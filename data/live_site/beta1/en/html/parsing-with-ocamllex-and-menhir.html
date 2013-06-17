@@ -124,12 +124,12 @@
                 
                 
 
-    <p id="idp10589856">
+    <p id="idp10711008">
     OCaml provides lexer and parser generators modeled on lex and yacc.
     Similar tools are available in a variety of languages, and with them
     you can parse a variety of kinds of input, including web formats or
     full blown programming languages.
-  </p><p id="idp10590512">
+  </p><p id="idp10711664">
     Let's be more precise about these terms. By
     <span><em>parsing</em></span>, we mean reading a textual input into a
     form that is easier for a program to manipulate. For example,
@@ -143,7 +143,7 @@
   <span class="err">cities:</span> <span class="err">[{</span> <span class="err">name:</span> <span class="nt">&quot;Chicago&quot;</span><span class="p">,</span> <span class="err">zips:</span> <span class="err">[60601]</span> <span class="p">}</span><span class="err">,</span>
            <span class="p">{</span> <span class="err">name:</span> <span class="nt">&quot;New York&quot;</span><span class="p">,</span> <span class="err">zips:</span> <span class="err">[10004]</span> <span class="p">}</span><span class="err">]</span>
 <span class="err">}</span>
-</pre></div><p id="idp10593712">
+</pre></div><p id="idp10714864">
     The input text is represented as a sequence of characters.
     Manipulating it in that form would be really hard, so what we want
     is to give it a structured type that is easier for our programs to
@@ -157,7 +157,7 @@
 <span class="o">|</span> <span class="o">`</span><span class="nc">List</span> <span class="k">of</span> <span class="n">value</span> <span class="kt">list</span>
 <span class="o">|</span> <span class="o">`</span><span class="nc">String</span> <span class="k">of</span> <span class="kt">string</span>
 <span class="o">|</span> <span class="o">`</span><span class="nc">Null</span> <span class="o">]</span>
-</pre></div><p id="idp10595936">
+</pre></div><p id="idp10717088">
     The objective of <span><em>parsing</em></span> is to convert the text
     input into a value of type <code>value</code>. This is
     normally done in two phase. First, <span><em>lexical</em></span>
@@ -166,20 +166,20 @@
     would be tokenized into a sequence of tokens like the following. In
     most cases (and in this example), lexical analysis will choose to
     omit white space from the token stream.
-  </p><pre id="idp10598352">
+  </p><pre id="idp10719504">
 LEFT_BRACE, ID(&quot;title&quot;), COLON, STRING(&quot;Cities&quot;), COMMA, ID(&quot;cities&quot;), ...
-</pre><p id="idp10599136">
+</pre><p id="idp10720288">
     The next step is to convert the token stream into a program value
     that represents the abstract syntax tree, like the type
     <code>value</code> above. This is called
     <span><em>parsing</em></span>.
-  </p><pre id="idp10600848">
+  </p><pre id="idp10722000">
 `Assoc
   [&quot;title&quot;, `String &quot;Cities&quot;;
    &quot;cities&quot;, `List
      [`Assoc [&quot;name&quot;, `String &quot;Chicago&quot;; &quot;zips&quot;, `List [Int 60601]];
        `Assoc [&quot;name&quot;, `String &quot;New York&quot;; &quot;zips&quot;, `List [Int 10004]]]]
-</pre><p id="idp10601824">
+</pre><p id="idp10722976">
     There are many techniques for lexing and parsing. In the lex/yacc
     world, lexing is specified using regular expressions, and parsing is
     specified using context-free grammars. These are concepts from
@@ -187,41 +187,41 @@ LEFT_BRACE, ID(&quot;title&quot;), COLON, STRING(&quot;Cities&quot;), COMMA, ID(
     you. For <code>lex</code>, this means constructing a finite
     automaton; and for <code>yacc</code>, this means constructing
     a pushdown automaton.
-  </p><p id="idp10604064">
+  </p><p id="idp10725216">
     Parsing is a broad and often intricate topic, and our purpose here
     is not to teach all of the ins and outs of yacc and lex, but to show
     how to use these tools in OCaml. There are online resources, and
     most experience you may have using lex/yacc in other languages will
     also apply in OCaml. However, there are differences, and we'll try
     to point out the larger ones here.
-  </p><p id="idp10604864">
+  </p><p id="idp10726016">
     For illustration, let's continue with the JSON example. For lexing,
     we'll use <code>ocamllex</code>, and for parsing, we'll use
     <code>menhir</code>, which is somewhat easier to use than
     <code>ocamlyacc</code>.
-  </p><section><h1 id="defining-a-json-parser-with-menhir">Defining a JSON parser with menhir</h1><p id="idp10608688">
+  </p><section><h1 id="defining-a-json-parser-with-menhir">Defining a JSON parser with menhir</h1><p id="idp10729840">
       The process of building a parser is interleaved between
       constructing the lexer and parser; you will have to do them
       simultaneously. The first step is to define the set of tokens that
       will be produced by the lexer. For various reasons, the tokens are
       specified by the parser (to specify what it expects as input), so
       we'll start with the parser first.
-    </p><p id="idp10609488">
+    </p><p id="idp10730640">
       A parser file has suffix <code>.mly</code> (we'll use the
       name <code>parser.mly</code>) and it contains several parts
       in the following sequence:
-    </p><pre id="idp10611424">
+    </p><pre id="idp10732576">
   declarations
   %%
   rules
   %%
   optional OCaml code
-</pre><p id="idp10612160">
+</pre><p id="idp10733312">
       The <code>%%</code> are section separators; they have to be
       on a line by themselves. The declarations include token and type
       specifications, precedence directives, and other things, but we
       start by declaring the tokens.
-    </p><section><h1 id="token-declarations">Token declarations</h1><p id="idp10614560">
+    </p><section><h1 id="token-declarations">Token declarations</h1><p id="idp10735824">
         A token is declared using the syntax
         <code>%token &lt;</code><span><em>type</em></span><code>&gt;</code>
 <span><em>uid</em></span>, where the
@@ -254,7 +254,7 @@ LEFT_BRACE, ID(&quot;title&quot;), COLON, STRING(&quot;Cities&quot;), COMMA, ID(
 <span class="o">%%</span>
 
 <span class="n">exp</span><span class="o">:</span> <span class="o">{</span> <span class="bp">()</span> <span class="o">}</span>
-</pre></div><p id="idp10622192">
+</pre></div><p id="idp10743504">
         The
         <code>&lt;</code><span><em>type</em></span><code>&gt;</code>
         specifications mean that a token carries a value. The
@@ -265,16 +265,16 @@ LEFT_BRACE, ID(&quot;title&quot;), COLON, STRING(&quot;Cities&quot;), COMMA, ID(
         with any value, so we omit the
         <code>&lt;</code><span><em>type</em></span><code>&gt;</code>
         specification.
-      </p><p id="idp10629520">
+      </p><p id="idp10750880">
         Compile this file with <code>menhir</code>. It will issue
         multiple warnings about unused tokens because we haven't
         actually defined a grammar yet. It is ok to ignore the warnings
         for now.
-      </p><pre id="idp10630832">
+      </p><pre id="idp10752192">
 $ menhir parser.mly
 Warning: the token COLON is unused.
 ...
-</pre><p id="idp10631568">
+</pre><p id="idp10752928">
         The <code>menhir</code> tool is a parser generator,
         meaning it generates the code to perform parsing from the
         <code>parser.mly</code> description. The
@@ -282,7 +282,7 @@ Warning: the token COLON is unused.
         implementation, and is generally difficult to read. However, the
         <code>parser.mli</code> contains declarations that we need
         to build a lexer.
-      </p><pre id="idp10635104">
+      </p><pre id="idp10756464">
 $ cat parser.mli
 exception Error
 
@@ -304,14 +304,14 @@ type token =
 
 
 val exp: (Lexing.lexbuf -&gt; token) -&gt; Lexing.lexbuf -&gt; (unit)
-</pre></section><section><h1 id="specifying-the-grammar-rules">Specifying the grammar rules</h1><p id="idp10637536">
+</pre></section><section><h1 id="specifying-the-grammar-rules">Specifying the grammar rules</h1><p id="idp10758896">
         The grammar itself is specified using a set of rules, where a
         rule contains a set of productions. Abstractly, a production
         looks like the following.
-      </p><pre id="idp10638112">
+      </p><pre id="idp10759472">
 symbol: [ id1 = ] symbol1; [ id2 = ] symbol2; ...; [ idN = ] symbolN
    { OCaml code }
-</pre><p id="idp10638880">
+</pre><p id="idp10760240">
         A production can be interpreted as follows: given values
         <code>id1</code>, ..., <code>idN</code> for the
         input symbols <code>symbol1</code>, ...,
@@ -319,7 +319,7 @@ symbol: [ id1 = ] symbol1; [ id2 = ] symbol2; ...; [ idN = ] symbolN
         the target <code>symbol</code>. That's too abstract, so
         let's get down to defining productions for parsing JSON. Here is
         the main production for a JSON value.
-      </p><pre id="idp10643136">
+      </p><pre id="idp10764496">
 value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
     { `Assoc obj }
   | LEFT_BRACK; vl = list_values; RIGHT_BRACK
@@ -337,17 +337,17 @@ value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
   | NULL
     { `Null }
   ;
-</pre><p id="idp10644128">
+</pre><p id="idp10765488">
         We can read it like this: a JSON <code>value</code> is
         either an object bracketed by curly braces, or an array
         bracketed by square braces. or a string, integer, float, etc. In
         each of the productions, the right hand side specfies the
         expected sequence. For example, the object is specified with the
         curly-bracket production.
-      </p><pre id="idp10645600">
+      </p><pre id="idp10766960">
 value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
     { `Assoc obj }
-</pre><p id="idp10646352">
+</pre><p id="idp10767712">
         That is, an object value starts with a
         <code>LEFT_BRACE</code>, contains some optional object
         field values (to be defined), and end with a
@@ -357,7 +357,7 @@ value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
         for <code>LEFT_BRACE</code> and
         <code>RIGHT_BRACE</code>, because their tokens don't have
         values.
-      </p><p id="idp10651328">
+      </p><p id="idp10772688">
         Next, let's define the object fields. In the following rules,
         the <code>opt_object_fields</code> are either empty, or a
         non-empty sequence of fields in reverse order. Note that if you
@@ -365,7 +365,7 @@ value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
         comment delimiters. By convention, the C comment
         <code>/* empty */</code> is used to point out that a
         production has an empty right hand side.
-      </p><pre id="idp10653536">
+      </p><pre id="idp10774896">
 opt_object_fields: /* empty */
     { [] }
   | obj = rev_object_fields
@@ -377,12 +377,12 @@ rev_object_fields: k = ID; COLON; v = value
   | obj = rev_object_fields; COMMA; k = ID; COLON; v = value
     { (k, v) :: obj }
   ;
-</pre><p id="idp10654448">
+</pre><p id="idp10775808">
         The rule <code>rev_object_fields</code> is defined
         recursively. It has either one key/value field, or it is a
         sequence of fields, followed by a <code>COMMA</code> and
         one more field definition.
-      </p><p id="idp10656448">
+      </p><p id="idp10777808">
         The <code>rev_</code> prefixed is intended to point out
         that the fields are returned in reverse order. Why would we do
         that? One reason is that the <code>menhir</code> parser
@@ -391,32 +391,32 @@ rev_object_fields: k = ID; COLON; v = value
         definitions. The following right-recursive rule accepts the same
         input, but during parsing it requires linear stack space to read
         object field definitions.
-      </p><pre id="idp10658752">
+      </p><pre id="idp10780112">
 /* Inefficient right-recursive rule */
 object_fields: k = ID; COLON; v = value
     { [k, v] }
   | k = ID; COLON; v = value; COMMA; obj = object_fields
     { (k, v) :: obj }
-</pre><p id="idp10659600">
+</pre><p id="idp10780960">
         Alternatively, we could keep the left-recursive definition and
         simply construct the returned value in left-to-right order. This
         is fine, though less efficient. You will have to choose you
         technique according to circumstances.
-      </p><pre id="idp10660272">
+      </p><pre id="idp10781632">
 /* Quadratic left-recursive rule */
 object_fields: k = ID; COLON; v = value
     { [k, v] }
   | obj = rev_object_fields; COMMA; k = ID; COLON; v = value
     { obj @ [k, v] }
   ;
-</pre><p id="idp10661120">
+</pre><p id="idp10782480">
         Finally, we can finish off the grammar by defining the rules for
         arrays, and adding a correct <code>%start</code>
         production. For the <code>%start</code> production, we'll
         return a <code>value option</code>, using
         <code>None</code> to represent end of file. Here is the
         complete file.
-      </p><pre id="idp10664592">
+      </p><pre id="idp10785952">
 %token &lt;int&gt; INT
 %token &lt;float&gt; FLOAT
 %token &lt;string&gt; ID
@@ -486,10 +486,10 @@ rev_values: v = value
   | vl = rev_values; COMMA; v = value
     { v :: vl }
   ;
-</pre><p id="idp10668144">
+</pre><p id="idp10789504">
         That's it. We can compile this with <code>menhir</code>,
         which will now no longer complain about unused symbols.
-      </p></section></section><section><h1 id="defining-a-lexer-with-ocamllex">Defining a lexer with ocamllex</h1><p id="idp10670768">
+      </p></section></section><section><h1 id="defining-a-lexer-with-ocamllex">Defining a lexer with ocamllex</h1><p id="idp10792128">
       For the next part, we need to define a lexer to tokenize the input
       text, meaning that we break the input into a sequence of words or
       tokens. For this, we'll define a lexer using
@@ -497,19 +497,19 @@ rev_values: v = value
       placed in a file with a <code>.mll</code> suffix (we'll use
       the name <code>lexer.mll</code>). A lexer file has several
       parts in the following sequence.
-    </p><pre id="idp10673648">
+    </p><pre id="idp10795008">
 { OCaml code }
 let definitions...
 rules...
 { OCaml code }
-</pre><section><h1 id="let-definitions-for-regular-expressions">Let-definitions for regular expressions</h1><p id="idp10675520">
+</pre><section><h1 id="let-definitions-for-regular-expressions">Let-definitions for regular expressions</h1><p id="idp10796896">
         The OCaml code for the header and trailer is optional. The
         let-definitions are used to ease the definition of regular
         expressions. They are optional, but very useful. To get started,
         we know that we'll need to match numbers and strings, so let's
         define names for the regular expressions that specify their
         form.
-      </p><p id="idp10676288">
+      </p><p id="idp10797664">
         An integer is a sequence of digits, optionally preceded by a
         minus sign. Leading zeroes are not allowed. The question mark
         means that the preceding symbol <code>-</code> is
@@ -521,18 +521,18 @@ rules...
         <code>int</code> has an optional minus sign, followed by a
         digit in the range 1-9, followed by zero or more digits in the
         range 0-9.
-      </p><pre id="idp10680016">
+      </p><pre id="idp10801392">
 let int = '-'? ['1'-'9'] ['0'-'9']*
-</pre><p id="idp10680720">
+</pre><p id="idp10802096">
         Floating-point numbers are similar, but we deal with decimal
         points and exponents. We can use multiple let-definitions for
         the different parts.
-      </p><pre id="idp10681296">
+      </p><pre id="idp10802672">
 let digits = ['0'-'9']+
 let frac = '.' digits
 let exp = ['e' 'E'] ['-' '+']? digits
 let float = int (frac | exp | frac exp)
-</pre><p id="idp10682096">
+</pre><p id="idp10803472">
         The <code>digits</code> expression has a
         <code>+</code> symbol, meaning that
         <code>digits</code> has one or more occurrences of digits
@@ -545,20 +545,20 @@ let float = int (frac | exp | frac exp)
         expression <code>(frac | exp | frac exp)</code> is either
         a <code>frac</code>, or an <code>exp</code>, or a
         <code>frac</code> followed by an <code>exp</code>.
-      </p><p id="idp10692720">
+      </p><p id="idp10814048">
         Finally, let's define identifiers and whitespace. An identifier
         (label), is an alphanumeric sequence not beginning with a digit.
-      </p><pre id="idp10693280">
+      </p><pre id="idp10814608">
 let white = [' ' '\t']+
 let newline = '\r' | '\n' | &quot;\r\n&quot;
 
 let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
-</pre></section><section><h1 id="lexing-rules">Lexing rules</h1><p id="idp10695584">
+</pre></section><section><h1 id="lexing-rules">Lexing rules</h1><p id="idp10816864">
         The lexing rules are specified as a set of
         <code>parse</code> rules. A <code>parse</code> rule
         has a regular expression followed by OCaml code that defines a
         semantic action. Let's write JSON parse rule.
-      </p><pre id="idp10697616">
+      </p><pre id="idp10818896">
 rule read = parse
 | white { read lexbuf }
 | newline { next_line lexbuf; read lexbuf }
@@ -577,14 +577,14 @@ rule read = parse
 | ',' { COMMA }
 | _ { raise (SyntaxError (&quot;Unexpected character: &quot; ^ Lexing.lexeme lexbuf)) }
 | eof { EOF }
-</pre><p id="idp10699472">
+</pre><p id="idp10820752">
         The OCaml code for the rules has a parameter called
         <code>lexbuf</code> that defines the input, including the
         position in the input file, as well as the text that was matched
         by the regular expression. Let's skip to the third action.
-      </p><pre id="idp10700832">
+      </p><pre id="idp10822112">
 | int { INT (int_of_string (Lexing.lexeme lexbuf)) }
-</pre><p id="idp10701552">
+</pre><p id="idp10822832">
         This action specifies that when the input matches the
         <code>int</code> regular expression (defined as
         <code>'-'? ['1'-'9'] ['0'-'9']*</code>, then the lexer
@@ -595,7 +595,7 @@ rule read = parse
         case, the string represents a number, so we use the
         <code>int_of_string</code> function to convert it to a
         number.
-      </p><p id="idp10705888">
+      </p><p id="idp10827168">
         Going back to the first actions, the first
         <code>white { read lexbuf }</code> calls the lexer
         recursively. That's, it skips the input whitespace and returns
@@ -605,44 +605,44 @@ rule read = parse
         Here is the definition of the <code>next_line</code>
         function, which updates the line number in the
         <code>lexbuf</code>.
-      </p><pre id="idp10709536">
+      </p><pre id="idp10830816">
 let next_line lexbuf =
   let pos = lexbuf.lex_curr_p in
   lexbuf.lex_curr_p &lt;-
     { pos with pos_bol = lexbuf.lex_curr_pos;
                pos_lnum = pos.pos_lnum + 1
     }
-</pre><p id="idp10710720">
+</pre><p id="idp10832000">
         There are actions for each different kind of token. The string
         expressions like <code>&quot;true&quot; { TRUE }</code>
         are used for keywords, and the special characters have actions
         too, like <code>'{' { LEFT_BRACE }</code>.
-      </p><p id="idp10712768">
+      </p><p id="idp10834048">
         Some of these patterns overlap. For example, the regular
         expression <code>&quot;true&quot;</code> is also matched
         by the <code>id</code> pattern.
         <code>ocamllex</code> used the following disambiguation
         when a prefix of the input is matched by more than one pattern.
-      </p><ul><li><p id="idp10716000">
+      </p><ul><li><p id="idp10837280">
             The longest match always wins. For example, the first input
             <code>trueX: 167</code> matches the regular expression
             <code>&quot;true&quot;</code> for 4 characters, and it
             matches <code>id</code> for 5 characters. The longer
             match wins, and the return value is
             <code>ID   &quot;trueX&quot;</code>.
-          </p></li><li><p id="idp10719856">
+          </p></li><li><p id="idp10841136">
             If all matches have the same length, then the first action
             wins. If the input were <code>true: 167</code>, then
             both <code>&quot;true&quot;</code> and
             <code>id</code> match the first 4 characters;
             <code>&quot;true&quot;</code> is first, so the return
             value is <code>TRUE</code>.
-          </p></li></ul></section><section><h1 id="recursive-rules">Recursive rules</h1><p id="idp10725488">
+          </p></li></ul></section><section><h1 id="recursive-rules">Recursive rules</h1><p id="idp10846832">
         Unlike many other lexer generators, <code>ocamllex</code>
         allows the definition of multiple lexer in the same file, and
         the definitions can be recursive. In this case, we use recursion
         to match string literals, using the following rule definition.
-      </p><pre id="idp10726864">
+      </p><pre id="idp10848208">
 and read_string buf = parse
 | '&quot;' { STRING (Buffer.contents buf) }
 | '\\' '/' { Buffer.add_char buf '/'; read_string buf lexbuf }
@@ -664,19 +664,19 @@ and read_string buf = parse
   }
 | _ { raise (SyntaxError (&quot;Illegal string character: &quot; ^ Lexing.lexeme lexbuf)) }
 | eof { raise (SyntaxError (&quot;String is not terminated&quot;)) }
-</pre><p id="idp10728880">
+</pre><p id="idp10850224">
         This rule takes a <code>buf : Buffer.t</code> as an
         argument. If we reach the terminating double quote
         <code>&quot;</code>, then we return the contents of the
         buffer as a <code>STRING</code>.
-      </p><p id="idp10731584">
+      </p><p id="idp10852928">
         The other cases are for handling the string contents. The action
         <code>[^ '&quot;' '\\']+ { ... }</code> matches normal
         input that does not contain a double-quote or backslash. The
         actions beginning with a backslash <code>\</code> define
         what to do for escape sequences. In each of these cases, the
         final step includes a recursive call to the lexer.
-      </p><p id="idp10733744">
+      </p><p id="idp10855088">
         As specified by JSON, we also handle Unicode code points,
         <code>'\\' 'u' hex hex hex hex</code>. Ocaml doesn't have
         any built-in handling for Unicode, so in this case we choose to
@@ -693,17 +693,17 @@ and read_string buf = parse
     <span class="nn">Buffer</span><span class="p">.</span><span class="n">add_char</span> <span class="n">buf</span> <span class="o">(</span><span class="nn">Char</span><span class="p">.</span><span class="n">chr</span> <span class="o">(</span><span class="m-Binary">0b10000000</span> <span class="ow">lor</span> <span class="o">((</span><span class="n">code</span> <span class="n">lsr</span> <span class="mi">6</span><span class="o">)</span> <span class="ow">land</span> <span class="mh">0x3f</span><span class="o">)));</span>
     <span class="nn">Buffer</span><span class="p">.</span><span class="n">add_char</span> <span class="n">buf</span> <span class="o">(</span><span class="nn">Char</span><span class="p">.</span><span class="n">chr</span> <span class="o">(</span><span class="m-Binary">0b10000000</span> <span class="ow">lor</span> <span class="o">(</span><span class="n">code</span> <span class="ow">land</span> <span class="mh">0x3f</span><span class="o">)))</span>
   <span class="k">end</span>
-</pre></div><p id="idp10737504">
+</pre></div><p id="idp10858848">
         That covers the lexer. Next, we need to combine the lexer with
         the parser to bring it all together.
-      </p></section></section><section><h1 id="bringing-it-all-together">Bringing it all together</h1><p id="idp10739376">
+      </p></section></section><section><h1 id="bringing-it-all-together">Bringing it all together</h1><p id="idp10860832">
       For the final part, we need to compose the lexer and parser. As we
       saw in the type definition in <code>parser.mli</code>, the
       parsing function expects a lexer of type
       <code>Lexing.lexbuf -&gt; token</code>, and it also expects
       a <code>lexbuf</code>.
     </p><div class="highlight"><pre><span class="k">val</span> <span class="n">prog</span><span class="o">:</span> <span class="o">(</span><span class="nn">Lexing</span><span class="p">.</span><span class="n">lexbuf</span> <span class="o">-&gt;</span> <span class="n">token</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nn">Lexing</span><span class="p">.</span><span class="n">lexbuf</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="nn">Json</span><span class="p">.</span><span class="n">value</span> <span class="n">option</span><span class="o">)</span>
-</pre></div><p id="idp10743232">
+</pre></div><p id="idp10864688">
       The standard lexing library <code>Lexing</code> provides a
       function <code>from_channel</code> to read the input from a
       channel. The following function describes the structure, where the
@@ -725,7 +725,7 @@ and read_string buf = parse
   <span class="k">let</span> <span class="n">lexbuf</span> <span class="o">=</span> <span class="nn">Lexing</span><span class="p">.</span><span class="n">from_channel</span> <span class="n">inx</span> <span class="k">in</span>
   <span class="n">parse_and_print</span> <span class="n">lexbuf</span><span class="o">;</span>
   <span class="n">close_in</span> <span class="n">inx</span>
-</pre></div><p id="idp10752688">
+</pre></div><p id="idp10874144">
       This isn't quite right yet -- we need to handle parsing errors.
       Currently there are two errors, <code>Parser.Error</code>
       and <code>Lexer.SyntaxError</code>. A simple solution when
@@ -743,16 +743,16 @@ and read_string buf = parse
   <span class="k">match</span> <span class="n">parse_with_error</span> <span class="n">lexbuf</span> <span class="k">with</span>
   <span class="o">|</span> <span class="nc">Some</span> <span class="n">value</span> <span class="o">-&gt;</span> <span class="nn">Json</span><span class="p">.</span><span class="n">output_value</span> <span class="n">stdout</span> <span class="n">value</span><span class="o">;</span> <span class="n">parse_and_print</span> <span class="n">lexbuf</span>
   <span class="o">|</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="bp">()</span>
-</pre></div><p id="idp10756160">
+</pre></div><p id="idp10877616">
       This approach, &quot;give up on the first error,&quot; is easy to
       implement, but it isn't very friendly. In general, error handling
       can be pretty intricate, and we won't discuss it here. However,
       the menhir parser defines additional mechanisms you can use to try
       and recover from errors, describe it its reference manual.
-    </p><p id="idp10757456">
+    </p><p id="idp10878912">
       Here is an example of a successful run on the following input
       file.
-    </p><pre id="idp10757936">
+    </p><pre id="idp10879392">
 $ cat test1.json
 true
 false
@@ -773,7 +773,7 @@ null
 &quot;Hello
        \/ሴ5&quot;
 { field1: &quot;Hello&quot;, field2: 170000000000000.000000, field3: [1, 2, 3], field4: { fieldA: 1, fieldB: &quot;Hello&quot; } }
-</pre><p id="idp10759392">
+</pre><p id="idp10880848">
       With our simple error handling scheme, errors are fatal.
     </p><div class="highlight"><pre><span class="o">$</span> <span class="n">cat</span> <span class="n">test2</span><span class="o">.</span><span class="n">json</span>
 <span class="o">{</span> <span class="n">name</span><span class="o">:</span> <span class="s2">&quot;Chicago&quot;</span><span class="o">,</span>

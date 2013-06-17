@@ -116,7 +116,7 @@
                 
                 
 
-    <p id="idp11821104">
+    <p id="idp11942912">
     We've described the runtime format of individual OCaml variables
     earlier in
     <a href="memory-representation-of-values.html">Chapter 21, <i>Memory Representation of Values</i></a>. When
@@ -126,7 +126,7 @@
     applications don't need to manually implement memory management and
     greatly reduces the likelihood of memory leaks creeping into your
     code.
-  </p><p id="idp11822704">
+  </p><p id="idp11944512">
     The OCaml runtime is a C library that provides routines that can be
     called from running OCaml programs. The runtime manages a
     <span><em>heap</em></span>, which is a collection of memory regions
@@ -134,7 +134,7 @@
     memory to hold <span><em>heap blocks</em></span> that it fills up
     with OCaml values in response to allocation requests by the OCaml
     program.
-  </p><section><h1 id="mark-and-sweep-garbage-collection">Mark and sweep garbage collection</h1><p id="idp11825424">
+  </p><section><h1 id="mark-and-sweep-garbage-collection">Mark and sweep garbage collection</h1><p id="idp11947296">
       When there isn't enough memory available to satisfy an allocation
       request from the pool of allocated heap blocks, the runtime system
       invokes the <span><em>garbage collector</em></span> (or GC). An
@@ -144,7 +144,7 @@
       <span><em>dead</em></span>, i.e. no longer in use. Dead values are
       collected and their memory made available for reuse by the
       application.
-    </p><p id="idp11827600">
+    </p><p id="idp11949472">
       The garbage collector doesn't keep constant track of values as
       they are allocated and used. Instead, it regularly scans them by
       starting from a set of <span><em>root</em></span> values that the
@@ -155,32 +155,32 @@
       points to <code>b2</code>. All blocks reachable from the
       roots by following edges in the graph must be retained, and
       unreachable blocks can be reused by the application.
-    </p><p id="idp11831792">
+    </p><p id="idp11953616">
       The algorithm used by OCaml to perform this heap traversal is
       commonly known as <span><em>mark and sweep</em></span> garbage
       collection, and we'll explain it further now.
-    </p></section><section><h1 id="generational-garbage-collection">Generational garbage collection</h1><p id="idp11834048">
+    </p></section><section><h1 id="generational-garbage-collection">Generational garbage collection</h1><p id="idp11955936">
       The usual OCaml programming style involves allocating many small
       variables that are used for a short period of time and then never
       accessed again. OCaml takes advantage of this fact to improve
       performance by using a <span><em>generational</em></span> garbage
       collector.
-    </p><p id="idp11835152">
+    </p><p id="idp11957040">
       A generational GC maintains separate memory regions to hold blocks
       based on how long the blocks have been live. OCaml's heap is split
       in two such regions:
-    </p><ul><li><p id="idp11836240">
+    </p><ul><li><p id="idp11958128">
           a small fixed-size <span><em>minor heap</em></span> where most
           blocks are initially allocated.
-        </p></li><li><p id="idp11837552">
+        </p></li><li><p id="idp11959440">
           a larger variable-sized <span><em>major heap</em></span> for
           blocks that have been live longer.
-        </p></li></ul><p id="idp11838736">
+        </p></li></ul><p id="idp11960624">
       A typical functional programming style means that young blocks
       tend to die young and old blocks tend to stay around for longer
       than young ones. This is often referred to as the
       <span><em>generational hypothesis</em></span>.
-    </p><p id="idp11839792">
+    </p><p id="idp11961680">
       OCaml uses different memory layouts and garbage collection
       algorithms for the major and minor heaps to account for this
       generational difference. We'll explain how they differ in more
@@ -188,7 +188,7 @@
     </p><section><h1><b>
     The <code>Gc</code> module and
     <code>OCAMLRUNPARAM</code>
-</b></h1><p id="idp11842512">
+</b></h1><p id="idp11964400">
       OCaml provides several mechanisms to query and alter the behaviour
       of the runtime system. The <code>Gc</code> module provides
       this functionality from within OCaml code, and we'll frequently
@@ -196,7 +196,7 @@
       standard library modules, Core alters the <code>Gc</code>
       interface from the standard OCaml library. We'll assume that
       you've opened <code>Core.Std</code> in our explanations.
-    </p><p id="idp11845408">
+    </p><p id="idp11967296">
       You can also control the behaviour of OCaml programs by setting
       the <code>OCAMLRUNPARAM</code> environment variable before
       launching your application. This lets you set garbage collector
@@ -205,28 +205,28 @@
       <code>OCAMLRUNPARAM</code> is documented in the
       <a href="http://caml.inria.fr/pub/docs/manual-ocaml/manual024.html" target="_top">OCaml
       manual</a>.
-    </p></section></section><section><h1 id="the-fast-minor-heap">The fast minor heap</h1><p id="idp11849680">
+    </p></section></section><section><h1 id="the-fast-minor-heap">The fast minor heap</h1><p id="idp11971616">
       The minor heap is where most of your short-lived values are held.
       It consists of one contiguous chunk of virtual memory containing a
       sequence of OCaml blocks. If there is space, allocating a new
       block is a fast constant-time operation that requires just a
       couple of CPU instructions.
-    </p><p id="idp11850400">
+    </p><p id="idp11972336">
       To garbage collect the minor heap, OCaml uses <span><em>copying
       collection</em></span> to move all live blocks in the minor heap to
       the major heap. This takes work proportional to the number of live
       blocks in the minor heap, which is typically small according to
       the generational hypothesis.
-    </p><section><h1 id="allocating-on-the-minor-heap">Allocating on the minor heap</h1><p id="idp11852720">
+    </p><section><h1 id="allocating-on-the-minor-heap">Allocating on the minor heap</h1><p id="idp11974656">
         The minor heap is a contiguous chunk of virtual memory that is
         usually a few megabytes in size so that it can be scanned
         quickly.
-      </p><pre id="idp11853280">
+      </p><pre id="idp11975216">
                 &lt;---- size ----&gt;
  base --- start ---------------- end
           limit      ptr &lt;------
                           blocks
-</pre><p id="idp11854160">
+</pre><p id="idp11976096">
         The runtime stores the minor heap in two pointers
         (<code>caml_young_start</code> and
         <code>caml_young_end</code>, but we will drop the
@@ -236,14 +236,14 @@
         system <code>malloc</code>, and <code>start</code>
         is aligned against the next nearest word boundary from
         <code>base</code> to make it easier to store OCaml values.
-      </p><p id="idp11859888">
+      </p><p id="idp11981824">
         In a fresh minor heap, the <code>limit</code> equals the
         <code>start</code> and the current <code>ptr</code>
         will equal the <code>end</code>. <code>ptr</code>
         decreases as blocks are allocated until it reaches
         <code>limit</code>, at which point a minor garbage
         collection is triggered.
-      </p><p id="idp11864688">
+      </p><p id="idp11986576">
         Allocating a block in the minor heap just requires
         <code>ptr</code> to be decremented by the size of the
         block (including the header) and checking that it's not less
@@ -252,7 +252,7 @@
         <code>limit</code>, a minor garbage collection is
         triggered. This is a very fast check (with no branching) on most
         CPU architectures.
-      </p><p id="idp11867600">
+      </p><p id="idp11989488">
         You may wonder why <code>limit</code> is required at all,
         since it always seems to equal <code>start</code>. It's
         because the easiest way for the runtime to schedule a minor heap
@@ -262,7 +262,7 @@
         garbage collection.
       </p><aside class="note"><h1>
       Setting the size of the minor heap
-      </h1><p id="idp11871856">
+      </h1><p id="idp11993744">
         The minor heap size defaults to 8MB on 64-bit platforms, unless
         overridden by the <code>s=&lt;words&gt;</code> argument to
         <code>OCAMLRUNPARAM</code>. You can change it after the
@@ -276,13 +276,13 @@
    <span class="n">stack_limit</span> <span class="o">=</span> <span class="mi">1048576</span><span class="o">;</span> <span class="n">allocation_policy</span> <span class="o">=</span> <span class="mi">0</span><span class="o">}</span>
 <span class="o">#</span> <span class="nn">Gc</span><span class="p">.</span><span class="n">tune</span> <span class="o">~</span><span class="n">minor_heap_size</span><span class="o">:(</span><span class="mi">262144</span> <span class="o">*</span> <span class="mi">2</span><span class="o">)</span> <span class="bp">()</span> <span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
-</pre></div><p id="idp11875840">
+</pre></div><p id="idp11997728">
         Changing the GC size dynamically will trigger an immediate minor
         heap collection. Note that Core increases the default minor heap
         size from the standard OCaml installation quite significantly,
         and you'll want to reduce this if running in very
         memory-constrained environments.
-      </p></aside></section></section><section><h1 id="the-long-lived-major-heap">The long-lived major heap</h1><p id="idp11878144">
+      </p></aside></section></section><section><h1 id="the-long-lived-major-heap">The long-lived major heap</h1><p id="idp11999968">
       The major heap is where the bulk of the longer-lived and larger
       values in your program are stored. It consists of any number of
       non-contiguous chunks of virtual memory, each containing live
@@ -290,25 +290,25 @@
       system maintains a free-list data structure that indexes all the
       free memory that it has allocated, and uses it to satisfy
       allocation requests for OCaml blocks.
-    </p><p id="idp11879008">
+    </p><p id="idp12000832">
       The major heap is typically much larger than the minor heap and
       can scale to gigabytes in size. It is cleaned via a mark-and-sweep
       garbage collection algorithm that operates in several phases.
-    </p><ul><li><p id="idp11880144">
+    </p><ul><li><p id="idp12001968">
           The <span><em>mark</em></span> phase scans the block graph and
           marks all live blocks by setting a bit in the tag of the block
           header (known as the <span><em>color</em></span> tag).
-        </p></li><li><p id="idp11881968">
+        </p></li><li><p id="idp12003792">
           The <span><em>sweep</em></span> phase sequentially scans the
           heap chunks and identifies dead blocks that weren't marked
           earlier.
-        </p></li><li><p id="idp11883328">
+        </p></li><li><p id="idp12005152">
           The <span><em>compact</em></span> phase relocates live blocks
           into a freshly allocated heap to eliminate gaps in the free
           list. This prevents the fragmentation of heap blocks in
           long-running programs, and normally occurs much less
           frequently than the mark and sweep phases.
-        </p></li></ul><p id="idp11884720">
+        </p></li></ul><p id="idp12006544">
       A major garbage collection must <span><em>stop the
       world</em></span> (that is, halt the application) to ensure that
       blocks can be moved around without this being observed by the live
@@ -316,24 +316,24 @@
       slices of the heap to avoid pausing the application for long
       periods of time. Only the compaction phase touches all the memory
       in one go, and is a relatively rare operation.
-    </p><section><h1 id="allocating-on-the-major-heap">Allocating on the major heap</h1><p id="idp11887120">
+    </p><section><h1 id="allocating-on-the-major-heap">Allocating on the major heap</h1><p id="idp12008880">
         The major heap consists of a singly-linked list of contiguous
         memory chunks sorted in increasing order of virtual address.
         Each chunk is a single memory region allocated via
         <span><em>malloc(3)</em></span> and consists of a header and data
         area which contains OCaml heap chunks. A heap chunk header
         contains:
-      </p><ul><li><p id="idp11888800">
+      </p><ul><li><p id="idp12010560">
             the <span><em>malloc</em></span>'ed virtual address of the
             memory region containing the chunk.
-          </p></li><li><p id="idp11890112">
+          </p></li><li><p id="idp12011872">
             the size in bytes of the data area.
-          </p></li><li><p id="idp11890960">
+          </p></li><li><p id="idp12012720">
             an allocation size in bytes used during heap compaction to
             merge small blocks to defragment the heap.
-          </p></li><li><p id="idp11891888">
+          </p></li><li><p id="idp12013648">
             a link to the next heap chunk in the list.
-          </p></li></ul><p id="idp11892608">
+          </p></li></ul><p id="idp12014368">
         Each chunk's data area starts on a page boundary and its size is
         a multiple of the page size (4KB). It contains a contiguous
         sequence of heap blocks which can be as small as one or two 4KB
@@ -341,7 +341,7 @@
         32-bit architectures).
       </p><aside class="note"><h1>
       Controlling major heap growth
-      </h1><p id="idp11894032">
+      </h1><p id="idp12015792">
         The <code>Gc</code> module uses the
         <code>major_heap_increment</code> value to control the
         major heap growth. This defines the number of words to add to
@@ -349,7 +349,7 @@
         operation that the operating system observes from the OCaml
         runtime after initial startup (since the minor is fixed in
         size).
-      </p><p id="idp11896176">
+      </p><p id="idp12017936">
         If you anticipate allocating some large OCaml values, then
         setting the heap increment to a larger value will let the
         operating system return a contiguous block of memory. This is
@@ -358,14 +358,14 @@
         housekeeping in the OCaml runtime to keep track of them.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span><span class="o">;;</span>
 <span class="o">#</span> <span class="nn">Gc</span><span class="p">.</span><span class="n">tune</span> <span class="o">~</span><span class="n">major_heap_increment</span><span class="o">:(</span><span class="mi">1000448</span> <span class="o">*</span> <span class="mi">4</span><span class="o">)</span> <span class="bp">()</span><span class="o">;;</span>
-</pre></div></aside><p id="idp11898128">
+</pre></div></aside><p id="idp12019888">
         Allocating an OCaml value on the major heap first checks the
         free list of blocks for a suitable region to place it. If there
         isn't enough room on the free list, the runtime expands the
         major heap by allocating a fresh heap chunk that will be large
         enough. That chunk is then added to the free list and the free
         list is checked again (and this time will definitely succeed).
-      </p><p id="idp11898960">
+      </p><p id="idp12020720">
         Remember that most allocations to the major heap will go via the
         minor heap, and only be promoted if they are still used by the
         program after a minor collection. The one exception to this is
@@ -373,59 +373,59 @@
         platforms). These will be allocated directly on the major heap
         since an allocation on the minor heap would likely trigger an
         immediate collection and copy it to the major heap anyway.
-      </p></section><section><h1 id="memory-allocation-strategies">Memory allocation strategies</h1><p id="idp11901632">
+      </p></section><section><h1 id="memory-allocation-strategies">Memory allocation strategies</h1><p id="idp12023376">
         The major heap does its best to manage memory allocation as
         efficiently as possible, and relies on heap compaction to ensure
         that memory stays contiguous and unfragmented. The default
         allocation policy normally works fine for most applications, but
         it's worth bearing in mind that there are other options too.
-      </p><p id="idp11902384">
+      </p><p id="idp12024128">
         The free list of blocks is always checked first when allocating
         a new block in the major heap. The default free list search is
         called <span><em>next-fit allocation</em></span>, with an
         alternative <span><em>first-fit</em></span> algorithm also
         available.
-      </p><section><h1 id="next-fit-allocation">Next-fit allocation</h1><p id="idp11905040">
+      </p><section><h1 id="next-fit-allocation">Next-fit allocation</h1><p id="idp12026784">
           Next-fit allocation keeps a pointer to the block in the free
           list that was most recently used to satisfy a request. When a
           new request comes in, the allocator searches from the next
           block until the end of the free list, and then from the
           beginning of the free list up to that block.
-        </p><p id="idp11905776">
+        </p><p id="idp12027520">
           Next-fit allocation is the default allocation strategy. It's
           quite a cheap allocation mechanism since the same heap chunk
           can be reused across allocation requests until it runs out.
           This in turn means that there is good memory locality to use
           CPU caches better.
-        </p></section><section><h1 id="first-fit-allocation">First-fit allocation</h1><p id="idp11907664">
+        </p></section><section><h1 id="first-fit-allocation">First-fit allocation</h1><p id="idp12029456">
           If your programs allocates values of many varied sizes, you
           may sometimes find that your free list becomes fragmented. In
           this situation, the GC is forced to perform an expensive
           compaction despite there being free chunks, since none of the
           chunks alone are big enough to satisfy the request.
-        </p><p id="idp11908416">
+        </p><p id="idp12030208">
           First-fit allocation focusses on reducing memory fragmentation
           (and hence the number of compactions), but at the expense of
           slower memory allocation. Every allocation scans the free list
           from the beginning for a suitable free chunk, instead of
           reusing the most recent heap chunk as the next-fit allocator
           does.
-        </p><p id="idp11909200">
+        </p><p id="idp12030992">
           For some workloads that need more real-time behaviour under
           load, the reduction in the frequency in heap compaction will
           outweigh the extra allocation cost.
         </p><aside class="note"><h1>
         Controlling the heap allocation policy
-        </h1><p id="idp11910512">
+        </h1><p id="idp12032304">
           You can set the heap allocation policy via the
           <code>Gc.allocation_policy</code> field. A value of
           <code>0</code> (the default) sets it to next-fit, and
           <code>1</code> to the first-fit allocator.
-        </p><p id="idp11913136">
+        </p><p id="idp12034928">
           The same behaviour can be controlled at runtime by setting
           <code>a=0</code> or <code>a=1</code> in
           <code>OCAMLRUNPARAM</code>.
-        </p></aside></section></section><section><h1 id="marking-and-scanning-the-heap">Marking and scanning the heap</h1><p id="idp11917280">
+        </p></aside></section></section><section><h1 id="marking-and-scanning-the-heap">Marking and scanning the heap</h1><p id="idp12039088">
         The marking process can take a long time to run over the
         complete major heap, and has to pause the main application while
         it's active. It therefore runs incrementally by marking the heap
@@ -457,7 +457,7 @@
                 black
               </td><td>
                 reachable, and its fields have been scanned
-              </td></tr></tbody></table><p id="idp11929568">
+              </td></tr></tbody></table><p id="idp12051376">
         The color tags in the value headers store most of the state of
         the marking process, allowing it to be paused and resumed later.
         The GC and application alternate between marking a slice of the
@@ -465,7 +465,7 @@
         logic. The OCaml runtime calculates a sensible value for the
         size of each major heap slice based on the rate of allocation
         and available memory (see below).
-      </p><p id="idp11930448">
+      </p><p id="idp12052256">
         The marking process starts with a set of
         <span><em>root</em></span> values that are always live (such as
         the application stack). All values on the heap are initially
@@ -476,7 +476,7 @@
         values</em></span> while it follows their fields. When a gray
         value's fields have all been followed it is popped off the stack
         and colored black.
-      </p><p id="idp11932288">
+      </p><p id="idp12054096">
         This process is repeated until the gray value stack is empty and
         there are no further values to mark. There's one important edge
         case in this process, though. The gray value stack can only grow
@@ -485,7 +485,7 @@
         follows their fields. If this happens, the heap is marked as
         <span><em>impure</em></span> and a more expensive check is
         initiated once the existing gray values have been processed.
-      </p><p id="idp11933680">
+      </p><p id="idp12055488">
         To mark an impure heap, the GC first marks it as pure and walks
         through the entire heap block-by-block in increasing order of
         memory address. If it finds a gray block, it adds it to the gray
@@ -497,7 +497,7 @@
         overflowing the gray list.
       </p><aside class="note"><h1>
       Controlling major heap collections
-      </h1><p id="idp11935392">
+      </h1><p id="idp12057792">
         You can trigger a single slice of the major GC via the
         <code>major_slice</code> call. This performs a minor
         collection first, and then a single slice. The size of the slice
@@ -509,7 +509,7 @@
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">232340</span>
 <span class="o">#</span> <span class="nn">Gc</span><span class="p">.</span><span class="n">full_major</span> <span class="bp">()</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
-</pre></div><p id="idp11937904">
+</pre></div><p id="idp12060304">
         The <code>space_overhead</code> setting controls how
         aggressive the GC is about setting the slice size to a large
         size. This represents the proportion of memory used for live
@@ -519,14 +519,14 @@
         overly memory-constrained. Set this even higher if you have lots
         of memory, or lower to cause the GC to work harder and collect
         blocks faster at the expense of using more CPU time.
-      </p></aside></section><section><h1 id="heap-compaction">Heap Compaction</h1><p id="idp11941728">
+      </p></aside></section><section><h1 id="heap-compaction">Heap Compaction</h1><p id="idp12064064">
         After a certain number of major GC cycles have completed, the
         heap may begin to be fragmented due to values being deallocated
         out of order from how they were allocated. This makes it harder
         for the GC to find a contiguous block of memory for fresh
         allocations, which in turn would require the heap to be grown
         unnecessarily.
-      </p><p id="idp11942512">
+      </p><p id="idp12064848">
         The heap compaction cycle avoids this by relocating all the
         values in the major heap into a fresh heap that places them all
         contiguously in memory again. A naive implementation of the
@@ -534,11 +534,11 @@
         OCaml performs the compaction in-place within the existing heap.
       </p><aside class="note"><h1>
       Controlling frequency of compactions
-      </h1><p id="idp11943984">
+      </h1><p id="idp12066320">
         The <code>max_overhead</code> setting in the
         <code>Gc</code> module defines the connection between free
         memory and allocated memory after which compaction is activated.
-      </p><p id="idp11945936">
+      </p><p id="idp12068272">
         A value of <code>0</code> triggers a compaction after
         every major garbage collection cycle, whereas the maximum value
         of <code>1000000</code> disables heap compaction
@@ -548,7 +548,7 @@
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span><span class="o">;;</span>
 <span class="o">#</span> <span class="nn">Gc</span><span class="p">.</span><span class="n">tune</span> <span class="o">~</span><span class="n">max_overhead</span><span class="o">:</span><span class="mi">0</span> <span class="bp">()</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span> 
-</pre></div></aside></section><section><h1 id="inter-generational-pointers">Inter-generational pointers</h1><p id="idp11950512">
+</pre></div></aside></section><section><h1 id="inter-generational-pointers">Inter-generational pointers</h1><p id="idp12072784">
         One complexity of generational collection arises from the fact
         that minor heap sweeps are much more frequent than major heap
         collections. In order to know which blocks in the minor heap are
@@ -556,20 +556,20 @@
         directly pointed to by major-heap blocks. Without this
         information, each minor collection would also require scanning
         the much larger major heap.
-      </p><p id="idp11951376">
+      </p><p id="idp12073648">
         OCaml maintains a set of such <span><em>inter-generational
         pointers</em></span> to avoid this dependency between a major and
         minor heap collection. The compiler introduces a write barrier
         to update this so-called <span><em>remembered set</em></span>
         whenever a major-heap block is modified to point at a minor-heap
         block.
-      </p><section><h1 id="the-mutable-write-barrier">The mutable write barrier</h1><p id="idp11954016">
+      </p><section><h1 id="the-mutable-write-barrier">The mutable write barrier</h1><p id="idp12076400">
           The write barrier can have profound implications for the
           structure of your code. It's one of the reasons why using
           immutable data structures and allocating a fresh copy with
           changes can sometimes be faster than mutating a record
           in-place.
-        </p><p id="idp11954720">
+        </p><p id="idp12077104">
           The OCaml compiler keeps track of any mutable types and adds a
           call to the runtime <code>caml_modify</code> function
           before making the change. This checks the location of target
@@ -578,7 +578,7 @@
           is reasonably efficient, it can sometimes be slower than
           simply allocating a fresh value on the fast minor heap and
           doing some extra minor collections.
-        </p><p id="idp11956352">
+        </p><p id="idp12078736">
           Let's see this for ourselves with a simple test program.
           You'll need to install the Core benchmarking suite via
           <code>opam install core_bench</code> before you compile
@@ -615,13 +615,13 @@
       <span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span> <span class="n">test_immutable</span> <span class="o">{</span> <span class="n">iters2</span><span class="o">=</span><span class="n">iters</span><span class="o">;</span> <span class="n">count2</span><span class="o">=</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span> <span class="o">})</span>
   <span class="o">]</span> <span class="k">in</span>
   <span class="nn">Bench</span><span class="p">.</span><span class="n">make_command</span> <span class="n">tests</span> <span class="o">|&gt;</span> <span class="nn">Command</span><span class="p">.</span><span class="n">run</span>
-</pre></div><p id="idp11959968">
+</pre></div><p id="idp12082352">
           This program defines a type <code>t1</code> that is
           mutable and <code>t2</code> that is immutable. The
           benchmark loop iterates over both fields and increments a
           counter. Compile and execute this with some extra options to
           show the amount of garbage collection occurring.
-        </p><pre id="idp11962000">
+        </p><pre id="idp12084384">
 $ ocamlbuild -use-ocamlfind -package core -package core_bench -tag thread barrier_bench.native
 $ ./barrier_bench.native name alloc
 Estimated testing time 20s (change using -quota SECS).
@@ -631,7 +631,7 @@ Estimated testing time 20s (change using -quota SECS).
 │ mutable   │ 7_954_262 │ 7_827_275-8_135_261 │ 2_000_004 │ -51.42 │   -51.42 │     100.00 │
 │ immutable │ 3_694_618 │ 3_396_611-4_037_053 │ 5_000_005 │ -28.43 │   -28.43 │      46.45 │
 └───────────┴───────────┴─────────────────────┴───────────┴────────┴──────────┴────────────┘
-</pre><p id="idp11965216">
+</pre><p id="idp12087600">
           There is a stark space/time tradeoff here. The mutable version
           takes significantly longer to complete than the immutable one,
           but allocates many fewer minor heap words than the immutable
@@ -640,13 +640,13 @@ Estimated testing time 20s (change using -quota SECS).
           the more conventional mutable versions. On the other hand, if
           you only rarely mutate a value, it can be faster to take the
           write barrier hit and not allocate at all.
-        </p><p id="idp11966176">
+        </p><p id="idp12088560">
           The only way to know for sure is to benchmark your program
           under real-world scenarios using
           <code>Core_bench</code>, and experiment with the
           tradeoffs. The command-line benchmark binaries have a number
           of useful options that affect garbage collection behaviour.
-        </p><pre id="idp11967584">
+        </p><pre id="idp12089968">
 $ ./barrier_bench.native -help
 Benchmark for mutable, immutable
 
@@ -697,14 +697,14 @@ prefix the column name with a '+'.
   [-version]           print the version of this build and exit
   [-help]              print this help text and exit
                        (alias: -?)
-</pre><p id="idp11972032">
+</pre><p id="idp12094416">
           The <code>-no-compactions</code> and
           <code>-stabilize-gc</code> options can help force a
           situation where your application has fragmented memory. This
           can simulate the behaviour of a long-running application
           without you having to actually wait that long to recreate the
           behaviour in a performance unit test.
-        </p></section></section></section><section><h1 id="attaching-finalizer-functions-to-values">Attaching finalizer functions to values</h1><p id="idp11975744">
+        </p></section></section></section><section><h1 id="attaching-finalizer-functions-to-values">Attaching finalizer functions to values</h1><p id="idp12098080">
       OCaml's automatic memory management guarantees that a value will
       eventually be freed when it's no longer in use, either via the
       garbage collector sweeping it or the program terminating. It's
@@ -713,7 +713,7 @@ prefix the column name with a '+'.
       has been closed, or that a log message is recorded.
     </p><aside class="note"><h1>
     What values can be finalized?
-    </h1><p id="idp11977664">
+    </h1><p id="idp12099584">
       Various values cannot have finalizers attached since they aren't
       heap-allocated. Some examples of values that are not
       heap-allocated are integers, constant constructors, booleans, the
@@ -721,7 +721,7 @@ prefix the column name with a '+'.
       what is heap-allocated or not is implementation-dependent, which
       is why Core provides the <code>Heap_block</code> module to
       explicitly check before attaching the finalizer.
-    </p><p id="idp11979216">
+    </p><p id="idp12101136">
       Some constant values can be heap-allocated but never deallocated
       during the lifetime of the program, for example a list of integer
       constants. <code>Heap_block</code> explicitly checks to see
@@ -730,7 +730,7 @@ prefix the column name with a '+'.
       immutable values such as floating-point values in arrays. These
       may be finalised while another duplicate copy is being used by the
       program.
-    </p><p id="idp11980800">
+    </p><p id="idp12102720">
       For this reason, attach finalizers only to values that you are
       explicitly sure are heap-allocated and aren't immutable. A common
       use is to attach them to file descriptors to ensure it is closed.
@@ -739,14 +739,14 @@ prefix the column name with a '+'.
       collector running in order to collect the value. For a busy
       system, you can easily run out of a scarce resource such as file
       descriptors before the GC catches up.
-    </p></aside><p id="idp11981872">
+    </p></aside><p id="idp12103792">
       Core provides a <code>Heap_block</code> module that
       dynamically checks if a given value is suitable for finalizing.
       This block is then passed to Async's
       <code>Gc.add_finalizer</code> function that schedules the
       finalizer safely with respect to all the other concurrent program
       threads.
-    </p><p id="idp11983952">
+    </p><p id="idp12105872">
       Let's explore this with a small example that finalizes values of
       different types, some of which are heap-allocated and others which
       are compile-time constants.
@@ -779,9 +779,9 @@ prefix the column name with a '+'.
   <span class="n">attach_finalizer</span> <span class="s2">&quot;allocated record&quot;</span> <span class="o">{</span> <span class="n">foo</span><span class="o">=</span><span class="n">alloced_bool</span> <span class="o">};</span>
   <span class="nn">Gc</span><span class="p">.</span><span class="n">compact</span> <span class="bp">()</span><span class="o">;</span>
   <span class="n">never_returns</span> <span class="o">(</span><span class="nn">Scheduler</span><span class="p">.</span><span class="n">go</span> <span class="bp">()</span><span class="o">)</span>
-</pre></div><p id="idp11987536">
+</pre></div><p id="idp12109456">
       Building and running this should show the following output.
-    </p><pre id="idp11988000">
+    </p><pre id="idp12109920">
 $ ocamlfind ocamlopt -package core -package async -thread \
   -o finalizer -linkpkg finalizer.ml
 $ ./finalizer
@@ -795,7 +795,7 @@ $ ./finalizer
     allocated string: OK
    allocated variant: OK
      allocated float: OK
-</pre><p id="idp11989424">
+</pre><p id="idp12110960">
       The GC calls the finalization functions in the order of the
       deallocation. If several values become unreachable during the same
       GC cycle, the finalisation functions will be called in the reverse
@@ -804,7 +804,7 @@ $ ./finalizer
       <code>add_finalizer</code> adds to the set of functions that
       are run when the value becomes unreachable. You can have many
       finalizers all pointing to the same heap block if you wish.
-    </p><p id="idp11991680">
+    </p><p id="idp12113216">
       After a garbage collection determines that a heap block
       <code>b</code> is unreachable, it removes from the set of
       finalizers all the functions associated with <code>b</code>,
@@ -813,14 +813,14 @@ $ ./finalizer
       <code>b</code> will run at most once. However, program
       termination will not cause all the finalizers to be run before the
       runtime exits.
-    </p><p id="idp11995184">
+    </p><p id="idp12116720">
       The finalizer can use all features of OCaml, including assignments
       that make the value reachable again and thus prevent it from being
       garbage collected. It can also loop forever, which will cause
       other finalizers to be interleaved with it.
     </p><aside class="note"><h1>
     Production note
-    </h1><p id="idp11996544">
+    </h1><p id="idp12118080">
       This chapter contains significant contributions from Stephen
       Weeks.
     </p></aside></section>

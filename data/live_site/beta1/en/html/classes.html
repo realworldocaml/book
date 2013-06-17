@@ -144,7 +144,7 @@
                 
                 
 
-    <p id="idp9584112">
+    <p id="idp9703952">
     Programming with objects directly is great for encapsulation, but
     one of the main goals of object-oriented programming is code reuse
     through inheritance. For inheritance, we need to introduce
@@ -152,7 +152,7 @@
     class is a &quot;recipe&quot; for creating objects. The recipe can
     be changed by adding new methods and fields, or it can be changed by
     modifying existing methods.
-  </p><section><h1 id="ocaml-classes">OCaml Classes</h1><p id="idp9586736">
+  </p><section><h1 id="ocaml-classes">OCaml Classes</h1><p id="idp9706576">
       In OCaml, class definitions must be defined as toplevel statements
       in a module. A class is not an object, and a class definition is
       not an expression. The syntax for a class definition uses the
@@ -169,14 +169,14 @@
     <span class="k">method</span> <span class="n">get</span> <span class="o">:</span> <span class="kt">int</span>
     <span class="k">method</span> <span class="n">set</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">unit</span>
   <span class="k">end</span>
-</pre></div><p id="idp9589584">
+</pre></div><p id="idp9709424">
       The type <code>class point : ... end</code> is a
       <span><em>class type</em></span>. This particular type specifies
       that the <code>point</code> class defines a mutable field
       <code>x</code>, a method <code>get</code> that returns
       an <code>int</code>, and a method <code>set</code>
       with type <code>int -&gt; unit</code>.
-    </p><p id="idp9595408">
+    </p><p id="idp9715248">
       To produce an object, classes are instantiated with the keyword
       <code>new</code>.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">p</span> <span class="o">=</span> <span class="k">new</span> <span class="n">point</span><span class="o">;;</span>
@@ -187,7 +187,7 @@
 <span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
 <span class="o">#</span> <span class="n">p</span><span class="o">#</span><span class="n">get</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">5</span>
-</pre></div><p id="idp9597872">
+</pre></div><p id="idp9717664">
       Inheritance uses an existing class to define a new one. For
       example, the following class definition supports an addition
       method <code>moveby</code> that moves the point by a
@@ -204,7 +204,7 @@
     <span class="k">method</span> <span class="n">moveby</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">unit</span>
     <span class="k">method</span> <span class="n">set</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">unit</span>
   <span class="k">end</span>
-</pre></div><p id="idp9600560">
+</pre></div><p id="idp9720352">
       This new <code>movable_point</code> class also makes use of
       the <code>(self : 'self)</code> binding after the
       <code>object</code> keyword. The variable
@@ -212,18 +212,18 @@
       self-invocation, and the type variable <code>'self</code>
       stands for the type of the current object (which in general is a
       subtype of <code>movable_point</code>).
-    </p></section><section><h1 id="an-example-cryptokit">An Example: Cryptokit</h1><p id="idp9606656">
+    </p></section><section><h1 id="an-example-cryptokit">An Example: Cryptokit</h1><p id="idp9726512">
       Let's take a break from describing the object system with a more
       practical example that uses the OCaml cryptographic library.
     </p><aside class="note"><h1>
     Installing the Cryptokit library
-    </h1><p id="idp9607904">
+    </h1><p id="idp9727760">
       The Cryptokit library can be installed via OPAM via
       <code>opam install cryptokit</code>. Once that's finished
       compiling and installing, you just need to
       <code>#require &quot;cryptokit&quot;</code> in your toplevel
       to load the library and make the modules available.
-    </p></aside><p id="idp9610064">
+    </p></aside><p id="idp9729920">
       Our first example mimics the <code>md5</code> command, which
       reads in an input file and returns a hexadecimal representation of
       its MD5 cryptographic hash. Cryptokit defines a number of
@@ -240,7 +240,7 @@
 <span class="k">end</span>
 
 <span class="k">val</span> <span class="n">hash_string</span> <span class="o">:</span> <span class="n">hash</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span>
-</pre></div><p id="idp9613648">
+</pre></div><p id="idp9733552">
       Concrete hash objects can be instantiated from various sub-modules
       in Cryptokit. The simplest ones such as MD5 or SHA1 do not take
       any special input parameters to build the object. The
@@ -252,7 +252,7 @@
 <span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">-&gt;</span> <span class="nn">Cryptokit</span><span class="p">.</span><span class="n">hash</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="nn">Cryptokit</span><span class="p">.</span><span class="nn">MAC</span><span class="p">.</span><span class="n">hmac_sha1</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="nn">Cryptokit</span><span class="p">.</span><span class="n">hash</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp9616224">
+</pre></div><p id="idp9736128">
       Hash objects hold state and are thus naturally imperative. Once
       instantiated, data is fed into them by the addition functions, the
       <code>result</code> is computed and finally the contents
@@ -268,7 +268,7 @@
   <span class="o">|&gt;</span> <span class="n">hash_string</span> <span class="o">(</span><span class="nn">Hash</span><span class="p">.</span><span class="n">md5</span> <span class="bp">()</span><span class="o">)</span>
   <span class="o">|&gt;</span> <span class="n">transform_string</span> <span class="o">(</span><span class="nn">Hexa</span><span class="p">.</span><span class="n">encode</span> <span class="bp">()</span><span class="o">)</span>
   <span class="o">|&gt;</span> <span class="n">print_endline</span>
-</pre></div><p id="idp9621056">
+</pre></div><p id="idp9740960">
       After opening the right modules, we read in the entire standard
       input into an OCaml string. This is then passed onto the MD5 hash
       function, which returns a binary string. This binary is passed
@@ -276,7 +276,7 @@
       returns an ASCII representation of the input. The output of this
       command will be the same as the <code>md5</code> command (or
       <code>md5sum</code> in some systems).
-    </p><p id="idp9623936">
+    </p><p id="idp9743840">
       We can extend this simple example by selecting either the
       <code>md5</code> or <code>sha1</code> hash function at
       runtime depending on the name of our binary.
@@ -297,17 +297,17 @@
   <span class="o">|&gt;</span> <span class="n">hash_string</span> <span class="n">hash_fn</span>
   <span class="o">|&gt;</span> <span class="n">transform_string</span> <span class="o">(</span><span class="nn">Hexa</span><span class="p">.</span><span class="n">encode</span> <span class="bp">()</span><span class="o">)</span>
   <span class="o">|&gt;</span> <span class="n">print_endline</span>
-</pre></div><p id="idp9628096">
+</pre></div><p id="idp9748000">
       Now let's try something more advanced. The
       <code>openssl</code> library is installed on most systems,
       and can be used to encrypt plaintext using several encryption
       strategies. At its simplest, it will take a secret phrase and
       derive an appropriate key and initialisation vector.
-    </p><pre id="idp9629504">
+    </p><pre id="idp9749408">
 $ openssl enc -nosalt -aes-128-cbc -base64 -k &quot;ocaml&quot; -P
 key=6217C07FF169F6AB2EB2731F855095F1
 iv =8164D5477E66E6A9EC99A8D58ACAADAF
-</pre><p id="idp9630528">
+</pre><p id="idp9750432">
       We've selected the <code>-nosalt</code> option here to make
       the output deterministic, and the <code>-P</code> option
       prints out the derived key and IV and exits. The algorithm used to
@@ -337,7 +337,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
   <span class="k">let</span> <span class="n">key</span> <span class="o">=</span> <span class="nn">String</span><span class="p">.</span><span class="n">sub</span> <span class="n">x</span> <span class="o">~</span><span class="n">pos</span><span class="o">:</span><span class="mi">0</span> <span class="o">~</span><span class="n">len</span><span class="o">:</span><span class="n">key_len</span> <span class="k">in</span>
   <span class="k">let</span> <span class="n">iv</span> <span class="o">=</span> <span class="nn">String</span><span class="p">.</span><span class="n">sub</span> <span class="n">x</span> <span class="o">~</span><span class="n">pos</span><span class="o">:</span><span class="n">key_len</span> <span class="o">~</span><span class="n">len</span><span class="o">:</span><span class="n">iv_len</span> <span class="k">in</span>
   <span class="nn">Printf</span><span class="p">.</span><span class="n">printf</span> <span class="s2">&quot;key=%s</span><span class="se">\n</span><span class="s2">iv =%s</span><span class="se">\n</span><span class="s2">%!&quot;</span> <span class="n">key</span> <span class="n">iv</span>
-</pre></div><p id="idp9635616">
+</pre></div><p id="idp9755472">
       The derivation algorithm takes an input password and desired total
       length (the addition of the key and IV length). It initialises a
       <code>Hexa.encode</code> transformer, which will accept
@@ -345,7 +345,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
       output bytes per input byte). A reference stores the last digest
       that's been calculated, and then the algorithm iterates until it
       has sufficient data to satisfy the required key length.
-    </p><p id="idp9637168">
+    </p><p id="idp9757024">
       Notice how the encoder object is used as an accumulator, by using
       the <code>put_string</code> and
       <code>available_output</code> to keep track of progress.
@@ -361,19 +361,19 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
   <span class="k">in</span>
   <span class="k">let</span> <span class="n">v</span> <span class="o">=</span> <span class="n">md5</span> <span class="n">password</span> <span class="k">in</span>
   <span class="nn">String</span><span class="p">.</span><span class="n">uppercase</span> <span class="o">(</span><span class="n">transform_string</span> <span class="o">(</span><span class="nn">Hexa</span><span class="p">.</span><span class="n">encode</span> <span class="bp">()</span><span class="o">)</span> <span class="o">(</span><span class="n">aux</span> <span class="n">v</span> <span class="n">v</span><span class="o">))</span>
-</pre></div><p id="idp9641088">
+</pre></div><p id="idp9760944">
       In this version, we don't use any references, and instead a
       recursive function keeps track of the last digest in use and the
       accumulated result string. This version isn't quite as efficient
       as the previous one due to the careless use of string
       concatenation for the accumulator, but this can easily be fixed by
       using the <code>Buffer</code> module instead.
-    </p></section><section><h1 id="class-parameters-and-polymorphism">Class parameters and polymorphism</h1><p id="idp9643824">
+    </p></section><section><h1 id="class-parameters-and-polymorphism">Class parameters and polymorphism</h1><p id="idp9763696">
       A class definition serves as the <span><em>constructor</em></span>
       for the class. In general, a class definition may have parameters
       that must be provided as arguments when the object is created with
       <code>new</code>.
-    </p><p id="idp9645552">
+    </p><p id="idp9765424">
       Let's build an example of an imperative singly-linked list using
       object-oriented techniques. First, we'll want to define a class
       for a single element of the list. We'll call it a
@@ -393,7 +393,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
   <span class="k">method</span> <span class="n">next</span> <span class="o">=</span> <span class="n">next_node</span>
   <span class="k">method</span> <span class="n">set_next</span> <span class="n">node</span> <span class="o">=</span> <span class="n">next_node</span> <span class="o">&lt;-</span> <span class="n">node</span>
 <span class="k">end</span><span class="o">;;</span>
-</pre></div><p id="idp9649696">
+</pre></div><p id="idp9769568">
       The <code>value</code> is the value stored in the node, and
       it can be retrieved and changed with the <code>get</code>
       and <code>set</code> methods. The
@@ -402,7 +402,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
       in the definition uses square brackets, but other uses of the type
       can omit them (or use parentheses if there is more than one type
       parameter).
-    </p><p id="idp9653936">
+    </p><p id="idp9773808">
       The type annotations on the <code>val</code> declarations
       are used to constrain type inference. If we omit these
       annotations, the type inferred for the class will be &quot;too
@@ -432,7 +432,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
              <span class="k">method</span> <span class="n">set_next</span> <span class="o">:</span> <span class="k">'</span><span class="n">c</span> <span class="n">option</span> <span class="o">-&gt;</span> <span class="kt">unit</span>
            <span class="k">end</span>
        <span class="nc">The</span> <span class="k">method</span> <span class="n">get</span> <span class="n">has</span> <span class="k">type</span> <span class="k">'</span><span class="n">b</span> <span class="n">where</span> <span class="k">'</span><span class="n">b</span> <span class="n">is</span> <span class="n">unbound</span>
-</pre></div><p id="idp9659872">
+</pre></div><p id="idp9779744">
       In general, we need to provide enough constraints so that the
       compiler will infer the correct type. We can add type constraints
       to the parameters, to the fields, and to the methods. It is a
@@ -441,7 +441,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
       clarity. A convenient middle ground is to annotate the fields
       and/or class parameters, and add constraints to methods only if
       necessary.
-    </p><p id="idp9660784">
+    </p><p id="idp9780656">
       Next, we can define the list itself. We'll keep a field
       <code>head</code> that refers to the first element in the
       list, and <code>last</code> that refers to the final element
@@ -464,7 +464,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
             <span class="n">first</span> <span class="o">&lt;-</span> <span class="n">new_node</span><span class="o">;</span>
             <span class="n">last</span> <span class="o">&lt;-</span> <span class="n">new_node</span>
 <span class="k">end</span><span class="o">;;</span>
-</pre></div></section><section><h1 id="object-types">Object types</h1><p id="idp9666224">
+</pre></div></section><section><h1 id="object-types">Object types</h1><p id="idp9786096">
       This definition of the class <code>slist</code> is not
       complete, we can construct lists, but we also need to add the
       ability to traverse the elements in the list. One common style for
@@ -473,7 +473,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
       traverse the elements of a collection. This pattern isn't
       restricted to lists, it can be used for many different kinds of
       collections.
-    </p><p id="idp9668480">
+    </p><p id="idp9788352">
       There are two common styles for defining abstract interfaces like
       this. In Java, an iterator would normally be specified with an
       interface, which specifies a set of method types. In languages
@@ -497,18 +497,18 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
   <span class="n">virtual</span> <span class="n">bool</span> <span class="nf">has_value</span><span class="o">()</span> <span class="kd">const</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
   <span class="n">virtual</span> <span class="kt">void</span> <span class="nf">next</span><span class="o">()</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
 <span class="o">};</span>
-</pre></div><p id="idp9671184">
+</pre></div><p id="idp9791056">
       OCaml support both styles. In fact, OCaml is more flexible than
       these approaches because an object type can be implemented by any
       object with the appropriate methods; it does not have to be
       specified by the object's class <span><em>a priori</em></span>.
       We'll leave abstract classes for later. Let's demonstrate the
       technique using object types.
-    </p><p id="idp9672368">
+    </p><p id="idp9792240">
       First, we'll define an object type <code>iterator</code>
       that specifies the methods in an iterator.
     </p><div class="highlight"><pre><span class="k">type</span> <span class="k">'</span><span class="n">a</span> <span class="n">iterator</span> <span class="o">=</span> <span class="o">&lt;</span> <span class="n">get</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span><span class="o">;</span> <span class="n">has_value</span> <span class="o">:</span> <span class="kt">bool</span><span class="o">;</span> <span class="n">next</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">&gt;;;</span>
-</pre></div><p id="idp9674688">
+</pre></div><p id="idp9794560">
       Next, we'll define an actual iterator for the class
       <code>slist</code>. We can represent the position in the
       list with a field <code>current</code>, following links as
@@ -529,7 +529,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
         <span class="nc">Some</span> <span class="n">node</span> <span class="o">-&gt;</span> <span class="n">current</span> <span class="o">&lt;-</span> <span class="n">node</span><span class="o">#</span><span class="n">next</span>
       <span class="o">|</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="k">raise</span> <span class="o">(</span><span class="nc">Invalid_argument</span> <span class="s2">&quot;no value&quot;</span><span class="o">)</span>
 <span class="k">end</span><span class="o">;;</span>
-</pre></div><p id="idp9678080">
+</pre></div><p id="idp9797952">
       Finally, we add a method <code>iterator</code> to the slist
       class to produce an iterator. To do so, we construct an
       <code>slist_iterator</code> that refers to the first node in
@@ -555,7 +555,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
 <span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
 <span class="o">#</span> <span class="n">it</span><span class="o">#</span><span class="n">has_value</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="bp">false</span>
-</pre></div><p id="idp9683312">
+</pre></div><p id="idp9803184">
       We may also wish to define functional-style methods,
       <code>iter f</code> takes a function <code>f</code>
       and applies it to each of the elements of the list.
@@ -565,7 +565,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
     <span class="n">f</span> <span class="n">it</span><span class="o">#</span><span class="n">get</span>
     <span class="n">it</span><span class="o">#</span><span class="n">next</span>
   <span class="k">done</span>
-</pre></div><p id="idp9686272">
+</pre></div><p id="idp9806144">
       What about functional operations similar to
       <code>List.map</code> or <code>List.fold</code>? In
       general, these methods take a function that produces a value of
@@ -576,7 +576,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
       this in the <code>slist</code> class, we need a method type
       <code>('b -&gt; 'a -&gt; 'b) -&gt; 'b -&gt; 'b</code>, where
       the method type is polymorphic over <code>'b</code>.
-    </p><p id="idp9692704">
+    </p><p id="idp9812576">
       The solution is to use a type quantifier, as shown in the
       following example. The method type must be specified directly
       after the method name, which means that method parameters must be
@@ -591,12 +591,12 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
             <span class="n">it</span><span class="o">#</span><span class="n">next</span>
          <span class="k">done</span><span class="o">;</span>
          <span class="o">!</span><span class="n">y</span><span class="o">)</span>
-</pre></div></section><section><h1 id="class-types">Class types</h1><p id="idp9697520">
+</pre></div></section><section><h1 id="class-types">Class types</h1><p id="idp9817392">
       Once we have defined the list implementation, the next step is to
       wrap it in a module or <code>.ml</code> file and give it a
       type so that it can be used in the rest of our code. What is the
       type?
-    </p><p id="idp9698848">
+    </p><p id="idp9818720">
       Before we begin, let's wrap up the implementation in an explicit
       module (we'll use explicit modules for illustration, but the
       process is similar when we want to define a
@@ -613,7 +613,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
 
    <span class="k">let</span> <span class="n">make</span> <span class="bp">()</span> <span class="o">=</span> <span class="k">new</span> <span class="n">slist</span>
 <span class="k">end</span><span class="o">;;</span>
-</pre></div><p id="idp9702688">
+</pre></div><p id="idp9822560">
       We have multiple choices in defining the module type, depending on
       how much of the implementation we want to expose. At one extreme,
       a maximally-abstract signature would completely hide the class
@@ -624,7 +624,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
 
    <span class="k">val</span> <span class="n">make</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="n">t</span>
 <span class="k">end</span> <span class="o">=</span> <span class="nc">SList</span>
-</pre></div><p id="idp9704512">
+</pre></div><p id="idp9824384">
       The abstract signature is simple because we ignore the classes.
       But what if we want to include them in the signature, so that
       other modules can inherit from the class definitions? For this, we
@@ -666,7 +666,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
 
   <span class="k">val</span> <span class="n">make</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="n">slist</span>
 <span class="k">end</span> <span class="o">=</span> <span class="nc">SList</span>
-</pre></div><p id="idp9708608">
+</pre></div><p id="idp9828480">
       In this signature, we've chosen to make nearly everything visible.
       The class type for <code>slist</code> specifies the types of
       the fields <code>first</code> and <code>last</code>,
@@ -674,7 +674,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
       class type for <code>slist_iterator</code>, which is of
       somewhat more questionable value, since the type doesn't appear in
       the type for <code>slist</code> at all.
-    </p><p id="idp9712912">
+    </p><p id="idp9832784">
       One more thing, in this example the function
       <code>make</code> has type
       <code>unit -&gt; 'a slist</code>. But wait, we've stressed
@@ -686,7 +686,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
       by erasing all the fields and keeping only the method types. In
       this case, the type expression <code>'a slist</code> is
       exactly equivalent to <code>'a t</code>.
-    </p><section><h1 id="binary-methods">Binary methods</h1><p id="idp9718688">
+    </p><section><h1 id="binary-methods">Binary methods</h1><p id="idp9838544">
         A <span><em>binary method</em></span> is a method that takes an
         object of <code>self</code> type. One common example is
         defining a method for equality.
@@ -714,7 +714,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
 <span class="o">-</span> <span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="bp">true</span>
 <span class="o">#</span> <span class="o">(</span><span class="k">new</span> <span class="n">rectangle</span> <span class="mi">5</span> <span class="mi">6</span><span class="o">)#</span><span class="n">equals</span> <span class="o">(</span><span class="k">new</span> <span class="n">rectangle</span> <span class="mi">5</span> <span class="mi">7</span><span class="o">);;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="bp">false</span>
-</pre></div><p id="idp9722560">
+</pre></div><p id="idp9842416">
         This works, but there is a problem lurking here. The method
         <code>equals</code> takes an object of the exact type
         <code>square</code> or <code>rectangle</code>.
@@ -730,15 +730,15 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
        <span class="n">is</span> <span class="n">not</span> <span class="n">a</span> <span class="n">subtype</span> <span class="k">of</span> <span class="n">shape</span> <span class="o">=</span> <span class="o">&lt;</span> <span class="n">area</span> <span class="o">:</span> <span class="kt">int</span><span class="o">;</span> <span class="n">equals</span> <span class="o">:</span> <span class="n">shape</span> <span class="o">-&gt;</span> <span class="kt">bool</span> <span class="o">&gt;</span> 
 <span class="nc">Type</span> <span class="n">shape</span> <span class="o">=</span> <span class="o">&lt;</span> <span class="n">area</span> <span class="o">:</span> <span class="kt">int</span><span class="o">;</span> <span class="n">equals</span> <span class="o">:</span> <span class="n">shape</span> <span class="o">-&gt;</span> <span class="kt">bool</span> <span class="o">&gt;</span> <span class="n">is</span> <span class="n">not</span> <span class="n">a</span> <span class="n">subtype</span> <span class="k">of</span>
   <span class="n">square</span> <span class="o">=</span> <span class="o">&lt;</span> <span class="n">area</span> <span class="o">:</span> <span class="kt">int</span><span class="o">;</span> <span class="n">equals</span> <span class="o">:</span> <span class="n">square</span> <span class="o">-&gt;</span> <span class="kt">bool</span><span class="o">;</span> <span class="n">width</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">&gt;</span> 
-</pre></div><p id="idp9727600">
+</pre></div><p id="idp9847456">
         The problem is that a <code>square</code> expects to be
         compared with a <code>square</code>, not an arbitrary
         shape; similarly for <code>rectangle</code>.
-      </p><p id="idp9730240">
+      </p><p id="idp9850096">
         This problem is fundamental. Many languages solve it either with
         narrowing (with dynamic type checking), or by method
         overloading. Since OCaml has neither of these, what can we do?
-      </p><p id="idp9730848">
+      </p><p id="idp9850704">
         One proposal we could consider is, since the problematic method
         is equality, why not just drop it from the base type
         <code>shape</code> and use polymorphic equality instead?
@@ -746,14 +746,14 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
         applied to objects.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="o">(</span><span class="k">object</span> <span class="k">method</span> <span class="n">area</span> <span class="o">=</span> <span class="mi">5</span> <span class="k">end</span><span class="o">)</span> <span class="o">=</span> <span class="o">(</span><span class="k">object</span> <span class="k">method</span> <span class="n">area</span> <span class="o">=</span> <span class="mi">5</span> <span class="k">end</span><span class="o">);;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="bp">false</span>
-</pre></div><p id="idp9733264">
+</pre></div><p id="idp9853120">
         The problem here is that the builtin polymorphic equality
         compares the method implementations, not their return values.
         The method implementations (the function values that implement
         the methods) are different, so the equality comparison is false.
         There are other reasons not to use the builtin polymorphic
         equality, but these false negatives are a showstopper.
-      </p><p id="idp9734080">
+      </p><p id="idp9853936">
         If we want to define equality for shapes in general, the
         remaining solution is to use the same approach as we described
         for narrowing. That is, introduce a
@@ -774,7 +774,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
   <span class="k">method</span> <span class="n">repr</span> <span class="o">=</span> <span class="nc">Square</span> <span class="n">self</span><span class="o">#</span><span class="n">width</span>
   <span class="k">method</span> <span class="n">equals</span> <span class="o">(</span><span class="n">other</span> <span class="o">:</span> <span class="n">shape</span><span class="o">)</span> <span class="o">=</span> <span class="n">self</span><span class="o">#</span><span class="n">repr</span> <span class="o">=</span> <span class="n">other</span><span class="o">#</span><span class="n">repr</span>
 <span class="k">end</span><span class="o">;;</span>
-</pre></div><p id="idp9736944">
+</pre></div><p id="idp9856800">
         The binary method <code>equals</code> is now implemented
         in terms of the concrete type <code>shape_repr</code>. In
         fact, the objects are now isomorphic to the
@@ -796,12 +796,12 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
   <span class="k">type</span> <span class="n">shape_repr</span> <span class="o">=</span> <span class="nc">Square</span> <span class="k">of</span> <span class="kt">int</span> <span class="o">|</span> <span class="nc">Circle</span> <span class="k">of</span> <span class="kt">int</span> <span class="o">|</span> <span class="nc">Rectangle</span> <span class="k">of</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span>
   <span class="o">...</span>
 <span class="k">end</span><span class="o">;;</span>
-</pre></div></section></section><section><h1 id="private-methods">Private methods</h1><p id="idp9743472">
+</pre></div></section></section><section><h1 id="private-methods">Private methods</h1><p id="idp9863376">
       Methods can be declared <span><em>private</em></span>, which means
       that they may be called by subclasses, but they are not visible
       otherwise (similar to a <span><em>protected</em></span> method in
       C++).
-    </p><p id="idp9744912">
+    </p><p id="idp9864816">
       To illustrate, let's build a class <code>vector</code> that
       contains an array of integers, resizing the storage array on
       demand. The field <code>values</code> contains the actual
@@ -836,7 +836,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
   <span class="o">^</span>
 <span class="nc">Error</span><span class="o">:</span> <span class="nc">This</span> <span class="n">expression</span> <span class="n">has</span> <span class="k">type</span> <span class="n">vector</span>
        <span class="nc">It</span> <span class="n">has</span> <span class="n">no</span> <span class="k">method</span> <span class="n">ensure_capacity</span>
-</pre></div><p id="idp9751856">
+</pre></div><p id="idp9871760">
       To be precise, the method <code>ensure_capacity</code> is
       part of the class type, but it is not part of the object type.
       This means the object <code>v</code> has no method
@@ -853,7 +853,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
         <span class="n">values</span><span class="o">.(</span><span class="n">i</span><span class="o">)</span> <span class="o">&lt;-</span> <span class="n">values</span><span class="o">.(</span><span class="n">j</span><span class="o">);</span>
         <span class="n">values</span><span class="o">.(</span><span class="n">j</span><span class="o">)</span> <span class="o">&lt;-</span> <span class="n">tmp</span>
   <span class="k">end</span><span class="o">;;</span>
-</pre></div><p id="idp9756656">
+</pre></div><p id="idp9876560">
       Yet another reason for private methods is to factor the
       implementation and support recursion. Moving along with this
       example, let's build a binary heap, which is a binary tree in heap
@@ -886,11 +886,11 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
                <span class="n">self</span><span class="o">#</span><span class="n">move_up</span> <span class="n">parent</span>
             <span class="k">end</span>
 <span class="k">end</span><span class="o">;;</span>
-</pre></div><p id="idp9761696">
+</pre></div><p id="idp9881648">
       The method <code>move_up</code> implements the process of
       restoring heap order as a recursive method (though it would be
       straightforward avoid the recursion and use iteration here).
-    </p><p id="idp9762976">
+    </p><p id="idp9882928">
       The key property of private methods is that they are visible to
       subclasses, but not anywhere else. If you want the stronger
       guarantee that a method is <span><em>really</em></span> private,
@@ -907,7 +907,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
     <span class="o">...</span>
     <span class="k">method</span> <span class="k">private</span> <span class="n">move_up</span> <span class="n">i</span> <span class="o">=</span> <span class="o">...</span>
   <span class="k">end</span><span class="o">;;</span>
-</pre></div></section><section><h1 id="virtual-classes-and-methods">Virtual classes and methods</h1><p id="idp9767696">
+</pre></div></section><section><h1 id="virtual-classes-and-methods">Virtual classes and methods</h1><p id="idp9887648">
       A <span><em>virtual</em></span> class is a class where some methods
       or fields are declared, but not implemented. This should not be
       confused with the word &quot;virtual&quot; as it is used in C++.
@@ -916,7 +916,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
       <span><em>all</em></span> methods use dynamic dispatch, but the
       keyword <span><em>virtual</em></span> means the method or field is
       not implemented.
-    </p><p id="idp9770240">
+    </p><p id="idp9890192">
       In the previous section, we defined a class
       <code>swappable_vector</code> that inherits from
       <code>array_vector</code> and adds a <code>swap</code>
@@ -924,7 +924,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
       defined for any object with <code>get</code> and
       <code>set</code> methods; it doesn't have to be the specific
       class <code>array_vector</code>.
-    </p><p id="idp9775792">
+    </p><p id="idp9895744">
       One way to do this is to declare the
       <code>swappable_vector</code> abstractly, declaring the
       methods <code>get</code> and <code>set</code>, but
@@ -939,7 +939,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
       <span class="n">self</span><span class="o">#</span><span class="n">set</span> <span class="n">i</span> <span class="o">(</span><span class="n">self</span><span class="o">#</span><span class="n">get</span> <span class="n">j</span><span class="o">);</span>
       <span class="n">self</span><span class="o">#</span><span class="n">set</span> <span class="n">j</span> <span class="n">tmp</span>
 <span class="k">end</span><span class="o">;;</span>
-</pre></div><p id="idp9780720">
+</pre></div><p id="idp9900672">
       At some future time, we may settle on a concrete implementation
       for the vector. We can inherit from the
       <code>abstract_swappable_bvector</code> to get the
@@ -962,7 +962,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
             <span class="nn">Array</span><span class="p">.</span><span class="n">blit</span> <span class="n">values</span> <span class="mi">0</span> <span class="n">new_values</span> <span class="mi">0</span> <span class="o">(</span><span class="nn">Array</span><span class="p">.</span><span class="n">length</span> <span class="n">values</span><span class="o">);</span>
             <span class="n">values</span> <span class="o">&lt;-</span> <span class="n">new_values</span>
 <span class="k">end</span>
-</pre></div><p id="idp9784912">
+</pre></div><p id="idp9904864">
       Here's a different implementation using
       <code>HashTbl</code>.
     </p><div class="highlight"><pre><span class="k">class</span> <span class="n">hash_vector</span> <span class="o">=</span>
@@ -977,13 +977,13 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
 
    <span class="k">method</span> <span class="n">set</span> <span class="o">=</span> <span class="nn">Hashtbl</span><span class="p">.</span><span class="n">add</span> <span class="n">table</span>
 <span class="k">end</span><span class="o">;;</span>
-</pre></div><p id="idp9787408">
+</pre></div><p id="idp9907360">
       One way to view a <code>virtual</code> class is that it is
       like a functor, where the &quot;inputs&quot; are the declared, but
       not defined, virtual methods and fields. The functor application
       is implemented through inheritance, when virtual methods are given
       concrete implementations.
-    </p><p id="idp9789168">
+    </p><p id="idp9909120">
       We've been mentioning that fields can be virtual too. Here is
       another implementation of the swapper, this time with direct
       access to the array of values.
@@ -998,7 +998,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
       <span class="n">values</span><span class="o">.(</span><span class="n">i</span><span class="o">)</span> <span class="o">&lt;-</span> <span class="n">values</span><span class="o">.(</span><span class="n">j</span><span class="o">);</span>
       <span class="n">values</span><span class="o">.(</span><span class="n">j</span><span class="o">)</span> <span class="o">&lt;-</span> <span class="n">tmp</span>
 <span class="k">end</span><span class="o">;;</span>
-</pre></div><p id="idp9791008">
+</pre></div><p id="idp9910960">
       This level of dependency on the implementation details is
       possible, but it is hard to justify the use of a virtual class --
       why not just define the <code>swap</code> method as part of
@@ -1006,7 +1006,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
       situations where there are multiple (useful) implementations of
       the virtual parts. In most cases, this will be public virtual
       methods.
-    </p></section><section><h1 id="multiple-inheritance">Multiple inheritance</h1><p id="idp9793728">
+    </p></section><section><h1 id="multiple-inheritance">Multiple inheritance</h1><p id="idp9913744">
       When a class inherits from more than one superclass, it is using
       <span><em>multiple inheritance</em></span>. Multiple inheritance
       extends the variety of ways in which classes can be combined, and
@@ -1014,16 +1014,16 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
       However, it can be tricky to use, particularly when the
       inheritance hierarchy is a graph rather than a tree, so it should
       be used with care.
-    </p><section><h1 id="how-names-are-resolved">How names are resolved</h1><p id="idp9796048">
+    </p><section><h1 id="how-names-are-resolved">How names are resolved</h1><p id="idp9916128">
         The main &quot;trickiness&quot; of multiple inheritance is due
         to naming -- what happens when a method or field with some name
         is defined in more than one class?
-      </p><p id="idp9796832">
+      </p><p id="idp9916912">
         If there is one thing to remember about inheritance in OCaml, it
         is this: inheritance is like textual inclusion. If there is more
         than one definition for a name, the last definition wins. Let's
         look at some artificial, but illustrative, examples.
-      </p><p id="idp9797520">
+      </p><p id="idp9917600">
         First, let's consider what happens when we define a method more
         than once. In the following example, the method
         <code>get</code> is defined twice; the second definition
@@ -1037,7 +1037,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
 <span class="k">class</span> <span class="n">m1</span> <span class="o">:</span> <span class="k">object</span> <span class="k">method</span> <span class="n">f</span> <span class="o">:</span> <span class="kt">int</span> <span class="k">method</span> <span class="n">get</span> <span class="o">:</span> <span class="kt">int</span> <span class="k">end</span>
 <span class="o">#</span> <span class="o">(</span><span class="k">new</span> <span class="n">m1</span><span class="o">)#</span><span class="n">f</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">2</span>
-</pre></div><p id="idp9800160">
+</pre></div><p id="idp9920240">
         Fields have similar behavior, though the compiler produces a
         warning message about the override.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">class</span> <span class="n">m2</span> <span class="o">=</span>
@@ -1055,7 +1055,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
 <span class="k">class</span> <span class="n">m2</span> <span class="o">:</span> <span class="k">object</span> <span class="k">val</span> <span class="n">x</span> <span class="o">:</span> <span class="kt">int</span> <span class="k">method</span> <span class="n">f</span> <span class="o">:</span> <span class="kt">int</span> <span class="k">end</span>
 <span class="o">#</span> <span class="o">(</span><span class="k">new</span> <span class="n">m2</span><span class="o">)#</span><span class="n">f</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">2</span>
-</pre></div><p id="idp9801984">
+</pre></div><p id="idp9922064">
         Of course, it is unlikely that you will define two methods or
         two fields of the same name in the same class. However, the
         rules for inheritance follow the same pattern: the last
@@ -1078,7 +1078,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
 <span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
 <span class="o">#</span> <span class="n">x</span><span class="o">#</span><span class="n">get</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">2</span>
-</pre></div><p id="idp9805728">
+</pre></div><p id="idp9925808">
         To reiterate, to understand what inheritance means, replace each
         <code>inherit</code> directive with its definition, and
         take the last definition of each method or field. This holds
@@ -1127,7 +1127,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">2</span>
 <span class="o">#</span> <span class="n">x</span><span class="o">#</span><span class="n">f3</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">3</span>
-</pre></div></section><section><h1 id="mixins">Mixins</h1><p id="idp9814400">
+</pre></div></section><section><h1 id="mixins">Mixins</h1><p id="idp9934592">
         When should you use multiple inheritance? If you ask multiple
         people, you're likely to get multiple (perhaps heated) answers.
         Some will argue that multiple inheritance is overly complicated;
@@ -1135,7 +1135,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
         and one should use object composition instead. But regardless of
         who you talk to, you will rarely hear that multiple inheritance
         is great and you should use it widely.
-      </p><p id="idp9815280">
+      </p><p id="idp9935472">
         In any case, if you're programming with objects, there's one
         general pattern for multiple inheritance that is both useful and
         reasonably simple, the <span><em>mixin</em></span> pattern.
@@ -1146,7 +1146,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
         <span><em>B</em></span> from <span><em>A</em></span>, then you can
         inherit from <span><em>M</em></span> -- &quot;mixing&quot; it in
         -- to get features <span><em>B</em></span>.
-      </p><p id="idp9819568">
+      </p><p id="idp9939760">
         That's too abstract, so let's give an example based on
         collections. In Section XXX:Objecttypes, we introduced the
         <span><em>iterator</em></span> pattern, where an
@@ -1159,7 +1159,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
 <span class="k">class</span> <span class="o">[</span><span class="k">'</span><span class="n">a</span><span class="o">]</span> <span class="n">deque</span> <span class="o">:</span> <span class="k">object</span> <span class="o">...</span> <span class="k">method</span> <span class="n">iterator</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="n">iterator</span> <span class="k">end</span><span class="o">;;</span>
 <span class="k">class</span> <span class="o">[</span><span class="k">'</span><span class="n">a</span><span class="o">,</span> <span class="k">'</span><span class="n">b</span><span class="o">]</span> <span class="n">map</span> <span class="o">:</span> <span class="k">object</span> <span class="o">...</span> <span class="k">method</span> <span class="n">iterator</span> <span class="o">:</span> <span class="k">'</span><span class="n">b</span> <span class="n">iterator</span> <span class="k">end</span><span class="o">;;</span>
 <span class="o">...</span>
-</pre></div><p id="idp9823008">
+</pre></div><p id="idp9943200">
         The collections are different is some ways, but they share a
         common pattern for iteration that we can reuse. For a simple
         example, let's define a mixin that implements an arithmetic sum
@@ -1192,14 +1192,14 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
      <span class="k">inherit</span> <span class="o">[</span><span class="kt">int</span><span class="o">]</span> <span class="n">deque</span>
      <span class="k">inherit</span> <span class="n">int_sum_mixin</span>
   <span class="k">end</span><span class="o">;;</span>
-</pre></div><p id="idp9825488">
+</pre></div><p id="idp9945680">
         In this particular case, the mixin works only for a collection
         of integers, so we can't add the mixin to the polymorphic class
         definition <code>['a] slist</code> itself. However, the
         result of using the mixin is that the integer collection has a
         method <code>sum</code>, and it is done with very little
         of the fuss we would need if we used object composition instead.
-      </p><p id="idp9827648">
+      </p><p id="idp9947840">
         The mixin pattern isn't limited to non-polymorphic classes, of
         course. We can use it to implement generic features as well. The
         following mixin defines functional-style iteration in terms of
@@ -1225,7 +1225,7 @@ iv =8164D5477E66E6A9EC99A8D58ACAADAF
 <span class="k">end</span><span class="o">;;</span>
 </pre></div><aside class="note"><h1>
       Production note
-      </h1><p id="idp9831008">
+      </h1><p id="idp9951200">
         This chapter contains significant external contributions from
         Leo White.
       </p></aside></section></section>

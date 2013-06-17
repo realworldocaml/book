@@ -116,13 +116,13 @@
                 
                 
 
-    <p id="idp11998416">
+    <p id="idp12120016">
     Compiling source code into executable programs is a fairly complex
     process that involves quite a few tools -- preprocessors, compilers,
     runtime libraries, linkers and assemblers. It's important to
     understand how these fit together to help with your day-to-day
     workflow of developing, debugging and deploying applications.
-  </p><p id="idp11999168">
+  </p><p id="idp12120768">
     OCaml has a strong emphasis on static type safety and rejects source
     code that doesn't meet its requirements as early as possible. The
     compiler does this by running the source code through a series of
@@ -131,7 +131,7 @@
     information from the previous stage. The final native code output is
     low-level assembly code that doesn't know anything about the OCaml
     modules or objects that the compiler started with.
-  </p><p id="idp12000112">
+  </p><p id="idp12121712">
     You don't have to do all this manually, of course. The compiler
     frontends (<code>ocamlc</code> and
     <code>ocamlopt</code>) are invoked via the command-line and
@@ -140,35 +140,35 @@
     performance problem. This chapter explains the compiler pipeline in
     more depth so you understand how to harness the command-line tools
     effectively.
-  </p><p id="idp12002352">
+  </p><p id="idp12123952">
     In this chapter, we'll cover the following topics:
-  </p><ul><li><p id="idp12003328">
+  </p><ul><li><p id="idp12124928">
         the compilation pipeline and what each stage represents.
-      </p></li><li><p id="idp12004192">
+      </p></li><li><p id="idp12125792">
         source preprocessing via Camlp4 and the intermediate forms.
-      </p></li><li><p id="idp12005056">
+      </p></li><li><p id="idp12126656">
         the type-checking process, including module resolution.
-      </p></li></ul><p id="idp12005776">
+      </p></li></ul><p id="idp12127376">
     The details of the compilation process into executable code can be
     found next in
     <a href="the-compiler-backend-byte-code-and-native-code.html">Chapter 24, <i>The Compiler Backend: Byte-code and Native-code</i></a>.
-  </p><section><h1 id="an-overview-of-the-toolchain">An overview of the toolchain</h1><p id="idp12008160">
+  </p><section><h1 id="an-overview-of-the-toolchain">An overview of the toolchain</h1><p id="idp12129744">
       The OCaml tools accept textual source code as input, using
       filename extensions of <code>.ml</code> and
       <code>.mli</code> for modules and signatures respectively.
       We explained the basics of the build process earlier in
       <a href="files-modules-and-programs.html">Chapter 4, <i>Files, Modules and Programs</i></a>, so we'll
       assume you've built a few OCaml programs already by this point.
-    </p><p id="idp12010976">
+    </p><p id="idp12132560">
       Each source file represents a <span><em>compilation
       unit</em></span> that is built separately. The compiler generates
       intermediate files with different filename extensions to use as it
       advances through the compilation stages. The linker takes a
       collection of compiled units and produces a standalone executable
       or library archive that can be reused by other applications.
-    </p><p id="idp12012128">
+    </p><p id="idp12133712">
       The overall compilation pipeline looks like this:
-    </p><pre id="idp12012592">
+    </p><pre id="idp12134176">
     Source code
         |
         | parsing and preprocessing
@@ -198,7 +198,7 @@
     |               | assembly &amp; linking
     v               v
  Interpreted    Compiled
-</pre><p id="idp12014592">
+</pre><p id="idp12136176">
       Notice that the pipeline branches towards the end. OCaml has
       multiple compiler frontends that reuse the early stages of
       compilation, but produce very different final outputs. The
@@ -208,82 +208,82 @@
       suitable for high-performance applications.
     </p><section><h1><b>
     Obtaining the compiler source code
-    </b></h1><p id="idp12016944">
+    </b></h1><p id="idp12138528">
       Although it's not necessary to understand the examples, you may
       find it useful to have a copy of the OCaml source tree checked out
       while you read through this chapter. The source code is available
       from multiple places:
-    </p><ul><li><p id="idp12018112">
+    </p><ul><li><p id="idp12139696">
           Stable releases as zip and tar archives from the
           <a href="http://caml.inria.fr/download.en.html" target="_top">OCaml
           download site</a>.
-        </p></li><li><p id="idp12019712">
+        </p></li><li><p id="idp12141296">
           A Subversion anonymous mirror of the main development sources
           available on the
           <a href="http://caml.inria.fr/ocaml/anonsvn.en.html" target="_top">development
           resources</a> page online.
-        </p></li><li><p id="idp12021376">
+        </p></li><li><p id="idp12142960">
           A Git mirror of the Subversion repository with all the history
           and development branches included, browsable online at
           <a href="https://github.com/ocaml/ocaml" target="_top">Github</a>.
-        </p></li></ul><p id="idp12022912">
+        </p></li></ul><p id="idp12144496">
       The source tree is split up into sub-directories. The core
       compiler consists of:
-    </p><ul><li><p id="idp12023920">
+    </p><ul><li><p id="idp12145504">
 <code>config/</code>: configuration directives to tailor
           OCaml for your operating system and architecture.
-        </p></li><li><p id="idp12025504">
+        </p></li><li><p id="idp12147088">
 <code>bytecomp/</code> and <code>byterun/</code>:
           byte-code compiler and runtime, including the garbage
           collector.
-        </p></li><li><p id="idp12027792">
+        </p></li><li><p id="idp12149376">
 <code>asmcomp/</code> and <code>asmrun/</code>:
           native-code compiler and runtime. The native runtime symlinks
           many modules from the <code>byterun</code> directory to
           share code, most notably the garbage collector.
-        </p></li><li><p id="idp12030880">
+        </p></li><li><p id="idp12152464">
 <code>parsing/</code>: the OCaml lexer, parser and
           libraries for manipulating them.
-        </p></li><li><p id="idp12032432">
+        </p></li><li><p id="idp12154016">
 <code>typing/</code>: the static type checking
           implementation and type definitions.
-        </p></li><li><p id="idp12033984">
+        </p></li><li><p id="idp12155568">
 <code>camlp4/</code>: the source code macro
           preprocessor.
-        </p></li><li><p id="idp12035520">
+        </p></li><li><p id="idp12157104">
 <code>driver/</code>: command-line interfaces for the
           compiler tools.
-        </p></li></ul><p id="idp12036928">
+        </p></li></ul><p id="idp12158512">
       There are a number of tools and scripts also built alongside the
       core compiler:
-    </p><ul><li><p id="idp12037936">
+    </p><ul><li><p id="idp12159520">
 <code>debugger/</code>: the interactive byte-code
           debugger.
-        </p></li><li><p id="idp12039472">
+        </p></li><li><p id="idp12161056">
 <code>toplevel/</code>: interactive top-level console.
-        </p></li><li><p id="idp12040992">
+        </p></li><li><p id="idp12162576">
 <code>emacs/</code>: a <span><em>caml-mode</em></span>
           for the Emacs editor.
-        </p></li><li><p id="idp12042960">
+        </p></li><li><p id="idp12164544">
 <code>stdlib/</code>: the compiler standard library,
           including the <code>Pervasives</code> module.
-        </p></li><li><p id="idp12045216">
+        </p></li><li><p id="idp12166800">
 <code>ocamlbuild/</code>: build system that automates
           common OCaml compilation modes.
-        </p></li><li><p id="idp12046768">
+        </p></li><li><p id="idp12168352">
 <code>otherlibs/</code>: optional libraries such as the
           Unix and graphics modules.
-        </p></li><li><p id="idp12048320">
+        </p></li><li><p id="idp12169904">
 <code>tools/</code>: command-line utilities such as
           <code>ocamldep</code> that are installed with the
           compiler.
-        </p></li><li><p id="idp12050608">
+        </p></li><li><p id="idp12172192">
 <code>testsuite/</code>: regression tests for the core
           compiler.
-        </p></li></ul></section><p id="idp12052144">
+        </p></li></ul></section><p id="idp12173728">
       We'll go through each of the compilation stages now and explain
       how that'll be useful to you during day-to-day OCaml development.
-    </p></section><section><h1 id="parsing-source-code">Parsing source code</h1><p id="idp12053920">
+    </p></section><section><h1 id="parsing-source-code">Parsing source code</h1><p id="idp12175552">
       When a source file is passed to the OCaml compiler, its first task
       is to parse the text into a more structured Abstract Syntax Tree
       (AST). The parsing logic is implemented in OCaml itself using the
@@ -291,27 +291,27 @@
       <a href="parsing-with-ocamllex-and-menhir.html">Chapter 16, <i>Parsing with OCamllex and Menhir</i></a>. The
       lexer and parser rules can be found in the
       <code>parsing</code> directory in the source distribution.
-    </p><section><h1 id="syntax-errors">Syntax errors</h1><p id="idp12057232">
+    </p><section><h1 id="syntax-errors">Syntax errors</h1><p id="idp12178928">
         The OCaml parser's goal is to output a well-formed AST data
         structure to the next phase of compilation, and so it rejects
         any source code that doesn't match basic syntactic requirements.
         The compiler emits a <span><em>syntax error</em></span> in this
         situation, with a pointer to the filename and line and character
         number that's as close to the error as possible.
-      </p><p id="idp12058448">
+      </p><p id="idp12180144">
         Here's an example syntax error that we obtain by performing a
         module assignment as a statement instead of as a let-binding.
       </p><div class="highlight"><pre><span class="c">(* broken_module.ml *)</span>
 <span class="k">let</span> <span class="bp">()</span> <span class="o">=</span>
   <span class="k">module</span> <span class="nc">MyString</span> <span class="o">=</span> <span class="nc">String</span><span class="o">;</span>
   <span class="bp">()</span>
-</pre></div><p id="idp12060000">
+</pre></div><p id="idp12181696">
         The above code results in a syntax error when compiled.
-      </p><pre id="idp12060464">
+      </p><pre id="idp12182160">
 $ ocamlc -c broken_module.ml 
 File &quot;broken_module.ml&quot;, line 3, characters 2-8:
 Error: Syntax error
-</pre><p id="idp12061376">
+</pre><p id="idp12183072">
         The correct version of this source code creates the
         <code>MyString</code> module correctly via a local open,
         and compiles successfully.
@@ -319,12 +319,12 @@ Error: Syntax error
 <span class="k">let</span> <span class="bp">()</span> <span class="o">=</span>
   <span class="k">let</span> <span class="k">module</span> <span class="nc">MyString</span> <span class="o">=</span> <span class="nc">String</span> <span class="k">in</span>
   <span class="bp">()</span>
-</pre></div><p id="idp12063632">
+</pre></div><p id="idp12185328">
         The syntax error points to the line and character number of the
         first token that couldn't be parsed. In the broken example the
         <code>module</code> keyword isn't a valid token at that
         point in parsing, so the error location information is correct.
-      </p></section><section><h1 id="automatically-indenting-source-code">Automatically indenting source code</h1><p id="idp12066240">
+      </p></section><section><h1 id="automatically-indenting-source-code">Automatically indenting source code</h1><p id="idp12187984">
         Sadly, syntax errors do get more inaccurate sometimes depending
         on the nature of your mistake. Try to spot the deliberate error
         in the following function definitions.
@@ -343,13 +343,13 @@ Error: Syntax error
   <span class="k">let</span> <span class="o">_</span><span class="n">x</span> <span class="o">=</span> <span class="n">add_and_print</span> <span class="mi">1</span> <span class="mi">2</span> <span class="k">in</span>
   <span class="k">let</span> <span class="o">_</span><span class="n">y</span> <span class="o">=</span> <span class="n">concat_and_print</span> <span class="s2">&quot;a&quot;</span> <span class="s2">&quot;b&quot;</span> <span class="k">in</span>
   <span class="bp">()</span>
-</pre></div><p id="idp12068288">
+</pre></div><p id="idp12190032">
         When you compile this file you'll get a syntax error.
-      </p><pre id="idp12068752">
+      </p><pre id="idp12190496">
 $ ocamlc -c follow_on_function.ml
 File &quot;follow_on_function.ml&quot;, line 12, characters 0-3:
 Error: Syntax error
-</pre><p id="idp12069680">
+</pre><p id="idp12191424">
         The line number in the error points to the end of the
         <code>add_and_print</code> function, but the actual error
         is at the end of the <span><em>first</em></span> function
@@ -358,17 +358,17 @@ Error: Syntax error
         the first <code>let</code> binding. This eventually
         results in a parsing error at the very end of the second
         function.
-      </p><p id="idp12072304">
+      </p><p id="idp12194048">
         This class of bug (due to a single errant character) can be hard
         to spot in a large body of code. Luckily, there's a great tool
         in OPAM called ocp-indent that applies structured indenting
         rules to your source code on a line-by-line basis. This not only
         beautifies your code layout, but it also makes this syntax error
         much easier to locate.
-      </p><p id="idp12073104">
+      </p><p id="idp12194848">
         Let's run our erronous file through ocp-indent and see how it
         processes it.
-      </p><pre id="idp12073600">
+      </p><pre id="idp12195344">
 $ opam install ocp-indent
 $ ocp-indent follow_on_function.ml
 (* follow_on_function.ml *)
@@ -386,14 +386,14 @@ let () =
   let _x = add_and_print 1 2 in
   let _y = concat_and_print &quot;a&quot; &quot;b&quot; in
   ()
-</pre><p id="idp12074912">
+</pre><p id="idp12196656">
         The <code>add_and_print</code> definition has been
         indented as if it were part of the first
         <code>concat_and_print</code> definition, and the errant
         semicolon is now much easier to spot. We just need to remove
         that semicolon and re-run ocp-indent to verify that the syntax
         is correct.
-      </p><pre id="idp12077008">
+      </p><pre id="idp12198752">
 $ ocp-indent follow_on_function_fixed.ml 
 (* follow_on_function_fixed.ml *)
 let concat_and_print x y =
@@ -414,19 +414,19 @@ let () =
 $ ocamlc -i follow_on_function_fixed.ml 
 val concat_and_print : string -&gt; string -&gt; string
 val add_and_print : int -&gt; int -&gt; int
-</pre><p id="idp12078288">
+</pre><p id="idp12200032">
         The
         <a href="https://github.com/OCamlPro/ocp-indent" target="_top">ocp-indent
         homepage</a> documents how to integrate it with your
         favourite editor. All the Core libraries are formatted using it
         to ensure consistency, and it's a good idea to do this before
         publishing your own source code online.
-      </p></section><section><h1 id="generating-documentation-from-interfaces">Generating documentation from interfaces</h1><p id="idp12081056">
+      </p></section><section><h1 id="generating-documentation-from-interfaces">Generating documentation from interfaces</h1><p id="idp12202800">
         Whitespace and source code comments are removed during parsing
         and aren't significant in determining the semantics of the
         program. However, other tools in the OCaml distribution can
         interpret comments for their own ends.
-      </p><p id="idp12081712">
+      </p><p id="idp12203456">
         The OCamldoc tool uses specially formatted comments in the
         source code to generate documentation bundles. These comments
         are combined with the function definitions and signatures and
@@ -434,7 +434,7 @@ val add_and_print : int -&gt; int -&gt; int
         can generate HTML pages, LaTeX and PDF documents, UNIX manual
         pages and even module dependency graphs that can be viewed using
         <a href="http://www.graphviz.org" target="_top">Graphviz</a>.
-      </p><p id="idp12083264">
+      </p><p id="idp12205008">
         Here's a sample of some source code that's been annotated with
         OCamldoc comments.
       </p><div class="highlight"><pre><span class="c">(** example.ml: The first special comment of the file is the comment </span>
@@ -457,21 +457,21 @@ val add_and_print : int -&gt; int -&gt; int
   <span class="o">|</span> <span class="o">`</span><span class="nc">Cambridge</span>  <span class="o">-&gt;</span> <span class="nc">Rain</span> <span class="mi">100</span>
   <span class="o">|</span> <span class="o">`</span><span class="nc">New_york</span>   <span class="o">-&gt;</span> <span class="nc">Rain</span> <span class="mi">20</span>
   <span class="o">|</span> <span class="o">`</span><span class="nc">California</span> <span class="o">-&gt;</span> <span class="nc">Sun</span>
-</pre></div><p id="idp12086240">
+</pre></div><p id="idp12207984">
         The OCamldoc comments are distinguished by beginning with the
         double asterisk. There are formatting conventions for the
         contents of the comment to mark metadata. For instance, the
         <code>@tag</code> fields mark specific properties such as
         the author of that section of code.
-      </p><p id="idp12087648">
+      </p><p id="idp12209392">
         Try compiling the HTML documentation and UNIX man pages by
         running <code>ocamldoc</code> over the source file.
-      </p><pre id="idp12088864">
+      </p><pre id="idp12210608">
 $ mkdir -p html man/man3
 $ ocamldoc -html -d html example.ml
 $ ocamldoc -man -d man/man3 example.ml
 $ man -M man Example
-</pre><p id="idp12089664">
+</pre><p id="idp12211408">
         You should now have HTML files inside the
         <code>html/</code> directory and also be able to view the
         UNIX manual pages held in <code>man/man3</code>. There are
@@ -481,31 +481,31 @@ $ man -M man Example
         manual</a> for the complete list.
       </p><aside class="tip"><h1>
       Using custom OCamldoc generators
-      </h1><p id="idp12093248">
+      </h1><p id="idp12214992">
         The default HTML output stylesheets from OCamldoc are pretty
         spartan and distinctly Web 1.0. The tool supports plugging in
         custom documentation generators, and there are several available
         that provide prettier or more detailed output.
-      </p><ul><li><p id="idp12094432">
+      </p><ul><li><p id="idp12216176">
 <a href="http://argot.x9c.fr/" target="_top">Argot</a> is an
             enchanced HTML generator that supports code folding and
             searching by name or type definition.
-          </p></li><li><p id="idp12096032">
+          </p></li><li><p id="idp12217776">
 <a href="https://gitorious.org/ocamldoc-generators/ocamldoc-generators" target="_top">ocamldoc-generators</a>
             add support for Bibtex references within comments and
             generating literate documentation that embeds the code
             alongside the comments.
-          </p></li><li><p id="idp12097728">
+          </p></li><li><p id="idp12219472">
             JSON output is available via a custom
             <a href="https://github.com/xen-org/ocamldoc-json" target="_top">generator</a>
             in Xen.
-          </p></li></ul></aside></section></section><section><h1 id="preprocessing-source-code">Preprocessing source code</h1><p id="idp12100736">
+          </p></li></ul></aside></section></section><section><h1 id="preprocessing-source-code">Preprocessing source code</h1><p id="idp12222544">
       One powerful feature in OCaml is a facility to extend the standard
       language grammar without having to modify the compiler. You can
       roughly think of it as a type-safe version to the
       <code>cpp</code> preprocessor used in C/C++ to control
       conditional compilation directives.
-    </p><p id="idp12102096">
+    </p><p id="idp12223952">
       The OCaml distribution includes a system called Camlp4 for writing
       extensible parsers. This provides some OCaml libraries that are
       used to define grammars and also dynamically loadable syntax
@@ -513,18 +513,18 @@ $ man -M man Example
       keywords and later transform these keywords (or indeed, any
       portion of the input program) into conventional OCaml code that
       can be understood by the rest of the compiler.
-    </p><p id="idp12102976">
+    </p><p id="idp12224832">
       We've already seen several Core libraries that use Camlp4:
-    </p><ul><li><p id="idp12103952">
+    </p><ul><li><p id="idp12225808">
 <code>Fieldslib</code> generates first-class values that
           represent fields of a record.
-        </p></li><li><p id="idp12105504">
+        </p></li><li><p id="idp12227360">
 <code>Sexplib</code> to convert types to textual
           s-expressions.
-        </p></li><li><p id="idp12107040">
+        </p></li><li><p id="idp12228896">
 <code>Bin_prot</code> for efficient binary conversion
           and parsing.
-        </p></li></ul><p id="idp12108448">
+        </p></li></ul><p id="idp12230304">
       These libraries all extend the language in quite a minimal way by
       adding a <code>with</code> keyword to type declarations to
       signify that extra code should be generated from that declaration.
@@ -536,28 +536,28 @@ $ man -M man Example
   <span class="n">foo</span><span class="o">:</span> <span class="kt">int</span><span class="o">;</span>
   <span class="n">bar</span><span class="o">:</span> <span class="kt">string</span>
 <span class="o">}</span> <span class="k">with</span> <span class="n">sexp</span><span class="o">,</span> <span class="n">fields</span>
-</pre></div><p id="idp12110864">
+</pre></div><p id="idp12232720">
       Compiling this code will normally give you a syntax error if you
       do so without Camlp4 since the <code>with</code> keyword
       isn't normally allowed after a type definition.
-    </p><pre id="idp12112144">
+    </p><pre id="idp12234000">
 $ ocamlfind ocamlc -c type_conv_example.ml
 File &quot;type_conv_example.ml&quot;, line 7, characters 2-6:
 Error: Syntax error
-</pre><p id="idp12113104">
+</pre><p id="idp12234960">
       Now add in the syntax extension packages for
       <code>fieldslib</code> and <code>sexplib</code>, and
       everything will compile again.
-    </p><pre id="idp12115040">
+    </p><pre id="idp12236896">
 $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \
   -package fieldslib.syntax type_conv_example.ml
-</pre><p id="idp12115824">
+</pre><p id="idp12237680">
       We've specified a couple of additional flags here. The
       <code>-syntax</code> flag directs
       <code>ocamlfind</code> to add the <code>-pp</code>
       flag to the compiler command-line. This flag instructs the
       compiler to run the preprocessor during its parsing phase.
-    </p><p id="idp12118528">
+    </p><p id="idp12240384">
       The <code>-package</code> flag imports other OCaml
       libraries. The <code>.syntax</code> suffix in the package
       name is a convention that indicates these libraries are
@@ -567,21 +567,21 @@ $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \
       code into conventional OCaml code that has no trace of the new
       keywords. The compiler then compiles this transformed code with no
       knowledge of the preprocessor's actions.
-    </p><p id="idp12121552">
+    </p><p id="idp12243408">
       Both Fieldslib and Sexplib need this new <code>with</code>
       keyword, but they both can't register the same extension. Instead,
       a library called Type_conv provides the common extension framework
       for them to use. Type_conv registers the <code>with</code>
       grammar extension to Camlp4, and the OCamlfind packaging ensures
       that it's loaded before Variantslib or Sexplib.
-    </p><p id="idp12123728">
+    </p><p id="idp12245584">
       The two extensions generate boilerplate OCaml code based on the
       type definition. This avoids the inevitable performance hit of
       doing the code generation dynamically. It also doesn't require a
       Just-In-Time (JIT) runtime that can be a source of unpredictable
       dynamic behaviour. Instead, all code is simply generated at
       compile-time via Camlp4.
-    </p><p id="idp12124512">
+    </p><p id="idp12246368">
       The syntax extensions accept an input AST and output a modified
       one. If you're not familiar with the Camlp4 module in question,
       how do you figure out what changes it's made to your code? The
@@ -590,16 +590,16 @@ $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \
       extension's behaviour or run Camlp4 manually yourself to see the
       transformation in action. We'll show you how to do both of these
       now.
-    </p><section><h1 id="using-camlp4-interactively">Using Camlp4 interactively</h1><p id="idp12126576">
+    </p><section><h1 id="using-camlp4-interactively">Using Camlp4 interactively</h1><p id="idp12248432">
         The <code>utop</code> top-level can run the phrases that
         you type through <code>camlp4</code> automatically. You
         should have at least these lines in your
         <code>~/.ocamlinit</code> file in your home directory (see
         <a href="installation.html">Appendix A, <i>Installation</i></a> for more information).
-      </p><pre id="idp12130016">
+      </p><pre id="idp12251872">
 #use &quot;topfind&quot;
 #camlp4o
-</pre><p id="idp12130704">
+</pre><p id="idp12252560">
         The first directive loads the <code>ocamlfind</code>
         top-level interface that lets you require
         <code>ocamlfind</code> packages (including all their
@@ -608,7 +608,7 @@ $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \
         <code>utop</code> and load the syntax extensions in. We'll
         use the <code>comparelib</code> syntax extension for our
         experiments.
-      </p><p id="idp12134304">
+      </p><p id="idp12256160">
         OCaml provides a built-in polymorphic comparison operator that
         inspects the runtime representation of two values to see if
         they're equal. As we noted in
@@ -617,7 +617,7 @@ $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \
         functions between values. However, it quickly become tedious to
         manually define comparison functions for complex type
         definitions.
-      </p><p id="idp12135840">
+      </p><p id="idp12257696">
         Let's see how <code>comparelib</code> solves this problem
         by running it in <code>utop</code>.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="o">#</span><span class="n">require</span> <span class="s2">&quot;comparelib.syntax&quot;</span> <span class="o">;;</span>
@@ -629,20 +629,20 @@ $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \
 <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">{</span> <span class="n">foo</span> <span class="o">:</span> <span class="kt">string</span><span class="o">;</span> <span class="n">bar</span> <span class="o">:</span> <span class="n">t</span><span class="o">;</span> <span class="o">}</span>
 <span class="k">val</span> <span class="n">compare</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="k">val</span> <span class="n">compare_t</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp12139184">
+</pre></div><p id="idp12261040">
         The first definition of <code>t</code> is a standard OCaml
         phrase and results in the expected output. The second one
         includes the <code>with compare</code> directive. This is
         intercepted by <code>comparelib</code> and transformed
         into the original type definition with two new functions also
         incuded.
-      </p></section><section><h1 id="running-camlp4-from-the-command-line">Running Camlp4 from the command line</h1><p id="idp12143296">
+      </p></section><section><h1 id="running-camlp4-from-the-command-line">Running Camlp4 from the command line</h1><p id="idp12265104">
         The top-level is a quick way to examine the signatures generated
         from the extensions, but how can we see what these new functions
         actually do? You can't do this from <code>utop</code>
         directly since it embeds the Camlp4 invocation as an automated
         part of its operation.
-      </p><p id="idp12144704">
+      </p><p id="idp12266512">
         Let's turn to the command-line to obtain the result of the
         <code>comparelib</code> transformation instead. Create a
         file that contains the type declaration from earlier:
@@ -651,7 +651,7 @@ $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \
   <span class="n">foo</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span> 
   <span class="n">bar</span><span class="o">:</span> <span class="n">t</span>
 <span class="o">}</span> <span class="k">with</span> <span class="n">compare</span>
-</pre></div><p id="idp12147008">
+</pre></div><p id="idp12268816">
         We need to run the Camlp4 binary with the library paths to
         Comparelib and Type_conv. Let's use a small shell script to wrap
         this invocation.
@@ -662,13 +662,13 @@ $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \
 <span class="nv">INCLUDE</span><span class="o">=</span><span class="sb">`</span><span class="nv">$OCAMLFIND</span> -i-format comparelib.syntax<span class="sb">`</span>
 <span class="nv">ARCHIVES</span><span class="o">=</span><span class="sb">`</span><span class="nv">$OCAMLFIND</span> -a-format comparelib.syntax<span class="sb">`</span>
 camlp4o -printer o <span class="nv">$INCLUDE</span> <span class="nv">$ARCHIVES</span> <span class="nv">$1</span>
-</pre></div><p id="idp12148784">
+</pre></div><p id="idp12270592">
         The script uses the <code>ocamlfind</code> package manager
         to list the include and library paths needed by
         <code>comparelib</code>. It then invokes the
         <code>camlp4o</code> preprocessor with these paths and
         outputs the resulting AST to the standard output.
-      </p><pre id="idp12151536">
+      </p><pre id="idp12273344">
 $ sh camlp4_dump comparelib_test.ml
 type t = { foo : string; bar : t }
 
@@ -690,7 +690,7 @@ let rec compare : t -&gt; t -&gt; int =
 let _ = compare
 let compare_t = compare
 let _ = compare_t
-</pre><p id="idp12152832">
+</pre><p id="idp12274640">
         The output contains the original type definition accompanied by
         some automatically generated code that implements an explicit
         comparison function for each field in the record. If you're
@@ -699,13 +699,13 @@ let _ = compare_t
         yourself.
       </p><aside class="note"><h1>
       A style note: wildcards in let bindings
-      </h1><p id="idp12154976">
+      </h1><p id="idp12276784">
         You may have noticed the <code>let _ = fun</code>
         construct in the auto-generated code above. The underscore in a
         <code>let</code> binding is just the same as a wildcard
         underscore in a pattern match, and tells the compiler to accept
         any return value and discard it immediately.
-      </p><p id="idp12157040">
+      </p><p id="idp12278848">
         This is fine for mechanically generated code from Type_conv, but
         should be avoided in code that you write by hand. If it's a
         unit-returning expression, then write a <code>unit</code>
@@ -713,16 +713,16 @@ let _ = compare_t
         expression changes type in the future (e.g. due to code
         refactoring).
       </p><div class="highlight"><pre><span class="k">let</span> <span class="bp">()</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">expr</span><span class="o">&gt;</span>
-</pre></div><p id="idp12159456">
+</pre></div><p id="idp12281264">
         If the expression has a different type, then write it
         explicitly.
       </p><div class="highlight"><pre><span class="k">let</span> <span class="o">(_:</span><span class="n">some_type</span><span class="o">)</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">expr</span><span class="o">&gt;</span>
 <span class="k">let</span> <span class="bp">()</span> <span class="o">=</span> <span class="n">ignore</span> <span class="o">(&lt;</span><span class="n">expr</span><span class="o">&gt;</span> <span class="o">:</span> <span class="n">some_type</span><span class="o">)</span>
 <span class="k">let</span> <span class="bp">()</span> <span class="o">=</span> <span class="n">don't_wait_for</span> <span class="o">(&lt;</span><span class="n">expr</span><span class="o">&gt;)</span>  <span class="c">(* if the expression returns a unit Deferred.t *)</span>
-</pre></div><p id="idp12161088">
+</pre></div><p id="idp12282896">
         The last one is used to ignore Async expressions that should run
         in the background rather than blocking in the current thread.
-      </p><p id="idp12161632">
+      </p><p id="idp12283440">
         One other important reason for using wildcard matches is to bind
         a variable name to something that you want to use in future
         code, but don't want to use right away. This would normally
@@ -732,27 +732,27 @@ let _ = compare_t
       </p><div class="highlight"><pre><span class="k">let</span> <span class="n">fn</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span>
   <span class="k">let</span> <span class="o">_</span><span class="n">z</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="k">in</span>
   <span class="bp">()</span>
-</pre></div><p id="idp12163472">
+</pre></div><p id="idp12285280">
         Although you don't use <code>_z</code> in your code, this
         will never generate an unused variable warning.
-      </p></aside></section><section><h1 id="preprocessing-module-signatures">Preprocessing module signatures</h1><p id="idp12166160">
+      </p></aside></section><section><h1 id="preprocessing-module-signatures">Preprocessing module signatures</h1><p id="idp12287968">
         Another useful feature of <code>type_conv</code> is that
         it can generate module signatures too. Copy the earlier type
         definition into a <code>comparelib_test.mli</code> and
         rerun the Camlp4 dumper script.
-      </p><pre id="idp12168160">
+      </p><pre id="idp12289968">
 $ sh camlp4_dump comparelib_test.mli 
 type t = { foo : string; bar : t }
 
 val compare : t -&gt; t -&gt; int
-</pre><p id="idp12169024">
+</pre><p id="idp12290832">
         The external signature generated by
         <code>comparelib</code> is much simpler than the actual
         code. Running Camlp4 directly on the original source code lets
         you see these all these transformations precisely.
       </p><aside class="caution"><h1>
       Don't overdo the syntax extensions
-      </h1><p id="idp12171056">
+      </h1><p id="idp12292864">
         Syntax extensions are a powerful extension mechanism that can
         completely alter your source code's layout and style. Core
         includes a very conservative set of extensions that take care to
@@ -760,14 +760,14 @@ val compare : t -&gt; t -&gt; int
         libraries that are much more ambitious -- some introduce
         whitespace-sensitive indentation while others build entirely new
         embedded languages using OCaml as a host language.
-      </p><p id="idp12171936">
+      </p><p id="idp12293744">
         While it's tempting to compress all your boiler-plate code into
         Camlp4 extensions, it can make your source code much harder for
         other people to quickly read and understand. Core mainly focuses
         on type-driven code generation using the
         <code>type_conv</code> extension and doesn't fundamentally
         change the OCaml syntax.
-      </p><p id="idp12173392">
+      </p><p id="idp12295200">
         Another thing to consider before deploying your own syntax
         extension is compatibility with other extensions. Two separate
         extensions can create a grammar clash that leads to odd syntax
@@ -775,49 +775,49 @@ val compare : t -&gt; t -&gt; int
         syntax extensions go through <code>type_conv</code>, which
         acts as a single point for extending the grammar via the
         <code>with</code> keyword.
-      </p></aside></section><section><h1 id="further-reading-on-camlp4">Further reading on Camlp4</h1><p id="idp12177072">
+      </p></aside></section><section><h1 id="further-reading-on-camlp4">Further reading on Camlp4</h1><p id="idp12298816">
         We've deliberately only shown you how to use Camlp4 extensions
         here, and not how to build your own. The full details of
         building new extensions are fairly daunting and could be the
         subject of an entirely new book.
-      </p><p id="idp12177728">
+      </p><p id="idp12299472">
         The best resources to get started are:
-      </p><ul><li><p id="idp12178688">
+      </p><ul><li><p id="idp12300432">
             the online
             <a href="http://brion.inria.fr/gallium/index.php/Camlp4" target="_top">Camlp4
             wiki</a>.
-          </p></li><li><p id="idp12180256">
+          </p></li><li><p id="idp12302000">
             using OPAM to install existing Camlp4 extensions and
             inspecting their source code.
-          </p></li><li><p id="idp12181152">
+          </p></li><li><p id="idp12302896">
             a series of
             <a href="http://ambassadortothecomputers.blogspot.co.uk/p/reading-camlp4.html" target="_top">blog
             posts</a> by Jake Donham describe the internals of
             Camlp4 and its syntax extension mechanism.
-          </p></li></ul></section></section><section><h1 id="static-type-checking">Static type checking</h1><p id="idp12184112">
+          </p></li></ul></section></section><section><h1 id="static-type-checking">Static type checking</h1><p id="idp12305808">
       After obtaining a valid abstract syntax tree, the compiler has to
       verify that the code obeys the rules of the OCaml type system.
       Code that is syntactically correct but misuses values is rejected
       with an explanation of the problem.
-    </p><p id="idp12184768">
+    </p><p id="idp12306464">
       Although type checking is done in a single pass in OCaml, it
       actually consists of three distinct steps that happen
       simultaneously:
-    </p><ul><li><p id="idp12185840">
+    </p><ul><li><p id="idp12307536">
           an <span><em>automatic type inference</em></span> algorithm
           that calculates types for a module without requiring manual
           type annotations.
-        </p></li><li><p id="idp12187200">
+        </p></li><li><p id="idp12308896">
           a <span><em>module system</em></span> that combines software
           components with explicit knowledge of their type signatures.
-        </p></li><li><p id="idp12188528">
+        </p></li><li><p id="idp12310224">
 <span><em>explicit subtyping</em></span> checks for objects and
           polymorphic variants.
-        </p></li></ul><p id="idp12189664">
+        </p></li></ul><p id="idp12311360">
       Automatic type inference lets you write succinct code for a
       particular task and have the compiler ensure that your use of
       variables is locally consistent.
-    </p><p id="idp12190240">
+    </p><p id="idp12311936">
       Type inference doesn't scale to very large code bases that depend
       on separate compilation of files. A small change in one module may
       ripple through thousands of other files and libraries and require
@@ -825,12 +825,12 @@ val compare : t -&gt; t -&gt; int
       providing the facility to combine and manipulate explicit type
       signatures for modules within a large project, and also to reuse
       them via functors and first-class modules.
-    </p><p id="idp12191120">
+    </p><p id="idp12312816">
       Subtyping in OCaml objects is always an explicit operation (via
       the <code>:&gt;</code> operator). This means that it doesn't
       complicate the core type inference engine and can be tested as a
       separate concern.
-    </p><section><h1 id="displaying-inferred-types-from-the-compiler">Displaying inferred types from the compiler</h1><p id="idp12193696">
+    </p><section><h1 id="displaying-inferred-types-from-the-compiler">Displaying inferred types from the compiler</h1><p id="idp12315344">
         We've already seen how you can explore type inference directly
         from the top-level. It's also possible to generate type
         signatures for an entire file by asking the compiler to do the
@@ -839,32 +839,32 @@ val compare : t -&gt; t -&gt; int
       </p><div class="highlight"><pre><span class="c">(* typedef.ml *)</span>
 <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="nc">Foo</span> <span class="o">|</span> <span class="nc">Bar</span>
 <span class="k">let</span> <span class="n">v</span> <span class="o">=</span> <span class="nc">Foo</span>
-</pre></div><p id="idp12195392">
+</pre></div><p id="idp12317040">
         Now run the compiler with the <code>-i</code> flag to
         infer the type signature for that file. This runs the type
         checker but doesn't compile the code any further after
         displaying the interface to the standard output.
-      </p><pre id="idp12196752">
+      </p><pre id="idp12318400">
 $ ocamlc -i typedef.ml
 type t = Foo | Bar
 val v : t
-</pre><p id="idp12197472">
+</pre><p id="idp12319120">
         The output is the default signature for the module which
         represents the input file. It's often useful to redirect this
         output to an <code>mli</code> file to give you a starting
         signature to edit the external interface without having to type
         it all in by hand.
-      </p><p id="idp12198832">
+      </p><p id="idp12320480">
         The compiler stores a compiled version of the interface as a
         <code>cmi</code> file. This interface is either obtained
         from compiling an <code>mli</code> signature file for a
         module, or by the inferred type if there is only an
         <code>ml</code> implementation present.
-      </p><p id="idp12201568">
+      </p><p id="idp12323216">
         The compiler makes sure that your <code>ml</code> and
         <code>mli</code> files have compatible signatures. The
         type checker throws an immediate error if this isn't the case.
-      </p><pre id="idp12203488">
+      </p><pre id="idp12325136">
 $ echo type t = Foo &gt; test.ml
 $ echo type t = Bar &gt; test.mli
 $ ocamlc -c test.mli test.ml
@@ -879,14 +879,14 @@ Error: The implementation test.ml does not match the interface test.cmi:
 </pre><aside class="note"><h1>
       Which comes first: the ml or the
       mli?
-      </h1><p id="idp12206928">
+      </h1><p id="idp12328576">
         There are two schools of thought on which order OCaml code
         should be written in. It's very easy to begin writing code by
         starting with an <code>ml</code> file and using the type
         inference to guide you as you build up your functions. The
         <code>mli</code> file can then be generated as described
         above, and the exported functions documented.
-      </p><p id="idp12209024">
+      </p><p id="idp12330672">
         If you're writing code that spans multiple files, it's sometimes
         easier to start by writing all the <code>mli</code>
         signatures and checking that they type check against each other.
@@ -894,26 +894,26 @@ Error: The implementation test.ml does not match the interface test.cmi:
         implementations with the confidence that they'll all glue
         together correctly with no cyclic dependencies between the
         modules.
-      </p><p id="idp12210496">
+      </p><p id="idp12332144">
         As with any such stylistic debate, you should experiment with
         which system works best for you. Everyone agrees on one thing
         though: no matter what order you write them, production code
         should always explicitly define an <code>mli</code> file
         for every <code>ml</code> file in the project.
-      </p><p id="idp12212560">
+      </p><p id="idp12334208">
         Signature files provide a place to write succinct documentation
         and to abstract internal details that shouldn't be exported.
         Maintaining separate signature files also speeds up incremental
         compilation in larger code-bases, since recompiling a
         <code>mli</code> signature is much faster than a full
         compilation of the implementation to native code.
-      </p></aside></section><section><h1 id="type-inference-1">Type inference</h1><p id="idp12215360">
+      </p></aside></section><section><h1 id="type-inference-1">Type inference</h1><p id="idp12336960">
         Type inference is the process of determining the appropriate
         types for expressions based on their use. It's a feature that's
         partially present in many other languages such as Haskell and
         Scala, but OCaml embeds it as a fundamental feature throughout
         the core language.
-      </p><p id="idp12216080">
+      </p><p id="idp12337680">
         OCaml type inference is based on the Hindley-Milner algorithm,
         which is notable for its ability to infer the most general type
         for an expression without requiring any explicit type
@@ -923,17 +923,17 @@ Error: The implementation test.ml does not match the interface test.cmi:
         possible inferences. Manual type annotations can specialize the
         type explicitly, but the automatic inference selects the most
         general type unless told otherwise.
-      </p><p id="idp12217472">
+      </p><p id="idp12339072">
         OCaml does have some language extensions which strain the limits
         of principal type inference, but by and large most programs you
         write will never <span><em>require</em></span> annotations
         (although they sometimes help the compiler produce better error
         messages).
-      </p><section><h1 id="adding-type-annotations-to-find-errors">Adding type annotations to find errors</h1><p id="idp12219792">
+      </p><section><h1 id="adding-type-annotations-to-find-errors">Adding type annotations to find errors</h1><p id="idp12341392">
           It's often said that the hardest part of writing OCaml code is
           getting past the type checker -- but once the code does
           compile, it works correctly the first time!
-        </p><p id="idp12220400">
+        </p><p id="idp12342000">
           There are a couple of tricks to make it easier to quickly
           locate type errors in your code. The first is to introduce
           manual type annotations to narrow down the source of your
@@ -941,13 +941,13 @@ Error: The implementation test.ml does not match the interface test.cmi:
           change your types and can be removed once your code is
           correct. However, they act as anchors to locate errors while
           you're still writing your code.
-        </p><p id="idp12221264">
+        </p><p id="idp12342864">
           Manual type annotations are particulary useful if you use lots
           of polymorphic variants or objects. Type inference with row
           polymorphism can generate some very large signatures, and
           errors tend to propagate more widely than if you are using
           more explicitly typed variants or classes.
-        </p><p id="idp12222000">
+        </p><p id="idp12343600">
           For instance, consider this broken example that expresses some
           simple algebraic operations over integers.
         </p><div class="highlight"><pre><span class="c">(* broken_poly.ml *)</span>
@@ -970,11 +970,11 @@ Error: The implementation test.ml does not match the interface test.cmi:
             <span class="o">))</span>
         <span class="o">))</span>
     <span class="o">))</span>
-</pre></div><p id="idp12224544">
+</pre></div><p id="idp12346144">
           There's a single character typo in the code so that it uses
           <code>Nu</code> instead of <code>Num</code>. The
           resulting type error is impressive.
-        </p><pre id="idp12226496">
+        </p><pre id="idp12348144">
 $ ocamlc -c broken_poly.ml 
 File &quot;broken_poly.ml&quot;, line 11, characters 10-154:
 Error: This expression has type
@@ -988,20 +988,20 @@ Error: This expression has type
               [&gt; `Sub of 'a * [&gt; `Mul of [&gt; `Nu of int ] * [&gt; `Num of int ] ] ] ]
        but an expression was expected of type 'a
        The second variant type does not allow tag(s) `Nu
-</pre><p id="idp12227840">
+</pre><p id="idp12349488">
           The type error is perfectly accurate, but rather verbose and
           with a line number that doesn't point to the exact location of
           the incorrect variant name. The best the compiler can do is to
           point you in the general direction of the
           <code>algebra</code> function application.
-        </p><p id="idp12229264">
+        </p><p id="idp12350912">
           This is because the type checker doesn't have enough
           information to match the inferred type of the
           <code>algebra</code> definition to its application a few
           lines down. It calculates types for both expressions
           separately, and when they don't match up, outputs the
           difference as best it can.
-        </p><p id="idp12230704">
+        </p><p id="idp12352352">
           Let's see what happens with an explicit type annotation to
           help the compiler out.
         </p><div class="highlight"><pre><span class="c">(* broken_poly_with_annot.ml *)</span>
@@ -1031,24 +1031,24 @@ Error: This expression has type
             <span class="o">))</span>
         <span class="o">))</span>
     <span class="o">))</span>
-</pre></div><p id="idp12233200">
+</pre></div><p id="idp12354848">
           This code contains exactly the same error as before, but we've
           added a closed type definition of the polymorphic variants,
           and a type annotation to the <code>algebra</code>
           definition. The compiler error we get is much more useful now.
-        </p><pre id="idp12234560">
+        </p><pre id="idp12356208">
 $ ocamlc -i broken_poly_with_annot.ml 
 File &quot;broken_poly_with_annot.ml&quot;, line 24, characters 14-21:
 Error: This expression has type [&gt; `Nu of int ]
        but an expression was expected of type t
        The second variant type does not allow tag(s) `Nu
-</pre><p id="idp12235536">
+</pre><p id="idp12357184">
           This error points directly to the correct line number that
           contains the typo. Once you fix the problem, you can remove
           the manual annotations if you prefer more succinct code. You
           can also leave the annotations there of course, to help with
           future refactoring and debugging.
-        </p></section><section><h1 id="enforcing-principal-typing">Enforcing principal typing</h1><p id="idp12237600">
+        </p></section><section><h1 id="enforcing-principal-typing">Enforcing principal typing</h1><p id="idp12359136">
           The compiler also has a stricter <span><em>principal type
           checking</em></span> mode that is activated via the
           <code>-principal</code> flag. This warns about risky
@@ -1056,22 +1056,22 @@ Error: This expression has type [&gt; `Nu of int ]
           one principal result. A type is considered risky if the
           success or failure of type inference depends on the order in
           which sub-expressions are typed.
-        </p><p id="idp12239536">
+        </p><p id="idp12361072">
           The principality check only affects a few language features:
-        </p><ul><li><p id="idp12240528">
+        </p><ul><li><p id="idp12362064">
               polymorphic methods for objects.
-            </p></li><li><p id="idp12241376">
+            </p></li><li><p id="idp12362912">
               permuting the order of labeled arguments in a function
               from their type definition.
-            </p></li><li><p id="idp12242288">
+            </p></li><li><p id="idp12363824">
               discarding optional labelled arguments.
-            </p></li><li><p id="idp12243136">
+            </p></li><li><p id="idp12364672">
               generalized algebraic data types (GADTs) present from
               OCaml 4.0 onwards.
-            </p></li><li><p id="idp12244032">
+            </p></li><li><p id="idp12365568">
               automatic disambiguation of record field and constructor
               names (since OCaml 4.1)
-            </p></li></ul><p id="idp12244816">
+            </p></li></ul><p id="idp12366352">
           Here's an example of principality warnings when used with
           record disambiguation.
         </p><div class="highlight"><pre><span class="c">(* non_principal.ml *)</span>
@@ -1081,17 +1081,17 @@ Error: This expression has type [&gt; `Nu of int ]
 <span class="k">let</span> <span class="n">f</span> <span class="n">x</span> <span class="o">=</span>
   <span class="n">x</span><span class="o">.</span><span class="n">bar</span><span class="o">;</span>
   <span class="n">x</span><span class="o">.</span><span class="n">foo</span>
-</pre></div><p id="idp12246384">
+</pre></div><p id="idp12367920">
           Inferring the signature with <code>-principal</code>
           will show you a new warning.
-        </p><pre id="idp12247584">
+        </p><pre id="idp12369120">
 $ ocamlc -i -principal non_principal.ml 
 File &quot;non_principal.ml&quot;, line 7, characters 4-7:
 Warning 18: this type-based field disambiguation is not principal.
 type s = { foo : int; bar : unit; }
 type t = { foo : int; }
 val f : s -&gt; int
-</pre><p id="idp12248784">
+</pre><p id="idp12370320">
           This example isn't principal since the inferred type for
           <code>x.foo</code> is guided by the inferred type of
           <code>x.bar</code>, whereas principal typing requires
@@ -1100,7 +1100,7 @@ val f : s -&gt; int
           from the definition of <code>f</code>, its argument
           would be of type <code>t</code> and not
           <code>type s</code>.
-        </p><p id="idp12253728">
+        </p><p id="idp12375264">
           You can fix this either by permuting the order of the type
           declarations, or by adding an explicit type annotation.
         </p><div class="highlight"><pre><span class="c">(* principal.ml *)</span>
@@ -1110,16 +1110,16 @@ val f : s -&gt; int
 <span class="k">let</span> <span class="n">f</span> <span class="o">(</span><span class="n">x</span><span class="o">:</span><span class="n">s</span><span class="o">)</span> <span class="o">=</span>
   <span class="n">x</span><span class="o">.</span><span class="n">bar</span><span class="o">;</span>
   <span class="n">x</span><span class="o">.</span><span class="n">foo</span>
-</pre></div><p id="idp12255328">
+</pre></div><p id="idp12376864">
           There is now no ambiguity about the inferred types, since
           we've explicitly given the argument a type and the order of
           inference of the sub-expressions no longer matters.
-        </p><pre id="idp12255936">
+        </p><pre id="idp12377472">
 $ ocamlc -i -principal principal.ml 
 type s = { foo : int; bar : unit; }
 type t = { foo : int; }
 val f : s -&gt; int
-</pre><p id="idp12256832">
+</pre><p id="idp12378368">
           Ideally, all code should systematically use
           <code>-principal</code>. It reduces variance in type
           inference and enforces the notion of a single known type.
@@ -1128,13 +1128,13 @@ val f : s -&gt; int
           This is generally only a problem if you use objects
           extensively, which usually have larger type signature to cover
           all their methods.
-        </p><p id="idp12259056">
+        </p><p id="idp12380592">
           As a result, the suggested approach is to only compile with
           <code>-principal</code> occasionally to check if your
           code is compliant. If compiling in principal mode works, it is
           guaranteed that the program will pass type checking in
           non-principal mode too.
-        </p><p id="idp12260448">
+        </p><p id="idp12381984">
           Bear in mind that the <code>cmi</code> files generated
           in principal mode differ from the default mode. Try to ensure
           that you compile your whole project with it activated. Getting
@@ -1142,7 +1142,7 @@ val f : s -&gt; int
           result in the type checker failing unexpectedly very
           occasionally. In this case, just recompile with a clean source
           tree.
-        </p></section></section><section><h1 id="modules-and-separate-compilation">Modules and separate compilation</h1><p id="idp12263408">
+        </p></section></section><section><h1 id="modules-and-separate-compilation">Modules and separate compilation</h1><p id="idp12384944">
         The OCaml module system enables smaller components to be reused
         effectively in large projects while still retaining all the
         benefits of static type safety. We covered the basics of using
@@ -1152,7 +1152,7 @@ val f : s -&gt; int
         to functors and first-class modules, described in
         <a href="functors.html">Chapter 9, <i>Functors</i></a> and
         <a href="first-class-modules.html">Chapter 10, <i>First class modules</i></a> respectively.
-      </p><p id="idp12266416">
+      </p><p id="idp12387888">
         This section discusses how the compiler implements them in more
         detail. Modules are essential for larger projects that consist
         of many source files (also known as <span><em>compilation
@@ -1160,21 +1160,21 @@ val f : s -&gt; int
         source file when changing just one or two files, and the module
         system minimizes such recompilation while still encouraging code
         reuse.
-      </p><section><h1 id="the-mapping-between-files-and-modules">The mapping between files and modules</h1><p id="idp12268800">
+      </p><section><h1 id="the-mapping-between-files-and-modules">The mapping between files and modules</h1><p id="idp12390288">
           Individual compilation units provide a convenient way to break
           up a big module hierarchy into a collection of files. The
           relationship between files and modules can be explained
           directly in terms of the module system.
-        </p><p id="idp12269472">
+        </p><p id="idp12390960">
           Create a file called <code>alice.ml</code> with the
           following contents.
         </p><div class="highlight"><pre><span class="c">(* alice.ml *)</span>
 <span class="k">let</span> <span class="n">friends</span> <span class="o">=</span> <span class="o">[</span> <span class="nn">Bob</span><span class="p">.</span><span class="n">name</span> <span class="o">]</span>
-</pre></div><p id="idp12271648">
+</pre></div><p id="idp12393136">
           and a corresponding signature file.
         </p><div class="highlight"><pre><span class="c">(* alice.mli *)</span>
 <span class="k">val</span> <span class="n">friends</span> <span class="o">:</span> <span class="nn">Bob</span><span class="p">.</span><span class="n">t</span> <span class="kt">list</span>
-</pre></div><p id="idp12273088">
+</pre></div><p id="idp12394576">
           These two files are exactly analogous to including the
           following code directly in another module that references
           <code>Alice</code>.
@@ -1183,14 +1183,14 @@ val f : s -&gt; int
 <span class="k">end</span> <span class="o">=</span> <span class="k">struct</span>
   <span class="k">let</span> <span class="n">friends</span> <span class="o">=</span> <span class="o">[</span> <span class="nn">Bob</span><span class="p">.</span><span class="n">name</span> <span class="o">]</span>
 <span class="k">end</span>
-</pre></div></section><section><h1 id="defining-a-module-search-path">Defining a module search path</h1><p id="idp12276720">
+</pre></div></section><section><h1 id="defining-a-module-search-path">Defining a module search path</h1><p id="idp12398096">
           In the example above, <code>Alice</code> also has a
           reference to another module <code>Bob</code>. For the
           overall type of <code>Alice</code> to be valid, the
           compiler also needs to check that the <code>Bob</code>
           module contains at least a <code>Bob.name</code> value
           and defines a <code>Bob.t</code> type.
-        </p><p id="idp12281584">
+        </p><p id="idp12402960">
           The type checker resolves such module references into concrete
           structures and signatures in order to unify types across
           module boundaries. It does this by searching a list of
@@ -1200,7 +1200,7 @@ val f : s -&gt; int
           the search path, and use the first ones it encounters as the
           interfaces for <code>Alice</code> and
           <code>Bob</code>.
-        </p><p id="idp12285248">
+        </p><p id="idp12406624">
           The module search path is set by adding <code>-I</code>
           flags to the compiler command-line with the directory
           containing the <code>cmi</code> files as the argument.
@@ -1210,7 +1210,7 @@ val f : s -&gt; int
           process of turning third-party package names and build
           descriptions into command-line flags that are passed to the
           compiler command-line.
-        </p><p id="idp12287536">
+        </p><p id="idp12408912">
           By default, only the current directory and the OCaml standard
           library will be searched for <code>cmi</code> files. The
           <code>Pervasives</code> module from the standard library
@@ -1224,7 +1224,7 @@ val f : s -&gt; int
         </p><section><h1><b>
         Inspecting compilation units with
         <code>ocamlobjinfo</code>
-</b></h1><p id="idp12292656">
+</b></h1><p id="idp12414032">
           For separate compilation to be sound, we need to ensure that
           all the <code>cmi</code> files used to type-check a
           module are the same across compilation runs. If they vary,
@@ -1232,11 +1232,11 @@ val f : s -&gt; int
           type signature for a common module with the same name. This in
           turn lets the program completely violate the static type
           system and can lead to memory corruption and crashes.
-        </p><p id="idp12294208">
+        </p><p id="idp12415584">
           OCaml guards against this by recording a CRC checksum in every
           <code>cmi</code>. Let's examine our earlier
           <code>typedef.ml</code> more closely.
-        </p><pre id="idp12296112">
+        </p><pre id="idp12417488">
 $ ocamlc -c typedef.ml
 $ ocamlobjinfo typedef.cmi
 File typedef.cmi
@@ -1244,7 +1244,7 @@ Unit name: Typedef
 Interfaces imported:
     559f8708a08ddf66822f08be4e9c3372    Typedef
     65014ccc4d9329a2666360e6af2d7352    Pervasives
-</pre><p id="idp12296992">
+</pre><p id="idp12418368">
 <code>ocamlobjinfo</code> examines the compiled
           interface and displays what other compilation units it depends
           on. In this case, we don't use any external modules other than
@@ -1252,7 +1252,7 @@ Interfaces imported:
           <code>Pervasives</code> by default, unless you use the
           <code>-nopervasives</code> flag (this is an advanced
           use-case, and you shouldn't normally need it).
-        </p><p id="idp12300544">
+        </p><p id="idp12421920">
           The long alphanumeric identifier beside each module name is a
           hash calculated from all the types and values exported from
           that compilation unit. It's used during type-checking and
@@ -1262,61 +1262,61 @@ Interfaces imported:
           may have conflicting type signatures in different modules. The
           compiler will reject such programs with an error similar to
           this:
-        </p><pre id="idp12301536">
+        </p><pre id="idp12422912">
 File &quot;foo.ml&quot;, line 1, characters 0-1:
 Error: The files /home/build/bar.cmi
        and /usr/lib/ocaml/map.cmi make inconsistent assumptions
        over interface Map
-</pre><p id="idp12302544">
+</pre><p id="idp12423920">
           This hash check is very conservative, but ensures that
           separate compilation remains type-safe all the way up to the
           final link phase. Your build system should ensure that you
           never see the error messages above, but if you do run into it,
           just clean out your intermediate files and recompile from
           scratch.
-        </p></section></section></section><section><h1 id="shorter-module-paths-in-type-errors">Shorter module paths in type errors</h1><p id="idp12304832">
+        </p></section></section></section><section><h1 id="shorter-module-paths-in-type-errors">Shorter module paths in type errors</h1><p id="idp12426224">
         Core uses the OCaml module system quite extensively to provide a
         complete replacement standard library. It collects these modules
         into a single <code>Std</code> module which provides a
         single module that needs to be opened to import the replacement
         modules and functions.
-      </p><p id="idp12306256">
+      </p><p id="idp12427648">
         There's one downside to this approach: type errors suddenly get
         much more verbose. We can see this if you run the vanilla OCaml
         top-level (not <code>utop</code>).
-      </p><pre id="idp12307552">
+      </p><pre id="idp12428944">
 $ ocaml
 # List.map print_endline &quot;&quot; ;;
 Error: This expression has type string but an expression was expected of type
          string list
-</pre><p id="idp12308576">
+</pre><p id="idp12429968">
         This type error without <code>Core.Std</code> has a
         straightforward type error. When we switch to Core, though, it
         gets more verbose.
-      </p><pre id="idp12309824">
+      </p><pre id="idp12431216">
 # open Core.Std ;;
 # List.map ~f:print_endline &quot;&quot; ;;
 Error: This expression has type string but an expression was expected of type
          'a Core.Std.List.t = 'a list
-</pre><p id="idp12310928">
+</pre><p id="idp12432320">
         The default <code>List</code> module in OCaml is
         overridden by <code>Core.Std.List</code>. The compiler
         does its best to show the type equivalence, but at the cost of a
         more verbose error message.
-      </p><p id="idp12312928">
+      </p><p id="idp12434320">
         The compiler can remedy this via a so-called &quot;short
         paths&quot; heuristic. This causes the compiler to search all
         the type aliases for the shortest module path, and use that as
         the preferred output type. The option is activated by passing
         <code>-short-paths</code> to the compiler, and works on
         the top-level too.
-      </p><pre id="idp12314720">
+      </p><pre id="idp12436112">
 $ ocaml -short-paths
 # open Core.Std;;
 # List.map ~f:print_endline &quot;foo&quot;;;
 Error: This expression has type string but an expression was expected of type
          'a list
-</pre><p id="idp12315872">
+</pre><p id="idp12437264">
         The <code>utop</code> enhanced top-level activates short
         paths by default, which is why you've not had to do this before
         in our interactive examples. However, the compiler doesn't
@@ -1324,35 +1324,35 @@ Error: This expression has type string but an expression was expected of type
         situations where the type aliasing information is useful to
         know, and would be lost in the error if the shortest module path
         is always picked.
-      </p><p id="idp12317824">
+      </p><p id="idp12439216">
         You'll need to choose for yourself if you prefer short paths or
         the default behaviour in your own projects, and pass the
         <code>-short-paths</code> flag to the compiler if you need
         it.
-      </p></section></section><section><h1 id="the-typed-syntax-tree">The typed syntax tree</h1><p id="idp12320528">
+      </p></section></section><section><h1 id="the-typed-syntax-tree">The typed syntax tree</h1><p id="idp12441856">
       When the type checking process has successfully completed, it is
       combined with the AST to form a <span><em>typed abstract syntax
       tree</em></span>. This contains precise location information for
       every token in the input file, and decorates each token with
       concrete type information.
-    </p><p id="idp12321648">
+    </p><p id="idp12442976">
       The compiler can output this as compiled <code>cmt</code>
       and <code>cmti</code> files that contain the typed AST for
       the implementation and signatures of a compilation unit. This is
       activated by passing the <code>-bin-annot</code> flag to the
       compiler.
-    </p><p id="idp12324416">
+    </p><p id="idp12445696">
       The <code>cmt</code> files are particularly useful for IDE
       tools to match up OCaml source code at a specific location to the
       inferred or external types.
-    </p><section><h1 id="using-ocp-index-for-auto-completion">Using ocp-index for auto-completion</h1><p id="idp12326736">
+    </p><section><h1 id="using-ocp-index-for-auto-completion">Using ocp-index for auto-completion</h1><p id="idp12448128">
         One such command-line tool to display auto-completion
         information in your editor is <code>ocp-index</code>.
         Install it via OPAM as follows.
-      </p><pre id="idp12327984">
+      </p><pre id="idp12449376">
 $ opam install ocp-index
 $ ocp-index
-</pre><p id="idp12328688">
+</pre><p id="idp12450080">
         Let's refer back to our Ncurses binding example from the
         beginning of
         <a href="foreign-function-interface.html">Chapter 20, <i>Foreign Function Interface</i></a>. This
@@ -1360,15 +1360,15 @@ $ ocp-index
         the interfaces with <code>-bin-annot</code> so that we can
         obtain the <code>cmt</code> and <code>cmti</code>
         files.
-      </p><pre id="idp12332128">
+      </p><pre id="idp12453520">
 $ ocamlfind ocamlopt -bin-annot -c -package ctypes.foreign \
     ncurses.mli ncurses.ml
-</pre><p id="idp12332896">
+</pre><p id="idp12454288">
         Next, run <code>ocp-index</code> in completion mode. You
         pass it a set of directories to search for
         <code>cmt</code> files in, and a fragment of text to
         autocomplete.
-      </p><pre id="idp12334832">
+      </p><pre id="idp12456224">
 $ ocp-index complete -I . Ncur
 Ncurses module
 
@@ -1389,26 +1389,26 @@ Ncurses.endwin val unit -&gt; unit
 Ncurses.initscr val unit -&gt; Ncurses.window
 Ncurses.wrefresh val Ncurses.window -&gt; unit
 Ncurses.window val Ncurses.window Ctypes.typ
-</pre><p id="idp12336640">
+</pre><p id="idp12458032">
         As you can imagine, autocompletion is invaluable on larger
         codebases. See the
         <a href="https://github.com/ocamlpro/ocp-index" target="_top">ocp-index</a>
         homepage for more information on how to integrate it with your
         favourite editor.
-      </p></section><section><h1 id="examining-the-typed-syntax-tree-directly">Examining the typed syntax tree directly</h1><p id="idp12339280">
+      </p></section><section><h1 id="examining-the-typed-syntax-tree-directly">Examining the typed syntax tree directly</h1><p id="idp12460736">
         The compiler has a couple of advanced flags that can dump the
         raw output of the internal AST representation. You can't depend
         on these flags to give the same output across compiler
         revisions, but they are a useful learning tool.
-      </p><p id="idp12339952">
+      </p><p id="idp12461408">
         We'll use our toy <code>typedef.ml</code> again.
       </p><div class="highlight"><pre><span class="c">(* typedef.ml *)</span>
 <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="nc">Foo</span> <span class="o">|</span> <span class="nc">Bar</span>
 <span class="k">let</span> <span class="n">v</span> <span class="o">=</span> <span class="nc">Foo</span>
-</pre></div><p id="idp12342096">
+</pre></div><p id="idp12463552">
         Let's first look at the untyped syntax tree that's generated
         from the parsing phase.
-      </p><pre id="idp12342608">
+      </p><pre id="idp12464064">
 $ ocamlc -dparsetree typedef.ml
 [
   structure_item (typedef.ml[1,0+0]..[1,0+18])
@@ -1440,21 +1440,21 @@ $ ocamlc -dparsetree typedef.ml
           None false
     ]
 ]
-</pre><p id="idp12345328">
+</pre><p id="idp12466784">
         This is rather a lot of output for a simple two-line program,
         but it shows just how much structure the OCaml parser generates
         even from a small source file.
-      </p><p id="idp12345920">
+      </p><p id="idp12467376">
         Each portion of the AST is decorated with the precise location
         information (including the filename and character location of
         the token). This code hasn't been type checked yet, and so the
         raw tokens are all included.
-      </p><p id="idp12346576">
+      </p><p id="idp12468032">
         The typed AST that is normally output as a compiled
         <code>cmt</code> file can be displayed in a more
         developer-readable form via the <code>-dtypedtree</code>
         option.
-      </p><pre id="idp12348512">
+      </p><pre id="idp12469968">
 $ ocamlc -dtypedtree typedef.ml
 [
   structure_item (typedef.ml[1,0+0]..typedef.ml[1,0+18])
@@ -1481,12 +1481,12 @@ $ ocamlc -dtypedtree typedef.ml
           Pexp_construct &quot;Foo&quot; [] false
     ]
 ]
-</pre><p id="idp12350656">
+</pre><p id="idp12472112">
         The typed AST is more explicit than the untyped syntax tree. For
         instance, the type declaration has been given a unique name
         (<code>t/1008</code>), as has the <code>v</code>
         value (<code>v/1011</code>).
-      </p><p id="idp12353328">
+      </p><p id="idp12474784">
         You'll rarely need to look at this raw output from the compiler
         unless you're building IDE tools such as
         <code>ocp-index</code>, or are hacking on extensions to

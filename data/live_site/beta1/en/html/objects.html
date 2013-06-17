@@ -144,7 +144,7 @@
                 
                 
 
-    <p id="idp9383552">
+    <p id="idp9503840">
     We've already seen several tools that OCaml provides for organizing
     programs, particularly modules. In addition, OCaml also supports
     object-oriented programming. There are objects, classes, and their
@@ -154,7 +154,7 @@
     and inheritance.
   </p><aside class="note"><h1>
   What is Object-Oriented Programming?
-  </h1><p id="idp9385856">
+  </h1><p id="idp9506096">
     Object-oriented programming (often shorted to OOP) is a programming
     style that encapsulates computation and data within logical
     <span><em>objects</em></span>. Each object contains some data stored
@@ -164,40 +164,40 @@
     <span><em>class</em></span>, and objects are constructed from a class
     definition by calling a constructor with the data that the object
     will use to build itself.
-  </p><p id="idp9388432">
+  </p><p id="idp9508672">
     There are five fundamental properties that differentiate OOP from
     other styles:
-  </p><ul><li><p id="idp9389440">
+  </p><ul><li><p id="idp9509680">
 <span><em>Abstraction</em></span>: the details of the
         implementation are hidden in the object, and the external
         interface is just the set of publicly-accessible methods.
-      </p></li><li><p id="idp9390800">
+      </p></li><li><p id="idp9511040">
 <span><em>Dynamic lookup</em></span>: when a message is sent to
         an object, the method to be executed is determined by the
         implementation of the object, not by some static property of the
         program. In other words, different objects may react to the same
         message in different ways.
-      </p></li><li><p id="idp9392288">
+      </p></li><li><p id="idp9512528">
 <span><em>Subtyping</em></span>: if an object
         <code>a</code> has all the functionality of an object
         <code>b</code>, then we may use <code>a</code> in
         any context where <code>b</code> is expected.
-      </p></li><li><p id="idp9396352">
+      </p></li><li><p id="idp9516640">
 <span><em>Inheritance</em></span>: the definition of one kind of
         object can be reused to produce a new kind of object. This new
         definition can override some behaviour, but also share code with
         its parent.
-      </p></li><li><p id="idp9397760">
+      </p></li><li><p id="idp9518048">
 <span><em>Open recursion</em></span>: an object's methods can
         invoke another method in the same object using a special
         variable (often called self). These method calls use dynamic
         lookup, allowing a method defined in one object to invoke
         methods defined in another object that inherits from the first.
-      </p></li></ul><p id="idp9399136">
+      </p></li></ul><p id="idp9519424">
     Almost every notable modern programming language has been influenced
     by OOP, and you'll have run across these terms if you've ever used
     C++, Java, C#, Ruby, Python or Javascript.
-  </p></aside><section><h1 id="when-to-use-objects">When to use objects</h1><p id="idp9400944">
+  </p></aside><section><h1 id="when-to-use-objects">When to use objects</h1><p id="idp9521232">
       You might wonder when to use objects in OCaml, which has a
       multitude of alternative mechanisms to express the same concept.
       First-class modules are more expressive (a module can include
@@ -205,7 +205,7 @@
       algebraic data types also offer a wide range of ways to express
       program structure. In fact, many seasoned OCaml programmers rarely
       use classes and objects, if at all.
-    </p><p id="idp9401808">
+    </p><p id="idp9522096">
       Modules already provide these features in some form, but the main
       focus of classes is on code reuse through inheritance and late
       binding of methods. This is a critical property of classes: the
@@ -214,13 +214,13 @@
       the meantime, while classes are being defined, it is possible (and
       necessary) to refer to methods without knowing statically how they
       will be implemented.
-    </p><p id="idp9403152">
+    </p><p id="idp9523440">
       In contrast, modules use static (lexical) scoping. If you want to
       parameterize your module code so that some part of it can be
       implemented later, you would write a function or functor. This is
       more explicit, but often more verbose than overriding a method in
       a class.
-    </p><p id="idp9403856">
+    </p><p id="idp9524144">
       In general, a rule of thumb is: use classes and objects in
       situations where dynamic binding is a big win, for example if you
       have many similar variations in the implementation of a concept.
@@ -234,13 +234,13 @@
       might be driven by design choices, or because of the need to
       interact with existing components that are already object
       oriented.
-    </p><p id="idp9406384">
+    </p><p id="idp9526672">
       In this chapter, we'll introduce you to the basics of object
       definition and use in OCaml, and then demonstrate their use with
       an example using Cryptokit. We'll return to the more advanced
       areas of object use later on in the book in
       <a href="classes.html">Chapter 12, <i>Classes</i></a>.
-    </p></section><section><h1 id="ocaml-objects">OCaml objects</h1><p id="idp9408928">
+    </p></section><section><h1 id="ocaml-objects">OCaml objects</h1><p id="idp9529216">
       If you already know about object oriented programming in a
       language like Java or C++, the OCaml object system may come as a
       surprise. Foremost is the complete separation of objects, and
@@ -251,7 +251,7 @@
       <code>Deque</code> in Java by inheriting from a class
       <code>Stack</code>, we would be allowed to pass a deque
       anywhere a stack is expected.
-    </p><p id="idp9411360">
+    </p><p id="idp9531648">
       OCaml is entirely different. Classes are used to construct objects
       and support inheritance, but classes are not types. Instead,
       objects have <span><em>object types</em></span>, and if you want to
@@ -264,12 +264,12 @@
     <span class="k">method</span> <span class="n">set</span> <span class="n">i</span> <span class="o">=</span> <span class="n">v</span> <span class="o">&lt;-</span> <span class="n">i</span>
   <span class="k">end</span><span class="o">;;</span>
 <span class="k">val</span> <span class="n">r</span> <span class="o">:</span> <span class="o">&lt;</span> <span class="n">get</span> <span class="o">:</span> <span class="kt">int</span><span class="o">;</span> <span class="n">set</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">unit</span> <span class="o">&gt;</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">obj</span><span class="o">&gt;</span>
-</pre></div><p id="idp9413584">
+</pre></div><p id="idp9533872">
       The object has an integer value <code>v</code>, a method
       <code>get</code> that returns v, and a method
       <code>set</code> that updates the value of
       <code>v</code>.
-    </p><p id="idp9416848">
+    </p><p id="idp9537136">
       The object type is enclosed in angle brackets
       <code>&lt; ... &gt;</code>, containing just the types of the
       methods. Fields, like <code>v</code>, are not part of the
@@ -283,7 +283,7 @@
 <span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
 <span class="o">#</span> <span class="n">r</span><span class="o">#</span><span class="n">get</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">17</span>
-</pre></div><p id="idp9420816">
+</pre></div><p id="idp9541104">
       Objects can also be constructed by functions. If we want to
       specify the initial value of the object, we can define a function
       that takes the value and returns an object.
@@ -298,13 +298,13 @@
 <span class="k">val</span> <span class="n">r</span> <span class="o">:</span> <span class="o">&lt;</span> <span class="n">get</span> <span class="o">:</span> <span class="kt">int</span><span class="o">;</span> <span class="n">set</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">unit</span> <span class="o">&gt;</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">obj</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="n">r</span><span class="o">#</span><span class="n">get</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">5</span>
-</pre></div><p id="idp9422768">
+</pre></div><p id="idp9543056">
       Note that the types of the function <code>make</code> and
       the returned object now use the polymorphic type
       <code>'a</code>. When make is invoked on a concrete value
       <code>5</code>, we get the same object type as before, with
       type <code>int</code> for the value.
-    </p></section><section><h1 id="object-polymorphism">Object Polymorphism</h1><p id="idp9427296">
+    </p></section><section><h1 id="object-polymorphism">Object Polymorphism</h1><p id="idp9547632">
       Like polymorphic variants, methods can be used without an explicit
       type declaration.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">size</span> <span class="n">p</span> <span class="o">=</span>
@@ -317,10 +317,10 @@
     <span class="k">if</span> <span class="o">(</span><span class="n">size</span> <span class="n">p</span><span class="o">)</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="o">.</span> <span class="k">then</span> <span class="n">reset</span> <span class="n">p</span><span class="o">;;</span>
 <span class="k">val</span> <span class="n">limit</span> <span class="o">:</span>
   <span class="o">&lt;</span> <span class="n">move</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">-&gt;</span> <span class="kt">float</span> <span class="o">-&gt;</span> <span class="kt">unit</span><span class="o">;</span> <span class="n">x</span> <span class="o">:</span> <span class="kt">float</span><span class="o">;</span> <span class="n">y</span> <span class="o">:</span> <span class="kt">float</span><span class="o">;</span> <span class="o">..</span> <span class="o">&gt;</span> <span class="o">-&gt;</span> <span class="kt">unit</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp9429104">
+</pre></div><p id="idp9549440">
       As you can see object types are inferred automatically from the
       methods that are invoked on them.
-    </p><p id="idp9429616">
+    </p><p id="idp9549952">
       The type system will complain if it sees incompatible uses of the
       same method:
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">print_coord</span> <span class="n">c</span> <span class="o">=</span> 
@@ -337,14 +337,14 @@
        <span class="n">but</span> <span class="n">an</span> <span class="n">expression</span> <span class="n">was</span> <span class="n">expected</span> <span class="k">of</span> <span class="k">type</span> 
          <span class="o">&lt;</span> <span class="n">x</span> <span class="o">:</span> <span class="kt">string</span><span class="o">;</span> <span class="n">y</span> <span class="o">:</span> <span class="kt">string</span><span class="o">;</span> <span class="o">..</span> <span class="o">&gt;</span>
        <span class="nc">Types</span> <span class="k">for</span> <span class="k">method</span> <span class="n">x</span> <span class="n">are</span> <span class="n">incompatible</span>
-</pre></div><p id="idp9431792">
+</pre></div><p id="idp9552128">
       The <code>..</code> in the inferred object types are
       ellipsis, standing for any other methods. The type
       <code>&lt; x : float; .. &gt;</code> specifies an object
       that must have at least an <code>x</code> method, and
       possibly some others as well. Such object types are said to be
       <span><em>open</em></span>.
-    </p><p id="idp9435008">
+    </p><p id="idp9555296">
       We can manually <span><em>close</em></span> an object type using a
       type annotation:
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">size</span> <span class="o">(</span><span class="n">p</span><span class="o">:</span> <span class="o">&lt;</span> <span class="n">x</span><span class="o">:</span> <span class="kt">float</span><span class="o">;</span> <span class="n">y</span><span class="o">:</span> <span class="kt">float</span> <span class="o">&gt;)</span> <span class="o">=</span>
@@ -365,7 +365,7 @@
        <span class="nc">The</span> <span class="n">second</span> <span class="k">object</span> <span class="k">type</span> <span class="n">has</span> <span class="n">no</span> <span class="k">method</span> <span class="n">name</span>
 </pre></div><aside class="note"><h1>
     Elisions are polymorphic
-    </h1><p id="idp9438080">
+    </h1><p id="idp9558368">
       The <code>..</code> in an open object type is an elision,
       standing for &quot;possibly more methods.&quot; It may not be
       apparent from the syntax, but an elided object type is actually
@@ -377,7 +377,7 @@
        <span class="o">^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span>
 <span class="nc">Error</span><span class="o">:</span> <span class="nc">A</span> <span class="k">type</span> <span class="n">variable</span> <span class="n">is</span> <span class="n">unbound</span> <span class="k">in</span> <span class="n">this</span> <span class="k">type</span> <span class="n">declaration</span><span class="o">.</span>
 <span class="nc">In</span> <span class="k">type</span> <span class="o">&lt;</span> <span class="n">x</span> <span class="o">:</span> <span class="kt">float</span><span class="o">;</span> <span class="n">y</span> <span class="o">:</span> <span class="kt">float</span><span class="o">;</span> <span class="o">..</span> <span class="o">&gt;</span> <span class="k">as</span> <span class="k">'</span><span class="n">a</span> <span class="n">the</span> <span class="n">variable</span> <span class="k">'</span><span class="n">a</span> <span class="n">is</span> <span class="n">unbound</span>
-</pre></div><p id="idp9441168">
+</pre></div><p id="idp9561456">
       A <code>..</code> in an object type is called a
       <span><em>row variable</em></span> and this typing scheme is called
       <span><em>row polymorphism</em></span>. Even though
@@ -386,7 +386,7 @@
       types, and there is a close relationship between objects and
       polymorphic variants: objects are to records what polymorphic
       variants are to ordinary variants.
-    </p></aside><p id="idp9444304">
+    </p></aside><p id="idp9564592">
       An object of type <code>&lt; get:int; .. &gt;</code> can be
       any object with a method <code>get:int</code>, it doesn't
       matter how it is implemented. When the method
@@ -408,12 +408,12 @@
 <span class="o">#</span> <span class="n">print_ival</span> <span class="n">t</span><span class="o">;;</span>
 <span class="nc">Int</span><span class="o">:</span> <span class="mi">1370650592</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
-</pre></div></section><section><h1 id="immutable-objects">Immutable objects</h1><p id="idp9449840">
+</pre></div></section><section><h1 id="immutable-objects">Immutable objects</h1><p id="idp9570016">
       Many people consider object-oriented programming to be
       intrinsically imperative, where an object is like a state machine.
       Sending a message to an object causes it to change state, possibly
       sending messages to other objects.
-    </p><p id="idp9450496">
+    </p><p id="idp9570672">
       Indeed, in many programs, this makes sense, but it is by no means
       required. Let's define a function that creates immutable point
       objects.
@@ -426,7 +426,7 @@
   <span class="k">end</span><span class="o">;;</span>
 <span class="k">val</span> <span class="n">point</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">-&gt;</span> <span class="kt">float</span> <span class="o">-&gt;</span> 
   <span class="o">(&lt;</span> <span class="n">move</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">-&gt;</span> <span class="kt">float</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span><span class="o">;</span> <span class="n">x</span> <span class="o">:</span> <span class="kt">float</span><span class="o">;</span> <span class="n">y</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">&gt;</span> <span class="k">as</span> <span class="k">'</span><span class="n">a</span><span class="o">)</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp9452320">
+</pre></div><p id="idp9572496">
       A key part of the implementation is the definition of the method
       <code>move</code>. The expression
       <code>{&lt; ... &gt;}</code> produces a copy of the current
@@ -443,13 +443,13 @@
 <span class="o">-</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">=</span> <span class="mi">4</span><span class="o">.</span>
 <span class="o">#</span> <span class="n">q</span><span class="o">#</span><span class="n">y</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">=</span> <span class="mi">5</span><span class="o">.</span>
-</pre></div><p id="idp9459296">
+</pre></div><p id="idp9579472">
       There are some restriction on the use of the expression
       <code>{&lt; ... &gt;}</code>. It can be used only within a
       method body, and only the values of fields may be updated. Method
       implementations are fixed at the time the object is created, they
       cannot be changed dynamically.
-    </p></section><section><h1 id="when-to-use-objects-1">When to use objects</h1><p id="idp9461968">
+    </p></section><section><h1 id="when-to-use-objects-1">When to use objects</h1><p id="idp9582080">
       You might wonder when to use objects in OCaml, which has a
       multitude of alternative mechanisms to express the similar
       concepts. First-class modules are more expressive (a module can
@@ -457,12 +457,12 @@
       functors, and algebraic data types also offer a wide range of ways
       to express program structure. In fact, many seasoned OCaml
       programmers rarely use classes and objects, if at all.
-    </p><p id="idp9462832">
+    </p><p id="idp9582944">
       Objects have some advantages over records: they don't require type
       definitions and their support for row polymorphism makes them more
       flexible. However, the heavy syntax and additional runtime cost
       means that objects are rarely used in place of records.
-    </p><p id="idp9463520">
+    </p><p id="idp9583632">
       The real benefits of objects come from the class system. Classes
       support inheritance and open recursion. Open recursion allows
       parts of an object to be defined separately. This works because
@@ -471,13 +471,13 @@
       binding. This makes it possible (and necessary) for one method to
       refer to other methods in the object without knowing statically
       how they will be implemented.
-    </p><p id="idp9464848">
+    </p><p id="idp9584960">
       In contrast, modules use static binding. If you want to
       parameterize your module code so that some part of it can be
       implemented later, you would write a function or functor. This is
       more explicit, but often more verbose than overriding a method in
       a class.
-    </p><p id="idp9465536">
+    </p><p id="idp9585648">
       In general, a rule of thumb is: use classes and objects in
       situations where open recursion is a big win. Two good examples
       are Xavier Leroy's
@@ -486,10 +486,10 @@
       combined in building-block style, and the
       <a href="http://cristal.inria.fr/camlimages/" target="_top">Camlimages</a>
       library which manipulates various graphical file formats.
-    </p><p id="idp9467744">
+    </p><p id="idp9587856">
       We'll introduce you to classes, and examples using open recursion,
       in <a href="classes.html">Chapter 12, <i>Classes</i></a>.
-    </p></section><section><h1 id="subtyping">Subtyping</h1><p id="idp9470176">
+    </p></section><section><h1 id="subtyping">Subtyping</h1><p id="idp9590176">
       Subtyping is a central concept in object-oriented programming. It
       governs when an object with one type <span><em>A</em></span> can be
       used in an expression that expects an object of another type
@@ -500,7 +500,7 @@
       can be applied. This coercion works only if the expression
       <code>e</code> has some type <code>s</code> and
       <code>s</code> is a subtype of <code>t</code>.
-    </p><section><h1 id="width-subtyping">Width Subtyping</h1><p id="idp9477712">
+    </p><section><h1 id="width-subtyping">Width Subtyping</h1><p id="idp9597728">
         To explore this, let's define some simple object types for
         geometric shapes. The generic type <code>shape</code> has
         a method to compute the area, and <code>square</code> and
@@ -520,7 +520,7 @@
   <span class="k">method</span> <span class="n">area</span> <span class="o">=</span> <span class="mi">3</span><span class="o">.</span><span class="mi">14</span> <span class="o">*.</span> <span class="n">r</span> <span class="o">**</span> <span class="mi">2</span><span class="o">.</span><span class="mi">0</span>
   <span class="k">method</span> <span class="n">radius</span> <span class="o">=</span> <span class="n">r</span>
 <span class="k">end</span><span class="o">;;</span>
-</pre></div><p id="idp9481760">
+</pre></div><p id="idp9601776">
         A <code>square</code> has a method <code>area</code>
         just like a <code>shape</code>, and an additional method
         <code>width</code>. Still, we expect a
@@ -534,7 +534,7 @@
        <span class="nc">The</span> <span class="n">second</span> <span class="k">object</span> <span class="k">type</span> <span class="n">has</span> <span class="n">no</span> <span class="k">method</span> <span class="n">width</span>
 <span class="o">#</span> <span class="k">let</span> <span class="n">shape</span> <span class="n">w</span> <span class="o">:</span> <span class="n">shape</span> <span class="o">=</span> <span class="o">(</span><span class="n">square</span> <span class="n">w</span> <span class="o">:&gt;</span> <span class="n">shape</span><span class="o">);;</span>
 <span class="k">val</span> <span class="n">shape</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">-&gt;</span> <span class="n">shape</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp9488816">
+</pre></div><p id="idp9608832">
         This form of object subtyping is called
         <span><em>width</em></span> subtyping. Width subtyping means that
         an object type <span><em>A</em></span> is a a subtype of
@@ -544,7 +544,7 @@
         <code>shape</code> because it implements all of the
         methods of <code>shape</code> (the <code>area</code>
         method).
-      </p></section><section><h1 id="variance">Variance</h1><p id="idp9495648">
+      </p></section><section><h1 id="variance">Variance</h1><p id="idp9615616">
         What about types built from object types? If a
         <code>square</code> is a <code>shape</code>, we
         expect a <code>square list</code> to be a
@@ -554,7 +554,7 @@
 <span class="k">val</span> <span class="n">squares</span> <span class="o">:</span> <span class="n">square</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[&lt;</span><span class="n">obj</span><span class="o">&gt;;</span> <span class="o">&lt;</span><span class="n">obj</span><span class="o">&gt;]</span>
 <span class="o">#</span> <span class="k">let</span> <span class="n">shapes</span><span class="o">:</span> <span class="n">shape</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">(</span><span class="n">squares</span> <span class="o">:&gt;</span> <span class="n">shape</span> <span class="kt">list</span><span class="o">);;</span>
 <span class="k">val</span> <span class="n">shapes</span> <span class="o">:</span> <span class="n">shape</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[&lt;</span><span class="n">obj</span><span class="o">&gt;;</span> <span class="o">&lt;</span><span class="n">obj</span><span class="o">&gt;]</span>
-</pre></div><p id="idp9500432">
+</pre></div><p id="idp9620400">
         This would not be safe for all types built from objects. For
         instance, it is not safe to coerce a
         <code>square array</code> into a
@@ -569,13 +569,13 @@
 <span class="nc">Type</span> <span class="n">square</span> <span class="o">=</span> <span class="o">&lt;</span> <span class="n">area</span> <span class="o">:</span> <span class="kt">float</span><span class="o">;</span> <span class="n">width</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">&gt;</span> <span class="n">is</span> <span class="n">not</span> <span class="n">compatible</span> <span class="k">with</span> <span class="k">type</span>
   <span class="n">shape</span> <span class="o">=</span> <span class="o">&lt;</span> <span class="n">area</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">&gt;</span> 
 <span class="nc">The</span> <span class="n">second</span> <span class="k">object</span> <span class="k">type</span> <span class="n">has</span> <span class="n">no</span> <span class="k">method</span> <span class="n">width</span>
-</pre></div><p id="idp9503920">
+</pre></div><p id="idp9623888">
         This is disallowed because it would allow non-square shapes to
         be inserted into <code>square_array</code>. We call such
         types <span><em>invariant</em></span>, while types like
         <code>list</code> are said to be
         <span><em>covariant</em></span>.
-      </p><p id="idp9506800">
+      </p><p id="idp9626768">
         For some types the type built from <code>shape</code> is a
         subtype of the one built from <code>square</code>.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">type</span> <span class="k">'</span><span class="n">a</span> <span class="n">to_string</span> <span class="o">=</span> <span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">string</span><span class="o">;;</span>
@@ -586,16 +586,16 @@
 <span class="o">#</span> <span class="k">let</span> <span class="n">square_to_string</span><span class="o">:</span> <span class="n">square</span> <span class="n">to_string</span> <span class="o">=</span> 
     <span class="o">(</span><span class="n">shape_to_string</span> <span class="o">:&gt;</span> <span class="n">square</span> <span class="n">to_string</span><span class="o">);;</span>
 <span class="k">val</span> <span class="n">square_to_string</span> <span class="o">:</span> <span class="n">square</span> <span class="n">to_string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp9510128">
+</pre></div><p id="idp9630096">
         We call such types <span><em>contravariant</em></span>.
-      </p></section><section><h1 id="depth-subtyping">Depth subtyping</h1><p id="idp9512224">
+      </p></section><section><h1 id="depth-subtyping">Depth subtyping</h1><p id="idp9632208">
         We can also extend subtyping to object types whose methods types
         are subtypes. This is commonly called <span><em>depth</em></span>
         subtyping, which, in its most general form, says that an object
         type <code>&lt; m: t1 &gt;</code> is a subtype of
         <code>&lt; m: t2 &gt;</code> iff <code>t1</code> is
         a subtype of <code>t2</code>.
-      </p><p id="idp9516160">
+      </p><p id="idp9636192">
         To explore this, let's start building objects containing shapes
         by applying our <code>make</code> function to a square and
         a circle.
@@ -607,7 +607,7 @@
 <span class="k">type</span> <span class="n">circle_val</span> <span class="o">=</span> <span class="o">&lt;</span> <span class="n">get</span> <span class="o">:</span> <span class="n">circle</span><span class="o">;</span> <span class="n">set</span> <span class="o">:</span> <span class="n">circle</span> <span class="o">-&gt;</span> <span class="kt">unit</span> <span class="o">&gt;</span>
 <span class="o">#</span> <span class="k">let</span> <span class="n">circ_val</span><span class="o">:</span> <span class="n">circle_val</span> <span class="o">=</span> <span class="n">make</span> <span class="o">(</span><span class="n">circle</span> <span class="mi">2</span><span class="o">.</span><span class="mi">0</span><span class="o">);;</span>
 <span class="k">val</span> <span class="n">circ_val</span> <span class="o">:</span> <span class="n">circle_val</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">obj</span><span class="o">&gt;</span>
-</pre></div><p id="idp9518784">
+</pre></div><p id="idp9638816">
         If we wanted to write a function that took a list of such
         objects and found the total area of their shapes, we might try:
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">type</span> <span class="n">shape_val</span> <span class="o">=</span> <span class="o">&lt;</span> <span class="n">get</span><span class="o">:</span> <span class="n">shape</span><span class="o">;</span> <span class="n">set</span><span class="o">:</span> <span class="n">shape</span> <span class="o">-&gt;</span> <span class="kt">unit</span> <span class="o">&gt;;;</span>
@@ -615,7 +615,7 @@
 <span class="k">let</span> <span class="n">total_area</span> <span class="o">(</span><span class="n">shape_vals</span><span class="o">:</span> <span class="n">shape_val</span> <span class="kt">list</span><span class="o">)</span> <span class="o">=</span>
     <span class="nn">List</span><span class="p">.</span><span class="n">fold</span> <span class="o">~</span><span class="n">init</span><span class="o">:</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">t</span> <span class="n">s</span> <span class="o">-&gt;</span> <span class="n">t</span> <span class="o">+.</span> <span class="n">s</span><span class="o">#</span><span class="n">get</span><span class="o">#</span><span class="n">area</span><span class="o">)</span> <span class="n">shape_vals</span><span class="o">;;</span>
 <span class="k">val</span> <span class="n">total_area</span> <span class="o">:</span> <span class="n">shape_val</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">float</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp9520720">
+</pre></div><p id="idp9640752">
         However, when we try to apply this function to our objects we
         get an error:
       </p><div class="highlight"><pre><span class="o">#</span> <span class="n">total_area</span> <span class="o">[</span> <span class="o">(</span><span class="n">sq_val</span> <span class="o">:&gt;</span> <span class="n">shape_val</span><span class="o">);</span> <span class="o">(</span><span class="n">circ_val</span> <span class="o">:&gt;</span> <span class="n">shape_val</span><span class="o">)</span> <span class="o">];;</span>
@@ -626,7 +626,7 @@
        <span class="n">is</span> <span class="n">not</span> <span class="n">a</span> <span class="n">subtype</span> <span class="k">of</span> <span class="n">shape_val</span> <span class="o">=</span> <span class="o">&lt;</span> <span class="n">get</span> <span class="o">:</span> <span class="n">shape</span><span class="o">;</span> <span class="n">set</span> <span class="o">:</span> <span class="n">shape</span> <span class="o">-&gt;</span> <span class="kt">unit</span> <span class="o">&gt;</span> 
        <span class="nc">Type</span> <span class="n">shape</span> <span class="o">=</span> <span class="o">&lt;</span> <span class="n">area</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">&gt;</span> <span class="n">is</span> <span class="n">not</span> <span class="n">a</span> <span class="n">subtype</span> <span class="k">of</span>
        <span class="n">square</span> <span class="o">=</span> <span class="o">&lt;</span> <span class="n">area</span> <span class="o">:</span> <span class="kt">float</span><span class="o">;</span> <span class="n">width</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">&gt;</span> 
-</pre></div><p id="idp9522672">
+</pre></div><p id="idp9642704">
         As you can see, <code>square_val</code> and
         <code>circle_val</code> are not subtypes of
         <code>shape_val</code>. The problem is with the
@@ -636,14 +636,14 @@
         <code>square_val</code> to a <code>shape_val</code>,
         then it would be possible to set sq_val to an arbitrary shape,
         which would be an error.
-      </p><p id="idp9529680">
+      </p><p id="idp9649712">
         Another way of looking at this is that
         <code>&lt; set: 'a -&gt; unit; .. &gt;</code> is
         contravariant in <code>'a</code>, so
         <code>&lt; set: square -&gt; unit; get: square &gt;</code>
         cannot be subtype of
         <code>&lt; set: shape -&gt; unit; get: shape &gt;</code>.
-      </p><p id="idp9533184">
+      </p><p id="idp9653216">
         Still, the <code>total_area</code> function should be
         fine, in principle. It doesn't call <code>set</code>, so
         it isn't making that error. To make it work, we need to use a
@@ -658,7 +658,7 @@
 <span class="k">val</span> <span class="n">total_area</span> <span class="o">:</span> <span class="n">readonly_shape_val</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">float</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="n">total_area</span> <span class="o">[</span> <span class="o">(</span><span class="n">sq_val</span> <span class="o">:&gt;</span> <span class="n">readonly_shape_val</span><span class="o">);</span> <span class="o">(</span><span class="n">circ_val</span> <span class="o">:&gt;</span> <span class="n">readonly_shape_val</span><span class="o">)</span> <span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">=</span> <span class="mi">21</span><span class="o">.</span><span class="mi">5600000000000023</span>
-</pre></div><p id="idp9537472">
+</pre></div><p id="idp9657504">
         Aspects of this section may seem fairly complicated, but it
         should be pointed out that this typing
         <span><em>works</em></span>, and in the end the type annotations
@@ -673,7 +673,7 @@
         back to dynamic typing. The situation in OCaml is much better;
         it works, it is statically checked, and the annotations are
         pretty simple.
-      </p></section><section><h1 id="narrowing">Narrowing</h1><p id="idp9543120">
+      </p></section><section><h1 id="narrowing">Narrowing</h1><p id="idp9663040">
         Narrowing, also called <span><em>down casting</em></span>, is the
         ability to coerce an object to one of its subtypes. For example,
         if we have a list of shapes <code>shape list</code>, we
@@ -687,25 +687,25 @@
         <code>(Square) x</code> is allowed if the value
         <code>x</code> has type <code>Square</code> or one
         of its subtypes; otherwise the coercion throws an exception.
-      </p><p id="idp9549936">
+      </p><p id="idp9669856">
         Narrowing is <span><em>not permitted</em></span> in OCaml.
         Period.
-      </p><p id="idp9550816">
+      </p><p id="idp9670736">
         Why? There are two reasonable explanations, one based on a
         design principle, and another technical (the technical reason is
         simple: it is hard to implement).
-      </p><p id="idp9551408">
+      </p><p id="idp9671328">
         The design argument is this: narrowing violates abstraction. In
         fact, with a structural typing system like in OCaml, narrowing
         would essentially provide the ability to enumerate the methods
         in an object. To check whether an object <code>obj</code>
         has some method <code>foo : int</code>, one would attempt
         a coercion <code>(obj :&gt; &lt; foo : int &gt;)</code>.
-      </p><p id="idp9554272">
+      </p><p id="idp9674240">
         More commonly, narrowing leads to poor object-oriented style.
         Consider the following Java code, which returns the name of a
         shape object.
-      </p><pre id="idp9554848">
+      </p><pre id="idp9674816">
 String GetShapeName(Shape s) {
   if (s instanceof Square) {
     return &quot;Square&quot;;
@@ -715,26 +715,26 @@ String GetShapeName(Shape s) {
     return &quot;Other&quot;;
   }
 }
-</pre><p id="idp9555856">
+</pre><p id="idp9675824">
         Most programmers would consider this code to be
         &quot;wrong.&quot; Instead of performing a case analysis on the
         type of object, it would be better to define a method to return
         the name of the shape. Instead of calling
         <code>GetShapeName(s)</code>, we should call
         <code>s.Name()</code> instead.
-      </p><p id="idp9558336">
+      </p><p id="idp9678304">
         However, the situation is not always so obvious. The following
         code checks whether an array of shapes looks like a
         &quot;barbell,&quot; composed to two <code>Circle</code>
         objects separated by a <code>Line</code>, where the
         circles have the same radius.
-      </p><pre id="idp9560528">
+      </p><pre id="idp9680496">
 boolean IsBarBell(Shape[] s) {
   return s.length == 3 &amp;&amp; (s[0] instanceof Circle) &amp;&amp;
     (s[1] instanceof Line) &amp;&amp; (s[2] instanceof Circle) &amp;&amp;
     ((Circle) s[0]).radius() == ((Circle) s[2]).radius();
 }
-</pre><p id="idp9561424">
+</pre><p id="idp9681392">
         In this case, it is much less clear how to augment the
         <code>Shape</code> class to support this kind of pattern
         analysis. It is also not obvious that object-oriented
@@ -743,7 +743,7 @@ boolean IsBarBell(Shape[] s) {
       </p><div class="highlight"><pre><span class="k">let</span> <span class="n">is_bar_bell</span> <span class="o">=</span> <span class="k">function</span>
  <span class="o">|</span> <span class="o">[</span><span class="nc">Circle</span> <span class="n">r1</span><span class="o">;</span> <span class="nc">Line</span> <span class="o">_;</span> <span class="nc">Circle</span> <span class="n">r2</span><span class="o">]</span> <span class="k">when</span> <span class="n">r1</span> <span class="o">==</span> <span class="n">r2</span> <span class="o">-&gt;</span> <span class="bp">true</span>
  <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="bp">false</span><span class="o">;;</span>
-</pre></div><p id="idp9563920">
+</pre></div><p id="idp9683888">
         Regardless, there is a solution if you find yourself in this
         situation, which is to augment the classes with variants. You
         can define a method <code>variant</code> that injects the
@@ -761,12 +761,12 @@ boolean IsBarBell(Shape[] s) {
      <span class="o">|</span> <span class="nc">Circle</span> <span class="n">c1</span><span class="o">,</span> <span class="nc">Line</span> <span class="o">_,</span> <span class="nc">Circle</span> <span class="n">c2</span> <span class="k">when</span> <span class="n">c1</span><span class="o">#</span><span class="n">radius</span> <span class="o">==</span> <span class="n">c2</span><span class="o">#</span><span class="n">radius</span> <span class="o">-&gt;</span> <span class="bp">true</span>
      <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="bp">false</span><span class="o">)</span>
  <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="bp">false</span><span class="o">;;</span>
-</pre></div><p id="idp9567104">
+</pre></div><p id="idp9687072">
         This pattern works, but it has drawbacks. In particular, the
         recursive type definition should make it clear that this pattern
         is essentially equivalent to using variants, and that objects do
         not provide much value here.
-      </p></section><section><h1 id="subtyping-vs.-row-polymorphism">Subtyping vs. Row Polymorphism</h1><p id="idp9569088">
+      </p></section><section><h1 id="subtyping-vs.-row-polymorphism">Subtyping vs. Row Polymorphism</h1><p id="idp9688992">
         There is a great deal of overlap between subtyping and row
         polymorphism. Row polymorphism is in general preferred over
         subtyping because it does not require explicit coercions, and it
@@ -775,7 +775,7 @@ boolean IsBarBell(Shape[] s) {
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">filter_large</span> <span class="n">v</span> <span class="o">=</span>
   <span class="k">if</span> <span class="n">v</span><span class="o">#</span><span class="n">get</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="o">.</span><span class="mi">0</span> <span class="k">then</span> <span class="nc">Some</span> <span class="n">v</span> <span class="k">else</span> <span class="nc">None</span><span class="o">;;</span>
 <span class="k">val</span> <span class="n">filter_large</span> <span class="o">:</span> <span class="o">(&lt;</span> <span class="n">get</span> <span class="o">:</span> <span class="kt">float</span><span class="o">;</span> <span class="o">..</span> <span class="o">&gt;</span> <span class="k">as</span> <span class="k">'</span><span class="n">a</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="n">option</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp9570976">
+</pre></div><p id="idp9690880">
         The return type of this function is built from the open object
         type of its argument, preserving any additional methods that it
         may have.
@@ -783,7 +783,7 @@ boolean IsBarBell(Shape[] s) {
 <span class="k">val</span> <span class="n">v</span> <span class="o">:</span> <span class="o">&lt;</span> <span class="n">get</span> <span class="o">:</span> <span class="kt">float</span><span class="o">;</span> <span class="n">set</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">-&gt;</span> <span class="kt">unit</span> <span class="o">&gt;</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">obj</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="n">filter_large</span> <span class="n">v</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="o">&lt;</span> <span class="n">get</span> <span class="o">:</span> <span class="kt">float</span><span class="o">;</span> <span class="n">set</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">-&gt;</span> <span class="kt">unit</span> <span class="o">&gt;</span> <span class="n">option</span> <span class="o">=</span> <span class="nc">Some</span> <span class="o">&lt;</span><span class="n">obj</span><span class="o">&gt;</span>
-</pre></div><p id="idp9572800">
+</pre></div><p id="idp9692704">
         Writing a similar function with a closed type and applying it
         using subtyping does not preserve the methods of the argument:
         the returned object is only known to have a
@@ -793,7 +793,7 @@ boolean IsBarBell(Shape[] s) {
   <span class="k">val</span> <span class="n">filter_large</span> <span class="o">:</span> <span class="o">&lt;</span> <span class="n">get</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">&gt;</span> <span class="o">-&gt;</span> <span class="o">&lt;</span> <span class="n">get</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">&gt;</span> <span class="n">option</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="n">filter_large</span> <span class="o">(</span><span class="n">v</span> <span class="o">:&gt;</span> <span class="o">&lt;</span> <span class="n">get</span><span class="o">:</span> <span class="kt">float</span> <span class="o">&gt;);;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="o">&lt;</span> <span class="n">get</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">&gt;</span> <span class="n">option</span> <span class="o">=</span> <span class="nc">Some</span> <span class="o">&lt;</span><span class="n">obj</span><span class="o">&gt;</span>
-</pre></div><p id="idp9575328">
+</pre></div><p id="idp9695232">
         However, there are some situations where we cannot use row
         polymorphism. For example, lists of heterogeneous elements can
         not be created using row polymorphism:
@@ -804,7 +804,7 @@ boolean IsBarBell(Shape[] s) {
 <span class="nc">Error</span><span class="o">:</span> <span class="nc">This</span> <span class="n">expression</span> <span class="n">has</span> <span class="k">type</span> <span class="o">&lt;</span> <span class="n">area</span> <span class="o">:</span> <span class="kt">float</span><span class="o">;</span> <span class="n">radius</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">&gt;</span>
        <span class="n">but</span> <span class="n">an</span> <span class="n">expression</span> <span class="n">was</span> <span class="n">expected</span> <span class="k">of</span> <span class="k">type</span> <span class="o">&lt;</span> <span class="n">area</span> <span class="o">:</span> <span class="kt">float</span><span class="o">;</span> <span class="n">width</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">&gt;</span>
        <span class="nc">The</span> <span class="n">second</span> <span class="k">object</span> <span class="k">type</span> <span class="n">has</span> <span class="n">no</span> <span class="k">method</span> <span class="n">radius</span>
-</pre></div><p id="idp9577456">
+</pre></div><p id="idp9697360">
         Since row polymorphism is a form of polymorphism, it also does
         not work well with references:
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">shape_ref</span><span class="o">:</span> <span class="o">&lt;</span> <span class="n">area</span><span class="o">:</span> <span class="kt">float</span><span class="o">;</span> <span class="o">..&gt;</span> <span class="n">ref</span> <span class="o">=</span> <span class="n">ref</span> <span class="o">(</span><span class="n">square</span> <span class="mi">4</span><span class="o">.</span><span class="mi">0</span><span class="o">);;</span>
@@ -816,7 +816,7 @@ boolean IsBarBell(Shape[] s) {
 <span class="nc">Error</span><span class="o">:</span> <span class="nc">This</span> <span class="n">expression</span> <span class="n">has</span> <span class="k">type</span> <span class="o">&lt;</span> <span class="n">area</span> <span class="o">:</span> <span class="kt">float</span><span class="o">;</span> <span class="n">radius</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">&gt;</span>
        <span class="n">but</span> <span class="n">an</span> <span class="n">expression</span> <span class="n">was</span> <span class="n">expected</span> <span class="k">of</span> <span class="k">type</span> <span class="o">&lt;</span> <span class="n">area</span> <span class="o">:</span> <span class="kt">float</span><span class="o">;</span> <span class="n">width</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">&gt;</span>
        <span class="nc">The</span> <span class="n">second</span> <span class="k">object</span> <span class="k">type</span> <span class="n">has</span> <span class="n">no</span> <span class="k">method</span> <span class="n">radius</span>
-</pre></div><p id="idp9579504">
+</pre></div><p id="idp9699408">
         In these cases we must use subtyping:
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">hlist</span><span class="o">:</span> <span class="n">shape</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[(</span><span class="n">square</span> <span class="mi">1</span><span class="o">.</span><span class="mi">0</span> <span class="o">:&gt;</span> <span class="n">shape</span><span class="o">);</span> <span class="o">(</span><span class="n">circle</span> <span class="mi">3</span><span class="o">.</span><span class="mi">0</span> <span class="o">:&gt;</span> <span class="n">shape</span><span class="o">)];;</span>
 <span class="k">val</span> <span class="n">hlist</span> <span class="o">:</span> <span class="n">shape</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[&lt;</span><span class="n">obj</span><span class="o">&gt;;</span> <span class="o">&lt;</span><span class="n">obj</span><span class="o">&gt;]</span>
@@ -826,7 +826,7 @@ boolean IsBarBell(Shape[] s) {
 <span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
 </pre></div><aside class="note"><h1>
       Production note
-      </h1><p id="idp9582128">
+      </h1><p id="idp9702032">
         This chapter contains significant external contributions from
         Leo White.
       </p></aside></section></section>

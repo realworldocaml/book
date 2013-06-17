@@ -144,13 +144,13 @@
                 
                 
 
-    <p id="idp6348032">
+    <p id="idp7255520">
     Variables and functions are fundamental ideas that show up in
     virtually all programming languages. But OCaml has a different take
     on these basic concepts, and so we'll spend some time digging into
     the details so you can see how OCaml's variables and functions
     differ from what you may have encountered in other languages.
-  </p><section><h1 id="variables">Variables</h1><p id="idp6349664">
+  </p><section><h1 id="variables">Variables</h1><p id="idp7257152">
       At its simplest, a variable is an identifier whose meaning is
       bound to a particular value. In OCaml these bindings are often
       introduced using the <code>let</code> keyword. We can type a
@@ -159,17 +159,17 @@
       bind a new variable. Note that variable names must start with a
       lowercase letter.
     </p><div class="highlight"><pre><span class="k">let</span> <span class="o">&lt;</span><span class="n">identifier</span><span class="o">&gt;</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">expr</span><span class="o">&gt;</span>
-</pre></div><p id="idp6353488">
+</pre></div><p id="idp7260976">
       As we'll see when we get to the module system in
       <a href="files-modules-and-programs.html">Chapter 4, <i>Files, Modules and Programs</i></a>, this same
       syntax is used for let bindings at the top-level of a module.
-    </p><p id="idp6354544">
+    </p><p id="idp7262032">
       Every variable binding has a <span><em>scope</em></span>, which is
       the portion of the code that can refer to that binding. The scope
       of a top-level let binding is everything that follows it in the
       session, when using <code>utop</code>, or, when using
       modules, for the remainder of the module.
-    </p><p id="idp6356208">
+    </p><p id="idp7263696">
       Here's a simple example.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">3</span><span class="o">;;</span>
 <span class="k">val</span> <span class="n">x</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">3</span>
@@ -177,12 +177,12 @@
 <span class="k">val</span> <span class="n">y</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">4</span>
 <span class="o">#</span> <span class="k">let</span> <span class="n">z</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="o">;;</span>
 <span class="k">val</span> <span class="n">z</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">7</span>
-</pre></div><p id="idp6357568">
+</pre></div><p id="idp7265056">
 <code>let</code> can also be used to create a variable
       binding whose scope is limited to a particular expression, using
       the following syntax.
     </p><div class="highlight"><pre><span class="k">let</span> <span class="o">&lt;</span><span class="n">identifier</span><span class="o">&gt;</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">expr1</span><span class="o">&gt;</span> <span class="k">in</span> <span class="o">&lt;</span><span class="n">expr2</span><span class="o">&gt;</span>
-</pre></div><p id="idp6359600">
+</pre></div><p id="idp7267088">
       This first evaluates <span><em><code>expr1</code></em></span>
       and then evaluates <span><em><code>expr2</code></em></span>
       with <span><em><code>identifier</code></em></span> bound to
@@ -196,7 +196,7 @@
     <span class="nn">String</span><span class="p">.</span><span class="n">concat</span> <span class="o">~</span><span class="n">sep</span><span class="o">:</span><span class="s2">&quot;-&quot;</span> <span class="n">language_list</span>
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">dashed_languages</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;OCaml-Perl-C++-C&quot;</span>
-</pre></div><p id="idp6364448">
+</pre></div><p id="idp7271936">
       Note that the scope of <code>language_list</code> is just
       the expression
       <code>String.concat ~sep:&quot;-&quot; language_list</code>,
@@ -207,7 +207,7 @@
   <span class="n">language_list</span><span class="o">;;</span>
   <span class="o">^^^^^^^^^^^^^</span>
 <span class="nc">Error</span><span class="o">:</span> <span class="nc">Unbound</span> <span class="n">value</span> <span class="n">language_list</span>
-</pre></div><p id="idp6367184">
+</pre></div><p id="idp7274672">
       A let binding in an inner scope can <span><em>shadow</em></span>,
       or hide, the definition from an outer scope. So, for example, we
       could have written the <code>dashed_languages</code> example
@@ -219,7 +219,7 @@
      <span class="nn">String</span><span class="p">.</span><span class="n">concat</span> <span class="o">~</span><span class="n">sep</span><span class="o">:</span><span class="s2">&quot;-&quot;</span> <span class="n">languages</span>
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">dashed_languages</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;OCaml-Perl-C++-C&quot;</span>
-</pre></div><p id="idp6370064">
+</pre></div><p id="idp7277552">
       This time, in the inner scope we called the list of strings
       <code>languages</code> instead of
       <code>language_list</code>, thus hiding the original
@@ -229,7 +229,7 @@
       reappears.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="n">languages</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;OCaml,Perl,C++,C&quot;</span>
-</pre></div><p id="idp6374112">
+</pre></div><p id="idp7281600">
       One common idiom is to use a series of nested
       <code>let</code>/<code>in</code> expressions to build
       up the components of a larger computation. Thus, we might write:
@@ -240,7 +240,7 @@
   <span class="o">;;</span>
 <span class="o">#</span> <span class="n">area_of_ring</span> <span class="mi">1</span><span class="o">.</span> <span class="mi">3</span><span class="o">.;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">=</span> <span class="mi">25</span><span class="o">.</span><span class="mi">1327412287183449</span>
-</pre></div><p id="idp6377056">
+</pre></div><p id="idp7284544">
       It's important not to confuse a sequence of let bindings with the
       modification of a mutable variable. For example, consider how
       <code>area_of_ring</code> would work if we had instead
@@ -251,7 +251,7 @@
      <span class="k">let</span> <span class="n">pi</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span> <span class="k">in</span>
      <span class="n">area_of_circle</span> <span class="n">outer_radius</span> <span class="o">-.</span> <span class="n">area_of_circle</span> <span class="n">inner_radius</span>
   <span class="o">;;</span>
-</pre></div><p id="idp6379424">
+</pre></div><p id="idp7286912">
       Here, we redefined <code>pi</code> to be zero after the
       definition of <code>area_of_circle</code>. You might think
       that this would mean that the result of the computation would now
@@ -267,18 +267,18 @@
     <span class="k">let</span> <span class="n">pi</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span> <span class="k">in</span>
         <span class="o">^^</span>
 <span class="nc">Warning</span> <span class="mi">26</span><span class="o">:</span> <span class="n">unused</span> <span class="n">variable</span> <span class="n">pi</span><span class="o">.</span>
-</pre></div><p id="idp6385040">
+</pre></div><p id="idp7292528">
       In OCaml, let bindings are immutable. As we'll see in
       <a href="a-guided-tour.html#imperative-programming">the section called “Imperative programming”</a>, there are
       mutable values in OCaml, but no mutable variables.
     </p><aside class="note"><h1> 
     Why don't variables vary?
-    </h1><p id="idp6386736">
+    </h1><p id="idp7294224">
       One source of confusion for people new to functional languages is
       the fact that variables are typically immutable. This seems pretty
       surprising even on linguistic terms. Isn't the whole point of a
       variable that it can vary?
-    </p><p id="idp6387392">
+    </p><p id="idp7294880">
       The answer to this is that variables in a functional language are
       really more like variables in an equation. If you think about the
       mathematical equation <code>x (y + z) = x y + x z</code>,
@@ -286,11 +286,11 @@
       <code>y</code> and <code>z</code>. They vary in the
       sense that you can instantiate this equation with different
       numbers for those variables, and it still holds.
-    </p><p id="idp6390624">
+    </p><p id="idp7298112">
       The same is true in a functional language. A function can be
       applied to different inputs, and thus its variables will take on
       different values, even without mutation.
-    </p></aside><section><h1 id="pattern-matching-and-let">Pattern matching and <code>let</code></h1><p id="idp6392720">
+    </p></aside><section><h1 id="pattern-matching-and-let">Pattern matching and <code>let</code></h1><p id="idp7300208">
         Another useful feature of let bindings is that they support the
         use of <span><em>patterns</em></span> on the left-hand side.
         Consider the following code, which uses
@@ -299,7 +299,7 @@
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="o">(</span><span class="n">ints</span><span class="o">,</span><span class="n">strings</span><span class="o">)</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">unzip</span> <span class="o">[(</span><span class="mi">1</span><span class="o">,</span><span class="s2">&quot;one&quot;</span><span class="o">);</span> <span class="o">(</span><span class="mi">2</span><span class="o">,</span><span class="s2">&quot;two&quot;</span><span class="o">);</span> <span class="o">(</span><span class="mi">3</span><span class="o">,</span><span class="s2">&quot;three&quot;</span><span class="o">)];;</span>
 <span class="k">val</span> <span class="n">ints</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span> <span class="mi">2</span><span class="o">;</span> <span class="mi">3</span><span class="o">]</span>
 <span class="k">val</span> <span class="n">strings</span> <span class="o">:</span> <span class="kt">string</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;one&quot;</span><span class="o">;</span> <span class="s2">&quot;two&quot;</span><span class="o">;</span> <span class="s2">&quot;three&quot;</span><span class="o">]</span>
-</pre></div><p id="idp6395584">
+</pre></div><p id="idp7303072">
         Here, <code>(ints,strings)</code> is a pattern, and the
         <code>let</code> binding assigns values to both of the
         identifiers that show up in that pattern. A pattern is
@@ -307,7 +307,7 @@
         where some components are identifiers to be bound. As we saw in
         <a href="a-guided-tour.html#tuples-lists-options-and-pattern-matching">the section called “Tuples, Lists, Options and Pattern Matching”</a>,
         OCaml has patterns for a variety of different data-types.
-      </p><p id="idp6398080">
+      </p><p id="idp7305568">
         Using a pattern in a let-binding makes the most sense for a
         pattern that is <span><em>irrefutable</em></span>,
         <span><em>i.e.</em></span>, where any value of the type in
@@ -324,7 +324,7 @@
 <span class="nc">Warning</span> <span class="mi">8</span><span class="o">:</span> <span class="n">this</span> <span class="n">pattern</span><span class="o">-</span><span class="n">matching</span> <span class="n">is</span> <span class="n">not</span> <span class="n">exhaustive</span><span class="o">.</span>
 <span class="nc">Here</span> <span class="n">is</span> <span class="n">an</span> <span class="n">example</span> <span class="k">of</span> <span class="n">a</span> <span class="n">value</span> <span class="n">that</span> <span class="n">is</span> <span class="n">not</span> <span class="n">matched</span><span class="o">:</span>
 <span class="bp">[]</span>
-</pre></div><p id="idp6401248">
+</pre></div><p id="idp7308736">
         This case can't really come up in practice, because
         <code>String.split</code> always returns a list with at
         least one element. But the compiler doesn't know this, and so it
@@ -336,14 +336,14 @@
      <span class="o">|</span> <span class="n">first</span> <span class="o">::</span> <span class="n">rest</span> <span class="o">-&gt;</span> <span class="nn">String</span><span class="p">.</span><span class="n">concat</span> <span class="o">~</span><span class="n">sep</span><span class="o">:</span><span class="s2">&quot;,&quot;</span> <span class="o">(</span><span class="nn">String</span><span class="p">.</span><span class="n">uppercase</span> <span class="n">first</span> <span class="o">::</span> <span class="n">rest</span><span class="o">)</span>
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">upcase_first_entry</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div></section></section><section><h1 id="functions">Functions</h1><p id="idp6404976">
+</pre></div></section></section><section><h1 id="functions">Functions</h1><p id="idp7312464">
       OCaml being a functional language, it's no surprise that functions
       are an important and pervasive element of programming in OCaml.
       Indeed, we've seen functions pop up already in many of the
       examples we've looked at thus far. But while we've introduced the
       basics of functions, we're now going to cover them in more depth,
       starting from the foundations.
-    </p><section><h1 id="anonymous-functions">Anonymous Functions</h1><p id="idp6406656">
+    </p><section><h1 id="anonymous-functions">Anonymous Functions</h1><p id="idp7314144">
         We'll start by looking at the most basic style of function
         declaration in OCaml: the <span><em>anonymous</em></span>
         function. An anonymous function is a function value that is
@@ -351,25 +351,25 @@
         <code>fun</code> keyword, as shown here.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="o">(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="o">);;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp6409296">
+</pre></div><p id="idp7316784">
         Anonymous functions aren't named, but they can be used for many
         different purposes nonetheless. You can, for example, apply an
         anonymous function to an argument.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="o">(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span> <span class="mi">7</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">8</span>
-</pre></div><p id="idp6410864">
+</pre></div><p id="idp7318352">
         Or pass it to another function. Passing functions to iteration
         functions like <code>List.map</code> is probably the most
         common use-case for anonymous functions.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">2</span><span class="o">;</span> <span class="mi">3</span><span class="o">;</span> <span class="mi">4</span><span class="o">]</span>
-</pre></div><p id="idp6413152">
+</pre></div><p id="idp7320640">
         Or even stuff them into a data structure.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">increments</span> <span class="o">=</span> <span class="o">[</span> <span class="o">(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="o">);</span> <span class="o">(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">2</span><span class="o">)</span> <span class="o">]</span> <span class="o">;;</span>
 <span class="k">val</span> <span class="n">increments</span> <span class="o">:</span> <span class="o">(</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span><span class="o">)</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[&lt;</span><span class="k">fun</span><span class="o">&gt;;</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;]</span>
 <span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">f</span> <span class="o">-&gt;</span> <span class="n">f</span> <span class="mi">5</span><span class="o">)</span> <span class="n">increments</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">6</span><span class="o">;</span> <span class="mi">7</span><span class="o">]</span>
-</pre></div><p id="idp6414688">
+</pre></div><p id="idp7322176">
         It's worth stopping for a moment to puzzle this example out,
         since this kind of higher-order use of functions can be a bit
         obscure at first. The first thing to understand is the function
@@ -381,7 +381,7 @@
         <code>increments</code> list (which are themselves
         functions) and returns the list containing the results of these
         function applications.
-      </p><p id="idp6418704">
+      </p><p id="idp7326192">
         The key thing to understand is that functions are ordinary
         values in OCaml, and you can do everything with them that you'd
         do with an ordinary value, including passing them to and
@@ -392,20 +392,20 @@
 <span class="k">val</span> <span class="n">plusone</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="n">plusone</span> <span class="mi">3</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">4</span>
-</pre></div><p id="idp6420544">
+</pre></div><p id="idp7328032">
         Defining named functions is so common that there is a built in
         syntax for it. Thus, the following definition of
         <code>plusone</code> is equivalent to the definition
         above.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">plusone</span> <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="o">;;</span>
 <span class="k">val</span> <span class="n">plusone</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp6422688">
+</pre></div><p id="idp7330176">
         This is the most common and convenient way to declare a
         function, but syntactic niceties aside, the two styles of
         function definition are entirely equivalent.
       </p><aside class="note"><h1>
 let and fun
-</h1><p id="idp6425168">
+</h1><p id="idp7332656">
         Functions and let bindings have a lot to do with each other. In
         some sense, you can think of the argument of a function as a
         variable being bound to the value passed by the caller. Indeed,
@@ -414,18 +414,18 @@ let and fun
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">8</span>
 <span class="o">#</span> <span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">7</span> <span class="k">in</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">8</span>
-</pre></div><p id="idp6426912">
+</pre></div><p id="idp7334400">
         This connection is important, and will come up more when
         programming in a monadic style, as we'll see in
         <a href="concurrent-programming-with-async.html">Chapter 18, <i>Concurrent Programming with Async</i></a>.
-      </p></aside></section><section><h1 id="multi-argument-functions">Multi-argument functions</h1><p id="idp6429072">
+      </p></aside></section><section><h1 id="multi-argument-functions">Multi-argument functions</h1><p id="idp7336560">
         OCaml of course also supports multi-argument functions, for
         example:
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">abs_diff</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span> <span class="n">abs</span> <span class="o">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span><span class="o">);;</span>
 <span class="k">val</span> <span class="n">abs_diff</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="n">abs_diff</span> <span class="mi">3</span> <span class="mi">4</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">1</span>
-</pre></div><p id="idp6430560">
+</pre></div><p id="idp7338048">
         You may find the type signature of <code>abs_diff</code>
         with all of its arrows a little hard to parse. To understand
         what's going on, let's rewrite <code>abs_diff</code> in an
@@ -433,7 +433,7 @@ let and fun
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">abs_diff</span> <span class="o">=</span>
     <span class="o">(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="k">fun</span> <span class="n">y</span> <span class="o">-&gt;</span> <span class="n">abs</span> <span class="o">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span><span class="o">)));;</span>
 <span class="k">val</span> <span class="n">abs_diff</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp6434032">
+</pre></div><p id="idp7341520">
         This rewrite makes it explicit that <code>abs_diff</code>
         is actually a function of one argument that returns another
         function of one argument, which itself returns the final
@@ -442,7 +442,7 @@ let and fun
         <code>x</code>, which was captured by the first function
         application, and <code>y</code>, which was captured by the
         second one.
-      </p><p id="idp6437232">
+      </p><p id="idp7344720">
         This style of function is called a <span><em>curried</em></span>
         function. (Currying is named after Haskell Curry, a famous
         logician who had a significant impact on the design and theory
@@ -454,7 +454,7 @@ let and fun
         signature, but it makes it easier to see how the currying fits
         in.
       </p><div class="highlight"><pre><span class="k">val</span> <span class="n">abs_diff</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span><span class="o">)</span>
-</pre></div><p id="idp6440592">
+</pre></div><p id="idp7348160">
         Currying is more than just a theoretical curiosity. You can make
         use of currying to specialize a function by feeding in some of
         the arguments. Here's an example where we create a specialized
@@ -466,22 +466,22 @@ let and fun
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="o">#</span> <span class="n">dist_from_3</span> <span class="o">(-</span><span class="mi">1</span><span class="o">);;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">4</span>
-</pre></div><p id="idp6443808">
+</pre></div><p id="idp7351376">
         The practice of applying some of the arguments of a curried
         function to get a new function is called <span><em>partial
         application</em></span>.
-      </p><p id="idp6444704">
+      </p><p id="idp7352272">
         Note that the <code>fun</code> keyword supports its own
         syntax for currying, so the following definition of
         <code>abs_diff</code> is equivalent to the definition
         above.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">abs_diff</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">x</span> <span class="n">y</span> <span class="o">-&gt;</span> <span class="n">abs</span> <span class="o">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">y</span><span class="o">));;</span>
-</pre></div><p id="idp6447392">
+</pre></div><p id="idp7354960">
         You might worry that curried functions are terribly expensive,
         but this is not the case. In OCaml, there is no penalty for
         calling a curried function with all of its arguments. (Partial
         application, unsurprisingly, does have a small extra cost.)
-      </p><p id="idp6448080">
+      </p><p id="idp7355648">
         Currying is not the only way of writing a multi-argument
         function in OCaml. It's also possible to use the different arms
         of a tuple as different arguments. So, we could write:
@@ -489,17 +489,17 @@ let and fun
 <span class="k">val</span> <span class="n">abs_diff</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="n">abs_diff</span> <span class="o">(</span><span class="mi">3</span><span class="o">,</span><span class="mi">4</span><span class="o">);;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">1</span>
-</pre></div><p id="idp6449696">
+</pre></div><p id="idp7357264">
         OCaml handles this calling convention efficiently as well. In
         particular it does not generally have to allocate a tuple just
         for the purpose of sending arguments to a tuple-style function.
         (You can't, however, use partial application for this style of
         function.)
-      </p><p id="idp6450400">
+      </p><p id="idp7357968">
         There are small tradeoffs between these two approaches, but most
         of the time, one should stick to currying, since it's the
         default style in the OCaml world.
-      </p></section><section><h1 id="recursive-functions">Recursive functions</h1><p id="idp6452000">
+      </p></section><section><h1 id="recursive-functions">Recursive functions</h1><p id="idp7359568">
         A function is <span><em>recursive</em></span> if it refers to
         itself in its definition. Recursion is important in any
         programming language, but is particularly important in
@@ -509,7 +509,7 @@ let and fun
         also supports imperative looping constructs like
         <code>for</code> and <code>while</code>, but these
         are only useful when using OCaml's imperative features.)
-      </p><p id="idp6455024">
+      </p><p id="idp7362592">
         In order to define a recursive function, you need to mark the
         let binding as recursive with the <code>rec</code>
         keyword, as shown in this example:
@@ -522,14 +522,14 @@ let and fun
       <span class="k">if</span> <span class="n">x</span> <span class="o">=</span> <span class="n">y</span> <span class="k">then</span> <span class="nc">Some</span> <span class="n">x</span> <span class="k">else</span> <span class="n">find_first_stutter</span> <span class="o">(</span><span class="n">y</span><span class="o">::</span><span class="n">tl</span><span class="o">)</span>
    <span class="o">;;</span>
 <span class="k">val</span> <span class="n">find_first_stutter</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="n">option</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp6457504">
+</pre></div><p id="idp7365072">
         Note that in the above, the pattern
         <code>| [] | [_]</code> is actually the combination of two
         patterns; <code>[]</code>, matching the empty list, and
         <code>[_]</code>, matching any single element list. The
         <code>_</code> is there so we don't have to put an
         explicit name on that single element.
-      </p><p id="idp6460496">
+      </p><p id="idp7368064">
         We can also define multiple mutually recursive values by using
         <code>let rec</code> combined with the
         <code>and</code> keyword. Here's a (gratuitously
@@ -545,7 +545,7 @@ let and fun
 <span class="o">-</span> <span class="o">:</span> <span class="kt">bool</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="bp">true</span><span class="o">;</span> <span class="bp">false</span><span class="o">;</span> <span class="bp">true</span><span class="o">;</span> <span class="bp">false</span><span class="o">;</span> <span class="bp">true</span><span class="o">;</span> <span class="bp">false</span><span class="o">]</span>
 <span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="n">is_odd</span> <span class="o">[</span><span class="mi">0</span><span class="o">;</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">;</span><span class="mi">4</span><span class="o">;</span><span class="mi">5</span><span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">bool</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="bp">false</span><span class="o">;</span> <span class="bp">true</span><span class="o">;</span> <span class="bp">false</span><span class="o">;</span> <span class="bp">true</span><span class="o">;</span> <span class="bp">false</span><span class="o">;</span> <span class="bp">true</span><span class="o">]</span>
-</pre></div><p id="idp6464176">
+</pre></div><p id="idp7371744">
         OCaml distinguishes between non-recursive definitions (using
         <code>let</code>) and recursive definitions (using
         <code>let rec</code>) largely for technical reasons: the
@@ -553,7 +553,7 @@ let and fun
         definitions are mutually recursive, and for reasons that don't
         apply to a pure language like Haskell, these have to be marked
         explicitly by the programmer.
-      </p><p id="idp6466512">
+      </p><p id="idp7373776">
         But this decision has some good effects. For one thing,
         recursive (and especially mutually recursive) definitions are
         harder to reason about than non-recursive definitions that
@@ -561,18 +561,18 @@ let and fun
         defined. It's therefore useful that, in the absence of an
         explicit marker, new definitions can only build upon ones that
         were previously defined.
-      </p><p id="idp6467360">
+      </p><p id="idp7374624">
         In addition, having a non-recursive form makes it easier to
         create a new definition that extends and supersedes an existing
         one by shadowing it.
-      </p></section><section><h1 id="prefix-and-infix-operators">Prefix and Infix operators</h1><p id="idp6468944">
+      </p></section><section><h1 id="prefix-and-infix-operators">Prefix and Infix operators</h1><p id="idp7376208">
         So far, we've seen examples of functions used in both prefix and
         infix style:
       </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Int</span><span class="p">.</span><span class="n">max</span> <span class="mi">3</span> <span class="mi">4</span><span class="o">;;</span>  <span class="c">(* prefix *)</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">4</span>
 <span class="o">#</span> <span class="mi">3</span> <span class="o">+</span> <span class="mi">4</span><span class="o">;;</span>        <span class="c">(* infix  *)</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">7</span>
-</pre></div><p id="idp6470400">
+</pre></div><p id="idp7377664">
         You might not have thought of the second example as an ordinary
         function, but it very much is. Infix operators like
         <code>+</code> really only differ syntactically from other
@@ -582,24 +582,24 @@ let and fun
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">7</span>
 <span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">~</span><span class="n">f</span><span class="o">:((+)</span> <span class="mi">3</span><span class="o">)</span> <span class="o">[</span><span class="mi">4</span><span class="o">;</span><span class="mi">5</span><span class="o">;</span><span class="mi">6</span><span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">7</span><span class="o">;</span> <span class="mi">8</span><span class="o">;</span> <span class="mi">9</span><span class="o">]</span>
-</pre></div><p id="idp6472720">
+</pre></div><p id="idp7379984">
         In the second expression above, we've partially applied
         <code>(+)</code> to gain a function that increments its
         single argument by <code>3</code>, and then applied that
         to all the elements of a list.
-      </p><p id="idp6474608">
+      </p><p id="idp7381872">
         A function is treated syntactically as an operator if the name
         of that function is chosen from one of a specialized set of
         identifiers. This set includes any identifier that is a sequence
         of characters from the following set
-      </p><pre id="idp6475280">
+      </p><pre id="idp7382544">
 ! $ % &amp; * + - . / : &lt; = &gt; ? @ ^ | ~
-</pre><p id="idp6475984">
+</pre><p id="idp7383248">
         or is one of a handful of pre-determined strings, including
         <code>mod</code>, the modulus operator, and
         <code>lsl</code>, for &quot;logical shift left&quot;, a
         bit-shifting operation.
-      </p><p id="idp6477952">
+      </p><p id="idp7385216">
         We can define (or redefine) the meaning of an operator as
         follows. Here's an example of a simple vector-addition operator
         on int pairs.
@@ -607,7 +607,7 @@ let and fun
 <span class="k">val</span> <span class="o">(</span> <span class="o">+!</span> <span class="o">)</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="o">(</span><span class="mi">3</span><span class="o">,</span><span class="mi">2</span><span class="o">)</span> <span class="o">+!</span> <span class="o">(-</span><span class="mi">2</span><span class="o">,</span><span class="mi">4</span><span class="o">);;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">(</span><span class="mi">1</span><span class="o">,</span><span class="mi">6</span><span class="o">)</span>
-</pre></div><p id="idp6479552">
+</pre></div><p id="idp7386816">
         The syntactic role of an operator is typically determined by its
         first character or two, though there are a few exceptions. This
         table breaks the different operators and other syntactic forms
@@ -689,19 +689,19 @@ let and fun
 <code>;</code>
 </td><td>
                 Right associative
-              </td></tr></tbody></table><p id="idp7320928">
+              </td></tr></tbody></table><p id="idp7437600">
         There's one important special case: <code>-</code> and
         <code>-.</code>, which are the integer and floating point
         subtraction operators, can act as both prefix operators (for
         negation) and infix operators (for subtraction), So, both
         <code>-x</code> and <code>x - y</code> are
         meaningful expressions.
-      </p><p id="idp7324016">
+      </p><p id="idp7440688">
         Here's an example of a very useful operator that's defined in
         Core, following these rules. Here's the definition:
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="o">(|&gt;)</span> <span class="n">x</span> <span class="n">f</span> <span class="o">=</span> <span class="n">f</span> <span class="n">x</span> <span class="o">;;</span>
 <span class="k">val</span> <span class="o">(</span> <span class="o">|&gt;</span> <span class="o">)</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp7325520">
+</pre></div><p id="idp7442192">
         It's not quite obvious at first what the purpose of this
         operator is: it just takes some value and a function, and
         applies the function to the value. But its utility is clearer
@@ -721,7 +721,7 @@ let and fun
 <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span>
 <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">bin</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
-</pre></div><p id="idp7329072">
+</pre></div><p id="idp7445744">
         Note that we can do this without <code>|&gt;</code>, but
         the result is a bit more verbose.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">path</span> <span class="o">=</span> <span class="nn">Sys</span><span class="p">.</span><span class="n">getenv_exn</span> <span class="s2">&quot;PATH&quot;</span> <span class="k">in</span>
@@ -734,7 +734,7 @@ let and fun
 <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span>
 <span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">bin</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
-</pre></div><p id="idp7331536">
+</pre></div><p id="idp7448208">
         An important part of what's happening here is partial
         application. Normally, <code>List.iter</code> takes two
         arguments: a function to be called on each element of the list,
@@ -744,15 +744,15 @@ let and fun
 <span class="nc">Two</span>
 <span class="n">lines</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
-</pre></div><p id="idp7334512">
+</pre></div><p id="idp7451184">
         Or, we can pass it just the function argument, leaving us with a
         function for printing out a list of strings.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">iter</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="n">print_endline</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">unit</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp7336016">
+</pre></div><p id="idp7452688">
         It is this later form that we're using in the
         <code>|&gt;</code> pipeline above.
-      </p><p id="idp7337104">
+      </p><p id="idp7453776">
         Note that <code>|&gt;</code> only works in the intended
         way because it is left-associative. Indeed, let's see what
         happens if we try using a right associative operator, like (^!).
@@ -769,7 +769,7 @@ let and fun
 <span class="nc">Error</span><span class="o">:</span> <span class="nc">This</span> <span class="n">expression</span> <span class="n">has</span> <span class="k">type</span> <span class="kt">string</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">unit</span>
        <span class="n">but</span> <span class="n">an</span> <span class="n">expression</span> <span class="n">was</span> <span class="n">expected</span> <span class="k">of</span> <span class="k">type</span>
          <span class="o">(</span><span class="kt">string</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="kt">list</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span>
-</pre></div><p id="idp7339904">
+</pre></div><p id="idp7456576">
         The above type error is a little bewildering at first glance.
         What's going on is that, because <code>^!</code> is right
         associative, the operator is trying to feed the value
@@ -777,12 +777,12 @@ let and fun
         function <code>List.iter ~f:print_endline</code>. But
         <code>List.iter ~f:print_endline</code> expects a list of
         strings as its input, not a function.
-      </p><p id="idp7343088">
+      </p><p id="idp7459760">
         The type error aside, this example highlights the importance of
         choosing the operator you use with care, particularly with
         respect to associativity.
       </p></section><section><h1 id="declaring-functions-with-function">Declaring functions with
-      <code>function</code></h1><p id="idp7345168">
+      <code>function</code></h1><p id="idp7461840">
         Another way to define a function is using the
         <code>function</code> keyword. Instead of having syntactic
         support for declaring multi-argument (curried) functions,
@@ -795,7 +795,7 @@ let and fun
 <span class="k">val</span> <span class="n">some_or_zero</span> <span class="o">:</span> <span class="kt">int</span> <span class="n">option</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="n">some_or_zero</span> <span class="o">[</span><span class="nc">Some</span> <span class="mi">3</span><span class="o">;</span> <span class="nc">None</span><span class="o">;</span> <span class="nc">Some</span> <span class="mi">4</span><span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">3</span><span class="o">;</span> <span class="mi">0</span><span class="o">;</span> <span class="mi">4</span><span class="o">]</span>
-</pre></div><p id="idp7348240">
+</pre></div><p id="idp7464912">
         This is equivalent to combining an ordinary function definition
         with a <code>match</code>.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">some_or_zero</span> <span class="n">num_opt</span> <span class="o">=</span>
@@ -804,7 +804,7 @@ let and fun
     <span class="o">|</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="mi">0</span>
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">some_or_zero</span> <span class="o">:</span> <span class="kt">int</span> <span class="n">option</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp7350384">
+</pre></div><p id="idp7467056">
         We can also combine the different styles of function declaration
         together, as in the following example where we declare a two
         argument (curried) function with a pattern match on the second
@@ -817,13 +817,13 @@ let and fun
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="n">some_or_default</span> <span class="mi">100</span><span class="o">)</span> <span class="o">[</span><span class="nc">Some</span> <span class="mi">3</span><span class="o">;</span> <span class="nc">None</span><span class="o">;</span> <span class="nc">Some</span> <span class="mi">4</span><span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">3</span><span class="o">;</span> <span class="mi">100</span><span class="o">;</span> <span class="mi">4</span><span class="o">]</span>
-</pre></div><p id="idp7352432">
+</pre></div><p id="idp7469104">
         Also, note the use of partial application to generate the
         function passed to <code>List.map</code>. In other words,
         <code>some_or_default 100</code> is a function that was
         created by feeding just the first argument to
         <code>some_or_default</code>.
-      </p></section><section><h1 id="labeled-arguments">Labeled Arguments</h1><p id="idp7355904">
+      </p></section><section><h1 id="labeled-arguments">Labeled Arguments</h1><p id="idp7472576">
         Up until now, we've written functions where the arguments are
         specified positionally, <span><em>i.e.</em></span>, by the order
         in which the arguments are passed to the function. OCaml also
@@ -833,7 +833,7 @@ let and fun
         be labeled.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">ratio</span> <span class="o">~</span><span class="n">num</span> <span class="o">~</span><span class="n">denom</span> <span class="o">=</span> <span class="kt">float</span> <span class="n">num</span> <span class="o">/.</span> <span class="kt">float</span> <span class="n">denom</span><span class="o">;;</span>
 <span class="k">val</span> <span class="n">ratio</span> <span class="o">:</span> <span class="n">num</span><span class="o">:</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="n">denom</span><span class="o">:</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">float</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp7358160">
+</pre></div><p id="idp7474832">
         We can then provide a labeled argument using a similar
         convention. As you can see, the arguments can be provided in any
         order.
@@ -841,7 +841,7 @@ let and fun
 <span class="o">-</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">3</span>
 <span class="o">#</span> <span class="n">ratio</span> <span class="o">~</span><span class="n">denom</span><span class="o">:</span><span class="mi">10</span> <span class="o">~</span><span class="n">num</span><span class="o">:</span><span class="mi">3</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">3</span>
-</pre></div><p id="idp7359680">
+</pre></div><p id="idp7476352">
         OCaml also supports <span><em>label punning</em></span>, meaning
         that you get to drop the text after the <code>:</code> if
         the name of the label and the name of the variable being used
@@ -852,30 +852,30 @@ let and fun
 <span class="o">#</span> <span class="k">let</span> <span class="n">denom</span> <span class="o">=</span> <span class="mi">4</span><span class="o">;;</span>
 <span class="o">#</span> <span class="n">ratio</span> <span class="o">~</span><span class="n">num</span> <span class="o">~</span><span class="n">denom</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">75</span>
-</pre></div><p id="idp7362384">
+</pre></div><p id="idp7479056">
         Labeled arguments are useful in a few different cases:
-      </p><ul><li><p id="idp7363360">
+      </p><ul><li><p id="idp7480032">
             When defining a function with lots of arguments. Beyond a
             certain number, arguments are easier to remember by name
             than by position.
-          </p></li><li><p id="idp7364320">
+          </p></li><li><p id="idp7480992">
             When defining functions that have multiple arguments that
             might get confused with each other. This is most at issue
             when the arguments are of the same type. For example,
             consider this signature for a function for extracting a
             substring of another string.
           </p><div class="highlight"><pre><span class="k">val</span> <span class="n">substring</span><span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">string</span>
-</pre></div><p id="idp7365904">
+</pre></div><p id="idp7482576">
             where the two ints are the starting position and length of
             the substring to extract. Labeled arguments can make this
             signature clearer:
           </p><div class="highlight"><pre><span class="k">val</span> <span class="n">substring</span><span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="n">pos</span><span class="o">:</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="n">len</span><span class="o">:</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">string</span>
-</pre></div><p id="idp7367472">
+</pre></div><p id="idp7484144">
             This improves the readability of both the signature and of
             client code that makes use of <code>substring</code>,
             and makes it harder to accidentally swap the position and
             the length.
-          </p></li><li><p id="idp7369120">
+          </p></li><li><p id="idp7485792">
             When the meaning of a particular argument is unclear from
             the type alone. For example, consider a function for
             creating a hashtable where the first argument is the initial
@@ -885,11 +885,11 @@ let and fun
             signature doesn't give you much of a hint as to the meaning
             of the arguments.
           </p><div class="highlight"><pre><span class="k">val</span> <span class="n">create_hashtable</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">bool</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="k">'</span><span class="n">a</span><span class="o">,</span><span class="k">'</span><span class="n">b</span><span class="o">)</span> <span class="nn">Hashtable</span><span class="p">.</span><span class="n">t</span>
-</pre></div><p id="idp7370992">
+</pre></div><p id="idp7487664">
             but with labeled arguments, we can make the intent much
             clearer.
           </p><div class="highlight"><pre><span class="k">val</span> <span class="n">create_hashtable</span> <span class="o">:</span> <span class="n">init_size</span><span class="o">:</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="n">allow_shrinking</span><span class="o">:</span><span class="kt">bool</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="k">'</span><span class="n">a</span><span class="o">,</span><span class="k">'</span><span class="n">b</span><span class="o">)</span> <span class="nn">Hashtable</span><span class="p">.</span><span class="n">t</span>
-</pre></div></li><li><p id="idp7372960">
+</pre></div></li><li><p id="idp7489632">
             When you want flexibility on the order in which arguments
             are passed. Consider a function like
             <code>List.iter</code>, that takes two arguments: a
@@ -903,13 +903,13 @@ let and fun
   <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">dedup</span> <span class="o">~</span><span class="n">compare</span><span class="o">:</span><span class="nn">String</span><span class="p">.</span><span class="n">compare</span>
   <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">iter</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="n">print_endline</span>
   <span class="o">;;</span>
-</pre></div><p id="idp7376112">
+</pre></div><p id="idp7492784">
             In other cases, you want to put the function argument
             second. One common reason is readability. In particular, a
             multi-line function passed as an argument to another
             function is easiest to read when it is the final argument to
             that function.
-          </p></li></ul><section><h1 id="higher-order-functions-and-labels">Higher-order functions and labels</h1><p id="idp7377968">
+          </p></li></ul><section><h1 id="higher-order-functions-and-labels">Higher-order functions and labels</h1><p id="idp7494640">
           One surprising gotcha with labeled arguments is that while
           order doesn't matter when calling a function with labeled
           arguments, it does matter in a higher-order context,
@@ -917,7 +917,7 @@ let and fun
           labeled arguments to another function. Here's an example.
         </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">apply_to_tuple</span> <span class="n">f</span> <span class="o">(</span><span class="n">first</span><span class="o">,</span><span class="n">second</span><span class="o">)</span> <span class="o">=</span> <span class="n">f</span> <span class="o">~</span><span class="n">first</span> <span class="o">~</span><span class="n">second</span><span class="o">;;</span>
 <span class="k">val</span> <span class="n">apply_to_tuple</span> <span class="o">:</span> <span class="o">(</span><span class="n">first</span><span class="o">:</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="n">second</span><span class="o">:</span><span class="k">'</span><span class="n">b</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">c</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="o">*</span> <span class="k">'</span><span class="n">b</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">c</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp7380160">
+</pre></div><p id="idp7496832">
           Here, the definition of <code>apply_to_tuple</code> sets
           up the expectation that its first argument is a function with
           two labeled arguments, <code>first</code> and
@@ -926,12 +926,12 @@ let and fun
           change the order in which the labeled arguments were listed.
         </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">apply_to_tuple_2</span> <span class="n">f</span> <span class="o">(</span><span class="n">first</span><span class="o">,</span><span class="n">second</span><span class="o">)</span> <span class="o">=</span> <span class="n">f</span> <span class="o">~</span><span class="n">second</span> <span class="o">~</span><span class="n">first</span><span class="o">;;</span>
 <span class="k">val</span> <span class="n">apply_to_tuple_2</span> <span class="o">:</span> <span class="o">(</span><span class="n">second</span><span class="o">:</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="n">first</span><span class="o">:</span><span class="k">'</span><span class="n">b</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">c</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span> <span class="o">*</span> <span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">c</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp7384432">
+</pre></div><p id="idp7501104">
           It turns out this order of listing matters. In particular, if
           we define a function that has a different order
         </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">divide</span> <span class="o">~</span><span class="n">first</span> <span class="o">~</span><span class="n">second</span> <span class="o">=</span> <span class="n">first</span> <span class="o">/</span> <span class="n">second</span><span class="o">;;</span>
 <span class="k">val</span> <span class="n">divide</span> <span class="o">:</span> <span class="n">first</span><span class="o">:</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="n">second</span><span class="o">:</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp7386000">
+</pre></div><p id="idp7502672">
           we'll find that it can't be passed in to
           <code>apply_to_tuple_2</code>.
         </p><div class="highlight"><pre><span class="o">#</span> <span class="n">apply_to_tuple_2</span> <span class="n">divide</span> <span class="o">(</span><span class="mi">3</span><span class="o">,</span><span class="mi">4</span><span class="o">);;</span>
@@ -940,25 +940,25 @@ let and fun
                    <span class="o">^^^^^^</span>
 <span class="nc">Error</span><span class="o">:</span> <span class="nc">This</span> <span class="n">expression</span> <span class="n">has</span> <span class="k">type</span> <span class="n">first</span><span class="o">:</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="n">second</span><span class="o">:</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span>
        <span class="n">but</span> <span class="n">an</span> <span class="n">expression</span> <span class="n">was</span> <span class="n">expected</span> <span class="k">of</span> <span class="k">type</span> <span class="n">second</span><span class="o">:</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="n">first</span><span class="o">:</span><span class="k">'</span><span class="n">b</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">c</span>
-</pre></div><p id="idp7388288">
+</pre></div><p id="idp7504960">
           But, it works smoothly with the original
           <code>apply_to_tuple</code>.
         </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">apply_to_tuple</span> <span class="n">f</span> <span class="o">(</span><span class="n">first</span><span class="o">,</span><span class="n">second</span><span class="o">)</span> <span class="o">=</span> <span class="n">f</span> <span class="o">~</span><span class="n">first</span> <span class="o">~</span><span class="n">second</span><span class="o">;;</span>
 <span class="k">val</span> <span class="n">apply_to_tuple</span> <span class="o">:</span> <span class="o">(</span><span class="n">first</span><span class="o">:</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="n">second</span><span class="o">:</span><span class="k">'</span><span class="n">b</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">c</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="o">*</span> <span class="k">'</span><span class="n">b</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">c</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="n">apply_to_tuple</span> <span class="n">divide</span> <span class="o">(</span><span class="mi">3</span><span class="o">,</span><span class="mi">4</span><span class="o">);;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">0</span>
-</pre></div><p id="idp7390448">
+</pre></div><p id="idp7507120">
           So, even though the order of labeled arguments usually doesn't
           matter, it will sometimes bite you in higher-ordered contexts,
           where you're passing functions as arguments to other functions
           as we were in the above examples.
-        </p></section></section><section><h1 id="optional-arguments">Optional arguments</h1><p id="idp7392256">
+        </p></section></section><section><h1 id="optional-arguments">Optional arguments</h1><p id="idp7508928">
         An optional argument is like a labeled argument that the caller
         can choose whether or not to provide. Optional arguments are
         passed in using the same syntax as labeled arguments, and, like
         labeled arguments, optional arguments can be provided in any
         order.
-      </p><p id="idp7392960">
+      </p><p id="idp7509632">
         Here's an example of a string concatenation function with an
         optional separator. This function uses the <code>^</code>
         operator for simple pairwise string concatenation.
@@ -971,7 +971,7 @@ let and fun
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;foobar&quot;</span>
 <span class="o">#</span> <span class="n">concat</span> <span class="o">~</span><span class="n">sep</span><span class="o">:</span><span class="s2">&quot;:&quot;</span> <span class="s2">&quot;foo&quot;</span> <span class="s2">&quot;bar&quot;</span><span class="o">;;</span>    <span class="c">(* with the optional argument    *)</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;foo:bar&quot;</span>
-</pre></div><p id="idp7395424">
+</pre></div><p id="idp7512096">
         Here, <code>?</code> is used in the definition of the
         function to mark <code>sep</code> as optional. And while
         the caller can pass a value of type <code>string</code>
@@ -980,7 +980,7 @@ let and fun
         <code>string option</code>, with <code>None</code>
         appearing when <code>sep</code> is not provided by the
         caller.
-      </p><p id="idp7400960">
+      </p><p id="idp7517632">
         In the above example, we had a bit of code to substitute in the
         empty string when no argument was provided. This is a common
         enough pattern that there's an explicit syntax for providing a
@@ -988,19 +988,19 @@ let and fun
         <code>concat</code> even more concisely.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">concat</span> <span class="o">?(</span><span class="n">sep</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="o">)</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="o">^</span> <span class="n">sep</span> <span class="o">^</span> <span class="n">y</span> <span class="o">;;</span>
 <span class="k">val</span> <span class="n">concat</span> <span class="o">:</span> <span class="o">?</span><span class="n">sep</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp7403328">
+</pre></div><p id="idp7520000">
         Optional arguments are very useful, but they're also easy to
         abuse. The key advantage of optional arguments is that they let
         you write functions with multiple arguments that users can
         ignore most of the time, only worrying about them when they
         specifically want to invoke those options.
-      </p><p id="idp7404064">
+      </p><p id="idp7520736">
         The downside is that the caller may be unaware that there is a
         choice to be made, and so may unknowingly (and wrongly) pick
         that default behavior. Optional arguments really only make sense
         when the extra concision of omitting the argument overwhelms the
         corresponding loss of explicitness.
-      </p><p id="idp7404800">
+      </p><p id="idp7521472">
         This means that rarely used functions should not have optional
         arguments. A good rule of thumb is to avoid optional arguments
         for functions internal to a module, <span><em>i.e.</em></span>,
@@ -1008,14 +1008,14 @@ let and fun
         <code>mli</code> file. We'll learn more about
         <code>mli</code>s in
         <a href="files-modules-and-programs.html">Chapter 4, <i>Files, Modules and Programs</i></a>.
-      </p><section><h1 id="explicit-passing-of-an-optional-argument">Explicit passing of an optional argument</h1><p id="idp7408496">
+      </p><section><h1 id="explicit-passing-of-an-optional-argument">Explicit passing of an optional argument</h1><p id="idp7525168">
           Under the covers, a function with an optional argument
           receives <code>None</code> when the caller doesn't
           provide the argument, and <code>Some</code> when it
           does. But the <code>Some</code> and
           <code>None</code> are normally not explicitly passed in
           by the caller.
-        </p><p id="idp7411648">
+        </p><p id="idp7528320">
           But sometimes, passing in <code>Some</code> or
           <code>None</code> explicitly is exactly what you want.
           OCaml lets you do this by using <code>?</code> instead
@@ -1026,7 +1026,7 @@ let and fun
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;foo:bar&quot;</span>
 <span class="o">#</span> <span class="n">concat</span> <span class="o">?</span><span class="n">sep</span><span class="o">:(</span><span class="nc">Some</span> <span class="s2">&quot;:&quot;</span><span class="o">)</span> <span class="s2">&quot;foo&quot;</span> <span class="s2">&quot;bar&quot;</span><span class="o">;;</span> <span class="c">(* pass an explicit [Some] *)</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;foo:bar&quot;</span>
-</pre></div><p id="idp7416688">
+</pre></div><p id="idp7533360">
           And the following two lines are equivalent ways of calling
           <code>concat</code> without specifying
           <code>sep</code>.
@@ -1034,7 +1034,7 @@ let and fun
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;foobar&quot;</span>
 <span class="o">#</span> <span class="n">concat</span> <span class="o">?</span><span class="n">sep</span><span class="o">:</span><span class="nc">None</span> <span class="s2">&quot;foo&quot;</span> <span class="s2">&quot;bar&quot;</span><span class="o">;;</span> <span class="c">(* explicitly pass `None` *)</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;foobar&quot;</span>
-</pre></div><p id="idp7419632">
+</pre></div><p id="idp7536304">
           One use-case for this is when you want to define a wrapper
           function that mimics the optional arguments of the function
           it's wrapping. For example, imagine we wanted to create a
@@ -1048,26 +1048,26 @@ let and fun
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;FOObar&quot;</span>
 <span class="o">#</span> <span class="n">uppercase_concat</span> <span class="s2">&quot;foo&quot;</span> <span class="s2">&quot;bar&quot;</span> <span class="o">~</span><span class="n">sep</span><span class="o">:</span><span class="s2">&quot;:&quot;</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;FOO:bar&quot;</span>
-</pre></div><p id="idp7422848">
+</pre></div><p id="idp7539520">
           In the way we've written it, we've been forced to separately
           make the decision as to what the default separator is. Thus,
           if we later change <code>concat</code>'s default
           behavior, we'll need to remember to change
           <code>uppercase_concat</code> to match it.
-        </p><p id="idp7424768">
+        </p><p id="idp7541440">
           Instead, we can have <code>uppercase_concat</code>
           simply pass through the optional argument to
           <code>concat</code> using the <code>?</code>
           syntax.
         </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">uppercase_concat</span> <span class="o">?</span><span class="n">sep</span> <span class="n">a</span> <span class="n">b</span> <span class="o">=</span> <span class="n">concat</span> <span class="o">?</span><span class="n">sep</span> <span class="o">(</span><span class="nn">String</span><span class="p">.</span><span class="n">uppercase</span> <span class="n">a</span><span class="o">)</span> <span class="n">b</span> <span class="o">;;</span>
 <span class="k">val</span> <span class="n">uppercase_concat</span> <span class="o">:</span> <span class="o">?</span><span class="n">sep</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp7428208">
+</pre></div><p id="idp7544880">
           Now, if someone calls <code>uppercase_concat</code>
           without an argument, an explicit <code>None</code> will
           be passed to <code>concat</code>, leaving
           <code>concat</code> to decide what the default behavior
           should be.
-        </p></section><section><h1 id="inference-of-labeled-and-optional-arguments">Inference of labeled and optional arguments</h1><p id="idp7432176">
+        </p></section><section><h1 id="inference-of-labeled-and-optional-arguments">Inference of labeled and optional arguments</h1><p id="idp7548848">
           One subtle aspect of labeled and optional arguments is how
           they are inferred by the type system. Consider the following
           example for computing numerical derivatives of a function of
@@ -1094,14 +1094,14 @@ let and fun
   <span class="n">delta</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span>
   <span class="n">x</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span> <span class="n">y</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span> <span class="n">f</span><span class="o">:(</span><span class="n">x</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span> <span class="n">y</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span> <span class="kt">float</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="kt">float</span> <span class="o">*</span> <span class="kt">float</span> <span class="o">=</span>
   <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp7440256">
+</pre></div><p id="idp7556928">
           In principle, it's not obvious how the order of the arguments
           to <code>f</code> should be chosen. Since labeled
           arguments can be passed in arbitrary order, it seems like it
           could as well be
           <code>y:float -&gt; x:float -&gt; float</code> as it is
           <code>x:float -&gt; y:float -&gt; float</code>.
-        </p><p id="idp7442768">
+        </p><p id="idp7559440">
           Even worse, it would be perfectly consistent for
           <code>f</code> to take an optional argument instead of a
           labeled one, which could lead to this type signature for
@@ -1110,13 +1110,13 @@ let and fun
   <span class="n">delta</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span>
   <span class="n">x</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span> <span class="n">y</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span> <span class="n">f</span><span class="o">:(?</span><span class="n">x</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span> <span class="n">y</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span> <span class="kt">float</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="kt">float</span> <span class="o">*</span> <span class="kt">float</span> <span class="o">=</span>
   <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp7445664">
+</pre></div><p id="idp7562336">
           Since there are multiple plausible types to choose from, OCaml
           needs some heuristic for choosing between them. The heuristic
           the compiler uses is to prefer labels to options, and to
           choose the order of arguments that shows up in the source
           code.
-        </p><p id="idp7446368">
+        </p><p id="idp7563344">
           Note that these heuristics might at different points in the
           source suggest different types. Here's a version of
           <code>numeric_deriv</code> where different invocations
@@ -1136,7 +1136,7 @@ let and fun
 <span class="nc">Error</span><span class="o">:</span> <span class="nc">This</span> <span class="k">function</span> <span class="n">is</span> <span class="n">applied</span> <span class="k">to</span> <span class="n">arguments</span>
 <span class="k">in</span> <span class="n">an</span> <span class="n">order</span> <span class="n">different</span> <span class="n">from</span> <span class="n">other</span> <span class="n">calls</span><span class="o">.</span>
 <span class="nc">This</span> <span class="n">is</span> <span class="n">only</span> <span class="n">allowed</span> <span class="k">when</span> <span class="n">the</span> <span class="n">real</span> <span class="k">type</span> <span class="n">is</span> <span class="n">known</span><span class="o">.</span>
-</pre></div><p id="idp7449568">
+</pre></div><p id="idp7566544">
           As suggested by the error message, we can get OCaml to accept
           the fact that <code>f</code> is used with different
           argument orders if we provide explicit type information. Thus,
@@ -1154,7 +1154,7 @@ let and fun
   <span class="n">delta</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span>
   <span class="n">x</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span> <span class="n">y</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span> <span class="n">f</span><span class="o">:(</span><span class="n">x</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span> <span class="n">y</span><span class="o">:</span><span class="kt">float</span> <span class="o">-&gt;</span> <span class="kt">float</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="kt">float</span> <span class="o">*</span> <span class="kt">float</span> <span class="o">=</span>
   <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div></section><section><h1 id="optional-arguments-and-partial-application">Optional arguments and partial application</h1><p id="idp7454080">
+</pre></div></section><section><h1 id="optional-arguments-and-partial-application">Optional arguments and partial application</h1><p id="idp7571056">
           Optional arguments can be tricky to think about in the
           presence of partial application. We can of course partially
           apply the optional argument itself:
@@ -1162,14 +1162,14 @@ let and fun
 <span class="k">val</span> <span class="n">colon_concat</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="n">colon_concat</span> <span class="s2">&quot;a&quot;</span> <span class="s2">&quot;b&quot;</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;a:b&quot;</span>
-</pre></div><p id="idp7455712">
+</pre></div><p id="idp7572688">
           But what happens if we partially apply just the first
           argument?
         </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">prepend_pound</span> <span class="o">=</span> <span class="n">concat</span> <span class="s2">&quot;# &quot;</span><span class="o">;;</span>
 <span class="k">val</span> <span class="n">prepend_pound</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="n">prepend_pound</span> <span class="s2">&quot;a BASH comment&quot;</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;# a BASH comment&quot;</span>
-</pre></div><p id="idp7457280">
+</pre></div><p id="idp7574256">
           The optional argument <code>?sep</code> has now
           disappeared, or been <span><em>erased</em></span>. Indeed, if
           we try to pass in that optional argument now, it will be
@@ -1180,9 +1180,9 @@ let and fun
   <span class="o">^^^^^^^^^^^^^</span>
 <span class="nc">Error</span><span class="o">:</span> <span class="nc">This</span> <span class="k">function</span> <span class="n">has</span> <span class="k">type</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span>
        <span class="nc">It</span> <span class="n">is</span> <span class="n">applied</span> <span class="k">to</span> <span class="n">too</span> <span class="n">many</span> <span class="n">arguments</span><span class="o">;</span> <span class="n">maybe</span> <span class="n">you</span> <span class="n">forgot</span> <span class="n">a</span> <span class="o">`;</span><span class="k">'</span><span class="o">.</span>
-</pre></div><p id="idp7460240">
+</pre></div><p id="idp7577216">
           So when does OCaml decide to erase an optional argument?
-        </p><p id="idp7460720">
+        </p><p id="idp7577696">
           The rule is: an optional argument is erased as soon as the
           first positional (<span><em>i.e.</em></span>, neither labeled
           nor optional) argument defined <span><em>after</em></span> the
@@ -1192,7 +1192,7 @@ let and fun
           in the second position:
         </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">concat</span> <span class="n">x</span> <span class="o">?(</span><span class="n">sep</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="o">)</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="o">^</span> <span class="n">sep</span> <span class="o">^</span> <span class="n">y</span> <span class="o">;;</span>
 <span class="k">val</span> <span class="n">concat</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="o">?</span><span class="n">sep</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp7464544">
+</pre></div><p id="idp7581520">
           then application of the first argument would not cause the
           optional argument to be erased.
         </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">prepend_pound</span> <span class="o">=</span> <span class="n">concat</span> <span class="s2">&quot;# &quot;</span><span class="o">;;</span>
@@ -1201,7 +1201,7 @@ let and fun
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;# a BASH comment&quot;</span>
 <span class="o">#</span> <span class="n">prepend_pound</span> <span class="s2">&quot;a BASH comment&quot;</span> <span class="o">~</span><span class="n">sep</span><span class="o">:</span><span class="s2">&quot;--- &quot;</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;# --- a BASH comment&quot;</span>
-</pre></div><p id="idp7466368">
+</pre></div><p id="idp7583344">
           However, if all arguments to a function are presented at once,
           then erasure of optional arguments isn't applied until all of
           the arguments are passed in. This preserves our ability to
@@ -1209,7 +1209,7 @@ let and fun
           Thus, we can write:
         </p><div class="highlight"><pre><span class="o">#</span> <span class="n">concat</span> <span class="s2">&quot;a&quot;</span> <span class="s2">&quot;b&quot;</span> <span class="o">~</span><span class="n">sep</span><span class="o">:</span><span class="s2">&quot;=&quot;</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;a=b&quot;</span>
-</pre></div><p id="idp7467952">
+</pre></div><p id="idp7584928">
           An optional argument that doesn't have any following
           positional arguments can't be erased at all, which leads to a
           compiler warning.
@@ -1219,111 +1219,111 @@ let and fun
                  <span class="o">^^^^^^^^^^^^^^^^^^^^^^^</span>
 <span class="nc">Warning</span> <span class="mi">16</span><span class="o">:</span> <span class="n">this</span> <span class="n">optional</span> <span class="n">argument</span> <span class="n">cannot</span> <span class="n">be</span> <span class="n">erased</span><span class="o">.</span>
 <span class="k">val</span> <span class="n">concat</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="o">?</span><span class="n">sep</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp7469872">
+</pre></div><p id="idp7586848">
           And indeed, when we provide the two positional arguments, the
           <code>sep</code> argument is not erased, instead
           returning a function that expects the <code>sep</code>
           argument to be provided.
         </p><div class="highlight"><pre><span class="o">#</span> <span class="n">concat</span> <span class="s2">&quot;a&quot;</span> <span class="s2">&quot;b&quot;</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="o">?</span><span class="n">sep</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div></section></section></section><section><h1 id="exercises">Exercises</h1><section><h1 id="typing">Typing</h1><p id="idp7474800">
+</pre></div></section></section></section><section><h1 id="exercises">Exercises</h1><section><h1 id="typing">Typing</h1><p id="idp7591776">
         For each of the following expressions, is the expression
         well-typed? If it is well-typed, does it evaluate to a value? If
         so, what is the value?
-      </p><ul><li><p id="idp7475888">
+      </p><ul><li><p id="idp7592864">
 <code>1 - 2</code>
-</p></li></ul><p id="idp7477152">
+</p></li></ul><p id="idp7594128">
         Well typed. The value is .
-      </p><ul><li><p id="idp7478048">
+      </p><ul><li><p id="idp7595024">
 <code>1 - 2 - 3</code>
-</p></li></ul><p id="idp7479312">
+</p></li></ul><p id="idp7596288">
         Well typed. Subtraction is left-associative, so the value is
         <code>-4</code>.
-      </p><ul><li><p id="idp7480928">
+      </p><ul><li><p id="idp7597904">
 <code>1 - - 2</code>
-</p></li></ul><p id="idp7482192">
+</p></li></ul><p id="idp7599168">
         Well typed. The value is <code>3</code>.
-      </p><ul><li><p id="idp7483712">
+      </p><ul><li><p id="idp7600688">
 <code>0b101 + 0x10</code>
-</p></li></ul><p id="idp7484976">
+</p></li></ul><p id="idp7601952">
         Well typed. The value is <code>0x15</code>
         (<code>21</code> in decimal).
-      </p><ul><li><p id="idp7487120">
+      </p><ul><li><p id="idp7604096">
 <code>1073741823 + 1</code>
-</p></li></ul><p id="idp7488384">
+</p></li></ul><p id="idp7605360">
         Well typed. On a 32-bit platform, <code>1073741823</code>
         is the maximum integer, so the value is
         <code>-1073741824</code>. On a 64-bit machine, the
         addition does not overflow, so the result is
         <code>1073741824</code>.
-      </p><ul><li><p id="idp7491344">
+      </p><ul><li><p id="idp7608320">
 <code>1073741823.0 + 1e2</code>
-</p></li></ul><p id="idp7492608">
+</p></li></ul><p id="idp7609584">
         Ill typed. The operator <code>+</code> is for integer
         addition only.
-      </p><ul><li><p id="idp7494128">
+      </p><ul><li><p id="idp7611104">
 <code>1 ^ 1</code>
-</p></li></ul><p id="idp7495392">
+</p></li></ul><p id="idp7612368">
         Ill typed. The operator <code>^</code> is string
         concatenation.
-      </p><ul><li><p id="idp7496912">
+      </p><ul><li><p id="idp7613888">
 <code>if true then 1</code>
-</p></li></ul><p id="idp7498176">
+</p></li></ul><p id="idp7615152">
         Ill typed. The missing <code>else</code> branch has type
         <code>unit</code>, which is not compatible with
         <code>1</code>.
-      </p><ul><li><p id="idp7500944">
+      </p><ul><li><p id="idp7617920">
 <code>if false then ()</code>
-</p></li></ul><p id="idp7502208">
+</p></li></ul><p id="idp7619184">
         Well typed. The result is <code>()</code>.
-      </p><ul><li><p id="idp7503728">
+      </p><ul><li><p id="idp7620704">
 <code>if 0.3 -. 0.2 = 0.1 then 'a' else 'b'</code>
-</p></li></ul><p id="idp7504992">
+</p></li></ul><p id="idp7621968">
         Well-typed. On most platforms, <code>0.3 -. 0.2</code> is
         very close to, but different from, <code>0.1</code>, so
         the result is <code>'b'</code>.
-      </p><ul><li><p id="idp7507760">
+      </p><ul><li><p id="idp7624736">
 <code>true || (1 / 0 &gt;= 0)</code>
-</p></li></ul><p id="idp7509024">
+</p></li></ul><p id="idp7626000">
         Well-typed. The value is <code>true</code> (since
         disjunction <code>||</code> is a short-circuit operator).
-      </p><ul><li><p id="idp7511168">
+      </p><ul><li><p id="idp7628144">
 <code>1 &gt; 2 - 1</code>
-</p></li></ul><p id="idp7512432">
+</p></li></ul><p id="idp7629408">
         Well typed, because <code>-</code> has higher precedence
         than <code>&gt;</code>. The result is
         <code>false</code>.
-      </p><ul><li><p id="idp7515200">
+      </p><ul><li><p id="idp7632176">
 <code>&quot;Hello world&quot;.[6]</code>
-</p></li></ul><p id="idp7516464">
+</p></li></ul><p id="idp7633440">
         Well typed. The value is <code>'w'</code>.
-      </p><ul><li><p id="idp7517984">
+      </p><ul><li><p id="idp7634960">
 <code>&quot;Hello world&quot;.[11] &lt;- 's'</code>
-</p></li></ul><p id="idp7519248">
+</p></li></ul><p id="idp7636224">
         Well typed, but the index <code>11</code> is out of
         bounds, so the expression does not evaluate to a value.
-      </p><ul><li><p id="idp7520864">
+      </p><ul><li><p id="idp7637840">
 <code>String.lowercase &quot;A&quot; &lt; &quot;B&quot;</code>
-</p></li></ul><p id="idp7522128">
+</p></li></ul><p id="idp7639104">
         Well typed. The value is <code>false</code>.
-      </p><ul><li><p id="idp7523648">
+      </p><ul><li><p id="idp7640624">
 <code>Char.code 'a'</code>
-</p></li></ul><p id="idp7524912">
+</p></li></ul><p id="idp7641888">
         Well typed. The ASCII character code for <code>'a'</code>
         is <code>97</code>.
-      </p><ul><li><p id="idp7527056">
+      </p><ul><li><p id="idp7644032">
 <code>(((())))</code>
-</p></li></ul><p id="idp7528320">
+</p></li></ul><p id="idp7645296">
         Well typed. The value is the unit <code>()</code>.
-      </p><ul><li><p id="idp7529840">
+      </p><ul><li><p id="idp7646816">
 <code>((((*1*))))</code>
-</p></li></ul><p id="idp7531104">
+</p></li></ul><p id="idp7648080">
         Well typed. The value is <code>()</code>.
-      </p><ul><li><p id="idp7532624">
+      </p><ul><li><p id="idp7649600">
 <code>((*((()*))</code>
-</p></li></ul><p id="idp7533888">
+</p></li></ul><p id="idp7650864">
         Well typed. The value is <code>()</code>.
-      </p><p id="idp7534896">
+      </p><p id="idp7651872">
         % -<span><em>- % Local Variables: % Mode: LaTeX % fill-column:
         100 % TeX-master: &quot;paper&quot; % TeX-command-default:
         &quot;LaTeX/dvips Interactive&quot; % End: % -</em></span>- %

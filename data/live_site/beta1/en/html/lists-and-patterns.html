@@ -144,31 +144,31 @@
                 
                 
 
-    <p id="idp7536976">
+    <p id="idp7653952">
     This chapter will focus on two common elements of programming in
     OCaml: lists and pattern matching. Both of these were discussed in
     <a href="a-guided-tour.html">Chapter 1, <i>A Guided Tour</i></a>, but we'll go into more
     depth here, presenting the two topics together and using one to help
     illustrate the other.
-  </p><section><h1 id="list-basics">List Basics</h1><p id="idp7539040">
+  </p><section><h1 id="list-basics">List Basics</h1><p id="idp7656016">
       An OCaml list is an immutable, finite sequence of elements of the
       same type. As we've seen, OCaml lists can be generated using a
       bracket-and-semicolon notation:
     </p><div class="highlight"><pre><span class="o">#</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span> <span class="mi">2</span><span class="o">;</span> <span class="mi">3</span><span class="o">]</span>
-</pre></div><p id="idp7540496">
+</pre></div><p id="idp7657472">
       And they can also be generated using the equivalent
       <code>::</code> notation.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="mi">1</span> <span class="o">::</span> <span class="o">(</span><span class="mi">2</span> <span class="o">::</span> <span class="o">(</span><span class="mi">3</span> <span class="o">::</span> <span class="bp">[]</span><span class="o">))</span> <span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span> <span class="mi">2</span><span class="o">;</span> <span class="mi">3</span><span class="o">]</span>
 <span class="o">#</span> <span class="mi">1</span> <span class="o">::</span> <span class="mi">2</span> <span class="o">::</span> <span class="mi">3</span> <span class="o">::</span> <span class="bp">[]</span> <span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span> <span class="mi">2</span><span class="o">;</span> <span class="mi">3</span><span class="o">]</span>
-</pre></div><p id="idp7542560">
+</pre></div><p id="idp7659536">
       As you can see, the <code>::</code> operator is
       right-associative, which means that we can built up lists without
       parenthesis. The empty list <code>[]</code> is used to
       terminate a list.
-    </p><p id="idp7544320">
+    </p><p id="idp7661296">
       The <code>::</code> operator conveys something important
       about the nature of lists, which is that they are implemented as
       singly-linked lists. The following is a rough graphical
@@ -176,11 +176,11 @@
       <code>1 :: 2 :: 3 :: []</code> is laid out as a
       data-structure. The final arrow (from the box containing
       <code>3</code>) points to the empty list.
-    </p><pre id="idp7546896">
+    </p><pre id="idp7663872">
 +---+---+   +---+---+   +---+---+
 | 1 | *----&gt;| 2 | *----&gt;| 3 | *----&gt;||
 +---+---+   +---+---+   +---+---+
-</pre><p id="idp7547808">
+</pre><p id="idp7664784">
       Each <code>::</code> essentially adds a new block to the
       picture above. Such a block contains two things: a reference to
       the data in that list element, and a reference to the remainder of
@@ -193,7 +193,7 @@
 <span class="k">val</span> <span class="n">m</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">0</span><span class="o">;</span> <span class="mi">1</span><span class="o">;</span> <span class="mi">2</span><span class="o">;</span> <span class="mi">3</span><span class="o">]</span>
 <span class="o">#</span> <span class="n">l</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span> <span class="mi">2</span><span class="o">;</span> <span class="mi">3</span><span class="o">]</span>
-</pre></div></section><section><h1 id="using-patterns-to-extract-data-from-a-list">Using patterns to extract data from a list</h1><p id="idp7551872">
+</pre></div></section><section><h1 id="using-patterns-to-extract-data-from-a-list">Using patterns to extract data from a list</h1><p id="idp7668848">
       We can read data out of a list using a match statement. Here's a
       simple example of a recursive function that computes the sum of
       all elements of a list.
@@ -207,11 +207,11 @@
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">6</span>
 <span class="o">#</span> <span class="n">sum</span> <span class="bp">[]</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">0</span>
-</pre></div><p id="idp7553600">
+</pre></div><p id="idp7670576">
       This code follows the convention of using <code>hd</code> to
       represent the first element (or head) of the list, and
       <code>tl</code> to represent the remainder (or tail).
-    </p><p id="idp7555312">
+    </p><p id="idp7672288">
       The match statement in <code>sum</code> is really doing two
       things: first, it's acting as a case-analysis tool, breaking down
       the possibilities into a pattern-indexed list of cases. Second, it
@@ -221,7 +221,7 @@
       first case of the match statement. Variables that are bound in
       this way can be used in the expression to the right of the arrow
       for the pattern in question.
-    </p><p id="idp7558096">
+    </p><p id="idp7675072">
       The fact that match statements can be used to bind new variables
       can be a source of confusion. To see how, imagine we wanted to
       write a function that filtered out from a list all elements equal
@@ -233,24 +233,24 @@
     <span class="o">|</span> <span class="n">to_drop</span> <span class="o">::</span> <span class="n">tl</span> <span class="o">-&gt;</span> <span class="n">drop_value</span> <span class="n">tl</span> <span class="n">to_drop</span>
     <span class="o">|</span> <span class="n">hd</span> <span class="o">::</span> <span class="n">tl</span> <span class="o">-&gt;</span> <span class="n">hd</span> <span class="o">::</span> <span class="n">drop_value</span> <span class="n">tl</span> <span class="n">to_drop</span>
   <span class="o">;;</span>
-</pre></div><p id="idp7560016">
+</pre></div><p id="idp7676992">
       But when we type this in, the compiler will immediately warn us
       that something is wrong.
-    </p><pre id="idp7560528">
+    </p><pre id="idp7677504">
 Characters 114-122:
       | hd :: tl -&gt; hd :: drop_value tl to_drop
         ^^^^^^^^
 Warning 11: this match case is unused.
 val drop_value : 'a list -&gt; 'a -&gt; 'a list = &lt;fun&gt;
-</pre><p id="idp7561552">
+</pre><p id="idp7678528">
       Moreover, the function clearly does the wrong thing, filtering out
       all elements of the list rather than just those equal to the
       provided value, as you can see below.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="n">drop_value</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">]</span> <span class="mi">2</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="bp">[]</span>
-</pre></div><p id="idp7563008">
+</pre></div><p id="idp7679984">
       So, what's going on?
-    </p><p id="idp7563392">
+    </p><p id="idp7680368">
       The key observation is that the appearance of
       <code>to_drop</code> in the second case doesn't imply a
       check that the first element is equal to the value
@@ -261,7 +261,7 @@ val drop_value : 'a list -&gt; 'a -&gt; 'a list = &lt;fun&gt;
       earlier definition of <code>to_drop</code>. The third case
       is unused because it is essentially the same pattern as we had in
       the second case.
-    </p><p id="idp7567360">
+    </p><p id="idp7684336">
       A better way to write this code is not to use pattern matching for
       determining whether the first element is equal to
       <code>to_drop</code>, but to instead use an ordinary
@@ -276,7 +276,7 @@ val drop_value : 'a list -&gt; 'a -&gt; 'a list = &lt;fun&gt;
 <span class="k">val</span> <span class="n">drop_value</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="n">drop_value</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">]</span> <span class="mi">2</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span> <span class="mi">3</span><span class="o">]</span>
-</pre></div><p id="idp7570000">
+</pre></div><p id="idp7686976">
       Note that if we wanted to drop a particular literal value (rather
       than a value that was passed in), we could do this using something
       like our original implementation of <code>drop_value</code>.
@@ -289,7 +289,7 @@ val drop_value : 'a list -&gt; 'a -&gt; 'a list = &lt;fun&gt;
 <span class="k">val</span> <span class="n">drop_zero</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="n">drop_zero</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">0</span><span class="o">;</span><span class="mi">3</span><span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span> <span class="mi">2</span><span class="o">;</span> <span class="mi">3</span><span class="o">]</span>
-</pre></div></section><section><h1 id="limitations-and-blessings-of-pattern-matching">Limitations (and blessings) of pattern matching</h1><p id="idp7573424">
+</pre></div></section><section><h1 id="limitations-and-blessings-of-pattern-matching">Limitations (and blessings) of pattern matching</h1><p id="idp7690400">
       The above example highlights an important fact about patterns,
       which is that they can't be used to express arbitrary conditions.
       Patterns can characterize the layout of a data-structure, and can
@@ -297,7 +297,7 @@ val drop_value : 'a list -&gt; 'a -&gt; 'a list = &lt;fun&gt;
       example, but that's where they stop. A pattern can check if a list
       has two elements, but it can't check if the first two elements are
       equal to each other.
-    </p><p id="idp7574896">
+    </p><p id="idp7691872">
       You can think of patterns as a specialized sub-language that can
       express a limited (though still quite rich) set of conditions. The
       fact that the pattern language is limited turns out to be a very
@@ -305,14 +305,14 @@ val drop_value : 'a list -&gt; 'a -&gt; 'a list = &lt;fun&gt;
       patterns in the compiler. In particular, both the efficiency of
       match statements and the ability of the compiler to detect errors
       in matches depend on the constrained nature of patterns.
-    </p><section><h1 id="performance">Performance</h1><p id="idp7577152">
+    </p><section><h1 id="performance">Performance</h1><p id="idp7693648">
         Naively, you might think that it would be necessary to check
         each case in a <code>match</code> in sequence to figure
         out which one fires. If the cases of a match were guarded by
         arbitrary code, that would be the case. But OCaml is often able
         to generate machine code that jumps directly to the matched case
         based on an efficiently chosen set of runtime checks.
-      </p><p id="idp7578592">
+      </p><p id="idp7695088">
         As an example, consider the following rather silly functions for
         incrementing an integer by one. The first is implemented with a
         match statement, and the second with a sequence of if
@@ -332,11 +332,11 @@ val drop_value : 'a list -&gt; 'a -&gt; 'a list = &lt;fun&gt;
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">plus_one_match</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="k">val</span> <span class="n">plus_one_if</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp7580624">
+</pre></div><p id="idp7697120">
         Note the use of <code>_</code> in the above match. This is
         a wild-card pattern that matches any value, but without binding
         a variable name to the value in question.
-      </p><p id="idp7581808">
+      </p><p id="idp7698304">
         If you benchmark these functions, you'll see that
         <code>plus_one_if</code> is considerably slower than
         <code>plus_one_match</code>, and the advantage gets larger
@@ -357,7 +357,7 @@ val drop_value : 'a list -&gt; 'a -&gt; 'a list = &lt;fun&gt;
 <span class="o">|</span> <span class="n">plus_one_match</span> <span class="o">|</span>    <span class="mi">369</span><span class="o">.</span><span class="mi">38</span> <span class="o">|</span>    <span class="mi">83</span><span class="o">.</span><span class="mi">40</span> <span class="o">|</span>
 <span class="o">|</span> <span class="n">plus_one_if</span>    <span class="o">|</span>    <span class="mi">442</span><span class="o">.</span><span class="mi">88</span> <span class="o">|</span>   <span class="mi">100</span><span class="o">.</span><span class="mi">00</span> <span class="o">|</span>
 <span class="o">+----------------+-----------+----------+</span>
-</pre></div><p id="idp7586736">
+</pre></div><p id="idp7703232">
         Here's another less artificial example. We can rewrite the
         <code>sum</code> function we described earlier in the
         chapter using an <code>if</code> statement rather than a
@@ -371,7 +371,7 @@ val drop_value : 'a list -&gt; 'a -&gt; 'a list = &lt;fun&gt;
     <span class="k">else</span> <span class="nn">List</span><span class="p">.</span><span class="n">hd_exn</span> <span class="n">l</span> <span class="o">+</span> <span class="n">sum_if</span> <span class="o">(</span><span class="nn">List</span><span class="p">.</span><span class="n">tl_exn</span> <span class="n">l</span><span class="o">)</span>
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">sum_if</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp7592416">
+</pre></div><p id="idp7708912">
         Again, we can benchmark these to see the difference.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">numbers</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">range</span> <span class="mi">0</span> <span class="mi">1000</span> <span class="k">in</span>
   <span class="o">[</span> <span class="nn">Bench</span><span class="p">.</span><span class="nn">Test</span><span class="p">.</span><span class="n">create</span> <span class="o">~</span><span class="n">name</span><span class="o">:</span><span class="s2">&quot;sum_if&quot;</span> <span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span> <span class="n">ignore</span> <span class="o">(</span><span class="n">sum_if</span> <span class="n">numbers</span><span class="o">))</span>
@@ -386,7 +386,7 @@ val drop_value : 'a list -&gt; 'a -&gt; 'a list = &lt;fun&gt;
 <span class="o">|</span> <span class="n">sum</span>    <span class="o">|</span>   <span class="mi">177_740</span> <span class="o">|</span>    <span class="mi">27</span><span class="o">.</span><span class="mi">32</span> <span class="o">|</span>
 <span class="o">+--------+-----------+----------+</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
-</pre></div><p id="idp7595104">
+</pre></div><p id="idp7711600">
         In this case, the match-based implementation is more than three
         times faster than the one using if. The difference comes because
         we need to effectively do the same work multiple times, since
@@ -394,13 +394,13 @@ val drop_value : 'a list -&gt; 'a -&gt; 'a list = &lt;fun&gt;
         list to determine whether or not it's the empty cell. With a
         match statement, this work happens exactly once per list
         element.
-      </p><p id="idp7595952">
+      </p><p id="idp7712448">
         Generally, pattern matching is more efficient than the
         alternatives you might code by hand. One notable exception is
         matches over strings, which are in fact tested sequentially, and
         which for long lists can be outperformed by a hashtable. But
         most of the time, pattern matching is a clear performance win.
-      </p></section><section><h1 id="detecting-errors">Detecting errors</h1><p id="idp7597712">
+      </p></section><section><h1 id="detecting-errors">Detecting errors</h1><p id="idp7714208">
         The error-detecting capabilities of match statements are if
         anything more important than their performance. We've already
         seen one example of OCaml's ability to find problems in a
@@ -409,7 +409,7 @@ val drop_value : 'a list -&gt; 'a -&gt; 'a list = &lt;fun&gt;
         case was redundant. There are no algorithms for determining if a
         predicate written in a general-purpose language is redundant,
         but it can be solved reliably in the context of patterns.
-      </p><p id="idp7599280">
+      </p><p id="idp7715776">
         OCaml also checks match statements for exhaustiveness. Consider
         what happens if we modify <code>drop_zero</code> by
         deleting the handler for one of the cases.
@@ -418,16 +418,16 @@ val drop_value : 'a list -&gt; 'a -&gt; 'a list = &lt;fun&gt;
     <span class="o">|</span> <span class="bp">[]</span> <span class="o">-&gt;</span> <span class="bp">[]</span>
     <span class="o">|</span> <span class="mi">0</span>  <span class="o">::</span> <span class="n">tl</span> <span class="o">-&gt;</span> <span class="n">drop_zero</span> <span class="n">tl</span>
   <span class="o">;;</span>
-</pre></div><p id="idp7601488">
+</pre></div><p id="idp7717984">
         The compiler will produce a warning that we've missed a case,
         along with an example of an unmatched pattern.
-      </p><pre id="idp7602016">
+      </p><pre id="idp7718512">
 val drop_zero : int list -&gt; 'a list = &lt;fun&gt;
 Characters 26-84:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a value that is not matched:
 1::_
-</pre><p id="idp7603024">
+</pre><p id="idp7719520">
         For simple examples like this, exhaustiveness checks are useful
         enough. But as we'll see in
         <a href="variants.html">Chapter 6, <i>Variants</i></a>, as you get to more
@@ -436,13 +436,13 @@ Here is an example of a value that is not matched:
         addition to catching outright errors, they act as a sort of
         refactoring tool, guiding you to the locations where you need to
         adapt your code to deal with changing types.
-      </p></section></section><section><h1 id="using-the-list-module-effectively">Using the <code>List</code> module effectively</h1><p id="idp7606160">
+      </p></section></section><section><h1 id="using-the-list-module-effectively">Using the <code>List</code> module effectively</h1><p id="idp7722656">
       We've so far written a fair amount of list-munging code using
       pattern matching and recursive functions. But in real life, you're
       usually better off using the <code>List</code> module, which
       is full of reusable functions that abstract out common patterns
       for computing with lists.
-    </p><p id="idp7607504">
+    </p><p id="idp7724000">
       Let's work through a concrete example to see this in action. We'll
       write a function <code>render_table</code> that, given a
       list of column headers and a list of rows, prints them out in a
@@ -455,16 +455,16 @@ Here is an example of a value that is not matched:
        <span class="o">[</span><span class="s2">&quot;ML&quot;</span>   <span class="o">;</span><span class="s2">&quot;Robin Milner&quot;</span>  <span class="o">;</span><span class="s2">&quot;1973&quot;</span><span class="o">]</span> <span class="o">;</span>
        <span class="o">[</span><span class="s2">&quot;OCaml&quot;</span><span class="o">;</span><span class="s2">&quot;Xavier Leroy&quot;</span>  <span class="o">;</span><span class="s2">&quot;1996&quot;</span><span class="o">]</span> <span class="o">;</span>
      <span class="o">]);;</span>
-</pre></div><p id="idp7610064">
+</pre></div><p id="idp7726560">
       it would generate the following output.
-    </p><pre id="idp7610448">
+    </p><pre id="idp7726944">
 | language | architect      | first release |
 |----------+----------------+---------------|
 | Lisp     | John McCarthy  | 1958          |
 | C        | Dennis Ritchie | 1969          |
 | ML       | Robin Milner   | 1973          |
 | OCaml    | Xavier Leroy   | 1996          |
-</pre><p id="idp7611360">
+</pre><p id="idp7727856">
       The first step is to write a function to compute the maximum width
       of each column of data. We can do this by converting the header
       and each row into a list of integer lengths, and then taking the
@@ -473,25 +473,25 @@ Here is an example of a value that is not matched:
       quite concisely by making use of three functions from the
       <code>List</code> module: <code>map</code>,
       <code>map2_exn</code>, and <code>fold</code>.
-    </p><p id="idp7614688">
+    </p><p id="idp7731184">
 <code>List.map</code> is the simplest to explain. It takes a
       list and a function for transforming elements of that list, and
       returns a new list with the transformed elements. Thus, we can
       write:
     </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="nn">String</span><span class="p">.</span><span class="n">length</span> <span class="o">[</span><span class="s2">&quot;Hello&quot;</span><span class="o">;</span> <span class="s2">&quot;World!&quot;</span><span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">5</span><span class="o">;</span> <span class="mi">6</span><span class="o">]</span>
-</pre></div><p id="idp7616960">
+</pre></div><p id="idp7733456">
 <code>List.map2_exn</code> is similar to
       <code>List.map</code>, except that it takes two lists and a
       function for combining them. Thus, we might write:
     </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">map2_exn</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="nn">Int</span><span class="p">.</span><span class="n">max</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">]</span> <span class="o">[</span><span class="mi">3</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">1</span><span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">3</span><span class="o">;</span> <span class="mi">2</span><span class="o">;</span> <span class="mi">3</span><span class="o">]</span>
-</pre></div><p id="idp7619648">
+</pre></div><p id="idp7736144">
       The <code>_exn</code> is there because the function throws
       an exception if the lists are of mismatched length.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">map2_exn</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="nn">Int</span><span class="p">.</span><span class="n">max</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">]</span> <span class="o">[</span><span class="mi">3</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">1</span><span class="o">;</span><span class="mi">0</span><span class="o">];;</span>
 <span class="nc">Exception</span><span class="o">:</span> <span class="o">(</span><span class="nc">Invalid_argument</span> <span class="s2">&quot;length mismatch in rev_map2_exn: 3 &lt;&gt; 4 &quot;</span><span class="o">).</span>
-</pre></div><p id="idp7621808">
+</pre></div><p id="idp7738304">
 <code>List.fold</code> is the most complicated of the three,
       taking three arguments: a list to process, an initial accumulator
       value, and a function for updating the accumulator with the
@@ -502,12 +502,12 @@ Here is an example of a value that is not matched:
       type-signature for <code>fold</code>.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">fold</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="n">init</span><span class="o">:</span><span class="k">'</span><span class="n">accum</span> <span class="o">-&gt;</span> <span class="n">f</span><span class="o">:(</span><span class="k">'</span><span class="n">accum</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">accum</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">accum</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp7625552">
+</pre></div><p id="idp7742048">
       We can use <code>List.fold</code> for something as simple as
       summing up a list:
     </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">fold</span> <span class="o">~</span><span class="n">init</span><span class="o">:</span><span class="mi">0</span> <span class="o">~</span><span class="n">f</span><span class="o">:(+)</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">;</span><span class="mi">4</span><span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">10</span>
-</pre></div><p id="idp7627504">
+</pre></div><p id="idp7744000">
       This example is particularly simple because the accumulator and
       the list elements are of the same type. But
       <code>fold</code> is not limited to such cases. We can for
@@ -515,7 +515,7 @@ Here is an example of a value that is not matched:
       case the accumulator is itself a list.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">fold</span> <span class="o">~</span><span class="n">init</span><span class="o">:</span><span class="bp">[]</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="kt">list</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span> <span class="o">::</span> <span class="kt">list</span><span class="o">)</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">;</span><span class="mi">4</span><span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">4</span><span class="o">;</span> <span class="mi">3</span><span class="o">;</span> <span class="mi">2</span><span class="o">;</span> <span class="mi">1</span><span class="o">]</span>
-</pre></div><p id="idp7630592">
+</pre></div><p id="idp7747088">
       Let's bring our three functions together to compute the maximum
       column widths.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">max_widths</span> <span class="n">header</span> <span class="n">rows</span> <span class="o">=</span>
@@ -526,7 +526,7 @@ Here is an example of a value that is not matched:
         <span class="nn">List</span><span class="p">.</span><span class="n">map2_exn</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="nn">Int</span><span class="p">.</span><span class="n">max</span> <span class="n">acc</span> <span class="o">(</span><span class="n">lengths</span> <span class="n">row</span><span class="o">))</span>
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">max_widths</span> <span class="o">:</span> <span class="kt">string</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="kt">list</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp7632272">
+</pre></div><p id="idp7748768">
       Using <code>List.map</code> we define the function
       <code>lengths</code> which converts a list of strings to a
       list of integer lengths. <code>List.fold</code> is then used
@@ -534,7 +534,7 @@ Here is an example of a value that is not matched:
       take the max of the accumulator with the lengths of the strings in
       each row of the table, with the accumulator initialized to the
       lengths of the header row.
-    </p><p id="idp7635424">
+    </p><p id="idp7751920">
       Now that we know how to compute column widths, we can write the
       code to generate the line that separates the header from the rest
       of the text table. We'll do this in part by mapping
@@ -554,13 +554,13 @@ Here is an example of a value that is not matched:
 <span class="k">val</span> <span class="n">render_separator</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="n">render_separator</span> <span class="o">[</span><span class="mi">3</span><span class="o">;</span><span class="mi">6</span><span class="o">;</span><span class="mi">2</span><span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;|-----+--------+----|&quot;</span>
-</pre></div><p id="idp7639600">
+</pre></div><p id="idp7756096">
       Note that we make the line of dashes two larger than the provided
       width to provide some whitespace around each entry in the table.
     </p><aside class="note"><h1>
     Performance of String.concat and
     ^
-</h1><p id="idp7642032">
+</h1><p id="idp7758528">
       In the above, we're using two different ways of concatenating
       strings, <code>String.concat</code>, which operates on lists
       of strings, and <code>^</code>, which is a pairwise
@@ -568,16 +568,16 @@ Here is an example of a value that is not matched:
       numbers of strings, since, it allocates a new string every time it
       runs. Thus, the following code:
     </p><div class="highlight"><pre><span class="k">let</span> <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span> <span class="o">^</span> <span class="s2">&quot;.&quot;</span>  <span class="o">^</span> <span class="s2">&quot;.&quot;</span>  <span class="o">^</span> <span class="s2">&quot;.&quot;</span>  <span class="o">^</span> <span class="s2">&quot;.&quot;</span>  <span class="o">^</span> <span class="s2">&quot;.&quot;</span>  <span class="o">^</span> <span class="s2">&quot;.&quot;</span>
-</pre></div><p id="idp7645520">
+</pre></div><p id="idp7762016">
       will allocate a string of length 2, 3, 4, 5, 6 and 7, whereas this
       code:
     </p><div class="highlight"><pre><span class="k">let</span> <span class="n">s</span> <span class="o">=</span> <span class="nn">String</span><span class="p">.</span><span class="n">concat</span> <span class="o">[</span><span class="s2">&quot;.&quot;</span><span class="o">;</span><span class="s2">&quot;.&quot;</span><span class="o">;</span><span class="s2">&quot;.&quot;</span><span class="o">;</span><span class="s2">&quot;.&quot;</span><span class="o">;</span><span class="s2">&quot;.&quot;</span><span class="o">;</span><span class="s2">&quot;.&quot;</span><span class="o">;</span><span class="s2">&quot;.&quot;</span><span class="o">]</span>
-</pre></div><p id="idp7647008">
+</pre></div><p id="idp7763504">
       allocates one string of size 7, as well as a list of length 7. At
       these small sizes, the differences don't amount to much, but for
       assembling of large strings, it can be a serious performance
       issue.
-    </p></aside><p id="idp7647760">
+    </p></aside><p id="idp7764256">
       Now we need code for rendering a row with data in it. We'll first
       write a function <code>pad</code> for padding out a string
       to a specified length plus one blank space on either side.
@@ -587,7 +587,7 @@ Here is an example of a value that is not matched:
 <span class="k">val</span> <span class="n">pad</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="n">pad</span> <span class="s2">&quot;hello&quot;</span> <span class="mi">10</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot; hello      &quot;</span>
-</pre></div><p id="idp7650144">
+</pre></div><p id="idp7766640">
       We can render a row of data by merging together the padded
       strings. Again, we'll use <code>List.map2_exn</code> for
       combining the list of data in the row with the list of widths.
@@ -598,7 +598,7 @@ Here is an example of a value that is not matched:
 <span class="k">val</span> <span class="n">render_row</span> <span class="o">:</span> <span class="kt">string</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="n">render_row</span> <span class="o">[</span><span class="s2">&quot;Hello&quot;</span><span class="o">;</span><span class="s2">&quot;World&quot;</span><span class="o">]</span> <span class="o">[</span><span class="mi">10</span><span class="o">;</span><span class="mi">15</span><span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;| Hello      | World           |&quot;</span>
-</pre></div><p id="idp7652608">
+</pre></div><p id="idp7769104">
       Now we can bring this all together in a single function that
       renders the table.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">render_table</span> <span class="n">header</span> <span class="n">rows</span> <span class="o">=</span>
@@ -610,25 +610,25 @@ Here is an example of a value that is not matched:
       <span class="o">)</span>
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">render_table</span> <span class="o">:</span> <span class="kt">string</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="kt">list</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><section><h1 id="more-useful-list-functions">More useful list functions</h1><p id="idp7655472">
+</pre></div><section><h1 id="more-useful-list-functions">More useful list functions</h1><p id="idp7771968">
         The example we worked through above only touched on three of the
         function in <code>List</code>. We won't cover the entire
         interface, but there are a few more functions that are useful
         enough to mention here.
-      </p><p id="idp7656752">
+      </p><p id="idp7773248">
         Very often when processing lists, one wants to restrict
         attention to just a subset of values. The
         <code>List.filter</code> function does just that.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">filter</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span> <span class="ow">mod</span> <span class="mi">2</span> <span class="o">=</span> <span class="mi">0</span><span class="o">)</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">;</span><span class="mi">4</span><span class="o">;</span><span class="mi">5</span><span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">2</span><span class="o">;</span> <span class="mi">4</span><span class="o">]</span>
-</pre></div><p id="idp7658992">
+</pre></div><p id="idp7775488">
         Sometimes, you want to both transform and filter as part of the
         same computation. <code>List.filter_map</code> allows you
         to do just that. The function passed to
         <code>List.filter_map</code> returns an optional value,
         and <code>List.filter_map</code> drops all elements for
         which <code>None</code> is returned.
-      </p><p id="idp7662064">
+      </p><p id="idp7778560">
         Here's an example. The following expression computes the list of
         file extensions in the current directory, piping the results
         through <code>List.dedup</code> to remove duplicates. Note
@@ -644,7 +644,7 @@ Here is an example of a value that is not matched:
   <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">dedup</span>
   <span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;byte&quot;</span><span class="o">;</span> <span class="s2">&quot;ml&quot;</span><span class="o">;</span> <span class="s2">&quot;mli&quot;</span><span class="o">;</span> <span class="s2">&quot;native&quot;</span><span class="o">;</span> <span class="s2">&quot;txt&quot;</span><span class="o">]</span>
-</pre></div><p id="idp7665856">
+</pre></div><p id="idp7782352">
         One feature of OCaml's pattern language that we've encountered
         here for the first time is <span><em>or-patterns</em></span>,
         which allow you to have multiple sub-patterns within a larger
@@ -652,7 +652,7 @@ Here is an example of a value that is not matched:
         <code>None | Some (&quot;&quot;,_)</code> is an
         or-pattern. As we'll see later, or-patterns can be nested
         anywhere within larger patterns.
-      </p><p id="idp7667648">
+      </p><p id="idp7784144">
         Another function that is similar to <code>filter</code> is
         <code>partition_tf</code>, which takes a list and
         partitions it into a pair of lists based on a boolean condition.
@@ -670,27 +670,27 @@ Here is an example of a value that is not matched:
     <span class="nn">List</span><span class="p">.</span><span class="n">partition_tf</span> <span class="o">(</span><span class="nn">Sys</span><span class="p">.</span><span class="n">ls_dir</span> <span class="s2">&quot;.&quot;</span><span class="o">)</span>  <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="n">is_ocaml_source</span><span class="o">;;</span>
 <span class="k">val</span> <span class="n">ml_files</span> <span class="o">:</span> <span class="kt">string</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;example.ml&quot;</span><span class="o">]</span>
 <span class="k">val</span> <span class="n">other_files</span> <span class="o">:</span> <span class="kt">string</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;_build&quot;</span><span class="o">;</span> <span class="s2">&quot;_tags&quot;</span><span class="o">]</span>
-</pre></div><p id="idp7672928">
+</pre></div><p id="idp7789424">
         Note the use of a nested or-pattern in
         <code>is_ocaml_source</code>.
-      </p><p id="idp7674016">
+      </p><p id="idp7790512">
         Another very common operation on lists is concatenation. The
         list module actually comes with a few different ways of doing
         this. First, there's <code>List.append</code>, for
         concatenating a pair of lists.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">append</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">]</span> <span class="o">[</span><span class="mi">4</span><span class="o">;</span><span class="mi">5</span><span class="o">;</span><span class="mi">6</span><span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span> <span class="mi">2</span><span class="o">;</span> <span class="mi">3</span><span class="o">;</span> <span class="mi">4</span><span class="o">;</span> <span class="mi">5</span><span class="o">;</span> <span class="mi">6</span><span class="o">]</span>
-</pre></div><p id="idp7676160">
+</pre></div><p id="idp7792656">
         There's also <code>@</code>, an operator equivalent of
         <code>List.append</code>.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">]</span> <span class="o">@</span> <span class="o">[</span><span class="mi">4</span><span class="o">;</span><span class="mi">5</span><span class="o">;</span><span class="mi">6</span><span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span> <span class="mi">2</span><span class="o">;</span> <span class="mi">3</span><span class="o">;</span> <span class="mi">4</span><span class="o">;</span> <span class="mi">5</span><span class="o">;</span> <span class="mi">6</span><span class="o">]</span>
-</pre></div><p id="idp7678736">
+</pre></div><p id="idp7795232">
         In addition, there is <code>List.concat</code>, for
         concatenating a list of lists.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">concat</span> <span class="o">[[</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">];[</span><span class="mi">3</span><span class="o">;</span><span class="mi">4</span><span class="o">;</span><span class="mi">5</span><span class="o">];[</span><span class="mi">6</span><span class="o">];</span><span class="bp">[]</span><span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span> <span class="mi">2</span><span class="o">;</span> <span class="mi">3</span><span class="o">;</span> <span class="mi">4</span><span class="o">;</span> <span class="mi">5</span><span class="o">;</span> <span class="mi">6</span><span class="o">]</span>
-</pre></div><p id="idp7680704">
+</pre></div><p id="idp7797200">
         Here's an example of using <code>List.concat</code> along
         with <code>List.map</code> to compute a recursive listing
         of a directory tree.
@@ -707,7 +707,7 @@ Here is an example of a value that is not matched:
 <span class="o">[</span><span class="s2">&quot;./_build/_digests&quot;</span><span class="o">;</span> <span class="s2">&quot;./_build/_log&quot;</span><span class="o">;</span> <span class="s2">&quot;./_build/example.ml&quot;</span><span class="o">;</span>
  <span class="s2">&quot;./_build/example.ml.depends&quot;</span><span class="o">;</span> <span class="s2">&quot;./_build/ocamlc.where&quot;</span><span class="o">;</span> <span class="s2">&quot;./_tags&quot;</span><span class="o">;</span>
  <span class="s2">&quot;./example.ml&quot;</span><span class="o">]</span>
-</pre></div><p id="idp7683808">
+</pre></div><p id="idp7800304">
         The above combination of <code>List.map</code> and
         <code>List.concat</code> is common enough that there is a
         function <code>List.concat_map</code> that combines these
@@ -720,7 +720,7 @@ Here is an example of a value that is not matched:
       <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">concat_map</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">sub</span> <span class="o">-&gt;</span> <span class="n">ls_rec</span> <span class="o">(</span><span class="n">s</span> <span class="o">^/</span> <span class="n">sub</span><span class="o">))</span>
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">ls_rec</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div></section></section><section><h1 id="tail-recursion">Tail recursion</h1><p id="idp7688400">
+</pre></div></section></section><section><h1 id="tail-recursion">Tail recursion</h1><p id="idp7804896">
       The only way to compute the length of an OCaml list is to walk the
       list from beginning to end. As a result, computing the length of a
       list takes time linear in the size of the list. Here's a simple
@@ -731,7 +731,7 @@ Here is an example of a value that is not matched:
   <span class="o">;;</span>
 <span class="o">#</span> <span class="n">length</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">3</span>
-</pre></div><p id="idp7690208">
+</pre></div><p id="idp7806704">
       This looks simple enough, but you'll discover that this
       implementation runs into problems on very large lists. Here are
       some examples, using another useful function from the
@@ -747,7 +747,7 @@ Here is an example of a value that is not matched:
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">0</span><span class="o">;</span> <span class="mi">1</span><span class="o">;</span> <span class="mi">2</span><span class="o">;</span> <span class="mi">3</span><span class="o">;</span> <span class="mi">4</span><span class="o">;</span> <span class="mi">5</span><span class="o">;</span> <span class="mi">6</span><span class="o">;</span> <span class="mi">7</span><span class="o">;</span> <span class="mi">8</span><span class="o">;</span> <span class="mi">9</span><span class="o">]</span>
 <span class="o">#</span> <span class="n">length</span> <span class="o">(</span><span class="n">make_list</span> <span class="mi">10_000_000</span><span class="o">);;</span>
 <span class="nc">Stack</span> <span class="n">overflow</span> <span class="n">during</span> <span class="n">evaluation</span> <span class="o">(</span><span class="n">looping</span> <span class="n">recursion</span><span class="o">?).</span>
-</pre></div><p id="idp7696608">
+</pre></div><p id="idp7813104">
       To understand what went wrong, you need to learn a bit more about
       how function calls work. Typically, a function call needs some
       space to keep track of information associated with the call, such
@@ -757,7 +757,7 @@ Here is an example of a value that is not matched:
       typically organized in a stack, where a new <span><em>stack
       frame</em></span> is allocated for each nested function call, and
       then deallocated when the function call is complete.
-    </p><p id="idp7698464">
+    </p><p id="idp7814496">
       And that's the problem with our call to <code>length</code>:
       it tried to allocate ten million stack frames, which exhausted the
       available stack space. Happily, there's a way around this problem.
@@ -772,7 +772,7 @@ Here is an example of a value that is not matched:
 <span class="k">val</span> <span class="n">length</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="n">length</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">;</span><span class="mi">4</span><span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">4</span>
-</pre></div><p id="idp7700928">
+</pre></div><p id="idp7816960">
       This implementation depends on a helper function,
       <code>length_plus_n</code>, that computes the length of a
       given list plus a given <code>n</code>. In practice,
@@ -781,7 +781,7 @@ Here is an example of a value that is not matched:
       the way rather than doing them as we unwind the nested sequence of
       function calls, as we did in our first implementation of
       <code>length</code>.
-    </p><p id="idp7704240">
+    </p><p id="idp7820272">
       The advantage of this approach is that the recursive call in
       <code>length_plus_n</code> is a <span><em>tail
       call</em></span>. We'll explain more precisely what it means to be
@@ -795,7 +795,7 @@ Here is an example of a value that is not matched:
       without blowing the stack.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="n">length</span> <span class="o">(</span><span class="n">make_list</span> <span class="mi">10_000_000</span><span class="o">);;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">10000000</span>
-</pre></div><p id="idp7708928">
+</pre></div><p id="idp7824960">
       So when is a call a tail call? Let's think about the situation of
       one function (the <span><em>caller</em></span>) invokes another
       (the <span><em>callee</em></span>). The invocation is considered a
@@ -806,7 +806,7 @@ Here is an example of a value that is not matched:
       don't need to keep it around. Thus, instead of allocating a new
       stack frame for the callee, the compiler is free to reuse the
       caller's stack frame.
-    </p><p id="idp7710688">
+    </p><p id="idp7826720">
       Tail recursion is important for more than just lists. Ordinary
       (non-tail) recursive calls are reasonable when the dealing with
       data-structures like binary trees where the depth of the tree is
@@ -814,7 +814,7 @@ Here is an example of a value that is not matched:
       situations where the depth of the sequence of nested calls is on
       the order of the size of your data, tail recursion is usually the
       right approach.
-    </p></section><section><h1 id="more-concise-and-faster-patterns">More concise and faster patterns</h1><p id="idp7712544">
+    </p></section><section><h1 id="more-concise-and-faster-patterns">More concise and faster patterns</h1><p id="idp7828576">
       Now that we know more about how lists and patterns work, let's
       consider how we can improve on an example from
       <a href="a-guided-tour.html#recursive-list-functions">the section called “Recursive list functions”</a>: the function
@@ -829,10 +829,10 @@ Here is an example of a value that is not matched:
       <span class="k">else</span> <span class="n">hd</span> <span class="o">::</span> <span class="n">destutter</span> <span class="o">(</span><span class="n">hd'</span> <span class="o">::</span> <span class="n">tl</span><span class="o">)</span>
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">destutter</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp7715664">
+</pre></div><p id="idp7831696">
       We'll consider some ways of making this code more concise and more
       efficient.
-    </p><p id="idp7716160">
+    </p><p id="idp7832192">
       First, let's consider efficiency. One problem with the
       <code>destutter</code> code above is that it in some cases
       recreates on the right-hand side of the arrow a value that already
@@ -852,7 +852,7 @@ Here is an example of a value that is not matched:
       <span class="k">else</span> <span class="n">hd</span> <span class="o">::</span> <span class="n">destutter</span> <span class="n">tl</span>
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">destutter</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp7720880">
+</pre></div><p id="idp7836912">
       We can further collapse this by combining the first two cases into
       one, using an or-pattern.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="k">rec</span> <span class="n">destutter</span> <span class="o">=</span> <span class="k">function</span>
@@ -862,7 +862,7 @@ Here is an example of a value that is not matched:
       <span class="k">else</span> <span class="n">hd</span> <span class="o">::</span> <span class="n">destutter</span> <span class="n">tl</span>
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">destutter</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp7722688">
+</pre></div><p id="idp7838720">
       We can make the code slightly terser now by using a
       <code>when</code> clause. A <code>when</code> clause
       allows one to add an extra precondition on a pattern in the form
@@ -876,7 +876,7 @@ Here is an example of a value that is not matched:
 <span class="k">val</span> <span class="n">destutter</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 </pre></div><aside class="note"><h1> 
     Polymorphic compare
-    </h1><p id="idp7726432">
+    </h1><p id="idp7842464">
       In the <code>destutter</code> example above, we made use of
       the fact that OCaml lets us test equality between values of any
       type, using the <code>=</code> operator. Thus, we can write:
@@ -886,12 +886,12 @@ Here is an example of a value that is not matched:
 <span class="o">-</span> <span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="bp">true</span>
 <span class="o">#</span> <span class="o">[</span><span class="nc">Some</span> <span class="mi">3</span><span class="o">;</span> <span class="nc">None</span><span class="o">]</span> <span class="o">=</span> <span class="o">[</span><span class="nc">None</span><span class="o">;</span> <span class="nc">Some</span> <span class="mi">3</span><span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="bp">false</span>
-</pre></div><p id="idp7729200">
+</pre></div><p id="idp7845232">
       Indeed, if we look at the type of the equality operator, we'll see
       that it is polymorphic:
     </p><div class="highlight"><pre><span class="o">#</span> <span class="o">(=);;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">bool</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp7730672">
+</pre></div><p id="idp7846704">
       OCaml actually comes with a whole family of polymorphic comparison
       operators, including the standard infix comparators,
       <code>&lt;</code>, <code>&gt;=</code>,
@@ -900,7 +900,7 @@ Here is an example of a value that is not matched:
       <code>0</code> or <code>1</code> to flag whether the
       first operator is smaller than, equal to, or greater than the
       second, respectively.
-    </p><p id="idp7735488">
+    </p><p id="idp7851520">
       You might wonder how you could build function like these yourself
       if OCaml didn't come with them built-in. It turns out that you
       <span><em>can't</em></span> build these functions on your own.
@@ -909,28 +909,28 @@ Here is an example of a value that is not matched:
       the basis of ignoring almost everything about the types of the
       values that are being compared, paying attention only to the
       structure of the values as they're laid out in memory.
-    </p><p id="idp7736816">
+    </p><p id="idp7852848">
       Polymorphic compare does have some limitations. For example, they
       will fail at runtime if they encounter functions:
     </p><div class="highlight"><pre><span class="o">#</span> <span class="o">(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span> <span class="o">=</span> <span class="o">(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="o">);;</span>
 <span class="nc">Exception</span><span class="o">:</span> <span class="o">(</span><span class="nc">Invalid_argument</span> <span class="s2">&quot;equal: functional value&quot;</span><span class="o">).</span>
-</pre></div><p id="idp7738448">
+</pre></div><p id="idp7854480">
       Similarly, it will fail on values that come from outside the OCaml
       heap, like values from C-bindings. But they will work in a
       reasonable way for other kinds of values.
-    </p><p id="idp7739040">
+    </p><p id="idp7855072">
       For simple atomic types, polymorphic compare has the semantics you
       would expect: for floating point numbers and integer, polymorphic
       compare corresponds to the expected numerical comparison
       functions. For strings, it's a lexicographic comparison.
-    </p><p id="idp7739712">
+    </p><p id="idp7855744">
       Sometimes, however, the type-ignoring nature of polymorphic
       compare is a problem, particularly when you have your own notion
       of equality and ordering that you want to impose. We'll discuss
       this issue more, as well as some of the other downsides of
       polymorphic compare, in
       <a href="maps-and-hashtables.html">Chapter 13, <i>Maps and Hashtables</i></a>.
-    </p></aside><p id="idp7741040">
+    </p></aside><p id="idp7857072">
       Note that <code>when</code> clauses have some downsides. As
       we noted earlier, the static checks associated with pattern
       matches rely on the fact that patterns are restricted in what they
@@ -938,7 +938,7 @@ Here is an example of a value that is not matched:
       to a pattern, something will be lost. In particular, the ability
       for the compiler to determine if a match is exhaustive, or if some
       case is redundant, is compromised.
-    </p><p id="idp7742496">
+    </p><p id="idp7858528">
       Consider the following function which takes a list of optional
       values, and returns the number of those values that are
       <code>Some</code>. Because this implementation uses
@@ -957,11 +957,11 @@ Here is an example of a value that is not matched:
 <span class="nc">Here</span> <span class="n">is</span> <span class="n">an</span> <span class="n">example</span> <span class="k">of</span> <span class="n">a</span> <span class="n">value</span> <span class="n">that</span> <span class="n">is</span> <span class="n">not</span> <span class="n">matched</span><span class="o">:</span>
 <span class="o">_::_</span>
 <span class="o">(</span><span class="nc">However</span><span class="o">,</span> <span class="n">some</span> <span class="n">guarded</span> <span class="n">clause</span> <span class="n">may</span> <span class="k">match</span> <span class="n">this</span> <span class="n">value</span><span class="o">.)</span>
-</pre></div><p id="idp7746288">
+</pre></div><p id="idp7862320">
       Despite the warning, the function does work fine.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="n">count_some</span> <span class="o">[</span><span class="nc">Some</span> <span class="mi">3</span><span class="o">;</span> <span class="nc">None</span><span class="o">;</span> <span class="nc">Some</span> <span class="mi">4</span><span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">2</span>
-</pre></div><p id="idp7747616">
+</pre></div><p id="idp7863648">
       If we add another redundant case without a <code>when</code>
       clause, the compiler will stop complaining about exhaustiveness,
       and won't produce a warning about the redundancy.
@@ -973,7 +973,7 @@ Here is an example of a value that is not matched:
     <span class="o">|</span> <span class="n">x</span> <span class="o">::</span> <span class="n">tl</span> <span class="o">-&gt;</span> <span class="o">-</span><span class="mi">1</span> <span class="c">(* unreachable *)</span>
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">count_some</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="n">option</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp7750000">
+</pre></div><p id="idp7866032">
       Probably a better approach is to simply drop the second
       <code>when</code> clause.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="k">rec</span> <span class="n">count_some</span> <span class="kt">list</span> <span class="o">=</span>
@@ -982,7 +982,7 @@ Here is an example of a value that is not matched:
     <span class="o">|</span> <span class="n">x</span> <span class="o">::</span> <span class="n">tl</span> <span class="k">when</span> <span class="nn">Option</span><span class="p">.</span><span class="n">is_none</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">count_some</span> <span class="n">tl</span>
     <span class="o">|</span> <span class="o">_</span> <span class="o">::</span> <span class="n">tl</span> <span class="o">-&gt;</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">count_some</span> <span class="n">tl</span>
   <span class="o">;;</span>
-</pre></div><p id="idp7752272">
+</pre></div><p id="idp7868304">
       This is a little less clear, however, than the direct pattern
       matching solution, where the meaning of each pattern is clearer on
       its own.
@@ -992,11 +992,11 @@ Here is an example of a value that is not matched:
     <span class="o">|</span> <span class="nc">None</span>   <span class="o">::</span> <span class="n">tl</span> <span class="o">-&gt;</span> <span class="n">count_some</span> <span class="n">tl</span>
     <span class="o">|</span> <span class="nc">Some</span> <span class="o">_</span> <span class="o">::</span> <span class="n">tl</span> <span class="o">-&gt;</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">count_some</span> <span class="n">tl</span>
   <span class="o">;;</span>
-</pre></div><p id="idp7754000">
+</pre></div><p id="idp7870032">
       The takeaway from all of this is that, while
       <code>when</code> clauses can be useful, one should prefer
       patterns wherever they are sufficient.
-    </p><p id="idp7755200">
+    </p><p id="idp7871232">
       As a side note, the above implementation of
       <code>count_some</code> is longer than necessary, and even
       worse is not tail recursive. In real life, you would probably just

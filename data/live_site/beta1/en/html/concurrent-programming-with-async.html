@@ -124,7 +124,7 @@
                 
                 
 
-    <p id="idp10902384">
+    <p id="idp11023744">
     The logic of building programs that interact with the outside world
     is often dominated by waiting: waiting for the click of a mouse, or
     for data to be fetched from disk, or for space to be available on an
@@ -132,7 +132,7 @@
     applications are typically <span><em>concurrent</em></span>, needing
     to wait for multiple different events at the same time, responding
     immediately to whatever event happens first.
-  </p><p id="idp10903664">
+  </p><p id="idp11025024">
     A common approach to concurrency is to use preemptive system
     threads, which is the most common solution in languages like Java or
     C#. In this model, each task that may require simultaneous waiting
@@ -141,31 +141,31 @@
     Javascript are single-threaded, and applications register function
     callbacks to be triggered upon external events such as a timeout or
     browser click.
-  </p><p id="idp10904576">
+  </p><p id="idp11025936">
     Each of these mechanisms has its own trade-offs. Preemptive threads
     require significant memory and other resources per thread. Also, the
     operating system can arbitrarily interleave the execution of
     preemptive threads, requiring the programmer to carefully protect
     shared resources with locks and condition variables, which can be
     exceedingly error-prone.
-  </p><p id="idp10905360">
+  </p><p id="idp11026720">
     Single-threaded event-driven systems, on the other hand, execute a
     single task at a time and do not require the same kind of complex
     synchronization that preemptive threads do. However, the inverted
     control structure of an event-driven program often means that your
     own control flow has to be threaded awkwardly through the system's
     event loop, leading to a maze of event callbacks.
-  </p><p id="idp10906176">
+  </p><p id="idp11027536">
     This chapter covers the Async library, which offers a hybrid model
     that aims to provide the best of both worlds, avoiding the
     performance compromises and synchronization woes of preemptive
     threads without the confusing inversion of control that usually
     comes with event-driven systems.
-  </p><section><h1 id="async-basics">Async basics</h1><p id="idp10907968">
+  </p><section><h1 id="async-basics">Async basics</h1><p id="idp11029344">
       Consider a typical function for doing I/O in Core.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">In_channel</span><span class="p">.</span><span class="n">read_all</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp10909456">
+</pre></div><p id="idp11030832">
       Since the function returns a concrete string, it has to block
       until the read completes. The blocking nature of the call means
       that no progress can be made on anything else until the read is
@@ -174,7 +174,7 @@
 <span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
 <span class="o">#</span> <span class="nn">In_channel</span><span class="p">.</span><span class="n">read_all</span> <span class="s2">&quot;test.txt&quot;</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;This is only a test.&quot;</span>
-</pre></div><p id="idp10911392">
+</pre></div><p id="idp11032768">
       In Async, well-behaved functions never block. Instead, they return
       a value of type <code>Deferred.t</code> that acts as a
       placeholder that will eventually be filled in with the result. As
@@ -183,14 +183,14 @@
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">open</span> <span class="nn">Async</span><span class="p">.</span><span class="nc">Std</span><span class="o">;;</span>
 <span class="o">#</span> <span class="nn">Reader</span><span class="p">.</span><span class="n">file_contents</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp10914528">
+</pre></div><p id="idp11035904">
       Note that we opened <code>Async.Std</code>, which adds a
       number of new identifiers and modules into our environment that
       make using Async more convenient. Opening
       <code>Async.Std</code> is standard practice for writing
       programs using Async, much like opening
       <code>Core.Std</code> is for using Core.
-    </p><p id="idp10917328">
+    </p><p id="idp11038704">
       A deferred is essentially a handle to a value that may be computed
       in the future. As such, if we call
       <code>Reader.file_contents</code>, the resulting deferred
@@ -200,7 +200,7 @@
 <span class="k">val</span> <span class="n">contents</span> <span class="o">:</span> <span class="kt">string</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">abstr</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">peek</span> <span class="n">contents</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="n">option</span> <span class="o">=</span> <span class="nc">None</span>
-</pre></div><p id="idp10920576">
+</pre></div><p id="idp11041952">
       The value in <code>contents</code> isn't yet determined in
       part because there's nothing running that could do the necessary
       I/O. When using Async, processing of I/O and other events is
@@ -215,14 +215,14 @@
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;This is only a test.</span><span class="se">\n</span><span class="s2">&quot;</span>
 <span class="o">#</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">peek</span> <span class="n">contents</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="n">option</span> <span class="o">=</span> <span class="nc">Some</span> <span class="s2">&quot;This is only a test.</span><span class="se">\n</span><span class="s2">&quot;</span>
-</pre></div><p id="idp10924160">
+</pre></div><p id="idp11045536">
       In order to do real work with deferreds, we need a way of
       sequencing deferred computations, which we do using
       <code>Deferred.bind</code>. First, let's consider the
       type-signature of bind.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">bind</span> <span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">t</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp10926592">
+</pre></div><p id="idp11047968">
       Thus, <code>Deferred.bind d f</code> takes a deferred value
       <code>d</code> and a function f that is to be run with the
       value of <code>d</code> once it's determined. The call to
@@ -232,7 +232,7 @@
       with the scheduler an <span><em>Async job</em></span> that is
       responsible for running <code>f</code> once
       <code>d</code> is determined.
-    </p><p id="idp10932592">
+    </p><p id="idp11054016">
       Here's a simple use of bind for a function that replaces a file
       with an uppercase version of its contents.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">uppercase_file</span> <span class="n">filename</span> <span class="o">=</span>
@@ -245,7 +245,7 @@
 <span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
 <span class="o">#</span> <span class="nn">Reader</span><span class="p">.</span><span class="n">file_contents</span> <span class="s2">&quot;test.txt&quot;</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;THIS IS ONLY A TEST.&quot;</span>
-</pre></div><p id="idp10934528">
+</pre></div><p id="idp11055952">
       Writing out <code>Deferred.bind</code> explicitly can be
       rather verbose, and so <code>Async.Std</code> includes an
       infix operator for it: <code>&gt;&gt;=</code>. Using this
@@ -257,12 +257,12 @@
     <span class="nn">Writer</span><span class="p">.</span><span class="n">save</span> <span class="n">filename</span> <span class="o">~</span><span class="n">contents</span><span class="o">:(</span><span class="nn">String</span><span class="p">.</span><span class="n">uppercase</span> <span class="n">text</span><span class="o">)</span>
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">uppercase_file</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">unit</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp10939344">
+</pre></div><p id="idp11060768">
       In the above we've dropped the parenthesis around the function on
       the right-hand side of the bind, and we didn't add a level of
       indentation for the contents of that function. This is standard
       practice for using the bind operator.
-    </p><p id="idp10940000">
+    </p><p id="idp11061424">
       Now let's look at another potential use of bind. In this case,
       we'll write a function that counts the number of lines in a file.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">count_lines</span> <span class="n">filename</span> <span class="o">=</span>
@@ -270,27 +270,27 @@
     <span class="o">&gt;&gt;=</span> <span class="k">fun</span> <span class="n">text</span> <span class="o">-&gt;</span>
     <span class="nn">List</span><span class="p">.</span><span class="n">length</span> <span class="o">(</span><span class="nn">String</span><span class="p">.</span><span class="n">split</span> <span class="n">text</span> <span class="o">~</span><span class="n">on</span><span class="o">:</span><span class="sc">'\n'</span><span class="o">)</span>
   <span class="o">;;</span>
-</pre></div><p id="idp10941632">
+</pre></div><p id="idp11063056">
       This looks reasonable enough, but when we try to compile it, we
       get the following error.
-    </p><pre id="idp10942144">
+    </p><pre id="idp11063568">
 Error: This expression has type int but an expression was expected of type
          'a Deferred.t
-</pre><p id="idp10942912">
+</pre><p id="idp11064336">
       The issue here is that bind expects a function that returns a
       deferred, but we've provided it a function that simply returns the
       result. To make these signatures match, we need a function for
       taking an ordinary value and wrapping it in a deferred. This
       function is a standard part of Async, and is called
       <code>return</code>:
-    </p><pre id="idp10944368">
+    </p><pre id="idp11065792">
 # return;;
 - : 'a -&gt; 'a Deferred.t = &lt;fun&gt;
 # let three = return 3;;
 val three : int Deferred.t = &lt;abstr&gt;
 # three;;
 - : int = 3
-</pre><p id="idp10945232">
+</pre><p id="idp11066656">
       Using <code>return</code>, we can make
       <code>count_lines</code> compile.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">count_lines</span> <span class="n">filename</span> <span class="o">=</span>
@@ -299,7 +299,7 @@ val three : int Deferred.t = &lt;abstr&gt;
     <span class="n">return</span> <span class="o">(</span><span class="nn">List</span><span class="p">.</span><span class="n">length</span> <span class="o">(</span><span class="nn">String</span><span class="p">.</span><span class="n">split</span> <span class="n">text</span> <span class="o">~</span><span class="n">on</span><span class="o">:</span><span class="sc">'\n'</span><span class="o">))</span>
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">count_lines</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp10948480">
+</pre></div><p id="idp11069904">
       Together, <code>bind</code> and <code>return</code>
       form a design pattern in functional programming known as a
       <span><em>monad</em></span>. You'll run across this signature in
@@ -307,14 +307,14 @@ val three : int Deferred.t = &lt;abstr&gt;
       across monads in
       <a href="error-handling.html#bind-and-other-error-handling-idioms">the section called “<code>bind</code> and other error-handling
       idioms”</a>.
-    </p><p id="idp10951840">
+    </p><p id="idp11073200">
       Calling <code>bind</code> and <code>return</code>
       together is a fairly common pattern, and as such there is a
       standard shortcut for it called <code>Deferred.map</code>,
       which has the following signature:
     </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">map</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="n">f</span><span class="o">:(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp10955568">
+</pre></div><p id="idp11076928">
       and comes with its own infix equivalent,
       <code>&gt;&gt;|</code>. Using it, we can rewrite
       <code>count_lines</code> again a bit more succinctly:
@@ -324,7 +324,7 @@ val three : int Deferred.t = &lt;abstr&gt;
     <span class="nn">List</span><span class="p">.</span><span class="n">length</span> <span class="o">(</span><span class="nn">String</span><span class="p">.</span><span class="n">split</span> <span class="n">text</span> <span class="o">~</span><span class="n">on</span><span class="o">:</span><span class="sc">'\n'</span><span class="o">)</span>
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">count_lines</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><section><h1 id="ivars-and-upon">Ivars and upon</h1><p id="idp10959856">
+</pre></div><section><h1 id="ivars-and-upon">Ivars and upon</h1><p id="idp11081280">
         Deferreds are usually built using combinations of
         <code>bind</code>, <code>map</code> and
         <code>return</code>, but sometimes you want to construct a
@@ -332,7 +332,7 @@ val three : int Deferred.t = &lt;abstr&gt;
         is done using an <span><em>ivar</em></span>, which is a handle
         that lets you control precisely when a deferred becomes
         determined.
-      </p><p id="idp10963088">
+      </p><p id="idp11084512">
         There are three fundamental operations for working with an ivar;
         you can create one, using <code>Ivar.create</code>, you
         can read off the deferred that corresponds to the ivar in
@@ -350,13 +350,13 @@ val three : int Deferred.t = &lt;abstr&gt;
 <span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
 <span class="o">#</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">peek</span> <span class="n">def</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="n">option</span> <span class="o">=</span> <span class="nc">Some</span> <span class="s2">&quot;Hello&quot;</span>
-</pre></div><p id="idp10967264">
+</pre></div><p id="idp11088688">
         Ivars are something of a low-level feature; operators like map,
         bind and return are typically easier to use and think about. But
         ivars can be useful when you want to build complicated
         synchronization patterns that can't be constructed naturally
         otherwise.
-      </p><p id="idp10967968">
+      </p><p id="idp11089392">
         As an example, imagine we wanted a way of scheduling a sequence
         of actions that would run after a fixed delay. In addition, we'd
         like to guarantee that these delayed actions are executed in the
@@ -367,7 +367,7 @@ val three : int Deferred.t = &lt;abstr&gt;
     <span class="k">val</span> <span class="n">create</span> <span class="o">:</span> <span class="nn">Time</span><span class="p">.</span><span class="nn">Span</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="n">t</span>
     <span class="k">val</span> <span class="n">schedule</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="kt">unit</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">t</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">t</span>
   <span class="k">end</span><span class="o">;;</span>
-</pre></div><p id="idp10969840">
+</pre></div><p id="idp11091264">
         An action is handed to <code>schedule</code> in the form
         of a deferred-returning thunk (a thunk is a function whose
         argument is of type <code>unit</code>). A deferred is
@@ -382,12 +382,12 @@ val three : int Deferred.t = &lt;abstr&gt;
         <code>upon</code>:
       </p><div class="highlight"><pre><span class="o">#</span> <span class="n">upon</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">unit</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="kt">unit</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp10976768">
+</pre></div><p id="idp11098192">
         Like <code>bind</code> and <code>return</code>,
         <code>upon</code> schedules a callback to be executed when
         the deferred it is passed is determined; but unlike those calls,
         it doesn't create a new deferred for this callback to fill.
-      </p><p id="idp10979520">
+      </p><p id="idp11100944">
         Our delayer implementation is organized around a queue of
         thunks, where every call to <code>schedule</code> adds a
         thunk to the queue, and also schedules a job in the future to
@@ -415,19 +415,19 @@ val three : int Deferred.t = &lt;abstr&gt;
       <span class="nn">Ivar</span><span class="p">.</span><span class="n">read</span> <span class="n">ivar</span>
   <span class="k">end</span><span class="o">;;</span>
 <span class="k">module</span> <span class="nc">Delayer</span> <span class="o">:</span> <span class="nc">Delayer_intf</span>
-</pre></div><p id="idp10983632">
+</pre></div><p id="idp11105056">
         This code isn't particularly long, but it is a bit subtle. This
         is typical of code that involves ivars and
         <code>upon</code>, and because of this, you should stick
         to the simpler map/bind/return style of working with deferreds
         when you can.
-      </p></section></section><section><h1 id="examples-an-echo-server">Examples: an echo server</h1><p id="idp10986400">
+      </p></section></section><section><h1 id="examples-an-echo-server">Examples: an echo server</h1><p id="idp11107888">
       Now that we have the basics of Async under our belt, let's look at
       a small complete stand-alone Async program. In particular, we'll
       write an echo server, <span><em>i.e.</em></span>, a program that
       accepts connections from clients and spits back every line of text
       sent to it.
-    </p><p id="idp10987488">
+    </p><p id="idp11108976">
       The first step is to create a function that can copy data from an
       input to an output. Here, we'll use Async's
       <code>Reader</code> and <code>Writer</code> modules
@@ -448,7 +448,7 @@ val three : int Deferred.t = &lt;abstr&gt;
     <span class="nn">Writer</span><span class="p">.</span><span class="n">flushed</span> <span class="n">w</span>
     <span class="o">&gt;&gt;=</span> <span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span>
     <span class="n">copy_blocks</span> <span class="n">buffer</span> <span class="n">r</span> <span class="n">w</span>
-</pre></div><p id="idp10990912">
+</pre></div><p id="idp11112400">
       Bind is used in the above code to sequence the operations: first,
       we call <code>Reader.read</code> to get a block of input.
       Then, when that's complete and if a new block was returned, we
@@ -458,7 +458,7 @@ val three : int Deferred.t = &lt;abstr&gt;
       hit an end-of-file condition, the loop is ended. The deferred
       returned by a call to <code>copy_blocks</code> becomes
       determined only once the end-of-file condition is hit.
-    </p><p id="idp10993952">
+    </p><p id="idp11115440">
       One important aspect of how this is written is that it uses
       <span><em>pushback</em></span>, which is to say that if the writer
       can't make progress writing, the reader will stop reading. If you
@@ -466,7 +466,7 @@ val three : int Deferred.t = &lt;abstr&gt;
       can cause your program to leak memory, since you'll need to
       allocate space for the data that's been read in but not yet
       written out.
-    </p><p id="idp10995200">
+    </p><p id="idp11116688">
       Another memory leak you might be concerned with is the chain of
       deferreds that is built up as you go through the loop. After all,
       this code constructs an ever-growing chain of binds, each of which
@@ -476,7 +476,7 @@ val three : int Deferred.t = &lt;abstr&gt;
       condition is hit. Because of this, we could safely replace all of
       these deferreds with a single deferred. Async has logic to do just
       this, which is essentially a form of tail-call optimization.
-    </p><p id="idp10996912">
+    </p><p id="idp11118448">
 <code>copy_blocks</code> provides the logic for handling a
       client connection, but we still need to set up a server to receive
       such connections and dispatch to <code>copy_blocks</code>.
@@ -495,7 +495,7 @@ val three : int Deferred.t = &lt;abstr&gt;
          <span class="n">copy_blocks</span> <span class="n">buffer</span> <span class="n">r</span> <span class="n">w</span><span class="o">)</span>
   <span class="k">in</span>
   <span class="n">ignore</span> <span class="o">(</span><span class="n">host_and_port</span> <span class="o">:</span> <span class="o">(</span><span class="nn">Socket</span><span class="p">.</span><span class="nn">Address</span><span class="p">.</span><span class="nn">Inet</span><span class="p">.</span><span class="n">t</span><span class="o">,</span> <span class="kt">int</span><span class="o">)</span> <span class="nn">Tcp</span><span class="p">.</span><span class="nn">Server</span><span class="p">.</span><span class="n">t</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">t</span><span class="o">)</span>
-</pre></div><p id="idp11001168">
+</pre></div><p id="idp11122704">
       The result of calling <code>Tcp.Server.create</code> is a
       <code>Tcp.Server.t</code>, which is a handle to the server
       that lets you shut the server down. We don't use that
@@ -503,7 +503,7 @@ val three : int Deferred.t = &lt;abstr&gt;
       the unused-variables error. We put in a type annotation around the
       ignored value to make the nature of the value we're ignoring
       explicit.
-    </p><p id="idp11003344">
+    </p><p id="idp11124880">
       The most important argument to
       <code>Tcp.Server.create</code> is the final one, which is
       the client connection handler. Notably, the above code does
@@ -511,27 +511,27 @@ val three : int Deferred.t = &lt;abstr&gt;
       communication is done. That's because the server will
       automatically shut down the connection once the deferred returned
       by the handler becomes determined.
-    </p><p id="idp11004832">
+    </p><p id="idp11126368">
       Finally, we need to initiate the server and start the Async
       scheduler.
     </p><div class="highlight"><pre><span class="c">(* Call [run], and then start the scheduler *)</span>
 <span class="k">let</span> <span class="bp">()</span> <span class="o">=</span>
   <span class="n">run</span> <span class="bp">()</span><span class="o">;</span>
   <span class="n">never_returns</span> <span class="o">(</span><span class="nn">Scheduler</span><span class="p">.</span><span class="n">go</span> <span class="bp">()</span><span class="o">)</span>
-</pre></div><p id="idp11006368">
+</pre></div><p id="idp11127904">
       One of the most common newbie errors with Async is to forget to
       run the scheduler. It can be a bewildering mistake, because
       without the scheduler, your program won't do anything at all; even
       calls to <code>printf</code> won't actually reach the
       terminal.
-    </p><p id="idp11007744">
+    </p><p id="idp11129280">
       It's worth noting that even though we didn't spend much explicit
       effort on thinking about multiple clients, this server is able to
       handle many concurrent clients without further modification.
-    </p><p id="idp11008352">
+    </p><p id="idp11129888">
       Now that we have the echo server, we can try it out using
       <code>netcat</code>.
-    </p><pre id="idp11009536">
+    </p><pre id="idp11131072">
 echo_server $ ./echo.native &amp;
 [1] 25030
 echo_server $ nc 127.0.0.1 8765
@@ -541,7 +541,7 @@ It repeats whatever I write.
 It repeats whatever I write.
 </pre><aside class="note"><h1>
     Functions that never return
-    </h1><p id="idp11011312">
+    </h1><p id="idp11132848">
       You might wonder what's going on with the call to
       <code>never_returns</code> above.
       <code>never_returns</code> is an idiom that comes from
@@ -552,7 +552,7 @@ It repeats whatever I write.
 <span class="k">val</span> <span class="n">loop_forever</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="k">let</span> <span class="n">always_fail</span> <span class="bp">()</span> <span class="o">=</span> <span class="k">assert</span> <span class="bp">false</span><span class="o">;;</span>
 <span class="k">val</span> <span class="n">always_fail</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp11016016">
+</pre></div><p id="idp11137552">
       This can be surprising when you call a function like this
       expecting it to return unit, and really it never returns. The
       type-checker won't necessarily complain in such a case.
@@ -562,7 +562,7 @@ It repeats whatever I write.
     <span class="n">x</span> <span class="o">+</span> <span class="n">n</span>
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">do_stuff</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">unit</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp11017856">
+</pre></div><p id="idp11139392">
       With a name like <code>loop_forever</code>, the meaning is
       clear enough in this case. But with something like
       <code>Scheduler.go</code>, the fact that it never returns is
@@ -572,7 +572,7 @@ It repeats whatever I write.
       <code>loop_forever</code>.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="k">rec</span> <span class="n">loop_forever</span> <span class="bp">()</span> <span class="o">:</span> <span class="n">never_returns</span> <span class="o">=</span> <span class="n">loop_forever</span> <span class="bp">()</span><span class="o">;;</span>
 <span class="k">val</span> <span class="n">loop_forever</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">-&gt;</span> <span class="n">never_returns</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp11022544">
+</pre></div><p id="idp11144080">
       The type <code>never_returns</code> is uninhabited, so a
       function can't return a value of type
       <code>never_returns</code>, which means only functions that
@@ -586,7 +586,7 @@ It repeats whatever I write.
   <span class="o">;;</span>
 <span class="nc">Error</span><span class="o">:</span> <span class="nc">This</span> <span class="n">expression</span> <span class="n">has</span> <span class="k">type</span> <span class="kt">unit</span> <span class="n">but</span> <span class="n">an</span> <span class="n">expression</span> <span class="n">was</span> <span class="n">expected</span> <span class="k">of</span> <span class="k">type</span>
          <span class="n">never_returns</span>
-</pre></div><p id="idp11026720">
+</pre></div><p id="idp11148256">
       We can resolve the error by calling the function
       <code>never_returns</code>.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="n">never_returns</span><span class="o">;;</span>
@@ -597,24 +597,24 @@ It repeats whatever I write.
     <span class="n">x</span> <span class="o">+</span> <span class="n">n</span>
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">do_stuff</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp11029104">
+</pre></div><p id="idp11150640">
       Thus, we got the compilation to go through by explicitly marking
       in the source that the call to <code>loop_forever</code>
       never returns.
-    </p></aside><section><h1 id="improving-the-echo-server">Improving the echo server</h1><p id="idp11031632">
+    </p></aside><section><h1 id="improving-the-echo-server">Improving the echo server</h1><p id="idp11153216">
         Let's try to go a little bit farther with our echo server. Let's
         walk through a few small improvements:
-      </p><ul><li><p id="idp11032672">
+      </p><ul><li><p id="idp11154256">
             Add a proper command-line interface with
             <code>Command</code>
-</p></li><li><p id="idp11034208">
+</p></li><li><p id="idp11155792">
             Add a flag to specify the port to listen on, and a flag to
             make the server echo back the capitalized version of
             whatever was sent to it.
-          </p></li><li><p id="idp11035184">
+          </p></li><li><p id="idp11156768">
             Simplify the code using Async's <code>Pipe</code>
             interface.
-          </p></li></ul><p id="idp11036624">
+          </p></li></ul><p id="idp11158208">
         Here's the improved code below.
       </p><div class="highlight"><pre><span class="k">let</span> <span class="n">run</span> <span class="o">~</span><span class="n">uppercase</span> <span class="o">~</span><span class="n">port</span> <span class="o">=</span>
   <span class="k">let</span> <span class="n">host_and_port</span> <span class="o">=</span>
@@ -640,7 +640,7 @@ It repeats whatever I write.
     <span class="o">)</span>
     <span class="o">(</span><span class="k">fun</span> <span class="n">uppercase</span> <span class="n">port</span> <span class="bp">()</span> <span class="o">-&gt;</span> <span class="n">run</span> <span class="o">~</span><span class="n">uppercase</span> <span class="o">~</span><span class="n">port</span><span class="o">)</span>
   <span class="o">|&gt;</span> <span class="nn">Command</span><span class="p">.</span><span class="n">run</span>
-</pre></div><p id="idp11039168">
+</pre></div><p id="idp11160752">
         The most notable change in this function is the use of Async's
         <code>Pipe</code>. A <code>Pipe</code> is a
         communication channel that's used for connecting different parts
@@ -649,26 +649,26 @@ It repeats whatever I write.
         ready to be read from or written to. Our use of pipes is fairly
         minimal here, but they are an important part of Async, so it's
         worth discussing them in some detail.
-      </p><p id="idp11041888">
+      </p><p id="idp11163072">
         Pipes are created in connected read/write pairs, as you can see
         below.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="o">(</span><span class="n">r</span><span class="o">,</span><span class="n">w</span><span class="o">)</span> <span class="o">=</span> <span class="nn">Pipe</span><span class="p">.</span><span class="n">create</span> <span class="bp">()</span><span class="o">;;</span>
 <span class="k">val</span> <span class="n">r</span> <span class="o">:</span> <span class="k">'</span><span class="o">_</span><span class="n">a</span> <span class="nn">Pipe</span><span class="p">.</span><span class="nn">Reader</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">abstr</span><span class="o">&gt;</span>
 <span class="k">val</span> <span class="n">w</span> <span class="o">:</span> <span class="k">'</span><span class="o">_</span><span class="n">a</span> <span class="nn">Pipe</span><span class="p">.</span><span class="nn">Writer</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">abstr</span><span class="o">&gt;</span>
-</pre></div><p id="idp11043456">
+</pre></div><p id="idp11164640">
 <code>r</code> and <code>w</code> are really just
         read and write handles to the same underlying object. Note that
         <code>r</code> and <code>w</code> have weakly
         polymorphic types. That's because a pipe is mutable and so can
         contain elements of only one type, which will be settled by the
         compiler once we try to use the pipe for anything.
-      </p><p id="idp11046976">
+      </p><p id="idp11168112">
         If we just try and write to the writer, we'll see that we block
         indefinitely in utop. You can break out of the wait by hitting
         <code>Control-C</code>.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Pipe</span><span class="p">.</span><span class="n">write</span> <span class="n">w</span> <span class="s2">&quot;Hello World!&quot;</span><span class="o">;;</span>
 <span class="nn">Interrupted</span><span class="p">.</span>
-</pre></div><p id="idp11049296">
+</pre></div><p id="idp11170432">
         The deferred returned by write completes on its own once the
         value written into the pipe has been read out:
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="o">(</span><span class="n">r</span><span class="o">,</span><span class="n">w</span><span class="o">)</span> <span class="o">=</span> <span class="nn">Pipe</span><span class="p">.</span><span class="n">create</span> <span class="bp">()</span><span class="o">;;</span>
@@ -680,7 +680,7 @@ It repeats whatever I write.
 <span class="o">-</span> <span class="o">:</span> <span class="o">[</span> <span class="o">`</span><span class="nc">Eof</span> <span class="o">|</span> <span class="o">`</span><span class="nc">Ok</span> <span class="k">of</span> <span class="kt">string</span> <span class="o">]</span> <span class="o">=</span> <span class="o">`</span><span class="nc">Ok</span> <span class="s2">&quot;Hello World!&quot;</span>
 <span class="o">#</span> <span class="n">write_complete</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
-</pre></div><p id="idp11051088">
+</pre></div><p id="idp11172224">
         In the function <code>run</code> above, we're taking
         advantage of one of the many utility functions provided for
         pipes in the <code>Pipe</code> module. In particular,
@@ -691,7 +691,7 @@ It repeats whatever I write.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Pipe</span><span class="p">.</span><span class="n">transfer</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="nn">Pipe</span><span class="p">.</span><span class="nn">Reader</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span> <span class="nn">Pipe</span><span class="p">.</span><span class="nn">Writer</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="n">f</span><span class="o">:(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="kt">unit</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span>
 <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp11055760">
+</pre></div><p id="idp11176896">
         The two pipes being connected are generated by the
         <code>Reader.pipe</code> and
         <code>Writer.pipe</code> call respectively. Note that
@@ -699,7 +699,7 @@ It repeats whatever I write.
         writer gets blocked, the writer's pipe will stop pulling data
         from the reader's pipe, which will prevent the reader from
         reading in more data.
-      </p><p id="idp11057920">
+      </p><p id="idp11179056">
         Importantly, the deferred returned by
         <code>Pipe.transfer</code> becomes determined once the
         reader has been closed and the last element is transferred from
@@ -707,7 +707,7 @@ It repeats whatever I write.
         the server will shut down that client connection. So, when a
         client disconnects, the rest of the shutdown happens
         transparently.
-      </p><p id="idp11059408">
+      </p><p id="idp11180544">
         The command-line parsing for this program is based on the
         <code>Command</code> library that we introduced in
         <a href="command-line-parsing.html">Chapter 14, <i>Command Line Parsing</i></a>. When you open
@@ -718,40 +718,40 @@ It repeats whatever I write.
     <span class="o">?</span><span class="n">readme</span><span class="o">:(</span><span class="kt">unit</span> <span class="o">-&gt;</span> <span class="kt">string</span><span class="o">)</span> <span class="o">-&gt;</span>
     <span class="o">(</span><span class="k">'</span><span class="n">a</span><span class="o">,</span> <span class="kt">unit</span> <span class="o">-&gt;</span> <span class="kt">unit</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">t</span><span class="o">)</span> <span class="nn">Command</span><span class="p">.</span><span class="nn">Spec</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="nn">Command</span><span class="p">.</span><span class="n">t</span>
 <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp11064656">
+</pre></div><p id="idp11185792">
         This differs from the ordinary <code>Command.basic</code>
         call in that the main function must return a
         <code>Deferred.t</code>, and that the running of the
         command (using <code>Command.run</code>) automatically
         starts the async scheduler, without requiring an explicit call
         to <code>Scheduler.go</code>.
-      </p></section></section><section><h1 id="example-searching-definitions-with-duckduckgo">Example: searching definitions with DuckDuckGo</h1><p id="idp11069600">
+      </p></section></section><section><h1 id="example-searching-definitions-with-duckduckgo">Example: searching definitions with DuckDuckGo</h1><p id="idp11190720">
       DuckDuckGo is a search engine with a freely available search
       interface. In this section, we'll use Async to write a small
       command-line utility for querying DuckDuckGo to extract
       definitions for a collection of terms.
-    </p><p id="idp11070240">
+    </p><p id="idp11191360">
       Our code is going to rely on a number of other libraries, all of
       which can be installed using OPAM. Refer to
       <a href="installation.html">Appendix A, <i>Installation</i></a> if you need help on the
       installation. Here's the list of libraries we'll need.
-    </p><ul><li><p id="idp11072064">
+    </p><ul><li><p id="idp11193184">
 <code>textwrap</code>, a library for wrapping long
           lines. We'll use this for printing out our results.
-        </p></li><li><p id="idp11073600">
+        </p></li><li><p id="idp11194720">
 <code>uri</code>, a library for handling URI's, or
           &quot;Uniform Resource Identifiers&quot;, of which HTTP URL's
           are an example.
-        </p></li><li><p id="idp11075344">
+        </p></li><li><p id="idp11196464">
 <code>yojson</code>, a JSON parsing library that was
           described in <a href="handling-json-data.html">Chapter 15, <i>Handling JSON data</i></a>
-</p></li><li><p id="idp11077680">
+</p></li><li><p id="idp11198736">
 <code>cohttp</code>, a library for creating HTTP clients
           and servers. We need Async support, which comes with the
           <code>cohttp.async</code> package.
-        </p></li></ul><p id="idp11079824">
+        </p></li></ul><p id="idp11200880">
       Now let's dive into the implementation.
-    </p><section><h1 id="uri-handling">URI handling</h1><p id="idp11081424">
+    </p><section><h1 id="uri-handling">URI handling</h1><p id="idp11202480">
         You're probably familiar with HTTP URLs, which identify
         endpoints across the World Wide Web. These are actually part of
         a more general family known as Uniform Resource Identifiers
@@ -760,7 +760,7 @@ It repeats whatever I write.
         and is rather complicated. Luckily, the <code>uri</code>
         library provides a strongly-typed interface which takes care of
         much of the hassle.
-      </p><p id="idp11083648">
+      </p><p id="idp11204704">
         We'll need a function for generating the URI's that we're going
         to use to query the DuckDuckGo servers.
       </p><div class="highlight"><pre><span class="c">(* file: search.ml *)</span>
@@ -771,20 +771,20 @@ It repeats whatever I write.
 <span class="k">let</span> <span class="n">query_uri</span> <span class="n">query</span> <span class="o">=</span>
   <span class="k">let</span> <span class="n">base_uri</span> <span class="o">=</span> <span class="nn">Uri</span><span class="p">.</span><span class="n">of_string</span> <span class="s2">&quot;http://api.duckduckgo.com/?format=json&quot;</span> <span class="k">in</span>
   <span class="nn">Uri</span><span class="p">.</span><span class="n">add_query_param</span> <span class="n">base_uri</span> <span class="o">(</span><span class="s2">&quot;q&quot;</span><span class="o">,</span> <span class="o">[</span><span class="n">query</span><span class="o">])</span>
-</pre></div><p id="idp11085456">
+</pre></div><p id="idp11206512">
         A <code>Uri.t</code> is constructed from the
         <code>Uri.of_string</code> function, and a query parameter
         <code>q</code> is added with the desired search query. The
         library takes care of encoding the URI correctly when outputting
         it in the network protocol.
-      </p></section><section><h1 id="parsing-json-strings">Parsing JSON strings</h1><p id="idp11089472">
+      </p></section><section><h1 id="parsing-json-strings">Parsing JSON strings</h1><p id="idp11210480">
         The HTTP response from DuckDuckGo is in JSON, a common (and
         thankfully simple) format that is specified in
         <a href="http://www.ietf.org/rfc/rfc4627.txt" target="_top">RFC4627</a>.
         We'll parse the JSON data using the Yojson library, which we
         already introduced in
         <a href="handling-json-data.html">Chapter 15, <i>Handling JSON data</i></a>.
-      </p><p id="idp11091504">
+      </p><p id="idp11212512">
         We expect the response from DuckDuckGo to come across as a JSON
         record, which is represented by the <code>Assoc</code> tag
         in Yojson's JSON variant. We expect the definition itself to
@@ -807,7 +807,7 @@ It repeats whatever I write.
     <span class="o">|</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="n">find</span> <span class="s2">&quot;Definition&quot;</span>
     <span class="k">end</span>
   <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="nc">None</span>
-</pre></div></section><section><h1 id="executing-an-http-client-query">Executing an HTTP client query</h1><p id="idp11096576">
+</pre></div></section><section><h1 id="executing-an-http-client-query">Executing an HTTP client query</h1><p id="idp11217520">
         Now let's look at the code for dispatching the search queries
         over HTTP, using the Cohttp library.
       </p><div class="highlight"><pre><span class="c">(* Execute the DuckDuckGo search *)</span>
@@ -817,7 +817,7 @@ It repeats whatever I write.
   <span class="nn">Pipe</span><span class="p">.</span><span class="n">to_list</span> <span class="n">body</span>
   <span class="o">&gt;&gt;|</span> <span class="k">fun</span> <span class="n">strings</span> <span class="o">-&gt;</span>
   <span class="o">(</span><span class="n">word</span><span class="o">,</span> <span class="n">get_definition_from_json</span> <span class="o">(</span><span class="nn">String</span><span class="p">.</span><span class="n">concat</span> <span class="n">strings</span><span class="o">))</span>
-</pre></div><p id="idp11098608">
+</pre></div><p id="idp11219552">
         To better understand what's going on, it's useful to look at the
         type for <code>Cohttp_async.Client.get</code>, which we
         can do in utop.
@@ -827,19 +827,19 @@ It repeats whatever I write.
     <span class="o">?</span><span class="n">headers</span><span class="o">:</span><span class="nn">Cohttp</span><span class="p">.</span><span class="nn">Header</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span>
     <span class="nn">Uri</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="nn">Cohttp</span><span class="p">.</span><span class="nn">Response</span><span class="p">.</span><span class="n">r</span> <span class="o">*</span> <span class="nn">Cohttp_async</span><span class="p">.</span><span class="n">body</span><span class="o">)</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">t</span>
 <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp11101264">
+</pre></div><p id="idp11222208">
         The <code>get</code> call takes as a required argument a
         URI, and returns a deferred value containing a
         <code>Cohttp.Response.t</code> (which we ignore) and a
         pipe reader to which the body of the request will be written to
         as it is received.
-      </p><p id="idp11103280">
+      </p><p id="idp11224224">
         In this case, the HTTP body probably isn't very large, so we
         call <code>Pipe.to_list</code> to collect the strings from
         the pipe as a single deferred list of strings. We then join
         those strings using <code>String.concat</code> and pass
         the result through our parsing function.
-      </p><p id="idp11105360">
+      </p><p id="idp11226304">
         Running a single search isn't that interesting from a
         concurrency perspective, so let's write code for dispatching
         multiple searches in parallel. First, we need code for
@@ -854,7 +854,7 @@ It repeats whatever I write.
     <span class="o">|</span> <span class="nc">Some</span> <span class="n">def</span> <span class="o">-&gt;</span>
       <span class="nn">String</span><span class="p">.</span><span class="n">concat</span> <span class="o">~</span><span class="n">sep</span><span class="o">:</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
         <span class="o">(</span><span class="nn">Wrapper</span><span class="p">.</span><span class="n">wrap</span> <span class="o">(</span><span class="nn">Wrapper</span><span class="p">.</span><span class="n">make</span> <span class="mi">70</span><span class="o">)</span> <span class="n">def</span><span class="o">))</span>
-</pre></div><p id="idp11107408">
+</pre></div><p id="idp11228352">
         We use the <code>Wrapper</code> module from the
         <code>textwrap</code> package to do the line-wrapping. It
         may not be obvious that this routine is using Async, but it
@@ -867,7 +867,7 @@ It repeats whatever I write.
         is that if you write an Async program and forget to start the
         scheduler, calls like <code>printf</code> won't actually
         generate any output!
-      </p><p id="idp11113328">
+      </p><p id="idp11234272">
         The next function dispatches the searches in parallel, waits for
         the results, and then prints.
       </p><div class="highlight"><pre><span class="c">(* Run many searches in parallel, printing out the results after they're all</span>
@@ -876,14 +876,14 @@ It repeats whatever I write.
   <span class="nn">Deferred</span><span class="p">.</span><span class="n">all</span> <span class="o">(</span><span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="n">words</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="n">get_definition</span><span class="o">)</span>
   <span class="o">&gt;&gt;|</span> <span class="k">fun</span> <span class="n">results</span> <span class="o">-&gt;</span>
   <span class="nn">List</span><span class="p">.</span><span class="n">iter</span> <span class="n">results</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="n">print_result</span>
-</pre></div><p id="idp11115136">
+</pre></div><p id="idp11236080">
         We used <code>List.map</code> to call
         <code>get_definition</code> on each word, and
         <code>Deferred.all</code> to wait for all the results.
         Here's the type of <code>Deferred.all</code>:
       </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">all</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">t</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp11119520">
+</pre></div><p id="idp11240464">
         Note that the list returned by <code>Deferred.all</code>
         reflects the order of the deferreds passed to it. As such, the
         definitions will be printed out in the same order that the
@@ -895,7 +895,7 @@ It repeats whatever I write.
 <span class="k">let</span> <span class="n">search_and_print</span> <span class="n">words</span> <span class="o">=</span>
   <span class="nn">Deferred</span><span class="p">.</span><span class="n">all_unit</span> <span class="o">(</span><span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="n">words</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">word</span> <span class="o">-&gt;</span>
     <span class="n">get_definition</span> <span class="n">word</span> <span class="o">&gt;&gt;|</span> <span class="n">print_result</span><span class="o">))</span>
-</pre></div><p id="idp11122288">
+</pre></div><p id="idp11243232">
         The difference is that we both dispatch the query and print out
         the result in the closure passed to <code>map</code>,
         rather than waiting for all of the results to get back and then
@@ -907,7 +907,7 @@ It repeats whatever I write.
         type of this function in utop.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">all_unit</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">t</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">unit</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp11126992">
+</pre></div><p id="idp11247936">
         Finally, we create a command line interface using
         <code>Command.async_basic</code>.
       </p><div class="highlight"><pre><span class="k">let</span> <span class="bp">()</span> <span class="o">=</span>
@@ -919,10 +919,10 @@ It repeats whatever I write.
     <span class="o">)</span>
     <span class="o">(</span><span class="k">fun</span> <span class="n">words</span> <span class="bp">()</span> <span class="o">-&gt;</span> <span class="n">search_and_print</span> <span class="n">words</span><span class="o">)</span>
   <span class="o">|&gt;</span> <span class="nn">Command</span><span class="p">.</span><span class="n">run</span>
-</pre></div><p id="idp11129408">
+</pre></div><p id="idp11250352">
         And that's all we need to create a simple but usable definition
         searcher.
-      </p><pre id="idp11129904">
+      </p><pre id="idp11250848">
 $ ./search.native &quot;Concurrent Programming&quot; &quot;OCaml&quot;
 Concurrent Programming
 ----------------------
@@ -937,7 +937,7 @@ OCaml
 &quot;OCaml, originally known as Objective Caml, is the main implementation
 of the Caml programming language, created by Xavier Leroy, Jérôme
 Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
-</pre></section></section><section><h1 id="exception-handling">Exception handling</h1><p id="idp11132448">
+</pre></section></section><section><h1 id="exception-handling">Exception handling</h1><p id="idp11253456">
       When programming with external resources, errors are everywhere:
       everything from a flaky server to a network outage to exhausting
       of local resources can lead to a runtime error. When programming
@@ -947,7 +947,7 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
       <a href="error-handling.html#exceptions">the section called “Exceptions”</a>, but as we'll see,
       exception handling in a concurrent program presents some new
       challenges.
-    </p><p id="idp11134128">
+    </p><p id="idp11255536">
       Let's get a better sense of how exceptions work in Async by
       creating an asynchronous computation that (sometimes) fails with
       an exception. The function <code>maybe_raise</code> below
@@ -975,12 +975,12 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
      <span class="o">(</span><span class="n">someone_is_listening</span> <span class="bp">true</span><span class="o">)</span> <span class="o">(</span><span class="n">kill_index</span> <span class="mi">0</span><span class="o">))</span>
     <span class="o">((</span><span class="n">name</span> <span class="n">main</span><span class="o">)</span> <span class="o">(</span><span class="n">here</span> <span class="bp">()</span><span class="o">)</span> <span class="o">(</span><span class="n">id</span> <span class="mi">1</span><span class="o">)</span> <span class="o">(</span><span class="n">has_seen_error</span> <span class="bp">false</span><span class="o">)</span>
      <span class="o">(</span><span class="n">someone_is_listening</span> <span class="bp">false</span><span class="o">)</span> <span class="o">(</span><span class="n">kill_index</span> <span class="mi">0</span><span class="o">)))))).</span>
-</pre></div><p id="idp11137984">
+</pre></div><p id="idp11259392">
       In utop, the exception thrown by <code>maybe_raise ()</code>
       terminates the evaluation of just that expression, but in a
       stand-alone program, an uncaught exception would bring down the
       entire process.
-    </p><p id="idp11139296">
+    </p><p id="idp11260704">
       So, how could we capture and handle such an exception? You might
       try to do this using OCaml's built-in <code>try/with</code>
       statement, but as you can see below, that doesn't quite do the
@@ -1003,12 +1003,12 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
      <span class="o">(</span><span class="n">someone_is_listening</span> <span class="bp">true</span><span class="o">)</span> <span class="o">(</span><span class="n">kill_index</span> <span class="mi">0</span><span class="o">))</span>
     <span class="o">((</span><span class="n">name</span> <span class="n">main</span><span class="o">)</span> <span class="o">(</span><span class="n">here</span> <span class="bp">()</span><span class="o">)</span> <span class="o">(</span><span class="n">id</span> <span class="mi">1</span><span class="o">)</span> <span class="o">(</span><span class="n">has_seen_error</span> <span class="bp">false</span><span class="o">)</span>
      <span class="o">(</span><span class="n">someone_is_listening</span> <span class="bp">false</span><span class="o">)</span> <span class="o">(</span><span class="n">kill_index</span> <span class="mi">0</span><span class="o">)))))).</span>
-</pre></div><p id="idp11142640">
+</pre></div><p id="idp11264048">
       This didn't work because <code>try/with</code> only captures
       exceptions that are thrown in the code directly executed within
       it, while <code>maybe_raise</code> schedules an Async job to
       run in the future, and it's that job that throws an exception.
-    </p><p id="idp11144672">
+    </p><p id="idp11266080">
       We can capture this kind of asynchronous error use the
       <code>try_with</code> function provided by Async:
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">handle_error</span> <span class="bp">()</span> <span class="o">=</span>
@@ -1021,14 +1021,14 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;success&quot;</span>
 <span class="o">#</span> <span class="n">handle_error</span> <span class="bp">()</span><span class="o">;;</span>
   <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;failure&quot;</span>
-</pre></div><p id="idp11147280">
+</pre></div><p id="idp11268688">
 <code>try_with f</code> takes as its argument a
       deferred-returning thunk <code>f</code>, and returns a
       deferred that becomes determined either as <code>Ok</code>
       of whatever <code>f</code> returned, or
       <code>Error exn</code> if <code>f</code> threw an
       exception before its return value became determined.
-    </p><section><h1 id="monitors">Monitors</h1><p id="idp11153168">
+    </p><section><h1 id="monitors">Monitors</h1><p id="idp11274576">
 <code>try_with</code> is a a great way of handling
         exceptions in Async, but it's not the whole story. All of
         Async's exception-handling mechanisms,
@@ -1038,7 +1038,7 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
         name. Monitors are fairly low-level and are only occasionally
         used directly, but it's nonetheless worth understanding how they
         work.
-      </p><p id="idp11155840">
+      </p><p id="idp11277248">
         In Async, a monitor is a context that determines what to do when
         there is an unhandled exception. Every Async job runs within the
         context of some monitor, which, when the job is running, is
@@ -1046,7 +1046,7 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
         scheduled, say, using <code>bind</code> or
         <code>map</code>, it inherits the current monitor of the
         job that spawned it.
-      </p><p id="idp11158032">
+      </p><p id="idp11279440">
         Monitors are arranged in a tree -- when a new monitor is created
         (say, using <code>Monitor.create</code>) it is a child of
         the current monitor. You can explicitly run jobs within a
@@ -1071,13 +1071,13 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
      <span class="o">(</span><span class="n">someone_is_listening</span> <span class="bp">true</span><span class="o">)</span> <span class="o">(</span><span class="n">kill_index</span> <span class="mi">0</span><span class="o">))</span>
     <span class="o">((</span><span class="n">name</span> <span class="n">main</span><span class="o">)</span> <span class="o">(</span><span class="n">here</span> <span class="bp">()</span><span class="o">)</span> <span class="o">(</span><span class="n">id</span> <span class="mi">1</span><span class="o">)</span> <span class="o">(</span><span class="n">has_seen_error</span> <span class="bp">false</span><span class="o">)</span>
      <span class="o">(</span><span class="n">someone_is_listening</span> <span class="bp">false</span><span class="o">)</span> <span class="o">(</span><span class="n">kill_index</span> <span class="mi">0</span><span class="o">)))))).</span>
-</pre></div><p id="idp11163584">
+</pre></div><p id="idp11284992">
         In addition to the ordinary stack-trace, the exception displays
         the trace of monitors through which the exception traveled,
         starting at the one we created, called &quot;blow up
         monitor&quot;. The other monitors you see come from utop's
         special handling of deferreds.
-      </p><p id="idp11164368">
+      </p><p id="idp11285776">
         Monitors can do more than just augment the error-trace of an
         exception. You can also use a monitor to explicitly handle
         errors delivered to that monitor. The
@@ -1098,13 +1098,13 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
 <span class="k">val</span> <span class="n">swallow_error</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="n">swallow_error</span> <span class="bp">()</span><span class="o">;;</span>
 <span class="n">an</span> <span class="n">error</span> <span class="n">happened</span>
-</pre></div><p id="idp11167552">
+</pre></div><p id="idp11288960">
         The message &quot;an error happened&quot; is printed out, but
         the deferred returned by <code>swallow_error</code> is
         never determined. This makes sense, since the calculation never
         actually completes, so there's no value to return. You can break
         out of this in utop by hitting <code>Control-C</code>.
-      </p><p id="idp11169760">
+      </p><p id="idp11291168">
         Here's an example of a monitor which passes some exceptions
         through to the parent, and handles others. Exceptions are sent
         to the parent using <code>Monitor.send_exn</code>, with
@@ -1125,12 +1125,12 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
        <span class="o">&gt;&gt;=</span> <span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span> <span class="k">raise</span> <span class="n">exn_to_raise</span><span class="o">)</span>
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">swallow_some_errors</span> <span class="o">:</span> <span class="n">exn</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp11173904">
+</pre></div><p id="idp11295312">
         Note that we use <code>Monitor.extract_exn</code> to grab
         the underlying exception that was thrown. Async wraps exceptions
         it catches with extra information, including the monitor trace,
         so you need to grab the underlying exception to match on it.
-      </p><p id="idp11175264">
+      </p><p id="idp11296672">
         If we pass in an exception other than
         <code>Ignore_me</code>, like, say, the built-in exception
         <code>Not_found</code>, then the exception will be passed
@@ -1146,13 +1146,13 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
      <span class="o">(</span><span class="n">someone_is_listening</span> <span class="bp">true</span><span class="o">)</span> <span class="o">(</span><span class="n">kill_index</span> <span class="mi">0</span><span class="o">))</span>
     <span class="o">((</span><span class="n">name</span> <span class="n">main</span><span class="o">)</span> <span class="o">(</span><span class="n">here</span> <span class="bp">()</span><span class="o">)</span> <span class="o">(</span><span class="n">id</span> <span class="mi">1</span><span class="o">)</span> <span class="o">(</span><span class="n">has_seen_error</span> <span class="bp">false</span><span class="o">)</span>
      <span class="o">(</span><span class="n">someone_is_listening</span> <span class="bp">false</span><span class="o">)</span> <span class="o">(</span><span class="n">kill_index</span> <span class="mi">0</span><span class="o">)))))).</span>
-</pre></div><p id="idp11179312">
+</pre></div><p id="idp11300720">
         If instead we use <code>Ignore_me</code>, the exception
         will be ignored, and we again see that the deferred never
         returns, but the exception was caught and ignored.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="n">swallow_some_errors</span> <span class="nc">Ignore_me</span><span class="o">;;</span>
 <span class="n">ignoring</span> <span class="n">exn</span>
-</pre></div><p id="idp11181584">
+</pre></div><p id="idp11302992">
         In practice, you should rarely use monitors directly, instead
         using functions like <code>try_with</code> and
         <code>Monitor.protect</code> that are built on top of
@@ -1163,18 +1163,18 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
         request, in either case responding to an exception by closing
         the connection. It is for building this kind of custom error
         handling that monitors can be helpful.
-      </p></section><section><h1 id="example-handling-exceptions-with-duckduckgo">Example: Handling exceptions with DuckDuckGo</h1><p id="idp11186000">
+      </p></section><section><h1 id="example-handling-exceptions-with-duckduckgo">Example: Handling exceptions with DuckDuckGo</h1><p id="idp11307344">
         Let's now go back and improve the exception handling of our
         DuckDuckGo client. In particular, we'll change it so that any
         individual queries that fail are reported as such, without
         preventing other queries from succeeding.
-      </p><p id="idp11186656">
+      </p><p id="idp11308000">
         The search code as it is fails rarely, so let's make a change
         that allows us to trigger failures more predictably. We'll do
         this by making it possible to distribute the requests over
         multiple servers. Then, we'll handle the errors that occur when
         one of those servers is misspecified.
-      </p><p id="idp11187392">
+      </p><p id="idp11308736">
         First we'll need to change <code>query_uri</code> to take
         an argument specifying the server to connect to, as follows.
       </p><div class="highlight"><pre><span class="c">(* Generate a DuckDuckGo search URI from a query string *)</span>
@@ -1183,13 +1183,13 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
     <span class="nn">Uri</span><span class="p">.</span><span class="n">of_string</span> <span class="o">(</span><span class="nn">String</span><span class="p">.</span><span class="n">concat</span> <span class="o">[</span><span class="s2">&quot;http://&quot;</span><span class="o">;</span><span class="n">server</span><span class="o">;</span><span class="s2">&quot;/?format=json&quot;</span><span class="o">])</span>
   <span class="k">in</span>
   <span class="nn">Uri</span><span class="p">.</span><span class="n">add_query_param</span> <span class="n">base_uri</span> <span class="o">(</span><span class="s2">&quot;q&quot;</span><span class="o">,</span> <span class="o">[</span><span class="n">query</span><span class="o">])</span>
-</pre></div><p id="idp11189840">
+</pre></div><p id="idp11311184">
         and then making the appropriate changes to get the list of
         servers on the command-line, and to distribute the search
         queries round-robin over the list of servers. Now, let's see
         what happens if we rebuild the application and run it giving it
         a list of servers, some of which won't respond to the query.
-      </p><pre id="idp11190592">
+      </p><pre id="idp11311936">
 $ ./search_with_configurable_server.native \
      -servers localhost,api.duckduckgo.com \
      &quot;Concurrent Programming&quot; OCaml
@@ -1207,7 +1207,7 @@ $ ./search_with_configurable_server.native \
       ((name main) (here ()) (id 1) (has_seen_error true)
        (someone_is_listening false) (kill_index 0))))))
   (Pid 1352)))
-</pre><p id="idp11192304">
+</pre><p id="idp11313648">
         As you can see, we got a &quot;Connection refused&quot; failure
         which ends the entire program, even though one of the two
         queries would have gone through successfully. We can handle the
@@ -1225,14 +1225,14 @@ $ ./search_with_configurable_server.native \
   <span class="o">&gt;&gt;|</span> <span class="k">function</span>
   <span class="o">|</span> <span class="nc">Ok</span> <span class="o">(</span><span class="n">word</span><span class="o">,</span><span class="n">result</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="n">word</span><span class="o">,</span> <span class="nc">Ok</span> <span class="n">result</span><span class="o">)</span>
   <span class="o">|</span> <span class="nc">Error</span> <span class="o">_</span>          <span class="o">-&gt;</span> <span class="o">(</span><span class="n">word</span><span class="o">,</span> <span class="nc">Error</span> <span class="s2">&quot;Unexpected failure&quot;</span><span class="o">)</span>
-</pre></div><p id="idp11196128">
+</pre></div><p id="idp11317472">
         Here, we use <code>try_with</code> to capture the
         exception, which we then use map (the
         <code>&gt;&gt;|</code> operator) to convert the error into
         the form we want: a pair whose first element is the word being
         searched for, and the second element is the (possibly erroneous)
         result.
-      </p><p id="idp11198224">
+      </p><p id="idp11319568">
         Now we just need to change the code for
         <code>print_result</code> so that it can handle the new
         type.
@@ -1247,10 +1247,10 @@ $ ./search_with_configurable_server.native \
      <span class="o">|</span> <span class="nc">Ok</span> <span class="o">(</span><span class="nc">Some</span> <span class="n">def</span><span class="o">)</span> <span class="o">-&gt;</span>
        <span class="nn">String</span><span class="p">.</span><span class="n">concat</span> <span class="o">~</span><span class="n">sep</span><span class="o">:</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
          <span class="o">(</span><span class="nn">Wrapper</span><span class="p">.</span><span class="n">wrap</span> <span class="o">(</span><span class="nn">Wrapper</span><span class="p">.</span><span class="n">make</span> <span class="mi">70</span><span class="o">)</span> <span class="n">def</span><span class="o">))</span>
-</pre></div><p id="idp11200832">
+</pre></div><p id="idp11322176">
         Now, if we run that same query, we'll get individualized
         handling of the connection failures:
-      </p><pre id="idp11201344">
+      </p><pre id="idp11322688">
 $ ./search_with_error_handling.native \
      -servers localhost,api.duckduckgo.com \
      &quot;Concurrent Programming&quot; OCaml
@@ -1265,10 +1265,10 @@ OCaml
 &quot;OCaml, originally known as Objective Caml, is the main implementation
 of the Caml programming language, created by Xavier Leroy, Jérôme
 Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
-</pre><p id="idp11202592">
+</pre><p id="idp11323936">
         Now, only the query that went to <code>localhost</code>
         failed.
-      </p><p id="idp11203760">
+      </p><p id="idp11325104">
         Note that in this code, we're relying on the fact that
         <code>Cohttp_async.Client.get</code> will clean up after
         itself after an exception, in particular by closing its file
@@ -1277,7 +1277,7 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
         <code>Monitor.protect</code> call, which is analogous to
         the <code>protect</code> call described in
         <a href="error-handling.html#cleaning-up-in-the-presence-of-exceptions">the section called “Cleaning up in the presence of exceptions”</a>.
-      </p></section></section><section><h1 id="timeouts-cancellation-and-choices">Timeouts, Cancellation and Choices</h1><p id="idp11208960">
+      </p></section></section><section><h1 id="timeouts-cancellation-and-choices">Timeouts, Cancellation and Choices</h1><p id="idp11330176">
       In a concurrent program, one often needs to combine results from
       multiple distinct concurrent sub-computations going on in the same
       program. We already saw this in our DuckDuckGo example, where we
@@ -1295,7 +1295,7 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
 <span class="k">val</span> <span class="n">string_and_float</span> <span class="o">:</span> <span class="o">(</span><span class="kt">string</span> <span class="o">*</span> <span class="kt">float</span><span class="o">)</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">abstr</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="n">string_and_float</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">*</span> <span class="kt">float</span> <span class="o">=</span> <span class="o">(</span><span class="s2">&quot;A&quot;</span><span class="o">,</span> <span class="mi">32</span><span class="o">.</span><span class="mi">33</span><span class="o">)</span>
-</pre></div><p id="idp11214048">
+</pre></div><p id="idp11335264">
       Sometimes, however, we want to wait only for the first of multiple
       events to occur. This happens particularly often when dealing with
       timeouts. In that case, we can use the call
@@ -1305,7 +1305,7 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
     </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">any</span> <span class="o">[</span> <span class="o">(</span><span class="n">after</span> <span class="o">(</span><span class="n">sec</span> <span class="mi">0</span><span class="o">.</span><span class="mi">5</span><span class="o">)</span> <span class="o">&gt;&gt;|</span> <span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span> <span class="s2">&quot;half a second&quot;</span><span class="o">)</span>
                <span class="o">;</span> <span class="o">(</span><span class="n">after</span> <span class="o">(</span><span class="n">sec</span> <span class="mi">10</span><span class="o">.)</span> <span class="o">&gt;&gt;|</span> <span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span> <span class="s2">&quot;ten seconds&quot;</span><span class="o">)</span> <span class="o">]</span> <span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;half a second&quot;</span>
-</pre></div><p id="idp11216688">
+</pre></div><p id="idp11337904">
       Let's use this to add timeouts to our DuckDuckGo searches. We'll
       do this by writing a wrapper for <code>get_definition</code>
       that takes a timeout (in the form of a
@@ -1323,12 +1323,12 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
        <span class="o">(</span><span class="n">word</span><span class="o">,</span><span class="n">result'</span><span class="o">)</span>
       <span class="o">)</span>
     <span class="o">]</span>
-</pre></div><p id="idp11220128">
+</pre></div><p id="idp11341344">
       We use <code>&gt;&gt;|</code> above to transform the
       deferred values we're waiting for so that
       <code>Deferred.any</code> can choose between values of the
       same type.
-    </p><p id="idp11222080">
+    </p><p id="idp11343296">
       A problem with this code is that the HTTP query kicked off by
       <code>get_definition</code> is not actually shut down when
       the timeout fires. As such,
@@ -1339,7 +1339,7 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
       <code>Cohttp_async.Client.get</code>. Once
       <code>interrupt</code> is determined, the client connection
       will terminated and the corresponding connections closed.
-    </p><p id="idp11226480">
+    </p><p id="idp11347696">
       The following code shows how you can change
       <code>get_definition</code> and
       <code>get_definition_with_timeout</code> to cancel the
@@ -1355,7 +1355,7 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
   <span class="o">&gt;&gt;|</span> <span class="k">function</span>
   <span class="o">|</span> <span class="nc">Ok</span> <span class="o">(</span><span class="n">word</span><span class="o">,</span><span class="n">result</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="n">word</span><span class="o">,</span> <span class="nc">Ok</span> <span class="n">result</span><span class="o">)</span>
   <span class="o">|</span> <span class="nc">Error</span> <span class="n">exn</span>        <span class="o">-&gt;</span> <span class="o">(</span><span class="n">word</span><span class="o">,</span> <span class="nc">Error</span> <span class="n">exn</span><span class="o">)</span>
-</pre></div><p id="idp11230512">
+</pre></div><p id="idp11351728">
       Next, we'll modify <code>get_definition_with_timeout</code>
       to create a deferred to pass in to
       <code>get_definition</code> which will become determined
@@ -1368,7 +1368,7 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
     <span class="o">|</span> <span class="nc">Error</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="nc">Error</span> <span class="s2">&quot;Unexpected failure&quot;</span>
   <span class="k">in</span>
   <span class="o">(</span><span class="n">word</span><span class="o">,</span><span class="n">result'</span><span class="o">)</span>
-</pre></div><p id="idp11233936">
+</pre></div><p id="idp11355152">
       This will work, and will cause the connection to shut-down cleanly
       when we time out; but our code no longer explicitly knows whether
       or not the timeout has kicked in. In particular, the error message
@@ -1377,7 +1377,7 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
       previous implementation. This is a minor issue in this case, but
       if we wanted to have special behavior in the case of a timeout, it
       would be a more serious issue.
-    </p><p id="idp11236224">
+    </p><p id="idp11357440">
       We can get more precise handling of timeouts using Async's
       <code>choose</code> operator, which lets you pick between a
       collection of different deferreds, reacting to exactly one of
@@ -1389,14 +1389,14 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
 <span class="o">-</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">choice</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="n">choose</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">choice</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="nn">Deferred</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp11240960">
+</pre></div><p id="idp11362176">
 <code>choose</code> provides no guarantee that the
       <code>choice</code> built around the first deferred to
       become determined will in fact be chosen. But
       <code>choose</code> does guarantee that only one
       <code>choice</code> will be chosen, and only the chosen
       <code>choice</code> will execute the attached closure.
-    </p><p id="idp11245120">
+    </p><p id="idp11366336">
       In the following, we use <code>choose</code> to ensure that
       the <code>interrupt</code> deferred becomes determined if
       and only if the timeout-deferred is chosen. Here's the code.
@@ -1415,11 +1415,11 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
            <span class="o">(</span><span class="n">word</span><span class="o">,</span><span class="n">result'</span><span class="o">)</span>
         <span class="o">)</span>
     <span class="o">]</span>
-</pre></div><p id="idp11248816">
+</pre></div><p id="idp11370032">
       Now, if we run this with a suitably small timeout, we'll see that
       some queries succeed and some fail, and the timeouts are reported
       as such.
-    </p><pre id="idp11249376">
+    </p><pre id="idp11370592">
 $ ./search_with_timeout_no_leak.native &quot;concurrent programming&quot; ocaml -timeout 0.1s
 concurrent programming
 ----------------------

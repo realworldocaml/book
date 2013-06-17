@@ -124,7 +124,7 @@
                 
                 
 
-    <p id="idp10328656">
+    <p id="idp10449456">
     Data serialization, <span><em>i.e.</em></span> converting data to and
     from a sequence of bytes that's suitable for writing to disk or
     sending across the network, is an important and common programming
@@ -133,22 +133,22 @@
     you want something that is easy for humans to edit. To this end,
     OCaml comes with several techniques for data serialization depending
     on what your problem is.
-  </p><p id="idp10330000">
+  </p><p id="idp10450800">
     We'll start by using the popular and simple JSON data format, and
     then look at other serialization formats later in in the book. This
     chapter introduces you to a couple of new techniques that glue
     together the basic ideas from Part I of the book:
-  </p><ul><li><p id="idp10331184">
+  </p><ul><li><p id="idp10451984">
         Using polymorphic variants to write more extensible libraries
         and protocols (but still retain the ability to extend them if
         needed)
-      </p></li><li><p id="idp10332128">
+      </p></li><li><p id="idp10452928">
         The use of <span><em>combinators</em></span> to compose common
         operations over data structures in a type-safe way.
-      </p></li><li><p id="idp10333440">
+      </p></li><li><p id="idp10454240">
         Using external tools to generate boilerplate OCaml modules and
         signatures from external specification files.
-      </p></li></ul><section><h1 id="json-basics">JSON Basics</h1><p id="idp10335312">
+      </p></li></ul><section><h1 id="json-basics">JSON Basics</h1><p id="idp10456112">
       JSON is a lightweight data-interchange format often used in web
       services and browsers. It's described in
       <a href="http://www.ietf.org/rfc/rfc4627.txt" target="_top">RFC4627</a>,
@@ -156,7 +156,7 @@
       You'll run into JSON very often when working with modern web APIs,
       so we'll cover several different ways to manipulate it in this
       chapter.
-    </p><p id="idp10336800">
+    </p><p id="idp10457600">
       JSON consists of two basic structures: an unordered collection of
       key/value pairs, and an ordered list of values. Values can be
       strings, booleans, floats, integers or null. Let's see what a JSON
@@ -172,7 +172,7 @@
   <span class="p">],</span>
   <span class="nt">&quot;is_online&quot;</span><span class="p">:</span> <span class="kc">true</span>
 <span class="p">}</span>
-</pre></div><p id="idp10338784">
+</pre></div><p id="idp10459584">
       The outermost JSON value is usually a record (delimited by the
       curly braces) and contains an unordered set of key/value pairs.
       The keys must be strings but values can be any JSON type. In the
@@ -180,14 +180,14 @@
       <code>authors</code> field contains a list of records.
       Unlike OCaml lists, JSON lists can contain multiple different JSON
       types within a single list.
-    </p><p id="idp10341008">
+    </p><p id="idp10461808">
       This free-form nature of JSON types is both a blessing and a
       curse. It's very easy to generate JSON values, but code that
       parses them also has to handle subtle variations in how the values
       are represented. For example, what if the <code>pages</code>
       value above is actually represented as a string value of
       <code>&quot;450&quot;</code> instead of an integer?
-    </p><p id="idp10343168">
+    </p><p id="idp10463968">
       Our first task is to parse the JSON into a more structured OCaml
       type so that we can use static typing more effectively. When
       manipulating JSON in Python or Ruby, you might write unit tests to
@@ -198,21 +198,21 @@
       actual value.
     </p><aside class="note"><h1>
     Installing the Yojson library
-    </h1><p id="idp10345456">
+    </h1><p id="idp10466256">
       There are several JSON libraries available for OCaml. For this
       chapter, we've picked the
       <a href="http://mjambon.com/yojson.html" target="_top"><code>Yojson</code></a>
       library by Martin Jambon. It's easiest to install via OPAM.
-    </p><pre id="idp10347152">
+    </p><pre id="idp10467952">
 $ opam install yojson
-</pre><p id="idp10347840">
+</pre><p id="idp10468640">
       See <a href="installation.html">Appendix A, <i>Installation</i></a> for installation
       instructions if you haven't already got OPAM. Once installed, you
       can open it in the <code>utop</code> toplevel by:
-    </p><pre id="idp10349744">
+    </p><pre id="idp10470544">
 #require &quot;yojson&quot; ;;
 open Yojson ;;
-</pre></aside></section><section><h1 id="parsing-json-with-yojson">Parsing JSON with Yojson</h1><p id="idp10351952">
+</pre></aside></section><section><h1 id="parsing-json-with-yojson">Parsing JSON with Yojson</h1><p id="idp10472704">
       The JSON specification has very few data types, and the
       <code>Yojson.Basic.json</code> type shown below is
       sufficient to express any valid JSON structure.
@@ -224,10 +224,10 @@ open Yojson ;;
   <span class="o">|</span> <span class="o">`</span><span class="nc">List</span> <span class="k">of</span> <span class="n">json</span> <span class="kt">list</span>
   <span class="o">|</span> <span class="o">`</span><span class="nc">Null</span>
   <span class="o">|</span> <span class="o">`</span><span class="nc">String</span> <span class="k">of</span> <span class="kt">string</span> <span class="o">]</span>
-</pre></div><p id="idp10354304">
+</pre></div><p id="idp10475056">
       Some interesting properties should leap out at you after reading
       this definition:
-    </p><ul><li><p id="idp10355312">
+    </p><ul><li><p id="idp10476064">
           Some of the type definitions are
           <span><em>recursive</em></span> (that is, one of the algebraic
           data types includes a reference to the name of the type being
@@ -237,15 +237,15 @@ open Yojson ;;
           <code>List</code> can contain fields of different types,
           unlike the OCaml <code>list</code> whose contents must
           be uniform.
-        </p></li><li><p id="idp10359088">
+        </p></li><li><p id="idp10479840">
           The definition specifically includes a <code>Null</code>
           variant for empty fields. OCaml doesn't allow null values by
           default, so this must be encoded like any other value.
-        </p></li><li><p id="idp10360768">
+        </p></li><li><p id="idp10481520">
           The type definition uses polymorphic variants and not normal
           variants. This will become significant later when we extend it
           with custom extensions to the JSON format.
-        </p></li></ul><p id="idp10361632">
+        </p></li></ul><p id="idp10482384">
       Let's parse the earlier JSON example into this type now. The first
       stop is the <code>Yojson.Basic</code> documentation, where
       we find these helpful functions:
@@ -260,14 +260,14 @@ open Yojson ;;
 <span class="k">val</span> <span class="n">from_file</span> <span class="o">:</span> <span class="o">?</span><span class="n">buf</span><span class="o">:</span><span class="nn">Bi_outbuf</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="o">?</span><span class="n">fname</span><span class="o">:</span><span class="kt">string</span> <span class="o">-&gt;</span> <span class="o">?</span><span class="n">lnum</span><span class="o">:</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="n">json</span>
 <span class="c">(* Read a JSON value from a file. See [from_string] for the meaning of the optional</span>
 <span class="c">   arguments. *)</span>
-</pre></div><p id="idp10364848">
+</pre></div><p id="idp10485600">
       When first reading these interfaces, you can generally ignore the
       optional arguments (which have the question marks in the type
       signature), as they will be filled in with sensible values. In the
       above signature, the optional arguments offer finer control over
       the memory buffer allocation and error messages from parsing
       incorrect JSON.
-    </p><p id="idp10365632">
+    </p><p id="idp10486384">
       The type signature for these functions with the optional elements
       removed makes their purpose much clearer. The two ways of parsing
       the JSON are either directly from a string or from a file on a
@@ -277,21 +277,21 @@ open Yojson ;;
 </pre></div><aside class="note"><h1>
     The standard OCaml in_channel and
     out_channel
-</h1><p id="idp10369488">
+</h1><p id="idp10490240">
       You'll notice when reading the Yojson interface that we've left
       out the <code>from_channel</code> function, which uses a
       <code>in_channel</code> type provided by the OCaml standard
       library. These OCaml channels are considered deprecated in Core,
       as they're primarily used by the compiler itself, but don't always
       play well with threading and asynchronous programming.
-    </p><p id="idp10371648">
+    </p><p id="idp10492432">
       The Core equivalent are the <code>In_channel</code> and
       <code>Out_channel</code> modules instead, but you will still
       see the standard OCaml channel types being used in third-party
       libraries such as Yojson which weren't specifically designed to be
       used with Core. They won't do any harm if you don't use them in
       your code, so just ignore them and use strings or files instead.
-    </p></aside><p id="idp10373952">
+    </p></aside><p id="idp10494736">
       The next example shows both the string and file functions in
       action, assuming the JSON record is stored in a file called
       <code>book.json</code>.
@@ -310,11 +310,11 @@ open Yojson ;;
 
   <span class="c">(* Test that the two values are the same *)</span>
   <span class="n">print_endline</span> <span class="o">(</span><span class="k">if</span> <span class="n">json1</span> <span class="o">=</span> <span class="n">json2</span> <span class="k">then</span> <span class="s2">&quot;OK&quot;</span> <span class="k">else</span> <span class="s2">&quot;FAIL&quot;</span><span class="o">)</span>
-</pre></div><p id="idp10376976">
+</pre></div><p id="idp10497760">
       You can build this by writing a <code>_tags</code> file to
       define the package dependencies, and then running
       <code>ocamlbuild</code>.
-    </p><pre id="idp10378896">
+    </p><pre id="idp10499680">
 $ cat _tags
 true: package(core,yojson)
 true: thread, debug, annot
@@ -322,7 +322,7 @@ true: thread, debug, annot
 $ ocamlbuild -use-ocamlfind read_json.native
 $ ./read_json.native
 OK
-</pre><p id="idp10379712">
+</pre><p id="idp10500496">
       The <code>from_file</code> function accepts an input
       filename and takes care of opening and closing it for you. It's
       far more common to use <code>from_string</code> to construct
@@ -331,7 +331,7 @@ OK
       <a href="concurrent-programming-with-async.html">Chapter 18, <i>Concurrent Programming with Async</i></a>) or
       a database. Finally, the example checks that the two input
       mechanisms actually resulted in the same OCaml data structure.
-    </p></section><section><h1 id="selecting-values-from-json-structures">Selecting values from JSON structures</h1><p id="idp10383952">
+    </p></section><section><h1 id="selecting-values-from-json-structures">Selecting values from JSON structures</h1><p id="idp10504688">
       Now that we've figured out how to parse the example JSON into an
       OCaml value, let's manipulate it from OCaml code and extract
       specific fields.
@@ -363,11 +363,11 @@ OK
     <span class="o">|</span> <span class="nc">Some</span> <span class="bp">false</span> <span class="o">-&gt;</span> <span class="s2">&quot;no&quot;</span> <span class="k">in</span>
   <span class="n">printf</span> <span class="s2">&quot;Online: %s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">(</span><span class="n">string_of_bool_option</span> <span class="n">is_online</span><span class="o">);</span>
   <span class="n">printf</span> <span class="s2">&quot;Translated: %s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">(</span><span class="n">string_of_bool_option</span> <span class="n">is_translated</span><span class="o">)</span>
-</pre></div><p id="idp10386912">
+</pre></div><p id="idp10507648">
       Build this with the same <code>_tags</code> file as the
       earlier example, and run <code>ocamlbuild</code> on the new
       file.
-    </p><pre id="idp10388832">
+    </p><pre id="idp10509568">
 $ ocamlbuild -use-ocamlfind parse_book.native
 $ ./parse_book.native 
 Title: Real World OCaml (450)
@@ -375,26 +375,26 @@ Authors: Jason Hickey, Anil Madhavapeddy, Yaron Minsky
 Tags: functional programming, ocaml, algorithms
 Online: yes
 Translated: &lt;none&gt;
-</pre><p id="idp10389968">
+</pre><p id="idp10510704">
       This code introduces the <code>Yojson.Basic.Util</code>
       module, which contains <span><em>combinator</em></span> functions
       that let you easily map a JSON object into a more strongly-typed
       OCaml value.
     </p><section><h1><b>
     Functional Combinators
-    </b></h1><p id="idp10392368">
+    </b></h1><p id="idp10513104">
       Combinators are a design pattern that crops up quite often in
       functional programming. John Hughes defines them as &quot;a
       function which builds program fragments from program
       fragments&quot;. In a functional language, this generally means
       higher-order functions that combine other functions to apply
       useful transformations over values.
-    </p><p id="idp10393600">
+    </p><p id="idp10514336">
       You've already run across several of these in the
       <code>List</code> module:
     </p><div class="highlight"><pre><span class="k">val</span> <span class="n">map</span>  <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="n">f</span><span class="o">:(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span><span class="o">)</span>   <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span> <span class="kt">list</span>
 <span class="k">val</span> <span class="n">fold</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="n">init</span><span class="o">:</span><span class="k">'</span><span class="n">accum</span> <span class="o">-&gt;</span> <span class="n">f</span><span class="o">:(</span><span class="k">'</span><span class="n">accum</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">accum</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">accum</span>
-</pre></div><p id="idp10395872">
+</pre></div><p id="idp10516608">
 <code>map</code> and <code>fold</code> are extremely
       common combinators that transform an input list by applying a
       function to each value of the list. The <code>map</code>
@@ -403,13 +403,13 @@ Translated: &lt;none&gt;
       list to a function that accumulates a single result, and returns
       that instead.
     </p><div class="highlight"><pre><span class="k">val</span> <span class="n">iter</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="n">f</span><span class="o">:(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">unit</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="kt">unit</span>
-</pre></div><p id="idp10400400">
+</pre></div><p id="idp10521136">
 <code>iter</code> is a more specialised combinator that is
       only useful in OCaml due to side-effects being allowed. The input
       function is applied to every value, but no result is supplied. The
       function must instead apply some side-effect such as changing a
       mutable record field or printing to the standard output.
-    </p></section><p id="idp10401936">
+    </p></section><p id="idp10522672">
 <code>Yojson</code> provides several combinators in the
       <code>Yojson.Basic.Util</code> module.
     </p><table><thead><tr><th>
@@ -446,7 +446,7 @@ Translated: &lt;none&gt;
 </td><td>
               Filter valid strings from a list of JSON fields, and
               return them as OCaml strings.
-            </td></tr></tbody></table><p id="idp10419856">
+            </td></tr></tbody></table><p id="idp10540592">
       We'll go through each of these uses one-by-one now. The examples
       below also use the <code>|&gt;</code> pipe-forward operator
       that we explained earlier in
@@ -454,12 +454,12 @@ Translated: &lt;none&gt;
       chain together multiple JSON selection functions and feed the
       output from one into the next one, without having to create
       separate <code>let</code> bindings for each one.
-    </p><p id="idp10422640">
+    </p><p id="idp10543376">
       Let's start with selecting a single <code>title</code> field
       from the record.
     </p><div class="highlight"><pre>  <span class="k">let</span> <span class="k">open</span> <span class="nn">Yojson</span><span class="p">.</span><span class="nn">Basic</span><span class="p">.</span><span class="nc">Util</span> <span class="k">in</span>
   <span class="k">let</span> <span class="n">title</span> <span class="o">=</span> <span class="n">json</span> <span class="o">|&gt;</span> <span class="n">member</span> <span class="s2">&quot;title&quot;</span> <span class="o">|&gt;</span> <span class="n">to_string</span> <span class="k">in</span>
-</pre></div><p id="idp10424880">
+</pre></div><p id="idp10545616">
       The <code>member</code> function accepts a JSON object and
       named key and returns the JSON field associated with that key, or
       <code>Null</code>. Since we know that the
@@ -471,7 +471,7 @@ Translated: &lt;none&gt;
       chain these operations together.
     </p><div class="highlight"><pre>  <span class="k">let</span> <span class="n">tags</span> <span class="o">=</span> <span class="n">json</span> <span class="o">|&gt;</span> <span class="n">member</span> <span class="s2">&quot;tags&quot;</span> <span class="o">|&gt;</span> <span class="n">to_list</span> <span class="o">|&gt;</span> <span class="n">filter_string</span> <span class="k">in</span>
   <span class="k">let</span> <span class="n">pages</span> <span class="o">=</span> <span class="n">json</span> <span class="o">|&gt;</span> <span class="n">member</span> <span class="s2">&quot;pages&quot;</span> <span class="o">|&gt;</span> <span class="n">to_int</span> <span class="k">in</span>
-</pre></div><p id="idp10430496">
+</pre></div><p id="idp10551184">
       The <code>tags</code> field is similar to
       <code>title</code>, but the field is a list of strings
       instead of a single one. Converting this to an OCaml
@@ -484,7 +484,7 @@ Translated: &lt;none&gt;
       skipped from the output of <code>filter_string</code>.
     </p><div class="highlight"><pre>  <span class="k">let</span> <span class="n">is_online</span> <span class="o">=</span> <span class="n">json</span> <span class="o">|&gt;</span> <span class="n">member</span> <span class="s2">&quot;is_online&quot;</span> <span class="o">|&gt;</span> <span class="n">to_bool_option</span> <span class="k">in</span>
   <span class="k">let</span> <span class="n">is_translated</span> <span class="o">=</span> <span class="n">json</span> <span class="o">|&gt;</span> <span class="n">member</span> <span class="s2">&quot;is_translated&quot;</span> <span class="o">|&gt;</span> <span class="n">to_bool_option</span> <span class="k">in</span>
-</pre></div><p id="idp10438176">
+</pre></div><p id="idp10558864">
       The <code>is_online</code> and
       <code>is_translated</code> fields are optional in our JSON
       schema, so no error should be raised if they are not present. The
@@ -494,7 +494,7 @@ Translated: &lt;none&gt;
       <code>is_translated</code> will be <code>None</code>.
     </p><div class="highlight"><pre>  <span class="k">let</span> <span class="n">authors</span> <span class="o">=</span> <span class="n">json</span> <span class="o">|&gt;</span> <span class="n">member</span> <span class="s2">&quot;authors&quot;</span> <span class="o">|&gt;</span> <span class="n">to_list</span> <span class="k">in</span>
   <span class="k">let</span> <span class="n">names</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="n">authors</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">json</span> <span class="o">-&gt;</span> <span class="n">member</span> <span class="s2">&quot;name&quot;</span> <span class="n">json</span> <span class="o">|&gt;</span> <span class="n">to_string</span><span class="o">)</span> <span class="k">in</span>
-</pre></div><p id="idp10444944">
+</pre></div><p id="idp10565632">
       The final use of JSON combinators is to extract all the
       <code>name</code> fields from the list of authors. We first
       construct the <code>author list</code>, and then
@@ -507,7 +507,7 @@ Translated: &lt;none&gt;
   <span class="o">|&gt;</span> <span class="n">member</span> <span class="s2">&quot;authors&quot;</span>
   <span class="o">|&gt;</span> <span class="n">to_list</span>
   <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">json</span> <span class="o">-&gt;</span> <span class="n">member</span> <span class="s2">&quot;name&quot;</span> <span class="n">json</span> <span class="o">|&gt;</span> <span class="n">to_string</span><span class="o">)</span>
-</pre></div><p id="idp10450208">
+</pre></div><p id="idp10570896">
       This style of programming which omits variable names and chains
       functions together is known as <span><em>point-free
       programming</em></span>. It's a succinct style, but shouldn't be
@@ -515,12 +515,12 @@ Translated: &lt;none&gt;
       values. If an explicit name is assigned to each stage of the
       transformations, debuggers in particular have an easier time
       making the program flow easier to represent to the programmer.
-    </p><p id="idp10451488">
+    </p><p id="idp10572176">
       This technique of using chained parsing functions is very powerful
       in combination with the OCaml type system. Many errors that don't
       make sense at runtime (for example, mixing up lists and objects)
       will be caught statically via a type error.
-    </p></section><section><h1 id="constructing-json-values">Constructing JSON values</h1><p id="idp10453376">
+    </p></section><section><h1 id="constructing-json-values">Constructing JSON values</h1><p id="idp10574112">
       Building and printing JSON values is pretty straightforward given
       the <code>Yojson.Basic.json</code> type. You can just
       construct values of type <code>json</code> and call the
@@ -534,19 +534,19 @@ Translated: &lt;none&gt;
   <span class="o">|</span> <span class="o">`</span><span class="nc">List</span> <span class="k">of</span> <span class="n">json</span> <span class="kt">list</span>
   <span class="o">|</span> <span class="o">`</span><span class="nc">Null</span>
   <span class="o">|</span> <span class="o">`</span><span class="nc">String</span> <span class="k">of</span> <span class="kt">string</span> <span class="o">]</span>
-</pre></div><p id="idp10457920">
+</pre></div><p id="idp10578656">
       We can directly build a JSON value against this type, and use the
       pretty-printing functions in the <code>Yojson.Basic</code>
       module to lay the output out in the JSON format.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">person</span> <span class="o">=</span> <span class="o">`</span><span class="nc">Assoc</span> <span class="o">[</span> <span class="o">(</span><span class="s2">&quot;name&quot;</span><span class="o">,</span> <span class="o">`</span><span class="nc">String</span> <span class="s2">&quot;Anil&quot;</span><span class="o">)</span> <span class="o">]</span> <span class="o">;;</span>
 <span class="k">val</span> <span class="n">x</span> <span class="o">:</span> <span class="o">[&gt;</span> <span class="o">`</span><span class="nc">Assoc</span> <span class="k">of</span> <span class="o">(</span><span class="kt">string</span> <span class="o">*</span> <span class="o">[&gt;</span> <span class="o">`</span><span class="nc">String</span> <span class="k">of</span> <span class="kt">string</span> <span class="o">])</span> <span class="kt">list</span> <span class="o">]</span> <span class="o">=</span>
   <span class="o">`</span><span class="nc">Assoc</span> <span class="o">[(</span><span class="s2">&quot;name&quot;</span><span class="o">,</span> <span class="o">`</span><span class="nc">String</span> <span class="s2">&quot;Anil&quot;</span><span class="o">)]</span>
-</pre></div><p id="idp10460448">
+</pre></div><p id="idp10581184">
       In the example above, we've constructed a simple JSON object that
       represents a single person. We haven't actually defined the type
       of <code>person</code> explicitly, as we're relying on the
       magic of polymorphic variants to make this all work.
-    </p><p id="idp10461808">
+    </p><p id="idp10582544">
       The OCaml type system infers a type for <code>person</code>
       based on how you construct its value. In this case, only the
       <code>Assoc</code> and <code>String</code> variants
@@ -556,7 +556,7 @@ Translated: &lt;none&gt;
       <code>Int</code> or <code>Null</code>).
     </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Yojson</span><span class="p">.</span><span class="nn">Basic</span><span class="p">.</span><span class="n">pretty_to_string</span> <span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="o">?</span><span class="n">std</span><span class="o">:</span><span class="kt">bool</span> <span class="o">-&gt;</span> <span class="nn">Yojson</span><span class="p">.</span><span class="nn">Basic</span><span class="p">.</span><span class="n">json</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>  
-</pre></div><p id="idp10467152">
+</pre></div><p id="idp10587888">
       The <code>pretty_to_string</code> function has a more
       explicit signature that requires an argument of type
       <code>Yojson.Basic.json</code>. When
@@ -571,7 +571,7 @@ Translated: &lt;none&gt;
 <span class="o">#</span> <span class="nn">Yojson</span><span class="p">.</span><span class="nn">Basic</span><span class="p">.</span><span class="n">pretty_to_channel</span> <span class="n">stdout</span> <span class="n">person</span> <span class="o">;;</span>
 <span class="o">{</span> <span class="s2">&quot;name&quot;</span><span class="o">:</span> <span class="s2">&quot;Anil&quot;</span> <span class="o">}</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
-</pre></div><p id="idp10473328">
+</pre></div><p id="idp10594064">
       In this case, there are no problems. Our <code>person</code>
       value has an inferred type that is a valid sub-type of
       <code>json</code>, and so the conversion to a string just
@@ -581,7 +581,7 @@ Translated: &lt;none&gt;
       uses of polymorphic variants are still checked at compile-time.
     </p><section><h1><b>
     Polymorphic variants and easier type checking
-    </b></h1><p id="idp10476944">
+    </b></h1><p id="idp10597680">
       One difficulty you will encounter is that type errors involving
       polymorphic variants can be quite verbose if you make a mistake in
       your code. For example, suppose you build an
@@ -596,7 +596,7 @@ Translated: &lt;none&gt;
          <span class="o">[&gt;</span> <span class="o">`</span><span class="nc">Assoc</span> <span class="k">of</span> <span class="kt">string</span> <span class="o">*</span> <span class="o">[&gt;</span> <span class="o">`</span><span class="nc">String</span> <span class="k">of</span> <span class="kt">string</span> <span class="o">]</span> <span class="o">]</span>
        <span class="n">but</span> <span class="n">an</span> <span class="n">expression</span> <span class="n">was</span> <span class="n">expected</span> <span class="k">of</span> <span class="k">type</span> <span class="nn">Yojson</span><span class="p">.</span><span class="nn">Basic</span><span class="p">.</span><span class="n">json</span>
        <span class="nc">Types</span> <span class="k">for</span> <span class="n">tag</span> <span class="o">`</span><span class="nc">Assoc</span> <span class="n">are</span> <span class="n">incompatible</span>
-</pre></div><p id="idp10480112">
+</pre></div><p id="idp10600848">
       The type error above is more verbose than it needs to be, which
       can be inconvenient to wade through for larger values. You can
       help the compiler to narrow down this error to a shorter form by
@@ -605,7 +605,7 @@ Translated: &lt;none&gt;
 <span class="nc">Error</span><span class="o">:</span> <span class="nc">This</span> <span class="n">expression</span> <span class="n">has</span> <span class="k">type</span> <span class="k">'</span><span class="n">a</span> <span class="o">*</span> <span class="k">'</span><span class="n">b</span>
        <span class="n">but</span> <span class="n">an</span> <span class="n">expression</span> <span class="n">was</span> <span class="n">expected</span> <span class="k">of</span> <span class="k">type</span>
          <span class="o">(</span><span class="kt">string</span> <span class="o">*</span> <span class="nn">Yojson</span><span class="p">.</span><span class="nn">Basic</span><span class="p">.</span><span class="n">json</span><span class="o">)</span> <span class="kt">list</span>
-</pre></div><p id="idp10482192">
+</pre></div><p id="idp10603216">
       We've annotated <code>person</code> as being of type
       <code>Yojson.Basic.json</code>, and as a result the compiler
       spots that the argument to the <code>Assoc</code> variant
@@ -615,11 +615,11 @@ Translated: &lt;none&gt;
       can be more confusing. However, a bit of careful manual type
       annotation is all it takes to make tracking down such issues much
       easier.
-    </p><p id="idp10485184">
+    </p><p id="idp10606208">
       We'll discuss more techniques like this that help you interpret
       type errors more easily in
       <a href="the-compiler-frontend-parsing-and-type-checking.html">Chapter 23, <i>The Compiler Frontend: Parsing and Type Checking</i></a>.
-    </p></section></section><section><h1 id="using-non-standard-json-extensions">Using non-standard JSON extensions</h1><p id="idp10487840">
+    </p></section></section><section><h1 id="using-non-standard-json-extensions">Using non-standard JSON extensions</h1><p id="idp10608912">
       The standard JSON types are <span><em>really</em></span> basic, and
       OCaml types are far more expressive. Yojson supports an extended
       JSON format for those times when you're not interoperating with
@@ -640,7 +640,7 @@ Translated: &lt;none&gt;
   <span class="o">|</span> <span class="o">`</span><span class="nc">Stringlit</span> <span class="k">of</span> <span class="kt">string</span>
   <span class="o">|</span> <span class="o">`</span><span class="nc">Tuple</span> <span class="k">of</span> <span class="n">json</span> <span class="kt">list</span>
   <span class="o">|</span> <span class="o">`</span><span class="nc">Variant</span> <span class="k">of</span> <span class="kt">string</span> <span class="o">*</span> <span class="n">json</span> <span class="n">option</span> <span class="o">]</span>
-</pre></div><p id="idp10491664">
+</pre></div><p id="idp10612736">
       The <code>Safe.json</code> type includes all of the variants
       from <code>Basic.json</code> and extends it with a few more
       useful ones. A standard JSON type such as a
@@ -650,29 +650,29 @@ Translated: &lt;none&gt;
       with the <code>Basic</code> module however, the compiler
       will reject your code until you make it compliant with the
       portable subset of JSON.
-    </p><p id="idp10496736">
+    </p><p id="idp10617808">
       Yojson supports the following JSON extensions:
-    </p><ul><li><p id="idp10497712">
+    </p><ul><li><p id="idp10618784">
           The <code>lit</code> suffix denotes that the value is
           stored as a JSON string. For example, a
           <code>Floatlit</code> will be stored as
           <code>&quot;1.234&quot;</code> instead of
           <code>1.234</code>.
-        </p></li><li><p id="idp10501456">
+        </p></li><li><p id="idp10622576">
           The <code>Tuple</code> type is stored as
           <code>(&quot;abc&quot;, 123)</code> instead of a list.
-        </p></li><li><p id="idp10503728">
+        </p></li><li><p id="idp10624848">
           The <code>Variant</code> type encodes OCaml variants
           more explicitly, as <code>&lt;&quot;Foo&quot;&gt;</code>
           or <code>&lt;&quot;Bar&quot;:123&gt;</code> for a
           variant with parameters.
-        </p></li></ul><p id="idp10506640">
+        </p></li></ul><p id="idp10627760">
       The only purpose of these extensions is to have greater control
       over how OCaml values are represented in JSON (for instance,
       storing a floating pointer number as a JSON string). The output
       still obeys the same standard format that can be easily exchanged
       with other languages.
-    </p><p id="idp10507360">
+    </p><p id="idp10628480">
       You can convert a <code>Safe.json</code> to a
       <code>Basic.json</code> type by using the
       <code>to_basic</code> function as follows.
@@ -687,13 +687,13 @@ Translated: &lt;none&gt;
 <span class="c">    `Variant (&quot;B&quot;, Some x)          -&gt;    `List [ `String &quot;B&quot;, x ]</span>
 <span class="c">    `Intlit &quot;12345678901234567890&quot;  -&gt;    `String &quot;12345678901234567890&quot;</span>
 <span class="c"> *)</span>
-</pre></div></section><section><h1 id="automatically-mapping-json-to-ocaml-types">Automatically mapping JSON to OCaml types</h1><p id="idp10512944">
+</pre></div></section><section><h1 id="automatically-mapping-json-to-ocaml-types">Automatically mapping JSON to OCaml types</h1><p id="idp10634000">
       The combinators described earlier make it easy to write functions
       that extract fields from JSON records, but the process is still
       pretty manual. When you implement larger specifications, it's much
       easier to generate the mappings from JSON schemas to OCaml values
       more mechanically than writing conversion functions individually.
-    </p><p id="idp10513712">
+    </p><p id="idp10634768">
       We'll cover an alternative JSON processing method that is better
       for larger-scale JSON handling now, using the
       <a href="http://mjambon.com/atd-biniou-intro.html" target="_top">ATD</a>
@@ -702,28 +702,28 @@ Translated: &lt;none&gt;
       modules, which are then used throughout your application.
     </p><aside class="note"><h1>
     Installing the ATDgen library and tool
-    </h1><p id="idp10516256">
+    </h1><p id="idp10637360">
       ATDgen installs some OCaml libraries that interface with Yojson,
       and also a command-line tool that generates code. It can all be
       installed via OPAM:
-    </p><pre id="idp10516832">
+    </p><pre id="idp10637936">
 $ opam install atdgen
 $ atdgen -version
 1.2.3
-</pre><p id="idp10517552">
+</pre><p id="idp10638656">
       The command-line tool will be installed within your
       <code>~/.opam</code> directory, and will already be on your
       <code>PATH</code> from running
       <code>opam config env</code>. See
       <a href="installation.html">Appendix A, <i>Installation</i></a> if this isn't working.
-    </p></aside><section><h1 id="atd-basics">ATD basics</h1><p id="idp10522112">
+    </p></aside><section><h1 id="atd-basics">ATD basics</h1><p id="idp10643280">
         The idea behind ATD is to specify the format of the JSON in a
         separate file, and then run a compiler
         (<code>atdgen</code>) that outputs OCaml code to construct
         and parse JSON values. This means that you don't need to write
         any OCaml parsing code at all, as it will all be auto-generated
         for you.
-      </p><p id="idp10523552">
+      </p><p id="idp10644720">
         Let's go straight into looking at an example of how this works,
         by using a small portion of the GitHub API. GitHub is a popular
         code hosting and sharing website that provides a JSON-based web
@@ -731,7 +731,7 @@ $ atdgen -version
         code fragment below describes the GitHub authorization API
         (which is based on a pseudo-standard web protocol known as
         OAuth).
-      </p><pre id="idp10525072">
+      </p><pre id="idp10646240">
 (* github.atd *)
 type scope = [
     User &lt;json name=&quot;user&quot;&gt;
@@ -761,24 +761,24 @@ type authorization_response = {
   ?note: string option;
   ?note_url: string option;
 }
-</pre><p id="idp10526608">
+</pre><p id="idp10647776">
         The ATD specification syntax is deliberately quite similar to
         OCaml type definitions. Every JSON record is assigned a type
         name (e.g. <code>app</code> in the example above). You can
         also define variants that are similar to OCaml's variant types
         (e.g. <code>scope</code> in the example).
-      </p></section><section><h1 id="atd-annotations">ATD annotations</h1><p id="idp10530016">
+      </p></section><section><h1 id="atd-annotations">ATD annotations</h1><p id="idp10651184">
         ATD deviates significantly from OCaml syntax due to its support
         for annotations within the specification. The annotations can
         customise the code that is generated for a particular target (of
         which the OCaml backend is of most interest to us).
-      </p><p id="idp10530704">
+      </p><p id="idp10651872">
         For example, the GitHub <code>scope</code> field above is
         defined as a variant type with each option starting with an
         uppercase letter as is conventional for OCaml variants. However,
         the the JSON values that come back from Github are actually
         lowercase, and so aren't exactly the same as the option name.
-      </p><p id="idp10532144">
+      </p><p id="idp10653312">
         The annotation
         <code>&lt;json name=&quot;user&quot;&gt;</code> signals
         that the JSON value of the field should be treated as
@@ -786,7 +786,7 @@ type authorization_response = {
         OCaml should be <code>User</code>. These annotations are
         also useful to map JSON values to reserved keywords in OCaml
         (e.g. <code>type</code>).
-      </p></section><section><h1 id="compiling-atd-specifications-to-ocaml">Compiling ATD specifications to OCaml</h1><p id="idp10536992">
+      </p></section><section><h1 id="compiling-atd-specifications-to-ocaml">Compiling ATD specifications to OCaml</h1><p id="idp10658096">
         The ATD specification we defined above can be compiled to OCaml
         code using the <code>atdgen</code> command-line tool.
         Let's run the compiler twice, to generate some OCaml type
@@ -794,7 +794,7 @@ type authorization_response = {
         between input data and those type definitions.
       </p><div class="highlight"><pre><span class="nv">$ </span>atdgen -t github.atd
 <span class="nv">$ </span>atdgen -j github.atd
-</pre></div><p id="idp10539408">
+</pre></div><p id="idp10660512">
         This will generate some new files in your current directory.
         <code>Github_t.ml</code> and
         <code>Github_t.mli</code> will contain an OCaml module
@@ -824,7 +824,7 @@ type authorization_response = {
   <span class="n">note</span><span class="o">:</span> <span class="kt">string</span> <span class="n">option</span><span class="o">;</span>
   <span class="n">note_url</span><span class="o">:</span> <span class="kt">string</span> <span class="n">option</span>
 <span class="o">}</span>
-</pre></div><p id="idp10542832">
+</pre></div><p id="idp10663936">
         There is an obvious correspondence to the ATD definition. Note
         that field names in OCaml records in the same module cannot
         shadow each other, and so we instruct ATDgen to prefix every
@@ -834,7 +834,7 @@ type authorization_response = {
         in the ATD spec prefixes every field name in the generated
         <code>authorization_request</code> record with
         <code>auth_req</code>.
-      </p><p id="idp10545808">
+      </p><p id="idp10666912">
         The <code>Github_t</code> module only contains the type
         definitions, while <code>Github_j</code> provides
         serialization functions to and from JSON. You can read the
@@ -852,49 +852,49 @@ type authorization_response = {
 
 <span class="k">val</span> <span class="n">authorization_response_of_string</span> <span class="o">:</span>
   <span class="kt">string</span> <span class="o">-&gt;</span> <span class="n">authorization_response</span>
-</pre></div><p id="idp10550368">
+</pre></div><p id="idp10671472">
         This is pretty convenient! We've now written a single ATD file,
         and all the OCaml boilerplate to convert between JSON and a
         strongly typed record has been generated for us. You can control
         various aspects of the serializer by passing flags to
         <code>atdgen</code>. The important ones for JSON are:
-      </p><ul><li><p id="idp10552320">
+      </p><ul><li><p id="idp10673424">
 <code>-j-std</code>: Convert tuples and variants into
             standard JSON and refuses to print NaN and infinities. You
             should specify this if you intend to interoperate with
             services that aren't using ATD.
-          </p></li><li><p id="idp10554016">
+          </p></li><li><p id="idp10675120">
 <code>-j-custom-fields FUNCTION</code>: call a custom
             function for every unknown field encountered, instead of
             raising a parsing exception.
-          </p></li><li><p id="idp10555648">
+          </p></li><li><p id="idp10676752">
 <code>-j-defaults</code>: always explicitly output a
             JSON value if possible. This requires the default value for
             that field to be defined in the ATD specification.
-          </p></li></ul><p id="idp10557168">
+          </p></li></ul><p id="idp10678272">
         The full ATD specification is quite sophisticated and well
         documented online at its homepage. The ATD compiler can also
         target formats other than JSON, and outputs code for other
         languages such as Java if you need more interoperability.
-      </p><p id="idp10557840">
+      </p><p id="idp10678944">
         There are also several similar projects that automate the code
         generation process: <a href="http://piqi.org" target="_top">Piqi</a>
         uses the Google protobuf format, and
         <a href="http://thrift.apache.org" target="_top">Thrift</a> supports
         many other programming languages and includes OCaml bindings.
-      </p></section><section><h1 id="example-querying-github-organization-information">Example: Querying Github organization information</h1><p id="idp10561152">
+      </p></section><section><h1 id="example-querying-github-organization-information">Example: Querying Github organization information</h1><p id="idp10682368">
         Let's finish up with an example of some live JSON parsing from
         Github, and build a tool to query organization information via
         their API. Start by looking at the online
         <a href="http://developer.github.com/v3/orgs/" target="_top">API
         documentation</a> for Github to see what the JSON schema for
         retrieving the organization information looks like.
-      </p><p id="idp10562608">
+      </p><p id="idp10683824">
         Now create an ATD file that covers the fields we need. Any extra
         fields present in the response will be ignored by the ATD
         parser, so we don't need a completely exhaustive specification
         of every field that Github might send back.
-      </p><pre id="idp10563280">
+      </p><pre id="idp10684496">
 (* github_org.atd *)
 type org = {
   login: string;
@@ -905,10 +905,10 @@ type org = {
   ?email: string option;
   public_repos: int
 }
-</pre><p id="idp10564128">
+</pre><p id="idp10685344">
         Let's build the OCaml type declaration first by calling
         <code>atdgen -t</code> on the specification file.
-      </p><pre id="idp10565344">
+      </p><pre id="idp10686560">
 $ atdgen -t github_org.atd
 $ cat github_org_t.mli
 (* Auto-generated from &quot;github_org.atd&quot; *)
@@ -921,13 +921,13 @@ type org = {
   email: string option;
   public_repos: int
 }
-</pre><p id="idp10566624">
+</pre><p id="idp10687840">
         The OCaml type has an obvious mapping to the ATD spec, but we
         still need the logic to convert JSON buffers to and from this
         type. Calling <code>atdgen -j</code> will generate this
         serialization code for us in a new file called
         <code>github_org_j.ml</code>.
-      </p><pre id="idp10568688">
+      </p><pre id="idp10689904">
 $ atdgen -j github_org.atd
 $ cat github_org_j.mli
 (* Auto-generated from &quot;github_org.atd&quot; *)
@@ -961,7 +961,7 @@ val read_org :
 val org_of_string :
   string -&gt; org
   (** Deserialize JSON data of type {!org}. *)
-</pre><p id="idp10570944">
+</pre><p id="idp10692160">
         The <code>Github_org_j</code> serializer interface
         contains everything we need to map to-and-from the OCaml types
         and JSON. The easiest way to use this interface is by using the
@@ -969,11 +969,11 @@ val org_of_string :
         <code>org_of_string</code> functions, but there are also
         more advanced low-level buffer functions available if you need
         higher performance (but we won't go into that in this tutorial).
-      </p><p id="idp10573840">
+      </p><p id="idp10695056">
         All we need to complete our example is an OCaml program that
         fetches the JSON and uses these modules to output a one-line
         summary. Our example below does just that.
-      </p><p id="idp10574432">
+      </p><p id="idp10695648">
         The code below calls the cURL command-line utility by using the
         <code>Core_extended.Shell</code> interface to run an
         external command and capture its output. You'll need to ensure
@@ -999,10 +999,10 @@ val org_of_string :
     <span class="nn">Command</span><span class="p">.</span><span class="nn">Spec</span><span class="p">.</span><span class="err">(</span><span class="n">empty</span> <span class="o">+&gt;</span> <span class="n">anon</span> <span class="o">(</span><span class="s2">&quot;organization&quot;</span> <span class="o">%:</span> <span class="kt">string</span><span class="o">))</span>
     <span class="n">print_org</span>
   <span class="o">|&gt;</span> <span class="nn">Command</span><span class="p">.</span><span class="n">run</span>
-</pre></div><p id="idp10578288">
+</pre></div><p id="idp10699504">
         Below is a short shell script that generates all of the OCaml
         code and also builds the final executable.
-      </p><pre id="idp10578816">
+      </p><pre id="idp10700032">
 $ cat _tags 
 true: package(core,core_extended,yojson,atdgen)
 true: thread, debug, annot
@@ -1015,12 +1015,12 @@ atdgen -j github_org.atd
 ocamlbuild -use-ocamlfind github_org_info.native
 
 $ ./buildgh.sh
-</pre><p id="idp10579728">
+</pre><p id="idp10700944">
         You can now run the command-line tool with a single argument to
         specify the name of the organization, and it will dynamically
         fetch the JSON from the web, parse it, and render the summary to
         your console.
-      </p><pre id="idp10580368">
+      </p><pre id="idp10701584">
 $ curl https://api.github.com/orgs/janestreet 
 {
   &quot;login&quot;: &quot;janestreet&quot;,
@@ -1039,7 +1039,7 @@ $ ./github_org_info.native mirage
 Mirage account (131943) with 32 public repos
 $ ./github_org_info.native janestreet
 ??? (3384712) with 31 public repos
-</pre><p id="idp10581664">
+</pre><p id="idp10702880">
         The JSON returned from the <code>janestreet</code> query
         is missing an organization name, but this is explicitly
         reflected in the OCaml type since the ATD spec marked
@@ -1048,14 +1048,14 @@ $ ./github_org_info.native janestreet
         null-pointer exceptions. Similarly, the JSON integer for the
         <code>id</code> is mapped into a native OCaml integer via
         the ATD conversion.
-      </p><p id="idp10584592">
+      </p><p id="idp10705808">
         While this tool is obviously quite simple, the ability to
         specify optional and default fields is very powerful. Take a
         look at the full ATD specification for the GitHub API in the
         <a href="http://github.com/avsm/ocaml-github" target="_top"><code>ocaml-github</code></a>
         repository online, which has lots of quirks typical in
         real-world web APIs.
-      </p><p id="idp10586416">
+      </p><p id="idp10707632">
         Our example shells out to <code>curl</code> on the
         command-line to obtain the JSON, which is rather inefficient.
         We'll explain how to integrate the HTTP fetch directly into your

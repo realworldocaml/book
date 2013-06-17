@@ -144,14 +144,14 @@
                 
                 
 
-    <p id="idp8168176">
+    <p id="idp8283920">
     Variant types are one of the most useful features of OCaml, and also
     one of the most unusual. They let you represent data that may take
     on multiple different forms, where each form is marked by an
     explicit tag. As we'll see, when combined with pattern matching,
     variants give you a powerful way of representing complex data and of
     organizing the case-analysis on that information.
-  </p><p id="idp8168992">
+  </p><p id="idp8284736">
     Let's consider a concrete example of how variants can be useful.
     Almost all terminals support a set of 8 basic colors, and we can
     represent those colors using a variant. Each color is declared as a
@@ -163,7 +163,7 @@
 <span class="o">-</span> <span class="o">:</span> <span class="n">basic_color</span> <span class="o">=</span> <span class="nc">Cyan</span>
 <span class="o">#</span> <span class="o">[</span><span class="nc">Blue</span><span class="o">;</span> <span class="nc">Magenta</span><span class="o">;</span> <span class="nc">Red</span><span class="o">]</span> <span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="n">basic_color</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="nc">Blue</span><span class="o">;</span> <span class="nc">Magenta</span><span class="o">;</span> <span class="nc">Red</span><span class="o">]</span>
-</pre></div><p id="idp8170784">
+</pre></div><p id="idp8286864">
     The following function uses pattern matching to convert a
     <code>basic_color</code> to a corresponding integer. The
     exhaustiveness checking on pattern matches means that the compiler
@@ -174,7 +174,7 @@
 <span class="k">val</span> <span class="n">basic_color_to_int</span> <span class="o">:</span> <span class="n">basic_color</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="n">basic_color_to_int</span> <span class="o">[</span><span class="nc">Blue</span><span class="o">;</span><span class="nc">Red</span><span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">4</span><span class="o">;</span> <span class="mi">1</span><span class="o">]</span>
-</pre></div><p id="idp8173504">
+</pre></div><p id="idp8289584">
     Using the above, we can generate escape codes to change the color of
     a given string displayed in a terminal.
   </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">color_by_number</span> <span class="n">number</span> <span class="n">text</span> <span class="o">=</span>
@@ -185,10 +185,10 @@
 <span class="o">#</span> <span class="n">printf</span> <span class="s2">&quot;Hello %s World!</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="n">blue</span><span class="o">;;</span>
 <span class="nc">Hello</span> <span class="nc">Blue</span> <span class="nc">World</span><span class="o">!</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
-</pre></div><p id="idp8175568">
+</pre></div><p id="idp8291648">
     On most terminals, that word &quot;Blue&quot; will be rendered in
     blue.
-  </p><p id="idp8176176">
+  </p><p id="idp8292256">
     In this example, the cases of the variant are simple tag with no
     associated data. This is substantively the same as the enumerations
     found in languages like C and Java. But as we'll see, variants can
@@ -197,13 +197,13 @@
     colors that a modern terminal can display. Many terminals, including
     the venerable <code>xterm</code>, support 256 different
     colors, broken up into the following groups.
-  </p><ul><li><p id="idp8178256">
+  </p><ul><li><p id="idp8294336">
         The 8 basic colors, in regular and bold versions.
-      </p></li><li><p id="idp8179104">
+      </p></li><li><p id="idp8295184">
         A 6 × 6 × 6 RGB color cube
-      </p></li><li><p id="idp8180000">
+      </p></li><li><p id="idp8296080">
         A 24-level grayscale ramp
-      </p></li></ul><p id="idp8180640">
+      </p></li></ul><p id="idp8296720">
     We'll also represent this more complicated color-space as a variant,
     but this time, the different tags will have arguments which describe
     the data available in each case. Note that variants can have
@@ -216,7 +216,7 @@
 <span class="o">;;</span>
 <span class="o">#</span> <span class="o">[</span><span class="nc">RGB</span> <span class="o">(</span><span class="mi">250</span><span class="o">,</span><span class="mi">70</span><span class="o">,</span><span class="mi">70</span><span class="o">);</span> <span class="nc">Basic</span> <span class="o">(</span><span class="nc">Green</span><span class="o">,</span> <span class="nc">Regular</span><span class="o">)];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="n">color</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="nc">RGB</span> <span class="o">(</span><span class="mi">250</span><span class="o">,</span> <span class="mi">70</span><span class="o">,</span> <span class="mi">70</span><span class="o">);</span> <span class="nc">Basic</span> <span class="o">(</span><span class="nc">Green</span><span class="o">,</span> <span class="nc">Regular</span><span class="o">)]</span>
-</pre></div><p id="idp8183152">
+</pre></div><p id="idp8299232">
     Once again, we'll use pattern matching to convert a color to a
     corresponding integer. But in this case, the pattern matching does
     more than separate out the different cases; it also allows us to
@@ -228,7 +228,7 @@
     <span class="o">|</span> <span class="nc">RGB</span> <span class="o">(</span><span class="n">r</span><span class="o">,</span><span class="n">g</span><span class="o">,</span><span class="n">b</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="mi">16</span> <span class="o">+</span> <span class="n">b</span> <span class="o">+</span> <span class="n">g</span> <span class="o">*</span> <span class="mi">6</span> <span class="o">+</span> <span class="n">r</span> <span class="o">*</span> <span class="mi">36</span>
     <span class="o">|</span> <span class="nc">Gray</span> <span class="n">i</span> <span class="o">-&gt;</span> <span class="mi">232</span> <span class="o">+</span> <span class="n">i</span> <span class="o">;;</span>
 <span class="k">val</span> <span class="n">color_to_int</span> <span class="o">:</span> <span class="n">color</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp8185088">
+</pre></div><p id="idp8301168">
     Now, we can print text using the full set of available colors.
   </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">color_print</span> <span class="n">color</span> <span class="n">s</span> <span class="o">=</span>
      <span class="n">printf</span> <span class="s2">&quot;%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">(</span><span class="n">color_by_number</span> <span class="o">(</span><span class="n">color_to_int</span> <span class="n">color</span><span class="o">)</span> <span class="n">s</span><span class="o">);;</span>
@@ -241,11 +241,11 @@
 <span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
 </pre></div><aside class="note"><h1>
   Catch-all cases and refactoring
-  </h1><p id="idp8187248">
+  </h1><p id="idp8303328">
     OCaml's type system can act as a refactoring tool, by warning you of
     places where your code needs to be updated to match an interface
     change. This is particularly valuable in the context of variants.
-  </p><p id="idp8187856">
+  </p><p id="idp8303936">
     Consider what would happen if we were to change the definition of
     <code>color</code> to the following.
   </p><div class="highlight"><pre><span class="o">#</span> <span class="k">type</span> <span class="n">color</span> <span class="o">=</span>
@@ -254,7 +254,7 @@
   <span class="o">|</span> <span class="nc">RGB</span>   <span class="k">of</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span> <span class="c">(* 6x6x6 color cube *)</span>
   <span class="o">|</span> <span class="nc">Gray</span>  <span class="k">of</span> <span class="kt">int</span>             <span class="c">(* 24 grayscale levels *)</span>
 <span class="o">;;</span>
-</pre></div><p id="idp8190064">
+</pre></div><p id="idp8306144">
     We've essentially broken out the <code>Basic</code> case into
     two cases, <code>Basic</code> and <code>Bold</code>, and
     <code>Basic</code> has changed from having two arguments to
@@ -270,7 +270,7 @@
 <span class="nc">Characters</span> <span class="mi">40</span><span class="o">-</span><span class="mi">60</span><span class="o">:</span>
 <span class="nc">Error</span><span class="o">:</span> <span class="nc">This</span> <span class="n">pattern</span> <span class="n">matches</span> <span class="n">values</span> <span class="k">of</span> <span class="k">type</span> <span class="k">'</span><span class="n">a</span> <span class="o">*</span> <span class="k">'</span><span class="n">b</span>
        <span class="n">but</span> <span class="n">a</span> <span class="n">pattern</span> <span class="n">was</span> <span class="n">expected</span> <span class="n">which</span> <span class="n">matches</span> <span class="n">values</span> <span class="k">of</span> <span class="k">type</span> <span class="n">basic_color</span>
-</pre></div><p id="idp8195024">
+</pre></div><p id="idp8311104">
     Here, the compiler is complaining that the <code>Basic</code>
     tag is used with the wrong number of arguments. If we fix that,
     however, the compiler flag will flag a second problem, which is that
@@ -284,7 +284,7 @@
 <span class="nc">Here</span> <span class="n">is</span> <span class="n">an</span> <span class="n">example</span> <span class="k">of</span> <span class="n">a</span> <span class="n">value</span> <span class="n">that</span> <span class="n">is</span> <span class="n">not</span> <span class="n">matched</span><span class="o">:</span>
 <span class="nc">Bold</span> <span class="o">_</span>
 <span class="k">val</span> <span class="n">color_to_int</span> <span class="o">:</span> <span class="n">color</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp8198688">
+</pre></div><p id="idp8314768">
     Fixing this now leads us to the correct implementation.
   </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">color_to_int</span> <span class="o">=</span> <span class="k">function</span>
     <span class="o">|</span> <span class="nc">Basic</span> <span class="n">basic_color</span> <span class="o">-&gt;</span> <span class="n">basic_color_to_int</span> <span class="n">basic_color</span>
@@ -292,14 +292,14 @@
     <span class="o">|</span> <span class="nc">RGB</span> <span class="o">(</span><span class="n">r</span><span class="o">,</span><span class="n">g</span><span class="o">,</span><span class="n">b</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="mi">16</span> <span class="o">+</span> <span class="n">b</span> <span class="o">+</span> <span class="n">g</span> <span class="o">*</span> <span class="mi">6</span> <span class="o">+</span> <span class="n">r</span> <span class="o">*</span> <span class="mi">36</span>
     <span class="o">|</span> <span class="nc">Gray</span> <span class="n">i</span> <span class="o">-&gt;</span> <span class="mi">232</span> <span class="o">+</span> <span class="n">i</span> <span class="o">;;</span>
 <span class="k">val</span> <span class="n">color_to_int</span> <span class="o">:</span> <span class="n">color</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp8200368">
+</pre></div><p id="idp8316448">
     As we've seen, the type errors identified the things that needed to
     be fixed to complete the refactoring of the code. This is
     fantastically useful, but for it to work well and reliably, you need
     to write your code in a way that maximizes the compiler's chances of
     helping you find the bugs. To this end, a useful rule of thumb is to
     avoid catch-all cases in pattern matches.
-  </p><p id="idp8201168">
+  </p><p id="idp8317248">
     Here's an example that illustrates how catch-all cases interact with
     exhaustion checks. Imagine we wanted a version of
     <code>color_to_int</code> that works on older terminals by
@@ -312,13 +312,13 @@
       <span class="n">base</span> <span class="o">+</span> <span class="n">basic_color_to_int</span> <span class="n">basic_color</span>
     <span class="o">|</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="n">basic_color_to_int</span> <span class="nc">White</span><span class="o">;;</span>
 <span class="k">val</span> <span class="n">oldschool_color_to_int</span> <span class="o">:</span> <span class="n">color</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp8204512">
+</pre></div><p id="idp8320592">
     But because the catch-all case encompasses all possibilities, the
     type system will no longer warn us that we have missed the new
     <code>Bold</code> case when we change the type to include it.
     We can get this check back by being avoiding the catch-all case, and
     instead being explicit about the tags that are ignored.
-  </p></aside><section><h1 id="combining-records-and-variants">Combining records and variants</h1><p id="idp8206880">
+  </p></aside><section><h1 id="combining-records-and-variants">Combining records and variants</h1><p id="idp8322960">
       Records and variants are most effective when used in concert.
       Consider again the type <code>Log_entry.t</code> from
       <a href="records.html">Chapter 5, <i>Records</i></a>:
@@ -331,7 +331,7 @@
       <span class="o">}</span>
   <span class="k">end</span>
   <span class="o">;;</span>
-</pre></div><p id="idp8209536">
+</pre></div><p id="idp8325616">
       This record type combines multiple pieces of data into one value.
       In particular, a single <code>Log_entry.t</code> has a
       <code>session_id</code> <span><em>and</em></span> a
@@ -345,7 +345,7 @@
                         <span class="o">|</span> <span class="nc">Heartbeat</span> <span class="k">of</span> <span class="nn">Heartbeat</span><span class="p">.</span><span class="n">t</span>
                         <span class="o">|</span> <span class="nc">Log_entry</span> <span class="k">of</span> <span class="nn">Log_entry</span><span class="p">.</span><span class="n">t</span>
   <span class="o">;;</span>
-</pre></div><p id="idp8215568">
+</pre></div><p id="idp8331648">
       A <code>client_message</code> is a <code>Logon</code>
 <span><em>or</em></span> a <code>Heartbeat</code>
 <span><em>or</em></span> a <code>Log_entry</code>. If we want
@@ -355,7 +355,7 @@
       for the different possible messages. We can then match on the
       <code>client_message</code> to determine the type of the
       particular message being dealt with.
-    </p><p id="idp8220864">
+    </p><p id="idp8336944">
       You can increase the precision of your types by using variants to
       represent differences between types, and records to represent
       shared structure. Consider the following function that takes a
@@ -363,12 +363,12 @@
       messages generated by a given user. The code in question is
       implemented by folding over the list of messages, where the
       accumulator is a pair of:
-    </p><ul><li><p id="idp8222832">
+    </p><ul><li><p id="idp8338912">
           the set of session identifiers for the user that have been
           seen thus far.
-        </p></li><li><p id="idp8223712">
+        </p></li><li><p id="idp8339792">
           the set of messages so far that are associated with the user.
-        </p></li></ul><p id="idp8224448">
+        </p></li></ul><p id="idp8340528">
       Here's the concrete code.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">messages_for_user</span> <span class="n">user</span> <span class="n">messages</span> <span class="o">=</span>
     <span class="k">let</span> <span class="o">(</span><span class="n">user_messages</span><span class="o">,_)</span> <span class="o">=</span>
@@ -394,7 +394,7 @@
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">messages_for_user</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="n">client_message</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="n">client_message</span> <span class="kt">list</span> <span class="o">=</span>
   <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp8226800">
+</pre></div><p id="idp8342880">
       There's one awkward bit about the code above, which is the
       calculation of the session ids. In particular, we have the
       following repetitive snippet of code:
@@ -403,13 +403,13 @@
     <span class="o">|</span> <span class="nc">Heartbeat</span> <span class="n">m</span> <span class="o">-&gt;</span> <span class="n">m</span><span class="o">.</span><span class="nn">Heartbeat</span><span class="p">.</span><span class="n">session_id</span>
     <span class="o">|</span> <span class="nc">Log_entry</span> <span class="n">m</span> <span class="o">-&gt;</span> <span class="n">m</span><span class="o">.</span><span class="nn">Log_entry</span><span class="p">.</span><span class="n">session_id</span>
   <span class="k">in</span>
-</pre></div><p id="idp8228576">
+</pre></div><p id="idp8344656">
       This code effectively computes the session id for each underlying
       message type. The repetition in this case isn't that bad, but
       would become problematic in larger and more complicated examples.
       Also, we had to include code for the <code>Logon</code>
       case, even though it can't actually come up.
-    </p><p id="idp8229936">
+    </p><p id="idp8346016">
       We can improve the code by refactoring our types to explicitly
       separate the parts that are shared from those that are common. The
       first step is to cut down the definitions of the per-message
@@ -430,7 +430,7 @@
              <span class="o">}</span>
   <span class="k">end</span>
   <span class="o">;;</span>
-</pre></div><p id="idp8231808">
+</pre></div><p id="idp8347888">
       We can then define a variant type that covers the different
       possible unique components.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">type</span> <span class="n">details</span> <span class="o">=</span>
@@ -438,7 +438,7 @@
   <span class="o">|</span> <span class="nc">Heartbeat</span> <span class="k">of</span> <span class="nn">Heartbeat</span><span class="p">.</span><span class="n">t</span>
   <span class="o">|</span> <span class="nc">Log_entry</span> <span class="k">of</span> <span class="nn">Log_entry</span><span class="p">.</span><span class="n">t</span>
  <span class="o">;;</span>
-</pre></div><p id="idp8233296">
+</pre></div><p id="idp8349376">
       Separately, we need a record that contains the fields that are
       common across all messages.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">module</span> <span class="nc">Common</span> <span class="o">=</span> <span class="k">struct</span>
@@ -447,7 +447,7 @@
              <span class="o">}</span>
   <span class="k">end</span>
   <span class="o">;;</span>
-</pre></div><p id="idp8234800">
+</pre></div><p id="idp8350880">
       A full message can then be represented as a pair of a
       <code>Common.t</code> and a <code>details</code>.
       Using this, we can rewrite our example above as follows:
@@ -471,11 +471,11 @@
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">messages_for_user</span> <span class="o">:</span>
   <span class="kt">string</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="nn">Common</span><span class="p">.</span><span class="n">t</span> <span class="o">*</span> <span class="n">details</span><span class="o">)</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="nn">Common</span><span class="p">.</span><span class="n">t</span> <span class="o">*</span> <span class="n">details</span><span class="o">)</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp8238624">
+</pre></div><p id="idp8354704">
       Note that the more complex match statement for computing the
       session id has been replaced with the simple expression
       <code>common.Common.session_id</code>.
-    </p><p id="idp8239792">
+    </p><p id="idp8355872">
       In addition, this design allows us to essentially downcast to the
       specific message type once we know what it is, and then dispatch
       code to handle just that message type. In particular, while we use
@@ -490,20 +490,20 @@
     <span class="o">|</span> <span class="nc">Logon</span>     <span class="n">m</span> <span class="o">-&gt;</span> <span class="n">handle_logon</span>     <span class="n">server_state</span> <span class="o">(</span><span class="n">common</span><span class="o">,</span><span class="n">m</span><span class="o">)</span>
     <span class="o">|</span> <span class="nc">Heartbeat</span> <span class="n">m</span> <span class="o">-&gt;</span> <span class="n">handle_heartbeat</span> <span class="n">server_state</span> <span class="o">(</span><span class="n">common</span><span class="o">,</span><span class="n">m</span><span class="o">)</span>
   <span class="o">;;</span>
-</pre></div><p id="idp8243328">
+</pre></div><p id="idp8359408">
       And it's explicit at the type level that
       <code>handle_log_entry</code> sees only
       <code>Log_entry</code> messages,
       <code>handle_logon</code> sees only <code>Logon</code>
       messages, etc.
-    </p></section><section><h1 id="variants-and-recursive-data-structures">Variants and recursive data structures</h1><p id="idp8247216">
+    </p></section><section><h1 id="variants-and-recursive-data-structures">Variants and recursive data structures</h1><p id="idp8363296">
       Another common application of variants is to represent tree-like
       recursive data structures. We'll show how this can be done by
       walking through the design of a simple Boolean expression
       language. Such a language can be useful anywhere you need to
       specify filters, which are used in everything from packet
       analyzers to mail clients.
-    </p><p id="idp8247984">
+    </p><p id="idp8364064">
       An expression in this language will be defined by the variant
       <code>blang</code> (short for &quot;Boolean language&quot;)
       with one tag for each kind of expression we want to support.
@@ -514,21 +514,21 @@
   <span class="o">|</span> <span class="nc">Or</span>    <span class="k">of</span> <span class="k">'</span><span class="n">a</span> <span class="n">blang</span> <span class="kt">list</span>
   <span class="o">|</span> <span class="nc">Not</span>   <span class="k">of</span> <span class="k">'</span><span class="n">a</span> <span class="n">blang</span>
   <span class="o">;;</span>
-</pre></div><p id="idp8250432">
+</pre></div><p id="idp8366512">
       Note that the definition of the type <code>blang</code> is
       recursive, meaning that a <code>blang</code> may contain
       other <code>blang</code>s. Also, <code>blang</code> is
       parameterized by a polymorphic type <code>'a</code> which is
       used for specifying the type of the value that goes under the
       <code>Base</code> tag.
-    </p><p id="idp8254656">
+    </p><p id="idp8370736">
       The purpose of each tag is pretty straightforward.
       <code>And</code>, <code>Or</code> and
       <code>Not</code> are the basic operators for building up
       Boolean expressions, and <code>Const</code> lets you enter
       the constants <code>true</code> and
       <code>false</code>.
-    </p><p id="idp8258960">
+    </p><p id="idp8375040">
       The <code>Base</code> tag is what allows you to tie the
       <code>blang</code> to your application, by letting you
       specify an element of some base predicate type, whose truth or
@@ -540,7 +540,7 @@
   <span class="k">type</span> <span class="n">mail_predicate</span> <span class="o">=</span> <span class="o">{</span> <span class="n">field</span><span class="o">:</span> <span class="n">mail_field</span><span class="o">;</span>
                           <span class="n">contains</span><span class="o">:</span> <span class="kt">string</span> <span class="o">}</span>
   <span class="o">;;</span>
-</pre></div><p id="idp8261984">
+</pre></div><p id="idp8378064">
       Using the above, we can construct a simple expression with
       <code>mail_predicate</code> as its base predicate.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">test</span> <span class="n">field</span> <span class="n">contains</span> <span class="o">=</span> <span class="nc">Base</span> <span class="o">{</span> <span class="n">field</span><span class="o">;</span> <span class="n">contains</span> <span class="o">};;</span>
@@ -555,7 +555,7 @@
    <span class="o">[</span><span class="nc">Base</span> <span class="o">{</span><span class="n">field</span> <span class="o">=</span> <span class="nc">To</span><span class="o">;</span> <span class="n">contains</span> <span class="o">=</span> <span class="s2">&quot;doligez&quot;</span><span class="o">};</span>
     <span class="nc">Base</span> <span class="o">{</span><span class="n">field</span> <span class="o">=</span> <span class="nc">CC</span><span class="o">;</span> <span class="n">contains</span> <span class="o">=</span> <span class="s2">&quot;doligez&quot;</span><span class="o">}];</span>
   <span class="nc">Base</span> <span class="o">{</span><span class="n">field</span> <span class="o">=</span> <span class="nc">Subject</span><span class="o">;</span> <span class="n">contains</span> <span class="o">=</span> <span class="s2">&quot;runtime&quot;</span><span class="o">}]</span>
-</pre></div><p id="idp8264656">
+</pre></div><p id="idp8380736">
       Being able to construct such expressions isn't enough; we also
       need to be able to evaluate such an expression. The following code
       shows how you could write a general-purpose evaluator for
@@ -572,14 +572,14 @@
     <span class="o">|</span> <span class="nc">Not</span>   <span class="n">blang</span>  <span class="o">-&gt;</span> <span class="n">not</span> <span class="o">(</span><span class="n">eval'</span> <span class="n">blang</span><span class="o">)</span>
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">eval</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="n">blang</span>  <span class="o">-&gt;</span> <span class="o">(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">bool</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="kt">bool</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp8267664">
+</pre></div><p id="idp8383744">
       The structure of the code is pretty straightforward --- we're just
       pattern matching over the structure of the data, doing the
       appropriate calculation based on which tag we see. To use this
       evaluator on a concrete example, we just need to write the
       <code>base_eval</code> function which is capable of
       evaluating a base predicate.
-    </p><p id="idp8269040">
+    </p><p id="idp8385120">
       Another useful operation on expressions is simplification. The
       following function applies some basic simplification rules, most
       of which are driven by the presence of constants.
@@ -609,7 +609,7 @@
       <span class="o">|</span> <span class="n">blang</span> <span class="o">-&gt;</span> <span class="nc">Not</span> <span class="n">blang</span>
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">simplify</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="n">blang</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="n">blang</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp8271408">
+</pre></div><p id="idp8387488">
       One thing to notice about the above code is that it uses a
       catch-all case in the very last line within the
       <code>Not</code> case. It's generally better to be explicit
@@ -619,7 +619,7 @@
       <span class="k">match</span> <span class="n">simplify</span> <span class="n">blang</span> <span class="k">with</span>
       <span class="o">|</span> <span class="nc">Const</span> <span class="kt">bool</span> <span class="o">-&gt;</span> <span class="nc">Const</span> <span class="o">(</span><span class="n">not</span> <span class="kt">bool</span><span class="o">)</span>
       <span class="o">|</span> <span class="o">(</span><span class="nc">And</span> <span class="o">_</span> <span class="o">|</span> <span class="nc">Or</span> <span class="o">_</span> <span class="o">|</span> <span class="nc">Base</span> <span class="o">_</span> <span class="o">|</span> <span class="nc">Not</span> <span class="o">_)</span> <span class="o">-&gt;</span> <span class="nc">Not</span> <span class="n">blang</span>
-</pre></div><p id="idp8273808">
+</pre></div><p id="idp8389888">
       it's easy to see that we've missed an important case:
       double-negation.
     </p><div class="highlight"><pre>    <span class="o">|</span> <span class="nc">Not</span> <span class="n">blang</span> <span class="o">-&gt;</span>
@@ -627,21 +627,21 @@
       <span class="o">|</span> <span class="nc">Const</span> <span class="n">b</span> <span class="o">-&gt;</span> <span class="nc">Const</span> <span class="o">(</span><span class="n">not</span> <span class="n">b</span><span class="o">)</span>
       <span class="o">|</span> <span class="nc">Not</span> <span class="n">blang</span> <span class="o">-&gt;</span> <span class="n">blang</span>
       <span class="o">|</span> <span class="o">(</span><span class="nc">And</span> <span class="o">_</span> <span class="o">|</span> <span class="nc">Or</span> <span class="o">_</span> <span class="o">|</span> <span class="nc">Base</span> <span class="o">_</span> <span class="o">)</span> <span class="o">-&gt;</span> <span class="nc">Not</span> <span class="n">blang</span>
-</pre></div><p id="idp8275360">
+</pre></div><p id="idp8391440">
       This example is more than a toy. There's a module very much in
       this spirit in Core called <code>Blang</code>, and it gets a
       lot of practical use in a variety of applications.
-    </p><p id="idp8276576">
+    </p><p id="idp8392656">
       More generally, using variants to build recursive data structures
       is a common technique, and shows up everywhere from designing
       little languages to building efficient data structures.
-    </p></section><section><h1 id="polymorphic-variants">Polymorphic variants</h1><p id="idp8278192">
+    </p></section><section><h1 id="polymorphic-variants">Polymorphic variants</h1><p id="idp8394384">
       In addition to the ordinary variants we've seen so far, OCaml also
       supports so-called <span><em>polymorphic variants</em></span>. As
       we'll see, polymorphic variants are more flexible and
       syntactically more lightweight than ordinary variants, but that
       extra power comes at a cost.
-    </p><p id="idp8279264">
+    </p><p id="idp8395456">
       Syntactically, polymorphic variants are distinguished from
       ordinary variants by the leading backtick. And unlike ordinary
       variants, polymorphic variants can be used without an explicit
@@ -655,7 +655,7 @@
 <span class="o">#</span> <span class="o">[</span><span class="n">three</span><span class="o">;</span> <span class="n">four</span><span class="o">;</span> <span class="n">nan</span><span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="o">[&gt;</span> <span class="o">`</span><span class="nc">Float</span> <span class="k">of</span> <span class="kt">float</span> <span class="o">|</span> <span class="o">`</span><span class="nc">Int</span> <span class="k">of</span> <span class="kt">int</span> <span class="o">|</span> <span class="o">`</span><span class="nc">Not_a_number</span> <span class="o">]</span> <span class="kt">list</span> <span class="o">=</span>
 <span class="o">[`</span><span class="nc">Int</span> <span class="mi">3</span><span class="o">;</span> <span class="o">`</span><span class="nc">Float</span> <span class="mi">4</span><span class="o">.;</span> <span class="o">`</span><span class="nc">Not_a_number</span><span class="o">]</span>
-</pre></div><p id="idp8281520">
+</pre></div><p id="idp8397712">
       As you can see, polymorphic variant types are inferred
       automatically, and when we combine variants with different tags,
       the compiler infers a new type that knows about all of those tags.
@@ -663,7 +663,7 @@
       (<span><em>e.g.</em></span>, <code>`Int</code>) matches the
       type name (<code>int</code>). This is a common convention in
       OCaml.
-    </p><p id="idp8283824">
+    </p><p id="idp8400016">
       The type system will complain, if it sees incompatible uses of the
       same tag:
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">five</span> <span class="o">=</span> <span class="o">`</span><span class="nc">Int</span> <span class="s2">&quot;five&quot;</span><span class="o">;;</span>
@@ -676,7 +676,7 @@
        <span class="n">but</span> <span class="n">an</span> <span class="n">expression</span> <span class="n">was</span> <span class="n">expected</span> <span class="k">of</span> <span class="k">type</span>
          <span class="o">[&gt;</span> <span class="o">`</span><span class="nc">Float</span> <span class="k">of</span> <span class="kt">float</span> <span class="o">|</span> <span class="o">`</span><span class="nc">Int</span> <span class="k">of</span> <span class="kt">int</span> <span class="o">]</span>
        <span class="nc">Types</span> <span class="k">for</span> <span class="n">tag</span> <span class="o">`</span><span class="nc">Int</span> <span class="n">are</span> <span class="n">incompatible</span>
-</pre></div><p id="idp8285712">
+</pre></div><p id="idp8401904">
       The <code>&gt;</code> at the beginning of the variant types
       above is critical, because it marks the types as being open to
       combination with other variant types. We can read the type
@@ -686,7 +686,7 @@
       <code>`Float of float</code>, but may include more tags as
       well. In other words, you can roughly translate
       <code>&gt;</code> to mean: &quot;these tags or more&quot;.
-    </p><p id="idp8289792">
+    </p><p id="idp8405904">
       OCaml will in some cases infer a variant type with
       <code>&lt;</code>, to indicate &quot;these tags or
       less&quot;, as in the following example.
@@ -695,12 +695,12 @@
      <span class="o">|</span> <span class="o">`</span><span class="nc">Float</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">.</span>
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">is_positive</span> <span class="o">:</span> <span class="o">[&lt;</span> <span class="o">`</span><span class="nc">Float</span> <span class="k">of</span> <span class="kt">float</span> <span class="o">|</span> <span class="o">`</span><span class="nc">Int</span> <span class="k">of</span> <span class="kt">int</span> <span class="o">]</span> <span class="o">-&gt;</span> <span class="kt">bool</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp8292144">
+</pre></div><p id="idp8408256">
       The <code>&lt;</code> is there because
       <code>is_positive</code> has no way of dealing with values
       that have tags other than <code>`Float of float</code> or
       <code>`Int of int</code>.
-    </p><p id="idp8295104">
+    </p><p id="idp8411216">
       We can think of these <code>&lt;</code> and
       <code>&gt;</code> markers as indications of upper and lower
       bounds on the tags involved. If the same set of tags are both an
@@ -710,7 +710,7 @@
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">exact</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">filter</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="n">is_positive</span> <span class="o">[</span><span class="n">three</span><span class="o">;</span><span class="n">four</span><span class="o">];;</span>
 <span class="k">val</span> <span class="n">exact</span> <span class="o">:</span> <span class="o">[</span> <span class="o">`</span><span class="nc">Float</span> <span class="k">of</span> <span class="kt">float</span> <span class="o">|</span> <span class="o">`</span><span class="nc">Int</span> <span class="k">of</span> <span class="kt">int</span> <span class="o">]</span> <span class="kt">list</span>
    <span class="o">=</span> <span class="o">[`</span><span class="nc">Int</span> <span class="mi">3</span><span class="o">;</span> <span class="o">`</span><span class="nc">Float</span> <span class="mi">4</span><span class="o">.]</span>
-</pre></div><p id="idp8298416">
+</pre></div><p id="idp8414528">
       Perhaps surprisingly, we can also create polymorphic variant types
       that have different upper and lower bounds. Note that
       <code>Ok</code> and <code>Error</code> in the
@@ -727,14 +727,14 @@
      <span class="k">match</span> <span class="n">is_positive</span> <span class="n">x</span> <span class="k">with</span> <span class="nc">Error</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="bp">false</span> <span class="o">|</span> <span class="nc">Ok</span> <span class="n">b</span> <span class="o">-&gt;</span> <span class="n">b</span><span class="o">);;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="o">[&lt;</span> <span class="o">`</span><span class="nc">Float</span> <span class="k">of</span> <span class="kt">float</span> <span class="o">|</span> <span class="o">`</span><span class="nc">Int</span> <span class="k">of</span> <span class="kt">int</span> <span class="o">|</span> <span class="o">`</span><span class="nc">Not_a_number</span> <span class="o">&gt;</span> <span class="o">`</span><span class="nc">Float</span> <span class="o">`</span><span class="nc">Int</span> <span class="o">]</span> <span class="kt">list</span> <span class="o">=</span>
 <span class="o">[`</span><span class="nc">Int</span> <span class="mi">3</span><span class="o">;</span> <span class="o">`</span><span class="nc">Float</span> <span class="mi">4</span><span class="o">.]</span>
-</pre></div><p id="idp8302288">
+</pre></div><p id="idp8418400">
       Here, the inferred type states that the tags can be no more than
       <code>`Float</code>, <code>`Int</code> and
       <code>`Not_a_number</code>, and must contain at least
       <code>`Float</code> and <code>`Int</code>. As you can
       already start to see, polymorphic variants can lead to fairly
       complex inferred types.
-    </p><section><h1 id="example-terminal-colors-redux">Example: Terminal colors redux</h1><p id="idp8306896">
+    </p><section><h1 id="example-terminal-colors-redux">Example: Terminal colors redux</h1><p id="idp8423008">
         To see how to use polymorphic variants in practice, we'll return
         to terminal colors. Imagine that we have a new terminal type
         that adds yet more colors, say, by adding an alpha channel so
@@ -746,7 +746,7 @@
   <span class="o">|</span> <span class="nc">Gray</span>  <span class="k">of</span> <span class="kt">int</span>                   <span class="c">(* 24 grayscale levels *)</span>
   <span class="o">|</span> <span class="nc">RGBA</span>  <span class="k">of</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span> <span class="c">(* 6x6x6x6 color space *)</span>
   <span class="o">;;</span>
-</pre></div><p id="idp8308816">
+</pre></div><p id="idp8424928">
         We want to write a function
         <code>extended_color_to_int</code>, that works like
         <code>color_to_int</code> for all of the old kinds of
@@ -757,7 +757,7 @@
     <span class="o">|</span> <span class="nc">RGBA</span> <span class="o">(</span><span class="n">r</span><span class="o">,</span><span class="n">g</span><span class="o">,</span><span class="n">b</span><span class="o">,</span><span class="n">a</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="mi">256</span> <span class="o">+</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">*</span> <span class="mi">6</span> <span class="o">+</span> <span class="n">g</span> <span class="o">*</span> <span class="mi">36</span> <span class="o">+</span> <span class="n">r</span> <span class="o">*</span> <span class="mi">216</span>
     <span class="o">|</span> <span class="o">(</span><span class="nc">Basic</span> <span class="o">_</span> <span class="o">|</span> <span class="nc">RGB</span> <span class="o">_</span> <span class="o">|</span> <span class="nc">Gray</span> <span class="o">_)</span> <span class="k">as</span> <span class="n">color</span> <span class="o">-&gt;</span> <span class="n">color_to_int</span> <span class="n">color</span>
   <span class="o">;;</span>
-</pre></div><p id="idp8311952">
+</pre></div><p id="idp8428064">
         This looks reasonable enough, but it leads to the following type
         error.
       </p><div class="highlight"><pre><span class="nc">Characters</span> <span class="mi">93</span><span class="o">-</span><span class="mi">98</span><span class="o">:</span>
@@ -765,13 +765,13 @@
                                                           <span class="o">^^^^^</span>
 <span class="nc">Error</span><span class="o">:</span> <span class="nc">This</span> <span class="n">expression</span> <span class="n">has</span> <span class="k">type</span> <span class="n">extended_color</span>
        <span class="n">but</span> <span class="n">an</span> <span class="n">expression</span> <span class="n">was</span> <span class="n">expected</span> <span class="k">of</span> <span class="k">type</span> <span class="n">color</span>
-</pre></div><p id="idp8313952">
+</pre></div><p id="idp8430064">
         The problem is that <code>extended_color</code> and
         <code>color</code> are in the compiler's view distinct and
         unrelated types. The compiler doesn't, for example, recognize
         any equality between the <code>Basic</code> tag in the two
         types.
-      </p><p id="idp8316368">
+      </p><p id="idp8432480">
         What we want to do is to share tags between two different
         variant types, and polymorphic variants let us do this in a
         natural way. First, let's rewrite
@@ -800,7 +800,7 @@
    <span class="o">|</span> <span class="o">`</span><span class="nc">Gray</span> <span class="k">of</span> <span class="kt">int</span>
    <span class="o">|</span> <span class="o">`</span><span class="nc">RGB</span> <span class="k">of</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span> <span class="o">]</span> <span class="o">-&gt;</span>
   <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp8320528">
+</pre></div><p id="idp8436640">
         Now we can try writing <code>extended_color_to_int</code>.
         The key issue with this code is that
         <code>extended_color_to_int</code> needs to invoke
@@ -824,7 +824,7 @@
    <span class="o">|</span> <span class="o">`</span><span class="nc">RGB</span> <span class="k">of</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span>
    <span class="o">|</span> <span class="o">`</span><span class="nc">RGBA</span> <span class="k">of</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span> <span class="o">]</span> <span class="o">-&gt;</span>
   <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp8328240">
+</pre></div><p id="idp8444352">
         The above code is more delicately balanced than one might
         imagine. In particular, if we use a catch-all case instead of an
         explicit enumeration of the cases, the type is no longer
@@ -847,7 +847,7 @@
        <span class="nc">The</span> <span class="n">second</span> <span class="n">variant</span> <span class="k">type</span> <span class="n">does</span> <span class="n">not</span> <span class="n">allow</span> <span class="n">tag</span><span class="o">(</span><span class="n">s</span><span class="o">)</span> <span class="o">`</span><span class="nc">RGBA</span>
 </pre></div><aside class="note"><h1>
       Polymorphic variants and catch-all cases
-      </h1><p id="idp8331568">
+      </h1><p id="idp8447520">
         As we saw with the definition of <code>is_positive</code>,
         a match statement can lead to the inference of an upper bound on
         a variant type, limiting the possible tags to those that can be
@@ -865,7 +865,7 @@
 <span class="o">-</span> <span class="o">:</span> <span class="o">(</span><span class="kt">bool</span><span class="o">,</span> <span class="kt">string</span><span class="o">)</span> <span class="nn">Result</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="nc">Ok</span> <span class="bp">false</span>
 <span class="o">#</span> <span class="n">is_positive_permissive</span> <span class="o">(`</span><span class="nc">Ratio</span> <span class="o">(</span><span class="mi">3</span><span class="o">,</span><span class="mi">4</span><span class="o">));;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="o">(</span><span class="kt">bool</span><span class="o">,</span> <span class="kt">string</span><span class="o">)</span> <span class="nn">Result</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="nc">Error</span> <span class="s2">&quot;Unknown number type&quot;</span>
-</pre></div><p id="idp8334160">
+</pre></div><p id="idp8450224">
         Catch-all cases are error-prone even with ordinary variants, but
         they are especially so with polymorphic variants. That's because
         you have no way of bounding what tags your function might have
@@ -876,11 +876,11 @@
         the erroneous code will compile without complaint.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="n">is_positive_permissive</span> <span class="o">(`</span><span class="nc">Floot</span> <span class="mi">3</span><span class="o">.</span><span class="mi">5</span><span class="o">);;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="o">(</span><span class="kt">bool</span><span class="o">,</span> <span class="kt">string</span><span class="o">)</span> <span class="nn">Result</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="nc">Error</span> <span class="s2">&quot;Unknown number type&quot;</span>
-</pre></div><p id="idp8337888">
+</pre></div><p id="idp8453952">
         With ordinary variants, such a typo would have been caught as an
         unknown tag. As a general matter, one should be wary about
         mixing catch-all cases and polymorphic variants.
-      </p></aside><p id="idp8338624">
+      </p></aside><p id="idp8454688">
         Let's consider how we might turn our code into a proper library
         with an implementation in an <code>ml</code> file and an
         implementation in a separate <code>mli</code>, as we saw
@@ -905,7 +905,7 @@
 
 <span class="k">val</span> <span class="n">color_to_int</span>          <span class="o">:</span> <span class="n">color</span> <span class="o">-&gt;</span> <span class="kt">int</span>
 <span class="k">val</span> <span class="n">extended_color_to_int</span> <span class="o">:</span> <span class="n">extended_color</span> <span class="o">-&gt;</span> <span class="kt">int</span>
-</pre></div><p id="idp8343120">
+</pre></div><p id="idp8459184">
         Here, <code>extended_color</code> is defined as an
         explicit extension of <code>color</code>. Also, notice
         that we defined all of these types as exact variants. We can
@@ -942,7 +942,7 @@
   <span class="o">|</span> <span class="o">`</span><span class="nc">RGBA</span> <span class="o">(</span><span class="n">r</span><span class="o">,</span><span class="n">g</span><span class="o">,</span><span class="n">b</span><span class="o">,</span><span class="n">a</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="mi">256</span> <span class="o">+</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">*</span> <span class="mi">6</span> <span class="o">+</span> <span class="n">g</span> <span class="o">*</span> <span class="mi">36</span> <span class="o">+</span> <span class="n">r</span> <span class="o">*</span> <span class="mi">216</span>
   <span class="o">|</span> <span class="o">`</span><span class="nc">Grey</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="mi">2000</span> <span class="o">+</span> <span class="n">x</span>
   <span class="o">|</span> <span class="o">(`</span><span class="nc">Basic</span> <span class="o">_</span> <span class="o">|</span> <span class="o">`</span><span class="nc">RGB</span> <span class="o">_</span> <span class="o">|</span> <span class="o">`</span><span class="nc">Gray</span> <span class="o">_)</span> <span class="k">as</span> <span class="n">color</span> <span class="o">-&gt;</span> <span class="n">color_to_int</span> <span class="n">color</span>
-</pre></div><p id="idp8347424">
+</pre></div><p id="idp8463488">
         In the above code, we did something funny to the definition of
         <code>extended_color_to_int</code>, that underlines some
         of the downsides of polymorphic variants. In particular, we
@@ -956,7 +956,7 @@
         <code>extended_color_to_int</code>, which happens to be
         compatible with the narrower type that was listed in the
         <code>mli</code>.
-      </p><p id="idp8352224">
+      </p><p id="idp8468288">
         If we add an explicit type annotation to the code itself (rather
         than just in the <code>mli</code>), then the compiler has
         enough information to warn us.
@@ -964,14 +964,14 @@
   <span class="o">|</span> <span class="o">`</span><span class="nc">RGBA</span> <span class="o">(</span><span class="n">r</span><span class="o">,</span><span class="n">g</span><span class="o">,</span><span class="n">b</span><span class="o">,</span><span class="n">a</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="mi">256</span> <span class="o">+</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">*</span> <span class="mi">6</span> <span class="o">+</span> <span class="n">g</span> <span class="o">*</span> <span class="mi">36</span> <span class="o">+</span> <span class="n">r</span> <span class="o">*</span> <span class="mi">216</span>
   <span class="o">|</span> <span class="o">`</span><span class="nc">Grey</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="mi">2000</span> <span class="o">+</span> <span class="n">x</span>
   <span class="o">|</span> <span class="o">(`</span><span class="nc">Basic</span> <span class="o">_</span> <span class="o">|</span> <span class="o">`</span><span class="nc">RGB</span> <span class="o">_</span> <span class="o">|</span> <span class="o">`</span><span class="nc">Gray</span> <span class="o">_)</span> <span class="k">as</span> <span class="n">color</span> <span class="o">-&gt;</span> <span class="n">color_to_int</span> <span class="n">color</span>
-</pre></div><p id="idp8354592">
+</pre></div><p id="idp8470656">
         In particular, the compiler will complain that the
         <code>`Grey</code> case is unused.
       </p><div class="highlight"><pre><span class="nc">File</span> <span class="s2">&quot;color.ml&quot;</span><span class="o">,</span> <span class="n">line</span> <span class="mi">29</span><span class="o">,</span> <span class="n">characters</span> <span class="mi">4</span><span class="o">-</span><span class="mi">11</span><span class="o">:</span>
 <span class="nc">Error</span><span class="o">:</span> <span class="nc">This</span> <span class="n">pattern</span> <span class="n">matches</span> <span class="n">values</span> <span class="k">of</span> <span class="k">type</span> <span class="o">[?</span> <span class="o">`</span><span class="nc">Grey</span> <span class="k">of</span> <span class="k">'</span><span class="n">a</span> <span class="o">]</span>
        <span class="n">but</span> <span class="n">a</span> <span class="n">pattern</span> <span class="n">was</span> <span class="n">expected</span> <span class="n">which</span> <span class="n">matches</span> <span class="n">values</span> <span class="k">of</span> <span class="k">type</span> <span class="n">extended_color</span>
        <span class="nc">The</span> <span class="n">second</span> <span class="n">variant</span> <span class="k">type</span> <span class="n">does</span> <span class="n">not</span> <span class="n">allow</span> <span class="n">tag</span><span class="o">(</span><span class="n">s</span><span class="o">)</span> <span class="o">`</span><span class="nc">Grey</span>
-</pre></div><p id="idp8357072">
+</pre></div><p id="idp8473136">
         Once we have type definitions at our disposal, we can revisit
         the question of how we write the pattern match that narrows the
         type. In particular, we can explicitly use the type name as part
@@ -980,20 +980,20 @@
       </p><div class="highlight"><pre><span class="k">let</span> <span class="n">extended_color_to_int</span> <span class="o">:</span> <span class="n">extended_color</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="k">function</span>
   <span class="o">|</span> <span class="o">`</span><span class="nc">RGBA</span> <span class="o">(</span><span class="n">r</span><span class="o">,</span><span class="n">g</span><span class="o">,</span><span class="n">b</span><span class="o">,</span><span class="n">a</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="mi">256</span> <span class="o">+</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="o">*</span> <span class="mi">6</span> <span class="o">+</span> <span class="n">g</span> <span class="o">*</span> <span class="mi">36</span> <span class="o">+</span> <span class="n">r</span> <span class="o">*</span> <span class="mi">216</span>
   <span class="o">|</span> <span class="o">#</span><span class="n">color</span> <span class="k">as</span> <span class="n">color</span> <span class="o">-&gt;</span> <span class="n">color_to_int</span> <span class="n">color</span>
-</pre></div><p id="idp8359552">
+</pre></div><p id="idp8475616">
         This is useful when you want to narrow down to a type whose
         definition is long, and you don't want the verbosity of writing
         the tags down explicitly in the match.
-      </p></section><section><h1 id="when-to-use-polymorphic-variants">When to use polymorphic variants</h1><p id="idp8361152">
+      </p></section><section><h1 id="when-to-use-polymorphic-variants">When to use polymorphic variants</h1><p id="idp8477216">
         At first glance, polymorphic variants look like a strict
         improvement over ordinary variants. You can do everything that
         ordinary variants can do, plus it's more flexible and more
         concise. What's not to like?
-      </p><p id="idp8361792">
+      </p><p id="idp8477856">
         In reality, regular variants are the more pragmatic choice most
         of the time. That's because the flexibility of polymorphic
         variants comes at a price. Here are some of the downsides.
-      </p><ul><li><p id="idp8362912">
+      </p><ul><li><p id="idp8478976">
 <span><em>Complexity:</em></span> As we've seen, the typing
             rules for polymorphic variants are a lot more complicated
             than they are for regular variants. This means that heavy
@@ -1003,22 +1003,22 @@
             to decode error messages. Indeed, concision at the value
             level is often balanced out by more verbosity at the type
             level.
-          </p></li><li><p id="idp8364624">
+          </p></li><li><p id="idp8480688">
 <span><em>Error-finding:</em></span> Polymorphic variants are
             type-safe, but the typing discipline that they impose is, by
             dint of its flexibility, less likely to catch bugs in your
             program.
-          </p></li><li><p id="idp8366000">
+          </p></li><li><p id="idp8482064">
 <span><em>Efficiency:</em></span> This isn't a huge effect,
             but polymorphic variants are somewhat heavier than regular
             variants, and OCaml can't generate code for matching on
             polymorphic variants that is quite as efficient as what it
             generated for regular variants.
-          </p></li></ul><p id="idp8367328">
+          </p></li></ul><p id="idp8483392">
         All that said, polymorphic variants are still a useful and
         powerful feature, but it's worth understanding their
         limitations, and how to use them sensibly and modestly.
-      </p><p id="idp8367920">
+      </p><p id="idp8483984">
         Probably the safest and most common use-case for polymorphic
         variants is where ordinary variants would be sufficient, but are
         syntactically too heavyweight. For example, you often want to
@@ -1027,7 +1027,7 @@
         Polymorphic variants are very useful here, and as long as there
         are type annotations that constrain these to have explicit,
         exact types, this tends to work well.
-      </p><p id="idp8368864">
+      </p><p id="idp8484928">
         Variants are most problematic exactly where you take full
         advantage of their power; in particular, when you take advantage
         of the ability of polymorphic variant types to overlap in the

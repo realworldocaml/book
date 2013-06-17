@@ -144,12 +144,12 @@
                 
                 
 
-    <p id="idp5358176">
+    <p id="idp179424">
     This chapter gives an overview of OCaml by walking through a series
     of small examples that cover most of the major features of the
     language. This should give a sense of what OCaml can do, without
     getting too deep in any one topic.
-  </p><p id="idp4618848">
+  </p><p id="idp180080">
     We'll present this guided tour using the Core standard library and
     the <code>utop</code> OCaml toplevel, a shell that lets you
     type in expressions and evaluate them interactively.
@@ -157,33 +157,34 @@
     toplevel (which you can start by typing <code>ocaml</code> at
     the command line). These instructions will assume you're using
     <code>utop</code> specifically.
-  </p><p id="idp5443904">
+  </p><p id="idp183472">
     Before getting started, make sure you have a working OCaml
     installation and toplevel as you read through this chapter so you
     can try out the examples.
   </p><aside class="note"><h1>
   Installing utop
-</h1><p id="idp2609120">
+</h1><p id="idp6884800">
     The easiest way to get the examples running is to set up the OPAM
     package manager, which is explained in
     <a href="installation.html">Appendix A, <i>Installation</i></a>. In a nutshell, you need to
     have a working C compilation environment and the PCRE library
     installed, and then:
-  </p><pre id="idp5711808">
+  </p><pre id="idp6885952">
 $ opam init
 $ opam switch 4.01.0dev+trunk
 $ opam install utop core_extended
 $ eval `opam config -env`
-</pre><p id="idp5605376">
+</pre><p id="idp6886688">
     Note that the above commands will take some time to run. When
     they're done, you should have a file called
     <code>~/.ocamlinit</code> in your home directory, to which you
-    should add the following.
+    should add at least the following.
   </p><div class="highlight"><pre><span class="o">#</span><span class="n">use</span> <span class="s2">&quot;topfind&quot;</span>
 <span class="o">#</span><span class="n">camlp4o</span>
 <span class="o">#</span><span class="n">thread</span>
 <span class="o">#</span><span class="n">require</span> <span class="s2">&quot;core.top&quot;</span>
-</pre></div><p id="idp5413328">
+<span class="o">#</span><span class="n">require</span> <span class="s2">&quot;core.syntax&quot;</span>
+</pre></div><p id="idp6888688">
     Then type in <code>utop</code>, and you'll be in an
     interactive toplevel environment. OCaml phrases are only evaluated
     when you enter a double semicolon (<code>;;</code>), so you
@@ -191,7 +192,7 @@ $ eval `opam config -env`
     <code>utop</code> by pressing <code>control-d</code>.
     For complete instructions, please refer to
     <a href="installation.html">Appendix A, <i>Installation</i></a>.
-  </p></aside><section><h1 id="ocaml-as-a-calculator">OCaml as a calculator</h1><p id="idp5294448">
+  </p></aside><section><h1 id="ocaml-as-a-calculator">OCaml as a calculator</h1><p id="idp6893216">
       Let's spin up <code>utop</code>. Throughout the book we're
       going to use Core, a more full-featured and capable replacement
       for OCaml's standard library. Accordingly, we'll start by opening
@@ -200,7 +201,7 @@ $ eval `opam config -env`
       the examples below will fail.
     </p><div class="highlight"><pre><span class="o">$</span> <span class="n">utop</span>
 <span class="o">#</span> <span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span><span class="o">;;</span>
-</pre></div><p id="idp3914512">
+</pre></div><p id="idp6896528">
       Now that we have Core open, let's try a few simple numerical
       calculations.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="mi">3</span> <span class="o">+</span> <span class="mi">4</span><span class="o">;;</span>
@@ -213,30 +214,30 @@ $ eval `opam config -env`
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">100</span>
 <span class="o">#</span> <span class="n">sqrt</span> <span class="mi">9</span><span class="o">.;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">=</span> <span class="mi">3</span><span class="o">.</span>
-</pre></div><p id="idp2948336">
+</pre></div><p id="idp6898048">
       By and large, this is pretty similar to what you'd find in any
       programming language, but there are a few things that jump right
       out at you.
-    </p><ul><li><p id="idp3693456">
+    </p><ul><li><p id="idp6899120">
           We needed to type <code>;;</code> in order to tell the
           toplevel that it should evaluate an expression. This is a
           peculiarity of the toplevel that is not required in
           stand-alone programs (though it is sometimes helpful to
           include <code>;;</code> to improve OCaml's error
           reporting).
-        </p></li><li><p id="idp2572528">
+        </p></li><li><p id="idp6901392">
           After evaluating an expression, the toplevel prints both the
           type of the result and the result itself.
-        </p></li><li><p id="idp3686512">
+        </p></li><li><p id="idp6902304">
           Function arguments are separated by spaces, instead of by
           parenthesis and commas, which is more like the UNIX shell than
           C or Java.
-        </p></li><li><p id="idp3165792">
+        </p></li><li><p id="idp6903264">
           OCaml allows you to place underscores in the middle of your
           integer literals, as a way of improving readability. Note that
           underscores can be placed anywhere in within the number, not
           just every three digits.
-        </p></li><li><p id="idp3729504">
+        </p></li><li><p id="idp6904304">
           OCaml carefully distinguishes between
           <code>float</code>, the type for floating point numbers
           and <code>int</code>, the type for integers. The types
@@ -248,7 +249,7 @@ $ eval `opam config -env`
           some kinds of bugs that arise in other languages due to
           unexpected differences between the behavior of
           <code>int</code> and <code>float</code>.
-        </p></li></ul><p id="idp237984">
+        </p></li></ul><p id="idp6910240">
       We can also create a variable to name the value of a given
       expression, using the <code>let</code> keyword (also known
       as a <span><em>let binding</em></span>).
@@ -256,12 +257,12 @@ $ eval `opam config -env`
 <span class="k">val</span> <span class="n">x</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">7</span>
 <span class="o">#</span> <span class="k">let</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">x</span><span class="o">;;</span>
 <span class="k">val</span> <span class="n">y</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">14</span>
-</pre></div><p id="idp240608">
+</pre></div><p id="idp6912608">
       After a new variable is created, the toplevel tells us the name of
       the variable (<code>x</code> or <code>y</code>), in
       addition to its type (<code>int</code>) and value
       (<code>7</code> or <code>14</code>).
-    </p><p id="idp6010912">
+    </p><p id="idp6916224">
       Note that there are some constraints on what identifiers can be
       used for variable names. Punctuation is excluded, except for
       <code>_</code> and <code>'</code>, and variables must
@@ -272,12 +273,16 @@ $ eval `opam config -env`
 <span class="k">val</span> <span class="n">x_plus_y</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">21</span>
 <span class="o">#</span> <span class="k">let</span> <span class="n">x'</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="o">;;</span>
 <span class="k">val</span> <span class="n">x'</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">8</span>
-</pre></div><p id="idp6013712">
+</pre></div><p id="idp6919120">
       But these are not:
-    </p><p id="idp6014096">
-<code>ocaml # let Seven = 3 + 4;; Error: Unbound constructor Seven # let 7x = 7;; Error: This expression should not be a function, the expected type is int # let x-plus-y = x + y;; Error: Parse error: [fun_binding] expected after [ipatt] (in [let_binding])</code>
-      ## Functions and type Inference
-    </p><p id="idp6015376">
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="nc">Seven</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">+</span> <span class="mi">4</span><span class="o">;;</span>
+<span class="nc">Error</span><span class="o">:</span> <span class="nc">Unbound</span> <span class="n">constructor</span> <span class="nc">Seven</span>
+<span class="o">#</span> <span class="k">let</span> <span class="mi">7</span><span class="n">x</span> <span class="o">=</span> <span class="mi">7</span><span class="o">;;</span>
+<span class="nc">Error</span><span class="o">:</span> <span class="nc">This</span> <span class="n">expression</span> <span class="n">should</span> <span class="n">not</span> <span class="n">be</span> <span class="n">a</span> <span class="k">function</span><span class="o">,</span> <span class="n">the</span> <span class="n">expected</span> <span class="k">type</span> <span class="n">is</span>
+<span class="kt">int</span>
+<span class="o">#</span> <span class="k">let</span> <span class="n">x</span><span class="o">-</span><span class="n">plus</span><span class="o">-</span><span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="o">;;</span>
+<span class="nc">Error</span><span class="o">:</span> <span class="nc">Parse</span> <span class="n">error</span><span class="o">:</span> <span class="o">[</span><span class="n">fun_binding</span><span class="o">]</span> <span class="n">expected</span> <span class="n">after</span> <span class="o">[</span><span class="n">ipatt</span><span class="o">]</span> <span class="o">(</span><span class="k">in</span> <span class="o">[</span><span class="n">let_binding</span><span class="o">])</span>
+</pre></div></section><section><h1 id="functions-and-type-inference">Functions and type Inference</h1><p id="idp6921632">
       The <code>let</code> syntax can also be used for creating
       functions.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">square</span> <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span> <span class="o">;;</span>
@@ -286,18 +291,18 @@ $ eval `opam config -env`
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">4</span>
 <span class="o">#</span> <span class="n">square</span> <span class="o">(</span><span class="n">square</span> <span class="mi">2</span><span class="o">);;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">16</span>
-</pre></div><p id="idp6017568">
+</pre></div><p id="idp6923824">
       Functions in OCaml are values like any other, which is why we bind
       one to a variable using the same <code>let</code> keyword
       used for binding a variable to a simple value such as an integer.
-    </p><p id="idp6018704">
+    </p><p id="idp6925056">
       When using <code>let</code> to define a function, the first
       identifier after the <code>let</code> is the function name,
       and each subsequent identifier is a different argument to the
       function. Thus, <code>square</code> is a function with a
       single argument. If no arguments are given, then we just have the
       ordinary definition of a variable that we saw earlier.
-    </p><p id="idp6021264">
+    </p><p id="idp6927616">
       Now that we're creating more interesting values like functions,
       the types have gotten more interesting too.
       <code>int -&gt; int</code> is a function type, in this case
@@ -311,7 +316,7 @@ $ eval `opam config -env`
 <span class="k">val</span> <span class="n">ratio</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">float</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="n">ratio</span> <span class="mi">4</span> <span class="mi">7</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">571428571428571397</span>
-</pre></div><p id="idp6025584">
+</pre></div><p id="idp6931936">
       As a side note, the above is our first use of OCaml modules. Here,
       <code>Float.of_int</code> refers to the
       <code>of_int</code> function contained in the
@@ -321,7 +326,7 @@ $ eval `opam config -env`
       <code>of_int</code> as well as many other useful functions
       for dealing with floats. It's also worth noting that module names
       always start with a capital letter.
-    </p><p id="idp6029504">
+    </p><p id="idp6935856">
       The notation for the type-signature of a multi-argument function
       may be a little surprising at first, but we'll explain where it
       comes from when we get to function currying in
@@ -331,7 +336,7 @@ $ eval `opam config -env`
       value. Thus, <code>int -&gt; int -&gt; float</code>
       describes a function that takes two <code>int</code>
       arguments and returns a <code>float</code>.
-    </p><p id="idp6032672">
+    </p><p id="idp6939024">
       We can even write functions that take other functions as
       arguments. Here's an example of a function that takes three
       arguments: a test function and two integer arguments. The function
@@ -341,7 +346,7 @@ $ eval `opam config -env`
     <span class="o">+</span> <span class="o">(</span><span class="k">if</span> <span class="n">test</span> <span class="n">second</span> <span class="k">then</span> <span class="n">second</span> <span class="k">else</span> <span class="mi">0</span><span class="o">)</span>
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">sum_if_true</span> <span class="o">:</span> <span class="o">(</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">bool</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp6034528">
+</pre></div><p id="idp6940880">
       If we look at the inferred type signature in detail, we see that
       the first argument is a function that takes an integer and returns
       a boolean, and that the remaining two arguments are integers.
@@ -353,27 +358,27 @@ $ eval `opam config -env`
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">4</span>
 <span class="o">#</span> <span class="n">sum_if_true</span> <span class="n">even</span> <span class="mi">2</span> <span class="mi">4</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">6</span>
-</pre></div><p id="idp6036448">
+</pre></div><p id="idp6942800">
       Note that in the definition of <code>even</code> we used
       <code>=</code> in two different ways: once as the part of
       the let binding that separates the thing being defined from its
       definition; and once as an equality test, when comparing
       <code>x mod 2</code> to <code>0</code>. These are very
       different operations despite the fact that they share some syntax.
-    </p><section><h1 id="type-inference">Type inference</h1><p id="idp6040512">
+    </p><section><h1 id="type-inference">Type inference</h1><p id="idp6946864">
         As the types we encounter get more complicated, you might ask
         yourself how OCaml is able to figure them out, given that we
         didn't write down any explicit type information.
-      </p><p id="idp6041120">
+      </p><p id="idp6947472">
         OCaml determines the type of an expression using a technique
         called <span><em>type inference</em></span>, by which it infers
         the type of a given expression based on what it already knows
         about the types of other related variables, and on constraints
         on the types that arise from the structure of the code.
-      </p><p id="idp6042240">
+      </p><p id="idp6948592">
         As an example, let's walk through the process of inferring the
         type of <code>sum_if_true</code>.
-      </p><ul><li><p id="idp6043872">
+      </p><ul><li><p id="idp6950224">
             OCaml requires that both arms of an <code>if</code>
             statement return the same type, so the expression
             <code>if test first then first else 0</code> requires
@@ -383,23 +388,23 @@ $ eval `opam config -env`
             <code>if test second then second else 0</code> we can
             conclude that <code>second</code> has type
             <code>int</code>.
-          </p></li><li><p id="idp6049728">
+          </p></li><li><p id="idp6956080">
 <code>test</code> is passed <code>first</code>
             as an argument. Since <code>first</code> has type
             <code>int</code>, the input type of
             <code>test</code> must be <code>int</code>.
-          </p></li><li><p id="idp6054240">
+          </p></li><li><p id="idp6960592">
 <code>test first</code> is used as the condition in an
             <code>if</code> statement, so the return type of
             <code>test</code> must be <code>bool</code>.
-          </p></li><li><p id="idp6057504">
+          </p></li><li><p id="idp6963856">
             The fact that <code>+</code> returns an int implies
             that the return value of <code>sum_if_true</code> must
             be int.
-          </p></li></ul><p id="idp6059392">
+          </p></li></ul><p id="idp6965744">
         Together, that nails down the types of all the variables, which
         determines the overall type of <code>sum_if_true</code>.
-      </p><p id="idp6060528">
+      </p><p id="idp6966880">
         Over time, you'll build a rough intuition for how the OCaml
         inference engine works, which makes it easier to reason through
         your programs. One way of making it easier to understand the
@@ -413,19 +418,19 @@ $ eval `opam config -env`
      <span class="o">+</span> <span class="o">(</span><span class="k">if</span> <span class="n">test</span> <span class="n">y</span> <span class="k">then</span> <span class="n">y</span> <span class="k">else</span> <span class="mi">0</span><span class="o">)</span>
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">sum_if_true</span> <span class="o">:</span> <span class="o">(</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">bool</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp6063296">
+</pre></div><p id="idp6969648">
         In the above, we've marked every argument to the function with
         its type, with the final annotation indicating the type of the
         return value. Such type annotations can actually go around any
         value in an OCaml program, and can be useful for figuring out
         why a given program is failing to compile.
-      </p></section><section><h1 id="inferring-generic-types">Inferring generic types</h1><p id="idp6065040">
+      </p></section><section><h1 id="inferring-generic-types">Inferring generic types</h1><p id="idp6971392">
         Sometimes, there isn't enough information to fully determine the
         concrete type of a given value. Consider this function:
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">first_if_true</span> <span class="n">test</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span>
     <span class="k">if</span> <span class="n">test</span> <span class="n">x</span> <span class="k">then</span> <span class="n">x</span> <span class="k">else</span> <span class="n">y</span>
   <span class="o">;;</span>
-</pre></div><p id="idp6066448">
+</pre></div><p id="idp6972800">
 <code>first_if_true</code> takes as its arguments a
         function <code>test</code>, and two values,
         <code>x</code> and <code>y</code>, where
@@ -439,7 +444,7 @@ $ eval `opam config -env`
         <code>first_if_true</code> on values of any type. Indeed,
         if we look at the type returned by the toplevel:
       </p><div class="highlight"><pre><span class="k">val</span> <span class="n">first_if_true</span> <span class="o">:</span> <span class="o">(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="kt">bool</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp6075552">
+</pre></div><p id="idp6981904">
         we see that rather than choose a single concrete type, OCaml has
         introduced a <span><em>type variable</em></span>
 <code>'a</code> to express that the type is generic. In
@@ -454,20 +459,20 @@ $ eval `opam config -env`
         of genericity is called <span><em>parametric
         polymorphism</em></span>, and is very similar to generics in C#
         and Java.
-      </p><p id="idp6082736">
+      </p><p id="idp6989088">
         The generic type of <code>first_if_true</code> allows us
         to write:
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">long_string</span> <span class="n">s</span> <span class="o">=</span> <span class="nn">String</span><span class="p">.</span><span class="n">length</span> <span class="n">s</span> <span class="o">&gt;</span> <span class="mi">6</span><span class="o">;;</span>
 <span class="k">val</span> <span class="n">long_string</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">bool</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="n">first_if_true</span> <span class="n">long_string</span> <span class="s2">&quot;short&quot;</span> <span class="s2">&quot;loooooong&quot;</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;loooooong&quot;</span>
-</pre></div><p id="idp6084800">
+</pre></div><p id="idp6991152">
         as well as:
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">big_number</span> <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="o">;;</span>
 <span class="k">val</span> <span class="n">big_number</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">bool</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="n">first_if_true</span> <span class="n">big_number</span> <span class="mi">4</span> <span class="mi">3</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">4</span>
-</pre></div><p id="idp6086224">
+</pre></div><p id="idp6992576">
         Both <code>long_string</code> and
         <code>big_number</code> are functions, and each is passed
         to <code>first_if_true</code> with two other arguments of
@@ -481,7 +486,7 @@ $ eval `opam config -env`
                            <span class="o">^^^^^^^</span>
 <span class="nc">Error</span><span class="o">:</span> <span class="nc">This</span> <span class="n">expression</span> <span class="n">has</span> <span class="k">type</span> <span class="kt">string</span> <span class="n">but</span>
     <span class="n">an</span> <span class="n">expression</span> <span class="n">was</span> <span class="n">expected</span> <span class="k">of</span> <span class="k">type</span> <span class="kt">int</span>
-</pre></div><p id="idp6091488">
+</pre></div><p id="idp6997840">
         In this example, <code>big_number</code> requires that
         <code>'a</code> be instantiated as <code>int</code>,
         whereas <code>&quot;short&quot;</code> and
@@ -491,13 +496,13 @@ $ eval `opam config -env`
         same time.
       </p><aside class="note"><h1>
       Type errors vs exceptions
-      </h1><p id="idp6096752">
+      </h1><p id="idp7003104">
         There's a big difference in OCaml (and really in any compiled
         language) between errors that are caught at compile time and
         those that are caught at run time. It's better to catch errors
         as early as possible in the development process, and compilation
         time is best of all.
-      </p><p id="idp6097792">
+      </p><p id="idp7003824">
         Working in the toplevel somewhat obscures the difference between
         run time and compile time errors, but that difference is still
         there. Generally, type errors, like this one:
@@ -508,7 +513,7 @@ $ eval `opam config -env`
            <span class="o">^^^^^^^^</span>
 <span class="nc">Error</span><span class="o">:</span> <span class="nc">This</span> <span class="n">expression</span> <span class="n">has</span> <span class="k">type</span> <span class="kt">string</span> <span class="n">but</span> <span class="n">an</span> <span class="n">expression</span> <span class="n">was</span> <span class="n">expected</span> <span class="k">of</span> <span class="k">type</span>
          <span class="kt">int</span>
-</pre></div><p id="idp6099472">
+</pre></div><p id="idp7005504">
         are compile-time errors (because <code>+</code> requires
         that both its arguments be of type <code>int</code>),
         whereas errors that can't be caught by the type system, like
@@ -520,14 +525,14 @@ $ eval `opam config -env`
 <span class="o">-</span> <span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="bp">true</span>
 <span class="o">#</span> <span class="n">is_a_multiple</span> <span class="mi">8</span> <span class="mi">0</span><span class="o">;;</span>
 <span class="nc">Exception</span><span class="o">:</span> <span class="nn">Division_by_zero</span><span class="p">.</span>
-</pre></div><p id="idp6102608">
+</pre></div><p id="idp7008640">
         The distinction here is that type errors will stop you whether
         or not the offending code is ever actually executed. Merely
         defining <code>add_potato</code> is an error, whereas
         <code>is_a_multiple</code> only fails when it's called,
         and then, only when it's called with an input that triggers the
         exception.
-      </p></aside></section></section><section><h1 id="tuples-lists-options-and-pattern-matching">Tuples, Lists, Options and Pattern Matching</h1><section><h1 id="tuples">Tuples</h1><p id="idp6106704">
+      </p></aside></section></section><section><h1 id="tuples-lists-options-and-pattern-matching">Tuples, Lists, Options and Pattern Matching</h1><section><h1 id="tuples">Tuples</h1><p id="idp7012736">
         So far we've encountered a handful of basic types like
         <code>int</code>, <code>float</code> and
         <code>string</code> as well as function types like
@@ -540,19 +545,19 @@ $ eval `opam config -env`
 <span class="k">val</span> <span class="n">a_tuple</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">string</span> <span class="o">=</span> <span class="o">(</span><span class="mi">3</span><span class="o">,</span> <span class="s2">&quot;three&quot;</span><span class="o">)</span>
 <span class="o">#</span> <span class="k">let</span> <span class="n">another_tuple</span> <span class="o">=</span> <span class="o">(</span><span class="mi">3</span><span class="o">,</span><span class="s2">&quot;four&quot;</span><span class="o">,</span><span class="mi">5</span><span class="o">.);;</span>
 <span class="k">val</span> <span class="n">another_tuple</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">string</span> <span class="o">*</span> <span class="kt">float</span> <span class="o">=</span> <span class="o">(</span><span class="mi">3</span><span class="o">,</span> <span class="s2">&quot;four&quot;</span><span class="o">,</span> <span class="mi">5</span><span class="o">.)</span>
-</pre></div><p id="idp6111216">
+</pre></div><p id="idp7017248">
         (For the mathematically inclined, the <code>*</code>
         character is used because the set of all pairs of type
         <code>t * s</code> corresponds to the Cartesian product of
         the set of elements of type <code>t</code> and the set of
         elements of type <code>s</code>.)
-      </p><p id="idp6114288">
+      </p><p id="idp7020320">
         You can extract the components of a tuple using OCaml's pattern
         matching syntax. For example:
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span><span class="n">y</span><span class="o">)</span> <span class="o">=</span> <span class="n">a_tuple</span><span class="o">;;</span>
 <span class="k">val</span> <span class="n">x</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">3</span>
 <span class="k">val</span> <span class="n">y</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;three&quot;</span>
-</pre></div><p id="idp6115792">
+</pre></div><p id="idp7021824">
         Here, the <code>(x,y)</code> on the left-hand side of the
         <code>let</code> binding is the pattern. This pattern lets
         us mint the new variables <code>x</code> and
@@ -561,7 +566,7 @@ $ eval `opam config -env`
         expressions.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="n">x</span> <span class="o">+</span> <span class="nn">String</span><span class="p">.</span><span class="n">length</span> <span class="n">y</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">8</span>
-</pre></div><p id="idp6119792">
+</pre></div><p id="idp7025824">
         Note that the same syntax is used both for constructing and for
         pattern matching on tuples. Another syntactic note: it's the
         commas, rather than the parens, that make a tuple. Thus, we can
@@ -569,10 +574,10 @@ $ eval `opam config -env`
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">x</span><span class="o">,</span><span class="n">y</span> <span class="o">=</span> <span class="n">a_tuple</span><span class="o">;;</span>        
 <span class="k">val</span> <span class="n">x</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">3</span>
 <span class="k">val</span> <span class="n">y</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;three&quot;</span>
-</pre></div><p id="idp6121440">
+</pre></div><p id="idp7027472">
         That said, it's more idiomatic to include the parens even when
         they're not strictly necessary.
-      </p><p id="idp6121952">
+      </p><p id="idp7027984">
         Pattern matching can also show up in function arguments. Here's
         a function for computing the distance between two points on the
         plane, where each point is represented as a pair of
@@ -582,20 +587,20 @@ $ eval `opam config -env`
     <span class="n">sqrt</span> <span class="o">((</span><span class="n">x1</span> <span class="o">-.</span> <span class="n">x2</span><span class="o">)</span> <span class="o">**</span> <span class="mi">2</span><span class="o">.</span> <span class="o">+.</span> <span class="o">(</span><span class="n">y1</span> <span class="o">-.</span> <span class="n">y2</span><span class="o">)</span> <span class="o">**</span> <span class="mi">2</span><span class="o">.)</span>
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">distance</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">*</span> <span class="kt">float</span> <span class="o">-&gt;</span> <span class="kt">float</span> <span class="o">*</span> <span class="kt">float</span> <span class="o">-&gt;</span> <span class="kt">float</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp6124416">
+</pre></div><p id="idp7030448">
         The <code>**</code> operator used above is for raising a
         floating-point number to a power.
-      </p><p id="idp6125520">
+      </p><p id="idp7031552">
         This is just a first taste of pattern matching. Pattern matching
         is a pervasive tool in OCaml, and as you'll see, it has
         surprising power.
-      </p></section><section><h1 id="lists">Lists</h1><p id="idp6127104">
+      </p></section><section><h1 id="lists">Lists</h1><p id="idp7033136">
         Where tuples let you combine a fixed number of items,
         potentially of different types, lists let you hold any number of
         items of the same type. For example:
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">languages</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;OCaml&quot;</span><span class="o">;</span><span class="s2">&quot;Perl&quot;</span><span class="o">;</span><span class="s2">&quot;C&quot;</span><span class="o">];;</span>
 <span class="k">val</span> <span class="n">languages</span> <span class="o">:</span> <span class="kt">string</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;OCaml&quot;</span><span class="o">;</span> <span class="s2">&quot;Perl&quot;</span><span class="o">;</span> <span class="s2">&quot;C&quot;</span><span class="o">]</span>
-</pre></div><p id="idp6128736">
+</pre></div><p id="idp7034768">
         Note that you can't mix elements of different types in the same
         list, as we did with tuples.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">numbers</span> <span class="o">=</span> <span class="o">[</span><span class="mi">3</span><span class="o">;</span><span class="s2">&quot;four&quot;</span><span class="o">;</span><span class="mi">5</span><span class="o">];;</span>
@@ -604,24 +609,24 @@ $ eval `opam config -env`
                    <span class="o">^^^^^^</span>
 <span class="nc">Error</span><span class="o">:</span> <span class="nc">This</span> <span class="n">expression</span> <span class="n">has</span> <span class="k">type</span> <span class="kt">string</span> <span class="n">but</span> <span class="n">an</span> <span class="n">expression</span> <span class="n">was</span> <span class="n">expected</span> <span class="k">of</span> <span class="k">type</span>
          <span class="kt">int</span>
-</pre></div><section><h1 id="the-list-module">The <code>List</code> module</h1><p id="idp6132224">
+</pre></div><section><h1 id="the-list-module">The <code>List</code> module</h1><p id="idp7038256">
           Core comes with a <code>List</code> module that has a
           rich collection of functions for working with lists. We can
           access values from within a module by using dot-notation. For
           example, this is how we compute the length of a list.
         </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">length</span> <span class="n">languages</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">3</span>
-</pre></div><p id="idp6134352">
+</pre></div><p id="idp7040384">
           Here's something a little more complicated. We can compute the
           list of the lengths of each language as follows.
         </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="n">languages</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="nn">String</span><span class="p">.</span><span class="n">length</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">5</span><span class="o">;</span> <span class="mi">4</span><span class="o">;</span> <span class="mi">1</span><span class="o">]</span>
-</pre></div><p id="idp6135760">
+</pre></div><p id="idp7041792">
 <code>List.map</code> takes two arguments: a list and a
           function for transforming the elements of that list. Note that
           <code>List.map</code> creates a new list and does not
           modify the original.
-        </p><p id="idp6137616">
+        </p><p id="idp7043648">
           In this example, the function <code>String.length</code>
           is passed under the <span><em>labeled argument</em></span>
 <code>~f</code>. Labels allow you to specify arguments
@@ -630,22 +635,22 @@ $ eval `opam config -env`
           function's behavior.
         </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="nn">String</span><span class="p">.</span><span class="n">length</span> <span class="n">languages</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">5</span><span class="o">;</span> <span class="mi">4</span><span class="o">;</span> <span class="mi">1</span><span class="o">]</span>
-</pre></div><p id="idp6140736">
+</pre></div><p id="idp7046768">
           We'll learn more about labeled arguments and why they're
           important in
           <a href="variables-and-functions.html">Chapter 2, <i>Variables and Functions</i></a>.
-        </p></section><section><h1 id="constructing-lists-with">Constructing lists with <code>::</code></h1><p id="idp6143232">
+        </p></section><section><h1 id="constructing-lists-with">Constructing lists with <code>::</code></h1><p id="idp7049264">
           In addition to constructing lists using brackets, we can use
           the operator <code>::</code> for adding elements to the
           front of a list.
         </p><div class="highlight"><pre><span class="o">#</span> <span class="s2">&quot;French&quot;</span> <span class="o">::</span> <span class="s2">&quot;Spanish&quot;</span> <span class="o">::</span> <span class="n">languages</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;French&quot;</span><span class="o">;</span> <span class="s2">&quot;Spanish&quot;</span><span class="o">;</span> <span class="s2">&quot;OCaml&quot;</span><span class="o">;</span> <span class="s2">&quot;Perl&quot;</span><span class="o">;</span> <span class="s2">&quot;C&quot;</span><span class="o">]</span>
-</pre></div><p id="idp6145360">
+</pre></div><p id="idp7051392">
           Here, we're creating a new and extended list, not changing the
           list we started with, as you can see below.
         </p><div class="highlight"><pre><span class="o">#</span> <span class="n">languages</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;OCaml&quot;</span><span class="o">;</span> <span class="s2">&quot;Perl&quot;</span><span class="o">;</span> <span class="s2">&quot;C&quot;</span><span class="o">]</span>
-</pre></div><p id="idp6146768">
+</pre></div><p id="idp7052800">
           The bracket notation for lists is really just syntactic sugar
           for <code>::</code>. Thus, the following declarations
           are all equivalent. Note that <code>[]</code> is used to
@@ -657,7 +662,7 @@ $ eval `opam config -env`
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span> <span class="mi">2</span><span class="o">;</span> <span class="mi">3</span><span class="o">]</span>
 <span class="o">#</span> <span class="mi">1</span> <span class="o">::</span> <span class="mi">2</span> <span class="o">::</span> <span class="mi">3</span> <span class="o">::</span> <span class="bp">[]</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span> <span class="mi">2</span><span class="o">;</span> <span class="mi">3</span><span class="o">]</span>
-</pre></div><p id="idp6150240">
+</pre></div><p id="idp7056272">
           The <code>::</code> operator can only be used for adding
           one element to the front of the list, with the list
           terminating at <code>[]</code>, the empty list. There's
@@ -665,11 +670,11 @@ $ eval `opam config -env`
           which can concatenate two lists.
         </p><div class="highlight"><pre><span class="o">#</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">]</span> <span class="o">@</span> <span class="o">[</span><span class="mi">4</span><span class="o">;</span><span class="mi">5</span><span class="o">;</span><span class="mi">6</span><span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span> <span class="mi">2</span><span class="o">;</span> <span class="mi">3</span><span class="o">;</span> <span class="mi">4</span><span class="o">;</span> <span class="mi">5</span><span class="o">;</span> <span class="mi">6</span><span class="o">]</span>
-</pre></div><p id="idp6153600">
+</pre></div><p id="idp7059712">
           It's important to remember that, unlike <code>::</code>,
           this is not a constant-time operation. Concatenating two lists
           takes time proportional to the length of the first list.
-        </p></section><section><h1 id="list-patterns-using-match">List patterns using <code>match</code></h1><p id="idp6156272">
+        </p></section><section><h1 id="list-patterns-using-match">List patterns using <code>match</code></h1><p id="idp7062384">
           The elements of a list can be accessed through pattern
           matching. List patterns are based on the two list
           constructors, <code>[]</code> and <code>::</code>.
@@ -677,7 +682,7 @@ $ eval `opam config -env`
         </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">my_favorite_language</span> <span class="o">(</span><span class="n">my_favorite</span> <span class="o">::</span> <span class="n">the_rest</span><span class="o">)</span> <span class="o">=</span>
      <span class="n">my_favorite</span>
   <span class="o">;;</span>
-</pre></div><p id="idp6159024">
+</pre></div><p id="idp7065136">
           By pattern matching using <code>::</code>, we've
           isolated and named the first element of the list
           (<code>my_favorite</code>) and the remainder of the list
@@ -685,7 +690,7 @@ $ eval `opam config -env`
           what we've done is the equivalent of using the functions
           <code>car</code> and <code>cdr</code> to isolate
           the first element of a list and the remainder of that list.
-        </p><p id="idp6162864">
+        </p><p id="idp7068976">
           If you try the above example in the toplevel, however, you'll
           see that it spits out a warning:
         </p><div class="highlight"><pre>    <span class="nc">Characters</span> <span class="mi">25</span><span class="o">-</span><span class="mi">69</span><span class="o">:</span>
@@ -695,7 +700,7 @@ $ eval `opam config -env`
 <span class="nc">Here</span> <span class="n">is</span> <span class="n">an</span> <span class="n">example</span> <span class="k">of</span> <span class="n">a</span> <span class="n">value</span> <span class="n">that</span> <span class="n">is</span> <span class="n">not</span> <span class="n">matched</span><span class="o">:</span>
 <span class="bp">[]</span>
 <span class="k">val</span> <span class="n">my_favorite_language</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp6164752">
+</pre></div><p id="idp7070864">
           The warning indicates that the pattern is not exhaustive,
           meaning there are values of the type in question that won't be
           captured by the pattern. The warning even gives an example of
@@ -707,11 +712,11 @@ $ eval `opam config -env`
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;English&quot;</span>
 <span class="o">#</span> <span class="n">my_favorite_language</span> <span class="bp">[]</span><span class="o">;;</span>
 <span class="nc">Exception</span><span class="o">:</span> <span class="nc">Match_failure</span> <span class="o">(</span><span class="s2">&quot;//toplevel//&quot;</span><span class="o">,</span> <span class="mi">11</span><span class="o">,</span> <span class="mi">10</span><span class="o">).</span>
-</pre></div><p id="idp6168000">
+</pre></div><p id="idp7074112">
           You can avoid these warnings, and more importantly make sure
           that your code actually handles all of the possible cases, by
           using a <code>match</code> statement instead.
-        </p><p id="idp6169184">
+        </p><p id="idp7075296">
           A <code>match</code> statement is a kind of juiced-up
           version of the switch statement found in <code>C</code>
           and <code>Java</code>. It essentially lets you list a
@@ -721,7 +726,7 @@ $ eval `opam config -env`
           matched pattern. And, as we've already seen, we can name new
           variables in our patterns that correspond to sub-structures of
           the value being matched.
-        </p><p id="idp6172608">
+        </p><p id="idp7078720">
           Here's a new version of
           <code>my_favorite_language</code> that uses
           <code>match</code> and doesn't trigger a compiler
@@ -736,13 +741,13 @@ $ eval `opam config -env`
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;English&quot;</span>
 <span class="o">#</span> <span class="n">my_favorite_language</span> <span class="bp">[]</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">=</span> <span class="s2">&quot;OCaml&quot;</span>
-</pre></div><p id="idp6175616">
+</pre></div><p id="idp7081808">
           Note that we included a comment in the above code. OCaml
           comments are bounded by <code>(*</code> and
           <code>*)</code>, and can be nested arbitrarily and cover
           multiple lines. There's no equivalent of C-style single line
           comments that are prefixed by <code>//</code>.
-        </p><p id="idp6178160">
+        </p><p id="idp7084352">
           The first pattern, <code>first :: the_rest</code>,
           covers the case where <code>languages</code> has at
           least one element, since every list except for the empty list
@@ -752,7 +757,7 @@ $ eval `opam config -env`
           empty, or has at least one element), and the compiler can
           detect that exhaustiveness, which is why it doesn't spit out a
           warning.
-        </p></section><section><h1 id="recursive-list-functions">Recursive list functions</h1><p id="idp6182464">
+        </p></section><section><h1 id="recursive-list-functions">Recursive list functions</h1><p id="idp7088656">
           Recursive functions, or, functions that call themselves, are
           an important technique in OCaml and in any functional
           language. The typical approach to designing a recursive
@@ -761,7 +766,7 @@ $ eval `opam config -env`
           <span><em>inductive cases</em></span>, where the function
           breaks the problem down into smaller pieces and then calls
           itself to solve those smaller problems.
-        </p><p id="idp6184048">
+        </p><p id="idp7090240">
           When writing recursive list functions, this separation between
           the base cases and the inductive cases is often done using
           pattern matching. Here's a simple example of a function that
@@ -774,14 +779,14 @@ $ eval `opam config -env`
 <span class="k">val</span> <span class="n">sum</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">int</span>
 <span class="o">#</span> <span class="n">sum</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">6</span>
-</pre></div><p id="idp6185888">
+</pre></div><p id="idp7092080">
           Following the common OCaml idiom, we use <code>hd</code>
           to refer to the head of the list and <code>tl</code> to
           refer to the tail. Note that we had to use the
           <code>rec</code> keyword to allow <code>sum</code>
           to refer to itself. As you might imagine, the base case and
           inductive case are different arms of the match.
-        </p><p id="idp6188928">
+        </p><p id="idp7095200">
           Logically, you can think of the evaluation of a simple
           recursive function like <code>sum</code> almost as if it
           were a mathematical equation whose meaning you were unfolding
@@ -794,10 +799,10 @@ $ eval `opam config -env`
 <span class="mi">1</span> <span class="o">+</span> <span class="o">(</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">3</span><span class="o">)</span>
 <span class="mi">1</span> <span class="o">+</span> <span class="mi">5</span>
 <span class="mi">6</span>
-</pre></div><p id="idp6191184">
+</pre></div><p id="idp7097456">
           This suggests a reasonable mental model for what OCaml is
           actually doing to evaluate a recursive function.
-        </p><p id="idp6191728">
+        </p><p id="idp7098000">
           We can introduce more complicated list patterns as well.
           Here's a function for destuttering a list,
           <span><em>i.e.</em></span>, for removing sequential duplicates.
@@ -808,21 +813,21 @@ $ eval `opam config -env`
       <span class="k">if</span> <span class="n">hd1</span> <span class="o">=</span> <span class="n">hd2</span> <span class="k">then</span> <span class="n">destutter</span> <span class="o">(</span><span class="n">hd2</span> <span class="o">::</span> <span class="n">tl</span><span class="o">)</span>
       <span class="k">else</span> <span class="n">hd1</span> <span class="o">::</span> <span class="n">destutter</span> <span class="o">(</span><span class="n">hd2</span> <span class="o">::</span> <span class="n">tl</span><span class="o">)</span>
   <span class="o">;;</span>
-</pre></div><p id="idp6193936">
+</pre></div><p id="idp7100208">
           Again, the first arm of the match is the base case, and the
           second is the inductive. Unfortunately, this code has a
           problem. If you type it into the toplevel, you'll see this
           error:
-        </p><pre id="idp6194560">
+        </p><pre id="idp7100832">
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a value that is not matched:
 _::[]
-</pre><p id="idp6195312">
+</pre><p id="idp7101584">
           This indicates that we're missing a case, in particular we
           don't handle one-element lists. Note how the underscore is
           used to indicate the presence of a value without specifying
           what that value is.
-        </p><p id="idp6195952">
+        </p><p id="idp7102224">
           We can fix this warning by adding another case to the match:
         </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="k">rec</span> <span class="n">destutter</span> <span class="kt">list</span> <span class="o">=</span>
     <span class="k">match</span> <span class="kt">list</span> <span class="k">with</span>
@@ -835,7 +840,7 @@ _::[]
 <span class="k">val</span> <span class="n">destutter</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="o">#</span> <span class="n">destutter</span> <span class="o">[</span><span class="s2">&quot;hey&quot;</span><span class="o">;</span><span class="s2">&quot;hey&quot;</span><span class="o">;</span><span class="s2">&quot;hey&quot;</span><span class="o">;</span><span class="s2">&quot;man!&quot;</span><span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;hey&quot;</span><span class="o">;</span> <span class="s2">&quot;man!&quot;</span><span class="o">]</span>
-</pre></div><p id="idp6197792">
+</pre></div><p id="idp7104064">
           Note that this code used another variant of the list pattern,
           <code>[hd]</code>, to match a list with a single
           element. We can do this to match a list with any fixed number
@@ -844,21 +849,21 @@ _::[]
           three elements, and will bind those elements to the variables
           <code>x</code>, <code>y</code> and
           <code>z</code>.
-        </p><p id="idp6202048">
+        </p><p id="idp7108320">
           In the last few examples, our list processing code involved a
           lot of recursive functions. In practice, this isn't usually
           necessary. Most of the time, you'll find yourself happy to use
           the iteration functions found in the <code>List</code>
           module. But it's good to know how to use recursion when you
           need to do something new that's not already supported.
-        </p></section></section><section><h1 id="options">Options</h1><p id="idp6204624">
+        </p></section></section><section><h1 id="options">Options</h1><p id="idp7110896">
         Another common data structure in OCaml is the option. An option
         is used to express that a value might or might not be present.
         For example,
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">divide</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span>
     <span class="k">if</span> <span class="n">y</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">then</span> <span class="nc">None</span> <span class="k">else</span> <span class="nc">Some</span> <span class="o">(</span><span class="n">x</span><span class="o">/</span><span class="n">y</span><span class="o">)</span> <span class="o">;;</span>
 <span class="k">val</span> <span class="n">divide</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="n">option</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp6206240">
+</pre></div><p id="idp7112512">
         The function <code>divide</code> either returns
         <code>None</code>, if the divisor is zero, or
         <code>Some</code> of the result of the division,
@@ -867,7 +872,7 @@ _::[]
         <code>[]</code> for lists, which let you build optional
         values. You can think of an option as a specialized list that
         can only have zero or one element.
-      </p><p id="idp6211168">
+      </p><p id="idp7117440">
         To examine the contents of an option, we use pattern matching,
         as we did with tuples and lists. Consider the following simple
         function for printing a log entry given an optional time and a
@@ -888,13 +893,13 @@ _::[]
 <span class="o">#</span> <span class="n">print_log_entry</span> <span class="nc">None</span> <span class="s2">&quot;Up to the minute&quot;</span><span class="o">;;</span>
 <span class="mi">2013</span><span class="o">-</span><span class="mi">02</span><span class="o">-</span><span class="mi">23</span> <span class="mi">16</span><span class="o">:</span><span class="mi">49</span><span class="o">:</span><span class="mi">25</span><span class="o">:</span> <span class="nc">Up</span> <span class="k">to</span> <span class="n">the</span> <span class="n">minute</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
-</pre></div><p id="idp6214288">
+</pre></div><p id="idp7120640">
         We use a <code>match</code> statement for handling the two
         possible states of an option.
       </p><aside class="note"><h1> 
       Nesting lets with let and
       in
-</h1><p id="idp6217904">
+</h1><p id="idp7124256">
         As a side note, this is our first use of <code>let</code>
         to define a new variable within the body of a function. A
         <code>let</code> bounded with an <code>in</code> can
@@ -906,10 +911,10 @@ _::[]
   <span class="n">x</span> <span class="o">+</span> <span class="n">x</span>
   <span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">14</span>
-</pre></div><p id="idp6222016">
+</pre></div><p id="idp7128368">
         Note that the scope of the let binding is terminated by the
         double-semicolon.
-      </p><p id="idp6222512">
+      </p><p id="idp7128864">
         We can also have multiple let statements in a row, each one
         adding a new variable binding to what came before.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">7</span> <span class="k">in</span>
@@ -917,11 +922,11 @@ _::[]
   <span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
   <span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">56</span>
-</pre></div><p id="idp6223904">
+</pre></div><p id="idp7130336">
         This kind of nested let binding is a common way of building up a
         complex expression, with each <code>let</code> naming some
         component, before combining them in one final expression.
-      </p></aside><p id="idp6225264">
+      </p></aside><p id="idp7131696">
         Options are important because they are the standard way in OCaml
         to encode a value that might not be there --- there's no such
         thing as a <code>NullPointerException</code> in OCaml.
@@ -930,7 +935,7 @@ _::[]
         <span><em>nullable</em></span>, meaning that, whatever their type
         is, any given value also contains the possibility of being a
         null value. In such languages, null is lurking everywhere.
-      </p><p id="idp6227184">
+      </p><p id="idp7133616">
         In OCaml, however, nulls are explicit. A value of type
         <code>string * string</code> always actually contains two
         well-defined values of type <code>string</code>. If you
@@ -940,51 +945,51 @@ _::[]
         <a href="error-handling.html">Chapter 7, <i>Error Handling</i></a>, this explicitness
         allows the compiler to provide a great deal of help in making
         sure you're correctly handing the possibility of missing data.
-      </p></section></section><section><h1 id="records-and-variants">Records and Variants</h1><p id="idp6231488">
+      </p></section></section><section><h1 id="records-and-variants">Records and Variants</h1><p id="idp7138000">
       So far, we've looked only at data structures that were predefined
       in the language, like lists and tuples. But OCaml also allows us
       to define new datatypes. Here's a toy example of a datatype
       representing a point in 2-dimensional space:
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">type</span> <span class="n">point2d</span> <span class="o">=</span> <span class="o">{</span> <span class="n">x</span> <span class="o">:</span> <span class="kt">float</span><span class="o">;</span> <span class="n">y</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">};;</span>
 <span class="k">type</span> <span class="n">point2d</span> <span class="o">=</span> <span class="o">{</span> <span class="n">x</span> <span class="o">:</span> <span class="kt">float</span><span class="o">;</span> <span class="n">y</span> <span class="o">:</span> <span class="kt">float</span><span class="o">;</span> <span class="o">}</span>
-</pre></div><p id="idp6233120">
+</pre></div><p id="idp7139632">
 <code>point2d</code> is a <span><em>record</em></span> type,
       which you can think of as a tuple where the individual fields are
       named, rather than being defined positionally. Record types are
       easy enough to construct:
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">p</span> <span class="o">=</span> <span class="o">{</span> <span class="n">x</span> <span class="o">=</span> <span class="mi">3</span><span class="o">.;</span> <span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="mi">4</span><span class="o">.</span> <span class="o">};;</span>
 <span class="k">val</span> <span class="n">p</span> <span class="o">:</span> <span class="n">point2d</span> <span class="o">=</span> <span class="o">{</span><span class="n">x</span> <span class="o">=</span> <span class="mi">3</span><span class="o">.;</span> <span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="mi">4</span><span class="o">.}</span>
-</pre></div><p id="idp6235584">
+</pre></div><p id="idp7142176">
       And we can get access to the contents of these types using pattern
       matching:
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">magnitude</span> <span class="o">{</span> <span class="n">x</span> <span class="o">=</span> <span class="n">x_pos</span><span class="o">;</span> <span class="n">y</span> <span class="o">=</span> <span class="n">y_pos</span> <span class="o">}</span> <span class="o">=</span>
     <span class="n">sqrt</span> <span class="o">(</span><span class="n">x_pos</span> <span class="o">**</span> <span class="mi">2</span><span class="o">.</span> <span class="o">+.</span> <span class="n">y_pos</span> <span class="o">**</span> <span class="mi">2</span><span class="o">.);;</span>
 <span class="k">val</span> <span class="n">magnitude</span> <span class="o">:</span> <span class="n">point2d</span> <span class="o">-&gt;</span> <span class="kt">float</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp6237184">
+</pre></div><p id="idp7143776">
       The pattern match here binds the variable <code>x_pos</code>
       to the value contained in the <code>x</code> field, and the
       variable <code>y_pos</code> to the value in the
       <code>y</code> field.
-    </p><p id="idp6240064">
+    </p><p id="idp7146656">
       We can write this more tersely using what's called <span><em>field
       punning</em></span>. When the name of the field and the name of the
       variable it is bound to in the match coincide, we don't have to
       write them both down. Using this, our magnitude function can be
       rewritten as follows.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">magnitude</span> <span class="o">{</span> <span class="n">x</span><span class="o">;</span> <span class="n">y</span> <span class="o">}</span> <span class="o">=</span> <span class="n">sqrt</span> <span class="o">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span><span class="o">.</span> <span class="o">+.</span> <span class="n">y</span> <span class="o">**</span> <span class="mi">2</span><span class="o">.);;</span>
-</pre></div><p id="idp6241936">
+</pre></div><p id="idp7148688">
       We can also use dot-notation for accessing record fields:
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">distance</span> <span class="n">v1</span> <span class="n">v2</span> <span class="o">=</span>
      <span class="n">magnitude</span> <span class="o">{</span> <span class="n">x</span> <span class="o">=</span> <span class="n">v1</span><span class="o">.</span><span class="n">x</span> <span class="o">-.</span> <span class="n">v2</span><span class="o">.</span><span class="n">x</span><span class="o">;</span> <span class="n">y</span> <span class="o">=</span> <span class="n">v1</span><span class="o">.</span><span class="n">y</span> <span class="o">-.</span> <span class="n">v2</span><span class="o">.</span><span class="n">y</span> <span class="o">};;</span>
 <span class="k">val</span> <span class="n">distance</span> <span class="o">:</span> <span class="n">point2d</span> <span class="o">-&gt;</span> <span class="n">point2d</span> <span class="o">-&gt;</span> <span class="kt">float</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp6243408">
+</pre></div><p id="idp7150240">
       And we can of course include our newly defined types as components
       in larger types, as in the following types, each of which is a
       description of a different geometric object.
     </p><div class="highlight"><pre><span class="o">#</span> <span class="k">type</span> <span class="n">circle_desc</span>  <span class="o">=</span> <span class="o">{</span> <span class="n">center</span><span class="o">:</span> <span class="n">point2d</span><span class="o">;</span> <span class="n">radius</span><span class="o">:</span> <span class="kt">float</span> <span class="o">}</span>
   <span class="k">type</span> <span class="n">rect_desc</span>    <span class="o">=</span> <span class="o">{</span> <span class="n">lower_left</span><span class="o">:</span> <span class="n">point2d</span><span class="o">;</span> <span class="n">width</span><span class="o">:</span> <span class="kt">float</span><span class="o">;</span> <span class="n">height</span><span class="o">:</span> <span class="kt">float</span> <span class="o">}</span>
   <span class="k">type</span> <span class="n">segment_desc</span> <span class="o">=</span> <span class="o">{</span> <span class="n">endpoint1</span><span class="o">:</span> <span class="n">point2d</span><span class="o">;</span> <span class="n">endpoint2</span><span class="o">:</span> <span class="n">point2d</span> <span class="o">}</span> <span class="o">;;</span>
-</pre></div><p id="idp6245088">
+</pre></div><p id="idp7151920">
       Now, imagine that you want to combine multiple objects of these
       types together as a description of a multi-object scene. You need
       some unified way of representing these objects together in a
@@ -995,7 +1000,7 @@ _::[]
     <span class="o">|</span> <span class="nc">Rect</span>    <span class="k">of</span> <span class="n">rect_desc</span>
     <span class="o">|</span> <span class="nc">Segment</span> <span class="k">of</span> <span class="n">segment_desc</span>
   <span class="o">;;</span>
-</pre></div><p id="idp6247136">
+</pre></div><p id="idp7153968">
       The <code>|</code> character separates the different cases
       of the variant (the first <code>|</code> is optional), and
       each case has a tag, like <code>Circle</code>,
@@ -1024,7 +1029,7 @@ _::[]
 <span class="o">#</span> <span class="n">is_inside_scene</span> <span class="o">{</span><span class="n">x</span><span class="o">=</span><span class="mi">3</span><span class="o">.;</span><span class="n">y</span><span class="o">=</span><span class="mi">7</span><span class="o">.}</span>
     <span class="o">[</span> <span class="nc">Circle</span> <span class="o">{</span><span class="n">center</span> <span class="o">=</span> <span class="o">{</span><span class="n">x</span><span class="o">=</span><span class="mi">4</span><span class="o">.;</span><span class="n">y</span><span class="o">=</span> <span class="mi">4</span><span class="o">.};</span> <span class="n">radius</span> <span class="o">=</span> <span class="mi">5</span><span class="o">.</span><span class="mi">0</span> <span class="o">}</span> <span class="o">];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="bp">true</span>
-</pre></div><p id="idp6253584">
+</pre></div><p id="idp7160416">
       You might at this point notice that the use of
       <code>match</code> here is reminiscent of how we used
       <code>match</code> with <code>option</code> and
@@ -1033,20 +1038,20 @@ _::[]
       just examples of variant types that happen to be important enough
       to be defined in the standard library (and in the case of lists,
       to have some special syntax).
-    </p><p id="idp6257920">
+    </p><p id="idp7164832">
       We also made our first use of an <span><em>anonymous
       function</em></span> in the call to <code>List.exists</code>.
       Anonymous functions are declared using the <code>fun</code>
       keyword, and don't need to be explicitly named. Such functions are
       common in OCaml, particularly when using iteration functions like
       <code>List.exists</code>.
-    </p><p id="idp6260736">
+    </p><p id="idp7167648">
       The purpose of <code>List.exists</code> is to check if there
       are any elements of the given list in question on which the
       provided function evaluates to <code>true</code>. In this
       case, we're using <code>List.exists</code> to check if there
       is a scene element within which our point resides.
-    </p></section><section><h1 id="imperative-programming">Imperative programming</h1><p id="idp6264240">
+    </p></section><section><h1 id="imperative-programming">Imperative programming</h1><p id="idp7171152">
       So far, we've only written so-called <span><em>pure</em></span> or
       <span><em>functional</em></span> code, meaning that we didn't write
       any code that modified a variable or value after its creation.
@@ -1056,13 +1061,13 @@ _::[]
       from <span><em>imperative</em></span> programming, where
       computations are structured as sequences of instructions that
       operate by modifying state as they go.
-    </p><p id="idp6266656">
+    </p><p id="idp7173568">
       Functional code is the default in OCaml, with variable bindings
       and most data structures being immutable. But OCaml also has
       excellent support for imperative programming, including mutable
       data structures like arrays and hashtables, and control-flow
       constructs like for and while loops.
-    </p><section><h1 id="arrays">Arrays</h1><p id="idp6268256">
+    </p><section><h1 id="arrays">Arrays</h1><p id="idp7175168">
         Perhaps the simplest mutable data structure in OCaml is the
         array. Arrays in OCaml are very similar to arrays in other
         languages like C: indexing starts at 0, and accessing or
@@ -1075,20 +1080,20 @@ _::[]
 <span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
 <span class="o">#</span> <span class="n">numbers</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">array</span> <span class="o">=</span> <span class="o">[|</span><span class="mi">1</span><span class="o">;</span> <span class="mi">2</span><span class="o">;</span> <span class="mi">4</span><span class="o">;</span> <span class="mi">4</span><span class="o">|]</span>
-</pre></div><p id="idp6270144">
+</pre></div><p id="idp7177056">
         the <code>.(i)</code> syntax is used to refer to an
         element of an array, and the <code>&lt;-</code> syntax is
         for modification. Because the elements of the array are counted
         starting at zero, element <code>.(2)</code> is the third
         element.
-      </p><p id="idp6272528">
+      </p><p id="idp7179520">
         A new and somewhat odd type has cropped up in this example:
         <code>unit</code>. What makes <code>unit</code>
         different is that there is only one value of type
         <code>unit</code>, which is written <code>()</code>.
         Because there is only one value of type <code>unit</code>
         that value doesn't really convey any information.
-      </p><p id="idp6276128">
+      </p><p id="idp7183280">
         If it doesn't convey any information, then what is
         <code>unit</code> good for? Most of the time,
         <code>unit</code> acts as a placeholder. Thus, we use
@@ -1098,7 +1103,7 @@ _::[]
         functions that don't require an input value. This is similar to
         the role that <code>void</code> plays in languages like C
         and Java.
-      </p></section><section><h1 id="mutable-record-fields">Mutable record fields</h1><p id="idp6280304">
+      </p></section><section><h1 id="mutable-record-fields">Mutable record fields</h1><p id="idp7187536">
         The array is an important mutable data structure, but it's not
         the only one. Records, which are immutable by default, can be
         declared with specific fields as being mutable. Here's a small
@@ -1111,7 +1116,7 @@ _::[]
      <span class="k">mutable</span> <span class="n">samples</span><span class="o">:</span> <span class="kt">int</span><span class="o">;</span>
    <span class="o">}</span>
   <span class="o">;;</span>
-</pre></div><p id="idp6282080">
+</pre></div><p id="idp7189312">
         The fields in <code>running_sum</code> are designed to be
         easy to extend incrementally, and sufficient to compute means
         and standard deviations, as shown below. (Note that there are
@@ -1125,7 +1130,7 @@ _::[]
            <span class="o">-.</span> <span class="o">(</span><span class="n">rsum</span><span class="o">.</span><span class="n">sum</span> <span class="o">/.</span> <span class="kt">float</span> <span class="n">rsum</span><span class="o">.</span><span class="n">samples</span><span class="o">)</span> <span class="o">**</span> <span class="mi">2</span><span class="o">.)</span> <span class="o">;;</span>
 <span class="k">val</span> <span class="n">mean</span> <span class="o">:</span> <span class="n">running_sum</span> <span class="o">-&gt;</span> <span class="kt">float</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="k">val</span> <span class="n">stdev</span> <span class="o">:</span> <span class="n">running_sum</span> <span class="o">-&gt;</span> <span class="kt">float</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp6284768">
+</pre></div><p id="idp7192000">
         We also need functions to create and update
         <code>running_sum</code>s:
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">create</span> <span class="bp">()</span> <span class="o">=</span> <span class="o">{</span> <span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.;</span> <span class="n">sum_sq</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.;</span> <span class="n">samples</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">}</span>
@@ -1136,19 +1141,19 @@ _::[]
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">create</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">-&gt;</span> <span class="n">running_sum</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
 <span class="k">val</span> <span class="n">update</span> <span class="o">:</span> <span class="n">running_sum</span> <span class="o">-&gt;</span> <span class="kt">float</span> <span class="o">-&gt;</span> <span class="kt">unit</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp6287152">
+</pre></div><p id="idp7194464">
 <code>create</code> returns a
         <code>running_sum</code> corresponding to the empty set,
         and <code>update rsum x</code> changes
         <code>rsum</code> to reflect the addition of
         <code>x</code> to its set of samples, by updating the
         number of samples, the sum, and the sum of squares.
-      </p><p id="idp6290784">
+      </p><p id="idp7198096">
         Note the use in the above code of single semi-colons to sequence
         operations. When we were working purely functionally, this
         wasn't necessary, but you start needing it when you're writing
         imperative code.
-      </p><p id="idp6291424">
+      </p><p id="idp7198736">
         Here's an example of <code>create</code> and
         <code>update</code> in action.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">rsum</span> <span class="o">=</span> <span class="n">create</span> <span class="bp">()</span><span class="o">;;</span>
@@ -1159,7 +1164,7 @@ _::[]
 <span class="o">-</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">=</span> <span class="mi">1</span><span class="o">.</span><span class="mi">33333333333333326</span>
 <span class="o">#</span> <span class="n">stdev</span> <span class="n">rsum</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">float</span> <span class="o">=</span> <span class="mi">3</span><span class="o">.</span><span class="mi">94405318873307698</span>
-</pre></div></section><section><h1 id="refs">Refs</h1><p id="idp6295216">
+</pre></div></section><section><h1 id="refs">Refs</h1><p id="idp7202528">
         We can create a single mutable value by using a
         <code>ref</code>. The <code>ref</code> type comes
         pre-defined in the standard library, but there's nothing really
@@ -1171,7 +1176,7 @@ _::[]
 <span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
 <span class="o">#</span> <span class="n">x</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="n">ref</span> <span class="o">=</span> <span class="o">{</span><span class="n">contents</span> <span class="o">=</span> <span class="mi">1</span><span class="o">}</span>
-</pre></div><p id="idp6298704">
+</pre></div><p id="idp7206096">
         There are a handful of useful functions and operators defined
         for <code>ref</code>s to make them more convenient to work
         with.
@@ -1183,23 +1188,23 @@ _::[]
 <span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
 <span class="o">#</span> <span class="o">!</span><span class="n">x</span> <span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">1</span>
-</pre></div><p id="idp6301152">
+</pre></div><p id="idp7208624">
         There's nothing magical with these operators either. You can
-        complete reimplement the <code>ref</code> type and all of
-        these operators in just a few lines of code.
+        completely reimplement the <code>ref</code> type and all
+        of these operators in just a few lines of code.
       </p><div class="highlight"><pre><span class="k">type</span> <span class="k">'</span><span class="n">a</span> <span class="n">ref</span> <span class="o">=</span> <span class="o">{</span> <span class="k">mutable</span> <span class="n">contents</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="o">}</span>
 
 <span class="k">let</span> <span class="n">ref</span> <span class="n">x</span> <span class="o">=</span> <span class="o">{</span> <span class="n">contents</span> <span class="o">=</span> <span class="n">x</span> <span class="o">}</span>
 <span class="k">let</span> <span class="o">(!)</span> <span class="n">r</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">contents</span>
 <span class="k">let</span> <span class="o">(:=)</span> <span class="n">r</span> <span class="n">x</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">contents</span> <span class="o">&lt;-</span> <span class="n">x</span>
-</pre></div><p id="idp6303488">
+</pre></div><p id="idp7210976">
         The <code>'a</code> before the ref indicates that the
         <code>ref</code> type is polymorphic, in the same way that
         lists are polymorphic, meaning it can contain values of any
         type. The parenthesis around <code>!</code> and
         <code>:=</code> are needed because these are operators,
         rather than ordinary functions.
-      </p><p id="idp6306624">
+      </p><p id="idp7214112">
         Even though a <code>ref</code> is just another record
         type, it's important because it is the standard way of
         simulating the traditional mutable variable you'll find in most
@@ -1211,11 +1216,11 @@ _::[]
     <span class="k">let</span> <span class="n">sum</span> <span class="o">=</span> <span class="n">ref</span> <span class="mi">0</span> <span class="k">in</span>
     <span class="nn">List</span><span class="p">.</span><span class="n">iter</span> <span class="kt">list</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">sum</span> <span class="o">:=</span> <span class="o">!</span><span class="n">sum</span> <span class="o">+</span> <span class="n">x</span><span class="o">);</span>
     <span class="o">!</span><span class="n">sum</span>
-</pre></div><p id="idp6309696">
+</pre></div><p id="idp7217184">
         This isn't the most idiomatic (or the fastest) way to sum up a
         list, but it shows how you can use a ref in place of a mutable
         variable.
-      </p></section><section><h1 id="for-and-while-loops">For and while loops</h1><p id="idp6311264">
+      </p></section><section><h1 id="for-and-while-loops">For and while loops</h1><p id="idp7218752">
         OCaml also supports traditional imperative control-flow
         constructs like for and while loops. Here, for example, is some
         code for permuting an array that uses a for loop. We use the
@@ -1234,12 +1239,12 @@ _::[]
     <span class="k">done</span>
   <span class="o">;;</span>
 <span class="k">val</span> <span class="n">permute</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="kt">array</span> <span class="o">-&gt;</span> <span class="kt">unit</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
-</pre></div><p id="idp6315152">
+</pre></div><p id="idp7222640">
         From a syntactic perspective, you should note the keywords that
         distinguish a for loop: <code>for</code>,
         <code>to</code>, <code>do</code> and
         <code>done</code>.
-      </p><p id="idp6318160">
+      </p><p id="idp7225648">
         Here's an example run of this code.
       </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">ar</span> <span class="o">=</span> <span class="nn">Array</span><span class="p">.</span><span class="n">init</span> <span class="mi">20</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">i</span> <span class="o">-&gt;</span> <span class="n">i</span><span class="o">);;</span>
 <span class="k">val</span> <span class="n">ar</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">array</span> <span class="o">=</span>
@@ -1249,7 +1254,7 @@ _::[]
 <span class="o">#</span> <span class="n">ar</span><span class="o">;;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">array</span> <span class="o">=</span>
 <span class="o">[|</span><span class="mi">14</span><span class="o">;</span> <span class="mi">13</span><span class="o">;</span> <span class="mi">1</span><span class="o">;</span> <span class="mi">3</span><span class="o">;</span> <span class="mi">2</span><span class="o">;</span> <span class="mi">19</span><span class="o">;</span> <span class="mi">17</span><span class="o">;</span> <span class="mi">18</span><span class="o">;</span> <span class="mi">9</span><span class="o">;</span> <span class="mi">16</span><span class="o">;</span> <span class="mi">15</span><span class="o">;</span> <span class="mi">7</span><span class="o">;</span> <span class="mi">12</span><span class="o">;</span> <span class="mi">11</span><span class="o">;</span> <span class="mi">4</span><span class="o">;</span> <span class="mi">10</span><span class="o">;</span> <span class="mi">0</span><span class="o">;</span> <span class="mi">5</span><span class="o">;</span> <span class="mi">6</span><span class="o">;</span> <span class="mi">8</span><span class="o">|]</span>
-</pre></div><p id="idp6320032">
+</pre></div><p id="idp7227520">
         OCaml also supports while loops, as shown in the following
         function for finding the first non-negative position in an
         array. Note that <code>while</code> (like
@@ -1266,12 +1271,12 @@ _::[]
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="n">option</span> <span class="o">=</span> <span class="nc">None</span>
 <span class="o">#</span> <span class="n">find_first_negative_entry</span> <span class="o">[|</span><span class="mi">1</span><span class="o">;-</span><span class="mi">2</span><span class="o">;</span><span class="mi">0</span><span class="o">;</span><span class="mi">3</span><span class="o">|];;</span>
 <span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="n">option</span> <span class="o">=</span> <span class="nc">Some</span> <span class="mi">1</span>
-</pre></div></section></section><section><h1 id="a-complete-program">A complete program</h1><p id="idp6324480">
+</pre></div></section></section><section><h1 id="a-complete-program">A complete program</h1><p id="idp7231968">
       So far, we've played with the basic features of the language using
       the toplevel. Now we'll create a simple, complete stand-alone
       program that does something useful: sum up a list of numbers read
       in from the standard input.
-    </p><p id="idp6325136">
+    </p><p id="idp7232624">
       Here's the code, which you can save in a file called
       <code>sum.ml</code>. Note that we don't terminate
       expressions with <code>;;</code> here, since it's not
@@ -1288,7 +1293,7 @@ _::[]
 
 <span class="k">let</span> <span class="bp">()</span> <span class="o">=</span>
   <span class="n">printf</span> <span class="s2">&quot;Total: %F</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">(</span><span class="n">read_and_accumulate</span> <span class="mi">0</span><span class="o">.)</span>
-</pre></div><p id="idp6328128">
+</pre></div><p id="idp7235616">
       This is our first use of OCaml's input and output routines. The
       function <code>read_and_accumulate</code> is a recursive
       function that uses <code>In_channel.input_line</code> to
@@ -1296,7 +1301,7 @@ _::[]
       at each iteration with its updated accumulated sum. Note that
       <code>input_line</code> returns an optional value, with
       <code>None</code> indicating the end of the input.
-    </p><p id="idp6331264">
+    </p><p id="idp7238752">
       After <code>read_and_accumulate</code> returns, the total
       needs to be printed. This is done using the
       <code>printf</code> command, which provides support for
@@ -1306,21 +1311,21 @@ _::[]
       are required. In this case, there is a single formatting
       directive, <code>%F</code>, so <code>printf</code>
       expects one additional argument of type <code>float</code>.
-    </p><section><h1 id="compiling-and-running">Compiling and running</h1><p id="idp6336096">
+    </p><section><h1 id="compiling-and-running">Compiling and running</h1><p id="idp7243584">
         We can use <code>ocamlbuild</code> to compile the program.
         We'll need to create a file, in the same directory as
         <code>sum.ml</code>, called <code>_tags</code>. We
         can put the following in <code>_tags</code> to indicate
         that we're building against Core, and that threads should be
         enabled, which is required by Core.
-      </p><pre id="idp6339232">
+      </p><pre id="idp7246720">
 true:package(core),thread
-</pre><p id="idp6339856">
+</pre><p id="idp7247344">
         With our <code>_tags</code> file in place, we can build
         our executable by issuing this command.
-      </p><pre id="idp6340960">
+      </p><pre id="idp7248448">
 ocamlbuild -use-ocamlfind sum.native
-</pre><p id="idp6341584">
+</pre><p id="idp7249072">
         The <code>.native</code> suffix indicates that we're
         building a native-code executable, which we'll discuss more in
         <a href="files-modules-and-programs.html">Chapter 4, <i>Files, Modules and Programs</i></a>. Once the
@@ -1328,19 +1333,19 @@ ocamlbuild -use-ocamlfind sum.native
         command-line utility. In this example, we can just type in a
         sequence of numbers, one per line, hitting control-d to exit
         when the input is complete.
-      </p><pre id="idp6343488">
+      </p><pre id="idp7250976">
 $ ./sum.native
 1
 2
 3
 94.5
 Total: 100.5
-</pre><p id="idp6344112">
+</pre><p id="idp7251600">
         More work is needed to make a really usable command-line
         program, including a proper command-line parsing interface and
         better error handling, all of which is covered in
         <a href="command-line-parsing.html">Chapter 14, <i>Command Line Parsing</i></a>.
-      </p></section></section><section><h1 id="where-to-go-from-here">Where to go from here</h1><p id="idp6346352">
+      </p></section></section><section><h1 id="where-to-go-from-here">Where to go from here</h1><p id="idp7253840">
       That's it for the guided tour! There are plenty of features left
       and lots of details to explain, but we hope that you now have a
       sense of what to expect from OCaml, and that you'll be more

@@ -108,47 +108,47 @@
                 
                 
 
-    <section><h1 id="why-ocaml">Why OCaml?</h1><p id="idp4215840">
+    <section><h1 id="why-ocaml">Why OCaml?</h1><p id="idp3678560">
       The programming languages that you use affect the software you
       create. They influence your software's reliability, security and
       efficiency, and how easy it is to read, refactor, and extend. The
       languages you know can also deeply affect how you think about
       programming and software design.
-    </p><p id="idp4257824">
+    </p><p id="idp4061184">
       But not all ideas about how to design a programming language are
       created equal. Over the last 40 years, a few key language features
       have emerged that together form a kind of sweet-spot in language
       design. These features include:
-    </p><ul><li><p id="idp1454512">
+    </p><ul><li><p id="idp4665536">
 <span><em>Garbage collection</em></span> for automatic memory
           management, now a feature of almost every modern high-level
           language.
-        </p></li><li><p id="idp4434912">
+        </p></li><li><p id="idp4505472">
 <span><em>Higher-order functions</em></span> that can be passed
           around as first-class values, as seen in Javascript or Scala.
-        </p></li><li><p id="idp3788240">
+        </p></li><li><p id="idp3567296">
 <span><em>Static type-checking</em></span> to reduce runtime
           errors, such as Java or Scala interfaces or variable type
           declarations in C#, Ada and Pascal.
-        </p></li><li><p id="idp3701824">
+        </p></li><li><p id="idp4564752">
 <span><em>Generics</em></span> to enable abstractions to be
           constructed across different datatypes, available as C++
           templates or in Java or C#.
-        </p></li><li><p id="idp5278192">
+        </p></li><li><p id="idp3968032">
 <span><em>Immutable data structures</em></span> that cannot be
           destructively updated, famously enforced in Haskell but also a
           common feature of many distributed big data frameworks.
-        </p></li><li><p id="idp2532864">
+        </p></li><li><p id="idp3934000">
 <span><em>Algebraic datatypes</em></span> and <span><em>pattern
           matching</em></span> to define and manipulate complex data
           structures, available in Miranda, F# and Standard ML.
-        </p></li><li><p id="idp4183072">
+        </p></li><li><p id="idp4194432">
 <span><em>Automatic type inference</em></span> to avoid having
           to laboriously define the type of every single variable in a
           program, and instead have them inferred based on how a value
           is used. Available in Standard ML, F# and even modern C++11
           via its <code>auto</code> keyword.
-        </p></li></ul><p id="idp5859952">
+        </p></li></ul><p id="idp4455696">
       Some of you will know and love these features, and others will be
       completely new to them. Most of you will have seen
       <span><em>some</em></span> of them in other languages that you've
@@ -162,7 +162,7 @@
       that completely embody these ideas are statically-typed functional
       programming languages like OCaml, F#, Haskell, Scala and Standard
       ML.
-    </p><p id="idp3862272">
+    </p><p id="idp4420272">
       Among this worthy set of languages, OCaml stands apart because it
       manages to provide a great deal of power while remaining highly
       pragmatic. The compiler has a straightforward compilation strategy
@@ -171,24 +171,24 @@
       collector is an incremental, precise implementation with no
       dynamic JIT compilation, and the runtime is simple and portable
       across platforms.
-    </p><p id="idp5228144">
+    </p><p id="idp2680752">
       It is all of this that makes OCaml a great choice for programmers
       who want to step up to a better programming language, and at the
       same time want to get practical work done.
-    </p><section><h1 id="a-brief-history-from-the-1960s">A brief history from the 1960s</h1><p id="idp3071408">
+    </p><section><h1 id="a-brief-history-from-the-1960s">A brief history from the 1960s</h1><p id="idp3483744">
         OCaml was written in 1996 by Xavier Leroy, Jérôme Vouillon,
         Damien Doligez and Didier Rémy at INRIA in France. It was
         inspired by a long line of research into ML starting in the
         1960s, and continues to have deep links to the academic
         community.
-      </p><p id="idp3758176">
+      </p><p id="idp4448320">
         ML was originally the <span><em>meta language</em></span> of the
         LCF proof assistant released by Robin Milner in 1972 (at
         Stanford, and later at Cambridge). ML was turned into a compiler
         in order to make it easier to use LCF on different machines, and
         gradually turned into a fully fledged system of its own by the
         1980s.
-      </p><p id="idp5976080">
+      </p><p id="idp423904">
         In 1990, Xavier Leroy and Damien Doligez built a new
         implementation called Caml Light that was based on a bytecode
         interpreter with a fast sequential garbage collector. Over the
@@ -198,7 +198,7 @@
         mainstream languages such as C++. A module system inspired by
         Standard ML also provided powerful facilities for abstraction
         and larger scale programs.
-      </p><p id="idp5623376">
+      </p><p id="idp424896">
         The modern OCaml emerged in 1996, when a powerful and elegant
         object system was implemented by Didier Rémy and Jérôme
         Vouillon. This object system was notable for supporting many
@@ -207,7 +207,7 @@
         In 2000, Jacques Garrique extended OCaml with several new
         features such as polymorphic methods and variants and labelled
         and optional arguments.
-      </p><p id="idp4256448">
+      </p><p id="idp296704">
         The last decade has seen OCaml attract a significant user base,
         and language improvements have been steadily added to support
         the growing codebases that use the language both commercially
@@ -217,7 +217,7 @@
         support for x86_64, ARM, PowerPC and Sparc64, making OCaml a
         good choice for systems where resource usage, predictability and
         performance all matter.
-      </p></section><section><h1 id="the-core-standard-library">The Core Standard Library</h1><p id="idp5668208">
+      </p></section><section><h1 id="the-core-standard-library">The Core Standard Library</h1><p id="idp427984">
         A language on its own isn't enough. You also need a rich set of
         libraries to base your applications on. A common source of
         frustration for those learning OCaml is that the standard
@@ -226,31 +226,31 @@
         within the compiler itself, and therefore by design covers only
         a small subset of the functionality you expect for more
         general-purpose use.
-      </p><p id="idp4135856">
+      </p><p id="idp429424">
         Happily, in the world of open-source software nothing stops
         alternative libraries from being written to supplement the
         compiler-supplied standard library, and this is exactly what the
         Core distribution is.
-      </p><p id="idp1766336">
+      </p><p id="idp430064">
         Jane Street, a company that has been using OCaml for more than a
         decade, developed Core for its own internal use, but designed it
         from the start with an eye towards being a general-purpose
         standard library with very broad applicability. Like the OCaml
         language itself, Core is engineered with correctness,
         reliability and performance in mind.
-      </p><p id="idp2560592">
+      </p><p id="idp430864">
         Core is distributed with syntax extensions which provide useful
         new functionality to OCaml, and there are additional libraries
         such as the Async network communications library that extend the
         reach of Core into building complex distributed systems. All of
         these libraries are distributed under a liberal Apache 2 license
         to permit free use in hobby, academic and commercial settings.
-      </p></section><section><h1 id="the-ocaml-platform">The OCaml Platform</h1><p id="idp3313312">
+      </p></section><section><h1 id="the-ocaml-platform">The OCaml Platform</h1><p id="idp432848">
         Core is a comprehensive and effective standard library, but
         there's a lot more out software out there. A large community of
         programmers have been using OCaml since its first release in
         1996 and have generated a lot of useful libraries and tools.
-      </p><p id="idp4719424">
+      </p><p id="idp433536">
         In Real World OCaml, we'll introduce some of these libraries for
         you to experiment with realistic examples. The installation and
         management of these third-party libraries is made much easier
@@ -259,7 +259,7 @@
         Platform, which is a set of tools and libraries that, along with
         the OCaml compiler, let you build realistic applications quickly
         and effectively.
-      </p><p id="idp2523712">
+      </p><p id="idp434464">
         Another big improvement in Core is the <code>utop</code>
         command-line interface. This is a modern interactive tool that
         supports command history, macro expansion, module completion,
@@ -269,7 +269,7 @@
         course, be installed using OPAM, and
         <a href="installation.html">Appendix A, <i>Installation</i></a> guides you through that
         process.
-      </p></section></section><section><h1 id="about-this-book">About this book</h1><p id="idp5052288">
+      </p></section></section><section><h1 id="about-this-book">About this book</h1><p id="idp2037168">
       Real World OCaml is aimed at programmers who have some experience
       with conventional programming languages, but not specifically with
       <span><em>statically-typed functional programming</em></span>. The
@@ -279,7 +279,7 @@
       the full lifecycle of how to construct software with static
       typing, including the powerful module system that makes code reuse
       so much more robust.
-    </p><p id="idp4634032">
+    </p><p id="idp232464">
       At the same time, OCaml is not Haskell. It takes a much more
       pragmatic approach by being strictly evaluated by default and
       permitting arbitrary side-effects. In fact, you can write OCaml
@@ -288,7 +288,7 @@
       systems programming is that, with some experience, you can predict
       the runtime behaviour of a block of code very easily. We'll
       explain some of these tricks to you as we go through the book.
-    </p><p id="idp4504528">
+    </p><p id="idp233424">
       If you've learnt some OCaml before, this book may surprise you
       with some differences from your past experience. Core redefines
       most of the standard modules to be much more consistent, and so
@@ -300,9 +300,9 @@
       available to learn that. Real World OCaml focuses on the
       techniques the authors have used in their personal experience to
       construct scalable, robust computer systems.
-    </p><section><h1 id="what-to-expect">What to expect</h1><p id="idp4410576">
+    </p><section><h1 id="what-to-expect">What to expect</h1><p id="idp235440">
         Real World OCaml is split into three parts and appendices:
-      </p><ul><li><p id="idp4267760">
+      </p><ul><li><p id="idp236336">
             Part I covers the basic language concepts you'll need to
             know when building OCaml programs. You won't need to
             memorise all of this (objects, for example, are used rarely
@@ -314,7 +314,7 @@
             difficult at first, they will put you in good stead even
             when switching to other languages, many of which have drawn
             inspiration from ML.
-          </p></li><li><p id="idp2492960">
+          </p></li><li><p id="idp237872">
             Part II builds on the basics by working through useful tools
             and techniques. Here you'll pick up useful techniques for
             building networked systems, as well as functional design
@@ -323,7 +323,7 @@
             is on networked systems, and among other examples we'll
             build a running example that will perform Internet queries
             using the DuckDuckGo search engine.
-          </p></li><li><p id="idp5575648">
+          </p></li><li><p id="idp239200">
             Part III is all about understanding the runtime system in
             OCaml. It's a remarkably simple system in comparison to
             other language runtimes (such as Java or the .NET CLR), and
@@ -332,13 +332,13 @@
             C libraries. This is also where we talk about profiling and
             debugging techniques using tools such as GNU
             <code>gdb</code>.
-          </p></li></ul><p id="idp2292592">
+          </p></li></ul><p id="idp241088">
         Contributing your code back to the community is also important
         (if only to get bug fixes from other people!), and our
         appendices explain how to do this via OPAM and GitHub.
       </p><aside class="note"><h1>
       Note to reviewers
-      </h1><p id="idp3233072">
+      </h1><p id="idp242384">
         Real World OCaml uses some tools that we've developed while
         writing this book. Some of these resulted in improvements to the
         OCaml compiler, which means that you will need to ensure that
@@ -347,20 +347,20 @@
         package manager, so please do follow the installation
         instructions in <a href="installation.html">Appendix A, <i>Installation</i></a>
         carefully.
-      </p><p id="idp3046032">
+      </p><p id="idp243936">
         At this stage, the Windows operating system is also unsupported,
         and only Mac OS X, Linux, FreeBSD and OpenBSD can be expected to
         work reliably. We realize this is a concern; there are no
         fundamental barriers to Windows support, but we're focussed on
         getting the main content finished before getting stuck into the
         porting effort.
-      </p></aside></section></section><section><h1 id="about-the-authors">About the Authors</h1><section><h1 id="jason-hickey">Jason Hickey</h1><p id="idp4521328">
+      </p></aside></section></section><section><h1 id="about-the-authors">About the Authors</h1><section><h1 id="jason-hickey">Jason Hickey</h1><p id="idp247072">
         Jason Hickey is a Software Engineer at Google Inc. in Mountain
         View, California. He is part of the team that designs and
         develops the global computing infrastructure used to support
         Google services, including the software systems for managing and
         scheduling massively distributed computing resources.
-      </p><p id="idp5769280">
+      </p><p id="idp247824">
         Prior to joining Google, Jason was an Assistant Professor of
         Computer Science at Caltech, where his research was in reliable
         and fault-tolerant computing systems, including programming
@@ -372,7 +372,7 @@
         advanced build system for large software projects. He is the
         author of the textbook, <span><em>An Introduction to Objective
         Caml</em></span> (unpublished).
-      </p></section><section><h1 id="anil-madhavapeddy">Anil Madhavapeddy</h1><p id="idp5378048">
+      </p></section><section><h1 id="anil-madhavapeddy">Anil Madhavapeddy</h1><p id="idp250416">
         Anil Madhavapeddy is a Senior Research Fellow at the University
         of Cambridge, based in the Systems Research Group. He was on the
         original team that developed the Xen hypervisor, and helped
@@ -380,7 +380,7 @@
         entirely in OCaml. This XenServer product has been deployed on
         millions of physical hosts, and drives critical infrastructure
         for many Fortune 500 companies.
-      </p><p id="idp5468432">
+      </p><p id="idp251296">
         Prior to obtaining his PhD in 2006 from the University of
         Cambridge, Anil had a diverse background in industry at NetApp,
         NASA and Internet Vision. He is an active member of the
@@ -390,14 +390,14 @@
         startup companies where OCaml is extensively used. He has also
         developed the Mirage unikernel system that is written entirely
         in OCaml from the device drivers up.
-      </p></section><section><h1 id="yaron-minsky">Yaron Minsky</h1><p id="idp3482912">
+      </p></section><section><h1 id="yaron-minsky">Yaron Minsky</h1><p id="idp253456">
         Yaron Minsky heads the Technology group at Jane Street, a
         proprietary trading firm that is the largest industrial user of
         OCaml. He was responsible for introducing OCaml to the company
         and for managing the company's transition to using OCaml for all
         of its core infrastructure. Today, billions of dollars worth of
         securities transactions flow each day through those systems.
-      </p><p id="idp5529024">
+      </p><p id="idp254288">
         Yaron obtained his PhD in Computer Science from Cornell
         University, where he studied distributed systems. Yaron has
         lectured, blogged and written about OCaml for years, with
