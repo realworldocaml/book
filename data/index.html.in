@@ -60,13 +60,13 @@
                   
                  <p><b>What license is the book released under?</b></p>
                  <p>The online HTML version of the book is available under a <a href="http://creativecommons.org/licenses/by-nc-nd/3.0/us/">Creative Commons Attribution- Noncommercial-No Derivative Works 3.0 United States License</a>, which means that you are welcome to copy, distribute and transmit the work, but must give us attribution, not create derived works from it, or use it directly for commercial purposes (it's fine to use to within your workplace to learn OCaml, of course, but not to re-sell the book directly.</p>
-                 <p>We'd like to thank O'Reilly for their generosity in allowing this online version to be available freely.  Of course, we encourage you to also purchase a copy of the book from them.  The O'Reilly production team is doing a tremendous job of typesetting and editing the print version of the book into a beautiful edition that's worth of a place on your shelf.</p>
+                 <p>We'd like to thank O'Reilly for their generosity in allowing this online version to be available freely.  Of course, we encourage you to also purchase a copy of the book from them.  The O'Reilly production team is doing a tremendous job of typesetting and editing the print version of the book into a beautiful edition that's worthy of a place on your shelf.</p>
 
                  <p><b>Can I get a PDF or e-book of the beta?</b></p>
                  <p>O'Reilly is making the book available under their <a href="http://shop.oreilly.com/category/roughcuts.do">Rough Cuts</a> program.  You will get regular updates to all the beta milestones in PDF or e-book formats if you purchase it there.</p>
 
                  <p><b>Is the source code to the website commenting system available?</b></p>
-                 <p>It's not right now, but only because the authors are so busy finishing the book.  Anil is planning to tidy up the toolchain and open-source it just as soon as he finds time.  All the libraries used to build it, such as <a href="http://github.com/mirage/ocaml-cohttp">ocaml-cohttp</a> or <a href="http://github.com/avsm/ocaml-github">ocaml-github</a> are already all available via OPAM.</p>
+                 <p>It's not right now, but only because the authors are so busy finishing the book.  Anil is planning to tidy up the toolchain and open-source it just as soon as he finds time.  All the libraries used to build it, such as <a href="http://github.com/mirage/ocaml-cohttp">ocaml-cohttp</a> or <a href="http://github.com/avsm/ocaml-github">ocaml-github</a> are already all available via <a href="http://opam.ocamlpro.com">OPAM</a>.</p>
 
                 <p>If you have any questions about all this, please get in touch with <a href="mailto:anil@recoil.org">Anil Madhavapeddy</a>.
             </article>
