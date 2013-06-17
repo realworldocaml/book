@@ -5,6 +5,8 @@ type t =
   | File of string
   | Directory
 
+type cache = (string, t) Hashtbl.t
+
 let is_dir fname =
   try Sys.is_directory fname
   with Sys_error err ->
@@ -15,11 +17,11 @@ let string_of_file file =
   Lwt_unix.((stat file) >|= fun st -> st.st_size)
   >>= fun size ->
   let buf = String.create size in
-  Lwt_io.with_file ~mode:Lwt_io.Input file
+  Lwt_io.with_file ~mode:Lwt_io.input file
     (fun ic -> Lwt_io.read_into_exactly ic buf 0 size)
   >|= fun () -> buf
       
-let cache ~root =
+let cache root =
   let h = Hashtbl.create 53 in
   let rec aux ~rel =
     let fulldir = Filename.concat root rel in
@@ -49,7 +51,7 @@ let lookup h path =
 
 let test () =
   Lwt_unix.run (
-    cache ~root:""
+    cache ""
     >>= fun h ->
     Hashtbl.iter (fun k v ->
      Printf.printf "%s -> %s\n" k
