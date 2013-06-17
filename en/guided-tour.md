@@ -1142,7 +1142,7 @@ val x : int ref = {contents = 0}
 - : int = 1
 ```
 
-There's nothing magical with these operators either.  You can complete
+There's nothing magical with these operators either.  You can completely
 reimplement the `ref` type and all of these operators in just a few
 lines of code.
 
