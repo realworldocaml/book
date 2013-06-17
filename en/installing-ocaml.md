@@ -426,15 +426,32 @@ to load it every time you start `utop`, by adding this to it:
 #camlp4o
 #require "core.top"
 #require "core.syntax"
+```
+
+You can also optionally add some more useful libraries that are used in
+the book, such as `Core_extended` and `Async`.  You can also open the Core
+module by default if that's all you ever use the top-level for.  Just append
+these lines to the `.ocamlinit` file if that's what you prefer.
+
+```
 #require "core_extended"
 #require "async"
 open Core.Std
 ```
 
-When you run `utop` with this initialization file, it should start up with
+When you run `utop` with these initialization rules, it should start up with
 Core opened and ready to use.
 
 ### Editors
+
+<note>
+<title>Note to reviewers</title>
+
+The instructions for editor setup are still being compiled.  If you have a
+relevant tip or HOWTO, then we'd *really* appreciate you leaving a note here
+with a pointer or direct instructions.
+
+</note>
 
 #### Emacs
 
