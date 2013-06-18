@@ -20,7 +20,7 @@ can be created from and converted back to regular modules.  As we'll
 see, letting modules into the core language makes it possible build
 more modular programs.
 
-### A trivial example
+## A trivial example
 
 As we did with functors, we'll start out by considering a trivial
 example so we can cover the basic mechanics of first class modules
@@ -128,9 +128,312 @@ val six : (module X_int) = <module>
 - : int = 12
 ```
 
-Of course, all we've really done with this example is come up with a
-more cumbersome way of working with integers.  Now let's consider some
-more realistic examples.
+## Example: a query-handling service
+
+In this section, we'll see what happens when we take a more complete
+and realistic module signature as the basis for a first class module.
+In particular, consider the following signature for a module that
+implements a query handling service.
+
+```ocaml
+# module type Query_handler = sig
+
+    (** Configuration for a query handler.  Note that this can be
+        converted to and from an s-expression *)
+    type config with sexp
+
+    (** The name of the query-handling service *)
+    val name : string
+
+    (** The state o fthe query handler *)
+    type t
+
+    (** Create a new query handler from a config *)
+    val create : config -> t
+
+    (** Evaluate a given query, where both input and output are
+        s-expressions *)
+    val eval : t -> Sexp.t -> Sexp.t Or_error.t
+  end;;
+module type Query_handler =
+  sig
+    type config
+    val name : string
+    type t
+    val create : config -> t
+    val eval : t -> Sexp.t -> Sexp.t Or_error.t
+    val config_of_sexp : Sexp.t -> config
+    val sexp_of_config : config -> Sexp.t
+  end
+```
+
+In the above we use s-expressions as the format for queries and
+responses as well for the config.  S-expressions are a simple,
+flexible, and human-readable serialization format commonly used in
+Core.  We'll cover s-expressions in more detail in
+[xref](#data-serialization-with-s-expressions), but for now, it's
+enough to think of them as balanced parenthetical expressions whose
+atomic values are strings, _e.g._, `(this (is an) (s expression))`.
+
+In addition, we use the `sexplib` syntax extension which extends OCaml
+by adding the `with sexp` declaration.  When attached to a type in a
+signature adds in declarations of converters to and from
+s-expressions.  In a module, `with sexp` adds the actual
+implementation of those functions.  This is all described in more
+detail in [xref](#data-serialization-with-s-expressions).
+
+Let's give a couple of examples of simple services that satisfy this
+interface.  For example, the following service hands out unique
+integer ids by keeping an internal counter which it bumps every time
+it produces a counter.  The input to the query in this case is just
+the trivial s-expression `()`.
+
+```ocaml
+# module Unique = struct
+    type config = int with sexp
+    type t = { mutable next_id: int }
+
+    let name = "unique"
+    let create start_at = { next_id = start_at }
+
+    let eval t sexp =
+      match Or_error.try_with (fun () -> unit_of_sexp sexp) with
+      | Error _ as err -> err
+      | Ok () ->
+        let resp = Ok (Int.sexp_of_t t.next_id) in
+        t.next_id <- t.next_id + 1;
+        resp
+  end;;
+module Unique :
+  sig
+    type config = int
+    val config_of_sexp : Sexp.t -> config
+    val sexp_of_config : config -> Sexp.t
+    type t = { mutable next_id : config; }
+    val name : string
+    val create : config -> t
+    val eval : t -> Sexp.t -> (Sexp.t, Error.t) Result.t
+  end
+```
+
+We can use this module to create an instance of the `Unique` query
+handler and interact with it.
+
+```ocaml
+# let config = Unique.config_of_sexp (Sexp.of_string "0");;
+val config : Unique.config = <abstr>
+# let unique = Unique.create config;;
+val unique : Unique.t = <abstr>
+# Unique.eval unique (Sexp.of_string "()");;
+- : Sexp.t Or_error.t = Core_kernel.Result.Ok 0
+# Unique.eval unique (Sexp.of_string "()");;
+- : Sexp.t Or_error.t = Core_kernel.Result.Ok 1
+```
+
+Now, consider what happens if we have multiple such modules.  Here,
+for example, is a query handler for handling directory listings.
+
+```ocaml
+# module List_dir = struct
+    type config = string with sexp
+    type t = { cwd: string }
+
+    let is_abs s =
+      String.length s > 0 && s.[0] = '/'
+
+    let name = "ls"
+    let create cwd = { cwd }
+
+    let eval t sexp =
+      match Or_error.try_with (fun () -> string_of_sexp sexp) with
+      | Error _ as err -> err
+      | Ok dir ->
+        let dir =
+          if is_abs dir then dir 
+          else Filename.concat t.cwd dir
+        in
+        Ok (Array.sexp_of_t String.sexp_of_t (Sys.readdir dir))
+  end;;
+module List_dir :
+  sig
+    type config = string
+    val name : config
+    type t
+    val create : config -> t
+    val eval : t -> Sexp.t -> Sexp.t Or_error.t
+    val config_of_sexp : Sexp.t -> config
+    val sexp_of_config : config -> Sexp.t
+  end
+# let list_dir = List_dir.create "/";;
+val list_dir : List_dir.t = <abstr>
+# List_dir.eval list_dir (sexp_of_string "var");;
+- : Sexp.t Or_error.t =
+Core_kernel.Result.Ok
+ (agentx at audit backups db empty folders jabberd lib log mail msgs named
+  netboot pgsql_socket_alt root rpc run rwho spool tmp vm yp)
+```
+
+Now, what if we want to dispatch queries to any of an arbitrary
+collection of handlers?  This is difficult to do with modules and
+functors alone, but it's quite natural with first-class modules.  The
+first thing we'll need to do is to create a signature that combines a
+`Query_handler` module with an instantiated example of the handler, as
+follows.
+
+```ocaml
+# module type Query_handler_instance = sig
+    module Query_handler : Query_handler
+    val this : Query_handler.t
+  end;;
+module type Query_handler_instance =
+  sig module Query_handler : Query_handler val this : Query_handler.t end
+```
+
+We can create first-class modules of this type easily enough, if we
+have both the `Query_handler` module and a config to create it from.
+
+```ocaml
+# let unique_instance =
+    (module struct
+       module Query_handler = Unique
+       let this = Unique.create 0
+     end : Query_handler_instance);;
+val unique_instance : (module Query_handler_instance) = <module>
+# let list_dir_instance =
+    (module struct
+       module Query_handler = List_dir
+       let this = List_dir.create "/"
+     end : Query_handler_instance);;
+val list_dir_instance : (module Query_handler_instance) = <module>
+```
+
+Here's some code for putting together a simple interactive prompt that
+lets you dispatch queries to a given query handler by name.
+
+```ocaml
+# let dispatch_to_list handlers name_and_query =
+    let (name,query) = <:of_sexp<string * Sexp.t>> name_and_query in
+    let response =
+      List.find_map handlers
+        ~f:(fun (module I : Query_handler_instance) ->
+          if I.Query_handler.name <> name then None
+          else Some (I.Query_handler.eval I.this query)
+        )
+    in
+    match response with
+    | Some x -> x
+    | None -> Or_error.error "Could not find matching handler"
+                name String.sexp_of_t
+  ;;
+val dispatch_to_list :
+  (module Query_handler_instance) list -> Sexp.t -> Sexp.t Or_error.t = <fun>
+```
+
+And using this, we can create a simple interactive tool for sending
+queries and viewing the results.
+
+```ocaml
+# let run s =
+    match dispatch_to_list [ unique_instance; list_dir_instance ]
+            (Sexp.of_string s)
+    with
+    | Error e -> printf "ERROR: %s\n" (Error.to_string_hum e)
+    | Ok s -> print_endline (Sexp.to_string_hum s)
+  ;;
+val run : string -> unit = <fun>
+```
+
+```ocaml
+# let rec repl handlers =
+    printf ">>> %!";
+    match In_channel.input_line stdin with
+    | None -> ()
+    | Some line ->
+      match Or_error.try_with (fun () -> Sexp.of_string line) with
+      | Error e -> printf "PARSE ERROR: %s\n%!" (Error.to_string_hum e)
+      | Ok (Sexp.Atom "quit") -> ()
+      | Ok query ->
+        begin match dispatch_to_list handlers query with
+        | Error e -> printf "ERROR: %s\n%!" (Error.to_string_hum e)
+        | Ok s -> printf "%s\n%!" (Sexp.to_string_hum s)
+        end;
+        repl handlers
+  ;;
+```
+
+
+
+
+```ocaml
+# let handle_query handlers =
+    printf ">>> %!"; (* prompt *)
+    match In_channel.input_line stdin with
+    | None -> `Stop (* terminate on end-of-stream, so Ctrl-D will exit *)
+    | Some line ->
+      let line = String.strip line in (* drop leading and trailing whitespace *)
+      if line = "" then `Continue
+      else match Or_error.try_with (fun () -> Sexp.of_string line) with
+      | Error err ->
+        eprintf "Couldn't parse query: %s\n%!" (Error.to_string_hum err);
+        `Continue
+      | Ok  ->
+        let resp = Service.Bundle.handle_request bundle query_sexp in
+        Sexp.output_hum stdout (<:sexp_of<Sexp.t Or_error.t>> resp);
+        Out_channel.newline stdout;
+        `Continue
+
+  let handle_loop services =
+    let bundle = Service.Bundle.create services in
+    let rec loop () =
+      match handle_one bundle with
+      | `Stop -> ()
+      | `Continue -> loop ()
+    in
+    loop ()
+```
+
+
+
+
+## BREAK
+
+
+
+Here, requests and responses are delivered as s-expressions, which are
+a simple, flexible, and human-readable serialization format commonly
+used in Core.  We'll cover s-expressions in more detail in
+[xref](#data-serialization-with-s-expressions), but for now, it's
+enough to think of them as balanced parenthetical expressions whose
+atomic values are strings.
+
+
+
+```ocaml
+# module type Number = sig
+    type t
+    val zero : t
+    val one : t
+    val ( + ) : t -> t -> t
+    val ( /% ) : t -> t -> t  
+    val ( / ) : t -> t -> t
+    val ( * ) : t -> t -> t
+    val ( > ) : t -> t -> bool
+    val ( = ) : t -> t -> bool
+    val ( < ) : t -> t -> bool
+  end;;
+```
+
+```ocaml
+# let gcd (module N : Number) n m =
+     let rec gcd n m = 
+        if N.(n > m) then gcd m n
+        else if N.(n = zero) then m
+        else gcd n N.(m - n)
+     in
+     gcd n m
+  ;;
+```
+
 
 ## Dynamically choosing a module
 
@@ -191,7 +494,10 @@ This section describes the design of a library for bundling together
 multiple services, where a service is a component that exports a query
 interface.  A service bundle combines together multiple individual
 services under a single query interface that works by dispatching
-incoming queries to the appropriate underlying service.
+incoming queries to the appropriate underlying service.  We'll use
+this to build a simple command-line interface for interacting with
+these services, but the basic idea could be used in other contexts,
+like building a system for managing web services.
 
 The following is a first attempt at an interface for our `Service`
 module, which contains both a module type `S`, which is the interface
