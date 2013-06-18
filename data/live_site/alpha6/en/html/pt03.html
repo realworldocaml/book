@@ -1,0 +1,706 @@
+<html>
+
+    <head>
+    
+        <meta charset="utf-8"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW"/>
+        
+        <title>Part III. The Runtime System / Real World OCaml</title>
+        
+        <link rel="stylesheet" href="../../media/css/main.css"/>
+        
+        <script src="../../media/js/require.js" data-main="../../media/js/main.js"> </script>
+        <script>
+            require.config({
+                config: {
+                    gitHub: {
+                        user: 'ocamllabs',
+                        repo: 'rwo\u002Dcomments',
+                        milestone: 'alpha6',
+                        page: 'pt03.html'
+                    }
+                }
+            });
+        </script>
+        
+    
+    </head>
+    
+    <body>
+    
+        <div class="body">
+        
+            <header class="header">
+                <h1><img src="../../media/img/header.png" width="213" height="59" alt="Real World OCaml, by Jason Hickey, Anil Madhavapeddy and Yaron Minsky"/></h1>
+            </header>
+    
+            <nav class="navigation">
+                <ul>
+                    <li>
+                        <a href="index.html">Table of Contents</a>
+                    </li>
+                    
+                        <li>
+                            <a href="prologue.html">Prologue</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt01.html">I. Language Concepts</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt02.html">II. Tools and Techniques</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt03.html" class="here">III. The Runtime System</a>
+                            
+                                 
+                                    <ul>
+                                        
+                                            <li>
+                                                <a href="foreign-function-interface.html">20. Foreign Function Interface</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="memory-representation-of-values.html">21. Memory Representation of Values</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="understanding-the-garbage-collector.html">22. Understanding the Garbage Collector</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="the-compiler-frontend-parsing-and-type-checking.html">23. The Compiler Frontend: Parsing and Type Checking</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="the-compiler-backend-byte-code-and-native-code.html">24. The Compiler Backend: Byte-code and Native-code</a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="installation.html">A. Installation</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="packaging.html">B. Packaging</a>
+                            
+                                
+                            
+                        </li>
+                    
+                </ul>
+            </nav>
+        
+            <article class="page">
+        
+                <h1>Part III. The Runtime System</h1>
+                
+                
+
+    <section class="index">
+        
+    <ul>
+        
+            <li>
+                <a href="foreign-function-interface.html">20. Foreign Function Interface</a>
+                
+    <ul>
+        
+            <li>
+                <a href="foreign-function-interface.html#the-ctypes-library">The Ctypes library</a>
+                
+            </li>
+        
+            <li>
+                <a href="foreign-function-interface.html#example-a-terminal-interface">Example: a terminal interface</a>
+                
+            </li>
+        
+            <li>
+                <a href="foreign-function-interface.html#basic-scalar-c-types">Basic scalar C types</a>
+                
+            </li>
+        
+            <li>
+                <a href="foreign-function-interface.html#pointers-and-arrays">Pointers and arrays</a>
+                
+    <ul>
+        
+            <li>
+                <a href="foreign-function-interface.html#allocating-typed-memory-for-pointers">Allocating typed memory for pointers</a>
+                
+            </li>
+        
+            <li>
+                <a href="foreign-function-interface.html#using-views-to-map-complex-values">Using views to map complex values</a>
+                
+            </li>
+        
+            <li>
+                <a href="foreign-function-interface.html#abstract-pointers">Abstract pointers</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="foreign-function-interface.html#structs-and-unions">Structs and unions</a>
+                
+    <ul>
+        
+            <li>
+                <a href="foreign-function-interface.html#defining-a-structure">Defining a structure</a>
+                
+            </li>
+        
+            <li>
+                <a href="foreign-function-interface.html#adding-fields-to-structures">Adding fields to structures</a>
+                
+            </li>
+        
+            <li>
+                <a href="foreign-function-interface.html#incomplete-structure-definitions">Incomplete structure definitions</a>
+                
+    <ul>
+        
+            <li>
+                <a href="foreign-function-interface.html#recap-a-time-printing-command">Recap: a time-printing command</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="foreign-function-interface.html#defining-arrays">Defining arrays</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="foreign-function-interface.html#passing-functions-to-c">Passing functions to C</a>
+                
+    <ul>
+        
+            <li>
+                <a href="foreign-function-interface.html#example-a-command-line-quicksort">Example: a command-line quicksort</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="foreign-function-interface.html#learning-more-about-c-bindings">Learning more about C bindings</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="memory-representation-of-values.html">21. Memory Representation of Values</a>
+                
+    <ul>
+        
+            <li>
+                <a href="memory-representation-of-values.html#ocaml-blocks-and-values">OCaml blocks and values</a>
+                
+    <ul>
+        
+            <li>
+                <a href="memory-representation-of-values.html#distinguishing-integer-and-pointers-at-runtime">Distinguishing integer and pointers at runtime</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="memory-representation-of-values.html#blocks-and-values">Blocks and values</a>
+                
+    <ul>
+        
+            <li>
+                <a href="memory-representation-of-values.html#integers-characters-and-other-basic-types">Integers, characters and other basic types</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="memory-representation-of-values.html#tuples-records-and-arrays">Tuples, records and arrays</a>
+                
+    <ul>
+        
+            <li>
+                <a href="memory-representation-of-values.html#floating-point-numbers-and-arrays">Floating point numbers and arrays</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="memory-representation-of-values.html#variants-and-lists">Variants and lists</a>
+                
+            </li>
+        
+            <li>
+                <a href="memory-representation-of-values.html#polymorphic-variants-1">Polymorphic variants</a>
+                
+            </li>
+        
+            <li>
+                <a href="memory-representation-of-values.html#string-values">String values</a>
+                
+            </li>
+        
+            <li>
+                <a href="memory-representation-of-values.html#custom-heap-blocks">Custom heap blocks</a>
+                
+    <ul>
+        
+            <li>
+                <a href="memory-representation-of-values.html#managing-external-memory-with-bigarray">Managing external memory with Bigarray</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html">22. Understanding the Garbage Collector</a>
+                
+    <ul>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html#mark-and-sweep-garbage-collection">Mark and sweep garbage collection</a>
+                
+            </li>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html#generational-garbage-collection">Generational garbage collection</a>
+                
+            </li>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html#the-fast-minor-heap">The fast minor heap</a>
+                
+    <ul>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html#allocating-on-the-minor-heap">Allocating on the minor heap</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html#the-long-lived-major-heap">The long-lived major heap</a>
+                
+    <ul>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html#allocating-on-the-major-heap">Allocating on the major heap</a>
+                
+            </li>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html#memory-allocation-strategies">Memory allocation strategies</a>
+                
+    <ul>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html#next-fit-allocation">Next-fit allocation</a>
+                
+            </li>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html#first-fit-allocation">First-fit allocation</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html#marking-and-scanning-the-heap">Marking and scanning the heap</a>
+                
+            </li>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html#inter-generational-pointers">Inter-generational pointers</a>
+                
+    <ul>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html#the-mutable-write-barrier">The mutable write barrier</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="understanding-the-garbage-collector.html#attaching-finalizer-functions-to-values">Attaching finalizer functions to values</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html">23. The Compiler Frontend: Parsing and Type Checking</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#an-overview-of-the-toolchain">An overview of the toolchain</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#parsing-source-code">Parsing source code</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#syntax-errors">Syntax errors</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#automatically-indenting-source-code">Automatically indenting source code</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#generating-documentation-from-interfaces">Generating documentation from interfaces</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#preprocessing-source-code">Preprocessing source code</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#using-camlp4-interactively">Using Camlp4 interactively</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#using-camlp4-from-the-interactive-top-level">Using Camlp4 from the interactive top-level</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#running-camlp4-from-the-command-line">Running Camlp4 from the command-line</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#further-reading-on-camlp4">Further reading on Camlp4</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#static-type-checking">Static type checking</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#displaying-inferred-types-from-the-compiler">Displaying inferred types from the compiler</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#type-inference-1">Type inference</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#adding-type-annotations-to-find-errors">Adding type annotations to find errors</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#enforcing-principal-typing">Enforcing principal typing</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#modules-and-separate-compilation">Modules and separate compilation</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#the-mapping-between-files-and-modules">The mapping between files and modules</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#defining-a-module-search-path">Defining a module search path</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#shorter-module-paths-in-type-errors">Shorter module paths in type errors</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#the-typed-syntax-tree">The typed syntax tree</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#using-ocp-index-for-auto-completion">Using ocp-index for auto-completion</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-frontend-parsing-and-type-checking.html#examining-the-typed-syntax-tree-directly">Examining the typed syntax tree directly</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html">24. The Compiler Backend: Byte-code and Native-code</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#the-untyped-lambda-form">The untyped lambda form</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#pattern-matching-optimization">Pattern matching optimization</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#benchmarking-pattern-matching">Benchmarking pattern matching</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#generating-portable-bytecode">Generating portable bytecode</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#compiling-and-linking-bytecode">Compiling and linking bytecode</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#executing-bytecode">Executing bytecode</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#embedding-ocaml-bytecode-in-c">Embedding OCaml bytecode in C</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#compiling-fast-native-code">Compiling fast native code</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#inspecting-assembly-output">Inspecting assembly output</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#the-impact-of-polymorphic-comparison">The impact of polymorphic comparison</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#benchmarking-polymorphic-comparison">Benchmarking polymorphic comparison</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#debugging-native-code-binaries">Debugging native code binaries</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#understanding-name-mangling">Understanding name mangling</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#interactive-breakpoints-with-the-gnu-debugger">Interactive breakpoints with the GNU debugger</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#profiling-native-code">Profiling native code</a>
+                
+    <ul>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#gprof">Gprof</a>
+                
+            </li>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#perf">Perf</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#embedding-native-code-in-c">Embedding native code in C</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+            <li>
+                <a href="the-compiler-backend-byte-code-and-native-code.html#summarising-the-file-extensions">Summarising the file extensions</a>
+                
+            </li>
+        
+    </ul>
+
+            </li>
+        
+    </ul>
+
+    </section>
+
+
+                
+            </article>
+            
+            
+    
+                <nav class="pagination">
+                    
+                        <a rel="previous" href="fast-binary-serialization.html">
+                            &lt; Previous
+                        </a>
+                    
+                    
+                        <a rel="next" href="foreign-function-interface.html">
+                            Next &gt;
+                        </a>
+                    
+                </nav>
+            
+            
+            
+            <footer class="footer">
+                <p>Copyright 2012-2013, Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p>
+            </footer>
+            
+        </div>
+    
+    </body>
+
+</html>

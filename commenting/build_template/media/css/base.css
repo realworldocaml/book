@@ -160,6 +160,10 @@ body {
     background-image: url(../img/aside-tip.png);
 }
 
+.page aside.caution {
+    background-image: url(../img/aside-warning.png);
+}
+
 
 /* Content styles. */
 

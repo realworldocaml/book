@@ -1,8 +1,11 @@
 # First class modules
 
-<note><title> A note to reviewers</title>
+<note>
+<title>Note to reviewers</title>
 
-This chapter is highly incomplete.  Proceed with caution...
+This chapter is still incomplete, but the contents here are still
+instructive enough that we decided to include it in the public
+beta release.
 
 </note>
 

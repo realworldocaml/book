@@ -87,9 +87,7 @@ according to the generational hypothesis.
 ### Allocating on the minor heap
 
 The minor heap is a contiguous chunk of virtual memory that is usually a few
-megabytes in size so that it can be scanned quickly.  The runtime stores the
-minor heap in two pointers (`caml_young_start` and `caml_young_end`) that
-delimit the start and end of the heap region.
+megabytes in size so that it can be scanned quickly.
 
 ```
                 <---- size ---->
@@ -98,13 +96,21 @@ delimit the start and end of the heap region.
                           blocks
 ```
 
+The runtime stores the minor heap in two pointers (`caml_young_start` and
+`caml_young_end`, but we will drop the `caml_young` prefix for brevity) that
+delimit the start and end of the heap region.  The `base` is the memory address
+returned by the system `malloc`, and `start` is aligned against the next
+nearest word boundary from `base` to make it easier to store OCaml values.
+
 In a fresh minor heap, the `limit` equals the `start` and the current `ptr`
 will equal the `end`.  `ptr` decreases as blocks are allocated until it reaches
-`limit`, at which point a minor garbage collection is triggered.  To allocate a
-block in the minor heap, `ptr` is decremented by the size of the block
-(including the header) and the header area is immediately set to a valid value.
-If there isn't enough space left for the block without decrementing past the
-`limit`, a minor garbage collection is triggered.
+`limit`, at which point a minor garbage collection is triggered.
+
+Allocating a block in the minor heap just requires `ptr` to be decremented by
+the size of the block (including the header) and checking that it's not less
+than `limit`.  If there isn't enough space left for the block without
+decrementing past the `limit`, a minor garbage collection is triggered.  This
+is a very fast check (with no branching) on most CPU architectures.
 
 You may wonder why `limit` is required at all, since it always seems to equal
 `start`.  It's because the easiest way for the runtime to schedule a minor heap
@@ -220,10 +226,10 @@ immediate collection and copy it to the major heap anyway.
 
 ### Memory allocation strategies
 
-The major heap does its best to manage memory allocation as efficiently as possible,
-and relies on heap compaction ot ensure that memory stays contiguous and unfragmented.
-The default allocation policy normally works fine for most applications, but
-it's worth bearing in mind that there are other options too.
+The major heap does its best to manage memory allocation as efficiently as
+possible, and relies on heap compaction to ensure that memory stays contiguous
+and unfragmented.  The default allocation policy normally works fine for most
+applications, but it's worth bearing in mind that there are other options too.
 
 The free list of blocks is always checked first when allocating a new block in
 the major heap.  The default free list search is called *next-fit allocation*,
@@ -284,6 +290,13 @@ white (during marking)      not reached yet, but possibly reachable
 white (during sweeping)     unreachable and can be freed
 gray                        reachable, but its fields have not been scanned
 black                       reachable, and its fields have been scanned
+
+The color tags in the value headers store most of the state of the marking
+process, allowing it to be paused and resumed later.  The GC and application
+alternate between marking a slice of the major heap and actually getting on
+with executing the program logic.  The OCaml runtime calculates a sensible
+value for the size of each major heap slice based on the rate of allocation and
+available memory (see below).
 
 The marking process starts with a set of *root* values that are always live
 (such as the application stack).  All values on the heap are initially marked
@@ -443,7 +456,7 @@ garbage collection occurring.
 
 ```console
 $ ocamlbuild -use-ocamlfind -package core -package core_bench -tag thread barrier_bench.native
-$ ./barrier_bench.native name allocated
+$ ./barrier_bench.native name alloc
 Estimated testing time 20s (change using -quota SECS).
 ┌───────────┬───────────┬─────────────────────┬───────────┬────────┬──────────┬────────────┐
 │ Name      │ Time (ns) │           Time 95ci │     Minor │  Major │ Promoted │ Percentage │
@@ -466,7 +479,8 @@ scenarios using `Core_bench`, and experiment with the tradeoffs.  The
 command-line benchmark binaries have a number of useful options that affect
 garbage collection behaviour.
 
-```
+```console
+$ ./barrier_bench.native -help
 Benchmark for mutable, immutable
 
   barrier_bench.native [COLUMN ...]
@@ -474,19 +488,27 @@ Benchmark for mutable, immutable
 Columns that can be specified are:
 	name       - Name of the test.
 	cycles     - Number of CPU cycles (RDTSC) taken.
-	cycles95ci - 95% confidence interval and error for cycles.
+	cycles-err - 95% confidence interval and R^2 error for cycles.
 	~cycles    - Cycles taken excluding major GC costs.
 	time       - Number of nano secs taken.
-	time95ci   - 95% confidence interval and error for time (ns).
+	time-err   - 95% confidence interval and R^2 error for time.
 	~time      - Time (ns) taken excluding major GC costs.
-	allocated  - Allocation of major, minor and promoted words.
+	alloc      - Allocation of major, minor and promoted words.
+	gc         - Show major and minor collections per 1000 runs.
 	percentage - Relative execution time as a percentage.
-	gc         - Show major and minor collections.
 	speedup    - Relative execution cost as a speedup.
 	samples    - Number of samples collected for profiling.
 
+R^2 error indicates how noisy the benchmark data is. A value of
+1.0 means the amortized cost of benchmark is almost exactly predicated
+and 0.0 means the reported values are not reliable at all.
+Also see: http://en.wikipedia.org/wiki/Coefficient_of_determination
+
+Major and Minor GC stats indicate how many collections happen per 1000
+runs of the benchmarked function.
+
 The following columns will be displayed by default:
-	+name time time95ci percentage
+	+name time percentage
 
 To specify that a column should be displayed only if it has a non-trivial value,
 prefix the column name with a '+'.
@@ -508,7 +530,6 @@ prefix the column name with a '+'.
   [-version]           print the version of this build and exit
   [-help]              print this help text and exit
                        (alias: -?)
-
 ```
 
 The `-no-compactions` and `-stabilize-gc` options can help force a situation

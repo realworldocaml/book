@@ -1,0 +1,1047 @@
+<html>
+
+    <head>
+    
+        <meta charset="utf-8"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW"/>
+        
+        <title>Chapter 4. Files, Modules and Programs / Real World OCaml</title>
+        
+        <link rel="stylesheet" href="../../media/css/main.css"/>
+        
+        <script src="../../media/js/require.js" data-main="../../media/js/main.js"> </script>
+        <script>
+            require.config({
+                config: {
+                    gitHub: {
+                        user: 'ocamllabs',
+                        repo: 'rwo\u002Dcomments',
+                        milestone: 'alpha6',
+                        page: 'files\u002Dmodules\u002Dand\u002Dprograms.html'
+                    }
+                }
+            });
+        </script>
+        
+    
+    </head>
+    
+    <body>
+    
+        <div class="body">
+        
+            <header class="header">
+                <h1><img src="../../media/img/header.png" width="213" height="59" alt="Real World OCaml, by Jason Hickey, Anil Madhavapeddy and Yaron Minsky"/></h1>
+            </header>
+    
+            <nav class="navigation">
+                <ul>
+                    <li>
+                        <a href="index.html">Table of Contents</a>
+                    </li>
+                    
+                        <li>
+                            <a href="prologue.html">Prologue</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt01.html">I. Language Concepts</a>
+                            
+                                 
+                                    <ul>
+                                        
+                                            <li>
+                                                <a href="a-guided-tour.html">1. A Guided Tour</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="variables-and-functions.html">2. Variables and Functions</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="lists-and-patterns.html">3. Lists and Patterns</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="files-modules-and-programs.html" class="here">4. Files, Modules and Programs</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="records.html">5. Records</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="variants.html">6. Variants</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="error-handling.html">7. Error Handling</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="imperative-programming-1.html">8. Imperative Programming</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="functors.html">9. Functors</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="first-class-modules.html">10. Plugins with First-class Modules</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="object-oriented-programming.html">11. Object-Oriented Programming</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="classes.html">12. Classes</a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt02.html">II. Tools and Techniques</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt03.html">III. The Runtime System</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="installation.html">A. Installation</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="packaging.html">B. Packaging</a>
+                            
+                                
+                            
+                        </li>
+                    
+                </ul>
+            </nav>
+        
+            <article class="page">
+        
+                <h1>Chapter 4. Files, Modules and Programs</h1>
+                
+                
+
+    <p id="idp7685296">
+    We've so far experienced OCaml largely through the toplevel. As you
+    move from exercises to real-world programs, you'll need to leave the
+    toplevel behind and start building programs from files. Files are
+    more than just a convenient way to store and manage your code; in
+    OCaml, they also act as boundaries that divide your program into
+    conceptual units.
+  </p><p id="idp7686080">
+    In this chapter, we'll show you how to build an OCaml program from a
+    collection of files, as well as the basics of working with modules
+    and module signatures.
+  </p><section><h1 id="single-file-programs">Single File Programs</h1><p id="idp7687536">
+      We'll start with an example: a utility that reads lines from
+      <code>stdin</code> and computes a frequency count of the
+      lines that have been read in. At the end, the 10 lines with the
+      highest frequency counts are written out. We'll start with a
+      simple implementation, which we'll save as the file
+      <code>freq.ml</code>.
+    </p><p id="idp7689520">
+      This implementation will use two functions from the
+      <code>List.Assoc</code> module, which provides utility
+      functions for interacting with association lists,
+      <span><em>i.e.</em></span>, lists of key/value pairs. In
+      particular, we use the function
+      <code>List.Assoc.find</code>, which looks up a key in an
+      association list, and <code>List.add</code>, which adds a
+      new binding to an association list, as shown below.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">assoc</span> <span class="o">=</span> <span class="o">[(</span><span class="s2">&quot;one&quot;</span><span class="o">,</span> <span class="mi">1</span><span class="o">);</span> <span class="o">(</span><span class="s2">&quot;two&quot;</span><span class="o">,</span><span class="mi">2</span><span class="o">);</span> <span class="o">(</span><span class="s2">&quot;three&quot;</span><span class="o">,</span><span class="mi">3</span><span class="o">)];;</span>
+<span class="k">val</span> <span class="n">assoc</span> <span class="o">:</span> <span class="o">(</span><span class="kt">string</span> <span class="o">*</span> <span class="kt">int</span><span class="o">)</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[(</span><span class="s2">&quot;one&quot;</span><span class="o">,</span> <span class="mi">1</span><span class="o">);</span> <span class="o">(</span><span class="s2">&quot;two&quot;</span><span class="o">,</span> <span class="mi">2</span><span class="o">);</span> <span class="o">(</span><span class="s2">&quot;three&quot;</span><span class="o">,</span> <span class="mi">3</span><span class="o">)]</span>
+<span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="nn">Assoc</span><span class="p">.</span><span class="n">find</span> <span class="n">assoc</span> <span class="s2">&quot;two&quot;</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="n">option</span> <span class="o">=</span> <span class="nc">Some</span> <span class="mi">2</span>
+<span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="nn">Assoc</span><span class="p">.</span><span class="n">add</span> <span class="n">assoc</span> <span class="s2">&quot;four&quot;</span> <span class="mi">4</span><span class="o">;;</span> <span class="c">(* add a new key *)</span>
+<span class="o">[(</span><span class="s2">&quot;four&quot;</span><span class="o">,</span> <span class="mi">4</span><span class="o">);</span> <span class="o">(</span><span class="s2">&quot;one&quot;</span><span class="o">,</span> <span class="mi">1</span><span class="o">);</span> <span class="o">(</span><span class="s2">&quot;two&quot;</span><span class="o">,</span> <span class="mi">2</span><span class="o">);</span> <span class="o">(</span><span class="s2">&quot;three&quot;</span><span class="o">,</span> <span class="mi">3</span><span class="o">)]</span>
+<span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="nn">Assoc</span><span class="p">.</span><span class="n">add</span> <span class="n">assoc</span> <span class="s2">&quot;two&quot;</span> <span class="mi">4</span><span class="o">;;</span> <span class="c">(* overwrite an existing key *)</span>
+<span class="o">-</span> <span class="o">:</span> <span class="o">(</span><span class="kt">string</span><span class="o">,</span> <span class="kt">int</span><span class="o">)</span> <span class="nn">List</span><span class="p">.</span><span class="nn">Assoc</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">[(</span><span class="s2">&quot;two&quot;</span><span class="o">,</span> <span class="mi">4</span><span class="o">);</span> <span class="o">(</span><span class="s2">&quot;one&quot;</span><span class="o">,</span> <span class="mi">1</span><span class="o">);</span> <span class="o">(</span><span class="s2">&quot;three&quot;</span><span class="o">,</span> <span class="mi">3</span><span class="o">)]</span>
+</pre></div><p id="idp7694048">
+      Note that <code>List.Assoc.add</code> doesn't modify the
+      original list, but instead allocates a new list with the requisite
+      key/value added.
+    </p><p id="idp7695200">
+      Now we can write down <code>freq.ml</code>.
+    </p><div class="highlight"><pre><span class="c">(* freq.ml: basic implementation *)</span>
+
+<span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="k">let</span> <span class="n">build_counts</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="nn">In_channel</span><span class="p">.</span><span class="n">fold_lines</span> <span class="n">stdin</span> <span class="o">~</span><span class="n">init</span><span class="o">:</span><span class="bp">[]</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="n">counts</span> <span class="n">line</span> <span class="o">-&gt;</span>
+    <span class="k">let</span> <span class="n">count</span> <span class="o">=</span>
+      <span class="k">match</span> <span class="nn">List</span><span class="p">.</span><span class="nn">Assoc</span><span class="p">.</span><span class="n">find</span> <span class="n">counts</span> <span class="n">line</span> <span class="k">with</span>
+      <span class="o">|</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="mi">0</span>
+      <span class="o">|</span> <span class="nc">Some</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span>
+    <span class="k">in</span>
+    <span class="nn">List</span><span class="p">.</span><span class="nn">Assoc</span><span class="p">.</span><span class="n">add</span> <span class="n">counts</span> <span class="n">line</span> <span class="o">(</span><span class="n">count</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span>
+  <span class="o">)</span>
+
+<span class="k">let</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="n">build_counts</span> <span class="bp">()</span>
+  <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">sort</span> <span class="o">~</span><span class="n">cmp</span><span class="o">:(</span><span class="k">fun</span> <span class="o">(_,</span><span class="n">x</span><span class="o">)</span> <span class="o">(_,</span><span class="n">y</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">compare</span> <span class="n">y</span> <span class="n">x</span><span class="o">)</span>
+  <span class="o">|&gt;</span> <span class="o">(</span><span class="k">fun</span> <span class="n">l</span> <span class="o">-&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">take</span> <span class="n">l</span> <span class="mi">10</span><span class="o">)</span>
+  <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">iter</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="o">(</span><span class="n">line</span><span class="o">,</span><span class="n">count</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">printf</span> <span class="s2">&quot;%3d: %s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="n">count</span> <span class="n">line</span><span class="o">)</span>
+</pre></div><p id="idp7697808">
+      The function <code>build_counts</code> reads in lines from
+      <code>stdin</code>, constructing from those lines an
+      association list with the frequencies of each line. It does this
+      by invoking <code>In_channel.fold_lines</code> (similar to
+      the function <code>List.fold</code> described in
+      <a href="lists-and-patterns.html">Chapter 3, <i>Lists and Patterns</i></a>), which reads
+      through the lines one by one, calling the provided fold function
+      for each line to update the accumulator. That accumulator is
+      initialized to the empty list.
+    </p><p id="idp7701536">
+      With <code>build_counts</code> defined, we then call the
+      function to build the association list, sort that list by
+      frequency in descending order, grab the first 10 elements off the
+      list, and then iterate over those ten elements and print them to
+      the screen. These operations are tied together using the
+      <code>|&gt;</code> operator, as described in
+      <a href="variables-and-functions.html">Chapter 2, <i>Variables and Functions</i></a>.
+    </p><aside class="note"><h1>
+    Where is the main function?
+    </h1><p id="idp7704496">
+      Unlike C, programs in OCaml do not have a unique
+      <code>main</code> function. When an OCaml program is
+      evaluated, all the statements in the implementation files are
+      evaluated in order. These implementation files can contain
+      arbitrary expressions, not just function definitions. In this
+      example, the declaration starting with <code>let () =</code>
+      plays the role of the <code>main</code> declaration, kicking
+      off the processing. But really the entire file is evaluated at
+      startup, and so in some sense the full codebase is one big
+      <code>main</code> function.
+    </p></aside><p id="idp7708064">
+      If we weren't using Core or any other external libraries, we could
+      build the executable like this:
+    </p><pre id="idp7708576">
+ocamlc freq.ml -o freq
+</pre><p id="idp7709200">
+      But in this case, this command will fail with the error
+      <code>Unbound module Core</code>. We need a somewhat more
+      complex invocation to get Core linked in:
+    </p><pre id="idp7710384">
+ocamlfind ocamlc -linkpkg -thread -package core freq.ml -o freq
+</pre><p id="idp7711088">
+      Here we're using <code>ocamlfind</code>, a tool which itself
+      invokes other parts of the ocaml toolchain (in this case,
+      <code>ocamlc</code>) with the appropriate flags to link in
+      particular libraries and packages. Here,
+      <code>-package core</code> is asking
+      <code>ocamlfind</code> to link in the Core library,
+      <code>-linkpkg</code> is required to do the final linking in
+      of packages for building a runnable executable, and
+      <code>-thread</code> turns on threading support, which is
+      required for Core.
+    </p><p id="idp7715648">
+      While this works well enough for a one-file project, more
+      complicated builds will require a tool to orchestrate the build.
+      One great tool for this task is <code>ocamlbuild</code>,
+      which is shipped with the OCaml compiler. We'll talk more about
+      <code>ocamlbuild</code> in
+      <a href="packaging.html">Appendix B, <i>Packaging</i></a>, but for now, we'll just
+      walk through the steps required for this simple application.
+      First, create a <code>_tags</code> file containing the
+      following lines:
+    </p><pre id="idp7718816">
+true:package(core),thread,annot,debugging
+</pre><p id="idp7719440">
+      The purpose of the <code>_tags</code> file is to specify
+      which compilation options are required for which files. In this
+      case, we're telling <code>ocamlbuild</code> to link in the
+      <code>core</code> package and to turn on threading,
+      generation of annotation files, and debugging support for all
+      files (since the condition <code>true</code> evaluates to
+      <code>true</code> on all files).
+    </p><p id="idp7723232">
+      We can then invoke <code>ocamlbuild</code> to build the
+      executable.
+    </p><pre id="idp7724240">
+$ ocamlbuild -use-ocamlfind freq.byte
+</pre><p id="idp7724864">
+      If we'd invoked <code>ocamlbuild</code> with a target of
+      <code>freq.native</code> instead of
+      <code>freq.byte</code>, we would have gotten native-code
+      instead.
+    </p><p id="idp7727120">
+      We can now run the our program from the command-line. The
+      following line extracts strings from the
+      <code>ocamlopt</code> binary, reporting the most frequently
+      occurring ones. Note that the specific results will very from
+      platform to platform, since the binary itself will differ between
+      platforms.
+    </p><pre id="idp7728480">
+$ strings `which ocamlopt` | ./freq.byte
+ 13: movq
+ 10: cmpq
+  8: &quot;, &amp;
+  7: .globl
+  6: addq
+  6: leaq
+  5: &quot;, $
+  5: .long
+  5: .quad
+  4: &quot;, '
+</pre><aside class="note"><h1>
+    Bytecode vs native code
+    </h1><p id="idp7729968">
+      OCaml ships with two compilers: the <code>ocamlc</code>
+      bytecode compiler and the <code>ocamlopt</code> native-code
+      compiler. Programs compiled with <code>ocamlc</code> are
+      interpreted by a virtual machine, while programs compiled with
+      <code>ocamlopt</code> are compiled to native machine code to
+      be run on a specific operating system and processor architecture.
+    </p><p id="idp7733072">
+      Aside from performance, executables generated by the two compilers
+      have nearly identical behavior. There are a few things to be aware
+      of. First, the bytecode compiler can be used on more
+      architectures, and has some tools that are not available for
+      native code. For example, the OCaml debugger only works with
+      bytecode (although the <code>gdb</code>, the Gnu Debugger,
+      works with OCaml native-code applications). The bytecode compiler
+      is also quicker than the native-code compiler. In addition, in
+      order to run a bytecode executable you typically need to have
+      OCaml installed on the system in question. That's not strictly
+      required, though, since you can build a bytecode executable with
+      an embedded runtime, using the <code>-custom</code> compiler
+      flag.
+    </p><p id="idp7735504">
+      As a general matter, production executables should usually be
+      built using the native-code compiler, but it sometimes makes sense
+      to use bytecode for development builds. And, of course, bytecode
+      makes sense when targeting a platform not supported by the
+      native-code compiler.
+    </p></aside></section><section><h1 id="multi-file-programs-and-modules">Multi-file programs and modules</h1><p id="idp7737344">
+      Source files in OCaml are tied into the module system, with each
+      file compiling down into a module whose name is derived from the
+      name of the file. We've encountered modules before, for example,
+      when we used functions like <code>find</code> and
+      <code>add</code> from the <code>List.Assoc</code>
+      module. At it's simplest, you can think of a module as a
+      collection of definitions that are stored within a namespace.
+    </p><p id="idp7740032">
+      Let's consider how we can use modules to refactor the
+      implementation of <code>freq.ml</code>. Remember that the
+      variable <code>counts</code> contains an association list
+      representing the counts of the lines seen so far. But updating an
+      association list takes time linear in the length of the list,
+      meaning that the time complexity of processing a file is quadratic
+      in the number of distinct lines in the file.
+    </p><p id="idp7742080">
+      We can fix this problem by replacing association lists with a more
+      efficient data structure. To do that, we'll first factor out the
+      key functionality into a separate module with an explicit
+      interface. We can consider alternative (and more efficient)
+      implementations once we have a clear interface to program against.
+    </p><p id="idp7742832">
+      We'll start by creating a file, <code>counter.ml</code> that
+      contains the logic for maintaining the association list used to
+      describe the counts. The key function, called
+      <code>touch</code>, updates the association list with the
+      information that a given line should be added to the frequency
+      counts.
+    </p><div class="highlight"><pre><span class="c">(* counter.ml: first version *)</span>
+
+<span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="k">let</span> <span class="n">touch</span> <span class="n">t</span> <span class="n">s</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">count</span> <span class="o">=</span>
+    <span class="k">match</span> <span class="nn">List</span><span class="p">.</span><span class="nn">Assoc</span><span class="p">.</span><span class="n">find</span> <span class="n">t</span> <span class="n">s</span> <span class="k">with</span>
+    <span class="o">|</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="mi">0</span>
+    <span class="o">|</span> <span class="nc">Some</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span>
+  <span class="k">in</span>
+  <span class="nn">List</span><span class="p">.</span><span class="nn">Assoc</span><span class="p">.</span><span class="n">add</span> <span class="n">t</span> <span class="n">s</span> <span class="o">(</span><span class="n">count</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span>
+</pre></div><p id="idp7745888">
+      The file <code>counter.ml</code> will be compiled into a
+      module named <code>Counter</code>. The name of the module is
+      derived automatically from the filename. Note that the module name
+      is capitalized even if the file is not.
+    </p><p id="idp7747680">
+      We can now rewrite <code>freq.ml</code> to use
+      <code>Counter</code>. Note that the resulting code can still
+      be built with <code>ocamlbuild</code>, which will discover
+      dependencies and realize that <code>counter.ml</code> needs
+      to be compiled.
+    </p><div class="highlight"><pre><span class="c">(* freq.ml: using Counter *)</span>
+<span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="k">let</span> <span class="n">build_counts</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="nn">In_channel</span><span class="p">.</span><span class="n">fold_lines</span> <span class="n">stdin</span> <span class="o">~</span><span class="n">init</span><span class="o">:</span><span class="bp">[]</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="nn">Counter</span><span class="p">.</span><span class="n">touch</span>
+
+<span class="k">let</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="n">build_counts</span> <span class="bp">()</span>
+  <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">sort</span> <span class="o">~</span><span class="n">cmp</span><span class="o">:(</span><span class="k">fun</span> <span class="o">(_,</span><span class="n">x</span><span class="o">)</span> <span class="o">(_,</span><span class="n">y</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">compare</span> <span class="n">y</span> <span class="n">x</span><span class="o">)</span>
+  <span class="o">|&gt;</span> <span class="o">(</span><span class="k">fun</span> <span class="n">l</span> <span class="o">-&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">take</span> <span class="n">l</span> <span class="mi">10</span><span class="o">)</span>
+  <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">iter</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="o">(</span><span class="n">line</span><span class="o">,</span><span class="n">count</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">printf</span> <span class="s2">&quot;%3d: %s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="n">count</span> <span class="n">line</span><span class="o">)</span>
+</pre></div></section><section><h1 id="signatures-and-abstract-types">Signatures and Abstract Types</h1><p id="idp7752912">
+      While we've pushed some of the logic to the
+      <code>Counter</code> module, the code in
+      <code>freq.ml</code> can still depend on the details of the
+      implementation of <code>Counter</code>. Indeed, if you look
+      at the definition of <code>build_counts</code>:
+    </p><div class="highlight"><pre><span class="k">let</span> <span class="n">build_counts</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="nn">In_channel</span><span class="p">.</span><span class="n">fold_lines</span> <span class="n">stdin</span> <span class="o">~</span><span class="n">init</span><span class="o">:</span><span class="bp">[]</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="nn">Counter</span><span class="p">.</span><span class="n">touch</span>
+</pre></div><p id="idp7756912">
+      you'll see that it depends on the fact that the empty set of
+      frequency counts is represented as an empty list. We'd like to
+      prevent this kind of dependency so we can change the
+      implementation of <code>Counter</code> without needing to
+      change client code like that in <code>freq.ml</code>.
+    </p><p id="idp7758864">
+      The implementation details of a module can be hidden by attaching
+      an <span><em>interface</em></span>. (Note that the terms
+      <span><em>interface</em></span>, <span><em>signature</em></span> and
+      <span><em>module type</em></span> are all used interchangeably.) A
+      module defined by a file <code>filename.ml</code> can be
+      constrained by a signature placed in a file called
+      <code>filename.mli</code>.
+    </p><p id="idp7762288">
+      For <code>counter.mli</code>, we'll start by writing down an
+      interface that describes what's currently available in
+      <code>counter.ml</code>, without hiding anything.
+      <code>val</code> declarations are used to specify values in
+      a signature. The syntax of a <code>val</code> declaration is
+      as follows:
+    </p><pre id="idp7765376">
+val &lt;identifier&gt; : &lt;type&gt;
+</pre><p id="idp7766000">
+      Using this syntax, we can write the signature of
+      <code>counter.ml</code> as follows.
+    </p><div class="highlight"><pre><span class="c">(* filename: counter.mli *)</span>
+<span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="k">val</span> <span class="n">touch</span> <span class="o">:</span> <span class="o">(</span><span class="kt">string</span> <span class="o">*</span> <span class="kt">int</span><span class="o">)</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="kt">string</span> <span class="o">*</span> <span class="kt">int</span><span class="o">)</span> <span class="kt">list</span>
+</pre></div><p id="idp7768128">
+      Note that <code>ocamlbuild</code> will detect the presence
+      of the <code>mli</code> file automatically and include it in
+      the build.
+    </p><aside class="note"><h1>
+    Auto-generating mli files
+    </h1><p id="idp7770976">
+      If you don't want to construct an mli entirely by hand, you can
+      ask OCaml to autogenerate one for you from the source, which you
+      can then adjust to fit your needs. In this case, we can write:
+    </p><pre id="idp7771584">
+$ ocamlbuild -use-ocamlfind counter.inferred.mli
+</pre><p id="idp7772208">
+      Which will generate the file
+      <code>_build/counter.inferred.mli</code>, with the following
+      contents.
+    </p><pre id="idp7773216">
+$ cat _build/counter.inferred.mli
+val touch :
+  ('a, int) Core.Std.List.Assoc.t -&gt; 'a -&gt; ('a, int) Core.Std.List.Assoc.t
+</pre><p id="idp7774016">
+      This is equivalent to the <code>mli</code> that we
+      generated, but is a little more verbose. In general, you want to
+      use autogenerated <code>mli</code>'s as a starting point
+      only. There's no replacement for a careful consideration of what
+      should be included in the interface of your module and of how that
+      should be organized, documented and formatted.
+    </p></aside><p id="idp7776144">
+      To hide the fact that frequency counts are represented as
+      association lists, we'll need to make the type of frequency counts
+      <span><em>abstract</em></span>. A type is abstract if its name is
+      exposed in the interface, but its definition is not. Here's an
+      abstract interface for <code>Counter</code>:
+    </p><div class="highlight"><pre><span class="c">(* counter.mli: abstract interface *)</span>
+
+<span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="k">type</span> <span class="n">t</span>
+
+<span class="k">val</span> <span class="n">empty</span> <span class="o">:</span> <span class="n">t</span>
+<span class="k">val</span> <span class="n">to_list</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="kt">string</span> <span class="o">*</span> <span class="kt">int</span><span class="o">)</span> <span class="kt">list</span>
+<span class="k">val</span> <span class="n">touch</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="n">t</span>
+</pre></div><p id="idp7778912">
+      Note that we needed to add <code>empty</code> and
+      <code>to_list</code> to <code>Counter</code>, since
+      otherwise, there would be no way to create a
+      <code>Counter.t</code> or get data out of one.
+    </p><p id="idp7781872">
+      Here's a rewrite of <code>counter.ml</code> to match this
+      interface.
+    </p><div class="highlight"><pre><span class="c">(* counter.ml: implementation matching abstract interface *)</span>
+
+<span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">(</span><span class="kt">string</span> <span class="o">*</span> <span class="kt">int</span><span class="o">)</span> <span class="kt">list</span>
+
+<span class="k">let</span> <span class="n">empty</span> <span class="o">=</span> <span class="bp">[]</span>
+
+<span class="k">let</span> <span class="n">to_list</span> <span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+
+<span class="k">let</span> <span class="n">touch</span> <span class="n">t</span> <span class="n">s</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">count</span> <span class="o">=</span>
+    <span class="k">match</span> <span class="nn">List</span><span class="p">.</span><span class="nn">Assoc</span><span class="p">.</span><span class="n">find</span> <span class="n">t</span> <span class="n">s</span> <span class="k">with</span>
+    <span class="o">|</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="mi">0</span>
+    <span class="o">|</span> <span class="nc">Some</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span>
+  <span class="k">in</span>
+  <span class="nn">List</span><span class="p">.</span><span class="nn">Assoc</span><span class="p">.</span><span class="n">add</span> <span class="n">t</span> <span class="n">s</span> <span class="o">(</span><span class="n">count</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span>
+</pre></div><p id="idp7784208">
+      If we now try to compile <code>freq.ml</code>, we'll get the
+      following error:
+    </p><pre id="idp7785216">
+File &quot;freq.ml&quot;, line 11, characters 20-22:
+Error: This expression has type 'a list
+       but an expression was expected of type Counter.t
+</pre><p id="idp7786144">
+      This is because <code>freq.ml</code> depends on the fact
+      that frequency counts are represented as association lists, a fact
+      that we've just hidden. We just need to fix
+      <code>build_counts</code> to use
+      <code>Counter.empty</code> instead of <code>[]</code>
+      and <code>Counter.to_list</code> to get the association list
+      out at the end for processing and printing. The resulting
+      implementation is shown below.
+    </p><div class="highlight"><pre><span class="c">(* filename: freq.ml *)</span>
+<span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="k">let</span> <span class="n">build_counts</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="nn">In_channel</span><span class="p">.</span><span class="n">fold_lines</span> <span class="n">stdin</span> <span class="o">~</span><span class="n">init</span><span class="o">:</span><span class="nn">Counter</span><span class="p">.</span><span class="n">empty</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="nn">Counter</span><span class="p">.</span><span class="n">touch</span>
+
+<span class="k">let</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="n">build_counts</span> <span class="bp">()</span>
+  <span class="o">|&gt;</span> <span class="nn">Counter</span><span class="p">.</span><span class="n">to_list</span>
+  <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">sort</span> <span class="o">~</span><span class="n">cmp</span><span class="o">:(</span><span class="k">fun</span> <span class="o">(_,</span><span class="n">x</span><span class="o">)</span> <span class="o">(_,</span><span class="n">y</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nn">Int</span><span class="p">.</span><span class="n">descending</span> <span class="n">x</span> <span class="n">y</span><span class="o">)</span>
+  <span class="o">|&gt;</span> <span class="o">(</span><span class="k">fun</span> <span class="n">counts</span> <span class="o">-&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">take</span> <span class="n">counts</span> <span class="mi">10</span><span class="o">)</span>
+  <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">iter</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="o">(</span><span class="n">line</span><span class="o">,</span><span class="n">count</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">printf</span> <span class="s2">&quot;%3d: %s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="n">count</span> <span class="n">line</span><span class="o">)</span>
+</pre></div><p id="idp7791488">
+      Now we can turn to optimizing the implementation of
+      <code>Counter</code>. Here's an alternate and far more
+      efficient implementation, based on the <code>Map</code>
+      datastructure in Core.
+    </p><div class="highlight"><pre><span class="c">(* counter.ml: efficient version *)</span>
+
+<span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="kt">int</span> <span class="nn">String</span><span class="p">.</span><span class="nn">Map</span><span class="p">.</span><span class="n">t</span>
+
+<span class="k">let</span> <span class="n">empty</span> <span class="o">=</span> <span class="nn">String</span><span class="p">.</span><span class="nn">Map</span><span class="p">.</span><span class="n">empty</span>
+
+<span class="k">let</span> <span class="n">to_list</span> <span class="n">t</span> <span class="o">=</span> <span class="nn">Map</span><span class="p">.</span><span class="n">to_alist</span> <span class="n">t</span>
+
+<span class="k">let</span> <span class="n">touch</span> <span class="n">t</span> <span class="n">s</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">count</span> <span class="o">=</span>
+    <span class="k">match</span> <span class="nn">Map</span><span class="p">.</span><span class="n">find</span> <span class="n">t</span> <span class="n">s</span> <span class="k">with</span>
+    <span class="o">|</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="mi">0</span>
+    <span class="o">|</span> <span class="nc">Some</span> <span class="n">x</span> <span class="o">-&gt;</span> <span class="n">x</span>
+  <span class="k">in</span>
+  <span class="nn">Map</span><span class="p">.</span><span class="n">add</span> <span class="n">t</span> <span class="o">~</span><span class="n">key</span><span class="o">:</span><span class="n">s</span> <span class="o">~</span><span class="n">data</span><span class="o">:(</span><span class="n">count</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span>
+</pre></div><p id="idp7794608">
+      Note that in the above we use <code>String.Map</code> in
+      some places and simply <code>Map</code> in others. This has
+      to do with the fact that for some operations, like creating a
+      <code>Map.t</code>, you need access to type-specialized
+      information, and for others, like looking something up in
+      <code>Map.t</code>, you don't. This is covered in more
+      detail in <a href="maps-and-hashtables.html">Chapter 13, <i>Maps and Hashtables</i></a>.
+    </p></section><section><h1 id="concrete-types-in-signatures">Concrete types in signatures</h1><p id="idp7799232">
+      In our frequency-count example, the module
+      <code>Counter</code> had an abstract type
+      <code>Counter.t</code> for representing a collection of
+      frequency counts. Sometimes, you'll want to make a type in your
+      interface <span><em>concrete</em></span>, by including the type
+      definition in the interface.
+    </p><p id="idp7801552">
+      For example, imagine we wanted to add a function to
+      <code>Counter</code> for returning the line with the median
+      frequency count. If the number of lines is even, then there is no
+      precise median and the function would return the lines before and
+      after the median instead. We'll use a custom type to represent the
+      fact that there are two possible return values. Here's a possible
+      implementation.
+    </p><div class="highlight"><pre><span class="k">type</span> <span class="n">median</span> <span class="o">=</span> <span class="o">|</span> <span class="nc">Median</span> <span class="k">of</span> <span class="kt">string</span>
+              <span class="o">|</span> <span class="nc">Before_and_after</span> <span class="k">of</span> <span class="kt">string</span> <span class="o">*</span> <span class="kt">string</span>
+
+<span class="k">let</span> <span class="n">median</span> <span class="n">t</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">sorted_strings</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">sort</span> <span class="o">(</span><span class="nn">Map</span><span class="p">.</span><span class="n">to_alist</span> <span class="n">t</span><span class="o">)</span>
+      <span class="o">~</span><span class="n">cmp</span><span class="o">:(</span><span class="k">fun</span> <span class="o">(_,</span><span class="n">x</span><span class="o">)</span> <span class="o">(_,</span><span class="n">y</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="nn">Int</span><span class="p">.</span><span class="n">descending</span> <span class="n">x</span> <span class="n">y</span><span class="o">)</span>
+  <span class="k">in</span>
+  <span class="k">let</span> <span class="n">len</span> <span class="o">=</span> <span class="nn">List</span><span class="p">.</span><span class="n">length</span> <span class="n">sorted_strings</span> <span class="k">in</span>
+  <span class="k">if</span> <span class="n">len</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">then</span> <span class="n">failwith</span> <span class="s2">&quot;median: empty frequency count&quot;</span><span class="o">;</span>
+  <span class="k">let</span> <span class="n">nth</span> <span class="n">n</span> <span class="o">=</span> <span class="n">fst</span> <span class="o">(</span><span class="nn">List</span><span class="p">.</span><span class="n">nth_exn</span> <span class="n">sorted_strings</span> <span class="n">n</span><span class="o">)</span> <span class="k">in</span>
+  <span class="k">if</span> <span class="n">len</span> <span class="ow">mod</span> <span class="mi">2</span> <span class="o">=</span> <span class="mi">1</span>
+  <span class="k">then</span> <span class="nc">Median</span> <span class="o">(</span><span class="n">nth</span> <span class="o">(</span><span class="n">len</span><span class="o">/</span><span class="mi">2</span><span class="o">))</span>
+  <span class="k">else</span> <span class="nc">Before_and_after</span> <span class="o">(</span><span class="n">nth</span> <span class="o">(</span><span class="n">len</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="o">),</span> <span class="n">nth</span> <span class="o">(</span><span class="n">len</span><span class="o">/</span><span class="mi">2</span><span class="o">));;</span>
+</pre></div><p id="idp7805296">
+      Now, to expose this usefully in the interface, we need to expose
+      both the function and the type <code>median</code> with its
+      definition. Note that values (of which functions are an example)
+      and types have distinct namespaces, so there's no name clash here.
+      The following two lines added to <code>freq.mli</code> does
+      the trick.
+    </p><div class="highlight"><pre><span class="k">type</span> <span class="n">median</span> <span class="o">=</span> <span class="o">|</span> <span class="nc">Median</span> <span class="k">of</span> <span class="kt">string</span>
+              <span class="o">|</span> <span class="nc">Before_and_after</span> <span class="k">of</span> <span class="kt">string</span> <span class="o">*</span> <span class="kt">string</span>
+
+<span class="k">val</span> <span class="n">median</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="n">median</span>
+</pre></div><p id="idp7808352">
+      The decision of whether a given type should be abstract or
+      concrete is an important one. Abstract types give you more control
+      over how values are created and accessed, and make it easier to
+      enforce invariants beyond what is enforced by the type itself;
+      concrete types let you expose more detail and structure to client
+      code in a lightweight way. The right choice depends very much on
+      the context.
+    </p></section><section><h1 id="nested-modules">Nested modules</h1><p id="idp7810208">
+      Up until now, we've only considered modules that correspond to
+      files, like <code>counter.ml</code>. But modules (and module
+      signatures) can be nested inside other modules. As a simple
+      example, consider a program that needs to deal with multiple
+      identifier like usernames and hostnames. If you just represent
+      these as strings, then it becomes easy to confuse one with the
+      other.
+    </p><p id="idp7811664">
+      A better approach is to mint new abstract types for each
+      identifier, where those types are under the covers just
+      implemented as strings. That way, the type system will prevent you
+      from confusing a username with a hostname, and if you do need to
+      convert, you can do so using explicit conversions to and from the
+      string type.
+    </p><p id="idp7812432">
+      Here's how you might create such an abstract type, within a
+      sub-module:
+    </p><div class="highlight"><pre><span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="k">module</span> <span class="nc">Username</span> <span class="o">:</span> <span class="k">sig</span>
+  <span class="k">type</span> <span class="n">t</span>
+  <span class="k">val</span> <span class="n">of_string</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="n">t</span>
+  <span class="k">val</span> <span class="n">to_string</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="kt">string</span>
+<span class="k">end</span> <span class="o">=</span> <span class="k">struct</span>
+  <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="kt">string</span>
+  <span class="k">let</span> <span class="n">of_string</span> <span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+  <span class="k">let</span> <span class="n">to_string</span> <span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+<span class="k">end</span>
+</pre></div><p id="idp7814288">
+      Note that the <code>to_string</code> and
+      <code>of_string</code> functions above are implemented
+      simply as the identity function, which means they have no runtime
+      effect. They are there purely as part of the discipline that they
+      enforce on the code through the type system.
+    </p><p id="idp7816176">
+      The basic structure of a module declaration like this is:
+    </p><div class="highlight"><pre><span class="k">module</span> <span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;</span> <span class="o">:</span> <span class="o">&lt;</span><span class="n">signature</span><span class="o">&gt;</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">implementation</span><span class="o">&gt;</span>
+</pre></div><p id="idp7817584">
+      We could have written this slightly differently, by giving the
+      signature its own toplevel <code>module type</code>
+      declaration, making it possible to create multiple distinct types
+      with the same underlying implementation in a lightweight way.
+    </p><div class="highlight"><pre><span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="k">module</span> <span class="k">type</span> <span class="nc">ID</span> <span class="o">=</span> <span class="k">sig</span>
+  <span class="k">type</span> <span class="n">t</span>
+  <span class="k">val</span> <span class="n">of_string</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="n">t</span>
+  <span class="k">val</span> <span class="n">to_string</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="kt">string</span>
+<span class="k">end</span>
+
+<span class="k">module</span> <span class="nc">String_id</span> <span class="o">=</span> <span class="k">struct</span>
+  <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="kt">string</span>
+  <span class="k">let</span> <span class="n">of_string</span> <span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+  <span class="k">let</span> <span class="n">to_string</span> <span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+<span class="k">end</span>
+
+<span class="k">module</span> <span class="nc">Username</span> <span class="o">:</span> <span class="nc">ID</span> <span class="o">=</span> <span class="nc">String_id</span>
+<span class="k">module</span> <span class="nc">Hostname</span> <span class="o">:</span> <span class="nc">ID</span> <span class="o">=</span> <span class="nc">String_id</span>
+
+<span class="k">type</span> <span class="n">session_info</span> <span class="o">=</span> <span class="o">{</span> <span class="n">user</span><span class="o">:</span> <span class="nn">Username</span><span class="p">.</span><span class="n">t</span><span class="o">;</span>
+                      <span class="n">host</span><span class="o">:</span> <span class="nn">Hostname</span><span class="p">.</span><span class="n">t</span><span class="o">;</span>
+                      <span class="n">when_started</span><span class="o">:</span> <span class="nn">Time</span><span class="p">.</span><span class="n">t</span><span class="o">;</span>
+                    <span class="o">}</span>
+
+<span class="k">let</span> <span class="n">sessions_have_same_user</span> <span class="n">s1</span> <span class="n">s2</span> <span class="o">=</span>
+  <span class="n">s1</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">s2</span><span class="o">.</span><span class="n">host</span>
+</pre></div><p id="idp7820784">
+      The above code has a bug: it compares the username in one session
+      to the host in the other session, when it should be comparing the
+      usernames in both cases. Because of howe defined our types,
+      however, the compiler will flag this bug for us.
+    </p><pre id="idp7821456">
+File &quot;buggy.ml&quot;, line 25, characters 12-19:
+Error: This expression has type Hostname.t
+       but an expression was expected of type Username.t
+Command exited with code 2.
+</pre><p id="idp7822480">
+      Using the <code>include</code> statement, we can build
+      abstract types that have extended functionality. Thus, we can
+      rewrite the definition of <code>Hostname</code> to add a
+      function <code>Hostname.mine</code> that returns the
+      hostname of the present machine.
+    </p><div class="highlight"><pre><span class="k">module</span> <span class="nc">Hostname</span> <span class="o">:</span> <span class="k">sig</span>
+  <span class="k">include</span> <span class="nc">ID</span>
+  <span class="k">val</span> <span class="n">mine</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">-&gt;</span> <span class="n">t</span>
+<span class="k">end</span> <span class="o">=</span> <span class="k">struct</span>
+  <span class="k">include</span> <span class="nc">String_id</span>
+  <span class="k">let</span> <span class="n">mine</span> <span class="o">=</span> <span class="nn">Unix</span><span class="p">.</span><span class="n">gethostname</span>
+<span class="k">end</span>
+</pre></div></section><section><h1 id="opening-modules">Opening modules</h1><p id="idp7827216">
+      One useful primitive in OCaml's module language is the
+      <code>open</code> statement. We've seen that already in the
+      <code>open Core.Std</code> that has been at the top of our
+      source files.
+    </p><p id="idp7829008">
+      We've used OCaml's <code>open</code> statement many times
+      already in the `open
+    </p><p id="idp7830016">
+      So far, we've been referring to values and types within a module
+      by using the module name as an explicit qualifier.
+      <span><em>e.g.</em></span>, we write <code>List.map</code> to
+      refer to the <code>map</code> function in the
+      <code>List</code> module Sometimes, though, you want to be
+      able to refer to the contents of a module without that kind of
+      explicit qualification. This is what the <code>open</code>
+      statement is for.
+    </p><p id="idp7833600">
+      We've already seen the <code>open</code> statement in use in
+      the <code>open Core.Std</code> statements at the top of each
+      source file. Opening a module adds its contents to the environment
+      that the compiler looks in for finding identifiers. Here's a
+      trivial example that gives you a sense of how this works.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">module</span> <span class="nc">M</span> <span class="o">=</span> <span class="k">struct</span> <span class="k">let</span> <span class="n">foo</span> <span class="o">=</span> <span class="mi">3</span> <span class="k">end</span><span class="o">;;</span>
+<span class="k">module</span> <span class="nc">M</span> <span class="o">:</span> <span class="k">sig</span> <span class="k">val</span> <span class="n">foo</span> <span class="o">:</span> <span class="kt">int</span> <span class="k">end</span>
+<span class="o">#</span> <span class="n">foo</span><span class="o">;;</span>
+<span class="nc">Error</span><span class="o">:</span> <span class="nc">Unbound</span> <span class="n">value</span> <span class="n">foo</span>
+<span class="o">#</span> <span class="k">open</span> <span class="nc">M</span><span class="o">;;</span>
+<span class="o">#</span> <span class="n">foo</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">3</span>
+</pre></div><p id="idp7836512">
+<code>open</code> is essential when you want to modify your
+      environment for a standard library like Core, but it's generally
+      good style to keep opening of modules to a minimum. Opening a
+      module is basically a tradeoff between terseness and explicitness
+      --- the more modules you open, the harder it is to look at an
+      identifier and figure out where it's defined.
+    </p><p id="idp7837920">
+      Here's some general advice on how to deal with opens.
+    </p><ul><li><p id="idp7838896">
+          Opening modules at the toplevel of a module should be done
+          quite sparingly, and generally only with modules that have
+          been specifically designed to be opened, like
+          <code>Core.Std</code> or
+          <code>Option.Monad_infix</code>.
+        </p></li><li><p id="idp7841136">
+          If you do need to do an open, it's better to do a
+          <span><em>local open</em></span>. There are two syntaxes for
+          local opens. For example, you can write:
+        </p><div class="highlight"><pre><span class="k">let</span> <span class="n">average</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="k">open</span> <span class="nc">Int64</span> <span class="k">in</span>
+  <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">/</span> <span class="n">of_int</span> <span class="mi">2</span>
+</pre></div><p id="idp7843040">
+          In the above, <code>of_int</code> and the infix
+          operators are the ones from <code>Int64</code> module.
+        </p><p id="idp7844672">
+          There's another even more lightweight syntax for local opens,
+          which is particularly useful for small expressions:
+        </p><div class="highlight"><pre><span class="k">let</span> <span class="n">average</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span>
+  <span class="nn">Int64</span><span class="p">.</span><span class="err">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">/</span> <span class="n">of_int</span> <span class="mi">2</span><span class="o">)</span>
+</pre></div></li><li><p id="idp7846464">
+          An alternative to local opens that makes your code terser
+          without giving up on explicitness is to locally rebind the
+          name of a module. So, instead of writing:
+        </p><div class="highlight"><pre><span class="k">let</span> <span class="n">print_median</span> <span class="n">m</span> <span class="o">=</span>
+   <span class="k">match</span> <span class="n">m</span> <span class="k">with</span>
+   <span class="o">|</span> <span class="nn">Counter</span><span class="p">.</span><span class="nc">Median</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="n">printf</span> <span class="s2">&quot;True median:</span><span class="se">\n</span><span class="s2">   %s</span><span class="se">\n</span><span class="s2">&quot;</span>
+   <span class="o">|</span> <span class="nn">Counter</span><span class="p">.</span><span class="nc">Before_and_after</span> <span class="k">of</span> <span class="n">before</span> <span class="o">*</span> <span class="n">after</span> <span class="o">-&gt;</span>
+     <span class="n">printf</span> <span class="s2">&quot;Before and after median:</span><span class="se">\n</span><span class="s2">   %s</span><span class="se">\n</span><span class="s2">   %s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="n">before</span> <span class="n">after</span>
+</pre></div><p id="idp7848304">
+          you could write:
+        </p><div class="highlight"><pre><span class="k">let</span> <span class="n">print_median</span> <span class="n">m</span> <span class="o">=</span>
+   <span class="k">let</span> <span class="k">module</span> <span class="nc">C</span> <span class="o">=</span> <span class="nc">Counter</span> <span class="k">in</span>
+   <span class="k">match</span> <span class="n">m</span> <span class="k">with</span>
+   <span class="o">|</span> <span class="nn">C</span><span class="p">.</span><span class="nc">Median</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="n">printf</span> <span class="s2">&quot;True median:</span><span class="se">\n</span><span class="s2">   %s</span><span class="se">\n</span><span class="s2">&quot;</span>
+   <span class="o">|</span> <span class="nn">C</span><span class="p">.</span><span class="nc">Before_and_after</span> <span class="k">of</span> <span class="n">before</span> <span class="o">*</span> <span class="n">after</span> <span class="o">-&gt;</span>
+     <span class="n">printf</span> <span class="s2">&quot;Before and after median:</span><span class="se">\n</span><span class="s2">   %s</span><span class="se">\n</span><span class="s2">   %s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="n">before</span> <span class="n">after</span>
+</pre></div><p id="idp7850016">
+          Because the module name <code>C</code> only exists for a
+          short scope, it's easy to read and remember what
+          <code>C</code> stands for. Rebinding modules to very
+          short names at the toplevel of your module is usually a
+          mistake.
+        </p></li></ul></section><section><h1 id="including-modules">Including modules</h1><p id="idp7853168">
+      While opening a module affects the environment used to search for
+      identifiers, <span><em>including</em></span> a module is a way of
+      actually adding new identifiers to a module proper. Consider the
+      following simple module for representing a range of intervals.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">module</span> <span class="nc">Interval</span> <span class="o">=</span> <span class="k">struct</span>
+    <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">|</span> <span class="nc">Interval</span> <span class="k">of</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span>
+             <span class="o">|</span> <span class="nc">Empty</span>
+
+    <span class="k">let</span> <span class="n">create</span> <span class="n">low</span> <span class="n">high</span> <span class="o">=</span>
+      <span class="k">if</span> <span class="n">high</span> <span class="o">&lt;</span> <span class="n">low</span> <span class="k">then</span> <span class="nc">Empty</span> <span class="k">else</span> <span class="nc">Interval</span> <span class="o">(</span><span class="n">low</span><span class="o">,</span><span class="n">high</span><span class="o">)</span>
+  <span class="k">end</span><span class="o">;;</span>
+<span class="k">module</span> <span class="nc">Interval</span> <span class="o">:</span>
+  <span class="k">sig</span> <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="nc">Interval</span> <span class="k">of</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span> <span class="o">|</span> <span class="nc">Empty</span> <span class="k">val</span> <span class="n">create</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="n">t</span> <span class="k">end</span>
+</pre></div><p id="idp7855872">
+      We can use the <code>include</code> directive to create a
+      new, extended version of the <code>Interval</code> module.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">module</span> <span class="nc">Extended_interval</span> <span class="o">=</span> <span class="k">struct</span>
+    <span class="k">include</span> <span class="nc">Interval</span>
+
+    <span class="k">let</span> <span class="n">contains</span> <span class="n">t</span> <span class="n">x</span> <span class="o">=</span>
+      <span class="k">match</span> <span class="n">t</span> <span class="k">with</span>
+      <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&gt;</span> <span class="bp">false</span>
+      <span class="o">|</span> <span class="nc">Interval</span> <span class="o">(</span><span class="n">low</span><span class="o">,</span><span class="n">high</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">low</span> <span class="o">&amp;&amp;</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">high</span>
+  <span class="k">end</span><span class="o">;;</span>
+<span class="k">module</span> <span class="nc">Extended_interval</span> <span class="o">:</span>
+  <span class="k">sig</span>
+    <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="nn">Interval</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="nc">Interval</span> <span class="k">of</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span> <span class="o">|</span> <span class="nc">Empty</span>
+    <span class="k">val</span> <span class="n">create</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="n">t</span>
+    <span class="k">val</span> <span class="n">contains</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">bool</span>
+  <span class="k">end</span>
+<span class="o">#</span> <span class="nn">Extended_interval</span><span class="p">.</span><span class="n">contains</span> <span class="o">(</span><span class="nn">Extended_interval</span><span class="p">.</span><span class="n">create</span> <span class="mi">3</span> <span class="mi">10</span><span class="o">)</span> <span class="mi">4</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="bp">true</span>
+</pre></div><p id="idp7859184">
+      The difference between <code>include</code> and
+      <code>open</code> is that we've done more than change how
+      identifiers are searched for: we've changed what's in the module.
+      If we'd used <code>open</code>, we'd have gotten a quite
+      different result.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">module</span> <span class="nc">Extended_interval</span> <span class="o">=</span> <span class="k">struct</span>
+    <span class="k">open</span> <span class="nc">Interval</span>
+
+    <span class="k">let</span> <span class="n">contains</span> <span class="n">t</span> <span class="n">x</span> <span class="o">=</span>
+      <span class="k">match</span> <span class="n">t</span> <span class="k">with</span>
+      <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&gt;</span> <span class="bp">false</span>
+      <span class="o">|</span> <span class="nc">Interval</span> <span class="o">(</span><span class="n">low</span><span class="o">,</span><span class="n">high</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">low</span> <span class="o">&amp;&amp;</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">high</span>
+  <span class="k">end</span><span class="o">;;</span>
+<span class="k">module</span> <span class="nc">Extended_interval</span> <span class="o">:</span>
+  <span class="k">sig</span> <span class="k">val</span> <span class="n">contains</span> <span class="o">:</span> <span class="nn">Extended_interval</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">bool</span> <span class="k">end</span>
+<span class="o">#</span> <span class="nn">Extended_interval</span><span class="p">.</span><span class="n">contains</span> <span class="o">(</span><span class="nn">Extended_interval</span><span class="p">.</span><span class="n">create</span> <span class="mi">3</span> <span class="mi">10</span><span class="o">)</span> <span class="mi">4</span><span class="o">;;</span>
+<span class="nc">Error</span><span class="o">:</span> <span class="nc">Unbound</span> <span class="n">value</span> <span class="nn">Extended_interval</span><span class="p">.</span><span class="n">create</span>
+</pre></div><p id="idp7863088">
+      To consider a more realistic example, imagine you wanted to build
+      an extended version of the <code>List</code> module, where
+      you've added some functionality not present in the module as
+      distributed in Core. <code>include</code> allows us to do
+      just that.
+    </p><div class="highlight"><pre><span class="c">(* ext_list.ml: an extended list module *)</span>
+
+<span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="c">(* The new function we're going to add *)</span>
+<span class="k">let</span> <span class="k">rec</span> <span class="n">intersperse</span> <span class="kt">list</span> <span class="n">el</span> <span class="o">=</span>
+  <span class="k">match</span> <span class="kt">list</span> <span class="k">with</span>
+  <span class="o">|</span> <span class="bp">[]</span> <span class="o">|</span> <span class="o">[</span> <span class="o">_</span> <span class="o">]</span>   <span class="o">-&gt;</span> <span class="kt">list</span>
+  <span class="o">|</span> <span class="n">x</span> <span class="o">::</span> <span class="n">y</span> <span class="o">::</span> <span class="n">tl</span> <span class="o">-&gt;</span> <span class="n">x</span> <span class="o">::</span> <span class="n">el</span> <span class="o">::</span> <span class="n">intersperse</span> <span class="o">(</span><span class="n">y</span><span class="o">::</span><span class="n">tl</span><span class="o">)</span> <span class="n">el</span>
+
+<span class="c">(* The remainder of the list module *)</span>
+<span class="k">include</span> <span class="nc">List</span>
+</pre></div><p id="idp7866192">
+      Now, what about the interface of this new module? It turns out
+      that include works on the signature language as well, so we can
+      pull essentially the same trick to write an <code>mli</code>
+      for this new module. The only trick is that we need to get our
+      hands on the signature for the list module, which can be done
+      using <code>module type of</code>.
+    </p><div class="highlight"><pre><span class="c">(* ext_list.mli: an extended list module *)</span>
+
+<span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="c">(* Include the interface of the list module from Core *)</span>
+<span class="k">include</span> <span class="o">(</span><span class="k">module</span> <span class="k">type</span> <span class="k">of</span> <span class="nc">List</span><span class="o">)</span>
+
+<span class="c">(* Signature of function we're adding *)</span>
+<span class="k">val</span> <span class="n">intersperse</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span>
+</pre></div><p id="idp7869504">
+      Note that the order of declarations in the <code>mli</code>
+      does not need to match the order of declarations in the
+      <code>ml</code>. Also, the order of declarations in the
+      <code>ml</code> is quite important in that it determines
+      what values are shadowed. If we wanted to replace a function in
+      <code>List</code> with a new function of the same name, the
+      declaration of that function in the <code>ml</code> would
+      have to come after the <code>include List</code>
+      declaration.
+    </p><p id="idp7873936">
+      And we can now use <code>Ext_list</code> as a replacement
+      for <code>List</code>. If we want to use
+      <code>Ext_list</code> in preference to
+      <code>List</code> in our project, we can create a file of
+      common definitions:
+    </p><div class="highlight"><pre><span class="c">(* common.ml *)</span>
+
+<span class="k">module</span> <span class="nc">List</span> <span class="o">=</span> <span class="nc">Ext_list</span>
+</pre></div><p id="idp7877760">
+      And if we then put <code>open Common</code> after
+      <code>open Core.Std</code> at the top of each file in our
+      project, then references to <code>List</code> will
+      automatically go to <code>Ext_list</code> instead.
+    </p></section><section><h1 id="common-errors-with-modules">Common errors with modules</h1><p id="idp7881728">
+      When OCaml compiles a program with an <code>ml</code> and an
+      <code>mli</code>, it will complain if it detects a mismatch
+      between the two. Here are some of the common errors you'll run
+      into.
+    </p><section><h1 id="type-mismatches">Type mismatches</h1><p id="idp7884384">
+        The simplest kind of error is where the type specified in the
+        signature does not match up with the type in the implementation
+        of the module. As an example, if we replace the
+        <code>val</code> declaration in
+        <code>counter.mli</code> by swapping the types of the
+        first two arguments:
+      </p><div class="highlight"><pre><span class="k">val</span> <span class="n">touch</span> <span class="o">:</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="n">t</span>
+</pre></div><p id="idp7887184">
+        and then try to compile <code>Counter</code> (by writing
+        <code>ocamlbuild -use-ocamlfind counter.cmo</code>. The
+        <code>cmo</code> file is a compiled object file,
+        containing the bytecode-compiled version of a module), we'll get
+        the following error:
+      </p><pre id="idp7889600">
+File &quot;counter.ml&quot;, line 1, characters 0-1:
+Error: The implementation counter.ml
+       does not match the interface counter.cmi:
+       Values do not match:
+         val touch :
+           ('a, int) Core.Std.Map.t -&gt; 'a -&gt; ('a, int) Core.Std.Map.t
+       is not included in
+         val touch : string -&gt; t -&gt; t
+</pre><p id="idp7890736">
+        This error message is a bit intimidating at first, and it takes
+        a bit of thought to see why the first type for touch (which
+        comes from the implementation) doesn't match the second one
+        (which comes from the interface). The key thing to remember is
+        that <code>t</code> is a
+        <code>Core.Std.Map.t</code>, at which point you can see
+        that the error is a mismatch in the order of arguments to
+        <code>touch</code>.
+      </p><p id="idp7893408">
+        There's no denying that learning to decode such error messages
+        is difficult at first, and takes some getting used to. But in
+        time, decoding these errors becomes second nature.
+      </p></section><section><h1 id="missing-definitions">Missing definitions</h1><p id="idp7895024">
+        We might decide that we want a new function in
+        <code>Counter</code> for pulling out the frequency count
+        of a given string. We can update the <code>mli</code> by
+        adding the following line.
+      </p><div class="highlight"><pre><span class="k">val</span> <span class="n">count</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="kt">int</span>
+</pre></div><p id="idp7897696">
+        Now, if we try to compile without actually adding the
+        implementation, we'll get this error:
+      </p><pre id="idp7898208">
+File &quot;counter.ml&quot;, line 1, characters 0-1:
+Error: The implementation counter.ml
+       does not match the interface counter.cmi:
+       The field `count' is required but not provided
+</pre><p id="idp7899280">
+        A missing type definition will lead to a similar error.
+      </p></section><section><h1 id="type-definition-mismatches">Type definition mismatches</h1><p id="idp7900752">
+        Type definitions that show up in an <code>mli</code> need
+        to match up with corresponding definitions in the
+        <code>ml</code>. Consider again the example of the type
+        <code>median</code>. The order of the declaration of
+        variants matters to the OCaml compiler, so the definition of
+        <code>median</code> in the implementation listing those
+        options in a different order:
+      </p><div class="highlight"><pre><span class="k">type</span> <span class="n">median</span> <span class="o">=</span> <span class="o">|</span> <span class="nc">Before_and_after</span> <span class="k">of</span> <span class="n">line</span> <span class="o">*</span> <span class="n">line</span>
+              <span class="o">|</span> <span class="nc">Median</span> <span class="k">of</span> <span class="n">line</span>
+</pre></div><p id="idp7904912">
+        will lead to a compilation error:
+      </p><pre id="idp7905296">
+File &quot;counter.ml&quot;, line 1, characters 0-1:
+Error: The implementation counter.ml
+       does not match the interface counter.cmi:
+       Type declarations do not match:
+         type median = Before_and_after of string * string | Median of string
+       is not included in
+         type median = Median of string | Before_and_after of string * string
+       Their first fields have different names, Before_and_after and Median.
+</pre><p id="idp7906864">
+        Order is similarly important in other parts of the signature,
+        including the order in which record fields are declared and the
+        order of arguments (including labeled and optional arguments) to
+        a function.
+      </p></section><section><h1 id="cyclic-dependencies">Cyclic dependencies</h1><p id="idp7908512">
+        In most cases, OCaml doesn't allow circular dependencies,
+        <span><em>i.e.</em></span>, a collection of definitions that all
+        refer to each other. If you want to create such definitions, you
+        typically have to mark them specially. For example, when
+        defining a set of mutually recursive values (like the definition
+        of <code>is_even</code> and <code>is_odd</code> in
+        <a href="variables-and-functions.html#recursive-functions">the section called “Recursive functions”</a>), you need to
+        define them using <code>let rec</code> rather than
+        ordinary <code>let</code>.
+      </p><p id="idp7912640">
+        The same is true at the module level. By default, circular
+        dependencies between modules are not allowed, and indeed,
+        circular dependencies among files are never allowed. Recursive
+        modules are possible, but are a rare case and we won't discuss
+        them further here.
+      </p><p id="idp7913344">
+        The simplest case of this is that a module can not directly
+        refer to itself (although definitions within a module can refer
+        to each other in the ordinary way). So, if we tried to add a
+        reference to <code>Counter</code> from within
+        <code>counter.ml</code>:
+      </p><div class="highlight"><pre><span class="k">let</span> <span class="n">singleton</span> <span class="n">l</span> <span class="o">=</span> <span class="nn">Counter</span><span class="p">.</span><span class="n">touch</span> <span class="nn">Counter</span><span class="p">.</span><span class="n">empty</span>
+</pre></div><p id="idp7916080">
+        then when we try to build, we'll get this error:
+      </p><pre id="idp7916544">
+File &quot;counter.ml&quot;, line 17, characters 18-31:
+Error: Unbound module Counter
+Command exited with code 2.
+</pre><p id="idp7917456">
+        The problem manifests in a different way if we create circular
+        references between files. We could create such a situation by
+        adding a reference to Freq from <code>counter.ml</code>,
+        <span><em>e.g.</em></span>, by adding the following line:
+      </p><div class="highlight"><pre><span class="k">let</span> <span class="n">build_counts</span> <span class="o">=</span> <span class="nn">Freq</span><span class="p">.</span><span class="n">build_counts</span>
+</pre></div><p id="idp7919904">
+        In this case, <code>ocamlbuild</code> will notice the
+        error and complain:
+      </p><pre id="idp7920912">
+Circular dependencies: &quot;freq.cmo&quot; already seen in
+  [ &quot;counter.cmo&quot;; &quot;freq.cmo&quot; ]
+</pre></section></section>
+
+
+                
+            </article>
+            
+            
+    
+                <nav class="pagination">
+                    
+                        <a rel="previous" href="lists-and-patterns.html">
+                            &lt; Previous
+                        </a>
+                    
+                    
+                        <a rel="next" href="records.html">
+                            Next &gt;
+                        </a>
+                    
+                </nav>
+            
+            
+            
+            <footer class="footer">
+                <p>Copyright 2012-2013, Jason Hickey, Anil Madhavapeddy and Yaron Minsky.</p>
+            </footer>
+            
+        </div>
+    
+    </body>
+
+</html>
