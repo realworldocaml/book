@@ -2,4 +2,4 @@ true:package(xmlm,cmdliner)
 true:thread,debug,annot
 <*.ml{,i}>:syntax(camlp4o)
 true: package(core,core_extended,threads,sexplib.syntax)
-<downtime.*> or <memcache.*> or <rwocli.*> or <githubbot.*> or <config.*> or <rwoserver.*>:package(lwt.unix,github.unix,lwt.syntax)
+<redirect.*> or <downtime.*> or <memcache.*> or <rwocli.*> or <githubbot.*> or <config.*> or <rwoserver.*>:package(lwt.unix,github.unix,lwt.syntax)
