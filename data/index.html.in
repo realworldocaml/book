@@ -22,6 +22,13 @@
                 <p>We are developing the book via a series of <a href="#milestones">milestones</a> as we finish chapters.  The alpha milestones are for a
                    closed set of reviewers, and the beta milestones are for public review by the community. See the <a href="#faq">FAQ</a> for commonly asked questions.</p>
 
+                <h2>News</h2>
+                <ul>
+                 <li><i>19th June 2013:</i> Site is now SSL-only. No auth tokens are ever sent in the clear, and are only stored client-side in your browser.</li>
+                 <li><i>17th June 2013:</i> Blog (Anil): <a href="http://anil.recoil.org/2013/06/17/real-world-ocaml-beta-available.html">Real World OCaml beta available</a>.</li>
+                 <li><i>17th June 2013:</i> Public beta1 milestone released. (<a href="https://news.ycombinator.com/item?id=3641355">HN#1</a>, <a href="https://news.ycombinator.com/item?id=5893168">HN#2</a>, <a href="http://www.reddit.com/r/programming/comments/1gipea/first_public_beta_of_real_world_ocaml_book/">reddit#1</a>, <a href="http://www.reddit.com/r/ocaml/comments/1gil84/public_beta_of_real_world_ocaml/">reddit#2</a>).</li>
+                </ul>
+
                 <a name="milestones"></a>
                 <h1>Milestones</h1>
                   <p><ul>@MILESTONES@
