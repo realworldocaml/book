@@ -17,7 +17,7 @@ define([
     var gitHubMilestone = config.milestone;
     var gitHubPageLabel = "page-" + config.page.split(".")[0];
     var gitHubClientId = $.cookie("github_client_id");
-    var gitHubAccessToken = $.cookie("github_access_token");
+    var gitHubAccessToken = $.cookie("github_access_token_ssl");
     
     /**
      * Tests if the user is currently authenticated.
