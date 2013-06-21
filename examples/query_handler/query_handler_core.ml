@@ -115,26 +115,23 @@ let dispatch_to_list handlers name_and_query =
     Or_error.error_string "malformed query"
 ;;
 
-let rec repl handlers =
-    printf ">>> %!";
-    let result =
-      match In_channel.input_line stdin with
-      | None -> `Stop
-      | Some line ->
-        match Or_error.try_with (fun () -> Sexp.of_string line) with
+let rec cli handlers =
+  printf ">>> %!";
+  let result =
+    match In_channel.input_line stdin with
+    | None -> `Stop
+    | Some line ->
+      match Or_error.try_with (fun () -> Sexp.of_string line) with
+      | Error e -> `Continue (Error.to_string_hum e)
+      | Ok (Sexp.Atom "quit") -> `Stop
+      | Ok query ->
+        begin match dispatch_to_list handlers query with
         | Error e -> `Continue (Error.to_string_hum e)
-        | Ok (Sexp.Atom "quit") -> `Stop
-        | Ok query ->
-          begin match dispatch_to_list handlers query with
-          | Error e -> `Continue (Error.to_string_hum e)
-          | Ok s    -> `Continue (Sexp.to_string_hum s)
-          end;
-    in
-    match result with
-    | `Stop -> ()
-    | `Continue msg ->
-      printf "%s\n%!" msg;
-      repl handlers
-
-let () =
-  repl [unique_instance; list_dir_instance]
+        | Ok s    -> `Continue (Sexp.to_string_hum s)
+        end;
+  in
+  match result with
+  | `Stop -> ()
+  | `Continue msg ->
+    printf "%s\n%!" msg;
+    cli handlers
