@@ -12075,11 +12075,14 @@ include Foldable.Extend(T)
   </sect1>
 </chapter><chapter id="first-class-modules">
   <title>First class modules</title>
-  <note><title> 
-  A note to reviewers
+  <note>
+  <title>
+  Note to reviewers
   </title>
   <para>
-    This chapter is highly incomplete. Proceed with caution...
+    This chapter is still incomplete, but the contents here are still
+    instructive enough that we decided to include it in the public beta
+    release.
   </para>
   </note>
   <para>
@@ -12098,16 +12101,6 @@ include Foldable.Extend(T)
     regular modules. As we'll see, letting modules into the core
     language makes it possible build more modular programs.
   </para>
-  <note>
-  <title>
-  Note to reviewers
-  </title>
-  <para>
-    This chapter is still incomplete, but the contents here are still
-    instructive enough that we decided to include it in the public beta
-    release.
-  </para>
-  </note>
   <sect1 id="a-trivial-example-1">
     <title>A trivial example</title>
     <para>
@@ -12223,11 +12216,308 @@ val six : (module X_int) = &lt;module&gt;
 # to_int (List.fold ~init:six ~f:plus [three;three]);;
 - : int = 12
 </programlisting>
+  </sect1>
+  <sect1 id="example-a-query-handling-service">
+    <title>Example: a query-handling service</title>
     <para>
-      Of course, all we've really done with this example is come up with
-      a more cumbersome way of working with integers. Now let's consider
-      some more realistic examples.
+      In this section, we'll see what happens when we take a more
+      complete and realistic module signature as the basis for a first
+      class module. In particular, consider the following signature for
+      a module that implements a query handling service.
     </para>
+    <programlisting language="ocaml">
+# module type Query_handler = sig
+
+    (** Configuration for a query handler.  Note that this can be
+        converted to and from an s-expression *)
+    type config with sexp
+
+    (** The name of the query-handling service *)
+    val name : string
+
+    (** The state o fthe query handler *)
+    type t
+
+    (** Create a new query handler from a config *)
+    val create : config -&gt; t
+
+    (** Evaluate a given query, where both input and output are
+        s-expressions *)
+    val eval : t -&gt; Sexp.t -&gt; Sexp.t Or_error.t
+  end;;
+module type Query_handler =
+  sig
+    type config
+    val name : string
+    type t
+    val create : config -&gt; t
+    val eval : t -&gt; Sexp.t -&gt; Sexp.t Or_error.t
+    val config_of_sexp : Sexp.t -&gt; config
+    val sexp_of_config : config -&gt; Sexp.t
+  end
+</programlisting>
+    <para>
+      In the above we use s-expressions as the format for queries and
+      responses as well for the config. S-expressions are a simple,
+      flexible, and human-readable serialization format commonly used in
+      Core. We'll cover s-expressions in more detail in
+      <xref linkend="data-serialization-with-s-expressions"/>,
+      but for now, it's enough to think of them as balanced
+      parenthetical expressions whose atomic values are strings,
+      <emphasis>e.g.</emphasis>,
+      <literal>(this (is an) (s expression))</literal>.
+    </para>
+    <para>
+      In addition, we use the <literal>sexplib</literal> syntax
+      extension which extends OCaml by adding the
+      <literal>with sexp</literal> declaration. When attached to a type
+      in a signature adds in declarations of converters to and from
+      s-expressions. In a module, <literal>with sexp</literal> adds the
+      actual implementation of those functions. This is all described in
+      more detail in
+      <xref linkend="data-serialization-with-s-expressions"/>.
+    </para>
+    <para>
+      Let's give a couple of examples of simple services that satisfy
+      this interface. For example, the following service hands out
+      unique integer ids by keeping an internal counter which it bumps
+      every time it produces a counter. The input to the query in this
+      case is just the trivial s-expression <literal>()</literal>.
+    </para>
+    <programlisting language="ocaml">
+# module Unique = struct
+    type config = int with sexp
+    type t = { mutable next_id: int }
+
+    let name = &quot;unique&quot;
+    let create start_at = { next_id = start_at }
+
+    let eval t sexp =
+      match Or_error.try_with (fun () -&gt; unit_of_sexp sexp) with
+      | Error _ as err -&gt; err
+      | Ok () -&gt;
+        let resp = Ok (Int.sexp_of_t t.next_id) in
+        t.next_id &lt;- t.next_id + 1;
+        resp
+  end;;
+module Unique :
+  sig
+    type config = int
+    val config_of_sexp : Sexp.t -&gt; config
+    val sexp_of_config : config -&gt; Sexp.t
+    type t = { mutable next_id : config; }
+    val name : string
+    val create : config -&gt; t
+    val eval : t -&gt; Sexp.t -&gt; (Sexp.t, Error.t) Result.t
+  end
+</programlisting>
+    <para>
+      We can use this module to create an instance of the
+      <literal>Unique</literal> query handler and interact with it.
+    </para>
+    <programlisting language="ocaml">
+# let config = Unique.config_of_sexp (Sexp.of_string &quot;0&quot;);;
+val config : Unique.config = &lt;abstr&gt;
+# let unique = Unique.create config;;
+val unique : Unique.t = &lt;abstr&gt;
+# Unique.eval unique (Sexp.of_string &quot;()&quot;);;
+- : Sexp.t Or_error.t = Core_kernel.Result.Ok 0
+# Unique.eval unique (Sexp.of_string &quot;()&quot;);;
+- : Sexp.t Or_error.t = Core_kernel.Result.Ok 1
+</programlisting>
+    <para>
+      Now, consider what happens if we have multiple such modules. Here,
+      for example, is a query handler for handling directory listings.
+    </para>
+    <programlisting language="ocaml">
+# module List_dir = struct
+    type config = string with sexp
+    type t = { cwd: string }
+
+    let is_abs s =
+      String.length s &gt; 0 &amp;&amp; s.[0] = '/'
+
+    let name = &quot;ls&quot;
+    let create cwd = { cwd }
+
+    let eval t sexp =
+      match Or_error.try_with (fun () -&gt; string_of_sexp sexp) with
+      | Error _ as err -&gt; err
+      | Ok dir -&gt;
+        let dir =
+          if is_abs dir then dir 
+          else Filename.concat t.cwd dir
+        in
+        Ok (Array.sexp_of_t String.sexp_of_t (Sys.readdir dir))
+  end;;
+module List_dir :
+  sig
+    type config = string
+    val name : config
+    type t
+    val create : config -&gt; t
+    val eval : t -&gt; Sexp.t -&gt; Sexp.t Or_error.t
+    val config_of_sexp : Sexp.t -&gt; config
+    val sexp_of_config : config -&gt; Sexp.t
+  end
+# let list_dir = List_dir.create &quot;/&quot;;;
+val list_dir : List_dir.t = &lt;abstr&gt;
+# List_dir.eval list_dir (sexp_of_string &quot;var&quot;);;
+- : Sexp.t Or_error.t =
+Core_kernel.Result.Ok
+ (agentx at audit backups db empty folders jabberd lib log mail msgs named
+  netboot pgsql_socket_alt root rpc run rwho spool tmp vm yp)
+</programlisting>
+    <para>
+      Now, what if we want to dispatch queries to any of an arbitrary
+      collection of handlers? This is difficult to do with modules and
+      functors alone, but it's quite natural with first-class modules.
+      The first thing we'll need to do is to create a signature that
+      combines a <literal>Query_handler</literal> module with an
+      instantiated example of the handler, as follows.
+    </para>
+    <programlisting language="ocaml">
+# module type Query_handler_instance = sig
+    module Query_handler : Query_handler
+    val this : Query_handler.t
+  end;;
+module type Query_handler_instance =
+  sig module Query_handler : Query_handler val this : Query_handler.t end
+</programlisting>
+    <para>
+      We can create first-class modules of this type easily enough, if
+      we have both the <literal>Query_handler</literal> module and a
+      config to create it from.
+    </para>
+    <programlisting language="ocaml">
+# let unique_instance =
+    (module struct
+       module Query_handler = Unique
+       let this = Unique.create 0
+     end : Query_handler_instance);;
+val unique_instance : (module Query_handler_instance) = &lt;module&gt;
+# let list_dir_instance =
+    (module struct
+       module Query_handler = List_dir
+       let this = List_dir.create &quot;/&quot;
+     end : Query_handler_instance);;
+val list_dir_instance : (module Query_handler_instance) = &lt;module&gt;
+</programlisting>
+    <para>
+      Here's some code for putting together a simple interactive prompt
+      that lets you dispatch queries to a given query handler by name.
+    </para>
+    <programlisting language="ocaml">
+# let dispatch_to_list handlers name_and_query =
+    let (name,query) = &lt;:of_sexp&lt;string * Sexp.t&gt;&gt; name_and_query in
+    let response =
+      List.find_map handlers
+        ~f:(fun (module I : Query_handler_instance) -&gt;
+          if I.Query_handler.name &lt;&gt; name then None
+          else Some (I.Query_handler.eval I.this query)
+        )
+    in
+    match response with
+    | Some x -&gt; x
+    | None -&gt; Or_error.error &quot;Could not find matching handler&quot;
+                name String.sexp_of_t
+  ;;
+val dispatch_to_list :
+  (module Query_handler_instance) list -&gt; Sexp.t -&gt; Sexp.t Or_error.t = &lt;fun&gt;
+</programlisting>
+    <para>
+      And using this, we can create a simple interactive tool for
+      sending queries and viewing the results.
+    </para>
+    <programlisting language="ocaml">
+# let run s =
+    match dispatch_to_list [ unique_instance; list_dir_instance ]
+            (Sexp.of_string s)
+    with
+    | Error e -&gt; printf &quot;ERROR: %s\n&quot; (Error.to_string_hum e)
+    | Ok s -&gt; print_endline (Sexp.to_string_hum s)
+  ;;
+val run : string -&gt; unit = &lt;fun&gt;
+</programlisting>
+    <programlisting language="ocaml">
+# let rec repl handlers =
+    printf &quot;&gt;&gt;&gt; %!&quot;;
+    match In_channel.input_line stdin with
+    | None -&gt; ()
+    | Some line -&gt;
+      match Or_error.try_with (fun () -&gt; Sexp.of_string line) with
+      | Error e -&gt; printf &quot;PARSE ERROR: %s\n%!&quot; (Error.to_string_hum e)
+      | Ok (Sexp.Atom &quot;quit&quot;) -&gt; ()
+      | Ok query -&gt;
+        begin match dispatch_to_list handlers query with
+        | Error e -&gt; printf &quot;ERROR: %s\n%!&quot; (Error.to_string_hum e)
+        | Ok s -&gt; printf &quot;%s\n%!&quot; (Sexp.to_string_hum s)
+        end;
+        repl handlers
+  ;;
+</programlisting>
+    <programlisting language="ocaml">
+# let handle_query handlers =
+    printf &quot;&gt;&gt;&gt; %!&quot;; (* prompt *)
+    match In_channel.input_line stdin with
+    | None -&gt; `Stop (* terminate on end-of-stream, so Ctrl-D will exit *)
+    | Some line -&gt;
+      let line = String.strip line in (* drop leading and trailing whitespace *)
+      if line = &quot;&quot; then `Continue
+      else match Or_error.try_with (fun () -&gt; Sexp.of_string line) with
+      | Error err -&gt;
+        eprintf &quot;Couldn't parse query: %s\n%!&quot; (Error.to_string_hum err);
+        `Continue
+      | Ok  -&gt;
+        let resp = Service.Bundle.handle_request bundle query_sexp in
+        Sexp.output_hum stdout (&lt;:sexp_of&lt;Sexp.t Or_error.t&gt;&gt; resp);
+        Out_channel.newline stdout;
+        `Continue
+
+  let handle_loop services =
+    let bundle = Service.Bundle.create services in
+    let rec loop () =
+      match handle_one bundle with
+      | `Stop -&gt; ()
+      | `Continue -&gt; loop ()
+    in
+    loop ()
+</programlisting>
+  </sect1>
+  <sect1 id="break">
+    <title>BREAK</title>
+    <para>
+      Here, requests and responses are delivered as s-expressions, which
+      are a simple, flexible, and human-readable serialization format
+      commonly used in Core. We'll cover s-expressions in more detail in
+      <xref linkend="data-serialization-with-s-expressions"/>,
+      but for now, it's enough to think of them as balanced
+      parenthetical expressions whose atomic values are strings.
+    </para>
+    <programlisting language="ocaml">
+# module type Number = sig
+    type t
+    val zero : t
+    val one : t
+    val ( + ) : t -&gt; t -&gt; t
+    val ( /% ) : t -&gt; t -&gt; t  
+    val ( / ) : t -&gt; t -&gt; t
+    val ( * ) : t -&gt; t -&gt; t
+    val ( &gt; ) : t -&gt; t -&gt; bool
+    val ( = ) : t -&gt; t -&gt; bool
+    val ( &lt; ) : t -&gt; t -&gt; bool
+  end;;
+</programlisting>
+    <programlisting language="ocaml">
+# let gcd (module N : Number) n m =
+     let rec gcd n m = 
+        if N.(n &gt; m) then gcd m n
+        else if N.(n = zero) then m
+        else gcd n N.(m - n)
+     in
+     gcd n m
+  ;;
+</programlisting>
   </sect1>
   <sect1 id="dynamically-choosing-a-module">
     <title>Dynamically choosing a module</title>
@@ -12295,7 +12585,10 @@ include (val multiplexer : S)
       exports a query interface. A service bundle combines together
       multiple individual services under a single query interface that
       works by dispatching incoming queries to the appropriate
-      underlying service.
+      underlying service. We'll use this to build a simple command-line
+      interface for interacting with these services, but the basic idea
+      could be used in other contexts, like building a system for
+      managing web services.
     </para>
     <para>
       The following is a first attempt at an interface for our
@@ -15307,7 +15600,7 @@ end
         for a given type will call out to the comparison functions for
         its component types. As a result, the <literal>foo</literal>
         field will be compared using <literal>Int.Set.compare</literal>.
-        This is different, and sander, than the structural comparison
+        This is different, and saner, than the structural comparison
         done by polymorphic compare.
       </para>
       <para>
