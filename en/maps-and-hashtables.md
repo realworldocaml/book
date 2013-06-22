@@ -538,7 +538,7 @@ definition.  Using it, we can rewrite the above example as follows.
 The comparison function created by `comparelib` for a given type will
 call out to the comparison functions for its component types.  As a
 result, the `foo` field will be compared using `Int.Set.compare`.
-This is different, and sander, than the structural comparison done by
+This is different, and saner, than the structural comparison done by
 polymorphic compare.  
 
 If you want your comparison function to behave in a specific way, you
