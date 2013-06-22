@@ -9,7 +9,7 @@ textarea,
 input {
     font-family: "Domine", serif;
     font-size: 14px;
-    color: #4E443C;
+    color: #000000;
 }
 
 body {
@@ -60,7 +60,7 @@ body {
 .navigation > ul > li:first-child > a:hover {
     font-size: 17px;
     border-bottom: 1px #8E8880 solid;
-    color: #4E443C;
+    color: #000000;
     display: table;
     padding-bottom: 1px;
 }
@@ -73,7 +73,7 @@ body {
 }
 
 .navigation a {
-    color: #4E443C;
+    color: #000000;
     font-weight: bold;
     display: block;
 }
@@ -244,7 +244,7 @@ a > img {
 .pagination a {
     position: absolute;
     top: 0;
-    color: #4E443C;
+    color: #000000;
     font-weight: bold;
 }
 
