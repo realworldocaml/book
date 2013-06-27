@@ -91,7 +91,7 @@ at you.
 - After evaluating an expression, the toplevel prints both the type of
   the result and the result itself.
 - Function arguments are separated by spaces, instead of by
-  parenthesis and commas, which is more like the UNIX shell than C or
+  parentheses and commas, which is more like the UNIX shell than C or
   Java.
 - OCaml allows you to place underscores in the middle of your integer
   literals, as a way of improving readability.  Note that underscores
@@ -259,7 +259,7 @@ As an example, let's walk through the process of inferring the type of
   input type of `test` must be `int`.
 - `test first` is used as the condition in an `if` statement, so the
   return type of `test` must be `bool`.
-- The fact that `+` returns an int implies that the return value of
+- The fact that `+` returns `int` implies that the return value of
   `sum_if_true` must be int.
 
 Together, that nails down the types of all the variables, which
@@ -310,10 +310,11 @@ we look at the type returned by the toplevel:
 val first_if_true : ('a -> bool) -> 'a -> 'a -> 'a = <fun>
 ```
 
-we see that rather than choose a single concrete type, OCaml has
-introduced a _type variable_ `'a` to express that the type is generic.
-In particular, the type of the `test` argument is `('a -> bool)`,
-which means that test is a one-argument function whose return value is
+Rather than choose a single concrete type, OCaml has introduced a
+_type variable_ `'a` to express that the type is generic.  (You can
+tell it's a type variable by the leading single-quote.)  In
+particular, the type of the `test` argument is `('a -> bool)`, which
+means that test is a one-argument function whose return value is
 `bool`, and whose argument could be of any type `'a`.  But, whatever
 type `'a` is, it has to be the same as the type of the other two
 arguments, `x` and `y`, and of the return value of `first_if_true`.
@@ -1148,16 +1149,21 @@ reimplement the `ref` type and all of these operators in just a few
 lines of code.
 
 ```ocaml
-type 'a ref = { mutable contents : 'a }
+# type 'a ref = { mutable contents : 'a }
 
-let ref x = { contents = x }
-let (!) r = r.contents
-let (:=) r x = r.contents <- x
+  let ref x = { contents = x }
+  let (!) r = r.contents
+  let (:=) r x = r.contents <- x
+  ;;
+type 'a ref = { mutable contents : 'a; }
+val ref : 'a -> 'a ref = <fun>
+val ( ! ) : 'a ref -> 'a = <fun>
+val ( := ) : 'a ref -> 'a -> unit = <fun>
 ```
 
 The `'a` before the ref indicates that the `ref` type is polymorphic,
 in the same way that lists are polymorphic, meaning it can contain
-values of any type.  The parenthesis around `!` and `:=` are needed
+values of any type.  The parentheses around `!` and `:=` are needed
 because these are operators, rather than ordinary functions.
 
 Even though a `ref` is just another record type, it's important
@@ -1186,14 +1192,15 @@ as our source of randomness.  `Random` starts with a default seed, but
 you can call `Random.self_init` to choose a new seed at random.
 
 ```ocaml
-# let permute ar =
-    for i = 0 to Array.length ar - 2 do
+# let permute array =
+    let length = Array.length array in
+    for i = 0 to length - 2 do
        (* pick a j that is after i and before the end of the list *)
-       let j = i + 1 + Random.int (Array.length ar - i - 1) in
+       let j = i + 1 + Random.int (length - i - 1) in
        (* Swap i and j *)
-       let tmp = ar.(i) in
-       ar.(i) <- ar.(j);
-       ar.(j) <- tmp
+       let tmp = array.(i) in
+       array.(i) <- array.(j);
+       array.(j) <- tmp
     done
   ;;
 val permute : 'a array -> unit = <fun>
