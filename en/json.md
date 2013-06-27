@@ -34,18 +34,8 @@ key/value pairs, and an ordered list of values.  Values can be strings,
 booleans, floats, integers or null.  Let's see what a JSON record for
 an example book description looks like:
 
-```json
-{
-  "title": "Real World OCaml",
-  "tags" : [ "functional programming", "ocaml", "algorithms" ],
-  "pages": 450,
-  "authors": [
-    { "name": "Jason Hickey", "affiliation": "Google" },
-    { "name": "Anil Madhavapeddy", "affiliation": "Cambridge"},
-    { "name": "Yaron Minsky", "affiliation": "Jane Street"}
-  ],
-  "is_online": true
-}
+```frag
+((typ json)(name json/book.json))
 ```
 
 The outermost JSON value is usually a record (delimited by the curly
@@ -83,9 +73,8 @@ $ opam install yojson
 See [xref](#installation) for installation instructions if you haven't already
 got OPAM. Once installed, you can open it in the `utop` toplevel by:
 
-```
-#require "yojson" ;;
-open Yojson ;;
+```frag
+((typ ocamltop)(name json/install.topscript)(header false))
 ```
 
 </note>
@@ -96,15 +85,8 @@ The JSON specification has very few data types, and the
 `Yojson.Basic.json` type shown below is sufficient to express any
 valid JSON structure.
 
-```ocaml
-type json = [
-  | `Assoc of (string * json) list
-  | `Bool of bool
-  | `Float of float
-  | `Int of int
-  | `List of json list
-  | `Null
-  | `String of string ]
+```frag
+((typ ocaml)(name json/yojson_basic.mli)(part 0))
 ```
 
 Some interesting properties should leap out at you after reading this
@@ -127,18 +109,8 @@ Let's parse the earlier JSON example into this type now.  The first
 stop is the `Yojson.Basic` documentation, where we find these helpful
 functions:
 
-```ocaml
-val from_string : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> string -> json
-(* Read a JSON value from a string.
-   [buf]   : use this buffer at will during parsing instead of
-             creating a new one. 
-   [fname] : data file name to be used in error messages. It does not 
-             have to be a real file. 
-   [lnum]  : number of the first line of input. Default is 1. *)
-
-val from_file : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> string -> json
-(* Read a JSON value from a file. See [from_string] for the meaning of the optional
-   arguments. *)
+```frag
+((typ ocaml)(name json/yojson_basic.mli)(part 1))
 ```
 
 When first reading these interfaces, you can generally ignore the
@@ -152,9 +124,8 @@ The type signature for these functions with the optional elements removed makes
 their purpose much clearer.  The two ways of parsing the JSON are either
 directly from a string or from a file on a filesystem.
 
-```ocaml
-val from_string : string -> json
-val from_file : string -> json
+```frag
+((typ ocaml)(name json/yojson_basic_simple.mli))
 ```
 
 <note>
@@ -174,39 +145,18 @@ ignore them and use strings or files instead.
 
 </note>
 
-
 The next example shows both the string and file functions in action, assuming
 the JSON record is stored in a file called `book.json`.
 
-```ocaml
-(* read_json.ml *)
-open Core.Std
-
-let () =
-  (* Read JSON file into an OCaml string *)
-  let buf = In_channel.read_all "book.json" in
-
-  (* Use the string JSON constructor *)
-  let json1 = Yojson.Basic.from_string buf in
-
-  (* Use the file JSON constructor *)
-  let json2 = Yojson.Basic.from_file "book.json" in
-
-  (* Test that the two values are the same *)
-  print_endline (if json1 = json2 then "OK" else "FAIL")
+```frag
+((typ ocaml)(name json/read_json.ml))
 ```
 
 You can build this by writing a `_tags` file to define the package
 dependencies, and then running `ocamlbuild`.
 
-```console
-$ cat _tags
-true: package(core,yojson)
-true: thread, debug, annot
-
-$ ocamlbuild -use-ocamlfind read_json.native
-$ ./read_json.native
-OK
+```frag
+((typ console)(name json/run_read_json.out))
 ```
 
 The `from_file` function accepts an input filename and takes care of
@@ -223,48 +173,15 @@ Now that we've figured out how to parse the example JSON into an OCaml
 value, let's manipulate it from OCaml code and extract specific
 fields.
 
-```ocaml
-(* parse_book.ml *)
-open Core.Std
-
-let () =
-  (* Read the JSON file *)
-  let json = Yojson.Basic.from_file "book.json" in
-
-  (* Locally open the JSON manipulation functions *)
-  let open Yojson.Basic.Util in
-  let title = json |> member "title" |> to_string in
-  let tags = json |> member "tags" |> to_list |> filter_string in
-  let pages = json |> member "pages" |> to_int in
-  let is_online = json |> member "is_online" |> to_bool_option in
-  let is_translated = json |> member "is_translated" |> to_bool_option in
-  let authors = json |> member "authors" |> to_list in
-  let names = List.map authors ~f:(fun json -> member "name" json |> to_string) in
-
-  (* Print the results of the parsing *)
-  printf "Title: %s (%d)\n" title pages;
-  printf "Authors: %s\n" (String.concat ~sep:", " names);
-  printf "Tags: %s\n" (String.concat ~sep:", " tags);
-  let string_of_bool_option =
-    function
-    | None -> "<none>"
-    | Some true -> "yes"
-    | Some false -> "no" in
-  printf "Online: %s\n" (string_of_bool_option is_online);
-  printf "Translated: %s\n" (string_of_bool_option is_translated)
+```frag
+((typ ocaml)(name json/parse_book.ml))
 ```
 
 Build this with the same `_tags` file as the earlier example, and run
 `ocamlbuild` on the new file.
 
-```console
-$ ocamlbuild -use-ocamlfind parse_book.native
-$ ./parse_book.native 
-Title: Real World OCaml (450)
-Authors: Jason Hickey, Anil Madhavapeddy, Yaron Minsky
-Tags: functional programming, ocaml, algorithms
-Online: yes
-Translated: <none>
+```frag
+((typ console)(name json/run_parse_book.out))
 ```
 
 This code introduces the `Yojson.Basic.Util` module, which contains _combinator_

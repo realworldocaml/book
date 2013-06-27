@@ -12,6 +12,7 @@
             <header class="header">
                 <h1><img src="media/img/header.png" width="213" height="59" alt="Real World OCaml, by Jason Hickey, Anil Madhavapeddy and Yaron Minsky" /></h1>
                 <h1><img src="media/img/oreilly-cover.gif" alt="OReilly" /></h1>
+                <p><a href="http://twitter.com/realworldocaml">@realworldocaml</a><br /><a href="http://twitter.com/avsm">@avsm</a><br /><a href="http://twitter.com/yminsky">@yminsky</a><br /><a href="https://plus.google.com/111219778721183890368">@hickey</a></p>
             </header>
             <article class="page">
                 <h1>Welcome</h1>
@@ -20,6 +21,13 @@
                    place for proof-readers to give us online comments of the book ahead of its release later in 2013.</p>
                 <p>We are developing the book via a series of <a href="#milestones">milestones</a> as we finish chapters.  The alpha milestones are for a
                    closed set of reviewers, and the beta milestones are for public review by the community. See the <a href="#faq">FAQ</a> for commonly asked questions.</p>
+
+                <h2>News</h2>
+                <ul>
+                 <li><i>19th June 2013:</i> Site is now SSL-only. No auth tokens are ever sent in the clear, and are only stored client-side in your browser.</li>
+                 <li><i>17th June 2013:</i> Blog (Anil): <a href="http://anil.recoil.org/2013/06/17/real-world-ocaml-beta-available.html">Real World OCaml beta available</a>.</li>
+                 <li><i>17th June 2013:</i> Public beta1 milestone released. (<a href="https://news.ycombinator.com/item?id=3641355">HN#1</a>, <a href="https://news.ycombinator.com/item?id=5893168">HN#2</a>, <a href="http://www.reddit.com/r/programming/comments/1gipea/first_public_beta_of_real_world_ocaml_book/">reddit#1</a>, <a href="http://www.reddit.com/r/ocaml/comments/1gil84/public_beta_of_real_world_ocaml/">reddit#2</a>).</li>
+                </ul>
 
                 <a name="milestones"></a>
                 <h1>Milestones</h1>
@@ -59,13 +67,13 @@
                   
                  <p><b>What license is the book released under?</b></p>
                  <p>The online HTML version of the book is available under a <a href="http://creativecommons.org/licenses/by-nc-nd/3.0/us/">Creative Commons Attribution- Noncommercial-No Derivative Works 3.0 United States License</a>, which means that you are welcome to copy, distribute and transmit the work, but must give us attribution, not create derived works from it, or use it directly for commercial purposes (it's fine to use to within your workplace to learn OCaml, of course, but not to re-sell the book directly.</p>
-                 <p>We'd like to thank O'Reilly for their generosity in allowing this online version to be available freely.  Of course, we encourage you to also purchase a copy of the book from them.  The O'Reilly production team is doing a tremendous job of typesetting and editing the print version of the book into a beautiful edition that's worth of a place on your shelf.</p>
+                 <p>We'd like to thank O'Reilly for their generosity in allowing this online version to be available freely.  Of course, we encourage you to also purchase a copy of the book from them.  The O'Reilly production team is doing a tremendous job of typesetting and editing the print version of the book into a beautiful edition that's worthy of a place on your shelf.</p>
 
                  <p><b>Can I get a PDF or e-book of the beta?</b></p>
                  <p>O'Reilly is making the book available under their <a href="http://shop.oreilly.com/category/roughcuts.do">Rough Cuts</a> program.  You will get regular updates to all the beta milestones in PDF or e-book formats if you purchase it there.</p>
 
                  <p><b>Is the source code to the website commenting system available?</b></p>
-                 <p>It's not right now, but only because the authors are so busy finishing the book.  Anil is planning to tidy up the toolchain and open-source it just as soon as he finds time.  All the libraries used to build it, such as <a href="http://github.com/mirage/ocaml-cohttp">ocaml-cohttp</a> or <a href="http://github.com/avsm/ocaml-github">ocaml-github</a> are already all available via OPAM.</p>
+                 <p>It's not right now, but only because the authors are so busy finishing the book.  Anil is planning to tidy up the toolchain and open-source it just as soon as he finds time.  All the libraries used to build it, such as <a href="http://github.com/mirage/ocaml-cohttp">ocaml-cohttp</a> or <a href="http://github.com/avsm/ocaml-github">ocaml-github</a> are already all available via <a href="http://opam.ocamlpro.com">OPAM</a>.</p>
 
                 <p>If you have any questions about all this, please get in touch with <a href="mailto:anil@recoil.org">Anil Madhavapeddy</a>.
             </article>

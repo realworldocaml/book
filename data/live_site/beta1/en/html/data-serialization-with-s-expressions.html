@@ -1,0 +1,674 @@
+<html>
+
+    <head>
+    
+        <meta charset="utf-8"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW"/>
+        
+        <title>Chapter 17. Data Serialization with S-Expressions / Real World OCaml</title>
+        
+        <link rel="stylesheet" href="../../media/css/main.css"/>
+        
+        <script src="../../media/js/require.js" data-main="../../media/js/main.js"> </script>
+        <script>
+            require.config({
+                config: {
+                    gitHub: {
+                        user: 'ocamllabs',
+                        repo: 'rwo\u002Dcomments',
+                        milestone: 'beta1',
+                        page: 'data\u002Dserialization\u002Dwith\u002Ds\u002Dexpressions.html'
+                    }
+                }
+            });
+        </script>
+        
+    
+    </head>
+    
+    <body>
+    
+        <div class="body">
+        
+            <header class="header">
+                <h1><img src="../../media/img/header.png" width="213" height="59" alt="Real World OCaml, by Jason Hickey, Anil Madhavapeddy and Yaron Minsky"/></h1>
+            </header>
+    
+            <nav class="navigation">
+                <ul>
+                    <li>
+                        <a href="index.html">Table of Contents</a>
+                    </li>
+                    
+                        <li>
+                            <a href="prologue.html">Prologue</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt01.html">I. Language Concepts</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt02.html">II. Tools and Techniques</a>
+                            
+                                 
+                                    <ul>
+                                        
+                                            <li>
+                                                <a href="maps-and-hashtables.html">13. Maps and Hashtables</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="command-line-parsing.html">14. Command Line Parsing</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="handling-json-data.html">15. Handling JSON data</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="parsing-with-ocamllex-and-menhir.html">16. Parsing with OCamllex and Menhir</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="data-serialization-with-s-expressions.html" class="here">17. Data Serialization with S-Expressions</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="concurrent-programming-with-async.html">18. Concurrent Programming with Async</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="fast-binary-serialization.html">19. Fast Binary Serialization</a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt03.html">III. The Runtime System</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="installation.html">A. Installation</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="packaging.html">B. Packaging</a>
+                            
+                                
+                            
+                        </li>
+                    
+                </ul>
+            </nav>
+        
+            <article class="page">
+        
+                <h1>Chapter 17. Data Serialization with S-Expressions</h1>
+                
+                
+
+    <p id="idp10883696">
+    We've already shown you how to parse third-party data formats into
+    OCaml in earlier chapters. Sometimes though, you just want to
+    quickly convert an OCaml type to and from a human-readable and
+    editable form in your own code, and not worry about
+    interoperability. Core's solution to this problem is to use
+    s-expressions.
+  </p><p id="idp10884448">
+    S-expressions are nested parenthetical expressions whose atomic
+    values are strings. They were first popularized by the Lisp
+    programming language in the 1960s, and have remained one of the
+    simplest and most effective ways to encode structured data. There's
+    a full definition of them available
+    <a href="http://people.csail.mit.edu/rivest/Sexp.txt" target="_top">online</a>.
+  </p><p id="idp10885920">
+    An example s-expression might look like this:
+  </p><div class="highlight"><pre><span class="p">(</span><span class="nf">this</span> <span class="p">(</span><span class="nf">is</span> <span class="nv">an</span><span class="p">)</span> <span class="p">(</span><span class="nf">s</span> <span class="nv">expression</span><span class="p">))</span>
+</pre></div><p id="idp10887344">
+    The OCaml type of an s-expression is quite simple:
+  </p><div class="highlight"><pre><span class="k">module</span> <span class="nc">Sexp</span> <span class="o">:</span> <span class="k">sig</span>
+  <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="nc">Atom</span> <span class="k">of</span> <span class="kt">string</span> <span class="o">|</span> <span class="nc">List</span> <span class="k">of</span> <span class="n">t</span> <span class="kt">list</span>
+<span class="k">end</span>
+</pre></div><p id="idp10888816">
+    An s-expression can be thought of as a tree where each node contains
+    a list of its children, and where the leaves of the tree are
+    strings.
+  </p><p id="idp10889376">
+    The <code>Sexp</code> module in Core comes with functionality
+    for parsing and printing s-expressions.
+  </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">sexp</span> <span class="o">=</span>
+    <span class="k">let</span> <span class="n">a</span> <span class="n">x</span> <span class="o">=</span> <span class="nn">Sexp</span><span class="p">.</span><span class="nc">Atom</span> <span class="n">x</span> <span class="ow">and</span> <span class="n">l</span> <span class="n">x</span> <span class="o">=</span> <span class="nn">Sexp</span><span class="p">.</span><span class="nc">List</span> <span class="n">x</span> <span class="k">in</span>
+    <span class="n">l</span> <span class="o">[</span><span class="n">a</span> <span class="s2">&quot;this&quot;</span><span class="o">;</span><span class="n">l</span> <span class="o">[</span><span class="n">a</span> <span class="s2">&quot;is&quot;</span><span class="o">;</span> <span class="n">a</span> <span class="s2">&quot;an&quot;</span><span class="o">];</span> <span class="n">l</span> <span class="o">[</span><span class="n">a</span> <span class="s2">&quot;s&quot;</span><span class="o">;</span> <span class="n">a</span> <span class="s2">&quot;expression&quot;</span><span class="o">]];;</span>
+<span class="k">val</span> <span class="n">sexp</span> <span class="o">:</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">(</span><span class="n">this</span> <span class="o">(</span><span class="n">is</span> <span class="n">an</span><span class="o">)</span> <span class="o">(</span><span class="n">s</span> <span class="n">expression</span><span class="o">))</span>
+</pre></div><p id="idp10891936">
+    In addition, most of the base types in Core support conversion to
+    and from s-expressions. For example, we can write:
+  </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Int</span><span class="p">.</span><span class="n">sexp_of_t</span> <span class="mi">3</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">sexp_of_t</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="o">(</span><span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="nn">List</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="n">sexp_of_t</span> <span class="nn">Int</span><span class="p">.</span><span class="n">sexp_of_t</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">];;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">(</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span><span class="o">)</span>
+</pre></div><p id="idp10893792">
+    Notice that <code>List.sexp_of_t</code> is polymorphic, and
+    takes as its first argument another conversion function to handle
+    the elements of the list to be converted. Core uses this scheme more
+    generally for defining sexp-converters for polymorphic types.
+  </p><p id="idp10895152">
+    But what if you want a function to convert some brand new type to an
+    s-expression? You can of course write it yourself manually:
+  </p><div class="highlight"><pre><span class="o">#</span> <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">{</span> <span class="n">foo</span><span class="o">:</span> <span class="kt">int</span><span class="o">;</span> <span class="n">bar</span><span class="o">:</span> <span class="kt">float</span> <span class="o">};;</span>
+<span class="o">#</span> <span class="k">let</span> <span class="n">sexp_of_t</span> <span class="n">t</span> <span class="o">=</span>
+    <span class="k">let</span> <span class="n">a</span> <span class="n">x</span> <span class="o">=</span> <span class="nn">Sexp</span><span class="p">.</span><span class="nc">Atom</span> <span class="n">x</span> <span class="ow">and</span> <span class="n">l</span> <span class="n">x</span> <span class="o">=</span> <span class="nn">Sexp</span><span class="p">.</span><span class="nc">List</span> <span class="n">x</span> <span class="k">in</span>
+    <span class="n">l</span> <span class="o">[</span> <span class="n">l</span> <span class="o">[</span><span class="n">a</span> <span class="s2">&quot;foo&quot;</span><span class="o">;</span> <span class="nn">Int</span><span class="p">.</span><span class="n">sexp_of_t</span> <span class="n">t</span><span class="o">.</span><span class="n">foo</span>  <span class="o">];</span>
+        <span class="n">l</span> <span class="o">[</span><span class="n">a</span> <span class="s2">&quot;bar&quot;</span><span class="o">;</span> <span class="nn">Float</span><span class="p">.</span><span class="n">sexp_of_t</span> <span class="n">t</span><span class="o">.</span><span class="n">bar</span><span class="o">];</span> <span class="o">]</span>
+  <span class="o">;;</span>
+<span class="k">val</span> <span class="n">sexp_of_t</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="nn">Core</span><span class="p">.</span><span class="nn">Std</span><span class="p">.</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="n">sexp_of_t</span> <span class="o">{</span> <span class="n">foo</span> <span class="o">=</span> <span class="mi">3</span><span class="o">;</span> <span class="n">bar</span> <span class="o">=</span> <span class="o">-</span><span class="mi">5</span><span class="o">.</span><span class="mi">5</span> <span class="o">};;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="nn">Core</span><span class="p">.</span><span class="nn">Std</span><span class="p">.</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">((</span><span class="n">foo</span> <span class="mi">3</span><span class="o">)</span> <span class="o">(</span><span class="n">bar</span> <span class="o">-</span><span class="mi">5</span><span class="o">.</span><span class="mi">5</span><span class="o">))</span>
+</pre></div><p id="idp10897296">
+    This is somewhat tiresome to write, and it gets more so when you
+    consider the parser, <span><em>i.e.</em></span>,
+    <code>t_of_sexp</code>, which is considerably more complex.
+    Writing this kind of parsing and printing code by hand is mechanical
+    and error prone, not to mention a drag.
+  </p><p id="idp10899104">
+    Given how mechanical the code is, you could imagine writing a
+    program that inspected the type definition and auto-generated the
+    conversion code for you. As it turns out, we can do just that using
+    <code>Sexplib</code>. The <code>Sexplib</code> package,
+    which is included with Core, provides both a library for
+    manipulating s-expressions and a syntax extension for generating
+    such conversion functions. With that syntax extension enabled, any
+    type that has <code>with sexp</code> as an annotation will
+    trigger the generation of the functions we want for free.
+  </p><div class="highlight"><pre><span class="o">#</span> <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">{</span> <span class="n">foo</span><span class="o">:</span> <span class="kt">int</span><span class="o">;</span> <span class="n">bar</span><span class="o">:</span> <span class="kt">float</span> <span class="o">}</span> <span class="k">with</span> <span class="n">sexp</span><span class="o">;;</span>
+<span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">{</span> <span class="n">foo</span> <span class="o">:</span> <span class="kt">int</span><span class="o">;</span> <span class="n">bar</span> <span class="o">:</span> <span class="kt">float</span><span class="o">;</span> <span class="o">}</span>
+<span class="k">val</span> <span class="n">t_of_sexp__</span> <span class="o">:</span> <span class="nn">Sexplib</span><span class="p">.</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="k">val</span> <span class="n">t_of_sexp</span> <span class="o">:</span> <span class="nn">Sexplib</span><span class="p">.</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="k">val</span> <span class="n">sexp_of_t</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="nn">Sexplib</span><span class="p">.</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="n">t_of_sexp</span> <span class="o">(</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">of_string</span> <span class="s2">&quot;((bar 35) (foo 3))&quot;</span><span class="o">);;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="n">t</span> <span class="o">=</span> <span class="o">{</span><span class="n">foo</span> <span class="o">=</span> <span class="mi">3</span><span class="o">;</span> <span class="n">bar</span> <span class="o">=</span> <span class="mi">35</span><span class="o">.}</span>
+</pre></div><p id="idp10903632">
+    The <code>with sexp</code> is detected by a
+    <code>Sexplib</code> syntax extension and replaced with the
+    extra conversion functions you see above. You can ignore
+    <code>t_of_sexp__</code>, which is a helper function that is
+    needed in very rare cases.
+  </p><p id="idp10906352">
+    The syntax extensions in Core almost all have this same basic
+    structure: they auto-generate code based on type definitions,
+    implementing functionality that you could in theory have implemented
+    by hand, but with far less programmer effort.
+  </p><aside class="note"><h1>
+  The camlp4 preprocessor and
+  type_conv
+</h1><p id="idp10909088">
+    OCaml doesn't directly support converting static type definitions to
+    and from other data formats. Instead, it supplies a powerful syntax
+    extension mechanism known as <code>camlp4</code>. This lets
+    you extend the grammar of the language to mark types as requiring
+    special action, and then mechanically generate boilerplate code over
+    those types (such as converting to and from other data formats).
+  </p><p id="idp10910592">
+    Many of the examples in the subsequent chapters depend on
+    <code>camlp4</code>, but the examples all invoke it
+    automatically for you via the <code>-pp</code> flag to the
+    OCaml compiler. If you're interested in building your own
+    generators, investigate the <code>type_conv</code> library
+    which provides the basic extension mechanism used by the rest of
+    this chapter.
+  </p></aside><section><h1 id="the-sexp-format">The Sexp format</h1><p id="idp10914688">
+      The textual representation of s-expressions is pretty
+      straightforward. An s-expression is written down as a nested
+      parenthetical expression, with whitespace-separated strings as the
+      atoms. Quotes are used for atoms that contain parenthesis or
+      spaces themselves; backslash is the escape character; and
+      semicolons are used to introduce single-line comments. Thus, the
+      following file, <code>example.scm</code>:
+    </p><div class="highlight"><pre><span class="c1">;; example.scm</span>
+
+<span class="p">((</span><span class="nf">foo</span> <span class="mf">3.3</span><span class="p">)</span> <span class="c1">;; This is a comment</span>
+ <span class="p">(</span><span class="nf">bar</span> <span class="s">&quot;this is () an \&quot; atom&quot;</span><span class="p">))</span>
+</pre></div><p id="idp10917296">
+      can be loaded using sexplib. As you can see, the commented data is
+      not part of the resulting s-expression.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">load_sexp</span> <span class="s2">&quot;example.scm&quot;</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="nn">Core</span><span class="p">.</span><span class="nn">Std</span><span class="p">.</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">((</span><span class="n">foo</span> <span class="mi">3</span><span class="o">.</span><span class="mi">3</span><span class="o">)</span> <span class="o">(</span><span class="n">bar</span> <span class="s2">&quot;this is () an </span><span class="se">\&quot;</span><span class="s2"> atom&quot;</span><span class="o">))</span>
+</pre></div><p id="idp10918928">
+      All in, the s-expression format actually supports three comment
+      syntaxes:
+    </p><ul><li><p id="idp10919936">
+<code>;</code>, which comments out everything to the end
+          of a line
+        </p></li><li><p id="idp10921440">
+<code>#|</code> and <code>|#</code>, which are
+          delimiters for commenting out a block
+        </p></li><li><p id="idp10923632">
+<code>#;</code>, which comments out the first complete
+          s-expression that follows.
+        </p></li></ul><p id="idp10925072">
+      The following example shows all of these in action.
+    </p><div class="highlight"><pre><span class="c1">;; comment_heavy_example.scm</span>
+<span class="p">((</span><span class="nf">this</span> <span class="nv">is</span> <span class="nv">included</span><span class="p">)</span>
+ <span class="c1">; (this is commented out</span>
+ <span class="p">(</span><span class="nf">this</span> <span class="nv">stays</span><span class="p">)</span>
+ <span class="o">#</span><span class="c1">; (all of this is commented</span>
+     <span class="nv">out</span> <span class="p">(</span><span class="nf">even</span> <span class="nv">though</span> <span class="nv">it</span> <span class="nv">crosses</span> <span class="nv">lines</span><span class="o">.</span><span class="p">))</span>
+  <span class="p">(</span><span class="k">and </span><span class="o">#</span><span class="nv">|</span> <span class="nv">block</span> <span class="nv">delimiters</span> <span class="o">#</span><span class="nv">|</span> <span class="nv">which</span> <span class="nv">can</span> <span class="nv">be</span> <span class="nv">nested</span> <span class="o">#</span><span class="nv">|</span>
+     <span class="nv">will</span> <span class="nv">comment</span> <span class="nv">out</span>
+    <span class="nv">an</span> <span class="nv">arbitrary</span> <span class="nv">multi-line</span> <span class="nv">block</span><span class="p">)))</span> <span class="nv">|</span><span class="o">#</span>
+   <span class="nv">now</span> <span class="nv">we</span><span class="ss">'re</span> <span class="nv">done</span>
+   <span class="p">))</span>
+</pre></div><p id="idp10926784">
+      Again, loading the file as an s-expression drops the comments.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">load_sexp</span> <span class="s2">&quot;comment_heavy_example.scm&quot;</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="nn">Core</span><span class="p">.</span><span class="nn">Std</span><span class="p">.</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">((</span><span class="n">this</span> <span class="n">is</span> <span class="n">included</span><span class="o">)</span> <span class="o">(</span><span class="n">this</span> <span class="n">stays</span><span class="o">)</span> <span class="o">(</span><span class="ow">and</span> <span class="n">now</span> <span class="n">we're</span> <span class="k">done</span><span class="o">))</span>
+</pre></div><p id="idp10928336">
+      Note that the comments were dropped from the file upon reading.
+      This is expected, since there's no place in the
+      <code>Sexp.t</code> type to store comments.
+    </p><p id="idp10929600">
+      If we introduce an error into our s-expression, by, say, deleting
+      the open-paren in front of <code>bar</code>, we'll get a
+      parse error:
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Exn</span><span class="p">.</span><span class="n">handle_uncaught</span> <span class="o">~</span><span class="n">exit</span><span class="o">:</span><span class="bp">false</span> <span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span>
+    <span class="n">ignore</span> <span class="o">(</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">load_sexp</span> <span class="s2">&quot;example.scm&quot;</span><span class="o">));;</span>
+  <span class="nc">Uncaught</span> <span class="k">exception</span><span class="o">:</span>
+
+  <span class="o">(</span><span class="nn">Sexplib</span><span class="p">.</span><span class="nn">Sexp</span><span class="p">.</span><span class="nc">Parse_error</span>
+   <span class="o">((</span><span class="n">location</span> <span class="n">parse</span><span class="o">)</span> <span class="o">(</span><span class="n">err_msg</span> <span class="s2">&quot;unexpected character: ')'&quot;</span><span class="o">)</span> <span class="o">(</span><span class="n">text_line</span> <span class="mi">4</span><span class="o">)</span>
+    <span class="o">(</span><span class="n">text_char</span> <span class="mi">29</span><span class="o">)</span> <span class="o">(</span><span class="n">global_offset</span> <span class="mi">94</span><span class="o">)</span> <span class="o">(</span><span class="n">buf_pos</span> <span class="mi">94</span><span class="o">)))</span>
+</pre></div><p id="idp10932160">
+      In the above, we use <code>Exn.handle_uncaught</code> to
+      make sure that the exception gets printed out in full detail. You
+      should generally wrap every Core program in this handler to get
+      good error messages for any unexpected exceptions.
+    </p></section><section><h1 id="sexp-converters">Sexp converters</h1><p id="idp10934672">
+      The most important functionality provided by Sexplib is the
+      auto-generation of converters for new types. We've seen a bit of
+      how this works already, but let's walk through a complete example.
+      Here's the source for the beginning of a library for representing
+      integer intervals.
+    </p><div class="highlight"><pre><span class="c">(* file: int_interval.ml *)</span>
+<span class="c">(* Module for representing closed integer intervals *)</span>
+
+<span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="c">(* Invariant: For any Range (x,y), y &gt;= x *)</span>
+<span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">|</span> <span class="nc">Range</span> <span class="k">of</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span>
+         <span class="o">|</span> <span class="nc">Empty</span>
+<span class="k">with</span> <span class="n">sexp</span>
+
+<span class="k">let</span> <span class="n">is_empty</span> <span class="o">=</span> <span class="k">function</span> <span class="nc">Empty</span> <span class="o">-&gt;</span> <span class="bp">true</span> <span class="o">|</span> <span class="nc">Range</span> <span class="o">_</span> <span class="o">-&gt;</span> <span class="bp">false</span>
+<span class="k">let</span> <span class="n">create</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">y</span> <span class="k">then</span> <span class="nc">Empty</span> <span class="k">else</span> <span class="nc">Range</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span><span class="n">y</span><span class="o">)</span>
+<span class="k">let</span> <span class="n">contains</span> <span class="n">i</span> <span class="n">x</span> <span class="o">=</span> <span class="k">match</span> <span class="n">i</span> <span class="k">with</span>
+   <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&gt;</span> <span class="bp">false</span>
+   <span class="o">|</span> <span class="nc">Range</span> <span class="o">(</span><span class="n">low</span><span class="o">,</span><span class="n">high</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">low</span> <span class="o">&amp;&amp;</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">high</span>
+</pre></div><p id="idp10936944">
+      We can now use this module as follows:
+    </p><div class="highlight"><pre><span class="c">(* file: test_interval.ml *)</span>
+
+<span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="k">let</span> <span class="n">intervals</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="k">module</span> <span class="nc">I</span> <span class="o">=</span> <span class="nc">Int_interval</span> <span class="k">in</span>
+  <span class="o">[</span> <span class="nn">I</span><span class="p">.</span><span class="n">create</span> <span class="mi">3</span> <span class="mi">4</span><span class="o">;</span>
+    <span class="nn">I</span><span class="p">.</span><span class="n">create</span> <span class="mi">5</span> <span class="mi">4</span><span class="o">;</span> <span class="c">(* should be empty *)</span>
+    <span class="nn">I</span><span class="p">.</span><span class="n">create</span> <span class="mi">2</span> <span class="mi">3</span><span class="o">;</span>
+    <span class="nn">I</span><span class="p">.</span><span class="n">create</span> <span class="mi">1</span> <span class="mi">6</span><span class="o">;</span>
+  <span class="o">]</span>
+
+<span class="k">let</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="n">intervals</span>
+  <span class="o">|&gt;</span> <span class="nn">List</span><span class="p">.</span><span class="n">sexp_of_t</span> <span class="nn">Int_interval</span><span class="p">.</span><span class="n">sexp_of_t</span>
+  <span class="o">|&gt;</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">to_string_hum</span>
+  <span class="o">|&gt;</span> <span class="n">print_endline</span>
+</pre></div><p id="idp10938768">
+      But we're still missing something: we haven't created an
+      <code>mli</code> signature for
+      <code>Int_interval</code> yet. Note that we need to
+      explicitly export the s-expression converters that were created
+      within the ml. If we don't:
+    </p><div class="highlight"><pre><span class="c">(* file: int_interval.mli *)</span>
+<span class="c">(* Module for representing closed integer intervals *)</span>
+
+<span class="k">type</span> <span class="n">t</span>
+
+<span class="k">val</span> <span class="n">is_empty</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="kt">bool</span>
+<span class="k">val</span> <span class="n">create</span> <span class="o">:</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="n">t</span>
+<span class="k">val</span> <span class="n">contains</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="o">-&gt;</span> <span class="kt">bool</span>
+</pre></div><p id="idp10941920">
+      then we'll get the following error:
+    </p><pre id="idp10942368">
+File &quot;test_interval.ml&quot;, line 15, characters 20-42:
+Error: Unbound value Int_interval.sexp_of_t
+Command exited with code 2.
+</pre><p id="idp10943376">
+      We could export the types by hand in the signature:
+    </p><div class="highlight"><pre><span class="k">type</span> <span class="n">t</span>
+<span class="k">val</span> <span class="n">sexp_of_t</span> <span class="o">:</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="n">t</span>
+<span class="k">val</span> <span class="n">t_of_sexp</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span>
+</pre></div><p id="idp10944848">
+      But Sexplib has a shorthand for this as well, so that we can just
+      use the same <code>with</code> shorthand in the
+      <code>mli</code>.
+    </p><div class="highlight"><pre><span class="k">type</span> <span class="n">t</span> <span class="k">with</span> <span class="n">sexp</span>
+</pre></div><p id="idp10947728">
+      at which point <code>test_interval.ml</code> will compile
+      again, and if we run it, we'll get the following output:
+    </p><pre id="idp10948928">
+$ ./test_interval.native
+((Range 3 4) Empty (Range 2 3) (Range 1 6))
+</pre><section><h1 id="preserving-invariants">Preserving invariants</h1><p id="idp10950768">
+        One easy mistake to make when dealing with sexp converters is to
+        ignore the fact that those converters can violate the invariants
+        of your code. For example, the <code>Int_interval</code>
+        module depends for the correctness of the
+        <code>is_empty</code> check on the fact that for any value
+        <code>Range (x,y)</code>, <code>y</code> is greater
+        than or equal to <code>x</code>. The
+        <code>create</code> function preserves this invariant, but
+        the <code>t_of_sexp</code> function does not.
+      </p><p id="idp10956448">
+        We can fix this problem by overriding the autogenerated function
+        and writing a custom sexp-converter that is based on the
+        auto-generated converter.
+      </p><div class="highlight"><pre><span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">|</span> <span class="nc">Range</span> <span class="k">of</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span>
+         <span class="o">|</span> <span class="nc">Empty</span>
+<span class="k">with</span> <span class="n">sexp</span>
+
+<span class="k">let</span> <span class="n">create</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span> <span class="k">if</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">y</span> <span class="k">then</span> <span class="nc">Empty</span> <span class="k">else</span> <span class="nc">Range</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span><span class="n">y</span><span class="o">)</span>
+
+<span class="k">let</span> <span class="n">t_of_sexp</span> <span class="n">sexp</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">t</span> <span class="o">=</span> <span class="n">t_of_sexp</span> <span class="n">sexp</span> <span class="k">in</span>
+  <span class="k">begin</span> <span class="k">match</span> <span class="n">t</span> <span class="k">with</span>
+  <span class="o">|</span> <span class="nc">Empty</span> <span class="o">-&gt;</span> <span class="bp">()</span>
+  <span class="o">|</span> <span class="nc">Range</span> <span class="o">(</span><span class="n">x</span><span class="o">,</span><span class="n">y</span><span class="o">)</span> <span class="o">-&gt;</span>
+    <span class="k">if</span> <span class="n">y</span> <span class="o">&lt;</span> <span class="n">x</span> <span class="k">then</span> <span class="n">of_sexp_error</span> <span class="s2">&quot;Upper and lower bound of Range swapped&quot;</span> <span class="n">sexp</span>
+  <span class="k">end</span><span class="o">;</span>
+  <span class="n">t</span>
+</pre></div><p id="idp10958528">
+        This trick of overriding an existing function definition with a
+        new one is perfectly acceptable in OCaml. Function definitions
+        are only recursive if the <code>rec</code> keyword is
+        specified, and so in this case the inner
+        <code>t_of_sexp</code> call will go to the earlier
+        auto-generated definition that resulted from the
+        <code>type t with sexp</code> definition.
+      </p><p id="idp10961360">
+        We call the function <code>of_sexp_error</code> to raise
+        an exception because that improves the error reporting that
+        Sexplib can provide when a conversion fails.
+      </p></section><section><h1 id="getting-good-error-messages">Getting good error messages</h1><p id="idp10963904">
+        There are two steps to deserializing a type from an
+        s-expression: first, converting the bytes in a file to an
+        s-expression, and the second, converting that s-expression into
+        the type in question. One problem with this is that it can be
+        hard to localize errors to the right place using this scheme.
+        Consider the following example:
+      </p><div class="highlight"><pre><span class="c">(* file: read_foo.ml *)</span>
+
+<span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">{</span> <span class="n">a</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span> <span class="n">b</span><span class="o">:</span> <span class="kt">int</span><span class="o">;</span> <span class="n">c</span><span class="o">:</span> <span class="kt">float</span> <span class="n">option</span> <span class="o">}</span> <span class="k">with</span> <span class="n">sexp</span>
+
+<span class="k">let</span> <span class="n">run</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">t</span> <span class="o">=</span>
+    <span class="nn">Sexp</span><span class="p">.</span><span class="n">load_sexp</span> <span class="s2">&quot;example.scm&quot;</span>
+    <span class="o">|&gt;</span> <span class="n">t_of_sexp</span>
+  <span class="k">in</span>
+  <span class="n">printf</span> <span class="s2">&quot;b is: %d</span><span class="se">\n</span><span class="s2">%!&quot;</span> <span class="n">t</span><span class="o">.</span><span class="n">b</span>
+
+<span class="k">let</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="nn">Exn</span><span class="p">.</span><span class="n">handle_uncaught</span> <span class="o">~</span><span class="n">exit</span><span class="o">:</span><span class="bp">true</span> <span class="n">run</span>
+</pre></div><p id="idp10965920">
+        If you were to run this on a malformatted file, say, this one:
+      </p><pre id="idp10966400">
+;; example.scm
+((a not-an-integer)
+ (b not-an-integer)
+ (c ()))
+</pre><p id="idp10967136">
+        you'll get the following error:
+      </p><pre id="idp10967584">
+read_foo $ ./read_foo.native
+Uncaught exception:
+
+  (Sexplib.Conv.Of_sexp_error
+   (Failure &quot;int_of_sexp: (Failure int_of_string)&quot;) not-an-integer)
+</pre><p id="idp10968448">
+        If all you have is the error message and the string, it's not
+        terribly informative. In particular, you know that the parsing
+        error-ed out on the atom &quot;not-an-integer&quot;, but you
+        don't know which one! In a large file, this kind of bad error
+        message can be pure misery.
+      </p><p id="idp10969200">
+        But there's hope! If we make small change to the
+        <code>run</code> function as follows:
+      </p><div class="highlight"><pre><span class="k">let</span> <span class="n">run</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">t</span> <span class="o">=</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">load_sexp_conv_exn</span> <span class="s2">&quot;example.scm&quot;</span> <span class="n">t_of_sexp</span> <span class="k">in</span>
+  <span class="n">printf</span> <span class="s2">&quot;b is: %d</span><span class="se">\n</span><span class="s2">%!&quot;</span> <span class="n">t</span><span class="o">.</span><span class="n">b</span>
+</pre></div><p id="idp10971568">
+        and run it again, we'll get the following much more helpful
+        error message:
+      </p><div class="highlight"><pre><span class="n">read_foo</span> <span class="o">$</span> <span class="o">./</span><span class="n">read_foo</span><span class="o">.</span><span class="n">native</span>
+<span class="nc">Uncaught</span> <span class="k">exception</span><span class="o">:</span>
+
+  <span class="o">(</span><span class="nn">Sexplib</span><span class="p">.</span><span class="nn">Conv</span><span class="p">.</span><span class="nc">Of_sexp_error</span>
+   <span class="o">(</span><span class="nn">Sexplib</span><span class="p">.</span><span class="nn">Sexp</span><span class="p">.</span><span class="nn">Annotated</span><span class="p">.</span><span class="nc">Conv_exn</span> <span class="n">example</span><span class="o">.</span><span class="n">scm</span><span class="o">:</span><span class="mi">3</span><span class="o">:</span><span class="mi">4</span>
+    <span class="o">(</span><span class="nc">Failure</span> <span class="s2">&quot;int_of_sexp: (Failure int_of_string)&quot;</span><span class="o">))</span>
+   <span class="n">not</span><span class="o">-</span><span class="n">an</span><span class="o">-</span><span class="n">integer</span><span class="o">)</span>
+</pre></div><p id="idp10973296">
+        In the above error, &quot;example.scm:3:4&quot; tells us that
+        the error occurred on &quot;example.scm&quot;, line 3, character
+        4, which is a much better start for figuring out what has gone
+        wrong.
+      </p></section></section><section><h1 id="sexp-conversion-directives">Sexp-conversion directives</h1><p id="idp10975760">
+      Sexplib supports a collection of directives for modifying the
+      default behavior of the auto-generated sexp-converters. These
+      directives allow you to customize the way in which types are
+      represented as s-expressions without having to write a custom
+      parser.
+    </p><section><h1 id="sexp_opaque"><code>sexp_opaque</code></h1><p id="idp10978000">
+        The most commonly used directive is
+        <code>sexp_opaque</code>, whose purpose is to mark a given
+        component of a type as being unconvertible. Anything marked with
+        <code>sexp_opaque</code> will be presented as the atom
+        <code>&lt;opaque&gt;</code> by the to-sexp converter, and
+        will trigger an exception from the from-sexp converter.
+      </p><p id="idp10980800">
+        Note that the type of a component marked as opaque doesn't need
+        to have a sexp-converter defined. Here, if we define a type
+        without a sexp-converter, and then try to use another type with
+        a sexp-converter, we'll error out:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">type</span> <span class="n">no_converter</span> <span class="o">=</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span><span class="o">;;</span>
+<span class="k">type</span> <span class="n">no_converter</span> <span class="o">=</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span>
+<span class="o">#</span> <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">{</span> <span class="n">a</span><span class="o">:</span> <span class="n">no_converter</span><span class="o">;</span> <span class="n">b</span><span class="o">:</span> <span class="kt">string</span> <span class="o">}</span> <span class="k">with</span> <span class="n">sexp</span><span class="o">;;</span>
+<span class="nc">Characters</span> <span class="mi">14</span><span class="o">-</span><span class="mi">26</span><span class="o">:</span>
+  <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">{</span> <span class="n">a</span><span class="o">:</span> <span class="n">no_converter</span><span class="o">;</span> <span class="n">b</span><span class="o">:</span> <span class="kt">string</span> <span class="o">}</span> <span class="k">with</span> <span class="n">sexp</span><span class="o">;;</span>
+                <span class="o">^^^^^^^^^^^^</span>
+<span class="nc">Error</span><span class="o">:</span> <span class="nc">Unbound</span> <span class="n">value</span> <span class="n">no_converter_of_sexp</span>
+</pre></div><p id="idp10982656">
+        But with <code>sexp_opaque</code>, we won't:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">{</span> <span class="n">a</span><span class="o">:</span> <span class="n">no_converter</span> <span class="n">sexp_opaque</span><span class="o">;</span> <span class="n">b</span><span class="o">:</span> <span class="kt">string</span> <span class="o">}</span> <span class="k">with</span> <span class="n">sexp</span><span class="o">;;</span>
+<span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">{</span> <span class="n">a</span> <span class="o">:</span> <span class="n">no_converter</span> <span class="nn">Core</span><span class="p">.</span><span class="nn">Std</span><span class="p">.</span><span class="n">sexp_opaque</span><span class="o">;</span> <span class="n">b</span> <span class="o">:</span> <span class="kt">string</span><span class="o">;</span> <span class="o">}</span>
+<span class="k">val</span> <span class="n">t_of_sexp__</span> <span class="o">:</span> <span class="nn">Sexplib</span><span class="p">.</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="k">val</span> <span class="n">t_of_sexp</span> <span class="o">:</span> <span class="nn">Sexplib</span><span class="p">.</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="k">val</span> <span class="n">sexp_of_t</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="nn">Sexplib</span><span class="p">.</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp10985072">
+        And if we now convert a value of this type to an s-expression,
+        we'll see the contents of field <code>a</code> marked as
+        opaque:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="n">sexp_of_t</span> <span class="o">{</span> <span class="n">a</span> <span class="o">=</span> <span class="o">(</span><span class="mi">3</span><span class="o">,</span><span class="mi">4</span><span class="o">);</span> <span class="n">b</span> <span class="o">=</span> <span class="s2">&quot;foo&quot;</span> <span class="o">};;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">((</span><span class="n">a</span> <span class="o">&lt;</span><span class="n">opaque</span><span class="o">&gt;)</span> <span class="o">(</span><span class="n">b</span> <span class="n">foo</span><span class="o">))</span>
+</pre></div></section><section><h1 id="sexp_list"><code>sexp_list</code></h1><p id="idp10989056">
+        Sometimes, sexp-converters have more parentheses than one would
+        ideally like. Consider, for example, the following variant type:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">type</span> <span class="n">compatible_versions</span> <span class="o">=</span> <span class="o">|</span> <span class="nc">Specific</span> <span class="k">of</span> <span class="kt">string</span> <span class="kt">list</span>
+                             <span class="o">|</span> <span class="nc">All</span>
+  <span class="k">with</span> <span class="n">sexp</span><span class="o">;;</span>
+<span class="o">#</span> <span class="n">sexp_of_compatible_versions</span> <span class="o">(</span><span class="nc">Specific</span> <span class="o">[</span><span class="s2">&quot;3.12.0&quot;</span><span class="o">;</span> <span class="s2">&quot;3.12.1&quot;</span><span class="o">;</span> <span class="s2">&quot;3.13.0&quot;</span><span class="o">]);;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">(</span><span class="nc">Specific</span> <span class="o">(</span><span class="mi">3</span><span class="o">.</span><span class="mi">12</span><span class="o">.</span><span class="mi">0</span> <span class="mi">3</span><span class="o">.</span><span class="mi">12</span><span class="o">.</span><span class="mi">1</span> <span class="mi">3</span><span class="o">.</span><span class="mi">13</span><span class="o">.</span><span class="mi">0</span><span class="o">))</span>
+</pre></div><p id="idp10990848">
+        You might prefer to make the syntax a bit less parenthesis-laden
+        by dropping the parentheses around the list.
+        <code>sexp_list</code> gives us this alternate syntax:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">type</span> <span class="n">compatible_versions</span> <span class="o">=</span> <span class="o">|</span> <span class="nc">Specific</span> <span class="k">of</span> <span class="kt">string</span> <span class="n">sexp_list</span>
+                             <span class="o">|</span> <span class="nc">All</span>
+  <span class="k">with</span> <span class="n">sexp</span><span class="o">;;</span>
+<span class="o">#</span> <span class="n">sexp_of_compatible_versions</span> <span class="o">(</span><span class="nc">Specific</span> <span class="o">[</span><span class="s2">&quot;3.12.0&quot;</span><span class="o">;</span> <span class="s2">&quot;3.12.1&quot;</span><span class="o">;</span> <span class="s2">&quot;3.13.0&quot;</span><span class="o">]);;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">(</span><span class="nc">Specific</span> <span class="mi">3</span><span class="o">.</span><span class="mi">12</span><span class="o">.</span><span class="mi">0</span> <span class="mi">3</span><span class="o">.</span><span class="mi">12</span><span class="o">.</span><span class="mi">1</span> <span class="mi">3</span><span class="o">.</span><span class="mi">13</span><span class="o">.</span><span class="mi">0</span><span class="o">)</span>
+</pre></div></section><section><h1 id="sexp_option"><code>sexp_option</code></h1><p id="idp10995040">
+        Another common directive is <code>sexp_option</code>,
+        which is used to to make a record field optional in the
+        s-expression. Normally, optional values are represented either
+        as <code>()</code> for <code>None</code>, or as
+        <code>(x)</code> for <code>Some x</code>, and a
+        record field containing an option would be rendered accordingly.
+        For example:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">{</span> <span class="n">a</span><span class="o">:</span> <span class="kt">int</span> <span class="n">option</span><span class="o">;</span> <span class="n">b</span><span class="o">:</span> <span class="kt">string</span> <span class="o">}</span> <span class="k">with</span> <span class="n">sexp</span><span class="o">;;</span>
+<span class="o">#</span> <span class="n">sexp_of_t</span> <span class="o">{</span> <span class="n">a</span> <span class="o">=</span> <span class="nc">None</span><span class="o">;</span> <span class="n">b</span> <span class="o">=</span> <span class="s2">&quot;hello&quot;</span> <span class="o">};;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">((</span><span class="n">a</span> <span class="bp">()</span><span class="o">)</span> <span class="o">(</span><span class="n">b</span> <span class="n">hello</span><span class="o">))</span>
+<span class="o">#</span> <span class="n">sexp_of_t</span> <span class="o">{</span> <span class="n">a</span> <span class="o">=</span> <span class="nc">Some</span> <span class="mi">3</span><span class="o">;</span> <span class="n">b</span> <span class="o">=</span> <span class="s2">&quot;hello&quot;</span> <span class="o">};;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">((</span><span class="n">a</span> <span class="o">(</span><span class="mi">3</span><span class="o">))</span> <span class="o">(</span><span class="n">b</span> <span class="n">hello</span><span class="o">))</span>
+</pre></div><p id="idp11000624">
+        But what if we want a field to be optional,
+        <span><em>i.e.</em></span>, we want to allow it to be omitted
+        from the record entirely? In that case, we can mark it with
+        <code>sexp_option</code>:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">{</span> <span class="n">a</span><span class="o">:</span> <span class="kt">int</span> <span class="n">sexp_option</span><span class="o">;</span> <span class="n">b</span><span class="o">:</span> <span class="kt">string</span> <span class="o">}</span> <span class="k">with</span> <span class="n">sexp</span><span class="o">;;</span>
+<span class="o">#</span> <span class="n">sexp_of_t</span> <span class="o">{</span> <span class="n">a</span> <span class="o">=</span> <span class="nc">Some</span> <span class="mi">3</span><span class="o">;</span> <span class="n">b</span> <span class="o">=</span> <span class="s2">&quot;hello&quot;</span> <span class="o">};;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">((</span><span class="n">a</span> <span class="mi">3</span><span class="o">)</span> <span class="o">(</span><span class="n">b</span> <span class="n">hello</span><span class="o">))</span>
+<span class="o">#</span> <span class="n">sexp_of_t</span> <span class="o">{</span> <span class="n">a</span> <span class="o">=</span> <span class="nc">None</span><span class="o">;</span> <span class="n">b</span> <span class="o">=</span> <span class="s2">&quot;hello&quot;</span> <span class="o">};;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">((</span><span class="n">b</span> <span class="n">hello</span><span class="o">))</span>
+</pre></div></section><section><h1 id="specifying-defaults">Specifying defaults</h1><p id="idp11004880">
+        The <code>sexp_option</code> declaration is really just an
+        example of how one might want to deal with default values. With
+        <code>sexp_option</code>, your type on the OCaml side is
+        an option, with <code>None</code> representing the case
+        where no value is provided. But you might want to allow other
+        ways of filling in default values.
+      </p><p id="idp11007728">
+        Consider the following type which represents the configuration
+        of a very simple web-server.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">type</span> <span class="n">http_server_config</span> <span class="o">=</span> <span class="o">{</span>
+     <span class="n">web_root</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+     <span class="n">port</span><span class="o">:</span> <span class="kt">int</span><span class="o">;</span>
+     <span class="n">addr</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+  <span class="o">}</span> <span class="k">with</span> <span class="n">sexp</span><span class="o">;;</span>
+</pre></div><p id="idp11009296">
+        One could imagine making some of these parameters optional; in
+        particular, by default, we might want the web server to bind to
+        port 80, and to listen as localhost. The sexp-syntax allows this
+        as follows.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">type</span> <span class="n">http_server_config</span> <span class="o">=</span> <span class="o">{</span>
+     <span class="n">web_root</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+     <span class="n">port</span><span class="o">:</span> <span class="kt">int</span> <span class="k">with</span> <span class="n">default</span><span class="o">(</span><span class="mi">80</span><span class="o">);</span>
+     <span class="n">addr</span><span class="o">:</span> <span class="kt">string</span> <span class="k">with</span> <span class="n">default</span><span class="o">(</span><span class="s2">&quot;localhost&quot;</span><span class="o">);</span>
+  <span class="o">}</span> <span class="k">with</span> <span class="n">sexp</span><span class="o">;;</span>
+</pre></div><p id="idp11011120">
+        The top-level will echo back the type you just defined as usual,
+        but also generate some additional conversion functions.
+      </p><div class="highlight"><pre><span class="k">type</span> <span class="n">http_server_config</span> <span class="o">=</span> <span class="o">{</span> <span class="n">web_root</span> <span class="o">:</span> <span class="kt">string</span><span class="o">;</span> <span class="n">port</span> <span class="o">:</span> <span class="kt">int</span><span class="o">;</span> <span class="n">addr</span> <span class="o">:</span> <span class="kt">string</span><span class="o">;</span> <span class="o">}</span>
+<span class="k">val</span> <span class="n">http_server_config_of_sexp__</span> <span class="o">:</span> <span class="nn">Sexplib</span><span class="p">.</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="n">http_server_config</span> <span class="o">=</span>
+  <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="k">val</span> <span class="n">http_server_config_of_sexp</span> <span class="o">:</span> <span class="nn">Sexplib</span><span class="p">.</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="n">http_server_config</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="k">val</span> <span class="n">sexp_of_http_server_config</span> <span class="o">:</span> <span class="n">http_server_config</span> <span class="o">-&gt;</span> <span class="nn">Sexplib</span><span class="p">.</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp11013232">
+        These new functions let you convert to and from s-expressions.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="n">http_server_config_of_sexp</span> <span class="o">(</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">of_string</span> <span class="s2">&quot;((web_root /var/www/html))&quot;</span><span class="o">;;</span>
+<span class="o">#</span> <span class="k">let</span> <span class="n">cfg</span> <span class="o">=</span>
+  <span class="n">http_server_config_of_sexp</span> <span class="o">(</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">of_string</span> <span class="s2">&quot;((web_root /var/www/html))&quot;</span><span class="o">);;</span>
+<span class="k">val</span> <span class="n">cfg</span> <span class="o">:</span> <span class="n">http_server_config</span> <span class="o">=</span>
+  <span class="o">{</span><span class="n">web_root</span> <span class="o">=</span> <span class="s2">&quot;/var/www/html&quot;</span><span class="o">;</span> <span class="n">port</span> <span class="o">=</span> <span class="mi">80</span><span class="o">;</span> <span class="n">addr</span> <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span><span class="o">}</span>
+</pre></div><p id="idp11014960">
+        When we convert the configuration back out to an s-expression,
+        you'll notice that no data is dropped.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="n">sexp_of_http_server_config</span> <span class="n">cfg</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="nn">Sexplib</span><span class="p">.</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">((</span><span class="n">web_root</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">)</span> <span class="o">(</span><span class="n">port</span> <span class="mi">80</span><span class="o">)</span> <span class="o">(</span><span class="n">addr</span> <span class="n">localhost</span><span class="o">))</span>
+</pre></div><p id="idp11016544">
+        We could make the generated s-expression also drop exported
+        values, by using the <code>sexp_drop_default</code>
+        directive.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">type</span> <span class="n">http_server_config</span> <span class="o">=</span> <span class="o">{</span>
+     <span class="n">web_root</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+     <span class="n">port</span><span class="o">:</span> <span class="kt">int</span> <span class="k">with</span> <span class="n">default</span><span class="o">(</span><span class="mi">80</span><span class="o">),</span> <span class="n">sexp_drop_default</span><span class="o">;</span>
+     <span class="n">addr</span><span class="o">:</span> <span class="kt">string</span> <span class="k">with</span> <span class="n">default</span><span class="o">(</span><span class="s2">&quot;localhost&quot;</span><span class="o">),</span> <span class="n">sexp_drop_default</span><span class="o">;</span>
+  <span class="o">}</span> <span class="k">with</span> <span class="n">sexp</span><span class="o">;;</span>
+<span class="k">type</span> <span class="n">http_server_config</span> <span class="o">=</span> <span class="o">{</span> <span class="n">web_root</span> <span class="o">:</span> <span class="kt">string</span><span class="o">;</span> <span class="n">port</span> <span class="o">:</span> <span class="kt">int</span><span class="o">;</span> <span class="n">addr</span> <span class="o">:</span> <span class="kt">string</span><span class="o">;</span> <span class="o">}</span>
+<span class="k">val</span> <span class="n">http_server_config_of_sexp__</span> <span class="o">:</span> <span class="nn">Sexplib</span><span class="p">.</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="n">http_server_config</span> <span class="o">=</span>
+  <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="k">val</span> <span class="n">http_server_config_of_sexp</span> <span class="o">:</span> <span class="nn">Sexplib</span><span class="p">.</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="n">http_server_config</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="k">val</span> <span class="n">sexp_of_http_server_config</span> <span class="o">:</span> <span class="n">http_server_config</span> <span class="o">-&gt;</span> <span class="nn">Sexplib</span><span class="p">.</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="k">let</span> <span class="n">cfg</span> <span class="o">=</span> <span class="n">http_server_config_of_sexp</span> <span class="o">(</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">of_string</span> <span class="s2">&quot;((web_root /var/www/html))&quot;</span><span class="o">);;</span>
+<span class="k">val</span> <span class="n">cfg</span> <span class="o">:</span> <span class="n">http_server_config</span> <span class="o">=</span>
+  <span class="o">{</span><span class="n">web_root</span> <span class="o">=</span> <span class="s2">&quot;/var/www/html&quot;</span><span class="o">;</span> <span class="n">port</span> <span class="o">=</span> <span class="mi">80</span><span class="o">;</span> <span class="n">addr</span> <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span><span class="o">}</span>
+<span class="o">#</span> <span class="n">sexp_of_http_server_config</span> <span class="n">cfg</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="nn">Sexplib</span><span class="p">.</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">((</span><span class="n">web_root</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">))</span>
+</pre></div><p id="idp11019600">
+        As you can see, the fields that are at their default values are
+        simply omitted from the s-expression. On the other hand, if we
+        convert a config with other values, then those values will be
+        included in the s-expression.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="n">sexp_of_http_server_config</span> <span class="o">{</span> <span class="n">cfg</span> <span class="k">with</span> <span class="n">port</span> <span class="o">=</span> <span class="mi">8080</span> <span class="o">};;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="nn">Sexplib</span><span class="p">.</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">((</span><span class="n">web_root</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">)</span> <span class="o">(</span><span class="n">port</span> <span class="mi">8080</span><span class="o">))</span>
+<span class="o">#</span> <span class="n">sexp_of_http_server_config</span> <span class="o">{</span> <span class="n">cfg</span> <span class="k">with</span> <span class="n">port</span> <span class="o">=</span> <span class="mi">8080</span><span class="o">;</span> <span class="n">addr</span> <span class="o">=</span> <span class="s2">&quot;192.168.0.1&quot;</span> <span class="o">};;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="nn">Sexplib</span><span class="p">.</span><span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span>
+<span class="o">((</span><span class="n">web_root</span> <span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">www</span><span class="o">/</span><span class="n">html</span><span class="o">)</span> <span class="o">(</span><span class="n">port</span> <span class="mi">8080</span><span class="o">)</span> <span class="o">(</span><span class="n">addr</span> <span class="mi">192</span><span class="o">.</span><span class="mi">168</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">1</span><span class="o">))</span>
+</pre></div><p id="idp11021552">
+        This can be very useful in designing config file formats that
+        are both reasonably terse and easy to generate and maintain. It
+        can also be useful for backwards compatibility: if you add a new
+        field to your config record, but you make that field optional,
+        then you should still be able to parse older version of your
+        config.
+      </p></section></section>
+
+
+                
+            </article>
+            
+            
+    
+                <nav class="pagination">
+                    
+                        <a rel="previous" href="parsing-with-ocamllex-and-menhir.html">
+                            &lt; Previous
+                        </a>
+                    
+                    
+                        <a rel="next" href="concurrent-programming-with-async.html">
+                            Next &gt;
+                        </a>
+                    
+                </nav>
+            
+            
+            
+            <footer class="footer">
+                <p>Copyright 2012-2013, Jason Hickey, Anil Madhavapeddy and Yaron Minsky. Licensed under <a href="http://creativecommons.org/licenses/by-nc-nd/3.0/us/">CC BY-NC-ND 3.0 US</a>.</p>
+            </footer>
+            
+        </div>
+    
+    </body>
+
+</html>

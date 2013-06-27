@@ -1,0 +1,914 @@
+<html>
+
+    <head>
+    
+        <meta charset="utf-8"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW"/>
+        
+        <title>Chapter 13. Maps and Hashtables / Real World OCaml</title>
+        
+        <link rel="stylesheet" href="../../media/css/main.css"/>
+        
+        <script src="../../media/js/require.js" data-main="../../media/js/main.js"> </script>
+        <script>
+            require.config({
+                config: {
+                    gitHub: {
+                        user: 'ocamllabs',
+                        repo: 'rwo\u002Dcomments',
+                        milestone: 'beta1',
+                        page: 'maps\u002Dand\u002Dhashtables.html'
+                    }
+                }
+            });
+        </script>
+        
+    
+    </head>
+    
+    <body>
+    
+        <div class="body">
+        
+            <header class="header">
+                <h1><img src="../../media/img/header.png" width="213" height="59" alt="Real World OCaml, by Jason Hickey, Anil Madhavapeddy and Yaron Minsky"/></h1>
+            </header>
+    
+            <nav class="navigation">
+                <ul>
+                    <li>
+                        <a href="index.html">Table of Contents</a>
+                    </li>
+                    
+                        <li>
+                            <a href="prologue.html">Prologue</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt01.html">I. Language Concepts</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt02.html">II. Tools and Techniques</a>
+                            
+                                 
+                                    <ul>
+                                        
+                                            <li>
+                                                <a href="maps-and-hashtables.html" class="here">13. Maps and Hashtables</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="command-line-parsing.html">14. Command Line Parsing</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="handling-json-data.html">15. Handling JSON data</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="parsing-with-ocamllex-and-menhir.html">16. Parsing with OCamllex and Menhir</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="data-serialization-with-s-expressions.html">17. Data Serialization with S-Expressions</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="concurrent-programming-with-async.html">18. Concurrent Programming with Async</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="fast-binary-serialization.html">19. Fast Binary Serialization</a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt03.html">III. The Runtime System</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="installation.html">A. Installation</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="packaging.html">B. Packaging</a>
+                            
+                                
+                            
+                        </li>
+                    
+                </ul>
+            </nav>
+        
+            <article class="page">
+        
+                <h1>Chapter 13. Maps and Hashtables</h1>
+                
+                
+
+    <p id="idp9954928">
+    Lots of programming problems require dealing with data organized as
+    key/value pairs. Maybe the simplest way of representing such data in
+    OCaml is an <span><em>association list</em></span>, which is simply a
+    list of pairs of keys and values. For example, you could represent a
+    mapping between the 10 digits and their English names as follows.
+  </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">digit_alist</span> <span class="o">=</span>
+    <span class="o">[</span> <span class="mi">0</span><span class="o">,</span> <span class="s2">&quot;zero&quot;</span><span class="o">;</span> <span class="mi">1</span><span class="o">,</span> <span class="s2">&quot;one&quot;</span><span class="o">;</span> <span class="mi">2</span><span class="o">,</span> <span class="s2">&quot;two&quot;</span>  <span class="o">;</span> <span class="mi">3</span><span class="o">,</span> <span class="s2">&quot;three&quot;</span><span class="o">;</span> <span class="mi">4</span><span class="o">,</span> <span class="s2">&quot;four&quot;</span>
+    <span class="o">;</span> <span class="mi">5</span><span class="o">,</span> <span class="s2">&quot;five&quot;</span><span class="o">;</span> <span class="mi">6</span><span class="o">,</span> <span class="s2">&quot;six&quot;</span><span class="o">;</span> <span class="mi">7</span><span class="o">,</span> <span class="s2">&quot;seven&quot;</span><span class="o">;</span> <span class="mi">8</span><span class="o">,</span> <span class="s2">&quot;eight&quot;</span><span class="o">;</span> <span class="mi">9</span><span class="o">,</span> <span class="s2">&quot;nine&quot;</span> <span class="o">]</span>
+  <span class="o">;;</span>
+</pre></div><p id="idp9957296">
+    We can use functions from the <code>List.Assoc</code> module
+    to manipulate such an association list.
+  </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="nn">Assoc</span><span class="p">.</span><span class="n">find</span> <span class="n">digit_alist</span> <span class="mi">6</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="n">option</span> <span class="o">=</span> <span class="nc">Some</span> <span class="s2">&quot;six&quot;</span>
+<span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="nn">Assoc</span><span class="p">.</span><span class="n">find</span> <span class="n">digit_alist</span> <span class="mi">22</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="n">option</span> <span class="o">=</span> <span class="nc">None</span>
+<span class="o">#</span> <span class="nn">List</span><span class="p">.</span><span class="nn">Assoc</span><span class="p">.</span><span class="n">add</span> <span class="n">digit_alist</span> <span class="mi">0</span> <span class="s2">&quot;zilch&quot;</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="o">(</span><span class="kt">int</span><span class="o">,</span> <span class="kt">string</span><span class="o">)</span> <span class="nn">List</span><span class="p">.</span><span class="nn">Assoc</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span>
+<span class="o">[(</span><span class="mi">0</span><span class="o">,</span> <span class="s2">&quot;zilch&quot;</span><span class="o">);</span> <span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="s2">&quot;one&quot;</span><span class="o">);</span> <span class="o">(</span><span class="mi">2</span><span class="o">,</span> <span class="s2">&quot;two&quot;</span><span class="o">);</span> <span class="o">(</span><span class="mi">3</span><span class="o">,</span> <span class="s2">&quot;three&quot;</span><span class="o">);</span> <span class="o">(</span><span class="mi">4</span><span class="o">,</span> <span class="s2">&quot;four&quot;</span><span class="o">);</span>
+ <span class="o">(</span><span class="mi">5</span><span class="o">,</span> <span class="s2">&quot;five&quot;</span><span class="o">);</span> <span class="o">(</span><span class="mi">6</span><span class="o">,</span> <span class="s2">&quot;six&quot;</span><span class="o">);</span> <span class="o">(</span><span class="mi">7</span><span class="o">,</span> <span class="s2">&quot;seven&quot;</span><span class="o">);</span> <span class="o">(</span><span class="mi">8</span><span class="o">,</span> <span class="s2">&quot;eight&quot;</span><span class="o">);</span> <span class="o">(</span><span class="mi">9</span><span class="o">,</span> <span class="s2">&quot;nine&quot;</span><span class="o">)]</span>
+</pre></div><p id="idp9959856">
+    Association lists are simple and easy to use, but their performance
+    is not ideal, since almost every non-trivial operation on an
+    association list requires a linear-time scan of the list.
+  </p><p id="idp9960464">
+    In this chapter, we'll talk about two more efficient alternatives to
+    association lists: <span><em>maps</em></span> and
+    <span><em>hashtables</em></span>. A map is an immutable tree-based
+    data structure where most operations take time logarithmic in the
+    size of the map, whereas a hashtable is a mutable data structure
+    where most operations have constant time complexity. We'll describe
+    both of these data structures in detail, and provide some advice as
+    to how to choose between them.
+  </p><section><h1 id="maps">Maps</h1><p id="idp9963280">
+      Let's consider an example of how one might use a map in practice.
+      In <a href="files-modules-and-programs.html">Chapter 4, <i>Files, Modules and Programs</i></a>, we
+      showed a module <code>Counter</code> for keeping frequency
+      counts on a set of strings. Here's the interface.
+    </p><div class="highlight"><pre><span class="c">(* counter.mli *)</span>
+<span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="k">type</span> <span class="n">t</span>
+
+<span class="k">val</span> <span class="n">empty</span> <span class="o">:</span> <span class="n">t</span>
+<span class="k">val</span> <span class="n">touch</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="kt">string</span> <span class="o">-&gt;</span> <span class="n">t</span>
+<span class="k">val</span> <span class="n">to_list</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="kt">string</span> <span class="o">*</span> <span class="kt">int</span><span class="o">)</span> <span class="kt">list</span>
+</pre></div><p id="idp9966352">
+      The intended behavior here is straightforward.
+      <code>Counter.empty</code> represents an empty collection of
+      frequency counts; <code>touch</code> increments the
+      frequency count of the specified string by 1; and
+      <code>to_list</code> returns the list of non-zero
+      frequencies.
+    </p><p id="idp9969120">
+      Here's the implementation.
+    </p><div class="highlight"><pre><span class="c">(* counter.ml *)</span>
+<span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="kt">int</span> <span class="nn">String</span><span class="p">.</span><span class="nn">Map</span><span class="p">.</span><span class="n">t</span>
+
+<span class="k">let</span> <span class="n">empty</span> <span class="o">=</span> <span class="nn">String</span><span class="p">.</span><span class="nn">Map</span><span class="p">.</span><span class="n">empty</span>
+
+<span class="k">let</span> <span class="n">to_list</span> <span class="n">t</span> <span class="o">=</span> <span class="nn">Map</span><span class="p">.</span><span class="n">to_alist</span> <span class="n">t</span>
+
+<span class="k">let</span> <span class="n">touch</span> <span class="n">t</span> <span class="n">s</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">count</span> <span class="o">=</span> <span class="nn">Option</span><span class="p">.</span><span class="n">value</span> <span class="o">~</span><span class="n">default</span><span class="o">:</span><span class="mi">0</span> <span class="o">(</span><span class="nn">Map</span><span class="p">.</span><span class="n">find</span> <span class="n">t</span> <span class="n">s</span><span class="o">)</span> <span class="k">in</span>
+  <span class="nn">Map</span><span class="p">.</span><span class="n">add</span> <span class="n">t</span> <span class="o">~</span><span class="n">key</span><span class="o">:</span><span class="n">s</span> <span class="o">~</span><span class="n">data</span><span class="o">:(</span><span class="n">count</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span>
+</pre></div><p id="idp9970720">
+      Note that in some places the above code refers to
+      <code>String.Map.t</code>, and in others
+      <code>Map.t</code>. This has to do with the fact that maps
+      are implemented as ordered binary trees, and as such, need a way
+      of comparing keys.
+    </p><p id="idp9972752">
+      To deal with this, a map, once created, stores the necessary
+      comparison function within the data structure. Thus, operations
+      like <code>Map.find</code> or <code>Map.add</code>
+      that access the contents of a map or create a new map from an
+      existing one, do so by using the comparison function embedded
+      within the map.
+    </p><p id="idp9974880">
+      But in order to get a map in the first place, you need to get your
+      hands on the comparison function somehow. For this reason, modules
+      like <code>String</code> contain a <code>Map</code>
+      sub-module that have values like
+      <code>String.Map.empty</code> and
+      <code>String.Map.of_alist</code> that are specialized to
+      strings, and thus have access to a string comparison function.
+      Such a <code>Map</code> sub-module is included in every
+      module that satisfies the <code>Comparable.S</code>
+      interface from Core.
+    </p><section><h1 id="creating-maps-with-comparators">Creating maps with comparators</h1><p id="idp9981040">
+        The specialized <code>Map</code> sub-module is convenient,
+        but it's not the only way of creating a
+        <code>Map.t</code>. The information required to compare
+        values of a given type is wrapped up in a value called a
+        <span><em>comparator</em></span>, that can be used to create maps
+        using the <code>Map</code> module directly.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">digit_map</span> <span class="o">=</span> <span class="nn">Map</span><span class="p">.</span><span class="n">of_alist_exn</span> <span class="n">digit_alist</span>
+                     <span class="o">~</span><span class="n">comparator</span><span class="o">:</span><span class="nn">Int</span><span class="p">.</span><span class="n">comparator</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">digit_map</span> <span class="o">:</span> <span class="o">(</span><span class="kt">int</span><span class="o">,</span> <span class="kt">string</span><span class="o">,</span> <span class="nn">Int</span><span class="p">.</span><span class="n">comparator</span><span class="o">)</span> <span class="nn">Map</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">abstr</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="nn">Map</span><span class="p">.</span><span class="n">find</span> <span class="n">digit_map</span> <span class="mi">3</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">string</span> <span class="n">option</span> <span class="o">=</span> <span class="nc">Some</span> <span class="s2">&quot;three&quot;</span>
+</pre></div><p id="idp9985472">
+        The above uses <code>Map.of_alist_exn</code> which creates
+        a map from an association list, throwing an exception if there
+        are duplicate keys in the list.
+      </p><p id="idp9986736">
+        The comparator is only required for operations that create maps
+        from scratch. Operations that update an existing map simply
+        inherit the comparator of the map they start with.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">zilch_map</span> <span class="o">=</span> <span class="nn">Map</span><span class="p">.</span><span class="n">add</span> <span class="n">digit_map</span> <span class="o">~</span><span class="n">key</span><span class="o">:</span><span class="mi">0</span> <span class="o">~</span><span class="n">data</span><span class="o">:</span><span class="s2">&quot;zilch&quot;</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">zilch_map</span> <span class="o">:</span> <span class="o">(</span><span class="kt">int</span><span class="o">,</span> <span class="kt">string</span><span class="o">,</span> <span class="nn">Int</span><span class="p">.</span><span class="n">comparator</span><span class="o">)</span> <span class="nn">Map</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">abstr</span><span class="o">&gt;</span>
+</pre></div><p id="idp9988608">
+        The type <code>Map.t</code> has three type parameters: one
+        for the key, one for the value, and one to identify the
+        comparator. Indeed, the type <code>'a Int.Map.t</code> is
+        just a type alias for
+        <code>(int,'a,Int.comparator) Map.t</code>
+</p><p id="idp9991312">
+        Including the comparator in the type is important because
+        because operations that work on multiple maps at the same time
+        often require that the maps share their comparison function.
+        Consider, for example, <code>Map.symmetric_diff</code>,
+        which computes a summary of the differences between two maps.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">left</span> <span class="o">=</span> <span class="nn">String</span><span class="p">.</span><span class="nn">Map</span><span class="p">.</span><span class="n">of_alist_exn</span> <span class="o">[</span><span class="s2">&quot;foo&quot;</span><span class="o">,</span><span class="mi">1</span><span class="o">;</span> <span class="s2">&quot;bar&quot;</span><span class="o">,</span><span class="mi">3</span><span class="o">;</span> <span class="s2">&quot;snoo&quot;</span><span class="o">,</span> <span class="mi">0</span><span class="o">]</span>
+  <span class="k">let</span> <span class="n">right</span> <span class="o">=</span> <span class="nn">String</span><span class="p">.</span><span class="nn">Map</span><span class="p">.</span><span class="n">of_alist_exn</span> <span class="o">[</span><span class="s2">&quot;foo&quot;</span><span class="o">,</span><span class="mi">0</span><span class="o">;</span> <span class="s2">&quot;snoo&quot;</span><span class="o">,</span> <span class="mi">0</span><span class="o">]</span>
+  <span class="k">let</span> <span class="n">diff</span> <span class="o">=</span> <span class="nn">Map</span><span class="p">.</span><span class="n">symmetric_diff</span> <span class="o">~</span><span class="n">data_equal</span><span class="o">:</span><span class="nn">Int</span><span class="p">.</span><span class="n">equal</span> <span class="n">left</span> <span class="n">right</span>
+  <span class="o">;;</span>
+<span class="k">val</span> <span class="n">left</span> <span class="o">:</span> <span class="kt">int</span> <span class="nn">String</span><span class="p">.</span><span class="nn">Map</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">abstr</span><span class="o">&gt;</span>
+<span class="k">val</span> <span class="n">right</span> <span class="o">:</span> <span class="kt">int</span> <span class="nn">String</span><span class="p">.</span><span class="nn">Map</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">abstr</span><span class="o">&gt;</span>
+<span class="k">val</span> <span class="n">diff</span> <span class="o">:</span>
+  <span class="o">(</span><span class="kt">string</span> <span class="o">*</span> <span class="o">[</span> <span class="o">`</span><span class="nc">Left</span> <span class="k">of</span> <span class="kt">int</span> <span class="o">|</span> <span class="o">`</span><span class="nc">Right</span> <span class="k">of</span> <span class="kt">int</span> <span class="o">|</span> <span class="o">`</span><span class="nc">Unequal</span> <span class="k">of</span> <span class="kt">int</span> <span class="o">*</span> <span class="kt">int</span> <span class="o">])</span> <span class="kt">list</span> <span class="o">=</span>
+  <span class="o">[(</span><span class="s2">&quot;foo&quot;</span><span class="o">,</span> <span class="o">`</span><span class="nc">Unequal</span> <span class="o">(</span><span class="mi">1</span><span class="o">,</span> <span class="mi">0</span><span class="o">));</span> <span class="o">(</span><span class="s2">&quot;bar&quot;</span><span class="o">,</span> <span class="o">`</span><span class="nc">Left</span> <span class="mi">3</span><span class="o">)]</span>
+</pre></div><p id="idp9994240">
+        The type of <code>Map.symmetric_diff</code>, shown below,
+        requires that the two maps it compares have the same comparator
+        type. Each comparator has a fresh abstract type, so the type of
+        a comparator identifies the comparator uniquely.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Map</span><span class="p">.</span><span class="n">symmetric_diff</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="o">(</span><span class="k">'</span><span class="n">k</span><span class="o">,</span> <span class="k">'</span><span class="n">v</span><span class="o">,</span> <span class="k">'</span><span class="n">cmp</span><span class="o">)</span> <span class="nn">Map</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span>
+    <span class="o">(</span><span class="k">'</span><span class="n">k</span><span class="o">,</span> <span class="k">'</span><span class="n">v</span><span class="o">,</span> <span class="k">'</span><span class="n">cmp</span><span class="o">)</span> <span class="nn">Map</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span>
+    <span class="n">data_equal</span><span class="o">:(</span><span class="k">'</span><span class="n">v</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">v</span> <span class="o">-&gt;</span> <span class="kt">bool</span><span class="o">)</span> <span class="o">-&gt;</span>
+    <span class="o">(</span><span class="k">'</span><span class="n">k</span> <span class="o">*</span> <span class="o">[</span> <span class="o">`</span><span class="nc">Left</span> <span class="k">of</span> <span class="k">'</span><span class="n">v</span> <span class="o">|</span> <span class="o">`</span><span class="nc">Right</span> <span class="k">of</span> <span class="k">'</span><span class="n">v</span> <span class="o">|</span> <span class="o">`</span><span class="nc">Unequal</span> <span class="k">of</span> <span class="k">'</span><span class="n">v</span> <span class="o">*</span> <span class="k">'</span><span class="n">v</span> <span class="o">])</span> <span class="kt">list</span>
+<span class="o">=</span> <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+</pre></div><p id="idp9996752">
+        This constraint is important because the algorithm that
+        <code>Map.symmetric_diff</code> uses depends on the fact
+        that both maps have the same comparator.
+      </p><p id="idp9998016">
+        We can create a new comparator using the
+        <code>Comparator.Make</code> functor, which takes as its
+        input a module containing the type of the object to be compared,
+        sexp-converter functions, and a comparison function. The sexp
+        converters are included in the comparator to make it possible
+        for users of the comparator to generate better error messages.
+        Here's an example.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">module</span> <span class="nc">Reverse</span> <span class="o">=</span> <span class="nn">Comparator</span><span class="p">.</span><span class="nc">Make</span><span class="o">(</span><span class="k">struct</span>
+    <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="kt">string</span>
+    <span class="k">let</span> <span class="n">sexp_of_t</span> <span class="o">=</span> <span class="nn">String</span><span class="p">.</span><span class="n">sexp_of_t</span>
+    <span class="k">let</span> <span class="n">t_of_sexp</span> <span class="o">=</span> <span class="nn">String</span><span class="p">.</span><span class="n">t_of_sexp</span>
+    <span class="k">let</span> <span class="n">compare</span> <span class="n">x</span> <span class="n">y</span> <span class="o">=</span> <span class="nn">String</span><span class="p">.</span><span class="n">compare</span> <span class="n">y</span> <span class="n">x</span>
+  <span class="k">end</span><span class="o">);;</span>
+<span class="k">module</span> <span class="nc">Reverse</span> <span class="o">:</span>
+  <span class="k">sig</span>
+    <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="kt">string</span>
+    <span class="k">val</span> <span class="n">compare</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="kt">int</span>
+    <span class="k">val</span> <span class="n">t_of_sexp</span> <span class="o">:</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="n">t</span>
+    <span class="k">val</span> <span class="n">sexp_of_t</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span>
+    <span class="k">type</span> <span class="n">comparator</span>
+    <span class="k">val</span> <span class="n">comparator</span> <span class="o">:</span> <span class="o">(</span><span class="n">t</span><span class="o">,</span> <span class="n">comparator</span><span class="o">)</span> <span class="nn">Comparator</span><span class="p">.</span><span class="n">t_</span>
+  <span class="k">end</span>
+</pre></div><p id="idp10000992">
+        As you can see below, both <code>Reverse.comparator</code>
+        and <code>String.comparator</code> can be used to create
+        maps with a key type of <code>string</code>.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">alist</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;foo&quot;</span><span class="o">,</span> <span class="mi">0</span><span class="o">;</span> <span class="s2">&quot;snoo&quot;</span><span class="o">,</span> <span class="mi">3</span><span class="o">];;</span>
+<span class="k">val</span> <span class="n">alist</span> <span class="o">:</span> <span class="o">(</span><span class="kt">string</span> <span class="o">*</span> <span class="kt">int</span><span class="o">)</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[(</span><span class="s2">&quot;foo&quot;</span><span class="o">,</span> <span class="mi">0</span><span class="o">);</span> <span class="o">(</span><span class="s2">&quot;snoo&quot;</span><span class="o">,</span> <span class="mi">3</span><span class="o">)]</span>
+<span class="o">#</span> <span class="k">let</span> <span class="n">ord_map</span> <span class="o">=</span> <span class="nn">Map</span><span class="p">.</span><span class="n">of_alist_exn</span> <span class="o">~</span><span class="n">comparator</span><span class="o">:</span><span class="nn">String</span><span class="p">.</span><span class="n">comparator</span> <span class="n">alist</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">ord_map</span> <span class="o">:</span> <span class="o">(</span><span class="kt">string</span><span class="o">,</span> <span class="kt">int</span><span class="o">,</span> <span class="nn">String</span><span class="p">.</span><span class="n">comparator</span><span class="o">)</span> <span class="nn">Map</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">abstr</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="k">let</span> <span class="n">rev_map</span> <span class="o">=</span> <span class="nn">Map</span><span class="p">.</span><span class="n">of_alist_exn</span> <span class="o">~</span><span class="n">comparator</span><span class="o">:</span><span class="nn">Reverse</span><span class="p">.</span><span class="n">comparator</span> <span class="n">alist</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">rev_map</span> <span class="o">:</span> <span class="o">(</span><span class="kt">string</span><span class="o">,</span> <span class="kt">int</span><span class="o">,</span> <span class="nn">Reverse</span><span class="p">.</span><span class="n">comparator</span><span class="o">)</span> <span class="nn">Map</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">abstr</span><span class="o">&gt;</span>
+</pre></div><p id="idp10005136">
+<code>Map.min_elt</code> returns the key and value for the
+        smallest key in the map, which lets us see that these two maps
+        do indeed use different comparison functions.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Map</span><span class="p">.</span><span class="n">min_elt</span> <span class="n">ord_map</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="o">(</span><span class="kt">string</span> <span class="o">*</span> <span class="kt">int</span><span class="o">)</span> <span class="n">option</span> <span class="o">=</span> <span class="nc">Some</span> <span class="o">(</span><span class="s2">&quot;foo&quot;</span><span class="o">,</span> <span class="mi">0</span><span class="o">)</span>
+<span class="o">#</span> <span class="nn">Map</span><span class="p">.</span><span class="n">min_elt</span> <span class="n">rev_map</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="o">(</span><span class="kt">string</span> <span class="o">*</span> <span class="kt">int</span><span class="o">)</span> <span class="n">option</span> <span class="o">=</span> <span class="nc">Some</span> <span class="o">(</span><span class="s2">&quot;snoo&quot;</span><span class="o">,</span> <span class="mi">3</span><span class="o">)</span>
+</pre></div><p id="idp10007696">
+        And accordingly, if we try to use
+        <code>Map.symmetric_diff</code> on these two maps, we'll
+        get a compile-timer error.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Map</span><span class="p">.</span><span class="n">symmetric_diff</span> <span class="n">ord_map</span> <span class="n">rev_map</span><span class="o">;;</span>
+
+<span class="nc">Error</span><span class="o">:</span> <span class="nc">This</span> <span class="n">expression</span> <span class="n">has</span> <span class="k">type</span> <span class="o">(</span><span class="kt">string</span><span class="o">,</span> <span class="kt">int</span><span class="o">,</span> <span class="nn">Reverse</span><span class="p">.</span><span class="n">comparator</span><span class="o">)</span> <span class="nn">Map</span><span class="p">.</span><span class="n">t</span>
+       <span class="n">but</span> <span class="n">an</span> <span class="n">expression</span> <span class="n">was</span> <span class="n">expected</span> <span class="k">of</span> <span class="k">type</span>
+         <span class="o">(</span><span class="k">'</span><span class="n">a</span><span class="o">,</span> <span class="k">'</span><span class="n">b</span><span class="o">,</span> <span class="k">'</span><span class="n">c</span><span class="o">)</span> <span class="nn">Map</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">(</span><span class="kt">string</span><span class="o">,</span> <span class="kt">int</span><span class="o">,</span> <span class="nn">String</span><span class="p">.</span><span class="n">comparator</span><span class="o">)</span> <span class="nn">Map</span><span class="p">.</span><span class="n">t</span>
+       <span class="nc">Type</span> <span class="nn">Reverse</span><span class="p">.</span><span class="n">comparator</span> <span class="n">is</span> <span class="n">not</span> <span class="n">compatible</span> <span class="k">with</span> <span class="k">type</span> <span class="nn">String</span><span class="p">.</span><span class="n">comparator</span> 
+</pre></div></section><section><h1 id="trees">Trees</h1><p id="idp10011440">
+        As we've discussed, maps carry within them the comparator that
+        they were created with. Sometimes, often for space efficiency
+        reasons, you want a version of the map data structure that
+        doesn't include the comparator. You can get such a
+        representation with <code>Map.to_tree</code>, which
+        returns just the tree that the map is built out of, and not
+        including the comparator.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">ord_tree</span> <span class="o">=</span> <span class="nn">Map</span><span class="p">.</span><span class="n">to_tree</span> <span class="n">ord_map</span><span class="o">;;</span> 
+<span class="k">val</span> <span class="n">ord_tree</span> <span class="o">:</span> <span class="o">(</span><span class="kt">string</span><span class="o">,</span> <span class="kt">int</span><span class="o">,</span> <span class="nn">String</span><span class="p">.</span><span class="n">comparator</span><span class="o">)</span> <span class="nn">Map</span><span class="p">.</span><span class="nn">Tree</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">abstr</span><span class="o">&gt;</span>
+</pre></div><p id="idp10014112">
+        Even though a <code>Map.Tree.t</code> doesn't physically
+        include a comparator, it does include the comparator in its
+        type. This is what is known as a <span><em>phantom type
+        parameter</em></span>, because it reflects something about the
+        logic of value in question, even though it doesn't correspond to
+        any values directly represented in the underlying physical
+        structure of the value.
+      </p><p id="idp10016032">
+        Since the comparator isn't included in the tree, we need to
+        provide the comparator explicitly when we, say, search for a
+        key, as shown below.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Map</span><span class="p">.</span><span class="nn">Tree</span><span class="p">.</span><span class="n">find</span> <span class="o">~</span><span class="n">comparator</span><span class="o">:</span><span class="nn">String</span><span class="p">.</span><span class="n">comparator</span> <span class="n">ord_tree</span> <span class="s2">&quot;snoo&quot;</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="n">option</span> <span class="o">=</span> <span class="nc">Some</span> <span class="mi">3</span>
+</pre></div><p id="idp10017664">
+        The algorithm of <code>Map.Tree.find</code> depends on the
+        fact that it's using the same comparator when looking a value up
+        as you were when you stored it. That's the invariant that the
+        phantom type is there to enforce. As you can see below, using
+        the wrong comparator will lead to a type error.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Map</span><span class="p">.</span><span class="nn">Tree</span><span class="p">.</span><span class="n">find</span> <span class="o">~</span><span class="n">comparator</span><span class="o">:</span><span class="nn">Reverse</span><span class="p">.</span><span class="n">comparator</span> <span class="n">ord_tree</span> <span class="s2">&quot;snoo&quot;</span><span class="o">;;</span>
+
+<span class="nc">Error</span><span class="o">:</span> <span class="nc">This</span> <span class="n">expression</span> <span class="n">has</span> <span class="k">type</span> <span class="o">(</span><span class="kt">string</span><span class="o">,</span> <span class="kt">int</span><span class="o">,</span> <span class="nn">String</span><span class="p">.</span><span class="n">comparator</span><span class="o">)</span> <span class="nn">Map</span><span class="p">.</span><span class="nn">Tree</span><span class="p">.</span><span class="n">t</span>
+       <span class="n">but</span> <span class="n">an</span> <span class="n">expression</span> <span class="n">was</span> <span class="n">expected</span> <span class="k">of</span> <span class="k">type</span>
+         <span class="o">(</span><span class="k">'</span><span class="n">a</span><span class="o">,</span> <span class="k">'</span><span class="n">b</span><span class="o">,</span> <span class="k">'</span><span class="n">c</span><span class="o">)</span> <span class="nn">Map</span><span class="p">.</span><span class="nn">Tree</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">(</span><span class="kt">string</span><span class="o">,</span> <span class="k">'</span><span class="n">b</span><span class="o">,</span> <span class="nn">Reverse</span><span class="p">.</span><span class="n">comparator</span><span class="o">)</span> <span class="nn">Map</span><span class="p">.</span><span class="nn">Tree</span><span class="p">.</span><span class="n">t</span>
+       <span class="nc">Type</span> <span class="nn">String</span><span class="p">.</span><span class="n">comparator</span> <span class="n">is</span> <span class="n">not</span> <span class="n">compatible</span> <span class="k">with</span> <span class="k">type</span> <span class="nn">Reverse</span><span class="p">.</span><span class="n">comparator</span> 
+</pre></div></section><section><h1 id="the-polymorphic-comparator">The polymorphic comparator</h1><p id="idp10022096">
+        We don't need to generate specialized comparators for every type
+        we want to build a map on. We can instead use a comparator based
+        on OCaml's build-in polymorphic comparison function, which was
+        discussed in <a href="lists-and-patterns.html">Chapter 3, <i>Lists and Patterns</i></a>.
+        This comparator is found in the
+        <code>Comparator.Poly</code> module, allowing us to write:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Map</span><span class="p">.</span><span class="n">of_alist_exn</span> <span class="o">~</span><span class="n">comparator</span><span class="o">:</span><span class="nn">Comparator</span><span class="p">.</span><span class="nn">Poly</span><span class="p">.</span><span class="n">comparator</span> <span class="n">digit_alist</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="o">(</span><span class="kt">int</span><span class="o">,</span> <span class="kt">string</span><span class="o">,</span> <span class="nn">Comparator</span><span class="p">.</span><span class="nn">Poly</span><span class="p">.</span><span class="n">comparator</span><span class="o">)</span> <span class="nn">Map</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">abstr</span><span class="o">&gt;</span>
+</pre></div><p id="idp10025376">
+        Or, equivalently:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Map</span><span class="p">.</span><span class="nn">Poly</span><span class="p">.</span><span class="n">of_alist_exn</span> <span class="n">digit_alist</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="o">(</span><span class="kt">int</span><span class="o">,</span> <span class="kt">string</span><span class="o">)</span> <span class="nn">Map</span><span class="p">.</span><span class="nn">Poly</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">abstr</span><span class="o">&gt;</span>
+</pre></div><p id="idp10026896">
+        Note that maps based on the polymorphic comparator are not
+        equivalent to those based on the type-specific comparators from
+        the point of view of the type system. Thus, the compiler rejects
+        the following:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Map</span><span class="p">.</span><span class="n">symmetric_diff</span> <span class="o">(</span><span class="nn">Map</span><span class="p">.</span><span class="nn">Poly</span><span class="p">.</span><span class="n">singleton</span> <span class="mi">3</span> <span class="s2">&quot;three&quot;</span><span class="o">)</span>
+                     <span class="o">(</span><span class="nn">Int</span><span class="p">.</span><span class="nn">Map</span><span class="p">.</span><span class="n">singleton</span>  <span class="mi">3</span> <span class="s2">&quot;four&quot;</span> <span class="o">)</span> <span class="o">;;</span>
+
+<span class="nc">Error</span><span class="o">:</span> <span class="nc">This</span> <span class="n">expression</span> <span class="n">has</span> <span class="k">type</span> <span class="k">'</span><span class="n">a</span> <span class="nn">Int</span><span class="p">.</span><span class="nn">Map</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">(</span><span class="kt">int</span><span class="o">,</span> <span class="k">'</span><span class="n">a</span><span class="o">,</span> <span class="nn">Int</span><span class="p">.</span><span class="n">comparator</span><span class="o">)</span> <span class="nn">Map</span><span class="p">.</span><span class="n">t</span>
+       <span class="n">but</span> <span class="n">an</span> <span class="n">expression</span> <span class="n">was</span> <span class="n">expected</span> <span class="k">of</span> <span class="k">type</span>
+         <span class="o">(</span><span class="k">'</span><span class="n">b</span><span class="o">,</span> <span class="k">'</span><span class="n">c</span><span class="o">,</span> <span class="k">'</span><span class="n">d</span><span class="o">)</span> <span class="nn">Map</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">(</span><span class="kt">int</span><span class="o">,</span> <span class="kt">string</span><span class="o">,</span> <span class="nn">Z</span><span class="p">.</span><span class="nn">Poly</span><span class="p">.</span><span class="n">comparator</span><span class="o">)</span> <span class="nn">Map</span><span class="p">.</span><span class="n">t</span>
+       <span class="nc">Type</span> <span class="nn">Int</span><span class="p">.</span><span class="n">comparator</span> <span class="n">is</span> <span class="n">not</span> <span class="n">compatible</span> <span class="k">with</span> <span class="k">type</span> <span class="nn">Z</span><span class="p">.</span><span class="nn">Poly</span><span class="p">.</span><span class="n">comparator</span> 
+</pre></div><p id="idp10029584">
+        This is rejected for good reason: there's no guarantee that the
+        comparator associated with a given type will order things in the
+        same way that polymorphic compare does.
+      </p><section><h1><b>
+      The difference between <code>=</code> and
+      <code>==</code>, and <code>phys_equal</code> in Core
+      </b></h1><p id="idp10033024">
+        If you come from a C/C++ background, you'll probably reflexively
+        use <code>==</code> to test two values for equality. In
+        OCaml, the <code>==</code> operator tests for
+        <span><em>physical</em></span> equality while the
+        <code>=</code> operator tests for
+        <span><em>structural</em></span> equality.
+      </p><p id="idp10036560">
+        The physical equality test will match if two data structures
+        have precisely the same pointer in memory. Two data structures
+        that have identical contents but are constructed separately will
+        not match using <code>==</code>.
+      </p><p id="idp10037888">
+        The <code>=</code> structural equality operator
+        recursively inspects each field in the two values and tests them
+        individually for equality. Crucially, if your data structure is
+        cyclical (that is, a value recursively points back to another
+        field within the same structure), the <code>=</code>
+        operator will never terminate, and your program will hang! You
+        therefore must use the physical equality operator or write a
+        custom comparison function when comparing recursive values.
+      </p><p id="idp10040144">
+        It's quite easy to mix up the use of <code>=</code> and
+        <code>==</code>, so Core disables the
+        <code>==</code> operator and provides the more explicit
+        <code>phys_equal</code> function instead. You'll see a
+        type error if you use <code>==</code> anywhere in code
+        that uses opens the Core standard module.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span><span class="o">;;</span>
+<span class="o">#</span> <span class="mi">1</span> <span class="o">==</span> <span class="mi">2</span><span class="o">;;</span>
+<span class="nc">Error</span><span class="o">:</span> <span class="nc">This</span> <span class="n">expression</span> <span class="n">has</span> <span class="k">type</span> <span class="kt">int</span> <span class="n">but</span> <span class="n">an</span> <span class="n">expression</span> <span class="n">was</span> <span class="n">expected</span> <span class="k">of</span> <span class="k">type</span>
+         <span class="o">[</span> <span class="o">`</span><span class="nc">Consider_using_phys_equal</span> <span class="o">]</span>
+<span class="o">#</span> <span class="n">phys_equal</span> <span class="mi">1</span> <span class="mi">2</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="bp">false</span>
+</pre></div><p id="idp10045344">
+        If you feel like hanging your OCaml interpreter, you can verify
+        what happens with recursive values and structural equality for
+        yourself:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">type</span> <span class="n">t1</span> <span class="o">=</span> <span class="o">{</span> <span class="n">foo1</span><span class="o">:</span><span class="kt">int</span><span class="o">;</span> <span class="n">bar1</span><span class="o">:</span><span class="n">t2</span> <span class="o">}</span> <span class="ow">and</span> <span class="n">t2</span> <span class="o">=</span> <span class="o">{</span> <span class="n">foo2</span><span class="o">:</span><span class="kt">int</span><span class="o">;</span> <span class="n">bar2</span><span class="o">:</span><span class="n">t1</span> <span class="o">}</span> <span class="o">;;</span>
+<span class="k">type</span> <span class="n">t1</span> <span class="o">=</span> <span class="o">{</span> <span class="n">foo1</span> <span class="o">:</span> <span class="kt">int</span><span class="o">;</span> <span class="n">bar1</span> <span class="o">:</span> <span class="n">t2</span><span class="o">;</span> <span class="o">}</span>
+<span class="ow">and</span> <span class="n">t2</span> <span class="o">=</span> <span class="o">{</span> <span class="n">foo2</span> <span class="o">:</span> <span class="kt">int</span><span class="o">;</span> <span class="n">bar2</span> <span class="o">:</span> <span class="n">t1</span><span class="o">;</span> <span class="o">}</span>
+<span class="o">#</span> <span class="k">let</span> <span class="k">rec</span> <span class="n">v1</span> <span class="o">=</span> <span class="o">{</span> <span class="n">foo1</span><span class="o">=</span><span class="mi">1</span><span class="o">;</span> <span class="n">bar1</span><span class="o">=</span><span class="n">v2</span> <span class="o">}</span> <span class="ow">and</span> <span class="n">v2</span> <span class="o">=</span> <span class="o">{</span> <span class="n">foo2</span><span class="o">=</span><span class="mi">2</span><span class="o">;</span> <span class="n">bar2</span><span class="o">=</span><span class="n">v1</span> <span class="o">};;</span>
+<span class="o">&lt;</span><span class="n">lots</span> <span class="k">of</span> <span class="n">text</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="n">v1</span> <span class="o">==</span> <span class="n">v1</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="bp">true</span>
+<span class="o">#</span> <span class="n">phys_equal</span> <span class="n">v1</span> <span class="n">v1</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="bp">true</span>
+<span class="o">#</span> <span class="n">v1</span> <span class="o">=</span> <span class="n">v1</span> <span class="o">;;</span>
+<span class="o">&lt;</span><span class="n">press</span> <span class="o">^</span><span class="nc">Z</span> <span class="ow">and</span> <span class="n">kill</span> <span class="n">the</span> <span class="n">process</span> <span class="n">now</span><span class="o">&gt;</span>
+</pre></div></section></section><section><h1 id="sets">Sets</h1><p id="idp10048624">
+        Sometimes, instead of keeping track of a set of key/value pairs,
+        you just want a data-type for keeping track of a set of keys.
+        You could build this on top of a map by representing a set of
+        values by a map whose data type is <code>unit</code>. But
+        a more idiomatic (and efficient) solution is to use Core's set
+        type, which is similar in design and spirit to the map type,
+        while having an API better tuned to working with sets, and a
+        lower memory footprint. Here's a simple example:
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">dedup</span> <span class="o">~</span><span class="n">comparator</span> <span class="n">l</span> <span class="o">=</span>
+    <span class="nn">List</span><span class="p">.</span><span class="n">fold</span> <span class="n">l</span> <span class="o">~</span><span class="n">init</span><span class="o">:(</span><span class="nn">Set</span><span class="p">.</span><span class="n">empty</span> <span class="o">~</span><span class="n">comparator</span><span class="o">)</span> <span class="o">~</span><span class="n">f</span><span class="o">:</span><span class="nn">Set</span><span class="p">.</span><span class="n">add</span>
+    <span class="o">|&gt;</span> <span class="nn">Set</span><span class="p">.</span><span class="n">to_list</span>
+  <span class="o">;;</span>
+<span class="k">val</span> <span class="n">dedup</span> <span class="o">:</span> <span class="n">comparator</span><span class="o">:(</span><span class="k">'</span><span class="n">a</span><span class="o">,</span> <span class="k">'</span><span class="n">b</span><span class="o">)</span> <span class="nn">Core</span><span class="p">.</span><span class="nn">Comparator</span><span class="p">.</span><span class="n">t_</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">a</span> <span class="kt">list</span> <span class="o">=</span>
+  <span class="o">&lt;</span><span class="k">fun</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="n">dedup</span> <span class="o">~</span><span class="n">comparator</span><span class="o">:</span><span class="nn">Int</span><span class="p">.</span><span class="n">comparator</span> <span class="o">[</span><span class="mi">8</span><span class="o">;</span><span class="mi">3</span><span class="o">;</span><span class="mi">2</span><span class="o">;</span><span class="mi">3</span><span class="o">;</span><span class="mi">7</span><span class="o">;</span><span class="mi">8</span><span class="o">;</span><span class="mi">10</span><span class="o">];;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="kt">list</span> <span class="o">=</span> <span class="o">[</span><span class="mi">2</span><span class="o">;</span> <span class="mi">3</span><span class="o">;</span> <span class="mi">7</span><span class="o">;</span> <span class="mi">8</span><span class="o">;</span> <span class="mi">10</span><span class="o">]</span>
+</pre></div><p id="idp10051600">
+        In addition to the operators you would expect to have for maps,
+        sets support the traditional set operations, including union,
+        intersection and set difference. And, as with maps, we can
+        create sets based on type-specific comparators or on the
+        polymorphic comparator.
+      </p><aside class="warning"><h1> 
+      The perils of polymorphic compare
+      </h1><p id="idp10053024">
+        Polymorphic compare is highly convenient, but it has serious
+        downsides as well, and should be used with care. In particular,
+        polymorphic compare has a fixed algorithm for comparing values
+        of any type, and that algorithm can sometimes yield surprising
+        results.
+      </p><p id="idp10053728">
+        To understand what's wrong with polymorphic compare, you need to
+        understand a bit about how it works. Polymorphic compare is
+        <span><em>structural</em></span>, in that it operates directly on
+        the runtime-representation of OCaml values, walking the
+        structure of the values in question without regard for their
+        type.
+      </p><p id="idp10054896">
+        This is convenient because it provides a comparison function
+        that works for most OCaml values, and largely behaves as you
+        would expect. For example, on <code>int</code>s and
+        <code>float</code>s it acts as you would expect a numeric
+        comparison function to act. For simple containers like strings
+        and lists and arrays it operates as a lexicographic comparison.
+        And except for closures and values from outside of the OCaml
+        heap, it works on almost every OCaml type.
+      </p><p id="idp10057168">
+        But sometimes, a structural comparison is not what you want.
+        Sets are a great example of this. Consider the following two
+        sets.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="o">(</span><span class="n">s1</span><span class="o">,</span><span class="n">s2</span><span class="o">)</span> <span class="o">=</span> <span class="o">(</span><span class="nn">Int</span><span class="p">.</span><span class="nn">Set</span><span class="p">.</span><span class="n">of_list</span> <span class="o">[</span><span class="mi">1</span><span class="o">;</span><span class="mi">2</span><span class="o">],</span>
+                 <span class="nn">Int</span><span class="p">.</span><span class="nn">Set</span><span class="p">.</span><span class="n">of_list</span> <span class="o">[</span><span class="mi">2</span><span class="o">;</span><span class="mi">1</span><span class="o">]);;</span>
+<span class="k">val</span> <span class="n">s1</span> <span class="o">:</span> <span class="nn">Int</span><span class="p">.</span><span class="nn">Set</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">abstr</span><span class="o">&gt;</span>
+<span class="k">val</span> <span class="n">s2</span> <span class="o">:</span> <span class="nn">Int</span><span class="p">.</span><span class="nn">Set</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">abstr</span><span class="o">&gt;</span>
+</pre></div><p id="idp10058880">
+        Logically, these two sets should be equal, and that's the result
+        that you get if you call <code>Set.equal</code> on them.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Set</span><span class="p">.</span><span class="n">equal</span> <span class="n">s1</span> <span class="n">s2</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="bp">true</span>
+</pre></div><p id="idp10061088">
+        But because the elements were added in different orders, the
+        layout of the trees underlying the sets will be different. As
+        such, a structural comparison function will conclude that
+        they're different.
+      </p><p id="idp10061728">
+        Let's see what happens if we use polymorphic compare to test for
+        equality by way of the <code>=</code> operator. Comparing
+        the maps directly will fail at runtime because the comparators
+        stored within the sets contain function values.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="n">s1</span> <span class="o">=</span> <span class="n">s2</span><span class="o">;;</span>
+<span class="nc">Exception</span><span class="o">:</span> <span class="o">(</span><span class="nc">Invalid_argument</span> <span class="s2">&quot;equal: functional value&quot;</span><span class="o">).</span>
+</pre></div><p id="idp10064096">
+        We can however use the function <code>Set.to_tree</code>
+        to expose the underlying tree without the attached comparator.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="nn">Set</span><span class="p">.</span><span class="n">to_tree</span> <span class="n">s1</span> <span class="o">=</span> <span class="nn">Set</span><span class="p">.</span><span class="n">to_tree</span> <span class="n">s2</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="bp">false</span>
+</pre></div><p id="idp10066320">
+        This can cause real and quite subtle bugs. If, for example, you
+        use a map whose keys contain sets, then the map built with the
+        polymorphic comparator will behave incorrectly, separating out
+        keys that should be aggregated together. Even worse, it will
+        work sometimes and fail others, since if the sets are built in a
+        consistent order, then they will work as expected, but once the
+        order changes, the behavior will change.
+      </p><p id="idp10067696">
+        For this reason, it's preferable to avoid polymorphic compare
+        for serious applications.
+      </p></aside></section><section><h1 id="satisfying-the-comparable.s-interface">Satisfying the <code>Comparable.S</code>
+      interface</h1><p id="idp10070416">
+        Core's <code>Comparable.S</code> interface includes a lot
+        of useful functionality, including support for working with maps
+        and sets. In particular, <code>Comparable.S</code>
+        requires the presence of the <code>Map</code> and
+        <code>Set</code> sub-modules as well as a comparator.
+      </p><p id="idp10073808">
+<code>Comparable.S</code> is satisfied by most of the
+        types in Core, but the question arises of how to satisfy the
+        comparable interface for a new type that you design. Certainly
+        implementing all of the required functionality from scratch
+        would be an absurd amount of work.
+      </p><p id="idp10075184">
+        The module <code>Comparable</code> contains a number of
+        functors to help you do just this. The simplest one of these is
+        <code>Comparable.Make</code>, which takes as an input any
+        module that satisfies the following interface:
+      </p><div class="highlight"><pre><span class="k">sig</span>
+  <span class="k">type</span> <span class="n">t</span>
+  <span class="k">val</span> <span class="n">sexp_of_t</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span>
+  <span class="k">val</span> <span class="n">t_of_sexp</span> <span class="o">:</span> <span class="nn">Sexp</span><span class="p">.</span><span class="n">t</span> <span class="o">-&gt;</span> <span class="n">t</span>
+  <span class="k">val</span> <span class="n">compare</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="kt">int</span>
+<span class="k">end</span>
+</pre></div><p id="idp10078336">
+        In other words, it expects a type with a comparison function as
+        well as functions for converting to and from
+        <span><em>s-expressions</em></span>. S-expressions are a
+        serialization format used commonly in Core, which we'll discuss
+        more in
+        <a href="data-serialization-with-s-expressions.html">Chapter 17, <i>Data Serialization with S-Expressions</i></a>.
+        In the meantime, we can just use the
+        <code>with sexp</code> declaration that comes from the
+        <code>sexplib</code> syntax extension to create
+        s-expression converters for us. S-expression converters can also
+        be written by hand.
+      </p><p id="idp10081776">
+        The following example shows how this all fits together,
+        following the same basic pattern for using functors described in
+        <a href="functors.html#extending-modules">the section called “Extending modules”</a>.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">module</span> <span class="nc">Foo_and_bar</span> <span class="o">:</span> <span class="k">sig</span>
+    <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">{</span> <span class="n">foo</span><span class="o">:</span> <span class="nn">Int</span><span class="p">.</span><span class="nn">Set</span><span class="p">.</span><span class="n">t</span><span class="o">;</span> <span class="n">bar</span><span class="o">:</span> <span class="kt">string</span> <span class="o">}</span>
+    <span class="k">include</span> <span class="nn">Comparable</span><span class="p">.</span><span class="nc">S</span> <span class="k">with</span> <span class="k">type</span> <span class="n">t</span> <span class="o">:=</span> <span class="n">t</span>
+  <span class="k">end</span> <span class="o">=</span> <span class="k">struct</span>
+    <span class="k">module</span> <span class="nc">T</span> <span class="o">=</span> <span class="k">struct</span>
+      <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">{</span> <span class="n">foo</span><span class="o">:</span> <span class="nn">Int</span><span class="p">.</span><span class="nn">Set</span><span class="p">.</span><span class="n">t</span><span class="o">;</span> <span class="n">bar</span><span class="o">:</span> <span class="kt">string</span> <span class="o">}</span> <span class="k">with</span> <span class="n">sexp</span>
+      <span class="k">let</span> <span class="n">compare</span> <span class="n">t1</span> <span class="n">t2</span> <span class="o">=</span>
+        <span class="k">let</span> <span class="n">c</span> <span class="o">=</span> <span class="nn">Int</span><span class="p">.</span><span class="nn">Set</span><span class="p">.</span><span class="n">compare</span> <span class="n">t1</span><span class="o">.</span><span class="n">foo</span> <span class="n">t2</span><span class="o">.</span><span class="n">foo</span> <span class="k">in</span>
+        <span class="k">if</span> <span class="n">c</span> <span class="o">&lt;&gt;</span> <span class="mi">0</span> <span class="k">then</span> <span class="n">c</span> <span class="k">else</span> <span class="nn">String</span><span class="p">.</span><span class="n">compare</span> <span class="n">t1</span><span class="o">.</span><span class="n">bar</span> <span class="n">t2</span><span class="o">.</span><span class="n">bar</span>
+    <span class="k">end</span>
+    <span class="k">include</span> <span class="nc">T</span>
+    <span class="k">include</span> <span class="nn">Comparable</span><span class="p">.</span><span class="nc">Make</span><span class="o">(</span><span class="nc">T</span><span class="o">)</span>
+  <span class="k">end</span><span class="o">;;</span>
+</pre></div><p id="idp10084544">
+        We don't include the full response from the top-level because it
+        is quite lengthy, but <code>Foo_and_bar</code> does
+        satisfy <code>Comparable.S</code>.
+      </p><p id="idp10086496">
+        In the above, we wrote the comparison function by hand, but this
+        isn't strictly necessary. Core ships with a syntax extension
+        called <code>comparelib</code> which will create a
+        comparison function from a type definition. Using it, we can
+        rewrite the above example as follows.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">module</span> <span class="nc">Foo_and_bar</span> <span class="o">:</span> <span class="k">sig</span>
+    <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">{</span> <span class="n">foo</span><span class="o">:</span> <span class="nn">Int</span><span class="p">.</span><span class="nn">Set</span><span class="p">.</span><span class="n">t</span><span class="o">;</span> <span class="n">bar</span><span class="o">:</span> <span class="kt">string</span> <span class="o">}</span>
+    <span class="k">include</span> <span class="nn">Comparable</span><span class="p">.</span><span class="nc">S</span> <span class="k">with</span> <span class="k">type</span> <span class="n">t</span> <span class="o">:=</span> <span class="n">t</span>
+  <span class="k">end</span> <span class="o">=</span> <span class="k">struct</span>
+    <span class="k">module</span> <span class="nc">T</span> <span class="o">=</span> <span class="k">struct</span>
+      <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">{</span> <span class="n">foo</span><span class="o">:</span> <span class="nn">Int</span><span class="p">.</span><span class="nn">Set</span><span class="p">.</span><span class="n">t</span><span class="o">;</span> <span class="n">bar</span><span class="o">:</span> <span class="kt">string</span> <span class="o">}</span> <span class="k">with</span> <span class="n">sexp</span><span class="o">,</span> <span class="n">compare</span>
+    <span class="k">end</span>
+    <span class="k">include</span> <span class="nc">T</span>
+    <span class="k">include</span> <span class="nn">Comparable</span><span class="p">.</span><span class="nc">Make</span><span class="o">(</span><span class="nc">T</span><span class="o">)</span>
+  <span class="k">end</span><span class="o">;;</span>
+</pre></div><p id="idp10089120">
+        The comparison function created by <code>comparelib</code>
+        for a given type will call out to the comparison functions for
+        its component types. As a result, the <code>foo</code>
+        field will be compared using <code>Int.Set.compare</code>.
+        This is different, and sander, than the structural comparison
+        done by polymorphic compare.
+      </p><p id="idp10091904">
+        If you want your comparison function to behave in a specific
+        way, you should still write your own comparison function by
+        hand; but if all you want is a total order suitable for creating
+        maps and sets with, then <code>comparelib</code> is a good
+        way to go.
+      </p><p id="idp10093280">
+        You can also satisfy the <code>Comparable.S</code>
+        interface using polymorphic compare.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">module</span> <span class="nc">Foo_and_bar</span> <span class="o">:</span> <span class="k">sig</span>
+    <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">{</span> <span class="n">foo</span><span class="o">:</span> <span class="kt">int</span><span class="o">;</span> <span class="n">bar</span><span class="o">:</span> <span class="kt">string</span> <span class="o">}</span>
+    <span class="k">include</span> <span class="nn">Comparable</span><span class="p">.</span><span class="nc">S</span> <span class="k">with</span> <span class="k">type</span> <span class="n">t</span> <span class="o">:=</span> <span class="n">t</span>
+  <span class="k">end</span> <span class="o">=</span> <span class="k">struct</span>
+    <span class="k">module</span> <span class="nc">T</span> <span class="o">=</span> <span class="k">struct</span>
+      <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">{</span> <span class="n">foo</span><span class="o">:</span> <span class="kt">int</span><span class="o">;</span> <span class="n">bar</span><span class="o">:</span> <span class="kt">string</span> <span class="o">}</span> <span class="k">with</span> <span class="n">sexp</span>
+    <span class="k">end</span>
+    <span class="k">include</span> <span class="nc">T</span>
+    <span class="k">include</span> <span class="nn">Comparable</span><span class="p">.</span><span class="nc">Poly</span><span class="o">(</span><span class="nc">T</span><span class="o">)</span>
+  <span class="k">end</span><span class="o">;;</span>
+</pre></div><p id="idp10095664">
+        That said, for reasons we discussed earlier, polymorphic compare
+        should be used sparingly.
+      </p></section></section><section><h1 id="hashtables">Hashtables</h1><p id="idp10097536">
+      Hashtables are the imperative cousin of maps. We walked over a
+      basic hashtable implementation in
+      <a href="imperative-programming-1.html">Chapter 8, <i>Imperative Programming</i></a>, so in this
+      section we'll mostly discuss the pragmatics of Core's
+      <code>Hashtbl</code> module. We'll cover this material more
+      briefly than we did with maps, because many of the concepts are
+      shared.
+    </p><p id="idp10099760">
+      Hashtables differ from maps in a few key ways. First, hashtables
+      are mutable, meaning that adding a key/value pair to a hashtable
+      modifies the table, rather than creating a new table with the
+      binding added. Second, hashtables generally have better
+      time-complexity than maps, providing constant time lookup and
+      modifications as opposed to logarithmic for maps. And finally,
+      just as maps depend on having a comparison function for creating
+      the ordered binary tree that underlies a map, hashtables depend on
+      having a <span><em>hash function</em></span>,
+      <span><em>i.e.</em></span>, a function for converting a key to an
+      integer.
+    </p><p id="idp10101680">
+      When creating a hashtable, we need to provide a value of type
+      <span><em>hashable</em></span> which includes among other things
+      the function for hashing the key type. This is analogous to the
+      comparator used for creating maps.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">table</span> <span class="o">=</span> <span class="nn">Hashtbl</span><span class="p">.</span><span class="n">create</span> <span class="o">~</span><span class="n">hashable</span><span class="o">:</span><span class="nn">String</span><span class="p">.</span><span class="n">hashable</span> <span class="bp">()</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">table</span> <span class="o">:</span> <span class="o">(</span><span class="kt">string</span><span class="o">,</span> <span class="k">'</span><span class="o">_</span><span class="n">a</span><span class="o">)</span> <span class="nn">Hashtbl</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">abstr</span><span class="o">&gt;</span>
+<span class="o">#</span> <span class="nn">Hashtbl</span><span class="p">.</span><span class="n">replace</span> <span class="n">table</span> <span class="o">~</span><span class="n">key</span><span class="o">:</span><span class="s2">&quot;three&quot;</span> <span class="o">~</span><span class="n">data</span><span class="o">:</span><span class="mi">3</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">unit</span> <span class="o">=</span> <span class="bp">()</span>
+<span class="o">#</span> <span class="nn">Hashtbl</span><span class="p">.</span><span class="n">find</span> <span class="n">table</span> <span class="s2">&quot;three&quot;</span><span class="o">;;</span>
+<span class="o">-</span> <span class="o">:</span> <span class="kt">int</span> <span class="n">option</span> <span class="o">=</span> <span class="nc">Some</span> <span class="mi">3</span>
+</pre></div><p id="idp10104144">
+      The <code>hashable</code> value is included as part of the
+      <code>Hashable.S</code> interface, which is satisfied by
+      most types in Core. The <code>Hashable.S</code> interface
+      also includes a <code>Table</code> sub-module which provides
+      more convenient creation functions.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">table</span> <span class="o">=</span> <span class="nn">String</span><span class="p">.</span><span class="nn">Table</span><span class="p">.</span><span class="n">create</span> <span class="bp">()</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">table</span> <span class="o">:</span> <span class="k">'</span><span class="o">_</span><span class="n">a</span> <span class="nn">String</span><span class="p">.</span><span class="nn">Table</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">abstr</span><span class="o">&gt;</span>
+</pre></div><p id="idp10108640">
+      There is also a polymorphic <code>hashable</code> value,
+      corresponding to the polymorphic hash function provided by the
+      OCaml runtime, for cases where you don't have a hash function for
+      your specific type.
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">table</span> <span class="o">=</span> <span class="nn">Hashtbl</span><span class="p">.</span><span class="n">create</span> <span class="o">~</span><span class="n">hashable</span><span class="o">:</span><span class="nn">Hashtbl</span><span class="p">.</span><span class="nn">Poly</span><span class="p">.</span><span class="n">hashable</span> <span class="bp">()</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">table</span> <span class="o">:</span> <span class="o">(</span><span class="k">'</span><span class="o">_</span><span class="n">a</span><span class="o">,</span> <span class="k">'</span><span class="o">_</span><span class="n">b</span><span class="o">)</span> <span class="nn">Hashtbl</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">abstr</span><span class="o">&gt;</span>
+</pre></div><p id="idp10111104">
+      Or, equivalently:
+    </p><div class="highlight"><pre><span class="o">#</span> <span class="k">let</span> <span class="n">table</span> <span class="o">=</span> <span class="nn">Hashtbl</span><span class="p">.</span><span class="nn">Poly</span><span class="p">.</span><span class="n">create</span> <span class="bp">()</span><span class="o">;;</span>
+<span class="k">val</span> <span class="n">table</span> <span class="o">:</span> <span class="o">(</span><span class="k">'</span><span class="o">_</span><span class="n">a</span><span class="o">,</span> <span class="k">'</span><span class="o">_</span><span class="n">b</span><span class="o">)</span> <span class="nn">Hashtbl</span><span class="p">.</span><span class="n">t</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">abstr</span><span class="o">&gt;</span>
+</pre></div><p id="idp10112640">
+      Note that, unlike the comparators used with maps and sets,
+      hashables don't show up in the type of a
+      <code>Hashtbl.t</code>. That's because hashtables don't have
+      operations that operate on multiple hashtables that depend on
+      those tables having the same hash function, in that way that
+      <code>Map.symmetric_diff</code> and
+      <code>Set.union</code> depend on their arguments using the
+      same comparison function.
+    </p><section><h1 id="satisfying-the-hashable.s-interface">Satisfying the <code>Hashable.S</code>
+      interface</h1><p id="idp10117488">
+        Most types in Core satisfy the <code>Hashable.S</code>
+        interface, but as with the <code>Comparable.S</code>
+        interface, the question remains of how one should satisfy this
+        interface with a new type. Again, the answer is to use a functor
+        to build the necessary functionality; in this case,
+        <code>Hashable.Make</code>. Note that we use OCaml's
+        <code>lxor</code> operator for doing the
+        &quot;logical&quot; (<span><em>i.e.</em></span>, bit-wise)
+        exclusive-or of the hashes from the component values.
+      </p><div class="highlight"><pre><span class="o">#</span> <span class="k">module</span> <span class="nc">Foo_and_bar</span> <span class="o">:</span> <span class="k">sig</span>
+    <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">{</span> <span class="n">foo</span><span class="o">:</span> <span class="kt">int</span><span class="o">;</span> <span class="n">bar</span><span class="o">:</span> <span class="kt">string</span> <span class="o">}</span>
+    <span class="k">include</span> <span class="nn">Hashable</span><span class="p">.</span><span class="nc">S</span> <span class="k">with</span> <span class="k">type</span> <span class="n">t</span> <span class="o">:=</span> <span class="n">t</span>
+  <span class="k">end</span> <span class="o">=</span> <span class="k">struct</span>
+    <span class="k">module</span> <span class="nc">T</span> <span class="o">=</span> <span class="k">struct</span>
+      <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">{</span> <span class="n">foo</span><span class="o">:</span> <span class="kt">int</span><span class="o">;</span> <span class="n">bar</span><span class="o">:</span> <span class="kt">string</span> <span class="o">}</span> <span class="k">with</span> <span class="n">sexp</span><span class="o">,</span> <span class="n">compare</span>
+      <span class="k">let</span> <span class="n">hash</span> <span class="n">t</span> <span class="o">=</span>
+        <span class="o">(</span><span class="nn">Int</span><span class="p">.</span><span class="n">hash</span> <span class="n">t</span><span class="o">.</span><span class="n">foo</span><span class="o">)</span> <span class="ow">lxor</span> <span class="o">(</span><span class="nn">String</span><span class="p">.</span><span class="n">hash</span> <span class="n">t</span><span class="o">.</span><span class="n">bar</span><span class="o">)</span>
+    <span class="k">end</span>
+    <span class="k">include</span> <span class="nc">T</span>
+    <span class="k">include</span> <span class="nn">Hashable</span><span class="p">.</span><span class="nc">Make</span><span class="o">(</span><span class="nc">T</span><span class="o">)</span>
+  <span class="k">end</span><span class="o">;;</span>
+</pre></div><p id="idp10122832">
+        Note that in order to satisfy hashable, one also needs to
+        provide a comparison function. That's because Core's hashtables
+        use ordered binary tree data-structure for the hash-buckets, so
+        that performance of the table degrades gracefully in the case of
+        pathologically bad choice of hash function.
+      </p><p id="idp10123568">
+        There is currently no analogue of <code>comparelib</code>
+        for auto-generation of hash-functions, so you do need to either
+        write the hash-function by hand, or use the built-in polymorphic
+        hash function, <code>Hashtbl.hash</code>.
+      </p></section></section><section><h1 id="choosing-between-maps-and-hashtables">Choosing between maps and hashtables</h1><p id="idp10126960">
+      Maps and hashtables overlap enough in functionality that it's not
+      always clear when to choose one or the other. Maps, by virtue of
+      being immutable, are generally the default choice in OCaml by
+      virtue of fitting most naturally with otherwise functional code.
+      OCaml also has good support for imperative programming, though,
+      and when programming in an imperative idiom, hashtables are often
+      the more natural choice.
+    </p><p id="idp10127824">
+      Programming idioms aside, there are significant performance
+      differences between maps and hashtables as well. For code that is
+      dominated by updates and lookups, hashtables are a clear
+      performance win, and the win is clearer the larger the size of the
+      tables.
+    </p><p id="idp10128512">
+      The best way of answering a performance question is by running a
+      benchmark, so let's do just that. The following benchmark uses the
+      <code>core_bench</code> library, and it compares maps and
+      hashtables under a very simple workload. Here, we're keeping track
+      of a set of 1000 different integer keys, and cycling over the keys
+      and updating the values they contain. Note that we use the
+      <code>Map.change</code> and
+      <code>Hashtbl.change</code> functions to update the
+      respective data structures.
+    </p><div class="highlight"><pre><span class="c">(* file: map_vs_hash.ml *)</span>
+
+<span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+<span class="k">open</span> <span class="nn">Core_bench</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="k">let</span> <span class="n">map_iter</span> <span class="o">~</span><span class="n">num_keys</span> <span class="o">~</span><span class="n">iterations</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="k">rec</span> <span class="n">loop</span> <span class="n">i</span> <span class="n">map</span> <span class="o">=</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="k">then</span> <span class="bp">()</span>
+    <span class="k">else</span> <span class="n">loop</span> <span class="o">(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)</span>
+           <span class="o">(</span><span class="nn">Map</span><span class="p">.</span><span class="n">change</span> <span class="n">map</span> <span class="o">(</span><span class="n">i</span> <span class="ow">mod</span> <span class="n">num_keys</span><span class="o">)</span> <span class="o">(</span><span class="k">fun</span> <span class="n">current</span> <span class="o">-&gt;</span>
+              <span class="nc">Some</span> <span class="o">(</span><span class="mi">1</span> <span class="o">+</span> <span class="nn">Option</span><span class="p">.</span><span class="n">value</span> <span class="o">~</span><span class="n">default</span><span class="o">:</span><span class="mi">0</span> <span class="n">current</span><span class="o">)))</span>
+  <span class="k">in</span>
+  <span class="n">loop</span> <span class="n">iterations</span> <span class="nn">Int</span><span class="p">.</span><span class="nn">Map</span><span class="p">.</span><span class="n">empty</span>
+
+<span class="k">let</span> <span class="n">table_iter</span> <span class="o">~</span><span class="n">num_keys</span> <span class="o">~</span><span class="n">iterations</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">table</span> <span class="o">=</span> <span class="nn">Int</span><span class="p">.</span><span class="nn">Table</span><span class="p">.</span><span class="n">create</span> <span class="o">~</span><span class="n">size</span><span class="o">:</span><span class="n">num_keys</span> <span class="bp">()</span> <span class="k">in</span>
+  <span class="k">let</span> <span class="k">rec</span> <span class="n">loop</span> <span class="n">i</span> <span class="o">=</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="k">then</span> <span class="bp">()</span>
+    <span class="k">else</span> <span class="o">(</span>
+      <span class="nn">Hashtbl</span><span class="p">.</span><span class="n">change</span> <span class="n">table</span> <span class="o">(</span><span class="n">i</span> <span class="ow">mod</span> <span class="n">num_keys</span><span class="o">)</span> <span class="o">(</span><span class="k">fun</span> <span class="n">current</span> <span class="o">-&gt;</span>
+        <span class="nc">Some</span> <span class="o">(</span><span class="mi">1</span> <span class="o">+</span> <span class="nn">Option</span><span class="p">.</span><span class="n">value</span> <span class="o">~</span><span class="n">default</span><span class="o">:</span><span class="mi">0</span> <span class="n">current</span><span class="o">));</span>
+      <span class="n">loop</span> <span class="o">(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)</span>
+    <span class="o">)</span>
+  <span class="k">in</span>
+  <span class="n">loop</span> <span class="n">iterations</span>
+
+<span class="k">let</span> <span class="n">tests</span> <span class="o">~</span><span class="n">num_keys</span> <span class="o">~</span><span class="n">iterations</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">test</span> <span class="n">name</span> <span class="n">f</span> <span class="o">=</span> <span class="nn">Bench</span><span class="p">.</span><span class="nn">Test</span><span class="p">.</span><span class="n">create</span> <span class="n">f</span> <span class="o">~</span><span class="n">name</span> <span class="k">in</span>
+  <span class="o">[</span> <span class="n">test</span> <span class="s2">&quot;map&quot;</span>   <span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span> <span class="n">map_iter</span>   <span class="o">~</span><span class="n">num_keys</span> <span class="o">~</span><span class="n">iterations</span><span class="o">)</span>
+  <span class="o">;</span> <span class="n">test</span> <span class="s2">&quot;table&quot;</span> <span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span> <span class="n">table_iter</span> <span class="o">~</span><span class="n">num_keys</span> <span class="o">~</span><span class="n">iterations</span><span class="o">)</span>
+  <span class="o">]</span>
+
+<span class="k">let</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="n">tests</span> <span class="o">~</span><span class="n">num_keys</span><span class="o">:</span><span class="mi">1000</span> <span class="o">~</span><span class="n">iterations</span><span class="o">:</span><span class="mi">100_000</span>
+  <span class="o">|&gt;</span> <span class="nn">Bench</span><span class="p">.</span><span class="n">make_command</span>
+  <span class="o">|&gt;</span> <span class="nn">Command</span><span class="p">.</span><span class="n">run</span>
+</pre></div><p id="idp10133424">
+      The results, shown below, show the hashtable version to be around
+      four times faster than the map version.
+    </p><pre id="idp10133952">
+bench $ ./map_vs_hash.native -clear-columns name time speedup
+Estimated testing time 20s (change using -quota SECS).
+┌───────┬────────────┬─────────┐
+│ Name  │  Time (ns) │ Speedup │
+├───────┼────────────┼─────────┤
+│ map   │ 31_584_468 │    1.00 │
+│ table │  8_157_439 │    3.87 │
+└───────┴────────────┴─────────┘
+</pre><p id="idp10135456">
+      We can make the speedup smaller or larger depending on the details
+      of the test; for example, it will very with the number of distinct
+      keys. But overall, for code that is heavy on sequences of querying
+      and updating a set of key/value pairs, hashtables will
+      significantly outperform maps.
+    </p><p id="idp10136176">
+      Hashtables are not always the faster choice, though. In
+      particular, maps are often more performant in situations where you
+      want to take advantage of maps as a persistent data-structure. In
+      particular, if you create map <code>m'</code> by calling
+      <code>Map.add</code> on some other map <code>m</code>,
+      then <code>m</code> and <code>m'</code> can be used
+      independently, and in fact share most of their underlying storage.
+      Thus, if you need to keep in memory at the same time multiple
+      different related collections of key/value pairs, then a map is
+      typically a much more efficient data structure to do it with.
+    </p><p id="idp10140576">
+      Here's a benchmark to demonstrates this. In it, we create a list
+      of maps (or hashtables) that are built up by iteratively applying
+      updates, starting from an empty map. In the hashtable
+      implementation, we do this by calling
+      <code>Hashtbl.copy</code> to get the list entries.
+    </p><div class="highlight"><pre><span class="c">(* file: map_vs_hash2.ml *)</span>
+
+<span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+<span class="k">open</span> <span class="nn">Core_bench</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="k">let</span> <span class="n">create_maps</span> <span class="o">~</span><span class="n">num_keys</span> <span class="o">~</span><span class="n">iterations</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="k">rec</span> <span class="n">loop</span> <span class="n">i</span> <span class="n">map</span> <span class="o">=</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="k">then</span> <span class="bp">[]</span>
+    <span class="k">else</span>
+      <span class="k">let</span> <span class="n">new_map</span> <span class="o">=</span>
+        <span class="nn">Map</span><span class="p">.</span><span class="n">change</span> <span class="n">map</span> <span class="o">(</span><span class="n">i</span> <span class="ow">mod</span> <span class="n">num_keys</span><span class="o">)</span> <span class="o">(</span><span class="k">fun</span> <span class="n">current</span> <span class="o">-&gt;</span>
+          <span class="nc">Some</span> <span class="o">(</span><span class="mi">1</span> <span class="o">+</span> <span class="nn">Option</span><span class="p">.</span><span class="n">value</span> <span class="o">~</span><span class="n">default</span><span class="o">:</span><span class="mi">0</span> <span class="n">current</span><span class="o">))</span>
+      <span class="k">in</span>
+      <span class="n">new_map</span> <span class="o">::</span> <span class="n">loop</span> <span class="o">(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)</span> <span class="n">new_map</span>
+  <span class="k">in</span>
+  <span class="n">loop</span> <span class="n">iterations</span> <span class="nn">Int</span><span class="p">.</span><span class="nn">Map</span><span class="p">.</span><span class="n">empty</span>
+
+<span class="k">let</span> <span class="n">create_tables</span> <span class="o">~</span><span class="n">num_keys</span> <span class="o">~</span><span class="n">iterations</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">table</span> <span class="o">=</span> <span class="nn">Int</span><span class="p">.</span><span class="nn">Table</span><span class="p">.</span><span class="n">create</span> <span class="o">~</span><span class="n">size</span><span class="o">:</span><span class="n">num_keys</span> <span class="bp">()</span> <span class="k">in</span>
+  <span class="k">let</span> <span class="k">rec</span> <span class="n">loop</span> <span class="n">i</span> <span class="o">=</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="k">then</span> <span class="bp">[]</span>
+    <span class="k">else</span> <span class="o">(</span>
+      <span class="nn">Hashtbl</span><span class="p">.</span><span class="n">change</span> <span class="n">table</span> <span class="o">(</span><span class="n">i</span> <span class="ow">mod</span> <span class="n">num_keys</span><span class="o">)</span> <span class="o">(</span><span class="k">fun</span> <span class="n">current</span> <span class="o">-&gt;</span>
+        <span class="nc">Some</span> <span class="o">(</span><span class="mi">1</span> <span class="o">+</span> <span class="nn">Option</span><span class="p">.</span><span class="n">value</span> <span class="o">~</span><span class="n">default</span><span class="o">:</span><span class="mi">0</span> <span class="n">current</span><span class="o">));</span>
+      <span class="k">let</span> <span class="n">new_table</span> <span class="o">=</span> <span class="nn">Hashtbl</span><span class="p">.</span><span class="n">copy</span> <span class="n">table</span> <span class="k">in</span>
+      <span class="n">new_table</span> <span class="o">::</span> <span class="n">loop</span> <span class="o">(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="o">)</span>
+    <span class="o">)</span>
+  <span class="k">in</span>
+  <span class="n">loop</span> <span class="n">iterations</span>
+
+<span class="k">let</span> <span class="n">tests</span> <span class="o">~</span><span class="n">num_keys</span> <span class="o">~</span><span class="n">iterations</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">test</span> <span class="n">name</span> <span class="n">f</span> <span class="o">=</span> <span class="nn">Bench</span><span class="p">.</span><span class="nn">Test</span><span class="p">.</span><span class="n">create</span> <span class="n">f</span> <span class="o">~</span><span class="n">name</span> <span class="k">in</span>
+  <span class="o">[</span> <span class="n">test</span> <span class="s2">&quot;map&quot;</span>   <span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span> <span class="n">ignore</span> <span class="o">(</span><span class="n">create_maps</span>   <span class="o">~</span><span class="n">num_keys</span> <span class="o">~</span><span class="n">iterations</span><span class="o">))</span>
+  <span class="o">;</span> <span class="n">test</span> <span class="s2">&quot;table&quot;</span> <span class="o">(</span><span class="k">fun</span> <span class="bp">()</span> <span class="o">-&gt;</span> <span class="n">ignore</span> <span class="o">(</span><span class="n">create_tables</span> <span class="o">~</span><span class="n">num_keys</span> <span class="o">~</span><span class="n">iterations</span><span class="o">))</span>
+  <span class="o">]</span>
+
+<span class="k">let</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="n">tests</span> <span class="o">~</span><span class="n">num_keys</span><span class="o">:</span><span class="mi">50</span> <span class="o">~</span><span class="n">iterations</span><span class="o">:</span><span class="mi">1000</span>
+  <span class="o">|&gt;</span> <span class="nn">Bench</span><span class="p">.</span><span class="n">make_command</span>
+  <span class="o">|&gt;</span> <span class="nn">Command</span><span class="p">.</span><span class="n">run</span>
+</pre></div><p id="idp10143984">
+      Unsurprisingly, maps perform far better than hashtables on this
+      benchmark, in this case by more than a factor of ten.
+    </p><pre id="idp10144512">
+$ ./map_vs_hash2.native -clear-columns name time speedup
+Estimated testing time 20s (change using -quota SECS).
+┌───────┬───────────┬─────────┐
+│ Name  │ Time (ns) │ Speedup │
+├───────┼───────────┼─────────┤
+│ map   │   208_438 │   12.62 │
+│ table │ 2_630_707 │    1.00 │
+└───────┴───────────┴─────────┘
+</pre><p id="idp10146016">
+      These numbers can be made more extreme by increasing the size of
+      the tables or the length of the list.
+    </p><p id="idp10146544">
+      As you can see, the relative performance of trees and maps depends
+      a great deal on the details of how they're used, and so whether to
+      choose one data structure or the other will depend on the details
+      of the application.
+    </p></section>
+
+
+                
+            </article>
+            
+            
+    
+                <nav class="pagination">
+                    
+                        <a rel="previous" href="pt02.html">
+                            &lt; Previous
+                        </a>
+                    
+                    
+                        <a rel="next" href="command-line-parsing.html">
+                            Next &gt;
+                        </a>
+                    
+                </nav>
+            
+            
+            
+            <footer class="footer">
+                <p>Copyright 2012-2013, Jason Hickey, Anil Madhavapeddy and Yaron Minsky. Licensed under <a href="http://creativecommons.org/licenses/by-nc-nd/3.0/us/">CC BY-NC-ND 3.0 US</a>.</p>
+            </footer>
+            
+        </div>
+    
+    </body>
+
+</html>

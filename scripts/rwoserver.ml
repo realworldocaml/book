@@ -23,6 +23,8 @@ open Cohttp_lwt_unix
 let docroot = "./live_site"
 let dataroot = "./fragments"
 
+let github_access_token_cookie = "github_access_token_ssl"
+
 let user = "ocamllabs"
 let repo = "rwo-comments"
 
@@ -48,12 +50,15 @@ module Auth = struct
       return login
 
   let check ~milestone ~login =
-    let _,allowed_users = Config.allowed_users milestone in
-    List.mem login allowed_users
+    match Config.is_public milestone with
+    |true -> true
+    |false -> List.mem login (Config.internal_reviewers) 
 
   let who_has_access ~milestone = 
-    let who,_ = Config.allowed_users milestone in
-    who
+    if Config.is_public milestone then
+      "Public"
+    else
+      "Authors"
 
   let denied =
     let tmpl = Core.Std.In_channel.read_all "forbidden.html.in" in
@@ -141,7 +146,7 @@ module Comment = struct
   (* HTML comment for context *)
   let context_comment ~milestone ~id ~frag =
     let comment_header = sprintf "This comment references this from milestone %s:" milestone in
-    let url = sprintf "http://www.realworldocaml.org/%s/en/html/%s#%s" milestone frag.Para_frag.file id in
+    let url = sprintf "https://realworldocaml.org/%s/en/html/%s#%s" milestone frag.Para_frag.file id in
     sprintf "%s [%s](%s)\n\nContext:\n\n%s" comment_header url url frag.Para_frag.html 
     
   (* Create and edit issue on Github *)
@@ -159,11 +164,6 @@ module Comment = struct
       >>= fun _ -> return issue
     )))
 end
-
-let check_auth req =
-  match Header.get_authorization (Request.headers req) with
-  |Some a when a = Config.auth -> true
-  |Some _ | None -> false
 
 let is_directory path =
   try Sys.is_directory path with _ -> false
@@ -211,9 +211,9 @@ let dispatch ~milestone req =
   let current_cookies = Cookie.Cookie_hdr.extract (Request.headers req) in
   (* Extract the access_token so we can do an ACL check *)
   let access_token =
-    match List.mem_assoc "github_access_token" current_cookies with
+    match List.mem_assoc github_access_token_cookie current_cookies with
     |false -> None
-    |true -> Some (Github.Token.of_string (List.assoc "github_access_token" current_cookies))
+    |true -> Some (Github.Token.of_string (List.assoc github_access_token_cookie current_cookies))
   in
   (* Always set the github_client_id Cookie if not already set *)
   let headers = 
@@ -250,7 +250,7 @@ let dispatch ~milestone req =
   end
   (* No access token and no code, so redirect to Github oAuth login *)
   |None, None ->
-    let redirect_uri = Uri.(with_path (of_string "http://www.realworldocaml.org") (Request.path req)) in
+    let redirect_uri = Uri.(with_path (of_string "https://realworldocaml.org") (Request.path req)) in
     let uri = Github.URI.authorize ~scopes:[`Public_repo] ~redirect_uri 
       ~client_id:Config.client_id () in
     printf "Redirect for auth to %s\n%!" (Uri.to_string uri);
@@ -264,7 +264,7 @@ let dispatch ~milestone req =
     |Some token ->
       (* Set a cookie with the token and redirect without the code param *)
       let token = Github.Token.to_string token in
-      let cookie = Cookie.Set_cookie_hdr.make ("github_access_token", token) in
+      let cookie = Cookie.Set_cookie_hdr.make (github_access_token_cookie, token) in
       let cookie_hdr, cookie_val = Cookie.Set_cookie_hdr.serialize cookie in
       let headers = Header.add headers cookie_hdr cookie_val in
       (* Strip out the code GET param and redirect to the original URL *)
@@ -278,10 +278,10 @@ let callback con_id ?body req =
   printf "%s %s [%s]\n%!" (Code.string_of_method (Request.meth req)) path 
     (String.concat "," (List.map (fun (h,v) -> sprintf "%s=%s" h (String.concat "," v)) 
       (Request.params req)));
-  (* Check that the host is www.realworldocaml.org, as the Github redirect requires
+  (* Check that the host is realworldocaml.org, as the Github redirect requires
    * the exact match, or it'll reject the cross-domain Javascript *)
   match Request.header req "host" with
-  |Some "www.realworldocaml.org" -> begin
+  |Some "realworldocaml.org" -> begin
     match Request.meth req with
     |`POST -> dispatch_post ?body req
     |`GET -> begin
@@ -297,13 +297,14 @@ let callback con_id ?body req =
     end
     |_ -> Server.respond_not_found ()
   end
-  |Some _ | None -> (* redirect to www.realworldocaml.org *)
-    print_endline "redirecting to www.realworldocaml.org";
-    let uri = Uri.with_host (Request.uri req) (Some "www.realworldocaml.org") in
+  |Some _ | None -> (* redirect to realworldocaml.org *)
+    print_endline "redirecting to realworldocaml.org";
+    let uri = Uri.with_host (Request.uri req) (Some "realworldocaml.org") in
+    let uri = Uri.with_port uri (Some 443) in
     Server.respond_redirect ~uri ()
 
 let _ =
   Sys.set_signal Sys.sigpipe Sys.Signal_ignore;
   let conn_closed con_id () = () in
   let spec = { Cohttp_lwt_unix.Server.callback; conn_closed } in
-  Lwt_main.run (Cohttp_lwt_unix.server ~address:"0.0.0.0" ~port:80 spec)
+  Lwt_main.run (Cohttp_lwt_unix.server ~address:"127.0.0.1" ~port:8000 spec)
