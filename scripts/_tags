@@ -1,4 +1,5 @@
-true:package(xmlm,cmdliner)
+true:package(xmlm,cmdliner,str)
+<run_core_toplevel.*>: package(compiler-libs.toplevel)
 true:thread,debug,annot
 <*.ml{,i}>:syntax(camlp4o)
 true: package(core,threads,sexplib.syntax)
