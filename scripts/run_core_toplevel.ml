@@ -15,7 +15,7 @@ let initial_phrases = [
   "open Core.Std" ]
 
 (* Initialise toploop and turn on short-paths *)
-let reset () =
+let reset_toplevel () =
   Toploop.initialize_toplevel_env ();
   Toploop.input_name := ""; (* no filename *)
   Topdirs.dir_directory (Sys.getenv "OCAML_TOPLEVEL_PATH");
@@ -93,7 +93,8 @@ let toploop_eval phrase =
 
 open Core.Std
 let parse_file file =
-  reset ();
+  printf "C: init\n%!";
+  reset_toplevel ();
   List.iter initial_phrases ~f:(fun phrase ->
       match toploop_eval (phrase ^ ";;") with
       | `Normal _ -> ()
@@ -114,7 +115,9 @@ let parse_file file =
   |> List.iter ~f:(fun phrase ->
       if String.is_prefix phrase ~prefix:"#part" then begin
         part := Caml.Scanf.sscanf phrase "#part %d" (fun p -> p);
+        printf "C: part %d -> %s\n%!" !part (ofile !part);
       end else begin
+        printf "X: %s\n%!" phrase;
         match toploop_eval (phrase ^ ";;") with
         | `Normal(s, _, _) ->
           print_part !part (sprintf "# %s ;;\n%s" phrase s)
@@ -123,9 +126,10 @@ let parse_file file =
           exit (-1)
       end
     );
-  Hashtbl.iter parts ~f:(fun ~key ~data ->
-      Out_channel.write_all ("X"^(ofile key)) ~data:(Buffer.contents data)
-    )
+  Hashtbl.iter parts 
+    ~f:(fun ~key ~data ->
+        Out_channel.write_all (ofile key) ~data:(Buffer.contents data)
+      )
 
 let () =
   Command.basic
