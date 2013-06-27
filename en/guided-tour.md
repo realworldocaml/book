@@ -959,7 +959,7 @@ of some element of a list of `scene_element`s.
      | Circle { center; radius } ->
        distance center point < radius
      | Rect { lower_left; width; height } ->
-       point.x > lower_left.x && point.x < lower_left.x +. width
+       point.x    > lower_left.x && point.x < lower_left.x +. width
        && point.y > lower_left.y && point.y < lower_left.y +. height
      | Segment { endpoint1; endpoint2 } -> false
   ;;
@@ -1227,19 +1227,45 @@ for finding the first non-negative position in an array.  Note that
 `while` (like `for`) is also a keyword.
 
 ```ocaml
-# let find_first_negative_entry ar =
+# let find_first_negative_entry array =
      let pos = ref 0 in
-     while !pos < Array.length ar && ar.(!pos) >= 0 do
+     while !pos < Array.length array && array.(!pos) >= 0 do
        pos := !pos + 1
      done;
-     if !pos = Array.length ar then None else Some !pos
+     if !pos = Array.length array then None else Some !pos
   ;;
-val find_first_negative_entry : int Core.Std.Array.t -> int option = <fun>
+val find_first_negative_entry : int array -> int option = <fun>
 # find_first_negative_entry [|1;2;0;3|];;
 - : int option = None
 # find_first_negative_entry [|1;-2;0;3|];;
 - : int option = Some 1
 ```
+
+As a side note, the above code takes advantage of the fact that `&&`,
+OCaml's and operator, short-circuits.  In particular, in an expression
+of the form `<expr1> && <expr2>`, `<expr2>` will only be evaluated if
+`<expr1>` evaluated to true.  Were it not for that, then the above
+function would result in an out-of-bounds error.  Indeed, we can
+trigger that out-of-bounds error by rewriting the function to avoid
+the short-circuiting.
+
+```ocaml
+# let find_first_negative_entry array =
+     let pos = ref 0 in
+     while 
+       let pos_is_good = !pos < Array.length array in
+       let element_is_non_negative = array.(!pos) >= 0 in
+       pos_is_good && element_is_non_negative
+     do
+       pos := !pos + 1
+     done;
+     if !pos = Array.length array then None else Some !pos
+  ;;
+# find_first_negative_entry [|1;2;0;3|];;
+Exception: (Invalid_argument "index out of bounds").
+```
+
+The or operator, `||` short-circuits in a similar way to `&&`.
 
 ## A complete program
 
