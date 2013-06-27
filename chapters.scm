@@ -105,12 +105,6 @@
  (note "complete")
  (title "Concurrent Programming with Async")
  )
-((part Practical)
- (name "fast-binary-serialization")
- (file "binio")
- (note "50% done (Yaron)")
- (title "Fast Binary Serialization")
- )
 ;; PART 3: ADVANCED TOPICS
 ((part Advanced)
  (name "foreign-function-interface")
