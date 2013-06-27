@@ -180,23 +180,25 @@ $ sudo port install opam
 
 ### Debian Linux
 
-There are experimental binary packages available for Debian
-Wheezy/amd64.  You should be able to use these on 64-bit Ubuntu and other
-derivative distributions such as Linux Mint also.  Just add the following line
-to your `/etc/apt/sources.list`:
+OPAM has recently been packaged for Debian and will soon be part of the unstable
+distribution.  If you're on an earlier stable distribution such as `wheezy`, you
+can either compile from source, or cherry-pick just the OPAM binary package from
+`unstable` by:
 
-```
-deb http://www.recoil.org/~avsm/ wheezy main
-```
 
-When this is done, update your packages and install OPAM.  You can
-ignore the warning about unsigned packages, which will disappear when
-OPAM is upstreamed into Debian mainline.
-
-```
+```console
 # apt-get update
-# apt-get install opam
+# apt-get -t unstable install opam
 ```
+
+<note>
+<title>Note to reviewers</title>
+
+The binary packages for OPAM are not yet available as of the 17th June 2013,
+but the package is in the `NEW` queue.  It should be available by the the time
+the book is released, and these instructions will be updated accordingly.
+
+</note>
 
 ### Fedora and Red Hat
 
@@ -424,15 +426,32 @@ to load it every time you start `utop`, by adding this to it:
 #camlp4o
 #require "core.top"
 #require "core.syntax"
+```
+
+You can also optionally add some more useful libraries that are used in
+the book, such as `Core_extended` and `Async`.  You can also open the Core
+module by default if that's all you ever use the top-level for.  Just append
+these lines to the `.ocamlinit` file if that's what you prefer.
+
+```
 #require "core_extended"
 #require "async"
 open Core.Std
 ```
 
-When you run `utop` with this initialization file, it should start up with
+When you run `utop` with these initialization rules, it should start up with
 Core opened and ready to use.
 
 ### Editors
+
+<note>
+<title>Note to reviewers</title>
+
+The instructions for editor setup are still being compiled.  If you have a
+relevant tip or HOWTO, then we'd *really* appreciate you leaving a note here
+with a pointer or direct instructions.
+
+</note>
 
 #### Emacs
 

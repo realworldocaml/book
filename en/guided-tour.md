@@ -33,13 +33,14 @@ $ eval `opam config -env`
 
 Note that the above commands will take some time to run.  When they're
 done, you should have a file called `~/.ocamlinit` in your home
-directory, to which you should add the following.
+directory, to which you should add at least the following.
 
 ```ocaml
 #use "topfind"
 #camlp4o
 #thread
 #require "core.top"
+#require "core.syntax"
 ```
 
 Then type in `utop`, and you'll be in an interactive toplevel
@@ -1142,7 +1143,7 @@ val x : int ref = {contents = 0}
 - : int = 1
 ```
 
-There's nothing magical with these operators either.  You can complete
+There's nothing magical with these operators either.  You can completely
 reimplement the `ref` type and all of these operators in just a few
 lines of code.
 

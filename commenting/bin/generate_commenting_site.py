@@ -253,7 +253,7 @@ def render_locale_chapter_page(html_name, chapter_tag, soup, navigation_list, ar
     for element in chapter_root.find_all("div", "informaltable"):
         element.replaceWith(element.find("table", recursive=False))
     # Remove wrappers around asides.
-    for section_class in ("note", "important", "warning", "tip"):
+    for section_class in ("note", "important", "warning", "tip", "caution"):
         for element in chapter_root.find_all("div", section_class):
             aside = soup.new_tag("aside")
             aside["class"] = section_class

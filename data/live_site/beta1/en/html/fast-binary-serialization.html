@@ -1,0 +1,452 @@
+<html>
+
+    <head>
+    
+        <meta charset="utf-8"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW"/>
+        
+        <title>Chapter 19. Fast Binary Serialization / Real World OCaml</title>
+        
+        <link rel="stylesheet" href="../../media/css/main.css"/>
+        
+        <script src="../../media/js/require.js" data-main="../../media/js/main.js"> </script>
+        <script>
+            require.config({
+                config: {
+                    gitHub: {
+                        user: 'ocamllabs',
+                        repo: 'rwo\u002Dcomments',
+                        milestone: 'beta1',
+                        page: 'fast\u002Dbinary\u002Dserialization.html'
+                    }
+                }
+            });
+        </script>
+        
+    
+    </head>
+    
+    <body>
+    
+        <div class="body">
+        
+            <header class="header">
+                <h1><img src="../../media/img/header.png" width="213" height="59" alt="Real World OCaml, by Jason Hickey, Anil Madhavapeddy and Yaron Minsky"/></h1>
+            </header>
+    
+            <nav class="navigation">
+                <ul>
+                    <li>
+                        <a href="index.html">Table of Contents</a>
+                    </li>
+                    
+                        <li>
+                            <a href="prologue.html">Prologue</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt01.html">I. Language Concepts</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt02.html">II. Tools and Techniques</a>
+                            
+                                 
+                                    <ul>
+                                        
+                                            <li>
+                                                <a href="maps-and-hashtables.html">13. Maps and Hashtables</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="command-line-parsing.html">14. Command Line Parsing</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="handling-json-data.html">15. Handling JSON data</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="parsing-with-ocamllex-and-menhir.html">16. Parsing with OCamllex and Menhir</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="data-serialization-with-s-expressions.html">17. Data Serialization with S-Expressions</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="concurrent-programming-with-async.html">18. Concurrent Programming with Async</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="fast-binary-serialization.html" class="here">19. Fast Binary Serialization</a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt03.html">III. The Runtime System</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="installation.html">A. Installation</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="packaging.html">B. Packaging</a>
+                            
+                                
+                            
+                        </li>
+                    
+                </ul>
+            </nav>
+        
+            <article class="page">
+        
+                <h1>Chapter 19. Fast Binary Serialization</h1>
+                
+                
+
+    <aside class="note"><h1>
+  Note to reviewers
+  </h1><p id="idp11373664">
+    This chapter is still incomplete, but the contents here are still
+    instructive enough that we decided to include it in the public beta
+    release.
+  </p></aside><p id="idp11374352">
+    Now that we've learned the basics of working with Async, let's walk
+    through a small but non-trivial application: a message broker which
+    provides clients with a simple pub/sub API that lets them publish
+    and subscribe to streams of values associated with a given topic.
+  </p><p id="idp11375040">
+    All of this will require a serialization format for the messages
+    themselves. S-expressions, which we encountered in
+    <a href="data-serialization-with-s-expressions.html">Chapter 17, <i>Data Serialization with S-Expressions</i></a>,
+    are a good serialization format when you need something
+    machine-parseable as well as human readable and editable. But
+    Sexplib's s-expressions are not particularly performant for a couple
+    of reasons:
+  </p><ul><li><p id="idp11377040">
+        s-expression serialization goes through an intermediate type,
+        <code>Sexp.t</code>, which must be allocated and is then
+        typically thrown away, putting non-trivial pressure on the
+        garbage collector.
+      </p></li><li><p id="idp11378752">
+        parsing and printing to strings in an ASCII format can be
+        expensive for types like <code>int</code>s,
+        <code>float</code>s and <code>Time.t</code>s where
+        some real computation needs to be done to produce or parse the
+        ASCII representation.
+      </p></li></ul><p id="idp11381728">
+    Bin-prot is a library and syntax extension that addresses these
+    issues by providing efficient serialization in a compact binary
+    format. You can enable Bin-prot in your top-level by typing the
+    following:
+  </p><div class="highlight"><pre><span class="o">#</span> <span class="o">#</span><span class="n">require</span> <span class="s2">&quot;bin_prot.syntax&quot;</span><span class="o">;;</span>
+</pre></div><p id="idp11383376">
+    The syntax extension is triggered on a given type by writing
+    <code>with bin_io</code> to the end of the type definition.
+    Thus, we can write:
+  </p><div class="highlight"><pre><span class="o">#</span> <span class="k">module</span> <span class="nc">M</span> <span class="o">=</span> <span class="k">struct</span>
+    <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">{</span> <span class="n">number</span><span class="o">:</span> <span class="kt">int</span><span class="o">;</span>
+               <span class="n">text</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+               <span class="n">variant</span> <span class="o">:</span> <span class="o">[`</span><span class="nc">Whatever</span> <span class="k">of</span> <span class="kt">float</span> <span class="o">|</span> <span class="o">`</span><span class="nc">Nothing</span> <span class="o">];</span>
+             <span class="o">}</span>
+    <span class="k">with</span> <span class="n">bin_io</span>
+  <span class="k">end</span><span class="o">;;</span>
+<span class="k">module</span> <span class="nc">M</span> <span class="o">:</span>
+  <span class="k">sig</span>
+    <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">{</span>
+      <span class="n">number</span> <span class="o">:</span> <span class="kt">int</span><span class="o">;</span>
+      <span class="n">text</span> <span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+      <span class="n">variant</span> <span class="o">:</span> <span class="o">[</span> <span class="o">`</span><span class="nc">Nothing</span> <span class="o">|</span> <span class="o">`</span><span class="nc">Whatever</span> <span class="k">of</span> <span class="kt">float</span> <span class="o">];</span>
+    <span class="o">}</span>
+    <span class="k">val</span> <span class="n">bin_size_t</span> <span class="o">:</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="kt">int</span>
+    <span class="k">val</span> <span class="n">bin_write_t_</span> <span class="o">:</span>
+      <span class="nn">Bin_prot</span><span class="p">.</span><span class="nn">Unsafe_common</span><span class="p">.</span><span class="n">sptr</span> <span class="o">-&gt;</span>
+      <span class="nn">Bin_prot</span><span class="p">.</span><span class="nn">Unsafe_common</span><span class="p">.</span><span class="n">eptr</span> <span class="o">-&gt;</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="nn">Bin_prot</span><span class="p">.</span><span class="nn">Unsafe_common</span><span class="p">.</span><span class="n">sptr</span>
+    <span class="k">val</span> <span class="n">bin_write_t</span> <span class="o">:</span> <span class="nn">Bin_prot</span><span class="p">.</span><span class="nn">Common</span><span class="p">.</span><span class="n">buf</span> <span class="o">-&gt;</span> <span class="n">pos</span><span class="o">:</span><span class="kt">int</span> <span class="o">-&gt;</span> <span class="n">t</span> <span class="o">-&gt;</span> <span class="kt">int</span>
+    <span class="k">val</span> <span class="n">bin_writer_t</span> <span class="o">:</span> <span class="n">t</span> <span class="nn">Bin_prot</span><span class="p">.</span><span class="nn">Type_class</span><span class="p">.</span><span class="n">writer0</span>
+    <span class="k">val</span> <span class="n">bin_read_t__</span> <span class="o">:</span> <span class="k">'</span><span class="n">a</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">b</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">c</span> <span class="o">-&gt;</span> <span class="k">'</span><span class="n">d</span>
+    <span class="k">val</span> <span class="n">bin_read_t_</span> <span class="o">:</span>
+      <span class="nn">Bin_prot</span><span class="p">.</span><span class="nn">Unsafe_common</span><span class="p">.</span><span class="n">sptr_ptr</span> <span class="o">-&gt;</span> <span class="nn">Bin_prot</span><span class="p">.</span><span class="nn">Unsafe_common</span><span class="p">.</span><span class="n">eptr</span> <span class="o">-&gt;</span> <span class="n">t</span>
+    <span class="k">val</span> <span class="n">bin_read_t</span> <span class="o">:</span> <span class="nn">Bin_prot</span><span class="p">.</span><span class="nn">Common</span><span class="p">.</span><span class="n">buf</span> <span class="o">-&gt;</span> <span class="n">pos_ref</span><span class="o">:</span><span class="kt">int</span> <span class="n">ref</span> <span class="o">-&gt;</span> <span class="n">t</span>
+    <span class="k">val</span> <span class="n">bin_reader_t</span> <span class="o">:</span> <span class="n">t</span> <span class="nn">Bin_prot</span><span class="p">.</span><span class="nn">Type_class</span><span class="p">.</span><span class="n">reader0</span>
+    <span class="k">val</span> <span class="n">bin_t</span> <span class="o">:</span> <span class="n">t</span> <span class="nn">Bin_prot</span><span class="p">.</span><span class="nn">Type_class</span><span class="p">.</span><span class="n">t0</span>
+  <span class="k">end</span>
+</pre></div><p id="idp11387008">
+    The details of the generated values are not particularly important,
+    but they give you the functionality needed to serialize and
+    deserialize binary messages efficiently.
+  </p><p id="idp11387600">
+    Clients can either publish values under a topic, or subscribe to the
+    stream of values associated with a given topic. The server will
+    maintain a cache of the last value published under any given topic,
+    so that a subscriber immediately receives the most recently
+    published value under said topic. To make it easier to see what's
+    going on, we'll also implement a query for dumping the current state
+    of the server.
+  </p><p id="idp11388448">
+    We'll use Async's <code>Rpc</code> module for implementing
+    that client/server protocol. The following module specifies the
+    specific message types we'll use, as well as the RPCs that will be
+    used for communicating with the server.
+  </p><p id="idp11389744">
+    First, we'll start with the basic types.
+  </p><div class="highlight"><pre><span class="c">(* file: protocol.ml *)</span>
+<span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+<span class="k">open</span> <span class="nn">Async</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="k">module</span> <span class="nc">Username</span> <span class="o">:</span> <span class="nc">Identifiable</span> <span class="o">=</span> <span class="nc">String</span>
+<span class="k">module</span> <span class="nc">Topic</span>    <span class="o">:</span> <span class="nc">Identifiable</span> <span class="o">=</span> <span class="nc">String</span>
+
+<span class="k">module</span> <span class="nc">Message</span> <span class="o">=</span> <span class="k">struct</span>
+  <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">{</span> <span class="n">text</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+             <span class="n">topic</span><span class="o">:</span> <span class="nn">Topic</span><span class="p">.</span><span class="n">t</span><span class="o">;</span>
+             <span class="n">from</span><span class="o">:</span> <span class="nn">Username</span><span class="p">.</span><span class="n">t</span><span class="o">;</span>
+             <span class="n">time</span><span class="o">:</span> <span class="nn">Time</span><span class="p">.</span><span class="n">t</span><span class="o">;</span>
+           <span class="o">}</span>
+  <span class="k">with</span> <span class="n">sexp</span><span class="o">,</span> <span class="n">bin_io</span>
+<span class="k">end</span>
+</pre></div><p id="idp11391440">
+<code>Username.t</code> and <code>Topic.t</code> are
+    just abstract types that are implemented as strings. The
+    <code>Message.t</code> type contains the basic information
+    associated with a message, including the text of the message, who
+    it's from, the topic, and the time it was sent.
+  </p><p id="idp11394176">
+    Note that the declaration of <code>Message.t</code> is
+    followed by the annotation <code>with sexp, bin_io</code>.
+    We've seen <code>with sexp</code> before in
+    <a href="data-serialization-with-s-expressions.html">Chapter 17, <i>Data Serialization with S-Expressions</i></a>,
+    but <code>bin_io</code> is new. S-expressions are a convenient
+    serialization format, but like any human-readable serialization
+    format,
+  </p><p id="idp11398320">
+    Now we can move on to declaring the <code>Rpc</code> protocol
+    we'll use. The <code>Rpc</code> module actually supports two
+    different kinds of RPC protocols: an ordinary RPC, represented by an
+    <code>Rpc.Rpc.t</code>, is a simple back-and-forth style of
+    communication: the client sends a message, and the server sends a
+    response. In the following, we use <code>Rpc.Rpc.create</code>
+    to declare the <code>Rpc</code> interface.
+  </p><div class="highlight"><pre><span class="k">let</span> <span class="n">publish_rpc</span> <span class="o">=</span> <span class="nn">Rpc</span><span class="p">.</span><span class="nn">Rpc</span><span class="p">.</span><span class="n">create</span>
+  <span class="o">~</span><span class="n">name</span><span class="o">:</span><span class="s2">&quot;publish&quot;</span>
+  <span class="o">~</span><span class="n">version</span><span class="o">:</span><span class="mi">0</span>
+  <span class="o">~</span><span class="n">bin_query</span><span class="o">:</span><span class="nn">Message</span><span class="p">.</span><span class="n">bin_t</span>
+  <span class="o">~</span><span class="n">bin_response</span><span class="o">:</span><span class="nn">Unit</span><span class="p">.</span><span class="n">bin_t</span>
+</pre></div><p id="idp11403712">
+    Note that we declare a name for the RPC and a version number. The
+    name and the version number are used together to identify which RPC
+    is being sent, with the version number allowing the minting of
+    multiple revisions of the RPC, potentially with different types and
+    behavior.
+  </p><p id="idp11404416">
+    The argument <code>bin_query</code> and
+    <code>bin_response</code> are used
+  </p><p id="idp11406272">
+    ```ocaml let subscribe_rpc = Rpc.Pipe_rpc.create
+    ~name:&quot;subscribe&quot; ~version:0 ~bin_query:Topic.bin_t
+    ~bin_response:Message.bin_t ~bin_error:String.bin_t
+  </p><p id="idp11407120">
+    module Dump = struct type single = { topic : Topic.t; message :
+    Message.t; num_subscribers: int; } with sexp,bin_io type t = single
+    list with sexp,bin_io end
+  </p><p id="idp11407696">
+    let dump_rpc = Rpc.Rpc.create ~name:&quot;dump&quot; ~version:0
+    ~bin_query:Unit.bin_t ~bin_response:Dump.bin_t ``` # Fast Binary
+    Serialization with bin_prot
+  </p><p id="idp11408496">
+    S-expressions are a good serialization format when you need
+    something machine-parseable as well as human readable and editable.
+    But Sexplib's s-expressions are not particularly performant for a
+    couple of reasons:
+  </p><ul><li><p id="idp11409648">
+        s-expression serialization goes through an intermediate type,
+        <code>Sexp.t</code>, which must be allocated and is then
+        typically thrown away, putting non-trivial pressure on the
+        garbage collector.
+      </p></li><li><p id="idp11411360">
+        parsing and printing to strings in an ASCII format can be
+        expensive for types like <code>int</code>s,
+        <code>float</code>s and <code>Time.t</code>s where
+        some real computation needs to be done to produce or parse the
+        ASCII representation.
+      </p></li></ul><p id="idp11414336">
+<code>Bin_prot</code> is a library that addresses these issues
+    by providing fast serialization in a compact binary format. We'll
+    also introduce the Core <code>Bigstring</code> library for
+    handling large binary strings efficiently during this chapter.
+  </p><aside class="note"><h1>
+  Using bin_prot in the toplevel
+  </h1><p id="idp11417744">
+    The <code>bin_prot</code> syntax extension is part of the
+    <code>core.syntax</code> bundle, and so should be available in
+    the toplevel if you've loaded that in via your
+    <code>~/.ocamlinit</code> file. You can also just type this in
+    directly into <code>utop</code> instead to load just this
+    extension.
+  </p><pre id="idp11421216">
+#require &quot;bin_prot.syntax&quot; ;;
+</pre><p id="idp11421968">
+    The extension is activated by putting <code>with bin_io</code>
+    after the type declaration. This looks a bit unsightly in the
+    toplevel because of all the definitions that are generated. We'll
+    elide those definitions in the book, but you can see them for
+    yourself in the toplevel.
+  </p></aside><section><h1 id="defining-a-message-broker">Defining a message broker</h1><p id="idp11424624">
+      Here's a small complete example of a program that can read and
+      write values using <code>bin_io</code>. Here, the
+      serialization is of types that might be used as part of a
+      message-queue, where each message has a topic, some content, and a
+      source, which is in turn a hostname and a port.
+    </p><div class="highlight"><pre><span class="k">open</span> <span class="nn">Core</span><span class="p">.</span><span class="nc">Std</span>
+
+<span class="k">module</span> <span class="nc">Message</span> <span class="o">=</span> <span class="k">struct</span>
+  <span class="k">module</span> <span class="nc">Source</span> <span class="o">=</span> <span class="k">struct</span>
+    <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">{</span> <span class="n">hostname</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+               <span class="n">port</span><span class="o">:</span> <span class="kt">int</span><span class="o">;</span>
+             <span class="o">}</span>
+    <span class="k">with</span> <span class="n">bin_io</span>
+  <span class="k">end</span>
+
+  <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="o">{</span> <span class="n">topic</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+             <span class="n">content</span><span class="o">:</span> <span class="kt">string</span><span class="o">;</span>
+             <span class="n">source</span><span class="o">:</span> <span class="nn">Source</span><span class="p">.</span><span class="n">t</span><span class="o">;</span>
+           <span class="o">}</span>
+  <span class="k">with</span> <span class="n">bin_io</span>
+<span class="k">end</span>
+</pre></div><p id="idp11427264">
+      You can can combine multiple syntax generators in the same type
+      declaration by comma-separating them, so you could generate both
+      formats via <code>with bin_io,sexp</code> above.
+    </p><p id="idp11428544">
+      Next we need to define how to marshal and unmarshal these
+      messages. The interface is a little more complex than for
+      s-expressions since we don't just want to serialise from the
+      normal OCaml <code>string</code>, but also to the
+      <code>bigstring</code> type. We'll explain what this is in
+      more detail shortly, but for now think of it as a more efficient
+      alternative for large binary data.
+    </p><div class="highlight"><pre><span class="k">let</span> <span class="n">binable</span> <span class="o">=</span>
+  <span class="o">(</span><span class="k">module</span> <span class="nc">Message</span> <span class="o">:</span> <span class="nn">Binable</span><span class="p">.</span><span class="nc">S</span> <span class="k">with</span> <span class="k">type</span> <span class="n">t</span> <span class="o">=</span> <span class="nn">Message</span><span class="p">.</span><span class="n">t</span><span class="o">)</span>
+
+<span class="k">let</span> <span class="n">save_message</span> <span class="n">outc</span> <span class="n">msg</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">s</span> <span class="o">=</span> <span class="nn">Binable</span><span class="p">.</span><span class="n">to_bigstring</span> <span class="n">binable</span> <span class="n">msg</span> <span class="k">in</span>
+  <span class="k">let</span> <span class="n">len</span> <span class="o">=</span> <span class="nn">Bigstring</span><span class="p">.</span><span class="n">length</span> <span class="n">s</span> <span class="k">in</span>
+  <span class="nn">Out_channel</span><span class="p">.</span><span class="n">output_binary_int</span> <span class="n">outc</span> <span class="n">len</span><span class="o">;</span>
+  <span class="nn">Bigstring</span><span class="p">.</span><span class="n">really_output</span> <span class="n">outc</span> <span class="n">s</span>
+</pre></div><p id="idp11431952">
+      The <code>binable</code> value above captures all the
+      auto-generated <code>bin_io</code> functions into a
+      first-class module of type <code>Binable.S</code>. This
+      module has the low-level reader and writer functions which we
+      don't want to have to manually construct.
+    </p><p id="idp11434704">
+      The <code>save_message</code> is then responsible for
+      writing the binary content out to a <code>bigstring</code>.
+      It first invokes the <code>Binable.to_bigstring</code> on a
+      <code>Message.t</code> value to retrieve a marshalled
+      string. It then determines the length of this string, and writes
+      out the length and the string to the output channel.
+    </p><p id="idp11438208">
+      The <code>Binable</code> interface in Core is pretty simple:
+      <code>type 'a m = (module Binable.S with type t = 'a)  val of_bigstring : 'a m -&gt; bigstring -&gt; 'a val to_bigstring : ?prefix_with_length:bool -&gt; 'a m -&gt; 'a -&gt; bigstring val of_string : 'a m -&gt; string -&gt; 'a val to_string : 'a m -&gt; 'a -&gt; string</code>
+</p><p id="idp11440352">
+      Since the <code>Binable.S</code> module values are generated
+      for you automatically, the only functions you'll need to regularly
+      use are the conversion functions above.
+    </p><p id="idp11441632">
+      Reading back the binary value we've just defined is quite similar.
+      We read in the length field, read that much data into a
+      <code>bigstring</code>, and convert it to our type using
+      <code>Binable.of_bigstring</code>.
+    </p><div class="highlight"><pre><span class="k">let</span> <span class="n">load_message</span> <span class="n">inc</span> <span class="o">=</span>
+  <span class="k">match</span> <span class="nn">In_channel</span><span class="p">.</span><span class="n">input_binary_int</span> <span class="n">inc</span> <span class="k">with</span>
+  <span class="o">|</span> <span class="nc">None</span> <span class="o">-&gt;</span> <span class="n">failwith</span> <span class="s2">&quot;length missing from header&quot;</span>
+  <span class="o">|</span> <span class="nc">Some</span> <span class="n">len</span> <span class="o">-&gt;</span>
+    <span class="k">let</span> <span class="n">buf</span> <span class="o">=</span> <span class="nn">Bigstring</span><span class="p">.</span><span class="n">create</span> <span class="n">len</span> <span class="k">in</span>
+    <span class="nn">Bigstring</span><span class="p">.</span><span class="n">really_input</span> <span class="o">~</span><span class="n">pos</span><span class="o">:</span><span class="mi">0</span> <span class="o">~</span><span class="n">len</span> <span class="n">inc</span> <span class="n">buf</span><span class="o">;</span>
+    <span class="nn">Binable</span><span class="p">.</span><span class="n">of_bigstring</span> <span class="n">binable</span> <span class="n">buf</span>
+</pre></div><p id="idp11445168">
+      The code to generate and read and write these messages now just
+      uses the static <code>Message.t</code> type, with no need to
+      worry about the marshalling mechanism.
+    </p><div class="highlight"><pre><span class="c">(* Generate some example messages *)</span>
+<span class="k">let</span> <span class="n">example</span> <span class="n">content</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">source</span> <span class="o">=</span>
+    <span class="o">{</span> <span class="nn">Message</span><span class="p">.</span><span class="nn">Source</span><span class="p">.</span>
+      <span class="n">hostname</span> <span class="o">=</span> <span class="s2">&quot;ocaml.org&quot;</span><span class="o">;</span> <span class="n">port</span> <span class="o">=</span> <span class="mi">2322</span> <span class="o">}</span>
+  <span class="k">in</span>
+  <span class="o">{</span> <span class="nn">Message</span><span class="p">.</span>
+    <span class="n">topic</span> <span class="o">=</span> <span class="s2">&quot;rwo-example&quot;</span><span class="o">;</span> <span class="n">content</span><span class="o">;</span> <span class="n">source</span><span class="o">;</span> <span class="o">}</span>
+
+<span class="c">(* write out three messages... *)</span>
+<span class="k">let</span> <span class="n">write_messages</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">outc</span> <span class="o">=</span> <span class="nn">Out_channel</span><span class="p">.</span><span class="n">create</span> <span class="s2">&quot;tmp.bin&quot;</span> <span class="k">in</span>
+  <span class="nn">List</span><span class="p">.</span><span class="n">iter</span> <span class="o">~</span><span class="n">f</span><span class="o">:(</span><span class="n">save_message</span> <span class="n">outc</span><span class="o">)</span> <span class="o">[</span>
+    <span class="n">example</span> <span class="s2">&quot;a wonderful&quot;</span><span class="o">;</span>
+    <span class="n">example</span> <span class="s2">&quot;trio&quot;</span><span class="o">;</span>
+    <span class="n">example</span> <span class="s2">&quot;of messages&quot;</span><span class="o">;</span>
+  <span class="o">];</span>
+  <span class="nn">Out_channel</span><span class="p">.</span><span class="n">close</span> <span class="n">outc</span>
+
+<span class="c">(* ... and read them back in *)</span>
+<span class="k">let</span> <span class="n">read_messages</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="k">let</span> <span class="n">inc</span> <span class="o">=</span> <span class="nn">In_channel</span><span class="p">.</span><span class="n">create</span> <span class="s2">&quot;tmp.bin&quot;</span> <span class="k">in</span>
+  <span class="k">for</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">to</span> <span class="mi">3</span> <span class="k">do</span>
+    <span class="k">let</span> <span class="n">msg</span> <span class="o">=</span> <span class="n">load_message</span> <span class="n">inc</span> <span class="k">in</span>
+    <span class="n">printf</span> <span class="s2">&quot;msg %d: %s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="n">i</span> <span class="n">msg</span><span class="o">.</span><span class="nn">Message</span><span class="p">.</span><span class="n">content</span>
+  <span class="k">done</span>
+
+<span class="k">let</span> <span class="bp">()</span> <span class="o">=</span>
+  <span class="n">write_messages</span> <span class="bp">()</span><span class="o">;</span> <span class="n">read_messages</span> <span class="bp">()</span>
+</pre></div></section>
+
+
+                
+            </article>
+            
+            
+    
+                <nav class="pagination">
+                    
+                        <a rel="previous" href="concurrent-programming-with-async.html">
+                            &lt; Previous
+                        </a>
+                    
+                    
+                        <a rel="next" href="pt03.html">
+                            Next &gt;
+                        </a>
+                    
+                </nav>
+            
+            
+            
+            <footer class="footer">
+                <p>Copyright 2012-2013, Jason Hickey, Anil Madhavapeddy and Yaron Minsky. Licensed under <a href="http://creativecommons.org/licenses/by-nc-nd/3.0/us/">CC BY-NC-ND 3.0 US</a>.</p>
+            </footer>
+            
+        </div>
+    
+    </body>
+
+</html>
