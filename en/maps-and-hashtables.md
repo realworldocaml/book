@@ -309,7 +309,7 @@ This is rejected for good reason: there's no guarantee that the
 comparator associated with a given type will order things in the same
 way that polymorphic compare does.
 
-<sidebar>
+<note>
 <title>The difference between `=` and `==`, and `phys_equal` in Core</title>
 
 If you come from a C/C++ background, you'll probably reflexively use `==` to
@@ -358,7 +358,7 @@ and t2 = { foo2 : int; bar2 : t1; }
 <press ^Z and kill the process now>
 ```
 
-</sidebar>
+</note>
 
 ### Sets
 
@@ -583,6 +583,28 @@ comparison function for creating the ordered binary tree that
 underlies a map, hashtables depend on having a _hash function_,
 _i.e._, a function for converting a key to an integer.
 
+<note> <title> Time complexity of hashtables </title>
+
+The statement that hashtables provide constant-time access hides some
+complexities.  First of all, any hashtable implementation, OCaml's
+included, needs to resize the table when it gets too full.  A resize
+requires allocating a new backing array for the hashtable and copying
+over all entries, and so it is quite an expensive operation.  That
+means adding a new element to the table is only _amortized_ constant,
+which is to say, it's constant on average over a long sequence of
+additions, but some of the indivdual additions can be quite expensive.
+
+Another hidden cost of hashtables has to do with the hash function you
+use.  If you end up with a pathologically bad hash function that
+hashes all of your data to the same number, then all of your
+insertions will hash to the same underlying bucket, meaning you no
+longer get constant-time access at all.  Core's hashtable
+implementation uses binary trees for the hash-buckets, so this case
+only leads to logarithmic time, rather than quadratic for a
+traditional hashtable.
+
+</note>
+
 When creating a hashtable, we need to provide a value of type
 _hashable_ which includes among other things the function for hashing
 the key type.  This is analogous to the comparator used for creating
@@ -629,6 +651,41 @@ don't have operations that operate on multiple hashtables that depend
 on those tables having the same hash function, in that way that
 `Map.symmetric_diff` and `Set.union` depend on their arguments using
 the same comparison function.
+
+<warning> <title> Collisions with the polymorphic hash function </title>
+
+OCaml's polymorphic hash function works by walking over the
+data-structure its given using a breadth-first traversal that is
+bounded in the number of nodes its willing to traverse.  By default,
+that bound is set at 10 "meaningful" nodes, essentially...
+
+The bound on the traversal, means that the hash function may ignore
+part of the data-structure, and this can lead to pathological cases
+where every value you store has the same hash value.  By default,
+OCaml's hash function will stop after it has found ten nodes it can
+extract data from.  We'll demonstrate this below, using the function
+`List.range` to allocate lists of integers of different length.
+
+
+```ocaml
+# Caml.Hashtbl.hash (List.range 0 9);;
+- : int = 209331808
+# Caml.Hashtbl.hash (List.range 0 10);;
+- : int = 182325193
+# Caml.Hashtbl.hash (List.range 0 11);;
+- : int = 182325193
+# Caml.Hashtbl.hash (List.range 0 100);;
+- : int = 182325193
+```
+
+As you can see, the hash function stops after the first 10 elements.
+The same can happen with any large data structure, including records
+and arrays.  When building hash functions over large custom
+data-structures, it is generally a good idea to write one's own hash
+function.
+
+</warning>
+
 
 ### Satisfying the `Hashable.S` interface
 
