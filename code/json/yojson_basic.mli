@@ -1,4 +1,3 @@
-# 1
 type json = [
   | `Assoc of (string * json) list
   | `Bool of bool
@@ -9,7 +8,7 @@ type json = [
   | `String of string
 ]
 
-# 2
+(* part 1 *)
 val from_string : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> string -> json
 (* Read a JSON value from a string.
    [buf]   : use this buffer at will during parsing instead of
