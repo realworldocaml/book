@@ -96,26 +96,28 @@ let build_instance
 let unique_instance = build_instance (module Unique) 0
 let list_dir_instance = build_instance (module List_dir)  "/var"
 
-let dispatch_to_list handlers name_and_query =
+let build_dispatch_table handlers =
+  let table = String.Table.create () in
+  List.iter handlers
+    ~f:(fun ((module I : Query_handler_instance) as instance) ->
+      Hashtbl.replace table ~key:I.Query_handler.name ~data:instance);
+  table
+
+let dispatch dispatch_table name_and_query =
   match name_and_query with
   | Sexp.List [Sexp.Atom name; query] ->
-    let response =
-      List.find_map handlers
-        ~f:(fun (module I : Query_handler_instance) ->
-          if I.Query_handler.name <> name then None
-          else Some (I.Query_handler.eval I.this query)
-        )
-    in
-    begin match response with
-    | Some x -> x
-    | None -> Or_error.error "Could not find matching handler"
-                name String.sexp_of_t
+    begin match Hashtbl.find dispatch_table name with
+    | None ->
+      Or_error.error "Could not find matching handler"
+        name String.sexp_of_t
+    | Some (module I : Query_handler_instance) ->
+      I.Query_handler.eval I.this query
     end
   | _ ->
     Or_error.error_string "malformed query"
 ;;
 
-let rec cli handlers =
+let rec cli dispatch_table =
   printf ">>> %!";
   let result =
     match In_channel.input_line stdin with
@@ -125,7 +127,7 @@ let rec cli handlers =
       | Error e -> `Continue (Error.to_string_hum e)
       | Ok (Sexp.Atom "quit") -> `Stop
       | Ok query ->
-        begin match dispatch_to_list handlers query with
+        begin match dispatch dispatch_table query with
         | Error e -> `Continue (Error.to_string_hum e)
         | Ok s    -> `Continue (Sexp.to_string_hum s)
         end;
@@ -134,4 +136,72 @@ let rec cli handlers =
   | `Stop -> ()
   | `Continue msg ->
     printf "%s\n%!" msg;
-    cli handlers
+    cli dispatch_table
+
+
+
+module Loader = struct
+  type config = (module Query_handler) list sexp_opaque
+  with sexp
+
+  type t = { known  : (module Query_handler)          String.Table.t
+           ; active : (module Query_handler_instance) String.Table.t
+           }
+
+  let name = "loader"
+
+  let create known_list =
+    let active = String.Table.create () in
+    let known  = String.Table.create () in
+    List.iter known_list
+      ~f:(fun ((module Q : Query_handler) as q) ->
+        Hashtbl.replace known ~key:Q.name ~data:q);
+    { known; active }
+
+  let load t handler_name config =
+    if Hashtbl.mem t.active handler_name then
+      Or_error.error "Can't re-register an active handler"
+        handler_name String.sexp_of_t
+    else
+      match Hashtbl.find t.known handler_name with
+      | None ->
+        Or_error.error "Unknown handler" handler_name String.sexp_of_t
+      | Some (module Q : Query_handler) ->
+        let instance =
+          (module struct
+             module Query_handler = Q
+             let this = Q.create (Q.config_of_sexp config)
+           end : Query_handler_instance)
+        in
+        Hashtbl.replace t.active ~key:handler_name ~data:instance;
+        Ok Sexp.unit
+
+  let unload t handler_name =
+    if not (Hashtbl.mem t.active handler_name) then
+      Or_error.error "Handler not active" handler_name String.sexp_of_t
+    else if handler_name = name then
+      Or_error.error_string "It's unwise to unload yourself"
+    else (
+      Hashtbl.remove t.active handler_name;
+      Ok Sexp.unit
+    )
+
+  type request =
+    | Load of string * Sexp.t
+    | Unload of string
+    | Known_services
+    | Active_services
+  with sexp
+
+  let eval t sexp =
+    match Or_error.try_with (fun () -> request_of_sexp sexp) with
+    | Error _ as err -> err
+    | Ok resp ->
+      match resp with
+      | Load (name,config) -> load   t name config
+      | Unload name        -> unload t name
+      | Known_services ->
+        Ok (<:sexp_of<string list>> (Hashtbl.keys t.known))
+      | Active_services ->
+        Ok (<:sexp_of<string list>> (Hashtbl.keys t.active))
+end
