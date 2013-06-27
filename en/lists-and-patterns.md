@@ -27,7 +27,17 @@ And they can also be generated using the equivalent `::` notation.
 
 As you can see, the `::` operator is right-associative, which means
 that we can built up lists without parenthesis.  The empty list `[]`
-is used to terminate a list.
+is used to terminate a list.  Note that the empty list is polymorphic,
+meaning it can be used with elements of any type.
+
+```ocaml
+# let empty = [];;
+val empty : 'a list = []
+# 3 :: empty;;
+- : int list = [3]
+# "three" :: empty;;
+- : string list = ["three"]
+```
 
 The `::` operator conveys something important about the nature of
 lists, which is that they are implemented as singly-linked lists.  The

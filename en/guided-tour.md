@@ -268,7 +268,7 @@ determines the overall type of `sum_if_true`.
 Over time, you'll build a rough intuition for how the OCaml inference
 engine works, which makes it easier to reason through your programs.
 One way of making it easier to understand the types is to add explicit
-type annotations.  These annotations never change the behavior of an
+type annotations.  These annotations don't change the behavior of an
 OCaml program, but they can serve as useful documentation, as well as
 catch unintended type changes.  Here's an annotated version of
 `sum_if_true`:
@@ -1195,7 +1195,7 @@ you can call `Random.self_init` to choose a new seed at random.
 # let permute array =
     let length = Array.length array in
     for i = 0 to length - 2 do
-       (* pick a j that is after i and before the end of the list *)
+       (* pick a j that is after i and before the end of the array *)
        let j = i + 1 + Random.int (length - i - 1) in
        (* Swap i and j *)
        let tmp = array.(i) in
