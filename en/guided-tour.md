@@ -260,7 +260,7 @@ structure of the code.
 As an example, let's walk through the process of inferring the type of
 `sum_if_true`.
 
-- OCaml requires that both arms of an `if` statement return the same
+- OCaml requires that both arms of an `if` statement have the same
   type, so the expression `if test first then first else 0` requires
   that `first` must be the same type as `0`, which is `int`.
   Similarly, from `if test second then second else 0` we can conclude
