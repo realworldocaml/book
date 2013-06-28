@@ -152,7 +152,7 @@ int
 Error: Parse error: [fun_binding] expected after [ipatt] (in [let_binding])
 ```
 
-## Functions and type Inference
+## Functions and type inference
 
 The `let` syntax can also be used to define a function.
 
@@ -452,17 +452,7 @@ can now be used in subsequent expressions.
 ```
 
 Note that the same syntax is used both for constructing and for
-pattern matching on tuples.  Another syntactic note: it's the commas,
-rather than the parentheses, that make a tuple.  Thus, we can write:
-
-```ocaml
-# let x,y = a_tuple;;        
-val x : int = 3
-val y : string = "three"
-```
-
-That said, it's more idiomatic to include the parentheses even when they're
-not strictly necessary.
+pattern matching on tuples.
 
 Pattern matching can also show up in function arguments.  Here's a
 function for computing the distance between two points on the plane,
