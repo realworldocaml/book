@@ -153,6 +153,9 @@ int
 Error: Parse error: [fun_binding] expected after [ipatt] (in [let_binding])
 ```
 
+The error messages here are a little confusing, but they'll make more
+sense as you learn more about the language.
+
 ## Functions and type inference
 
 The `let` syntax can also be used to define a function.
