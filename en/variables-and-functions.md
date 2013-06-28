@@ -142,7 +142,7 @@ Warning 26: unused variable pi.
 ```
 
 In OCaml, let bindings are immutable.  As we'll see in
-[xref](#imperative-programming), there are mutable values in OCaml,
+[xref](#imperative-programming-1), there are mutable values in OCaml,
 but no mutable variables.
 
 <note> <title> Why don't variables vary?  </title>
@@ -231,7 +231,7 @@ the foundations.
 ### Anonymous Functions ###
 
 We'll start by looking at the most basic style of function declaration
-in OCaml: the _anonymous_ function.  An anonymous function is a
+in OCaml: the _anonymous function_.  An anonymous function is a
 function value that is declared without being named.  They can be
 declared using the `fun` keyword, as shown here.
 
@@ -421,7 +421,7 @@ A function is _recursive_ if it refers to itself in its definition.
 Recursion is important in any programming language, but is
 particularly important in functional languages, because it is the
 fundamental building block that is used for building looping
-constructs.  (As we'll see in [xref](#imperative-programming), OCaml
+constructs.  (As we'll see in [xref](#imperative-programming-1), OCaml
 also supports imperative looping constructs like `for` and `while`,
 but these are only useful when using OCaml's imperative features.)
 
@@ -512,8 +512,8 @@ applied that to all the elements of a list.
 
 A function is treated syntactically as an operator if the name of that
 function is chosen from one of a specialized set of identifiers.  This
-set includes any identifier that is a sequence of characters from the
-following set
+set includes identifiers that are sequences of characters from the
+following set:
 
 ```
 ! $ % & * + - . / : < = > ? @ ^ | ~
@@ -533,6 +533,24 @@ val ( +! ) : int * int -> int * int -> int * int = <fun>
 - : int * int = (1,6)
 ```
 
+Note that you have to be careful when dealing with operators containg
+`*`.  Consider the following example.
+
+```ocaml
+# let (***) x y = (x ** y) ** y;;
+Error: This expression has type int but an expression was expected of type
+         float
+```
+
+What's going on is that `(***)` isn't interpreted as an operator at
+all; it's read as a comment!  To get this to work properly, we need to
+put spaces around any operator that begins or ends with `*`.
+
+```ocaml
+# let ( *** ) x y = (x ** y) ** y;;
+val ( *** ) : float -> float -> float = <fun>
+```
+
 The syntactic role of an operator is typically determined by its first
 character or two, though there are a few exceptions.  This table
 breaks the different operators and other syntactic forms into groups
@@ -543,7 +561,7 @@ beginning with `!`.
 ------------------------------------------
 Prefix                     Usage
 -----------------------    -----------------
-`!`..., `?`..., `~`...     Unary prefix
+`!`..., `?`..., `~`...     Prefix
 
 `.`, `.(`, `.[`
 
@@ -551,7 +569,7 @@ function application,      Left associative
 constructor, `assert`,
 `lazy`
 
-`-`, `-.`                  Unary prefix
+`-`, `-.`                  Prefix
 
 `**`...,                   Right associative
 `lsl`, `lsr`, `asr`
@@ -588,8 +606,8 @@ integer and floating point subtraction operators, can act as both
 prefix operators (for negation) and infix operators (for subtraction),
 So, both `-x` and `x - y` are meaningful expressions.
 
-Here's an example of a very useful operator that's defined in Core,
-following these rules.  Here's the definition:
+Here's an example of a very useful operator from the standard library
+that can be defined following these rules.  Here's the code.
 
 ```ocaml
 # let (|>) x f = f x ;;
@@ -940,7 +958,8 @@ Optional arguments are very useful, but they're also easy to abuse.
 The key advantage of optional arguments is that they let you write
 functions with multiple arguments that users can ignore most of the
 time, only worrying about them when they specifically want to invoke
-those options.
+those options.  They also allow you to extend an API with new
+functionality without changing existing code that calls that function.
 
 The downside is that the caller may be unaware that there is a choice
 to be made, and so may unknowingly (and wrongly) pick that default
