@@ -237,9 +237,8 @@ having to create separate `let` bindings for each one.
 
 Let's start with selecting a single `title` field from the record.
 
-```ocaml
-  let open Yojson.Basic.Util in
-  let title = json |> member "title" |> to_string in
+```frag
+((typ ocamltop)(name json/parse_book.topscript)(part 1))
 ```
 
 The `member` function accepts a JSON object and named key and returns
@@ -250,9 +249,8 @@ this conversion, and raises an exception if there is an unexpected JSON
 type.  The `|>` operator provides a convenient way to chain these
 operations together.
 
-```ocaml
-  let tags = json |> member "tags" |> to_list |> filter_string in
-  let pages = json |> member "pages" |> to_int in
+```frag
+((typ ocamltop)(name json/parse_book.topscript)(part 2))
 ```
 
 The `tags` field is similar to `title`, but the field is a list of strings
@@ -263,9 +261,8 @@ Remember that OCaml lists must contain values of the same type, so any JSON
 values that cannot be converted to a `string` will be skipped from the output
 of `filter_string`.
 
-```ocaml
-  let is_online = json |> member "is_online" |> to_bool_option in
-  let is_translated = json |> member "is_translated" |> to_bool_option in
+```frag
+((typ ocamltop)(name json/parse_book.topscript)(part 3))
 ```
 
 The `is_online` and `is_translated` fields are optional in our JSON
@@ -274,9 +271,8 @@ OCaml type is a `string option` to reflect this, and can be extracted
 via `to_bool_option`.  In our example JSON, only `is_online` is
 present and `is_translated` will be `None`.
 
-```ocaml
-  let authors = json |> member "authors" |> to_list in
-  let names = List.map authors ~f:(fun json -> member "name" json |> to_string) in
+```frag
+((typ ocamltop)(name json/parse_book.topscript)(part 4))
 ```
 
 The final use of JSON combinators is to extract all the `name` fields from
@@ -285,12 +281,8 @@ the list of authors.  We first construct the `author list`, and then
 binds `authors` to a variable name.  It can also be written more
 succinctly using the pipe-forward operator:
 
-```ocaml
-let names =
-  json
-  |> member "authors"
-  |> to_list
-  |> List.map ~f:(fun json -> member "name" json |> to_string)
+```frag
+((typ ocamltop)(name json/parse_book.topscript)(part 5))
 ```
 
 This style of programming which omits variable names and chains
