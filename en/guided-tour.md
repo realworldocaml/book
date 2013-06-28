@@ -184,7 +184,7 @@ types have gotten more interesting too.  `int -> int` is a function
 type, in this case indicating a function that takes an `int` and
 returns an `int`.  We can also write functions that take multiple
 arguments.  (Note that the following example will not work if you
-haven't opened `Core.Std`.)
+haven't opened `Core.Std` as was suggested earlier.)
 
 ```ocaml
 # let ratio x y =
@@ -572,6 +572,17 @@ might expect.
 
 In particular, rather than a list of three strings, what we have is a
 singleton list containing a three-tuple of strings.
+
+Another thing that is uncovered by this example is that commas create
+a tuple, even if there are no surrounding parens.  So, we can write:
+
+```ocaml
+# 1,2,3;;
+- : int * int * int = (1, 2, 3)
+```
+
+to allocate a tuple of integers.  This is generally considered poor
+style and should be avoided.
 
 </note>
 
@@ -1246,8 +1257,8 @@ val ar : int array =
 ```
 
 OCaml also supports while loops, as shown in the following function
-for finding the first non-negative position in an array.  Note that
-`while` (like `for`) is also a keyword.
+for finding the position of the first negative entry in an array.
+Note that `while` (like `for`) is also a keyword.
 
 ```ocaml
 # let find_first_negative_entry array =
