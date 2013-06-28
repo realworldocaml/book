@@ -249,8 +249,8 @@ any explicit type information.
 
 OCaml determines the type of an expression using a technique called
 _type inference_, by which it infers the type of a given expression
-based on what it already knows about the types of other related
-variables, and on constraints on the types that arise from the
+based on what it already knows about the types of variables used in
+the expression, and on constraints on the types that arise from the
 structure of the code.
 
 As an example, let's walk through the process of inferring the type of
@@ -552,6 +552,24 @@ started with, as you can see below.
 - : string list = ["OCaml"; "Perl"; "C"]
 ```
 
+<note> <title> Semicolons vs. commas </title>
+
+Unlike many other languages, OCaml uses semicolons to separate list
+elements in lists rather than commas.  Commas, instead, are used for
+separating elements in a tuple.  If you try to use commas instead,
+you'll see that your code compiles, but doesn't do quite what you
+might expect.
+
+```ocaml
+# ["OCaml", "Perl", "C"];;
+- : (string * string * string) list = [("OCaml", "Perl", "C")]
+```
+
+In particular, rather than a list of three strings, what we have is a
+singleton list containing a three-tuple of strings.
+
+</note>
+
 The bracket notation for lists is really just syntactic sugar for
 `::`.  Thus, the following declarations are all equivalent.  Note that
 `[]` is used to represent the empty list, and that `::` is
@@ -718,8 +736,7 @@ This suggests a reasonable mental model for what OCaml is actually
 doing to evaluate a recursive function.
 
 We can introduce more complicated list patterns as well.  Here's a
-function for destuttering a list, _i.e._, for removing sequential
-duplicates.
+function for removing sequential duplicates.
 
 ```ocaml
 # let rec destutter list =
