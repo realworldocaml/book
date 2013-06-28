@@ -449,7 +449,7 @@ Note that in the above we use `String.Map` in some places and simply
 operations, like creating a `Map.t`, you need access to
 type-specialized information, and for others, like looking something
 up in `Map.t`, you don't.  This is covered in more detail in
-[xref](#maps-and-hashtables).
+[xref](#maps-and-hash-tables).
 
 ## Concrete types in signatures
 

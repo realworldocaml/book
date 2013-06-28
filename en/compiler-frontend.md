@@ -449,7 +449,7 @@ You can now run `utop` and load the syntax extensions in.  We'll use the
 
 OCaml provides a built-in polymorphic comparison operator that inspects the runtime
 representation of two values to see if they're equal.  As we noted in
-[xref](#maps-and-hashtables), the polymorphic comparison is less efficient
+[xref](#maps-and-hash-tables), the polymorphic comparison is less efficient
 than defining explicit comparison functions between values. However, it quickly
 become tedious to manually define comparison functions for complex type
 definitions.

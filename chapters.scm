@@ -72,7 +72,7 @@
  )
 ;; PART 2: PRACTICAL EXAMPLES
 ((part Practical)
- (name "maps-and-hashtables")
+ (name "maps-and-hash-tables")
  (file "maps-and-hashtables")
  (note "complete")
  (title "Maps and Hashtables")

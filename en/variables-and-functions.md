@@ -12,7 +12,8 @@ At its simplest, a variable is an identifier whose meaning is bound to
 a particular value.  In OCaml these bindings are often introduced
 using the `let` keyword.  We can type a so-called _top-level_ `let`
 binding into `utop` with the following syntax to bind a new variable.
-Note that variable names must start with a lowercase letter.
+Note that variable names must start with a lowercase letter or an
+underscore.
 
 ```ocaml
 let <identifier> = <expr>
@@ -307,9 +308,9 @@ entirely equivalent.
 <title>`let` and `fun`</title>
 
 Functions and let bindings have a lot to do with each other.  In some
-sense, you can think of the argument of a function as a variable being
-bound to the value passed by the caller.  Indeed, the following two
-expressions are nearly equivalent:
+sense, you can think of the parameter of a function as a variable
+being bound to the value passed by the caller.  Indeed, the following
+two expressions are nearly equivalent:
 
 ```ocaml
 # (fun x -> x + 1) 7;;
@@ -347,23 +348,24 @@ val abs_diff : int -> int -> int = <fun>
 
 This rewrite makes it explicit that `abs_diff` is actually a function
 of one argument that returns another function of one argument, which
-itself returns the final computation.  Because the functions are
-nested, the inner expression `abs (x - y)` has access to both `x`,
-which was captured by the first function application, and `y`, which
-was captured by the second one.
+itself returns the final result.  Because the functions are nested,
+the inner expression `abs (x - y)` has access to both `x`, which was
+captured by the first function application, and `y`, which was
+captured by the second one.
 
 This style of function is called a _curried_ function.  (Currying is
-named after Haskell Curry, a famous logician who had a significant
-impact on the design and theory of programming languages.)  The key to
+named after Haskell Curry, a logician who had a significant impact on
+the design and theory of programming languages.)  The key to
 interpreting the type signature of a curried function is the
 observation that `->` is right-associative.  The type signature of
-`abs_diff` can therefore be parenthesized as follows.  This doesn't
-change the meaning of the signature, but it makes it easier to see how
-the currying fits in.
+`abs_diff` can therefore be parenthesized as follows.  
 
 ```ocaml
 val abs_diff : int -> (int -> int)
 ```
+
+The parentheses above don't change the meaning of the signature, but
+it makes it easier to see the currying.
 
 Currying is more than just a theoretical curiosity.  You can make use
 of currying to specialize a function by feeding in some of the
@@ -396,7 +398,7 @@ curried function with all of its arguments.  (Partial application,
 unsurprisingly, does have a small extra cost.)
 
 Currying is not the only way of writing a multi-argument function in
-OCaml.  It's also possible to use the different arms of a tuple as
+OCaml.  It's also possible to use the different parts of a tuple as
 different arguments.  So, we could write:
 
 ```ocaml
@@ -604,10 +606,32 @@ constructor, `assert`,
 There's one important special case: `-` and `-.`, which are the
 integer and floating point subtraction operators, can act as both
 prefix operators (for negation) and infix operators (for subtraction),
-So, both `-x` and `x - y` are meaningful expressions.
+So, both `-x` and `x - y` are meaningful expressions.  Another thing
+to remember about negation  is that it has lower precedence than
+function application, which means that if you want to pass a negative
+value, you need to wrap it in parentheses, as you can see below.
+
+```ocaml
+# Int.max 3 (-4);;
+- : int = 3
+# Int.max 3 -4;;
+Error: This expression has type int -> int
+       but an expression was expected of type int
+```
+
+Here, OCaml is interpreting the second expression as equivalent to:
+
+```ocaml
+# (Int.max 3) - 4;;
+Error: This expression has type int -> int
+       but an expression was expected of type int
+```
+
+which obviously doesn't make sense.
 
 Here's an example of a very useful operator from the standard library
-that can be defined following these rules.  Here's the code.
+whose behavior depends critically on the precedence rules described
+above.  Here's the code.
 
 ```ocaml
 # let (|>) x f = f x ;;
@@ -1220,12 +1244,13 @@ argument is not erased, instead returning a function that expects the
 
 ### Typing
 
-For each of the following expressions, is the expression well-typed?  If it is well-typed, does it
-evaluate to a value?  If so, what is the value?
+For each of the following expressions, is the expression well-typed?
+If it is well-typed, does it evaluate to a value?  If so, what is the
+value?
 
 - `1 - 2`
 
-  Well typed.  The value is \hbox{\lstinline/-1/}.
+  Well typed.  The value is `-1`.
 
 - `1 - 2 - 3`
 
@@ -1291,7 +1316,6 @@ evaluate to a value?  If so, what is the value?
 
   Well typed.  The value is `false`.
 
-
 - `Char.code 'a'`
 
   Well typed.  The ASCII character code for `'a'` is `97`.
@@ -1307,13 +1331,3 @@ evaluate to a value?  If so, what is the value?
 - `((*((()*))`
 
   Well typed.  The value is `()`.
-
-% -*-
-% Local Variables:
-% Mode: LaTeX
-% fill-column: 100
-% TeX-master: "paper"
-% TeX-command-default: "LaTeX/dvips Interactive"
-% End:
-% -*-
-% vim:tw=100:fo=tcq:

@@ -898,7 +898,7 @@ Sometimes, however, the type-ignoring nature of polymorphic compare is
 a problem, particularly when you have your own notion of equality and
 ordering that you want to impose.  We'll discuss this issue more, as
 well as some of the other downsides of polymorphic compare, in
-[xref](#maps-and-hashtables).
+[xref](#maps-and-hash-tables).
 
 </note>
 
