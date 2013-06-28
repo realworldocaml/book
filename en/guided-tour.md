@@ -1120,7 +1120,10 @@ operations.  When we were working purely functionally, this wasn't
 necessary, but you start needing it when you're writing imperative
 code.
 
-Here's an example of `create` and `update` in action.
+Here's an example of `create` and `update` in action.  Note that this
+code uses `List.iter`, which calls the function `~f` on each element
+of the provided list.
+
 
 ```ocaml
 # let rsum = create ();;
@@ -1132,6 +1135,7 @@ val rsum : running_sum = {sum = 0.; sum_sq = 0.; samples = 0}
 # stdev rsum;;
 - : float = 3.94405318873307698
 ```
+
 
 ### Refs
 
