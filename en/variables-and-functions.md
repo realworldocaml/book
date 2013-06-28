@@ -739,12 +739,14 @@ function that was created by feeding just the first argument to
 
 ### Labeled Arguments ###
 
-Up until now, we've written functions where the arguments are
-specified positionally, _i.e._, by the order in which the arguments
-are passed to the function.  OCaml also supports labeled arguments,
-which let you identify a function argument by name.  Labels are marked
-by a leading tilde, and a label (followed by a colon) are put in front
-of the variable to be labeled.
+Up until now, the functions we've defined have specified their arguments
+positionally, _i.e._, by the order in which the arguments are passed to
+the function.  OCaml also supports labeled arguments, which let you
+identify a function argument by name.  Indeed, we've already encountered
+functions from Core like `List.map` that use labeled arguments.  Labeled
+arguments are marked by a leading tilde, and a label (followed by a
+colon) are put in front of the variable to be labeled.  Here's an
+example.
 
 ```ocaml
 # let ratio ~num ~denom = float num /. float denom;;
