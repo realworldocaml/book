@@ -90,9 +90,9 @@ at you.
   helpful to include `;;` to improve OCaml's error reporting).
 - After evaluating an expression, the toplevel prints first the result
   and then the type of the result.
-- Function arguments are separated by spaces, instead of by
-  parentheses and commas, which is more like the UNIX shell than C or
-  Java.
+- Function arguments are separated by spaces instead of by parentheses
+  and commas, which is more like the UNIX shell than it is like
+  traditional programming languages like C or Java.
 - OCaml allows you to place underscores in the middle of your integer
   literals, as a way of improving readability.  Note that underscores
   can be placed anywhere in within the number, not just every three
@@ -154,7 +154,7 @@ Error: Parse error: [fun_binding] expected after [ipatt] (in [let_binding])
 
 ## Functions and type Inference
 
-The `let` syntax can also be used for creating functions.
+The `let` syntax can also be used to define a function.
 
 ```ocaml
 # let square x = x * x ;;
@@ -165,9 +165,9 @@ val square : int -> int = <fun>
 - : int = 16
 ```
 
-Functions in OCaml are values like any other, which is why we bind one
-to a variable using the same `let` keyword used for binding a variable
-to a simple value such as an integer.
+Functions in OCaml are values like any other, which is why we use the
+`let` keyword to bind a function to a variable name, just as we use
+`let` to bind a simple value like an integer to a variable name.
 
 When using `let` to define a function, the first identifier after the
 `let` is the function name, and each subsequent identifier is a
@@ -453,7 +453,7 @@ can now be used in subsequent expressions.
 
 Note that the same syntax is used both for constructing and for
 pattern matching on tuples.  Another syntactic note: it's the commas,
-rather than the parens, that make a tuple.  Thus, we can write:
+rather than the parentheses, that make a tuple.  Thus, we can write:
 
 ```ocaml
 # let x,y = a_tuple;;        
@@ -461,7 +461,7 @@ val x : int = 3
 val y : string = "three"
 ```
 
-That said, it's more idiomatic to include the parens even when they're
+That said, it's more idiomatic to include the parentheses even when they're
 not strictly necessary.
 
 Pattern matching can also show up in function arguments.  Here's a
