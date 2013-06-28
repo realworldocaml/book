@@ -1,10 +1,10 @@
 # Variables and Functions
 
-Variables and functions are fundamental ideas that show up in
-virtually all programming languages.  But OCaml has a different take
-on these basic concepts, and so we'll spend some time digging into the
-details so you can see how OCaml's variables and functions differ from
-what you may have encountered in other languages.
+Variables and functions are fundamental ideas that show up in virtually
+all programming languages.  But OCaml has a different take on these
+basic concepts, so we'll spend some time digging into the details so you
+can understand OCaml's variables and functions and see how they differ
+from what you've encountered elsewhere.
 
 ## Variables
 
