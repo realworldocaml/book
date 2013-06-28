@@ -249,7 +249,7 @@ val compute_bounds : cmp:('a -> 'a -> int) -> 'a list -> ('a * 'a) option =
 
 The above code is a little bit hard to swallow, however, on a
 syntactic level.  We can make it easier to read, and drop some of the
-parenthesis, by using the infix operator form of bind, which we get
+parentheses, by using the infix operator form of bind, which we get
 access to by locally opening `Option.Monad_infix`.  The module is
 called `Monad_infix` because the bind operator is part of a
 sub-interface called `Monad`, which we'll talk about more in

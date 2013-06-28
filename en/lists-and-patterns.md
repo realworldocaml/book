@@ -26,7 +26,7 @@ And they can also be generated using the equivalent `::` notation.
 ```
 
 As you can see, the `::` operator is right-associative, which means
-that we can built up lists without parenthesis.  The empty list `[]`
+that we can build up lists without parentheses.  The empty list `[]`
 is used to terminate a list.  Note that the empty list is polymorphic,
 meaning it can be used with elements of any type.
 
@@ -492,7 +492,7 @@ it runs.  Thus, the following code:
 let s = "." ^ "."  ^ "."  ^ "."  ^ "."  ^ "."  ^ "."
 ```
 
-will allocate a string of length 2, 3, 4, 5, 6 and 7, whereas this
+will allocate strings of length 2, 3, 4, 5, 6 and 7, whereas this
 code:
 
 ```ocaml
@@ -865,7 +865,7 @@ that it is polymorphic:
 OCaml actually comes with a whole family of polymorphic comparison
 operators, including the standard infix comparators, `<`, `>=`,
 _etc._, as well as the function `compare` that returns `-1`, `0` or
-`1` to flag whether the first operator is smaller than, equal to, or
+`1` to flag whether the first operand is smaller than, equal to, or
 greater than the second, respectively.
 
 You might wonder how you could build function like these yourself if
@@ -877,8 +877,8 @@ about the types of the values that are being compared, paying
 attention only to the structure of the values as they're laid out in
 memory.
 
-Polymorphic compare does have some limitations.  For example, they
-will fail at runtime if they encounter functions:
+Polymorphic compare does have some limitations.  For example, it will
+fail at runtime if it encounters a function value.
 
 ```ocaml
 # (fun x -> x + 1) = (fun x -> x + 1);;
@@ -886,7 +886,7 @@ Exception: (Invalid_argument "equal: functional value").
 ```
 
 Similarly, it will fail on values that come from outside the OCaml
-heap, like values from C-bindings.  But they will work in a reasonable
+heap, like values from C-bindings.  But it will work in a reasonable
 way for other kinds of values.
 
 For simple atomic types, polymorphic compare has the semantics you

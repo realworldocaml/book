@@ -148,7 +148,7 @@ operator, we can rewrite `uppercase_file` as follows.
 val uppercase_file : string -> unit Deferred.t = <fun>
 ```
 
-In the above we've dropped the parenthesis around the function on the
+In the above we've dropped the parentheses around the function on the
 right-hand side of the bind, and we didn't add a level of indentation
 for the contents of that function.  This is standard practice for
 using the bind operator.
