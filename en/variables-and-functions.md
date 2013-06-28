@@ -802,10 +802,10 @@ Labeled arguments are useful in a few different cases:
     accidentally swap the position and the length.
 
   - When the meaning of a particular argument is unclear from the type
-    alone.  For example, consider a function for creating a hashtable
+    alone.  For example, consider a function for creating a hash table
     where the first argument is the initial size of the table, and the
     second argument is a flag which, when true, indicates that the
-    hashtable will reduce its size when the hashtable contains few
+    hash table will reduce its size when the hash table contains few
     elements.  The following signature doesn't give you much of a hint
     as to the meaning of the arguments.
 

@@ -788,7 +788,7 @@ val memoize : ('a -> 'b) -> 'a -> 'b = <fun>
 ```
 
 The code above is a bit tricky.  `memoize` takes as its argument a
-function `f`, and then allocates a hashtable (called `table`) and
+function `f`, and then allocates a hash table (called `table`) and
 returns a new function as the memoized version of `f`.  When called,
 this new function looks in `table` first, and if it fails to find a
 value, calls `f` and stashes the result in `table`.  Note that `table`

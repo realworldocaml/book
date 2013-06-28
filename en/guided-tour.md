@@ -122,8 +122,8 @@ or `14`).
 
 Note that there are some constraints on what identifiers can be used
 for variable names.  Punctuation is excluded, except for `_` and `'`,
-and variables must start with a lowercase letter.  Thus, these are
-legal:
+and variables must start with a lowercase letter or an underscore.
+Thus, these are legal:
 
 ```ocaml
 # let x7 = 3 + 4;;
@@ -132,9 +132,15 @@ val x7 : int = 7
 val x_plus_y : int = 21
 # let x' = x + 1;;
 val x' : int = 8
+# let _x' = x' + x';;
+# _x';;
+- : int = 8
 ```
 
-But these are not:
+Note that by default, `utop` doesn't bother to print out variables
+starting with an underscore.
+
+The following examples, however, are not legal.
 
 ```ocaml
 # let Seven = 3 + 4;;
@@ -1002,12 +1008,13 @@ value after its creation.  Indeed, almost all of the data structures
 we've encountered so far are _immutable_, meaning there's no way in
 the language to modify them at all.  This is a quite different style
 from _imperative_ programming, where computations are structured as
-sequences of instructions that operate by modifying state as they go.
+sequences of instructions that operate by making modifications to the
+state of the program.
 
 Functional code is the default in OCaml, with variable bindings and
 most data structures being immutable.  But OCaml also has excellent
 support for imperative programming, including mutable data structures
-like arrays and hashtables, and control-flow constructs like for and
+like arrays and hash tables, and control-flow constructs like for and
 while loops.
 
 ### Arrays

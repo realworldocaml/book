@@ -710,7 +710,7 @@ module Loader = struct
 
 ```
 
-Note that a `Loader.t` has two hashtables: one containing the known
+Note that a `Loader.t` has two hash tables: one containing the known
 query handler modules, and one containing the active query handler
 instances.  The `Loader.t` will be responsible for creating new
 instances and adding them to the table, as well as for removing
