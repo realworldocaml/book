@@ -3,7 +3,7 @@
 This chapter gives an overview of OCaml by walking through a series of
 small examples that cover most of the major features of the language.
 This should give a sense of what OCaml can do, without getting too
-deep in any one topic.
+deep into any one topic.
 
 We'll present this guided tour using the Core standard library and the
 `utop` OCaml toplevel, a shell that lets you type in expressions and
@@ -88,8 +88,8 @@ at you.
   evaluate an expression.  This is a peculiarity of the toplevel that
   is not required in stand-alone programs (though it is sometimes
   helpful to include `;;` to improve OCaml's error reporting).
-- After evaluating an expression, the toplevel prints both the type of
-  the result and the result itself.
+- After evaluating an expression, the toplevel prints first the result
+  and then the type of the result.
 - Function arguments are separated by spaces, instead of by
   parentheses and commas, which is more like the UNIX shell than C or
   Java.
