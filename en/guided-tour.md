@@ -522,7 +522,8 @@ of the lengths of each language as follows.
 
 `List.map` takes two arguments: a list and a function for transforming
 the elements of that list.  Note that `List.map` creates a new list
-and does not modify the original.
+and does not modify the original.  Indeed, OCaml lists are immutable,
+so there are no operations for modifying lists in the language at all.
 
 In this example, the function `String.length` is passed under the
 _labeled argument_ `~f`.  Labels allow you to specify arguments by
