@@ -95,8 +95,7 @@ at you.
   traditional programming languages like C or Java.
 - OCaml allows you to place underscores in the middle of your integer
   literals, as a way of improving readability.  Note that underscores
-  can be placed anywhere in within the number, not just every three
-  digits.
+  can be placed anywhere within a number, not just every three digits.
 - OCaml carefully distinguishes between `float`, the type for floating
   point numbers and `int`, the type for integers.  The types have
   different literals (`6.` instead of `6`) and different infix
@@ -104,7 +103,9 @@ at you.
   cast between types.  This can be a bit of a nuisance, but it has its
   benefits, since it prevents some kinds of bugs that arise in other
   languages due to unexpected differences between the behavior of
-  `int` and `float`.
+  `int` and `float`.  For example, in many languages, `1 / 3` is `0`,
+  but `1 / 3.0` is a third.  OCaml requires you to be explicit about
+  which operation you're doing.
 
 We can also create a variable to name the value of a given expression,
 using the `let` keyword (also known as a _let binding_).
@@ -1046,10 +1047,10 @@ the `.(i)` syntax is used to refer to an element of an array, and the
 `<-` syntax is for modification. Because the elements of the array are
 counted starting at zero, element `.(2)` is the third element.
 
-A new and somewhat odd type has cropped up in this example: `unit`.
-What makes `unit` different is that there is only one value of type
-`unit`, which is written `()`.  Because there is only one value of
-type `unit` that value doesn't really convey any information.
+An odd type has cropped up in this example: `unit`.  What makes `unit`
+different is that there is only one value of type `unit`, which is
+written `()`.  Because there is only one value of type `unit`, that
+value doesn't really convey any information.
 
 If it doesn't convey any information, then what is `unit` good for?
 Most of the time, `unit` acts as a placeholder.  Thus, we use `unit`
