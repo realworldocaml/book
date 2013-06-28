@@ -62,7 +62,7 @@ val dashed_languages : string = "OCaml-Perl-C++-C"
 
 Note that the scope of `language_list` is just the expression
 `String.concat ~sep:"-" language_list`, and is not available at the
-toplevel, as we can see if we try to access it now.
+top level, as we can see if we try to access it now.
 
 ```ocaml
 # language_list;;
@@ -220,6 +220,10 @@ to use a match statement to handle such cases explicitly:
 val upcase_first_entry : string -> string = <fun>
 ```
 
+Note that this is our first use of `assert`, which is a function that
+is useful for throwing an exception in an impossible case.  Asserts
+are discussed in more detail in [xref](#error-handling)
+
 ## Functions ##
 
 OCaml being a functional language, it's no surprise that functions are
@@ -264,7 +268,7 @@ Or even stuff them into a data structure.
 ```ocaml
 # let increments = [ (fun x -> x + 1); (fun x -> x + 2) ] ;;
 val increments : (int -> int) list = [<fun>; <fun>]
-# List.map ~f:(fun f -> f 5) increments;;
+# List.map ~f:(fun g -> g 5) increments;;
 - : int list = [6; 7]
 ```
 
@@ -498,7 +502,7 @@ style:
 You might not have thought of the second example as an ordinary
 function, but it very much is.  Infix operators like `+` really only
 differ syntactically from other functions.  In fact, if we put
-parenthesis around an infix operator, you can use it as an ordinary
+parentheses around an infix operator, you can use it as an ordinary
 prefix function.
 
 ```ocaml
@@ -678,9 +682,9 @@ verbose.
 
 
 An important part of what's happening here is partial application.
-Normally, `List.iter` takes two arguments: a function to be called on
-each element of the list, and the list to iterate over.  We can call
-`List.iter` with all its arguments:
+For example, `List.iter` normally takes two arguments: a function to
+be called on each element of the list, and the list to iterate over.
+We can call `List.iter` with all its arguments:
 
 ```ocaml
 # List.iter ~f:print_endline ["Two"; "lines"];;
