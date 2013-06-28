@@ -53,9 +53,9 @@ let output_t_as_markdown s =
         (Exn.to_string exn) s; raise exn
   in
   let buf =
-    let buf = In_channel.read_all (sprintf "code/%s" t.name) in
     match t.typ with
     | "ocaml" ->
+      let buf = In_channel.read_all (sprintf "code/%s" t.name) in
       printf "```ocaml\n";
       if t.header then printf "(* %s %s *)\n" t.name
         (match t.part with
@@ -65,18 +65,18 @@ let output_t_as_markdown s =
     | "ocamltop" ->
       printf "```ocaml\n";
       if t.header then printf "# script %s\n$ utop\n" t.name;
-      buf
+      In_channel.read_all (sprintf "code/%s.%d.out" (Filename.chop_extension t.name) t.part)
     | "console" -> 
       printf "```console\n";
       let basename = Filename.chop_extension t.name in
       if t.header then printf "# running %s.sh\n" basename;
-      buf
+      In_channel.read_all (sprintf "code/%s" t.name)
     | "json" ->
       printf "```json\n";
-      buf
+      In_channel.read_all (sprintf "code/%s" t.name)
     | _ ->
       printf "```\n";
-      buf
+      In_channel.read_all (sprintf "code/%s" t.name)
   in
   printf "%s\n```\n" (String.rstrip buf)
 
