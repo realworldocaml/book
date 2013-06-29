@@ -1,14 +1,5 @@
 # First class modules
 
-<note>
-<title>Note to reviewers</title>
-
-This chapter is still incomplete, but the contents here are still
-instructive enough that we decided to include it in the public
-beta release.
-
-</note>
-
 You can think of OCaml as being broken up into two parts: a core
 language that is concerned with values and types, and a module
 language that is concerned with modules and module signatures.  These
@@ -19,41 +10,55 @@ module, or a function that takes a module as an argument.
 
 OCaml provides a way around this stratification in the form of
 _first-class modules_.  First-class modules are ordinary values that
-can be created from and converted back to regular modules.  As we'll
-see, letting modules into the core language makes it possible build
-more modular programs.
+can be created from and converted back to regular modules.  
 
-## A trivial example
+First-class modules are a sophisticated technique, and you'll need to
+get comfortable with some advanced aspects of the language to use them
+effectively.  But it's worth learning, because letting modules into
+the core language is quite powerful, increasing the range of what you
+can express and making it easier to build flexible and modular
+systems.
 
-As we did with functors, we'll start out by considering a trivial
-example so we can cover the basic mechanics of first class modules
-with a minimum of fuss.  We'll actually use essentially the same
-example we used with functors: a module containing a single integer
-variable.
+## Working with first-class modules
 
-A first-class module is created by packaging up a module with a
-signature that it satisfies.  The following defines a simple signature
-and a module that matches it.
+We'll start out by covering the basic mechanics of first-class modules
+by working through some toy examples.  We'll get to more realistic
+examples in the next section.
+
+In that light, consider the following signature of a module with a
+single integer variable.
 
 ```ocaml
 # module type X_int = sig val x : int end;;
 module type X_int = sig val x : int end
+```
+
+We can also create a module that matches this signature.
+
+```ocaml
 # module Three : X_int = struct let x = 3 end;;
 module Three : X_int
 # Three.x;;
 - : int = 3
 ```
 
-We can convert this ordinary module into a first-class module using
-the `module` keyword.
+A first-class module is created by packaging up a module with a
+signature that it satisfies.  This is done using the `module` keyword,
+using the following syntax:
+
+```
+(module <Module_name> : <Module_type>)
+```
+
+So, we can convert `Three` into a first-class module as follows.
 
 ```ocaml
 # let three = (module Three : X_int);;
 val three : (module X_int) = <module>
 ```
 
-If the module type can be inferred, than you can even omit the
-signature.  Thus, we can write:
+The module type doesn't need to be part of the construction of a
+first-class module if it can be inferred.  Thus, we can write:
 
 ```ocaml
 # module Four = struct let x = 4 end;;
@@ -62,18 +67,37 @@ module Four : sig val x : int end
 val numbers : (module X_int) list = [<module>; <module>]
 ```
 
-And we can even create a first-class module from an anonymous module:
+We can also create a first-class module from an anonymous module:
 
 ```ocaml
 # let numbers = [three; (module struct let x = 4 end)];;
 val numbers : (module X_int) list = [<module>; <module>]
 ```
 
-Note that the type of the first-class module, `(module X_int)`, is
-based on the name of the signature that we used in constructing it.  A
-first class module based on a signature with a different name, even if
-it is substantively the same signature, will result in a distinct
-type, as is shown below.
+In order to access the contents of a first-class module, you need to
+unpack it into an ordinary module.  This can be done using the `val`
+keyword, using this syntax:
+
+```
+(val <first_class_module> : <Module_type>)
+```
+
+And here's an example.
+
+```ocaml
+# module New_three = (val three : X_int) ;;
+module New_three : X_int
+# New_three.x;;
+- : int = 3
+```
+
+<note> <title> Equality of first-class module types </title>
+
+The type of the first-class module, _e.g._, `(module X_int)`, is based
+on the fully-qualified name of the signature that was used to
+construct it.  A first class module based on a signature with a
+different name, even if it is substantively the same signature, will
+result in a distinct type, as you can see below.
 
 ```ocaml
 # module type Y_int = X_int;;
@@ -85,26 +109,32 @@ Error: This expression has type (module Y_int)
        but an expression was expected of type (module X_int)
 ```
 
-This constraint can occasionally be confusing.  The most common source
-of confusion is if someone creates a module type aas a local alias to
-a module type defined elsewhere, the two module types will lead to
-distinct first class module types.
-
-In order to access the contents of a first-class module, you need to
-unpack it into an ordinary module.  This can be done using the `val`
-keyword, as shown below.
+Even though their types as first-class modules are distinct, the
+underlying module types are compatible (indeed, identical), so we can
+unify the types by unpacking and repacking the module.
 
 ```ocaml
-# module New_three = (val three : X_int) ;;
-module New_three : X_int
-# New_three.x;;
-- : int = 3
+# [three; (module (val five))];;
+- : (module X_int) list = [<module>; <module>]
 ```
 
+The way in which type equality for first-class modules is determined
+can be confusing.  One common and problematic case is that of creating
+an alias of a module type defined elsewhere.  This is often done to
+improve readability, and can happen both through an explicit
+declaration of a module type or implicitly through an `include`
+declaration.  In both cases, this has the unintended side effect of
+making first class modules built off of the alias incompatible with
+those built off of the original module type.  To deal with this, one
+should be disciplined in how one refers to signatures when
+constructing first-class modules.
+
+</note>
+
 We can also write ordinary functions which consume and create first
-class modules.  The following shows the definition of two function,
-`to_int`, which converts a `(module X_int)` into an `int`.  And
-`plus`, which adds two `(module X_int)`s.
+class modules.  The following shows the definition of two functions:
+`to_int`, which converts a `(module X_int)` into an `int`; and `plus`,
+which returns the sum of two `(module X_int)`s.
 
 ```ocaml
 # let to_int m =
@@ -121,7 +151,7 @@ val plus : (module X_int) -> (module X_int) -> (module X_int) = <fun>
 ```
 
 With these functions in hand, we can now work with values of type
-`(module X_int)` in a more natural style, taking full advantage of the
+`(module X_int)` in a more natural style, taking advantage of the
 concision and simplicity of the core language.
 
 ```ocaml
@@ -131,12 +161,184 @@ val six : (module X_int) = <module>
 - : int = 12
 ```
 
-## Example: a query-handling service
+There are some useful syntactic shortcuts when dealing with first
+class modules.  One notable one is that you can do the conversion to an
+ordinary module within a pattern match.  Thus, we can rewrite the
+`to_int` function as follows.
 
-In this section, we'll see what happens when we take a more complete
-and realistic module signature as the basis for a first class module.
-In particular, consider the following signature for a module that
-implements a query handling service.
+```ocaml
+# let to_int (module M : X_int) = M.x ;;
+val to_int : (module X_int) -> int = <fun>
+```
+
+First-class modules can contain types and functions in addition to
+simple values like `int`.  Here's an interface that contains a type
+and a corresponding `bump` operation that takes a value of the type
+and produces a new one.
+
+```ocaml
+# module type Bumpable = sig
+    type t
+    val bump : t -> t
+  end;;
+module type Bumpable = sig type t val val bump : t -> t end
+```
+
+We can create multiple instances of this module with different
+undelrying types.
+
+```ocaml
+# module Int_bumper = struct
+    type t = int
+    let bump n = n + 1
+  end;;
+module Int_bumper : sig type t = int val bump : t -> t end
+# module Float_bumper = struct
+     type t = float
+     let bump n = n +. 1.
+  end;;
+module Float_bumper : sig type t = float val bump : t -> t end
+```
+
+And we can convert these to first-class modules.
+
+```ocaml
+# let int_bumper = (module Int_bumper : Bumpable);;
+val int_bumper : (module Bumpable) = <module>
+```
+
+But you can't do much with `int_bumper`, since `int_bumper` is fully
+abstract, so that we can no longer recover the fact that the type in
+question is `int`.  This means you can't really do much with it, as
+you can see below.
+
+```ocaml
+# let (module Bumpable) = int_bumper in Bumpable.bump 3;;
+Error: This expression has type int but an expression was expected of type
+         Bumpable.t
+```
+
+To make `int_bumber` usable, we need to expose the type, which we can
+do as follows.
+
+```ocaml
+# let int_bumper = (module Int_bumper : Bumpable with type t = int);;
+val int_bumper : (module Bumpable with type t = int) = <module>
+# let float_bumper = (module Float_bumper : Bumpable with type t = float);;
+val float_bumper : (module Bumpable with type t = float) = <module>
+```
+
+The sharing constraints we've added above make the resulting
+first-class modules polymorphic in the type `t`.  As a result, we can
+now use these values on values of the matching type.
+
+```ocaml
+# let (module Bumpable) = int_bumper in Bumpable.bump 3;;
+- : int = 4
+# let (module Bumpable) = float_bumper in Bumpable.bump 3.5;;
+- : float = 4.5
+```
+
+We can also write functions that use such first-class modules
+polymorphically.  The following function takes two arguments: a
+`Bumpable` module, and a list of elements of the same type as the type
+`t` of the module.
+
+```ocaml
+# let bump_list
+       (type a)
+       (module B : Bumpable with type t = a)
+       (l: a list)
+    =
+    List.map ~f:B.bump l
+  ;;
+val bump_list : (module Bumpable with type t = 'a) -> 'a list -> 'a list =
+  <fun>
+```
+
+Here, we used a feature of OCaml that hasn't come up before: a
+_locally abstract type_.  For any function, you can declare a
+pseudo-parameter of the form `(type a)` for any type name `a` which
+introduces a fresh type that acts like an abstract type within the
+context of the function.  Here, we used that type as part of a sharing
+constraint that ties the type `B.t` with the type of the elements of
+the list passed in.
+
+The resulting function is polymorphic in both the type of the list
+element and the type `Bumpable.t`.  We can see this function in action
+below.
+
+```ocaml
+# bump_list int_bumper [1;2;3];;
+- : int list = [2; 3; 4]
+# bump_list float_bumper [1.5;2.5;3.5];;
+- : float list = [2.5; 3.5; 4.5]
+```
+
+Polymorphic first-class modules are important because they allow you
+to connect the types associated with a first-class module to the types
+of other values you're working with.
+
+<note><title> More on locally abstract types </title>
+
+One of the key properties of locally abstract types is that they are
+dealt with as abstract types within the function they're defined
+within, but are polymorphic from the outside.  Consider the following
+example.
+
+```ocaml
+# let wrap_in_list (type a) (x:a) = [x];;
+- : 'a -> 'a list = <fun>
+```
+
+This compiles successfully because the type `a` is used in a way that
+is compatible with it being abstract, but the type of the function
+that is inferred is polymorphic.
+
+If, on the other hand, we try to use the type `a` as equivalent to
+some concrete type, say, `int`, then the compiler will complain.
+
+```ocaml
+# let wrap_int_in_list (type a) (x:a) = x + x;;
+Error: This expression has type a but an expression was expected of type int
+```
+
+One common use of locally abstract types is to create a new type that
+can be used in constructing a module.  Here's an example of doing this
+to create a new first-class module.
+
+```ocaml
+# module type Comparable = sig
+    type t
+    val compare : t -> t -> int
+  end ;;
+module type Comparable = sig type t val compare : t -> t -> int end
+# let create_comparable (type a) compare =
+    (module struct
+       type t = a
+       let compare = compare
+     end : Comparable with type t = a)
+  ;;
+# create_comparable Int.compare;;
+- : (module Comparable with type t = int) = <module>
+# create_comparable Float.compare;;
+- : (module Comparable with type t = float) = <module>
+```
+
+Here, what we effectively do is capture a polymorphic type and export
+it as a concrete type within a module.
+
+This technique is useful beyond first-class modules.  For example, we
+can use the same approach to construct a local module to be fed to a
+functor.
+
+</note>
+
+## Example: A query handling framework
+
+Now let's look at first class modules in the context of a more
+complete and realistic example.  In particular, consider the following
+signature for a module that implements a query handler.
 
 ```ocaml
 # module type Query_handler = sig
@@ -171,7 +373,7 @@ module type Query_handler =
 ```
 
 In the above we use s-expressions as the format for queries and
-responses as well for the config.  S-expressions are a simple,
+responses, as well for the config.  S-expressions are a simple,
 flexible, and human-readable serialization format commonly used in
 Core.  We'll cover s-expressions in more detail in
 [xref](#data-serialization-with-s-expressions), but for now, it's
@@ -180,16 +382,39 @@ atomic values are strings, _e.g._, `(this (is an) (s expression))`.
 
 In addition, we use the `sexplib` syntax extension which extends OCaml
 by adding the `with sexp` declaration.  When attached to a type in a
-signature adds in declarations of converters to and from
-s-expressions.  In a module, `with sexp` adds the actual
-implementation of those functions.  This is all described in more
-detail in [xref](#data-serialization-with-s-expressions).
+signature, `with sexp` adds declarations of s-expression converters,
+_e.g._,
 
-Let's give a couple of examples of simple services that satisfy this
-interface.  For example, the following service hands out unique
-integer ids by keeping an internal counter which it bumps every time
-it produces a counter.  The input to the query in this case is just
-the trivial s-expression `()`.
+```ocaml
+# module type M = sig type t with sexp end;;
+module type M =
+  sig type t val t_of_sexp : Sexp.t -> t val sexp_of_t : t -> Sexp.t end
+```
+
+In a module, `with sexp` adds the implementation of those functions.
+Thus, we can write
+
+```ocaml
+# type u = { a: int; b: float } with sexp;;
+type u = { a : int; b : float; }
+val u_of_sexp : Sexp.t -> u = <fun>
+val sexp_of_u : u -> Sexp.t = <fun>
+# sexp_of_u {a=3;b=7.};;
+- : Sexp.t = ((a 3) (b 7))
+# u_of_sexp (Sexp.of_string "((a 43) (b 3.4))");;
+- : u = {a = 43; b = 3.4}
+```
+
+This is all described in more detail in
+[xref](#data-serialization-with-s-expressions).
+
+### Implementing a query handler
+
+Let's look at some examples of query handlers that satisfy this
+interface.  The following handler produces unique integer ids by
+keeping an internal counter which it bumps every time it produces a
+new value.  The input to the query in this case is just the trivial
+s-expression `()`, otherwise known as `Sexp.unit`.
 
 ```ocaml
 # module Unique = struct
@@ -203,9 +428,9 @@ the trivial s-expression `()`.
       match Or_error.try_with (fun () -> unit_of_sexp sexp) with
       | Error _ as err -> err
       | Ok () ->
-        let resp = Ok (Int.sexp_of_t t.next_id) in
+        let response = Ok (Int.sexp_of_t t.next_id) in
         t.next_id <- t.next_id + 1;
-        resp
+        response
   end;;
 module Unique :
   sig
@@ -223,26 +448,26 @@ We can use this module to create an instance of the `Unique` query
 handler and interact with it.
 
 ```ocaml
-# let config = Unique.config_of_sexp (Sexp.of_string "0");;
-val config : Unique.config = <abstr>
-# let unique = Unique.create config;;
-val unique : Unique.t = <abstr>
-# Unique.eval unique (Sexp.of_string "()");;
-- : Sexp.t Or_error.t = Core_kernel.Result.Ok 0
-# Unique.eval unique (Sexp.of_string "()");;
-- : Sexp.t Or_error.t = Core_kernel.Result.Ok 1
+# let unique = Unique.create 0;;
+val unique : Unique.t = {Unique.next_id = 0}
+# Unique.eval unique Sexp.unit;;
+- : (Sexp.t, Error.t) Result.t = Ok 0
+# Unique.eval unique Sexp.unit;;
+- : (Sexp.t, Error.t) Result.t = Ok 1
 ```
 
-Now, consider what happens if we have multiple such modules.  Here,
-for example, is a query handler for handling directory listings.
+Here's another example: a query handler that does directory listings.
+Here, the config is the default directory that relative paths are
+interpreted within.
 
 ```ocaml
 # module List_dir = struct
     type config = string with sexp
     type t = { cwd: string }
 
-    let is_abs s =
-      String.length s > 0 && s.[0] = '/'
+    (** [is_abs p] Returns true if [p] is an absolute path  *)
+    let is_abs p =
+      String.length p > 0 && p.[0] = '/'
 
     let name = "ls"
     let create cwd = { cwd }
@@ -267,21 +492,33 @@ module List_dir :
     val config_of_sexp : Sexp.t -> config
     val sexp_of_config : config -> Sexp.t
   end
-# let list_dir = List_dir.create "/";;
-val list_dir : List_dir.t = <abstr>
-# List_dir.eval list_dir (sexp_of_string "var");;
-- : Sexp.t Or_error.t =
-Core_kernel.Result.Ok
- (agentx at audit backups db empty folders jabberd lib log mail msgs named
-  netboot pgsql_socket_alt root rpc run rwho spool tmp vm yp)
 ```
 
+Again, we can create an instance of this query handler and interact
+with it directly.
+
+```ocaml
+# let list_dir = List_dir.create "/var";;
+val list_dir : List_dir.t = <abstr>
+# List_dir.eval list_dir (sexp_of_string ".");;
+- : (Sexp.t, Error.t) Result.t =
+Ok
+ (agentx at audit backups db empty folders jabberd lib log mail msgs named
+  netboot pgsql_socket_alt root rpc run rwho spool tmp vm yp)
+# List_dir.eval list_dir (sexp_of_string "yp");;
+- : (Sexp.t, Error.t) Result.t =
+Ok (binding binding~orig Makefile.main Makefile.yp)
+```
+
+### Dispatching to multiple query handlers
+
 Now, what if we want to dispatch queries to any of an arbitrary
-collection of handlers?  This is difficult to do with modules and
-functors alone, but it's quite natural with first-class modules.  The
-first thing we'll need to do is to create a signature that combines a
-`Query_handler` module with an instantiated example of the handler, as
-follows.
+collection of handlers?  Ideally, we'd just like to pass in the
+handlers as a simple data structure like a list.  This is awkward to
+do with modules and functors alone, but it's quite natural with
+first-class modules.  The first thing we'll need to do is create a
+signature that combines a `Query_handler` module with an instantiated
+query handler.
 
 ```ocaml
 # module type Query_handler_instance = sig
@@ -292,8 +529,11 @@ module type Query_handler_instance =
   sig module Query_handler : Query_handler val this : Query_handler.t end
 ```
 
-We can create first-class modules of this type easily enough, if we
-have both the `Query_handler` module and a config to create it from.
+With this signature, we can create a first-class module that
+encompasses both an instance of the query and the matching operations
+for working with that query.
+
+We can create an instance as follows.
 
 ```ocaml
 # let unique_instance =
@@ -302,427 +542,386 @@ have both the `Query_handler` module and a config to create it from.
        let this = Unique.create 0
      end : Query_handler_instance);;
 val unique_instance : (module Query_handler_instance) = <module>
-# let list_dir_instance =
+```
+
+Constructing instances in this way is a little verbose, but we can
+write a function that eliminates most of this boilerplate.  Note that
+we are again making use of a locally abstract type.
+
+```ocaml
+# let build_instance
+        (type a)
+        (module Q : Query_handler with type config = a)
+        config
+    =
     (module struct
-       module Query_handler = List_dir
-       let this = List_dir.create "/"
-     end : Query_handler_instance);;
+       module Query_handler = Q
+       let this = Q.create config
+     end : Query_handler_instance)
+  ;;
+val build_instance :
+  (module Query_handler with type config = 'a) ->
+  'a -> (module Query_handler_instance) = <fun>
+```
+
+Using `build_instance`, constructing a new instance becomes a
+one-liner:
+
+```ocaml
+# let unique_instance = build_instance (module Unique) 0;;
+val unique_instance : (module Query_handler_instance) = <module>
+# let list_dir_instance = build_instance (module List_dir)  "/var";;
 val list_dir_instance : (module Query_handler_instance) = <module>
 ```
 
-Here's some code for putting together a simple interactive prompt that
-lets you dispatch queries to a given query handler by name.
+The following code lets you dispatch queries to one of a list of query
+handler instances.  We assume that the shape of the query is as
+follows:
+
+```
+(<query-name> <query>)
+```
+
+where `<query-name>` is used to determine which query handler to
+dispatch the query to.
+
+The first thing we'll need is a function that takes a list of query
+handler instances and constructs a dispatch table from it.
 
 ```ocaml
-# let dispatch_to_list handlers name_and_query =
-    let (name,query) = <:of_sexp<string * Sexp.t>> name_and_query in
-    let response =
-      List.find_map handlers
-        ~f:(fun (module I : Query_handler_instance) ->
-          if I.Query_handler.name <> name then None
-          else Some (I.Query_handler.eval I.this query)
-        )
-    in
-    match response with
-    | Some x -> x
-    | None -> Or_error.error "Could not find matching handler"
-                name String.sexp_of_t
+# let build_dispatch_table handlers =
+    let table = String.Table.create () in
+    List.iter handlers
+      ~f:(fun ((module I : Query_handler_instance) as instance) ->
+        Hashtbl.replace table ~key:I.Query_handler.name ~data:instance);
+    table
   ;;
-val dispatch_to_list :
-  (module Query_handler_instance) list -> Sexp.t -> Sexp.t Or_error.t = <fun>
+val build_dispatch_table :
+  (module Query_handler_instance) list ->
+  (module Query_handler_instance) String.Table.t = <fun>
 ```
 
-And using this, we can create a simple interactive tool for sending
-queries and viewing the results.
+Now, we need a function that dispatches to a handler using a dispatch
+table.
 
 ```ocaml
-# let run s =
-    match dispatch_to_list [ unique_instance; list_dir_instance ]
-            (Sexp.of_string s)
-    with
-    | Error e -> printf "ERROR: %s\n" (Error.to_string_hum e)
-    | Ok s -> print_endline (Sexp.to_string_hum s)
-  ;;
-val run : string -> unit = <fun>
-```
-
-```ocaml
-# let rec repl handlers =
-    printf ">>> %!";
-    match In_channel.input_line stdin with
-    | None -> ()
-    | Some line ->
-      match Or_error.try_with (fun () -> Sexp.of_string line) with
-      | Error e -> printf "PARSE ERROR: %s\n%!" (Error.to_string_hum e)
-      | Ok (Sexp.Atom "quit") -> ()
-      | Ok query ->
-        begin match dispatch_to_list handlers query with
-        | Error e -> printf "ERROR: %s\n%!" (Error.to_string_hum e)
-        | Ok s -> printf "%s\n%!" (Sexp.to_string_hum s)
-        end;
-        repl handlers
-  ;;
-```
-
-
-
-
-```ocaml
-# let handle_query handlers =
-    printf ">>> %!"; (* prompt *)
-    match In_channel.input_line stdin with
-    | None -> `Stop (* terminate on end-of-stream, so Ctrl-D will exit *)
-    | Some line ->
-      let line = String.strip line in (* drop leading and trailing whitespace *)
-      if line = "" then `Continue
-      else match Or_error.try_with (fun () -> Sexp.of_string line) with
-      | Error err ->
-        eprintf "Couldn't parse query: %s\n%!" (Error.to_string_hum err);
-        `Continue
-      | Ok  ->
-        let resp = Service.Bundle.handle_request bundle query_sexp in
-        Sexp.output_hum stdout (<:sexp_of<Sexp.t Or_error.t>> resp);
-        Out_channel.newline stdout;
-        `Continue
-
-  let handle_loop services =
-    let bundle = Service.Bundle.create services in
-    let rec loop () =
-      match handle_one bundle with
-      | `Stop -> ()
-      | `Continue -> loop ()
-    in
-    loop ()
-```
-
-
-
-
-## BREAK
-
-
-
-Here, requests and responses are delivered as s-expressions, which are
-a simple, flexible, and human-readable serialization format commonly
-used in Core.  We'll cover s-expressions in more detail in
-[xref](#data-serialization-with-s-expressions), but for now, it's
-enough to think of them as balanced parenthetical expressions whose
-atomic values are strings.
-
-
-
-```ocaml
-# module type Number = sig
-    type t
-    val zero : t
-    val one : t
-    val ( + ) : t -> t -> t
-    val ( /% ) : t -> t -> t  
-    val ( / ) : t -> t -> t
-    val ( * ) : t -> t -> t
-    val ( > ) : t -> t -> bool
-    val ( = ) : t -> t -> bool
-    val ( < ) : t -> t -> bool
-  end;;
-```
-
-```ocaml
-# let gcd (module N : Number) n m =
-     let rec gcd n m = 
-        if N.(n > m) then gcd m n
-        else if N.(n = zero) then m
-        else gcd n N.(m - n)
-     in
-     gcd n m
-  ;;
-```
-
-
-## Dynamically choosing a module
-
-Perhaps the simplest thing you can do with first-class modules that
-you can't do without them is to pick the implementation of a module at
-runtime.
-
-Consider an application that does I/O multiplexing using a system call
-like `select` to determine which file descriptors are ready to use.
-There are in fact multiple APIs you might want to use, including
-`select` itself, `epoll`, and `libev`, where different multiplexers
-make somewhat different performance and portability trade-offs.  You
-could support all of these in one application by defining a single
-module, let's call it `Mutliplexer`, whose implementation is chosen at
-runtime based on an environment variable.
-
-To do this, you'd first need an interface `S` that all of the
-different multiplexer implementations would need to match, and then an
-implementation of each multiplexer.
-
-```ocaml
-(* file: multiplexer.ml *)
-
-(* An interface the OS-specific functionality *)
-module type S = sig ... end
-
-(* The implementations of each individual multiplexer *)
-module Select : S = struct ... end
-module Epoll  : S = struct ... end
-module Libev  : S = struct ... end
-```
-
-We can choose the first-class module that we want based on looking up
-an environment variable.
-
-```ocaml
-let multiplexer =
-  match Sys.getenv "MULTIPLEXER" with
-  | None
-  | Some "select" -> (module Select : S)
-  | Some "epoll"  -> (module Epoll : S)
-  | Some "libev"  -> (module Libev : S)
-  | Some other -> failwithf "Unknown multiplexer: %s" other ()
-```
-
-Finally, we can convert the resulting first-class module back to an
-ordinary module, and then include that so it becomes part of the body
-of our module.
-
-```ocaml
-(* The final, dynamically chosen, implementation *)
-include (val multiplexer : S)
-```
-
-## Example: A service bundle
-
-This section describes the design of a library for bundling together
-multiple services, where a service is a component that exports a query
-interface.  A service bundle combines together multiple individual
-services under a single query interface that works by dispatching
-incoming queries to the appropriate underlying service.  We'll use
-this to build a simple command-line interface for interacting with
-these services, but the basic idea could be used in other contexts,
-like building a system for managing web services.
-
-The following is a first attempt at an interface for our `Service`
-module, which contains both a module type `S`, which is the interface
-that a service should meet, as well as a `Bundle` module which is for
-combining multiple services.
-
-```ocaml
-(* file: service.mli *)
-
-open Core.Std
-
-(** The module type for a service. *)
-module type S = sig
-  type t
-  val name           : string
-  val create         : unit -> t
-  val handle_request : t -> Sexp.t -> Sexp.t Or_error.t
-end
-
-(** Bundles multiple services together *)
-module Bundle : sig
-  type t
-  val create : (module S) list -> t
-  val handle_request : t -> Sexp.t -> Sexp.t Or_error.t
-  val service_names  : t -> string list
-end
-```
-
-Here, a service has a state, represented by the type `t`, a name by
-which the service can be referenced, a function `create` for
-instantiating a service, and a function by which a service can
-actually handle a request.  Here, requests and responses are delivered
-as s-expressions, which are a very simple serialization format
-commonly used in Core.  We'll cover s-expressions in more detail in
-[xref](#data-serialization-with-s-expressions), but for now, it's
-enough to think of them as balanced parenthetical expressions whose
-atomic values are strings.
-
-At the `Bundle` level, the s-expression of a request is expected to be
-formatted as follows:
-
-```
-(<service-name> <body>)
-```
-
-where `<service_name>` is the service that should handle the request,
-and `<body>` is the body of the request.
-
-Now let's look at how to implement `service.ml`.  We'll start with the
-definition of the module type `S` and the definition of the type
-`Bundle.t`.  A `Bundle.t` is implemented as a hashtable of request
-handlers, one per service.  Each request handler is a function of type
-`(Sexp.t -> Sexp.t Or_error.t)`.  These request handlers really stand
-in for the underlying service, with the particular state of the
-service in question being hidden behind the function.
-
-```ocaml
-(* file: service.ml *)
-
-open Core.Std
-
-module type S = sig
-  type t
-  val name           : string
-  val create         : unit -> t
-  val handle_request : t -> Sexp.t -> Sexp.t Or_error.t
-end
-
-module Bundle = struct
-  type t = { handlers: (Sexp.t -> Sexp.t Or_error.t) String.Table.t; }
-```
-
-The next thing we need is a function for creating a `Bundle.t`.  This
-`create` function builds a table to hold the request handlers, and
-then iterates through the services, unpacking each module,
-constructing the request handler, and then putting that request
-handler in the table.
-
-```ocaml
-  (** Creates a handler given a list of services *)
-  let create services =
-    let handlers = String.Table.create () in
-    List.iter services ~f:(fun service_m ->
-      let module Service = (val service_m : S) in
-      let service = Service.create () in
-      if Hashtbl.mem handlers Service.name then
-        failwith ("Attempt to register duplicate handler for "^Service.name);
-      Hashtbl.replace handlers ~key:Service.name
-        ~data:(fun sexp -> Service.handle_request service sexp)
-    );
-    {handlers}
-```
-
-Note that the `Service.t` that is created is referenced by the
-corresponding request handler, so that it is effectively hidden behind
-the function in the `handlers` table.
-
-Now we can write the function to handle requests.  The handler will
-examine the s-expression to determine the body of the query and the
-name of the service to dispatch to.  It then looks up the handler
-calls it to generate the response.
-
-```ocaml
-  let handle_request t sexp =
-    match sexp with
-    | Sexp.List [Sexp.Atom name;query] ->
-      begin match Hashtbl.find t.handlers name with
-      | None -> Or_error.error_string ("Unknown service: "^name)
-      | Some handler ->
-        try handler query
-        with exn -> Error (Error.of_exn exn)
+# let dispatch dispatch_table name_and_query =
+    match name_and_query with
+    | Sexp.List [Sexp.Atom name; query] ->
+      begin match Hashtbl.find dispatch_table name with
+      | None ->
+        Or_error.error "Could not find matching handler"
+          name String.sexp_of_t
+      | Some (module I : Query_handler_instance) ->
+        I.Query_handler.eval I.this query
       end
-    | _ -> Or_error.error_string "Malformed query"
+    | _ ->
+      Or_error.error_string "malformed query"
+  ;;
+val dispatch :
+  (string, (module Query_handler_instance)) Hashtbl.t ->
+  Sexp.t -> Sexp.t Or_error.t = <fun>
 ```
 
-Last of all, we define a function for looking up the names of the
-available services.
+This function interacts with an instance by unpacking it into a module
+`I` and then using the query handler instance (`I.this`) in concert
+with the associated module (`I.Query_handler`).
+
+The bundling together of the module and the value is in many ways
+reminisicent of object-oriented languages.  One key difference, is
+that first-class modules allow you to package up more than just a
+functions or methods.  As we've seen, you can also include types and
+even modules.  We've only used it in a small way here, but this extra
+power allows you to build more sophisticated components that involve
+multiple interdependent types and values.
+
+Now let's turn this into a complete, running example, by adding a
+command-line interface, as shown below.
 
 ```ocaml
-  let service_names t = Hashtbl.keys t.handlers
-
-end
-```
-
-To see this system in action, we need to define some services, create
-the corresponding bundle, and then hook that bundle up to some kind of
-client.  For simplicity, we'll build a simple command-line interface.
-There are two functions below: `handle_one`, which handles a single
-interaction; and `handle_loop`, which creates the bundle and then runs
-`handle_one` in a loop.
-
-```ocaml
-(* file: service_client.ml *)
-
-open Core.Std
-
-(** Handles a single request coming from stdin *)
-let handle_one bundle =
-  printf ">>> %!"; (* prompt *)
-  match In_channel.input_line stdin with
-  | None -> `Stop (* terminate on end-of-stream, so Ctrl-D will exit *)
-  | Some line ->
-    let line = String.strip line in (* drop leading and trailing whitespace *)
-    if line = "" then `Continue
-    else match Or_error.try_with (fun () -> Sexp.of_string line) with
-    | Error err ->
-      eprintf "Couldn't parse query: %s\n%!" (Error.to_string_hum err);
-      `Continue
-    | Ok query_sexp ->
-      let resp = Service.Bundle.handle_request bundle query_sexp in
-      Sexp.output_hum stdout (<:sexp_of<Sexp.t Or_error.t>> resp);
-      Out_channel.newline stdout;
-      `Continue
-
-let handle_loop services =
-  let bundle = Service.Bundle.create services in
-  let rec loop () =
-    match handle_one bundle with
+# let rec cli dispatch_table =
+    printf ">>> %!";
+    let result =
+      match In_channel.input_line stdin with
+      | None -> `Stop
+      | Some line ->
+        match Or_error.try_with (fun () -> Sexp.of_string line) with
+        | Error e -> `Continue (Error.to_string_hum e)
+        | Ok (Sexp.Atom "quit") -> `Stop
+        | Ok query ->
+          begin match dispatch dispatch_table query with
+          | Error e -> `Continue (Error.to_string_hum e)
+          | Ok s    -> `Continue (Sexp.to_string_hum s)
+          end;
+    in
+    match result with
     | `Stop -> ()
-    | `Continue -> loop ()
-  in
-  loop ()
+    | `Continue msg ->
+      printf "%s\n%!" msg;
+      cli dispatch_table
+  ;;
+val cli : (string, (module Query_handler_instance)) Hashtbl.t -> unit = <fun>
 ```
 
-Now we'll create a couple of toy services.  One service is a counter
-that can be updated by query; and the other service lists a directory.
-The last line then kicks off the shell with the services we've
-defined.
+We can most effectively run this command-line interface from a
+stand-alone program, which we can do by putting the above code in a
+file along with following command to launch the interface.
 
 ```ocaml
-module Counter : Service.S = struct
-  type t = int ref
-
-  let name = "update-counter"
-  let create () = ref 0
-
-  let handle_request t sexp =
-    match Or_error.try_with (fun () -> int_of_sexp sexp) with
-    | Error _ as err -> err
-    | Ok x ->
-      t := !t + x;
-      Ok (sexp_of_int !t)
-end
-
-module List_dir : Service.S = struct
-  type t = unit
-
-  let name = "ls"
-  let create () = ()
-
-  let handle_request () sexp =
-    match Or_error.try_with (fun () -> string_of_sexp sexp) with
-    | Error _ as err -> err
-    | Ok dir -> Ok (Array.sexp_of_t String.sexp_of_t (Sys.readdir dir))
-end
-
 let () =
-  handle_loop [(module List_dir : Service.S); (module Counter : Service.S)]
+  cli [unique_instance; list_dir_instance]
 ```
 
-And now we can go ahead and start up the client.
+Here's an example of a session with this program.
 
 ```
-$ ./service_client.byte
->>> (update-counter 1)
-(Ok 1)
->>> (update-counter 10)
-(Ok 11)
+$ ./query_handler.byte 
+>>> (unique ())
+0
+>>> (unique ())
+1
 >>> (ls .)
-(Ok
- (_build _tags service.ml service.mli service.mli~ service.ml~
-  service_client.byte service_client.ml service_client.ml~))
->>>
+(agentx at audit backups db empty folders jabberd lib log mail msgs named
+ netboot pgsql_socket_alt root rpc run rwho spool tmp vm yp)
+>>> (ls vm)
+(sleepimage swapfile0 swapfile1 swapfile2 swapfile3 swapfile4 swapfile5
+ swapfile6)
 ```
 
-Now, let's consider what happens to the design when we want to make
-the interface of a service a bit more realistic.  In particular, right
-now services are created without any configuration.  Let's add a
-config type to each service, and change the interface of `Bundle` so
-that services can be registered along with their configs.  At the same
-time, we'll change the `Bundle` API to allow services to be changed
-dynamically, rather than just added at creation time.
+### Loading and unloading query handlers
 
+Let's show off the dynamism and flexibility of first-class modules by
+showing how to build a query handler whose job is to load and unload
+other query handlers.
+
+The module in question will be called `Loader`, and its configuration
+is a list of known `Query_handler` modules.  Here are the basic types.
+
+```ocaml
+module Loader = struct
+  type config = (module Query_handler) list sexp_opaque
+  with sexp
+
+  type t = { known  : (module Query_handler)          String.Table.t
+           ; active : (module Query_handler_instance) String.Table.t
+           }
+
+  let name = "loader"
+
+```
+
+Note that a `Loader.t` has two hash tables: one containing the known
+query handler modules, and one containing the active query handler
+instances.  The `Loader.t` will be responsible for creating new
+instances and adding them to the table, as well as for removing
+instances, all in response to user queries.
+
+Next, we'll need a function for creating a `Loader.t`.  This function
+requires the list of known query handler modules.  Note that the table
+of active modules starts out as empty.
+
+```ocaml
+  let create known_list =
+    let active = String.Table.create () in
+    let known  = String.Table.create () in
+    List.iter known_list
+      ~f:(fun ((module Q : Query_handler) as q) ->
+        Hashtbl.replace known ~key:Q.name ~data:q);
+    { known; active }
+```
+
+Now we'll start writing out the functions for manipulating the table
+of active query handlers.  We'll start with the function for loading
+an instance.  Note that it takes as an argument both the name of the
+query handler, and the configuration for instantiating that handler,
+in the form of an s-expression.  These are used for creating a
+first-class module of type `(module Query_handler_instance)`, which is
+then added to the active table.  
+
+```ocaml
+  let load t handler_name config =
+    if Hashtbl.mem t.active handler_name then
+      Or_error.error "Can't re-register an active handler"
+        handler_name String.sexp_of_t
+    else
+      match Hashtbl.find t.known handler_name with
+      | None ->
+        Or_error.error "Unknown handler" handler_name String.sexp_of_t
+      | Some (module Q : Query_handler) ->
+        let instance =
+          (module struct
+             module Query_handler = Q
+             let this = Q.create (Q.config_of_sexp config)
+           end : Query_handler_instance)
+        in
+        Hashtbl.replace t.active ~key:handler_name ~data:instance;
+        Ok Sexp.unit
+```
+
+Since the `load` function will refuse to `load` an already active
+handler, we also need the ability to unload a handler.  Note that the
+handler explicitly refuses to unload itself.
+
+```ocaml
+  let unload t handler_name =
+    if not (Hashtbl.mem t.active handler_name) then
+      Or_error.error "Handler not active" handler_name String.sexp_of_t
+    else if handler_name = name then
+      Or_error.error_string "It's unwise to unload yourself"
+    else (
+      Hashtbl.remove t.active handler_name;
+      Ok Sexp.unit
+    )
+```
+
+Finally, we need to implement the `eval` function, which will
+determine the query interface presented to the user.  We'll do this by
+creating a variant type, and using the s-expression converter
+generated for that type to parse the query from the user.
+
+```ocaml
+  type request =
+    | Load of string * Sexp.t
+    | Unload of string
+    | Known_services
+    | Active_services
+  with sexp
+```
+
+The eval function itself is fairly straight-forward, dispatching to
+the appropriate functions to respond to each type of query.  Note that
+we use write `<sexp_of<string list>>` to auto-generate a function for
+converting a list of strings to an s-expression.  This is part of the
+sexplib package described in
+[xref](#data-serialization-with-s-expressions).  
+
+This function ends the definition of the `Loader` module.
+
+```ocaml
+  let eval t sexp =
+    match Or_error.try_with (fun () -> request_of_sexp sexp) with
+    | Error _ as err -> err
+    | Ok resp ->
+      match resp with
+      | Load (name,config) -> load   t name config
+      | Unload name        -> unload t name
+      | Known_services ->
+        Ok (<:sexp_of<string list>> (Hashtbl.keys t.known))
+      | Active_services ->
+        Ok (<:sexp_of<string list>> (Hashtbl.keys t.active))
+end
+```
+
+Finally, we can put this all together with the command line interface.
+We first create an instance of the loader query handler, and then add
+that instance to the loader's active table.  We can then just launch
+the command-line interface, passing it the active table.
+
+```ocaml
+let () =
+  let loader = Loader.create [(module Unique); (module List_dir)] in
+  let loader_instance =
+    (module struct
+       module Query_handler = Loader
+       let this = loader
+     end : Query_handler_instance)
+  in
+  Hashtbl.replace loader.Loader.active
+    ~key:Loader.name ~data:loader_instance;
+  cli loader.Loader.active
+```
+
+The resulting command line interface behaves much as you'd expect,
+starting out with no query handlers available, but giving you the
+ability to load and unload them.  Here's an example of it in action.
+As you can see, we start out with `loader` itself as the only active
+handler.
+
+```
+>>> (loader known_services)
+(ls unique)
+>>> (loader active_services)
+(loader)
+```
+
+If we try to use one of the inactive queries, it will fail. 
+
+```
+>>> (ls .)
+Could not find matching handler: ls
+```
+
+But, we can load the `ls` handler with a config of our choice, at
+which point, it will be available for use.  And once we unload it, it
+will be unavailable yet again, and could be reloaded with a different
+config.
+
+```
+>>> (loader (load ls /var))
+()
+>>> (ls /var)
+(agentx at audit backups db empty folders jabberd lib log mail msgs named
+ netboot pgsql_socket_alt root rpc run rwho spool tmp vm yp)
+>>> (loader (unload ls))
+()
+>>> (ls /var)
+Could not find matching handler: ls
+```
+
+Notably, the loader can't be itself loaded (since it's not on the list
+of known handlers), and can't be unloaded.
+
+```
+>>> (loader (unload loader))
+It's unwise to unload yourself
+```
+
+We can push this dynamism yet further using libraries like
+`ocaml_plugin`, which use OCaml's dynamic linking facilities to allow
+a program to compile and load an OCaml source file as a first-class
+module.  Thus, one could extend `Loader` to loads entirely new query
+handlers from disk on demand.
+
+## Living without first-class modules
+
+It's worth noting that most designs that can be done with first class
+modules can be simulated without them, with some level of
+awkwardness.  For example, we could rewrite our query handler example
+without first-class modules using the following types:
+
+```ocaml
+# type query_handler_instance = { name : string
+                                ; eval : Sexp.t -> Sexp.t Or_error.t
+                                }
+  type query_handler = Sexp.t -> query_handler_instance
+  ;;
+type query_handler_instance = {
+  name : string;
+  eval : Sexp.t -> Sexp.t Or_error.t;
+}
+type query_handler = Sexp.t -> query_handler_instance
+```
+
+The idea here is that we hide the true types of the objects in
+question behind the functions stored in the closure.  Thus, we could
+put the `Unique` query handler into this framework as follows.
+
+```ocaml
+# let unique_handler config_sexp =
+    let config = Unique.config_of_sexp config_sexp in
+    let unique = Unique.create config in
+    { name = Unique.name
+    ; eval = (fun config -> Unique.eval unique config)
+    }
+  ;;
+val unique_handler : Sexp.t -> query_handler_instance = <fun>
+```
+
+For an example on this scale, the above approach is completely
+reasonable, and first-class modules are not really necessary.  But the
+more functionality you need to hide away behind a set of closures, and
+the more complicated the relationships between the different types in
+question, the more awkward this approach becomes, and the better it is
+to use first-class modules.
 
 

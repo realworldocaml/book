@@ -128,7 +128,7 @@ basic extension mechanism used by the rest of this chapter.
 The textual representation of s-expressions is pretty
 straightforward. An s-expression is written down as a nested
 parenthetical expression, with whitespace-separated strings as the
-atoms.  Quotes are used for atoms that contain parenthesis or spaces
+atoms.  Quotes are used for atoms that contain parentheses or spaces
 themselves; backslash is the escape character; and semicolons are used
 to introduce single-line comments.  Thus, the following file,
 `example.scm`:

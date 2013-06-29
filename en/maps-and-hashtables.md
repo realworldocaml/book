@@ -1,4 +1,4 @@
-# Maps and Hashtables
+# Maps and Hash Tables
 
 Lots of programming problems require dealing with data organized as
 key/value pairs.  Maybe the simplest way of representing such data in
@@ -32,9 +32,9 @@ not ideal, since almost every non-trivial operation on an association
 list requires a linear-time scan of the list.
 
 In this chapter, we'll talk about two more efficient alternatives to
-association lists: _maps_ and _hashtables_.  A map is an immutable
+association lists: _maps_ and _hash tables_.  A map is an immutable
 tree-based data structure where most operations take time logarithmic
-in the size of the map, whereas a hashtable is a mutable data
+in the size of the map, whereas a hash table is a mutable data
 structure where most operations have constant time complexity.  We'll
 describe both of these data structures in detail, and provide some
 advice as to how to choose between them.
@@ -309,7 +309,7 @@ This is rejected for good reason: there's no guarantee that the
 comparator associated with a given type will order things in the same
 way that polymorphic compare does.
 
-<sidebar>
+<note>
 <title>The difference between `=` and `==`, and `phys_equal` in Core</title>
 
 If you come from a C/C++ background, you'll probably reflexively use `==` to
@@ -358,7 +358,7 @@ and t2 = { foo2 : int; bar2 : t1; }
 <press ^Z and kill the process now>
 ```
 
-</sidebar>
+</note>
 
 ### Sets
 
@@ -565,25 +565,47 @@ compare.
 That said, for reasons we discussed earlier, polymorphic compare
 should be used sparingly.
 
-## Hashtables
+## Hash tables
 
-Hashtables are the imperative cousin of maps.  We walked over a basic
-hashtable implementation in [xref](#imperative-programming-1), so in
+Hash tables are the imperative cousin of maps.  We walked over a basic
+hash table implementation in [xref](#imperative-programming-1), so in
 this section we'll mostly discuss the pragmatics of Core's `Hashtbl`
 module.  We'll cover this material more briefly than we did with maps,
 because many of the concepts are shared.
 
-Hashtables differ from maps in a few key ways.  First, hashtables are
-mutable, meaning that adding a key/value pair to a hashtable modifies
+Hash tables differ from maps in a few key ways.  First, hash tables are
+mutable, meaning that adding a key/value pair to a hash table modifies
 the table, rather than creating a new table with the binding added.
-Second, hashtables generally have better time-complexity than maps,
+Second, hash tables generally have better time-complexity than maps,
 providing constant time lookup and modifications as opposed to
 logarithmic for maps.  And finally, just as maps depend on having a
 comparison function for creating the ordered binary tree that
-underlies a map, hashtables depend on having a _hash function_,
+underlies a map, hash tables depend on having a _hash function_,
 _i.e._, a function for converting a key to an integer.
 
-When creating a hashtable, we need to provide a value of type
+<note> <title> Time complexity of hash tables </title>
+
+The statement that hash tables provide constant-time access hides some
+complexities.  First of all, any hash table implementation, OCaml's
+included, needs to resize the table when it gets too full.  A resize
+requires allocating a new backing array for the hash table and copying
+over all entries, and so it is quite an expensive operation.  That
+means adding a new element to the table is only _amortized_ constant,
+which is to say, it's constant on average over a long sequence of
+additions, but some of the indivdual additions can be quite expensive.
+
+Another hidden cost of hash tables has to do with the hash function you
+use.  If you end up with a pathologically bad hash function that
+hashes all of your data to the same number, then all of your
+insertions will hash to the same underlying bucket, meaning you no
+longer get constant-time access at all.  Core's hash table
+implementation uses binary trees for the hash-buckets, so this case
+only leads to logarithmic time, rather than quadratic for a
+traditional hash table.
+
+</note>
+
+When creating a hash table, we need to provide a value of type
 _hashable_ which includes among other things the function for hashing
 the key type.  This is analogous to the comparator used for creating
 maps.
@@ -624,11 +646,46 @@ val table : ('_a, '_b) Hashtbl.t = <abstr>
 ```
 
 Note that, unlike the comparators used with maps and sets, hashables
-don't show up in the type of a `Hashtbl.t`.  That's because hashtables
-don't have operations that operate on multiple hashtables that depend
+don't show up in the type of a `Hashtbl.t`.  That's because hash tables
+don't have operations that operate on multiple hash tables that depend
 on those tables having the same hash function, in that way that
 `Map.symmetric_diff` and `Set.union` depend on their arguments using
 the same comparison function.
+
+<warning> <title> Collisions with the polymorphic hash function </title>
+
+OCaml's polymorphic hash function works by walking over the
+data-structure its given using a breadth-first traversal that is
+bounded in the number of nodes its willing to traverse.  By default,
+that bound is set at 10 "meaningful" nodes, essentially...
+
+The bound on the traversal, means that the hash function may ignore
+part of the data-structure, and this can lead to pathological cases
+where every value you store has the same hash value.  By default,
+OCaml's hash function will stop after it has found ten nodes it can
+extract data from.  We'll demonstrate this below, using the function
+`List.range` to allocate lists of integers of different length.
+
+
+```ocaml
+# Caml.Hashtbl.hash (List.range 0 9);;
+- : int = 209331808
+# Caml.Hashtbl.hash (List.range 0 10);;
+- : int = 182325193
+# Caml.Hashtbl.hash (List.range 0 11);;
+- : int = 182325193
+# Caml.Hashtbl.hash (List.range 0 100);;
+- : int = 182325193
+```
+
+As you can see, the hash function stops after the first 10 elements.
+The same can happen with any large data structure, including records
+and arrays.  When building hash functions over large custom
+data-structures, it is generally a good idea to write one's own hash
+function, _e.g._, 
+
+</warning>
+
 
 ### Satisfying the `Hashable.S` interface
 
@@ -656,7 +713,7 @@ component values.
 ```
 
 Note that in order to satisfy hashable, one also needs to provide a
-comparison function.  That's because Core's hashtables use ordered
+comparison function.  That's because Core's hash tables use ordered
 binary tree data-structure for the hash-buckets, so that performance
 of the table degrades gracefully in the case of pathologically bad
 choice of hash function.
@@ -665,24 +722,24 @@ There is currently no analogue of `comparelib` for auto-generation of
 hash-functions, so you do need to either write the hash-function by
 hand, or use the built-in polymorphic hash function, `Hashtbl.hash`.
 
-## Choosing between maps and hashtables
+## Choosing between maps and hash tables
 
-Maps and hashtables overlap enough in functionality that it's not
+Maps and hash tables overlap enough in functionality that it's not
 always clear when to choose one or the other.  Maps, by virtue of
 being immutable, are generally the default choice in OCaml by virtue
 of fitting most naturally with otherwise functional code.  OCaml also
 has good support for imperative programming, though, and when
-programming in an imperative idiom, hashtables are often the more
+programming in an imperative idiom, hash tables are often the more
 natural choice.
 
 Programming idioms aside, there are significant performance
-differences between maps and hashtables as well.  For code that is
-dominated by updates and lookups, hashtables are a clear performance
+differences between maps and hash tables as well.  For code that is
+dominated by updates and lookups, hash tables are a clear performance
 win, and the win is clearer the larger the size of the tables.
 
 The best way of answering a performance question is by running a
 benchmark, so let's do just that.  The following benchmark uses the
-`core_bench` library, and it compares maps and hashtables under a very
+`core_bench` library, and it compares maps and hash tables under a very
 simple workload.  Here, we're keeping track of a set of 1000 different
 integer keys, and cycling over the keys and updating the values they
 contain.  Note that we use the `Map.change` and `Hashtbl.change`
@@ -728,7 +785,7 @@ let () =
 ```
 
 
-The results, shown below, show the hashtable version to be around four
+The results, shown below, show the hash table version to be around four
 times faster than the map version.  
 
 ```
@@ -745,10 +802,10 @@ Estimated testing time 20s (change using -quota SECS).
 We can make the speedup smaller or larger depending on the details of
 the test; for example, it will very with the number of distinct keys.
 But overall, for code that is heavy on sequences of querying and
-updating a set of key/value pairs, hashtables will significantly
+updating a set of key/value pairs, hash tables will significantly
 outperform maps.
 
-Hashtables are not always the faster choice, though.  In particular,
+Hash tables are not always the faster choice, though.  In particular,
 maps are often more performant in situations where you want to take
 advantage of maps as a persistent data-structure.  In particular, if
 you create map `m'` by calling `Map.add` on some other map `m`, then
@@ -759,8 +816,8 @@ then a map is typically a much more efficient data structure to do it
 with.
 
 Here's a benchmark to demonstrates this.  In it, we create a list of
-maps (or hashtables) that are built up by iteratively applying
-updates, starting from an empty map.  In the hashtable implementation,
+maps (or hash tables) that are built up by iteratively applying
+updates, starting from an empty map.  In the hash table implementation,
 we do this by calling `Hashtbl.copy` to get the list entries.
 
 ```ocaml
@@ -806,7 +863,7 @@ let () =
   |> Command.run
 ```
 
-Unsurprisingly, maps perform far better than hashtables on this
+Unsurprisingly, maps perform far better than hash tables on this
 benchmark, in this case by more than a factor of ten.  
 
 ```
