@@ -1444,14 +1444,15 @@ multiple facilities for doing just this, `In_thread.run` being the
 simplest.   We can simply write:
 
 ```ocaml
-# let def = In_thread.run (fun () -> List.range 1 100);;
+# let def = In_thread.run (fun () -> List.range 1 10);;
 val def : int list Deferred.t = <abstr>
+# def;;
+- : int list = [1; 2; 3; 4; 5; 6; 7; 8; 9]
 ```
 
-To cause `List.range 1 100` to be run on one of Async's worker
+To cause `List.range 1 10` to be run on one of Async's worker
 threads.  When the computation is complete, the result is placed in
 the deferred, where it can be used in the ordinary way from Async.
-
 
 <warning> 
 <note> Thread-safety and locking </note>
@@ -1566,3 +1567,16 @@ didn't let `log_delays` run at all.
 DANGER WILL ROBINSON.  Why doesn't this work as I expect?  Did the
 compiler change somehow?
 
+Overall, combining Async and threads is quite tricky, but it can be
+done safely and easily if you follow the following hold:
+
+- There is no shared state between the various threads involved.
+- The computations executed by `In_thread.run` do not make any calls
+  to the async library.
+
+It is possible to safely use threads in ways that violate these
+constraints.  In particular, foreign threads can acquire the Async
+lock using calls from the `Thread_safe` module in Async, and thereby
+run Async computations safely.  This is a very flexible way of
+connecting threads to the Async world, but it's a complex use-case
+that is beyond the scope of this chapter.
