@@ -718,10 +718,15 @@ thrown exception.  This is useful for reporting detailed information
 on errors that did not cause your program to fail.
 
 This works well if you have backtraces enabled, but that isn't always
-the case.  In fact, by default, OCaml has backtraces turned off.  Core
-reverses the default, so if you're linking in Core, you will have
-backtraces enabled.  Even with Core, we can turn backtraces back off
-by setting the `OCAMLRUNPARAM` environment variable to be empty.
+the case.  In fact, by default, OCaml has backtraces turned off, and
+even if you have them turned on at runtime, you can't get backtraces
+unless you have compiled with debugging symbols.  Core reverses the
+default, so if you're linking in Core, you will have backtraces
+enabled at runtime.
+
+Even using Core and compiling with debugging symbols, you can turn
+backtraces off by setting the `OCAMLRUNPARAM` environment variable to
+be empty.
 
 ```bash
 $ export OCAMLRUNPARAM=
@@ -730,13 +735,14 @@ $ ./exn.byte
 Fatal error: exception Exn.Empty_list
 ```
 
-which is considerably less informative.  You can also turn backtraces
-off in your code by calling `Backtrace.Exn.set_recording false`.
+The resulting error message is considerably less informative.  You can
+also turn backtraces off in your code by calling
+`Backtrace.Exn.set_recording false`.
 
 There is a legitimate reasons to run without backtraces: speed.
-OCaml's exceptions are a fairly lightweight mechanism, but they're
-even faster if you disable stacktraces.  Here's a simple benchmark
-that shows the effect, using the `core_bench` package.
+OCaml's exceptions are fairly fast, but they're even faster still if
+you disable backtraces.  Here's a simple benchmark that shows the
+effect, using the `core_bench` package.
 
 ```ocaml
 (* file: exn_cost.ml *)
