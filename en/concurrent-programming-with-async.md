@@ -1397,3 +1397,172 @@ programming language, created by Xavier Leroy, Jérôme Vouillon,
 Damien Doligez, Didier Rémy and others in 1996."
 ```
 
+## Working with system threads
+
+OCaml does have built-in support for true system threads, _i.e._,
+kernel-level threads that can be interleaved at any time with each
+other.  We discussed in the beginning of the chapter why Async is
+generally a better choice than system threads, but even if you mostly
+use Async, OCaml's system threads are sometimes necessary, and it's
+worth understanding them.
+
+The most surprising aspect of OCaml's system threads is that they
+don't afford you any access to physical parallelism on the machine.
+That's because OCaml's runtime has a single runtime lock which at most
+one thread can be holding at a time.
+
+Given that threads don't provide physical parallelism, why are they
+useful at all?  
+
+The most common reason for using system threads is that there are some
+operating system calls that have no non-blocking alternative, which
+means that you can't run them directly in a system like Async without
+blocking out the entire system.  For this reason, Async maintains a
+thread pool for running such calls.  Most of the time, as a user of
+Async you don't need to think about this, but it's worth knowing that
+it's happening.
+
+Another reasonably common reason to have multiple threads is to deal
+with non-OCaml libraries that have their own event loop or for
+whatever reason need their own threads.  In that case, it's sometimes
+useful to run some OCaml code on the C thread as part of the
+communication between your main program and the C library.  C bindings
+are discussed in more detail in [xref](#foreign-function-interface).
+
+Another occasional motivation for using true system threads is to
+interoperate with compute-intensive OCaml code that otherwise would
+block the Async runtime.  In Async, if you have a long-running
+computation that never calls `bind` or `map`, then that computation
+will block out the entire system until it completes.  
+
+One way of dealing with this is to explicitly break up the calculation
+into smaller pieces that are separated by binds.  But sometimes this
+explicit yielding is impractical, since it may involve intrusive
+changes to an existing codebase.  Another solution is to run the code
+in question in a separate thread.  Async's `In_thread` module provides
+multiple facilities for doing just this, `In_thread.run` being the
+simplest.   We can simply write:
+
+```ocaml
+# let def = In_thread.run (fun () -> List.range 1 100);;
+val def : int list Deferred.t = <abstr>
+```
+
+To cause `List.range 1 100` to be run on one of Async's worker
+threads.  When the computation is complete, the result is placed in
+the deferred, where it can be used in the ordinary way from Async.
+
+
+<warning> 
+<note> Thread-safety and locking </note>
+
+Once you start working with system threads, you'll need to be careful
+about locking your data-structures.  Most OCaml data-structures do not
+have well-defined semantics when accessed concurrently by multiple
+threads.  The issues you can run into range from runtime exceptions to
+corrupted data-structures to, in some rare cases, segfaults.  That
+means you should always use mutexes when sharing data between
+different systems threads.  Even data-structures that seem like they
+should be safe, like lazy values, can have undefined behavior when
+accessed from multiple threads.
+
+There are two commonly available mutex packages for OCaml: the `Mutex`
+module that's part of the standard library, which is just a wrapper
+over OS-level mutexes, and `Nano_mutex`, a more efficient alternative
+that takes advantage of some of the locking done by the OCaml runtime
+to avoid needing to create an OS-level mutex much of the time.  As a
+result, creating a `Nano_mutex.t` is 20x faster than creating a
+`Mutex.t`, and acquiring the mutex is about 40% faster.
+
+</warning>
+
+Interoperability between Async and system threads can be quite tricky,
+so let's work through some of the issues.  Consider the following
+function tries which schedules itself to wake up every `100ms`, and
+keeps a list of the delays after which it actually woke up, until the
+deferred it was passed becomes determined.  We can use this to see how
+responsive Async is.
+
+```ocaml
+# let log_delays d =
+    let start = Time.now () in
+    let rec loop stamps =
+      let delay = Time.diff (Time.now ()) start in
+      match Deferred.peek d with
+      | Some () -> return (delay :: stamps)
+      | None ->
+        after (sec 0.1)
+        >>= fun () ->
+        loop (delay :: stamps)
+    in
+    loop [] >>| List.rev
+  ;;
+```
+
+If we feed this function a simple timeout, it works as you might
+expect.
+
+```ocaml
+# log_delays (after (sec 1.));;
+- : Core.Span.t list =
+[0s; 101.38ms; 206.134ms; 312.682ms; 413.978ms; 522.833ms; 626.277ms;
+ 727.612ms; 829.041ms; 930.538ms; 1.03186s]
+```
+
+Now, if instead of simply waiting a second, what if we have a busy
+loop running instead?
+
+```ocaml
+# let busy_loop n =
+    let x = ref None in
+    for i = 1 to n * 100_000 do x := Some i done
+  ;;
+# log_delays (Deferred.unit >>| fun () -> busy_loop 100);;
+- : Core.Span.t list = [0.000953674ms; 2.35119s]
+```
+
+As you can see, instead of waking up ten times a second, `log_delays`
+is blocked out for nearly a second while `busy_loop` churns away.
+
+If, on the other hand, we use `In_thread.run` to offload this to a
+different system thread, the behavior will be different.
+
+```ocaml
+# log_delays (In_thread.run (fun () -> busy_loop 100));;
+- : Core.Span.t list = [0.000953674ms; 1.47171s; 2.23492s; 2.33602s]
+```
+
+Now `log_delays` does get a chance to run, but not nearly as often as
+it would like to.  The reason for this is that that now that we're
+using system threads, we are at the mercy of the operating system in
+terms of when each thread gets scheduled.  The behavior becomes very
+dependent on the OS and how you configure the priority of your
+processes within the OS itself.
+
+Another tricky aspect of dealing with OCaml threads has to do with
+allocation.  OCaml's threads only get a chance to give up the runtime
+lock when they interact with the allocator, so if there's a piece of
+code that doesn't allocate at all, then it will never allow any other
+OCaml thread to run.  We can see this if we rewrite our busy-loop
+slightly.
+
+```ocaml
+# let noalloc_busy_loop n =
+    let rec loop n =
+      if n <= 0 then ()
+      else loop (n-1)
+    in
+    loop (n * 100_000)
+  ;;
+val noalloc_busy_loop : int -> unit = <fun>
+# log_delays (In_thread.run (fun () -> noalloc_busy_loop 500));;
+- : Core.Span.t list =
+[0.000953674ms; 977.943ms; 1.13111s; 2.30346s; 3.11876s; 4.44648s; 6.57483s]
+```
+
+Even though `noalloc_busy_loop` was running in a different thread, it
+didn't let `log_delays` run at all.
+
+DANGER WILL ROBINSON.  Why doesn't this work as I expect?  Did the
+compiler change somehow?
+
