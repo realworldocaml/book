@@ -2018,6 +2018,25 @@ Total: 100.5
       comfortable reading the rest of the book as a result.
     </para>
   </sect1>
+<qandaset>
+<qandadiv><title>General Information</title>
+
+<para>...</para>
+
+<qandadiv><title>Font Houses</title>
+
+<qandaentry><question><para>Adobe Systems, Inc.</para></question>
+<answer><para>...</para></answer>
+</qandaentry>
+
+<qandaentry><question><para>Agfa, Inc.</para></question>
+<answer><para>...</para></answer>
+</qandaentry>
+
+</qandadiv>
+</qandadiv>
+</qandaset>
+
 </chapter><chapter id="variables-and-functions">
   <title>Variables and Functions</title>
   <para>
