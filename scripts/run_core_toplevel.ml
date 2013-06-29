@@ -96,7 +96,7 @@ let parse_file file =
   printf "C: init\n%!";
   reset_toplevel ();
   List.iter initial_phrases ~f:(fun phrase ->
-      match toploop_eval (phrase ^ ";;") with
+      match toploop_eval (phrase ^ " ;;") with
       | `Normal _ -> ()
       | `Error s -> eprintf "Failed (%s): %s\n" s phrase; exit (-1)
     );
@@ -111,21 +111,29 @@ let parse_file file =
       Buffer.add_string buf s
     | Some buf -> Buffer.add_string buf s
   in
-  In_channel.read_lines file 
-  |> List.iter ~f:(fun phrase ->
-      if String.is_prefix phrase ~prefix:"#part" then begin
-        part := Caml.Scanf.sscanf phrase "#part %d" (fun p -> p);
-        printf "C: part %d -> %s\n%!" !part (ofile !part);
+  let _ = In_channel.with_file file ~f:(fun t ->
+    In_channel.fold_lines t ~init:[]
+      ~f:(fun acc line ->
+      if String.is_prefix line ~prefix:"#part" then begin
+        part := Scanf.sscanf line "#part %d" (fun p -> p);
+        printf "C: part %d -> %s\n%!" !part (ofile !part); 
+        []
       end else begin
-        printf "X: %s\n%!" phrase;
-        match toploop_eval (phrase ^ ";;") with
-        | `Normal(s, _, _) ->
-          print_part !part (sprintf "# %s ;;\n%s" phrase s)
-        | `Error s ->
-          eprintf "error %s\n%!" s;
-          exit (-1)
+        if String.is_suffix ~suffix:";;" line then begin
+          let phrase = String.concat ~sep:"\n" (List.rev (line :: acc)) in
+          printf "X: %s\n%!" phrase;
+          match toploop_eval phrase with
+          | `Normal(s, _, _) ->
+            print_part !part (sprintf "# %s \n%s" phrase s);
+            []
+          | `Error s ->
+            eprintf "error %s\n%!" s;
+            exit (-1)
+        end else
+          line::acc
       end
     );
+  ) in
   Hashtbl.iter parts 
     ~f:(fun ~key ~data ->
         Out_channel.write_all (ofile key) ~data:(Buffer.contents data)
