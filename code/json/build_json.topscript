@@ -10,3 +10,6 @@ Yojson.Basic.pretty_to_channel stdout person ;;
 #part 4
 let person = `Assoc ("name", `String "Anil");;
 Yojson.Basic.pretty_to_string person ;;
+#part 5
+let (person : Yojson.Basic.json) =
+  `Assoc ("name", `String "Anil");;

@@ -77,6 +77,10 @@ let output_t_as_markdown s =
     | "json" ->
       printf "```json\n";
       In_channel.read_all (sprintf "code/%s" t.name)
+    | "atd" ->
+      printf "```\n";
+      if t.header then printf "(* %s *)\n" t.name;
+      In_channel.read_all (sprintf "code/%s" t.name)
     | _ ->
       printf "```\n";
       In_channel.read_all (sprintf "code/%s" t.name)

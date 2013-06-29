@@ -9,7 +9,6 @@
 *.o
 *.omakedb.lock
 *.omc
-*.out
 *.pyc
 *.pyo
 *.tmp

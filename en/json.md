@@ -364,11 +364,8 @@ inconvenient to wade through for larger values.  You can help the compiler to
 narrow down this error to a shorter form by adding explicit type annotations as
 a hint about your intentions.
 
-```ocaml
-# let (person:Yojson.Basic.json) = `Assoc ("name", `String "Anil");;
-Error: This expression has type 'a * 'b
-       but an expression was expected of type
-         (string * Yojson.Basic.json) list
+```frag
+((typ ocamltop)(name json/build_json.topscript)(part 5))
 ```
 
 We've annotated `person` as being of type `Yojson.Basic.json`, and as a result
@@ -445,7 +442,7 @@ ATDgen installs some OCaml libraries that interface with Yojson,
 and also a command-line tool that generates code.  It can all be
 installed via OPAM:
 
-```
+```console
 $ opam install atdgen
 $ atdgen -version
 1.2.3
@@ -471,36 +468,8 @@ website that provides a JSON-based web [API](http://developer.github.com).  The
 ATD code fragment below describes the GitHub authorization API (which is based
 on a pseudo-standard web protocol known as OAuth).
 
-```
-(* github.atd *)
-type scope = [
-    User <json name="user">
-  | Public_repo <json name="public_repo">
-  | Repo <json name="repo">
-  | Repo_status <json name="repo_status">
-  | Delete_repo <json name="delete_repo">
-  | Gist <json name="gist">
-]
-
-type app = {
-  name: string;
-  url: string;
-}  <ocaml field_prefix="app_">
-
-type authorization_request = {
-  scopes: scope list;
-  note: string;
-} <ocaml field_prefix="auth_req_">
-
-type authorization_response = {
-  scopes: scope list;
-  token: string;
-  app: app;
-  url: string;
-  id: int;
-  ?note: string option;
-  ?note_url: string option;
-}
+```frag
+((typ atd)(name json/github.atd))
 ```
 
 The ATD specification syntax is deliberately quite similar to OCaml type
@@ -532,41 +501,12 @@ The ATD specification we defined above can be compiled to OCaml code using the
 OCaml type definitions and also a JSON serializing module that converts between
 input data and those type definitions.
 
-```bash
-$ atdgen -t github.atd
-$ atdgen -j github.atd
-```
-
-This will generate some new files in your current
+The `atdgen` command will generate some new files in your current
 directory. `Github_t.ml` and `Github_t.mli` will contain an OCaml
-module with types defines that correspond to the ATD file.  The
-signature is as follows.
+module with types defines that correspond to the ATD file.
 
-```ocaml
-type scope = [
-  | `User | `Public_repo | `Repo | `Repo_status
-  | `Delete_repo | `Gist
-]
-
-type app = {
-  app_name (*atd name *): string;
-  app_url (*atd url *): string
-}
-
-type authorization_request = {
-  auth_req_scopes (*atd scopes *): scope list;
-  auth_req_note (*atd note *): string
-}
-
-type authorization_response = {
-  scopes: scope list;
-  token: string;
-  app: app;
-  url: string;
-  id: int;
-  note: string option;
-  note_url: string option
-}
+```frag
+((typ console)(name json/build_github_atd.sh))
 ```
 
 There is an obvious correspondence to the ATD definition.  Note
@@ -582,17 +522,8 @@ can read the `github_j.mli` to see the full interface, but the
 important functions for most uses are the conversion functions to and
 from a string.  For our example above, this looks like:
 
-```ocaml
-val string_of_authorization_response :
-  ?len:int -> authorization_response -> string
-  (** Serialize a value of type {!authorization_response}
-      into a JSON string.
-      @param len specifies the initial length
-                 of the buffer used internally.
-                 Default: 1024. *)
-
-val authorization_response_of_string :
-  string -> authorization_response
+```frag
+((typ ocaml)(name json/github_j_excerpt.mli))
 ```
 
 This is pretty convenient! We've now written a single ATD file, and all the
