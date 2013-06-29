@@ -46,7 +46,6 @@ information about a given computer.
 # type host_info =
     { hostname   : string;
       os_name    : string;
-      os_release : string;
       cpu_arch   : string;
       timestamp  : Time.t;
     };;
@@ -64,13 +63,12 @@ running on, and the `Time.now` call from Core's `Time` module.
     let sh = Shell.sh_one_exn in
     { hostname   = sh "hostname";
       os_name    = sh "uname -s";
-      os_release = sh "uname -r";
       cpu_arch   = sh "uname -p";
       timestamp  = Time.now ();
     };;
 val my_host : host_info =
-  {hostname = "yevaud.local"; os_name = "Darwin"; os_release = "12.3.0";
-   cpu_arch = "i386"; timestamp = 2013-04-13 06:39:17.806527}
+  {hostname = "yevaud"; os_name = "Darwin"; cpu_arch = "i386";
+   timestamp = 2013-06-29 11:05:48.358121+01:00}
 ```
 
 You might wonder how the compiler inferred that `my_host` is of type
@@ -114,13 +112,12 @@ pattern match, as in the definition of `host_info_to_string` below.
 
 ```ocaml
 # let host_info_to_string { hostname = h; os_name = os;
-                            os_release = r; cpu_arch = c;
-                            timestamp = ts;
+                            cpu_arch = c; timestamp = ts;
                           } =
-       sprintf "%s (%s %s / %s, on %s)" h os r c (Time.to_sec_string ts);;
-    val host_info_to_string : host_info -> string = <fun>
+       sprintf "%s (%s / %s, on %s)" h os c (Time.to_sec_string ts);;
+val host_info_to_string : host_info -> string = <fun>
 # host_info_to_string my_host;;
-- : string = "yevaud.local (Darwin 12.3.0 / i386, on 2013-04-13 06:39:17)"
+- : string = "yevaud (Darwin / i386, on 2013-06-29 11:05:48)"
 ```
 
 Note that the pattern that we used had only a single case, rather than
@@ -140,22 +137,21 @@ the record, code that should be updated to react to the presence of
 those new fields will not be flagged by the compiler.
 
 As an example, imagine that we wanted to add a new field to our
-`host_info` record called `os_version`, as shown below.
+`host_info` record called `os_release`, as shown below.
 
 ```ocaml
 # type host_info =
     { hostname   : string;
       os_name    : string;
-      os_release : string;
       cpu_arch   : string;
-      os_version : string;
+      os_release : string;
       timestamp  : Time.t;
     } ;;
 ```
 
 The code for `host_info_to_string` would continue to compile without
 change.  In this particular case, it's pretty clear that you might
-want to update `host_info_to_string` in order to include `os_version`,
+want to update `host_info_to_string` in order to include `os_release`,
 and it would be nice if the type system would give you a warning about
 the change.
 
@@ -166,15 +162,13 @@ the missing field.
 
 ```ocaml
 # #warnings "+9";;
-# let host_info_to_string { hostname = h; os_name = os;
-                            os_release = r; cpu_arch = c;
-                            timestamp = ts;
+# olet host_info_to_string { hostname = h; os_name = os;
+                            cpu_arch = c; timestamp = ts;
                           } =
-    sprintf "%s (%s %s / %s, on %s)" h os r c (Time.to_sec_string ts);;
-Characters 24-183:
-val host_info_to_string : host_info -> string = <fun>
+    sprintf "%s (%s / %s, on %s)" h os c (Time.to_sec_string ts);;
+Characters 24-139:
 Warning 9: the following labels are not bound in this record pattern:
-os_version
+os_release
 Either bind these labels explicitly or add '; _' to the pattern.
 ```
 
@@ -184,10 +178,9 @@ adding an underscore to the pattern, as shown below.
 
 ```ocaml
 # let host_info_to_string { hostname = h; os_name = os;
-                            os_release = r; cpu_arch = c;
-                            timestamp = ts; _
+                            cpu_arch = c; timestamp = ts; _
                           } =
-    sprintf "%s (%s %s / %s, on %s)" h os r c (Time.to_sec_string ts);;
+    sprintf "%s (%s / %s, on %s)" h os c (Time.to_sec_string ts);;
 val host_info_to_string : host_info -> string = <fun>
 ```
 
@@ -202,8 +195,9 @@ pattern in the following function binds all of the fields in question
 to variables of the same name.  This is called _field punning_.
 
 ```ocaml
-# let host_info_to_string { hostname; os_name; os_release; cpu_arch } =
-     sprintf "%s (%s %s / %s)" hostname os_name os_release cpu_arch;;
+# let host_info_to_string { hostname; os_name; cpu_arch; timestamp; _ } =
+     sprintf "%s (%s / %s) <%s>" hostname os_name cpu_arch
+       (Time.to_string timestamp);;
   val host_info_to_string : host_info -> string = <fun>
 ```
 
@@ -215,17 +209,13 @@ following code for generating a `host_info` record.
     let sh cmd = Shell.sh_one_exn cmd in
     let hostname   = sh "hostname" in
     let os_name    = sh "uname -s" in
-    let os_release = sh "uname -r" in
     let cpu_arch   = sh "uname -p" in
-    let os_version = sh "Uname -v" in
+    let os_release = sh "uname -r" in
     let timestamp  = Time.now () in
-    { hostname; os_name; os_release; cpu_arch; os_version; timestamp };;
+    { hostname; os_name; cpu_arch; os_release; timestamp };;
 val my_host : host_info =
-  {hostname = "yevaud.local"; os_name = "Darwin"; os_release = "12.3.0";
-   cpu_arch = "i386";
-   os_version =
-    "Darwin Kernel Version 12.3.0: Sun Jan  6 22:37:10 PST 2013; root:xnu-2050.22.13~1/RELEASE_X86_64";
-   timestamp = 2013-04-13 06:49:57.771755}
+  {hostname = "yevaud"; os_name = "Darwin"; cpu_arch = "i386";
+   os_release = "12.4.0"; timestamp = 2013-06-29 11:11:32.475361+01:00}
 ```
 
 In the above code, we defined variables corresponding to the record
@@ -237,16 +227,13 @@ writing a function for constructing a record from labeled arguments,
 as shown below.
 
 ```ocaml
-# let create_host_info ~hostname ~os_name ~os_release ~cpu_arch ~os_version =
-    { os_name; os_release; cpu_arch; os_version;
+# let create_host_info ~hostname ~os_name ~cpu_arch ~os_release =
+    { os_name; cpu_arch; os_release;
       hostname = String.lowercase hostname;
       timestamp = Time.now () };;
 val create_host_info :
   hostname:string ->
-  os_name:string ->
-  os_release:string ->
-  cpu_arch:string -> os_version:string -> timestamp:Time.t -> host_info =
-  <fun>
+  os_name:string -> cpu_arch:string -> os_release:string -> host_info = <fun>
 ```
 
 This is considerably more concise than what you would get without
@@ -254,18 +241,16 @@ punning at all.
 
 ```ocaml
 # let create_host_info
-    ~hostname:hostname ~os_name:os_name ~os_release:os_release
-    ~cpu_arch:cpu_arch ~os_version:os_version =
-    { os_name = os_name; os_release = os_release;
-     cpu_arch = cpu_arch; os_version = os_version;
+    ~hostname:hostname ~os_name:os_name
+    ~cpu_arch:cpu_arch ~os_release:os_release =
+    { os_name = os_name; 
+      cpu_arch = cpu_arch;
+      os_release = os_release;       
       hostname = String.lowercase hostname;
       timestamp = Time.now () };;
 val create_host_info :
   hostname:string ->
-  os_name:string ->
-  os_release:string ->
-  cpu_arch:string -> os_version:string -> timestamp:Time.t -> host_info =
-  <fun>
+  os_name:string -> cpu_arch:string -> os_release:string -> host_info = <fun>
 ```
 
 Together, labeled arguments, field names, and field and label punning,
@@ -577,9 +562,9 @@ val get_users : Logon.t list -> string list = <fun>
 
 Here, we wrote a small function `(fun x -> x.Logon.user)` to access
 the `user` field.  This kind of accessor function is a common enough
-pattern that that it would be convenient to generate them
-automatically.  The `fieldslib` syntax extension that ships with
-`Core` does just that.
+pattern that it would be convenient to generate them automatically.
+The `fieldslib` syntax extension that ships with `Core` does just
+that.
 
 You can enable the syntax extension by typing `#require
 "fieldslib.syntax"` into the top-level, at which point the `with

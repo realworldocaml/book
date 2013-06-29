@@ -52,7 +52,7 @@ Hello Blue World!
 
 On most terminals, that word "Blue" will be rendered in blue.
 
-In this example, the cases of the variant are simple tag with no
+In this example, the cases of the variant are simple tags with no
 associated data.  This is substantively the same as the enumerations
 found in languages like C and Java.  But as we'll see, variants can do
 considerably more than represent a simple enumeration.  Indeed, an
@@ -818,7 +818,7 @@ mixing catch-all cases and polymorphic variants.
 </note>
 
 Let's consider how we might turn our code into a proper library with
-an implementation in an `ml` file and an implementation in a separate
+an implementation in an `ml` file and an interface in a separate
 `mli`, as we saw in [xref](#files-modules-and-programs).  Let's start
 with the `mli`.
 

@@ -554,6 +554,37 @@ The example we worked through above only touched on three of the
 function in `List`.  We won't cover the entire interface, but there
 are a few more functions that are useful enough to mention here.
 
+#### Combining list elements with `List.reduce` 
+
+`List.fold`, which we described earlier, is a very general and
+powerful function.  Sometimes, hwoever, you want something more that's
+simpler and thereby easier to use.  One such function is
+`List.reduce`, which is essentially a specialized version of
+`List.fold` that doesn't require an explicit starting value, and whose
+accumulator has to consume and produce values of the same type as the
+elements of the list it applies to.
+
+Here's the type signature:
+
+```ocaml
+# List.reduce;;
+- : 'a list -> f:('a -> 'a -> 'a) -> 'a option = <fun>
+```
+
+`reduce` returns an optional result, returning `None` when the input
+list is empty.
+
+Now we can see reduce in action.
+
+```ocaml
+# List.reduce ~f:(+) [1;2;3;4;5];;
+- : int option = Some 15
+# List.reduce ~f:(+) [];;
+- : int option = None
+```
+
+#### Filtering with `List.filter`  and `List.filter_map` 
+
 Very often when processing lists, one wants to restrict attention to
 just a subset of values.  The `List.filter` function does just that.
 
@@ -590,6 +621,8 @@ have multiple sub-patterns within a larger pattern.  In this case,
 `None | Some ("",_)` is an or-pattern.  As we'll see later,
 or-patterns can be nested anywhere within larger patterns.
 
+#### Partitioning with `List.partition_tf`
+
 Another function that is similar to `filter` is `partition_tf`, which
 takes a list and partitions it into a pair of lists based on a boolean
 condition.  `tf` is a mnemonic to remind the reader that `true`
@@ -610,6 +643,8 @@ val other_files : string list = ["_build"; "_tags"]
 ```
 
 Note the use of a nested or-pattern in `is_ocaml_source`.
+
+#### Combining lists
 
 Another very common operation on lists is concatenation.  The list
 module actually comes with a few different ways of doing this.  First,
