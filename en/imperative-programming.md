@@ -120,11 +120,6 @@ at.  It is implemented on top of `Hashtbl.hash`, which is a hash
 function provided by the OCaml runtime that can be applied to values
 of any type.  Thus, its own type is polymorphic: `'a -> int`.
 
-While `Hashtbl.hash` can be used with any type, it won't necessarily
-succeed for all values.  `Hashtbl.hash` will throw an exception if it
-encounters a value it can't handle, like a function or a value from a
-C libraries that lives outside the OCaml heap.
-
 The other functions defined above are fairly straightforward:
 
 - `create` creates an empty dictionary.
@@ -164,11 +159,11 @@ expected to work by side effect rather than by returning a value, and
 the overall `iter` function returns `unit ` as well.
 
 The code for `iter` uses two forms of iteration: a `for` loop to walk
-over the array of buckets; and within that loop, and a call to
-`List.iter` to walk over the list of values in a given bucket.  We
-could have done the outer loop with a recursive function instead of a
-`for` loop, but `for` loops are syntactically convenient, and are more
-familiar and idiomatic in the context of imperative code.
+over the array of buckets; and within that loop a call to `List.iter`
+to walk over the values in a given bucket.  We could have done the
+outer loop with a recursive function instead of a `for` loop, but
+`for` loops are syntactically convenient, and are more familiar and
+idiomatic in the context of imperative code.
 
 The following code is for adding and removing mappings from the
 dictionary.
@@ -511,7 +506,7 @@ previous and next elements.  At the beginning of the list, the `prev`
 field is `None`, and at the end of the list, the `next` field is
 `None`.
 
-The type of the list itself, `'a t`, is an mutable reference to an
+The type of the list itself, `'a t`, is a mutable reference to an
 optional `element`.  This reference is `None` if the list is empty,
 and `Some` otherwise.
 
@@ -703,9 +698,10 @@ to represent a lazy value.
 
 ```ocaml
 # type 'a lazy_state =
-  | Delayed of (unit -> 'a)
-  | Value of 'a
-  | Exn of exn
+    | Delayed of (unit -> 'a)
+    | Value of 'a
+    | Exn of exn
+  ;;
 type 'a lazy_state = Delayed of (unit -> 'a) | Value of 'a | Exn of exn
 ```
 
@@ -961,7 +957,7 @@ We can now turn this back into an ordinary Fibonacci function by tying
 the recursive knot, as shown below.
 
 ```ocaml
-# let rec fib i = fib_norec fib i
+# let rec fib i = fib_norec fib i;;
 val fib : int -> int = <fun>
 # fib 5;;
 - : int = 8
@@ -1519,7 +1515,7 @@ defined.  Similarly, if you call a function on a set of arguments,
 those arguments are evaluated before they are passed to the function.
 
 Consider the following simple example.  Here, we have a collection of
-angles and we want to determine if any of them have a negative `sin.
+angles and we want to determine if any of them have a negative `sin`.
 The following snippet of code would answer that question.
 
 ```ocaml
@@ -1572,9 +1568,9 @@ sequence of let-bindings will be evaluated in the order that they're
 defined.  But what about the evaluation order within a single
 expression?  Officially, the answer is that evaluation order within an
 expression is undefined.  In practice, OCaml has only one compiler,
-and that behavior is a kind of _de facto_ standard.  Unfortunately, the
-evaluation order in this case is often the oppose of what one might
-expect.
+and that behavior is a kind of _de facto_ standard.  Unfortunately,
+the evaluation order in this case is often the opposite of what one
+might expect.
 
 Consider the following example.
 
