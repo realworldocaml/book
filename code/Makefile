@@ -13,7 +13,7 @@ all: $(out)
 	cd $(*D) && $(runtop) $(*F).topscript
 
 %.out: %.sh
-	./exec_script.sh $< > $@ || rm -f $@
+	./exec_script.sh $< > $@ || (cat $@ && rm -f $@)
 
 clean:
 	find . -name \*.out | xargs rm
