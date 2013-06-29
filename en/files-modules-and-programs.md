@@ -114,10 +114,10 @@ ocamlfind ocamlc -linkpkg -thread -package core freq.ml -o freq
 Here we're using `ocamlfind`, a tool which itself invokes other parts
 of the OCaml toolchain (in this case, `ocamlc`) with the appropriate
 flags to link in particular libraries and packages.  Here, `-package
-core` is asking `ocamlfind` to link in the Core library, `-linkpkg` is
-required to do the final linking in of packages for building a
-runnable executable, and `-thread` turns on threading support, which
-is required for Core.
+core` is asking `ocamlfind` to link in the Core library, `-linkpkg`
+asks ocamlfind to link in the packages as is necessary for buliding an
+executable, while `-thread` turns on threading support, which is
+required for Core.
 
 While this works well enough for a one-file project, more complicated
 builds will require a tool to orchestrate the build.  One great tool
@@ -481,6 +481,11 @@ let median t =
   else Before_and_after (nth (len/2 - 1), nth (len/2));;
 ```
 
+In the above, we use `failwith` to throw an exception for the case of
+the empty list.  We'll discuss exceptions more in
+[xref](#error-handling).  Note also that the function `fst` simply
+returns the first element of any 2-tuple.
+
 Now, to expose this usefully in the interface, we need to expose both
 the function and the type `median` with its definition.  Note that
 values (of which functions are an example) and types have distinct
@@ -578,29 +583,14 @@ let sessions_have_same_user s1 s2 =
 
 The above code has a bug: it compares the username in one session to
 the host in the other session, when it should be comparing the
-usernames in both cases.  Because of howe defined our types, however,
-the compiler will flag this bug for us.
+usernames in both cases.  Because of how we defined our types,
+however, the compiler will flag this bug for us.
 
 ```
 File "buggy.ml", line 25, characters 12-19:
 Error: This expression has type Hostname.t
        but an expression was expected of type Username.t
 Command exited with code 2.
-```
-
-Using the `include` statement, we can build abstract types that have
-extended functionality.  Thus, we can rewrite the definition of
-`Hostname` to add a function `Hostname.mine` that returns the hostname
-of the present machine.
-
-```ocaml
-module Hostname : sig
-  include ID
-  val mine : unit -> t
-end = struct
-  include String_id
-  let mine = Unix.gethostname
-end
 ```
 
 ## Opening modules
@@ -653,7 +643,7 @@ Here's some general advice on how to deal with opens.
     ```
 
     In the above, `of_int` and the infix operators are the ones from
-    `Int64` module.
+    the `Int64` module.
 
     There's another even more lightweight syntax for local opens, which
     is particularly useful for small expressions:
@@ -910,7 +900,7 @@ function.
 
 ### Cyclic dependencies
 
-In most cases, OCaml doesn't allow circular dependencies, _i.e._, a
+In most cases, OCaml doesn't allow cyclic dependencies, _i.e._, a
 collection of definitions that all refer to each other.  If you want
 to create such definitions, you typically have to mark them specially.
 For example, when defining a set of mutually recursive values (like
@@ -918,10 +908,10 @@ the definition of `is_even` and `is_odd` in
 [xref](#recursive-functions)), you need to define them using `let rec`
 rather than ordinary `let`.
 
-The same is true at the module level.  By default, circular
-dependencies between modules are not allowed, and indeed, circular
-dependencies among files are never allowed.  Recursive modules are
-possible, but are a rare case and we won't discuss them further here.
+The same is true at the module level.  By default, cyclic dependencies
+between modules are not allowed, and indeed, cyclic dependencies among
+files are never allowed.  Recursive modules are possible, but are a
+rare case and we won't discuss them further here.
 
 The simplest case of this is that a module can not directly refer to
 itself (although definitions within a module can refer to each other
@@ -940,7 +930,7 @@ Error: Unbound module Counter
 Command exited with code 2.
 ```
 
-The problem manifests in a different way if we create circular
+The problem manifests in a different way if we create cyclic
 references between files.  We could create such a situation by adding
 a reference to Freq from `counter.ml`, _e.g._, by adding the following
 line:

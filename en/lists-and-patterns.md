@@ -232,7 +232,8 @@ value in question.
 If you benchmark these functions, you'll see that `plus_one_if` is
 considerably slower than `plus_one_match`, and the advantage gets
 larger as the number of cases increases.  Here, we'll benchmark these
-functions using the `core_bench` library.
+functions using the `core_bench` library, which can be installed by
+running `opam install core_bench` from the command-line.
 
 ```ocaml
 # #require "core_bench";;
@@ -284,12 +285,12 @@ Estimated testing time 20s (change using -quota SECS).
 - : unit = ()
 ```
 
-In this case, the match-based implementation is more than three times
-faster than the one using if.  The difference comes because we need to
-effectively do the same work multiple times, since each function we
-call has to re-examine the first element of the list to determine
-whether or not it's the empty cell.  With a match statement, this work
-happens exactly once per list element.
+In this case, the `match`-based implementation is more than three
+times faster than the one using `if`.  The difference comes because we
+need to effectively do the same work multiple times, since each
+function we call has to re-examine the first element of the list to
+determine whether or not it's the empty cell.  With a match statement,
+this work happens exactly once per list element.
 
 Generally, pattern matching is more efficient than the alternatives
 you might code by hand.  One notable exception is matches over
@@ -584,11 +585,10 @@ rightmost appearance of a given character.
 - : string list = ["byte"; "ml"; "mli"; "native"; "txt"]
 ```
 
-One feature of OCaml's pattern language that we've encountered here
-for the first time is _or-patterns_, which allow you to have multiple
-sub-patterns within a larger pattern.  In this case, `None | Some
-("",_)` is an or-pattern.  As we'll see later, or-patterns can be
-nested anywhere within larger patterns.
+The above is also an example of an or-patterns, which allows you to
+have multiple sub-patterns within a larger pattern.  In this case,
+`None | Some ("",_)` is an or-pattern.  As we'll see later,
+or-patterns can be nested anywhere within larger patterns.
 
 Another function that is similar to `filter` is `partition_tf`, which
 takes a list and partitions it into a pair of lists based on a boolean
@@ -647,7 +647,7 @@ compute a recursive listing of a directory tree.
       |> List.map ~f:(fun sub -> ls_rec (s ^ "/" ^ sub))
       |> List.concat
   ;;
-# all_files ".";;
+# ls_rec ".";;
 - : string list =
 ["./_build/_digests"; "./_build/_log"; "./_build/example.ml";
  "./_build/example.ml.depends"; "./_build/ocamlc.where"; "./_tags";
@@ -761,7 +761,7 @@ stack frame for the callee, the compiler is free to reuse the
 caller's stack frame.
 
 Tail recursion is important for more than just lists.  Ordinary
-(non-tail) recursive calls are reasonable when the dealing with
+(non-tail) recursive calls are reasonable when dealing with
 data-structures like binary trees where the depth of the tree is
 logarithmic in the size of your data.  But when dealing with
 situations where the depth of the sequence of nested calls is on the
@@ -868,7 +868,7 @@ _etc._, as well as the function `compare` that returns `-1`, `0` or
 `1` to flag whether the first operand is smaller than, equal to, or
 greater than the second, respectively.
 
-You might wonder how you could build function like these yourself if
+You might wonder how you could build functions like these yourself if
 OCaml didn't come with them built-in.  It turns out that you _can't_
 build these functions on your own.  OCaml's polymorphic comparison
 functions are actually built-in to the runtime to a low level.  These
