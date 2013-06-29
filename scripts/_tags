@@ -1,5 +1,6 @@
-true:package(xmlm,cmdliner)
+true:package(xmlm,cmdliner,str)
+<run_core_toplevel.*>: package(compiler-libs.toplevel)
 true:thread,debug,annot
 <*.ml{,i}>:syntax(camlp4o)
-true: package(core,core_extended,threads,sexplib.syntax)
+true: package(core,threads,sexplib.syntax)
 <redirect.*> or <downtime.*> or <memcache.*> or <rwocli.*> or <githubbot.*> or <config.*> or <rwoserver.*>:package(lwt.unix,github.unix,lwt.syntax)

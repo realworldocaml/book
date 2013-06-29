@@ -26,8 +26,18 @@ And they can also be generated using the equivalent `::` notation.
 ```
 
 As you can see, the `::` operator is right-associative, which means
-that we can built up lists without parenthesis.  The empty list `[]`
-is used to terminate a list.
+that we can build up lists without parentheses.  The empty list `[]`
+is used to terminate a list.  Note that the empty list is polymorphic,
+meaning it can be used with elements of any type.
+
+```ocaml
+# let empty = [];;
+val empty : 'a list = []
+# 3 :: empty;;
+- : int list = [3]
+# "three" :: empty;;
+- : string list = ["three"]
+```
 
 The `::` operator conveys something important about the nature of
 lists, which is that they are implemented as singly-linked lists.  The
@@ -222,7 +232,8 @@ value in question.
 If you benchmark these functions, you'll see that `plus_one_if` is
 considerably slower than `plus_one_match`, and the advantage gets
 larger as the number of cases increases.  Here, we'll benchmark these
-functions using the `core_bench` library.
+functions using the `core_bench` library, which can be installed by
+running `opam install core_bench` from the command-line.
 
 ```ocaml
 # #require "core_bench";;
@@ -274,17 +285,17 @@ Estimated testing time 20s (change using -quota SECS).
 - : unit = ()
 ```
 
-In this case, the match-based implementation is more than three times
-faster than the one using if.  The difference comes because we need to
-effectively do the same work multiple times, since each function we
-call has to re-examine the first element of the list to determine
-whether or not it's the empty cell.  With a match statement, this work
-happens exactly once per list element.
+In this case, the `match`-based implementation is more than three
+times faster than the one using `if`.  The difference comes because we
+need to effectively do the same work multiple times, since each
+function we call has to re-examine the first element of the list to
+determine whether or not it's the empty cell.  With a match statement,
+this work happens exactly once per list element.
 
 Generally, pattern matching is more efficient than the alternatives
 you might code by hand.  One notable exception is matches over
 strings, which are in fact tested sequentially, and which for long
-lists can be outperformed by a hashtable.  But most of the time,
+lists can be outperformed by a hash table.  But most of the time,
 pattern matching is a clear performance win.
 
 ### Detecting errors
@@ -482,7 +493,7 @@ it runs.  Thus, the following code:
 let s = "." ^ "."  ^ "."  ^ "."  ^ "."  ^ "."  ^ "."
 ```
 
-will allocate a string of length 2, 3, 4, 5, 6 and 7, whereas this
+will allocate strings of length 2, 3, 4, 5, 6 and 7, whereas this
 code:
 
 ```ocaml
@@ -543,6 +554,37 @@ The example we worked through above only touched on three of the
 function in `List`.  We won't cover the entire interface, but there
 are a few more functions that are useful enough to mention here.
 
+#### Combining list elements with `List.reduce` 
+
+`List.fold`, which we described earlier, is a very general and
+powerful function.  Sometimes, hwoever, you want something more that's
+simpler and thereby easier to use.  One such function is
+`List.reduce`, which is essentially a specialized version of
+`List.fold` that doesn't require an explicit starting value, and whose
+accumulator has to consume and produce values of the same type as the
+elements of the list it applies to.
+
+Here's the type signature:
+
+```ocaml
+# List.reduce;;
+- : 'a list -> f:('a -> 'a -> 'a) -> 'a option = <fun>
+```
+
+`reduce` returns an optional result, returning `None` when the input
+list is empty.
+
+Now we can see reduce in action.
+
+```ocaml
+# List.reduce ~f:(+) [1;2;3;4;5];;
+- : int option = Some 15
+# List.reduce ~f:(+) [];;
+- : int option = None
+```
+
+#### Filtering with `List.filter`  and `List.filter_map` 
+
 Very often when processing lists, one wants to restrict attention to
 just a subset of values.  The `List.filter` function does just that.
 
@@ -574,11 +616,12 @@ rightmost appearance of a given character.
 - : string list = ["byte"; "ml"; "mli"; "native"; "txt"]
 ```
 
-One feature of OCaml's pattern language that we've encountered here
-for the first time is _or-patterns_, which allow you to have multiple
-sub-patterns within a larger pattern.  In this case, `None | Some
-("",_)` is an or-pattern.  As we'll see later, or-patterns can be
-nested anywhere within larger patterns.
+The above is also an example of an or-patterns, which allows you to
+have multiple sub-patterns within a larger pattern.  In this case,
+`None | Some ("",_)` is an or-pattern.  As we'll see later,
+or-patterns can be nested anywhere within larger patterns.
+
+#### Partitioning with `List.partition_tf`
 
 Another function that is similar to `filter` is `partition_tf`, which
 takes a list and partitions it into a pair of lists based on a boolean
@@ -600,6 +643,8 @@ val other_files : string list = ["_build"; "_tags"]
 ```
 
 Note the use of a nested or-pattern in `is_ocaml_source`.
+
+#### Combining lists
 
 Another very common operation on lists is concatenation.  The list
 module actually comes with a few different ways of doing this.  First,
@@ -637,7 +682,7 @@ compute a recursive listing of a directory tree.
       |> List.map ~f:(fun sub -> ls_rec (s ^ "/" ^ sub))
       |> List.concat
   ;;
-# all_files ".";;
+# ls_rec ".";;
 - : string list =
 ["./_build/_digests"; "./_build/_log"; "./_build/example.ml";
  "./_build/example.ml.depends"; "./_build/ocamlc.where"; "./_tags";
@@ -751,7 +796,7 @@ stack frame for the callee, the compiler is free to reuse the
 caller's stack frame.
 
 Tail recursion is important for more than just lists.  Ordinary
-(non-tail) recursive calls are reasonable when the dealing with
+(non-tail) recursive calls are reasonable when dealing with
 data-structures like binary trees where the depth of the tree is
 logarithmic in the size of your data.  But when dealing with
 situations where the depth of the sequence of nested calls is on the
@@ -855,10 +900,10 @@ that it is polymorphic:
 OCaml actually comes with a whole family of polymorphic comparison
 operators, including the standard infix comparators, `<`, `>=`,
 _etc._, as well as the function `compare` that returns `-1`, `0` or
-`1` to flag whether the first operator is smaller than, equal to, or
+`1` to flag whether the first operand is smaller than, equal to, or
 greater than the second, respectively.
 
-You might wonder how you could build function like these yourself if
+You might wonder how you could build functions like these yourself if
 OCaml didn't come with them built-in.  It turns out that you _can't_
 build these functions on your own.  OCaml's polymorphic comparison
 functions are actually built-in to the runtime to a low level.  These
@@ -867,8 +912,8 @@ about the types of the values that are being compared, paying
 attention only to the structure of the values as they're laid out in
 memory.
 
-Polymorphic compare does have some limitations.  For example, they
-will fail at runtime if they encounter functions:
+Polymorphic compare does have some limitations.  For example, it will
+fail at runtime if it encounters a function value.
 
 ```ocaml
 # (fun x -> x + 1) = (fun x -> x + 1);;
@@ -876,7 +921,7 @@ Exception: (Invalid_argument "equal: functional value").
 ```
 
 Similarly, it will fail on values that come from outside the OCaml
-heap, like values from C-bindings.  But they will work in a reasonable
+heap, like values from C-bindings.  But it will work in a reasonable
 way for other kinds of values.
 
 For simple atomic types, polymorphic compare has the semantics you
@@ -888,7 +933,7 @@ Sometimes, however, the type-ignoring nature of polymorphic compare is
 a problem, particularly when you have your own notion of equality and
 ordering that you want to impose.  We'll discuss this issue more, as
 well as some of the other downsides of polymorphic compare, in
-[xref](#maps-and-hashtables).
+[xref](#maps-and-hash-tables).
 
 </note>
 

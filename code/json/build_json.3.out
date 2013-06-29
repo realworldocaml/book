@@ -1,0 +1,4 @@
+# Yojson.Basic.pretty_to_string person ;; 
+- : string = "{ \"name\": \"Anil\" }"
+# Yojson.Basic.pretty_to_channel stdout person ;; 
+- : unit = ()

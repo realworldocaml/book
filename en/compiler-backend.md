@@ -513,7 +513,7 @@ if you get lost in the more verbose assembly.
 
 #### The impact of polymorphic comparison
 
-We warned you earlier in [xref](#maps-and-hashtables) that using polymorphic
+We warned you earlier in [xref](#maps-and-hash-tables) that using polymorphic
 comparison is both convenient and perilous.  Let's look at precisely what
 the difference is at the assembly language level now.
 

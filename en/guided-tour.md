@@ -3,7 +3,7 @@
 This chapter gives an overview of OCaml by walking through a series of
 small examples that cover most of the major features of the language.
 This should give a sense of what OCaml can do, without getting too
-deep in any one topic.
+deep into any one topic.
 
 We'll present this guided tour using the Core standard library and the
 `utop` OCaml toplevel, a shell that lets you type in expressions and
@@ -88,15 +88,14 @@ at you.
   evaluate an expression.  This is a peculiarity of the toplevel that
   is not required in stand-alone programs (though it is sometimes
   helpful to include `;;` to improve OCaml's error reporting).
-- After evaluating an expression, the toplevel prints both the type of
-  the result and the result itself.
-- Function arguments are separated by spaces, instead of by
-  parenthesis and commas, which is more like the UNIX shell than C or
-  Java.
+- After evaluating an expression, the toplevel prints first the result
+  and then the type of the result.
+- Function arguments are separated by spaces instead of by parentheses
+  and commas, which is more like the UNIX shell than it is like
+  traditional programming languages like C or Java.
 - OCaml allows you to place underscores in the middle of your integer
   literals, as a way of improving readability.  Note that underscores
-  can be placed anywhere in within the number, not just every three
-  digits.
+  can be placed anywhere within a number, not just every three digits.
 - OCaml carefully distinguishes between `float`, the type for floating
   point numbers and `int`, the type for integers.  The types have
   different literals (`6.` instead of `6`) and different infix
@@ -104,7 +103,9 @@ at you.
   cast between types.  This can be a bit of a nuisance, but it has its
   benefits, since it prevents some kinds of bugs that arise in other
   languages due to unexpected differences between the behavior of
-  `int` and `float`.
+  `int` and `float`.  For example, in many languages, `1 / 3` is `0`,
+  but `1 / 3.0` is a third.  OCaml requires you to be explicit about
+  which operation you're doing.
 
 We can also create a variable to name the value of a given expression,
 using the `let` keyword (also known as a _let binding_).
@@ -122,8 +123,8 @@ or `14`).
 
 Note that there are some constraints on what identifiers can be used
 for variable names.  Punctuation is excluded, except for `_` and `'`,
-and variables must start with a lowercase letter.  Thus, these are
-legal:
+and variables must start with a lowercase letter or an underscore.
+Thus, these are legal:
 
 ```ocaml
 # let x7 = 3 + 4;;
@@ -132,9 +133,15 @@ val x7 : int = 7
 val x_plus_y : int = 21
 # let x' = x + 1;;
 val x' : int = 8
+# let _x' = x' + x';;
+# _x';;
+- : int = 8
 ```
 
-But these are not:
+Note that by default, `utop` doesn't bother to print out variables
+starting with an underscore.
+
+The following examples, however, are not legal.
 
 ```ocaml
 # let Seven = 3 + 4;;
@@ -146,9 +153,12 @@ int
 Error: Parse error: [fun_binding] expected after [ipatt] (in [let_binding])
 ```
 
-## Functions and type Inference
+The error messages here are a little confusing, but they'll make more
+sense as you learn more about the language.
 
-The `let` syntax can also be used for creating functions.
+## Functions and type inference
+
+The `let` syntax can also be used to define a function.
 
 ```ocaml
 # let square x = x * x ;;
@@ -159,9 +169,9 @@ val square : int -> int = <fun>
 - : int = 16
 ```
 
-Functions in OCaml are values like any other, which is why we bind one
-to a variable using the same `let` keyword used for binding a variable
-to a simple value such as an integer.
+Functions in OCaml are values like any other, which is why we use the
+`let` keyword to bind a function to a variable name, just as we use
+`let` to bind a simple value like an integer to a variable name.
 
 When using `let` to define a function, the first identifier after the
 `let` is the function name, and each subsequent identifier is a
@@ -174,7 +184,7 @@ types have gotten more interesting too.  `int -> int` is a function
 type, in this case indicating a function that takes an `int` and
 returns an `int`.  We can also write functions that take multiple
 arguments.  (Note that the following example will not work if you
-haven't opened `Core.Std`.)
+haven't opened `Core.Std` as was suggested earlier.)
 
 ```ocaml
 # let ratio x y =
@@ -243,14 +253,14 @@ any explicit type information.
 
 OCaml determines the type of an expression using a technique called
 _type inference_, by which it infers the type of a given expression
-based on what it already knows about the types of other related
-variables, and on constraints on the types that arise from the
+based on what it already knows about the types of variables used in
+the expression, and on constraints on the types that arise from the
 structure of the code.
 
 As an example, let's walk through the process of inferring the type of
 `sum_if_true`.
 
-- OCaml requires that both arms of an `if` statement return the same
+- OCaml requires that both arms of an `if` statement have the same
   type, so the expression `if test first then first else 0` requires
   that `first` must be the same type as `0`, which is `int`.
   Similarly, from `if test second then second else 0` we can conclude
@@ -259,7 +269,7 @@ As an example, let's walk through the process of inferring the type of
   input type of `test` must be `int`.
 - `test first` is used as the condition in an `if` statement, so the
   return type of `test` must be `bool`.
-- The fact that `+` returns an int implies that the return value of
+- The fact that `+` returns `int` implies that the return value of
   `sum_if_true` must be int.
 
 Together, that nails down the types of all the variables, which
@@ -268,7 +278,7 @@ determines the overall type of `sum_if_true`.
 Over time, you'll build a rough intuition for how the OCaml inference
 engine works, which makes it easier to reason through your programs.
 One way of making it easier to understand the types is to add explicit
-type annotations.  These annotations never change the behavior of an
+type annotations.  These annotations don't change the behavior of an
 OCaml program, but they can serve as useful documentation, as well as
 catch unintended type changes.  Here's an annotated version of
 `sum_if_true`:
@@ -310,10 +320,11 @@ we look at the type returned by the toplevel:
 val first_if_true : ('a -> bool) -> 'a -> 'a -> 'a = <fun>
 ```
 
-we see that rather than choose a single concrete type, OCaml has
-introduced a _type variable_ `'a` to express that the type is generic.
-In particular, the type of the `test` argument is `('a -> bool)`,
-which means that test is a one-argument function whose return value is
+Rather than choose a single concrete type, OCaml has introduced a
+_type variable_ `'a` to express that the type is generic.  (You can
+tell it's a type variable by the leading single-quote.)  In
+particular, the type of the `test` argument is `('a -> bool)`, which
+means that test is a one-argument function whose return value is
 `bool`, and whose argument could be of any type `'a`.  But, whatever
 type `'a` is, it has to be the same as the type of the other two
 arguments, `x` and `y`, and of the return value of `first_if_true`.
@@ -445,17 +456,7 @@ can now be used in subsequent expressions.
 ```
 
 Note that the same syntax is used both for constructing and for
-pattern matching on tuples.  Another syntactic note: it's the commas,
-rather than the parens, that make a tuple.  Thus, we can write:
-
-```ocaml
-# let x,y = a_tuple;;        
-val x : int = 3
-val y : string = "three"
-```
-
-That said, it's more idiomatic to include the parens even when they're
-not strictly necessary.
+pattern matching on tuples.
 
 Pattern matching can also show up in function arguments.  Here's a
 function for computing the distance between two points on the plane,
@@ -521,7 +522,8 @@ of the lengths of each language as follows.
 
 `List.map` takes two arguments: a list and a function for transforming
 the elements of that list.  Note that `List.map` creates a new list
-and does not modify the original.
+and does not modify the original.  Indeed, OCaml lists are immutable,
+so there are no operations for modifying lists in the language at all.
 
 In this example, the function `String.length` is passed under the
 _labeled argument_ `~f`.  Labels allow you to specify arguments by
@@ -554,6 +556,35 @@ started with, as you can see below.
 # languages;;
 - : string list = ["OCaml"; "Perl"; "C"]
 ```
+
+<note> <title> Semicolons vs. commas </title>
+
+Unlike many other languages, OCaml uses semicolons to separate list
+elements in lists rather than commas.  Commas, instead, are used for
+separating elements in a tuple.  If you try to use commas instead,
+you'll see that your code compiles, but doesn't do quite what you
+might expect.
+
+```ocaml
+# ["OCaml", "Perl", "C"];;
+- : (string * string * string) list = [("OCaml", "Perl", "C")]
+```
+
+In particular, rather than a list of three strings, what we have is a
+singleton list containing a three-tuple of strings.
+
+Another thing that is uncovered by this example is that commas create
+a tuple, even if there are no surrounding parens.  So, we can write:
+
+```ocaml
+# 1,2,3;;
+- : int * int * int = (1, 2, 3)
+```
+
+to allocate a tuple of integers.  This is generally considered poor
+style and should be avoided.
+
+</note>
 
 The bracket notation for lists is really just syntactic sugar for
 `::`.  Thus, the following declarations are all equivalent.  Note that
@@ -721,8 +752,7 @@ This suggests a reasonable mental model for what OCaml is actually
 doing to evaluate a recursive function.
 
 We can introduce more complicated list patterns as well.  Here's a
-function for destuttering a list, _i.e._, for removing sequential
-duplicates.
+function for removing sequential duplicates.
 
 ```ocaml
 # let rec destutter list =
@@ -958,7 +988,7 @@ of some element of a list of `scene_element`s.
      | Circle { center; radius } ->
        distance center point < radius
      | Rect { lower_left; width; height } ->
-       point.x > lower_left.x && point.x < lower_left.x +. width
+       point.x    > lower_left.x && point.x < lower_left.x +. width
        && point.y > lower_left.y && point.y < lower_left.y +. height
      | Segment { endpoint1; endpoint2 } -> false
   ;;
@@ -1001,12 +1031,13 @@ value after its creation.  Indeed, almost all of the data structures
 we've encountered so far are _immutable_, meaning there's no way in
 the language to modify them at all.  This is a quite different style
 from _imperative_ programming, where computations are structured as
-sequences of instructions that operate by modifying state as they go.
+sequences of instructions that operate by making modifications to the
+state of the program.
 
 Functional code is the default in OCaml, with variable bindings and
 most data structures being immutable.  But OCaml also has excellent
 support for imperative programming, including mutable data structures
-like arrays and hashtables, and control-flow constructs like for and
+like arrays and hash tables, and control-flow constructs like for and
 while loops.
 
 ### Arrays
@@ -1031,10 +1062,10 @@ the `.(i)` syntax is used to refer to an element of an array, and the
 `<-` syntax is for modification. Because the elements of the array are
 counted starting at zero, element `.(2)` is the third element.
 
-A new and somewhat odd type has cropped up in this example: `unit`.
-What makes `unit` different is that there is only one value of type
-`unit`, which is written `()`.  Because there is only one value of
-type `unit` that value doesn't really convey any information.
+An odd type has cropped up in this example: `unit`.  What makes `unit`
+different is that there is only one value of type `unit`, which is
+written `()`.  Because there is only one value of type `unit`, that
+value doesn't really convey any information.
 
 If it doesn't convey any information, then what is `unit` good for?
 Most of the time, `unit` acts as a placeholder.  Thus, we use `unit`
@@ -1100,7 +1131,10 @@ operations.  When we were working purely functionally, this wasn't
 necessary, but you start needing it when you're writing imperative
 code.
 
-Here's an example of `create` and `update` in action.
+Here's an example of `create` and `update` in action.  Note that this
+code uses `List.iter`, which calls the function `~f` on each element
+of the provided list.
+
 
 ```ocaml
 # let rsum = create ();;
@@ -1112,6 +1146,7 @@ val rsum : running_sum = {sum = 0.; sum_sq = 0.; samples = 0}
 # stdev rsum;;
 - : float = 3.94405318873307698
 ```
+
 
 ### Refs
 
@@ -1148,16 +1183,21 @@ reimplement the `ref` type and all of these operators in just a few
 lines of code.
 
 ```ocaml
-type 'a ref = { mutable contents : 'a }
+# type 'a ref = { mutable contents : 'a }
 
-let ref x = { contents = x }
-let (!) r = r.contents
-let (:=) r x = r.contents <- x
+  let ref x = { contents = x }
+  let (!) r = r.contents
+  let (:=) r x = r.contents <- x
+  ;;
+type 'a ref = { mutable contents : 'a; }
+val ref : 'a -> 'a ref = <fun>
+val ( ! ) : 'a ref -> 'a = <fun>
+val ( := ) : 'a ref -> 'a -> unit = <fun>
 ```
 
 The `'a` before the ref indicates that the `ref` type is polymorphic,
 in the same way that lists are polymorphic, meaning it can contain
-values of any type.  The parenthesis around `!` and `:=` are needed
+values of any type.  The parentheses around `!` and `:=` are needed
 because these are operators, rather than ordinary functions.
 
 Even though a `ref` is just another record type, it's important
@@ -1186,14 +1226,15 @@ as our source of randomness.  `Random` starts with a default seed, but
 you can call `Random.self_init` to choose a new seed at random.
 
 ```ocaml
-# let permute ar =
-    for i = 0 to Array.length ar - 2 do
-       (* pick a j that is after i and before the end of the list *)
-       let j = i + 1 + Random.int (Array.length ar - i - 1) in
+# let permute array =
+    let length = Array.length array in
+    for i = 0 to length - 2 do
+       (* pick a j that is after i and before the end of the array *)
+       let j = i + 1 + Random.int (length - i - 1) in
        (* Swap i and j *)
-       let tmp = ar.(i) in
-       ar.(i) <- ar.(j);
-       ar.(j) <- tmp
+       let tmp = array.(i) in
+       array.(i) <- array.(j);
+       array.(j) <- tmp
     done
   ;;
 val permute : 'a array -> unit = <fun>
@@ -1216,23 +1257,49 @@ val ar : int array =
 ```
 
 OCaml also supports while loops, as shown in the following function
-for finding the first non-negative position in an array.  Note that
-`while` (like `for`) is also a keyword.
+for finding the position of the first negative entry in an array.
+Note that `while` (like `for`) is also a keyword.
 
 ```ocaml
-# let find_first_negative_entry ar =
+# let find_first_negative_entry array =
      let pos = ref 0 in
-     while !pos < Array.length ar && ar.(!pos) >= 0 do
+     while !pos < Array.length array && array.(!pos) >= 0 do
        pos := !pos + 1
      done;
-     if !pos = Array.length ar then None else Some !pos
+     if !pos = Array.length array then None else Some !pos
   ;;
-val find_first_negative_entry : int Core.Std.Array.t -> int option = <fun>
+val find_first_negative_entry : int array -> int option = <fun>
 # find_first_negative_entry [|1;2;0;3|];;
 - : int option = None
 # find_first_negative_entry [|1;-2;0;3|];;
 - : int option = Some 1
 ```
+
+As a side note, the above code takes advantage of the fact that `&&`,
+OCaml's and operator, short-circuits.  In particular, in an expression
+of the form `<expr1> && <expr2>`, `<expr2>` will only be evaluated if
+`<expr1>` evaluated to true.  Were it not for that, then the above
+function would result in an out-of-bounds error.  Indeed, we can
+trigger that out-of-bounds error by rewriting the function to avoid
+the short-circuiting.
+
+```ocaml
+# let find_first_negative_entry array =
+     let pos = ref 0 in
+     while 
+       let pos_is_good = !pos < Array.length array in
+       let element_is_non_negative = array.(!pos) >= 0 in
+       pos_is_good && element_is_non_negative
+     do
+       pos := !pos + 1
+     done;
+     if !pos = Array.length array then None else Some !pos
+  ;;
+# find_first_negative_entry [|1;2;0;3|];;
+Exception: (Invalid_argument "index out of bounds").
+```
+
+The or operator, `||` short-circuits in a similar way to `&&`.
 
 ## A complete program
 

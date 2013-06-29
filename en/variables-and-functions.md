@@ -1,10 +1,10 @@
 # Variables and Functions
 
-Variables and functions are fundamental ideas that show up in
-virtually all programming languages.  But OCaml has a different take
-on these basic concepts, and so we'll spend some time digging into the
-details so you can see how OCaml's variables and functions differ from
-what you may have encountered in other languages.
+Variables and functions are fundamental ideas that show up in virtually
+all programming languages.  But OCaml has a different take on these
+basic concepts, so we'll spend some time digging into the details so you
+can understand OCaml's variables and functions and see how they differ
+from what you've encountered elsewhere.
 
 ## Variables
 
@@ -12,7 +12,8 @@ At its simplest, a variable is an identifier whose meaning is bound to
 a particular value.  In OCaml these bindings are often introduced
 using the `let` keyword.  We can type a so-called _top-level_ `let`
 binding into `utop` with the following syntax to bind a new variable.
-Note that variable names must start with a lowercase letter.
+Note that variable names must start with a lowercase letter or an
+underscore.
 
 ```ocaml
 let <identifier> = <expr>
@@ -61,7 +62,7 @@ val dashed_languages : string = "OCaml-Perl-C++-C"
 
 Note that the scope of `language_list` is just the expression
 `String.concat ~sep:"-" language_list`, and is not available at the
-toplevel, as we can see if we try to access it now.
+top level, as we can see if we try to access it now.
 
 ```ocaml
 # language_list;;
@@ -142,7 +143,7 @@ Warning 26: unused variable pi.
 ```
 
 In OCaml, let bindings are immutable.  As we'll see in
-[xref](#imperative-programming), there are mutable values in OCaml,
+[xref](#imperative-programming-1), there are mutable values in OCaml,
 but no mutable variables.
 
 <note> <title> Why don't variables vary?  </title>
@@ -219,6 +220,10 @@ to use a match statement to handle such cases explicitly:
 val upcase_first_entry : string -> string = <fun>
 ```
 
+Note that this is our first use of `assert`, which is a function that
+is useful for throwing an exception in an impossible case.  Asserts
+are discussed in more detail in [xref](#error-handling)
+
 ## Functions ##
 
 OCaml being a functional language, it's no surprise that functions are
@@ -231,7 +236,7 @@ the foundations.
 ### Anonymous Functions ###
 
 We'll start by looking at the most basic style of function declaration
-in OCaml: the _anonymous_ function.  An anonymous function is a
+in OCaml: the _anonymous function_.  An anonymous function is a
 function value that is declared without being named.  They can be
 declared using the `fun` keyword, as shown here.
 
@@ -263,7 +268,7 @@ Or even stuff them into a data structure.
 ```ocaml
 # let increments = [ (fun x -> x + 1); (fun x -> x + 2) ] ;;
 val increments : (int -> int) list = [<fun>; <fun>]
-# List.map ~f:(fun f -> f 5) increments;;
+# List.map ~f:(fun g -> g 5) increments;;
 - : int list = [6; 7]
 ```
 
@@ -307,9 +312,9 @@ entirely equivalent.
 <title>`let` and `fun`</title>
 
 Functions and let bindings have a lot to do with each other.  In some
-sense, you can think of the argument of a function as a variable being
-bound to the value passed by the caller.  Indeed, the following two
-expressions are nearly equivalent:
+sense, you can think of the parameter of a function as a variable
+being bound to the value passed by the caller.  Indeed, the following
+two expressions are nearly equivalent:
 
 ```ocaml
 # (fun x -> x + 1) 7;;
@@ -347,23 +352,24 @@ val abs_diff : int -> int -> int = <fun>
 
 This rewrite makes it explicit that `abs_diff` is actually a function
 of one argument that returns another function of one argument, which
-itself returns the final computation.  Because the functions are
-nested, the inner expression `abs (x - y)` has access to both `x`,
-which was captured by the first function application, and `y`, which
-was captured by the second one.
+itself returns the final result.  Because the functions are nested,
+the inner expression `abs (x - y)` has access to both `x`, which was
+captured by the first function application, and `y`, which was
+captured by the second one.
 
 This style of function is called a _curried_ function.  (Currying is
-named after Haskell Curry, a famous logician who had a significant
-impact on the design and theory of programming languages.)  The key to
+named after Haskell Curry, a logician who had a significant impact on
+the design and theory of programming languages.)  The key to
 interpreting the type signature of a curried function is the
 observation that `->` is right-associative.  The type signature of
-`abs_diff` can therefore be parenthesized as follows.  This doesn't
-change the meaning of the signature, but it makes it easier to see how
-the currying fits in.
+`abs_diff` can therefore be parenthesized as follows.  
 
 ```ocaml
 val abs_diff : int -> (int -> int)
 ```
+
+The parentheses above don't change the meaning of the signature, but
+it makes it easier to see the currying.
 
 Currying is more than just a theoretical curiosity.  You can make use
 of currying to specialize a function by feeding in some of the
@@ -396,7 +402,7 @@ curried function with all of its arguments.  (Partial application,
 unsurprisingly, does have a small extra cost.)
 
 Currying is not the only way of writing a multi-argument function in
-OCaml.  It's also possible to use the different arms of a tuple as
+OCaml.  It's also possible to use the different parts of a tuple as
 different arguments.  So, we could write:
 
 ```ocaml
@@ -421,7 +427,7 @@ A function is _recursive_ if it refers to itself in its definition.
 Recursion is important in any programming language, but is
 particularly important in functional languages, because it is the
 fundamental building block that is used for building looping
-constructs.  (As we'll see in [xref](#imperative-programming), OCaml
+constructs.  (As we'll see in [xref](#imperative-programming-1), OCaml
 also supports imperative looping constructs like `for` and `while`,
 but these are only useful when using OCaml's imperative features.)
 
@@ -440,10 +446,11 @@ binding as recursive with the `rec` keyword, as shown in this example:
 val find_first_stutter : 'a list -> 'a option = <fun>
 ```
 
-Note that in the above, the pattern `| [] | [_]` is actually the
-combination of two patterns; `[]`, matching the empty list, and `[_]`,
-matching any single element list.  The `_` is there so we don't have
-to put an explicit name on that single element.
+Note that in the above, the pattern `| [] | [_]` is what's called on
+_or-pattern_, which is the combination of two patterns.  In this case,
+`[]`, matching the empty list, and `[_]`, matching any single element
+list.  The `_` is there so we don't have to put an explicit name on
+that single element.
 
 We can also define multiple mutually recursive values by using `let
 rec` combined with the `and` keyword.  Here's a (gratuitously
@@ -496,7 +503,7 @@ style:
 You might not have thought of the second example as an ordinary
 function, but it very much is.  Infix operators like `+` really only
 differ syntactically from other functions.  In fact, if we put
-parenthesis around an infix operator, you can use it as an ordinary
+parentheses around an infix operator, you can use it as an ordinary
 prefix function.
 
 ```ocaml
@@ -512,8 +519,8 @@ applied that to all the elements of a list.
 
 A function is treated syntactically as an operator if the name of that
 function is chosen from one of a specialized set of identifiers.  This
-set includes any identifier that is a sequence of characters from the
-following set
+set includes identifiers that are sequences of characters from the
+following set:
 
 ```
 ! $ % & * + - . / : < = > ? @ ^ | ~
@@ -533,6 +540,24 @@ val ( +! ) : int * int -> int * int -> int * int = <fun>
 - : int * int = (1,6)
 ```
 
+Note that you have to be careful when dealing with operators containg
+`*`.  Consider the following example.
+
+```ocaml
+# let (***) x y = (x ** y) ** y;;
+Error: This expression has type int but an expression was expected of type
+         float
+```
+
+What's going on is that `(***)` isn't interpreted as an operator at
+all; it's read as a comment!  To get this to work properly, we need to
+put spaces around any operator that begins or ends with `*`.
+
+```ocaml
+# let ( *** ) x y = (x ** y) ** y;;
+val ( *** ) : float -> float -> float = <fun>
+```
+
 The syntactic role of an operator is typically determined by its first
 character or two, though there are a few exceptions.  This table
 breaks the different operators and other syntactic forms into groups
@@ -543,7 +568,7 @@ beginning with `!`.
 ------------------------------------------
 Prefix                     Usage
 -----------------------    -----------------
-`!`..., `?`..., `~`...     Unary prefix
+`!`..., `?`..., `~`...     Prefix
 
 `.`, `.(`, `.[`
 
@@ -551,7 +576,7 @@ function application,      Left associative
 constructor, `assert`,
 `lazy`
 
-`-`, `-.`                  Unary prefix
+`-`, `-.`                  Prefix
 
 `**`...,                   Right associative
 `lsl`, `lsr`, `asr`
@@ -586,10 +611,32 @@ constructor, `assert`,
 There's one important special case: `-` and `-.`, which are the
 integer and floating point subtraction operators, can act as both
 prefix operators (for negation) and infix operators (for subtraction),
-So, both `-x` and `x - y` are meaningful expressions.
+So, both `-x` and `x - y` are meaningful expressions.  Another thing
+to remember about negation  is that it has lower precedence than
+function application, which means that if you want to pass a negative
+value, you need to wrap it in parentheses, as you can see below.
 
-Here's an example of a very useful operator that's defined in Core,
-following these rules.  Here's the definition:
+```ocaml
+# Int.max 3 (-4);;
+- : int = 3
+# Int.max 3 -4;;
+Error: This expression has type int -> int
+       but an expression was expected of type int
+```
+
+Here, OCaml is interpreting the second expression as equivalent to:
+
+```ocaml
+# (Int.max 3) - 4;;
+Error: This expression has type int -> int
+       but an expression was expected of type int
+```
+
+which obviously doesn't make sense.
+
+Here's an example of a very useful operator from the standard library
+whose behavior depends critically on the precedence rules described
+above.  Here's the code.
 
 ```ocaml
 # let (|>) x f = f x ;;
@@ -636,9 +683,9 @@ verbose.
 
 
 An important part of what's happening here is partial application.
-Normally, `List.iter` takes two arguments: a function to be called on
-each element of the list, and the list to iterate over.  We can call
-`List.iter` with all its arguments:
+For example, `List.iter` normally takes two arguments: a function to
+be called on each element of the list, and the list to iterate over.
+We can call `List.iter` with all its arguments:
 
 ```ocaml
 # List.iter ~f:print_endline ["Two"; "lines"];;
@@ -739,12 +786,14 @@ function that was created by feeding just the first argument to
 
 ### Labeled Arguments ###
 
-Up until now, we've written functions where the arguments are
-specified positionally, _i.e._, by the order in which the arguments
-are passed to the function.  OCaml also supports labeled arguments,
-which let you identify a function argument by name.  Labels are marked
-by a leading tilde, and a label (followed by a colon) are put in front
-of the variable to be labeled.
+Up until now, the functions we've defined have specified their arguments
+positionally, _i.e._, by the order in which the arguments are passed to
+the function.  OCaml also supports labeled arguments, which let you
+identify a function argument by name.  Indeed, we've already encountered
+functions from Core like `List.map` that use labeled arguments.  Labeled
+arguments are marked by a leading tilde, and a label (followed by a
+colon) are put in front of the variable to be labeled.  Here's an
+example.
 
 ```ocaml
 # let ratio ~num ~denom = float num /. float denom;;
@@ -802,10 +851,10 @@ Labeled arguments are useful in a few different cases:
     accidentally swap the position and the length.
 
   - When the meaning of a particular argument is unclear from the type
-    alone.  For example, consider a function for creating a hashtable
+    alone.  For example, consider a function for creating a hash table
     where the first argument is the initial size of the table, and the
     second argument is a flag which, when true, indicates that the
-    hashtable will reduce its size when the hashtable contains few
+    hash table will reduce its size when the hash table contains few
     elements.  The following signature doesn't give you much of a hint
     as to the meaning of the arguments.
 
@@ -938,7 +987,8 @@ Optional arguments are very useful, but they're also easy to abuse.
 The key advantage of optional arguments is that they let you write
 functions with multiple arguments that users can ignore most of the
 time, only worrying about them when they specifically want to invoke
-those options.
+those options.  They also allow you to extend an API with new
+functionality without changing existing code that calls that function.
 
 The downside is that the caller may be unaware that there is a choice
 to be made, and so may unknowingly (and wrongly) pick that default
@@ -1199,12 +1249,13 @@ argument is not erased, instead returning a function that expects the
 
 ### Typing
 
-For each of the following expressions, is the expression well-typed?  If it is well-typed, does it
-evaluate to a value?  If so, what is the value?
+For each of the following expressions, is the expression well-typed?
+If it is well-typed, does it evaluate to a value?  If so, what is the
+value?
 
 - `1 - 2`
 
-  Well typed.  The value is \hbox{\lstinline/-1/}.
+  Well typed.  The value is `-1`.
 
 - `1 - 2 - 3`
 
@@ -1270,7 +1321,6 @@ evaluate to a value?  If so, what is the value?
 
   Well typed.  The value is `false`.
 
-
 - `Char.code 'a'`
 
   Well typed.  The ASCII character code for `'a'` is `97`.
@@ -1286,13 +1336,3 @@ evaluate to a value?  If so, what is the value?
 - `((*((()*))`
 
   Well typed.  The value is `()`.
-
-% -*-
-% Local Variables:
-% Mode: LaTeX
-% fill-column: 100
-% TeX-master: "paper"
-% TeX-command-default: "LaTeX/dvips Interactive"
-% End:
-% -*-
-% vim:tw=100:fo=tcq:

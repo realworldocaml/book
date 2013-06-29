@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-../build.sh service_client.byte
+../build.sh service.byte

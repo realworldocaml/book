@@ -61,17 +61,26 @@ if [ ! -e "$CHAPTERS" ]; then
   usage
 fi
 cd scripts && ./build.sh && cd ..
-SRCS="en/00-toc.md $(./scripts/_build/get_chapter_files.native ${PUBLIC} ${CHAPTERS} ${LINGUA}/)"
+SRCS="00-toc.md $(./scripts/_build/get_chapter_files.native ${PUBLIC} ${CHAPTERS})"
 TRANSFORM_DOCBOOK=./scripts/_build/transform_pandocbook.native
 echo Lingua: ${LINGUA}
 echo Chapters file: ${CHAPTERS}
 echo Source files: ${SRCS}
+
 rm -rf build/${LINGUA}
 mkdir -p build/${LINGUA}/source build/${LINGUA}/html
+echo Inserting code fragments in Markdown
+set -x
+mkdir -p build/${LINGUA}/md
+for i in ${SRCS}; do
+  ./scripts/_build/transform_markdown.native < ${LINGUA}/${i} > build/${LINGUA}/md/${i}
+  SRCS2="${SRCS2} build/${LINGUA}/md/${i}"
+done
+
 ln -nfs ${DOCBOOK_XSL_PATH} stylesheets/system-xsl
 set -x
-pandoc -f markdown -t docbook --chapters --template rwo.docbook -o build/${LINGUA}/source/rwo-pre.xml ${SRCS}
-pandoc -f markdown -t docbook --chapters --template rwo-oreilly.docbook -o build/${LINGUA}/source/rwo-pre-oreilly.xml ${SRCS}
+pandoc -f markdown -t docbook --chapters --template rwo.docbook -o build/${LINGUA}/source/rwo-pre.xml ${SRCS2}
+pandoc -f markdown -t docbook --chapters --template rwo-oreilly.docbook -o build/${LINGUA}/source/rwo-pre-oreilly.xml ${SRCS2}
 ${TRANSFORM_DOCBOOK} ${PUBLIC} ${CHAPTERS} build/${LINGUA}/source/rwo-pre.xml > build/${LINGUA}/source/rwo.xml
 ${TRANSFORM_DOCBOOK} ${PUBLIC} ${CHAPTERS} build/${LINGUA}/source/rwo-pre-oreilly.xml > build/${LINGUA}/source/rwo-oreilly.xml
 xsltproc --output build/${LINGUA}/html/ stylesheets/${LINGUA}/web.xsl build/${LINGUA}/source/rwo.xml

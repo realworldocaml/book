@@ -1,0 +1,4 @@
+# let is_online = json |> member "is_online" |> to_bool_option ;; 
+val is_online : bool option = Some true
+# let is_translated = json |> member "is_translated" |> to_bool_option ;; 
+val is_translated : bool option = None

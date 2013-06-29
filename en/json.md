@@ -34,18 +34,8 @@ key/value pairs, and an ordered list of values.  Values can be strings,
 booleans, floats, integers or null.  Let's see what a JSON record for
 an example book description looks like:
 
-```json
-{
-  "title": "Real World OCaml",
-  "tags" : [ "functional programming", "ocaml", "algorithms" ],
-  "pages": 450,
-  "authors": [
-    { "name": "Jason Hickey", "affiliation": "Google" },
-    { "name": "Anil Madhavapeddy", "affiliation": "Cambridge"},
-    { "name": "Yaron Minsky", "affiliation": "Jane Street"}
-  ],
-  "is_online": true
-}
+```frag
+((typ json)(name json/book.json))
 ```
 
 The outermost JSON value is usually a record (delimited by the curly
@@ -83,9 +73,8 @@ $ opam install yojson
 See [xref](#installation) for installation instructions if you haven't already
 got OPAM. Once installed, you can open it in the `utop` toplevel by:
 
-```
-#require "yojson" ;;
-open Yojson ;;
+```frag
+((typ ocamltop)(name json/install.topscript)(header false))
 ```
 
 </note>
@@ -96,15 +85,8 @@ The JSON specification has very few data types, and the
 `Yojson.Basic.json` type shown below is sufficient to express any
 valid JSON structure.
 
-```ocaml
-type json = [
-  | `Assoc of (string * json) list
-  | `Bool of bool
-  | `Float of float
-  | `Int of int
-  | `List of json list
-  | `Null
-  | `String of string ]
+```frag
+((typ ocaml)(name json/yojson_basic.mli)(part 0))
 ```
 
 Some interesting properties should leap out at you after reading this
@@ -127,18 +109,8 @@ Let's parse the earlier JSON example into this type now.  The first
 stop is the `Yojson.Basic` documentation, where we find these helpful
 functions:
 
-```ocaml
-val from_string : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> string -> json
-(* Read a JSON value from a string.
-   [buf]   : use this buffer at will during parsing instead of
-             creating a new one. 
-   [fname] : data file name to be used in error messages. It does not 
-             have to be a real file. 
-   [lnum]  : number of the first line of input. Default is 1. *)
-
-val from_file : ?buf:Bi_outbuf.t -> ?fname:string -> ?lnum:int -> string -> json
-(* Read a JSON value from a file. See [from_string] for the meaning of the optional
-   arguments. *)
+```frag
+((typ ocaml)(name json/yojson_basic.mli)(part 1))
 ```
 
 When first reading these interfaces, you can generally ignore the
@@ -152,9 +124,8 @@ The type signature for these functions with the optional elements removed makes
 their purpose much clearer.  The two ways of parsing the JSON are either
 directly from a string or from a file on a filesystem.
 
-```ocaml
-val from_string : string -> json
-val from_file : string -> json
+```frag
+((typ ocaml)(name json/yojson_basic_simple.mli))
 ```
 
 <note>
@@ -174,39 +145,18 @@ ignore them and use strings or files instead.
 
 </note>
 
-
 The next example shows both the string and file functions in action, assuming
 the JSON record is stored in a file called `book.json`.
 
-```ocaml
-(* read_json.ml *)
-open Core.Std
-
-let () =
-  (* Read JSON file into an OCaml string *)
-  let buf = In_channel.read_all "book.json" in
-
-  (* Use the string JSON constructor *)
-  let json1 = Yojson.Basic.from_string buf in
-
-  (* Use the file JSON constructor *)
-  let json2 = Yojson.Basic.from_file "book.json" in
-
-  (* Test that the two values are the same *)
-  print_endline (if json1 = json2 then "OK" else "FAIL")
+```frag
+((typ ocaml)(name json/read_json.ml))
 ```
 
 You can build this by writing a `_tags` file to define the package
 dependencies, and then running `ocamlbuild`.
 
-```console
-$ cat _tags
-true: package(core,yojson)
-true: thread, debug, annot
-
-$ ocamlbuild -use-ocamlfind read_json.native
-$ ./read_json.native
-OK
+```frag
+((typ console)(name json/run_read_json.out))
 ```
 
 The `from_file` function accepts an input filename and takes care of
@@ -223,48 +173,15 @@ Now that we've figured out how to parse the example JSON into an OCaml
 value, let's manipulate it from OCaml code and extract specific
 fields.
 
-```ocaml
-(* parse_book.ml *)
-open Core.Std
-
-let () =
-  (* Read the JSON file *)
-  let json = Yojson.Basic.from_file "book.json" in
-
-  (* Locally open the JSON manipulation functions *)
-  let open Yojson.Basic.Util in
-  let title = json |> member "title" |> to_string in
-  let tags = json |> member "tags" |> to_list |> filter_string in
-  let pages = json |> member "pages" |> to_int in
-  let is_online = json |> member "is_online" |> to_bool_option in
-  let is_translated = json |> member "is_translated" |> to_bool_option in
-  let authors = json |> member "authors" |> to_list in
-  let names = List.map authors ~f:(fun json -> member "name" json |> to_string) in
-
-  (* Print the results of the parsing *)
-  printf "Title: %s (%d)\n" title pages;
-  printf "Authors: %s\n" (String.concat ~sep:", " names);
-  printf "Tags: %s\n" (String.concat ~sep:", " tags);
-  let string_of_bool_option =
-    function
-    | None -> "<none>"
-    | Some true -> "yes"
-    | Some false -> "no" in
-  printf "Online: %s\n" (string_of_bool_option is_online);
-  printf "Translated: %s\n" (string_of_bool_option is_translated)
+```frag
+((typ ocaml)(name json/parse_book.ml))
 ```
 
 Build this with the same `_tags` file as the earlier example, and run
 `ocamlbuild` on the new file.
 
-```console
-$ ocamlbuild -use-ocamlfind parse_book.native
-$ ./parse_book.native 
-Title: Real World OCaml (450)
-Authors: Jason Hickey, Anil Madhavapeddy, Yaron Minsky
-Tags: functional programming, ocaml, algorithms
-Online: yes
-Translated: <none>
+```frag
+((typ console)(name json/run_parse_book.out))
 ```
 
 This code introduces the `Yojson.Basic.Util` module, which contains _combinator_
@@ -320,9 +237,8 @@ having to create separate `let` bindings for each one.
 
 Let's start with selecting a single `title` field from the record.
 
-```ocaml
-  let open Yojson.Basic.Util in
-  let title = json |> member "title" |> to_string in
+```frag
+((typ ocamltop)(name json/parse_book.topscript)(part 1))
 ```
 
 The `member` function accepts a JSON object and named key and returns
@@ -333,9 +249,8 @@ this conversion, and raises an exception if there is an unexpected JSON
 type.  The `|>` operator provides a convenient way to chain these
 operations together.
 
-```ocaml
-  let tags = json |> member "tags" |> to_list |> filter_string in
-  let pages = json |> member "pages" |> to_int in
+```frag
+((typ ocamltop)(name json/parse_book.topscript)(part 2))
 ```
 
 The `tags` field is similar to `title`, but the field is a list of strings
@@ -346,9 +261,8 @@ Remember that OCaml lists must contain values of the same type, so any JSON
 values that cannot be converted to a `string` will be skipped from the output
 of `filter_string`.
 
-```ocaml
-  let is_online = json |> member "is_online" |> to_bool_option in
-  let is_translated = json |> member "is_translated" |> to_bool_option in
+```frag
+((typ ocamltop)(name json/parse_book.topscript)(part 3))
 ```
 
 The `is_online` and `is_translated` fields are optional in our JSON
@@ -357,9 +271,8 @@ OCaml type is a `string option` to reflect this, and can be extracted
 via `to_bool_option`.  In our example JSON, only `is_online` is
 present and `is_translated` will be `None`.
 
-```ocaml
-  let authors = json |> member "authors" |> to_list in
-  let names = List.map authors ~f:(fun json -> member "name" json |> to_string) in
+```frag
+((typ ocamltop)(name json/parse_book.topscript)(part 4))
 ```
 
 The final use of JSON combinators is to extract all the `name` fields from
@@ -368,12 +281,8 @@ the list of authors.  We first construct the `author list`, and then
 binds `authors` to a variable name.  It can also be written more
 succinctly using the pipe-forward operator:
 
-```ocaml
-let names =
-  json
-  |> member "authors"
-  |> to_list
-  |> List.map ~f:(fun json -> member "name" json |> to_string)
+```frag
+((typ ocamltop)(name json/parse_book.topscript)(part 5))
 ```
 
 This style of programming which omits variable names and chains
@@ -393,28 +302,19 @@ caught statically via a type error.
 
 Building and printing JSON values is pretty straightforward given the
 `Yojson.Basic.json` type.  You can just construct values of type `json` and
-call the `to_string` function] on them.  Let's remind ourselves of the
-`Yojson.Basic.type` again:
+call the `to_string` function on them.  Let's remind ourselves of the
+`Yojson.Basic.type` again.
 
-```ocaml
-type json = [
-  | `Assoc of (string * json) list
-  | `Bool of bool
-  | `Float of float
-  | `Int of int
-  | `List of json list
-  | `Null
-  | `String of string ]
+```frag
+((typ ocaml)(name json/yojson_basic.mli)(header false)(part 0))
 ```
 
-We can directly build a JSON value against this type, and use the
-pretty-printing functions in the `Yojson.Basic` module to lay the
-output out in the JSON format.
+We can directly build a JSON value against this type and use the
+pretty-printing functions in the `Yojson.Basic` module to display
+JSON output.
 
-```ocaml
-# let person = `Assoc [ ("name", `String "Anil") ] ;;
-val x : [> `Assoc of (string * [> `String of string ]) list ] =
-  `Assoc [("name", `String "Anil")]
+```frag
+((typ ocamltop)(name json/build_json.topscript)(part 1))
 ```
 
 In the example above, we've constructed a simple JSON object that represents
@@ -427,9 +327,8 @@ the record, and so the inferred type only contains these fields without
 knowledge of the other possible allowed variants in JSON records that you
 haven't used yet (e.g. `Int` or `Null`).
 
-```ocaml
-# Yojson.Basic.pretty_to_string ;;
-- : ?std:bool -> Yojson.Basic.json -> string = <fun>  
+```frag
+((typ ocamltop)(name json/build_json.topscript)(part 2))
 ```
 
 The `pretty_to_string` function has a more explicit signature that requires an
@@ -437,13 +336,8 @@ argument of type `Yojson.Basic.json`.  When `person` is applied to
 `pretty_to_string`, the inferred type of `person` is statically checked against
 the structure of the `json` type to ensure that they're compatible.
 
-```ocaml
-# Yojson.Basic.pretty_to_string person ;;
-- : string = "{ \"name\": \"Anil\" }"
-
-# Yojson.Basic.pretty_to_channel stdout person ;;
-{ "name": "Anil" }
-- : unit = ()
+```frag
+((typ ocamltop)(name json/build_json.topscript)(part 3))
 ```
 
 In this case, there are no problems.  Our `person` value has an inferred type
@@ -461,16 +355,8 @@ polymorphic variants can be quite verbose if you make a mistake in
 your code.  For example, suppose you build an `Assoc` and mistakenly
 include a single value instead of a list of keys:
 
-```ocaml
-# let person = `Assoc ("name", `String "Anil");;
-val person : [> `Assoc of string * [> `String of string ] ] =
-  `Assoc ("name", `String "Anil")
-
-# Yojson.Basic.pretty_to_string person ;;
-Error: This expression has type
-         [> `Assoc of string * [> `String of string ] ]
-       but an expression was expected of type Yojson.Basic.json
-       Types for tag `Assoc are incompatible
+```frag
+((typ ocamltop)(name json/build_json.topscript)(part 4))
 ```
 
 The type error above is more verbose than it needs to be, which can be
@@ -478,11 +364,8 @@ inconvenient to wade through for larger values.  You can help the compiler to
 narrow down this error to a shorter form by adding explicit type annotations as
 a hint about your intentions.
 
-```ocaml
-# let (person:Yojson.Basic.json) = `Assoc ("name", `String "Anil");;
-Error: This expression has type 'a * 'b
-       but an expression was expected of type
-         (string * Yojson.Basic.json) list
+```frag
+((typ ocamltop)(name json/build_json.topscript)(part 5))
 ```
 
 We've annotated `person` as being of type `Yojson.Basic.json`, and as a result
@@ -506,20 +389,8 @@ want a convenient human-readable local format.  The `Yojson.Safe.json`
 type is a superset of the `Basic` polymorphic variant, and looks like
 this:
 
-```ocaml
-type json = [
-  | `Assoc of (string * json) list
-  | `Bool of bool
-  | `Float of float
-  | `Floatlit of string
-  | `Int of int
-  | `Intlit of string
-  | `List of json list
-  | `Null
-  | `String of string
-  | `Stringlit of string
-  | `Tuple of json list
-  | `Variant of string * json option ]
+```frag
+((typ ocaml)(name json/yojson_safe.mli)(header false))
 ```
 
 The `Safe.json` type includes all of the variants from `Basic.json` and extends
@@ -546,18 +417,8 @@ easily exchanged with other languages.
 You can convert a `Safe.json` to a `Basic.json` type by using the `to_basic`
 function as follows.
 
-```ocaml
-val to_basic : json -> Yojson.Basic.json
-(** Tuples are converted to JSON arrays, Variants are converted to
-    JSON strings or arrays of a string (constructor) and a json value
-    (argument). Long integers are converted to JSON strings.
-    Examples:
-
-    `Tuple [ `Int 1; `Float 2.3 ]   ->    `List [ `Int 1; `Float 2.3 ]
-    `Variant ("A", None)            ->    `String "A"
-    `Variant ("B", Some x)          ->    `List [ `String "B", x ]
-    `Intlit "12345678901234567890"  ->    `String "12345678901234567890"
- *)
+```frag
+((typ ocaml)(name json/yojson_safe.mli)(header false)(part 1))
 ```
 
 ## Automatically mapping JSON to OCaml types
@@ -581,7 +442,7 @@ ATDgen installs some OCaml libraries that interface with Yojson,
 and also a command-line tool that generates code.  It can all be
 installed via OPAM:
 
-```
+```console
 $ opam install atdgen
 $ atdgen -version
 1.2.3
@@ -607,36 +468,8 @@ website that provides a JSON-based web [API](http://developer.github.com).  The
 ATD code fragment below describes the GitHub authorization API (which is based
 on a pseudo-standard web protocol known as OAuth).
 
-```
-(* github.atd *)
-type scope = [
-    User <json name="user">
-  | Public_repo <json name="public_repo">
-  | Repo <json name="repo">
-  | Repo_status <json name="repo_status">
-  | Delete_repo <json name="delete_repo">
-  | Gist <json name="gist">
-]
-
-type app = {
-  name: string;
-  url: string;
-}  <ocaml field_prefix="app_">
-
-type authorization_request = {
-  scopes: scope list;
-  note: string;
-} <ocaml field_prefix="auth_req_">
-
-type authorization_response = {
-  scopes: scope list;
-  token: string;
-  app: app;
-  url: string;
-  id: int;
-  ?note: string option;
-  ?note_url: string option;
-}
+```frag
+((typ atd)(name json/github.atd))
 ```
 
 The ATD specification syntax is deliberately quite similar to OCaml type
@@ -668,41 +501,12 @@ The ATD specification we defined above can be compiled to OCaml code using the
 OCaml type definitions and also a JSON serializing module that converts between
 input data and those type definitions.
 
-```bash
-$ atdgen -t github.atd
-$ atdgen -j github.atd
-```
-
-This will generate some new files in your current
+The `atdgen` command will generate some new files in your current
 directory. `Github_t.ml` and `Github_t.mli` will contain an OCaml
-module with types defines that correspond to the ATD file.  The
-signature is as follows.
+module with types defines that correspond to the ATD file.
 
-```ocaml
-type scope = [
-  | `User | `Public_repo | `Repo | `Repo_status
-  | `Delete_repo | `Gist
-]
-
-type app = {
-  app_name (*atd name *): string;
-  app_url (*atd url *): string
-}
-
-type authorization_request = {
-  auth_req_scopes (*atd scopes *): scope list;
-  auth_req_note (*atd note *): string
-}
-
-type authorization_response = {
-  scopes: scope list;
-  token: string;
-  app: app;
-  url: string;
-  id: int;
-  note: string option;
-  note_url: string option
-}
+```frag
+((typ console)(name json/build_github_atd.sh))
 ```
 
 There is an obvious correspondence to the ATD definition.  Note
@@ -718,17 +522,8 @@ can read the `github_j.mli` to see the full interface, but the
 important functions for most uses are the conversion functions to and
 from a string.  For our example above, this looks like:
 
-```ocaml
-val string_of_authorization_response :
-  ?len:int -> authorization_response -> string
-  (** Serialize a value of type {!authorization_response}
-      into a JSON string.
-      @param len specifies the initial length
-                 of the buffer used internally.
-                 Default: 1024. *)
-
-val authorization_response_of_string :
-  string -> authorization_response
+```frag
+((typ ocaml)(name json/github_j_excerpt.mli))
 ```
 
 This is pretty convenient! We've now written a single ATD file, and all the

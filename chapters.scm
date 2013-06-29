@@ -72,7 +72,7 @@
  )
 ;; PART 2: PRACTICAL EXAMPLES
 ((part Practical)
- (name "maps-and-hashtables")
+ (name "maps-and-hash-tables")
  (file "maps-and-hashtables")
  (note "complete")
  (title "Maps and Hashtables")
@@ -104,12 +104,6 @@
  (file "concurrent-programming-with-async")
  (note "complete")
  (title "Concurrent Programming with Async")
- )
-((part Practical)
- (name "fast-binary-serialization")
- (file "binio")
- (note "50% done (Yaron)")
- (title "Fast Binary Serialization")
  )
 ;; PART 3: ADVANCED TOPICS
 ((part Advanced)

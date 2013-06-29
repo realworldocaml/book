@@ -1,0 +1,7 @@
+$ ocamlbuild -use-ocamlfind -pkg core,yojson -tag thread read_json.native
+ocamlfind ocamldep -package core,yojson -modules read_json.ml > read_json.ml.depends
+ocamlfind ocamlc -c -thread -package core,yojson -o read_json.cmo read_json.ml
+ocamlfind ocamlopt -c -thread -package core,yojson -o read_json.cmx read_json.ml
+ocamlfind ocamlopt -linkpkg -thread -package core,yojson read_json.cmx -o read_json.native
+$ ./read_json.native
+OK
