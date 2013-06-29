@@ -602,6 +602,7 @@ for double-negation.
     | (Base _ | And _ | Or _ ) as e -> Not e
   ;;
 val not_ : 'a expr -> 'a expr = <fun>
+```
 
 The example of a boolean expression language is more than a toy.
 There's a module very much in this spirit in Core called `Blang`
