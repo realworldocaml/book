@@ -127,8 +127,8 @@ let parse_file file =
             print_part !part (sprintf "# %s \n%s" phrase s);
             []
           | `Error s ->
-            eprintf "error %s\n%!" s;
-            exit (-1)
+            print_part !part (sprintf "# %s \n%s" phrase s);
+            []
         end else
           line::acc
       end
