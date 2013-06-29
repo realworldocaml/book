@@ -149,9 +149,9 @@ but no mutable variables.
 <note> <title> Why don't variables vary?  </title>
 
 One source of confusion for people new to functional languages is the
-fact that variables are typically immutable.  This seems pretty
-surprising even on linguistic terms.  Isn't the whole point of a
-variable that it can vary?
+fact that variables are immutable.  This seems pretty surprising even
+on linguistic terms.  Isn't the whole point of a variable that it can
+vary?
 
 The answer to this is that variables in a functional language are
 really more like variables in an equation.  If you think about the
