@@ -143,7 +143,7 @@ from a string:
 
 ```ocaml
 # Error.of_string "something went wrong";;
-- : Core.Std.Error.t = "something went wrong"
+- : Error.t = something went wrong
 ```
 
 But you can also construct an `Error.t` from a _thunk_, _i.e._, a
@@ -152,7 +152,7 @@ function that takes a single argument of type `unit`.
 ```ocaml
 # Error.of_thunk (fun () ->
     sprintf "something went wrong: %f" 32.3343);;
-  - : Core.Std.Error.t = "something went wrong: 32.334300"
+- : Error.t = something went wrong: 32.334300
 ```
 
 In this case, we can benefit from the laziness of `Error`, since the
@@ -175,8 +175,8 @@ times, `Time.sexp_of_t`.
 
 ```ocaml
 # Error.create "Something failed a long time ago" Time.epoch Time.sexp_of_t;;
-- : Core.Std.Error.t =
-"Something failed a long time ago: (1969-12-31 19:00:00.000000)"
+- : Error.t =
+Something failed a long time ago: (1970-01-01 01:00:00.000000+01:00)
 ```
 
 Note that the time isn't actually serialized into an s-expression
@@ -207,6 +207,15 @@ example, it's often useful to augment an error with some extra
 information about the context of the error or to combine multiple
 errors together.  `Error.tag` and `Error.of_list` fulfill these roles,
 as you can see below.
+
+```ocaml
+# Error.tag
+    (Error.of_list [ Error.of_string "Your tires were slashed";
+                     Error.of_string "Your windshield was smashed" ])
+    "over the weekend"
+  ;;
+over the weekend: Your tires were slashed; Your windshield was smashed
+```
 
 The type `'a Or_error.t` is just a shorthand for `('a,Error.t)
 Result.t`, and it is, after `option`, the most common way of returning
@@ -720,9 +729,9 @@ follows:
     Option.try_with (fun () -> find_exn alist key) ;;
 val find : (string * 'a) list -> string -> 'a option = <fun>
 # find ["a",1; "b",2] "c";;
-- : int Core.Std.Option.t = None
+- : int option = None
 # find ["a",1; "b",2] "b";;
-- : int Core.Std.Option.t = Some 2
+- : int option = Some 2
 ```
 
 And `Result` and `Or_error` have similar `try_with` functions.  So, we
