@@ -1,0 +1,3 @@
+# open Yojson.Basic.Util ;; 
+# let title = json |> member "title" |> to_string ;; 
+val title : string = "Real World OCaml"
