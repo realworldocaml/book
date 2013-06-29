@@ -852,4 +852,38 @@ And then we can re-raise that exception:
 Exception: Key_not_found("c").
 ```
 
+## Choosing your error handling method
+
+Given that OCaml supports both exceptions and error-aware return
+types, how do you choose between them?  The key is to think about the
+tradeoff between concision and explicitness.
+
+Exceptions are more concise because they allow you to defer the job of
+error handling to some larger scope, and because they don't clutter up
+your types.  But this same concision comes at a cost: exceptions are
+all too easy to ignore.  Error-aware return types, on the other hand,
+are fully manifest in your type definitions, making the errors that
+your code might generate explicit and impossible to ignore.
+
+The right tradeoff depends on your application.  If you're writing a
+rough and ready program where getting to done quickly is key, and
+failure is not that expensive, then using exceptions extensively may
+be the way to go.  If, on the other hand, you're writing production
+software whose failure is costly, then you should probably lean in the
+direction of using error-aware return types.
+
+To be clear, it doesn't make sense to avoid exceptions entirely.  The
+old maxim of "use exceptions for exceptional conditions" applies.  If
+an error occurs sufficiently rarely, then throwing an exception may
+well be the right behavior.  
+
+Also, for errors that are omnipresent, error-aware return types may
+also be overkill.  A good example is out-of-memory errors, which can
+occur anywhere, and so you'd need to use error-aware return types
+everywhere to capture those.  And having every operation marked as one
+that might fail is no more explicit than having none of them marked.
+
+In short, for errors that are a forseeable and ordinary part of the
+execution of your production code and that are not omnipresent, error
+aware return types are typically the right solution.
 
