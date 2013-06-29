@@ -34,7 +34,8 @@ We'll start with the implementation of a simple imperative dictionary,
 _i.e._, a mutable mapping from keys to values.  This is really for
 illustration purposes; both Core and the standard library provide
 imperative dictionaries, and for most real world tasks, you should use
-one of those implementations.
+one of those implementations.  There's more advice on using Core's
+implementation in particular in [xref](#maps-and-hashtables).
 
 Our dictionary, like those in Core and the standard library, will be
 implemented as a hash table.  In particular, we'll use an _open
@@ -284,8 +285,12 @@ and for setting an element in an array:
 array.(index) <- expr
 ```
 
+Out-of-bounds accesses for arrays (and indeed for all the array-like
+data structures) will lead to an exception being thrown.
+
 Array literals are written using `[|` and `|]` as delimiters.  Thus,
 `[| 1; 2; 3 |]` is a literal integer array.
+
 
 #### Strings
 
@@ -390,7 +395,7 @@ the `for` loop in action --- the `iter` function in `Dictionary` is
 built using it.  Here's a simple example of `for`.
 
 ```ocaml
-# for i = 0 to 3 do Printf.printf "i = %d\n" i done;;
+# for i = 0 to 3 do printf "i = %d\n" i done;;
 i = 0
 i = 1
 i = 2
@@ -402,7 +407,7 @@ As you can see, the upper and lower bounds are inclusive.  We can also
 use `downto` to iterate in the other direction.
 
 ```ocaml
-# for i = 3 downto 0 do Printf.printf "i = %d\n" i done;;
+# for i = 3 downto 0 do printf "i = %d\n" i done;;
 i = 3
 i = 2
 i = 1
@@ -963,7 +968,7 @@ val fib : int -> int = <fun>
 ```
 
 We can even write a polymorphic function that we'll call `make_rec`
-that can tie the recursive not for any function of this form.
+that can tie the recursive knot for any function of this form.
 
 ```ocaml
 # let make_rec f_norec =
@@ -1397,7 +1402,7 @@ the sum of those numbers.
     List.iter numbers ~f:(fun x -> fprintf outc "%d\n" x);
     Out_channel.close outc
   ;;
- val create_number_file : string -> int Core.Std.List.t -> unit = <fun>
+val create_number_file : string -> int list -> unit = <fun>
 # let sum_file filename =
      let file = In_channel.create filename in
      let numbers = List.map ~f:Int.of_string (In_channel.input_lines file) in
@@ -1526,9 +1531,9 @@ The following snippet of code would answer that question.
 - : bool = true
 ```
 
-In some sense, we don't really need to compute the `sin 128`, because
+In some sense, we don't really need to compute the `sin 128.`, because
 `sin 75.` is negative, so we could know the answer before even
-computing `sin 128`.
+computing `sin 128.`.
 
 It doesn't have to be this way.  Using the `lazy` keyword, we can
 write the original computation so that `sin 128.` won't ever be
@@ -1635,7 +1640,7 @@ As you can see, the polymorphic type of `identity` lets it operate on
 values with different types.
 
 This is not what happens with `remember`, though.  Here's the type
-that OCaml infers for remember, which looks almost, but not quite,
+that OCaml infers for `remember`, which looks almost, but not quite,
 like the type of the identity function.
 
 ```ocaml

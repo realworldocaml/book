@@ -419,7 +419,7 @@ Thus, the type system will let us throw an exception anywhere in a
 program.
 
 <note>
-<title>Declaring exceptions with `with sexp`</title>
+<title>Declaring exceptions using `with sexp`</title>
 
 OCaml can't always generate a useful textual representation of an
 exception.  For example:
