@@ -64,7 +64,10 @@ let output_t_as_markdown s =
       extract_ocaml_part t.name t.part buf
     | "ocamltop" ->
       printf "```ocaml\n";
-      if t.header then printf "# script %s\n$ utop\n" t.name;
+      if t.header then 
+        (match t.part with
+         | 0 -> printf "# script %s\n$ utop\n" t.name
+         | part -> printf "...part %d of %s\n" part t.name);
       In_channel.read_all (sprintf "code/%s.%d.out" (Filename.chop_extension t.name) t.part)
     | "console" -> 
       printf "```console\n";
