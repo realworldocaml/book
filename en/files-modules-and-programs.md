@@ -342,7 +342,7 @@ definition is not.  Here's an abstract interface for `Counter`:
 (* counter.mli: abstract interface *)
 open Core.Std
 
-(** A collection of string frequency counts frequency counts *)
+(** A collection of string frequency counts *)
 type t
 
 (** The empty set of frequency counts  *)
@@ -363,10 +363,11 @@ out of one.
 
 We also used this opportunity to document the module.  The `mli` file
 is the place where you specify your module's interface, and as such is
-is a natural place to document the module as well.  We also started
-our comments with a double asterisk to cause them to be picked up by
-the `ocamldoc` tool when generating API documentation.  We'll discuss
-`ocamldoc` more in [xref](#the-compiler-frontend-parsing-and-type-checking).
+a natural place to document the module as well.  We also started our
+comments with a double asterisk to cause them to be picked up by the
+`ocamldoc` tool when generating API documentation.  We'll discuss
+`ocamldoc` more in
+[xref](#the-compiler-frontend-parsing-and-type-checking).
 
 Here's a rewrite of `counter.ml` to match the new `counter.mli`.
 
@@ -393,9 +394,10 @@ let touch t s =
 If we now try to compile `freq.ml`, we'll get the following error:
 
 ```
-File "freq.ml", line 11, characters 20-22:
-Error: This expression has type 'a list
-       but an expression was expected of type Counter.t
+File "freq.ml", line 4, characters 42-55:
+Error: This expression has type Counter.t -> string -> Counter.t
+       but an expression was expected of type 'a list -> string -> 'a list
+       Type Counter.t is not compatible with type 'a list 
 ```
 
 This is because `freq.ml` depends on the fact that frequency counts
@@ -489,8 +491,8 @@ returns the first element of any 2-tuple.
 Now, to expose this usefully in the interface, we need to expose both
 the function and the type `median` with its definition.  Note that
 values (of which functions are an example) and types have distinct
-namespaces, so there's no name clash here.  The following two lines
-added to `freq.mli` does the trick.
+namespaces, so there's no name clash here.  Adding the following two
+lines added to `counter.mli` does the trick.
 
 ```ocaml
 type median = | Median of string
@@ -555,6 +557,7 @@ possible to create multiple distinct types with the same underlying
 implementation in a lightweight way.
 
 ```ocaml
+(* file: buggy.ml *)
 open Core.Std
 
 module type ID = sig

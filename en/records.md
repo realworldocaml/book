@@ -89,8 +89,8 @@ record field using dot-notation.
 
 When declaring an OCaml type, you always have the option of
 parameterizing it by a polymorphic type.  Records are no different in
-this regard.  So, for example, here's a type one might to timestamp
-arbitrary items.
+this regard.  So, for example, here's a type one might use to
+timestamp arbitrary items.
 
 ```ocaml
 # type 'a timestamped = { item: 'a; time: Time.t };;
@@ -324,7 +324,7 @@ different type (say, a `heartbeat`) using a type annotation.
 
 ```ocaml
 # let get_heatbeat_session_id (t:heartbeat) = t.session_id;;
-val get_heatbeat_session_id : heartbeat -> string = <funambulate>
+val get_heatbeat_session_id : heartbeat -> string = <fun>
 ```
 
 While it's possible to resolve ambiguous field names using type
@@ -383,7 +383,7 @@ it is standard practice to name the type associated with the module
   end;;
 ```
 
-Now, our heartbeat-creation function can be rendered as follows.
+Now, our log-entry-creation function can be rendered as follows.
 
 ```ocaml
 # let create_log_entry ~session_id ~important message =
@@ -650,9 +650,8 @@ naively expect from the above, as you can see below.
 
 The type is `Field.t_with_perm` rather than a simple `Field.t` because
 fields have a notion of access control associated with them because
-there are some special cases where we may expose a field but not
-expose the ability to read a field but not the ability to do a
-functional update.
+there are some special cases where we may expose the ability to read a
+field but not the ability to do a functional update.
 
 We can use first class fields to do things like write a generic
 function for displaying a record field.
