@@ -303,27 +303,18 @@ caught statically via a type error.
 Building and printing JSON values is pretty straightforward given the
 `Yojson.Basic.json` type.  You can just construct values of type `json` and
 call the `to_string` function] on them.  Let's remind ourselves of the
-`Yojson.Basic.type` again:
+`Yojson.Basic.type` again.
 
-```ocaml
-type json = [
-  | `Assoc of (string * json) list
-  | `Bool of bool
-  | `Float of float
-  | `Int of int
-  | `List of json list
-  | `Null
-  | `String of string ]
+```frag
+((typ ocaml)(name json/yojson_basic.mli)(header false)(part 0))
 ```
 
-We can directly build a JSON value against this type, and use the
-pretty-printing functions in the `Yojson.Basic` module to lay the
-output out in the JSON format.
+We can directly build a JSON value against this type and use the
+pretty-printing functions in the `Yojson.Basic` module to display
+JSON output.
 
-```ocaml
-# let person = `Assoc [ ("name", `String "Anil") ] ;;
-val x : [> `Assoc of (string * [> `String of string ]) list ] =
-  `Assoc [("name", `String "Anil")]
+```frag
+((typ ocamltop)(name json/build_json.topscript)(part 1))
 ```
 
 In the example above, we've constructed a simple JSON object that represents
@@ -336,9 +327,8 @@ the record, and so the inferred type only contains these fields without
 knowledge of the other possible allowed variants in JSON records that you
 haven't used yet (e.g. `Int` or `Null`).
 
-```ocaml
-# Yojson.Basic.pretty_to_string ;;
-- : ?std:bool -> Yojson.Basic.json -> string = <fun>  
+```frag
+((typ ocamltop)(name json/build_json.topscript)(part 2))
 ```
 
 The `pretty_to_string` function has a more explicit signature that requires an
@@ -346,13 +336,8 @@ argument of type `Yojson.Basic.json`.  When `person` is applied to
 `pretty_to_string`, the inferred type of `person` is statically checked against
 the structure of the `json` type to ensure that they're compatible.
 
-```ocaml
-# Yojson.Basic.pretty_to_string person ;;
-- : string = "{ \"name\": \"Anil\" }"
-
-# Yojson.Basic.pretty_to_channel stdout person ;;
-{ "name": "Anil" }
-- : unit = ()
+```frag
+((typ ocamltop)(name json/build_json.topscript)(part 3))
 ```
 
 In this case, there are no problems.  Our `person` value has an inferred type
@@ -370,16 +355,8 @@ polymorphic variants can be quite verbose if you make a mistake in
 your code.  For example, suppose you build an `Assoc` and mistakenly
 include a single value instead of a list of keys:
 
-```ocaml
-# let person = `Assoc ("name", `String "Anil");;
-val person : [> `Assoc of string * [> `String of string ] ] =
-  `Assoc ("name", `String "Anil")
-
-# Yojson.Basic.pretty_to_string person ;;
-Error: This expression has type
-         [> `Assoc of string * [> `String of string ] ]
-       but an expression was expected of type Yojson.Basic.json
-       Types for tag `Assoc are incompatible
+```frag
+((typ ocamltop)(name json/build_json.topscript)(part 4))
 ```
 
 The type error above is more verbose than it needs to be, which can be
@@ -415,20 +392,8 @@ want a convenient human-readable local format.  The `Yojson.Safe.json`
 type is a superset of the `Basic` polymorphic variant, and looks like
 this:
 
-```ocaml
-type json = [
-  | `Assoc of (string * json) list
-  | `Bool of bool
-  | `Float of float
-  | `Floatlit of string
-  | `Int of int
-  | `Intlit of string
-  | `List of json list
-  | `Null
-  | `String of string
-  | `Stringlit of string
-  | `Tuple of json list
-  | `Variant of string * json option ]
+```frag
+((typ ocaml)(name json/yojson_safe.mli)(header false))
 ```
 
 The `Safe.json` type includes all of the variants from `Basic.json` and extends
@@ -455,18 +420,8 @@ easily exchanged with other languages.
 You can convert a `Safe.json` to a `Basic.json` type by using the `to_basic`
 function as follows.
 
-```ocaml
-val to_basic : json -> Yojson.Basic.json
-(** Tuples are converted to JSON arrays, Variants are converted to
-    JSON strings or arrays of a string (constructor) and a json value
-    (argument). Long integers are converted to JSON strings.
-    Examples:
-
-    `Tuple [ `Int 1; `Float 2.3 ]   ->    `List [ `Int 1; `Float 2.3 ]
-    `Variant ("A", None)            ->    `String "A"
-    `Variant ("B", Some x)          ->    `List [ `String "B", x ]
-    `Intlit "12345678901234567890"  ->    `String "12345678901234567890"
- *)
+```frag
+((typ ocaml)(name json/yojson_safe.mli)(header false)(part 1))
 ```
 
 ## Automatically mapping JSON to OCaml types
