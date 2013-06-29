@@ -796,15 +796,15 @@ exception.  If we turn backtraces off, then the results look like
 this.
 
 ```
-$ ./exn_cost.native cycles speedup
+$ ./exn_cost.native cycles
 Estimated testing time 30s (change using -quota SECS).
-┌──────────────────────────────┬────────┬───────────┬──────────┬─────────┐
-│ Name                         │ Cycles │ Time (ns) │ % of max │ Speedup │
-├──────────────────────────────┼────────┼───────────┼──────────┼─────────┤
-│ simple computation           │ 198.84 │    116.97 │    83.86 │    1.19 │
-│ simple computation w/handler │ 217.17 │    127.75 │    91.60 │    1.09 │
-│ end with exn                 │ 237.10 │    139.47 │   100.00 │    1.00 │
-└──────────────────────────────┴────────┴───────────┴──────────┴─────────┘
+┌──────────────────────────────┬────────┬───────────┬──────────┐
+│ Name                         │ Cycles │ Time (ns) │ % of max │
+├──────────────────────────────┼────────┼───────────┼──────────┤
+│ simple computation           │ 198.84 │    116.97 │    83.86 │
+│ simple computation w/handler │ 217.17 │    127.75 │    91.60 │
+│ end with exn                 │ 237.10 │    139.47 │   100.00 │
+└──────────────────────────────┴────────┴───────────┴──────────┘
 ```
 
 Here, the handler costs about the same, at 20 cycles, but the
@@ -813,7 +813,7 @@ All told, this should only matter if you're using exceptions routinely
 as part of your flow control, which is in most cases a stylistic
 mistake anyway.
 
-### From exceptions to error-aware types and back again ###
+### From exceptions to error-aware types and back again
 
 Both exceptions and error-aware types are necessary parts of
 programming in OCaml.  As such, you often need to move between these
@@ -852,7 +852,7 @@ And then we can re-raise that exception:
 Exception: Key_not_found("c").
 ```
 
-## Choosing your error handling method
+## Choosing an error handling strategy
 
 Given that OCaml supports both exceptions and error-aware return
 types, how do you choose between them?  The key is to think about the
