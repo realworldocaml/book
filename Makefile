@@ -4,7 +4,7 @@ all:
 milestone-%: all
 	./gen-book.sh -p -m $*
 
-trunk: all
+trunk:
 	./gen-book.sh -m trunk
 
 pdf: trunk
