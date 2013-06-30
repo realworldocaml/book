@@ -1,5 +1,0 @@
-# let names =
-  json |> member "authors" |> to_list 
-  |> List.map ~f:(fun json -> member "name" json |> to_string) ;; 
-val names : string list =
-  ["Jason Hickey"; "Anil Madhavapeddy"; "Yaron Minsky"]

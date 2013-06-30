@@ -1,4 +1,0 @@
-# let tags = json |> member "tags" |> to_list |> filter_string ;; 
-val tags : string list = ["functional programming"; "ocaml"; "algorithms"]
-# let pages = json |> member "pages" |> to_int ;; 
-val pages : int = 450

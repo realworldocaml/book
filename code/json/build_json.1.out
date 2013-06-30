@@ -1,3 +1,0 @@
-# let person = `Assoc [ ("name", `String "Anil") ] ;; 
-val person : [> `Assoc of (string * [> `String of string ]) list ] =
-  `Assoc [("name", `String "Anil")]

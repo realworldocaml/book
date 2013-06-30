@@ -1,6 +1,0 @@
-# let (person : Yojson.Basic.json) =
-  `Assoc ("name", `String "Anil");; 
-File "", line 2, characters 2-33:
-Error: This expression has type 'a * 'b
-       but an expression was expected of type
-         (string * Yojson.Basic.json) list
