@@ -506,7 +506,7 @@ directory. `Github_t.ml` and `Github_t.mli` will contain an OCaml
 module with types defines that correspond to the ATD file.
 
 ```frag
-((typ console)(name json/build_github_atd.sh))
+((typ console)(name json/build_github_atd.out))
 ```
 
 There is an obvious correspondence to the ATD definition.  Note
@@ -562,75 +562,23 @@ present in the response will be ignored by the ATD parser, so we don't need
 a completely exhaustive specification of every field that Github might send
 back.
 
-```
-(* github_org.atd *)
-type org = {
-  login: string;
-  id: int;
-  url: string;
-  ?name: string option;
-  ?blog: string option;
-  ?email: string option;
-  public_repos: int
-}
+```frag
+((typ atd)(name json/github_org.atd))
 ```
 
 Let's build the OCaml type declaration first by calling `atdgen -t` on the
 specification file.
 
-```console
-$ atdgen -t github_org.atd
-$ cat github_org_t.mli
-(* Auto-generated from "github_org.atd" *)
-type org = {
-  login: string;
-  id: int;
-  url: string;
-  name: string option;
-  blog: string option;
-  email: string option;
-  public_repos: int
-}
+```frag
+((typ console)(name json/generate_github_org_types.out))
 ```
 
 The OCaml type has an obvious mapping to the ATD spec, but we still need the logic
 to convert JSON buffers to and from this type.  Calling `atdgen -j` will generate
 this serialization code for us in a new file called `github_org_j.ml`.
 
-```console
-$ atdgen -j github_org.atd
-$ cat github_org_j.mli
-(* Auto-generated from "github_org.atd" *)
-
-type org = Github_org_t.org = {
-  login: string;
-  id: int;
-  url: string;
-  name: string option;
-  blog: string option;
-  email: string option;
-  public_repos: int
-}
-
-val write_org :
-  Bi_outbuf.t -> org -> unit
-  (** Output a JSON value of type {!org}. *)
-
-val string_of_org :
-  ?len:int -> org -> string
-  (** Serialize a value of type {!org}
-      into a JSON string.
-      @param len specifies the initial length
-                 of the buffer used internally.
-                 Default: 1024. *)
-
-val read_org :
-  Yojson.Safe.lexer_state -> Lexing.lexbuf -> org
-  (** Input JSON data of type {!org}. *)
-
-val org_of_string :
-  string -> org
-  (** Deserialize JSON data of type {!org}. *)
+```frag
+((typ console)(name json/generate_github_org_json.out))
 ```
 
 The `Github_org_j` serializer interface contains everything we need to map
@@ -649,25 +597,8 @@ output.  You'll need to ensure that you have cURL installed on your system
 before running the example.  You might also need to `opam install
 core_extended` if you haven't installed it previously.
 
-```ocaml
-(* github_org_info.ml *)
-open Core.Std
-
-let print_org file () =
-  let url = sprintf "https://api.github.com/orgs/%s" file in
-  Core_extended.Shell.run_full "curl" [url]
-  |> Github_org_j.org_of_string
-  |> fun org ->
-      let open Github_org_t in
-      let name = Option.value ~default:"???" org.name in
-      printf "%s (%d) with %d public repos\n"
-        name org.id org.public_repos
-
-let () =
-  Command.basic ~summary:"Print Github organization information"
-    Command.Spec.(empty +> anon ("organization" %: string))
-    print_org
-  |> Command.run
+```frag
+((typ ocaml)(name json/github_org_info.ml))
 ```
 
 Below is a short shell script that generates all of the OCaml code and also
