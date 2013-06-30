@@ -17,3 +17,9 @@ let mk_tag ?(attrs=[]) tag_name contents =
   let attrs : Xmlm.attribute list = List.map (fun (k,v) -> ("",k),v) attrs in
   let tag = ("", tag_name), attrs in
   Element (tag, contents)
+
+let to_string c =
+  match c with
+  | Data x -> x
+  | Element _ -> failwith "Xml_tree.filter_string: encounter tag in string"
+
