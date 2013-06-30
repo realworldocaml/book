@@ -71,19 +71,20 @@ rm -rf build/${LINGUA}
 mkdir -p build/${LINGUA}/source build/${LINGUA}/html
 echo Inserting code fragments in Markdown
 set -x
-mkdir -p build/${LINGUA}/md
+mkdir -p build/${LINGUA}/md-ora
 for i in ${SRCS}; do
-  ./scripts/_build/transform_markdown.native < ${LINGUA}/${i} > build/${LINGUA}/md/${i}
-  SRCS2="${SRCS2} build/${LINGUA}/md/${i}"
+  ./scripts/_build/transform_markdown.native < ${LINGUA}/${i} > build/${LINGUA}/md-ora/${i}
+  SRCS_WEB="${SRCS_WEB} en/${i}"
+  SRCS_ORA="${SRCS_ORA} build/${LINGUA}/md-ora/${i}"
 done
 
 ln -nfs ${DOCBOOK_XSL_PATH} stylesheets/system-xsl
 set -x
-pandoc -f markdown -t docbook --chapters --template rwo.docbook -o build/${LINGUA}/source/rwo-pre.xml ${SRCS2}
-pandoc -f markdown -t docbook --chapters --template rwo-oreilly.docbook -o build/${LINGUA}/source/rwo-pre-oreilly.xml ${SRCS2}
+pandoc -f markdown -t docbook --chapters --template rwo.docbook -o build/${LINGUA}/source/rwo-pre.xml ${SRCS_WEB}
+pandoc -f markdown -t docbook --chapters --template rwo-oreilly.docbook -o build/${LINGUA}/source/rwo-pre-oreilly.xml ${SRCS_ORA}
 ${TRANSFORM_DOCBOOK} ${PUBLIC} ${CHAPTERS} build/${LINGUA}/source/rwo-pre.xml > build/${LINGUA}/source/rwo.xml
 ${TRANSFORM_DOCBOOK} ${PUBLIC} ${CHAPTERS} build/${LINGUA}/source/rwo-pre-oreilly.xml > build/${LINGUA}/source/rwo-oreilly.xml
-xsltproc --output build/${LINGUA}/html/ stylesheets/${LINGUA}/web.xsl build/${LINGUA}/source/rwo.xml
+xsltproc --nonet --output build/${LINGUA}/html/ stylesheets/${LINGUA}/web.xsl build/${LINGUA}/source/rwo.xml
 
 echo The raw HTML is in build/${LINGUA}/html.
 echo "The Docbook is in build/${LINGUA}/source/rwo[-oreilly].xml"
@@ -102,7 +103,7 @@ python commenting/bin/generate_commenting_site.py --github-milestone ${MILESTONE
 # syntax highlight the commenting HTML
 mkdir -p commenting-build/${LINGUA}/${MILESTONE}
 for i in commenting-build/${LINGUA}/html/*.html; do
-  cat $i | ./scripts/_build/html_code_highlight.native > commenting-build/${LINGUA}/${MILESTONE}/`basename $i`
+  ./scripts/_build/html_code_highlight.native < $i > commenting-build/${LINGUA}/${MILESTONE}/`basename $i`
 done
 
 # now parse the HTML and generate a sexp dump of the paragraph fragments
