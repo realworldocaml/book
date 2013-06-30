@@ -93,15 +93,17 @@ let toploop_eval phrase =
 
 open Core.Std
 let parse_file file =
-  printf "C: init\n%!";
+  eprintf "C: init\n%!";
   reset_toplevel ();
   List.iter initial_phrases ~f:(fun phrase ->
       match toploop_eval (phrase ^ " ;;") with
       | `Normal _ -> ()
       | `Error s -> eprintf "Failed (%s): %s\n" s phrase; exit (-1)
     );
-  let ofile p = sprintf "%s.%d.out" (Filename.chop_extension file) p in
+  let ofile p = sprintf "%s.%d.md" file p in
+  let ofile_html p = sprintf "%s.%d.html" file p in
   let parts = Int.Table.create () in
+  let html_parts = Int.Table.create () in
   let part = ref 0 in
   let print_part key s =
     match Hashtbl.find parts key with
@@ -111,33 +113,49 @@ let parse_file file =
       Buffer.add_string buf s
     | Some buf -> Buffer.add_string buf s
   in
-  let _ = In_channel.with_file file ~f:(fun t ->
-    In_channel.fold_lines t ~init:[]
-      ~f:(fun acc line ->
-      if String.is_prefix line ~prefix:"#part" then begin
-        part := Scanf.sscanf line "#part %d" (fun p -> p);
-        printf "C: part %d -> %s\n%!" !part (ofile !part); 
-        []
-      end else begin
-        if String.is_suffix ~suffix:";;" line then begin
-          let phrase = String.concat ~sep:"\n" (List.rev (line :: acc)) in
-          printf "X: %s\n%!" phrase;
-          match toploop_eval phrase with
-          | `Normal(s, _, _) ->
-            print_part !part (sprintf "# %s \n%s" phrase s);
+  let print_html_part key s =
+    match Hashtbl.find html_parts key with
+    | None ->
+      let buf = Buffer.create 100 in
+      Hashtbl.replace html_parts ~key ~data:buf;
+      Buffer.add_string buf s
+    | Some buf -> Buffer.add_string buf s
+  in
+
+  let _ =
+    In_channel.with_file file ~f:(
+      In_channel.fold_lines ~init:[] ~f:(
+        fun acc line ->
+          if String.is_prefix line ~prefix:"#part" then begin
+            part := Scanf.sscanf line "#part %d" (fun p -> p);
+            eprintf "C: part %d -> %s\n%!" !part (ofile !part); 
             []
-          | `Error s ->
-            print_part !part (sprintf "# %s \n%s" phrase s);
-            []
-        end else
-          line::acc
-      end
-    );
-  ) in
-  Hashtbl.iter parts 
-    ~f:(fun ~key ~data ->
-        Out_channel.write_all (ofile key) ~data:(Buffer.contents data)
-      )
+          end else begin
+            if String.is_suffix ~suffix:";;" line then begin
+              let phrase = String.concat ~sep:"\n" (List.rev (line :: acc)) in
+              eprintf "X: %s\n%!" phrase;
+              match toploop_eval phrase with
+              | `Normal(s, _, _) | `Error s ->
+                print_part !part (sprintf "# %s \n%s" phrase s);
+                print_html_part !part (Cow.Html.to_string (Cow.Code.ocaml_fragment ("# " ^ phrase)));
+                if s <> "" then print_html_part !part (Cow.Html.to_string <:html<<div class="ocamltopout">$str:s$</div>&>>);
+                []
+            end else
+              line::acc
+          end
+      );
+    ) in
+  Hashtbl.iter parts ~f:(
+    fun ~key ~data ->
+      eprintf "W: %s\n%!" (ofile key);
+      Out_channel.write_all (ofile key) ~data:(Buffer.contents data)
+  );
+  Hashtbl.iter html_parts ~f:(
+    fun ~key ~data ->
+      let data = sprintf "<div class=\"ocaml\"><pre><code>%s</code></pre></div>" (String.strip (Buffer.contents data)) in
+      eprintf "W: %s\n%!" (ofile_html key);
+      Out_channel.write_all (ofile_html key) ~data
+  )
 
 let () =
   Command.basic

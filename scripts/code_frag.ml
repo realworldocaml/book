@@ -1,0 +1,74 @@
+open Core.Std
+
+(* A fragment description, intended to be embedded in the book as
+   ```frag
+   ((typ xxx)(name xxx)(part 1)(header false))
+   ```
+   where the (part X) defaults to 0 and (header) defaults to true
+   If (part X) is specified, then there will be '#' preprocessor directives
+   in the [name] file.
+
+   The [name] file should be under the `code/` subdirectory
+*)
+type typ = [
+  | `OCaml
+  | `OCaml_toplevel
+  | `Console
+  | `JSON
+  | `ATD
+]
+
+type t = {
+  typ: string;
+  name: string;
+  part: int with default(0);
+  header: bool with default(true)
+} with sexp
+
+let typ_of_string s : typ =
+  match s with
+  | "ocaml"    -> `OCaml
+  | "ocamltop" -> `OCaml_toplevel
+  | "console"  -> `Console
+  | "json"     -> `JSON
+  | "atd"      -> `ATD
+  | x          -> raise (Failure ("Unknown fragment type " ^ x))
+
+let of_string s =
+  try
+    String.rstrip s |> Sexp.of_string |> t_of_sexp
+  with exn ->
+    eprintf "ERR: %s\n while parsing: %s\n%!"
+      (Exn.to_string exn) s; raise exn
+
+(** Hunt through OCaml code and split out any comments that
+    are of the form (* part X *)
+*)
+let extract_all_ocaml_parts filename buf =
+  let rec iter part parts =
+    function
+    |line::lines when String.is_prefix ~prefix:"(* part " line ->
+      let part = Caml.Scanf.sscanf line "(* part %d *)" (fun p -> p) in
+      let parts = (part, (Buffer.create 100)) :: parts in
+      iter part parts lines
+    |line::lines -> begin
+        match List.Assoc.find parts part with
+        | Some buf ->
+          Buffer.add_string buf line;
+          Buffer.add_char buf '\n';
+          iter part parts lines
+        | None ->
+          eprintf "no part %d in %s\n\n%s%!" part filename buf; 
+          exit (-1)
+      end
+    |[] -> List.map parts ~f:(fun (a,b) -> (a, Buffer.contents b))
+  in
+  let parts = [ (0, Buffer.create 100) ] in
+  iter 0 parts (String.split ~on:'\n' buf)
+
+let extract_ocaml_part filename part buf =
+  let parts = extract_all_ocaml_parts filename buf in
+  match List.Assoc.find parts part with
+  | None -> eprintf "no part %d found in %s\n\n%s" part filename buf; exit (-1)
+  | Some buf -> buf
+
