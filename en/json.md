@@ -442,10 +442,8 @@ ATDgen installs some OCaml libraries that interface with Yojson,
 and also a command-line tool that generates code.  It can all be
 installed via OPAM:
 
-```console
-$ opam install atdgen
-$ atdgen -version
-1.2.3
+```frag
+((typ console)(name json/install_atdgen.out))
 ```
 
 The command-line tool will be installed within your `~/.opam` directory,
