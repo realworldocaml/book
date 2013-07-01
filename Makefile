@@ -2,7 +2,7 @@ trunk:
 	./gen-book.sh -m trunk
 
 depend:
-	cd scripts && rm -rf _build && ./build.sh
+	cd scripts && ./build.sh
 	cd code && $(MAKE)
 
 milestone-%: all
