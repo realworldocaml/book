@@ -24,7 +24,13 @@ let cow file contents =
   (* Break the OCaml code into parts *)
   Code_frag.extract_all_ocaml_parts file contents
   |> List.iter ~f:(fun (part,buf) ->
-      let data = Cow.Html.to_string (Cow.Code.ocaml buf) in
+      let typ = "OCaml" in 
+      let repourl = sprintf "http://github.com/realworldocaml/code/" in
+      let fileurl = sprintf "http://github.com/realworldocaml/code/TODO/%s" file in
+      let info = <:html<$str:typ$ &lowast; <a href=$str:fileurl$>$str:file$</a> &lowast; <a href=$str:repourl$>all code</a>&>> in
+      let code = Cow.Code.ocaml_fragment buf in
+      let html = <:html<<div class="ocaml"><div class="ocamlinfo">$info$</div><code><pre>$code$</pre></code></div>&>> in
+      let data = Cow.Html.to_string html in
       Out_channel.write_all (ofile_html file part) ~data;
       Out_channel.write_all (ofile_md file part) ~data:buf;
     )
