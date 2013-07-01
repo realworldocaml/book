@@ -57,9 +57,9 @@ One thing that immediately jumps out is that functors are more
 syntactically heavyweight than ordinary functions.  For one thing,
 functors require explicit (module) type annotations, which ordinary
 functions do not.  Technically, only the type on the input is
-mandatory, although in practice, it's good practice to constrain the
-module returned by the functor, just as one typically uses an `mli`,
-even though it's not mandatory.
+mandatory, although in practice, you should usually constrain the
+module returned by the functor, just as you should use an `mli`, even
+though it's not mandatory.
 
 The following shows what happens when we omit the module type for the
 output of the functor.

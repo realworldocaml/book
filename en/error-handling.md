@@ -167,11 +167,11 @@ s-expression:
 (This (is an) (s expression))
 ```
 
-S-expressions are supported by the Sexplib library that is distributed
-with Core, and is the most common serialization format used in Core.
-Indeed, most types in Core come with built-in s-expression converters.
-Here's an example of creating an error using the sexp converter for
-times, `Time.sexp_of_t`.
+S-expressions are supported by the `sexplib` package that is
+distributed with Core, and is the most common serialization format
+used in Core.  Indeed, most types in Core come with built-in
+s-expression converters.  Here's an example of creating an error using
+the sexp converter for times, `Time.sexp_of_t`.
 
 ```ocaml
 # Error.create "Something failed a long time ago" Time.epoch Time.sexp_of_t;;
