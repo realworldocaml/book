@@ -19,3 +19,4 @@ server:
 
 clean:
 	rm -rf build
+	rm -rf scripts/_build
