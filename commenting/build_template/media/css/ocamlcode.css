@@ -1,0 +1,71 @@
+.ocaml {
+	border: 1px solid #999999;
+	margin-bottom: 15px;
+}
+
+.ocamlinfo {
+	text-align: right;
+	font-family: sans-serif;
+	font-size: 80%;
+	background: #D8D7BB;
+	color: #666666;
+}
+.ocamlinfo a { color: #666666; }
+.ocamlinfo a:visited { color: #666666; }
+
+.ocamltopout {
+        margin-top: 2px;
+        font-style: italic;
+        font-color: #eeeeee;
+        margin-left: 5px;
+        padding-left: 2px;
+}
+
+.ocaml code {
+	font-family: monospace;
+}
+.ocaml .keyword1 {
+	display: inline;
+	color: #15317E;
+
+}
+.ocaml .keyword2 {
+	display: inline;
+	color: #7D2252;
+
+}
+.ocaml .keyword3 {
+	display: inline;
+	color: #C48189;
+
+}
+.ocaml .keyword4 {
+	display: inline;
+	color: #000077;
+	font-weight: bold;
+
+}
+.ocaml .keyword5 {
+	display: inline;
+	color: #882222;
+
+}
+.ocaml .keyword6 {
+	display: inline;
+	color: #117777;
+
+}
+.ocaml .keyword7 {
+	display: inline;
+	color: #551177;
+
+}
+.ocaml .keyword8 {
+	display: inline;
+	color: #EE9A4D;
+
+}
+.ocaml .comments {
+	display: inline;
+	color: #990000;
+}
