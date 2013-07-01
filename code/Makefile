@@ -7,10 +7,11 @@ mli_src=      $(wildcard $(dirs:%=%/*.mli))
 json_src=     $(wildcard $(dirs:%=%/*.json))
 atd_src=      $(wildcard $(dirs:%=%/*.atd))
 scripts=      $(wildcard $(dirs:%=%/*.sh))
+rawscripts=   $(wildcard $(dirs:%=%/*.rawsh))
 topscripts=   $(wildcard $(dirs:%=%/*.topscript))
 
 all_src=      $(ml_src) $(mli_src) $(json_src) $(atd_src)
-all_scripts=  $(scripts:%.sh=%.out) $(topscripts)
+all_scripts=  $(scripts:%.sh=%.out) $(topscripts) $(rawscripts:%.rawsh=%.out)
 
 # The source files all map to %.<part>.html and %.<part>.md
 
@@ -24,6 +25,9 @@ highlight=   $(realpath ../scripts/_build/syntax_highlight_code.native)
 .PHONY: all
 all: $(all_src_html) $(all_src_md)
 	@ :
+
+print-%:
+	@echo $($*)
 
 %.mli.0.html %.mli.0.md: %.mli
 	$(highlight) -cow $< || (cat $@ && rm -f $@)
@@ -46,7 +50,12 @@ all: $(all_src_html) $(all_src_md)
 %.out.0.html %.out.0.md: %.out
 	$(highlight) -console $<
 
+%.out: %.rawsh
+	cp $< $@
+
 clean:
 	find . -name \*.out | xargs rm
 	find . -name \*.html | xargs rm
 	find . -name \*.md | xargs rm
+
+.PRECIOUS: $(all_src) $(all_scripts)
