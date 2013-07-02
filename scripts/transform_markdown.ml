@@ -6,7 +6,7 @@ open Code_frag
 let output_t_as_markdown s =
   let t = of_string s in
   let typ = typ_of_string t.typ in
-  let buf = In_channel.read_all (sprintf "code/%s.%d.md" t.name t.part) in
+  let buf = In_channel.read_all (sprintf "code/_build/%s.%d.md" t.name t.part) in
   match typ with
   | `OCaml ->
     printf "```ocaml\n";

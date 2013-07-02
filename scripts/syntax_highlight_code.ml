@@ -2,25 +2,11 @@
  * or Cow's OCaml syntax highlighting *)
 open Core.Std
 open Xml_tree
+open Code_frag
 
-let ofile_html file part = sprintf "%s.%d.html" file part
-let ofile_md file part   = sprintf "%s.%d.md" file part
-
-let run_through_pygmentize lang contents =
-  let ic,oc = Unix.open_process (sprintf "pygmentize -l %s -f html" lang) in
-  Out_channel.output_string oc contents;
-  Out_channel.close oc;
-  let html = Cow.Html.of_string (In_channel.input_all ic) in
-  match html with
-  |`El ((("","div"),[(("","class"),"highlight")]),[`El ((("","pre"),[]),data)]) :: _ ->
-    <:html<<div class="highlight">$data$</div>&>>
-  |_ -> raise (Failure "unexpected pygments output: not <div class=highlight><pre>...")
-
-let wrap_in_pretty_box typ file buf =
-  let repourl = sprintf "http://github.com/realworldocaml/code/" in
-  let fileurl = sprintf "http://github.com/realworldocaml/code/TODO/%s" file in
-  let info = <:html<$str:typ$ &lowast; <a href=$str:fileurl$>$str:file$</a> &lowast; <a href=$str:repourl$>all code</a>&>> in
-  <:html<<div class="rwocode"><div class="rwocodeinfo">$info$</div><code><pre>$list:buf$</pre></code></div>&>>
+let build_dir = ref ""
+let ofile_html file part = sprintf "%s/%s.%d.html" !build_dir file part
+let ofile_md file part   = sprintf "%s/%s.%d.md"   !build_dir file part
 
 (* Run a buffer through Pygments to colorize it *)
 let pygmentize lang file contents =
@@ -61,7 +47,8 @@ let console file =
   Out_channel.write_all (ofile_html file 0) ~data:buf;
   Out_channel.write_all (ofile_md file 0) ~data:(In_channel.read_all file)
 
-let do_highlight use_cow use_pygments use_console file () =
+let do_highlight build_dir' use_cow use_pygments use_console file () =
+  build_dir := build_dir';
   let buf = In_channel.read_all file in
   if use_cow then
     cow file buf
@@ -75,12 +62,14 @@ let () =
   Command.basic
     ~summary:"Syntax highlight code to HTML and Markdown"
     Command.Spec.(empty
+                  +> flag "-builddir" (optional_with_default "." string)
+                      ~doc:"dir Prepend directory to output files"
                   +> flag "-cow" no_arg 
                       ~doc:" Filter OCaml through COW, extracting only part %d "
                   +> flag "-pygments" (optional string)
                       ~doc:"lang Filter through Pygments with given [lang]"
                   +> flag "-console" no_arg
-                      ~doc:"Filter shell script output into HTML"
+                      ~doc:" Filter shell script output into HTML"
                   +> anon ("filename" %: file)
                  )
     do_highlight

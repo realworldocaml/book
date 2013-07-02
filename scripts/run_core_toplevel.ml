@@ -1,7 +1,6 @@
 (* Syntax hightlight code and eval ocaml toplevel phrases.
  * Based on http://github.com/ocaml/ocaml.org 
  * Modified by Anil Madhavapeddy for Real World OCaml and to use Core *)
-
 open Printf
 open Scanf
 
@@ -20,6 +19,10 @@ let reset_toplevel () =
   Toploop.input_name := ""; (* no filename *)
   Topdirs.dir_directory (Sys.getenv "OCAML_TOPLEVEL_PATH");
   Clflags.real_paths := false
+
+let build_dir = ref "."
+let ofile file part = sprintf "%s/%s.%d.md" !build_dir file part
+let ofile_html file part = sprintf "%s/%s.%d.html" !build_dir file part
 
 type outcome = [
   | `Normal of string * string * string (* exec output, stdout, stderr *)
@@ -100,8 +103,6 @@ let parse_file file =
       | `Normal _ -> ()
       | `Error s -> eprintf "Failed (%s): %s\n" s phrase; exit (-1)
     );
-  let ofile p = sprintf "%s.%d.md" file p in
-  let ofile_html p = sprintf "%s.%d.html" file p in
   let parts = Int.Table.create () in
   let html_parts = Int.Table.create () in
   let part = ref 0 in
@@ -128,7 +129,7 @@ let parse_file file =
         fun acc line ->
           if String.is_prefix line ~prefix:"#part" then begin
             part := Scanf.sscanf line "#part %d" (fun p -> p);
-            eprintf "C: part %d -> %s\n%!" !part (ofile !part); 
+            eprintf "C: part %d -> %s\n%!" !part (ofile file !part); 
             []
           end else begin
             if String.is_suffix ~suffix:";;" line then begin
@@ -147,19 +148,21 @@ let parse_file file =
     ) in
   Hashtbl.iter parts ~f:(
     fun ~key ~data ->
-      eprintf "W: %s\n%!" (ofile key);
-      Out_channel.write_all (ofile key) ~data:(Buffer.contents data)
-  );
+      eprintf "W: %s\n%!" (ofile file key);
+      Out_channel.write_all (ofile file key) ~data:(Buffer.contents data));
   Hashtbl.iter html_parts ~f:(
     fun ~key ~data ->
       let data = sprintf "<div class=\"ocaml\"><pre><code>%s</code></pre></div>" (String.strip (Buffer.contents data)) in
-      eprintf "W: %s\n%!" (ofile_html key);
-      Out_channel.write_all (ofile_html key) ~data
-  )
+      eprintf "W: %s\n%!" (ofile_html file key);
+      Out_channel.write_all (ofile_html file key) ~data)
 
 let () =
   Command.basic
     ~summary:"Run files through the Core toplevel"
-    Command.Spec.(empty +> (anon (sequence ("file" %: file))))
-    (fun files () -> List.iter ~f:parse_file files)
+    Command.Spec.(empty 
+                  +> flag "-builddir" (optional_with_default "." string)
+                      ~doc:"dir prepend build directory to output files"
+                  +> anon (sequence ("file" %: file))
+                 )
+    (fun bd files () -> build_dir := bd; List.iter ~f:parse_file files)
   |> Command.run

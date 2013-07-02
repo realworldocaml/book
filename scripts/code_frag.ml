@@ -72,3 +72,18 @@ let extract_ocaml_part filename part buf =
   | None -> eprintf "no part %d found in %s\n\n%s" part filename buf; exit (-1)
   | Some buf -> buf
 
+let run_through_pygmentize lang contents =
+  let ic,oc = Unix.open_process (sprintf "pygmentize -l %s -f html" lang) in
+  Out_channel.output_string oc contents;
+  Out_channel.close oc;
+  let html = Cow.Html.of_string (In_channel.input_all ic) in
+  match html with
+  |`El ((("","div"),[(("","class"),"highlight")]),[`El ((("","pre"),[]),data)]) :: _ ->
+    <:html<<div class="highlight">$data$</div>&>>
+  |_ -> raise (Failure "unexpected pygments output: not <div class=highlight><pre>...")
+
+let wrap_in_pretty_box typ file buf =
+  let repourl = sprintf "http://github.com/realworldocaml/code/" in
+  let fileurl = sprintf "http://github.com/realworldocaml/code/TODO/%s" file in
+  let info = <:html<$str:typ$ &lowast; <a href=$str:fileurl$>$str:file$</a> &lowast; <a href=$str:repourl$>all code</a>&>> in
+  <:html<<div class="rwocode"><div class="rwocodeinfo">$info$</div><code><pre>$list:buf$</pre></code></div>&>>
