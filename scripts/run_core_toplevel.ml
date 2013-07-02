@@ -138,7 +138,7 @@ let parse_file file =
               | `Normal(s, _, _) | `Error s ->
                 print_part !part (sprintf "# %s \n%s" phrase s);
                 print_html_part !part (Cow.Html.to_string (Cow.Code.ocaml_fragment ("# " ^ phrase)));
-                if s <> "" then print_html_part !part (Cow.Html.to_string <:html<<div class="ocamltopout">$str:s$</div>&>>);
+                if s <> "" then print_html_part !part (Cow.Html.to_string <:html<<div class="rwocodeout">$str:s$</div>&>>);
                 []
             end else
               line::acc
