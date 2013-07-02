@@ -61,7 +61,7 @@ let extract_all_ocaml_parts filename buf =
           eprintf "no part %d in %s\n\n%s%!" part filename buf; 
           exit (-1)
       end
-    |[] -> List.map parts ~f:(fun (a,b) -> (a, Buffer.contents b))
+    |[] -> List.map parts ~f:(fun (a,b) -> (a, String.strip (Buffer.contents b)))
   in
   let parts = [ (0, Buffer.create 100) ] in
   iter 0 parts (String.split ~on:'\n' buf)
