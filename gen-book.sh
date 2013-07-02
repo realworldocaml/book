@@ -96,7 +96,7 @@ fi
 # Otherwise continue to generate the commenting website
 
 # generate the syntax highlighted CSS
-pygmentize -S trac -O linenos=1 -a .highlight -f html > commenting/build_template/media/css/code.css
+#pygmentize -S trac -O linenos=1 -a .highlight -f html > commenting/build_template/media/css/code.css
 # generate the commenting HTML (no syntax highlighting)
 python commenting/bin/generate_commenting_site.py --github-milestone ${MILESTONE}
 
