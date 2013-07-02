@@ -5,8 +5,8 @@ let subst_with_code_frag c =
   let open Code_frag in
   try
     let t = of_string c in
-    let ic = open_in (sprintf "code/%s.%d.html" t.name t.part) in
-    let i = Xmlm.make_input ~entity:Xhtml.entity (`Channel ic) in
+    let frag = In_channel.read_all (sprintf "code/%s.%d.html" t.name t.part) in
+    let i = Xmlm.make_input ~entity:Xhtml.entity (`String (0,frag)) in
     let (_dtd,it) = in_tree i in
     Some it
   with exn -> prerr_endline (Exn.to_string exn); None
