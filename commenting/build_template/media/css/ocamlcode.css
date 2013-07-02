@@ -1,19 +1,20 @@
-.ocaml {
+.rwocode {
 	border: 1px solid #999999;
-	margin-bottom: 15px;
+	margin-bottom: 20px;
 }
 
-.ocamlinfo {
-	text-align: right;
+.rwocodeinfo {
+	text-align: left;
 	font-family: sans-serif;
 	font-size: 80%;
 	background: #D8D7BB;
-	color: #666666;
+	color: #444444;
+        padding-left: 5px;
 }
-.ocamlinfo a { color: #666666; }
-.ocamlinfo a:visited { color: #666666; }
+.rwocodeinfo a { color: #444444; }
+.rwocodeinfo a:visited { color: #444444; }
 
-.ocamltopout {
+.rwocodeout {
         margin-top: 2px;
         font-style: italic;
         font-color: #eeeeee;
@@ -21,51 +22,52 @@
         padding-left: 2px;
 }
 
-.ocaml code {
+.rwocode code {
 	font-family: monospace;
 }
-.ocaml .keyword1 {
+.rwocode .keyword1 {
 	display: inline;
 	color: #15317E;
 
 }
-.ocaml .keyword2 {
+.rwocode .keyword2 {
 	display: inline;
-	color: #7D2252;
+	color: ##000080;
 
 }
-.ocaml .keyword3 {
+.rwocode .keyword3 {
 	display: inline;
-	color: #C48189;
+	color: #440000;
 
 }
-.ocaml .keyword4 {
+.rwocode .keyword4 {
 	display: inline;
 	color: #000077;
 	font-weight: bold;
 
 }
-.ocaml .keyword5 {
+.rwocode .keyword5 {
 	display: inline;
 	color: #882222;
 
 }
-.ocaml .keyword6 {
+.rwocode .keyword6 {
 	display: inline;
 	color: #117777;
 
 }
-.ocaml .keyword7 {
+.rwocode .keyword7 {
 	display: inline;
 	color: #551177;
 
 }
-.ocaml .keyword8 {
+.rwocode .keyword8 {
 	display: inline;
 	color: #EE9A4D;
 
 }
-.ocaml .comments {
+.rwocode .comments {
 	display: inline;
-	color: #990000;
+	font-style: italic;
+	color: #007799;
 }
