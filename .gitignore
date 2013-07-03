@@ -27,6 +27,5 @@ _build
 book/*.css
 book/*.html
 build/
-commenting/build_template/media/css/code.css
 stylesheets/system-xsl
 _build
