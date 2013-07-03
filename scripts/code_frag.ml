@@ -82,8 +82,13 @@ let run_through_pygmentize lang contents =
     <:html<<div class="highlight">$data$</div>&>>
   |_ -> raise (Failure "unexpected pygments output: not <div class=highlight><pre>...")
 
-let wrap_in_pretty_box typ file buf =
+let wrap_in_pretty_box ~part typ file buf =
   let repourl = sprintf "http://github.com/realworldocaml/code/" in
   let fileurl = sprintf "http://github.com/realworldocaml/code/TODO/%s" file in
-  let info = <:html<$str:typ$ &lowast; <a href=$str:fileurl$>$str:file$</a> &lowast; <a href=$str:repourl$>all code</a>&>> in
+  let part =
+    match part with
+    | 0 -> []
+    | part -> <:html<, continued (part $int:part$)>>
+  in
+  let info = <:html<$str:typ$ &lowast; <a href=$str:fileurl$>$str:file$</a> $part$ &lowast; <a href=$str:repourl$>all code</a>&>> in
   <:html<<div class="rwocode"><div class="rwocodeinfo">$info$</div><code><pre>$list:buf$</pre></code></div>&>>

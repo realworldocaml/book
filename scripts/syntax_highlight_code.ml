@@ -18,7 +18,7 @@ let pygmentize lang file contents =
     | "json" -> "JSON"
     | "console" -> "Terminal"
     | unknown -> unknown in
-  let data = wrap_in_pretty_box typ file [data] |> Cow.Html.to_string in
+  let data = wrap_in_pretty_box ~part:0 typ file [data] |> Cow.Html.to_string in
   Out_channel.write_all (ofile_html file 0) ~data;
   Out_channel.write_all (ofile_md file 0) ~data:contents
 
@@ -27,7 +27,7 @@ let cow file contents =
   Code_frag.extract_all_ocaml_parts file contents
   |> List.iter ~f:(fun (part,buf) ->
       let code = Cow.Code.ocaml_fragment buf in
-      let html = wrap_in_pretty_box "OCaml" file [code] in
+      let html = wrap_in_pretty_box ~part "OCaml" file [code] in
       let data = Cow.Html.to_string html in
       Out_channel.write_all (ofile_html file part) ~data;
       Out_channel.write_all (ofile_md file part) ~data:buf;
@@ -42,7 +42,7 @@ let console file =
       else <:html<<div class="rwocodeout">$str:line$</div>&>> :: acc
     ))) in
   let buf =
-    wrap_in_pretty_box "Terminal" file olines
+    wrap_in_pretty_box ~part:0 "Terminal" file olines
     |> Cow.Html.to_string in
   Out_channel.write_all (ofile_html file 0) ~data:buf;
   Out_channel.write_all (ofile_md file 0) ~data:(In_channel.read_all file)
