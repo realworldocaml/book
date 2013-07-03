@@ -488,7 +488,7 @@ And
 
 Being able to construct such expressions isn't enough; we also need to
 be able to evaluate such an expression.  The following code shows how
-you could write a general-purpose evaluator for `expr`s.
+you could write a general-purpose evaluator for these expressions.
 
 ```ocaml
 # let rec eval expr base_eval =
@@ -502,7 +502,7 @@ you could write a general-purpose evaluator for `expr`s.
     | Or    exprs -> List.exists  exprs ~f:eval'
     | Not   expr  -> not (eval' expr)
   ;;
-val eval : 'a expr  -> ('a -> bool) -> bool = <fun>
+val eval : 'a expr -> ('a -> bool) -> bool = <fun>
 ```
 
 The structure of the code is pretty straightforward --- we're just
@@ -512,67 +512,109 @@ concrete example, we just need to write the `base_eval` function which
 is capable of evaluating a base predicate.
 
 Another useful operation on expressions is simplification.  The
-following function applies some basic simplification rules, most of
-which are driven by the presence of constants.
+following simplification code is based on having some simplifying
+constructors that mirror the tags used to construct a tree.  Then
+the simplification function is reponsible for rebuilding the tree
+using these constructors.
+
+```ocaml
+# let and_ l =
+    if List.mem l (Const false) then Const false
+    else
+      match List.filter l ~f:((<>) (Const true)) with
+      | [] -> Const true
+      | [ x ] -> x
+      | l -> And l
+
+  let or_ l =
+    if List.mem l (Const true) then Const true
+    else
+      match List.filter l ~f:((<>) (Const false)) with
+      | [] -> Const false
+      | [x] -> x
+      | l -> Or l
+
+  let not_ = function
+    | Const b -> Const (not b)
+    | e -> Not e
+  ;;
+val and_ : 'a expr list -> 'a expr = <fun>
+val or_ : 'a expr list -> 'a expr = <fun>
+val not_ : 'a expr -> 'a expr = <fun>
+```
+
+Now, we can write a simplification routine that brings these together.
 
 ```ocaml
 # let rec simplify = function
     | Base _ | Const _ as x -> x
-    | And exprs ->
-      let exprs =
-        List.map ~f:simplify exprs
-        |> List.filter ~f:(fun x -> x <> Const true)
-      in
-      if List.is_empty exprs then Const true
-      else if List.exists exprs ~f:(fun x -> x = Const false)
-      then Const false
-      else And exprs
-    | Or exprs ->
-      let exprs =
-        List.map ~f:simplify exprs
-        |> List.filter ~f:(fun x -> x <> Const false)
-      in
-      if List.is_empty exprs then Const false
-      else if List.exists exprs ~f:(fun x -> x = Const true)
-      then Const true
-      else Or exprs
-    | Not expr ->
-      match simplify expr with
-      | Const bool -> Const (not bool)
-      | expr -> Not expr
+    | And l -> and_ (List.map ~f:simplify l)
+    | Or l  -> or_  (List.map ~f:simplify l)
+    | Not e -> not_ (simplify e)
   ;;
 val simplify : 'a expr -> 'a expr = <fun>
 ```
 
-One thing to notice about the above code is that it uses a catch-all
-case in the very last line within the `Not` case.  It's generally
-better to be explicit about the cases you're ignoring.  Indeed, if we
-change this snippet of code to be more explicit:
+We can now apply this to a boolean expression and see how good of a
+job it does at simplifying it.
 
 ```ocaml
-    | Not expr ->
-      match simplify expr with
-      | Const bool -> Const (not bool)
-      | (And _ | Or _ | Base _ | Not _) -> Not expr
+# simplify (Not (And [ Or [Base "it's snowing"; Const true];
+                       Base "it's raining"]));;
+- : string expr = Not (Base "it's raining")
 ```
 
-it's easy to see that we've missed an important case: double-negation.
+Here, it correctly converted the `Or` branch to `Const true`, and then
+eliminated the `And`, entirely, since the `And` then had only one
+non-trivial component.
+
+There are some simplifications it misses, however.  In particular, see
+what happens if we add a double negation in.
 
 ```ocaml
-    | Not expr ->
-      match simplify expr with
-      | Const b -> Const (not b)
-      | Not expr -> expr
-      | (And _ | Or _ | Base _ ) -> Not expr
+# simplify (Not (And [ Or [Base "it's snowing"; Const true];
+                       Not (Not (Base "it's raining"))]));;
+- : string expr = Not (Not (Not (Base "it's raining")))
 ```
 
-This example is more than a toy.  There's a module very much in this
-spirit in Core called `Blang` (short for "boolean language"), and it
-gets a lot of practical use in a variety of applications.
+It fails to remove the double negation, and it's easy to see why.  The
+`not_` function has a catch-all case, so it ignores everything but the
+one case it explicitly considers, that of the negation of a constant.
+Catch-all cases are generally a bad idea, and if we make the code more
+explicit, we see that the missing of the double-negation is more
+obvious.
+
+```ocaml
+# let not_ = function
+    | Const b -> Const (not b)
+    | (Base _ | And _ | Or _ | Not _) as e -> Not e
+  ;;
+val not_ : 'a expr -> 'a expr = <fun>
+```
+
+We can of course fix this by handling simply adding an explicit case
+for double-negation.
+
+```ocaml
+# let not_ = function
+    | Const b -> Const (not b)
+    | Not e -> e
+    | (Base _ | And _ | Or _ ) as e -> Not e
+  ;;
+val not_ : 'a expr -> 'a expr = <fun>
+```
+
+The example of a boolean expression language is more than a toy.
+There's a module very much in this spirit in Core called `Blang`
+(short for "boolean language"), and it gets a lot of practical use in
+a variety of applications.  The simplification algorithm in particular
+is useful when you want to use it to specialize the evaluation of
+expressions for which the evaluation of some of the base predicates is
+already known.
 
 More generally, using variants to build recursive data structures is a
 common technique, and shows up everywhere from designing little
-languages to building efficient data structures.
+languages to building complex data structures.
 
 ## Polymorphic variants
 

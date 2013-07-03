@@ -143,7 +143,7 @@ from a string:
 
 ```ocaml
 # Error.of_string "something went wrong";;
-- : Core.Std.Error.t = "something went wrong"
+- : Error.t = something went wrong
 ```
 
 But you can also construct an `Error.t` from a _thunk_, _i.e._, a
@@ -152,7 +152,7 @@ function that takes a single argument of type `unit`.
 ```ocaml
 # Error.of_thunk (fun () ->
     sprintf "something went wrong: %f" 32.3343);;
-  - : Core.Std.Error.t = "something went wrong: 32.334300"
+- : Error.t = something went wrong: 32.334300
 ```
 
 In this case, we can benefit from the laziness of `Error`, since the
@@ -167,16 +167,16 @@ s-expression:
 (This (is an) (s expression))
 ```
 
-S-expressions are supported by the Sexplib library that is distributed
-with Core, and is the most common serialization format used in Core.
-Indeed, most types in Core come with built-in s-expression converters.
-Here's an example of creating an error using the sexp converter for
-times, `Time.sexp_of_t`.
+S-expressions are supported by the `sexplib` package that is
+distributed with Core, and is the most common serialization format
+used in Core.  Indeed, most types in Core come with built-in
+s-expression converters.  Here's an example of creating an error using
+the sexp converter for times, `Time.sexp_of_t`.
 
 ```ocaml
 # Error.create "Something failed a long time ago" Time.epoch Time.sexp_of_t;;
-- : Core.Std.Error.t =
-"Something failed a long time ago: (1969-12-31 19:00:00.000000)"
+- : Error.t =
+Something failed a long time ago: (1970-01-01 01:00:00.000000+01:00)
 ```
 
 Note that the time isn't actually serialized into an s-expression
@@ -207,6 +207,15 @@ example, it's often useful to augment an error with some extra
 information about the context of the error or to combine multiple
 errors together.  `Error.tag` and `Error.of_list` fulfill these roles,
 as you can see below.
+
+```ocaml
+# Error.tag
+    (Error.of_list [ Error.of_string "Your tires were slashed";
+                     Error.of_string "Your windshield was smashed" ])
+    "over the weekend"
+  ;;
+over the weekend: Your tires were slashed; Your windshield was smashed
+```
 
 The type `'a Or_error.t` is just a shorthand for `('a,Error.t)
 Result.t`, and it is, after `option`, the most common way of returning
@@ -340,6 +349,25 @@ exception Key_not_found of string
 Exception: Key_not_found("a").
 ```
 
+Exceptions are ordinary values, and can be manipulated just like other
+OCaml values, as you can see below.
+
+```ocaml
+# let exceptions = [ Not_found; Division_by_zero; Key_not_found "b" ];;
+val exceptions : exn list = [Not_found; Division_by_zero; Key_not_found("b")]
+# List.filter exceptions  ~f:(function
+    | Key_not_found _ | Not_found -> true
+    | _ -> false);;
+- : exn list = [Not_found; Key_not_found("b")]
+```
+
+All exceptions are of type `exn`, and that type is a similar to a
+variant type of the kind we encountered in [xref](#variants).  The
+biggest difference is that it is an open type, meaning that new tags
+can be added at any time, by any part of the program.  As such, you
+can never have a match on an exception that is guaranteed to
+exhaustively list all values.
+
 Here's an example of a function for looking up a key in an
 _association list_, _i.e._ a list of key/value pairs which uses this
 newly-defined exception:
@@ -391,7 +419,7 @@ Thus, the type system will let us throw an exception anywhere in a
 program.
 
 <note>
-<title>Declaring exceptions with `with sexp`</title>
+<title>Declaring exceptions using `with sexp`</title>
 
 OCaml can't always generate a useful textual representation of an
 exception.  For example:
@@ -653,9 +681,9 @@ val lookup_weight :
 
 ### Backtraces
 
-A big part of the point of exceptions is to give useful debugging
-information.  But at first glance, OCaml's exceptions can be less than
-informative.   Consider the following simple program.
+A big part of the value of exceptions is that they provide useful
+debugging information in the form of a stack backtrace.  Consider the
+following simple program.
 
 ```ocaml
 (* exn.ml *)
@@ -672,29 +700,12 @@ let () =
   printf "%d\n" (list_max [])
 ```
 
-If we build and run this program, we'll get a pretty uninformative
-error:
+If we build and run this program, we'll get a stack backtrace that
+will give you some information about where the error occurred, and the
+stack of function calls that were in place at the time of the error.
 
-```bash
-$ ./exn
-3
-Fatal error: exception Exn.Empty_list
 ```
-
-The example in question is short enough that it's quite easy to see
-where the error came from.  But in a complex program, simply knowing
-which exception was thrown is usually not enough information to figure
-out what went wrong.
-
-We can get more information from OCaml if we turn on stack backtraces.
-A backtrace is essentially a summary of the stack of calls that were
-executed to get to the point where the exception was thrown.
-Backtraces can be enabled by setting the `OCAMLRUNPARAM` environment
-variable as shown.
-
-```bash
-exn $ export OCAMLRUNPARAM=b=1
-exn $ ./exn
+$ ./exn.byte 
 3
 Fatal error: exception Exn.Empty_list
 Raised at file "exn.ml", line 7, characters 16-26
@@ -706,7 +717,109 @@ You can also capture a backtrace within your program by calling
 thrown exception.  This is useful for reporting detailed information
 on errors that did not cause your program to fail.
 
-### From exceptions to error-aware types and back again ###
+This works well if you have backtraces enabled, but that isn't always
+the case.  In fact, by default, OCaml has backtraces turned off, and
+even if you have them turned on at runtime, you can't get backtraces
+unless you have compiled with debugging symbols.  Core reverses the
+default, so if you're linking in Core, you will have backtraces
+enabled at runtime.
+
+Even using Core and compiling with debugging symbols, you can turn
+backtraces off by setting the `OCAMLRUNPARAM` environment variable to
+be empty.
+
+```bash
+$ export OCAMLRUNPARAM=
+$ ./exn.byte
+3
+Fatal error: exception Exn.Empty_list
+```
+
+The resulting error message is considerably less informative.  You can
+also turn backtraces off in your code by calling
+`Backtrace.Exn.set_recording false`.
+
+There is a legitimate reasons to run without backtraces: speed.
+OCaml's exceptions are fairly fast, but they're even faster still if
+you disable backtraces.  Here's a simple benchmark that shows the
+effect, using the `core_bench` package.
+
+```ocaml
+(* file: exn_cost.ml *)
+
+open Core.Std
+open Core_bench.Std
+
+let simple_computation () =
+  List.range 0 10
+  |> List.fold ~init:0 ~f:(fun sum x -> sum + x * x)
+  |> ignore
+
+let simple_with_handler () =
+  try simple_computation () with Exit -> ()
+
+let end_with_exn () =
+  try
+    simple_computation ();
+    raise Exit
+  with Exit -> ()
+
+let () =
+  [ Bench.Test.create ~name:"simple computation"
+      (fun () -> simple_computation ());
+    Bench.Test.create ~name:"simple computation w/handler"
+      (fun () -> simple_with_handler ());
+    Bench.Test.create ~name:"end with exn"
+      (fun () -> end_with_exn ());
+  ]
+  |> Bench.make_command
+  |> Command.run
+```
+
+We're testing three cases here: a simple computation with no
+exceptions; the same computation with an exception handler but no
+thrown exceptions; and finally the same computation where we use the
+exception to do the control flow back to the caller.
+
+If we run this with stacktraces on, the benchmark results look like
+this.
+
+```
+$ ./exn_cost.native cycles
+Estimated testing time 30s (change using -quota SECS).
+┌──────────────────────────────┬────────┬───────────┬──────────┐
+│ Name                         │ Cycles │ Time (ns) │ % of max │
+├──────────────────────────────┼────────┼───────────┼──────────┤
+│ simple computation           │ 198.32 │    116.66 │    78.36 │
+│ simple computation w/handler │ 219.23 │    128.96 │    86.62 │
+│ end with exn                 │ 253.10 │    148.88 │   100.00 │
+└──────────────────────────────┴────────┴───────────┴──────────┘
+```
+
+Here, we see that we lose something like 20 cycles to adding an
+exception handler, and 30 more to actually throwing and catching an
+exception.  If we turn backtraces off, then the results look like
+this.
+
+```
+$ ./exn_cost.native cycles
+Estimated testing time 30s (change using -quota SECS).
+┌──────────────────────────────┬────────┬───────────┬──────────┐
+│ Name                         │ Cycles │ Time (ns) │ % of max │
+├──────────────────────────────┼────────┼───────────┼──────────┤
+│ simple computation           │ 198.84 │    116.97 │    83.86 │
+│ simple computation w/handler │ 217.17 │    127.75 │    91.60 │
+│ end with exn                 │ 237.10 │    139.47 │   100.00 │
+└──────────────────────────────┴────────┴───────────┴──────────┘
+```
+
+Here, the handler costs about the same, at 20 cycles, but the
+exception itself costs only 20, as opposed to 30 additional cycles.
+All told, this should only matter if you're using exceptions routinely
+as part of your flow control, which is in most cases a stylistic
+mistake anyway.
+
+### From exceptions to error-aware types and back again
 
 Both exceptions and error-aware types are necessary parts of
 programming in OCaml.  As such, you often need to move between these
@@ -720,9 +833,9 @@ follows:
     Option.try_with (fun () -> find_exn alist key) ;;
 val find : (string * 'a) list -> string -> 'a option = <fun>
 # find ["a",1; "b",2] "c";;
-- : int Core.Std.Option.t = None
+- : int option = None
 # find ["a",1; "b",2] "b";;
-- : int Core.Std.Option.t = Some 2
+- : int option = Some 2
 ```
 
 And `Result` and `Or_error` have similar `try_with` functions.  So, we
@@ -745,4 +858,38 @@ And then we can re-raise that exception:
 Exception: Key_not_found("c").
 ```
 
+## Choosing an error handling strategy
+
+Given that OCaml supports both exceptions and error-aware return
+types, how do you choose between them?  The key is to think about the
+tradeoff between concision and explicitness.
+
+Exceptions are more concise because they allow you to defer the job of
+error handling to some larger scope, and because they don't clutter up
+your types.  But this same concision comes at a cost: exceptions are
+all too easy to ignore.  Error-aware return types, on the other hand,
+are fully manifest in your type definitions, making the errors that
+your code might generate explicit and impossible to ignore.
+
+The right tradeoff depends on your application.  If you're writing a
+rough and ready program where getting to done quickly is key, and
+failure is not that expensive, then using exceptions extensively may
+be the way to go.  If, on the other hand, you're writing production
+software whose failure is costly, then you should probably lean in the
+direction of using error-aware return types.
+
+To be clear, it doesn't make sense to avoid exceptions entirely.  The
+old maxim of "use exceptions for exceptional conditions" applies.  If
+an error occurs sufficiently rarely, then throwing an exception may
+well be the right behavior.  
+
+Also, for errors that are omnipresent, error-aware return types may
+also be overkill.  A good example is out-of-memory errors, which can
+occur anywhere, and so you'd need to use error-aware return types
+everywhere to capture those.  And having every operation marked as one
+that might fail is no more explicit than having none of them marked.
+
+In short, for errors that are a forseeable and ordinary part of the
+execution of your production code and that are not omnipresent, error
+aware return types are typically the right solution.
 

@@ -1,9 +1,9 @@
 # Functors
 
-Up until now, we've seen OCaml's module system play an important but
-limited role.  In particular, we've seen them as a mechanism for
-organizing code into units with specified interfaces.  But modules can
-do much more than that, acting as a powerful toolset for building
+Up until now, we've seen OCaml's modules play an important but limited
+role.  In particular, we've seen them as a mechanism for organizing
+code into units with specified interfaces.  But OCaml's module system
+can do much more than that, serving as a powerful tool for building
 generic code and structuring large-scale systems.  Much of that power
 comes from functors.
 
@@ -57,9 +57,9 @@ One thing that immediately jumps out is that functors are more
 syntactically heavyweight than ordinary functions.  For one thing,
 functors require explicit (module) type annotations, which ordinary
 functions do not.  Technically, only the type on the input is
-mandatory, although in practice, it's good practice to constrain the
-module returned by the functor, just as one typically uses an `mli`,
-even though it's not mandatory.
+mandatory, although in practice, you should usually constrain the
+module returned by the functor, just as you should use an `mli`, even
+though it's not mandatory.
 
 The following shows what happens when we omit the module type for the
 output of the functor.
@@ -533,7 +533,8 @@ existing one.
 Another feature that we might want for our interval module is the
 ability to _serialize_, _i.e._, to be able to read and write intervals
 as a stream of bytes.  In this case, we'll do this by converting to
-and from _s-expressions_. An s-expression is essentially a
+and from s-expressions, which were mentioned already in
+[xref](#error-handling).  To recall, an s-expression is essentially a
 parenthesized expression whose atoms are strings, and it is a
 serialization format that is used commonly in Core.  Here's an
 example.
@@ -751,7 +752,7 @@ val fold : 'a t -> init:'acc -> f:('acc -> 'a -> 'acc) -> 'acc
 
 The `Fqueue.fold` function above requires some explanation.  It
 follows the same pattern as the `List.fold` function we described in
-[xref](using-the-list-module-effectively).  Essentially, `Fqueue.fold
+[xref](#using-the-list-module-effectively).  Essentially, `Fqueue.fold
 ~q ~init ~f` walks over the elements of `q` from front to back,
 starting with an accumulator of `init` and using `f` to update the
 accumulator value as it walks over the queue, returning the final

@@ -1,10 +1,11 @@
-type 'a t =
+type 'a expr =
 | Base  of 'a
 | Const of bool
-| And   of 'a t list
-| Or    of 'a t list
-| Not   of 'a t
+| And   of 'a expr list
+| Or    of 'a expr list
+| Not   of 'a expr
 
-val eval : 'a t -> ('a -> bool) -> bool
-val simplify : 'a t -> 'a t
-val specialize : 'a t -> f:('a -> bool option) -> 'a t
+val eval : 'a expr -> ('a -> bool) -> bool
+val simplify : 'a expr -> 'a expr
+
+
