@@ -30,6 +30,9 @@ all: $(all_src_html) $(all_src_md)
 print-%:
 	@echo $($*)
 
+json/run_github_org.out:: json/build_github_org.out
+
+
 $(OBJ)/%.mli.0.html $(OBJ)/%.mli.0.md: %.mli
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -cow $< || (cat $@ && rm -f $@)
