@@ -152,7 +152,8 @@ let parse_file file =
       Out_channel.write_all (ofile file key) ~data:(Buffer.contents data));
   Hashtbl.iter html_parts ~f:(
     fun ~key ~data ->
-      let data = sprintf "<div class=\"ocaml\"><pre><code>%s</code></pre></div>" (String.strip (Buffer.contents data)) in
+      let code = Cow.Html.of_string (String.strip (Buffer.contents data)) in
+      let data = Code_frag.wrap_in_pretty_box "OCaml UTop" file [code] |> Cow.Html.to_string in
       eprintf "W: %s\n%!" (ofile_html file key);
       Out_channel.write_all (ofile_html file key) ~data)
 
