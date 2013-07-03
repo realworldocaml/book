@@ -1,0 +1,15 @@
+$ atdgen -t github_org.atd
+$ atdgen -j github_org.atd
+$ ocamlbuild -use-ocamlfind -tag thread -pkg core_extended,yojson,atdgen github_org_info.native
+ocamlfind ocamldep -package core_extended,yojson,atdgen -modules github_org_info.ml > github_org_info.ml.depends
+ocamlfind ocamldep -package core_extended,yojson,atdgen -modules github_org_j.mli > github_org_j.mli.depends
+ocamlfind ocamldep -package core_extended,yojson,atdgen -modules github_org_t.mli > github_org_t.mli.depends
+ocamlfind ocamlc -c -thread -package core_extended,yojson,atdgen -o github_org_t.cmi github_org_t.mli
+ocamlfind ocamlc -c -thread -package core_extended,yojson,atdgen -o github_org_j.cmi github_org_j.mli
+ocamlfind ocamlc -c -thread -package core_extended,yojson,atdgen -o github_org_info.cmo github_org_info.ml
+ocamlfind ocamldep -package core_extended,yojson,atdgen -modules github_org_j.ml > github_org_j.ml.depends
+ocamlfind ocamldep -package core_extended,yojson,atdgen -modules github_org_t.ml > github_org_t.ml.depends
+ocamlfind ocamlopt -c -thread -package core_extended,yojson,atdgen -o github_org_t.cmx github_org_t.ml
+ocamlfind ocamlopt -c -thread -package core_extended,yojson,atdgen -o github_org_j.cmx github_org_j.ml
+ocamlfind ocamlopt -c -thread -package core_extended,yojson,atdgen -o github_org_info.cmx github_org_info.ml
+ocamlfind ocamlopt -linkpkg -thread -package core_extended,yojson,atdgen github_org_t.cmx github_org_j.cmx github_org_info.cmx -o github_org_info.native
