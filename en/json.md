@@ -198,9 +198,8 @@ other functions to apply useful transformations over values.
 
 You've already run across several of these in the `List` module:
 
-```ocaml
-val map  : 'a list -> f:('a -> 'b)   -> 'b list
-val fold : 'a list -> init:'accum -> f:('accum -> 'a -> 'accum) -> 'accum
+```frag
+((typ ocaml)(name json/list_excerpt.mli)(part 0))
 ```
 
 `map` and `fold` are extremely common combinators that transform an
@@ -209,8 +208,8 @@ input list by applying a function to each value of the list.  The
 directly.  `fold` applies each value in the input list to a function
 that accumulates a single result, and returns that instead.
 
-```ocaml
-val iter : 'a list -> f:('a -> unit) -> unit
+```frag
+((typ ocaml)(name json/list_excerpt.mli)(part 1))
 ```
 
 `iter` is a more specialised combinator that is only useful in OCaml due to
@@ -602,44 +601,16 @@ core_extended` if you haven't installed it previously.
 Below is a short shell script that generates all of the OCaml code and also
 builds the final executable.
 
-```console
-$ cat _tags 
-true: package(core,core_extended,yojson,atdgen)
-true: thread, debug, annot
-
-$ cat buildgh.sh 
-#!/bin/sh
-
-atdgen -t github_org.atd
-atdgen -j github_org.atd
-ocamlbuild -use-ocamlfind github_org_info.native
-
-$ ./buildgh.sh
+```frag
+((typ ocaml)(name json/build_github_org.out))
 ```
 
 You can now run the command-line tool with a single argument to specify the
 name of the organization, and it will dynamically fetch the JSON from the web,
 parse it, and render the summary to your console.
 
-```
-$ curl https://api.github.com/orgs/janestreet 
-{
-  "login": "janestreet",
-  "id": 3384712,
-  "url": "https://api.github.com/orgs/janestreet",
-  "public_repos": 31,
-  "public_gists": 0,
-  "followers": 0,
-  "following": 0,
-  "html_url": "https://github.com/janestreet",
-  "created_at": "2013-01-25T19:35:43Z",
-  "updated_at": "2013-05-23T14:03:06Z",
-  "type": "Organization"
-}
-$ ./github_org_info.native mirage
-Mirage account (131943) with 32 public repos
-$ ./github_org_info.native janestreet
-??? (3384712) with 31 public repos
+```frag
+((typ console)(name json/run_github_org.out))
 ```
 
 The JSON returned from the `janestreet` query is missing an organization name,
