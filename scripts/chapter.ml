@@ -1,3 +1,5 @@
+(* Definitions used in the (chapters.scm) file *)
+
 open Core.Std
 
 type part =

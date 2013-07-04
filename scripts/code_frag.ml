@@ -1,5 +1,3 @@
-open Core.Std
-
 (* A fragment description, intended to be embedded in the book as
    ```frag
    ((typ xxx)(name xxx)(part 1)(header false))
@@ -10,6 +8,9 @@ open Core.Std
 
    The [name] file should be under the `code/` subdirectory
 *)
+
+open Core.Std
+
 type typ = [
   | `OCaml
   | `OCaml_toplevel
