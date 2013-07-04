@@ -1455,7 +1455,7 @@ threads.  When the computation is complete, the result is placed in
 the deferred, where it can be used in the ordinary way from Async.
 
 <warning> 
-<note> Thread-safety and locking </note>
+<title>Thread-safety and locking </title>
 
 Once you start working with system threads, you'll need to be careful
 about locking your data-structures.  Most OCaml data-structures do not
