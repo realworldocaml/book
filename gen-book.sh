@@ -62,7 +62,6 @@ if [ ! -e "$CHAPTERS" ]; then
 fi
 cd scripts && ./build.sh && cd ..
 SRCS="00-toc.md $(./scripts/_build/get_chapter_files.native ${PUBLIC} ${CHAPTERS})"
-TRANSFORM_DOCBOOK=./scripts/_build/transform_pandocbook.native
 echo Lingua: ${LINGUA}
 echo Chapters file: ${CHAPTERS}
 echo Source files: ${SRCS}
@@ -82,6 +81,7 @@ ln -nfs ${DOCBOOK_XSL_PATH} stylesheets/system-xsl
 set -x
 pandoc -f markdown -t docbook --chapters --template rwo.docbook -o build/${LINGUA}/source/rwo-pre.xml ${SRCS_WEB}
 pandoc -f markdown -t docbook --chapters --template rwo-oreilly.docbook -o build/${LINGUA}/source/rwo-pre-oreilly.xml ${SRCS_ORA}
+TRANSFORM_DOCBOOK=./scripts/_build/transform_pandocbook.native
 ${TRANSFORM_DOCBOOK} ${PUBLIC} ${CHAPTERS} build/${LINGUA}/source/rwo-pre.xml > build/${LINGUA}/source/rwo.xml
 ${TRANSFORM_DOCBOOK} ${PUBLIC} ${CHAPTERS} build/${LINGUA}/source/rwo-pre-oreilly.xml > build/${LINGUA}/source/rwo-oreilly.xml
 xsltproc --nonet --output build/${LINGUA}/html/ stylesheets/${LINGUA}/web.xsl build/${LINGUA}/source/rwo.xml
