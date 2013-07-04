@@ -537,9 +537,9 @@ and outputs code for other languages such as Java if you need more
 interoperability.
 
 There are also several similar projects that automate the code generation
-process: [Piqi](http://piqi.org) uses the Google protobuf format, and
-[Thrift](http://thrift.apache.org) supports many other programming languages
-and includes OCaml bindings.
+process. [Piqi](http://piqi.org) supports conversions between XML. JSON, and
+the Google protobuf format, and [Thrift](http://thrift.apache.org) supports
+many other programming languages and includes OCaml bindings.
 
 ### Example: Querying Github organization information
 
