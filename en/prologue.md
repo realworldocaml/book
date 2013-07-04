@@ -22,8 +22,8 @@ design.  These features include:
 * _Parametric polymorphism_ to enable abstractions to be constructed across different
   datatypes, available as C++ templates or generics in Java or C#.
 * _Immutable data structures_ that cannot be destructively updated,
-  famously enforced in Haskell but also a common feature of many
-  distributed big data frameworks.
+  famously enforced in Haskell but also a feature often present in distributed big data
+  frameworks such as Hadoop.
 * _Algebraic datatypes_ and _pattern matching_ to define and 
   manipulate complex data structures, available in Miranda, F# and Standard ML.
 * _Automatic type inference_ to avoid having to laboriously define the
