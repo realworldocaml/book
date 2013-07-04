@@ -78,7 +78,7 @@ The modern OCaml emerged in 1996, when a powerful and elegant object system was
 implemented by Didier Rémy and Jérôme Vouillon.  This object system was notable
 for supporting many common OO idioms in a statically type-safe way, whereas
 the same idioms required runtime checks in languages such as C++ or Java.
-In 2000, Jacques Garrique extended OCaml with several new features such as 
+In 2000, Jacques Garrigue extended OCaml with several new features such as 
 polymorphic methods and variants and labelled and optional arguments.
 
 The last decade has seen OCaml attract a significant user base, and language
