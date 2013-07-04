@@ -19,8 +19,8 @@ design.  These features include:
   values, as seen in Javascript or Scala.
 * _Static type-checking_ to reduce runtime errors, such as Java or Scala
   interfaces or variable type declarations in C#, Ada and Pascal.
-* _Generics_ to enable abstractions to be constructed across different
-  datatypes, available as C++ templates or in Java or C#.
+* _Parametric polymorphism_ to enable abstractions to be constructed across different
+  datatypes, available as C++ templates or generics in Java or C#.
 * _Immutable data structures_ that cannot be destructively updated,
   famously enforced in Haskell but also a common feature of many
   distributed big data frameworks.
