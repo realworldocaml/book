@@ -372,7 +372,7 @@ this:
 The `Safe.json` type includes all of the variants from `Basic.json` and extends
 it with a few more useful ones.  A standard JSON type such as a `String` will
 type-check against both the `Basic` module and also the non-standard `Safe`
-module.  If you use the extension values with the `Basic` module however, the
+module.  If you use the extended values with the `Basic` module however, the
 compiler will reject your code until you make it compliant with the portable
 subset of JSON.
 
