@@ -1,8 +1,4 @@
 $ ocamlbuild -use-ocamlfind -pkg core,yojson -tag thread parse_book.native
-ocamlfind ocamldep -package core,yojson -modules parse_book.ml > parse_book.ml.depends
-ocamlfind ocamlc -c -thread -package core,yojson -o parse_book.cmo parse_book.ml
-ocamlfind ocamlopt -c -thread -package core,yojson -o parse_book.cmx parse_book.ml
-ocamlfind ocamlopt -linkpkg -thread -package core,yojson parse_book.cmx -o parse_book.native
 $ ./parse_book.native
 Title: Real World OCaml (450)
 Authors: Jason Hickey, Anil Madhavapeddy, Yaron Minsky
