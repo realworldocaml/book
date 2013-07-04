@@ -17,8 +17,8 @@ design.  These features include:
   of almost every modern high-level language.
 * _Higher-order functions_ that can be passed around as first-class
   values, as seen in Javascript or Scala.
-* _Static type-checking_ to reduce runtime errors, such as Java or Scala
-  interfaces or variable type declarations in C#, Ada and Pascal.
+* _Static type-checking_ to reduce the number of runtime errors, as
+  enforced by Java or Scala interfaces or variable type declarations in C#, Ada and Pascal.
 * _Parametric polymorphism_ to enable abstractions to be constructed across different
   datatypes, available as C++ templates or generics in Java or C#.
 * _Immutable data structures_ that cannot be destructively updated,
