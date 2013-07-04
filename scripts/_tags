@@ -1,7 +1,8 @@
 true:package(xmlm,cmdliner,str)
 true: package(core,threads,sexplib.syntax)
 <*.ml{,i}>:syntax(camlp4o)
-<run_core_toplevel.*>: package(compiler-libs.toplevel,cow,cow.syntax)
+<run_core_toplevel.*>: package(compiler-libs.toplevel)
+true: package(cow,cow.syntax)
 true:thread,debug,annot
 <html_code_highlight.*> or <code_frag.*> or <transform_markdown.*> or <syntax_highlight_code.*>: package(cow.syntax,cow)
 <redirect.*> or <downtime.*> or <memcache.*> or <rwocli.*> or <githubbot.*> or <config.*> or <rwoserver.*>:package(lwt.unix,github.unix,lwt.syntax)
