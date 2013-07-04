@@ -13,11 +13,13 @@ let pygmentize lang file contents =
   (* The contents of <pre> are just Data tags, so filter them through
      Pygments *)
   let data = run_through_pygmentize lang contents in
-  let typ = match lang with
-    | "ocaml" -> "OCaml"
+  let typ =
+    match lang with
+    | "ocaml" -> "OCaml Source Code"
     | "json" -> "JSON"
     | "console" -> "Terminal"
-    | unknown -> unknown in
+    | unknown -> unknown
+  in
   let data = wrap_in_pretty_box ~part:0 typ file [data] |> Cow.Html.to_string in
   Out_channel.write_all (ofile_html file 0) ~data;
   Out_channel.write_all (ofile_md file 0) ~data:contents
