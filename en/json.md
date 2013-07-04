@@ -463,10 +463,10 @@ each option starting with an uppercase letter as is conventional for OCaml
 variants. However, the the JSON values that come back from Github are actually
 lowercase, and so aren't exactly the same as the option name.
 
-The annotation `<json name="user">` signals that the JSON value of the field
-should be treated as `name`, but the value of the parsed variant in OCaml
-should be `User`.  These annotations are also useful to map JSON values to
-reserved keywords in OCaml (e.g. `type`).
+The annotation `<json name="user">` signals that the JSON value of the field is
+`user`, but that the name of the parsed variant in OCaml should be `User`.
+These annotations are often useful to map JSON values to reserved keywords in
+OCaml (e.g. `type`).
 
 ### Compiling ATD specifications to OCaml
 
