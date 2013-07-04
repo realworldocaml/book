@@ -11,13 +11,13 @@ your problem is.
 We'll start by using the popular and simple JSON data format, and then look at
 other serialization formats later in in the book.  This chapter introduces you
 to a couple of new techniques that glue together the basic ideas from Part I of
-the book:
+the book by using:
 
-* Using polymorphic variants to write more extensible libraries and protocols (but
+* _polymorphic variants_ to write more extensible libraries and protocols (but
   still retain the ability to extend them if needed)
-* The use of _combinators_ to compose common operations over data
+* _functional combinators_ to compose common operations over data
   structures in a type-safe way.
-* Using external tools to generate boilerplate OCaml modules and
+* external tools to generate boilerplate OCaml modules and
   signatures from external specification files.
 
 ## JSON Basics
