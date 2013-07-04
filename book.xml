@@ -76,9 +76,9 @@
       </listitem>
       <listitem>
         <para>
-          <emphasis>Generics</emphasis> to enable abstractions to be
-          constructed across different datatypes, available as C++
-          templates or in Java or C#.
+          <emphasis>Parametric polymorphism</emphasis> to enable
+          abstractions to be constructed across different datatypes,
+          available as C++ templates or generics in Java or C#.
         </para>
       </listitem>
       <listitem>
@@ -169,7 +169,7 @@
         Vouillon. This object system was notable for supporting many
         common OO idioms in a statically type-safe way, whereas the same
         idioms required runtime checks in languages such as C++ or Java.
-        In 2000, Jacques Garrique extended OCaml with several new
+        In 2000, Jacques Garrigue extended OCaml with several new
         features such as polymorphic methods and variants and labelled
         and optional arguments.
       </para>
@@ -180,8 +180,8 @@
         and for academic use. First-class modules, Generalized Algebraic
         Data Types (GADTs) and dynamic linking have improved the
         flexibility of the language, and there is fast native code
-        support for x86_64, ARM, PowerPC and Sparc64, making OCaml a
-        good choice for systems where resource usage, predictability and
+        support for x86_64, ARM, PowerPC and Sparc, making OCaml a good
+        choice for systems where resource usage, predictability and
         performance all matter.
       </para>
     </sect2>
@@ -22477,9 +22477,9 @@ val def : int list Deferred.t = &lt;abstr&gt;
       ordinary way from Async.
     </para>
     <warning> 
-    <note> 
+    <title>
     Thread-safety and locking
-    </note>
+    </title>
     <para>
       Once you start working with system threads, you'll need to be
       careful about locking your data-structures. Most OCaml
