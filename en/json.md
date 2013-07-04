@@ -108,37 +108,19 @@ functions:
 ((typ ocaml)(name json/yojson_basic.mli)(part 1))
 ```
 
-When first reading these interfaces, you can generally ignore the
-optional arguments (which have the question marks in the type
-signature), as they will be filled in with sensible values. In the
-above signature, the optional arguments offer finer control over the
-memory buffer allocation and error messages from parsing incorrect
-JSON.
+When first reading these interfaces, you can generally ignore the optional
+arguments (which have the question marks in the type signature), as they will
+be filled in with sensible values. In the above signature, the optional
+arguments offer finer control over the memory buffer allocation and error
+messages from parsing incorrect JSON.
 
 The type signature for these functions with the optional elements removed makes
-their purpose much clearer.  The two ways of parsing the JSON are either
-directly from a string or from a file on a filesystem.
+their purpose much clearer.  The three ways of parsing JSON are either directly
+from a string, from a file on a filesystem, or via a buffered input channel.
 
 ```frag
 ((typ ocaml)(name json/yojson_basic_simple.mli))
 ```
-
-<note>
-<title>The standard OCaml `in_channel` and `out_channel`</title>
-
-You'll notice when reading the Yojson interface that we've left out the
-`from_channel` function, which uses a `in_channel` type provided by the OCaml
-standard library.  These OCaml channels are considered deprecated in Core, as
-they're primarily used by the compiler itself, but don't always play well with
-threading and asynchronous programming.
-
-The Core equivalent are the `In_channel` and `Out_channel` modules instead, but
-you will still see the standard OCaml channel types being used in third-party
-libraries such as Yojson which weren't specifically designed to be used with
-Core.  They won't do any harm if you don't use them in your code, so just
-ignore them and use strings or files instead.
-
-</note>
 
 The next example shows both the string and file functions in action, assuming
 the JSON record is stored in a file called `book.json`.
@@ -391,8 +373,8 @@ The `Safe.json` type includes all of the variants from `Basic.json` and extends
 it with a few more useful ones.  A standard JSON type such as a `String` will
 type-check against both the `Basic` module and also the non-standard `Safe`
 module.  If you use the extension values with the `Basic` module however, the
-compiler will reject your code until you make it compliant with the
-portable subset of JSON.
+compiler will reject your code until you make it compliant with the portable
+subset of JSON.
 
 Yojson supports the following JSON extensions:
 
