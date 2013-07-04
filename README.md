@@ -1,8 +1,16 @@
+To build the site from scratch, do:
+
+```
+$ make depend
+$ make
+```
+
+The output will be in `data/live_site/trunk/en/html/index.html`.
 `gen-book.sh` is the script that glues everything together.
 
-`code/` contains all the code examples.  You can `(cd code && make)` to
-rebuild all the files.  Every subdirectory in `code/` contains a set
-of fragments that represent OCaml code or shell commands or a toplevel
+`code/` contains all the code examples.  You can `(cd code && make)` to rebuild
+all the files, or just `make depend`.  Every subdirectory in `code/` contains a
+set of fragments that represent OCaml code or shell commands or a toplevel
 fragment.
 
 ## Code blocks
