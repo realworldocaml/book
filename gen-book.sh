@@ -69,7 +69,6 @@ echo Source files: ${SRCS}
 rm -rf build/${LINGUA}
 mkdir -p build/${LINGUA}/source build/${LINGUA}/html
 echo Inserting code fragments in Markdown
-set -x
 mkdir -p build/${LINGUA}/md-ora
 for i in ${SRCS}; do
   ./scripts/_build/transform_markdown.native < ${LINGUA}/${i} > build/${LINGUA}/md-ora/${i}

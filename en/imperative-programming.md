@@ -35,7 +35,7 @@ _i.e._, a mutable mapping from keys to values.  This is really for
 illustration purposes; both Core and the standard library provide
 imperative dictionaries, and for most real world tasks, you should use
 one of those implementations.  There's more advice on using Core's
-implementation in particular in [xref](#maps-and-hashtables).
+implementation in particular in [xref](#maps-and-hash-tables).
 
 Our dictionary, like those in Core and the standard library, will be
 implemented as a hash table.  In particular, we'll use an _open
