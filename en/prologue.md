@@ -176,9 +176,9 @@ Real World OCaml is split into three parts and appendices:
   concepts and examples is important.  This part opens up with a
   guided tour to give you a quick overview of the language.  It then
   moves onto modules, functors and objects, which may take some time
-  to digest.  Persevere though; even though these concepts may be
-  difficult at first, they will put you in good stead even when
-  switching to other languages, many of which have drawn inspiration
+  to digest.  It is persevering, however: even though these concepts may be
+  difficult at first, they will put you in good stead when
+  switching to other modern languages, many of which have drawn inspiration
   from ML.
 
 * Part II builds on the basics by working through useful tools and techniques.
