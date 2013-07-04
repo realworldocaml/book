@@ -62,16 +62,11 @@ as well as contain an actual value.
 <note>
 <title>Installing the Yojson library</title>
 
-There are several JSON libraries available for OCaml.  For this
-chapter, we've picked the [`Yojson`](http://mjambon.com/yojson.html)
-library by Martin Jambon.  It's easiest to install via OPAM.
-
-```
-$ opam install yojson
-```
-
-See [xref](#installation) for installation instructions if you haven't already
-got OPAM. Once installed, you can open it in the `utop` toplevel by:
+There are several JSON libraries available for OCaml.  For this chapter, we've
+picked the [`Yojson`](http://mjambon.com/yojson.html) library by Martin Jambon.
+It's easiest to install via OPAM by running `opam install yojson`.  See
+[xref](#installation) for installation instructions if you haven't already got
+OPAM. Once installed, you can open it in the `utop` toplevel by:
 
 ```frag
 ((typ ocamltop)(name json/install.topscript)(header false))
