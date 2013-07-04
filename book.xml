@@ -9187,7 +9187,7 @@ Exception: Key_not_found(&quot;c&quot;).
       the standard library provide imperative dictionaries, and for most
       real world tasks, you should use one of those implementations.
       There's more advice on using Core's implementation in particular
-      in <xref linkend="maps-and-hashtables"/>.
+      in <xref linkend="maps-and-hash-tables"/>.
     </para>
     <para>
       Our dictionary, like those in Core and the standard library, will
@@ -13536,60 +13536,9 @@ val unique_handler : Sexp.t -&gt; query_handler_instance = &lt;fun&gt;
   <para>
     Almost every notable modern programming language has been influenced
     by OOP, and you'll have run across these terms if you've ever used
-    C++, Java, C#, Ruby, Python or Javascript.
+    C++, Java, C#, Ruby, Python or JavaScript.
   </para>
   </note>
-  <sect1 id="when-to-use-objects">
-    <title>When to use objects</title>
-    <para>
-      You might wonder when to use objects in OCaml, which has a
-      multitude of alternative mechanisms to express the same concept.
-      First-class modules are more expressive (a module can include
-      types, while classes and objects cannot). Modules, functors, and
-      algebraic data types also offer a wide range of ways to express
-      program structure. In fact, many seasoned OCaml programmers rarely
-      use classes and objects, if at all.
-    </para>
-    <para>
-      Modules already provide these features in some form, but the main
-      focus of classes is on code reuse through inheritance and late
-      binding of methods. This is a critical property of classes: the
-      methods that implement an object are determined when the object is
-      instantiated, a form of <emphasis>dynamic</emphasis> binding. In
-      the meantime, while classes are being defined, it is possible (and
-      necessary) to refer to methods without knowing statically how they
-      will be implemented.
-    </para>
-    <para>
-      In contrast, modules use static (lexical) scoping. If you want to
-      parameterize your module code so that some part of it can be
-      implemented later, you would write a function or functor. This is
-      more explicit, but often more verbose than overriding a method in
-      a class.
-    </para>
-    <para>
-      In general, a rule of thumb is: use classes and objects in
-      situations where dynamic binding is a big win, for example if you
-      have many similar variations in the implementation of a concept.
-      Two good examples are Xavier Leroy's
-      <ulink url="http://gallium.inria.fr/~xleroy/software.html#cryptokit">Cryptokit</ulink>,
-      which provides a variety of cryptographic primitives that can be
-      combined in building-block style, and the
-      <ulink url="http://cristal.inria.fr/camlimages/">Camlimages</ulink>
-      library which manipulates various graphical file formats. And, of
-      course, the use of objects isn't just a programming choice -- it
-      might be driven by design choices, or because of the need to
-      interact with existing components that are already object
-      oriented.
-    </para>
-    <para>
-      In this chapter, we'll introduce you to the basics of object
-      definition and use in OCaml, and then demonstrate their use with
-      an example using Cryptokit. We'll return to the more advanced
-      areas of object use later on in the book in
-      <xref linkend="classes"/>.
-    </para>
-  </sect1>
   <sect1 id="ocaml-objects">
     <title>OCaml objects</title>
     <para>
@@ -13612,19 +13561,26 @@ val unique_handler : Sexp.t -&gt; query_handler_instance = &lt;fun&gt;
       example of a simple object.
     </para>
     <programlisting language="ocaml">
-# let r =
-  object
-    val mutable v = 0
-    method get = v
-    method set i = v &lt;- i
+# let s = object
+    val mutable v = [0; 2]
+
+    method pop =
+      match v with
+        hd :: tl -&gt; 
+          v &lt;- tl;
+          Some hd
+      | [] -&gt; None
+
+    method push hd = 
+      v &lt;- hd :: v
   end;;
-val r : &lt; get : int; set : int -&gt; unit &gt; = &lt;obj&gt;
+val s : &lt; pop : int option; push : int -&gt; unit &gt; = &lt;obj&gt;
 </programlisting>
     <para>
-      The object has an integer value <literal>v</literal>, a method
-      <literal>get</literal> that returns v, and a method
-      <literal>set</literal> that updates the value of
-      <literal>v</literal>.
+      The object has an integer list value <literal>v</literal>, a
+      method <literal>pop</literal> that returns the head of
+      <literal>v</literal>, and a method <literal>push</literal> that
+      adds an integer to the head of <literal>v</literal>.
     </para>
     <para>
       The object type is enclosed in angle brackets
@@ -13636,12 +13592,12 @@ val r : &lt; get : int; set : int -&gt; unit &gt; = &lt;obj&gt;
       <literal>#</literal> character.
     </para>
     <programlisting language="ocaml">
-# r#get;
-- : int = 0
-# r#set 17;;
+# s#pop;;
+- : int option = Some 0
+# s#push 4;;
 - : unit = ()
-# r#get;;
-- : int = 17
+# s#pop;;
+- : int option = Some 4
 </programlisting>
     <para>
       Objects can also be constructed by functions. If we want to
@@ -13649,24 +13605,32 @@ val r : &lt; get : int; set : int -&gt; unit &gt; = &lt;obj&gt;
       that takes the value and returns an object.
     </para>
     <programlisting language="ocaml">
-# let make i =
-  object
-    val mutable v = i
-    method get = v
-    method set y = v &lt;- y
+# let stack init = object
+    val mutable v = init
+
+    method pop =
+      match v with
+        hd :: tl -&gt; 
+          v &lt;- tl;
+          Some hd
+      | [] -&gt; None
+
+    method push hd = 
+      v &lt;- hd :: v
   end;;
-val make : 'a -&gt; &lt; get : 'a; set : 'a -&gt; unit &gt; = &lt;fun&gt;
-# let r = make 5;;
-val r : &lt; get : int; set : int -&gt; unit &gt; = &lt;obj&gt;
-# r#get;;
-- : int = 5
+val stack : 'a list -&gt; &lt; pop : 'a option; push : 'a -&gt; unit &gt; = &lt;fun&gt;
+# let s = stack [3; 2; 1];;
+val s : &lt; pop : int option; push : int -&gt; unit &gt; = &lt;obj&gt;
+# s#pop;;
+- : int option = Some 3
 </programlisting>
     <para>
-      Note that the types of the function <literal>make</literal> and
+      Note that the types of the function <literal>stack</literal> and
       the returned object now use the polymorphic type
-      <literal>'a</literal>. When make is invoked on a concrete value
-      <literal>5</literal>, we get the same object type as before, with
-      type <literal>int</literal> for the value.
+      <literal>'a</literal>. When <literal>stack</literal> is invoked on
+      a concrete value <literal>[3; 2; 1]</literal>, we get the same
+      object type as before, with type <literal>int</literal> for the
+      values on the stack.
     </para>
   </sect1>
   <sect1 id="object-polymorphism">
@@ -13676,16 +13640,13 @@ val r : &lt; get : int; set : int -&gt; unit &gt; = &lt;obj&gt;
       type declaration.
     </para>
     <programlisting language="ocaml">
-# let size p =
-    sqrt (p#x ** 2. +. p#y ** 2.);;
-val size : &lt; x : float; y : float; .. &gt; -&gt; float = &lt;fun&gt;
-# let reset p: unit = 
-    p#move 0. 0.;;
-val reset : &lt; move : float -&gt; float -&gt; unit; .. &gt; -&gt; unit = &lt;fun&gt;
-# let limit p =
-    if (size p) &gt; 10. then reset p;;
-val limit :
-  &lt; move : float -&gt; float -&gt; unit; x : float; y : float; .. &gt; -&gt; unit = &lt;fun&gt;
+# let area sq = sq#width ** 2.;;
+val area : &lt; width : float; .. &gt; -&gt; float = &lt;fun&gt;
+# let minimize sq : unit = sq#resize 1.;;
+val minimize : &lt; resize : float -&gt; unit; .. &gt; -&gt; unit = &lt;fun&gt;
+# let limit sq = 
+    if (area sq) &gt; 10. then minimize sq;;
+val limit : &lt; resize : float -&gt; unit; width : float; .. &gt; -&gt; unit = &lt;fun&gt;
 </programlisting>
     <para>
       As you can see object types are inferred automatically from the
@@ -13696,26 +13657,21 @@ val limit :
       same method:
     </para>
     <programlisting language="ocaml">
-# let print_coord c = 
-    print_string (&quot;(&quot; ^ c#x ^ &quot;,&quot; ^ c#y ^ &quot;)&quot;);;
-val print_coord : &lt; x : string; y : string; .. &gt; -&gt; unit = &lt;fun&gt;
-# let print_limited c =
-    limit c;
-    print_coord c;;
-Characters 47-48:
-  print_coord c;;
-              ^
-Error: This expression has type
-         &lt; move : float -&gt; float -&gt; unit; x : float; y : float; .. &gt;
-       but an expression was expected of type 
-         &lt; x : string; y : string; .. &gt;
-       Types for method x are incompatible
+# let toggle sq b : unit = 
+    if b then sq#resize `Fullscreen
+    else minimize sq;;
+Characters 76-78:
+    else minimize sq;;
+                  ^^
+Error: This expression has type &lt; resize : [&gt; `Fullscreen ] -&gt; unit; .. &gt;
+       but an expression was expected of type &lt; resize : float -&gt; unit; .. &gt;
+       Types for method resize are incompatible
 </programlisting>
     <para>
       The <literal>..</literal> in the inferred object types are
       ellipsis, standing for any other methods. The type
-      <literal>&lt; x : float; .. &gt;</literal> specifies an object
-      that must have at least an <literal>x</literal> method, and
+      <literal>&lt; width : float; .. &gt;</literal> specifies an object
+      that must have at least an <literal>width</literal> method, and
       possibly some others as well. Such object types are said to be
       <emphasis>open</emphasis>.
     </para>
@@ -13724,21 +13680,19 @@ Error: This expression has type
       type annotation:
     </para>
     <programlisting language="ocaml">
-# let size (p: &lt; x: float; y: float &gt;) =
-    sqrt (p#x ** 2. +. p#y ** 2.);;
-val size : &lt; x : float; y : float &gt; -&gt; float = &lt;fun&gt;
-# let p = object 
-    method x = 3. 
-    method y = 4. 
-    method name = &quot;p&quot; 
+# let area_closed (r: &lt; width : float &gt;) = r#width ** 2.;;
+val area_closed : &lt; width : float &gt; -&gt; float = &lt;fun&gt;
+# let sq = object
+    method width = 3. 
+    method name = &quot;sq&quot; 
   end;;
-val p : &lt; name : string; x : float; y : float &gt; = &lt;obj&gt;
-# size p;;
-Characters 7-10:
-  size p;;
-       ^
-Error: This expression has type &lt; name : string; x : float; y : float &gt;
-       but an expression was expected of type &lt; x : float; y : float &gt;
+val sq : &lt; name : string; width : float &gt; = &lt;obj&gt;
+# area_closed sq;;
+Characters 12-14:
+  area_closed sq;;
+              ^^
+Error: This expression has type &lt; name : string; width : float &gt;
+       but an expression was expected of type &lt; width : float &gt;
        The second object type has no method name
 </programlisting>
     <note>
@@ -13753,12 +13707,12 @@ Error: This expression has type &lt; name : string; x : float; y : float &gt;
       obscure error.
     </para>
     <programlisting language="ocaml">
-# type point = &lt; x: float; y: float; .. &gt;;;
-Characters 5-39:
-  type point = &lt; x: float; y: float; .. &gt;;;
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# type square = &lt; width : float; ..&gt;;;
+Characters 5-34:
+  type square = &lt; width : float; ..&gt;;;
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Error: A type variable is unbound in this type declaration.
-In type &lt; x : float; y : float; .. &gt; as 'a the variable 'a is unbound
+In type &lt; width : float; .. &gt; as 'a the variable 'a is unbound
 </programlisting>
     <para>
       A <literal>..</literal> in an object type is called a
@@ -13772,28 +13726,25 @@ In type &lt; x : float; y : float; .. &gt; as 'a the variable 'a is unbound
     </para>
     </note>
     <para>
-      An object of type <literal>&lt; get:int; .. &gt;</literal> can be
-      any object with a method <literal>get:int</literal>, it doesn't
-      matter how it is implemented. When the method
-      <literal>#get</literal> is invoked, the actual method that is run
+      An object of type
+      <literal>&lt; pop : int option; .. &gt;</literal> can be any
+      object with a method <literal>pop : int option</literal>, it
+      doesn't matter how it is implemented. When the method
+      <literal>#pop</literal> is invoked, the actual method that is run
       is determined by the object.
     </para>
     <programlisting language="ocaml">
-# let print_ival i = 
-    printf &quot;Int: %d\n&quot; i#get;;
-val print_ival : &lt; get : int; .. &gt; -&gt; unit = &lt;fun&gt;
-# print_ival (make 5);;
-Int: 5
+# let print_pop st = Option.iter ~f:(printf &quot;Popped: %d\n&quot;) st#pop;;
+val print_pop : &lt; pop : int Core.Std.Option.t; .. &gt; -&gt; unit = &lt;fun&gt;
+# print_pop (stack [5;4;3;2;1]);;
+Popped: 5
 - : unit = ()
 # let t = object
-    method get = Float.to_int (Time.to_float (Time.now ()))
+    method pop = Some (Float.to_int (Time.to_float (Time.now ())))
   end;;
-val t : &lt; get : int &gt; = &lt;obj&gt;
-# print_ival t;;
-Int: 1370650589
-- : unit = ()
-# print_ival t;;
-Int: 1370650592
+val t : &lt; pop : int option &gt; = &lt;obj&gt;
+# print_pop t;;
+Popped: 1372618419
 - : unit = ()
 </programlisting>
   </sect1>
@@ -13807,39 +13758,45 @@ Int: 1370650592
     </para>
     <para>
       Indeed, in many programs, this makes sense, but it is by no means
-      required. Let's define a function that creates immutable point
+      required. Let's define a function that creates immutable stack
       objects.
     </para>
     <programlisting language="ocaml">
-# let point (init_x: float) (init_y: float) = object
-    val x = init_x
-    val y = init_y
-    method x = x
-    method y = y
-    method move new_x new_y = {&lt; x = new_x; y = new_y &gt;}
+# let imm_stack init = object
+    val v = init
+
+    method pop =
+      match v with
+        hd :: tl -&gt; Some (hd, {&lt; v = tl &gt;})
+      | [] -&gt; None 
+
+    method push hd = 
+      {&lt; v = hd :: v &gt;}
   end;;
-val point : float -&gt; float -&gt; 
-  (&lt; move : float -&gt; float -&gt; 'a; x : float; y : float &gt; as 'a) = &lt;fun&gt;
+val imm_stack : 
+  'a list -&gt; (&lt; pop : ('a * 'b) option; push : 'a -&gt; 'b &gt; as 'b) = &lt;fun&gt;
 </programlisting>
     <para>
-      A key part of the implementation is the definition of the method
-      <literal>move</literal>. The expression
-      <literal>{&lt; ... &gt;}</literal> produces a copy of the current
-      object, with the same type, and the specified fields updated. In
-      other words, the <literal>move new_x new_y</literal> method
-      produces a copy of the object, with <literal>x</literal> replaced
-      by <literal>new_x</literal> and <literal>y</literal> replaced by
-      <literal>new_y</literal>. The original object is not modified.
+      The key parts of this implementation are in the
+      <literal>pop</literal> and <literal>push</literal> methods. The
+      expression <literal>{&lt; ... &gt;}</literal> produces a copy of
+      the current object, with the same type, and the specified fields
+      updated. In other words, the <literal>push hd</literal> method
+      produces a copy of the object, with <literal>v</literal> replaced
+      by <literal>hd :: v</literal>. The original object is not
+      modified.
     </para>
     <programlisting language="ocaml">
-# let p = point 3. 4.;;
-val p : &lt; move : float -&gt; float -&gt; 'a; x : float; y : float &gt; as 'a = &lt;obj&gt;
-# let q = p#move 3. 5.;;
-val q : &lt; move : float -&gt; float -&gt; 'a; x : float; y : float &gt; as 'a = &lt;obj&gt;
-# p#y;;
-- : float = 4.
-# q#y;;
-- : float = 5.
+# let s = imm_stack [3; 2; 1];;
+val s : &lt; pop : (int * 'a) option; push : int -&gt; 'a &gt; as 'a = &lt;obj&gt;
+# let t = s#push 4;;
+val t : &lt; pop : (int * 'a) option; push : int -&gt; 'a &gt; as 'a = &lt;obj&gt;
+# s#pop;;
+- : (int * (&lt; pop : 'a; push : int -&gt; 'b &gt; as 'b)) option as 'a =
+Some (3, &lt;obj&gt;)
+# t#pop;;
+- : (int * (&lt; pop : 'a; push : int -&gt; 'b &gt; as 'b)) option as 'a =
+Some (4, &lt;obj&gt;)
 </programlisting>
     <para>
       There are some restriction on the use of the expression
@@ -13849,16 +13806,16 @@ val q : &lt; move : float -&gt; float -&gt; 'a; x : float; y : float &gt; as 'a 
       cannot be changed dynamically.
     </para>
   </sect1>
-  <sect1 id="when-to-use-objects-1">
+  <sect1 id="when-to-use-objects">
     <title>When to use objects</title>
     <para>
       You might wonder when to use objects in OCaml, which has a
       multitude of alternative mechanisms to express the similar
       concepts. First-class modules are more expressive (a module can
       include types, while classes and objects cannot). Modules,
-      functors, and algebraic data types also offer a wide range of ways
-      to express program structure. In fact, many seasoned OCaml
-      programmers rarely use classes and objects, if at all.
+      functors, and datatypes also offer a wide range of ways to express
+      program structure. In fact, many seasoned OCaml programmers rarely
+      use classes and objects, if at all.
     </para>
     <para>
       Objects have some advantages over records: they don't require type
@@ -13913,7 +13870,7 @@ val q : &lt; move : float -&gt; float -&gt; 'a; x : float; y : float &gt; as 'a 
       <literal>s</literal> is a subtype of <literal>t</literal>.
     </para>
     <sect2 id="width-subtyping">
-      <title>Width Subtyping</title>
+      <title>Width subtyping</title>
       <para>
         To explore this, let's define some simple object types for
         geometric shapes. The generic type <literal>shape</literal> has
@@ -13966,6 +13923,60 @@ val shape : float -&gt; shape = &lt;fun&gt;
         method).
       </para>
     </sect2>
+    <sect2 id="depth-subtyping">
+      <title>Depth subtyping</title>
+      <para>
+        We can also use <emphasis>depth</emphasis> subtyping with
+        objects. Depth subtyping, in its most general form, says that an
+        object type <literal>&lt; m: t1 &gt;</literal> is a subtype of
+        <literal>&lt; m: t2 &gt;</literal> iff <literal>t1</literal> is
+        a subtype of <literal>t2</literal>.
+      </para>
+      <para>
+        For example, we can create two objects with a
+        <literal>shape</literal> method:
+      </para>
+      <programlisting language="ocaml">
+# let coin = object
+    method shape = circle 0.5
+    method color = &quot;silver&quot;
+  end
+val coin : &lt; color : string; shape : circle &gt; = &lt;obj&gt;
+# let map = object
+    method shape = square 1.0
+  end
+val map : &lt; shape : square &gt; = &lt;obj&gt;
+</programlisting>
+      <para>
+        Both these objects have a <literal>shape</literal> method whose
+        type is a subtype of the <literal>shape</literal> type, so they
+        can both be coerced into the object type
+        <literal>&lt; shape : shape &gt;</literal>
+      </para>
+      <programlisting language="ocaml">
+# type item = &lt; shape : shape &gt;;;
+type item = &lt; shape : shape &gt;
+# let items = [ (coin :&gt; item) ; (map :&gt; item) ];;
+val items : item list = [&lt;obj&gt;; &lt;obj&gt;]
+</programlisting>
+    </sect2>
+    <sect2 id="polymorphic-variant-subtyping">
+      <title>Polymorphic variant subtyping</title>
+      <para>
+        Subtyping can also be used to coerce a polymorphic variant into
+        a larger polymorphic variant type.
+      </para>
+      <programlisting language="ocaml">
+# type num = [ `Int of int | `Float of float ];;
+type num = [ `Float of float | `Int of int ]
+# type const = [ num | `String of string ];;
+type const = [ `Float of float | `Int of int | `String of string ]
+# let n : num = `Int 3;;
+val n : num = `Int 3
+# let c : const = (n :&gt; const);;
+val c : const = `Int 3
+</programlisting>
+    </sect2>
     <sect2 id="variance">
       <title>Variance</title>
       <para>
@@ -13982,10 +13993,11 @@ val squares : square list = [&lt;obj&gt;; &lt;obj&gt;]
 val shapes : shape list = [&lt;obj&gt;; &lt;obj&gt;]
 </programlisting>
       <para>
-        This would not be safe for all types built from objects. For
-        instance, it is not safe to coerce a
-        <literal>square array</literal> into a
-        <literal>shape array</literal>.
+        Note that this relies on lists being immutable. It would not be
+        safe to treat a <literal>square array</literal> as a
+        <literal>shape array</literal> because it would allow you to
+        store non-square shapes into what should be an array of squares.
+        OCaml recognises this and does not allow the coercion.
       </para>
       <programlisting language="ocaml">
 # let square_array: square array = [| square 1.0; square 2.0 |];;
@@ -14000,116 +14012,210 @@ Type square = &lt; area : float; width : float &gt; is not compatible with type
 The second object type has no method width
 </programlisting>
       <para>
-        This is disallowed because it would allow non-square shapes to
-        be inserted into <literal>square_array</literal>. We call such
-        types <emphasis>invariant</emphasis>, while types like
-        <literal>list</literal> are said to be
-        <emphasis>covariant</emphasis>.
+        We say that <literal>'a list</literal> is
+        <emphasis>covariant</emphasis> (in <literal>'a</literal>),
+        whilst <literal>'a array</literal> is
+        <emphasis>invariant</emphasis>.
       </para>
       <para>
-        For some types the type built from <literal>shape</literal> is a
-        subtype of the one built from <literal>square</literal>.
+        Subtyping function types requires a third class of variance. A
+        function with type <literal>square -&gt; string</literal> cannot
+        be used with type <literal>shape -&gt; string</literal> because
+        it expects its argument to be a <literal>square</literal> and
+        would not know what to do with a <literal>circle</literal>.
+        However, a function with type
+        <literal>shape -&gt; string</literal> <emphasis>can</emphasis>
+        safely be used with type <literal>square -&gt; string</literal>.
       </para>
       <programlisting language="ocaml">
-# type 'a to_string = 'a -&gt; string;;
-type 'a to_string = 'a -&gt; string
-# let shape_to_string: shape to_string = 
+# let shape_to_string: shape -&gt; string = 
     fun s -&gt; sprintf &quot;Shape(%F)&quot; s#area;;
-val shape_to_string : shape to_string = &lt;fun&gt;
-# let square_to_string: square to_string = 
-    (shape_to_string :&gt; square to_string);;
-val square_to_string : square to_string = &lt;fun&gt;
+val shape_to_string : shape -&gt; string = &lt;fun&gt;
+# let square_to_string: square -&gt; string = 
+    (shape_to_string :&gt; square -&gt; string);;
+val square_to_string : square -&gt; string = &lt;fun&gt;
 </programlisting>
       <para>
-        We call such types <emphasis>contravariant</emphasis>.
+        We say that <literal>'a -&gt; string</literal> is
+        <emphasis>contravariant</emphasis> in <literal>'a</literal>. In
+        general, function types are contravariant in their arguments and
+        covariant in their results.
       </para>
-    </sect2>
-    <sect2 id="depth-subtyping">
-      <title>Depth subtyping</title>
+      <note>
+      <title>
+      Variance annotations
+      </title>
       <para>
-        We can also extend subtyping to object types whose methods types
-        are subtypes. This is commonly called <emphasis>depth</emphasis>
-        subtyping, which, in its most general form, says that an object
-        type <literal>&lt; m: t1 &gt;</literal> is a subtype of
-        <literal>&lt; m: t2 &gt;</literal> iff <literal>t1</literal> is
-        a subtype of <literal>t2</literal>.
-      </para>
-      <para>
-        To explore this, let's start building objects containing shapes
-        by applying our <literal>make</literal> function to a square and
-        a circle.
+        OCaml works out the variance of a type using that type's
+        definition.
       </para>
       <programlisting language="ocaml">
-# type square_val = &lt; get: square; set: square -&gt; unit &gt;;;
-type square_val = &lt; get : square; set : square -&gt; unit &gt;
-# let sq_val: square_val = make (square 3.0);;
-val sq_val : square_val = &lt;obj&gt;
-# type circle_val = &lt; get: circle; set: circle -&gt; unit &gt;;;
-type circle_val = &lt; get : circle; set : circle -&gt; unit &gt;
-# let circ_val: circle_val = make (circle 2.0);;
-val circ_val : circle_val = &lt;obj&gt;
+# module Either = struct
+  type ('a, 'b) t = 
+      Left of 'a
+    | Right of 'b
+end;;
+module Either : sig type ('a, 'b) t = Left of 'a | Right of 'b end
+# let sq : (square, circle) Either.t = Either.Left (square 4.0);;
+val sq : (square, circle) Either.t = Either.Left &lt;obj&gt;
+# let sh : (shape, shape) Either.t = (sq :&gt; (shape, shape) Either.t);;
+val sh : (shape, shape) Either.t = Either.Left &lt;obj&gt;
 </programlisting>
       <para>
-        If we wanted to write a function that took a list of such
-        objects and found the total area of their shapes, we might try:
+        However, if the definition is hidden by a signature then OCaml
+        is forced to assume that the type is invariant.
       </para>
       <programlisting language="ocaml">
-# type shape_val = &lt; get: shape; set: shape -&gt; unit &gt;;;
-type shape_val = &lt; get : shape; set : shape -&gt; unit &gt;
-let total_area (shape_vals: shape_val list) =
-    List.fold ~init:0.0 ~f:(fun t s -&gt; t +. s#get#area) shape_vals;;
-val total_area : shape_val list -&gt; float = &lt;fun&gt;
+# module Either : sig 
+    type ('a, 'b) t
+    val left: 'a -&gt; ('a, 'b) t
+    val right: 'b -&gt; ('a, 'b) t
+  end = struct
+    type ('a, 'b) t = 
+        Left of 'a
+      | Right of 'b
+    let left x = Left x
+    let right x = Right x
+  end;;
+module Either :
+  sig
+    type ('a, 'b) t
+    val left : 'a -&gt; ('a, 'b) t
+    val right : 'b -&gt; ('a, 'b) t
+  end
+# let sq : (square, circle) Either.t = Either.left (square 4.0);;
+val sq : (square, circle) Either.t = &lt;abstr&gt;
+# let sh : (shape, shape) Either.t = (sq :&gt; (shape, shape) Either.t);;
+Characters 35-66:
+  let sh : (shape, shape) Either.t = (sq :&gt; (shape, shape) Either.t);;
+                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error: Type (square, circle) Either.t is not a subtype of
+         (shape, shape) Either.t 
+       Type square = &lt; area : float; width : float &gt; is not compatible with type
+         shape = &lt; area : float &gt; 
+       The second object type has no method width
+</programlisting>
+      <para>
+        We can fix this by adding <emphasis>variance
+        annotations</emphasis> to the type's parameters in the
+        signature: <literal>+</literal> for covariance or
+        <literal>-</literal> for contravariance.
+      </para>
+      <programlisting language="ocaml">
+# module Either : sig 
+    type (+'a, +'b) t
+    val left: 'a -&gt; ('a, 'b) t
+    val right: 'b -&gt; ('a, 'b) t
+  end = struct
+    type ('a, 'b) t = 
+        Left of 'a
+      | Right of 'b
+    let left x = Left x
+    let right x = Right x
+  end;;
+module Either :
+  sig
+    type (+'a, +'b) t
+    val left : 'a -&gt; ('a, 'b) t
+    val right : 'b -&gt; ('a, 'b) t
+  end
+# let sq : (square, circle) Either.t = Either.left (square 4.0);;
+val sq : (square, circle) Either.t = &lt;abstr&gt;
+# let sh : (shape, shape) Either.t = (sq :&gt; (shape, shape) Either.t);;
+val sh : (shape, shape) Either.t = &lt;abstr&gt;
+</programlisting>
+      </note>
+      <para>
+        For a more concrete example of variance, let's create some
+        stacks containing shapes by applying our
+        <literal>stack</literal> function to some squares and some
+        circles.
+      </para>
+      <programlisting language="ocaml">
+# type 'a stack = &lt; pop: 'a option; push: 'a -&gt; unit &gt;;;
+type 'a stack = &lt; pop : 'a option; push : 'a -&gt; unit &gt;
+# let square_stack: square stack = stack [square 3.0; square 1.0];;
+val square_stack : square stack = &lt;obj&gt;
+# let circle_stack: circle stack = stack [circle 2.0; circle 4.0];;
+val circle_stack : circle stack = &lt;obj&gt;
+</programlisting>
+      <para>
+        If we wanted to write a function that took a list of such stacks
+        and found the total area of their shapes, we might try:
+      </para>
+      <programlisting language="ocaml">
+# let total_area (shape_stacks: shape stack list) =
+    let stack_area acc st = 
+      let rec loop acc =
+        match st#pop with
+          Some s -&gt; loop (acc +. s#area)
+        | None -&gt; acc
+      in
+        loop acc
+    in
+      List.fold ~init:0.0 ~f:stack_area shape_stacks;;
+val total_area : shape stack list -&gt; float = &lt;fun&gt;
 </programlisting>
       <para>
         However, when we try to apply this function to our objects we
         get an error:
       </para>
       <programlisting language="ocaml">
-# total_area [ (sq_val :&gt; shape_val); (circ_val :&gt; shape_val) ];;
-Characters 13-34:
-  total_area [ (sq_val :&gt; shape_val); (circ_val :&gt; shape_val) ];;
-               ^^^^^^^^^^^^^^^^^^^^^
-Error: Type square_val = &lt; get : square; set : square -&gt; unit &gt;
-       is not a subtype of shape_val = &lt; get : shape; set : shape -&gt; unit &gt; 
+# total_area [(square_stack :&gt; shape stack); (circle_stack :&gt; shape stack)];;
+Characters 12-41:
+  total_area [(square_stack :&gt; shape stack); (circle_stack :&gt; shape stack)];;
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Error: Type square stack = &lt; pop : square option; push : square -&gt; unit &gt;
+       is not a subtype of
+         shape stack = &lt; pop : shape option; push : shape -&gt; unit &gt; 
        Type shape = &lt; area : float &gt; is not a subtype of
-       square = &lt; area : float; width : float &gt; 
+         square = &lt; area : float; width : float &gt; 
 </programlisting>
       <para>
-        As you can see, <literal>square_val</literal> and
-        <literal>circle_val</literal> are not subtypes of
-        <literal>shape_val</literal>. The problem is with the
-        <literal>set</literal> method. For <literal>shape_val</literal>,
-        the <literal>set</literal> method takes an arbitrary
-        <literal>shape</literal>. So if we could coerce a
-        <literal>square_val</literal> to a <literal>shape_val</literal>,
-        then it would be possible to set sq_val to an arbitrary shape,
+        As you can see, <literal>square stack</literal> and
+        <literal>circle stack</literal> are not subtypes of
+        <literal>shape stack</literal>. The problem is with the
+        <literal>push</literal> method. For
+        <literal>shape stack</literal>, the <literal>push</literal>
+        method takes an arbitrary <literal>shape</literal>. So if we
+        could coerce a <literal>square stack</literal> to a
+        <literal>shape stack</literal>, then it would be possible to
+        push an arbitrary shape onto <literal>square stack</literal>,
         which would be an error.
       </para>
       <para>
         Another way of looking at this is that
-        <literal>&lt; set: 'a -&gt; unit; .. &gt;</literal> is
+        <literal>&lt; push: 'a -&gt; unit; .. &gt;</literal> is
         contravariant in <literal>'a</literal>, so
-        <literal>&lt; set: square -&gt; unit; get: square &gt;</literal>
-        cannot be subtype of
-        <literal>&lt; set: shape -&gt; unit; get: shape &gt;</literal>.
+        <literal>&lt; push: square -&gt; unit; pop: square option &gt;</literal>
+        cannot be a subtype of
+        <literal>&lt; push: shape -&gt; unit; pop: shape option &gt;</literal>.
       </para>
       <para>
         Still, the <literal>total_area</literal> function should be
-        fine, in principle. It doesn't call <literal>set</literal>, so
+        fine, in principle. It doesn't call <literal>push</literal>, so
         it isn't making that error. To make it work, we need to use a
         more precise type that indicates we are not going to be using
         the set method. We define a type
-        <literal>readonly_shape_val</literal> and confirm that we can
-        coerce the list of shapes to it.
+        <literal>readonly_stack</literal> and confirm that we can coerce
+        the list of stacks to it.
       </para>
       <programlisting language="ocaml">
-# type readonly_shape_val = &lt; get : shape &gt;;;
-type readonly_shape_val = &lt; get : shape &gt;
-# let total_area (shape_vals: readonly_shape_val list) =
-    List.fold_left (fun t s -&gt; t +. s#get#area) 0.0 shape_vals;;
-val total_area : readonly_shape_val list -&gt; float = &lt;fun&gt;
-# total_area [ (sq_val :&gt; readonly_shape_val); (circ_val :&gt; readonly_shape_val) ];;
-- : float = 21.5600000000000023
+# type 'a readonly_stack = &lt; pop : 'a option &gt;;;
+type 'a readonly_stack = &lt; pop : 'a option &gt;
+# let total_area (shape_stacks: shape readonly_stack list) =
+    let stack_area acc st = 
+      let rec loop acc =
+        match st#pop with
+          Some s -&gt; loop (acc +. s#area)
+        | None -&gt; acc
+      in
+        loop acc
+    in
+      List.fold ~init:0.0 ~f:stack_area shape_stacks;;
+val total_area : shape readonly_stack list -&gt; float = &lt;fun&gt;
+# total_area [(square_stack :&gt; shape readonly_stack); (circle_stack :&gt; shape readonly_stack)];;
+- : float = 72.8000000000000114
 </programlisting>
       <para>
         Aspects of this section may seem fairly complicated, but it
@@ -14121,11 +14227,10 @@ val total_area : readonly_shape_val list -&gt; float = &lt;fun&gt;
         <literal>T</literal>, it is simply not possible to use
         <literal>list&lt;square&gt;</literal> where
         <literal>list&lt;shape&gt;</literal> is expected (at least
-        safely). The situation is similar in Java, although Java
-        supports has an escape hatch that allows the program to fall
-        back to dynamic typing. The situation in OCaml is much better;
-        it works, it is statically checked, and the annotations are
-        pretty simple.
+        safely). The situation is similar in Java, although Java has an
+        escape hatch that allows the program to fall back to dynamic
+        typing. The situation in OCaml is much better; it works, it is
+        statically checked, and the annotations are pretty simple.
       </para>
     </sect2>
     <sect2 id="narrowing">
@@ -14194,7 +14299,7 @@ String GetShapeName(Shape s) {
         circles have the same radius.
       </para>
       <programlisting>
-boolean IsBarBell(Shape[] s) {
+boolean IsBarbell(Shape[] s) {
   return s.length == 3 &amp;&amp; (s[0] instanceof Circle) &amp;&amp;
     (s[1] instanceof Line) &amp;&amp; (s[2] instanceof Circle) &amp;&amp;
     ((Circle) s[0]).radius() == ((Circle) s[2]).radius();
@@ -14208,7 +14313,7 @@ boolean IsBarBell(Shape[] s) {
         seems like a better fit.
       </para>
       <programlisting language="ocaml">
-let is_bar_bell = function
+let is_barbell = function
  | [Circle r1; Line _; Circle r2] when r1 == r2 -&gt; true
  | _ -&gt; false;;
 </programlisting>
@@ -14226,7 +14331,7 @@ and repr =
  | Circle of circle
  | Line of line;;
  
-let is_bar_bell = function
+let is_barbell = function
  | [s1; s2; s3] -&gt;
    (match s1#variant, s2#variant, s3#variant with
      | Circle c1, Line _, Circle c2 when c1#radius == c2#radius -&gt; true
@@ -14250,9 +14355,10 @@ let is_bar_bell = function
         following:
       </para>
       <programlisting language="ocaml">
-# let filter_large v =
-  if v#get &lt; 10.0 then Some v else None;;
-val filter_large : (&lt; get : float; .. &gt; as 'a) -&gt; 'a option = &lt;fun&gt;
+# let remove_large l = 
+    List.filter ~f:(fun s -&gt; s#area &lt; 10.0) l;;
+val remove_large :
+  (&lt; area : float; .. &gt; as 'a) Core.Std.List.t -&gt; 'a Core.Std.List.t = &lt;fun&gt;
 </programlisting>
       <para>
         The return type of this function is built from the open object
@@ -14260,23 +14366,25 @@ val filter_large : (&lt; get : float; .. &gt; as 'a) -&gt; 'a option = &lt;fun&g
         may have.
       </para>
       <programlisting language="ocaml">
-# let v = make 5.0;;
-val v : &lt; get : float; set : float -&gt; unit &gt; = &lt;obj&gt;
-# filter_large v;;
-- : &lt; get : float; set : float -&gt; unit &gt; option = Some &lt;obj&gt;
+# let squares : &lt; area : float; width : float &gt; list = 
+    [square 3.0; square 4.0; square 2.0];;
+val squares : &lt; area : float; width : float &gt; list = [&lt;obj&gt;; &lt;obj&gt;; &lt;obj&gt;]
+# remove_large squares;;
+- : &lt; area : float; width : float &gt; Core.Std.List.t = [&lt;obj&gt;; &lt;obj&gt;]
 </programlisting>
       <para>
         Writing a similar function with a closed type and applying it
         using subtyping does not preserve the methods of the argument:
-        the returned object is only known to have a
-        <literal>get</literal> method.
+        the returned object is only known to have an
+        <literal>area</literal> method.
       </para>
       <programlisting language="ocaml">
-# let filter_large (v: &lt; get: float &gt;) =
-  if v#get &lt; 10.0 then Some v else None;;
-  val filter_large : &lt; get : float &gt; -&gt; &lt; get : float &gt; option = &lt;fun&gt;
-# filter_large (v :&gt; &lt; get: float &gt;);;
-- : &lt; get : float &gt; option = Some &lt;obj&gt;
+# let remove_large (l: &lt; area : float &gt; list) = 
+    List.filter ~f:(fun s -&gt; s#area &lt; 10.0) l;;
+val remove_large : &lt; area : float &gt; list -&gt; &lt; area : float &gt; Core.Std.List.t =
+  &lt;fun&gt;
+# remove_large (squares :&gt; &lt; area : float &gt; list );;
+- : &lt; area : float &gt; Core.Std.List.t = [&lt;obj&gt;; &lt;obj&gt;]
 </programlisting>
       <para>
         However, there are some situations where we cannot use row
@@ -14288,8 +14396,8 @@ val v : &lt; get : float; set : float -&gt; unit &gt; = &lt;obj&gt;
 Characters 50-60:
   let hlist: &lt; area: float; ..&gt; list = [square 1.0; circle 3.0];;
                                                     ^^^^^^^^^^
-Error: This expression has type &lt; area : float; radius : float &gt;
-       but an expression was expected of type &lt; area : float; width : float &gt;
+Error: This expression has type circle but an expression was expected of type
+         square
        The second object type has no method radius
 </programlisting>
       <para>
@@ -14303,12 +14411,12 @@ val shape_ref : &lt; area : float; width : float &gt; ref = {contents = &lt;obj&
 Characters 13-23:
   shape_ref := circle 2.0;;
                ^^^^^^^^^^
-Error: This expression has type &lt; area : float; radius : float &gt;
-       but an expression was expected of type &lt; area : float; width : float &gt;
-       The second object type has no method radius
+Error: This expression has type circle but an expression was expected of type
+         &lt; area : float; width : float &gt;
+       The first object type has no method width
 </programlisting>
       <para>
-        In these cases we must use subtyping:
+        In both these cases we must use subtyping:
       </para>
       <programlisting language="ocaml">
 # let hlist: shape list = [(square 1.0 :&gt; shape); (circle 3.0 :&gt; shape)];;
@@ -18259,10 +18367,6 @@ let () =
     <programlisting>
 # running json/run_read_json.out.sh
 $ ocamlbuild -use-ocamlfind -pkg core,yojson -tag thread read_json.native
-ocamlfind ocamldep -package core,yojson -modules read_json.ml &gt; read_json.ml.depends
-ocamlfind ocamlc -c -thread -package core,yojson -o read_json.cmo read_json.ml
-ocamlfind ocamlopt -c -thread -package core,yojson -o read_json.cmx read_json.ml
-ocamlfind ocamlopt -linkpkg -thread -package core,yojson read_json.cmx -o read_json.native
 $ ./read_json.native
 OK
 </programlisting>
@@ -18322,10 +18426,6 @@ let () =
     <programlisting>
 # running json/run_parse_book.out.sh
 $ ocamlbuild -use-ocamlfind -pkg core,yojson -tag thread parse_book.native
-ocamlfind ocamldep -package core,yojson -modules parse_book.ml &gt; parse_book.ml.depends
-ocamlfind ocamlc -c -thread -package core,yojson -o parse_book.cmo parse_book.ml
-ocamlfind ocamlopt -c -thread -package core,yojson -o parse_book.cmx parse_book.ml
-ocamlfind ocamlopt -linkpkg -thread -package core,yojson parse_book.cmx -o parse_book.native
 $ ./parse_book.native
 Title: Real World OCaml (450)
 Authors: Jason Hickey, Anil Madhavapeddy, Yaron Minsky
@@ -19180,8 +19280,6 @@ let () =
 $ atdgen -t github_org.atd
 $ atdgen -j github_org.atd
 $ ocamlbuild -use-ocamlfind -tag thread -pkg core_extended,yojson,atdgen github_org_info.native
-ocamlfind ocamlopt -c -thread -package core_extended,yojson,atdgen -o github_org_info.cmx github_org_info.ml
-ocamlfind ocamlopt -linkpkg -thread -package core_extended,yojson,atdgen github_org_t.cmx github_org_j.cmx github_org_info.cmx -o github_org_info.native
 </programlisting>
       <para>
         You can now run the command-line tool with a single argument to
