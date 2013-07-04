@@ -36,7 +36,7 @@ let typ_of_string s : typ =
 
 let of_string s =
   try
-    String.rstrip s |> Sexp.of_string |> t_of_sexp
+    String.strip s |> Sexp.of_string |> t_of_sexp
   with exn ->
     eprintf "ERR: %s\n while parsing: %s\n%!"
       (Exn.to_string exn) s; raise exn
@@ -82,7 +82,7 @@ let run_through_pygmentize lang contents =
     <:html<<div class="highlight">$data$</div>&>>
   |_ -> raise (Failure "unexpected pygments output: not <div class=highlight><pre>...")
 
-let wrap_in_pretty_box ~part typ file buf =
+let wrap_in_pretty_box ~part typ file (buf:Cow.Xml.t) =
   let repourl = sprintf "http://github.com/realworldocaml/code/" in
   let fileurl = sprintf "http://github.com/realworldocaml/code/TODO/%s" file in
   let part =
@@ -91,4 +91,4 @@ let wrap_in_pretty_box ~part typ file buf =
     | part -> <:html<, continued (part $int:part$)>>
   in
   let info = <:html<$str:typ$ &lowast; <a href=$str:fileurl$>$str:file$</a> $part$ &lowast; <a href=$str:repourl$>all code</a>&>> in
-  <:html<<div class="rwocode"><code><pre>$list:buf$</pre></code><div class="rwocodeinfo">$info$</div></div>&>>
+  <:html<<div class="rwocode"><code><pre>$buf$</pre></code><div class="rwocodeinfo">$info$</div></div>&>>
