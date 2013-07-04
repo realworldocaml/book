@@ -86,7 +86,7 @@ improvements have been steadily added to support the growing codebases that use
 the language both commercially and for academic use.  First-class modules,
 Generalized Algebraic Data Types (GADTs) and dynamic linking have improved the
 flexibility of the language, and there is fast native code support for x86_64,
-ARM, PowerPC and Sparc64, making OCaml a good choice for systems where resource
+ARM, PowerPC and Sparc, making OCaml a good choice for systems where resource
 usage, predictability and performance all matter.  
 
 ### The Core Standard Library
