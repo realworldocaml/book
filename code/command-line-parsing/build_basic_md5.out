@@ -1,5 +1,1 @@
 $ ocamlbuild -use-ocamlfind -pkg cryptokit,core -tag thread basic_md5.native
-ocamlfind ocamldep -package cryptokit,core -modules basic_md5.ml > basic_md5.ml.depends
-ocamlfind ocamlc -c -thread -package cryptokit,core -o basic_md5.cmo basic_md5.ml
-ocamlfind ocamlopt -c -thread -package cryptokit,core -o basic_md5.cmx basic_md5.ml
-ocamlfind ocamlopt -linkpkg -thread -package cryptokit,core basic_md5.cmx -o basic_md5.native
