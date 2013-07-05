@@ -40,15 +40,11 @@ representation of the result.
 ((typ ocaml)(name command-line-parsing/basic_md5.ml))
 ```
 
-You can compile this file the usual way with `ocamlfind` by passing an
-additional `cryptokit` package.  Install Cryptokit via OPAM if you didn't do so
-earlier.
+Use `opam install cryptokit` to install Cryptokit if you didn't do so earlier,
+and then build the example.
 
-```console
-$ opam install cryptokit
-$ ocamlfind ocamlopt -thread -package cryptokit -package core -linkpkg \
-  -o md5 basic_md5.ml
-$ ./md5
+```frag
+((typ ocaml)(name command-line-parsing/build_basic_md5.out))
 ```
 
 The `do_hash` function accepts a filename parameter and prints the
