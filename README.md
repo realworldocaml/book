@@ -29,6 +29,10 @@ The `code/` directory can contain the following file extensions:
 * `sh` files are shell scripts that are run directly, with their output
   directed to a `out` file in the `code/` subdirectory.  If you need
   to have a dependency, place it in `code/Makefile` directly.
+* `errsh` files behave exactly the same as `sh` scripts, except that they
+  are expected to return an error exit code (for example, to display
+  help text output from Command).  The build scripts invert their error
+  code so that error becomes success, so check the output carefully.
 * `rawsh` files are assumed to be valid shell fragments, including the
   output, and are never executed.  Use this when you're sure that you
   wont need to regenerate the output, or want to manually tweak it.

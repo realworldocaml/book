@@ -10,10 +10,12 @@ json_src=     $(wildcard $(dirs:%=%/*.json))
 atd_src=      $(wildcard $(dirs:%=%/*.atd))
 scripts=      $(wildcard $(dirs:%=%/*.sh))
 rawscripts=   $(wildcard $(dirs:%=%/*.rawsh))
+errscripts=   $(wildcard $(dirs:%=%/*.errsh))
 topscripts=   $(wildcard $(dirs:%=%/*.topscript))
 
 all_src=      $(ml_src) $(mli_src) $(json_src) $(atd_src)
-all_scripts=  $(scripts:%.sh=%.out) $(topscripts) $(rawscripts:%.rawsh=%.out)
+all_scripts=  $(scripts:%.sh=%.out) $(errscripts:%.errsh=%.out) \
+	      $(topscripts) $(rawscripts:%.rawsh=%.out)
 
 # The source files all map to %.<part>.html and %.<part>.md
 all_src_html= $(all_src:%=$(OBJ)/%.0.html) $(all_scripts:%=$(OBJ)/%.0.html)
@@ -60,6 +62,9 @@ $(OBJ)/%.out.0.html $(OBJ)/%.out.0.md: %.out
 # The outputs of the shell scripts should be checked in.
 %.out: %.sh
 	./exec_script.sh $< > $@ || (cat $@ && rm -f $@)
+
+%.out: %.errsh
+	! ./exec_script.sh $< > $@ 2>&1 || (cat $@ && rm -f $@)
 
 %.out: %.rawsh
 	cp $< $@
