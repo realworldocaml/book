@@ -183,7 +183,7 @@ Note that the time isn't actually serialized into an s-expression
 until the error is printed out.  We're not restricted to doing this
 kind of error reporting with built-in types.  This will be discussed
 in more detail in [xref](#data-serialization-with-s-expressions), but
-Sexplib comes with a language extension that can auto-generate
+Sexplib comes with a language extension that can autogenerate
 sexp-converters for newly generated types, as shown below.
 
 ```ocaml

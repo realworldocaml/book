@@ -790,7 +790,7 @@ generated for that type to parse the query from the user.
 
 The eval function itself is fairly straight-forward, dispatching to
 the appropriate functions to respond to each type of query.  Note that
-we use write `<sexp_of<string list>>` to auto-generate a function for
+we use write `<sexp_of<string list>>` to autogenerate a function for
 converting a list of strings to an s-expression.  This is part of the
 sexplib package described in
 [xref](#data-serialization-with-s-expressions).  
