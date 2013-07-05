@@ -475,7 +475,7 @@ val do_stuff : int -> unit = <fun>
 
 With a name like `loop_forever`, the meaning is clear enough in this
 case.  But with something like `Scheduler.go`, the fact that it never
-returns is less clear, and so we use the type-system to make it more
+returns is less clear, and so we use the type system to make it more
 explicit by giving it a return type of `never_returns`.  To make it
 clearer how this works, let's do the same trick with `loop_forever`.
 

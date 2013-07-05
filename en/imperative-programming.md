@@ -1339,7 +1339,7 @@ And accordingly, we can pass it to `printf`.
 
 If this looks different from everything else you've seen so far,
 that's because it is.  This is really a special case in the
-type-system.  Most of the time, you don't need to worry about this
+type system.  Most of the time, you don't need to worry about this
 special handling of format strings --- you can just use `printf` and
 not worry about the details.  But it's useful to keep the broad
 outlines of the story in the back of your head.
@@ -1673,7 +1673,7 @@ Note that the type of `remember` was settled by the definition of
 
 So, when does the compiler infer weakly polymorphic types?  As we've
 seen, we need weakly polymorphic types when a value of unknown type is
-stored in a persistent mutable cell.  Because the type-system isn't
+stored in a persistent mutable cell.  Because the type system isn't
 precise enough to determine all cases where this might happen, OCaml
 uses a rough rule to flag cases where it's sure there are no
 persistent refs, and to only infer polymorphic types in those cases.
