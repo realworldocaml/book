@@ -48,11 +48,10 @@ and then build the example.
 ```
 
 The `do_hash` function accepts a filename parameter and prints the
-human-readable MD5 string to the console standard output.
-
-The subsequent `command` variable defines how to invoke `do_hash` by parsing
-the command-line arguments.  When you compile and run this program, it already
-defines a number of useful default command-line options.
+human-readable MD5 string to the console standard output.  The subsequent
+`command` variable defines how to invoke `do_hash` by parsing the command-line
+arguments.  When you compile and run this program, it already defines a number
+of useful default command-line options.
 
 For instance, query the version information for the binary you just compiled.
 
