@@ -69,9 +69,9 @@
       </listitem>
       <listitem>
         <para>
-          <emphasis>Static type-checking</emphasis> to reduce runtime
-          errors, such as Java or Scala interfaces or variable type
-          declarations in C#, Ada and Pascal.
+          <emphasis>Static type-checking</emphasis> to reduce the number
+          of runtime errors, as enforced by Java or Scala interfaces or
+          variable type declarations in C#, Ada and Pascal.
         </para>
       </listitem>
       <listitem>
@@ -85,7 +85,8 @@
         <para>
           <emphasis>Immutable data structures</emphasis> that cannot be
           destructively updated, famously enforced in Haskell but also a
-          common feature of many distributed big data frameworks.
+          feature often present in distributed big data frameworks such
+          as Hadoop.
         </para>
       </listitem>
       <listitem>
@@ -302,10 +303,10 @@
             important. This part opens up with a guided tour to give you
             a quick overview of the language. It then moves onto
             modules, functors and objects, which may take some time to
-            digest. Persevere though; even though these concepts may be
-            difficult at first, they will put you in good stead even
-            when switching to other languages, many of which have drawn
-            inspiration from ML.
+            digest. It is persevering, however: even though these
+            concepts may be difficult at first, they will put you in
+            good stead when switching to other modern languages, many of
+            which have drawn inspiration from ML.
           </para>
         </listitem>
         <listitem>
@@ -326,7 +327,7 @@
             OCaml. It's a remarkably simple system in comparison to
             other language runtimes (such as Java or the .NET CLR), and
             you'll need to read this to build very high performance
-            systems that have to minimise resource usage or interface to
+            systems that have to minimize resource usage or interface to
             C libraries. This is also where we talk about profiling and
             debugging techniques using tools such as GNU
             <literal>gdb</literal>.
@@ -542,10 +543,9 @@ $ utop
         <para>
           We needed to type <literal>;;</literal> in order to tell the
           toplevel that it should evaluate an expression. This is a
-          peculiarity of the toplevel that is not required in
-          stand-alone programs (though it is sometimes helpful to
-          include <literal>;;</literal> to improve OCaml's error
-          reporting).
+          peculiarity of the toplevel that is not required in standalone
+          programs (though it is sometimes helpful to include
+          <literal>;;</literal> to improve OCaml's error reporting).
         </para>
       </listitem>
       <listitem>
@@ -1999,7 +1999,7 @@ Exception: (Invalid_argument &quot;index out of bounds&quot;).
     <title>A complete program</title>
     <para>
       So far, we've played with the basic features of the language using
-      the toplevel. Now we'll create a simple, complete stand-alone
+      the toplevel. Now we'll create a simple, complete standalone
       program that does something useful: sum up a list of numbers read
       in from the standard input.
     </para>
@@ -2897,7 +2897,7 @@ val ( *** ) : float -&gt; float -&gt; float = &lt;fun&gt;
       </informaltable>
       <para>
         There's one important special case: <literal>-</literal> and
-        <literal>-.</literal>, which are the integer and floating point
+        <literal>-.</literal>, which are the integer and floating-point
         subtraction operators, can act as both prefix operators (for
         negation) and infix operators (for subtraction), So, both
         <literal>-x</literal> and <literal>x - y</literal> are
@@ -4894,7 +4894,7 @@ Exception: (Invalid_argument &quot;equal: functional value&quot;).
     </para>
     <para>
       For simple atomic types, polymorphic compare has the semantics you
-      would expect: for floating point numbers and integer, polymorphic
+      would expect: for floating-point numbers and integer, polymorphic
       compare corresponds to the expected numerical comparison
       functions. For strings, it's a lexicographic comparison.
     </para>
@@ -6763,7 +6763,7 @@ val get_users : Logon.t list -&gt; string list = &lt;fun&gt;
     <para>
       In addition to generating field accessor functions,
       <literal>fieldslib</literal> also creates a sub-module called
-      <literal>Fields</literal> that contains a first class
+      <literal>Fields</literal> that contains a first-class
       representative of each field, in the form of a value of type
       <literal>Field.t</literal>. The <literal>Field</literal> module
       provides the following functions:
@@ -6836,7 +6836,7 @@ val get_users : Logon.t list -&gt; string list = &lt;fun&gt;
       ability to do a functional update.
     </para>
     <para>
-      We can use first class fields to do things like write a generic
+      We can use first-class fields to do things like write a generic
       function for displaying a record field.
     </para>
     <programlisting language="ocaml">
@@ -8348,8 +8348,8 @@ Something failed a long time ago: (1970-01-01 01:00:00.000000+01:00)
         types. This will be discussed in more detail in
         <xref linkend="data-serialization-with-s-expressions"/>,
         but Sexplib comes with a language extension that can
-        auto-generate sexp-converters for newly generated types, as
-        shown below.
+        autogenerate sexp-converters for newly generated types, as shown
+        below.
       </para>
       <programlisting language="ocaml">
 # let custom_to_sexp = &lt;:sexp_of&lt;float * string list * int&gt;&gt;;;
@@ -10756,9 +10756,9 @@ Error: This expression has type string but an expression was expected of type
 </programlisting>
       <para>
         If this looks different from everything else you've seen so far,
-        that's because it is. This is really a special case in the
-        type-system. Most of the time, you don't need to worry about
-        this special handling of format strings --- you can just use
+        that's because it is. This is really a special case in the type
+        system. Most of the time, you don't need to worry about this
+        special handling of format strings --- you can just use
         <literal>printf</literal> and not worry about the details. But
         it's useful to keep the broad outlines of the story in the back
         of your head.
@@ -11171,7 +11171,7 @@ Error: This expression has type string but an expression was expected of type
         So, when does the compiler infer weakly polymorphic types? As
         we've seen, we need weakly polymorphic types when a value of
         unknown type is stored in a persistent mutable cell. Because the
-        type-system isn't precise enough to determine all cases where
+        type system isn't precise enough to determine all cases where
         this might happen, OCaml uses a rough rule to flag cases where
         it's sure there are no persistent refs, and to only infer
         polymorphic types in those cases. This rule is called
@@ -11186,7 +11186,7 @@ Error: This expression has type string but an expression was expected of type
         <listitem>
           <para>
             Constants (<emphasis>i.e.</emphasis>, things like integer
-            and floating point literals)
+            and floating-point literals)
           </para>
         </listitem>
         <listitem>
@@ -12048,7 +12048,7 @@ Error: Unbound constructor Int_interval.Interval
 </programlisting>
       <para>
         Core comes with a syntax extension called
-        <literal>sexplib</literal> which can auto-generate s-expression
+        <literal>sexplib</literal> which can autogenerate s-expression
         conversion functions from a type declaration. Attaching
         <literal>with sexp</literal> to a type definition signals to the
         extension to generate the converters. Thus, we can write:
@@ -12175,7 +12175,7 @@ module type Interval_intf_with_sexp =
       if Endpoint.compare low high &gt; 0 then Empty
       else Interval (low,high)
 
-    (* put a wrapper round the auto-generated sexp_of_t to enforce
+    (* put a wrapper round the autogenerated sexp_of_t to enforce
        the invariants of the data structure *)
     let t_of_sexp sexp =
       match t_of_sexp sexp with
@@ -12584,7 +12584,7 @@ module New_three : X_int
     <para>
       The type of the first-class module, <emphasis>e.g.</emphasis>,
       <literal>(module X_int)</literal>, is based on the fully-qualified
-      name of the signature that was used to construct it. A first class
+      name of the signature that was used to construct it. A first-class
       module based on a signature with a different name, even if it is
       substantively the same signature, will result in a distinct type,
       as you can see below.
@@ -12614,7 +12614,7 @@ Error: This expression has type (module Y_int)
       is often done to improve readability, and can happen both through
       an explicit declaration of a module type or implicitly through an
       <literal>include</literal> declaration. In both cases, this has
-      the unintended side effect of making first class modules built off
+      the unintended side effect of making first-class modules built off
       of the alias incompatible with those built off of the original
       module type. To deal with this, one should be disciplined in how
       one refers to signatures when constructing first-class modules.
@@ -12839,7 +12839,7 @@ module type Comparable = sig type t val compare : t -&gt; t -&gt; int end
   <sect1 id="example-a-query-handling-framework">
     <title>Example: A query handling framework</title>
     <para>
-      Now let's look at first class modules in the context of a more
+      Now let's look at first-class modules in the context of a more
       complete and realistic example. In particular, consider the
       following signature for a module that implements a query handler.
     </para>
@@ -13181,8 +13181,8 @@ val cli : (string, (module Query_handler_instance)) Hashtbl.t -&gt; unit = &lt;f
 </programlisting>
       <para>
         We can most effectively run this command-line interface from a
-        stand-alone program, which we can do by putting the above code
-        in a file along with following command to launch the interface.
+        standalone program, which we can do by putting the above code in
+        a file along with following command to launch the interface.
       </para>
       <programlisting language="ocaml">
 let () =
@@ -13318,7 +13318,7 @@ module Loader = struct
         to the appropriate functions to respond to each type of query.
         Note that we use write
         <literal>&lt;sexp_of&lt;string list&gt;&gt;</literal> to
-        auto-generate a function for converting a list of strings to an
+        autogenerate a function for converting a list of strings to an
         s-expression. This is part of the sexplib package described in
         <xref linkend="data-serialization-with-s-expressions"/>.
       </para>
@@ -13418,9 +13418,9 @@ It's unwise to unload yourself
   <sect1 id="living-without-first-class-modules">
     <title>Living without first-class modules</title>
     <para>
-      It's worth noting that most designs that can be done with first
-      class modules can be simulated without them, with some level of
-      awkwardness. For example, we could rewrite our query handler
+      It's worth noting that most designs that can be done with
+      first-class modules can be simulated without them, with some level
+      of awkwardness. For example, we could rewrite our query handler
       example without first-class modules using the following types:
     </para>
     <programlisting language="ocaml">
@@ -16805,22 +16805,25 @@ Estimated testing time 20s (change using -quota SECS).
   <sect1 id="basic-command-line-parsing">
     <title>Basic command-line parsing</title>
     <para>
-      Let's start by cloning the <literal>md5</literal> binary that is
-      present on most Linux and Mac OS X installations. It reads in the
+      Let's start by cloning the <literal>md5sum</literal> command that
+      is present on most Linux installations (the equivalent command on
+      MacOS X is simply <literal>md5</literal>). It reads in the
       contents of a file, applies the MD5 one-way cryptographic hash
       function to the data, and outputs an ASCII hex representation of
       the result.
     </para>
     <programlisting language="ocaml">
-(* basic_md5.ml : calculate MD5 hash of input *)
+(* command-line-parsing/basic_md5.ml  *)
 open Core.Std
 
 let do_hash file =
-  let open Cryptokit in
-  In_channel.read_all file
-  |&gt; hash_string (Hash.md5 ())
-  |&gt; transform_string (Hexa.encode ())
-  |&gt; print_endline
+  In_channel.with_file file ~f:(
+    fun ic -&gt;
+      let open Cryptokit in
+      hash_channel (Hash.md5 ()) ic
+      |&gt; transform_string (Hexa.encode ())
+      |&gt; print_endline
+  )
 
 let command =
   Command.basic
@@ -16830,41 +16833,36 @@ let command =
       empty
       +&gt; anon (&quot;filename&quot; %: string)
     )
-  (fun filename () -&gt; do_hash filename)
+    (fun filename () -&gt; do_hash filename)
 
 let () = Command.run ~version:&quot;1.0&quot; ~build_info:&quot;RWO&quot; command
 </programlisting>
     <para>
-      You can compile this file the usual way with
-      <literal>ocamlfind</literal> by passing an additional
-      <literal>cryptokit</literal> package. Install Cryptokit via OPAM
-      if you didn't do so earlier.
+      Use <literal>opam install cryptokit</literal> to install Cryptokit
+      if you didn't do so earlier, and then build the example.
     </para>
-    <programlisting>
-$ opam install cryptokit
-$ ocamlfind ocamlopt -thread -package cryptokit -package core -linkpkg \
-  -o md5 basic_md5.ml
-$ ./md5
+    <programlisting language="ocaml">
+(* command-line-parsing/build_basic_md5.out  *)
+$ ocamlbuild -use-ocamlfind -pkg cryptokit,core -tag thread basic_md5.native
 </programlisting>
     <para>
       The <literal>do_hash</literal> function accepts a filename
       parameter and prints the human-readable MD5 string to the console
-      standard output.
-    </para>
-    <para>
-      The subsequent <literal>command</literal> variable defines how to
-      invoke <literal>do_hash</literal> by parsing the command-line
-      arguments. When you compile and run this program, it already
-      defines a number of useful default command-line options.
+      standard output. The subsequent <literal>command</literal>
+      variable defines how to invoke <literal>do_hash</literal> by
+      parsing the command-line arguments. When you compile and run this
+      program, it already defines a number of useful default
+      command-line options.
     </para>
     <para>
       For instance, query the version information for the binary you
       just compiled.
     </para>
     <programlisting>
-$ ./md5 -version
+# running command-line-parsing/get_basic_md5_version.out.sh
+$ ./basic_md5.native -version
 1.0
-$ ./md5 -build-info
+$ ./basic_md5.native -build-info
 RWO
 </programlisting>
     <para>
@@ -16875,10 +16873,11 @@ RWO
       generate a build revision number, in the case of Mercurial).
     </para>
     <programlisting>
-$ ./md5
+# running command-line-parsing/get_basic_md5_help.out.sh
+$ ./basic_md5.native
 Generate an MD5 hash of the input data
 
-  md5 filename
+  basic_md5.native filename
 
 More detailed information
 
@@ -16902,8 +16901,9 @@ missing anonymous argument: filename
       output is displayed to the standard output.
     </para>
     <programlisting>
-$ ./md5 ./md5
-59562f5e4f790d16f1b2a095cd5de844
+# running command-line-parsing/run_basic_md5.out.sh
+$ ./basic_md5.native ./basic_md5.native
+ac6926499e26857c0eecda914db86fef
 </programlisting>
   </sect1>
   <sect1 id="defining-parsing-specifications">
@@ -18117,32 +18117,32 @@ add      diff     help     version
     task. You often have to match someone else's data format (such as
     XML), sometimes you need a highly efficient format, and other times
     you want something that is easy for humans to edit. To this end,
-    OCaml comes with several techniques for data serialization depending
-    on what your problem is.
+    OCaml libraries provide several techniques for data serialization
+    depending on what your problem is.
   </para>
   <para>
     We'll start by using the popular and simple JSON data format, and
     then look at other serialization formats later in in the book. This
     chapter introduces you to a couple of new techniques that glue
-    together the basic ideas from Part I of the book:
+    together the basic ideas from Part I of the book by using:
   </para>
   <itemizedlist>
     <listitem>
       <para>
-        Using polymorphic variants to write more extensible libraries
-        and protocols (but still retain the ability to extend them if
-        needed)
+        <emphasis>polymorphic variants</emphasis> to write more
+        extensible libraries and protocols (but still retain the ability
+        to extend them if needed)
       </para>
     </listitem>
     <listitem>
       <para>
-        The use of <emphasis>combinators</emphasis> to compose common
+        <emphasis>functional combinators</emphasis> to compose common
         operations over data structures in a type-safe way.
       </para>
     </listitem>
     <listitem>
       <para>
-        Using external tools to generate boilerplate OCaml modules and
+        external tools to generate boilerplate OCaml modules and
         signatures from external specification files.
       </para>
     </listitem>
@@ -18212,13 +18212,9 @@ add      diff     help     version
       There are several JSON libraries available for OCaml. For this
       chapter, we've picked the
       <ulink url="http://mjambon.com/yojson.html"><literal>Yojson</literal></ulink>
-      library by Martin Jambon. It's easiest to install via OPAM.
-    </para>
-    <programlisting>
-$ opam install yojson
-</programlisting>
-    <para>
-      See <xref linkend="installation"/> for installation
+      library by Martin Jambon. It's easiest to install via OPAM by
+      running <literal>opam install yojson</literal>. See
+      <xref linkend="installation"/> for installation
       instructions if you haven't already got OPAM. Once installed, you
       can open it in the <literal>utop</literal> toplevel by:
     </para>
@@ -18287,7 +18283,8 @@ type json = [
     </para>
     <programlisting language="ocaml">
 (* json/yojson_basic.mli (starting from part 1) *)
-val from_string : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt; string -&gt; json
+val from_string : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt;
+   string -&gt; json
 (* Read a JSON value from a string.
    [buf]   : use this buffer at will during parsing instead of
              creating a new one. 
@@ -18295,9 +18292,15 @@ val from_string : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt; str
              have to be a real file. 
    [lnum]  : number of the first line of input. Default is 1. *)
 
-val from_file : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt; string -&gt; json
+val from_file : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt; 
+   string -&gt; json
 (* Read a JSON value from a file. See [from_string] for the meaning of the optional
    arguments. *)
+
+val from_channel : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt;
+  in_channel -&gt; json
+  (** Read a JSON value from a channel.
+      See [from_string] for the meaning of the optional arguments. *)
 </programlisting>
     <para>
       When first reading these interfaces, you can generally ignore the
@@ -18309,37 +18312,16 @@ val from_file : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt; strin
     </para>
     <para>
       The type signature for these functions with the optional elements
-      removed makes their purpose much clearer. The two ways of parsing
-      the JSON are either directly from a string or from a file on a
-      filesystem.
+      removed makes their purpose much clearer. The three ways of
+      parsing JSON are either directly from a string, from a file on a
+      filesystem, or via a buffered input channel.
     </para>
     <programlisting language="ocaml">
 (* json/yojson_basic_simple.mli  *)
-val from_string : string -&gt; json
-val from_file   : string -&gt; json
+val from_string  : string     -&gt; json
+val from_file    : string     -&gt; json
+val from_channel : in_channel -&gt; json
 </programlisting>
-    <note>
-    <title>
-    The standard OCaml <literal>in_channel</literal> and
-    <literal>out_channel</literal>
-    </title>
-    <para>
-      You'll notice when reading the Yojson interface that we've left
-      out the <literal>from_channel</literal> function, which uses a
-      <literal>in_channel</literal> type provided by the OCaml standard
-      library. These OCaml channels are considered deprecated in Core,
-      as they're primarily used by the compiler itself, but don't always
-      play well with threading and asynchronous programming.
-    </para>
-    <para>
-      The Core equivalent are the <literal>In_channel</literal> and
-      <literal>Out_channel</literal> modules instead, but you will still
-      see the standard OCaml channel types being used in third-party
-      libraries such as Yojson which weren't specifically designed to be
-      used with Core. They won't do any harm if you don't use them in
-      your code, so just ignore them and use strings or files instead.
-    </para>
-    </note>
     <para>
       The next example shows both the string and file functions in
       action, assuming the JSON record is stored in a file called
@@ -18832,7 +18814,7 @@ type json = [
       useful ones. A standard JSON type such as a
       <literal>String</literal> will type-check against both the
       <literal>Basic</literal> module and also the non-standard
-      <literal>Safe</literal> module. If you use the extension values
+      <literal>Safe</literal> module. If you use the extended values
       with the <literal>Basic</literal> module however, the compiler
       will reject your code until you make it compliant with the
       portable subset of JSON.
@@ -18868,7 +18850,7 @@ type json = [
     <para>
       The only purpose of these extensions is to have greater control
       over how OCaml values are represented in JSON (for instance,
-      storing a floating pointer number as a JSON string). The output
+      storing a floating-pointer number as a JSON string). The output
       still obeys the same standard format that can be easily exchanged
       with other languages.
     </para>
@@ -18938,7 +18920,7 @@ $ atdgen -version
         separate file, and then run a compiler
         (<literal>atdgen</literal>) that outputs OCaml code to construct
         and parse JSON values. This means that you don't need to write
-        any OCaml parsing code at all, as it will all be auto-generated
+        any OCaml parsing code at all, as it will all be autogenerated
         for you.
       </para>
       <para>
@@ -18994,7 +18976,7 @@ type authorization_response = {
       <para>
         ATD deviates significantly from OCaml syntax due to its support
         for annotations within the specification. The annotations can
-        customise the code that is generated for a particular target (of
+        customize the code that is generated for a particular target (of
         which the OCaml backend is of most interest to us).
       </para>
       <para>
@@ -19007,11 +18989,11 @@ type authorization_response = {
       <para>
         The annotation
         <literal>&lt;json name=&quot;user&quot;&gt;</literal> signals
-        that the JSON value of the field should be treated as
-        <literal>name</literal>, but the value of the parsed variant in
-        OCaml should be <literal>User</literal>. These annotations are
-        also useful to map JSON values to reserved keywords in OCaml
-        (e.g. <literal>type</literal>).
+        that the JSON value of the field is <literal>user</literal>, but
+        that the variable name of the parsed variant in OCaml should be
+        <literal>User</literal>. These annotations are often useful to
+        map JSON values to reserved keywords in OCaml (e.g.
+        <literal>type</literal>).
       </para>
     </sect2>
     <sect2 id="compiling-atd-specifications-to-ocaml">
@@ -19128,10 +19110,11 @@ val string_of_authorization_response :
       </para>
       <para>
         There are also several similar projects that automate the code
-        generation process: <ulink url="http://piqi.org">Piqi</ulink>
-        uses the Google protobuf format, and
-        <ulink url="http://thrift.apache.org">Thrift</ulink> supports
-        many other programming languages and includes OCaml bindings.
+        generation process. <ulink url="http://piqi.org">Piqi</ulink>
+        supports conversions between XML. JSON, and the Google protobuf
+        format, and <ulink url="http://thrift.apache.org">Thrift</ulink>
+        supports many other programming languages and includes OCaml
+        bindings.
       </para>
     </sect2>
     <sect2 id="example-querying-github-organization-information">
@@ -20189,7 +20172,7 @@ val sexp_of_t : t -&gt; Core.Std.Sexp.t = &lt;fun&gt;
   </para>
   <para>
     Given how mechanical the code is, you could imagine writing a
-    program that inspected the type definition and auto-generated the
+    program that inspected the type definition and autogenerated the
     conversion code for you. As it turns out, we can do just that using
     <literal>Sexplib</literal>. The <literal>Sexplib</literal> package,
     which is included with Core, provides both a library for
@@ -20216,7 +20199,7 @@ val sexp_of_t : t -&gt; Sexplib.Sexp.t = &lt;fun&gt;
   </para>
   <para>
     The syntax extensions in Core almost all have this same basic
-    structure: they auto-generate code based on type definitions,
+    structure: they autogenerate code based on type definitions,
     implementing functionality that you could in theory have implemented
     by hand, but with far less programmer effort.
   </para>
@@ -20454,7 +20437,7 @@ $ ./test_interval.native
       <para>
         We can fix this problem by overriding the autogenerated function
         and writing a custom sexp-converter that is based on the
-        auto-generated converter.
+        autogenerated converter.
       </para>
       <programlisting language="ocaml">
 type t = | Range of int * int
@@ -20478,7 +20461,7 @@ let t_of_sexp sexp =
         are only recursive if the <literal>rec</literal> keyword is
         specified, and so in this case the inner
         <literal>t_of_sexp</literal> call will go to the earlier
-        auto-generated definition that resulted from the
+        autogenerated definition that resulted from the
         <literal>type t with sexp</literal> definition.
       </para>
       <para>
@@ -20574,7 +20557,7 @@ Uncaught exception:
     <title>Sexp-conversion directives</title>
     <para>
       Sexplib supports a collection of directives for modifying the
-      default behavior of the auto-generated sexp-converters. These
+      default behavior of the autogenerated sexp-converters. These
       directives allow you to customize the way in which types are
       represented as s-expressions without having to write a custom
       parser.
@@ -20892,11 +20875,11 @@ val contents : string Deferred.t = &lt;abstr&gt;
       The value in <literal>contents</literal> isn't yet determined in
       part because there's nothing running that could do the necessary
       I/O. When using Async, processing of I/O and other events is
-      handled by the Async scheduler. When writing a stand-alone
-      program, you need to start the scheduler explicitly, but utop
-      knows about Async, and can start the scheduler automatically. More
-      than that, utop knows about deferred values, and when you type in
-      an expression of type <literal>Deferred.t</literal>, it will make
+      handled by the Async scheduler. When writing a standalone program,
+      you need to start the scheduler explicitly, but utop knows about
+      Async, and can start the scheduler automatically. More than that,
+      utop knows about deferred values, and when you type in an
+      expression of type <literal>Deferred.t</literal>, it will make
       sure the scheduler is running and block until the deferred is
       determined. Thus, we can write:
     </para>
@@ -21163,7 +21146,7 @@ module Delayer : Delayer_intf
     <title>Examples: an echo server</title>
     <para>
       Now that we have the basics of Async under our belt, let's look at
-      a small complete stand-alone Async program. In particular, we'll
+      a small complete standalone Async program. In particular, we'll
       write an echo server, <emphasis>i.e.</emphasis>, a program that
       accepts connections from clients and spits back every line of text
       sent to it.
@@ -21333,7 +21316,7 @@ val do_stuff : int -&gt; unit = &lt;fun&gt;
       With a name like <literal>loop_forever</literal>, the meaning is
       clear enough in this case. But with something like
       <literal>Scheduler.go</literal>, the fact that it never returns is
-      less clear, and so we use the type-system to make it more explicit
+      less clear, and so we use the type system to make it more explicit
       by giving it a return type of <literal>never_returns</literal>. To
       make it clearer how this works, let's do the same trick with
       <literal>loop_forever</literal>.
@@ -21868,7 +21851,7 @@ Exception:
     <para>
       In utop, the exception thrown by <literal>maybe_raise ()</literal>
       terminates the evaluation of just that expression, but in a
-      stand-alone program, an uncaught exception would bring down the
+      standalone program, an uncaught exception would bring down the
       entire process.
     </para>
     <para>
@@ -22333,7 +22316,7 @@ let get_definition_with_timeout ~server ~timeout word =
   (word,result')
 </programlisting>
     <para>
-      This will work, and will cause the connection to shut-down cleanly
+      This will work, and will cause the connection to shutdown cleanly
       when we time out; but our code no longer explicitly knows whether
       or not the timeout has kicked in. In particular, the error message
       on a timeout will now be <literal>Unexpected failure</literal>
@@ -23097,7 +23080,7 @@ val double : float typ
       </listitem>
       <listitem>
         <para>
-          OCaml only supports double-precision floating point numbers,
+          OCaml only supports double-precision floating-point numbers,
           and so the C <literal>float</literal> and
           <literal>double</literal> functions both map onto the OCaml
           <literal>float</literal> type.
@@ -24281,7 +24264,7 @@ val sort_stdin : unit -&gt; unit
           </row>
           <row>
             <entry>
-              floating point number
+              floating-point number
             </entry>
             <entry>
               as a block with a single field containing the
@@ -24388,10 +24371,10 @@ val sort_stdin : unit -&gt; unit
       <title>Floating point numbers and arrays</title>
       <para>
         Floating point numbers in OCaml are always stored as full
-        double-precision values. Individual floating point values are
+        double-precision values. Individual floating-point values are
         stored as a block with a single field that contains the number.
         This block has the <literal>Double_tag</literal> set which
-        signals to the collector that the floating point value is not to
+        signals to the collector that the floating-point value is not to
         be scanned.
       </para>
       <programlisting language="ocaml">
@@ -24417,7 +24400,7 @@ val sort_stdin : unit -&gt; unit
 </programlisting>
       <para>
         First, let's check that float arrays do in fact have a different
-        tag number from normal floating point values.
+        tag number from normal floating-point values.
       </para>
       <programlisting language="ocaml">
 # Obj.double_tag;;
@@ -26526,7 +26509,7 @@ let _ = compare_t
       </title>
       <para>
         You may have noticed the <literal>let _ = fun</literal>
-        construct in the auto-generated code above. The underscore in a
+        construct in the autogenerated code above. The underscore in a
         <literal>let</literal> binding is just the same as a wildcard
         underscore in a pattern match, and tells the compiler to accept
         any return value and discard it immediately.
@@ -26602,7 +26585,7 @@ val compare : t -&gt; t -&gt; int
         Syntax extensions are a powerful extension mechanism that can
         completely alter your source code's layout and style. Core
         includes a very conservative set of extensions that take care to
-        minimise the syntax changes. There are a number of third-party
+        minimize the syntax changes. There are a number of third-party
         libraries that are much more ambitious -- some introduce
         whitespace-sensitive indentation while others build entirely new
         embedded languages using OCaml as a host language.
