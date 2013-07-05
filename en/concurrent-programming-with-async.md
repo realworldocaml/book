@@ -1330,7 +1330,7 @@ let get_definition_with_timeout ~server ~timeout word =
   (word,result')
 ```
 
-This will work, and will cause the connection to shut-down cleanly
+This will work, and will cause the connection to shutdown cleanly
 when we time out; but our code no longer explicitly knows whether or
 not the timeout has kicked in.  In particular, the error message on a
 timeout will now be `Unexpected failure` rather than `Timed out`,
