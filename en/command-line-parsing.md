@@ -56,11 +56,8 @@ defines a number of useful default command-line options.
 
 For instance, query the version information for the binary you just compiled.
 
-```console
-$ ./md5 -version
-1.0
-$ ./md5 -build-info
-RWO
+```frag
+((typ console)(name command-line-parsing/get_basic_md5_version.out))
 ```
 
 The actual versions are defined via optional arguments to `Command.run`.  You
@@ -68,22 +65,8 @@ can leave these blank or get your build system to generate them directly from
 your version control system (e.g. by running `hg tip` to generate a build
 revision number, in the case of Mercurial).
 
-```console
-$ ./md5
-Generate an MD5 hash of the input data
-
-  md5 filename
-
-More detailed information
-
-=== flags ===
-
-  [-build-info]  print info about this build and exit
-  [-version]     print the version of this build and exit
-  [-help]        print this help text and exit
-                 (alias: -?)
-
-missing anonymous argument: filename
+```frag
+((typ console)(name command-line-parsing/get_basic_md5_help.out))
 ```
 
 When we invoke this binary without any arguments, it helpfully displays a help
@@ -92,9 +75,8 @@ screen that informs you that a required argument `filename` is missing.
 If you do supply the filename argument, then `do_hash` is called with the
 argument and the MD5 output is displayed to the standard output.
 
-```
-$ ./md5 ./md5
-59562f5e4f790d16f1b2a095cd5de844
+```frag
+((typ console)(name command-line-parsing/run_basic_md5.out))
 ```
 
 ## Defining parsing specifications
