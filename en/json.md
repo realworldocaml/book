@@ -386,7 +386,7 @@ Yojson supports the following JSON extensions:
   `<"Foo">` or `<"Bar":123>` for a variant with parameters.
 
 The only purpose of these extensions is to have greater control over how OCaml
-values are represented in JSON (for instance, storing a floating pointer number
+values are represented in JSON (for instance, storing a floating-pointer number
 as a JSON string).  The output still obeys the same standard format that can be
 easily exchanged with other languages.
 

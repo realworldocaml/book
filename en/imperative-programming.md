@@ -1682,7 +1682,7 @@ This rule is called _the value restriction_.
 The core of the value restriction is the observation that some kinds
 of simple values by their nature can't contain refs, including:
 
-- Constants (_i.e._, things like integer and floating point literals)
+- Constants (_i.e._, things like integer and floating-point literals)
 - Constructors that contain only other simple values
 - Function declarations, _i.e._, expressions that begin with `fun` or
   `function`, or, the equivalent let binding, `let f x = ...`.
