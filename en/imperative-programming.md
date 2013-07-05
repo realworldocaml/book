@@ -35,7 +35,7 @@ _i.e._, a mutable mapping from keys to values.  This is really for
 illustration purposes; both Core and the standard library provide
 imperative dictionaries, and for most real world tasks, you should use
 one of those implementations.  There's more advice on using Core's
-implementation in particular in [xref](#maps-and-hashtables).
+implementation in particular in [xref](#maps-and-hash-tables).
 
 Our dictionary, like those in Core and the standard library, will be
 implemented as a hash table.  In particular, we'll use an _open
@@ -1339,7 +1339,7 @@ And accordingly, we can pass it to `printf`.
 
 If this looks different from everything else you've seen so far,
 that's because it is.  This is really a special case in the
-type-system.  Most of the time, you don't need to worry about this
+type system.  Most of the time, you don't need to worry about this
 special handling of format strings --- you can just use `printf` and
 not worry about the details.  But it's useful to keep the broad
 outlines of the story in the back of your head.
@@ -1673,7 +1673,7 @@ Note that the type of `remember` was settled by the definition of
 
 So, when does the compiler infer weakly polymorphic types?  As we've
 seen, we need weakly polymorphic types when a value of unknown type is
-stored in a persistent mutable cell.  Because the type-system isn't
+stored in a persistent mutable cell.  Because the type system isn't
 precise enough to determine all cases where this might happen, OCaml
 uses a rough rule to flag cases where it's sure there are no
 persistent refs, and to only infer polymorphic types in those cases.
@@ -1682,7 +1682,7 @@ This rule is called _the value restriction_.
 The core of the value restriction is the observation that some kinds
 of simple values by their nature can't contain refs, including:
 
-- Constants (_i.e._, things like integer and floating point literals)
+- Constants (_i.e._, things like integer and floating-point literals)
 - Constructors that contain only other simple values
 - Function declarations, _i.e._, expressions that begin with `fun` or
   `function`, or, the equivalent let binding, `let f x = ...`.

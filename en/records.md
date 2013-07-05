@@ -599,7 +599,7 @@ val get_users : Logon.t list -> string list = <fun>
 ```
 
 In addition to generating field accessor functions, `fieldslib` also
-creates a sub-module called `Fields` that contains a first class
+creates a sub-module called `Fields` that contains a first-class
 representative of each field, in the form of a value of type
 `Field.t`.  The `Field` module provides the following functions:
 
@@ -638,7 +638,7 @@ fields have a notion of access control associated with them because
 there are some special cases where we may expose the ability to read a
 field but not the ability to do a functional update.
 
-We can use first class fields to do things like write a generic
+We can use first-class fields to do things like write a generic
 function for displaying a record field.
 
 ```ocaml

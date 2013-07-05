@@ -925,7 +925,7 @@ heap, like values from C-bindings.  But it will work in a reasonable
 way for other kinds of values.
 
 For simple atomic types, polymorphic compare has the semantics you
-would expect: for floating point numbers and integer, polymorphic
+would expect: for floating-point numbers and integer, polymorphic
 compare corresponds to the expected numerical comparison functions.
 For strings, it's a lexicographic comparison.
 

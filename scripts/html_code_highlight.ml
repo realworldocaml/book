@@ -1,40 +1,19 @@
 open Core.Std
-open Xml_tree
 
-let rec filter i =
-  match i with
-  | Element ((("","pre"),attr),c) as e -> begin
-    match List.Assoc.find attr ("","id") with
-    | None -> e
-    | Some _pid -> begin
-      match List.Assoc.find attr ("","language") with
-      | None -> e
-      | Some lang ->
-        (* The contents of <pre> are just Data tags, so filter them through
-           Pygments *)
-        let ic,oc = Unix.open_process
-          (Printf.sprintf "pygmentize -l %s -f html" lang)
-        in
-        List.iter c ~f:(function
-        | Data x -> Out_channel.output_string oc x
-        | _ -> assert false
-        );
-        Out_channel.close oc;
-        let html = In_channel.input_all ic in
-        let htmli = Xmlm.make_input (`String (0,html)) in
-        let _,preit = in_tree htmli in
-        preit
-    end
-  end
-  | Element (p,c) -> Element (p, List.map ~f:filter c)
-  | Data _ as d -> d
+let subst_with_code_frag _attr (c:Cow.Xml.t) : Cow.Xml.t =
+  try
+    let t = Code_frag.of_string (Cow.Html.to_string c) in
+    In_channel.read_all (sprintf "code/_build/%s.%d.html" t.Code_frag.name t.Code_frag.part)
+    |> Cow.Html.of_string
+  with exn ->
+    eprintf "WARNING bare <pre> found. This should be turned into a ```frag:\n %s\n%!" (Exn.to_string exn);
+    Code_frag.wrap_in_pretty_box ~part:0 "Unknown" "" c
 
-(* Run each file through Pygments *)
 let () =
   try
-    let i = Xmlm.make_input ~entity:Xhtml.entity (`Channel stdin) in
-    let o = Xmlm.make_output ~decl:false (`Channel stdout) in
-    let (_dtd,it) = in_tree i in
-    let ot = filter it in
-    out_tree o (None,ot)
-  with Xmlm.Error (_p,e) -> print_endline (Xmlm.error_message e)
+    Xml_tree.read_document In_channel.stdin
+    |> fun (dtd, doc) -> Xml_tree.map ~tag:"pre" ~f:subst_with_code_frag doc
+    |> fun doc -> Xml_tree.write_document Out_channel.stdout dtd doc
+  with 
+  | Xmlm.Error (_p,e) ->
+    print_endline (Xmlm.error_message e)

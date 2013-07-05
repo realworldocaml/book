@@ -28,9 +28,11 @@ let github_access_token_cookie = "github_access_token_ssl"
 let user = "ocamllabs"
 let repo = "rwo-comments"
 
+let jar  = Lwt_main.run (Github_cookie_jar.init ())
+
 let our_token =
   Lwt_main.run (
-    match_lwt Github_cookie_jar.get "rwo" with
+    match_lwt Github_cookie_jar.get jar "rwo" with
     |None -> failwith "No 'rwo' github cookie found: add with git-jar`"
     |Some auth -> return (Github.Token.of_auth auth)
   )
@@ -153,14 +155,14 @@ module Comment = struct
   let create_issue ~context ~user_token ~new_issue =
     Github.(Monad.(run (
       (* This creation will not include milestone/labels if the user isnt authorized *)
-      Issues.create ~token:user_token ~user ~repo ~issue:new_issue ()
+      Issue.create ~token:user_token ~user ~repo ~issue:new_issue ()
       >>= fun issue ->
       let issue_number = issue.Github_t.issue_number in
       (* Edit the issue to add a milestone using our builtin token *)
-      Issues.edit ~token:our_token ~user ~repo ~issue_number ~issue:new_issue ()
+      Issue.update ~token:our_token ~user ~repo ~issue_number ~issue:new_issue ()
       >>= fun issue ->
       (* Add our context comment *)
-      Github.Issues.create_comment ~token:our_token ~user ~repo ~issue_number ~body:context ()
+      Issue.create_comment ~token:our_token ~user ~repo ~issue_number ~body:context ()
       >>= fun _ -> return issue
     )))
 end
@@ -170,8 +172,9 @@ let is_directory path =
 
 (* Proxy issue creation so that we can set milestones *)
 let dispatch_post ?body req =
-  lwt body = Body.string_of_body body in
-  match Request.get_param req "access_token" with
+  lwt body = Cohttp_lwt_body.string_of_body body in
+  let uri = Request.uri req in
+  match Uri.get_query_param uri "access_token" with
   |None -> print_endline "no access token"; Server.respond_not_found ()
   |Some token -> begin
     let open Github_t in
@@ -193,7 +196,7 @@ let dispatch_post ?body req =
       |Some (milestone,frag) ->
         let context = Comment.context_comment ~milestone ~id ~frag in
         lwt created_issue = Comment.create_issue ~context ~user_token ~new_issue in
-        let body = Body.body_of_string (Github_j.string_of_issue created_issue) in
+        let body = Cohttp_lwt_body.body_of_string (Github_j.string_of_issue created_issue) in
         let headers = Header.init_with "content-type" "application/json" in
         Server.respond ~headers ~status:`Created ~body ()  
     end
@@ -225,7 +228,8 @@ let dispatch ~milestone req =
     |true -> Header.init ()
   in
   (* See if we have a code in the GET header (signifying a Github redirect) *)
-  let code = Request.get_param req "code" in
+  let uri = Request.uri req in
+  let code = Uri.get_query_param uri "code" in
   match access_token, code with
   (* Have access token and no code, so serve file *)
   |Some access_token, None -> begin 
@@ -250,7 +254,7 @@ let dispatch ~milestone req =
   end
   (* No access token and no code, so redirect to Github oAuth login *)
   |None, None ->
-    let redirect_uri = Uri.(with_path (of_string "https://realworldocaml.org") (Request.path req)) in
+    let redirect_uri = Uri.(with_path (of_string "https://realworldocaml.org") (Uri.path uri)) in
     let uri = Github.URI.authorize ~scopes:[`Public_repo] ~redirect_uri 
       ~client_id:Config.client_id () in
     printf "Redirect for auth to %s\n%!" (Uri.to_string uri);
@@ -274,13 +278,15 @@ let dispatch ~milestone req =
 
 (* main callback function *)
 let callback con_id ?body req =
-  let path = Request.path req in
+  let uri = Request.uri req in
+  let headers = Request.headers req in
+  let path = Uri.path uri in
   printf "%s %s [%s]\n%!" (Code.string_of_method (Request.meth req)) path 
     (String.concat "," (List.map (fun (h,v) -> sprintf "%s=%s" h (String.concat "," v)) 
-      (Request.params req)));
+      (Uri.query uri)));
   (* Check that the host is realworldocaml.org, as the Github redirect requires
    * the exact match, or it'll reject the cross-domain Javascript *)
-  match Request.header req "host" with
+  match Header.get headers "host" with
   |Some "realworldocaml.org" -> begin
     match Request.meth req with
     |`POST -> dispatch_post ?body req
@@ -307,4 +313,4 @@ let _ =
   Sys.set_signal Sys.sigpipe Sys.Signal_ignore;
   let conn_closed con_id () = () in
   let spec = { Cohttp_lwt_unix.Server.callback; conn_closed } in
-  Lwt_main.run (Cohttp_lwt_unix.server ~address:"127.0.0.1" ~port:8000 spec)
+  Lwt_main.run (Cohttp_lwt_unix.Server.create ~address:"127.0.0.1" ~port:8000 spec)

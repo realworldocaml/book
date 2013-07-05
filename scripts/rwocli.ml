@@ -27,7 +27,10 @@ let repo = "rwo-comments"
 let run_gh fn = Lwt_main.run (Github.Monad.run (fn ()))
 (* Get our API tokens from the Github cookie jar *)
 let auth = Lwt.(Lwt_main.run (
-  Github_cookie_jar.get "rwo" >|= fun t ->
+  Github_cookie_jar.init ()
+  >>= fun jar ->
+  Github_cookie_jar.get jar "rwo"
+  >|= fun t ->
   Option.value_exn ~message:"Use git-jar to create an `rwo` cookie first." t))
 let token = Github.Token.of_string auth.auth_token
 
@@ -48,7 +51,7 @@ let find_milestone_num name =
 
 (* Get context from comments on an issue. We assume bactrian-bot is enough here. *)
 let find_context i =
-  run_gh (fun () -> Github.Issues.comments ~token ~user ~repo ~issue_number:i.issue_number ()) |!
+  run_gh (fun () -> Github.Issue.comments ~token ~user ~repo ~issue_number:i.issue_number ()) |!
   List.find ~f:(fun c -> c.issue_comment_user.user_login = "bactrian")
 
 let pandoc ?(output="plain") buf =
@@ -73,7 +76,7 @@ let list_comments filter_user (milestone:string option) output =
     |Some name -> `Num (find_milestone_num name)
   in
   let assignee = Option.bind filter_user (fun u -> Some (`Login u)) in
-  run_gh (fun () -> Github.Issues.for_repo ~token ~milestone ?assignee ~user ~repo ()) |!
+  run_gh (fun () -> Github.Issue.for_repo ~token ~milestone ?assignee ~user ~repo ()) |!
   List.filter_map ~f:id_from_issue |!
   List.sort ~cmp:(fun (id1,_) (id2,_) -> compare id1 id2) |!
   List.iter ~f:(fun (id,i) ->

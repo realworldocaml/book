@@ -609,7 +609,7 @@ constructor, `assert`,
 --------------------------------------------
 
 There's one important special case: `-` and `-.`, which are the
-integer and floating point subtraction operators, can act as both
+integer and floating-point subtraction operators, can act as both
 prefix operators (for negation) and infix operators (for subtraction),
 So, both `-x` and `x - y` are meaningful expressions.  Another thing
 to remember about negation  is that it has lower precedence than

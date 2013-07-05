@@ -86,7 +86,7 @@ at you.
 
 - We needed to type `;;` in order to tell the toplevel that it should
   evaluate an expression.  This is a peculiarity of the toplevel that
-  is not required in stand-alone programs (though it is sometimes
+  is not required in standalone programs (though it is sometimes
   helpful to include `;;` to improve OCaml's error reporting).
 - After evaluating an expression, the toplevel prints first the result
   and then the type of the result.
@@ -1304,7 +1304,7 @@ The or operator, `||` short-circuits in a similar way to `&&`.
 ## A complete program
 
 So far, we've played with the basic features of the language using the
-toplevel.  Now we'll create a simple, complete stand-alone program
+toplevel.  Now we'll create a simple, complete standalone program
 that does something useful: sum up a list of numbers read in from the
 standard input.
 

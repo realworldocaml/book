@@ -31,60 +31,32 @@ In this chapter, we'll:
 
 ## Basic command-line parsing
 
-Let's start by cloning the `md5` binary that is present on most Linux and Mac
-OS X installations. It reads in the contents of a file, applies the MD5 one-way
-cryptographic hash function to the data, and outputs an ASCII hex
-representation of the result.
+Let's start by cloning the `md5sum` command that is present on most Linux installations
+(the equivalent command on MacOS X is simply `md5`).  It reads in the contents
+of a file, applies the MD5 one-way cryptographic hash function to the data, and
+outputs an ASCII hex representation of the result.
 
-```ocaml
-(* basic_md5.ml : calculate MD5 hash of input *)
-open Core.Std
-
-let do_hash file =
-  let open Cryptokit in
-  In_channel.read_all file
-  |> hash_string (Hash.md5 ())
-  |> transform_string (Hexa.encode ())
-  |> print_endline
-
-let command =
-  Command.basic
-    ~summary:"Generate an MD5 hash of the input data"
-    ~readme:(fun () -> "More detailed information")
-    Command.Spec.(
-      empty
-      +> anon ("filename" %: string)
-    )
-  (fun filename () -> do_hash filename)
-
-let () = Command.run ~version:"1.0" ~build_info:"RWO" command
+```frag
+((typ ocaml)(name command-line-parsing/basic_md5.ml))
 ```
 
-You can compile this file the usual way with `ocamlfind` by passing an
-additional `cryptokit` package.  Install Cryptokit via OPAM if you didn't do so
-earlier.
+Use `opam install cryptokit` to install Cryptokit if you didn't do so earlier,
+and then build the example.
 
-```console
-$ opam install cryptokit
-$ ocamlfind ocamlopt -thread -package cryptokit -package core -linkpkg \
-  -o md5 basic_md5.ml
-$ ./md5
+```frag
+((typ ocaml)(name command-line-parsing/build_basic_md5.out))
 ```
 
 The `do_hash` function accepts a filename parameter and prints the
-human-readable MD5 string to the console standard output.
-
-The subsequent `command` variable defines how to invoke `do_hash` by parsing
-the command-line arguments.  When you compile and run this program, it already
-defines a number of useful default command-line options.
+human-readable MD5 string to the console standard output.  The subsequent
+`command` variable defines how to invoke `do_hash` by parsing the command-line
+arguments.  When you compile and run this program, it already defines a number
+of useful default command-line options.
 
 For instance, query the version information for the binary you just compiled.
 
-```console
-$ ./md5 -version
-1.0
-$ ./md5 -build-info
-RWO
+```frag
+((typ console)(name command-line-parsing/get_basic_md5_version.out))
 ```
 
 The actual versions are defined via optional arguments to `Command.run`.  You
@@ -92,22 +64,8 @@ can leave these blank or get your build system to generate them directly from
 your version control system (e.g. by running `hg tip` to generate a build
 revision number, in the case of Mercurial).
 
-```console
-$ ./md5
-Generate an MD5 hash of the input data
-
-  md5 filename
-
-More detailed information
-
-=== flags ===
-
-  [-build-info]  print info about this build and exit
-  [-version]     print the version of this build and exit
-  [-help]        print this help text and exit
-                 (alias: -?)
-
-missing anonymous argument: filename
+```frag
+((typ console)(name command-line-parsing/get_basic_md5_help.out))
 ```
 
 When we invoke this binary without any arguments, it helpfully displays a help
@@ -116,9 +74,8 @@ screen that informs you that a required argument `filename` is missing.
 If you do supply the filename argument, then `do_hash` is called with the
 argument and the MD5 output is displayed to the standard output.
 
-```
-$ ./md5 ./md5
-59562f5e4f790d16f1b2a095cd5de844
+```frag
+((typ console)(name command-line-parsing/run_basic_md5.out))
 ```
 
 ## Defining parsing specifications
