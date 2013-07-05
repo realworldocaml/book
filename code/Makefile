@@ -66,8 +66,10 @@ $(OBJ)/%.out.0.html $(OBJ)/%.out.0.md: %.out
 
 clean:
 	find . -name \*.out | xargs rm
-	find . -name \*.html | xargs rm
-	find . -name \*.md | xargs rm
 	rm -rf $(OBJ)
+
+clean-%:
+	find $* -name \*.out | xargs rm
+	rm -rf $(OBJ)/$*
 
 .PRECIOUS: $(all_src) $(all_scripts)
