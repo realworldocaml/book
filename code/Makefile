@@ -1,4 +1,4 @@
-dirs=        json
+dirs=        json command-line-parsing
 
 # html/md files directory
 OBJ=         _build

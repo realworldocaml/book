@@ -36,28 +36,8 @@ OS X installations. It reads in the contents of a file, applies the MD5 one-way
 cryptographic hash function to the data, and outputs an ASCII hex
 representation of the result.
 
-```ocaml
-(* basic_md5.ml : calculate MD5 hash of input *)
-open Core.Std
-
-let do_hash file =
-  let open Cryptokit in
-  In_channel.read_all file
-  |> hash_string (Hash.md5 ())
-  |> transform_string (Hexa.encode ())
-  |> print_endline
-
-let command =
-  Command.basic
-    ~summary:"Generate an MD5 hash of the input data"
-    ~readme:(fun () -> "More detailed information")
-    Command.Spec.(
-      empty
-      +> anon ("filename" %: string)
-    )
-  (fun filename () -> do_hash filename)
-
-let () = Command.run ~version:"1.0" ~build_info:"RWO" command
+```frag
+((typ ocaml)(name command-line-parsing/basic_md5.ml))
 ```
 
 You can compile this file the usual way with `ocamlfind` by passing an
