@@ -89,7 +89,7 @@ val contents : string Deferred.t = <abstr>
 The value in `contents` isn't yet determined in part because there's
 nothing running that could do the necessary I/O.  When using Async,
 processing of I/O and other events is handled by the Async scheduler.
-When writing a stand-alone program, you need to start the scheduler
+When writing a standalone program, you need to start the scheduler
 explicitly, but utop knows about Async, and can start the scheduler
 automatically.  More than that, utop knows about deferred values, and
 when you type in an expression of type `Deferred.t`, it will make sure
@@ -327,7 +327,7 @@ deferreds when you can.
 ## Examples: an echo server
 
 Now that we have the basics of Async under our belt, let's look at a
-small complete stand-alone Async program. In particular, we'll write
+small complete standalone Async program. In particular, we'll write
 an echo server, _i.e._, a program that accepts connections from
 clients and spits back every line of text sent to it.
 
@@ -920,7 +920,7 @@ Exception:
 ```
 
 In utop, the exception thrown by `maybe_raise ()` terminates the
-evaluation of just that expression, but in a stand-alone program, an
+evaluation of just that expression, but in a standalone program, an
 uncaught exception would bring down the entire process.
 
 So, how could we capture and handle such an exception?  You might try

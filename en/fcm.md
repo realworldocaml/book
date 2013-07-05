@@ -664,7 +664,7 @@ val cli : (string, (module Query_handler_instance)) Hashtbl.t -> unit = <fun>
 ```
 
 We can most effectively run this command-line interface from a
-stand-alone program, which we can do by putting the above code in a
+standalone program, which we can do by putting the above code in a
 file along with following command to launch the interface.
 
 ```ocaml
