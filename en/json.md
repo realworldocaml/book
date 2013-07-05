@@ -454,7 +454,7 @@ variant types (e.g. `scope` in the example).
 ### ATD annotations
 
 ATD deviates significantly from OCaml syntax due to its support for annotations
-within the specification.  The annotations can customise the code that is
+within the specification.  The annotations can customize the code that is
 generated for a particular target (of which the OCaml backend is of most
 interest to us).
 
