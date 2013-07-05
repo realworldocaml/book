@@ -31,10 +31,10 @@ In this chapter, we'll:
 
 ## Basic command-line parsing
 
-Let's start by cloning the `md5` binary that is present on most Linux and Mac
-OS X installations. It reads in the contents of a file, applies the MD5 one-way
-cryptographic hash function to the data, and outputs an ASCII hex
-representation of the result.
+Let's start by cloning the `md5sum` command that is present on most Linux installations
+(the equivalent command on MacOS X is simply `md5`).  It reads in the contents
+of a file, applies the MD5 one-way cryptographic hash function to the data, and
+outputs an ASCII hex representation of the result.
 
 ```frag
 ((typ ocaml)(name command-line-parsing/basic_md5.ml))
