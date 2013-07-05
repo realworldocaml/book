@@ -193,7 +193,7 @@ Real World OCaml is split into three parts and appendices:
   OCaml. It's a remarkably simple system in comparison to other
   language runtimes (such as Java or the .NET CLR), and you'll need to
   read this to build very high performance systems that have to
-  minimise resource usage or interface to C libraries.  This is also
+  minimize resource usage or interface to C libraries.  This is also
   where we talk about profiling and debugging techniques using tools
   such as GNU `gdb`.
 

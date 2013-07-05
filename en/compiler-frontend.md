@@ -606,7 +606,7 @@ see these all these transformations precisely.
 
 Syntax extensions are a powerful extension mechanism that can completely alter
 your source code's layout and style.  Core includes a very conservative set of
-extensions that take care to minimise the syntax changes.  There are a number
+extensions that take care to minimize the syntax changes.  There are a number
 of third-party libraries that are much more ambitious -- some introduce
 whitespace-sensitive indentation while others build entirely new embedded
 languages using OCaml as a host language.
