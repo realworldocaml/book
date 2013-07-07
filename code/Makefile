@@ -1,4 +1,4 @@
-dirs=        json command-line-parsing
+dirs=        json command-line-parsing guided-tour
 
 # html/md files directory
 OBJ=         _build
@@ -42,7 +42,7 @@ $(OBJ)/%.mli.0.html $(OBJ)/%.mli.0.md: %.mli
 $(OBJ)/%.ml.0.html $(OBJ)/%.ml.0.md: %.ml
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -cow $<  || (cat $@ && rm -f $@)
-	
+
 $(OBJ)/%.json.0.html $(OBJ)/%.json.0.md: %.json
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -pygments json $< || (cat $@ && rm -f $@)
