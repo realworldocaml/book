@@ -17,7 +17,7 @@ let out_tree o t =
   Xmlm.output_doc_tree frag o t
 
 let write_document chan dtd doc =
-  let o = Xmlm.make_output (`Channel chan) in
+  let o = Xmlm.make_output ~decl:false (`Channel chan) in
   match doc with
   |[] -> ()
   |[hd] -> out_tree o (dtd, hd)
