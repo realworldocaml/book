@@ -59,25 +59,15 @@ library.  Accordingly, we'll start by opening the `Core.Std` module to
 get access to Core's libraries.  If you don't open `Core.Std` many of
 the examples below will fail.
 
-```ocaml
-$ utop
-# open Core.Std;;
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 0)) 
 ```
 
 Now that we have Core open, let's try a few simple numerical
 calculations.
 
-```ocaml
-# 3 + 4;;
-- : int = 7
-# 8 / 3;;
-- : int = 2
-# 3.5 +. 6.;;
-- : float = 9.5
-# 30_000_000 / 300_000;;
-- : int = 100
-# sqrt 9.;;
-- : float = 3.
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 1)) 
 ```
 
 By and large, this is pretty similar to what you'd find in any
