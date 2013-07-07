@@ -1,0 +1,5 @@
+$ ./basic_md5_as_filename.native nonexistent
+Fatal error: exception Sys_error("nonexistent: No such file or directory")
+Raised by primitive operation at file "pervasives.ml", line 292, characters 20-46
+Called from file "lib/in_channel.ml", line 19, characters 46-65
+Called from file "lib/command.ml", line 1356, characters 4-54

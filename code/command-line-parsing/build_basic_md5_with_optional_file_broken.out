@@ -1,0 +1,8 @@
+$ ocamlbuild -use-ocamlfind -pkg cryptokit,core -tag thread basic_md5_with_optional_file_broken.native
+ocamlfind ocamlc -c -thread -package cryptokit,core -o basic_md5_with_optional_file_broken.cmo basic_md5_with_optional_file_broken.ml
++ ocamlfind ocamlc -c -thread -package cryptokit,core -o basic_md5_with_optional_file_broken.cmo basic_md5_with_optional_file_broken.ml
+File "basic_md5_with_optional_file_broken.ml", line 18, characters 4-11:
+Error: This expression has type string -> unit -> unit
+       but an expression was expected of type string option -> unit -> unit
+       Type string is not compatible with type string option 
+Command exited with code 2.
