@@ -3,7 +3,6 @@
 Many of the OCaml programs that you'll write will end up as binaries that need
 to be run from a command prompt.  Any non-trivial command-line program needs a
 few features:
-
 * program options and file inputs need to be parsed from the command
   line arguments.
 * sensible error messages have to be generated in response to
@@ -24,7 +23,6 @@ You may already be familiar with this command-line style from the Git or
 Mercurial version control systems.
 
 In this chapter, we'll:
-
 * learn how to use Command to construct basic and grouped command-line interfaces.
 * read examples that extend the cryptographic utility from [xref](#classes) and build a simple equivalent to the `md5` and `shasum` utilities.
 * demonstrate how _functional combinators_ can be used to declare complex data structures in a type-safe and elegant way.
@@ -59,19 +57,21 @@ For instance, query the version information for the binary you just compiled.
 ((typ console)(name command-line-parsing/get_basic_md5_version.out))
 ```
 
-The actual versions are defined via optional arguments to `Command.run`.  You
-can leave these blank or get your build system to generate them directly from
-your version control system (e.g. by running `hg tip` to generate a build
-revision number, in the case of Mercurial).
+The versions that you see in the output are defined via optional arguments to
+`Command.run`.  You can leave these blank in your own programs, or get your
+build system to generate them directly from your version control system (e.g.
+by running `hg tip` to generate a build revision number, in the case of
+Mercurial).
 
 ```frag
 ((typ console)(name command-line-parsing/get_basic_md5_help.out))
 ```
 
-When we invoke this binary without any arguments, it helpfully displays a help
-screen that informs you that a required argument `filename` is missing.
+When we invoke this binary without any arguments, it helpfully displays all
+of the command-line options available, along with a message to the standard
+error that informs you that a required argument `filename` is missing.
 
-If you do supply the filename argument, then `do_hash` is called with the
+If you do supply the `filename` argument, then `do_hash` is called with the
 argument and the MD5 output is displayed to the standard output.
 
 ```frag
@@ -562,7 +562,7 @@ val basic :
 ```
 
 The final line is the important one. It shows that the callback function for a
-spec should consume identical arguments to the supplied `main` function, expect
+spec should consume identical arguments to the supplied `main` function, except
 for an additional `unit` argument.  This final `unit` is there to make sure the
 callback is evaluated as a function, since if zero command-line arguments are
 specified (i.e. `Spec.empty`), the callback would otherwise have no arguments
