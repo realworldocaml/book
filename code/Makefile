@@ -33,6 +33,8 @@ print-%:
 	@echo $($*)
 
 json/run_github_org.out:: json/build_github_org.out
+command-line-parsing/run_basic_md5.out:: command-line-parsing/build_basic_md5.out
+command-line-parsing/run_basic_and_default_md5.out:: command-line-parsing/build_basic_md5_with_optional_file.out command-line-parsing/build_basic_md5_with_default_file.out
 
 
 $(OBJ)/%.mli.0.html $(OBJ)/%.mli.0.md: %.mli
