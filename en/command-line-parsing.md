@@ -3,6 +3,7 @@
 Many of the OCaml programs that you'll write will end up as binaries that need
 to be run from a command prompt.  Any non-trivial command-line program needs a
 few features:
+
 * program options and file inputs need to be parsed from the command
   line arguments.
 * sensible error messages have to be generated in response to
@@ -23,111 +24,81 @@ You may already be familiar with this command-line style from the Git or
 Mercurial version control systems.
 
 In this chapter, we'll:
+
 * learn how to use Command to construct basic and grouped command-line interfaces.
 * read examples that extend the cryptographic utility from [xref](#classes) and build a simple equivalent to the `md5` and `shasum` utilities.
 * demonstrate how _functional combinators_ can be used to declare complex data structures in a type-safe and elegant way.
 
 ## Basic command-line parsing
 
-Let's start by cloning the `md5sum` command that is present on most Linux installations
-(the equivalent command on MacOS X is simply `md5`).  It reads in the contents
-of a file, applies the MD5 one-way cryptographic hash function to the data, and
-outputs an ASCII hex representation of the result.
+Let's start by working through a clone of the `md5sum` command that is present
+on most Linux installations (the equivalent command on MacOS X is simply
+`md5`).  The function defined below reads in the contents of a file,
+applies the MD5 one-way cryptographic hash function to the data, and outputs an
+ASCII hex representation of the result.
+
 
 ```frag
-((typ ocaml)(name command-line-parsing/basic_md5.ml))
+((typ ocaml)(name command-line-parsing/basic_md5.ml)(part 0))
 ```
 
-Use `opam install cryptokit` to install Cryptokit if you didn't do so earlier,
-and then build the example.
+The `do_hash` function accepts a `filename` parameter and prints the
+human-readable MD5 string to the console standard output.  This is a
+straightforward function that we wish to wrap using a command-line binary built
+using `Command`.
 
-```frag
-((typ ocaml)(name command-line-parsing/build_basic_md5.out))
-```
-
-The `do_hash` function accepts a filename parameter and prints the
-human-readable MD5 string to the console standard output.  The subsequent
-`command` variable defines how to invoke `do_hash` by parsing the command-line
-arguments.  When you compile and run this program, it already defines a number
-of useful default command-line options.
-
-For instance, query the version information for the binary you just compiled.
-
-```frag
-((typ console)(name command-line-parsing/get_basic_md5_version.out))
-```
-
-The versions that you see in the output are defined via optional arguments to
-`Command.run`.  You can leave these blank in your own programs, or get your
-build system to generate them directly from your version control system (e.g.
-by running `hg tip` to generate a build revision number, in the case of
-Mercurial).
-
-```frag
-((typ console)(name command-line-parsing/get_basic_md5_help.out))
-```
-
-When we invoke this binary without any arguments, it helpfully displays all
-of the command-line options available, along with a message to the standard
-error that informs you that a required argument `filename` is missing.
-
-If you do supply the `filename` argument, then `do_hash` is called with the
-argument and the MD5 output is displayed to the standard output.
-
-```frag
-((typ console)(name command-line-parsing/run_basic_md5.out))
-```
-
-## Defining parsing specifications
-
-So how does all this work?  Most of the interesting logic lies in how the
-specifications are constructed.
-
-The `Command.Spec` module defines several combinators that can be chained
-together to define flags and anonymous arguments, what types they should map
-to, and whether to take special actions (such as interactive input) if certain
-fields are encountered.
+The first step is to declare all the possible command-line arguments in a
+*specification*.  `Command.Spec` defines combinators that can be chained
+together to define optional flags and positional arguments, what types they
+should map to, and whether to take special actions (such as pausing for
+interactive input) if certain inputs are encountered.
 
 ### Anonymous arguments
 
-Let's build the specification for a single argument that is specified
-directly on the command-line (this is known as an _anonymous_ argument).
+Let's build the specification for a single argument that is passed directly
+on the command-line (this is known as an _anonymous_ argument).
 
-```ocaml
-Command.Spec.(
-  empty
-  +> anon ("filename" %: string)
-)
+```frag
+((typ ocaml)(name command-line-parsing/basic_md5.ml)(part 1))
 ```
 
-The specification above begins with an `empty` value and then adds more
-parameters via the `+>` combinator.  Our example uses the `anon` function to
-define a single anonymous parameter.
+The specification functions are all defined in the `Command.Spec` module and
+initialized to an `empty` value. Parameters are subsequently added via the `+>`
+combinator (which is available since we opened `Command.Spec` into our default
+environment).  We've then defined a single `filename` anonymous argument to
+capture the input filename to `do_hash`.
 
-Anonymous parameters are created using the `%:` operator, which binds a textual
-string name (used in the help text) to an OCaml conversion function.  The
-conversion function is responsible for parsing the command-line fragment into
-an OCaml data type.  In the example above, this is just a `string`, but we'll
-see more complex conversion options below.
+Anonymous parameters are created using the `%:` operator. This binds a textual
+name (used in the help text to identify the parameter) to an OCaml conversion
+function that parses the command-line string fragments into a higher-level
+OCaml data type.  In the example above this is just `Command.Spec.string`, but
+we'll see more complex conversion options later in the chapter.
 
-### Callback functions
+### Defining basic commands
 
-This specification is usually combined with a callback function that accepts
-all the command-line parameters as its function arguments.  Multiple arguments
-are passed to the callback in the same order as they appeared in the
-specification (using the `+>` operator).
+Once we've defined a specification, we need to put it to work on real input.
+The simplest way is to directly create a command-line interface via the
+`Command.basic` module.
 
-The callback function is where all the actual work happens after the
-command-line parsing is complete.  This function is applied with the arguments
-containing the parsed command-line arguments, and takes over as the main thread
-of the application.
-
-In our example, we had just one anonymous argument, so the callback function
-just has a single `string` parameter applied to it:
-
-```ocaml
-(fun file () -> do_hash file)
+```frag
+((typ ocaml)(name command-line-parsing/basic_md5.ml)(part 2))
 ```
+
+`Command.basic` defines a concrete parser that takes the following extra
+arguments:
+
+* `summary` is a required one-line description to go at the top of the command
+  help screen.
+* `readme` is for longer help text when the command is called with `-help`.
+  The `readme` argument is a function that is only evaluated when the help
+  text is actually needed.
+* The specification and the callback function follow as non-labelled arguments.
+
+The callback function is where all the work happens after the command-line
+parsing is complete.  This function is applied with the arguments containing
+the parsed command-line values, and it takes over as the main thread of the
+application.  The callback's arguments are passed in the same order as they
+were bound in the specification (using the `+>` operator).
 
 <note>
 <title>The extra `unit` argument to callbacks</title>
@@ -142,38 +113,67 @@ other arguments.
 
 </note>
 
-### Creating basic commands
+### Running basic commands
 
-The specification and the function callback are glued together using the
-`basic` command.  Let's see how this looks in our `md5` command.
+Once we've defined the basic command, running it is just one function call away.
 
-```ocaml
-Command.basic
-  ~summary:"Generate an MD5 hash of the input data"
-  ~readme:(fun () -> "More detailed information")
-  Command.Spec.(
-    empty
-    +> anon ("filename" %: string)
-  )
-  (fun filename () -> do_hash filename)
+```frag
+((typ ocaml)(name command-line-parsing/basic_md5.ml)(part 3))
 ```
 
-The `basic` function takes the following arguments:
+`Command.run` takes a couple of optional arguments that are useful to identify
+which version of the binary you are running in production.  Let's build the
+complete MD5 example first so that we can see this in action.  Run `opam
+install cryptokit` to install Cryptokit if you didn't do so earlier in
+[xref](#classes).
 
-* `summary` is a required one-line description to go at the top of the command
-  help screen.
-* `readme` is for longer help text when the command is called with `-help`.
-  The `readme` argument is a function that is only evaluated when the help
-  text is actually needed.
-* The specification and the callback function follow, with the arguments to
-  the callback matching the order in which the specification binds
-  arguments. 
+```frag
+((typ ocaml)(name command-line-parsing/build_basic_md5.out))
+```
 
-### Command argument types
+You can now query the version information for the binary you just compiled.
 
-You aren't just limited to parsing command lines as strings, of course.  The
-`Command.Spec` module defines several other conversion functions that validate
-and parse input into various types:
+```frag
+((typ console)(name command-line-parsing/get_basic_md5_version.out))
+```
+
+The versions that you see in the output were defined via the optional arguments
+to `Command.run`.  You can leave these blank in your own programs or get your
+build system to generate them directly from your version control system (e.g.
+by running `hg tip` to generate a build revision number, in the case of
+Mercurial).
+
+```frag
+((typ console)(name command-line-parsing/get_basic_md5_help.out))
+```
+
+When we invoke this binary without any arguments, it helpfully displays all of
+the command-line options available, along with a message to the standard error
+that informs you that a required argument `filename` is missing.
+
+If you do supply the `filename` argument, then `do_hash` is called with the
+argument and the MD5 output is displayed to the standard output.
+
+```frag
+((typ console)(name command-line-parsing/run_basic_md5.out))
+```
+
+And that's all it took to build our little MD5 utility!  Here's a
+complete version of the example we just walked through, but made slightly
+more succinct by removing intermediate variables.
+
+```frag
+((typ ocaml)(name command-line-parsing/basic_md5_succinct.ml))
+```
+
+We'll now go through some of the more advanced features of the library
+for the rest of the chapter.
+
+## Argument types
+
+You aren't just limited to parsing command lines as strings, of course.
+`Command.Spec` defines several other conversion functions that validate and
+parse input into various types.
 
 Argument type    OCaml type    Example
 -------------    -----------   -------
@@ -185,166 +185,138 @@ Argument type    OCaml type    Example
 `time_span`      `Span.t`      `5s`
 `file`           `string`      `/etc/passwd`
 
-A more realistic `md5` function might also read from the standard input if a
-filename isn't specified.  We can change our specification with a single line
-to reflect this by writing:
+We can tighten up the specification of the command to `file` to reflect that
+the argument must be a valid filename, and not just any string.
 
-```ocaml
-Command.Spec.(
-  empty
-  +> anon (maybe ("filename" %: string))
-)
+```frag
+((typ ocaml)(name command-line-parsing/basic_md5_as_filename.ml)(part 1))
 ```
 
-The anonymous parameter has been prefixed with a `maybe` that
-indicates the value is now optional.  If you compile the example,
-you'll get a type error though:
+Running this with a non-existent filename will now output an error if the file
+doesn't exist.  As a bonus, it also enables interactive command-line completion
+to work on the filename argument (explained later in the chapter).
 
-```
-File "md5_broken.ml", line 18, characters 26-30:
-Error: This expression has type string option
-       but an expression was expected of type string
-Command exited with code 2.
+```frag
+((typ console)(name command-line-parsing/run_basic_md5_as_filename.out))
 ```
 
-This is because the type of the callback function has changed.  It now
-wants a `string option` instead of a `string` since the value is
-optional.  We can quickly adapt our example to use the new information
-and read from standard input if no file is specified.
+### Defining custom argument types
 
-```ocaml
-(* md5.ml : calculate md5 with an optional filename *)
-open Core.Std
+We can also define our own argument types if the predefined ones aren't
+sufficient. For instance, let's make a `regular_file` argument type that
+ensures that the input file isn't a character device or some other odd UNIX
+file type that can't be fully read.
 
-let get_file_data = function
-  | None
-  | Some "-" -> In_channel.(input_all stdin)
-  | Some file -> In_channel.read_all file
-
-let do_hash file =
-  let open Cryptokit in
-  get_file_data file
-  |> hash_string (Hash.md5 ())
-  |> transform_string (Hexa.encode ())
-  |> print_endline
-
-let command =
-  Command.basic
-    ~summary:"Generate an MD5 hash of the input data"
-    Command.Spec.(
-      empty
-      +> anon (maybe ("filename" %: string))
-    )
-  (fun file () -> do_hash file)
-
-let () = Command.run command
+```frag
+((typ ocaml)(name command-line-parsing/basic_md5_with_custom_arg.ml))
 ```
 
-There are several other transformations you can do on anonymous
-arguments.  We've shown you `maybe`, and you can also obtain lists of
-arguments or supply default values.  Try altering the example above to
-take a list of files and output checksums for all of them, just as the
-`md5` command does.
+The `regular_file` function transforms a `filename` string parameter into the
+same string, but first checks that the file exists and is a regular file type.
+When you build and run this code, you will see the new error messages if you
+try to open a special device such as `/dev/null`.
 
-Anonymous argument   OCaml type
-------------------   ----------
-sequence             `list` of arguments
-maybe                `option` argument
-maybe_with_default   argument with a default value if argument is missing
-
-<note>
-<title>Defining your own argument types</title>
-
-You can also define your own argument parsers by using the 
-`Spec.Arg_type` module directly.  For instance, the `time_span`
-converter is defined as follows.
-
-```ocaml
-# open Command.Spec ;;
-# let time_span = Command.Spec.Arg_type.create Time.Span.of_string;;
-val time_span : Core.Span.t Command.Spec.Arg_type.t = <abstr>
-# Command.Spec.(empty +> anon ("span" %: time_span));;
-- : (Core.Span.t -> '_a, '_a) Command.Spec.t = <abstr>
+```frag
+((typ console)(name command-line-parsing/run_basic_md5_with_custom_arg.out))
 ```
 
-</note>
+### Optional and default arguments
 
-## Adding flags to label the command line
+A more realistic MD5 binary could also read from the standard input if a
+`filename` isn't specified.
+
+```frag
+((typ ocaml)(name command-line-parsing/basic_md5_with_optional_file_broken.ml)(part 1))
+```
+
+This just wraps the `filename` argument declaration in the `maybe` function to
+mark it as an optional argument.  However, building this results in a
+compile-time error.
+
+```frag
+((typ console)(name command-line-parsing/build_basic_md5_with_optional_file_broken.out))
+```
+
+This is because changing the argument type has also changed the type of the
+callback function. It now wants a `string option` instead of a `string` since
+the value has become optional.  We can quickly adapt our example to use the new
+information and read from standard input if no file is specified.
+
+```frag
+((typ ocaml)(name command-line-parsing/basic_md5_with_optional_file.ml))
+```
+
+The `filename` parameter to `do_hash` is now a `string option` type.  This is
+resolved into an input channel via `get_file_data` to determine whether to open
+the standard input or a file, and then the rest of the command is similar to
+our previous examples.
+
+Another possible way to handle this would be to supply a dash as the default
+filename if one isn't specified. The `maybe_with_default` function can do just
+this, with the benefit of not having to change the callback parameter type
+(which may be a problem in more complex applications).
+
+The example below behaves exactly the same as the previous example, but
+replaces `maybe` with `maybe_with_default`.
+
+```frag
+((typ ocaml)(name command-line-parsing/basic_md5_with_default_file.ml))
+```
+
+Building and running both against a system file confirms that they have the
+same behavior.
+
+```frag
+((typ console)(name command-line-parsing/run_basic_and_default_md5.out))
+```
+
+### Sequences of arguments
+
+One last transformation that's useful is
+to obtain lists of anonymous arguments rather than a single one.  We can
+modify our MD5 code to accept a list of files on the command-line rather
+than just one.
+
+```frag
+((typ ocaml)(name command-line-parsing/basic_md5_sequence.ml))
+```
+
+The callback function is a little more complex now to handle the extra options.
+The `files` are now a `string list`, and an empty list reverts to using
+standard input just as our previous `maybe` and `maybe_with_default` examples
+did.  If the list of files isn't empty, then it opens up each file and runs
+them through `do_hash` sequentially. 
+
+## Adding labelled flags to the command line
 
 You aren't just limited to anonymous arguments on the command-line.  A *flag*
 is a named field that can be followed by an optional argument.  These flags can
 appear in any order on the command-line, or multiple times, depending on how
 they're declared in the specification.
 
-Let's add two arguments to our `md5` command that mimics the Linux version. A
-`-s` flag specifies the string to be hashed directly on the command-line and a
-`-t` runs a self-test.  The complete example is:
+Let's add two arguments to our `md5` command that mimics the MacOS X version. A
+`-s` flag specifies the string to be hashed directly on the command-line and
+`-t` runs a self-test.  The complete example is below.
 
-```ocaml
-(* mlmd5.ml : generate an MD5 hash of the input data *)
-open Core.Std
-
-let get_file_data file checksum =
-  match file, checksum with
-  | None, Some buf -> buf
-  | _, Some buf -> eprintf "Warning: ignoring file\n"; buf
-  | (None|Some "-"), None -> In_channel.(input_all stdin)
-  | Some file, None -> In_channel.read_all file
-
-let do_hash file checksum =
-  let open Cryptokit in
-  get_file_data file checksum
-  |> hash_string (Hash.md5 ())
-  |> transform_string (Hexa.encode ())
-  |> print_endline
-
-let command =
-  Command.basic
-    ~summary:"Generate an MD5 hash of the input data"
-    Command.Spec.(
-      empty
-      +> flag "-s" (optional string) ~doc:"string Checksum the given string"
-      +> flag "-t" no_arg ~doc:" run a built-in time trial"
-      +> anon (maybe ("filename" %: string))
-    )
-  (fun checksum trial file () ->
-    match trial with
-    | true -> printf "Running time trial\n"
-    | false -> do_hash file checksum)
-
-let () = Command.run command
+```frag
+((typ ocaml)(name command-line-parsing/basic_md5_with_flags.ml))
 ```
 
-The specification now uses the `flag` command.  The first argument to `flag` is
-its name on the command-line, and the `doc` argument supplies the help text.
+The specification now uses the `flag` function to define the two new labelled
+command-line arguments.  The `doc` string is formatted so that the first word
+is the short name that appears in the usage text, with the remainder being the
+full help text.  Notice that the `-t` flag has no argument, and so we prepend
+its `doc` text with a blank space.  The help text for the above code looks like
+this.
 
-The `doc` string is formatted so that the first word is the short name that
-appears in the usage text, with the remainder being the full help text.  Notice
-that the `-t` flag has no argument, and so we prepend its `doc` text with a
-blank space.  The help text for the above code looks like this:
-
-```
-$ ./mlmd5 -help
-Generate an MD5 hash of the input data
-
-  ./mlmd5 [filename]
-
-=== flags ===
-
-  [-s string]    Checksum the given string
-  [-t]           run a built-in time trial
-  [-build-info]  print info about this build and exit
-  [-version]     print the version of this build and exit
-  [-help]        print this help text and exit
-                 (alias: -?)
-
-$ ./mlmd5 -s "ocaml rocks"
-5a118fe92ac3b6c7854c595ecf6419cb
+```frag
+((typ console)(name command-line-parsing/run_basic_md5_flags_help.out))
 ```
 
-The `-s` flag in our specification requires a `string` argument, and the parser
-outputs an error message if it isn't supplied.  Here's a list of some of the
-functions that you can wrap flags in to control how they are parsed:
+The `-s` flag in our specification requires a `string` argument and isn't
+optional. As with the anonymous arguments, the `Command` parser outputs an
+error message if the flag isn't supplied.  Here's a list of some of the
+functions that you can wrap flags in to control how they are parsed.
 
 Flag function            OCaml type
 -------------            ----------
