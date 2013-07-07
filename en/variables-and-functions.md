@@ -30,13 +30,8 @@ when using modules, for the remainder of the module.
 
 Here's a simple example.
 
-```ocaml
-# let x = 3;;
-val x : int = 3
-# let y = 4;;
-val y : int = 4
-# let z = x + y;;
-val z : int = 7
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 0)) 
 ```
 
 `let` can also be used to create a variable binding whose scope is
@@ -50,40 +45,24 @@ This first evaluates _`expr1`_ and then evaluates _`expr2`_ with
 _`identifier`_ bound to whatever value was produced by the evaluation
 of _`expr1`_.  Here's how it looks in practice.
 
-```ocaml
-# let languages = "OCaml,Perl,C++,C";;
-val languages : string = "OCaml,Perl,C++,C"
-# let dashed_languages =
-    let language_list = String.split languages ~on:',' in
-    String.concat ~sep:"-" language_list
-  ;;
-val dashed_languages : string = "OCaml-Perl-C++-C"
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 1)) 
 ```
 
 Note that the scope of `language_list` is just the expression
 `String.concat ~sep:"-" language_list`, and is not available at the
 top level, as we can see if we try to access it now.
 
-```ocaml
-# language_list;;
-Characters 0-13:
-  language_list;;
-  ^^^^^^^^^^^^^
-Error: Unbound value language_list
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 2)) 
 ```
 
 A let binding in an inner scope can _shadow_, or hide, the definition
 from an outer scope.  So, for example, we could have written the
 `dashed_languages` example as follows:
 
-```ocaml
-# let languages = "OCaml,Perl,C++,C";;
-val languages : string = "OCaml,Perl,C++,C"
-# let dashed_languages =
-     let languages = String.split languages ~on:',' in
-     String.concat ~sep:"-" languages
-  ;;
-val dashed_languages : string = "OCaml-Perl-C++-C"
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 3)) 
 ```
 
 This time, in the inner scope we called the list of strings
@@ -92,23 +71,16 @@ definition of `languages`.  But once the definition of
 `dashed_languages` is complete, the inner scope has closed and the
 original definition of languages reappears.
 
-```ocaml
-# languages;;
-- : string = "OCaml,Perl,C++,C"
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 4)) 
 ```
 
 One common idiom is to use a series of nested `let`/`in` expressions
 to build up the components of a larger computation.  Thus, we might
 write:
 
-```ocaml
-# let area_of_ring inner_radius outer_radius =
-     let pi = acos (-1.) in
-     let area_of_circle r = pi *. r *. r in
-     area_of_circle outer_radius -. area_of_circle inner_radius
-  ;;
-# area_of_ring 1. 3.;;
-- : float = 25.1327412287183449
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 5)) 
 ```
 
 It's important not to confuse a sequence of let bindings with the
@@ -116,13 +88,8 @@ modification of a mutable variable.  For example, consider how
 `area_of_ring` would work if we had instead written this purposefully
 confusing bit of code.
 
-```ocaml
-# let area_of_ring inner_radius outer_radius =
-     let pi = acos (-1.) in
-     let area_of_circle r = pi *. r *. r in
-     let pi = 0. in
-     area_of_circle outer_radius -. area_of_circle inner_radius
-  ;;
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 6)) 
 ```
 
 Here, we redefined `pi` to be zero after the definition of
@@ -132,15 +99,8 @@ fact, the behavior of the function is unchanged.  That's because the
 original definition of `pi` wasn't changed, it was just shadowed, so
 that any subsequent reference to `pi` would see the new definition of
 `pi` as zero.  But there is no later use of `pi`, so the binding
-doesn't make a difference.  Indeed, if you type the example above into
-the toplevel, OCaml will warn you that the definition is unused.
-
-```ocaml
-Characters 126-128:
-    let pi = 0. in
-        ^^
-Warning 26: unused variable pi.
-```
+doesn't make a difference.  And this explains the warning produced by
+the toplevel telling us that there is an unused definition of `pi`.
 
 In OCaml, let bindings are immutable.  As we'll see in
 [xref](#imperative-programming-1), there are mutable values in OCaml,
@@ -174,10 +134,8 @@ _patterns_ on the left-hand side.  Consider the following code, which
 uses `List.unzip`, a function for converting a list of pairs into a
 pair of lists.
 
-```ocaml
-# let (ints,strings) = List.unzip [(1,"one"); (2,"two"); (3,"three")];;
-val ints : int list = [1; 2; 3]
-val strings : string list = ["one"; "two"; "three"]
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 7)) 
 ```
 
 Here, `(ints,strings)` is a pattern, and the `let` binding assigns
@@ -194,16 +152,8 @@ irrefutable, but list patterns are not.  Consider the following code
 that implements a function for up-casing the first element of a
 comma-separated list.
 
-```ocaml
-# let upcase_first_entry line =
-     let (first :: rest) = String.split ~on:',' line in
-     String.concat ~sep:"," (String.uppercase first :: rest)
-  ;;
-val upcase_first_entry : string -> string = <fun>
-Characters 40-53:
-Warning 8: this pattern-matching is not exhaustive.
-Here is an example of a value that is not matched:
-[]
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 8)) 
 ```
 
 This case can't really come up in practice, because `String.split`
@@ -211,13 +161,8 @@ always returns a list with at least one element.  But the compiler
 doesn't know this, and so it emits the warning.  It's generally better
 to use a match statement to handle such cases explicitly:
 
-```ocaml
-# let upcase_first_entry line =
-     match String.split ~on:',' line with
-     | [] -> assert false (* String.split returns at least one element *)
-     | first :: rest -> String.concat ~sep:"," (String.uppercase first :: rest)
-  ;;
-val upcase_first_entry : string -> string = <fun>
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 9)) 
 ```
 
 Note that this is our first use of `assert`, which is a function that
@@ -240,36 +185,30 @@ in OCaml: the _anonymous function_.  An anonymous function is a
 function value that is declared without being named.  They can be
 declared using the `fun` keyword, as shown here.
 
-```ocaml
-# (fun x -> x + 1);;
-- : int -> int = <fun>
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 10)) 
 ```
 
 Anonymous functions aren't named, but they can be used for many
 different purposes nonetheless.  You can, for example, apply an
 anonymous function to an argument.
 
-```ocaml
-# (fun x -> x + 1) 7;;
-- : int = 8
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 11)) 
 ```
 
 Or pass it to another function.  Passing functions to iteration
 functions like `List.map` is probably the most common use-case for
 anonymous functions.
 
-```ocaml
-# List.map ~f:(fun x -> x + 1) [1;2;3];;
-- : int list = [2; 3; 4]
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 12)) 
 ```
 
 Or even stuff them into a data structure.
 
-```ocaml
-# let increments = [ (fun x -> x + 1); (fun x -> x + 2) ] ;;
-val increments : (int -> int) list = [<fun>; <fun>]
-# List.map ~f:(fun g -> g 5) increments;;
-- : int list = [6; 7]
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 13)) 
 ```
 
 It's worth stopping for a moment to puzzle this example out, since
@@ -288,20 +227,16 @@ other functions and storing them in data structures.  We even name
 functions in the same way that we name other values, by using a let
 binding.
 
-```ocaml
-# let plusone = (fun x -> x + 1);;
-val plusone : int -> int = <fun>
-# plusone 3;;
-- : int = 4
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 14)) 
 ```
 
 Defining named functions is so common that there is a built in syntax
 for it.  Thus, the following definition of `plusone` is equivalent to
 the definition above.
 
-```ocaml
-# let plusone x = x + 1;;
-val plusone : int -> int = <fun>
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 15)) 
 ```
 
 This is the most common and convenient way to declare a function, but
@@ -316,11 +251,8 @@ sense, you can think of the parameter of a function as a variable
 being bound to the value passed by the caller.  Indeed, the following
 two expressions are nearly equivalent:
 
-```ocaml
-# (fun x -> x + 1) 7;;
-- : int = 8
-# let x = 7 in x + 1;;
-- : int = 8
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 16)) 
 ```
 
 This connection is important, and will come up more when programming
@@ -333,21 +265,16 @@ in a monadic style, as we'll see in
 
 OCaml of course also supports multi-argument functions, for example:
 
-```ocaml
-# let abs_diff x y = abs (x - y);;
-val abs_diff : int -> int -> int = <fun>
-# abs_diff 3 4;;
-- : int = 1
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 17)) 
 ```
 
 You may find the type signature of `abs_diff` with all of its arrows a
 little hard to parse.  To understand what's going on, let's rewrite
 `abs_diff` in an equivalent form, using the `fun` keyword:
 
-```ocaml
-# let abs_diff =
-    (fun x -> (fun y -> abs (x - y)));;
-val abs_diff : int -> int -> int = <fun>
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 18)) 
 ```
 
 This rewrite makes it explicit that `abs_diff` is actually a function
@@ -376,13 +303,8 @@ of currying to specialize a function by feeding in some of the
 arguments.  Here's an example where we create a specialized version of
 `abs_diff` that measures the distance of a given number from `3`.
 
-```ocaml
-# let dist_from_3 = abs_diff 3;;
-val dist_from_3 : int -> int = <fun>
-# dist_from_3 8;;
-- : int = 5
-# dist_from_3 (-1);;
-- : int = 4
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 19)) 
 ```
 
 The practice of applying some of the arguments of a curried function
@@ -392,8 +314,8 @@ Note that the `fun` keyword supports its own syntax for currying, so
 the following definition of `abs_diff` is equivalent to the definition
 above.
 
-```ocaml
-# let abs_diff = (fun x y -> abs (x - y));;
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 20)) 
 ```
 
 You might worry that curried functions are terribly expensive, but
@@ -405,11 +327,8 @@ Currying is not the only way of writing a multi-argument function in
 OCaml.  It's also possible to use the different parts of a tuple as
 different arguments.  So, we could write:
 
-```ocaml
-# let abs_diff (x,y) = abs (x - y)
-val abs_diff : int * int -> int = <fun>
-# abs_diff (3,4);;
-- : int = 1
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 21)) 
 ```
 
 OCaml handles this calling convention efficiently as well.  In
@@ -434,16 +353,8 @@ but these are only useful when using OCaml's imperative features.)
 In order to define a recursive function, you need to mark the let
 binding as recursive with the `rec` keyword, as shown in this example:
 
-```ocaml
-# let rec find_first_stutter list =
-    match list with
-    | [] | [_] ->
-      (* only zero or one elements, so no repeats *)
-      None
-    | x :: y :: tl ->
-      if x = y then Some x else find_first_stutter (y::tl)
-   ;;
-val find_first_stutter : 'a list -> 'a option = <fun>
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 22)) 
 ```
 
 Note that in the above, the pattern `| [] | [_]` is what's called on
@@ -456,18 +367,8 @@ We can also define multiple mutually recursive values by using `let
 rec` combined with the `and` keyword.  Here's a (gratuitously
 inefficient) example.
 
-```ocaml
-# let rec is_even x =
-    if x = 0 then true else is_odd (x - 1)
-  and is_odd x =
-    if x = 0 then false else is_even (x - 1)
- ;;
-val is_even : int -> bool = <fun>
-val is_odd : int -> bool = <fun>
-# List.map ~f:is_even [0;1;2;3;4;5];;
-- : bool list = [true; false; true; false; true; false]
-# List.map ~f:is_odd [0;1;2;3;4;5];;
-- : bool list = [false; true; false; true; false; true]
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 23)) 
 ```
 
 OCaml distinguishes between non-recursive definitions (using `let`)
@@ -493,11 +394,8 @@ shadowing it.
 So far, we've seen examples of functions used in both prefix and infix
 style:
 
-```ocaml
-# Int.max 3 4;;  (* prefix *)
-- : int = 4
-# 3 + 4;;        (* infix  *)
-- : int = 7
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 24)) 
 ```
 
 You might not have thought of the second example as an ordinary
@@ -506,11 +404,8 @@ differ syntactically from other functions.  In fact, if we put
 parentheses around an infix operator, you can use it as an ordinary
 prefix function.
 
-```ocaml
-# (+) 3 4;;
-- : int = 7
-# List.map ~f:((+) 3) [4;5;6];;
-- : int list = [7; 8; 9]
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 25)) 
 ```
 
 In the second expression above, we've partially applied `(+)` to gain
@@ -533,29 +428,23 @@ operation.
 We can define (or redefine) the meaning of an operator as follows.
 Here's an example of a simple vector-addition operator on int pairs.
 
-```ocaml
-# let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2);;
-val ( +! ) : int * int -> int * int -> int * int = <fun>
-# (3,2) +! (-2,4);;
-- : int * int = (1,6)
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 26)) 
 ```
 
 Note that you have to be careful when dealing with operators containg
 `*`.  Consider the following example.
 
-```ocaml
-# let (***) x y = (x ** y) ** y;;
-Error: This expression has type int but an expression was expected of type
-         float
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 27)) 
 ```
 
 What's going on is that `(***)` isn't interpreted as an operator at
 all; it's read as a comment!  To get this to work properly, we need to
 put spaces around any operator that begins or ends with `*`.
 
-```ocaml
-# let ( *** ) x y = (x ** y) ** y;;
-val ( *** ) : float -> float -> float = <fun>
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 28)) 
 ```
 
 The syntactic role of an operator is typically determined by its first
@@ -616,20 +505,14 @@ to remember about negation  is that it has lower precedence than
 function application, which means that if you want to pass a negative
 value, you need to wrap it in parentheses, as you can see below.
 
-```ocaml
-# Int.max 3 (-4);;
-- : int = 3
-# Int.max 3 -4;;
-Error: This expression has type int -> int
-       but an expression was expected of type int
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 29)) 
 ```
 
 Here, OCaml is interpreting the second expression as equivalent to:
 
-```ocaml
-# (Int.max 3) - 4;;
-Error: This expression has type int -> int
-       but an expression was expected of type int
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 30))
 ```
 
 which obviously doesn't make sense.
@@ -638,9 +521,8 @@ Here's an example of a very useful operator from the standard library
 whose behavior depends critically on the precedence rules described
 above.  Here's the code.
 
-```ocaml
-# let (|>) x f = f x ;;
-val ( |> ) : 'a -> ('a -> 'b) -> 'b = <fun>
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 31)) 
 ```
 
 It's not quite obvious at first what the purpose of this operator is:
@@ -652,33 +534,15 @@ printing out the unique elements of your `PATH`.  Note that
 `List.dedup` below removes duplicates from a list by sorting the list
 using the provided comparison function.
 
-```ocaml
-# Sys.getenv_exn "PATH"
-  |> String.split ~on:':'
-  |> List.dedup ~compare:String.compare
-  |> List.iter ~f:print_endline
-  ;;
-/bin
-/opt/local/bin
-/usr/bin
-/usr/local/bin
-- : unit = ()
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 32)) 
 ```
 
 Note that we can do this without `|>`, but the result is a bit more
 verbose.
 
-```ocaml
-# let path = Sys.getenv_exn "PATH" in
-  let split_path = String.split ~on:':' path in
-  let deduped_path = List.dedup ~compare:String.compare split_path in
-  List.iter ~f:print_endline deduped_path
-  ;;
-/bin
-/opt/local/bin
-/usr/bin
-/usr/local/bin
-- : unit = ()
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 33)) 
 ```
 
 
@@ -687,19 +551,15 @@ For example, `List.iter` normally takes two arguments: a function to
 be called on each element of the list, and the list to iterate over.
 We can call `List.iter` with all its arguments:
 
-```ocaml
-# List.iter ~f:print_endline ["Two"; "lines"];;
-Two
-lines
-- : unit = ()
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 34)) 
 ```
 
 Or, we can pass it just the function argument, leaving us with a
 function for printing out a list of strings.
 
-```ocaml
-# List.iter ~f:print_endline;;
-- : string list -> unit = <fun>
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 35)) 
 ```
 
 It is this later form that we're using in the `|>` pipeline above.
@@ -708,20 +568,8 @@ Note that `|>` only works in the intended way because it is
 left-associative.  Indeed, let's see what happens if we try using a
 right associative operator, like (^!).
 
-```ocaml
-# let (^!) = (|>);;
-val ( ^! ) : 'a -> ('a -> 'b) -> 'b = <fun>
-# Sys.getenv_exn "PATH"
-  ^! String.split ~on:':'
-  ^! List.dedup ~compare:String.compare
-  ^! List.iter ~f:print_endline
-  ;;
-        Characters 93-119:
-    ^! List.iter ~f:print_endline
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: This expression has type string list -> unit
-       but an expression was expected of type
-         (string list -> string list) -> 'a
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 36)) 
 ```
 
 The above type error is a little bewildering at first glance.  What's
@@ -742,41 +590,23 @@ Instead of having syntactic support for declaring multi-argument
 (curried) functions, `function` has built-in pattern matching.  Here's
 an example:
 
-```ocaml
-# let some_or_zero = function
-     | Some x -> x
-     | None -> 0
-  ;;
-val some_or_zero : int option -> int = <fun>
-# List.map ~f:some_or_zero [Some 3; None; Some 4];;
-- : int list = [3; 0; 4]
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 37)) 
 ```
 
 This is equivalent to combining an ordinary function definition with a
 `match`.
 
-```ocaml
-# let some_or_zero num_opt =
-    match num_opt with
-    | Some x -> x
-    | None -> 0
-  ;;
-val some_or_zero : int option -> int = <fun>
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 38)) 
 ```
 
 We can also combine the different styles of function declaration
 together, as in the following example where we declare a two argument
 (curried) function with a pattern match on the second argument.
 
-```ocaml
-# let some_or_default default = function
-     | Some x -> x
-     | None -> default
-  ;;
-# some_or_default 3 (Some 5);;
-- : int = 5
-# List.map ~f:(some_or_default 100) [Some 3; None; Some 4];;
-- : int list = [3; 100; 4]
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 39)) 
 ```
 
 Also, note the use of partial application to generate the function
@@ -795,19 +625,15 @@ arguments are marked by a leading tilde, and a label (followed by a
 colon) are put in front of the variable to be labeled.  Here's an
 example.
 
-```ocaml
-# let ratio ~num ~denom = float num /. float denom;;
-val ratio : num:int -> denom:int -> float = <fun>
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 40)) 
 ```
 
 We can then provide a labeled argument using a similar convention.  As
 you can see, the arguments can be provided in any order.
 
-```ocaml
-# ratio ~num:3 ~denom:10;;
-- : float = 0.3
-# ratio ~denom:10 ~num:3;;
-- : float = 0.3
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 41)) 
 ```
 
 OCaml also supports _label punning_, meaning that you get to drop the
@@ -816,11 +642,8 @@ variable being used are the same.  We've seen above how label punning
 works when defining a function.  The following shows how it can be
 used when invoking a function.
 
-```ocaml
-# let num = 3;;
-# let denom = 4;;
-# ratio ~num ~denom;;
-- : float = 0.75
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 42)) 
 ```
 
 Labeled arguments are useful in a few different cases:
@@ -876,12 +699,8 @@ Labeled arguments are useful in a few different cases:
     earlier in the chapter.  This requires putting the function
     argument first.
 
-    ```ocaml
-    # Sys.getenv_exn "PATH"
-      |> String.split ~on:':'
-      |> List.dedup ~compare:String.compare
-      |> List.iter ~f:print_endline
-      ;;
+    ```frag
+    ((typ ocamltop)(name variables-and-functions/main.topscript)(part 43)) 
     ```
 
     In other cases, you want to put the function argument second.  One
@@ -896,9 +715,9 @@ doesn't matter when calling a function with labeled arguments, it does
 matter in a higher-order context, _e.g._, when passing a function with
 labeled arguments to another function.  Here's an example.
 
-```ocaml
-# let apply_to_tuple f (first,second) = f ~first ~second;;
-val apply_to_tuple : (first:'a -> second:'b -> 'c) -> 'a * 'b -> 'c = <fun>
+
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 44)) 
 ```
 
 Here, the definition of `apply_to_tuple` sets up the expectation that
@@ -907,37 +726,27 @@ and `second`, listed in that order.  We could have defined
 `apply_to_tuple` differently to change the order in which the labeled
 arguments were listed.
 
-```ocaml
-# let apply_to_tuple_2 f (first,second) = f ~second ~first;;
-val apply_to_tuple_2 : (second:'a -> first:'b -> 'c) -> 'b * 'a -> 'c = <fun>
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 45)) 
 ```
 
 It turns out this order of listing matters.  In particular, if we
 define a function that has a different order
 
-```ocaml
-# let divide ~first ~second = first / second;;
-val divide : first:int -> second:int -> int = <fun>
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 46)) 
 ```
 
 we'll find that it can't be passed in to `apply_to_tuple_2`.
 
-```ocaml
-# apply_to_tuple_2 divide (3,4);;
-Characters 15-21:
-  apply_to_tuple_2 divide (3,4);;
-                   ^^^^^^
-Error: This expression has type first:int -> second:int -> int
-       but an expression was expected of type second:'a -> first:'b -> 'c
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 47)) 
 ```
 
 But, it works smoothly with the original `apply_to_tuple`.
 
-```ocaml
-# let apply_to_tuple f (first,second) = f ~first ~second;;
-val apply_to_tuple : (first:'a -> second:'b -> 'c) -> 'a * 'b -> 'c = <fun>
-# apply_to_tuple divide (3,4);;
-- : int = 0
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 48)) 
 ```
 
 So, even though the order of labeled arguments usually doesn't matter,
@@ -956,16 +765,8 @@ Here's an example of a string concatenation function with an optional
 separator.  This function uses the `^` operator for simple pairwise
 string concatenation.
 
-```ocaml
-# let concat ?sep x y =
-     let sep = match sep with None -> "" | Some x -> x in
-     x ^ sep ^ y
-  ;;
-val concat : ?sep:string -> string -> string -> string = <fun>
-# concat "foo" "bar";;             (* without the optional argument *)
-- : string = "foobar"
-# concat ~sep:":" "foo" "bar";;    (* with the optional argument    *)
-- : string = "foo:bar"
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 49)) 
 ```
 
 Here, `?` is used in the definition of the function to mark `sep` as
@@ -978,9 +779,8 @@ string when no argument was provided.  This is a common enough pattern
 that there's an explicit syntax for providing a default value, which
 allows us to write `concat` even more concisely.
 
-```ocaml
-# let concat ?(sep="") x y = x ^ sep ^ y ;;
-val concat : ?sep:string -> string -> string -> string = <fun>
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 50)) 
 ```
 
 Optional arguments are very useful, but they're also easy to abuse.
@@ -1014,21 +814,15 @@ you want.  OCaml lets you do this by using `?` instead of `~` to mark
 the argument.  Thus, the following two lines are equivalent ways of
 specifying the `sep` argument to concat.
 
-```ocaml
-# concat ~sep:":" "foo" "bar";; (* provide the optional argument *)
-- : string = "foo:bar"
-# concat ?sep:(Some ":") "foo" "bar";; (* pass an explicit [Some] *)
-- : string = "foo:bar"
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 51)) 
 ```
 
 And the following two lines are equivalent ways of calling `concat`
 without specifying `sep`.
 
-```ocaml
-# concat "foo" "bar";; (* don't provide the optional argument *)
-- : string = "foobar"
-# concat ?sep:None "foo" "bar";; (* explicitly pass `None` *)
-- : string = "foobar"
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 52)) 
 ```
 
 One use-case for this is when you want to define a wrapper function
@@ -1038,13 +832,8 @@ example, imagine we wanted to create a function called
 converts the first string that it's passed to uppercase.  We could
 write the function as follows.
 
-```ocaml
-# let uppercase_concat ?(sep="") a b = concat ~sep (String.uppercase a) b ;;
-val uppercase_concat : ?sep:string -> string -> string -> string = <fun>
-# uppercase_concat "foo" "bar";;
-- : string = "FOObar"
-# uppercase_concat "foo" "bar" ~sep:":";;
-- : string = "FOO:bar"
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 53)) 
 ```
 
 In the way we've written it, we've been forced to separately make the
@@ -1055,9 +844,8 @@ change `concat`'s default behavior, we'll need to remember to change
 Instead, we can have `uppercase_concat` simply pass through the
 optional argument to `concat` using the `?` syntax.
 
-```ocaml
-# let uppercase_concat ?sep a b = concat ?sep (String.uppercase a) b ;;
-val uppercase_concat : ?sep:string -> string -> string -> string = <fun>
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 54)) 
 ```
 
 Now, if someone calls `uppercase_concat` without an argument, an
@@ -1076,19 +864,8 @@ derivative is being computed.  The function `f` itself takes two
 labeled arguments `x` and `y`.  Note that you can use an apostrophe as
 part of a variable name, so `x'` and `y'` are just ordinary variables.
 
-```ocaml
-# let numeric_deriv ~delta ~x ~y ~f =
-    let x' = x +. delta in
-    let y' = y +. delta in
-    let base = f ~x ~y in
-    let dx = (f ~x:x' ~y -. base) /. delta in
-    let dy = (f ~x ~y:y' -. base) /. delta in
-    (dx,dy)
-  ;;
-val numeric_deriv :
-  delta:float ->
-  x:float -> y:float -> f:(x:float -> y:float -> float) -> float * float =
-  <fun>
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 55)) 
 ```
 
 In principle, it's not obvious how the order of the arguments to `f`
@@ -1116,21 +893,8 @@ Note that these heuristics might at different points in the source
 suggest different types.  Here's a version of `numeric_deriv` where
 different invocations of `f` list the arguments in different orders.
 
-```ocaml
-# let numeric_deriv ~delta ~x ~y ~f =
-    let x' = x +. delta in
-    let y' = y +. delta in
-    let base = f ~x ~y in
-    let dx = (f ~y ~x:x' -. base) /. delta in
-    let dy = (f ~x ~y:y' -. base) /. delta in
-    (dx,dy)
-  ;;
-Characters 131-132:
-      let dx = (f ~y ~x:x' -. base) /. delta in
-                ^
-Error: This function is applied to arguments
-in an order different from other calls.
-This is only allowed when the real type is known.
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 56)) 
 ```
 
 As suggested by the error message, we can get OCaml to accept the fact
@@ -1138,21 +902,9 @@ that `f` is used with different argument orders if we provide explicit
 type information.  Thus, the following code compiles without error,
 due to the type annotation on `f`.
 
-```ocaml
-# let numeric_deriv ~delta ~x ~y ~(f: x:float -> y:float -> float) =
-    let x' = x +. delta in
-    let y' = y +. delta in
-    let base = f ~x ~y in
-    let dx = (f ~y ~x:x' -. base) /. delta in
-    let dy = (f ~x ~y:y' -. base) /. delta in
-    (dx,dy)
-  ;;
-val numeric_deriv :
-  delta:float ->
-  x:float -> y:float -> f:(x:float -> y:float -> float) -> float * float =
-  <fun>
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 57)) 
 ```
-
 
 #### Optional arguments and partial application ###
 
@@ -1160,33 +912,22 @@ Optional arguments can be tricky to think about in the presence of
 partial application.  We can of course partially apply the optional
 argument itself:
 
-```ocaml
-# let colon_concat = concat ~sep:":";;
-val colon_concat : string -> string -> string = <fun>
-# colon_concat "a" "b";;
-- : string = "a:b"
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 58)) 
 ```
 
 But what happens if we partially apply just the first argument?
 
-```ocaml
-# let prepend_pound = concat "# ";;
-val prepend_pound : string -> string = <fun>
-# prepend_pound "a BASH comment";;
-- : string = "# a BASH comment"
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 59)) 
 ```
 
 The optional argument `?sep` has now disappeared, or been _erased_.
 Indeed, if we try to pass in that optional argument now, it will be
 rejected.
 
-```ocaml
-# prepend_pound "a BASH comment" ~sep:":";;
-Characters 0-13:
-  prepend_pound "a BASH comment" ~sep:":";;
-  ^^^^^^^^^^^^^
-Error: This function has type string -> string
-       It is applied to too many arguments; maybe you forgot a `;'.
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 60)) 
 ```
 
 So when does OCaml decide to erase an optional argument?
@@ -1197,21 +938,15 @@ _after_ the optional argument is passed in.  That explains the
 behavior of `prepend_pound` above.  But if we had instead defined
 `concat` with the optional argument in the second position:
 
-```ocaml
-# let concat x ?(sep="") y = x ^ sep ^ y ;;
-val concat : string -> ?sep:string -> string -> string = <fun>
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 61)) 
 ```
 
 then application of the first argument would not cause the optional
 argument to be erased.
 
-```ocaml
-# let prepend_pound = concat "# ";;
-val prepend_pound : ?sep:string -> string -> string = <fun>
-# prepend_pound "a BASH comment";;
-- : string = "# a BASH comment"
-# prepend_pound "a BASH comment" ~sep:"--- ";;
-- : string = "# --- a BASH comment"
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 62)) 
 ```
 
 However, if all arguments to a function are presented at once, then
@@ -1219,120 +954,22 @@ erasure of optional arguments isn't applied until all of the arguments
 are passed in.  This preserves our ability to pass in optional
 arguments anywhere on the argument list.  Thus, we can write:
 
-```ocaml
-# concat "a" "b" ~sep:"=";;
-- : string = "a=b"
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 63)) 
 ```
 
 An optional argument that doesn't have any following positional
 arguments can't be erased at all, which leads to a compiler warning.
 
-```ocaml
-# let concat x y ?(sep="") = x ^ sep ^ y ;;
-Characters 15-38:
-  let concat x y ?(sep="") = x ^ sep ^ y ;;
-                 ^^^^^^^^^^^^^^^^^^^^^^^
-Warning 16: this optional argument cannot be erased.
-val concat : string -> string -> ?sep:string -> string = <fun>
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 64)) 
 ```
 
 And indeed, when we provide the two positional arguments, the `sep`
 argument is not erased, instead returning a function that expects the
 `sep` argument to be provided.
 
-```ocaml
-# concat "a" "b";;
-- : ?sep:string -> string = <fun>
+```frag
+((typ ocamltop)(name variables-and-functions/main.topscript)(part 65)) 
 ```
 
-## Exercises
-
-### Typing
-
-For each of the following expressions, is the expression well-typed?
-If it is well-typed, does it evaluate to a value?  If so, what is the
-value?
-
-- `1 - 2`
-
-  Well typed.  The value is `-1`.
-
-- `1 - 2 - 3`
-
-  Well typed.  Subtraction is left-associative, so the value is `-4`.
-
-- `1 - - 2`
-
-  Well typed.  The value is `3`.
-
-
-- `0b101 + 0x10`
-
-  Well typed.  The value is `0x15` (`21` in decimal).
-
-- `1073741823 + 1`
-
-  Well typed.  On a 32-bit platform, `1073741823` is the maximum
-  integer, so the value is `-1073741824`.  On a 64-bit machine, the addition does not
-  overflow, so the result is `1073741824`.
-
-- `1073741823.0 + 1e2`
-
-  Ill typed.  The operator `+` is for integer addition only.
-
-- `1 ^ 1`
-
-  Ill typed.  The operator `^` is string concatenation.
-
-- `if true then 1`
-
-  Ill typed.  The missing `else` branch has type
-  `unit`, which is not compatible with `1`.
-
-- `if false then ()`
-
-  Well typed.  The result is `()`.
-
-- `if 0.3 -. 0.2 = 0.1 then 'a' else 'b'`
-
-  Well-typed.  On most platforms, `0.3 -. 0.2` is very close to, but different from,
-  `0.1`, so the result is `'b'`.
-
-- `true || (1 / 0 >= 0)`
-
-  Well-typed.  The value is `true` (since disjunction
-  `||` is a short-circuit operator).
-
-- `1 > 2 - 1`
-
-  Well typed, because `-` has higher precedence than `>`.
-  The result is `false`.
-
-- `"Hello world".[6]`
-
-  Well typed.  The value is `'w'`.
-
-- `"Hello world".[11] <- 's'`
-
-  Well typed, but the index `11` is out of bounds,
-  so the expression does not evaluate to a value.
-
-- `String.lowercase "A" < "B"`
-
-  Well typed.  The value is `false`.
-
-- `Char.code 'a'`
-
-  Well typed.  The ASCII character code for `'a'` is `97`.
-
-- `(((())))`
-
-  Well typed.  The value is the unit `()`.
-
-- `((((*1*))))`
-
-  Well typed.  The value is `()`.
-
-- `((*((()*))`
-
-  Well typed.  The value is `()`.

@@ -1,4 +1,4 @@
-dirs=        json command-line-parsing guided-tour
+dirs=        json command-line-parsing guided-tour variables-and-functions
 
 # html/md files directory
 OBJ=         _build
