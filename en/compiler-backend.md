@@ -704,8 +704,8 @@ to delimit an OCaml function call, for example).
 
 #### Understanding name mangling
 
-So how do you refer to OCaml functions into an interactive debugger like `gdb`?
-The first thing you need to know is how function names compile down into C
+So how do you refer to OCaml functions in an interactive debugger like `gdb`?
+The first thing you need to know is how function names compile down to C
 symbols; a procedure generally called *name mangling*.
 
 Each OCaml source file is compiled into a native object file that must export a
