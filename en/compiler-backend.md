@@ -1024,7 +1024,7 @@ OPAM switch.
 
 </tip>
 
-## Summarising the file extensions
+## Summarizing the file extensions
 
 We've seen how the compiler uses intermediate files to store various stages of
 the compilation toolchain.  Here's a cheat sheet of all them in one place.
@@ -1040,7 +1040,7 @@ Extension  Purpose
 .cma       Library of bytecode object files packed into a single file.
 .o         C source files are compiled into native object files by the system `cc`.
 .cmt       Typed abstract syntax tree for module implementations.
-.cmi       Typed abstract syntax tree for module interfaces.
+.cmti      Typed abstract syntax tree for module interfaces.
 .annot     Old-style annotation file for displaying typed, superseded by `cmt` files.
 
 The native code compiler generates some additional files.
