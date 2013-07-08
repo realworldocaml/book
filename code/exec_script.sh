@@ -2,5 +2,5 @@
 cd $(dirname $1)
 while IFS= read -r line ; do
   echo "$ $line"
-  sh -c "$line"
+  bash -c "$line"
 done < $(basename $1)
