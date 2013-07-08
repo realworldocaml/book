@@ -1,6 +1,6 @@
 open Core.Std
 
-let do_hash file =
+let do_hash file () =
   In_channel.with_file file ~f:(
     fun ic ->
       let open Cryptokit in
@@ -10,19 +10,12 @@ let do_hash file =
   )
 
 (* part 1 *)
-let spec =
-  let open Command.Spec in
-  empty
-  +> anon ("filename" %: string)
-
-(* part 2 *)
 let command =
   Command.basic
     ~summary:"Generate an MD5 hash of the input data"
     ~readme:(fun () -> "More detailed information")
-    spec
-    (fun filename () -> do_hash filename)
+    Command.Spec.(empty +> anon ("filename" %: file))
+    do_hash
 
-(* part 3 *)
 let () =
   Command.run ~version:"1.0" ~build_info:"RWO" command

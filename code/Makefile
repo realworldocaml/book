@@ -33,7 +33,11 @@ print-%:
 	@echo $($*)
 
 json/run_github_org.out:: json/build_github_org.out
-
+command-line-parsing/run_basic_md5.out:: command-line-parsing/build_basic_md5.out
+command-line-parsing/run_basic_and_default_md5.out:: command-line-parsing/build_basic_md5_with_optional_file.out command-line-parsing/build_basic_md5_with_default_file.out
+command-line-parsing/run_cal_add_sub_days.out:: command-line-parsing/build_cal_add_sub_days.out
+command-line-parsing/md5_completion.out:: command-line-parsing/build_basic_md5_with_flags.out
+command-line-parsing/cal_completion.out:: command-line-parsing/build_cal_add_sub_days.out
 
 $(OBJ)/%.mli.0.html $(OBJ)/%.mli.0.md: %.mli
 	@mkdir -p $(@D)
@@ -60,10 +64,13 @@ $(OBJ)/%.out.0.html $(OBJ)/%.out.0.md: %.out
 	$(highlight) -builddir $(OBJ) -console $<
 
 # The outputs of the shell scripts should be checked in.
-%.out: %.sh
+%.out.full: %.sh
 	./exec_script.sh $< > $@ || (cat $@ && rm -f $@)
 
-%.out: %.errsh
+%.out: %.out.full
+	egrep -v "(^ocamlfind |^\+)" < $< > $@
+
+%.out.full: %.errsh
 	! ./exec_script.sh $< > $@ 2>&1 || (cat $@ && rm -f $@)
 
 %.out: %.rawsh

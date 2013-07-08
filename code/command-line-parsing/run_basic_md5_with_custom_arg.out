@@ -1,0 +1,4 @@
+$ ./basic_md5_with_custom_arg.native /etc/passwd
+5ca39672bb3fbd2534cd477f0b1b6eca
+$ ./basic_md5_with_custom_arg.native /dev/null
+'/dev/null' is not a regular file.

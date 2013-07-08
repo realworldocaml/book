@@ -704,8 +704,8 @@ to delimit an OCaml function call, for example).
 
 #### Understanding name mangling
 
-So how do you refer to OCaml functions into an interactive debugger like `gdb`?
-The first thing you need to know is how function names compile down into C
+So how do you refer to OCaml functions in an interactive debugger like `gdb`?
+The first thing you need to know is how function names compile down to C
 symbols; a procedure generally called *name mangling*.
 
 Each OCaml source file is compiled into a native object file that must export a
@@ -860,7 +860,7 @@ Continuing.
 The `cont` command resumes execution after a breakpoint has paused it, `bt`
 displays a stack backtrace, and `clear` deletes the breakpoint so that the
 application can execute until completion.  GDB has a host of other features
-we won't cover here, but you view more guidelines via Mark Shinwell's talk
+we won't cover here, but you can view more guidelines via Mark Shinwell's talk
 on ["Real-world debugging in OCaml"](http://www.youtube.com/watch?v=NF2WpWnB-nk<).
 
 One very useful feature of OCaml native code is that C and OCaml both share the
@@ -1024,7 +1024,7 @@ OPAM switch.
 
 </tip>
 
-## Summarising the file extensions
+## Summarizing the file extensions
 
 We've seen how the compiler uses intermediate files to store various stages of
 the compilation toolchain.  Here's a cheat sheet of all them in one place.
@@ -1040,7 +1040,7 @@ Extension  Purpose
 .cma       Library of bytecode object files packed into a single file.
 .o         C source files are compiled into native object files by the system `cc`.
 .cmt       Typed abstract syntax tree for module implementations.
-.cmi       Typed abstract syntax tree for module interfaces.
+.cmti      Typed abstract syntax tree for module interfaces.
 .annot     Old-style annotation file for displaying typed, superseded by `cmt` files.
 
 The native code compiler generates some additional files.
