@@ -860,7 +860,7 @@ Continuing.
 The `cont` command resumes execution after a breakpoint has paused it, `bt`
 displays a stack backtrace, and `clear` deletes the breakpoint so that the
 application can execute until completion.  GDB has a host of other features
-we won't cover here, but you view more guidelines via Mark Shinwell's talk
+we won't cover here, but you can view more guidelines via Mark Shinwell's talk
 on ["Real-world debugging in OCaml"](http://www.youtube.com/watch?v=NF2WpWnB-nk<).
 
 One very useful feature of OCaml native code is that C and OCaml both share the
