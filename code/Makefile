@@ -37,6 +37,7 @@ command-line-parsing/run_basic_md5.out:: command-line-parsing/build_basic_md5.ou
 command-line-parsing/run_basic_and_default_md5.out:: command-line-parsing/build_basic_md5_with_optional_file.out command-line-parsing/build_basic_md5_with_default_file.out
 command-line-parsing/run_cal_add_sub_days.out:: command-line-parsing/build_cal_add_sub_days.out
 command-line-parsing/md5_completion.out:: command-line-parsing/build_basic_md5_with_flags.out
+command-line-parsing/cal_completion.out:: command-line-parsing/build_cal_add_sub_days.out
 
 $(OBJ)/%.mli.0.html $(OBJ)/%.mli.0.md: %.mli
 	@mkdir -p $(@D)
