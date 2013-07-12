@@ -59,10 +59,12 @@ instantiated, a form of _dynamic_ binding.  In the meantime, while
 classes are being defined, it is possible (and necessary) to refer to
 methods without knowing statically how they will be implemented.
 
-In contrast, modules use static (lexical) scoping.  If you want to
-parameterize your module code so that some part of it can be
-implemented later, you would write a function or functor.  This is more
-explicit, but often more verbose than overriding a method in a class.
+In contrast, modules use static (lexical) scoping, meaning that bindings to
+functions and other values are determined statically, when the module is
+defined.  The binding can't be overridden later.  If you want to parameterize
+your module code so that some part of it can be implemented later, you would
+write a function or functor.  This is more explicit, but often more verbose than
+overriding a method in a class.
 
 In general, a rule of thumb is: use classes and objects in situations where
 dynamic binding is a big win, for example if you have many similar variations in
@@ -93,8 +95,10 @@ anywhere a stack is expected.
 
 OCaml is entirely different.  Classes are used to construct objects and support
 inheritance, but classes are not types.  Instead, objects have _object types_,
-and if you want to use objects, you aren't required to use classes at all.
-Here's an example of a simple object.
+and if you want to use objects, you aren't required to use classes at all
+(though, as we will see, if we choose to use classes, we can use the class name
+as a shorthand for the type of objects created from that class).  Here's an
+example of a simple object.
 
 ```ocaml
 # let r =
@@ -143,7 +147,7 @@ val r : < get : int; set : int -> unit > = <obj>
 ```
 
 Note that the types of the function `make` and the returned object now
-use the polymorphic type `'a`.  When make is invoked on a concrete
+use the polymorphic type `'a`.  When `make` is invoked on a concrete
 value `5`, we get the same object type as before, with type `int` for
 the value.
 
@@ -303,43 +307,6 @@ There are some restriction on the use of the expression `{< ... >}`.
 It can be used only within a method body, and only the values of
 fields may be updated.  Method implementations are fixed at the time
 the object is created, they cannot be changed dynamically.
-
-## When to use objects
-
-You might wonder when to use objects in OCaml, which has a multitude of
-alternative mechanisms to express the similar concepts.  First-class modules
-are more expressive (a module can include types, while classes and objects
-cannot).  Modules, functors, and algebraic data types also offer a wide range
-of ways to express program structure.  In fact, many seasoned OCaml programmers
-rarely use classes and objects, if at all.
-
-Objects have some advantages over records: they don't require type definitions
-and their support for row polymorphism makes them more flexible. However, the
-heavy syntax and additional runtime cost means that objects are rarely used in
-place of records.
-
-The real benefits of objects come from the class system. Classes support
-inheritance and open recursion. Open recursion allows parts of an object to be
-defined separately. This works because calls between the methods of an object
-are determined when the object is instantiated, a form of _dynamic_
-binding. This makes it possible (and necessary) for one method to refer to
-other methods in the object without knowing statically how they will be
-implemented.
-
-In contrast, modules use static binding.  If you want to parameterize your
-module code so that some part of it can be implemented later, you would write a
-function or functor.  This is more explicit, but often more verbose than
-overriding a method in a class.
-
-In general, a rule of thumb is: use classes and objects in situations where
-open recursion is a big win.  Two good examples are Xavier Leroy's
-[Cryptokit](http://gallium.inria.fr/~xleroy/software.html#cryptokit), which
-provides a variety of cryptographic primitives that can be combined in
-building-block style, and the [Camlimages](http://cristal.inria.fr/camlimages/)
-library which manipulates various graphical file formats.
-
-We'll introduce you to classes, and examples using open recursion, in
-[xref](#classes).
 
 ## Subtyping
 

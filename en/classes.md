@@ -88,10 +88,11 @@ available.
 
 </note>
 
-Our first example mimics the `md5` command, which reads in an input
-file and returns a hexadecimal representation of its MD5 cryptographic hash.
-Cryptokit defines a number of different functions and collects them together
-under the `Cryptokit.hash` class type:
+Our first example mimics the `md5` command, which reads in an input file and
+returns a hexadecimal representation of its MD5 cryptographic hash.  Cryptokit
+defines a number of different functions and collects them together under the
+`Cryptokit.hash` class type (class types are discussed later in this chapter
+[xref](#class-types)):
 
 ```ocaml
 class type hash = object
@@ -118,9 +119,11 @@ Concrete hash objects can be instantiated from various sub-modules in Cryptokit.
 - : string -> Cryptokit.hash = <fun>
 ```
 
-Hash objects hold state and are thus naturally imperative. Once instantiated, data is fed into them by the addition functions, the `result` is computed and finally the contents erased via `wipe`.
-The `hash_string` convenience function applies the hash function fully to a string, and returns the result.
-The `md5` command is quite straight-forward now:
+Hash objects hold state and are thus naturally imperative. Once instantiated,
+data is fed into them by the addition functions, the `result` is computed and
+finally the contents erased via `wipe`.  The `hash_string` convenience function
+applies the hash function fully to a string, and returns the result.  The `md5`
+command is quite straight-forward now:
 
 ```ocaml
 open Core.Std
@@ -133,12 +136,16 @@ let () =
   |> print_endline
 ```
 
-After opening the right modules, we read in the entire standard input into an OCaml string.
-This is then passed onto the MD5 hash function, which returns a binary string.
-This binary is passed through the `Hexa` hexadecimal encoder, which returns an ASCII
-representation of the input.  The output of this command will be the same as the `md5` command (or `md5sum` in some systems).
+After opening the right modules, we read in the entire standard input into an
+OCaml string.  This is then passed onto the MD5 hash function, which returns a
+binary string.  This binary is passed through the `Hexa` hexadecimal encoder,
+which returns an ASCII representation of the input.  The output of this command
+will be the same as the `md5` command (or `md5sum` in some systems).
 
-We can extend this simple example by selecting either the `md5` or `sha1` hash function at runtime depending on the name of our binary.  `Sys.argv` is an array containing the arguments the command was invoked with, and the first entry is the name of the binary itself.
+We can extend this simple example by selecting either the `md5` or `sha1` hash
+function at runtime depending on the name of our binary.  `Sys.argv` is an array
+containing the arguments the command was invoked with, and the first entry is
+the name of the binary itself.
 
 ```ocaml
 open Core.Std
@@ -364,7 +371,7 @@ links as we traverse the list.
 
 ```ocaml
 class ['a] slist_iterator cur =
-object
+object (self : 'self)
   val mutable current : 'a node option = cur
 
   method has_value = current <> None
@@ -413,10 +420,10 @@ We may also wish to define functional-style methods, `iter f` takes a
 function `f` and applies it to each of the elements of the list.
 
 ```ocaml
-method iter f =
+method iter (f : 'a -> unit) =
   let it = self#iterator in
   while it#has_value do
-    f it#get
+    f it#get;
     it#next
   done
 ```
