@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
-
 cd $(dirname $1)
-rm -rf _build
-while read line; do
+while IFS= read -r line ; do
   echo "$ $line"
-  $line
+  bash -c "$line"
 done < $(basename $1)

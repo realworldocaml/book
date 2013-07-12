@@ -4,7 +4,11 @@
 
 open Core.Std
 open Chapter
-open Xml_tree
+
+let mk_tag ?(attrs=[]) tag_name contents =                                                                            
+  let attrs : Xmlm.attribute list = List.map ~f:(fun (k,v) -> ("",k),v) attrs in                                         
+  let tag = ("", tag_name), attrs in                                                                                  
+  `El (tag, contents)                                                                                                 
 
 let part_to_string = function
   | Basic     -> "I"   , "Language Concepts"
@@ -13,32 +17,32 @@ let part_to_string = function
   | Appendix | Preface -> assert false
 
 let part_to_intro =
-  let map_paras = List.map ~f:(fun p -> mk_tag "para" [Data p]) in
+  let map_paras = List.map ~f:(fun p -> mk_tag "para" [`Data p]) in
   function
   | Basic     -> map_paras [
-     "Part I covers the basic language concepts you'll need to know when building OCaml programs.
+      "Part I covers the basic language concepts you'll need to know when building OCaml programs.
       You won't need to memorise all of this (objects, for example, are used rarely in practice)
       but understanding the concepts and examples is important.";
-     "This part opens up with a guided tour to give you a quick overview of the language using
+      "This part opens up with a guided tour to give you a quick overview of the language using
       an interactive command-line interface. It then moves onto covering language features such 
       as records, algebraic data types and the module system.";
-     "The final portion covers more advanced features such as functors, objects and first-class 
+      "The final portion covers more advanced features such as functors, objects and first-class 
       modules, which may all take some time to digest. Persevere though; even though these concepts 
       may be difficult at first, they will put you in good stead even when switching to other 
       languages, many of which have drawn inspiration from ML."
-   ]
+    ]
   | Practical  -> map_paras [
-    "Part II builds on the basics by working through useful tools and techniques for using OCaml. 
+      "Part II builds on the basics by working through useful tools and techniques for using OCaml. 
      Here you'll pick up useful techniques for building networked systems, as well as functional 
      design patterns that help combine different features of the language to good effect.";
-     "The focus throughout this section is on networked systems, and among other examples we'll 
+      "The focus throughout this section is on networked systems, and among other examples we'll 
       build a running example that will perform Internet queries using the DuckDuckGo search engine."
     ]
   | Advanced -> map_paras [
-    "Part III is all about understanding the compiler toolchain and runtime system in OCaml.  
+      "Part III is all about understanding the compiler toolchain and runtime system in OCaml.  
      It's a remarkably simple system in comparison to other language runtimes (such as Java or 
      the .NET CLR).";
-     "You'll need to read this to build very high performance systems that have to minimise 
+      "You'll need to read this to build very high performance systems that have to minimise 
       resource usage or interface to C libraries. This is also where we talk about profiling and 
       debugging techniques using tools such as GNU gdb.";
     ]
@@ -51,19 +55,19 @@ module Transform = struct
   (* Turn a <linkend> tag from Pandoc into an <xref> tag that OReilly want *)
   let rewrite_linkend it =
     let rec aux = function
-      | Element ( (("","link"),[("","linkend"),v]), [Data "xref"]) ->
-        Element ( (("","xref"),[("","linkend"),v]), [])
-      | Element (tag, children) ->
-        Element (tag, List.map ~f:aux children)
+      | `El ( (("","link"),[("","linkend"),v]), [`Data "xref"]) ->
+        `El ( (("","xref"),[("","linkend"),v]), [])
+      | `El (tag, children) ->
+        `El (tag, List.map ~f:aux children)
       | x -> x
     in aux it
 
   (* Turn a <chapter> tag into a new (e.g. <appendix> or <preface> tag *)
   let rewrite_chapter_to_other_tag new_tag it =
     let rec aux = function
-      | Element ((("","chapter"),i), c) -> Element ((("",new_tag),i),c)
-      | Element (tag, children) ->
-        Element (tag, List.map ~f:aux children)
+      | `El ((("","chapter"),i), c) -> `El ((("",new_tag),i),c)
+      | `El (tag, children) ->
+        `El (tag, List.map ~f:aux children)
       | x -> x
     in aux it
 
@@ -71,12 +75,12 @@ module Transform = struct
    * Returns a tuple of the (id*chapter) and other tags. *)
   let split_chapters i =
     match i with
-    |Element (((_,"book"),_), children) ->
+    |`El (((_,"book"),_), children) ->
       List.partition_map ~f:(function
-        |Element ((("","chapter"),[("","id"),id]), _) as chapter ->
-          `Fst (id,chapter)
-        |other -> `Snd other
-      ) children
+          |`El ((("","chapter"),[("","id"),id]), _) as chapter ->
+            `Fst (id,chapter)
+          |other -> `Snd other
+        ) children
     |_ -> failwith "<book> tag not found"
 
   (* Given a list of input chapters and the book XML, output
@@ -94,29 +98,29 @@ module Transform = struct
     let mk_part part =
       let label_num,label_name = part_to_string part in
       let intro_elements = part_to_intro part in
-      let title = mk_tag "title" [Data label_name] in
+      let title = mk_tag "title" [`Data label_name] in
       let intro = mk_tag "partintro" intro_elements in
       let chapters =
         List.filter_map parts ~f:(fun c ->
-          if c.part = part then begin
-            match c.public, public with
-            |false, true ->
-              let title = mk_tag "title" [Data (Option.value ~default:"???" c.title)] in
-              let para = mk_tag "para" [Data "This chapter is under construction and not yet ready for public review, and so omitted from this milestone. This chaper is present as a placeholder so that cross-references from other chapters resolve correctly in the print version."] in
-              Some (mk_tag ~attrs:["id",c.name] "chapter" [ title; para ])
-            |_ -> Some (mk_chapter c.name)
-          end
-          else None
-        )
+            if c.part = part then begin
+              match c.public, public with
+              |false, true ->
+                let title = mk_tag "title" [`Data (Option.value ~default:"???" c.title)] in
+                let para = mk_tag "para" [`Data "This chapter is under construction and not yet ready for public review, and so omitted from this milestone. This chaper is present as a placeholder so that cross-references from other chapters resolve correctly in the print version."] in
+                Some (mk_tag ~attrs:["id",c.name] "chapter" [ title; para ])
+              |_ -> Some (mk_chapter c.name)
+            end
+            else None
+          )
       in
       mk_tag ~attrs:["label",label_num] "part" (title :: intro :: chapters)
     in
     let appendices =
       List.filter_map parts ~f:(fun c ->
-        if c.part = Appendix then Some (mk_appendix c.name) else None) in
+          if c.part = Appendix then Some (mk_appendix c.name) else None) in
     let prefaces =
       List.filter_map parts ~f:(fun c ->
-        if c.part = Preface then Some (mk_preface c.name) else None) in
+          if c.part = Preface then Some (mk_preface c.name) else None) in
     other_tags @ prefaces @ (List.map ~f:mk_part all_parts) @ appendices |!
     mk_tag "book"
 end
@@ -125,11 +129,11 @@ let apply_transform parts_file book public =
   try
     let parts = Sexp.load_sexps_conv_exn parts_file chapter_of_sexp in
     let o = Xmlm.make_output (`Channel stdout) in
-    Xmlm.make_input (`Channel (open_in book)) |!
-    in_tree |!
-    fun (dtd, t) -> Transform.rewrite_linkend t |!
-                    Transform.add_parts public parts |!
-                    fun t -> out_tree o (dtd, t)
+    Xmlm.make_input (`Channel (open_in book))
+    |> Xml_tree.in_tree
+    |> fun (dtd, t) -> Transform.rewrite_linkend t
+                       |> Transform.add_parts public parts
+                       |> fun t -> Xml_tree.out_tree o (dtd, t)
   with Xmlm.Error ((line,col),e) -> (
       Printf.eprintf "ERROR: [%d,%d] %s\n%!" line col (Xmlm.error_message e);
       exit 1)

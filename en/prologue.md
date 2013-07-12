@@ -17,13 +17,13 @@ design.  These features include:
   of almost every modern high-level language.
 * _Higher-order functions_ that can be passed around as first-class
   values, as seen in Javascript or Scala.
-* _Static type-checking_ to reduce runtime errors, such as Java or Scala
-  interfaces or variable type declarations in C#, Ada and Pascal.
-* _Generics_ to enable abstractions to be constructed across different
-  datatypes, available as C++ templates or in Java or C#.
+* _Static type-checking_ to reduce the number of runtime errors, as
+  enforced by Java or Scala interfaces or variable type declarations in C#, Ada and Pascal.
+* _Parametric polymorphism_ to enable abstractions to be constructed across different
+  datatypes, available as C++ templates or generics in Java or C#.
 * _Immutable data structures_ that cannot be destructively updated,
-  famously enforced in Haskell but also a common feature of many
-  distributed big data frameworks.
+  famously enforced in Haskell but also a feature often present in distributed big data
+  frameworks such as Hadoop.
 * _Algebraic datatypes_ and _pattern matching_ to define and 
   manipulate complex data structures, available in Miranda, F# and Standard ML.
 * _Automatic type inference_ to avoid having to laboriously define the
@@ -78,7 +78,7 @@ The modern OCaml emerged in 1996, when a powerful and elegant object system was
 implemented by Didier Rémy and Jérôme Vouillon.  This object system was notable
 for supporting many common OO idioms in a statically type-safe way, whereas
 the same idioms required runtime checks in languages such as C++ or Java.
-In 2000, Jacques Garrique extended OCaml with several new features such as 
+In 2000, Jacques Garrigue extended OCaml with several new features such as 
 polymorphic methods and variants and labelled and optional arguments.
 
 The last decade has seen OCaml attract a significant user base, and language
@@ -86,7 +86,7 @@ improvements have been steadily added to support the growing codebases that use
 the language both commercially and for academic use.  First-class modules,
 Generalized Algebraic Data Types (GADTs) and dynamic linking have improved the
 flexibility of the language, and there is fast native code support for x86_64,
-ARM, PowerPC and Sparc64, making OCaml a good choice for systems where resource
+ARM, PowerPC and Sparc, making OCaml a good choice for systems where resource
 usage, predictability and performance all matter.  
 
 ### The Core Standard Library
@@ -176,9 +176,9 @@ Real World OCaml is split into three parts and appendices:
   concepts and examples is important.  This part opens up with a
   guided tour to give you a quick overview of the language.  It then
   moves onto modules, functors and objects, which may take some time
-  to digest.  Persevere though; even though these concepts may be
-  difficult at first, they will put you in good stead even when
-  switching to other languages, many of which have drawn inspiration
+  to digest.  It is persevering, however: even though these concepts may be
+  difficult at first, they will put you in good stead when
+  switching to other modern languages, many of which have drawn inspiration
   from ML.
 
 * Part II builds on the basics by working through useful tools and techniques.
@@ -193,7 +193,7 @@ Real World OCaml is split into three parts and appendices:
   OCaml. It's a remarkably simple system in comparison to other
   language runtimes (such as Java or the .NET CLR), and you'll need to
   read this to build very high performance systems that have to
-  minimise resource usage or interface to C libraries.  This is also
+  minimize resource usage or interface to C libraries.  This is also
   where we talk about profiling and debugging techniques using tools
   such as GNU `gdb`.
 

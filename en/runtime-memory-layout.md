@@ -186,7 +186,7 @@ OCaml Value                        Representation
 `Foo | Bar`                        as ascending OCaml `int`s, starting from 0.
 `Foo | Bar of int`                 variants with parameters are boxed, while variants with no parameters are unboxed.
 polymorphic variants               variable space usage depending on the number of parameters.
-floating point number              as a block with a single field containing the double-precision float.
+floating-point number              as a block with a single field containing the double-precision float.
 string                             word-aligned byte arrays that are also directly compatible with C strings.
 `[1; 2; 3]`                        as `1::2::3::[]` where `[]` is an int, and `h::t` a block with tag 0 and two parameters.
 tuples, records and arrays         an array of values. Arrays can be variable size, but structs and tuples are fixed size.
@@ -238,9 +238,9 @@ a block header or an unboxed integer.
 ### Floating point numbers and arrays
 
 Floating point numbers in OCaml are always stored as full double-precision
-values.  Individual floating point values are stored as a block with a single
+values.  Individual floating-point values are stored as a block with a single
 field that contains the number.  This block has the `Double_tag` set which
-signals to the collector that the floating point value is not to be scanned.
+signals to the collector that the floating-point value is not to be scanned.
 
 ```ocaml
 # Obj.tag (Obj.repr 1.0) ;;
@@ -263,7 +263,7 @@ that the contents are not OCaml values.
 ```
 
 First, let's check that float arrays do in fact have a different tag number
-from normal floating point values.
+from normal floating-point values.
 
 ```ocaml
 # Obj.double_tag;;

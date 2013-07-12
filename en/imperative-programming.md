@@ -34,7 +34,8 @@ We'll start with the implementation of a simple imperative dictionary,
 _i.e._, a mutable mapping from keys to values.  This is really for
 illustration purposes; both Core and the standard library provide
 imperative dictionaries, and for most real world tasks, you should use
-one of those implementations.
+one of those implementations.  There's more advice on using Core's
+implementation in particular in [xref](#maps-and-hash-tables).
 
 Our dictionary, like those in Core and the standard library, will be
 implemented as a hash table.  In particular, we'll use an _open
@@ -119,11 +120,6 @@ at.  It is implemented on top of `Hashtbl.hash`, which is a hash
 function provided by the OCaml runtime that can be applied to values
 of any type.  Thus, its own type is polymorphic: `'a -> int`.
 
-While `Hashtbl.hash` can be used with any type, it won't necessarily
-succeed for all values.  `Hashtbl.hash` will throw an exception if it
-encounters a value it can't handle, like a function or a value from a
-C libraries that lives outside the OCaml heap.
-
 The other functions defined above are fairly straightforward:
 
 - `create` creates an empty dictionary.
@@ -163,11 +159,11 @@ expected to work by side effect rather than by returning a value, and
 the overall `iter` function returns `unit ` as well.
 
 The code for `iter` uses two forms of iteration: a `for` loop to walk
-over the array of buckets; and within that loop, and a call to
-`List.iter` to walk over the list of values in a given bucket.  We
-could have done the outer loop with a recursive function instead of a
-`for` loop, but `for` loops are syntactically convenient, and are more
-familiar and idiomatic in the context of imperative code.
+over the array of buckets; and within that loop a call to `List.iter`
+to walk over the values in a given bucket.  We could have done the
+outer loop with a recursive function instead of a `for` loop, but
+`for` loops are syntactically convenient, and are more familiar and
+idiomatic in the context of imperative code.
 
 The following code is for adding and removing mappings from the
 dictionary.
@@ -284,8 +280,12 @@ and for setting an element in an array:
 array.(index) <- expr
 ```
 
+Out-of-bounds accesses for arrays (and indeed for all the array-like
+data structures) will lead to an exception being thrown.
+
 Array literals are written using `[|` and `|]` as delimiters.  Thus,
 `[| 1; 2; 3 |]` is a literal integer array.
+
 
 #### Strings
 
@@ -390,7 +390,7 @@ the `for` loop in action --- the `iter` function in `Dictionary` is
 built using it.  Here's a simple example of `for`.
 
 ```ocaml
-# for i = 0 to 3 do Printf.printf "i = %d\n" i done;;
+# for i = 0 to 3 do printf "i = %d\n" i done;;
 i = 0
 i = 1
 i = 2
@@ -402,7 +402,7 @@ As you can see, the upper and lower bounds are inclusive.  We can also
 use `downto` to iterate in the other direction.
 
 ```ocaml
-# for i = 3 downto 0 do Printf.printf "i = %d\n" i done;;
+# for i = 3 downto 0 do printf "i = %d\n" i done;;
 i = 3
 i = 2
 i = 1
@@ -506,7 +506,7 @@ previous and next elements.  At the beginning of the list, the `prev`
 field is `None`, and at the end of the list, the `next` field is
 `None`.
 
-The type of the list itself, `'a t`, is an mutable reference to an
+The type of the list itself, `'a t`, is a mutable reference to an
 optional `element`.  This reference is `None` if the list is empty,
 and `Some` otherwise.
 
@@ -698,9 +698,10 @@ to represent a lazy value.
 
 ```ocaml
 # type 'a lazy_state =
-  | Delayed of (unit -> 'a)
-  | Value of 'a
-  | Exn of exn
+    | Delayed of (unit -> 'a)
+    | Value of 'a
+    | Exn of exn
+  ;;
 type 'a lazy_state = Delayed of (unit -> 'a) | Value of 'a | Exn of exn
 ```
 
@@ -788,7 +789,7 @@ val memoize : ('a -> 'b) -> 'a -> 'b = <fun>
 ```
 
 The code above is a bit tricky.  `memoize` takes as its argument a
-function `f`, and then allocates a hashtable (called `table`) and
+function `f`, and then allocates a hash table (called `table`) and
 returns a new function as the memoized version of `f`.  When called,
 this new function looks in `table` first, and if it fails to find a
 value, calls `f` and stashes the result in `table`.  Note that `table`
@@ -956,14 +957,14 @@ We can now turn this back into an ordinary Fibonacci function by tying
 the recursive knot, as shown below.
 
 ```ocaml
-# let rec fib i = fib_norec fib i
+# let rec fib i = fib_norec fib i;;
 val fib : int -> int = <fun>
 # fib 5;;
 - : int = 8
 ```
 
 We can even write a polymorphic function that we'll call `make_rec`
-that can tie the recursive not for any function of this form.
+that can tie the recursive knot for any function of this form.
 
 ```ocaml
 # let make_rec f_norec =
@@ -1338,7 +1339,7 @@ And accordingly, we can pass it to `printf`.
 
 If this looks different from everything else you've seen so far,
 that's because it is.  This is really a special case in the
-type-system.  Most of the time, you don't need to worry about this
+type system.  Most of the time, you don't need to worry about this
 special handling of format strings --- you can just use `printf` and
 not worry about the details.  But it's useful to keep the broad
 outlines of the story in the back of your head.
@@ -1397,7 +1398,7 @@ the sum of those numbers.
     List.iter numbers ~f:(fun x -> fprintf outc "%d\n" x);
     Out_channel.close outc
   ;;
- val create_number_file : string -> int Core.Std.List.t -> unit = <fun>
+val create_number_file : string -> int list -> unit = <fun>
 # let sum_file filename =
      let file = In_channel.create filename in
      let numbers = List.map ~f:Int.of_string (In_channel.input_lines file) in
@@ -1514,7 +1515,7 @@ defined.  Similarly, if you call a function on a set of arguments,
 those arguments are evaluated before they are passed to the function.
 
 Consider the following simple example.  Here, we have a collection of
-angles and we want to determine if any of them have a negative `sin.
+angles and we want to determine if any of them have a negative `sin`.
 The following snippet of code would answer that question.
 
 ```ocaml
@@ -1526,9 +1527,9 @@ The following snippet of code would answer that question.
 - : bool = true
 ```
 
-In some sense, we don't really need to compute the `sin 128`, because
+In some sense, we don't really need to compute the `sin 128.`, because
 `sin 75.` is negative, so we could know the answer before even
-computing `sin 128`.
+computing `sin 128.`.
 
 It doesn't have to be this way.  Using the `lazy` keyword, we can
 write the original computation so that `sin 128.` won't ever be
@@ -1567,9 +1568,9 @@ sequence of let-bindings will be evaluated in the order that they're
 defined.  But what about the evaluation order within a single
 expression?  Officially, the answer is that evaluation order within an
 expression is undefined.  In practice, OCaml has only one compiler,
-and that behavior is a kind of _de facto_ standard.  Unfortunately, the
-evaluation order in this case is often the oppose of what one might
-expect.
+and that behavior is a kind of _de facto_ standard.  Unfortunately,
+the evaluation order in this case is often the opposite of what one
+might expect.
 
 Consider the following example.
 
@@ -1635,7 +1636,7 @@ As you can see, the polymorphic type of `identity` lets it operate on
 values with different types.
 
 This is not what happens with `remember`, though.  Here's the type
-that OCaml infers for remember, which looks almost, but not quite,
+that OCaml infers for `remember`, which looks almost, but not quite,
 like the type of the identity function.
 
 ```ocaml
@@ -1672,7 +1673,7 @@ Note that the type of `remember` was settled by the definition of
 
 So, when does the compiler infer weakly polymorphic types?  As we've
 seen, we need weakly polymorphic types when a value of unknown type is
-stored in a persistent mutable cell.  Because the type-system isn't
+stored in a persistent mutable cell.  Because the type system isn't
 precise enough to determine all cases where this might happen, OCaml
 uses a rough rule to flag cases where it's sure there are no
 persistent refs, and to only infer polymorphic types in those cases.
@@ -1681,7 +1682,7 @@ This rule is called _the value restriction_.
 The core of the value restriction is the observation that some kinds
 of simple values by their nature can't contain refs, including:
 
-- Constants (_i.e._, things like integer and floating point literals)
+- Constants (_i.e._, things like integer and floating-point literals)
 - Constructors that contain only other simple values
 - Function declarations, _i.e._, expressions that begin with `fun` or
   `function`, or, the equivalent let binding, `let f x = ...`.

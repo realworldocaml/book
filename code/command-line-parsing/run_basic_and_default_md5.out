@@ -1,0 +1,4 @@
+$ cat /etc/passwd | ./basic_md5_with_optional_file.native
+5ca39672bb3fbd2534cd477f0b1b6eca
+$ cat /etc/passwd | ./basic_md5_with_default_file.native
+5ca39672bb3fbd2534cd477f0b1b6eca

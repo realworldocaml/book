@@ -7,6 +7,19 @@ tag.  As we'll see, when combined with pattern matching, variants give
 you a powerful way of representing complex data and of organizing the
 case-analysis on that information.
 
+The basic syntax of a variant type declaration is as follows.
+
+```ocaml
+type <variant-name> =
+  | <Tag> [ of <type> [* <type>]... ]
+  | <Tag> [ of <type> [* <type>]... ]
+  | ...
+```
+
+Each row starts with a tag that identifies that case, and in addition,
+there may be a collection of fields, each with its own type, that is
+associated with a given tag.
+
 Let's consider a concrete example of how variants can be useful.
 Almost all terminals support a set of 8 basic colors, and we can
 represent those colors using a variant.  Each color is declared as a
@@ -15,7 +28,7 @@ that variant tags must be capitalized.
 
 ```ocaml
 # type basic_color =
-    Black | Red | Green | Yellow | Blue | Magenta | Cyan | White ;;
+   | Black | Red | Green | Yellow | Blue | Magenta | Cyan | White ;;
 # Cyan ;;
 - : basic_color = Cyan
 # [Blue; Magenta; Red] ;;
@@ -52,7 +65,7 @@ Hello Blue World!
 
 On most terminals, that word "Blue" will be rendered in blue.
 
-In this example, the cases of the variant are simple tag with no
+In this example, the cases of the variant are simple tags with no
 associated data.  This is substantively the same as the enumerations
 found in languages like C and Java.  But as we'll see, variants can do
 considerably more than represent a simple enumeration.  Indeed, an
@@ -200,15 +213,28 @@ val oldschool_color_to_int : color -> int = <fun>
 But because the catch-all case encompasses all possibilities, the type
 system will no longer warn us that we have missed the new `Bold` case
 when we change the type to include it.  We can get this check back by
-being avoiding the catch-all case, and instead being explicit about
-the tags that are ignored.
+avoiding the catch-all case, and instead being explicit about the tags
+that are ignored.
 
 </note>
 
 ## Combining records and variants
 
-Records and variants are most effective when used in concert.
-Consider again the type `Log_entry.t` from [xref](#records):
+The term _algebraic data types_ is often used to describe a collection
+of types that includes variants , records and tuples.  Algebraic data
+types act as a peculialrly useful and powerful language for describing
+data.  At the heart of their utility is the fact that they combine two
+different kinds of types: _product types_, like tuples and records,
+which combine multiple different types together and are mathematically
+similar to cartesian products; and _sum types_, like variants, which
+let you combine multiple different possibilities into one type, and
+are mathematically similar to disjoint unions.
+
+Algebraic data types gain much of their power from the ability to
+construct layered combination of sums and products.  Let's see what we
+can achieve with this by revisiting the logging server types that were
+described in [xref](#records).  We'll start by reminding ourselves of
+the definition of `Log_entry.t`.
 
 ```ocaml
 # module Log_entry = struct
@@ -406,22 +432,21 @@ through the design of a simple Boolean expression language.  Such a
 language can be useful anywhere you need to specify filters, which are
 used in everything from packet analyzers to mail clients.
 
-An expression in this language will be defined by the variant `blang`
-(short for "Boolean language") with one tag for each kind of
-expression we want to support.
+An expression in this language will be defined by the variant `expr`,
+with one tag for each kind of expression we want to support.
 
 ```ocaml
-# type 'a blang =
+# type 'a expr =
   | Base  of 'a
   | Const of bool
-  | And   of 'a blang list
-  | Or    of 'a blang list
-  | Not   of 'a blang
+  | And   of 'a expr list
+  | Or    of 'a expr list
+  | Not   of 'a expr
   ;;
 ```
 
-Note that the definition of the type `blang` is recursive, meaning
-that a `blang` may contain other `blang`s.  Also, `blang` is
+Note that the definition of the type `expr` is recursive, meaning
+that a `expr` may contain other `expr`s.  Also, `expr` is
 parameterized by a polymorphic type `'a` which is used for specifying
 the type of the value that goes under the `Base` tag.
 
@@ -429,7 +454,7 @@ The purpose of each tag is pretty straightforward.  `And`, `Or` and
 `Not` are the basic operators for building up Boolean expressions, and
 `Const` lets you enter the constants `true` and `false`.
 
-The `Base` tag is what allows you to tie the `blang` to your
+The `Base` tag is what allows you to tie the `expr` to your
 application, by letting you specify an element of some base predicate
 type, whose truth or falsehood is determined by your application.  If
 you were writing a filter language for an email processor, your base
@@ -448,12 +473,12 @@ Using the above, we can construct a simple expression with
 
 ```ocaml
 # let test field contains = Base { field; contains };;
-val test : mail_field -> string -> mail_predicate blang = <fun>
+val test : mail_field -> string -> mail_predicate expr = <fun>
 # And [ Or [ test To "doligez"; test CC "doligez" ];
         test Subject "runtime";
       ]
   ;;
-- : mail_predicate blang =
+- : mail_predicate expr =
 And
  [Or
    [Base {field = To; contains = "doligez"};
@@ -463,21 +488,21 @@ And
 
 Being able to construct such expressions isn't enough; we also need to
 be able to evaluate such an expression.  The following code shows how
-you could write a general-purpose evaluator for `blang`s.
+you could write a general-purpose evaluator for these expressions.
 
 ```ocaml
-# let rec eval blang base_eval =
+# let rec eval expr base_eval =
     (* a shortcut, so we don't need to repeatedly pass [base_eval]
        explicitly to [eval] *)
-    let eval' blang = eval blang base_eval in
-    match blang with
+    let eval' expr = eval expr base_eval in
+    match expr with
     | Base  base   -> base_eval base
     | Const bool   -> bool
-    | And   blangs -> List.for_all blangs ~f:eval'
-    | Or    blangs -> List.exists  blangs ~f:eval'
-    | Not   blang  -> not (eval' blang)
+    | And   exprs -> List.for_all exprs ~f:eval'
+    | Or    exprs -> List.exists  exprs ~f:eval'
+    | Not   expr  -> not (eval' expr)
   ;;
-val eval : 'a blang  -> ('a -> bool) -> bool = <fun>
+val eval : 'a expr -> ('a -> bool) -> bool = <fun>
 ```
 
 The structure of the code is pretty straightforward --- we're just
@@ -487,67 +512,109 @@ concrete example, we just need to write the `base_eval` function which
 is capable of evaluating a base predicate.
 
 Another useful operation on expressions is simplification.  The
-following function applies some basic simplification rules, most of
-which are driven by the presence of constants.
+following simplification code is based on having some simplifying
+constructors that mirror the tags used to construct a tree.  Then
+the simplification function is reponsible for rebuilding the tree
+using these constructors.
+
+```ocaml
+# let and_ l =
+    if List.mem l (Const false) then Const false
+    else
+      match List.filter l ~f:((<>) (Const true)) with
+      | [] -> Const true
+      | [ x ] -> x
+      | l -> And l
+
+  let or_ l =
+    if List.mem l (Const true) then Const true
+    else
+      match List.filter l ~f:((<>) (Const false)) with
+      | [] -> Const false
+      | [x] -> x
+      | l -> Or l
+
+  let not_ = function
+    | Const b -> Const (not b)
+    | e -> Not e
+  ;;
+val and_ : 'a expr list -> 'a expr = <fun>
+val or_ : 'a expr list -> 'a expr = <fun>
+val not_ : 'a expr -> 'a expr = <fun>
+```
+
+Now, we can write a simplification routine that brings these together.
 
 ```ocaml
 # let rec simplify = function
     | Base _ | Const _ as x -> x
-    | And blangs ->
-      let blangs =
-        List.map ~f:simplify blangs
-        |> List.filter ~f:(fun x -> x <> Const true)
-      in
-      if List.is_empty blangs then Const true
-      else if List.exists blangs ~f:(fun x -> x = Const false)
-      then Const false
-      else And blangs
-    | Or blangs ->
-      let blangs =
-        List.map ~f:simplify blangs
-        |> List.filter ~f:(fun x -> x <> Const false)
-      in
-      if List.is_empty blangs then Const false
-      else if List.exists blangs ~f:(fun x -> x = Const true)
-      then Const true
-      else Or blangs
-    | Not blang ->
-      match simplify blang with
-      | Const bool -> Const (not bool)
-      | blang -> Not blang
+    | And l -> and_ (List.map ~f:simplify l)
+    | Or l  -> or_  (List.map ~f:simplify l)
+    | Not e -> not_ (simplify e)
   ;;
-val simplify : 'a blang -> 'a blang = <fun>
+val simplify : 'a expr -> 'a expr = <fun>
 ```
 
-One thing to notice about the above code is that it uses a catch-all
-case in the very last line within the `Not` case.  It's generally
-better to be explicit about the cases you're ignoring.  Indeed, if we
-change this snippet of code to be more explicit:
+We can now apply this to a boolean expression and see how good of a
+job it does at simplifying it.
 
 ```ocaml
-    | Not blang ->
-      match simplify blang with
-      | Const bool -> Const (not bool)
-      | (And _ | Or _ | Base _ | Not _) -> Not blang
+# simplify (Not (And [ Or [Base "it's snowing"; Const true];
+                       Base "it's raining"]));;
+- : string expr = Not (Base "it's raining")
 ```
 
-it's easy to see that we've missed an important case: double-negation.
+Here, it correctly converted the `Or` branch to `Const true`, and then
+eliminated the `And`, entirely, since the `And` then had only one
+non-trivial component.
+
+There are some simplifications it misses, however.  In particular, see
+what happens if we add a double negation in.
 
 ```ocaml
-    | Not blang ->
-      match simplify blang with
-      | Const b -> Const (not b)
-      | Not blang -> blang
-      | (And _ | Or _ | Base _ ) -> Not blang
+# simplify (Not (And [ Or [Base "it's snowing"; Const true];
+                       Not (Not (Base "it's raining"))]));;
+- : string expr = Not (Not (Not (Base "it's raining")))
 ```
 
-This example is more than a toy.  There's a module very much in this
-spirit in Core called `Blang`, and it gets a lot of practical use in a
-variety of applications.
+It fails to remove the double negation, and it's easy to see why.  The
+`not_` function has a catch-all case, so it ignores everything but the
+one case it explicitly considers, that of the negation of a constant.
+Catch-all cases are generally a bad idea, and if we make the code more
+explicit, we see that the missing of the double-negation is more
+obvious.
+
+```ocaml
+# let not_ = function
+    | Const b -> Const (not b)
+    | (Base _ | And _ | Or _ | Not _) as e -> Not e
+  ;;
+val not_ : 'a expr -> 'a expr = <fun>
+```
+
+We can of course fix this by handling simply adding an explicit case
+for double-negation.
+
+```ocaml
+# let not_ = function
+    | Const b -> Const (not b)
+    | Not e -> e
+    | (Base _ | And _ | Or _ ) as e -> Not e
+  ;;
+val not_ : 'a expr -> 'a expr = <fun>
+```
+
+The example of a boolean expression language is more than a toy.
+There's a module very much in this spirit in Core called `Blang`
+(short for "boolean language"), and it gets a lot of practical use in
+a variety of applications.  The simplification algorithm in particular
+is useful when you want to use it to specialize the evaluation of
+expressions for which the evaluation of some of the base predicates is
+already known.
 
 More generally, using variants to build recursive data structures is a
 common technique, and shows up everywhere from designing little
-languages to building efficient data structures.
+languages to building complex data structures.
 
 ## Polymorphic variants
 
@@ -818,7 +885,7 @@ mixing catch-all cases and polymorphic variants.
 </note>
 
 Let's consider how we might turn our code into a proper library with
-an implementation in an `ml` file and an implementation in a separate
+an implementation in an `ml` file and an interface in a separate
 `mli`, as we saw in [xref](#files-modules-and-programs).  Let's start
 with the `mli`.
 

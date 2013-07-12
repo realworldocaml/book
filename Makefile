@@ -1,10 +1,14 @@
-all: 
-	./gen-book.sh
+trunk: 
+	./gen-book.sh -m trunk
+
+depend:
+	cd scripts && ./build.sh
+	cd code && $(MAKE)
 
 milestone-%: all
 	./gen-book.sh -p -m $*
 
-trunk: all
+html:
 	./gen-book.sh -m trunk
 
 pdf: trunk
@@ -15,3 +19,4 @@ server:
 
 clean:
 	rm -rf build
+	rm -rf scripts/_build

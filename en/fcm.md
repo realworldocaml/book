@@ -95,7 +95,7 @@ module New_three : X_int
 
 The type of the first-class module, _e.g._, `(module X_int)`, is based
 on the fully-qualified name of the signature that was used to
-construct it.  A first class module based on a signature with a
+construct it.  A first-class module based on a signature with a
 different name, even if it is substantively the same signature, will
 result in a distinct type, as you can see below.
 
@@ -124,7 +124,7 @@ an alias of a module type defined elsewhere.  This is often done to
 improve readability, and can happen both through an explicit
 declaration of a module type or implicitly through an `include`
 declaration.  In both cases, this has the unintended side effect of
-making first class modules built off of the alias incompatible with
+making first-class modules built off of the alias incompatible with
 those built off of the original module type.  To deal with this, one
 should be disciplined in how one refers to signatures when
 constructing first-class modules.
@@ -336,7 +336,7 @@ functor.
 
 ## Example: A query handling framework
 
-Now let's look at first class modules in the context of a more
+Now let's look at first-class modules in the context of a more
 complete and realistic example.  In particular, consider the following
 signature for a module that implements a query handler.
 
@@ -664,7 +664,7 @@ val cli : (string, (module Query_handler_instance)) Hashtbl.t -> unit = <fun>
 ```
 
 We can most effectively run this command-line interface from a
-stand-alone program, which we can do by putting the above code in a
+standalone program, which we can do by putting the above code in a
 file along with following command to launch the interface.
 
 ```ocaml
@@ -710,7 +710,7 @@ module Loader = struct
 
 ```
 
-Note that a `Loader.t` has two hashtables: one containing the known
+Note that a `Loader.t` has two hash tables: one containing the known
 query handler modules, and one containing the active query handler
 instances.  The `Loader.t` will be responsible for creating new
 instances and adding them to the table, as well as for removing
@@ -790,7 +790,7 @@ generated for that type to parse the query from the user.
 
 The eval function itself is fairly straight-forward, dispatching to
 the appropriate functions to respond to each type of query.  Note that
-we use write `<sexp_of<string list>>` to auto-generate a function for
+we use write `<sexp_of<string list>>` to autogenerate a function for
 converting a list of strings to an s-expression.  This is part of the
 sexplib package described in
 [xref](#data-serialization-with-s-expressions).  
@@ -884,7 +884,7 @@ handlers from disk on demand.
 
 ## Living without first-class modules
 
-It's worth noting that most designs that can be done with first class
+It's worth noting that most designs that can be done with first-class
 modules can be simulated without them, with some level of
 awkwardness.  For example, we could rewrite our query handler example
 without first-class modules using the following types:

@@ -3,7 +3,7 @@
 This chapter gives an overview of OCaml by walking through a series of
 small examples that cover most of the major features of the language.
 This should give a sense of what OCaml can do, without getting too
-deep in any one topic.
+deep into any one topic.
 
 We'll present this guided tour using the Core standard library and the
 `utop` OCaml toplevel, a shell that lets you type in expressions and
@@ -14,42 +14,7 @@ specifically.
 
 Before getting started, make sure you have a working OCaml
 installation and toplevel as you read through this chapter so you can
-try out the examples.
-
-<note>
-<title>Installing `utop`</title>
-
-The easiest way to get the examples running is to set up the OPAM
-package manager, which is explained in [xref](#installation).  In a
-nutshell, you need to have a working C compilation environment and the
-PCRE library installed, and then:
-
-```
-$ opam init
-$ opam switch 4.01.0dev+trunk
-$ opam install utop core_extended
-$ eval `opam config -env`
-```
-
-Note that the above commands will take some time to run.  When they're
-done, you should have a file called `~/.ocamlinit` in your home
-directory, to which you should add at least the following.
-
-```ocaml
-#use "topfind"
-#camlp4o
-#thread
-#require "core.top"
-#require "core.syntax"
-```
-
-Then type in `utop`, and you'll be in an interactive toplevel
-environment.  OCaml phrases are only evaluated when you enter a double
-semicolon (`;;`), so you can split your typing over multiple lines.
-You can exit `utop` by pressing `control-d`. For complete
-instructions, please refer to [xref](#installation).
-
-</note>
+try out the examples.  Look at [xref](#installation) for the details.
 
 ## OCaml as a calculator
 
@@ -59,25 +24,15 @@ library.  Accordingly, we'll start by opening the `Core.Std` module to
 get access to Core's libraries.  If you don't open `Core.Std` many of
 the examples below will fail.
 
-```ocaml
-$ utop
-# open Core.Std;;
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 0)) 
 ```
 
 Now that we have Core open, let's try a few simple numerical
 calculations.
 
-```ocaml
-# 3 + 4;;
-- : int = 7
-# 8 / 3;;
-- : int = 2
-# 3.5 +. 6.;;
-- : float = 9.5
-# 30_000_000 / 300_000;;
-- : int = 100
-# sqrt 9.;;
-- : float = 3.
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 1)) 
 ```
 
 By and large, this is pretty similar to what you'd find in any
@@ -86,17 +41,16 @@ at you.
 
 - We needed to type `;;` in order to tell the toplevel that it should
   evaluate an expression.  This is a peculiarity of the toplevel that
-  is not required in stand-alone programs (though it is sometimes
+  is not required in standalone programs (though it is sometimes
   helpful to include `;;` to improve OCaml's error reporting).
-- After evaluating an expression, the toplevel prints both the type of
-  the result and the result itself.
-- Function arguments are separated by spaces, instead of by
-  parenthesis and commas, which is more like the UNIX shell than C or
-  Java.
+- After evaluating an expression, the toplevel prints first the result
+  and then the type of the result.
+- Function arguments are separated by spaces instead of by parentheses
+  and commas, which is more like the UNIX shell than it is like
+  traditional programming languages like C or Java.
 - OCaml allows you to place underscores in the middle of your integer
   literals, as a way of improving readability.  Note that underscores
-  can be placed anywhere in within the number, not just every three
-  digits.
+  can be placed anywhere within a number, not just every three digits.
 - OCaml carefully distinguishes between `float`, the type for floating
   point numbers and `int`, the type for integers.  The types have
   different literals (`6.` instead of `6`) and different infix
@@ -104,16 +58,15 @@ at you.
   cast between types.  This can be a bit of a nuisance, but it has its
   benefits, since it prevents some kinds of bugs that arise in other
   languages due to unexpected differences between the behavior of
-  `int` and `float`.
+  `int` and `float`.  For example, in many languages, `1 / 3` is `0`,
+  but `1 / 3.0` is a third.  OCaml requires you to be explicit about
+  which operation you're doing.
 
 We can also create a variable to name the value of a given expression,
 using the `let` keyword (also known as a _let binding_).
 
-```ocaml
-# let x = 3 + 4;;
-val x : int = 7
-# let y = x + x;;
-val y : int = 14
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 2)) 
 ```
 
 After a new variable is created, the toplevel tells us the name of the
@@ -122,46 +75,36 @@ or `14`).
 
 Note that there are some constraints on what identifiers can be used
 for variable names.  Punctuation is excluded, except for `_` and `'`,
-and variables must start with a lowercase letter.  Thus, these are
-legal:
+and variables must start with a lowercase letter or an underscore.
+Thus, these are legal:
 
-```ocaml
-# let x7 = 3 + 4;;
-val x7 : int = 7
-# let x_plus_y = x + y;;
-val x_plus_y : int = 21
-# let x' = x + 1;;
-val x' : int = 8
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 3)) 
 ```
 
-But these are not:
+Note that by default, `utop` doesn't bother to print out variables
+starting with an underscore.
 
-```ocaml
-# let Seven = 3 + 4;;
-Error: Unbound constructor Seven
-# let 7x = 7;;
-Error: This expression should not be a function, the expected type is
-int
-# let x-plus-y = x + y;;
-Error: Parse error: [fun_binding] expected after [ipatt] (in [let_binding])
+The following examples, however, are not legal.
+
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 4)) 
 ```
 
-## Functions and type Inference
+The error messages here are a little confusing, but they'll make more
+sense as you learn more about the language.
 
-The `let` syntax can also be used for creating functions.
+## Functions and type inference
 
-```ocaml
-# let square x = x * x ;;
-val square : int -> int = <fun>
-# square 2;;
-- : int = 4
-# square (square 2);;
-- : int = 16
+The `let` syntax can also be used to define a function.
+
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 5)) 
 ```
 
-Functions in OCaml are values like any other, which is why we bind one
-to a variable using the same `let` keyword used for binding a variable
-to a simple value such as an integer.
+Functions in OCaml are values like any other, which is why we use the
+`let` keyword to bind a function to a variable name, just as we use
+`let` to bind a simple value like an integer to a variable name.
 
 When using `let` to define a function, the first identifier after the
 `let` is the function name, and each subsequent identifier is a
@@ -174,15 +117,10 @@ types have gotten more interesting too.  `int -> int` is a function
 type, in this case indicating a function that takes an `int` and
 returns an `int`.  We can also write functions that take multiple
 arguments.  (Note that the following example will not work if you
-haven't opened `Core.Std`.)
+haven't opened `Core.Std` as was suggested earlier.)
 
-```ocaml
-# let ratio x y =
-     Float.of_int x /. Float.of_int y
-  ;;
-val ratio : int -> int -> float = <fun>
-# ratio 4 7;;
-- : float = 0.571428571428571397
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 6)) 
 ```
 
 As a side note, the above is our first use of OCaml modules.  Here,
@@ -206,12 +144,8 @@ Here's an example of a function that takes three arguments: a test
 function and two integer arguments.  The function returns the sum of
 the integers that pass the test.
 
-```ocaml
-# let sum_if_true test first second =
-    (if test first then first else 0)
-    + (if test second then second else 0)
-  ;;
-val sum_if_true : (int -> bool) -> int -> int -> int = <fun>
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 7)) 
 ```
 
 If we look at the inferred type signature in detail, we see that the
@@ -219,14 +153,8 @@ first argument is a function that takes an integer and returns a
 boolean, and that the remaining two arguments are integers.  Here's an
 example of this function in action.
 
-```ocaml
-# let even x =
-    x mod 2 = 0 ;;
-val even : int -> bool = <fun>
-# sum_if_true even 3 4;;
-- : int = 4
-# sum_if_true even 2 4;;
-- : int = 6
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 8)) 
 ```
 
 Note that in the definition of `even` we used `=` in two different
@@ -243,14 +171,14 @@ any explicit type information.
 
 OCaml determines the type of an expression using a technique called
 _type inference_, by which it infers the type of a given expression
-based on what it already knows about the types of other related
-variables, and on constraints on the types that arise from the
+based on what it already knows about the types of variables used in
+the expression, and on constraints on the types that arise from the
 structure of the code.
 
 As an example, let's walk through the process of inferring the type of
 `sum_if_true`.
 
-- OCaml requires that both arms of an `if` statement return the same
+- OCaml requires that both arms of an `if` statement have the same
   type, so the expression `if test first then first else 0` requires
   that `first` must be the same type as `0`, which is `int`.
   Similarly, from `if test second then second else 0` we can conclude
@@ -259,7 +187,7 @@ As an example, let's walk through the process of inferring the type of
   input type of `test` must be `int`.
 - `test first` is used as the condition in an `if` statement, so the
   return type of `test` must be `bool`.
-- The fact that `+` returns an int implies that the return value of
+- The fact that `+` returns `int` implies that the return value of
   `sum_if_true` must be int.
 
 Together, that nails down the types of all the variables, which
@@ -268,17 +196,13 @@ determines the overall type of `sum_if_true`.
 Over time, you'll build a rough intuition for how the OCaml inference
 engine works, which makes it easier to reason through your programs.
 One way of making it easier to understand the types is to add explicit
-type annotations.  These annotations never change the behavior of an
+type annotations.  These annotations don't change the behavior of an
 OCaml program, but they can serve as useful documentation, as well as
 catch unintended type changes.  Here's an annotated version of
 `sum_if_true`:
 
-```ocaml
-# let sum_if_true (test : int -> bool) (x : int) (y : int) : int =
-     (if test x then x else 0)
-     + (if test y then y else 0)
-  ;;
-val sum_if_true : (int -> bool) -> int -> int -> int = <fun>
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 9)) 
 ```
 
 In the above, we've marked every argument to the function with its
@@ -292,10 +216,8 @@ is failing to compile.
 Sometimes, there isn't enough information to fully determine the
 concrete type of a given value.  Consider this function:
 
-```ocaml
-# let first_if_true test x y =
-    if test x then x else y
-  ;;
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 10)) 
 ```
 
 `first_if_true` takes as its arguments a function `test`, and two
@@ -303,17 +225,14 @@ values, `x` and `y`, where `x` is to be returned if `test x` evaluates
 to `true`, and `y` otherwise.  So what's the type of `first_if_true`?
 There are no obvious clues such as arithmetic operators or literals to
 tell you what the type of `x` and `y` are.  That makes it seem like
-one could use this `first_if_true` on values of any type.  Indeed, if
-we look at the type returned by the toplevel:
+one could use this `first_if_true` on values of any type.
 
-```ocaml
-val first_if_true : ('a -> bool) -> 'a -> 'a -> 'a = <fun>
-```
-
-we see that rather than choose a single concrete type, OCaml has
-introduced a _type variable_ `'a` to express that the type is generic.
-In particular, the type of the `test` argument is `('a -> bool)`,
-which means that test is a one-argument function whose return value is
+Indeed, if we look at the type returned by the toplevel, we see that
+rather than choose a single concrete type, OCaml has introduced a
+_type variable_ `'a` to express that the type is generic.  (You can
+tell it's a type variable by the leading single-quote.)  In
+particular, the type of the `test` argument is `('a -> bool)`, which
+means that test is a one-argument function whose return value is
 `bool`, and whose argument could be of any type `'a`.  But, whatever
 type `'a` is, it has to be the same as the type of the other two
 arguments, `x` and `y`, and of the return value of `first_if_true`.
@@ -322,20 +241,14 @@ very similar to generics in C# and Java.
 
 The generic type of `first_if_true` allows us to write:
 
-```ocaml
-# let long_string s = String.length s > 6;;
-val long_string : string -> bool = <fun>
-# first_if_true long_string "short" "loooooong";;
-- : string = "loooooong"
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 11)) 
 ```
 
 as well as:
 
-```ocaml
-# let big_number x = x > 3;;
-val big_number : int -> bool = <fun>
-# first_if_true big_number 4 3;;
-- : int = 4
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 12)) 
 ```
 
 Both `long_string` and `big_number` are functions, and each is passed
@@ -344,13 +257,8 @@ to `first_if_true` with two other arguments of the appropriate type
 can't mix and match two different concrete types for `'a` in the same
 use of `first_if_true`.
 
-```ocaml
-# first_if_true big_number "short" "loooooong";;
-Characters 25-30:
-  first_if_true big_number "short" "loooooong";;
-                           ^^^^^^^
-Error: This expression has type string but
-    an expression was expected of type int
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 13)) 
 ```
 
 In this example, `big_number` requires that `'a` be instantiated as
@@ -370,28 +278,16 @@ Working in the toplevel somewhat obscures the difference between
 run time and compile time errors, but that difference is still there.
 Generally, type errors, like this one:
 
-```ocaml
-# let add_potato x =
-     x + "potato";;
-  Characters 28-36:
-       x + "potato";;
-           ^^^^^^^^
-Error: This expression has type string but an expression was expected of type
-         int
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 14)) 
 ```
 
 are compile-time errors (because `+` requires that both its arguments
 be of type `int`), whereas errors that can't be caught by the type
 system, like division by zero, lead to runtime exceptions.
 
-```ocaml
-# let is_a_multiple x y =
-     x mod y = 0 ;;
-  val is_a_multiple : int -> int -> bool = <fun>
-# is_a_multiple 8 2;;
-- : bool = true
-# is_a_multiple 8 0;;
-Exception: Division_by_zero.
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 15)) 
 ```
 
 The distinction here is that type errors will stop you whether or not
@@ -413,11 +309,8 @@ at a particularly simple data structure, the tuple.  A tuple is an
 ordered collection of values that can each be of different type.  You
 can create a tuple by joining values together with a comma:
 
-```ocaml
-# let a_tuple = (3,"three");;
-val a_tuple : int * string = (3, "three")
-# let another_tuple = (3,"four",5.);;
-val another_tuple : int * string * float = (3, "four", 5.)
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 16)) 
 ```
 
 (For the mathematically inclined, the `*` character is used because
@@ -428,10 +321,8 @@ type `s`.)
 You can extract the components of a tuple using OCaml's
 pattern matching syntax. For example:
 
-```ocaml
-# let (x,y) = a_tuple;;
-val x : int = 3
-val y : string = "three"
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 17)) 
 ```
 
 Here, the `(x,y)` on the left-hand side of the `let` binding is the
@@ -439,23 +330,12 @@ pattern.  This pattern lets us mint the new variables `x` and `y`,
 each bound to different components of the value being matched, which
 can now be used in subsequent expressions.
 
-```ocaml
-# x + String.length y;;
-- : int = 8
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 18)) 
 ```
 
 Note that the same syntax is used both for constructing and for
-pattern matching on tuples.  Another syntactic note: it's the commas,
-rather than the parens, that make a tuple.  Thus, we can write:
-
-```ocaml
-# let x,y = a_tuple;;        
-val x : int = 3
-val y : string = "three"
-```
-
-That said, it's more idiomatic to include the parens even when they're
-not strictly necessary.
+pattern matching on tuples.
 
 Pattern matching can also show up in function arguments.  Here's a
 function for computing the distance between two points on the plane,
@@ -463,11 +343,8 @@ where each point is represented as a pair of `float`s.  The pattern
 matching syntax lets us get at the values we need with a minimum of
 fuss.
 
-```ocaml
-# let distance (x1,y1) (x2,y2) =
-    sqrt ((x1 -. x2) ** 2. +. (y1 -. y2) ** 2.)
-  ;;
-val distance : float * float -> float * float -> float = <fun>
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 19)) 
 ```
 
 The `**` operator used above is for raising a floating-point number to
@@ -482,21 +359,15 @@ Where tuples let you combine a fixed number of items, potentially of
 different types, lists let you hold any number of items of the same
 type.  For example:
 
-```ocaml
-# let languages = ["OCaml";"Perl";"C"];;
-val languages : string list = ["OCaml"; "Perl"; "C"]
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 20)) 
 ```
 
 Note that you can't mix elements of different types in the same list,
 as we did with tuples.
 
-```ocaml
-# let numbers = [3;"four";5];;
-Characters 17-23:
-  let numbers = [3;"four";5];;
-                   ^^^^^^
-Error: This expression has type string but an expression was expected of type
-         int
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 21)) 
 ```
 
 #### The `List` module
@@ -506,31 +377,29 @@ functions for working with lists.  We can access values from within a
 module by using dot-notation.  For example, this is how we compute the
 length of a list.
 
-```ocaml
-# List.length languages;;
-- : int = 3
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 22)) 
 ```
 
 Here's something a little more complicated.  We can compute the list
 of the lengths of each language as follows.
 
-```ocaml
-# List.map languages ~f:String.length;;
-- : int list = [5; 4; 1]
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 23)) 
 ```
 
 `List.map` takes two arguments: a list and a function for transforming
 the elements of that list.  Note that `List.map` creates a new list
-and does not modify the original.
+and does not modify the original.  Indeed, OCaml lists are immutable,
+so there are no operations for modifying lists in the language at all.
 
 In this example, the function `String.length` is passed under the
 _labeled argument_ `~f`.  Labels allow you to specify arguments by
 name rather than by position.  As you can see below, we can change the
 order of labeled arguments without changing the function's behavior.
 
-```ocaml
-# List.map ~f:String.length languages;;
-- : int list = [5; 4; 1]
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 24)) 
 ```
 
 We'll learn more about labeled arguments and why they're important in
@@ -542,31 +411,51 @@ We'll learn more about labeled arguments and why they're important in
 In addition to constructing lists using brackets, we can use the
 operator `::` for adding elements to the front of a list.
 
-```ocaml
-# "French" :: "Spanish" :: languages;;
-- : string list = ["French"; "Spanish"; "OCaml"; "Perl"; "C"]
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 25)) 
 ```
 
 Here, we're creating a new and extended list, not changing the list we
 started with, as you can see below.
 
-```ocaml
-# languages;;
-- : string list = ["OCaml"; "Perl"; "C"]
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 26)) 
 ```
+
+<note> <title> Semicolons vs. commas </title>
+
+Unlike many other languages, OCaml uses semicolons to separate list
+elements in lists rather than commas.  Commas, instead, are used for
+separating elements in a tuple.  If you try to use commas instead,
+you'll see that your code compiles, but doesn't do quite what you
+might expect.
+
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 27)) 
+```
+
+In particular, rather than a list of three strings, what we have is a
+singleton list containing a three-tuple of strings.
+
+Another thing that is uncovered by this example is that commas create
+a tuple, even if there are no surrounding parens.  So, we can write:
+
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 28)) 
+```
+
+to allocate a tuple of integers.  This is generally considered poor
+style and should be avoided.
+
+</note>
 
 The bracket notation for lists is really just syntactic sugar for
 `::`.  Thus, the following declarations are all equivalent.  Note that
 `[]` is used to represent the empty list, and that `::` is
 right-associative.
 
-```ocaml
-# [1; 2; 3];;
-- : int list = [1; 2; 3]
-# 1 :: (2 :: (3 :: []));;
-- : int list = [1; 2; 3]
-# 1 :: 2 :: 3 :: [];;
-- : int list = [1; 2; 3]
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 29)) 
 ```
 
 The `::` operator can only be used for adding one element to the front
@@ -574,9 +463,8 @@ of the list, with the list terminating at `[]`, the empty list.
 There's also a list concatenation operator, `@`, which can concatenate
 two lists.
 
-```ocaml
-# [1;2;3] @ [4;5;6];;
-- : int list = [1; 2; 3; 4; 5; 6]
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 30)) 
 ```
 
 It's important to remember that, unlike `::`, this is not a
@@ -589,10 +477,8 @@ The elements of a list can be accessed through pattern matching.  List
 patterns are based on the two list constructors, `[]` and `::`.
 Here's a simple example.
 
-```ocaml
-# let my_favorite_language (my_favorite :: the_rest) =
-     my_favorite
-  ;;
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 31)) 
 ```
 
 By pattern matching using `::`, we've isolated and named the first
@@ -601,31 +487,16 @@ element of the list (`my_favorite`) and the remainder of the list
 equivalent of using the functions `car` and `cdr` to isolate the first
 element of a list and the remainder of that list.
 
-If you try the above example in the toplevel, however, you'll see that
-it spits out a warning:
+As you can see, however, the toplevel did not like this definition,
+and spit out a warning indicating that the pattern is not exhaustive.
+This means that there are values of the type in question that won't be
+captured by the pattern. The warning even gives an example of a value
+that doesn't match the provided pattern, in particular, `[]`, the
+empty list.  If we try to run `my_favorite_language`, we'll see that
+it works on non-empty list, and fails on empty ones.
 
-```ocaml
-    Characters 25-69:
-  .........................(my_favorite :: the_rest) =
-       my_favorite
-Warning 8: this pattern-matching is not exhaustive.
-Here is an example of a value that is not matched:
-[]
-val my_favorite_language : 'a list -> 'a = <fun>
-```
-
-The warning indicates that the pattern is not exhaustive, meaning
-there are values of the type in question that won't be captured by the
-pattern. The warning even gives an example of a value that doesn't
-match the provided pattern, in particular, `[]`, the empty list.  If
-we try to run `my_favorite_language`, we'll see that it works on
-non-empty list, and fails on empty ones.
-
-```ocaml
-# my_favorite_language ["English";"Spanish";"French"];;
-- : string = "English"
-# my_favorite_language [];;
-Exception: Match_failure ("//toplevel//", 11, 10).
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 32)) 
 ```
 
 You can avoid these warnings, and more importantly make sure that your
@@ -643,17 +514,8 @@ sub-structures of the value being matched.
 Here's a new version of `my_favorite_language` that uses `match` and
 doesn't trigger a compiler warning.
 
-```ocaml
-# let my_favorite_language languages =
-    match languages with
-    | first :: the_rest -> first
-    | [] -> "OCaml" (* A good default! *)
- ;;
-val my_favorite_language : string list -> string = <fun>
-# my_favorite_language ["English";"Spanish";"French"];;
-- : string = "English"
-# my_favorite_language [];;
-- : string = "OCaml"
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 33)) 
 ```
 
 Note that we included a comment in the above code.  OCaml comments are
@@ -685,15 +547,8 @@ base cases and the inductive cases is often done using pattern
 matching.  Here's a simple example of a function that sums the
 elements of a list.
 
-```ocaml
-# let rec sum l =
-    match l with
-    | [] -> 0                   (* base case *)
-    | hd :: tl -> hd + sum tl   (* inductive case *)
-  ;;
-val sum : int list -> int
-# sum [1;2;3];;
-- : int = 6
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 34)) 
 ```
 
 Following the common OCaml idiom, we use `hd` to refer to the head of
@@ -706,62 +561,30 @@ Logically, you can think of the evaluation of a simple recursive
 function like `sum` almost as if it were a mathematical equation whose
 meaning you were unfolding step by step.
 
-```ocaml
-sum [1;2;3]
-1 + sum [2;3]
-1 + (2 + sum [3])
-1 + (2 + (3 + sum []))
-1 + (2 + (3 + 0))
-1 + (2 + 3)
-1 + 5
-6
+```frag
+((typ ocaml)(name guided-tour/recursion.ml)(header false))
 ```
 
 This suggests a reasonable mental model for what OCaml is actually
 doing to evaluate a recursive function.
 
 We can introduce more complicated list patterns as well.  Here's a
-function for destuttering a list, _i.e._, for removing sequential
-duplicates.
+function for removing sequential duplicates.
 
-```ocaml
-# let rec destutter list =
-    match list with
-    | [] -> []
-    | hd1 :: hd2 :: tl ->
-      if hd1 = hd2 then destutter (hd2 :: tl)
-      else hd1 :: destutter (hd2 :: tl)
-  ;;
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 35)) 
 ```
 
 Again, the first arm of the match is the base case, and the second is
-the inductive.  Unfortunately, this code has a problem.  If you type
-it into the toplevel, you'll see this error:
-
-```
-Warning 8: this pattern-matching is not exhaustive.
-Here is an example of a value that is not matched:
-_::[]
-```
-
-This indicates that we're missing a case, in particular we don't
-handle one-element lists.  Note how the underscore is used to indicate
-the presence of a value without specifying what that value is.
+the inductive.  Unfortunately, this code has a problem, as is
+indicated by the warning message.  In particular we don't handle
+one-element lists.  Note how the underscore is used to indicate the
+presence of a value without specifying what that value is.
 
 We can fix this warning by adding another case to the match:
 
-```ocaml
-# let rec destutter list =
-    match list with
-    | [] -> []
-    | [hd] -> [hd]
-    | hd1 :: hd2 :: tl ->
-      if hd1 = hd2 then destutter (hd2 :: tl)
-      else hd1 :: destutter (hd2 :: tl)
-  ;;
-val destutter : 'a list -> 'a list = <fun>
-# destutter ["hey";"hey";"hey";"man!"];;
-- : string list = ["hey"; "man!"]
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 36)) 
 ```
 
 Note that this code used another variant of the list pattern, `[hd]`,
@@ -783,10 +606,8 @@ Another common data structure in OCaml is the option.  An option is
 used to express that a value might or might not be present.  For
 example,
 
-```ocaml
-# let divide x y =
-    if y = 0 then None else Some (x/y) ;;
-val divide : int -> int -> int option = <fun>
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 37)) 
 ```
 
 The function `divide` either returns `None`, if the divisor is zero,
@@ -801,21 +622,8 @@ printing a log entry given an optional time and a message.  If no time
 is provided (_i.e._, if the time is `None`), the current time is
 computed and used in its place.
 
-```ocaml
-# let print_log_entry maybe_time message =
-    let time =
-      match maybe_time with
-      | Some x -> x
-      | None -> Time.now ()
-    in
-    printf "%s: %s\n" (Time.to_sec_string time) message ;;
-val print_log_entry : Time.t option -> string -> unit
-# print_log_entry (Some Time.epoch) "A long long time ago";;
-1969-12-31 19:00:00: A long long time ago
-- : unit = ()
-# print_log_entry None "Up to the minute";;
-2013-02-23 16:49:25: Up to the minute
-- : unit = ()
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 38))
 ```
 
 We use a `match` statement for handling the two possible states of an
@@ -829,11 +637,8 @@ can be used to introduce a new binding within any local scope,
 including a function body.  The `in` marks the beginning of the scope
 within which the new variable can be used.  Thus, we could write:
 
-```ocaml
-# let x = 7 in
-  x + x
-  ;;
-- : int = 14
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 39)) 
 ```
 
 Note that the scope of the let binding is terminated by the
@@ -842,12 +647,8 @@ double-semicolon.
 We can also have multiple let statements in a row, each one adding a
 new variable binding to what came before.
 
-```ocaml
-# let x = 7 in
-  let y = x * x in
-  x + y
-  ;;
-- : int = 56
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 40)) 
 ```
 
 This kind of nested let binding is a common way of building up a
@@ -879,27 +680,23 @@ the language, like lists and tuples.  But OCaml also allows us to
 define new datatypes.  Here's a toy example of a datatype representing
 a point in 2-dimensional space:
 
-```ocaml
-# type point2d = { x : float; y : float };;
-type point2d = { x : float; y : float; }
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 41)) 
 ```
 
 `point2d` is a _record_ type, which you can think of as a tuple where
 the individual fields are named, rather than being defined
 positionally.  Record types are easy enough to construct:
 
-```ocaml
-# let p = { x = 3.; y = -4. };;
-val p : point2d = {x = 3.; y = -4.}
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 42)) 
 ```
 
 And we can get access to the contents of these types using pattern
 matching:
 
-```ocaml
-# let magnitude { x = x_pos; y = y_pos } =
-    sqrt (x_pos ** 2. +. y_pos ** 2.);;
-val magnitude : point2d -> float = <fun>
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 43)) 
 ```
 
 The pattern match here binds the variable `x_pos` to the value
@@ -911,26 +708,22 @@ When the name of the field and the name of the variable it is bound to
 in the match coincide, we don't have to write them both down.  Using
 this, our magnitude function can be rewritten as follows.
 
-```ocaml
-# let magnitude { x; y } = sqrt (x ** 2. +. y ** 2.);;
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 44)) 
 ```
 
 We can also use dot-notation for accessing record fields:
 
-```ocaml
-# let distance v1 v2 =
-     magnitude { x = v1.x -. v2.x; y = v1.y -. v2.y };;
-val distance : point2d -> point2d -> float = <fun>
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 45)) 
 ```
 
 And we can of course include our newly defined types as components in
 larger types, as in the following types, each of which is a
 description of a different geometric object.
 
-```ocaml
-# type circle_desc  = { center: point2d; radius: float }
-  type rect_desc    = { lower_left: point2d; width: float; height: float }
-  type segment_desc = { endpoint1: point2d; endpoint2: point2d } ;;
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 46)) 
 ```
 
 Now, imagine that you want to combine multiple objects of these types
@@ -938,12 +731,8 @@ together as a description of a multi-object scene.  You need some
 unified way of representing these objects together in a single type.
 One way of doing this is using a _variant_ type:
 
-```ocaml
-# type scene_element =
-    | Circle  of circle_desc
-    | Rect    of rect_desc
-    | Segment of segment_desc
-  ;;
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 47)) 
 ```
 
 The `|` character separates the different cases of the variant (the
@@ -952,28 +741,8 @@ and `Segment`, to distinguish that case from the others.  Here's how we
 might write a function for testing whether a point is in the interior
 of some element of a list of `scene_element`s.
 
-```ocaml
-# let is_inside_scene_element point scene_element =
-     match scene_element with
-     | Circle { center; radius } ->
-       distance center point < radius
-     | Rect { lower_left; width; height } ->
-       point.x > lower_left.x && point.x < lower_left.x +. width
-       && point.y > lower_left.y && point.y < lower_left.y +. height
-     | Segment { endpoint1; endpoint2 } -> false
-  ;;
-val is_inside_scene_element : point2d -> scene_element -> bool = <fun>
-# let is_inside_scene point scene =
-     List.exists scene
-       ~f:(fun el -> is_inside_scene_element point el)
-   ;;
-val is_inside_scene : point2d -> scene_element list -> bool = <fun>
-# is_inside_scene {x=3.;y=7.}
-    [ Circle {center = {x=4.;y= 4.}; radius = 0.5 } ];;
-- : bool = false
-# is_inside_scene {x=3.;y=7.}
-    [ Circle {center = {x=4.;y= 4.}; radius = 5.0 } ];;
-- : bool = true
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 48)) 
 ```
 
 You might at this point notice that the use of `match` here is
@@ -1001,12 +770,13 @@ value after its creation.  Indeed, almost all of the data structures
 we've encountered so far are _immutable_, meaning there's no way in
 the language to modify them at all.  This is a quite different style
 from _imperative_ programming, where computations are structured as
-sequences of instructions that operate by modifying state as they go.
+sequences of instructions that operate by making modifications to the
+state of the program.
 
 Functional code is the default in OCaml, with variable bindings and
 most data structures being immutable.  But OCaml also has excellent
 support for imperative programming, including mutable data structures
-like arrays and hashtables, and control-flow constructs like for and
+like arrays and hash tables, and control-flow constructs like for and
 while loops.
 
 ### Arrays
@@ -1018,23 +788,18 @@ constant-time operation.  Arrays are more compact in terms of memory
 utilization than most other data structures in OCaml, including lists.
 Here's an example:
 
-```ocaml
-# let numbers = [| 1; 2; 3; 4 |];;
-val numbers : int array = [|1; 2; 3; 4|]
-# numbers.(2) <- 4;;
-- : unit = ()
-# numbers;;
-- : int array = [|1; 2; 4; 4|]
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 49)) 
 ```
 
 the `.(i)` syntax is used to refer to an element of an array, and the
 `<-` syntax is for modification. Because the elements of the array are
 counted starting at zero, element `.(2)` is the third element.
 
-A new and somewhat odd type has cropped up in this example: `unit`.
-What makes `unit` different is that there is only one value of type
-`unit`, which is written `()`.  Because there is only one value of
-type `unit` that value doesn't really convey any information.
+An odd type has cropped up in this example: `unit`.  What makes `unit`
+different is that there is only one value of type `unit`, which is
+written `()`.  Because there is only one value of type `unit`, that
+value doesn't really convey any information.
 
 If it doesn't convey any information, then what is `unit` good for?
 Most of the time, `unit` acts as a placeholder.  Thus, we use `unit`
@@ -1052,13 +817,8 @@ specific fields as being mutable.  Here's a small example of a
 data structure for storing a running statistical summary of a
 collection of numbers.  Here's the basic data structure:
 
-```ocaml
-# type running_sum =
-   { mutable sum: float;
-     mutable sum_sq: float; (* sum of squares *)
-     mutable samples: int;
-   }
-  ;;
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 50)) 
 ```
 
 The fields in `running_sum` are designed to be easy to extend
@@ -1068,26 +828,14 @@ a row without a double semicolon between them.  That's because the
 double semicolon is required only to tell utop to process the input,
 not to separate two expressions.)
 
-```ocaml
-# let mean rsum = rsum.sum /. float rsum.samples
-  let stdev rsum =
-     sqrt (rsum.sum_sq /. float rsum.samples
-           -. (rsum.sum /. float rsum.samples) ** 2.) ;;
-val mean : running_sum -> float = <fun>
-val stdev : running_sum -> float = <fun>
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 51)) 
 ```
 
 We also need functions to create and update `running_sum`s:
 
-```ocaml
-# let create () = { sum = 0.; sum_sq = 0.; samples = 0 }
-  let update rsum x =
-     rsum.samples <- rsum.samples + 1;
-     rsum.sum     <- rsum.sum     +. x;
-     rsum.sum_sq  <- rsum.sum_sq  +. x *. x
-  ;;
-val create : unit -> running_sum = <fun>
-val update : running_sum -> float -> unit = <fun>
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 52)) 
 ```
 
 `create` returns a `running_sum` corresponding to the empty set, and
@@ -1100,17 +848,13 @@ operations.  When we were working purely functionally, this wasn't
 necessary, but you start needing it when you're writing imperative
 code.
 
-Here's an example of `create` and `update` in action.
+Here's an example of `create` and `update` in action.  Note that this
+code uses `List.iter`, which calls the function `~f` on each element
+of the provided list.
 
-```ocaml
-# let rsum = create ();;
-val rsum : running_sum = {sum = 0.; sum_sq = 0.; samples = 0}
-# List.iter [1.;3.;2.;-7.;4.;5.] ~f:(fun x -> update rsum x);;
-- : unit = ()
-# mean rsum;;
-- : float = 1.33333333333333326
-# stdev rsum;;
-- : float = 3.94405318873307698
+
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 53)) 
 ```
 
 ### Refs
@@ -1120,44 +864,28 @@ comes pre-defined in the standard library, but there's nothing really
 special about it.  It's just a record type with a single mutable field
 called `contents`.
 
-```ocaml
-# let x = { contents = 0 };;
-val x : int ref = {contents = 0}
-# x.contents <- x.contents + 1;;
-- : unit = ()
-# x;;
-- : int ref = {contents = 1}
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 54)) 
 ```
 
 There are a handful of useful functions and operators defined for
 `ref`s to make them more convenient to work with.
 
-```ocaml
-# let x = ref 0 ;; (* create a ref, i.e., { contents = 0 } *)
-val x : int ref = {contents = 0}
-# !x ;;            (* get the contents of a ref, i.e., x.contents *)
-- : int = 0
-# x := !x + 1 ;;   (* assignment, i.e., x.contents <- ... *)
-- : unit = ()
-# !x ;;
-- : int = 1
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 55)) 
 ```
 
 There's nothing magical with these operators either.  You can completely
 reimplement the `ref` type and all of these operators in just a few
 lines of code.
 
-```ocaml
-type 'a ref = { mutable contents : 'a }
-
-let ref x = { contents = x }
-let (!) r = r.contents
-let (:=) r x = r.contents <- x
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 56)) 
 ```
 
 The `'a` before the ref indicates that the `ref` type is polymorphic,
 in the same way that lists are polymorphic, meaning it can contain
-values of any type.  The parenthesis around `!` and `:=` are needed
+values of any type.  The parentheses around `!` and `:=` are needed
 because these are operators, rather than ordinary functions.
 
 Even though a `ref` is just another record type, it's important
@@ -1167,11 +895,8 @@ can sum over the elements of a list imperatively by calling
 `List.iter` to call a simple function on every element of a list,
 using a ref to accumulate the results.
 
-```ocaml
-# let sum list =
-    let sum = ref 0 in
-    List.iter list ~f:(fun x -> sum := !sum + x);
-    !sum
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 57)) 
 ```
 
 This isn't the most idiomatic (or the fastest) way to sum up a list,
@@ -1185,18 +910,8 @@ permuting an array that uses a for loop.  We use the `Random` module
 as our source of randomness.  `Random` starts with a default seed, but
 you can call `Random.self_init` to choose a new seed at random.
 
-```ocaml
-# let permute ar =
-    for i = 0 to Array.length ar - 2 do
-       (* pick a j that is after i and before the end of the list *)
-       let j = i + 1 + Random.int (Array.length ar - i - 1) in
-       (* Swap i and j *)
-       let tmp = ar.(i) in
-       ar.(i) <- ar.(j);
-       ar.(j) <- tmp
-    done
-  ;;
-val permute : 'a array -> unit = <fun>
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 58)) 
 ```
 
 From a syntactic perspective, you should note the keywords that
@@ -1204,40 +919,36 @@ distinguish a for loop: `for`, `to`, `do` and `done`.
 
 Here's an example run of this code.
 
-```ocaml
-# let ar = Array.init 20 ~f:(fun i -> i);;
-val ar : int array =
-  [|0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15; 16; 17; 18; 19|]
-# permute ar;;
-- : unit = ()
-# ar;;
-- : int array =
-[|14; 13; 1; 3; 2; 19; 17; 18; 9; 16; 15; 7; 12; 11; 4; 10; 0; 5; 6; 8|]
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 59)) 
 ```
 
 OCaml also supports while loops, as shown in the following function
-for finding the first non-negative position in an array.  Note that
-`while` (like `for`) is also a keyword.
+for finding the position of the first negative entry in an array.
+Note that `while` (like `for`) is also a keyword.
 
-```ocaml
-# let find_first_negative_entry ar =
-     let pos = ref 0 in
-     while !pos < Array.length ar && ar.(!pos) >= 0 do
-       pos := !pos + 1
-     done;
-     if !pos = Array.length ar then None else Some !pos
-  ;;
-val find_first_negative_entry : int Core.Std.Array.t -> int option = <fun>
-# find_first_negative_entry [|1;2;0;3|];;
-- : int option = None
-# find_first_negative_entry [|1;-2;0;3|];;
-- : int option = Some 1
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 60)) 
 ```
+
+As a side note, the above code takes advantage of the fact that `&&`,
+OCaml's and operator, short-circuits.  In particular, in an expression
+of the form `<expr1> && <expr2>`, `<expr2>` will only be evaluated if
+`<expr1>` evaluated to true.  Were it not for that, then the above
+function would result in an out-of-bounds error.  Indeed, we can
+trigger that out-of-bounds error by rewriting the function to avoid
+the short-circuiting.
+
+```frag
+((typ ocamltop)(name guided-tour/main.topscript)(part 61)) 
+```
+
+The or operator, `||` short-circuits in a similar way to `&&`.
 
 ## A complete program
 
 So far, we've played with the basic features of the language using the
-toplevel.  Now we'll create a simple, complete stand-alone program
+toplevel.  Now we'll create a simple, complete standalone program
 that does something useful: sum up a list of numbers read in from the
 standard input.
 
@@ -1245,19 +956,8 @@ Here's the code, which you can save in a file called `sum.ml`.  Note
 that we don't terminate expressions with `;;` here, since it's not
 required outside the toplevel.
 
-```ocaml
-(* file: sum.ml *)
-
-open Core.Std
-
-let rec read_and_accumulate accum =
-  let line = In_channel.input_line In_channel.stdin in
-  match line with
-  | None -> accum
-  | Some x -> read_and_accumulate (accum +. Float.of_string x)
-
-let () =
-  printf "Total: %F\n" (read_and_accumulate 0.)
+```frag
+((typ ocaml)(name guided-tour/sum.ml))
 ```
 
 This is our first use of OCaml's input and output routines.  The
@@ -1277,20 +977,13 @@ so `printf` expects one additional argument of type `float`.
 
 ### Compiling and running
 
-We can use `ocamlbuild` to compile the program.  We'll need to create
-a file, in the same directory as `sum.ml`, called `_tags`.  We can put
-the following in `_tags` to indicate that we're building against Core,
-and that threads should be enabled, which is required by Core.
+We'll use `ocamlbuild`, a build-tool that ships with the OCaml
+compiler, to compile our program.  We'll pass in the appropriate flags
+to link in Core and turn on support for threads, which is required by
+Core.
 
-```
-true:package(core),thread
-```
-
-With our `_tags` file in place, we can build our executable by issuing
-this command.
-
-```
-ocamlbuild -use-ocamlfind sum.native
+```frag
+((typ console)(name guided-tour/build_sum.out))
 ```
 
 The `.native` suffix indicates that we're building a native-code
