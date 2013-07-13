@@ -17,12 +17,12 @@ Javascript are single-threaded, and applications register function
 callbacks to be triggered upon external events such as a timeout or
 browser click.
 
-Each of these mechanisms has its own trade-offs. Preemptive threads
+Each of these mechanisms has its own trade-offs. System threads
 require significant memory and other resources per thread.  Also, the
-operating system can arbitrarily interleave the execution of
-preemptive threads, requiring the programmer to carefully protect
-shared resources with locks and condition variables, which can be
-exceedingly error-prone.
+operating system can arbitrarily interleave the execution of system
+threads, requiring the programmer to carefully protect shared
+resources with locks and condition variables, which can be exceedingly
+error-prone.
 
 Single-threaded event-driven systems, on the other hand, execute a
 single task at a time and do not require the same kind of complex
