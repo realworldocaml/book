@@ -615,7 +615,7 @@ to become unresponsive due to high CPU load.  Core's hash tables would
 be much less susceptible to such an attack, because the amount of
 degradation would be far less.
 
-</note>
+</warning>
 
 When creating a hash table, we need to provide a value of type
 _hashable_ which includes among other things the function for hashing
