@@ -657,3 +657,4 @@ It will help to check out how other applications that install tab-completion
 scripts and following their lead, as the details are very OS-specific.
 
 </note>
+
