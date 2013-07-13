@@ -129,9 +129,9 @@ The type `Map.t` has three type parameters: one for the key, one for
 the value, and one to identify the comparator.  Indeed, the type `'a
 Int.Map.t` is just a type alias for `(int,'a,Int.comparator) Map.t`
 
-Including the comparator in the type is important because because
-operations that work on multiple maps at the same time often require
-that the maps share their comparison function.  Consider, for example,
+Including the comparator in the type is important because operations
+that work on multiple maps at the same time often require that the
+maps share their comparison function.  Consider, for example,
 `Map.symmetric_diff`, which computes a summary of the differences
 between two maps.
 
@@ -243,9 +243,9 @@ val ord_tree : (string, int, String.comparator) Map.Tree.t = <abstr>
 Even though a `Map.Tree.t` doesn't physically include a comparator, it
 does include the comparator in its type.  This is what is known as a
 _phantom type parameter_, because it reflects something about the
-logic of value in question, even though it doesn't correspond to any
-values directly represented in the underlying physical structure of
-the value.
+logic of the value in question, even though it doesn't correspond to
+any values directly represented in the underlying physical structure
+of the value.
 
 Since the comparator isn't included in the tree, we need to provide
 the comparator explicitly when we, say, search for a key, as shown
@@ -275,7 +275,7 @@ Error: This expression has type (string, int, String.comparator) Map.Tree.t
 
 We don't need to generate specialized comparators for every type we
 want to build a map on.  We can instead use a comparator based on
-OCaml's build-in polymorphic comparison function, which was discussed
+OCaml's built-in polymorphic comparison function, which was discussed
 in [xref](#lists-and-patterns).  This comparator is found in the
 `Comparator.Poly` module, allowing us to write:
 
@@ -310,27 +310,30 @@ comparator associated with a given type will order things in the same
 way that polymorphic compare does.
 
 <note>
-<title>The difference between `=` and `==`, and `phys_equal` in Core</title>
+<title> `=`, `==`, and `phys_equal` </title>
 
-If you come from a C/C++ background, you'll probably reflexively use `==` to
-test two values for equality.  In OCaml, the `==` operator tests for *physical*
-equality while the `=` operator tests for *structural* equality.
+If you come from a C/C++ background, you'll probably reflexively use
+`==` to test two values for equality.  In OCaml, the `==` operator
+tests for *physical* equality while the `=` operator tests for
+*structural* equality.
 
-The physical equality test will match if two data structures have precisely the
-same pointer in memory.  Two data structures that have identical contents but
-are constructed separately will not match using `==`.
+The physical equality test will match if two data structures have
+precisely the same pointer in memory.  Two data structures that have
+identical contents but are constructed separately will not match using
+`==`.
 
-The `=` structural equality operator recursively inspects each field in the two
-values and tests them individually for equality.  Crucially, if your data
-structure is cyclical (that is, a value recursively points back to another
-field within the same structure), the `=` operator will never terminate, and
-your program will hang!  You therefore must use the physical equality operator
-or write a custom comparison function when comparing recursive values.
+The `=` structural equality operator recursively inspects each field
+in the two values and tests them individually for equality.
+Crucially, if your data structure is cyclical (that is, a value
+recursively points back to another field within the same structure),
+the `=` operator will never terminate, and your program will hang!
+You therefore must use the physical equality operator or write a
+custom comparison function when comparing recursive values.
 
-It's quite easy to mix up the use of `=` and `==`, so Core disables the `==`
-operator and provides the more explicit `phys_equal` function instead.  You'll
-see a type error if you use `==` anywhere in code that uses opens the Core
-standard module.
+It's quite easy to mix up the use of `=` and `==`, so Core disables
+the `==` operator and provides the more explicit `phys_equal` function
+instead.  You'll see a type error if you use `==` anywhere in code
+that opens `Core.Std`.
 
 ```ocaml
 # open Core.Std;;
@@ -487,12 +490,12 @@ end
 
 In other words, it expects a type with a comparison function as well
 as functions for converting to and from _s-expressions_.
-S-expressions are a serialization format used commonly in Core, which
-we'll discuss more in [xref](#data-serialization-with-s-expressions).
-In the meantime, we can just use the `with sexp` declaration that
+S-expressions are a serialization format used commonly in Core, and
+are required here to enable better error messages.  We'll discuss
+s-expressions more in [xref](#data-serialization-with-s-expressions),
+but in the meantime, we can just use the `with sexp` declaration that
 comes from the `sexplib` syntax extension to create s-expression
-converters for us.  S-expression converters can also be written by
-hand.
+converters for us.
 
 The following example shows how this all fits together, following the
 same basic pattern for using functors described in
@@ -583,7 +586,7 @@ comparison function for creating the ordered binary tree that
 underlies a map, hash tables depend on having a _hash function_,
 _i.e._, a function for converting a key to an integer.
 
-<note> <title> Time complexity of hash tables </title>
+<warning> <title> Time complexity of hash tables </title>
 
 The statement that hash tables provide constant-time access hides some
 complexities.  First of all, any hash table implementation, OCaml's
@@ -601,7 +604,16 @@ insertions will hash to the same underlying bucket, meaning you no
 longer get constant-time access at all.  Core's hash table
 implementation uses binary trees for the hash-buckets, so this case
 only leads to logarithmic time, rather than quadratic for a
-traditional hash table.
+traditional hash table.  
+
+The logarithmic behavior of Core's hash tables in the presence of hash
+collisions also helps protect against some denial-of-service attacks.
+One well-known type of attack is to send queries to a service with
+carefully chosen keys to cause many collisions.  This, in combination
+with the the quadratic behavior of hashtables, can cause the service
+to become unresponsive due to high CPU load.  Core's hash tables would
+be much less susceptible to such an attack, because the amount of
+degradation would be far less.
 
 </note>
 
@@ -646,9 +658,9 @@ val table : ('_a, '_b) Hashtbl.t = <abstr>
 ```
 
 Note that, unlike the comparators used with maps and sets, hashables
-don't show up in the type of a `Hashtbl.t`.  That's because hash tables
-don't have operations that operate on multiple hash tables that depend
-on those tables having the same hash function, in that way that
+don't show up in the type of a `Hashtbl.t`.  That's because hash
+tables don't have operations that operate on multiple hash tables that
+depend on those tables having the same hash function, in the way that
 `Map.symmetric_diff` and `Set.union` depend on their arguments using
 the same comparison function.
 
@@ -713,7 +725,7 @@ component values.
 ```
 
 Note that in order to satisfy hashable, one also needs to provide a
-comparison function.  That's because Core's hash tables use ordered
+comparison function.  That's because Core's hash tables use an ordered
 binary tree data-structure for the hash-buckets, so that performance
 of the table degrades gracefully in the case of pathologically bad
 choice of hash function.
@@ -726,9 +738,8 @@ hand, or use the built-in polymorphic hash function, `Hashtbl.hash`.
 
 Maps and hash tables overlap enough in functionality that it's not
 always clear when to choose one or the other.  Maps, by virtue of
-being immutable, are generally the default choice in OCaml by virtue
-of fitting most naturally with otherwise functional code.  OCaml also
-has good support for imperative programming, though, and when
+being immutable, are generally the default choice in OCaml.  OCaml
+also has good support for imperative programming, though, and when
 programming in an imperative idiom, hash tables are often the more
 natural choice.
 
@@ -800,20 +811,20 @@ Estimated testing time 20s (change using -quota SECS).
 ```
 
 We can make the speedup smaller or larger depending on the details of
-the test; for example, it will very with the number of distinct keys.
+the test; for example, it will vary with the number of distinct keys.
 But overall, for code that is heavy on sequences of querying and
 updating a set of key/value pairs, hash tables will significantly
 outperform maps.
 
 Hash tables are not always the faster choice, though.  In particular,
-maps are often more performant in situations where you want to take
-advantage of maps as a persistent data-structure.  In particular, if
-you create map `m'` by calling `Map.add` on some other map `m`, then
-`m` and `m'` can be used independently, and in fact share most of
-their underlying storage.  Thus, if you need to keep in memory at the
-same time multiple different related collections of key/value pairs,
-then a map is typically a much more efficient data structure to do it
-with.
+maps are often more performant in situations where you need to keep
+multiple related versions of the data structure in memory at once.  In
+particular, if you create map `m'` by calling `Map.add` on some other
+map `m`, then `m` and `m'` can be used independently, and in fact
+share most of their underlying storage.  Thus, if you need to keep in
+memory at the same time multiple different related collections of
+key/value pairs, then a map is typically a much more efficient data
+structure to do it with.
 
 Here's a benchmark to demonstrates this.  In it, we create a list of
 maps (or hash tables) that are built up by iteratively applying
