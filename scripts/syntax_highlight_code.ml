@@ -18,6 +18,7 @@ let pygmentize lang file contents =
     | "ocaml" -> "OCaml Source Code"
     | "json" -> "JSON"
     | "console" -> "Terminal"
+    | "scheme" -> "S-expression"
     | unknown -> unknown
   in
   let data = wrap_in_pretty_box ~part:0 typ file data |> Cow.Html.to_string in
