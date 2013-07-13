@@ -19,12 +19,13 @@ An example s-expression might look like this:
 (this (is an) (s expression))
 ```
 
-The OCaml type of an s-expression is quite simple:
+The OCaml type of an s-expression is quite simple.  Here's what the
+type definition for an s-expression would look like.
 
 ```ocaml
-module Sexp : sig
-  type t = Atom of string | List of t list
-end
+# module Our_sexp = struct
+    type t = Atom of string | List of t list
+  end;;
 ```
 
 An s-expression can be thought of as a tree where each node contains a
@@ -34,13 +35,30 @@ s-expression.
 
 ```ocaml
 # let sexp =
+    let a x = Our_sexp.Atom x and l x = Our_sexp.List x in
+    l [a "this";l [a "is"; a "an"]; l [a "s"; a "expression"]];;
+val sexp : Our_sexp.t =
+  Our_sexp.List
+   [Our_sexp.Atom "this";
+    Our_sexp.List [Our_sexp.Atom "is"; Our_sexp.Atom "an"];
+    Our_sexp.List [Our_sexp.Atom "s"; Our_sexp.Atom "expression"]]
+```
+
+Core provides good support for `s-expressions` in its `Sexp` module,
+including functions for converting s-expressions to and from strings.
+If we do the same example above with Core's s-expression type, we'll
+see that the output in the top-level is easier to read.
+
+```ocaml
+# let sexp =
     let a x = Sexp.Atom x and l x = Sexp.List x in
     l [a "this";l [a "is"; a "an"]; l [a "s"; a "expression"]];;
 val sexp : Sexp.t = (this (is an) (s expression))
 ```
 
-Core provides good support for `s-expressions` in its `Sexp` module,
-including functions for converting s-expressions to and from strings.
+This prints out nicely because Core registers a pretty printer with
+the toplevel.  This pretty-printer uses Core's functions for
+converting s-expressions to and from strings.
 
 ```ocaml
 # Sexp.of_string ("(1 2 (3 4))");;
@@ -49,8 +67,9 @@ including functions for converting s-expressions to and from strings.
 - : string = "(1 2)"
 ```
 
-In addition, most of the base types in Core support conversion to and
-from s-expressions.  For example, we can write:
+In addition to providing the `Sexp` module, most of the base types in
+Core support conversion to and from s-expressions.  For example, we
+can write:
 
 ```ocaml
 # Int.sexp_of_t 3;;
