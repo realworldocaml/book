@@ -141,15 +141,16 @@ destutter ["hey";"hey";"hey";"man!"];;
 let divide x y =
     if y = 0 then None else Some (x/y) ;;
 #part 38
-let print_log_entry maybe_time message =
+let log_entry maybe_time message =
     let time =
       match maybe_time with
       | Some x -> x
       | None -> Time.now ()
     in
-    printf "%s: %s\n" (Time.to_sec_string time) message ;;
-print_log_entry (Some Time.epoch) "A long long time ago";;
-print_log_entry None "Up to the minute";;
+    Time.to_sec_string time ^ " -- " ^ message
+  ;;
+log_entry (Some Time.epoch) "A long long time ago";;
+log_entry None "Up to the minute";;
 #part 39
 let x = 7 in
   x + x
