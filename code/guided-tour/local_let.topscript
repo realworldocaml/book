@@ -3,7 +3,7 @@ let x = 7 in
   x + x
   ;;
 #part 2
-x + x;;
+x;;
 #part 3
 let x = 7 in
   let y = x * x in

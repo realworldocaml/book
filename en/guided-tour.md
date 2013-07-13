@@ -801,18 +801,14 @@ the `.(i)` syntax is used to refer to an element of an array, and the
 `<-` syntax is for modification. Because the elements of the array are
 counted starting at zero, element `.(2)` is the third element.
 
-An odd type has cropped up in this example: `unit`.  What makes `unit`
-different is that there is only one value of type `unit`, which is
-written `()`.  Because there is only one value of type `unit`, that
-value doesn't really convey any information.
-
-If it doesn't convey any information, then what is `unit` good for?
-Most of the time, `unit` acts as a placeholder.  Thus, we use `unit`
-for the return value of an operation like setting a mutable field that
-operates by side effect rather than by returning a value.  It's also
-used as the argument to functions that don't require an input value.
-This is similar to the role that `void` plays in languages like C and
-Java.
+The `unit` type that we see above is interesting in that it has only
+one possible value, written `()`.  This means that a value of type
+`unit` doesn't convey any information.  Instead, `unit` tends to be
+used as a placeholder.  Thus, we use `unit` for the return value of an
+operation like setting a mutable field that communicates by side
+effect rather than by returning a value.  It's also used as the
+argument to functions that don't require an input value.  This is
+similar to the role that `void` plays in languages like C and Java.
 
 ### Mutable record fields
 
@@ -836,6 +832,10 @@ not to separate two expressions.)
 ```frag
 ((typ ocamltop)(name guided-tour/main.topscript)(part 51)) 
 ```
+
+Note that we use the function `float` above, which is a convenient
+equivalent of `Float.of_int` which is provided by the `Pervasives`
+library.
 
 We also need functions to create and update `running_sum`s:
 
