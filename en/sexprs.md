@@ -1,10 +1,10 @@
 # Data Serialization with S-Expressions
 
-We've already shown you how to parse third-party data formats into
-OCaml in earlier chapters.  Sometimes though, you just want to quickly
-convert an OCaml type to and from a human-readable and editable form
-in your own code, and not worry about interoperability.  Core's
-solution to this problem is to use s-expressions.
+We've already discussed the parsing of third-party data formats like
+JSON.  Sometimes, though, you're less concerned with interoperating
+with specific file formats, and you instead want an easy to use,
+human-readable format that integrates well with OCaml and its
+libraries.  Core's solution to this problem is to use s-expressions.
 
 S-expressions are nested parenthetical expressions whose atomic values
 are strings.  They were first popularized by the Lisp programming
@@ -234,7 +234,7 @@ The following example shows all of these in action.
  (this stays)
  #; (all of this is commented
      out (even though it crosses lines.))
-  (and #| block delimiters #| which can be nested #|
+  (and #| block delimiters #| which can be nested |#
      will comment out
     an arbitrary multi-line block))) |#
    now we're done
@@ -252,12 +252,13 @@ Note that the comments were dropped from the file upon reading.  This
 is expected, since there's no place in the `Sexp.t` type to store
 comments.
 
-If we introduce an error into our s-expression, by, say, deleting the
-open-paren in front of `bar`, we'll get a parse error:
+If we introduce an error into our s-expression, by, say, creating a
+file `broken_example.scm` which is `example.scm` without open-paren in
+front of `bar`, we'll get a parse error:
 
 ```ocaml
 # Exn.handle_uncaught ~exit:false (fun () ->
-    ignore (Sexp.load_sexp "example.scm"));;
+    ignore (Sexp.load_sexp "broken_example.scm"));;
   Uncaught exception:
 
   (Sexplib.Sexp.Parse_error
@@ -664,7 +665,6 @@ val sexp_of_http_server_config : http_server_config -> Sexplib.Sexp.t = <fun>
 These new functions let you convert to and from s-expressions.
 
 ```ocaml
-# http_server_config_of_sexp (Sexp.of_string "((web_root /var/www/html))";;
 # let cfg =
   http_server_config_of_sexp (Sexp.of_string "((web_root /var/www/html))");;
 val cfg : http_server_config =
