@@ -13,8 +13,8 @@ structured data.  There's a full definition of them available
 [online](http://people.csail.mit.edu/rivest/Sexp.txt).
 An example s-expression might look like this.
 
-```scheme
-(this (is an) (s expression))
+```frag
+((typ scheme)(name sexpr/basic.scm))
 ```
 
 This chapter will show you:
@@ -135,18 +135,15 @@ themselves; backslash is the escape character; and semicolons are used
 to introduce single-line comments.  Thus, the following file,
 `example.scm`:
 
-```scheme
-;; example.scm
-
-((foo 3.3) ;; This is a comment
- (bar "this is () an \" atom"))
+```frag
+((typ scheme)(name sexpr/example.scm))
 ```
 
 can be loaded using sexplib.  As you can see, the commented data is
 not part of the resulting s-expression.
 
 ```frag
-((typ ocamltop)(name sexpr/example_load.topscript))
+((typ ocamltop)(name sexpr/example_load.topscript)(part 0))
 ```
 
 All in, the s-expression format actually supports three comment
@@ -158,95 +155,45 @@ syntaxes:
 
 The following example shows all of these in action.
 
-```scheme
-;; comment_heavy_example.scm
-((this is included)
- ; (this is commented out
- (this stays)
- #; (all of this is commented
-     out (even though it crosses lines.))
-  (and #| block delimiters #| which can be nested #|
-     will comment out
-    an arbitrary multi-line block))) |#
-   now we're done
-   ))
+```frag
+((typ scheme)(name sexpr/comment_heavy.scm))
 ```
 
 Again, loading the file as an s-expression drops the comments.
 
-```ocaml
-# Sexp.load_sexp "comment_heavy_example.scm";;
-- : Core.Std.Sexp.t = ((this is included) (this stays) (and now we're done))
+```frag
+((typ ocamltop)(name sexpr/example_load.topscript)(part 1))
 ```
 
-Note that the comments were dropped from the file upon reading.  This
-is expected, since there's no place in the `Sexp.t` type to store
-comments.
+Note that the comments were dropped from the file upon reading.  This is
+expected, since there's no place in the `Sexp.t` type to store comments.
 
 If we introduce an error into our s-expression, by, say, deleting the
 open-paren in front of `bar`, we'll get a parse error:
 
-```ocaml
-# Exn.handle_uncaught ~exit:false (fun () ->
-    ignore (Sexp.load_sexp "example.scm"));;
-  Uncaught exception:
-
-  (Sexplib.Sexp.Parse_error
-   ((location parse) (err_msg "unexpected character: ')'") (text_line 4)
-    (text_char 29) (global_offset 94) (buf_pos 94)))
+```frag
+((typ ocamltop)(name sexpr/example_load.topscript)(part 2))
 ```
 
-In the above, we use `Exn.handle_uncaught` to make sure that the
-exception gets printed out in full detail.  You should generally wrap
-every Core program in this handler to get good error messages for any
-unexpected exceptions.
+In the above, we use `Exn.handle_uncaught` to make sure that the exception gets
+printed out in full detail.  You should generally wrap every Core program in
+this handler to get good error messages for any unexpected exceptions.
 
 ## Sexp converters
 
-The most important functionality provided by Sexplib is the
-auto-generation of converters for new types.  We've seen a bit of how
-this works already, but let's walk through a complete example.  Here's
-the source for the beginning of a library for representing integer
-intervals.
+The most important functionality provided by Sexplib is the auto-generation of
+converters for new types.  We've seen a bit of how this works already, but
+let's walk through a complete example.  Here's the source for the beginning of
+a library for representing integer intervals.
 
-```ocaml
-(* file: int_interval.ml *)
-(* Module for representing closed integer intervals *)
-
-open Core.Std
-
-(* Invariant: For any Range (x,y), y >= x *)
-type t = | Range of int * int
-         | Empty
-with sexp
-
-let is_empty = function Empty -> true | Range _ -> false
-let create x y = if x > y then Empty else Range (x,y)
-let contains i x = match i with
-   | Empty -> false
-   | Range (low,high) -> x >= low && x <= high
+```frag
+((typ ocaml)(name sexpr/int_interval.ml))
 ```
 
-We can now use this module as follows:
+We can now use this module as follows.
 
-```ocaml
-(* file: test_interval.ml *)
-
-open Core.Std
-
-let intervals =
-  let module I = Int_interval in
-  [ I.create 3 4;
-    I.create 5 4; (* should be empty *)
-    I.create 2 3;
-    I.create 1 6;
-  ]
-
-let () =
-  intervals
-  |> List.sexp_of_t Int_interval.sexp_of_t
-  |> Sexp.to_string_hum
-  |> print_endline
+```frag
+((typ ocaml)(name sexpr/test_interval.ml))
 ```
 
 But we're still missing something: we haven't created an `mli`
