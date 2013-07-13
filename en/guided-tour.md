@@ -769,14 +769,14 @@ a scene element within which our point resides.
 
 ## Imperative programming
 
-So far, we've only written so-called _pure_ or _functional_ code,
-meaning that we didn't write any code that modified a variable or
-value after its creation.  Indeed, almost all of the data structures
-we've encountered so far are _immutable_, meaning there's no way in
-the language to modify them at all.  This is a quite different style
-from _imperative_ programming, where computations are structured as
-sequences of instructions that operate by making modifications to the
-state of the program.
+The code we've written so far has been almost entirely _pure_ or
+_functional_, which roughly speaking means that the code in question
+doesn't modify variables or values as part of its execution.  Indeed,
+almost all of the data structures we've encountered are _immutable_,
+meaning there's no way in the language to modify them at all.  This is
+a quite different style from _imperative_ programming, where
+computations are structured as sequences of instructions that operate
+by making modifications to the state of the program.
 
 Functional code is the default in OCaml, with variable bindings and
 most data structures being immutable.  But OCaml also has excellent
