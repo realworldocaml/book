@@ -325,8 +325,8 @@ val float : float typ
 val double : float typ
 ```
 
-These values are all of type `'a typ`, where the value name (e.g. `void`) tells
-you the C type and the `'a` component (e.g. `unit`) is the OCaml
+These values are all of type `'a typ`, where the value name (_e.g._ `void`) tells
+you the C type and the `'a` component (_e.g._ `unit`) is the OCaml
 representation of that C type.  Most of the mappings are straightforward, but
 some of them need a bit more explanation.
 
@@ -963,10 +963,11 @@ scope since we opened `Ctypes` at the start of the file.
 <note>
 <title>Lifetime of allocated Ctypes</title>
 
-Values allocated via Ctypes (i.e. using `allocate`, `Array.make` and so on)
-will not be garbage-collected as long as they are reachable from OCaml values.
-The system memory they occupy is freed when they do become unreachable, via a
-finalizer function registered with the GC.
+Values allocated via Ctypes (_i.e._ using `allocate`, `Array.make` and
+so on) will not be garbage-collected as long as they are reachable
+from OCaml values.  The system memory they occupy is freed when they
+do become unreachable, via a finalizer function registered with the
+GC.
 
 The definition of reachability for Ctypes values is a little different from
 conventional OCaml values though.  The allocation functions return an

@@ -15,12 +15,13 @@ allocation requests by the OCaml program.
 
 ## Mark and sweep garbage collection
 
-When there isn't enough memory available to satisfy an allocation request from
-the pool of allocated heap blocks, the runtime system invokes the *garbage
-collector* (or GC). An OCaml program can't explicitly free a value when it is
-done with it. Instead, the GC regularly determines which values are *live* and
-which values are *dead*, i.e. no longer in use. Dead values are collected and
-their memory made available for reuse by the application.
+When there isn't enough memory available to satisfy an allocation
+request from the pool of allocated heap blocks, the runtime system
+invokes the *garbage collector* (or GC). An OCaml program can't
+explicitly free a value when it is done with it. Instead, the GC
+regularly determines which values are *live* and which values are
+*dead*, _i.e._ no longer in use. Dead values are collected and their
+memory made available for reuse by the application.
 
 The garbage collector doesn't keep constant track of values as they are
 allocated and used. Instead, it regularly scans them by starting from a set of

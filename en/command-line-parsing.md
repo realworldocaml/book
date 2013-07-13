@@ -2,37 +2,35 @@
 
 Many of the OCaml programs that you'll write will end up as binaries
 that need to be run from a command prompt.  Any non-trivial
-command-line program needs a few features:
+command-line should support a collection of basic features:
 
-* Program options and file inputs need to be parsed from the command
-  line arguments.
-* Sensible error messages have to be generated in response to
-  incorrect inputs.
-* Help needs to be shown for all the available options.
+* Parsing of command line arguments.
+* Generation of error messages in response to incorrect inputs.
+* Help for all the available options.
 * Interactive auto-completion of commands to assist the user.
 
 It's tedious and error-prone to code all this manually for every
 program you write. Core provides the Command library that simplifies
-all this by letting you declare all your command-line options in one
-place.  Command takes care of parsing the arguments, generating help
-text and provides interactive auto-completion to the user of the
-library.
+all of this by letting you declare all your command-line options in
+one place, and deriving all of the above functionality from that
+declaration.
 
-Command also copes as you add more features to your programs.  It's a
-simple library to use for small applications, and provides a
-sophisticated subcommand mode that grouping related commands together
-as the number of options grow.  You may already be familiar with this
-command-line style from the Git or Mercurial version control systems.
+Command is simple to use for simpel applications, but also also scales
+well as your needs grow more complex.  In particular, Command provides
+a sophisticated subcommand mode that grouping related commands
+together as the number of options grow.  You may already be familiar
+with this command-line style from the Git or Mercurial version control
+systems.
 
 In this chapter, we'll:
 
 * learn how to use Command to construct basic and grouped command-line
   interfaces.
-* read examples that extend the cryptographic utility from
+* see examples that extend the cryptographic utility from
   [xref](#classes) and build a simple equivalent to the `md5` and
   `shasum` utilities.
 * demonstrate how _functional combinators_ can be used to declare
-  complex data structures in a type-safe and elegant way.
+  complex command line interfaces in a type-safe and elegant way.
 
 ## Basic command-line parsing
 
@@ -48,16 +46,13 @@ data, and outputs an ASCII hex representation of the result.
 ```
 
 The `do_hash` function accepts a `filename` parameter and prints the
-human-readable MD5 string to the console standard output.  This is a
-straightforward function that we wish to wrap using a command-line
-binary built using `Command`.
-
-The first step is to declare all the possible command-line arguments
-in a *specification*.  `Command.Spec` defines combinators that can be
-chained together to define optional flags and positional arguments,
-what types they should map to, and whether to take special actions
-(such as pausing for interactive input) if certain inputs are
-encountered.
+human-readable MD5 string to the console standard output.  The first
+step towards turning this function into a command-line program is to
+declare all the possible command-line arguments in a *specification*.
+`Command.Spec` defines combinators that can be chained together to
+define optional flags and positional arguments, what types they should
+map to, and whether to take special actions (such as pausing for
+interactive input) if certain inputs are encountered.
 
 ### Anonymous arguments
 
@@ -116,7 +111,7 @@ passed in the same order as they were bound in the specification
 
 The callback above needs an extra `unit` argument after `file`.  This
 is to ensure that specifications can work even when they are empty
-(i.e. the `Command.Spec.empty` value).
+(_i.e._ the `Command.Spec.empty` value).
 
 Every OCaml function needs at least one argument, so the final `unit`
 guarantees that it will not be evaluated immediately as a value if
@@ -152,7 +147,7 @@ You can now query the version information for the binary you just compiled.
 The versions that you see in the output were defined via the optional
 arguments to `Command.run`.  You can leave these blank in your own
 programs or get your build system to generate them directly from your
-version control system (e.g.  by running `hg tip` to generate a build
+version control system (_e.g._  by running `hg tip` to generate a build
 revision number, in the case of Mercurial).
 
 ```frag
@@ -485,7 +480,7 @@ callback function for a spec should consume identical arguments to the
 supplied `main` function, except for an additional `unit` argument.
 This final `unit` is there to make sure the callback is evaluated as a
 function, since if zero command-line arguments are specified
-(i.e. `Spec.empty`), the callback would otherwise have no arguments
+(_i.e._ `Spec.empty`), the callback would otherwise have no arguments
 and be evaluated immediately.  That's why you have to supply an
 additional `()` to the callback function in all the previous examples.
 

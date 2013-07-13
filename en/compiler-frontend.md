@@ -9,7 +9,7 @@ applications.
 OCaml has a strong emphasis on static type safety and rejects source code that
 doesn't meet its requirements as early as possible.  The compiler does this by
 running the source code through a series of checks and transformations.  Each
-stage performs its job (e.g. type checking, optimization or code generation)
+stage performs its job (_e.g._ type checking, optimization or code generation)
 and discards some information from the previous stage.  The final native code
 output is low-level assembly code that doesn't know anything about the OCaml
 modules or objects that the compiler started with.
@@ -550,7 +550,7 @@ immediately.
 This is fine for mechanically generated code from Type_conv, but should be
 avoided in code that you write by hand.  If it's a unit-returning expression,
 then write a `unit` binding explicitly instead.  This will cause a type error
-if the expression changes type in the future (e.g. due to code refactoring).
+if the expression changes type in the future (_e.g._ due to code refactoring).
 
 ```ocaml
 let () = <expr>

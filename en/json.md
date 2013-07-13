@@ -301,7 +301,7 @@ The OCaml type system infers a type for `person` based on how you construct its
 value.  In this case, only the `Assoc` and `String` variants are used to define
 the record, and so the inferred type only contains these fields without
 knowledge of the other possible allowed variants in JSON records that you
-haven't used yet (e.g. `Int` or `Null`).
+haven't used yet (_e.g._ `Int` or `Null`).
 
 ```frag
 ((typ ocamltop)(name json/build_json.topscript)(part 2))
@@ -447,9 +447,9 @@ on a pseudo-standard web protocol known as OAuth).
 ```
 
 The ATD specification syntax is deliberately quite similar to OCaml type
-definitions.  Every JSON record is assigned a type name (e.g. `app` in the
+definitions.  Every JSON record is assigned a type name (_e.g._ `app` in the
 example above).  You can also define variants that are similar to OCaml's
-variant types (e.g. `scope` in the example).
+variant types (_e.g._ `scope` in the example).
 
 ### ATD annotations
 
@@ -466,7 +466,7 @@ lowercase, and so aren't exactly the same as the option name.
 The annotation `<json name="user">` signals that the JSON value of the field is
 `user`, but that the variable name of the parsed variant in OCaml should be
 `User`.  These annotations are often useful to map JSON values to reserved
-keywords in OCaml (e.g. `type`).
+keywords in OCaml (_e.g._ `type`).
 
 ### Compiling ATD specifications to OCaml
 
