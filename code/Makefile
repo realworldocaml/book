@@ -1,4 +1,4 @@
-dirs=        json command-line-parsing guided-tour variables-and-functions lists-and-patterns
+dirs=        json command-line-parsing guided-tour variables-and-functions lists-and-patterns sexpr
 
 # html/md files directory
 OBJ=         _build
@@ -8,12 +8,13 @@ ml_src=       $(wildcard $(dirs:%=%/*.ml))
 mli_src=      $(wildcard $(dirs:%=%/*.mli))
 json_src=     $(wildcard $(dirs:%=%/*.json))
 atd_src=      $(wildcard $(dirs:%=%/*.atd))
+scm_src=      $(wildcard $(dirs:%=%/*.scm))
 scripts=      $(wildcard $(dirs:%=%/*.sh))
 rawscripts=   $(wildcard $(dirs:%=%/*.rawsh))
 errscripts=   $(wildcard $(dirs:%=%/*.errsh))
 topscripts=   $(wildcard $(dirs:%=%/*.topscript))
 
-all_src=      $(ml_src) $(mli_src) $(json_src) $(atd_src)
+all_src=      $(ml_src) $(mli_src) $(json_src) $(atd_src) $(scm_src)
 all_scripts=  $(scripts:%.sh=%.out) $(errscripts:%.errsh=%.out) \
 	      $(topscripts) $(rawscripts:%.rawsh=%.out)
 
@@ -54,6 +55,10 @@ $(OBJ)/%.json.0.html $(OBJ)/%.json.0.md: %.json
 $(OBJ)/%.atd.0.html: %.atd
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -cow $< || (cat $@ && rm -f $@)
+
+$(OBJ)/%.scm.0.html: %.scm
+	@mkdir -p $(@D)
+	$(highlight) -builddir $(OBJ) -pygments scheme $< || (cat $@ && rm -f $@)
 
 $(OBJ)/%.topscript.0.md $(OBJ)/%.topscript.0.html: %.topscript
 	@mkdir -p $(@D)

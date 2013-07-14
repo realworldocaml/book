@@ -10,38 +10,36 @@ S-expressions are nested parenthetical expressions whose atomic values
 are strings.  They were first popularized by the Lisp programming
 language in the 1960s, and have remained one of the simplest and most
 effective ways to encode structured data.  There's a full definition
-of them available
-[online](http://people.csail.mit.edu/rivest/Sexp.txt).
+of them available [online](http://people.csail.mit.edu/rivest/Sexp.txt).
+An example s-expression might look like this.
 
-An example s-expression might look like this:
-
-```scheme
-(this (is an) (s expression))
+```frag
+((typ scheme)(name sexpr/basic.scm))
 ```
 
-The OCaml type of an s-expression is quite simple.  Here's what the
-type definition for an s-expression would look like.
+This chapter will show you:
 
-```ocaml
-# module Our_sexp = struct
-    type t = Atom of string | List of t list
-  end;;
+* how to generate s-expressions from arbitrary OCaml types, thus giving
+  you a human-readable format for persisting any values in your code.
+* TODO.
+
+## Basics
+
+OCaml values aren't directly converted to-and-from strings of s-expressions
+when you use Core.  The s-expression is instead built up as an OCaml value
+which is later serialized into strings or memory buffers.  The OCaml type of an
+s-expression is quite simple.
+
+```frag
+((typ ocaml)(name sexpr/sexp.mli))
 ```
 
-An s-expression can be thought of as a tree where each node contains a
-list of its children, and where the leaves of the tree are strings.
-Here's how we can use this type to represent the our example
-s-expression.
+An s-expression can be thought of as a tree where each node contains a list of
+its children, and where the leaves of the tree are strings.  Here's how we can
+use this type to represent the our example s-expression.
 
-```ocaml
-# let sexp =
-    let a x = Our_sexp.Atom x and l x = Our_sexp.List x in
-    l [a "this";l [a "is"; a "an"]; l [a "s"; a "expression"]];;
-val sexp : Our_sexp.t =
-  Our_sexp.List
-   [Our_sexp.Atom "this";
-    Our_sexp.List [Our_sexp.Atom "is"; Our_sexp.Atom "an"];
-    Our_sexp.List [Our_sexp.Atom "s"; Our_sexp.Atom "expression"]]
+```frag
+((typ ocamltop)(name sexpr/manually_making_sexp.topscript))
 ```
 
 Core provides good support for `s-expressions` in its `Sexp` module,
@@ -49,79 +47,75 @@ including functions for converting s-expressions to and from strings.
 If we do the same example above with Core's s-expression type, we'll
 see that the output in the top-level is easier to read.
 
-```ocaml
-# let sexp =
-    let a x = Sexp.Atom x and l x = Sexp.List x in
-    l [a "this";l [a "is"; a "an"]; l [a "s"; a "expression"]];;
-val sexp : Sexp.t = (this (is an) (s expression))
+```frag
+((typ ocamltop)(name sexpr/print_sexp.topscript))
 ```
 
 This prints out nicely because Core registers a pretty printer with
 the toplevel.  This pretty-printer uses Core's functions for
 converting s-expressions to and from strings.
 
-```ocaml
-# Sexp.of_string ("(1 2 (3 4))");;
-- : Sexp.t = (1 2 (3 4))
-# Sexp.to_string (Sexp.List [Sexp.Atom "1"; Sexp.Atom "2"]);;
-- : string = "(1 2)"
+```frag
+((typ ocamltop)(name sexpr/sexp_printer.topscript))
 ```
 
-In addition to providing the `Sexp` module, most of the base types in
-Core support conversion to and from s-expressions.  For example, we
-can write:
+In addition to providing the `Sexp` module, most of the base types in Core
+support conversion to and from s-expressions.  For example, we can write:
 
-```ocaml
-# Int.sexp_of_t 3;;
-- : Sexp.t = 3
-# List.sexp_of_t;;
-- : ('a -> Sexp.t) -> 'a List.t -> Sexp.t = <fun>
-# List.sexp_of_t Int.sexp_of_t [1;2;3];;
-- : Sexp.t = (1 2 3)
+```frag
+((typ ocamltop)(name sexpr/to_from_sexp.topscript))
 ```
 
-Notice that `List.sexp_of_t` is polymorphic, and takes as its first
-argument another conversion function to handle the elements of the
-list to be converted.  Core uses this scheme more generally for
-defining sexp-converters for polymorphic types.
+Notice that `List.sexp_of_t` is polymorphic, and takes as its first argument
+another conversion function to handle the elements of the list to be converted.
+Core uses this scheme more generally for defining sexp-converters for
+polymorphic types.
+
+<note>
+<title>More on toplevel printing</title>
+
+The values of the s-expressions that we created above were printed properly as
+s-expressions in the toplevel, instead of as the tree of `Atom` and `List`
+variants that they're actually made of.
+
+This is due to OCaml's facility for installing custom *toplevel printers* that
+can rewrite some values into more toplevel-friendly equivalents.  They are
+generally installed as `ocamlfind` packages ending in `top`.
+
+```frag
+((typ console)(name sexpr/list_top_packages.out))
+```
+
+The `core.top` package (which you should have loaded by default in your
+`.ocamlinit` file) loads in printers for the Core extensions already, so you
+don't need to do anything special to use the Sexplib printer.
+
+</note>
+
+### Generating s-expressions from OCaml types
 
 But what if you want a function to convert some brand new type to an
 s-expression?  You can of course write it yourself manually:
 
-```ocaml
-# type t = { foo: int; bar: float };;
-type t = { foo : int; bar : float; }
-# let sexp_of_t t =
-    let a x = Sexp.Atom x and l x = Sexp.List x in
-    l [ l [a "foo"; Int.sexp_of_t t.foo  ];
-        l [a "bar"; Float.sexp_of_t t.bar]; ]
-  ;;
-val sexp_of_t : t -> Sexp.t = <fun>
-# sexp_of_t { foo = 3; bar = -5.5 };;
-- : Sexp.t = ((foo 3) (bar -5.5))
+```frag
+((typ ocamltop)(name sexpr/manually_making_sexp.topscript))
 ```
 
-This is somewhat tiresome to write, and it gets more so when you
-consider the parser, _i.e._, `t_of_sexp`, which is considerably more
-complex.  Writing this kind of parsing and printing code by hand is
-mechanical and error prone, not to mention a drag.
+This is somewhat tiresome to write, and it gets more so when you consider the
+parser, _i.e._, `t_of_sexp`, which is considerably more complex.  Writing this
+kind of parsing and printing code by hand is mechanical and error prone, not to
+mention a drag.
 
-Given how mechanical the code is, you could imagine writing a program
-that inspected the type definition and autogenerated the conversion
-code for you.  As it turns out, we can do just that using `sexplib`.
-The `sexplib` package, which is included with Core, provides both a
-library for manipulating s-expressions and a _syntax extension_ for
-generating such conversion functions.  With that syntax extension
-enabled, any type that has `with sexp` as an annotation will trigger
-the generation of the functions we want for free.
+Given how mechanical the code is, you could imagine writing a program that
+inspected the type definition and autogenerated the conversion code for you.
+As it turns out, we can do just that using `sexplib`.  The `sexplib` package,
+which is included with Core, provides both a library for manipulating
+s-expressions and a _syntax extension_ for generating such conversion
+functions.  With that syntax extension enabled, any type that has `with sexp`
+as an annotation will trigger the generation of the functions we want for free.
 
-```ocaml
-# type t = { foo: int; bar: float } with sexp;;
-type t = { foo : int; bar : float; }
-val t_of_sexp : Sexp.t -> t = <fun>
-val sexp_of_t : t -> Sexp.t = <fun>
-# t_of_sexp (Sexp.of_string "((bar 35) (foo 3))");;
-- : t = {foo = 3; bar = 35.}
+```frag
+((typ ocamltop)(name sexpr/auto_making_sexp.topscript))
 ```
 
 The `sexplib` syntax extension sees the `with sexp` annotation
@@ -183,7 +177,7 @@ can be activated within the toplevel and also included in compilation
 using the `-pp` compiler flag.
 
 `sexplib` is part of a family of syntax extensions, including
-`comparelib`, described in [xref](#maps-and-hashtables), and
+`comparelib`, described in [xref](#maps-and-hash-tables), and
 `fieldslib`, described in [xref](#records), that generate code based
 on type declarations, and are all based on a common library called
 `type_conv`.  This library provides a common language for annotating
@@ -203,19 +197,15 @@ themselves; backslash is the escape character; and semicolons are used
 to introduce single-line comments.  Thus, the following file,
 `example.scm`:
 
-```scheme
-;; example.scm
-
-((foo 3.3) ;; This is a comment
- (bar "this is () an \" atom"))
+```frag
+((typ scheme)(name sexpr/example.scm))
 ```
 
 can be loaded using sexplib.  As you can see, the commented data is
 not part of the resulting s-expression.
 
-```ocaml
-# Sexp.load_sexp "example.scm";;
-- : Core.Std.Sexp.t = ((foo 3.3) (bar "this is () an \" atom"))
+```frag
+((typ ocamltop)(name sexpr/example_load.topscript)(part 0))
 ```
 
 All in, the s-expression format actually supports three comment
@@ -227,96 +217,46 @@ syntaxes:
 
 The following example shows all of these in action.
 
-```scheme
-;; comment_heavy_example.scm
-((this is included)
- ; (this is commented out
- (this stays)
- #; (all of this is commented
-     out (even though it crosses lines.))
-  (and #| block delimiters #| which can be nested |#
-     will comment out
-    an arbitrary multi-line block))) |#
-   now we're done
-   ))
+```frag
+((typ scheme)(name sexpr/comment_heavy.scm))
 ```
 
 Again, loading the file as an s-expression drops the comments.
 
-```ocaml
-# Sexp.load_sexp "comment_heavy_example.scm";;
-- : Core.Std.Sexp.t = ((this is included) (this stays) (and now we're done))
+```frag
+((typ ocamltop)(name sexpr/example_load.topscript)(part 1))
 ```
 
-Note that the comments were dropped from the file upon reading.  This
-is expected, since there's no place in the `Sexp.t` type to store
-comments.
+Note that the comments were dropped from the file upon reading.  This is
+expected, since there's no place in the `Sexp.t` type to store comments.
 
 If we introduce an error into our s-expression, by, say, creating a
 file `broken_example.scm` which is `example.scm` without open-paren in
 front of `bar`, we'll get a parse error:
 
-```ocaml
-# Exn.handle_uncaught ~exit:false (fun () ->
-    ignore (Sexp.load_sexp "broken_example.scm"));;
-  Uncaught exception:
-
-  (Sexplib.Sexp.Parse_error
-   ((location parse) (err_msg "unexpected character: ')'") (text_line 4)
-    (text_char 29) (global_offset 94) (buf_pos 94)))
+```frag
+((typ ocamltop)(name sexpr/example_load.topscript)(part 2))
 ```
 
-In the above, we use `Exn.handle_uncaught` to make sure that the
-exception gets printed out in full detail.  You should generally wrap
-every Core program in this handler to get good error messages for any
-unexpected exceptions.
+In the above, we use `Exn.handle_uncaught` to make sure that the exception gets
+printed out in full detail.  You should generally wrap every Core program in
+this handler to get good error messages for any unexpected exceptions.
 
 ## Sexp converters
 
-The most important functionality provided by Sexplib is the
-auto-generation of converters for new types.  We've seen a bit of how
-this works already, but let's walk through a complete example.  Here's
-the source for the beginning of a library for representing integer
-intervals.
+The most important functionality provided by Sexplib is the auto-generation of
+converters for new types.  We've seen a bit of how this works already, but
+let's walk through a complete example.  Here's the source for the beginning of
+a library for representing integer intervals.
 
-```ocaml
-(* file: int_interval.ml *)
-(* Module for representing closed integer intervals *)
-
-open Core.Std
-
-(* Invariant: For any Range (x,y), y >= x *)
-type t = | Range of int * int
-         | Empty
-with sexp
-
-let is_empty = function Empty -> true | Range _ -> false
-let create x y = if x > y then Empty else Range (x,y)
-let contains i x = match i with
-   | Empty -> false
-   | Range (low,high) -> x >= low && x <= high
+```frag
+((typ ocaml)(name sexpr/int_interval.ml))
 ```
 
-We can now use this module as follows:
+We can now use this module as follows.
 
-```ocaml
-(* file: test_interval.ml *)
-
-open Core.Std
-
-let intervals =
-  let module I = Int_interval in
-  [ I.create 3 4;
-    I.create 5 4; (* should be empty *)
-    I.create 2 3;
-    I.create 1 6;
-  ]
-
-let () =
-  intervals
-  |> List.sexp_of_t Int_interval.sexp_of_t
-  |> Sexp.to_string_hum
-  |> print_endline
+```frag
+((typ ocaml)(name sexpr/test_interval.ml))
 ```
 
 But we're still missing something: we haven't created an `mli`

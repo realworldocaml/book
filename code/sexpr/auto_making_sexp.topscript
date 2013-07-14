@@ -1,0 +1,3 @@
+type t = { foo: int; bar: float } with sexp ;;
+t_of_sexp (Sexp.of_string "((bar 35) (foo 3))") ;;
+

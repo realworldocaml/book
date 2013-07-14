@@ -17,6 +17,7 @@ type typ = [
   | `Console
   | `JSON
   | `ATD
+  | `Scheme
 ]
 
 type t = {
@@ -33,6 +34,7 @@ let typ_of_string s : typ =
   | "console"  -> `Console
   | "json"     -> `JSON
   | "atd"      -> `ATD
+  | "scheme"   -> `Scheme
   | x          -> raise (Failure ("Unknown fragment type " ^ x))
 
 let of_string s =
