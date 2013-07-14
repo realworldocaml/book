@@ -195,9 +195,9 @@ this work happens exactly once per list element.
 
 Generally, pattern matching is more efficient than the alternatives
 you might code by hand.  One notable exception is matches over
-strings, which are in fact tested sequentially, and which for long
-lists can be outperformed by a hash table.  But most of the time,
-pattern matching is a clear performance win.
+strings, which are in fact tested sequentially, so matches containing
+a long seuqence of strings can be outperformed by a hash table.  But
+most of the time, pattern matching is a clear performance win.
 
 ### Detecting errors
 
@@ -418,6 +418,9 @@ just a subset of values.  The `List.filter` function does just that.
 ((typ ocamltop)(name lists-and-patterns/main.topscript)(part 29)) 
 ```
 
+Note that the `mod` used above is an infix operator, as described in
+[xref](#variabls-and-functions).
+
 Sometimes, you want to both transform and filter as part of the same
 computation.  `List.filter_map` allows you to do just that.  The
 function passed to `List.filter_map` returns an optional value, and
@@ -490,6 +493,10 @@ into one, more efficient operation.
 ```frag
 ((typ ocamltop)(name lists-and-patterns/main.topscript)(part 36)) 
 ```
+
+Note that `^/` is an infix operator provided by Core for adding a new
+element to a string representing a file path.  It is equivalent to
+Core's `Filename.concat`.
 
 ## Tail recursion
 

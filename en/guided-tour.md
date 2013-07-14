@@ -389,9 +389,8 @@ of the lengths of each language as follows.
 ```
 
 `List.map` takes two arguments: a list and a function for transforming
-the elements of that list.  Note that `List.map` creates a new list
-and does not modify the original.  Indeed, OCaml lists are immutable,
-so there are no operations for modifying lists in the language at all.
+the elements of that list.  It returns a new list with the transformed
+elements, and does not modify the original list.
 
 In this example, the function `String.length` is passed under the
 _labeled argument_ `~f`.  Labels allow you to specify arguments by
@@ -617,17 +616,19 @@ optional values.  You can think of an option as a specialized list
 that can only have zero or one element.
 
 To examine the contents of an option, we use pattern matching, as we
-did with tuples and lists.  Consider the following simple function for
-printing a log entry given an optional time and a message.  If no time
-is provided (_i.e._, if the time is `None`), the current time is
-computed and used in its place.
+did with tuples and lists.  Consider the following function for
+creating a log entry string given an optional time and a message.  If
+no time is provided (_i.e._, if the time is `None`), the current time
+is computed and used in its place.
 
 ```frag
 ((typ ocamltop)(name guided-tour/main.topscript)(part 38))
 ```
 
-We use a `match` statement for handling the two possible states of an
-option.
+This example uses Core's `Time` module for dealing with time, the `^`
+operator for concatenating strings.  The concatenation operator is
+provided as part of the `Pervasives` module which is automatically
+opened in every OCaml program.
 
 <note> <title> Nesting `let`s with `let` and `in` </title>
 
@@ -638,17 +639,21 @@ including a function body.  The `in` marks the beginning of the scope
 within which the new variable can be used.  Thus, we could write:
 
 ```frag
-((typ ocamltop)(name guided-tour/main.topscript)(part 39)) 
+((typ ocamltop)(name guided-tour/local_let.topscript)(part 1)) 
 ```
 
 Note that the scope of the let binding is terminated by the
-double-semicolon.
+double-semicolon, so the value of `x` is no longer available.
+
+```frag
+((typ ocamltop)(name guided-tour/local_let.topscript)(part 2))
+```
 
 We can also have multiple let statements in a row, each one adding a
 new variable binding to what came before.
 
 ```frag
-((typ ocamltop)(name guided-tour/main.topscript)(part 40)) 
+((typ ocamltop)(name guided-tour/local_let.topscript)(part 3))
 ```
 
 This kind of nested let binding is a common way of building up a
@@ -764,14 +769,14 @@ a scene element within which our point resides.
 
 ## Imperative programming
 
-So far, we've only written so-called _pure_ or _functional_ code,
-meaning that we didn't write any code that modified a variable or
-value after its creation.  Indeed, almost all of the data structures
-we've encountered so far are _immutable_, meaning there's no way in
-the language to modify them at all.  This is a quite different style
-from _imperative_ programming, where computations are structured as
-sequences of instructions that operate by making modifications to the
-state of the program.
+The code we've written so far has been almost entirely _pure_ or
+_functional_, which roughly speaking means that the code in question
+doesn't modify variables or values as part of its execution.  Indeed,
+almost all of the data structures we've encountered are _immutable_,
+meaning there's no way in the language to modify them at all.  This is
+a quite different style from _imperative_ programming, where
+computations are structured as sequences of instructions that operate
+by making modifications to the state of the program.
 
 Functional code is the default in OCaml, with variable bindings and
 most data structures being immutable.  But OCaml also has excellent
@@ -796,18 +801,14 @@ the `.(i)` syntax is used to refer to an element of an array, and the
 `<-` syntax is for modification. Because the elements of the array are
 counted starting at zero, element `.(2)` is the third element.
 
-An odd type has cropped up in this example: `unit`.  What makes `unit`
-different is that there is only one value of type `unit`, which is
-written `()`.  Because there is only one value of type `unit`, that
-value doesn't really convey any information.
-
-If it doesn't convey any information, then what is `unit` good for?
-Most of the time, `unit` acts as a placeholder.  Thus, we use `unit`
-for the return value of an operation like setting a mutable field that
-operates by side effect rather than by returning a value.  It's also
-used as the argument to functions that don't require an input value.
-This is similar to the role that `void` plays in languages like C and
-Java.
+The `unit` type that we see above is interesting in that it has only
+one possible value, written `()`.  This means that a value of type
+`unit` doesn't convey any information.  Instead, `unit` tends to be
+used as a placeholder.  Thus, we use `unit` for the return value of an
+operation like setting a mutable field that communicates by side
+effect rather than by returning a value.  It's also used as the
+argument to functions that don't require an input value.  This is
+similar to the role that `void` plays in languages like C and Java.
 
 ### Mutable record fields
 
@@ -831,6 +832,10 @@ not to separate two expressions.)
 ```frag
 ((typ ocamltop)(name guided-tour/main.topscript)(part 51)) 
 ```
+
+Note that we use the function `float` above, which is a convenient
+equivalent of `Float.of_int` which is provided by the `Pervasives`
+library.
 
 We also need functions to create and update `running_sum`s:
 

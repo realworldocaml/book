@@ -17,12 +17,12 @@ Javascript are single-threaded, and applications register function
 callbacks to be triggered upon external events such as a timeout or
 browser click.
 
-Each of these mechanisms has its own trade-offs. Preemptive threads
+Each of these mechanisms has its own trade-offs. System threads
 require significant memory and other resources per thread.  Also, the
-operating system can arbitrarily interleave the execution of
-preemptive threads, requiring the programmer to carefully protect
-shared resources with locks and condition variables, which can be
-exceedingly error-prone.
+operating system can arbitrarily interleave the execution of system
+threads, requiring the programmer to carefully protect shared
+resources with locks and condition variables, which can be exceedingly
+error-prone.
 
 Single-threaded event-driven systems, on the other hand, execute a
 single task at a time and do not require the same kind of complex
@@ -99,6 +99,12 @@ Thus, we can write:
 ```ocaml
 # contents;;
 - : string = "This is only a test.\n"
+```
+
+If we peek again, we'll see that the value of `contents` has been
+determined.
+
+```ocaml
 # Deferred.peek contents;;
 - : string option = Some "This is only a test.\n"
 ```
@@ -124,9 +130,9 @@ an uppercase version of its contents.
 
 ```ocaml
 # let uppercase_file filename =
-    let text = Reader.file_contents filename in
-    Deferred.bind text (fun text ->
-      Writer.save filename ~contents:(String.uppercase text))
+    Deferred.bind (Reader.file_contents filename)
+     (fun text ->
+         Writer.save filename ~contents:(String.uppercase text))
   ;;
 val uppercase_file : string -> unit Deferred.t = <fun>
 # uppercase_file "test.txt";;
@@ -222,7 +228,13 @@ rewrite `count_lines` again a bit more succinctly:
     List.length (String.split text ~on:'\n')
   ;;
 val count_lines : string -> int Deferred.t = <fun>
+# count_lines "/etc/hosts";;
+- : int = 11
 ```
+
+Note that `count_lines` returns a deferred, but `utop` waits for that
+deferred to become determined, and shows us the contents of the
+deferred instead.
 
 ### Ivars and upon
 
@@ -470,7 +482,7 @@ necessarily complain in such a case.
     if n > 0 then loop_forever ();
     x + n
   ;;
-val do_stuff : int -> unit = <fun>
+val do_stuff : int -> int = <fun>
 ```
 
 With a name like `loop_forever`, the meaning is clear enough in this
@@ -527,7 +539,12 @@ through a few small improvements:
   server echo back the capitalized version of whatever was sent to it.
 - Simplify the code using Async's `Pipe` interface.
 
-Here's the improved code below.
+Here's the improved code below.  There's both the `run` function,
+which which actually starts the server, and the command-line
+interface, which is the entry-point of the program.  Note the use of
+`Deferred.never` in `run`, which returns a deferred that never becomes
+determined.  In this case, we use `Deferred.never` because the server
+in question doesn't shut down.
 
 ```ocaml
 let run ~uppercase ~port =
@@ -556,9 +573,9 @@ let () =
   |> Command.run
 ```
 
-The most notable change in this function is the use of Async's `Pipe`.
-A `Pipe` is a communication channel that's used for connecting
-different parts of your program.  You can think of it as a
+The most notable change in the above code is the use of Async's
+`Pipe`.  A `Pipe` is a communication channel that's used for
+connecting different parts of your program.  You can think of it as a
 consumer/producer queue that uses deferreds for communicating when the
 pipe is ready to be read from or written to.  Our use of pipes is
 fairly minimal here, but they are an important part of Async, so it's
@@ -670,10 +687,9 @@ Now let's dive into the implementation.
 
 ### URI handling
 
-You're probably familiar with HTTP URLs, which identify endpoints
-across the World Wide Web.  These are actually part of a more general
-family known as Uniform Resource Identifiers (URIs). The full URI
-specification is defined in
+HTTP URLs, which identify endpoints across the web, are actually part
+of a more general family known as Uniform Resource Identifiers
+(URIs). The full URI specification is defined in
 [RFC3986](http://tools.ietf.org/html/rfc3986), and is rather
 complicated.  Luckily, the `uri` library provides a strongly-typed
 interface which takes care of much of the hassle.
@@ -905,7 +921,7 @@ two behaviors on subsequent calls.
       >>= fun () ->
       if will_fail then raise Exit else return ()
  ;;
-val maybe_raise : Core.Span.t -> unit Deferred.t = <fun>
+val maybe_raise : unit -> unit Deferred.t = <fun>
 # maybe_raise ();;
 - : unit = ()
 # maybe_raise ();;
@@ -976,7 +992,7 @@ return value became determined.
 
 ### Monitors
 
-`try_with` is a a great way of handling exceptions in Async, but it's
+`try_with` is a great way of handling exceptions in Async, but it's
 not the whole story.  All of Async's exception-handling mechanisms,
 `try_with` included, are built on top of Async's system of _monitors_,
 which are inspired by the error-handling mechanism in Erlang of the
@@ -1027,7 +1043,7 @@ particularly important one.  It detaches the monitor from its parent,
 handing back the stream of errors that would otherwise have been
 delivered to the parent monitor.  This allows one to do custom
 handling of errors, which may include re-raising errors to the parent.
-Here is a very simple example of function that captures and ignores
+Here is a very simple example of a function that captures and ignores
 errors in the processes it spawns.
 
 ```ocaml

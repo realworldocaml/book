@@ -1,4 +1,4 @@
-;; a line comment
+;; comment_heavy_example.scm
 ((this is included)
  ; (this is commented out
  (this stays)

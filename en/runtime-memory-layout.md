@@ -54,10 +54,10 @@ managed by the runtime later on in
 
 ## OCaml blocks and values
 
-A running OCaml program uses blocks of memory (i.e. contiguous sequences of
-words in RAM) to represent values such as tuples, records, closures or arrays.
-An OCaml program implicitly allocates a block of memory when such a value is
-created. 
+A running OCaml program uses blocks of memory (_i.e._ contiguous
+sequences of words in RAM) to represent values such as tuples,
+records, closures or arrays.  An OCaml program implicitly allocates a
+block of memory when such a value is created.
 
 ```ocaml
 # let x = { foo = 13; bar = 14 } ;;

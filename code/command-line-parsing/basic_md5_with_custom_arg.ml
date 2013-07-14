@@ -1,12 +1,11 @@
 open Core.Std
 
 let do_hash file () =
-  In_channel.with_file file ~f:(
-    fun ic ->
-      let open Cryptokit in
-      hash_channel (Hash.md5 ()) ic
-      |> transform_string (Hexa.encode ())
-      |> print_endline
+  In_channel.with_file file ~f:(fun ic ->
+    let open Cryptokit in
+    hash_channel (Hash.md5 ()) ic
+    |> transform_string (Hexa.encode ())
+    |> print_endline
   )
 
 let regular_file =
@@ -14,7 +13,7 @@ let regular_file =
     (fun filename ->
        match Sys.is_file filename with
        | `Yes -> filename
-       | `No | `Unknown -> 
+       | `No | `Unknown ->
          eprintf "'%s' is not a regular file.\n%!" filename;
          exit 1
     )

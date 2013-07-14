@@ -20,10 +20,14 @@ let command =
     ~summary:"Generate an MD5 hash of the input data"
     Command.Spec.(
       empty
-      +> flag "-s" (optional string) ~doc:"string Checksum the given string"
-      +> flag "-v" (listed bool) ~doc:" verbosity level. Repeat multiple times for more info."
-      +> flag "-t" no_arg ~doc:" run a built-in time trial"
-      +> flag "-tlen" (optional_with_default 5 int) ~doc:"seconds length of time trial"
+      +> flag "-s" (optional string)
+           ~doc:"string Checksum the given string"
+      +> flag "-v" (listed bool)
+           ~doc:" verbosity level. Repeat multiple times for more info."
+      +> flag "-t" no_arg
+           ~doc:" run a built-in time trial"
+      +> flag "-tlen" (optional_with_default 5 int)
+           ~doc:"seconds length of time trial"
       +> anon (maybe_with_default "-" ("filename" %: file))
     )
     (fun use_string verbosity trial trial_secs filename () ->

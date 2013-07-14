@@ -1,16 +1,16 @@
 # Data Serialization with S-Expressions
 
-We've already shown you how to parse third-party data formats into OCaml in
-earlier chapters.   Sometimes though, you just want to quickly convert an OCaml
-type to and from a human-readable and editable form in your own code, and not
-worry about interoperability.  Core's solution to this problem is to use
-*s-expressions*.
+We've already discussed the parsing of third-party data formats like
+JSON.  Sometimes, though, you're less concerned with interoperating
+with specific file formats, and you instead want an easy to use,
+human-readable format that integrates well with OCaml and its
+libraries.  Core's solution to this problem is to use s-expressions.
 
-S-expressions are nested parenthetical expressions whose atomic values are
-strings.  They were first popularized by the Lisp programming language in the
-1960s, and have remained one of the simplest and most effective ways to encode
-structured data.  There's a full definition of them available
-[online](http://people.csail.mit.edu/rivest/Sexp.txt).
+S-expressions are nested parenthetical expressions whose atomic values
+are strings.  They were first popularized by the Lisp programming
+language in the 1960s, and have remained one of the simplest and most
+effective ways to encode structured data.  There's a full definition
+of them available [online](http://people.csail.mit.edu/rivest/Sexp.txt).
 An example s-expression might look like this.
 
 ```frag
@@ -25,55 +25,70 @@ This chapter will show you:
 
 ## Basics
 
-OCaml values are not directly converted to-and-from s-expression strings.
-Instead, the s-expression is built up as a simpler OCaml value, which is later
-serialized into strings or memory buffers.  The OCaml type of an s-expression
-is quite simple and available from the `Sexp` module within `Core.Std`.
+OCaml values aren't directly converted to-and-from strings of s-expressions
+when you use Core.  The s-expression is instead built up as an OCaml value
+which is later serialized into strings or memory buffers.  The OCaml type of an
+s-expression is quite simple.
 
 ```frag
 ((typ ocaml)(name sexpr/sexp.mli))
 ```
 
 An s-expression can be thought of as a tree where each node contains a list of
-its children, and where the leaves of the tree are strings.
+its children, and where the leaves of the tree are strings.  Here's how we can
+use this type to represent the our example s-expression.
 
-The `Sexp` module in Core also comes with functionality for parsing and
-printing s-expressions.
+```frag
+((typ ocamltop)(name sexpr/manually_making_sexp.topscript))
+```
+
+Core provides good support for `s-expressions` in its `Sexp` module,
+including functions for converting s-expressions to and from strings.
+If we do the same example above with Core's s-expression type, we'll
+see that the output in the top-level is easier to read.
 
 ```frag
 ((typ ocamltop)(name sexpr/print_sexp.topscript))
 ```
 
-In addition, most of the base types in Core support conversion to and
-from s-expressions.  For example, we can write:
+This prints out nicely because Core registers a pretty printer with
+the toplevel.  This pretty-printer uses Core's functions for
+converting s-expressions to and from strings.
+
+```frag
+((typ ocamltop)(name sexpr/sexp_printer.topscript))
+```
+
+In addition to providing the `Sexp` module, most of the base types in Core
+support conversion to and from s-expressions.  For example, we can write:
 
 ```frag
 ((typ ocamltop)(name sexpr/to_from_sexp.topscript))
 ```
 
-Notice that `List.sexp_of_t` is polymorphic, and takes as its first
-argument another conversion function to handle the elements of the
-list to be converted.  Core uses this scheme more generally for
-defining sexp-converters for polymorphic types.
+Notice that `List.sexp_of_t` is polymorphic, and takes as its first argument
+another conversion function to handle the elements of the list to be converted.
+Core uses this scheme more generally for defining sexp-converters for
+polymorphic types.
 
 <note>
-<title>Toplevel printing</title>
+<title>More on toplevel printing</title>
 
-You may have noticed that the values of the s-expressions that we created above
-were actually printed properly in the toplevel, instead of as the raw tree of
-`Atom` and `List` variants that they're actually made of.
+The values of the s-expressions that we created above were printed properly as
+s-expressions in the toplevel, instead of as the tree of `Atom` and `List`
+variants that they're actually made of.
 
-This is due to OCaml's facility for installing custom *toplevel printers*
-that can rewrite some values into more toplevel-friendly equivalents.  They
-are generally installed as `ocamlfind` packages ending in `top`.
+This is due to OCaml's facility for installing custom *toplevel printers* that
+can rewrite some values into more toplevel-friendly equivalents.  They are
+generally installed as `ocamlfind` packages ending in `top`.
 
 ```frag
 ((typ console)(name sexpr/list_top_packages.out))
 ```
 
 The `core.top` package (which you should have loaded by default in your
-`.ocamlinit` file) loads in printers for the Core extensions already, so
-you don't need to do anything special to use the Sexplib printer.
+`.ocamlinit` file) loads in printers for the Core extensions already, so you
+don't need to do anything special to use the Sexplib printer.
 
 </note>
 
@@ -93,35 +108,82 @@ mention a drag.
 
 Given how mechanical the code is, you could imagine writing a program that
 inspected the type definition and autogenerated the conversion code for you.
-As it turns out, we can do just that using `Sexplib`.  The `Sexplib` package,
+As it turns out, we can do just that using `sexplib`.  The `sexplib` package,
 which is included with Core, provides both a library for manipulating
-s-expressions and a syntax extension for generating such conversion functions.
-With that syntax extension enabled, any type that has `with sexp` as an
-annotation will trigger the generation of the functions we want for free.
+s-expressions and a _syntax extension_ for generating such conversion
+functions.  With that syntax extension enabled, any type that has `with sexp`
+as an annotation will trigger the generation of the functions we want for free.
 
 ```frag
 ((typ ocamltop)(name sexpr/auto_making_sexp.topscript))
 ```
 
-The `with sexp` is detected by a `Sexplib` syntax extension and replaced with
-the extra conversion functions you see above.  The syntax extensions in Core
-almost all have this same basic structure: they autogenerate code based on type
-definitions, implementing functionality that you could in theory have
-implemented by hand, but with far less programmer effort.
+The `sexplib` syntax extension sees the `with sexp` annotation
+replaces it with the definition of the conversions functions we see
+above.
 
-<note>
-<title>The `camlp4` preprocessor and `type_conv`</title>
+The syntax extension can be used outside of type declarations as
+well.  As discussed in [xref](#error-handling), `with sexp` can be
+attached to the declaration of an exception, which will improve the
+ability of Core to generate a useful string representation of an
+exception.
 
-OCaml doesn't directly support converting static type definitions to
-and from other data formats.  Instead, it supplies a powerful syntax
-extension mechanism known as `camlp4`.  This lets you extend the
-grammar of the language to mark types as requiring special action, and
-then mechanically generate boilerplate code over those types (such as
-converting to and from other data formats).
+```ocaml
+# exception Bad_message of string list;;
+exception Bad_message of string list
+# Exn.to_string (Bad_message ["1";"2";"3"]) |> print_endline;;
+- : string = "Bad_message(_)"
+# exception Good_message of string list with sexp;;
+exception Good_message of string list
+# Exn.to_string (Good_message ["1";"2";"3"]) |> print_endline;;
+(//toplevel//.Good_message (1 2 3))
+```
 
-Many of the examples in the book depend on `camlp4`, but the examples all
-invoke it automatically for you via the `core.syntax` OCamlfind package.
-We explain the preprocessor in more detail in [xref](#the-compiler-frontend-parsing-and-type-checking).
+Unsurprisingly, the string `//toplevel//` only gets printed out as
+part of the module path within a toplevel like `utop`.
+
+You don't always have to declare a named type to create an
+s-expression converter.  The following syntax lets you create one
+inline, as part of a larger expression.
+
+```ocaml
+# let l = [(1,"one"); (2,"two")];;
+val l : (int * string) list = [(1, "one"); (2, "two")]
+# List.iter l ~f:(fun x ->
+    <:sexp_of<int * string>> x
+    |> Sexp.to_string |> print_endline);;
+(1 one)
+(2 two)
+- : unit = ()
+```
+
+The declaration `<:sexp_of<int * string>>` simply gets expended to the
+sexp-converter for the type `int * string`.  This is useful whever you
+need a sexp-converter for an anonymous type.
+
+The syntax extensions bundled with Core almost all have the same basic
+structure: they autogenerate code based on type definitions,
+implementing functionality that you could in theory have implemented
+by hand, but with far less programmer effort.
+
+<note> <title>Syntax extensions, `camlp4` and `type_conv`</title>
+
+OCaml doesn't directly support generating code from type definitions.
+Instead, it supplies a powerful syntax extension mechanism known as
+`camlp4`, which lets you extend the grammar of the language.  In the
+case of `sexplib`, `camlp4` is used to create s-expression conversion
+functions.  `camlp4` is well integrated into the OCaml toolchain, and
+can be activated within the toplevel and also included in compilation
+using the `-pp` compiler flag.
+
+`sexplib` is part of a family of syntax extensions, including
+`comparelib`, described in [xref](#maps-and-hash-tables), and
+`fieldslib`, described in [xref](#records), that generate code based
+on type declarations, and are all based on a common library called
+`type_conv`.  This library provides a common language for annotating
+types (_e.g._, using the `with` notation) and utilities for working
+with type definitions.  If you want to build your own type-driven
+syntax extension, you should consider basing it on `type_conv`.
 
 </note>
 
@@ -168,8 +230,9 @@ Again, loading the file as an s-expression drops the comments.
 Note that the comments were dropped from the file upon reading.  This is
 expected, since there's no place in the `Sexp.t` type to store comments.
 
-If we introduce an error into our s-expression, by, say, deleting the
-open-paren in front of `bar`, we'll get a parse error:
+If we introduce an error into our s-expression, by, say, creating a
+file `broken_example.scm` which is `example.scm` without open-paren in
+front of `bar`, we'll get a parse error:
 
 ```frag
 ((typ ocamltop)(name sexpr/example_load.topscript)(part 2))
@@ -393,10 +456,9 @@ But with `sexp_opaque`, we won't:
 
 ```ocaml
 # type t = { a: no_converter sexp_opaque; b: string } with sexp;;
-type t = { a : no_converter Core.Std.sexp_opaque; b : string; }
-val t_of_sexp__ : Sexplib.Sexp.t -> t = <fun>
-val t_of_sexp : Sexplib.Sexp.t -> t = <fun>
-val sexp_of_t : t -> Sexplib.Sexp.t = <fun>
+type t = { a : no_converter; b : string; }
+val t_of_sexp : Sexp.t -> t = <fun>
+val sexp_of_t : t -> Sexp.t = <fun>
 ```
 
 And if we now convert a value of this type to an s-expression, we'll
@@ -406,6 +468,44 @@ see the contents of field `a` marked as opaque:
 # sexp_of_t { a = (3,4); b = "foo" };;
 - : Sexp.t = ((a <opaque>) (b foo))
 ```
+
+Note that the `t_of_sexp` function for an opaque type is generated,
+but will fail at runtime if it is used.
+
+```ocaml
+# t_of_sexp (Sexp.of_string "((a whatever) (b foo))");;
+Exception:
+(Sexplib.Conv.Of_sexp_error
+ (Failure "opaque_of_sexp: cannot convert opaque values") whatever).
+```
+
+This is there to allow for s-expression converters to be created for
+types containing `sexp_opaque` values, and the resulting converters
+won't necessarily fail.  For example, if we made the field containing
+a `no_converter` a list, the `t_of_sexp` function could still succeed
+when that list was empty, as shown below.
+
+```ocaml
+# type t = { a: no_converter sexp_opaque list; b: string } with sexp;;
+type t = { a : no_converter list; b : string; }
+val t_of_sexp : Sexp.t -> t = <fun>
+val sexp_of_t : t -> Sexp.t = <fun>
+# t_of_sexp (Sexp.of_string "((a ()) (b foo))");;
+- : t = {a = []; b = "foo"}
+```
+
+If you really only want to generate one direction of converter, one
+can do this by annotating the type with `with sexp_of` or `with
+of_sexp`, as shown below.
+
+```ocaml
+# type t = { a: no_converter sexp_opaque; b: string } with sexp_of;;
+type t = { a : no_converter; b : string; }
+val sexp_of_t : t -> Sexp.t = <fun>
+# type t = { a: no_converter sexp_opaque; b: string } with of_sexp;;
+type t = { a : no_converter; b : string; }
+val t_of_sexp : Sexp.t -> t = <fun>
+``
 
 ### `sexp_list`
 
@@ -505,7 +605,6 @@ val sexp_of_http_server_config : http_server_config -> Sexplib.Sexp.t = <fun>
 These new functions let you convert to and from s-expressions.
 
 ```ocaml
-# http_server_config_of_sexp (Sexp.of_string "((web_root /var/www/html))";;
 # let cfg =
   http_server_config_of_sexp (Sexp.of_string "((web_root /var/www/html))");;
 val cfg : http_server_config =
