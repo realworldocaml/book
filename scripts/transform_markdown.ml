@@ -22,6 +22,9 @@ let output_t_as_markdown s =
        | 0 -> printf "# script %s\n$ utop\n" t.name
        | part -> printf "...part %d of %s\n" part t.name);
     printf "%s\n```\n" buf
+  | `OCaml_syntax ->
+    printf "```html\n";
+    printf "%s\n```\n" buf
   | `Scheme ->
     printf "```scheme\n";
     if t.header then printf ";; %s.scm\n" t.name;
