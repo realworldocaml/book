@@ -55,8 +55,10 @@ anywhere a stack is expected.
 
 OCaml is entirely different.  Classes are used to construct objects and support
 inheritance, but classes are not types.  Instead, objects have _object types_,
-and if you want to use objects, you aren't required to use classes at all.
-Here's an example of a simple object.
+and if you want to use objects, you aren't required to use classes at all
+(though, as we will see, if we choose to use classes, we can use the class name
+as a shorthand for the type of objects created from that class).  Here's an
+example of a simple object.
 
 ```ocaml
 # let s = object
