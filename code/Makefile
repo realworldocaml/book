@@ -1,4 +1,4 @@
-dirs=        json command-line-parsing guided-tour variables-and-functions lists-and-patterns sexpr
+dirs=        json command-line-parsing guided-tour variables-and-functions lists-and-patterns sexpr files-modules-and-programs
 
 # html/md files directory
 OBJ=         _build
