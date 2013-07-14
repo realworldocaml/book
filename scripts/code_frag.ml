@@ -18,6 +18,7 @@ type typ = [
   | `JSON
   | `ATD
   | `Scheme
+  | `OCaml_syntax
 ]
 
 type t = {
@@ -35,6 +36,7 @@ let typ_of_string s : typ =
   | "json"     -> `JSON
   | "atd"      -> `ATD
   | "scheme"   -> `Scheme
+  | "ocamlsyntax" -> `OCaml_syntax
   | x          -> raise (Failure ("Unknown fragment type " ^ x))
 
 let of_string s =
