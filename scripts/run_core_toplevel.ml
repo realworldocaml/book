@@ -94,6 +94,92 @@ let toploop_eval phrase =
       `Error(Format.flush_str_formatter ())
   )
 
+(*** Suppress values beginning with _.  Lifted straight from uTop:
+ * uTop_main.ml
+ * ------------
+ * Copyright : (c) 2011, Jeremie Dimino <jeremie@dimino.org>
+ * Licence   : BSD3
+ **)
+
+let orig_print_out_signature = !Toploop.print_out_signature
+let orig_print_out_phrase = !Toploop.print_out_phrase
+
+let rec map_items unwrap wrap items =
+  match items with
+  | [] ->
+    []
+  | item :: items ->
+    let sig_item, _ = unwrap item in
+    let name, _ =
+      match sig_item with
+      | Outcometree.Osig_class (_, name, _, _, rs)
+      | Outcometree.Osig_class_type (_, name, _, _, rs)
+      | Outcometree.Osig_module (name, _, rs)
+      | Outcometree.Osig_type ((name, _, _, _, _), rs) ->
+        (name, rs)
+      | Outcometree.Osig_exception (name, _)
+      | Outcometree.Osig_modtype (name, _)
+      | Outcometree.Osig_value (name, _, _) ->
+        (name, Outcometree.Orec_not)
+    in
+    let keep = name = "" || name.[0] <> '_' in
+    if keep then
+      item :: map_items unwrap wrap items
+    else
+      (* Replace the [Orec_next] at the head of items by [Orec_first] *)
+      let items =
+        match items with
+        | [] ->
+          []
+        | item :: items' ->
+          let sig_item, extra = unwrap item in
+          match sig_item with
+          | Outcometree.Osig_class (a, name, b, c, rs) ->
+            if rs = Outcometree.Orec_next then
+              wrap (Outcometree.Osig_class (a, name, b, c, Outcometree.Orec_first)) extra :: items'
+            else
+              items
+          | Outcometree.Osig_class_type (a, name, b, c, rs) ->
+            if rs = Outcometree.Orec_next then
+              wrap (Outcometree.Osig_class_type (a, name, b, c, Outcometree.Orec_first)) extra :: items'
+            else
+              items
+          | Outcometree.Osig_module (name, a, rs) ->
+            if rs = Outcometree.Orec_next then
+              wrap (Outcometree.Osig_module (name, a, Outcometree.Orec_first)) extra :: items'
+            else
+              items
+          | Outcometree.Osig_type ((name, a, b, c, d), rs) ->
+            if rs = Outcometree.Orec_next then
+              wrap (Outcometree.Osig_type ((name, a, b, c, d), Outcometree.Orec_first)) extra :: items'
+            else
+              items
+          | Outcometree.Osig_exception _
+          | Outcometree.Osig_modtype _
+          | Outcometree.Osig_value _ ->
+            items
+      in
+      map_items unwrap wrap items
+
+let print_out_signature pp items =
+  orig_print_out_signature pp (map_items (fun x -> (x, ())) (fun x () -> x) items)
+
+let print_out_phrase pp phrase =
+  let phrase =
+    match phrase with
+    | Outcometree.Ophr_eval _
+    | Outcometree.Ophr_exception _ -> phrase
+    | Outcometree.Ophr_signature items ->
+        Outcometree.Ophr_signature (map_items (fun x -> x) (fun x y -> (x, y)) items)
+  in
+  orig_print_out_phrase pp phrase
+
+let () =
+  Toploop.print_out_signature := print_out_signature;
+  Toploop.print_out_phrase := print_out_phrase
+
+(** End of uTop code *)
+
 open Core.Std
 let parse_file file =
   eprintf "C: init\n%!";
