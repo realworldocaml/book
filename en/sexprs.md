@@ -17,13 +17,16 @@ An example s-expression might look like this.
 ((typ scheme)(name sexpr/basic.scm))
 ```
 
-This chapter will show you:
+This chapter will show you how to:
 
-* how to generate s-expressions from arbitrary OCaml types, thus giving
+* generate s-expressions from arbitrary OCaml types, thus giving
   you a human-readable format for persisting any values in your code.
-* TODO.
+* expose s-expressions across module interfaces, including with abstract types.
+* generate good error messages for debugging malformed inputs.
+* use custom type annotations to control the exact printing behavior for
+  s-expression converters.
 
-## Basics
+## Basic Usage
 
 OCaml values aren't directly converted to-and-from strings of s-expressions
 when you use Core.  The s-expression is instead built up as an OCaml value
@@ -315,41 +318,20 @@ second, converting that s-expression into the type in question.  One
 problem with this is that it can be hard to localize errors to the
 right place using this scheme.  Consider the following example:
 
-```ocaml
-(* file: read_foo.ml *)
-
-open Core.Std
-
-type t = { a: string; b: int; c: float option } with sexp
-
-let run () =
-  let t =
-    Sexp.load_sexp "example.scm"
-    |> t_of_sexp
-  in
-  printf "b is: %d\n%!" t.b
-
-let () =
-  Exn.handle_uncaught ~exit:true run
+```frag
+((typ ocaml)(name sexpr/read_foo.ml))
 ```
 
 If you were to run this on a malformatted file, say, this one:
 
-```
-;; example.scm
-((a not-an-integer)
- (b not-an-integer)
- (c ()))
+```frag
+((typ scheme)(name sexpr/foo_broken_example.scm))
 ```
 
 you'll get the following error:
 
-```
-read_foo $ ./read_foo.native
-Uncaught exception:
-
-  (Sexplib.Conv.Of_sexp_error
-   (Failure "int_of_sexp: (Failure int_of_string)") not-an-integer)
+```frag
+((typ console)(name sexpr/build_read_foo.out))
 ```
 
 If all you have is the error message and the string, it's not terribly
@@ -360,28 +342,20 @@ file, this kind of bad error message can be pure misery.
 But there's hope!  If we make small change to the `run` function as
 follows:
 
-```ocaml
-let run () =
-  let t = Sexp.load_sexp_conv_exn "example.scm" t_of_sexp in
-  printf "b is: %d\n%!" t.b
+```frag
+((typ ocaml)(name sexpr/read_foo_better_errors.ml))
 ```
 
 and run it again, we'll get the following much more helpful error
 message:
 
-```ocaml
-read_foo $ ./read_foo.native
-Uncaught exception:
-
-  (Sexplib.Conv.Of_sexp_error
-   (Sexplib.Sexp.Annotated.Conv_exn example.scm:3:4
-    (Failure "int_of_sexp: (Failure int_of_string)"))
-   not-an-integer)
+```frag
+((typ console)(name sexpr/build_read_foo_better_errors.out))
 ```
 
-In the above error, "example.scm:3:4" tells us that the error occurred on
-"example.scm", line 3, character 4, which is a much better start for
-figuring out what has gone wrong.
+In the above error, "foo_broken_example.scm:2:5" tells us that the error
+occurred on "foo_broken_example.scm", line 2, character 5, which is a much
+better start for figuring out what has gone wrong.
 
 ## Sexp-conversion directives
 
@@ -402,41 +376,28 @@ Note that the type of a component marked as opaque doesn't need to have a
 sexp-converter defined.  Here, if we define a type without a sexp-converter,
 and then try to use another type with a sexp-converter, we'll error out:
 
-```ocaml
-# type no_converter = int * int;;
-type no_converter = int * int
-# type t = { a: no_converter; b: string } with sexp;;
-Characters 14-26:
-  type t = { a: no_converter; b: string } with sexp;;
-                ^^^^^^^^^^^^
-Error: Unbound value no_converter_of_sexp
+```frag
+((typ ocamltop)(name sexpr/sexp_opaque.topscript)(part 0))
 ```
 
 But with `sexp_opaque`, we won't:
 
-```ocaml
-# type t = { a: no_converter sexp_opaque; b: string } with sexp;;
-type t = { a : no_converter; b : string; }
-val t_of_sexp : Sexp.t -> t = <fun>
-val sexp_of_t : t -> Sexp.t = <fun>
+```frag
+((typ ocamltop)(name sexpr/sexp_opaque.topscript)(part 1))
 ```
 
 And if we now convert a value of this type to an s-expression, we'll
 see the contents of field `a` marked as opaque:
 
-```ocaml
-# sexp_of_t { a = (3,4); b = "foo" };;
-- : Sexp.t = ((a <opaque>) (b foo))
+```frag
+((typ ocamltop)(name sexpr/sexp_opaque.topscript)(part 2))
 ```
 
 Note that the `t_of_sexp` function for an opaque type is generated,
 but will fail at runtime if it is used.
 
-```ocaml
-# t_of_sexp (Sexp.of_string "((a whatever) (b foo))");;
-Exception:
-(Sexplib.Conv.Of_sexp_error
- (Failure "opaque_of_sexp: cannot convert opaque values") whatever).
+```frag
+((typ ocamltop)(name sexpr/sexp_opaque.topscript)(part 3))
 ```
 
 This is there to allow for s-expression converters to be created for
@@ -445,51 +406,33 @@ won't necessarily fail.  For example, if we made the field containing
 a `no_converter` a list, the `t_of_sexp` function could still succeed
 when that list was empty, as shown below.
 
-```ocaml
-# type t = { a: no_converter sexp_opaque list; b: string } with sexp;;
-type t = { a : no_converter list; b : string; }
-val t_of_sexp : Sexp.t -> t = <fun>
-val sexp_of_t : t -> Sexp.t = <fun>
-# t_of_sexp (Sexp.of_string "((a ()) (b foo))");;
-- : t = {a = []; b = "foo"}
+```frag
+((typ ocamltop)(name sexpr/sexp_opaque.topscript)(part 4))
 ```
 
 If you really only want to generate one direction of converter, one
 can do this by annotating the type with `with sexp_of` or `with
 of_sexp`, as shown below.
 
-```ocaml
-# type t = { a: no_converter sexp_opaque; b: string } with sexp_of;;
-type t = { a : no_converter; b : string; }
-val sexp_of_t : t -> Sexp.t = <fun>
-# type t = { a: no_converter sexp_opaque; b: string } with of_sexp;;
-type t = { a : no_converter; b : string; }
-val t_of_sexp : Sexp.t -> t = <fun>
-``
+```frag
+((typ ocamltop)(name sexpr/sexp_opaque.topscript)(part 5))
+```
 
 ### `sexp_list`
 
 Sometimes, sexp-converters have more parentheses than one would
 ideally like.  Consider, for example, the following variant type:
 
-```ocaml
-# type compatible_versions = | Specific of string list
-                             | All
-  with sexp;;
-# sexp_of_compatible_versions (Specific ["3.12.0"; "3.12.1"; "3.13.0"]);;
-- : Sexp.t = (Specific (3.12.0 3.12.1 3.13.0))
+```frag
+((typ ocamltop)(name sexpr/sexp_list.topscript)(part 0))
 ```
 
 You might prefer to make the syntax a bit less parenthesis-laden by
 dropping the parentheses around the list.  `sexp_list` gives us this
 alternate syntax:
 
-```ocaml
-# type compatible_versions = | Specific of string sexp_list
-                             | All
-  with sexp;;
-# sexp_of_compatible_versions (Specific ["3.12.0"; "3.12.1"; "3.13.0"]);;
-- : Sexp.t = (Specific 3.12.0 3.12.1 3.13.0)
+```frag
+((typ ocamltop)(name sexpr/sexp_list.topscript)(part 1))
 ```
 
 ### `sexp_option`
@@ -500,24 +443,16 @@ are represented either as `()` for `None`, or as `(x)` for `Some x`,
 and a record field containing an option would be rendered accordingly.
 For example:
 
-```ocaml
-# type t = { a: int option; b: string } with sexp;;
-# sexp_of_t { a = None; b = "hello" };;
-- : Sexp.t = ((a ()) (b hello))
-# sexp_of_t { a = Some 3; b = "hello" };;
-- : Sexp.t = ((a (3)) (b hello))
+```frag
+((typ ocamltop)(name sexpr/sexp_option.topscript)(part 0))
 ```
 
 But what if we want a field to be optional, _i.e._, we want to allow
 it to be omitted from the record entirely?  In that case, we can mark
 it with `sexp_option`:
 
-```ocaml
-# type t = { a: int sexp_option; b: string } with sexp;;
-# sexp_of_t { a = Some 3; b = "hello" };;
-- : Sexp.t = ((a 3) (b hello))
-# sexp_of_t { a = None; b = "hello" };;
-- : Sexp.t = ((b hello))
+```frag
+((typ ocamltop)(name sexpr/sexp_option.topscript)(part 1))
 ```
 
 ### Specifying defaults
@@ -531,73 +466,38 @@ filling in default values.
 Consider the following type which represents the configuration of a
 very simple web-server.
 
-```ocaml
-# type http_server_config = {
-     web_root: string;
-     port: int;
-     addr: string;
-  } with sexp;;
+```frag
+((typ ocamltop)(name sexpr/sexp_default.topscript)(part 0))
 ```
 
 One could imagine making some of these parameters optional; in particular, by
 default, we might want the web server to bind to port 80, and to listen as
 localhost.  The sexp-syntax allows this as follows.
 
-```ocaml
-# type http_server_config = {
-     web_root: string;
-     port: int with default(80);
-     addr: string with default("localhost");
-  } with sexp;;
+```frag
+((typ ocamltop)(name sexpr/sexp_default.topscript)(part 1))
 ```
 
 The top-level will echo back the type you just defined as usual, but also
-generate some additional conversion functions.
+generate the additional conversion functions that let you convert to and from
+s-expressions.
 
-```ocaml
-type http_server_config = { web_root : string; port : int; addr : string; }
-val http_server_config_of_sexp__ : Sexplib.Sexp.t -> http_server_config =
-  <fun>
-val http_server_config_of_sexp : Sexplib.Sexp.t -> http_server_config = <fun>
-val sexp_of_http_server_config : http_server_config -> Sexplib.Sexp.t = <fun>
-```
-
-These new functions let you convert to and from s-expressions.
-
-```ocaml
-# let cfg =
-  http_server_config_of_sexp (Sexp.of_string "((web_root /var/www/html))");;
-val cfg : http_server_config =
-  {web_root = "/var/www/html"; port = 80; addr = "localhost"}
+```frag
+((typ ocamltop)(name sexpr/sexp_default.topscript)(part 2))
 ```
 
 When we convert the configuration back out to an s-expression, you'll notice
 that no data is dropped.
 
-```ocaml
-# sexp_of_http_server_config cfg;;
-- : Sexplib.Sexp.t = ((web_root /var/www/html) (port 80) (addr localhost))
+```frag
+((typ ocamltop)(name sexpr/sexp_default.topscript)(part 3))
 ```
 
 We could make the generated s-expression also drop exported values, by
 using the `sexp_drop_default` directive.
 
-```ocaml
-# type http_server_config = {
-     web_root: string;
-     port: int with default(80), sexp_drop_default;
-     addr: string with default("localhost"), sexp_drop_default;
-  } with sexp;;
-type http_server_config = { web_root : string; port : int; addr : string; }
-val http_server_config_of_sexp__ : Sexplib.Sexp.t -> http_server_config =
-  <fun>
-val http_server_config_of_sexp : Sexplib.Sexp.t -> http_server_config = <fun>
-val sexp_of_http_server_config : http_server_config -> Sexplib.Sexp.t = <fun>
-# let cfg = http_server_config_of_sexp (Sexp.of_string "((web_root /var/www/html))");;
-val cfg : http_server_config =
-  {web_root = "/var/www/html"; port = 80; addr = "localhost"}
-# sexp_of_http_server_config cfg;;
-- : Sexplib.Sexp.t = ((web_root /var/www/html))
+```frag
+((typ ocamltop)(name sexpr/sexp_default.topscript)(part 4))
 ```
 
 As you can see, the fields that are at their default values are simply
@@ -605,12 +505,8 @@ omitted from the s-expression.  On the other hand, if we convert a
 config with other values, then those values will be included in the
 s-expression.
 
-```ocaml
-# sexp_of_http_server_config { cfg with port = 8080 };;
-- : Sexplib.Sexp.t = ((web_root /var/www/html) (port 8080))
-# sexp_of_http_server_config { cfg with port = 8080; addr = "192.168.0.1" };;
-- : Sexplib.Sexp.t =
-((web_root /var/www/html) (port 8080) (addr 192.168.0.1))
+```frag
+((typ ocamltop)(name sexpr/sexp_default.topscript)(part 5))
 ```
 
 This can be very useful in designing config file formats that are both
