@@ -16,7 +16,7 @@ let initial_phrases = [
 (* Initialise toploop and turn on short-paths *)
 let reset_toplevel () =
   Toploop.initialize_toplevel_env ();
-  Toploop.input_name := ""; (* no filename *)
+  Toploop.input_name := "//toplevel//";
   Topdirs.dir_directory (Sys.getenv "OCAML_TOPLEVEL_PATH");
   Clflags.real_paths := false
 
@@ -72,6 +72,9 @@ let toploop_eval phrase =
       (out, err) in
     try
       let lexbuf = Lexing.from_string phrase in
+      let dummypos = { Lexing.pos_fname = "//toplevel//"; pos_lnum = 0; pos_bol = 0; pos_cnum = -1; } in
+      lexbuf.Lexing.lex_start_p <- dummypos;
+      lexbuf.Lexing.lex_curr_p <- dummypos;
       let phrase = !Toploop.parse_toplevel_phrase lexbuf in
       ignore(Toploop.execute_phrase true Format.str_formatter phrase);
       let exec_output = Format.flush_str_formatter () in
