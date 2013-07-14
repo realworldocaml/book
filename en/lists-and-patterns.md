@@ -419,7 +419,7 @@ just a subset of values.  The `List.filter` function does just that.
 ```
 
 Note that the `mod` used above is an infix operator, as described in
-[xref](#variabls-and-functions).
+[xref](#variables-and-functions).
 
 Sometimes, you want to both transform and filter as part of the same
 computation.  `List.filter_map` allows you to do just that.  The
