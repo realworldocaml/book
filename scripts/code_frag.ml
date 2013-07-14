@@ -96,4 +96,4 @@ let wrap_in_pretty_box ~part typ file (buf:Cow.Xml.t) =
     | part -> <:html<, continued (part $int:part$)>>
   in
   let info = <:html<$str:typ$ &lowast; <a href=$str:fileurl$>$str:file$</a> $part$ &lowast; <a href=$str:repourl$>all code</a>&>> in
-  <:html<<div class="rwocode"><code><pre>$buf$</pre></code><div class="rwocodeinfo">$info$</div></div>&>>
+  <:html<<div class="rwocode"><pre><code>$buf$</code></pre><div class="rwocodeinfo">$info$</div></div>&>>
