@@ -1,4 +1,4 @@
-dirs=        json command-line-parsing guided-tour variables-and-functions lists-and-patterns sexpr
+dirs=        json command-line-parsing guided-tour variables-and-functions lists-and-patterns sexpr maps-and-hash-tables
 
 # html/md files directory
 OBJ=         _build
@@ -14,10 +14,11 @@ scripts=      $(wildcard $(dirs:%=%/*.sh))
 rawscripts=   $(wildcard $(dirs:%=%/*.rawsh))
 errscripts=   $(wildcard $(dirs:%=%/*.errsh))
 topscripts=   $(wildcard $(dirs:%=%/*.topscript))
+rawtscripts=   $(wildcard $(dirs:%=%/*.rawscript))
 
 all_src=      $(ml_src) $(mli_src) $(json_src) $(atd_src) $(scm_src) $(syn_src)
 all_scripts=  $(scripts:%.sh=%.out) $(errscripts:%.errsh=%.out) \
-	      $(topscripts) $(rawscripts:%.rawsh=%.out)
+	      $(topscripts) $(rawtscripts) $(rawscripts:%.rawsh=%.out)
 
 # The source files all map to %.<part>.html and %.<part>.md
 all_src_html= $(all_src:%=$(OBJ)/%.0.html) $(all_scripts:%=$(OBJ)/%.0.html)
@@ -68,6 +69,10 @@ $(OBJ)/%.scm.0.html: %.scm
 $(OBJ)/%.topscript.0.md $(OBJ)/%.topscript.0.html: %.topscript
 	@mkdir -p $(@D)
 	cd $(*D) && $(runtop) $(*F).topscript -builddir "../$(@D)"
+
+$(OBJ)/%.rawscript.0.md $(OBJ)/%.rawscript.0.html: %.rawscript
+	@mkdir -p $(@D)
+	$(highlight) -builddir $(OBJ) -rawscript $<
 
 $(OBJ)/%.out.0.html $(OBJ)/%.out.0.md: %.out
 	@mkdir -p $(@D)
