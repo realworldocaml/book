@@ -41,9 +41,10 @@ let console file =
   (* Run lines starting with $ through pygments, pass rest through *)
   let olines = List.rev (In_channel.with_file file ~f:(
     In_channel.fold_lines ~init:[] ~f:(fun acc line ->
+      let line = if line = "" then " " else line in
       if String.is_prefix ~prefix:"$ " line then
         (run_through_pygmentize "console" line) :: acc
-      else <:html<<div class="rwocodeout">$str:line$</div>&>> :: acc
+      else (<:html<<div class="rwocodeout">$str:line$</div>&>>) :: acc
     ))) in
   let buf =
     wrap_in_pretty_box ~part:0 "Terminal" file (List.concat olines)
