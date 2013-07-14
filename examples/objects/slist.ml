@@ -59,7 +59,7 @@ struct
   end
 
   class ['a] slist =
-  object
+  object (self : 'self)
      val mutable first : ('a) node option = None
      val mutable last : ('a) node option = None
 
@@ -76,6 +76,33 @@ struct
               last <- new_node
 
      method iterator = (new slist_iterator first :> 'a iterator)
+  end
+
+  class ['a] slist2 =
+  object (self : 'self)
+     val mutable first : ('a) node option = None
+     val mutable last : ('a) node option = None
+
+     method is_empty = first = None
+
+     method insert x =
+        let new_node = Some (new node x) in
+        match last with
+           Some last_node ->
+              last_node#set_next new_node;
+              last <- new_node
+         | None ->
+              first <- new_node;
+              last <- new_node
+
+     method iterator = (new slist_iterator first :> 'a iterator)
+
+     method iter (f : 'a -> unit) =
+        let it = self#iterator in
+        while it#has_value do
+           f it#get;
+           it#next
+        done
   end
 
   let make () = new slist

@@ -1,22 +1,5 @@
 # Records
 
-<note><title>A note to reviewers</title>
-
-**IMPORTANT**: This section is going to describe how records and
-variants will behave in OCaml 4.01.  If you want to follow along fully
-with the examples here, you'll need to make sure you install a
-bleeding-edge release, which you can do as follows:
-
-```
-opam switch 4.01.0dev+trunk
-```
-
-Once you make the switch, you'll need to install the packages you
-need.  Note that switching back and forth between different compilers
-and their packages is a fast operation after the initial build.
-
-</note>
-
 One of OCaml's best features is its concise and expressive system for
 declaring new datatypes.  Two key elements of that system are
 _records_ and _variants_, both of which we discussed briefly in
@@ -186,6 +169,45 @@ val host_info_to_string : host_info -> string = <fun>
 
 It's a good idea to enable the warning for incomplete record matches,
 and to explicitly disable it with an `_` where necessary.
+
+<note> <title> Compiler warnings </title>
+
+The OCaml compiler is packed full of useful warnings that can be
+enabled and disabled separately.  For example, we could have found out
+about warning 9, which was discussed above, as follows:
+
+```
+$ ocaml -warn-help | egrep '\b9\b'
+  9 Missing fields in a record pattern.
+  R Synonym for warning 9.
+```
+
+You should think of OCaml's warnings as a powerful set of optional
+static analysis tools, and eagerly enable them in your build
+environment.  You don't typically enable all warnings, but the
+defaults that ship with the compiler are pretty good.
+
+The warnings used for building the examples in this book are specified
+with the following flag.
+
+```
+-w @A-4-33-41-42-43-34-44
+```
+
+The syntax of this can be found by running `ocaml -help`, but this
+particular invocation turns on all warnings as errors, disabling only
+the numbers listed explicitly after the `A`.
+
+Treating warnings as errors (_i.e._, making OCaml fail to compile any
+code that triggers a warning) is good practice, since without it,
+warnings are too often ignored during development.  When preparing a
+package for distribution, however, this is a bad idea, since the list
+of warnings may grow from one release of the compiler to another, and
+so this may lead your package to fail to compile on newer compiler
+releases.
+
+</note>
+
 
 ## Field punning
 
@@ -513,9 +535,8 @@ val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
 ## Mutable fields
 
 Like most OCaml values, records are immutable by default.  You can,
-however, declare individual record fields as mutable.  For example, we
-could take the `client_info` type and make the fields that may need to
-change over time mutable, as follows.
+however, declare individual record fields as mutable.  In the
+following, we've made the last two fields of `client_info` mutable.
 
 ```ocaml
 # type client_info =

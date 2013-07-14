@@ -15,8 +15,8 @@ binding into `utop` with the following syntax to bind a new variable.
 Note that variable names must start with a lowercase letter or an
 underscore.
 
-```ocaml
-let <identifier> = <expr>
+```frag
+((typ ocamlsyntax)(name variables-and-functions/let.syntax))
 ```
 
 As we'll see when we get to the module system in
@@ -37,8 +37,8 @@ Here's a simple example.
 `let` can also be used to create a variable binding whose scope is
 limited to a particular expression, using the following syntax.
 
-```ocaml
-let <identifier> = <expr1> in <expr2>
+```frag
+((typ ocamlsyntax)(name variables-and-functions/let_in.syntax))
 ```
 
 This first evaluates _`expr1`_ and then evaluates _`expr2`_ with

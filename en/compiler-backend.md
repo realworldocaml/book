@@ -72,14 +72,15 @@ some interesting points emerge from reading it.
   depending on the header tag of `v`.  Recall that variants without parameters are stored 
   in memory as integers in the order which they appear.  The pattern matching 
   engine knows this and has transformed the pattern into an efficient jump table. 
-* Values are addressed by a unique name that distinguished shadowed values by appending
-  a number (e.g. `v/1014`). The type safety checks in the earlier phase ensure that
-  these low-level accesses never violate runtime memory safety, so this layer
-  doesn't do any dynamic checks.  Unwise use of unsafe features such as the
+* Values are addressed by a unique name that distinguished shadowed
+  values by appending a number (_e.g._ `v/1014`). The type safety
+  checks in the earlier phase ensure that these low-level accesses
+  never violate runtime memory safety, so this layer doesn't do any
+  dynamic checks.  Unwise use of unsafe features such as the
   `Obj.magic` module can still easily induce crashes at this level.
 
 The first pattern match is *exhaustive*, so there are no unknown match cases
-that the compiler needs to check for (e.g. a value greater than 3).  What
+that the compiler needs to check for (_e.g._ a value greater than 3).  What
 happens if we modify the code to use an incomplete pattern match instead?
 
 ```ocaml
@@ -295,9 +296,10 @@ L2:	closure L1, 0
 The bytecode above has been simplified from the lambda form into a set of
 simple instructions that are executed in serial by the interpreter.
 
-There are around 140 instructions in total, but most are just minor variants of
-commonly encountered operations (e.g. function application at a specific
-arity).  You can find full details [online](http://cadmium.x9c.fr/distrib/caml-instructions.pdf).
+There are around 140 instructions in total, but most are just minor
+variants of commonly encountered operations (_e.g._ function
+application at a specific arity).  You can find full details
+[online](http://cadmium.x9c.fr/distrib/caml-instructions.pdf).
 
 <note>
 <title>Where did the bytecode instruction set come from?</title>

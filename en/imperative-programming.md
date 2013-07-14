@@ -410,6 +410,10 @@ i = 0
 - : unit = ()
 ```
 
+Note that the loop variable of a `for` loop, `i` in this case, is
+immutable in the scope of the loop, and is also local to the loop,
+`i.e.`, it can't be referenced outside of the loop.
+
 OCaml also supports `while` loops, which include a condition and a
 body.  The loop first evaluates the condition, and then, if it
 evaluates to true, evaluates the body and starts the loop again.

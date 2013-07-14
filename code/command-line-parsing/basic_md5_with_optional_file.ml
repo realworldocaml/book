@@ -1,7 +1,6 @@
 open Core.Std
 
-let get_file_data =
-  function
+let get_inchan = function
   | None | Some "-" ->
     In_channel.stdin
   | Some filename ->
@@ -9,7 +8,7 @@ let get_file_data =
 
 let do_hash filename () =
   let open Cryptokit in
-  get_file_data filename
+  get_inchan filename
   |> hash_channel (Hash.md5 ())
   |> transform_string (Hexa.encode ())
   |> print_endline

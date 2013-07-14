@@ -16,7 +16,7 @@ let initial_phrases = [
 (* Initialise toploop and turn on short-paths *)
 let reset_toplevel () =
   Toploop.initialize_toplevel_env ();
-  Toploop.input_name := ""; (* no filename *)
+  Toploop.input_name := "//toplevel//";
   Topdirs.dir_directory (Sys.getenv "OCAML_TOPLEVEL_PATH");
   Clflags.real_paths := false
 
@@ -72,6 +72,9 @@ let toploop_eval phrase =
       (out, err) in
     try
       let lexbuf = Lexing.from_string phrase in
+      let dummypos = { Lexing.pos_fname = "//toplevel//"; pos_lnum = 0; pos_bol = 0; pos_cnum = -1; } in
+      lexbuf.Lexing.lex_start_p <- dummypos;
+      lexbuf.Lexing.lex_curr_p <- dummypos;
       let phrase = !Toploop.parse_toplevel_phrase lexbuf in
       ignore(Toploop.execute_phrase true Format.str_formatter phrase);
       let exec_output = Format.flush_str_formatter () in
@@ -93,6 +96,92 @@ let toploop_eval phrase =
       if not backtrace_enabled then Printexc.record_backtrace false;
       `Error(Format.flush_str_formatter ())
   )
+
+(*** Suppress values beginning with _.  Lifted straight from uTop:
+ * uTop_main.ml
+ * ------------
+ * Copyright : (c) 2011, Jeremie Dimino <jeremie@dimino.org>
+ * Licence   : BSD3
+ **)
+
+let orig_print_out_signature = !Toploop.print_out_signature
+let orig_print_out_phrase = !Toploop.print_out_phrase
+
+let rec map_items unwrap wrap items =
+  match items with
+  | [] ->
+    []
+  | item :: items ->
+    let sig_item, _ = unwrap item in
+    let name, _ =
+      match sig_item with
+      | Outcometree.Osig_class (_, name, _, _, rs)
+      | Outcometree.Osig_class_type (_, name, _, _, rs)
+      | Outcometree.Osig_module (name, _, rs)
+      | Outcometree.Osig_type ((name, _, _, _, _), rs) ->
+        (name, rs)
+      | Outcometree.Osig_exception (name, _)
+      | Outcometree.Osig_modtype (name, _)
+      | Outcometree.Osig_value (name, _, _) ->
+        (name, Outcometree.Orec_not)
+    in
+    let keep = name = "" || name.[0] <> '_' in
+    if keep then
+      item :: map_items unwrap wrap items
+    else
+      (* Replace the [Orec_next] at the head of items by [Orec_first] *)
+      let items =
+        match items with
+        | [] ->
+          []
+        | item :: items' ->
+          let sig_item, extra = unwrap item in
+          match sig_item with
+          | Outcometree.Osig_class (a, name, b, c, rs) ->
+            if rs = Outcometree.Orec_next then
+              wrap (Outcometree.Osig_class (a, name, b, c, Outcometree.Orec_first)) extra :: items'
+            else
+              items
+          | Outcometree.Osig_class_type (a, name, b, c, rs) ->
+            if rs = Outcometree.Orec_next then
+              wrap (Outcometree.Osig_class_type (a, name, b, c, Outcometree.Orec_first)) extra :: items'
+            else
+              items
+          | Outcometree.Osig_module (name, a, rs) ->
+            if rs = Outcometree.Orec_next then
+              wrap (Outcometree.Osig_module (name, a, Outcometree.Orec_first)) extra :: items'
+            else
+              items
+          | Outcometree.Osig_type ((name, a, b, c, d), rs) ->
+            if rs = Outcometree.Orec_next then
+              wrap (Outcometree.Osig_type ((name, a, b, c, d), Outcometree.Orec_first)) extra :: items'
+            else
+              items
+          | Outcometree.Osig_exception _
+          | Outcometree.Osig_modtype _
+          | Outcometree.Osig_value _ ->
+            items
+      in
+      map_items unwrap wrap items
+
+let print_out_signature pp items =
+  orig_print_out_signature pp (map_items (fun x -> (x, ())) (fun x () -> x) items)
+
+let print_out_phrase pp phrase =
+  let phrase =
+    match phrase with
+    | Outcometree.Ophr_eval _
+    | Outcometree.Ophr_exception _ -> phrase
+    | Outcometree.Ophr_signature items ->
+        Outcometree.Ophr_signature (map_items (fun x -> x) (fun x y -> (x, y)) items)
+  in
+  orig_print_out_phrase pp phrase
+
+let () =
+  Toploop.print_out_signature := print_out_signature;
+  Toploop.print_out_phrase := print_out_phrase
+
+(** End of uTop code *)
 
 open Core.Std
 let parse_file file =
@@ -136,7 +225,14 @@ let parse_file file =
               let phrase = String.concat ~sep:"\n" (List.rev (line :: acc)) in
               eprintf "X: %s\n%!" phrase;
               match toploop_eval phrase with
-              | `Normal(s, _, _) | `Error s ->
+              | `Normal(s, stdout, stderr) ->
+                print_part !part (sprintf "# %s \n%s" phrase s);
+                print_html_part !part (Cow.Html.to_string (Cow.Code.ocaml_fragment ("# " ^ phrase)));
+                let sout = if stdout = "" then <:html<&>> else <:html<<br />$str:stdout$>> in
+                let serr = if stderr = "" then <:html<&>> else <:html<<br />$str:stderr$>> in
+                if s <> "" then print_html_part !part (Cow.Html.to_string <:html<<div class="rwocodeout">$str:s$$sout$$serr$</div>&>>);
+                []
+              | `Error s ->
                 print_part !part (sprintf "# %s \n%s" phrase s);
                 print_html_part !part (Cow.Html.to_string (Cow.Code.ocaml_fragment ("# " ^ phrase)));
                 if s <> "" then print_html_part !part (Cow.Html.to_string <:html<<div class="rwocodeout">$str:s$</div>&>>);
