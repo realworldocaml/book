@@ -15211,7 +15211,7 @@ end;;
     <para>
       The method <literal>move_up</literal> implements the process of
       restoring heap order as a recursive method (though it would be
-      straightforward avoid the recursion and use iteration here).
+      straightforward to avoid the recursion and use iteration here).
     </para>
     <para>
       The key property of private methods is that they are visible to
@@ -15301,7 +15301,7 @@ end
 </programlisting>
     <para>
       Here's a different implementation using
-      <literal>HashTbl</literal>.
+      <literal>Hashtbl</literal>.
     </para>
     <programlisting language="ocaml">
 class hash_vector =
@@ -15521,7 +15521,7 @@ val x : m9 = &lt;obj&gt;
         collections. In Section XXX:Objecttypes, we introduced the
         <emphasis>iterator</emphasis> pattern, where an
         <emphasis>iterator</emphasis> object is used to enumerate the
-        elements of a collection. Lots of containers can have iterators,
+        elements of a collection. Lots of containers can have iterators:
         singly-linked lists, dictionaries, vectors, etc.
       </para>
       <programlisting language="ocaml">
