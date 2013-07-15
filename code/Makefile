@@ -1,4 +1,17 @@
-dirs=        json command-line-parsing guided-tour variables-and-functions lists-and-patterns sexpr files-modules-and-programs
+dirs= json \
+      command-line-parsing guided-tour \
+      variables-and-functions \
+      lists-and-patterns \
+      sexpr \
+      files-modules-and-programs \
+      files-modules-and-programs-freq \
+      files-modules-and-programs-freq-with-counter \
+      files-modules-and-programs-freq-with-sig \
+      files-modules-and-programs-freq-with-sig-abstract \
+      files-modules-and-programs-freq-with-sig-abstract-fixed \
+      files-modules-and-programs-freq-fast \
+      files-modules-and-programs-freq-median \
+
 
 # html/md files directory
 OBJ=         _build
