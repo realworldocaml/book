@@ -15,7 +15,7 @@ let output_t_as_markdown s =
          | 0 -> ""
          | part -> sprintf "(starting from part %d)" part);
     printf "%s\n```\n" buf
-  | `OCaml_toplevel ->
+  | `OCaml_toplevel | `OCaml_rawtoplevel ->
     printf "```ocaml\n";
     if t.header then 
       (match t.part with

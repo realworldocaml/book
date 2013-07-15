@@ -1,7 +1,7 @@
 $ ./basic_md5.native
 Generate an MD5 hash of the input data
 
-  basic_md5.native filename
+  basic_md5.native FILENAME
 
 More detailed information
 
@@ -12,4 +12,4 @@ More detailed information
   [-help]        print this help text and exit
                  (alias: -?)
 
-missing anonymous argument: filename
+missing anonymous argument: FILENAME

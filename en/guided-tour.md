@@ -639,21 +639,21 @@ including a function body.  The `in` marks the beginning of the scope
 within which the new variable can be used.  Thus, we could write:
 
 ```frag
-((typ ocamltop)(name guided-tour/local_let.topscript)(part 1)) 
+((typ ocamltop)(name guided-tour/local_let.topscript)(part 0)) 
 ```
 
 Note that the scope of the let binding is terminated by the
 double-semicolon, so the value of `x` is no longer available.
 
 ```frag
-((typ ocamltop)(name guided-tour/local_let.topscript)(part 2))
+((typ ocamltop)(name guided-tour/local_let.topscript)(part 1))
 ```
 
 We can also have multiple let statements in a row, each one adding a
 new variable binding to what came before.
 
 ```frag
-((typ ocamltop)(name guided-tour/local_let.topscript)(part 3))
+((typ ocamltop)(name guided-tour/local_let.topscript)(part 2))
 ```
 
 This kind of nested let binding is a common way of building up a

@@ -1,0 +1,6 @@
+$ ../corebuild freq.byte
+File "freq.ml", line 4, characters 42-55:
+Error: This expression has type Counter.t -> string -> Counter.t
+       but an expression was expected of type 'a list -> string -> 'a list
+       Type Counter.t is not compatible with type 'a list 
+Command exited with code 2.
