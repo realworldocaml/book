@@ -1044,7 +1044,7 @@ provides methods _B_ from _A_, then you can inherit from _M_ --
 That's too abstract, so let's give an example based on collections.
 In Section XXX:Objecttypes, we introduced the _iterator_ pattern,
 where an _iterator_ object is used to enumerate the elements of a
-collection.  Lots of containers can have iterators, singly-linked
+collection.  Lots of containers can have iterators: singly-linked
 lists, dictionaries, vectors, etc.
 
 ```ocaml
