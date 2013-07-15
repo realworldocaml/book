@@ -27,16 +27,8 @@ we use the function `List.Assoc.find`, which looks up a key in an
 association list, and `List.add`, which adds a new binding to an
 association list, as shown below.
 
-```ocaml
-# let assoc = [("one", 1); ("two",2); ("three",3)];;
-val assoc : (string * int) list = [("one", 1); ("two", 2); ("three", 3)]
-# List.Assoc.find assoc "two";;
-- : int option = Some 2
-# List.Assoc.add assoc "four" 4;; (* add a new key *)
-- : (string, int) List.Assoc.t =
-[("four", 4); ("one", 1); ("two", 2); ("three", 3)]
-# List.Assoc.add assoc "two" 4;; (* overwrite an existing key *)
-- : (string, int) List.Assoc.t = [("two", 4); ("one", 1); ("three", 3)]
+```frag
+((typ ocamltop)(name files-modules-and-programs/intro.topscript))
 ```
 
 Note that `List.Assoc.add` doesn't modify the original list, but
@@ -44,26 +36,8 @@ instead allocates a new list with the requisite key/value added.
 
 Now we can write down `freq.ml`.
 
-```ocaml
-(* freq.ml: basic implementation *)
-
-open Core.Std
-
-let build_counts () =
-  In_channel.fold_lines stdin ~init:[] ~f:(fun counts line ->
-    let count =
-      match List.Assoc.find counts line with
-      | None -> 0
-      | Some x -> x
-    in
-    List.Assoc.add counts line (count + 1)
-  )
-
-let () =
-  build_counts ()
-  |> List.sort ~cmp:(fun (_,x) (_,y) -> Int.descending x y)
-  |> (fun l -> List.take l 10)
-  |> List.iter ~f:(fun (line,count) -> printf "%3d: %s\n" count line)
+```frag
+((typ ocaml)(name files-modules-and-programs/freq.ml))
 ```
 
 The function `build_counts` reads in lines from `stdin`, constructing
