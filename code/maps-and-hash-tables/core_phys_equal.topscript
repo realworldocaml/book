@@ -1,0 +1,3 @@
+open Core.Std ;;
+1 == 2 ;;
+phys_equal 1 2 ;;

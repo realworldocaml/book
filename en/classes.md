@@ -769,7 +769,7 @@ end;;
 ```
 
 The method `move_up` implements the process of restoring heap order as
-a recursive method (though it would be straightforward avoid the
+a recursive method (though it would be straightforward to avoid the
 recursion and use iteration here).
 
 The key property of private methods is that they are visible to
@@ -845,7 +845,7 @@ object (self : 'self)
 end
 ```
 
-Here's a different implementation using `HashTbl`.
+Here's a different implementation using `Hashtbl`.
 
 ```ocaml
 class hash_vector =
@@ -1044,7 +1044,7 @@ provides methods _B_ from _A_, then you can inherit from _M_ --
 That's too abstract, so let's give an example based on collections.
 In Section XXX:Objecttypes, we introduced the _iterator_ pattern,
 where an _iterator_ object is used to enumerate the elements of a
-collection.  Lots of containers can have iterators, singly-linked
+collection.  Lots of containers can have iterators: singly-linked
 lists, dictionaries, vectors, etc.
 
 ```ocaml
