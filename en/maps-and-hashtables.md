@@ -335,30 +335,15 @@ the `==` operator and provides the more explicit `phys_equal` function
 instead.  You'll see a type error if you use `==` anywhere in code
 that opens `Core.Std`.
 
-```ocaml
-# open Core.Std;;
-# 1 == 2;;
-Error: This expression has type int but an expression was expected of type
-         [ `Consider_using_phys_equal ]
-# phys_equal 1 2;;
-- : bool = false
+```frag
+((typ ocamltop)(name maps-and-hash-tables/core_phys_equal.topscript))
 ```
 
 If you feel like hanging your OCaml interpreter, you can verify what
 happens with recursive values and structural equality for yourself:
 
-```ocaml
-# type t1 = { foo1:int; bar1:t2 } and t2 = { foo2:int; bar2:t1 } ;;
-type t1 = { foo1 : int; bar1 : t2; }
-and t2 = { foo2 : int; bar2 : t1; }
-# let rec v1 = { foo1=1; bar1=v2 } and v2 = { foo2=2; bar2=v1 };;
-<lots of text>
-# v1 == v1;;
-- : bool = true
-# phys_equal v1 v1;;
-- : bool = true
-# v1 = v1 ;;
-<press ^Z and kill the process now>
+```frag
+((typ ocamlrawtop)(name maps-and-hash-tables/phys_equal.rawscript))
 ```
 
 </note>

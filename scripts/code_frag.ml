@@ -14,6 +14,7 @@ open Core.Std
 type typ = [
   | `OCaml
   | `OCaml_toplevel
+  | `OCaml_rawtoplevel
   | `Console
   | `JSON
   | `ATD
@@ -25,13 +26,14 @@ type t = {
   typ: string;
   name: string;
   part: int with default(0);
-  header: bool with default(true)
+                 header: bool with default(true)
 } with sexp
 
 let typ_of_string s : typ =
   match s with
   | "ocaml"    -> `OCaml
   | "ocamltop" -> `OCaml_toplevel
+  | "ocamlrawtop" -> `OCaml_rawtoplevel
   | "console"  -> `Console
   | "json"     -> `JSON
   | "atd"      -> `ATD
@@ -86,6 +88,31 @@ let run_through_pygmentize lang contents =
   |`El ((("","div"),[(("","class"),"highlight")]),[`El ((("","pre"),[]),data)]) :: _ ->
     <:html<<div class="highlight">$data$</div>&>>
   |_ -> raise (Failure "unexpected pygments output: not <div class=highlight><pre>...")
+
+(* concat toplevel phrases so that each toplevel phrase always starts with a ;; *)
+let concat_toplevel_phrases lines =
+  let combine l = String.concat ~sep:"\n" (List.rev l) in
+  List.fold_left lines ~init:(`output ([],[])) ~f:(fun state line ->
+      match state with
+      |`phrase (res,acc) -> begin
+          if String.is_suffix ~suffix:";;" line then
+            let res = combine (line::acc) :: res in
+            `output (res,[])
+          else `phrase (res,line::acc)
+        end
+      |`output (res,acc) -> begin
+          if String.is_prefix ~prefix:"#" line then begin
+            let res = combine acc :: res in
+            if String.is_suffix ~suffix:";;" line then 
+              `output ((line::res),[])
+            else `phrase (res,[line])
+          end else `output (res,line::acc)
+        end
+    )
+  |> (function
+      |`phrase _ -> failwith "unterminated phrase"
+      |`output (res,acc) -> List.rev (combine acc :: res))
+  |> List.filter ~f:(function |"" -> false |_ -> true)
 
 let wrap_in_pretty_box ~part typ file (buf:Cow.Xml.t) =
   let repourl = sprintf "http://github.com/realworldocaml/code/" in
