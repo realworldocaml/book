@@ -769,7 +769,7 @@ end;;
 ```
 
 The method `move_up` implements the process of restoring heap order as
-a recursive method (though it would be straightforward avoid the
+a recursive method (though it would be straightforward to avoid the
 recursion and use iteration here).
 
 The key property of private methods is that they are visible to
