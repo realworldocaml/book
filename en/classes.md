@@ -845,7 +845,7 @@ object (self : 'self)
 end
 ```
 
-Here's a different implementation using `HashTbl`.
+Here's a different implementation using `Hashtbl`.
 
 ```ocaml
 class hash_vector =
