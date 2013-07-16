@@ -5,10 +5,10 @@ foo;;
 #part 1
 let average x y =
     let open Int64 in
-    x + y / of_int 2
+    x + y / of_int 2;;
 #part 2
 let average x y =
-    Int64.(x + y / of_int 2)
+    Int64.(x + y / of_int 2);;
 #part 3
 module Interval = struct
     type t = | Interval of int * int

@@ -459,13 +459,13 @@ Here's some general advice on how to deal with opens.
     writing:
 
     ```frag
-    ((typ ocaml)(name files-modules-and-programs-freq-median/use_median_1.ml))
+    ((typ ocaml)(name files-modules-and-programs-freq-median/use_median_1.ml)(part 1))
     ```
 
     you could write:
 
     ```frag
-    ((typ ocaml)(name files-modules-and-programs-freq-median/use_median_2.ml))
+    ((typ ocaml)(name files-modules-and-programs-freq-median/use_median_2.ml)(part 1))
     ```
 
     Because the module name `C` only exists for a short scope, it's
@@ -505,19 +505,8 @@ extended version of the `List` module, where you've added some
 functionality not present in the module as distributed in Core.
 `include` allows us to do just that.
 
-```ocaml
-(* ext_list.ml: an extended list module *)
-
-open Core.Std
-
-(* The new function we're going to add *)
-let rec intersperse list el =
-  match list with
-  | [] | [ _ ]   -> list
-  | x :: y :: tl -> x :: el :: intersperse (y::tl) el
-
-(* The remainder of the list module *)
-include List
+```frag
+((typ ocaml)(name files-modules-and-programs/ext_list.ml))
 ```
 
 Now, what about the interface of this new module?  It turns out that
@@ -526,16 +515,8 @@ essentially the same trick to write an `mli` for this new module.  The
 only trick is that we need to get our hands on the signature for the
 list module, which can be done using `module type of`.
 
-```ocaml
-(* ext_list.mli: an extended list module *)
-
-open Core.Std
-
-(* Include the interface of the list module from Core *)
-include (module type of List)
-
-(* Signature of function we're adding *)
-val intersperse : 'a list -> 'a -> 'a list
+```frag
+((typ ocaml)(name files-modules-and-programs/ext_list.mli))
 ```
 
 Note that the order of declarations in the `mli` does not need to
@@ -549,10 +530,8 @@ And we can now use `Ext_list` as a replacement for `List`.  If we want
 to use `Ext_list` in preference to `List` in our project, we can
 create a file of common definitions:
 
-```ocaml
-(* common.ml *)
-
-module List = Ext_list
+```frag
+((typ ocaml)(name files-modules-and-programs/common.ml))
 ```
 
 And if we then put `open Common` after `open Core.Std` at the top of
@@ -572,24 +551,14 @@ signature does not match up with the type in the implementation of the
 module.  As an example, if we replace the `val` declaration in
 `counter.mli` by swapping the types of the first two arguments:
 
-```ocaml
-val touch : string -> t -> t
+```frag
+((typ ocamltop)(name files-modules-and-programs-freq-with-sig-mismatch/counter.mli)(part 1))
 ```
 
-and then try to compile `Counter` (by writing `ocamlbuild
--use-ocamlfind counter.cmo`.  The `cmo` file is a compiled object
-file, containing the bytecode-compiled version of a module), we'll get
-the following error:
+and we try to compile, we'll get the following error.
 
-```
-File "counter.ml", line 1, characters 0-1:
-Error: The implementation counter.ml
-       does not match the interface counter.cmi:
-       Values do not match:
-         val touch :
-           ('a, int) Core.Std.Map.t -> 'a -> ('a, int) Core.Std.Map.t
-       is not included in
-         val touch : string -> t -> t
+```frag
+((typ console)(name files-modules-and-programs-freq-with-sig-mismatch/build.out))
 ```
 
 This error message is a bit intimidating at first, and it takes a bit
@@ -609,18 +578,19 @@ We might decide that we want a new function in `Counter` for pulling
 out the frequency count of a given string.  We can update the `mli` by
 adding the following line.
 
-```ocaml
-val count : t -> string -> int
+```frag
+((typ ocamltop)
+ (name files-modules-and-programs-freq-with-sig-missing-def/counter.mli)
+ (part 1))
 ```
 
 Now, if we try to compile without actually adding the implementation,
 we'll get this error:
 
-```
-File "counter.ml", line 1, characters 0-1:
-Error: The implementation counter.ml
-       does not match the interface counter.cmi:
-       The field `count' is required but not provided
+```frag
+((typ console)
+ (name files-modules-and-programs-freq-with-sig-missing-def/build.out)
+) 
 ```
 
 A missing type definition will lead to a similar error.
