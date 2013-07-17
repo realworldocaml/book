@@ -552,7 +552,7 @@ module.  As an example, if we replace the `val` declaration in
 `counter.mli` by swapping the types of the first two arguments:
 
 ```frag
-((typ ocamltop)(name files-modules-and-programs-freq-with-sig-mismatch/counter.mli)(part 1))
+((typ ocaml)(name files-modules-and-programs-freq-with-sig-mismatch/counter.mli)(part 1))
 ```
 
 and we try to compile, we'll get the following error.
@@ -579,8 +579,8 @@ out the frequency count of a given string.  We can update the `mli` by
 adding the following line.
 
 ```frag
-((typ ocamltop)
- (name files-modules-and-programs-freq-with-sig-missing-def/counter.mli)
+((typ ocaml)
+ (name files-modules-and-programs-freq-with-missing-def/counter.mli)
  (part 1))
 ```
 
@@ -589,7 +589,7 @@ we'll get this error:
 
 ```frag
 ((typ console)
- (name files-modules-and-programs-freq-with-sig-missing-def/build.out)
+ (name files-modules-and-programs-freq-with-missing-def/build.out)
 ) 
 ```
 
@@ -603,22 +603,18 @@ the type `median`.  The order of the declaration of variants matters
 to the OCaml compiler, so the definition of `median` in the
 implementation listing those options in a different order:
 
-```ocaml
-type median = | Before_and_after of line * line
-              | Median of line
+```frag
+((typ ocaml)
+ (name files-modules-and-programs-freq-with-type-mismatch/counter.mli)
+ (part 1))
 ```
 
 will lead to a compilation error:
 
-```
-File "counter.ml", line 1, characters 0-1:
-Error: The implementation counter.ml
-       does not match the interface counter.cmi:
-       Type declarations do not match:
-         type median = Before_and_after of string * string | Median of string
-       is not included in
-         type median = Median of string | Before_and_after of string * string
-       Their first fields have different names, Before_and_after and Median.
+```frag
+((typ console)
+ (name files-modules-and-programs-freq-with-type-mismatch/build.out)
+) 
 ```
 
 Order is similarly important in other parts of the signature,
@@ -644,32 +640,37 @@ rare case and we won't discuss them further here.
 The simplest case of this is that a module can not directly refer to
 itself (although definitions within a module can refer to each other
 in the ordinary way).  So, if we tried to add a reference to `Counter`
-from within `counter.ml`:
+from within `counter.ml`
 
-```ocaml
-let singleton l = Counter.touch Counter.empty
+```frag
+((typ ocaml)
+ (name files-modules-and-programs-freq-cyclic1/counter.ml)
+ (part 1))
 ```
 
-then when we try to build, we'll get this error:
+we'll see this error when we try to build:
 
-```
-File "counter.ml", line 17, characters 18-31:
-Error: Unbound module Counter
-Command exited with code 2.
+```frag
+((typ console)
+ (name files-modules-and-programs-freq-cyclic1/build.out))
 ```
 
 The problem manifests in a different way if we create cyclic
 references between files.  We could create such a situation by adding
-a reference to Freq from `counter.ml`, _e.g._, by adding the following
-line:
+a reference to `Freq` from `counter.ml`, _e.g._, by adding the
+following line.
 
-```ocaml
-let build_counts = Freq.build_counts
+```frag
+((typ ocaml)
+ (name files-modules-and-programs-freq-cyclic2/counter.ml)
+ (part 1))
 ```
 
-In this case, `ocamlbuild` will notice the error and complain:
+In this case, `ocamlbuild` (which is invoked by the `corebuild`
+script) will notice the error and complain explicitly about the cycle.
 
+```frag
+((typ console)
+ (name files-modules-and-programs-freq-cyclic2/build.out))
 ```
-Circular dependencies: "freq.cmo" already seen in
-  [ "counter.cmo"; "freq.cmo" ]
-```
+
