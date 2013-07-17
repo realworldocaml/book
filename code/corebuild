@@ -9,6 +9,7 @@ ocamlbuild \
     -pkg bin_prot.syntax \
     -tag thread \
     -tag debug \
+    -cflags -short-paths
     -cflags "-w @A-4-33-41-42-43-34-44" \
     -cflags -strict-sequence \
     -cflags -principal \
