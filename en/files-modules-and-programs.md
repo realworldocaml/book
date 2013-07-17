@@ -96,7 +96,7 @@ While this works well enough for a one-file project, more complicated
 projects require a tool to orchestrate the build.  One good tool for
 this task is `ocamlbuild`, which is shipped with the OCaml compiler.
 We'll talk more about `ocamlbuild` in [xref](#packaging), but for now,
-we'll just use a simple wrapper around ocamlbuild called `corebuild`
+we'll just use a simple wrapper around `ocamlbuild` called `corebuild`
 that sets build parameters appropriately for building against Core and
 its related libraries.
 
