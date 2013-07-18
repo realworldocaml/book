@@ -1465,7 +1465,8 @@ val log_entry : Time.t option -&gt; string -&gt; string = &lt;fun&gt;
         used. Thus, we could write:
       </para>
       <programlisting language="ocaml">
-...part 1 of guided-tour/local_let.topscript
+# script guided-tour/local_let.topscript
+$ utop
 # let x = 7 in
   x + x
   ;; 
@@ -1477,7 +1478,7 @@ val log_entry : Time.t option -&gt; string -&gt; string = &lt;fun&gt;
         longer available.
       </para>
       <programlisting language="ocaml">
-...part 2 of guided-tour/local_let.topscript
+...part 1 of guided-tour/local_let.topscript
 # x;; 
 Characters -1-1:
 Error: Unbound value x
@@ -1487,7 +1488,7 @@ Error: Unbound value x
         adding a new variable binding to what came before.
       </para>
       <programlisting language="ocaml">
-...part 3 of guided-tour/local_let.topscript
+...part 2 of guided-tour/local_let.topscript
 # let x = 7 in
   let y = x * x in
   x + y
@@ -4892,14 +4893,16 @@ val count_some : 'a option list -&gt; int = &lt;fun&gt;
       new binding to an association list, as shown below.
     </para>
     <programlisting language="ocaml">
-# let assoc = [(&quot;one&quot;, 1); (&quot;two&quot;,2); (&quot;three&quot;,3)];;
+# script files-modules-and-programs/intro.topscript
+$ utop
+# let assoc = [(&quot;one&quot;, 1); (&quot;two&quot;,2); (&quot;three&quot;,3)] ;; 
 val assoc : (string * int) list = [(&quot;one&quot;, 1); (&quot;two&quot;, 2); (&quot;three&quot;, 3)]
-# List.Assoc.find assoc &quot;two&quot;;;
+# List.Assoc.find assoc &quot;two&quot; ;; 
 - : int option = Some 2
-# List.Assoc.add assoc &quot;four&quot; 4;; (* add a new key *)
+# List.Assoc.add assoc &quot;four&quot; 4 (* add a new key *) ;; 
 - : (string, int) List.Assoc.t =
 [(&quot;four&quot;, 4); (&quot;one&quot;, 1); (&quot;two&quot;, 2); (&quot;three&quot;, 3)]
-# List.Assoc.add assoc &quot;two&quot; 4;; (* overwrite an existing key *)
+# List.Assoc.add assoc &quot;two&quot;  4 (* overwrite an existing key *) ;; 
 - : (string, int) List.Assoc.t = [(&quot;two&quot;, 4); (&quot;one&quot;, 1); (&quot;three&quot;, 3)]
 </programlisting>
     <para>
@@ -4911,8 +4914,7 @@ val assoc : (string * int) list = [(&quot;one&quot;, 1); (&quot;two&quot;, 2); (
       Now we can write down <literal>freq.ml</literal>.
     </para>
     <programlisting language="ocaml">
-(* freq.ml: basic implementation *)
-
+(* files-modules-and-programs/freq.ml  *)
 open Core.Std
 
 let build_counts () =
@@ -20643,8 +20645,8 @@ let () =
       <literal>mli</literal> signature for
       <literal>Int_interval</literal> yet. Note that we need to
       explicitly export the s-expression converters that were created
-      within the ml. For example, here's an interface that doesn't
-      export the s-expression functions.
+      within the <literal>ml</literal> file. For example, here's an
+      interface that doesn't export the s-expression functions.
     </para>
     <programlisting language="ocaml">
 (* sexpr/int_interval_nosexp.mli  *)
