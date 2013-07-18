@@ -12,6 +12,8 @@ dirs= json \
       files-modules-and-programs-freq-with-sig-abstract-fixed \
       files-modules-and-programs-freq-fast \
       files-modules-and-programs-freq-median \
+      objects \
+      imperative-programming
 
 
 # html/md files directory

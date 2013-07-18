@@ -1,0 +1,7 @@
+#part 1
+type 'a ref = { mutable contents : 'a }
+#part 2
+let x = ref 1;;
+!x;;
+x := !x + 1;;
+!x;;

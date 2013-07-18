@@ -1,0 +1,26 @@
+#part 1
+let memo_rec f_norec =
+     let rec f = memoize (fun x -> f_norec f x) in
+     f
+  ;;
+
+#part 2
+let rec x = lazy (Lazy.force x + 1);;
+
+#part 3
+Lazy.force x;;
+
+#part 4
+let fib_norec fib i =
+  if i <= 1 then i
+  else fib (i - 1) + fib (i - 2) ;;
+
+#part 5
+let lazy_memo_rec f_norec x =
+   let rec f = lazy (memoize (fun x -> f_norec (Lazy.force f) x)) in
+   (Lazy.force f) x
+;;
+time (fun () -> lazy_memo_rec fib_norec 40);;
+
+
+

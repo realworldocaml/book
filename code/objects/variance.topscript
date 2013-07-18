@@ -1,0 +1,86 @@
+#part 1
+let squares: square list = [ square 1.0; square 2.0 ];;
+let shapes: shape list = (squares :> shape list);;
+
+#part 2
+let square_array: square array = [| square 1.0; square 2.0 |];;
+let shape_array: shape array = (square_array :> shape array);;
+
+#part 3
+let shape_to_string: shape -> string = 
+    fun s -> sprintf "Shape(%F)" s#area;;
+let square_to_string: square -> string = 
+    (shape_to_string :> square -> string);;
+
+#part 4
+# module Either = struct
+  type ('a, 'b) t = 
+      Left of 'a
+    | Right of 'b
+end;;
+let sq : (square, circle) Either.t = Either.Left (square 4.0);;
+let sh : (shape, shape) Either.t = (sq :> (shape, shape) Either.t);;
+
+#part 5
+module Either : sig 
+  type ('a, 'b) t
+  val left: 'a -> ('a, 'b) t
+  val right: 'b -> ('a, 'b) t
+end = struct
+  type ('a, 'b) t = 
+    | Left of 'a
+    | Right of 'b
+  let left x = Left x
+  let right x = Right x
+end;;
+let sq : (square, circle) Either.t = Either.left (square 4.0);;
+let sh : (shape, shape) Either.t = (sq :> (shape, shape) Either.t);;
+
+#part 6
+module Either : sig 
+  type (+'a, +'b) t
+  val left: 'a -> ('a, 'b) t
+  val right: 'b -> ('a, 'b) t
+end = struct
+  type ('a, 'b) t = 
+    | Left of 'a
+    | Right of 'b
+  let left x = Left x
+  let right x = Right x
+end;;
+# let sq : (square, circle) Either.t = Either.left (square 4.0);;
+# let sh : (shape, shape) Either.t = (sq :> (shape, shape) Either.t);;
+
+#part 7
+type 'a stack = < pop: 'a option; push: 'a -> unit >;;
+let square_stack: square stack = stack [square 3.0; square 1.0];;
+let circle_stack: circle stack = stack [circle 2.0; circle 4.0];;
+
+#part 8
+let total_area (shape_stacks: shape stack list) =
+  let stack_area acc st = 
+    let rec loop acc =
+      match st#pop with
+      | Some s -> loop (acc +. s#area)
+      | None -> acc
+    in
+      loop acc
+  in
+    List.fold ~init:0.0 ~f:stack_area shape_stacks;;
+
+#part 9
+total_area [(square_stack :> shape stack); (circle_stack :> shape stack)];;
+
+#part 10
+type 'a readonly_stack = < pop : 'a option >;;
+let total_area (shape_stacks: shape readonly_stack list) =
+  let stack_area acc st = 
+    let rec loop acc =
+      match st#pop with
+      | Some s -> loop (acc +. s#area)
+      | None -> acc
+    in
+      loop acc
+  in
+    List.fold ~init:0.0 ~f:stack_area shape_stacks;;
+total_area [(square_stack :> shape readonly_stack); (circle_stack :> shape readonly_stack)];;

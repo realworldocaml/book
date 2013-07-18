@@ -1,0 +1,39 @@
+#part 1
+type shape = < area : float >;;
+
+type square = < area : float; width : float >;;
+
+let square w = object
+  method area = w *. w
+  method width = w
+end;;
+
+type circle = < area : float; radius : float >;;
+
+let circle r = object
+  method area = 3.14 *. r ** 2.0
+  method radius = r
+end;;
+
+#part 2
+let shape w : shape = square w;;
+let shape w : shape = (square w :> shape);;
+
+#part 3
+let coin = object
+  method shape = circle 0.5
+  method color = "silver"
+end;;
+let map = object
+  method shape = square 1.0
+end;;
+
+#part 4
+type item = < shape : shape >;;
+let items = [ (coin :> item) ; (map :> item) ];;
+
+#part 5
+type num = [ `Int of int | `Float of float ];;
+type const = [ num | `String of string ];;
+let n : num = `Int 3;;
+let c : const = (n :> const);;

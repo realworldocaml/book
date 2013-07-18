@@ -47,18 +47,8 @@ Here's the interface we'll match, provided as an `mli`.  Here, the
 type `('a, 'b) t` is used for a dictionary with keys of type `'a` and
 data of type `'b`.
 
-```ocaml
-(* file: dictionary.mli *)
-open Core.Std
-
-type ('a, 'b) t
-
-val create : unit -> ('a, 'b) t
-val length : ('a, 'b) t -> int
-val add    : ('a, 'b) t -> key:'a -> data:'b -> unit
-val find   : ('a, 'b) t -> 'a -> 'b option
-val iter   : ('a, 'b) t -> f:(key:'a -> data:'b -> unit) -> unit
-val remove : ('a, 'b) t -> 'a -> unit
+```frag
+((typ ocaml)(name imperative-programming/dictionary.mli)(part 1))
 ```
 
 The `mli` also includes a collection of helper functions whose purpose
@@ -74,13 +64,8 @@ imperative constructs as they come up.
 Our first step is to define the type of a dictionary as a record with
 two fields.
 
-```ocaml
-(* file: dictionary.ml *)
-open Core.Std
-
-type ('a, 'b) t = { mutable length: int;
-                    buckets: ('a * 'b) list array;
-                  }
+```frag
+((typ ocaml)(name imperative-programming/dictionary.ml)(part 1))
 ```
 
 The first field, `length` is declared as mutable.  In OCaml, records
@@ -92,21 +77,8 @@ see.
 Now we'll start putting together the basic functions for manipulating
 a dictionary.
 
-```ocaml
-let num_buckets = 17
-
-let hash_bucket key = (Hashtbl.hash key) mod num_buckets
-
-let create () =
-  { length = 0;
-    buckets = Array.create ~len:num_buckets [];
-  }
-
-let length t = t.length
-
-let find t key =
-  List.find_map t.buckets.(hash_bucket key)
-    ~f:(fun (key',data) -> if key' = key then Some data else None)
+```frag
+((typ ocaml)(name imperative-programming/dictionary.ml)(part 2))
 ```
 
 Note that `num_buckets` is a constant.  That's because, for
@@ -133,9 +105,8 @@ Another bit of syntax has popped up in `find`: we write
 `List.find_map`, which you can see the type of by typing it into the
 toplevel:
 
-```ocaml
-# List.find_map;;
-- : 'a list -> f:('a -> 'b option) -> 'b option = <fun>
+```frag
+((typ ocamltop)(name imperative-programming/examples.topscript)(part 1))
 ```
 
 `List.find_map` iterates over the elements of the list, calling `f` on
@@ -145,11 +116,8 @@ all values, then `None` is returned by `find_map`.
 
 Now let's look at the implementation of `iter`:
 
-```ocaml
-let iter t ~f =
-  for i = 0 to Array.length t.buckets - 1 do
-    List.iter t.buckets.(i) ~f:(fun (key, data) -> f ~key ~data)
-  done
+```frag
+((typ ocaml)(name imperative-programming/dictionary.ml)(part 3))
 ```
 
 `iter` is designed to walk over all the entries in the dictionary.  In
@@ -168,31 +136,8 @@ idiomatic in the context of imperative code.
 The following code is for adding and removing mappings from the
 dictionary.
 
-```ocaml
-let bucket_has_key t i key =
-  List.exists t.buckets.(i) ~f:(fun (key',_) -> key' = key)
-
-let add t ~key ~data =
-  let i = hash_bucket key in
-  let replace = bucket_has_key t i key in
-  let filtered_bucket =
-    if replace then
-      List.filter t.buckets.(i) ~f:(fun (key',_) -> key' <> key)
-    else
-      t.buckets.(i)
-  in
-  t.buckets.(i) <- (key, data) :: filtered_bucket;
-  if not replace then t.length <- t.length + 1
-
-let remove t key =
-  let i = hash_bucket key in
-  if bucket_has_key t i key then (
-    let filtered_bucket =
-      List.filter t.buckets.(i) ~f:(fun (key',_) -> key' <> key)
-    in
-    t.buckets.(i) <- filtered_bucket;
-    t.length <- t.length - 1
-  )
+```frag
+((typ ocaml)(name imperative-programming/dictionary.ml)(part 4))
 ```
 
 This above code is made more complicated by the fact that we need to
@@ -330,8 +275,8 @@ container with a single mutable polymorphic field.
 
 The definition for the ref type is as follows:
 
-```ocaml
-type 'a ref = { mutable contents : 'a }
+```frag
+((typ ocamltop)(name imperative-programming/ref.topscript)(part 1))
 ```
 
 The standard library defines the following operators for working with
@@ -344,15 +289,8 @@ refs.
 
 You can see these in action below.
 
-```ocaml
-# let x = ref 1;;
-val x : int ref = {contents = 1}
-# !x;;
-- : int = 1
-# x := !x + 1;;
-- : unit = ()
-# !x;;
-- : int = 2
+```frag
+((typ ocamltop)(name imperative-programming/ref.topscript)(part 1))
 ```
 
 The above are just ordinary OCaml functions which could be defined as
@@ -389,25 +327,15 @@ The `for` loop is the simpler of the two.  Indeed, we've already seen
 the `for` loop in action --- the `iter` function in `Dictionary` is
 built using it.  Here's a simple example of `for`.
 
-```ocaml
-# for i = 0 to 3 do printf "i = %d\n" i done;;
-i = 0
-i = 1
-i = 2
-i = 3
-- : unit = ()
+```frag
+((typ ocamltop)(name imperative-programming/for.topscript)(part 1))
 ```
 
 As you can see, the upper and lower bounds are inclusive.  We can also
 use `downto` to iterate in the other direction.
 
-```ocaml
-# for i = 3 downto 0 do printf "i = %d\n" i done;;
-i = 3
-i = 2
-i = 1
-i = 0
-- : unit = ()
+```frag
+((typ ocamltop)(name imperative-programming/for.topscript)(part 2))
 ```
 
 Note that the loop variable of a `for` loop, `i` in this case, is
@@ -419,28 +347,8 @@ body.  The loop first evaluates the condition, and then, if it
 evaluates to true, evaluates the body and starts the loop again.
 Here's a simple example of a function for reversing an array in-place.
 
-```ocaml
-# let rev_inplace ar =
-    let i = ref 0 in
-    let j = ref (Array.length ar - 1) in
-    (* terminate when the upper and lower indices meet *)
-    while !i < !j do
-      (* swap the two elements *)
-      let tmp = ar.(!i) in
-      ar.(!i) <- ar.(!j);
-      ar.(!j) <- tmp;
-      (* bump the indices *)
-      incr i;
-      decr j
-    done
-  ;;
-val rev_inplace : 'a array -> unit = <fun>
-# let nums = [|1;2;3;4;5|];;
-val nums : int array = [|1; 2; 3; 4; 5|]
-# rev_inplace nums;;
-- : unit = ()
-# nums;;
-- : int array = [|5; 4; 3; 2; 1|]
+```frag
+((typ ocamltop)(name imperative-programming/for.topscript)(part 3))
 ```
 
 In the above, we used `incr` and `decr`, which are build-in functions
@@ -456,31 +364,8 @@ define our own linked list library as an illustration.
 
 Here's the `mli` of the module we'll build.
 
-```ocaml
-(* file: dlist.mli *)
-open Core.Std
-
-type 'a t
-type 'a element
-
-(** Basic list operations  *)
-val create   : unit -> 'a t
-val is_empty : 'a t -> bool
-
-(** Navigation using [element]s *)
-val first : 'a t -> 'a element option
-val next  : 'a element -> 'a element option
-val prev  : 'a element -> 'a element option
-val value : 'a element -> 'a
-
-(** Whole-data-structure iteration *)
-val iter    : 'a t -> f:('a -> unit) -> unit
-val find_el : 'a t -> f:('a -> bool) -> 'a element option
-
-(** Mutation *)
-val insert_first : 'a t -> 'a -> 'a element
-val insert_after : 'a element -> 'a -> 'a element
-val remove : 'a t -> 'a element -> unit
+```frag
+((typ ocaml)(name imperative-programming/dlist.mli))
 ```
 
 Note that there are two types defined here: `'a t`, the type of a
@@ -491,17 +376,8 @@ and give us a point at which to apply mutating operations.
 Now let's look at the implementation.  We'll start by defining `'a
 element` and `'a t`.
 
-```ocaml
-(* file: dlist.ml *)
-open Core.Std
-
-type 'a element =
-  { value : 'a;
-    mutable next : 'a element option;
-    mutable prev : 'a element option
-  }
-
-type 'a t = 'a element option ref
+```frag
+((typ ocaml)(name imperative-programming/dlist.ml)(part 1))
 ```
 
 An `'a element` is a record containing the value to be stored
@@ -517,15 +393,8 @@ and `Some` otherwise.
 Now we can define a few basic functions that operate on lists and
 elements.
 
-```ocaml
-let create () = ref None
-let is_empty t = !t = None
-
-let value elt = elt.value
-
-let first t = !t
-let next elt = elt.next
-let prev elt = elt.prev
+```frag
+((typ ocaml)(name imperative-programming/dlist.ml)(part 2))
 ```
 
 These all follow relatively straight-forwardly from our type
@@ -542,12 +411,8 @@ first, and then adding cycles using assignment afterwards.
 There is an exception to this, though: you can construct fixed-size
 cyclic data-structures using `let rec`.
 
-```ocaml
-# let rec endless_loop = 1 :: 2 :: 3 :: endless_loop;;
-val endless_loop : int list =
-  [1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1;
-   2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2;
-   ...]
+```frag
+((typ ocamltop)(name imperative-programming/examples.topscript)(part 2))
 ```
 
 This approach is quite limited, however.  General purpose cyclic data
@@ -561,15 +426,8 @@ Now, we'll start considering operations that mutate the list, starting
 with `insert_first`, which inserts an element at the front of the
 list.
 
-```ocaml
-let insert_first t value =
-  let new_elt = { prev = None; next = !t; value } in
-  begin match !t with
-  | Some old_first -> old_first.prev <- Some new_elt
-  | None -> ()
-  end;
-  t := Some new_elt;
-  new_elt
+```frag
+((typ ocaml)(name imperative-programming/dlist.ml)(part 3))
 ```
 
 `insert_first` first defines a new element `new_elt`, and then links
@@ -585,32 +443,14 @@ We can use `insert_after` to insert elements later in the list.
 `insert_after` takes as arguments both an `element` after which to
 insert the new node, and a value to insert.
 
-```ocaml
-let insert_after elt value =
-  let new_elt = { value; prev = Some elt; next = elt.next } in
-  begin match elt.next with
-  | Some old_next -> old_next.prev <- Some new_elt
-  | None -> ()
-  end;
-  elt.next <- Some new_elt;
-  new_elt
+```frag
+((typ ocaml)(name imperative-programming/dlist.ml)(part 4))
 ```
 
 Finally, we need a `remove` function.
 
-```ocaml
-let remove t elt =
-  let { prev; next; _ } = elt in
-  begin match prev with
-  | Some prev -> prev.next <- next
-  | None -> t := next
-  end;
-  begin match next with
-  | Some next -> next.prev <- prev;
-  | None -> ()
-  end;
-  elt.prev <- None;
-  elt.next <- None
+```frag
+((typ ocaml)(name imperative-programming/dlist.ml)(part 5))
 ```
 
 Note that the above code is careful to change the `prev` pointer of
@@ -649,22 +489,8 @@ in the list, returning the first `element` that passes the test.  Both
 use `next` to walk from element to element, and `value` to extract the
 element from a given node.
 
-```ocaml
-let iter t ~f =
-  let rec loop = function
-    | None -> ()
-    | Some el -> f (value el); loop (next el)
-  in
-  loop !t
-
-let find_el t ~f =
-  let rec loop = function
-    | None -> None
-    | Some elt ->
-      if f (value elt) then Some elt
-      else loop (next elt)
-  in
-  loop !t
+```frag
+((typ ocaml)(name imperative-programming/dlist.ml)(part 6))
 ```
 
 ## Laziness and other benign effects
@@ -683,14 +509,8 @@ prefix any expression, returning a value of type `'a Lazy.t`.  The
 evaluation of that expression is delayed until forced with the
 `Lazy.force` function.
 
-```ocaml
-# let v = lazy (print_string "performing lazy computation\n"; sqrt 16.);;
-val v : float lazy_t = <lazy>
-# Lazy.force v;;
-performing lazy computation
-- : float = 4.
-# Lazy.force v;;
-- : float = 4.
+```frag
+((typ ocamltop)(name imperative-programming/lazy.topscript)(part 1))
 ```
 
 You can see from the print statement that the actual computation was
@@ -700,13 +520,8 @@ To better understand how laziness works, let's walk through the
 implementation of our own lazy type.  We'll start by declaring types
 to represent a lazy value.
 
-```ocaml
-# type 'a lazy_state =
-    | Delayed of (unit -> 'a)
-    | Value of 'a
-    | Exn of exn
-  ;;
-type 'a lazy_state = Delayed of (unit -> 'a) | Value of 'a | Exn of exn
+```frag
+((typ ocamltop)(name imperative-programming/lazy.topscript)(part 2))
 ```
 
 A `lazy_state` represents the possible states of a lazy value.  A lazy
@@ -723,42 +538,21 @@ We can create a lazy value based on a thunk, _i.e._, a function that
 takes a unit argument.  Wrapping an expression in a thunk is another
 way to suspend the computation of an expression.
 
-```ocaml
-# let create_lazy f = ref (Delayed f);;
-val create_lazy : (unit -> 'a) -> 'a lazy_state ref = <fun>
-# let v = create_lazy
-    (fun () -> print_string "performing lazy computation\n"; sqrt 16.);;
-  val v : float lazy_state ref = {contents = Delayed <fun>}
+```frag
+((typ ocamltop)(name imperative-programming/lazy.topscript)(part 3))
 ```
 
 Now we just need a way to force a lazy value.  The following function
 does just that.
 
-```ocaml
-# let force v =
-    match !v with
-    | Value x -> x
-    | Exn e -> raise e
-    | Delayed f ->
-      try
-        let x = f () in
-        v := Value x;
-        x
-      with exn ->
-        v := Exn exn;
-        raise exn
-   ;;
-val force : 'a lazy_state ref -> 'a = <fun>
+```frag
+((typ ocamltop)(name imperative-programming/lazy.topscript)(part 4))
 ```
 
 Which we can use in the same way we used `Lazy.force`:
 
-```ocaml
-# force v;;
-performing lazy computation
-- : float = 4.
-# force v;;
-- : float = 4.
+```frag
+((typ ocamltop)(name imperative-programming/lazy.topscript)(part 5))
 ```
 
 The main user-visible difference between our implementation of
@@ -778,18 +572,8 @@ single-argument function and returns a memoized version of that
 function.  Here we'll use Core's `Hashtbl` module, rather than our toy
 `Dictionary`.
 
-```ocaml
-# let memoize f =
-    let table = Hashtbl.Poly.create () in
-    (fun x ->
-      match Hashtbl.find table x with
-      | Some y -> y
-      | None ->
-        let y = f x in
-        Hashtbl.add_exn table ~key:x ~data:y;
-        y
-    );;
-val memoize : ('a -> 'b) -> 'a -> 'b = <fun>
+```frag
+((typ ocamltop)(name imperative-programming/memo.topscript)(part 1))
 ```
 
 The code above is a bit tricky.  `memoize` takes as its argument a
@@ -819,31 +603,14 @@ Consider the following code for computing the edit distance.
 Understanding the algorithm isn't important here, but you should pay
 attention to the structure of the recursive calls.
 
-```ocaml
-# let rec edit_distance s t =
-    match String.length s, String.length t with
-    | (0,x) | (x,0) -> x
-    | (len_s,len_t) ->
-      let s' = String.drop_suffix s 1 in
-      let t' = String.drop_suffix t 1 in
-      let cost_to_drop_both =
-        if s.[len_s - 1] = t.[len_t - 1] then 0 else 1
-      in
-      List.reduce_exn ~f:Int.min
-        [ edit_distance s' t  + 1
-        ; edit_distance s  t' + 1
-        ; edit_distance s' t' + cost_to_drop_both
-        ]
-  ;;
-val edit_distance : string -> string -> int = <fun>
-# edit_distance "OCaml" "ocaml";;
-- : int = 2
+```frag
+((typ ocamltop)(name imperative-programming/memo.topscript)(part 1))
 ```
 
 The thing to note is that if you call `edit_distance "OCaml" "ocaml"`,
 then that will in turn dispatch the following calls:
 
-```ocaml
+```frag
 edit_distance "OCam" "ocaml"
 edit_distance "OCaml" "ocam"
 edit_distance "OCam" "ocam"
@@ -851,7 +618,7 @@ edit_distance "OCam" "ocam"
 
 And these calls will in turn dispatch other calls:
 
-```ocaml
+```frag
 edit_distance "OCam" "ocaml"
    edit_distance "OCa" "ocaml"
    edit_distance "OCam" "ocam"
@@ -873,25 +640,14 @@ meaning that our implementation of `edit_distance` is brutally slow
 for large strings.  We can see this by writing a small timing
 function.
 
-```ocaml
-# let time f =
-    let start = Time.now () in
-    let x = f () in
-    let stop = Time.now () in
-    printf "Time: %s\n" (Time.Span.to_string (Time.diff stop start));
-    x ;;
-val time : (unit -> 'a) -> 'a = <fun>
+```frag
+((typ ocamltop)(name imperative-programming/memo.topscript)(part 2))
 ```
 
 And now we can use this to try out some examples.
 
-```ocaml
-# time (fun () -> edit_distance "OCaml" "ocaml");;
-Time: 5.11003ms
-- : int = 2
-# time (fun () -> edit_distance "OCaml 4.01" "ocaml 4.01");;
-Time: 19.3322s
-- : int = 2
+```frag
+((typ ocamltop)(name imperative-programming/memo.topscript)(part 3))
 ```
 
 Just those few extra characters made it almost four thousand times
@@ -907,22 +663,16 @@ with two `1`'s, with every subsequent element being the sum of the
 previous two.  The classic recursive definition of Fibonacci is as
 follows:
 
-```ocaml
-# let rec fib i =
-    if i <= 1 then 1 else fib (i - 1) + fib (i - 2);;
+```frag
+((typ ocamltop)(name imperative-programming/fib.topscript)(part 1))
 ```
 
 This is, however, exponentially slow, for the same reason that
 `edit_distance` was slow: we end up making many redundant calls to
 `fib`.  It shows up quite dramatically in the performance.
 
-```ocaml
-# time (fun () -> fib 20);;
-Time: 5.17392ms
-- : int = 10946
-# time (fun () -> fib 40);;
-Time: 51.4205s
-- : int = 165580141
+```frag
+((typ ocamltop)(name imperative-programming/fib.topscript)(part 2))
 ```
 
 Here, `fib 40` takes almost a minute to compute, as opposed to five
@@ -934,15 +684,8 @@ within `fib`.  We can't just define `fib` in the ordinary way and
 memoize it after the fact and expect the first call to `fib` to be
 improved (though of course repeated calls will be improved).
 
-```ocaml
-# let fib = memoize fib;;
-val fib : int -> int = <fun>
-# time (fun () -> fib 40);;
-Time: 52.6s
-- : int = 165580141
-# time (fun () -> fib 40);;
-Time: 0.00596046ms
-- : int = 165580141
+```frag
+((typ ocamltop)(name imperative-programming/fib.topscript)(part 3))
 ```
 
 In order to make `fib` fast, our first step will be to rewrite `fib`
@@ -950,36 +693,22 @@ in a way that unwinds the recursion.  The following version expects as
 its first argument a function (called `fib`) that will be called in
 lieu of the usual recursive call.
 
-```ocaml
-# let fib_norec fib i =
-    if i <= 1 then i
-    else fib (i - 1) + fib (i - 2) ;;
-val fib_norec : (int -> int) -> int -> int = <fun>
+```frag
+((typ ocamltop)(name imperative-programming/fib.topscript)(part 4))
 ```
 
 We can now turn this back into an ordinary Fibonacci function by tying
 the recursive knot, as shown below.
 
-```ocaml
-# let rec fib i = fib_norec fib i;;
-val fib : int -> int = <fun>
-# fib 5;;
-- : int = 8
+```frag
+((typ ocamltop)(name imperative-programming/fib.topscript)(part 5))
 ```
 
 We can even write a polymorphic function that we'll call `make_rec`
 that can tie the recursive knot for any function of this form.
 
-```ocaml
-# let make_rec f_norec =
-    let rec f x = f_norec f x in
-    f
-  ;;
-val make_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
-# let fib = make_rec fib_norec;;
-val fib : int -> int = <fun>
-# fib 5;;
-- : int = 8
+```frag
+((typ ocamltop)(name imperative-programming/fib.topscript)(part 6))
 ```
 
 This is a pretty strange piece of code, and it may take a few minutes
@@ -994,14 +723,8 @@ implement the same old slow Fibonacci function.  To make it
 faster, we need variant on `make_rec` that inserts memoization when it
 ties the recursive knot.  We'll call that function `memo_rec`.
 
-```ocaml
-# let memo_rec f_norec x =
-     let fref = ref (fun _ -> assert false) in
-     let f = memoize (fun x -> f_norec !fref x) in
-     fref := f;
-     f x
-  ;;
-val memo_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
+```frag
+((typ ocamltop)(name imperative-programming/fib.topscript)(part 7))
 ```
 
 Note that `memo_rec` has the same signature as `make_rec`.
@@ -1012,11 +735,8 @@ wouldn't work here.
 
 Using `memo_rec`, we can now build an efficient version of `fib`.
 
-```ocaml
-# let fib = memo_rec fib_norec;;
-val fib : int -> int = <fun>
-# time (fun () -> fib 40);;
-Time: 0.236034ms
+```frag
+((typ ocamltop)(name imperative-programming/fib.topscript)(part 8))
 ```
 
 And as you can see, the exponential time complexity is now gone.
@@ -1033,10 +753,8 @@ computation completes.
 We can use `memo_rec` as part of a single declaration that makes this
 look like it's little more than a special form of `let rec`.
 
-```ocaml
-# let fib = memo_rec (fun fib i ->
-    if i <= 1 then 1 else fib (i - 1) + fib (i - 2));;
-val fib : int -> int = <fun>
+```frag
+((typ ocamltop)(name imperative-programming/fib.topscript)(part 9))
 ```
 
 Memoization is overkill for implementing Fibonacci, and indeed, the
@@ -1052,32 +770,16 @@ always recover the original interface with a wrapper function.)  With
 just that change and the addition of the `memo_rec` call, we can get a
 memoized version of `edit_distance`:
 
-```ocaml
-# let edit_distance = memo_rec (fun edit_distance (s,t) ->
-    match String.length s, String.length t with
-    | (0,x) | (x,0) -> x
-    | (len_s,len_t) ->
-      let s' = String.drop_suffix s 1 in
-      let t' = String.drop_suffix t 1 in
-      let cost_to_drop_both =
-        if s.[len_s - 1] = t.[len_t - 1] then 0 else 1
-      in
-      List.reduce_exn ~f:Int.min
-        [ edit_distance (s',t ) + 1
-        ; edit_distance (s ,t') + 1
-        ; edit_distance (s',t') + cost_to_drop_both
-        ]) ;;
-val edit_distance : string * string -> int = <fun>
+```frag
+((typ ocamltop)(name imperative-programming/memo.topscript)(part 5))
 ```
 
 This new version of `edit_distance` is much more efficient than the
 one we started with; the following call is about ten thousand times
 faster than it was without memoization.
 
-```ocaml
-# time (fun () -> edit_distance ("OCaml 4.01","ocaml 4.01"));;
-Time: 2.14601ms
-- : int = 2
+```frag
+((typ ocamltop)(name imperative-programming/memo.topscript)(part 6))
 ```
 
 <note> <title> Limitations of `let rec` </title>
@@ -1086,22 +788,15 @@ You might wonder why we didn't tie the recursive knot in
 `memo_rec` using `let rec`, as we did for `make_rec` earlier.  Here's
 code that tries to do just that:
 
-```ocaml
-# let memo_rec f_norec =
-     let rec f = memoize (fun x -> f_norec f x) in
-     f
-  ;;
-      Characters 41-72:
-       let rec f = memoize (fun x -> f_norec f x) in
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: This kind of expression is not allowed as right-hand side of `let rec'
+```frag
+((typ ocamltop)(name imperative-programming/letrec.topscript)(part 1))
 ```
 
 OCaml rejects the definition because OCaml, as a strict language, has
 limits on what it can put on the right hand side of a `let rec`.  In
 particular, imagine how the following code snippet would be compiled.
 
-```ocaml
+```frag
 let rec x = x + 1
 ```
 
@@ -1121,33 +816,24 @@ It's worth noting that these restrictions don't show up in a lazy
 language like Haskell.  Indeed, we can make something like our
 definition of `x` work if we use OCaml's laziness:
 
-```ocaml
-# let rec x = lazy (Lazy.force x + 1);;
-val x : int lazy_t = <lazy>
+```frag
+((typ ocamltop)(name imperative-programming/letrec.topscript)(part 2))
 ```
 
 Of course, actually trying to compute this will fail.  OCaml's `lazy`
 throws an exception when a lazy value tries to force itself as part of
 its own evaluation.
 
-```ocaml
-# Lazy.force x;;
-Exception: Lazy.Undefined.
+```frag
+((typ ocamltop)(name imperative-programming/letrec.topscript)(part 3))
 ```
 
 But we can also create useful recursive definitions with `lazy`.  In
 particular, we can use laziness to make our definition of `memo_rec`
 work without explicit mutation.
 
-```ocaml
-# let lazy_memo_rec f_norec x =
-     let rec f = lazy (memoize (fun x -> f_norec (Lazy.force f) x)) in
-     (Lazy.force f) x
-  ;;
-val lazy_memo_rec : (('a -> 'b) -> 'a -> 'b) -> 'a -> 'b = <fun>
-# time (fun () -> lazy_memo_rec fib_norec 40);;
-Time: 0.298977ms
-- : int = 102334155
+```frag
+((typ ocamltop)(name imperative-programming/letrec.topscript)(part 5))
 ```
 
 Laziness is more constrained than explicit mutation, and so in some
@@ -1209,22 +895,8 @@ Core's `Zone` module for looking up a timezone, and the `Time` module
 for computing the current time and printing it out in the timezone in
 question.
 
-```ocaml
-(* file: time_converter.ml *)
-open Core.Std
-
-let () =
-  Out_channel.output_string stdout "Pick a timezone: ";
-  Out_channel.flush stdout;
-  match In_channel.input_line stdin with
-  | None -> failwith "No timezone provided"
-  | Some zone_string ->
-    let zone = Zone.find_exn zone_string in
-    let time_string = Time.to_localized_string (Time.now ()) zone in
-    Out_channel.output_string stdout
-      (String.concat
-         ["The time in ";Zone.to_string zone;" is "; time_string;"\n"]);
-    Out_channel.flush stdout
+```frag
+((typ ocaml)(name imperative-programming/time_converter.ml))
 ```
 
 We can build this program (using `ocamlbuild` with the `_tags` file
@@ -1273,11 +945,8 @@ directives embedded in the format string.  So, for example, we can
 write:
 
 
-```ocaml
-# printf "%i is an integer, %F is a float, \"%s\" is a string\n"
-    3 4.5 "five";;
-3 is an integer, 4.5 is a float, "five" is a string
-- : unit = ()
+```frag
+((typ ocamltop)(name imperative-programming/printf.topscript)(part 1))
 ```
 
 Importantly, and unlike C's `printf`, the `printf` in OCaml is
@@ -1285,13 +954,8 @@ type-safe.  In particular, if we provide an argument whose type
 doesn't match what's presented in the format string, we'll get a type
 error.
 
-```ocaml
-# printf "An integer: %i\n" 4.5;;
-Characters 26-29:
-  printf "An integer: %i\n" 4.5;;
-                            ^^^
-Error: This expression has type float but an expression was expected of type
-         int
+```frag
+((typ ocamltop)(name imperative-programming/printf.topscript)(part 2))
 ```
 
 <note> <title> Understanding format strings </title>
@@ -1308,17 +972,8 @@ string at compile time, which means the format string needs to be
 available as a string literal at compile time.  Indeed, if you try to
 pass an ordinary string to `printf`, the compiler will complain.
 
-```ocaml
-# let fmt = "%i is an integer, %F is a float, \"%s\" is a string\n";;
-val fmt : string = "%i is an integer, %F is a float, \"%s\" is a string\n"
-# printf fmt 3 4.5 "five";;
-Characters 7-10:
-  printf fmt 3 4.5 "five";;
-         ^^^
-Error: This expression has type string but an expression was expected of type
-         ('a -> 'b -> 'c -> 'd, out_channel, unit) format =
-           ('a -> 'b -> 'c -> 'd, out_channel, unit, unit, unit, unit)
-           format6
+```frag
+((typ ocamltop)(name imperative-programming/printf.topscript)(part 3))
 ```
 
 If OCaml infers that a given string literal is a format string, then
@@ -1327,18 +982,14 @@ with the formatting directives it finds.  Thus, if we add a
 type-annotation indicating that the string we're defining is actually
 a format string, it will be interpreted as such:
 
-```ocaml
-# let fmt : ('a, 'b, 'c) format =
-    "%i is an integer, %F is a float, \"%s\" is a string\n";;
-  val fmt : (int -> float -> string -> 'c, 'b, 'c) format = <abstr>
+```frag
+((typ ocamltop)(name imperative-programming/printf.topscript)(part 4))
 ```
 
 And accordingly, we can pass it to `printf`.
 
-```ocaml
-# printf fmt 3 4.5 "five";;
-3 is an integer, 4.5 is a float, "five" is a string
-- : unit = ()
+```frag
+((typ ocamltop)(name imperative-programming/printf.topscript)(part 4))
 ```
 
 If this looks different from everything else you've seen so far,
@@ -1353,18 +1004,8 @@ outlines of the story in the back of your head.
 Now let's see how we can rewrite our time conversion program to be a
 little more concise using `printf`.
 
-```ocaml
-(* file: time_converter.ml *)
-open Core.Std
-
-let () =
-  printf "Pick a timezone: %!";
-  match In_channel.input_line stdin with
-  | None -> failwith "No timezone provided"
-  | Some zone_string ->
-    let zone = Zone.find_exn zone_string in
-    let time_string = Time.to_localized_string (Time.now ()) zone in
-    printf "The time in %s is %s.\n%!" (Zone.to_string zone) time_string
+```frag
+((typ ocaml)(name imperative-programming/time_converter2.ml))
 ```
 
 In the above example, we've used only two formatting directives: `%s`,
@@ -1396,25 +1037,8 @@ with files.  Here's a couple of functions, one that creates a file
 full of numbers, and the other that reads in such a file and returns
 the sum of those numbers.
 
-```ocaml
-# let create_number_file filename numbers =
-    let outc = Out_channel.create filename in
-    List.iter numbers ~f:(fun x -> fprintf outc "%d\n" x);
-    Out_channel.close outc
-  ;;
-val create_number_file : string -> int list -> unit = <fun>
-# let sum_file filename =
-     let file = In_channel.create filename in
-     let numbers = List.map ~f:Int.of_string (In_channel.input_lines file) in
-     let sum = List.fold ~init:0 ~f:(+) numbers in
-     In_channel.close file;
-     sum
-  ;;
-val sum_file : string -> int = <fun>
-# create_number_file "numbers.txt" [1;2;3;4;5];;
-- : unit = ()
-# sum_file "numbers.txt";;
-- : int = 15
+```frag
+((typ ocamltop)(name imperative-programming/file.topscript)(part 1))
 ```
 
 For both of these functions we followed the same basic sequence: we
@@ -1428,19 +1052,15 @@ the middle of its work, it won't actually close the file.  If we try to
 read a file that doesn't actually contain numbers, we'll see such an
 error:
 
-```ocaml
-# sum_file "/etc/hosts";;
-Exception: (Failure "Int.of_string: \"##\"").
+```frag
+((typ ocamltop)(name imperative-programming/file.topscript)(part 2))
 ```
 
 And if we do this over and over in a loop, we'll eventually run out of
 file descriptors.
 
-```ocaml
-# for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -> () done;;
-- : unit = ()
-# sum_file "numbers.txt";;
-Exception: (Sys_error "numbers.txt: Too many open files").
+```frag
+((typ ocamltop)(name imperative-programming/file.topscript)(part 3))
 ```
 
 And now, you'll need to restart your toplevel if you want to open any
@@ -1450,24 +1070,14 @@ To avoid this, we need to make sure that our code cleans up after
 itself.  We can do this using the `protect` function described in
 [xref](#error-handling), as follows.
 
-```ocaml
-# let sum_file filename =
-     let file = In_channel.create filename in
-     protect ~f:(fun () ->
-         let numbers = List.map ~f:Int.of_string (In_channel.input_lines file) in
-         List.fold ~init:0 ~f:(+) numbers)
-       ~finally:(fun () -> In_channel.close file)
-  ;;
-val sum_file : string -> int = <fun>
+```frag
+((typ ocamltop)(name imperative-programming/file2.topscript)(part 1))
 ```
 
 And now, the file descriptor leak is gone:
 
-```ocaml
-# for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -> () done;;
-- : unit = ()
-# sum_file "numbers.txt";;
-- : int = 15
+```frag
+((typ ocamltop)(name imperative-programming/file2.topscript)(part 2))
 ```
 
 This is really an example of a more general complexity of imperative
@@ -1480,13 +1090,8 @@ of this for you.  For example, the `with_file` function takes a
 filename and a function for processing that file, and takes care of
 the opening and closing of the file transparently.
 
-```ocaml
-# let sum_file filename =
-     In_channel.with_file filename ~f:(fun file ->
-       let numbers = List.map ~f:Int.of_string (In_channel.input_lines file) in
-       List.fold ~init:0 ~f:(+) numbers)
-  ;;
-val sum_file : string -> int = <fun>
+```frag
+((typ ocamltop)(name imperative-programming/file2.topscript)(part 3))
 ```
 
 Another misfeature of our implementation of `sum_file` is that we
@@ -1494,13 +1099,8 @@ read the entire file into memory before processing it.  For a large
 file, it's more efficient to process a line at a time.  You can use
 the `In_channel.fold_lines` function to do just that.
 
-```ocaml
-# let sum_file filename =
-     In_channel.with_file filename ~f:(fun file ->
-       In_channel.fold_lines file ~init:0 ~f:(fun sum line ->
-         sum + Int.of_string line))
-  ;;
-val sum_file : string -> int = <fun>
+```frag
+((typ ocamltop)(name imperative-programming/file2.topscript)(part 4))
 ```
 
 This is just a taste of the functionality of `In_channel` and
@@ -1522,13 +1122,8 @@ Consider the following simple example.  Here, we have a collection of
 angles and we want to determine if any of them have a negative `sin`.
 The following snippet of code would answer that question.
 
-```ocaml
-# let x = sin 120. in
-  let y = sin 75.  in
-  let z = sin 128. in
-  List.exists ~f:(fun x -> x < 0.) [x;y;z]
-  ;;
-- : bool = true
+```frag
+((typ ocamltop)(name imperative-programming/order.topscript)(part 1))
 ```
 
 In some sense, we don't really need to compute the `sin 128.`, because
@@ -1539,26 +1134,14 @@ It doesn't have to be this way.  Using the `lazy` keyword, we can
 write the original computation so that `sin 128.` won't ever be
 computed.
 
-```ocaml
-# let x = lazy (sin 120.) in
-  let y = lazy (sin 75.)  in
-  let z = lazy (sin 128.) in
-  List.exists ~f:(fun x -> Lazy.force x < 0.) [x;y;z]
-  ;;
-- : bool = true
+```frag
+((typ ocamltop)(name imperative-programming/order.topscript)(part 2))
 ```
 
 We can confirm that fact by a few well placed `printf`s.
 
-```ocaml
-# let x = lazy (printf "1\n"; sin 120.) in
-  let y = lazy (printf "2\n"; sin 75.)  in
-  let z = lazy (printf "3\n"; sin 128.) in
-  List.exists ~f:(fun x -> Lazy.force x < 0.) [x;y;z]
-  ;;
-1
-2
-- : bool = true
+```frag
+((typ ocamltop)(name imperative-programming/order.topscript)(part 3))
 ```
 
 OCaml is strict by default for a good reason: Lazy evaluation and
@@ -1578,16 +1161,8 @@ might expect.
 
 Consider the following example.
 
-```ocaml
-# List.exists ~f:(fun x -> x < 0.)
-    [ (printf "1\n"; sin 120.);
-      (printf "2\n"; sin 75.);
-      (printf "3\n"; sin 128.); ]
-  ;;
-3
-2
-1
-- : bool = true
+```frag
+((typ ocamltop)(name imperative-programming/order.topscript)(part 4))
 ```
 
 Here, you can see that the sub-expression that came last was actually
@@ -1600,14 +1175,8 @@ different sub-expressions, you should express them as a series of
 
 Consider the following simple imperative function.
 
-```ocaml
-# let remember =
-    let cache = ref None in
-    (fun x ->
-       match !cache with
-       | Some y -> y
-       | None -> cache := Some x; x)
-  ;;
+```frag
+((typ ocamltop)(name imperative-programming/weak.topscript)(part 1))
 ```
 
 `remember` simply caches the first value that's passed to it,
@@ -1627,13 +1196,8 @@ polymorphic type variable.  It's this kind of generalization that
 gives us polymorphic types in the first place.  The identity function,
 as an example, gets a polymorphic type in this way.
 
-```ocaml
-# let identity x = x;;
-val identity : 'a -> 'a = <fun>
-# identity 3;;
-- : int = 3
-# identity "five";;
-- : string = "five"
+```frag
+((typ ocamltop)(name imperative-programming/weak.topscript)(part 2))
 ```
 
 As you can see, the polymorphic type of `identity` lets it operate on
@@ -1643,7 +1207,7 @@ This is not what happens with `remember`, though.  Here's the type
 that OCaml infers for `remember`, which looks almost, but not quite,
 like the type of the identity function.
 
-```ocaml
+```frag
 val remember : '_a -> '_a = <fun>
 ```
 
@@ -1657,17 +1221,8 @@ OCaml will convert a weakly polymorphic variable to a concrete type as
 soon as it gets a clue as to what concrete type it is to be used as,
 as you can see below.
 
-```ocaml
-# let remember_three () = remember 3;;
-val remember_three : unit -> int = <fun>
-# remember;;
-- : int -> int = <fun>
-# remember "avocado";;
-Characters 9-18:
-  remember "avocado";;
-           ^^^^^^^^^
-Error: This expression has type string but an expression was expected of type
-         int
+```frag
+((typ ocamltop)(name imperative-programming/weak.topscript)(part 3))
 ```
 
 Note that the type of `remember` was settled by the definition of
@@ -1696,18 +1251,16 @@ of simple values by their nature can't contain refs, including:
 Thus, the following expression is a simple value, and as a result, the
 types of values contained within it are allowed to be polymorphic.
 
-```ocaml
-# (fun x -> [x;x]);;
-- : 'a -> 'a list = <fun>
+```frag
+((typ ocamltop)(name imperative-programming/value_restriction.topscript)(part 1))
 ```
 
 But, if we write down an expression that isn't a simple value by the
 above definition, we'll get different results.  For example, consider
 what happens if we try to memoize the function defined above.
 
-```ocaml
-# memoize (fun x -> [x;x]);;
-- : '_a -> '_a list = <fun>
+```frag
+((typ ocamltop)(name imperative-programming/value_restriction.topscript)(part 2))
 ```
 
 The memoized version of the function does in fact need to be
@@ -1716,9 +1269,8 @@ scenes to cache previous invocations of the function it has passed.
 But OCaml would make the same determination even if the function in
 question did no such thing.  Consider this example:
 
-```ocaml
-# identity (fun x -> [x;x]);;
-- : '_a -> '_a list = <fun>
+```frag
+((typ ocamltop)(name imperative-programming/value_restriction.topscript)(part 3))
 ```
 
 It would be safe to infer a weakly polymorphic variable here, but
@@ -1731,9 +1283,8 @@ values between uses of the same function.  Thus, a function that
 produces a fresh reference every time it's called can have a fully
 polymorphic type:
 
-```ocaml
-# let f () = ref None;;
-val f : unit -> 'a option ref = <fun>
+```frag
+((typ ocamltop)(name imperative-programming/value_restriction.topscript)(part 4))
 ```
 
 But a function that has a mutable cache that persists across calls,
@@ -1754,20 +1305,16 @@ Consider the `List.init` function, which is used for creating lists
 where each element is created by calling a function on the index of
 that element.
 
-```ocaml
-# List.init;;
-- : int -> f:(int -> 'a) -> 'a list = <fun>
-# List.init 10 ~f:Int.to_string;;
-- : string list = ["0"; "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"]
+```frag
+((typ ocamltop)(name imperative-programming/value_restriction.topscript)(part 5))
 ```
 
 Imagine we wanted to create a specialized version of `List.init` that
 always created lists of length 10.  We could do that using partial
 application, as follows.
 
-```ocaml
-# let list_init_10 = List.init 10;;
-val list_init_10 : f:(int -> '_a) -> '_a list = <fun>
+```frag
+((typ ocamltop)(name imperative-programming/value_restriction.topscript)(part 6))
 ```
 
 As you can see, we now infer a weakly polymorphic type for the
@@ -1778,9 +1325,8 @@ We can eliminate this possibility, and at the same time get the
 compiler to infer a polymorphic type, by using explicit variables
 rather than partial application.
 
-```ocaml
-# let list_init_10 ~f = List.init 10 ~f;;
-val list_init_10 : f:(int -> 'a) -> 'a list = <fun>
+```frag
+((typ ocamltop)(name imperative-programming/value_restriction.topscript)(part 7))
 ```
 
 This transformation is referred to as _eta expansion_, and is often
@@ -1802,66 +1348,30 @@ For example, we saw above that a function application, even a simple
 application of the identity function, is not a simple value and thus
 can turn a polymorphic value into a weakly polymorphic one.
 
-```ocaml
-# identity (fun x -> [x;x]);;
-- : '_a -> '_a list = <fun>
+```frag
+((typ ocamltop)(name imperative-programming/value_restriction.topscript)(part 8))
 ```
 
 But that's not always the case.  When the type of the returned value
 is immutable, then OCaml can typically infer a fully polymorphic type.
 
-```ocaml
-# identity [];;
-- : 'a list = []
+```frag
+((typ ocamltop)(name imperative-programming/value_restriction.topscript)(part 9))
 ```
 
 On the other hand, if the returned type is potentially mutable, then
 the result will be weakly polymorphic.
 
-```ocaml
-# [||];;
-- : 'a array = [||]
-# identity [||];;
-- : '_a array = [||]
+```frag
+((typ ocamltop)(name imperative-programming/value_restriction.topscript)(part 10))
 ```
 
 A more important example of this comes up when defining abstract data
 types.  Consider the following simple data-structure for an immutable
 list type that supports constant-time concatenation.
 
-```ocaml
-# module Concat_list : sig
-    type 'a t
-    val empty : 'a t
-    val singleton : 'a -> 'a t
-    val concat  : 'a t -> 'a t -> 'a t  (* constant time *)
-    val to_list : 'a t -> 'a list       (* linear time   *)
-  end = struct
-
-    type 'a t = Empty | Singleton of 'a | Concat of 'a t * 'a t
-
-    let empty = Empty
-    let singleton x = Singleton x
-    let concat x y = Concat (x,y)
-
-    let rec to_list_with_tail t tail =
-      match t with
-      | Empty -> tail
-      | Singleton x -> x :: tail
-      | Concat (x,y) -> to_list_with_tail x (to_list_with_tail y tail)
-
-    let to_list t =
-      to_list_with_tail t []
-
-  end;;
- module Concat_list :
-  sig
-    type 'a t
-    val empty : 'a t
-    val singleton : 'a -> 'a t
-    val concat : 'a t -> 'a t -> 'a t
-    val to_list : 'a t -> 'a list
-  end
+```frag
+((typ ocamltop)(name imperative-programming/value_restriction.topscript)(part 11))
 ```
 
 The details of the implementation don't matter so much, but it's
@@ -1869,11 +1379,8 @@ important to note that a `Concat_list.t` is unquestionably an
 immutable value.  However, when it comes to the value restriction,
 OCaml treats it as if it were mutable.
 
-```ocaml
-# Concat_list.empty;;
-- : 'a Concat_list.t = <abstr>
-# identity Concat_list.empty;;
-- : '_a Concat_list.t = <abstr>
+```frag
+((typ ocamltop)(name imperative-programming/value_restriction.topscript)(part 12))
 ```
 
 The issue here is that the signature, by virtue of being abstract, has
@@ -1891,7 +1398,6 @@ doesn't contain any persistent references to values of type `'a`, at
 which point, OCaml can infer polymorphic types for expressions of this
 type that are not simple values.
 
-```ocaml
-# identity Concat_list.empty;;
-- : 'a Concat_list.t = <abstr>
+```frag<
+((typ ocamltop)(name imperative-programming/value_restriction.topscript)(part 12))
 ```
