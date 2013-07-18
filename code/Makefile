@@ -17,6 +17,7 @@ dirs= json \
       files-modules-and-programs-freq-with-type-mismatch \
       files-modules-and-programs-freq-cyclic1 \
       files-modules-and-programs-freq-cyclic2 \
+      records \
 
 
 # html/md files directory
