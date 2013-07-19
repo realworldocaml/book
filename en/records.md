@@ -1,23 +1,18 @@
 # Records
 
 One of OCaml's best features is its concise and expressive system for
-declaring new datatypes.  Two key elements of that system are
-_records_ and _variants_, both of which we discussed briefly in
-[xref](#a-guided-tour).  In this chapter we'll cover records in more
-depth, covering more of the details of how they work, as well as
-advice on how to use them effectively in your software designs.
-Variants will be covered in more depth in [xref](#variants).
+declaring new datatypes, and records are a key element of that system.
+We discussed records briefly in [xref](#a-guided-tour), but this
+chapter will go into more depth, covering the details of how records
+work, as well as advice on how to use them effectively in your
+software designs.
 
 A record represents a collection of values stored together as one,
 where each component is identified by a different field name.  The
 basic syntax for a record type declaration is as follows.
 
-```ocaml
-type <record-name> =
-  { <field-name> : <type-name> ;
-    <field-name> : <type-name> ;
-    ...
-  }
+```frag
+((typ ocamlsyntax)(name records/record.syntax))
 ```
 
 Note that record field names must start with a lower-case letter.
@@ -25,13 +20,8 @@ Note that record field names must start with a lower-case letter.
 Here's a simple example, a `host_info` record that summarizes
 information about a given computer.
 
-```ocaml
-# type host_info =
-    { hostname   : string;
-      os_name    : string;
-      cpu_arch   : string;
-      timestamp  : Time.t;
-    };;
+```frag
+((typ ocamltop)(name records/main.topscript)(part 0))
 ```
 
 We can construct a `host_info` just as easily.  The following code
@@ -39,19 +29,8 @@ uses the `Shell` module from `Core_extended` to dispatch commands to
 the shell to extract the information we need about the computer we're
 running on, and the `Time.now` call from Core's `Time` module.
 
-```ocaml
-# #require "core_extended";;
-# open Core_extended.Std;;
-# let my_host =
-    let sh = Shell.sh_one_exn in
-    { hostname   = sh "hostname";
-      os_name    = sh "uname -s";
-      cpu_arch   = sh "uname -p";
-      timestamp  = Time.now ();
-    };;
-val my_host : host_info =
-  {hostname = "yevaud"; os_name = "Darwin"; cpu_arch = "i386";
-   timestamp = 2013-06-29 11:05:48.358121+01:00}
+```frag
+((typ ocamltop)(name records/main.topscript)(part 1))
 ```
 
 You might wonder how the compiler inferred that `my_host` is of type
@@ -63,9 +42,8 @@ scope with the same field name.
 Once we have a record value in hand, we can extract elements from the
 record field using dot-notation.
 
-```ocaml
-# my_host.cpu_arch;;
-- : string = "i386"
+```frag
+((typ ocamltop)(name records/main.topscript)(part 2))
 ```
 
 When declaring an OCaml type, you always have the option of
@@ -73,19 +51,15 @@ parameterizing it by a polymorphic type.  Records are no different in
 this regard.  So, for example, here's a type one might use to
 timestamp arbitrary items.
 
-```ocaml
-# type 'a timestamped = { item: 'a; time: Time.t };;
-type 'a timestamped = { item : 'a; time : Time.t; }
+```frag
+((typ ocamltop)(name records/main.topscript)(part 3))
 ```
 
 We can then write polymorphic functions that operate over this
 parameterized type.
 
-```ocaml
-# let first_timestamped list =
-    List.reduce list ~f:(fun a b -> if a.time < b.time then a else b)
-  ;;
-val first_timestamped : 'a timestamped list -> 'a timestamped option = <fun>
+```frag
+((typ ocamltop)(name records/main.topscript)(part 4))
 ```
 
 ## Patterns and exhaustiveness
@@ -93,18 +67,12 @@ val first_timestamped : 'a timestamped list -> 'a timestamped option = <fun>
 Another way of getting information out of a record is by using a
 pattern match, as in the definition of `host_info_to_string` below.
 
-```ocaml
-# let host_info_to_string { hostname = h; os_name = os;
-                            cpu_arch = c; timestamp = ts;
-                          } =
-       sprintf "%s (%s / %s, on %s)" h os c (Time.to_sec_string ts);;
-val host_info_to_string : host_info -> string = <fun>
-# host_info_to_string my_host;;
-- : string = "yevaud (Darwin / i386, on 2013-06-29 11:05:48)"
+```frag
+((typ ocamltop)(name records/main.topscript)(part 5))
 ```
 
 Note that the pattern that we used had only a single case, rather than
-using several cases separated by `|`s.  We needed only one pattern
+using several cases separated by `|`'s.  We needed only one pattern
 because record patterns are _irrefutable_, meaning that a record
 pattern match will never fail at runtime.  This makes sense, because
 the set of fields available in a record is always the same.  In
@@ -122,14 +90,8 @@ those new fields will not be flagged by the compiler.
 As an example, imagine that we wanted to add a new field to our
 `host_info` record called `os_release`, as shown below.
 
-```ocaml
-# type host_info =
-    { hostname   : string;
-      os_name    : string;
-      cpu_arch   : string;
-      os_release : string;
-      timestamp  : Time.t;
-    } ;;
+```frag
+((typ ocamltop)(name records/main.topscript)(part 6))
 ```
 
 The code for `host_info_to_string` would continue to compile without
@@ -143,28 +105,16 @@ record pattern.  With that warning turned on (which you can do in the
 toplevel by typing `#warnings "+9" `), the compiler will warn about
 the missing field.
 
-```ocaml
-# #warnings "+9";;
-# olet host_info_to_string { hostname = h; os_name = os;
-                            cpu_arch = c; timestamp = ts;
-                          } =
-    sprintf "%s (%s / %s, on %s)" h os c (Time.to_sec_string ts);;
-Characters 24-139:
-Warning 9: the following labels are not bound in this record pattern:
-os_release
-Either bind these labels explicitly or add '; _' to the pattern.
+```frag
+((typ ocamltop)(name records/main.topscript)(part 7))
 ```
 
 We can disable the warning for a given pattern by explicitly
 acknowledging that we are ignoring extra fields.  This is done by
 adding an underscore to the pattern, as shown below.
 
-```ocaml
-# let host_info_to_string { hostname = h; os_name = os;
-                            cpu_arch = c; timestamp = ts; _
-                          } =
-    sprintf "%s (%s / %s, on %s)" h os c (Time.to_sec_string ts);;
-val host_info_to_string : host_info -> string = <fun>
+```frag
+((typ ocamltop)(name records/main.topscript)(part 8))
 ```
 
 It's a good idea to enable the warning for incomplete record matches,
@@ -176,10 +126,8 @@ The OCaml compiler is packed full of useful warnings that can be
 enabled and disabled separately.  For example, we could have found out
 about warning 9, which was discussed above, as follows:
 
-```
-$ ocaml -warn-help | egrep '\b9\b'
-  9 Missing fields in a record pattern.
-  R Synonym for warning 9.
+```frag
+((typ console)(name records/warn_help.out))
 ```
 
 You should think of OCaml's warnings as a powerful set of optional
@@ -216,28 +164,15 @@ OCaml provides some handy syntactic shortcuts.  For example, the
 pattern in the following function binds all of the fields in question
 to variables of the same name.  This is called _field punning_.
 
-```ocaml
-# let host_info_to_string { hostname; os_name; cpu_arch; timestamp; _ } =
-     sprintf "%s (%s / %s) <%s>" hostname os_name cpu_arch
-       (Time.to_string timestamp);;
-  val host_info_to_string : host_info -> string = <fun>
+```frag
+((typ ocamltop)(name records/main.topscript)(part 9))
 ```
 
 Field punning can also be used to construct a record.  Consider the
 following code for generating a `host_info` record.
 
-```ocaml
-# let my_host =
-    let sh cmd = Shell.sh_one_exn cmd in
-    let hostname   = sh "hostname" in
-    let os_name    = sh "uname -s" in
-    let cpu_arch   = sh "uname -p" in
-    let os_release = sh "uname -r" in
-    let timestamp  = Time.now () in
-    { hostname; os_name; cpu_arch; os_release; timestamp };;
-val my_host : host_info =
-  {hostname = "yevaud"; os_name = "Darwin"; cpu_arch = "i386";
-   os_release = "12.4.0"; timestamp = 2013-06-29 11:11:32.475361+01:00}
+```frag
+((typ ocamltop)(name records/main.topscript)(part 10))
 ```
 
 In the above code, we defined variables corresponding to the record
@@ -248,31 +183,15 @@ You can take advantage of both field punning and label punning when
 writing a function for constructing a record from labeled arguments,
 as shown below.
 
-```ocaml
-# let create_host_info ~hostname ~os_name ~cpu_arch ~os_release =
-    { os_name; cpu_arch; os_release;
-      hostname = String.lowercase hostname;
-      timestamp = Time.now () };;
-val create_host_info :
-  hostname:string ->
-  os_name:string -> cpu_arch:string -> os_release:string -> host_info = <fun>
+```frag
+((typ ocamltop)(name records/main.topscript)(part 11))
 ```
 
 This is considerably more concise than what you would get without
 punning at all.
 
-```ocaml
-# let create_host_info
-    ~hostname:hostname ~os_name:os_name
-    ~cpu_arch:cpu_arch ~os_release:os_release =
-    { os_name = os_name; 
-      cpu_arch = cpu_arch;
-      os_release = os_release;       
-      hostname = String.lowercase hostname;
-      timestamp = Time.now () };;
-val create_host_info :
-  hostname:string ->
-  os_name:string -> cpu_arch:string -> os_release:string -> host_info = <fun>
+```frag
+((typ ocamltop)(name records/main.topscript)(part 12))
 ```
 
 Together, labeled arguments, field names, and field and label punning,
@@ -295,43 +214,24 @@ the client to demonstrate to the server that the client is alive and
 connected.  All of these messages include a session id and the time
 the message was generated.
 
-```ocaml
-# type log_entry =
-    { session_id: string;
-      time: Time.t;
-      important: bool;
-      message: string;
-    }
-  type heartbeat =
-    { session_id: string;
-      time: Time.t;
-      status_message: string;
-    }
-  type logon =
-    { session_id: string;
-      time: Time.t;
-      user: string;
-      credentials: string;
-    }
-;;
+```frag
+((typ ocamltop)(name records/main.topscript)(part 13))
 ```
 
 Reusing field names can lead to some ambiguity.  For example, if we
 want to write a function to grab the session_id from a record, what
 type will it have?
 
-```ocaml
-# let get_session_id t = t.session_id;;
-val get_session_id : logon -> string = <fun>
+```frag
+((typ ocamltop)(name records/main.topscript)(part 14))
 ```
 
 In this case, OCaml just picks the most recent definition of that
 record field.  We can force OCaml to assume we're dealing with a
 different type (say, a `heartbeat`) using a type annotation.
 
-```ocaml
-# let get_heatbeat_session_id (t:heartbeat) = t.session_id;;
-val get_heatbeat_session_id : heartbeat -> string = <fun>
+```frag
+((typ ocamltop)(name records/main.topscript)(part 15))
 ```
 
 While it's possible to resolve ambiguous field names using type
@@ -339,13 +239,8 @@ annotations, the ambiguity can be a bit confusing.  Consider the
 following functions for grabbing the session id and status from a
 heartbeat.
 
-```ocaml
-# let status_and_session t = (t.status_message, t.session_id);;
-val status_and_session : heartbeat -> string * string = <fun>
-# let session_and_status t = (t.session_id, t.status_message);;
-Error: The record type logon has no field status_message
-# let session_and_status (t:heartbeat) = (t.session_id, t.status_message);;
-val session_and_status : heartbeat -> string * string = <fun>
+```frag
+((typ ocamltop)(name records/main.topscript)(part 16))
 ```
 
 Why did the first definition succeed without a type annotation and the
@@ -364,41 +259,14 @@ name-space within which to put related values.  When using this style,
 it is standard practice to name the type associated with the module
 `t`.  Using this style we would write:
 
-```ocaml
-# module Log_entry = struct
-    type t =
-      { session_id: string;
-        time: Time.t;
-        important: bool;
-        message: string;
-      }
-  end
-  module Heartbeat = struct
-    type t =
-      { session_id: string;
-        time: Time.t;
-        status_message: string;
-      }
-  end
-  module Logon = struct
-    type t =
-      { session_id: string;
-        time: Time.t;
-        user: string;
-        credentials: string;
-      }
-  end;;
+```frag
+((typ ocamltop)(name records/main.topscript)(part 17))
 ```
 
 Now, our log-entry-creation function can be rendered as follows.
 
-```ocaml
-# let create_log_entry ~session_id ~important message =
-     { Log_entry.time = Time.now (); Log_entry.session_id;
-       Log_entry.important; Log_entry.message }
-  ;;
-val create_log_entry :
-  session_id:string -> important:bool -> string -> Log_entry.t = <fun>
+```frag
+((typ ocamltop)(name records/main.topscript)(part 18))
 ```
 
 The module name `Log_entry` is required to qualify the fields, because
@@ -408,31 +276,22 @@ record field, however, so we can write this more concisely.  Note that
 we are allowed to insert whitespace between the module-path and the
 field name.
 
-```ocaml
-# let create_log_entry ~session_id ~important message =
-     { Log_entry.
-       time = Time.now (); session_id; important; message }
-  ;;
-val create_log_entry :
-  session_id:string -> important:bool -> string -> Log_entry.t = <fun>
+```frag
+((typ ocamltop)(name records/main.topscript)(part 19))
 ```
 
 This is not restricted to constructing a record; we can use the same
 trick when pattern matching.
 
-```ocaml
-# let message_to_string { Log_entry.important; message; _ } =
-    if important then String.uppercase message else message
-  ;;
-val message_to_string : Log_entry.t -> string = <fun>
+```frag
+((typ ocamltop)(name records/main.topscript)(part 20))
 ```
 
 When using dot-notation for accessing record fields, we can qualify
 the field by the module directly.  
 
-```ocaml
-# let is_important t = t.Log_entry.important;;
-val is_important : Log_entry.t -> bool = <fun>
+```frag
+((typ ocamltop)(name records/main.topscript)(part 21))
 ```
 
 The syntax here is a little surprising when you first encounter it.
@@ -457,22 +316,8 @@ heartbeat was received from that client.  The following defines a type
 for representing this information, as well as a function for updating
 the client information when a new heartbeat arrives.
 
-```ocaml
-# type client_info =
-   { addr: Unix.Inet_addr.t;
-     port: int;
-     user: string;
-     credentials: string;
-     last_heartbeat_time: Time.t;
-   };;
-# let register_heartbeat t hb =
-      { addr = t.addr;
-        port = t.port;
-        user = t.user;
-        credentials = t.credentials;
-        last_heartbeat_time = hb.Heartbeat.time;
-      };;
-val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
+```frag
+((typ ocamltop)(name records/main.topscript)(part 22))
 ```
 
 This is fairly verbose, given that there's only one field that we
@@ -480,11 +325,8 @@ actually want to change, and all the others are just being copied over
 from `t`.  We can use OCaml's _functional update_ syntax to do this
 more tersely.  The syntax of a functional update is as follows.
 
-```ocaml
-{ <record> with <field> = <value>;
-                <field> = <value>;
-                ...
-}
+```frag
+((typ ocamlsyntax)(name records/functional_update.syntax))
 ```
 
 The purpose of the functional update is to create a new record based
@@ -492,10 +334,8 @@ on an existing one, with a set of field changes layered on top.
 
 Given this, we can rewrite `register_heartbeat` more concisely.
 
-```ocaml
-# let register_heartbeat t hb =
-    { t with last_heartbeat_time = hb.Heartbeat.time };;
-val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
+```frag
+((typ ocamltop)(name records/main.topscript)(part 23))
 ```
 
 Functional updates make your code independent of the identity of the
@@ -506,15 +346,8 @@ not prompt you to reconsider whether your update code should affect
 those fields.  Consider what happens if we decided to add a field for
 the status message received on the last heartbeat.
 
-```ocaml
-# type client_info =
-   { addr: Unix.Inet_addr.t;
-     port: int;
-     user: string;
-     credentials: string;
-     last_heartbeat_time: Time.t;
-     last_heartbeat_status: string;
-   };;
+```frag
+((typ ocamltop)(name records/main.topscript)(part 24))
 ```
 
 The original implementation of `register_heartbeat` would now be
@@ -524,12 +357,8 @@ continues to compile as is, even though it incorrectly ignores the new
 field.  The correct thing to do would be to update the code as
 follows.
 
-```ocaml
-# let register_heartbeat t hb =
-    { t with last_heartbeat_time   = hb.Heartbeat.time;
-             last_heartbeat_status = hb.Heartbeat.status_message;
-    };;
-val register_heartbeat : client_info -> Heartbeat.t -> client_info = <fun>
+```frag
+((typ ocamltop)(name records/main.topscript)(part 25))
 ```
 
 ## Mutable fields
@@ -538,27 +367,16 @@ Like most OCaml values, records are immutable by default.  You can,
 however, declare individual record fields as mutable.  In the
 following, we've made the last two fields of `client_info` mutable.
 
-```ocaml
-# type client_info =
-   { addr: Unix.Inet_addr.t;
-     port: int;
-     user: string;
-     credentials: string;
-     mutable last_heartbeat_time: Time.t;
-     mutable last_heartbeat_status: string;
-   };;
+```frag
+((typ ocamltop)(name records/main.topscript)(part 26))
 ```
 
 We then use the `<-` operator for actually changing the state.  The
 side-effecting version of `register_heartbeat` would be written as
 follows.
 
-```ocaml
-# let register_heartbeat t hb =
-    t.last_heartbeat_time   <- hb.Heartbeat.time;
-    t.last_heartbeat_status <- hb.Heartbeat.status_message
-  ;;
-val register_heartbeat : client_info -> Heartbeat.t -> unit = <fun>
+```frag
+((typ ocamltop)(name records/main.topscript)(part 27))
 ```
 
 Note that mutable assignment, and thus the `<-` operator, is not
@@ -575,10 +393,8 @@ when) to use OCaml's imperative features in
 Consider the following function for extracting the usernames from a
 list of `Logon` messages.
 
-```ocaml
-# let get_users logons =
-     List.dedup (List.map logons ~f:(fun x -> x.Logon.user));;
-val get_users : Logon.t list -> string list = <fun>
+```frag
+((typ ocamltop)(name records/main.topscript)(part 28))
 ```
 
 Here, we wrote a small function `(fun x -> x.Logon.user)` to access
@@ -587,23 +403,13 @@ pattern that it would be convenient to generate them automatically.
 The `fieldslib` syntax extension that ships with `Core` does just
 that.
 
-You can enable the syntax extension by typing `#require
-"fieldslib.syntax"` into the top-level, at which point the `with
-fields` annotation at the end of the declaration of a record type will
-cause the extension to be applied to a given type declaration.  So,
-for example, we could have defined `Logon` as follows.
+The `with fields` annotation at the end of the declaration of a record
+type will cause the extension to be applied to a given type
+declaration.  So, for example, we could have defined `Logon` as
+follows.
 
-```ocaml
-# #require "fieldslib.syntax";;
-# module Logon = struct
-    type t =
-      { session_id: string;
-        time: Time.t;
-        user: string;
-        credentials: string;
-      }
-    with fields
-  end;;
+```frag
+((typ ocamlrawtop)(name records/main-29.rawscript))
 ```
 
 Note that this will generate a _lot_ of output, because `fieldslib`
@@ -614,9 +420,8 @@ the remainder from the documentation that comes with `fieldslib`.
 One of the functions we obtain is `Logon.user`, which we can use to
 extract the user field from a logon message.
 
-```ocaml
-# let get_users logons = List.dedup (List.map logons ~f:Logon.user);;
-val get_users : Logon.t list -> string list = <fun>
+```frag
+((typ ocamltop)(name records/main.topscript)(part 30))
 ```
 
 In addition to generating field accessor functions, `fieldslib` also
@@ -637,9 +442,8 @@ whereas the type of `Logon.Fields.time` is `(Logon.t, Time.t)
 Field.t`.  Thus,  if you call `Field.get` on `Logon.Fields.user`,
 you'll get a function for extracting the `user` field from a `Logon.t`.
 
-```ocaml
-# Field.get Logon.Fields.user;;
-- : Logon.t -> string = <fun>
+```frag
+((typ ocamltop)(name records/main.topscript)(part 31))
 ```
 
 Thus, first parameter of the `Field.t` corresponds to the record you
@@ -649,9 +453,8 @@ contained in the field, which is also the return type of `get`.
 The type of `Field.get` is a little more complicated than you might
 naively expect from the above, as you can see below.
 
-```ocaml
-# Field.get;;
-- : ('b, 'r, 'a) Field.t_with_perm -> 'r -> 'a = <fun>
+```frag
+((typ ocamltop)(name records/main.topscript)(part 32))
 ```
 
 The type is `Field.t_with_perm` rather than a simple `Field.t` because
@@ -662,13 +465,8 @@ field but not the ability to do a functional update.
 We can use first-class fields to do things like write a generic
 function for displaying a record field.
 
-```ocaml
-# let show_field field to_string record =
-    let name = Field.name field in
-    let field_string = to_string (Field.get field record) in
-    name ^ ": " ^ field_string
-  ;;
-val show_field : ('a, 'b) Field.t -> ('b -> string) -> 'a -> string = <fun>
+```frag
+((typ ocamltop)(name records/main.topscript)(part 33))
 ```
 
 This takes three arguments: the `Field.t`, a function for converting
@@ -677,17 +475,8 @@ which the field can be grabbed.
 
 Here's an example of `show_field` in action.
 
-```ocaml
-# let logon = { Logon.
-                session_id = "26685";
-                time = Time.now ();
-                user = "yminsky";
-                credentials = "Xy2d9W"; }
-  ;;
-# show_field Logon.Fields.user Fn.id logon;;
-- : string = "user: yminsky"
-# show_field Logon.Fields.time Time.to_string logon;;
-- : string = "time: 2012-06-26 18:44:13.807826"
+```frag
+((typ ocamltop)(name records/main.topscript)(part 34))
 ```
 
 As a side note, the above is our first use of the `Fn` module (short
@@ -699,18 +488,8 @@ and `Fields.iter`, which let you iterate over all the fields of a
 record.  So, for example, in the case of `Logon.t`, the field iterator
 has the following type.
 
-```ocaml
-# Logon.Fields.iter;;
-- : session_id:(([< `Read | `Set_and_create ], Logon.t, string)
-                Field.t_with_perm -> unit) ->
-    time:(([< `Read | `Set_and_create ], Logon.t, Time.t) Field.t_with_perm ->
-          unit) ->
-    user:(([< `Read | `Set_and_create ], Logon.t, string) Field.t_with_perm ->
-          unit) ->
-    credentials:(([< `Read | `Set_and_create ], Logon.t, string)
-                 Field.t_with_perm -> unit) ->
-    unit
-= <fun>
+```frag
+((typ ocamltop)(name records/main.topscript)(part 35))
 ```
 
 This is a bit daunting to look at, largely because of the access
@@ -724,24 +503,8 @@ combination of the record and the `Field.t`.
 Now, let's use `Logon.Fields.iter` and `show_field` to print out all
 the fields of a `Logon` record.
 
-```ocaml
-# let print_logon logon =
-    let print to_string field =
-      printf "%s\n" (show_field field to_string logon)
-    in
-    Logon.Fields.iter
-      ~session_id:(print Fn.id)
-      ~time:(print Time.to_string)
-      ~user:(print Fn.id)
-      ~credentials:(print Fn.id)
-  ;;
-val print_logon : Logon.t -> unit = <fun>
-# print_logon logon;;
-session_id: 26685
-time: 2012-06-26 18:44:13.807826
-user: yminsky
-credentials: Xy2d9W
-- : unit = ()
+```frag
+((typ ocamltop)(name records/main.topscript)(part 26))
 ```
 
 One nice side effect of this approach is that it helps you adapt your

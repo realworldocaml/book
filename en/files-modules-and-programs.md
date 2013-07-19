@@ -37,7 +37,7 @@ instead allocates a new list with the requisite key/value added.
 Now we can write down `freq.ml`.
 
 ```frag
-((typ ocaml)(name files-modules-and-programs/freq.ml))
+((typ ocaml)(name files-modules-and-programs-freq/freq.ml))
 ```
 
 The function `build_counts` reads in lines from `stdin`, constructing
@@ -73,16 +73,15 @@ big `main` function.
 If we weren't using Core or any other external libraries, we could
 build the executable like this:
 
-```
-ocamlc freq.ml -o freq
+```frag
+((typ console)(name files-modules-and-programs-freq/simple_build_fail.out))
 ```
 
-But in this case, this command will fail with the error `Unbound
-module Core`.  We need a somewhat more complex invocation to get Core
-linked in:
+But as you can see, it fails because it can't find Core.  We need a
+somewhat more complex invocation to get Core linked in:
 
-```
-ocamlfind ocamlc -linkpkg -thread -package core freq.ml -o freq
+```frag
+((typ console)(name files-modules-and-programs-freq/simple_build.out))
 ```
 
 Here we're using `ocamlfind`, a tool which itself invokes other parts
@@ -94,29 +93,15 @@ executable, while `-thread` turns on threading support, which is
 required for Core.
 
 While this works well enough for a one-file project, more complicated
-builds will require a tool to orchestrate the build.  One great tool
-for this task is `ocamlbuild`, which is shipped with the OCaml
-compiler.  We'll talk more about `ocamlbuild` in [xref](#packaging),
-but for now, we'll just walk through the steps required for this
-simple application.  First, create a `_tags` file containing the
-following lines:
+projects require a tool to orchestrate the build.  One good tool for
+this task is `ocamlbuild`, which is shipped with the OCaml compiler.
+We'll talk more about `ocamlbuild` in [xref](#packaging), but for now,
+we'll just use a simple wrapper around `ocamlbuild` called `corebuild`
+that sets build parameters appropriately for building against Core and
+its related libraries.
 
-```
-true:package(core),thread,annot,debugging
-```
-
-The purpose of the `_tags` file is to specify which compilation
-options are required for which files.  In this case, we're telling
-`ocamlbuild` to link in the `core` package and to turn on threading,
-generation of annotation files, which are used by various editor modes
-for providing interactive inspection of the types inferred by the
-compiler, and debugging support.  This is applied to all files, since
-the condition `true` evaluates to `true` on all files.
-
-We can then invoke `ocamlbuild` to build the executable.
-
-```
-$ ocamlbuild -use-ocamlfind freq.byte
+```frag
+((typ console)(name files-modules-and-programs-freq/build.out))
 ```
 
 If we'd invoked `ocamlbuild` with a target of `freq.native` instead of
@@ -128,18 +113,8 @@ the most frequently occurring ones.  Note that the specific results
 will vary from platform to platform, since the binary itself will
 differ between platforms.
 
-```
-$ strings `which ocamlopt` | ./freq.byte
- 13: movq
- 10: cmpq
-  8: ", &
-  7: .globl
-  6: addq
-  6: leaq
-  5: ", $
-  5: .long
-  5: .quad
-  4: ", '
+```frag
+((typ console)(name files-modules-and-programs-freq/test.out))
 ```
 
 <note><title>Bytecode vs native code</title>
@@ -197,18 +172,9 @@ for maintaining the association list used to describe the counts.  The
 key function, called `touch`, updates the association list with the
 information that a given line should be added to the frequency counts.
 
-```ocaml
-(* counter.ml: first version *)
 
-open Core.Std
-
-let touch t s =
-  let count =
-    match List.Assoc.find t s with
-    | None -> 0
-    | Some x -> x
-  in
-  List.Assoc.add t s (count + 1)
+```frag
+((typ ocaml)(name files-modules-and-programs-freq-with-counter/counter.ml))
 ```
 
 The file `counter.ml` will be compiled into a module named `Counter`.
@@ -221,31 +187,15 @@ resulting code can still be built with `ocamlbuild`, which will
 discover dependencies and realize that `counter.ml` needs to be
 compiled.
 
-```ocaml
-(* freq.ml: using Counter *)
-open Core.Std
-
-let build_counts () =
-  In_channel.fold_lines stdin ~init:[] ~f:Counter.touch
-
-let () =
-  build_counts ()
-  |> List.sort ~cmp:(fun (_,x) (_,y) -> Int.descending x y)
-  |> (fun l -> List.take l 10)
-  |> List.iter ~f:(fun (line,count) -> printf "%3d: %s\n" count line)
+```frag
+((typ ocaml)(name files-modules-and-programs-freq-with-counter/freq.ml))
 ```
 
 ## Signatures and Abstract Types
 
 While we've pushed some of the logic to the `Counter` module, the code
 in `freq.ml` can still depend on the details of the implementation of
-`Counter`.  Indeed, if you look at the definition of `build_counts`:
-
-```ocaml
-let build_counts () =
-  In_channel.fold_lines stdin ~init:[] ~f:Counter.touch
-```
-
+`Counter`.  Indeed, if you look at the definition of `build_counts`,
 you'll see that it depends on the fact that the empty set of frequency
 counts is represented as an empty list.  We'd like to prevent this
 kind of dependency so we can change the implementation of `Counter`
@@ -262,18 +212,15 @@ describes what's currently available in `counter.ml`, without hiding
 anything.  `val` declarations are used to specify values in a
 signature.  The syntax of a `val` declaration is as follows:
 
-```
-val <identifier> : <type>
+```frag
+((typ ocamlsyntax)(name files-modules-and-programs/val.syntax))
 ```
 
 Using this syntax, we can write the signature of `counter.ml` as
 follows.
 
-```ocaml
-(* filename: counter.mli *)
-open Core.Std
-
-val touch : (string * int) list -> string -> (string * int) list
+```frag
+((typ ocaml)(name files-modules-and-programs-freq-with-sig/counter.mli))
 ```
 
 Note that `ocamlbuild` will detect the presence of the `mli` file
@@ -282,27 +229,20 @@ automatically and include it in the build.
 <note><title>Auto-generating `mli` files</title>
 
 If you don't want to construct an mli entirely by hand, you can ask
-OCaml to autogenerate one for you from the source, which you can then
-adjust to fit your needs.  In this case, we can write:
+OCaml to auto-generate one for you from the source, which you can then
+adjust to fit your needs.  Here's how you can do that using
+`corebuild`.
 
-```
-$ ocamlbuild -use-ocamlfind counter.inferred.mli
-```
-
-Which will generate the file `_build/counter.inferred.mli`, with the
-following contents.
-
-```
-$ cat _build/counter.inferred.mli
-val touch :
-  ('a, int) Core.Std.List.Assoc.t -> 'a -> ('a, int) Core.Std.List.Assoc.t
+```frag
+((typ console)(name files-modules-and-programs-freq-with-counter/infer_mli.out))
 ```
 
-This is equivalent to the `mli` that we generated, but is a little
-more verbose.  In general, you want to use autogenerated `mli`'s as a
-starting point only.  There's no replacement for a careful
-consideration of what should be included in the interface of your
-module and of how that should be organized, documented and formatted.
+The generated code is basically equivalent to the `mli` that we wrote
+by hand, but is a bit uglier and more verbose, and, of course, has no
+comments.  In general, auto-generated `mli`'s are only useful as a
+starting point.  In OCaml, the `mli` is the key place where you
+present and document your interface, and there's no replacement for
+careful human editing and organization.
 
 </note>
 
@@ -312,23 +252,8 @@ lists, we'll need to make the type of frequency counts _abstract_.  A
 type is abstract if its name is exposed in the interface, but its
 definition is not.  Here's an abstract interface for `Counter`:
 
-```ocaml
-(* counter.mli: abstract interface *)
-open Core.Std
-
-(** A collection of string frequency counts *)
-type t
-
-(** The empty set of frequency counts  *)
-val empty : t
-
-(** Bump the frequency count for the given string. *)
-val touch : t -> string -> t
-
-(* Converts the set of frequency counts to an association list.  Every strings
-   in the list will show up at most once, and the integers will be at least
-   1. *)
-val to_list : t -> (string * int) list
+```frag
+((typ ocaml)(name files-modules-and-programs-freq-with-sig-abstract/counter.mli))
 ```
 
 Note that we needed to add `empty` and `to_list` to `Counter`, since
@@ -345,33 +270,14 @@ comments with a double asterisk to cause them to be picked up by the
 
 Here's a rewrite of `counter.ml` to match the new `counter.mli`.
 
-```ocaml
-(* counter.ml: implementation matching abstract interface *)
-
-open Core.Std
-
-type t = (string * int) list
-
-let empty = []
-
-let to_list x = x
-
-let touch t s =
-  let count =
-    match List.Assoc.find t s with
-    | None -> 0
-    | Some x -> x
-  in
-  List.Assoc.add t s (count + 1)
+```frag
+((typ ocaml)(name files-modules-and-programs-freq-with-sig-abstract/counter.ml))
 ```
 
 If we now try to compile `freq.ml`, we'll get the following error:
 
-```
-File "freq.ml", line 4, characters 42-55:
-Error: This expression has type Counter.t -> string -> Counter.t
-       but an expression was expected of type 'a list -> string -> 'a list
-       Type Counter.t is not compatible with type 'a list 
+```frag
+((typ console)(name files-modules-and-programs-freq-with-sig-abstract/build.out))
 ```
 
 This is because `freq.ml` depends on the fact that frequency counts
@@ -381,43 +287,16 @@ We just need to fix `build_counts` to use `Counter.empty` instead of
 for processing and printing.  The resulting implementation is shown
 below.
 
-```ocaml
-(* filename: freq.ml *)
-open Core.Std
-
-let build_counts () =
-  In_channel.fold_lines stdin ~init:Counter.empty ~f:Counter.touch
-
-let () =
-  build_counts ()
-  |> Counter.to_list
-  |> List.sort ~cmp:(fun (_,x) (_,y) -> Int.descending x y)
-  |> (fun counts -> List.take counts 10)
-  |> List.iter ~f:(fun (line,count) -> printf "%3d: %s\n" count line)
+```frag
+((typ ocaml)(name files-modules-and-programs-freq-with-sig-abstract-fixed/freq.ml))
 ```
 
 Now we can turn to optimizing the implementation of `Counter`.  Here's
 an alternate and far more efficient implementation, based on the `Map`
 datastructure in Core.
 
-```ocaml
-(* counter.ml: efficient version *)
-
-open Core.Std
-
-type t = int String.Map.t
-
-let empty = String.Map.empty
-
-let to_list t = Map.to_alist t
-
-let touch t s =
-  let count =
-    match Map.find t s with
-    | None -> 0
-    | Some x -> x
-  in
-  Map.add t ~key:s ~data:(count + 1)
+```frag
+((typ ocaml)(name files-modules-and-programs-freq-fast/counter.ml))
 ```
 
 Note that in the above we use `String.Map` in some places and simply
@@ -441,20 +320,10 @@ return the lines before and after the median instead.  We'll use a
 custom type to represent the fact that there are two possible return
 values.  Here's a possible implementation.
 
-```ocaml
-type median = | Median of string
-              | Before_and_after of string * string
-
-let median t =
-  let sorted_strings = List.sort (Map.to_alist t)
-      ~cmp:(fun (_,x) (_,y) -> Int.descending x y)
-  in
-  let len = List.length sorted_strings in
-  if len = 0 then failwith "median: empty frequency count";
-  let nth n = fst (List.nth_exn sorted_strings n) in
-  if len mod 2 = 1
-  then Median (nth (len/2))
-  else Before_and_after (nth (len/2 - 1), nth (len/2));;
+```frag
+((typ ocaml)
+ (name files-modules-and-programs-freq-median/counter.ml)
+ (part 1))
 ```
 
 In the above, we use `failwith` to throw an exception for the case of
@@ -468,11 +337,10 @@ values (of which functions are an example) and types have distinct
 namespaces, so there's no name clash here.  Adding the following two
 lines added to `counter.mli` does the trick.
 
-```ocaml
-type median = | Median of string
-              | Before_and_after of string * string
-
-val median : t -> median
+```frag
+((typ ocaml)
+ (name files-modules-and-programs-freq-median/counter.mli)
+ (part 1))
 ```
 
 The decision of whether a given type should be abstract or concrete is
@@ -500,18 +368,8 @@ explicit conversions to and from the string type.
 Here's how you might create such an abstract type, within a
 sub-module:
 
-```ocaml
-open Core.Std
-
-module Username : sig
-  type t
-  val of_string : string -> t
-  val to_string : t -> string
-end = struct
-  type t = string
-  let of_string x = x
-  let to_string x = x
-end
+```frag
+((typ ocaml)(name files-modules-and-programs/abstract_username.ml))
 ```
 
 Note that the `to_string` and `of_string` functions above are
@@ -521,8 +379,8 @@ they enforce on the code through the type system.
 
 The basic structure of a module declaration like this is:
 
-```ocaml
-module <name> : <signature> = <implementation>
+```frag
+((typ ocamlsyntax)(name files-modules-and-programs/module.syntax))
 ```
 
 We could have written this slightly differently, by giving the
@@ -530,32 +388,9 @@ signature its own toplevel `module type` declaration, making it
 possible to create multiple distinct types with the same underlying
 implementation in a lightweight way.
 
-```ocaml
-(* file: buggy.ml *)
-open Core.Std
 
-module type ID = sig
-  type t
-  val of_string : string -> t
-  val to_string : t -> string
-end
-
-module String_id = struct
-  type t = string
-  let of_string x = x
-  let to_string x = x
-end
-
-module Username : ID = String_id
-module Hostname : ID = String_id
-
-type session_info = { user: Username.t;
-                      host: Hostname.t;
-                      when_started: Time.t;
-                    }
-
-let sessions_have_same_user s1 s2 =
-  s1.user = s2.host
+```frag
+((typ ocaml)(name files-modules-and-programs/session_info.ml))
 ```
 
 The above code has a bug: it compares the username in one session to
@@ -563,11 +398,8 @@ the host in the other session, when it should be comparing the
 usernames in both cases.  Because of how we defined our types,
 however, the compiler will flag this bug for us.
 
-```
-File "buggy.ml", line 25, characters 12-19:
-Error: This expression has type Hostname.t
-       but an expression was expected of type Username.t
-Command exited with code 2.
+```frag
+((typ console)(name files-modules-and-programs/build_session_info.out))
 ```
 
 ## Opening modules
@@ -585,14 +417,8 @@ library.  In general, opening a module adds the contents of that
 module to the environment that the compiler looks at to find the
 definition of various identifiers.  Here's an example.
 
-```ocaml
-# module M = struct let foo = 3 end;;
-module M : sig val foo : int end
-# foo;;
-Error: Unbound value foo
-# open M;;
-# foo;;
-- : int = 3
+```frag
+((typ ocamltop)(name files-modules-and-programs/main.topscript)(part 0))
 ```
 
 `open` is essential when you want to modify your environment for a
@@ -613,10 +439,8 @@ Here's some general advice on how to deal with opens.
     There are two syntaxes for local opens.  For example, you can
     write:
 
-    ```ocaml
-    let average x y =
-      let open Int64 in
-      x + y / of_int 2
+    ```frag
+    ((typ ocamltop)(name files-modules-and-programs/main.topscript)(part 1))
     ```
 
     In the above, `of_int` and the infix operators are the ones from
@@ -625,32 +449,23 @@ Here's some general advice on how to deal with opens.
     There's another even more lightweight syntax for local opens, which
     is particularly useful for small expressions:
 
-    ```ocaml
-    let average x y =
-      Int64.(x + y / of_int 2)
+    ```frag
+    ((typ ocamltop)(name files-modules-and-programs/main.topscript)(part 2))
     ```
 
   * An alternative to local opens that makes your code terser without
     giving up on explicitness is to locally rebind the name of a
-    module.  So, instead of writing:
+    module.  So, when using the `Counter.median` type, instead of
+    writing:
 
-    ```ocaml
-    let print_median m =
-       match m with
-       | Counter.Median string -> printf "True median:\n   %s\n"
-       | Counter.Before_and_after (before, after) ->
-         printf "Before and after median:\n   %s\n   %s\n" before after
+    ```frag
+    ((typ ocaml)(name files-modules-and-programs-freq-median/use_median_1.ml)(part 1))
     ```
 
     you could write:
 
-    ```ocaml
-    let print_median m =
-       let module C = Counter in
-       match m with
-       | C.Median string -> printf "True median:\n   %s\n"
-       | C.Before_and_after (before, after) ->
-         printf "Before and after median:\n   %s\n   %s\n" before after
+    ```frag
+    ((typ ocaml)(name files-modules-and-programs-freq-median/use_median_2.ml)(part 1))
     ```
 
     Because the module name `C` only exists for a short scope, it's
@@ -665,38 +480,15 @@ identifiers, _including_ a module is a way of actually adding new
 identifiers to a module proper.  Consider the following simple module
 for representing a range of intervals.
 
-```ocaml
-# module Interval = struct
-    type t = | Interval of int * int
-             | Empty
-
-    let create low high =
-      if high < low then Empty else Interval (low,high)
-  end;;
-module Interval :
-  sig type t = Interval of int * int | Empty val create : int -> int -> t end
+```frag
+((typ ocamltop)(name files-modules-and-programs/main.topscript)(part 3))
 ```
 
 We can use the `include` directive to create a new, extended version
 of the `Interval` module.
 
-```ocaml
-# module Extended_interval = struct
-    include Interval
-
-    let contains t x =
-      match t with
-      | Empty -> false
-      | Interval (low,high) -> x >= low && x <= high
-  end;;
-module Extended_interval :
-  sig
-    type t = Interval.t = Interval of int * int | Empty
-    val create : int -> int -> t
-    val contains : t -> int -> bool
-  end
-# Extended_interval.contains (Extended_interval.create 3 10) 4;;
-- : bool = true
+```frag
+((typ ocamltop)(name files-modules-and-programs/main.topscript)(part 4))
 ```
 
 The difference between `include` and `open` is that we've done more
@@ -704,19 +496,8 @@ than change how identifiers are searched for: we've changed what's in
 the module.  If we'd used `open`, we'd have gotten a quite different
 result.
 
-```ocaml
-# module Extended_interval = struct
-    open Interval
-
-    let contains t x =
-      match t with
-      | Empty -> false
-      | Interval (low,high) -> x >= low && x <= high
-  end;;
-module Extended_interval :
-  sig val contains : Extended_interval.t -> int -> bool end
-# Extended_interval.contains (Extended_interval.create 3 10) 4;;
-Error: Unbound value Extended_interval.create
+```frag
+((typ ocamltop)(name files-modules-and-programs/main.topscript)(part 5))
 ```
 
 To consider a more realistic example, imagine you wanted to build an
@@ -724,19 +505,8 @@ extended version of the `List` module, where you've added some
 functionality not present in the module as distributed in Core.
 `include` allows us to do just that.
 
-```ocaml
-(* ext_list.ml: an extended list module *)
-
-open Core.Std
-
-(* The new function we're going to add *)
-let rec intersperse list el =
-  match list with
-  | [] | [ _ ]   -> list
-  | x :: y :: tl -> x :: el :: intersperse (y::tl) el
-
-(* The remainder of the list module *)
-include List
+```frag
+((typ ocaml)(name files-modules-and-programs/ext_list.ml))
 ```
 
 Now, what about the interface of this new module?  It turns out that
@@ -745,16 +515,8 @@ essentially the same trick to write an `mli` for this new module.  The
 only trick is that we need to get our hands on the signature for the
 list module, which can be done using `module type of`.
 
-```ocaml
-(* ext_list.mli: an extended list module *)
-
-open Core.Std
-
-(* Include the interface of the list module from Core *)
-include (module type of List)
-
-(* Signature of function we're adding *)
-val intersperse : 'a list -> 'a -> 'a list
+```frag
+((typ ocaml)(name files-modules-and-programs/ext_list.mli))
 ```
 
 Note that the order of declarations in the `mli` does not need to
@@ -768,10 +530,8 @@ And we can now use `Ext_list` as a replacement for `List`.  If we want
 to use `Ext_list` in preference to `List` in our project, we can
 create a file of common definitions:
 
-```ocaml
-(* common.ml *)
-
-module List = Ext_list
+```frag
+((typ ocaml)(name files-modules-and-programs/common.ml))
 ```
 
 And if we then put `open Common` after `open Core.Std` at the top of
@@ -791,24 +551,14 @@ signature does not match up with the type in the implementation of the
 module.  As an example, if we replace the `val` declaration in
 `counter.mli` by swapping the types of the first two arguments:
 
-```ocaml
-val touch : string -> t -> t
+```frag
+((typ ocaml)(name files-modules-and-programs-freq-with-sig-mismatch/counter.mli)(part 1))
 ```
 
-and then try to compile `Counter` (by writing `ocamlbuild
--use-ocamlfind counter.cmo`.  The `cmo` file is a compiled object
-file, containing the bytecode-compiled version of a module), we'll get
-the following error:
+and we try to compile, we'll get the following error.
 
-```
-File "counter.ml", line 1, characters 0-1:
-Error: The implementation counter.ml
-       does not match the interface counter.cmi:
-       Values do not match:
-         val touch :
-           ('a, int) Core.Std.Map.t -> 'a -> ('a, int) Core.Std.Map.t
-       is not included in
-         val touch : string -> t -> t
+```frag
+((typ console)(name files-modules-and-programs-freq-with-sig-mismatch/build.out))
 ```
 
 This error message is a bit intimidating at first, and it takes a bit
@@ -828,18 +578,19 @@ We might decide that we want a new function in `Counter` for pulling
 out the frequency count of a given string.  We can update the `mli` by
 adding the following line.
 
-```ocaml
-val count : t -> string -> int
+```frag
+((typ ocaml)
+ (name files-modules-and-programs-freq-with-missing-def/counter.mli)
+ (part 1))
 ```
 
 Now, if we try to compile without actually adding the implementation,
 we'll get this error:
 
-```
-File "counter.ml", line 1, characters 0-1:
-Error: The implementation counter.ml
-       does not match the interface counter.cmi:
-       The field `count' is required but not provided
+```frag
+((typ console)
+ (name files-modules-and-programs-freq-with-missing-def/build.out)
+) 
 ```
 
 A missing type definition will lead to a similar error.
@@ -852,22 +603,18 @@ the type `median`.  The order of the declaration of variants matters
 to the OCaml compiler, so the definition of `median` in the
 implementation listing those options in a different order:
 
-```ocaml
-type median = | Before_and_after of line * line
-              | Median of line
+```frag
+((typ ocaml)
+ (name files-modules-and-programs-freq-with-type-mismatch/counter.mli)
+ (part 1))
 ```
 
 will lead to a compilation error:
 
-```
-File "counter.ml", line 1, characters 0-1:
-Error: The implementation counter.ml
-       does not match the interface counter.cmi:
-       Type declarations do not match:
-         type median = Before_and_after of string * string | Median of string
-       is not included in
-         type median = Median of string | Before_and_after of string * string
-       Their first fields have different names, Before_and_after and Median.
+```frag
+((typ console)
+ (name files-modules-and-programs-freq-with-type-mismatch/build.out)
+) 
 ```
 
 Order is similarly important in other parts of the signature,
@@ -893,32 +640,37 @@ rare case and we won't discuss them further here.
 The simplest case of this is that a module can not directly refer to
 itself (although definitions within a module can refer to each other
 in the ordinary way).  So, if we tried to add a reference to `Counter`
-from within `counter.ml`:
+from within `counter.ml`
 
-```ocaml
-let singleton l = Counter.touch Counter.empty
+```frag
+((typ ocaml)
+ (name files-modules-and-programs-freq-cyclic1/counter.ml)
+ (part 1))
 ```
 
-then when we try to build, we'll get this error:
+we'll see this error when we try to build:
 
-```
-File "counter.ml", line 17, characters 18-31:
-Error: Unbound module Counter
-Command exited with code 2.
+```frag
+((typ console)
+ (name files-modules-and-programs-freq-cyclic1/build.out))
 ```
 
 The problem manifests in a different way if we create cyclic
 references between files.  We could create such a situation by adding
-a reference to Freq from `counter.ml`, _e.g._, by adding the following
-line:
+a reference to `Freq` from `counter.ml`, _e.g._, by adding the
+following line.
 
-```ocaml
-let build_counts = Freq.build_counts
+```frag
+((typ ocaml)
+ (name files-modules-and-programs-freq-cyclic2/counter.ml)
+ (part 1))
 ```
 
-In this case, `ocamlbuild` will notice the error and complain:
+In this case, `ocamlbuild` (which is invoked by the `corebuild`
+script) will notice the error and complain explicitly about the cycle.
 
+```frag
+((typ console)
+ (name files-modules-and-programs-freq-cyclic2/build.out))
 ```
-Circular dependencies: "freq.cmo" already seen in
-  [ "counter.cmo"; "freq.cmo" ]
-```
+
