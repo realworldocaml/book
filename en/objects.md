@@ -144,7 +144,7 @@ An object of type `< pop : int option; .. >` can be any object with a method
 `#pop` is invoked, the actual method that is run is determined by the object.
 
 ```frag
-((typ ocamltop)(name objects/polymorphism.topscript)(part 5))
+((typ ocamltop)(name objects/stack.topscript)(part 4))
 ```
 
 ## Immutable objects ##
@@ -281,7 +281,7 @@ What about types built from object types? If a `square` is a `shape`, we expect
 a `square list` to be a `shape list`. OCaml does indeed allow such coercions:
 
 ```frag
-((typ ocamltop)(name objects/variance.topscript)(part 1))
+((typ ocamltop)(name objects/subtyping.topscript)(part 6))
 ```
 
 Note that this relies on lists being immutable. It would not be safe to treat a
@@ -290,7 +290,7 @@ non-square shapes into what should be an array of squares. OCaml recognises
 this and does not allow the coercion.
 
 ```frag
-((typ ocamltop)(name objects/variance.topscript)(part 2))
+((typ ocamltop)(name objects/subtyping.topscript)(part 7))
 ```
 
 We say that `'a list` is _covariant_ (in `'a`), whilst `'a array` is
@@ -303,7 +303,7 @@ expects its argument to be a `square` and would not know what to do with a
 with type `square -> string`.
 
 ```frag
-((typ ocamltop)(name objects/variance.topscript)(part 3))
+((typ ocamltop)(name objects/subtyping.topscript)(part 8))
 ```
 
 We say that `'a -> string` is _contravariant_ in `'a`. In general, function types
@@ -315,21 +315,21 @@ are contravariant in their arguments and covariant in their results.
 OCaml works out the variance of a type using that type's definition. 
 
 ```frag
-((typ ocamltop)(name objects/variance.topscript)(part 4))
+((typ ocamltop)(name objects/subtyping.topscript)(part 9))
 ```
 
 However, if the definition is hidden by a signature then OCaml is forced to
 assume that the type is invariant.
 
 ```frag
-((typ ocamltop)(name objects/variance.topscript)(part 5))
+((typ ocamltop)(name objects/subtyping.topscript)(part 10))
 ```
 
 We can fix this by adding _variance annotations_ to the type's parameters in the signature: `+`
 for covariance or `-` for contravariance.
 
 ```frag
-((typ ocamltop)(name objects/variance.topscript)(part 6))
+((typ ocamltop)(name objects/subtyping.topscript)(part 11))
 ```
 
 </note>
@@ -339,20 +339,20 @@ shapes by applying our `stack` function to some squares and some circles.
 
 
 ```frag
-((typ ocamltop)(name objects/variance.topscript)(part 7))
+((typ ocamltop)(name objects/subtyping.topscript)(part 12))
 ```
 
 If we wanted to write a function that took a list of such stacks and found the
 total area of their shapes, we might try:
 
 ```frag
-((typ ocamltop)(name objects/variance.topscript)(part 8))
+((typ ocamltop)(name objects/subtyping.topscript)(part 13))
 ```
 
 However, when we try to apply this function to our objects we get an error:
 
 ```frag
-((typ ocamltop)(name objects/variance.topscript)(part 9))
+((typ ocamltop)(name objects/subtyping.topscript)(part 14))
 ```
 
 As you can see, `square stack` and `circle stack` are not subtypes of `shape
@@ -372,7 +372,7 @@ define a type `readonly_stack` and confirm that we can coerce the list of
 stacks to it.
 
 ```frag
-((typ ocamltop)(name objects/variance.topscript)(part 10))
+((typ ocamltop)(name objects/subtyping.topscript)(part 15))
 ```
 
 Aspects of this section may seem fairly complicated, but it should be pointed

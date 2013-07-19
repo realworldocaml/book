@@ -1,3 +1,4 @@
+1;;
 #part 1
 let v = lazy (print_string "performing lazy computation\n"; sqrt 16.);;
 Lazy.force v;;

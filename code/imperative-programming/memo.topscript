@@ -1,3 +1,4 @@
+1;;
 #part 1
 let memoize f =
   let table = Hashtbl.Poly.create () in
@@ -41,6 +42,14 @@ time (fun () -> edit_distance "OCaml" "ocaml");;
 time (fun () -> edit_distance "OCaml 4.01" "ocaml 4.01");;
 
 #part 5
+let memo_rec f_norec x =
+   let fref = ref (fun _ -> assert false) in
+   let f = memoize (fun x -> f_norec !fref x) in
+   fref := f;
+   f x
+;;
+
+#part 6
 let edit_distance = memo_rec (fun edit_distance (s,t) ->
   match String.length s, String.length t with
   | (0,x) | (x,0) -> x
@@ -56,7 +65,7 @@ let edit_distance = memo_rec (fun edit_distance (s,t) ->
       ; edit_distance (s',t') + cost_to_drop_both
       ]) ;;
 
-#part 6
+#part 7
 time (fun () -> edit_distance ("OCaml 4.01","ocaml 4.01"));;
 
 

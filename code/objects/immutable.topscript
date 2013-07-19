@@ -1,3 +1,4 @@
+1;;
 #part 1
 let imm_stack init = object
   val v = init

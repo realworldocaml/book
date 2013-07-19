@@ -1,3 +1,4 @@
+1;;
 #part 1
 let remember =
   let cache = ref None in

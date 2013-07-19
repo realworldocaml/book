@@ -290,16 +290,14 @@ refs.
 You can see these in action below.
 
 ```frag
-((typ ocamltop)(name imperative-programming/ref.topscript)(part 1))
+((typ ocamltop)(name imperative-programming/ref.topscript)(part 3))
 ```
 
 The above are just ordinary OCaml functions which could be defined as
 follows.
 
-```ocaml
-let ref x = { contents = x }
-let (!) r = r.contents
-let (:=) r x = r.contents <- x
+```frag
+((typ ocamltop)(name imperative-programming/ref.topscript)(part 2))
 ```
 
 ### Foreign functions
@@ -610,7 +608,7 @@ attention to the structure of the recursive calls.
 The thing to note is that if you call `edit_distance "OCaml" "ocaml"`,
 then that will in turn dispatch the following calls:
 
-```frag
+```ocaml
 edit_distance "OCam" "ocaml"
 edit_distance "OCaml" "ocam"
 edit_distance "OCam" "ocam"
@@ -618,7 +616,7 @@ edit_distance "OCam" "ocam"
 
 And these calls will in turn dispatch other calls:
 
-```frag
+```ocaml
 edit_distance "OCam" "ocaml"
    edit_distance "OCa" "ocaml"
    edit_distance "OCam" "ocam"
@@ -771,7 +769,7 @@ just that change and the addition of the `memo_rec` call, we can get a
 memoized version of `edit_distance`:
 
 ```frag
-((typ ocamltop)(name imperative-programming/memo.topscript)(part 5))
+((typ ocamltop)(name imperative-programming/memo.topscript)(part 6))
 ```
 
 This new version of `edit_distance` is much more efficient than the
@@ -779,7 +777,7 @@ one we started with; the following call is about ten thousand times
 faster than it was without memoization.
 
 ```frag
-((typ ocamltop)(name imperative-programming/memo.topscript)(part 6))
+((typ ocamltop)(name imperative-programming/memo.topscript)(part 7))
 ```
 
 <note> <title> Limitations of `let rec` </title>
@@ -796,7 +794,7 @@ OCaml rejects the definition because OCaml, as a strict language, has
 limits on what it can put on the right hand side of a `let rec`.  In
 particular, imagine how the following code snippet would be compiled.
 
-```frag
+```ocaml
 let rec x = x + 1
 ```
 
@@ -1207,7 +1205,7 @@ This is not what happens with `remember`, though.  Here's the type
 that OCaml infers for `remember`, which looks almost, but not quite,
 like the type of the identity function.
 
-```frag
+```ocaml
 val remember : '_a -> '_a = <fun>
 ```
 
@@ -1398,6 +1396,6 @@ doesn't contain any persistent references to values of type `'a`, at
 which point, OCaml can infer polymorphic types for expressions of this
 type that are not simple values.
 
-```frag<
-((typ ocamltop)(name imperative-programming/value_restriction.topscript)(part 12))
+```frag
+((typ ocamltop)(name imperative-programming/value_restriction.topscript)(part 13))
 ```

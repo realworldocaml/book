@@ -1,3 +1,21 @@
+let time f =
+  let start = Time.now () in
+  let x = f () in
+  let stop = Time.now () in
+  printf "Time: %s\n" (Time.Span.to_string (Time.diff stop start));
+  x ;;
+
+let memoize f =
+  let table = Hashtbl.Poly.create () in
+  (fun x ->
+    match Hashtbl.find table x with
+    | Some y -> y
+    | None ->
+      let y = f x in
+      Hashtbl.add_exn table ~key:x ~data:y;
+      y
+  );;
+
 #part 1
 let rec fib i =
   if i <= 1 then 1 else fib (i - 1) + fib (i - 2);;

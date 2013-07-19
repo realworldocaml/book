@@ -1,4 +1,5 @@
 open Printf
+1;;
 
 #part 1
 printf "%i is an integer, %F is a float, \"%s\" is a string\n"

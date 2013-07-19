@@ -1,3 +1,4 @@
+1;;
 #part 1
 let area sq = sq#width ** 2.;;
 let minimize sq : unit = sq#resize 1.;;
@@ -19,11 +20,3 @@ area_closed sq;;
 
 #part 4
 type square = < width : float; ..>;;
-
-#part 5
-let print_pop st = Option.iter ~f:(printf "Popped: %d\n") st#pop;;
-print_pop (stack [5;4;3;2;1]);;
-let t = object
-  method pop = Some (Float.to_int (Time.to_float (Time.now ())))
-end;;
-print_pop t;;

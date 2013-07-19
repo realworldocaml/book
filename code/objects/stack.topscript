@@ -1,3 +1,4 @@
+1;;
 #part 1
 let s = object
   val mutable v = [0; 2]
@@ -33,3 +34,11 @@ let stack init = object
 end;;
 let s = stack [3; 2; 1];;
 s#pop;;
+
+#part 4
+let print_pop st = Option.iter ~f:(printf "Popped: %d\n") st#pop;;
+print_pop (stack [5;4;3;2;1]);;
+let t = object
+  method pop = Some (Float.to_int (Time.to_float (Time.now ())))
+end;;
+print_pop t;;
