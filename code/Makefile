@@ -18,6 +18,11 @@ dirs= json \
       files-modules-and-programs-freq-cyclic1 \
       files-modules-and-programs-freq-cyclic2 \
       records \
+      variants \
+      variants-termcol \
+      variants-termcol-annotated \
+      variants-termcol-fixed \
+
 
 
 # html/md files directory

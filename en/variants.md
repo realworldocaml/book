@@ -9,11 +9,8 @@ case-analysis on that information.
 
 The basic syntax of a variant type declaration is as follows.
 
-```ocaml
-type <variant-name> =
-  | <Tag> [ of <type> [* <type>]... ]
-  | <Tag> [ of <type> [* <type>]... ]
-  | ...
+```frag
+((typ ocamlsyntax)(name variants/variant.syntax))
 ```
 
 Each row starts with a tag that identifies that case, and in addition,
@@ -26,13 +23,8 @@ represent those colors using a variant.  Each color is declared as a
 simple tag, with pipes used to separate the different cases.  Note
 that variant tags must be capitalized.
 
-```ocaml
-# type basic_color =
-   | Black | Red | Green | Yellow | Blue | Magenta | Cyan | White ;;
-# Cyan ;;
-- : basic_color = Cyan
-# [Blue; Magenta; Red] ;;
-- : basic_color list = [Blue; Magenta; Red]
+```frag
+((typ ocamltop)(name variants/main.topscript)(part 0))
 ```
 
 The following function uses pattern matching to convert a
@@ -40,27 +32,15 @@ The following function uses pattern matching to convert a
 on pattern matches means that the compiler will warn us if we miss a
 color.
 
-```ocaml
-# let basic_color_to_int = function
-  | Black -> 0 | Red     -> 1 | Green -> 2 | Yellow -> 3
-  | Blue  -> 4 | Magenta -> 5 | Cyan  -> 6 | White  -> 7 ;;
-val basic_color_to_int : basic_color -> int = <fun>
-# List.map ~f:basic_color_to_int [Blue;Red];;
-- : int list = [4; 1]
+```frag
+((typ ocamltop)(name variants/main.topscript)(part 1))
 ```
 
 Using the above, we can generate escape codes to change the color of a
 given string displayed in a terminal.
 
-```ocaml
-# let color_by_number number text =
-    sprintf "\027[38;5;%dm%s\027[0m" number text;;
-  val color_by_number : int -> string -> string = <fun>
-# let blue = color_by_number (basic_color_to_int Blue) "Blue";;
-val blue : string = "\027[38;5;4mBlue\027[0m"
-# printf "Hello %s World!\n" blue;;
-Hello Blue World!
-- : unit = ()
+```frag
+((typ ocamltop)(name variants/main.topscript)(part 2))
 ```
 
 On most terminals, that word "Blue" will be rendered in blue.
@@ -83,15 +63,8 @@ but this time, the different tags will have arguments which describe
 the data available in each case.  Note that variants can have multiple
 arguments, which are separated by `*`'s.
 
-```ocaml
-# type weight = Regular | Bold
-  type color =
-  | Basic of basic_color * weight (* basic colors, regular and bold *)
-  | RGB   of int * int * int       (* 6x6x6 color cube *)
-  | Gray  of int                   (* 24 grayscale levels *)
-;;
-# [RGB (250,70,70); Basic (Green, Regular)];;
-- : color list = [RGB (250, 70, 70); Basic (Green, Regular)]
+```frag
+((typ ocamltop)(name variants/main.topscript)(part 3))
 ```
 
 Once again, we'll use pattern matching to convert a color to a
@@ -99,28 +72,14 @@ corresponding integer.  But in this case, the pattern matching does
 more than separate out the different cases; it also allows us to
 extract the data associated with each tag.
 
-```ocaml
-# let color_to_int = function
-    | Basic (basic_color,weight) ->
-      let base = match weight with Bold -> 8 | Regular -> 0 in
-      base + basic_color_to_int basic_color
-    | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
-    | Gray i -> 232 + i ;;
-val color_to_int : color -> int = <fun>
+```frag
+((typ ocamltop)(name variants/main.topscript)(part 4))
 ```
 
 Now, we can print text using the full set of available colors.
 
-```ocaml
-# let color_print color s =
-     printf "%s\n" (color_by_number (color_to_int color) s);;
-val color_print : color -> string -> unit = <fun>
-# color_print (Basic (Red,Bold)) "A bold red!";;
-A bold red!
-- : unit = ()
-# color_print (Gray 4) "A muted gray...";;
-A muted gray...
-- : unit = ()
+```frag
+((typ ocamltop)(name variants/main.topscript)(part 5))
 ```
 
 <note><title>Catch-all cases and refactoring</title>
@@ -132,13 +91,8 @@ change.  This is particularly valuable in the context of variants.
 Consider what would happen if we were to change the definition of
 `color` to the following.
 
-```ocaml
-# type color =
-  | Basic of basic_color     (* basic colors *)
-  | Bold  of basic_color     (* bold basic colors *)
-  | RGB   of int * int * int (* 6x6x6 color cube *)
-  | Gray  of int             (* 24 grayscale levels *)
-;;
+```frag
+((typ ocamltop)(name variants/catch_all.topscript)(part 1))
 ```
 
 We've essentially broken out the `Basic` case into two cases, `Basic`
@@ -147,44 +101,24 @@ and `Bold`, and `Basic` has changed from having two arguments to one.
 variant, and if we try to compile that same code again, the compiler
 will notice the discrepancy.
 
-```ocaml
-# let color_to_int = function
-    | Basic (basic_color,weight) ->
-      let base = match weight with Bold -> 8 | Regular -> 0 in
-      base + basic_color_to_int basic_color
-    | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
-    | Gray i -> 232 + i ;;
-Characters 40-60:
-Error: This pattern matches values of type 'a * 'b
-       but a pattern was expected which matches values of type basic_color
+```frag
+((typ ocamltop)(name variants/catch_all.topscript)(part 2))
 ```
+
 
 Here, the compiler is complaining that the `Basic` tag is used with
 the wrong number of arguments.  If we fix that, however, the compiler
 flag will flag a second problem, which is that we haven't handled the
 new `Bold` tag.
 
-```ocaml
-# let color_to_int = function
-    | Basic basic_color -> basic_color_to_int basic_color
-    | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
-    | Gray i -> 232 + i ;;
-Characters 19-154:
-Warning 8: this pattern matching is not exhaustive.
-Here is an example of a value that is not matched:
-Bold _
-val color_to_int : color -> int = <fun>
+```frag
+((typ ocamltop)(name variants/catch_all.topscript)(part 3))
 ```
 
 Fixing this now leads us to the correct implementation.
 
-```ocaml
-# let color_to_int = function
-    | Basic basic_color -> basic_color_to_int basic_color
-    | Bold  basic_color -> 8 + basic_color_to_int basic_color
-    | RGB (r,g,b) -> 16 + b + g * 6 + r * 36
-    | Gray i -> 232 + i ;;
-val color_to_int : color -> int = <fun>
+```frag
+((typ ocamltop)(name variants/catch_all.topscript)(part 4))
 ```
 
 As we've seen, the type errors identified the things that needed to be
@@ -201,13 +135,8 @@ works on older terminals by rendering the first 16 colors (the 8
 everything else as white.  We might have written the function as
 follows.
 
-```ocaml
-# let oldschool_color_to_int = function
-    | Basic (basic_color,weight) ->
-      let base = match weight with Bold -> 8 | Regular -> 0 in
-      base + basic_color_to_int basic_color
-    | _ -> basic_color_to_int White;;
-val oldschool_color_to_int : color -> int = <fun>
+```frag
+((typ ocamltop)(name variants/catch_all.topscript)(part 5))
 ```
 
 But because the catch-all case encompasses all possibilities, the type
@@ -236,16 +165,8 @@ can achieve with this by revisiting the logging server types that were
 described in [xref](#records).  We'll start by reminding ourselves of
 the definition of `Log_entry.t`.
 
-```ocaml
-# module Log_entry = struct
-    type t =
-      { session_id: string;
-        time: Time.t;
-        important: bool;
-        message: string;
-      }
-  end
-  ;;
+```frag
+((typ ocamltop)(name variants/logger.topscript)(part 1))
 ```
 
 This record type combines multiple pieces of data into one value.  In
@@ -255,11 +176,8 @@ think of record types as acting as conjunctions.  Variants, on the
 other hand, are disjunctions, letting you represent multiple
 possibilities, as in the following example.
 
-```ocaml
-# type client_message = | Logon of Logon.t
-                        | Heartbeat of Heartbeat.t
-                        | Log_entry of Log_entry.t
-  ;;
+```frag
+((typ ocamltop)(name variants/logger.topscript)(part 2))
 ```
 
 A `client_message` is a `Logon` _or_ a `Heartbeat` _or_ a `Log_entry`.
@@ -282,122 +200,46 @@ messages, where the accumulator is a pair of:
 
 Here's the concrete code.
 
-```ocaml
-# let messages_for_user user messages =
-    let (user_messages,_) =
-      List.fold messages ~init:([],String.Set.empty)
-        ~f:(fun ((messages,user_sessions) as acc) message ->
-          match message with
-          | Logon m ->
-            if m.Logon.user = user then
-              (message::messages, Set.add user_sessions m.Logon.session_id)
-            else acc
-          | Heartbeat _ | Log_entry _ ->
-            let session_id = match message with
-              | Logon     m -> m.Logon.session_id
-              | Heartbeat m -> m.Heartbeat.session_id
-              | Log_entry m -> m.Log_entry.session_id
-            in
-            if Set.mem user_sessions session_id then
-              (message::messages,user_sessions)
-            else acc
-        )
-    in
-    List.rev user_messages
-  ;;
-val messages_for_user : string -> client_message list -> client_message list =
-  <fun>
+```frag
+((typ ocamltop)(name variants/logger.topscript)(part 3))
 ```
 
 There's one awkward bit about the code above, which is the calculation
-of the session ids.  In particular, we have the following repetitive
-snippet of code:
-
-```ocaml
-  let session_id = match message with
-    | Logon     m -> m.Logon.session_id
-    | Heartbeat m -> m.Heartbeat.session_id
-    | Log_entry m -> m.Log_entry.session_id
-  in
-```
-
-This code effectively computes the session id for each underlying
-message type.  The repetition in this case isn't that bad, but would
-become problematic in larger and more complicated examples.  Also, we
-had to include code for the `Logon` case, even though it can't
-actually come up.
+of the session ids.  In particular, we have the repetitive bit of code
+where we compute the `session_id`.  This code effectively computes the
+session id for each underlying message type.  The repetition in this
+case isn't that bad, but would become problematic in larger and more
+complicated examples.  Also, we had to include code for the `Logon`
+case, even though it can't actually come up.
 
 We can improve the code by refactoring our types to explicitly
 separate the parts that are shared from those that are common.  The
 first step is to cut down the definitions of the per-message records
 to just contain the unique components of each message.
 
-```ocaml
-# module Log_entry = struct
-    type t = { important: bool;
-               message: string;
-             }
-  end
-
-  module Heartbeat = struct
-    type t = { status_message: string; }
-  end
-
-  module Logon = struct
-    type t = { user: string;
-               credentials: string;
-             }
-  end
-  ;;
+```frag
+((typ ocamltop)(name variants/logger.topscript)(part 4))
 ```
 
 We can then define a variant type that covers the different possible
 unique components.
 
-```ocaml
-# type details =
-  | Logon of Logon.t
-  | Heartbeat of Heartbeat.t
-  | Log_entry of Log_entry.t
- ;;
+```frag
+((typ ocamltop)(name variants/logger.topscript)(part 5))
 ```
 
 Separately, we need a record that contains the fields that are common
 across all messages.
 
-```ocaml
-# module Common = struct
-    type t = { session_id: string;
-               time: Time.t;
-             }
-  end
-  ;;
+```frag
+((typ ocamltop)(name variants/logger.topscript)(part 6))
 ```
 
 A full message can then be represented as a pair of a `Common.t` and a
 `details`.  Using this, we can rewrite our example above as follows:
 
-```ocaml
-# let messages_for_user user messages =
-    let (user_messages,_) =
-      List.fold messages ~init:([],String.Set.empty)
-        ~f:(fun ((messages,user_sessions) as acc) ((common,details) as message) ->
-          let session_id = common.Common.session_id in
-          match details with
-          | Logon m ->
-            if m.Logon.user = user then
-              (message::messages, Set.add user_sessions session_id)
-            else acc
-          | Heartbeat _ | Log_entry _ ->
-            if Set.mem user_sessions session_id then
-              (message::messages,user_sessions)
-            else acc
-        )
-    in
-    List.rev user_messages
-  ;;
-val messages_for_user :
-  string -> (Common.t * details) list -> (Common.t * details) list = <fun>
+```frag
+((typ ocamltop)(name variants/logger.topscript)(part 7))
 ```
 
 Note that the more complex match statement for computing the session
@@ -412,13 +254,8 @@ use `Common.t * Logon.t` to represent a logon message.  Thus, if we
 had functions for handling individual message types, we could write a
 dispatch function as follows.
 
-```ocaml
-# let handle_message server_state (common,details) =
-    match details with
-    | Log_entry m -> handle_log_entry server_state (common,m)
-    | Logon     m -> handle_logon     server_state (common,m)
-    | Heartbeat m -> handle_heartbeat server_state (common,m)
-  ;;
+```frag
+((typ ocamltop)(name variants/logger.topscript)(part 8))
 ```
 
 And it's explicit at the type level that `handle_log_entry` sees only
@@ -435,14 +272,8 @@ used in everything from packet analyzers to mail clients.
 An expression in this language will be defined by the variant `expr`,
 with one tag for each kind of expression we want to support.
 
-```ocaml
-# type 'a expr =
-  | Base  of 'a
-  | Const of bool
-  | And   of 'a expr list
-  | Or    of 'a expr list
-  | Not   of 'a expr
-  ;;
+```frag
+((typ ocamltop)(name variants/blang.topscript)(part 0))
 ```
 
 Note that the definition of the type `expr` is recursive, meaning
@@ -461,48 +292,23 @@ you were writing a filter language for an email processor, your base
 predicates might specify the tests you would run against an email, as
 in the following example.
 
-```ocaml
-# type mail_field = To | From | CC | Date | Subject
-  type mail_predicate = { field: mail_field;
-                          contains: string }
-  ;;
+```frag
+((typ ocamltop)(name variants/blang.topscript)(part 1))
 ```
 
 Using the above, we can construct a simple expression with
 `mail_predicate` as its base predicate.
 
-```ocaml
-# let test field contains = Base { field; contains };;
-val test : mail_field -> string -> mail_predicate expr = <fun>
-# And [ Or [ test To "doligez"; test CC "doligez" ];
-        test Subject "runtime";
-      ]
-  ;;
-- : mail_predicate expr =
-And
- [Or
-   [Base {field = To; contains = "doligez"};
-    Base {field = CC; contains = "doligez"}];
-  Base {field = Subject; contains = "runtime"}]
+```frag
+((typ ocamltop)(name variants/blang.topscript)(part 2))
 ```
 
 Being able to construct such expressions isn't enough; we also need to
 be able to evaluate such an expression.  The following code shows how
 you could write a general-purpose evaluator for these expressions.
 
-```ocaml
-# let rec eval expr base_eval =
-    (* a shortcut, so we don't need to repeatedly pass [base_eval]
-       explicitly to [eval] *)
-    let eval' expr = eval expr base_eval in
-    match expr with
-    | Base  base   -> base_eval base
-    | Const bool   -> bool
-    | And   exprs -> List.for_all exprs ~f:eval'
-    | Or    exprs -> List.exists  exprs ~f:eval'
-    | Not   expr  -> not (eval' expr)
-  ;;
-val eval : 'a expr -> ('a -> bool) -> bool = <fun>
+```frag
+((typ ocamltop)(name variants/blang.topscript)(part 3))
 ```
 
 The structure of the code is pretty straightforward --- we're just
@@ -517,51 +323,21 @@ constructors that mirror the tags used to construct a tree.  Then
 the simplification function is reponsible for rebuilding the tree
 using these constructors.
 
-```ocaml
-# let and_ l =
-    if List.mem l (Const false) then Const false
-    else
-      match List.filter l ~f:((<>) (Const true)) with
-      | [] -> Const true
-      | [ x ] -> x
-      | l -> And l
-
-  let or_ l =
-    if List.mem l (Const true) then Const true
-    else
-      match List.filter l ~f:((<>) (Const false)) with
-      | [] -> Const false
-      | [x] -> x
-      | l -> Or l
-
-  let not_ = function
-    | Const b -> Const (not b)
-    | e -> Not e
-  ;;
-val and_ : 'a expr list -> 'a expr = <fun>
-val or_ : 'a expr list -> 'a expr = <fun>
-val not_ : 'a expr -> 'a expr = <fun>
+```frag
+((typ ocamltop)(name variants/blang.topscript)(part 4))
 ```
 
 Now, we can write a simplification routine that brings these together.
 
-```ocaml
-# let rec simplify = function
-    | Base _ | Const _ as x -> x
-    | And l -> and_ (List.map ~f:simplify l)
-    | Or l  -> or_  (List.map ~f:simplify l)
-    | Not e -> not_ (simplify e)
-  ;;
-val simplify : 'a expr -> 'a expr = <fun>
+```frag
+((typ ocamltop)(name variants/blang.topscript)(part 5))
 ```
 
 We can now apply this to a boolean expression and see how good of a
 job it does at simplifying it.
 
-```ocaml
-# simplify (Not (And [ Or [Base "it's snowing"; Const true];
-                       Base "it's raining"]));;
-- : string expr = Not (Base "it's raining")
+```frag
+((typ ocamltop)(name variants/blang.topscript)(part 6))
 ```
 
 Here, it correctly converted the `Or` branch to `Const true`, and then
@@ -571,10 +347,8 @@ non-trivial component.
 There are some simplifications it misses, however.  In particular, see
 what happens if we add a double negation in.
 
-```ocaml
-# simplify (Not (And [ Or [Base "it's snowing"; Const true];
-                       Not (Not (Base "it's raining"))]));;
-- : string expr = Not (Not (Not (Base "it's raining")))
+```frag
+((typ ocamltop)(name variants/blang.topscript)(part 7))
 ```
 
 It fails to remove the double negation, and it's easy to see why.  The
@@ -584,24 +358,15 @@ Catch-all cases are generally a bad idea, and if we make the code more
 explicit, we see that the missing of the double-negation is more
 obvious.
 
-```ocaml
-# let not_ = function
-    | Const b -> Const (not b)
-    | (Base _ | And _ | Or _ | Not _) as e -> Not e
-  ;;
-val not_ : 'a expr -> 'a expr = <fun>
+```frag
+((typ ocamltop)(name variants/blang.topscript)(part 8))
 ```
 
 We can of course fix this by handling simply adding an explicit case
 for double-negation.
 
-```ocaml
-# let not_ = function
-    | Const b -> Const (not b)
-    | Not e -> e
-    | (Base _ | And _ | Or _ ) as e -> Not e
-  ;;
-val not_ : 'a expr -> 'a expr = <fun>
+```frag
+((typ ocamltop)(name variants/blang.topscript)(part 9))
 ```
 
 The example of a boolean expression language is more than a toy.
@@ -627,16 +392,8 @@ Syntactically, polymorphic variants are distinguished from ordinary
 variants by the leading backtick.  And unlike ordinary variants,
 polymorphic variants can be used without an explicit type declaration.
 
-```ocaml
-# let three = `Int 3;;
-val three : [> `Int of int ] = `Int 3
-# let four = `Float 4.;;
-val four : [> `Float of float ] = `Float 4.
-# let nan = `Not_a_number;;
-val nan : [> `Not_a_number ] = `Not_a_number
-# [three; four; nan];;
-- : [> `Float of float | `Int of int | `Not_a_number ] list =
-[`Int 3; `Float 4.; `Not_a_number]
+```frag
+((typ ocamltop)(name variants/main.topscript)(part 6))
 ```
 
 As you can see, polymorphic variant types are inferred automatically,
@@ -648,17 +405,8 @@ example, the tag name (_e.g._, `` `Int``) matches the type name
 The type system will complain, if it sees incompatible uses of the
 same tag:
 
-```ocaml
-# let five = `Int "five";;
-val five : [> `Int of string ] = `Int "five"
-# [three; four; five];;
-Characters 14-18:
-  [three; four; five];;
-                ^^^^
-Error: This expression has type [> `Int of string ]
-       but an expression was expected of type
-         [> `Float of float | `Int of int ]
-       Types for tag `Int are incompatible
+```frag
+((typ ocamltop)(name variants/main.topscript)(part 7))
 ```
 
 The `>` at the beginning of the variant types above is critical,
@@ -672,12 +420,8 @@ more".
 OCaml will in some cases infer a variant type with ` <`, to indicate
 "these tags or less", as in the following example.
 
-```ocaml
-# let is_positive = function
-     | `Int   x -> x > 0
-     | `Float x -> x > 0.
-  ;;
-val is_positive : [< `Float of float | `Int of int ] -> bool = <fun>
+```frag
+((typ ocamltop)(name variants/main.topscript)(part 8))
 ```
 
 The `<` is there because `is_positive` has no way of dealing with
@@ -689,10 +433,8 @@ lower bounds on the tags involved.  If the same set of tags are both
 an upper and a lower bound, we end up with an _exact_ polymorphic
 variant type, which has neither marker.  For example:
 
-```ocaml
-# let exact = List.filter ~f:is_positive [three;four];;
-val exact : [ `Float of float | `Int of int ] list
-   = [`Int 3; `Float 4.]
+```frag
+((typ ocamltop)(name variants/main.topscript)(part 9))
 ```
 
 Perhaps surprisingly, we can also create polymorphic variant types
@@ -700,18 +442,8 @@ that have different upper and lower bounds.  Note that `Ok` and
 `Error` in the following example come from the `Result.t` type from
 Core.
 
-```ocaml
-# let is_positive = function
-     | `Int   x -> Ok (x > 0)
-     | `Float x -> Ok (x > 0.)
-     | `Not_a_number -> Error "not a number";;
-val is_positive :
-  [< `Float of float | `Int of int | `Not_a_number ] ->
-  (bool, string) Result.t = <fun>
-# List.filter [three; four] ~f:(fun x ->
-     match is_positive x with Error _ -> false | Ok b -> b);;
-- : [< `Float of float | `Int of int | `Not_a_number > `Float `Int ] list =
-[`Int 3; `Float 4.]
+```frag
+((typ ocamltop)(name variants/main.topscript)(part 10))
 ```
 
 Here, the inferred type states that the tags can be no more than ``
@@ -727,13 +459,8 @@ yet more colors, say, by adding an alpha channel so you can specify
 translucent colors.  We could model this extended set of colors as
 follows, using an ordinary variant.
 
-```ocaml
-# type extended_color =
-  | Basic of basic_color * weight  (* basic colors, regular and bold *)
-  | RGB   of int * int * int       (* 6x6x6 color space *)
-  | Gray  of int                   (* 24 grayscale levels *)
-  | RGBA  of int * int * int * int (* 6x6x6x6 color space *)
-  ;;
+```frag
+((typ ocamltop)(name variants/main.topscript)(part 11))
 ```
 
 We want to write a function `extended_color_to_int`, that works like
@@ -741,57 +468,22 @@ We want to write a function `extended_color_to_int`, that works like
 for handling colors that include an alpha channel.  One might try to
 write such a function as follows.
 
-```ocaml
-# let extended_color_to_int = function
-    | RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
-    | (Basic _ | RGB _ | Gray _) as color -> color_to_int color
-  ;;
+```frag
+((typ ocamltop)(name variants/main.topscript)(part 12))
 ```
 
-This looks reasonable enough, but it leads to the following type
-error.
-
-```ocaml
-Characters 93-98:
-    | (Basic _ | RGB _ | Gray _) as color -> color_to_int color
-                                                          ^^^^^
-Error: This expression has type extended_color
-       but an expression was expected of type color
-```
-
-The problem is that `extended_color` and `color` are in the compiler's
-view distinct and unrelated types.  The compiler doesn't, for example,
-recognize any equality between the `Basic` tag in the two
-types.
+The code looks reasonable enough, but it leads to a type error because
+`extended_color` and `color` are in the compiler's view distinct and
+unrelated types.  The compiler doesn't, for example, recognize any
+equality between the `Basic` tag in the two types.
 
 What we want to do is to share tags between two different variant
 types, and polymorphic variants let us do this in a natural way.
 First, let's rewrite `basic_color_to_int` and `color_to_int` using
 polymorphic variants.  The translation here is pretty straightforward.
 
-```ocaml
-# let basic_color_to_int = function
-    | `Black -> 0 | `Red     -> 1 | `Green -> 2 | `Yellow -> 3
-    | `Blue  -> 4 | `Magenta -> 5 | `Cyan  -> 6 | `White  -> 7
-
-  let color_to_int = function
-    | `Basic (basic_color,weight) ->
-      let base = match weight with `Bold -> 8 | `Regular -> 0 in
-      base + basic_color_to_int basic_color
-    | `RGB (r,g,b) -> 16 + b + g * 6 + r * 36
-    | `Gray i -> 232 + i
- ;;
-val basic_color_to_int :
-  [< `Black | `Blue | `Cyan | `Green | `Magenta | `Red | `White | `Yellow ] ->
-  int = <fun>
-val color_to_int :
-  [< `Basic of
-       [< `Black | `Blue | `Cyan | `Green | `Magenta | `Red
-        | `White | `Yellow ] *
-       [< `Bold | `Regular ]
-   | `Gray of int
-   | `RGB of int * int * int ] ->
-  int = <fun>
+```frag
+((typ ocamltop)(name variants/main.topscript)(part 13))
 ```
 
 Now we can try writing `extended_color_to_int`.  The key issue with
@@ -802,20 +494,8 @@ match.  In particular, in the following code, the type of the variable
 `color` includes only the tags `` `Basic``, `` `RGB`` and `` `Gray``,
 and not `` `RGBA``.
 
-```ocaml
-# let extended_color_to_int = function
-    | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
-    | (`Basic _ | `RGB _ | `Gray _) as color -> color_to_int color
-  ;;
-val extended_color_to_int :
-  [< `Basic of
-       [< `Black | `Blue | `Cyan | `Green | `Magenta | `Red
-        | `White | `Yellow ] *
-       [< `Bold | `Regular ]
-   | `Gray of int
-   | `RGB of int * int * int
-   | `RGBA of int * int * int * int ] ->
-  int = <fun>
+```frag
+((typ ocamltop)(name variants/main.topscript)(part 14))
 ```
 
 The above code is more delicately balanced than one might imagine.
@@ -823,23 +503,8 @@ In particular, if we use a catch-all case instead of an explicit
 enumeration of the cases, the type is no longer narrowed, and so
 compilation fails.
 
-```ocaml
-# let extended_color_to_int = function
-    | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
-    | color -> color_to_int color
-  ;;
-      Characters 125-130:
-      | color -> color_to_int color
-                              ^^^^^
-Error: This expression has type [> `RGBA of int * int * int * int ]
-       but an expression was expected of type
-         [< `Basic of
-              [< `Black | `Blue | `Cyan | `Green | `Magenta | `Red
-               | `White | `Yellow ] *
-              [< `Bold | `Regular ]
-          | `Gray of int
-          | `RGB of int * int * int ]
-       The second variant type does not allow tag(s) `RGBA
+```frag
+((typ ocamltop)(name variants/main.topscript)(part 15))
 ```
 
 <note>
@@ -851,19 +516,8 @@ the possible tags to those that can be handled by the match.  If we
 add a catch-all case to our match statement, we end up with a function
 with a lower bound.
 
-```ocaml
-# let is_positive_permissive = function
-     | `Int   x -> Ok (x > 0)
-     | `Float x -> Ok (x > 0.)
-     | _ -> Error "Unknown number type"
-  ;;
-val is_positive_permissive :
-  [> `Float of float | `Int of int ] -> (bool, string) Core.Std._result =
-  <fun>
-# is_positive_permissive (`Int 0);;
-- : (bool, string) Result.t = Ok false
-# is_positive_permissive (`Ratio (3,4));;
-- : (bool, string) Result.t = Error "Unknown number type"
+```frag
+((typ ocamltop)(name variants/main.topscript)(part 16))
 ```
 
 Catch-all cases are error-prone even with ordinary variants, but they
@@ -873,9 +527,8 @@ Such code is particularly vulnerable to typos.  For instance, if code
 that uses `is_positive_permissive` passes in `Float` misspelled as
 `Floot`, the erroneous code will compile without complaint.
 
-```ocaml
-# is_positive_permissive (`Floot 3.5);;
-- : (bool, string) Result.t = Error "Unknown number type"
+```frag
+((typ ocamltop)(name variants/main.topscript)(part 17))
 ```
 
 With ordinary variants, such a typo would have been caught as an
@@ -889,65 +542,16 @@ an implementation in an `ml` file and an interface in a separate
 `mli`, as we saw in [xref](#files-modules-and-programs).  Let's start
 with the `mli`.
 
-```ocaml
-(* file: terminal_color.mli *)
-
-open Core.Std
-
-type basic_color =
-  [ `Black   | `Blue | `Cyan  | `Green
-  | `Magenta | `Red  | `White | `Yellow ]
-
-type color =
-  [ `Basic of basic_color * [ `Bold | `Regular ]
-  | `Gray of int
-  | `RGB  of int * int * int ]
-
-type extended_color =
-  [ color
-  | `RGBA of int * int * int * int ]
-
-val color_to_int          : color -> int
-val extended_color_to_int : extended_color -> int
+```frag
+((typ ocamltop)(name variants-termcol/terminal_color.mli))
 ```
 
 Here, `extended_color` is defined as an explicit extension of `color`.
 Also, notice that we defined all of these types as exact variants.
 We can implement this library as follows.
 
-```ocaml
-(* file: terminal_color.ml *)
-
-open Core.Std
-
-type basic_color =
-  [ `Black   | `Blue | `Cyan  | `Green
-  | `Magenta | `Red  | `White | `Yellow ]
-
-type color =
-  [ `Basic of basic_color * [ `Bold | `Regular ]
-  | `Gray of int
-  | `RGB  of int * int * int ]
-
-type extended_color =
-  [ color
-  | `RGBA of int * int * int * int ]
-
-let basic_color_to_int = function
-  | `Black -> 0 | `Red     -> 1 | `Green -> 2 | `Yellow -> 3
-  | `Blue  -> 4 | `Magenta -> 5 | `Cyan  -> 6 | `White  -> 7
-
-let color_to_int = function
-  | `Basic (basic_color,weight) ->
-    let base = match weight with `Bold -> 8 | `Regular -> 0 in
-    base + basic_color_to_int basic_color
-  | `RGB (r,g,b) -> 16 + b + g * 6 + r * 36
-  | `Gray i -> 232 + i
-
-let extended_color_to_int = function
-  | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
-  | `Grey x -> 2000 + x
-  | (`Basic _ | `RGB _ | `Gray _) as color -> color_to_int color
+```frag
+((typ ocamltop)(name variants-termcol/terminal_color.ml))
 ```
 
 In the above code, we did something funny to the definition of
@@ -965,21 +569,15 @@ If we add an explicit type annotation to the code itself (rather than
 just in the `mli`), then the compiler has enough information to warn
 us.
 
-```ocaml
-let extended_color_to_int : extended_color -> int = function
-  | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
-  | `Grey x -> 2000 + x
-  | (`Basic _ | `RGB _ | `Gray _) as color -> color_to_int color
+```frag
+((typ ocamltop)(name variants-termcol-annotated/terminal_color.ml)(part 1))
 ```
 
 In particular, the compiler will complain that the `` `Grey`` case is
 unused.
 
-```ocaml
-File "color.ml", line 29, characters 4-11:
-Error: This pattern matches values of type [? `Grey of 'a ]
-       but a pattern was expected which matches values of type extended_color
-       The second variant type does not allow tag(s) `Grey
+```frag
+((typ console)(name variants-termcol-annotated/build.out))
 ```
 
 Once we have type definitions at our disposal, we can revisit the
@@ -987,10 +585,8 @@ question of how we write the pattern match that narrows the type.  In
 particular, we can explicitly use the type name as part of the pattern
 match, by prefixing it with a `#`.
 
-```ocaml
-let extended_color_to_int : extended_color -> int = function
-  | `RGBA (r,g,b,a) -> 256 + a + b * 6 + g * 36 + r * 216
-  | #color as color -> color_to_int color
+```frag
+((typ ocamltop)(name variants-termcol-fixed/terminal_color.ml)(part 1))
 ```
 
 This is useful when you want to narrow down to a type whose definition
