@@ -60,21 +60,8 @@ and if you want to use objects, you aren't required to use classes at all
 as a shorthand for the type of objects created from that class).  Here's an
 example of a simple object.
 
-```ocaml
-# let s = object
-    val mutable v = [0; 2]
-
-    method pop =
-      match v with
-        hd :: tl -> 
-          v <- tl;
-          Some hd
-      | [] -> None
-
-    method push hd = 
-      v <- hd :: v
-  end;;
-val s : < pop : int option; push : int -> unit > = <obj>
+```frag
+((typ ocamltop)(name objects/stack.topscript)(part 1))
 ```
 
 The object has an integer list value `v`, a method `pop` that returns the
@@ -87,38 +74,16 @@ interface of an object.  All interaction with an object is through its methods.
 The syntax for a method invocation (also called "sending a message" to the
 object) uses the `#` character.
 
-```ocaml
-# s#pop;;
-- : int option = Some 0
-# s#push 4;;
-- : unit = ()
-# s#pop;;
-- : int option = Some 4
+```frag
+((typ ocamltop)(name objects/stack.topscript)(part 2))
 ```
 
 Objects can also be constructed by functions.  If we want to specify
 the initial value of the object, we can define a function that takes
 the value and returns an object.
 
-```ocaml
-# let stack init = object
-    val mutable v = init
-
-    method pop =
-      match v with
-        hd :: tl -> 
-          v <- tl;
-          Some hd
-      | [] -> None
-
-    method push hd = 
-      v <- hd :: v
-  end;;
-val stack : 'a list -> < pop : 'a option; push : 'a -> unit > = <fun>
-# let s = stack [3; 2; 1];;
-val s : < pop : int option; push : int -> unit > = <obj>
-# s#pop;;
-- : int option = Some 3
+```frag
+((typ ocamltop)(name objects/stack.topscript)(part 3))
 ```
 
 Note that the types of the function `stack` and the returned object now use the
@@ -130,14 +95,8 @@ stack.
 
 Like polymorphic variants, methods can be used without an explicit type declaration.
 
-```ocaml
-# let area sq = sq#width ** 2.;;
-val area : < width : float; .. > -> float = <fun>
-# let minimize sq : unit = sq#resize 1.;;
-val minimize : < resize : float -> unit; .. > -> unit = <fun>
-# let limit sq = 
-    if (area sq) > 10. then minimize sq;;
-val limit : < resize : float -> unit; width : float; .. > -> unit = <fun>
+```frag
+((typ ocamltop)(name objects/polymorphism.topscript)(part 1))
 ```
 
 As you can see object types are inferred automatically from the methods that
@@ -145,16 +104,8 @@ are invoked on them.
 
 The type system will complain if it sees incompatible uses of the same method:
 
-```ocaml
-# let toggle sq b : unit = 
-    if b then sq#resize `Fullscreen
-    else minimize sq;;
-Characters 76-78:
-    else minimize sq;;
-                  ^^
-Error: This expression has type < resize : [> `Fullscreen ] -> unit; .. >
-       but an expression was expected of type < resize : float -> unit; .. >
-       Types for method resize are incompatible
+```frag
+((typ ocamltop)(name objects/polymorphism.topscript)(part 2))
 ```
 
 The `..` in the inferred object types are ellipsis, standing for any other
@@ -164,21 +115,8 @@ are said to be _open_.
 
 We can manually _close_ an object type using a type annotation:
 
-```ocaml
-# let area_closed (r: < width : float >) = r#width ** 2.;;
-val area_closed : < width : float > -> float = <fun>
-# let sq = object
-    method width = 3. 
-    method name = "sq" 
-  end;;
-val sq : < name : string; width : float > = <obj>
-# area_closed sq;;
-Characters 12-14:
-  area_closed sq;;
-              ^^
-Error: This expression has type < name : string; width : float >
-       but an expression was expected of type < width : float >
-       The second object type has no method name
+```frag
+((typ ocamltop)(name objects/polymorphism.topscript)(part 3))
 ```
 
 <note>
@@ -189,13 +127,8 @@ methods."  It may not be apparent from the syntax, but an elided object type is
 actually polymorphic.  If we try to write a type definition, we get an obscure
 error.
 
-```ocaml
-# type square = < width : float; ..>;;
-Characters 5-34:
-  type square = < width : float; ..>;;
-       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: A type variable is unbound in this type declaration.
-In type < width : float; .. > as 'a the variable 'a is unbound
+```frag
+((typ ocamltop)(name objects/polymorphism.topscript)(part 4))
 ```
 
 A `..` in an object type is called a _row variable_ and this typing scheme is
@@ -210,19 +143,8 @@ An object of type `< pop : int option; .. >` can be any object with a method
 `pop : int option`, it doesn't matter how it is implemented.  When the method
 `#pop` is invoked, the actual method that is run is determined by the object.
 
-```ocaml
-# let print_pop st = Option.iter ~f:(printf "Popped: %d\n") st#pop;;
-val print_pop : < pop : int Core.Std.Option.t; .. > -> unit = <fun>
-# print_pop (stack [5;4;3;2;1]);;
-Popped: 5
-- : unit = ()
-# let t = object
-    method pop = Some (Float.to_int (Time.to_float (Time.now ())))
-  end;;
-val t : < pop : int option > = <obj>
-# print_pop t;;
-Popped: 1372618419
-- : unit = ()
+```frag
+((typ ocamltop)(name objects/stack.topscript)(part 4))
 ```
 
 ## Immutable objects ##
@@ -235,20 +157,8 @@ messages to other objects.
 Indeed, in many programs, this makes sense, but it is by no means required.
 Let's define a function that creates immutable stack objects.
 
-```ocaml
-# let imm_stack init = object
-    val v = init
-
-    method pop =
-      match v with
-        hd :: tl -> Some (hd, {< v = tl >})
-      | [] -> None 
-
-    method push hd = 
-      {< v = hd :: v >}
-  end;;
-val imm_stack : 
-  'a list -> (< pop : ('a * 'b) option; push : 'a -> 'b > as 'b) = <fun>
+```frag
+((typ ocamltop)(name objects/immutable.topscript)(part 1))
 ```
 
 The key parts of this implementation are in the `pop` and `push` methods. The
@@ -257,17 +167,8 @@ type, and the specified fields updated.  In other words, the `push hd` method
 produces a copy of the object, with `v` replaced by `hd :: v`.  The original
 object is not modified.
 
-```ocaml
-# let s = imm_stack [3; 2; 1];;
-val s : < pop : (int * 'a) option; push : int -> 'a > as 'a = <obj>
-# let t = s#push 4;;
-val t : < pop : (int * 'a) option; push : int -> 'a > as 'a = <obj>
-# s#pop;;
-- : (int * (< pop : 'a; push : int -> 'b > as 'b)) option as 'a =
-Some (3, <obj>)
-# t#pop;;
-- : (int * (< pop : 'a; push : int -> 'b > as 'b)) option as 'a =
-Some (4, <obj>)
+```frag
+((typ ocamltop)(name objects/immutable.topscript)(part 2))
 ```
 
 There are some restriction on the use of the expression `{< ... >}`.
@@ -328,37 +229,16 @@ To explore this, let's define some simple object types for geometric
 shapes.  The generic type `shape` has a method to compute the area,
 and `square` and `circle` are specific kinds of shape.
 
-```ocaml
-type shape = < area : float >;;
-
-type square = < area : float; width : float >;;
-
-let square w = object
-  method area = w *. w
-  method width = w
-end;;
-
-type circle = < area : float; radius : float >;;
-
-let circle r = object
-  method area = 3.14 *. r ** 2.0
-  method radius = r
-end;;
+```frag
+((typ ocamltop)(name objects/subtyping.topscript)(part 1))
 ```
 
 A `square` has a method `area` just like a `shape`, and an additional
 method `width`.  Still, we expect a `square` to be a `shape`, and it
 is.  The coercion `:>` must be explicit.
 
-```ocaml
-# let shape w : shape = square w;;
-Characters 22-30:
-  let shape w : shape = square w;;
-                        ^^^^^^^^
-Error: This expression has type square but an expression was expected of type shape
-       The second object type has no method width
-# let shape w : shape = (square w :> shape);;
-val shape : float -> shape = <fun>
+```frag
+((typ ocamltop)(name objects/subtyping.topscript)(part 2))
 ```
 
 This form of object subtyping is called _width_ subtyping. Width
@@ -375,26 +255,15 @@ iff `t1` is a subtype of `t2`.
 
 For example, we can create two objects with a `shape` method:
 
-```ocaml
-# let coin = object
-    method shape = circle 0.5
-    method color = "silver"
-  end
-val coin : < color : string; shape : circle > = <obj>
-# let map = object
-    method shape = square 1.0
-  end
-val map : < shape : square > = <obj>
+```frag
+((typ ocamltop)(name objects/subtyping.topscript)(part 3))
 ```
 
 Both these objects have a `shape` method whose type is a subtype of the `shape`
 type, so they can both be coerced into the object type `< shape : shape >`
 
-```ocaml
-# type item = < shape : shape >;;
-type item = < shape : shape >
-# let items = [ (coin :> item) ; (map :> item) ];;
-val items : item list = [<obj>; <obj>]
+```frag
+((typ ocamltop)(name objects/subtyping.topscript)(part 4))
 ```
 
 ### Polymorphic variant subtyping
@@ -402,15 +271,8 @@ val items : item list = [<obj>; <obj>]
 Subtyping can also be used to coerce a polymorphic variant into a larger
 polymorphic variant type.
 
-```ocaml
-# type num = [ `Int of int | `Float of float ];;
-type num = [ `Float of float | `Int of int ]
-# type const = [ num | `String of string ];;
-type const = [ `Float of float | `Int of int | `String of string ]
-# let n : num = `Int 3;;
-val n : num = `Int 3
-# let c : const = (n :> const);;
-val c : const = `Int 3
+```frag
+((typ ocamltop)(name objects/subtyping.topscript)(part 5))
 ```
 
 ### Variance
@@ -418,11 +280,8 @@ val c : const = `Int 3
 What about types built from object types? If a `square` is a `shape`, we expect
 a `square list` to be a `shape list`. OCaml does indeed allow such coercions:
 
-```ocaml
-# let squares: square list = [ square 1.0; square 2.0 ];;
-val squares : square list = [<obj>; <obj>]
-# let shapes: shape list = (squares :> shape list);;
-val shapes : shape list = [<obj>; <obj>]
+```frag
+((typ ocamltop)(name objects/subtyping.topscript)(part 6))
 ```
 
 Note that this relies on lists being immutable. It would not be safe to treat a
@@ -430,17 +289,8 @@ Note that this relies on lists being immutable. It would not be safe to treat a
 non-square shapes into what should be an array of squares. OCaml recognises
 this and does not allow the coercion.
 
-```ocaml
-# let square_array: square array = [| square 1.0; square 2.0 |];;
-val square_array : square array = [|<obj>; <obj>|]
-# let shape_array: shape array = (square_array :> shape array);;
-Characters 31-60:
-  let shape_array: shape array = (square_array :> shape array);;
-                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: Type square array is not a subtype of shape array 
-Type square = < area : float; width : float > is not compatible with type
-  shape = < area : float > 
-The second object type has no method width
+```frag
+((typ ocamltop)(name objects/subtyping.topscript)(part 7))
 ```
 
 We say that `'a list` is _covariant_ (in `'a`), whilst `'a array` is
@@ -452,13 +302,8 @@ expects its argument to be a `square` and would not know what to do with a
 `circle`. However, a function with type `shape -> string` _can_ safely be used
 with type `square -> string`.
 
-```ocaml
-# let shape_to_string: shape -> string = 
-    fun s -> sprintf "Shape(%F)" s#area;;
-val shape_to_string : shape -> string = <fun>
-# let square_to_string: square -> string = 
-    (shape_to_string :> square -> string);;
-val square_to_string : square -> string = <fun>
+```frag
+((typ ocamltop)(name objects/subtyping.topscript)(part 8))
 ```
 
 We say that `'a -> string` is _contravariant_ in `'a`. In general, function types
@@ -469,78 +314,22 @@ are contravariant in their arguments and covariant in their results.
 
 OCaml works out the variance of a type using that type's definition. 
 
-```ocaml
-# module Either = struct
-  type ('a, 'b) t = 
-      Left of 'a
-    | Right of 'b
-end;;
-module Either : sig type ('a, 'b) t = Left of 'a | Right of 'b end
-# let sq : (square, circle) Either.t = Either.Left (square 4.0);;
-val sq : (square, circle) Either.t = Either.Left <obj>
-# let sh : (shape, shape) Either.t = (sq :> (shape, shape) Either.t);;
-val sh : (shape, shape) Either.t = Either.Left <obj>
+```frag
+((typ ocamltop)(name objects/subtyping.topscript)(part 9))
 ```
 
 However, if the definition is hidden by a signature then OCaml is forced to
 assume that the type is invariant.
 
-```ocaml
-# module Either : sig 
-    type ('a, 'b) t
-    val left: 'a -> ('a, 'b) t
-    val right: 'b -> ('a, 'b) t
-  end = struct
-    type ('a, 'b) t = 
-        Left of 'a
-      | Right of 'b
-    let left x = Left x
-    let right x = Right x
-  end;;
-module Either :
-  sig
-    type ('a, 'b) t
-    val left : 'a -> ('a, 'b) t
-    val right : 'b -> ('a, 'b) t
-  end
-# let sq : (square, circle) Either.t = Either.left (square 4.0);;
-val sq : (square, circle) Either.t = <abstr>
-# let sh : (shape, shape) Either.t = (sq :> (shape, shape) Either.t);;
-Characters 35-66:
-  let sh : (shape, shape) Either.t = (sq :> (shape, shape) Either.t);;
-                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: Type (square, circle) Either.t is not a subtype of
-         (shape, shape) Either.t 
-       Type square = < area : float; width : float > is not compatible with type
-         shape = < area : float > 
-       The second object type has no method width
+```frag
+((typ ocamltop)(name objects/subtyping.topscript)(part 10))
 ```
 
 We can fix this by adding _variance annotations_ to the type's parameters in the signature: `+`
 for covariance or `-` for contravariance.
 
-```ocaml
-# module Either : sig 
-    type (+'a, +'b) t
-    val left: 'a -> ('a, 'b) t
-    val right: 'b -> ('a, 'b) t
-  end = struct
-    type ('a, 'b) t = 
-        Left of 'a
-      | Right of 'b
-    let left x = Left x
-    let right x = Right x
-  end;;
-module Either :
-  sig
-    type (+'a, +'b) t
-    val left : 'a -> ('a, 'b) t
-    val right : 'b -> ('a, 'b) t
-  end
-# let sq : (square, circle) Either.t = Either.left (square 4.0);;
-val sq : (square, circle) Either.t = <abstr>
-# let sh : (shape, shape) Either.t = (sq :> (shape, shape) Either.t);;
-val sh : (shape, shape) Either.t = <abstr>
+```frag
+((typ ocamltop)(name objects/subtyping.topscript)(part 11))
 ```
 
 </note>
@@ -549,44 +338,21 @@ For a more concrete example of variance, let's create some stacks containing
 shapes by applying our `stack` function to some squares and some circles.
 
 
-```ocaml
-# type 'a stack = < pop: 'a option; push: 'a -> unit >;;
-type 'a stack = < pop : 'a option; push : 'a -> unit >
-# let square_stack: square stack = stack [square 3.0; square 1.0];;
-val square_stack : square stack = <obj>
-# let circle_stack: circle stack = stack [circle 2.0; circle 4.0];;
-val circle_stack : circle stack = <obj>
+```frag
+((typ ocamltop)(name objects/subtyping.topscript)(part 12))
 ```
 
 If we wanted to write a function that took a list of such stacks and found the
 total area of their shapes, we might try:
 
-```ocaml
-# let total_area (shape_stacks: shape stack list) =
-    let stack_area acc st = 
-      let rec loop acc =
-        match st#pop with
-          Some s -> loop (acc +. s#area)
-        | None -> acc
-      in
-        loop acc
-    in
-      List.fold ~init:0.0 ~f:stack_area shape_stacks;;
-val total_area : shape stack list -> float = <fun>
+```frag
+((typ ocamltop)(name objects/subtyping.topscript)(part 13))
 ```
 
 However, when we try to apply this function to our objects we get an error:
 
-```ocaml
-# total_area [(square_stack :> shape stack); (circle_stack :> shape stack)];;
-Characters 12-41:
-  total_area [(square_stack :> shape stack); (circle_stack :> shape stack)];;
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: Type square stack = < pop : square option; push : square -> unit >
-       is not a subtype of
-         shape stack = < pop : shape option; push : shape -> unit > 
-       Type shape = < area : float > is not a subtype of
-         square = < area : float; width : float > 
+```frag
+((typ ocamltop)(name objects/subtyping.topscript)(part 14))
 ```
 
 As you can see, `square stack` and `circle stack` are not subtypes of `shape
@@ -605,22 +371,8 @@ precise type that indicates we are not going to be using the set method.  We
 define a type `readonly_stack` and confirm that we can coerce the list of
 stacks to it.
 
-```ocaml
-# type 'a readonly_stack = < pop : 'a option >;;
-type 'a readonly_stack = < pop : 'a option >
-# let total_area (shape_stacks: shape readonly_stack list) =
-    let stack_area acc st = 
-      let rec loop acc =
-        match st#pop with
-          Some s -> loop (acc +. s#area)
-        | None -> acc
-      in
-        loop acc
-    in
-      List.fold ~init:0.0 ~f:stack_area shape_stacks;;
-val total_area : shape readonly_stack list -> float = <fun>
-# total_area [(square_stack :> shape readonly_stack); (circle_stack :> shape readonly_stack)];;
-- : float = 72.8000000000000114
+```frag
+((typ ocamltop)(name objects/subtyping.topscript)(part 15))
 ```
 
 Aspects of this section may seem fairly complicated, but it should be pointed
@@ -708,20 +460,8 @@ situation, which is to augment the classes with variants.  You can
 define a method `variant` that injects the actual object into a
 variant type.
  
-```ocaml
-type shape = < variant : repr; area : float>
-and circle = < variant : repr; area : float; radius : float >
-and line = < variant : repr; area : float; length : float >
-and repr =
- | Circle of circle
- | Line of line;;
- 
-let is_barbell = function
- | [s1; s2; s3] ->
-   (match s1#variant, s2#variant, s3#variant with
-     | Circle c1, Line _, Circle c2 when c1#radius == c2#radius -> true
-	 | _ -> false)
- | _ -> false;;
+```frag
+((typ ocaml)(name objects/narrowing.ml)(part 1))
 ```
 
 This pattern works, but it has drawbacks.  In particular, the
@@ -736,75 +476,44 @@ polymorphism is in general preferred over subtyping because it does not require
 explicit coercions, and it preserves more type information, allowing functions
 like the following:
 
-```ocaml
-# let remove_large l = 
-    List.filter ~f:(fun s -> s#area < 10.0) l;;
-val remove_large :
-  (< area : float; .. > as 'a) Core.Std.List.t -> 'a Core.Std.List.t = <fun>
+```frag
+((typ ocamltop)(name objects/row_polymorphism.topscript)(part 1))
 ```
 
 The return type of this function is built from the open object type of its
 argument, preserving any additional methods that it may have. 
 
-```ocaml
-# let squares : < area : float; width : float > list = 
-    [square 3.0; square 4.0; square 2.0];;
-val squares : < area : float; width : float > list = [<obj>; <obj>; <obj>]
-# remove_large squares;;
-- : < area : float; width : float > Core.Std.List.t = [<obj>; <obj>]
+```frag
+((typ ocamltop)(name objects/row_polymorphism.topscript)(part 2))
 ```
 
 Writing a similar function with a closed type and applying it using subtyping
 does not preserve the methods of the argument: the returned object is only
 known to have an `area` method.
 
-```ocaml
-# let remove_large (l: < area : float > list) = 
-    List.filter ~f:(fun s -> s#area < 10.0) l;;
-val remove_large : < area : float > list -> < area : float > Core.Std.List.t =
-  <fun>
-# remove_large (squares :> < area : float > list );;
-- : < area : float > Core.Std.List.t = [<obj>; <obj>]
+```frag
+((typ ocamltop)(name objects/row_polymorphism.topscript)(part 3))
 ```
 
 However, there are some situations where we cannot use row polymorphism. For
 example, lists of heterogeneous elements can not be created using row
 polymorphism:
 
-```ocaml
-# let hlist: < area: float; ..> list = [square 1.0; circle 3.0];;
-Characters 50-60:
-  let hlist: < area: float; ..> list = [square 1.0; circle 3.0];;
-                                                    ^^^^^^^^^^
-Error: This expression has type circle but an expression was expected of type
-         square
-       The second object type has no method radius
+```frag
+((typ ocamltop)(name objects/row_polymorphism.topscript)(part 4))
 ```
 
 Since row polymorphism is a form of polymorphism, it also does not work well
 with references:
 
-```ocaml
-# let shape_ref: < area: float; ..> ref = ref (square 4.0);;
-val shape_ref : < area : float; width : float > ref = {contents = <obj>}
-# shape_ref := circle 2.0;;
-Characters 13-23:
-  shape_ref := circle 2.0;;
-               ^^^^^^^^^^
-Error: This expression has type circle but an expression was expected of type
-         < area : float; width : float >
-       The first object type has no method width
+```frag
+((typ ocamltop)(name objects/row_polymorphism.topscript)(part 5))
 ```
 
 In both these cases we must use subtyping:
 
-```ocaml
-# let hlist: shape list = [(square 1.0 :> shape); (circle 3.0 :> shape)];;
-val hlist : shape list = [<obj>; <obj>]
-# let shape_ref: shape ref = ref (square 4.0 :> shape);;
-val shape_ref : shape ref = {contents = <obj>}
-# shape_ref := (circle 2.0 :> shape);;
-- : unit = ()
+```frag
+((typ ocamltop)(name objects/row_polymorphism.topscript)(part 5))
 ```
 
 <note>

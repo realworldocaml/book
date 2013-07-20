@@ -18,6 +18,8 @@ dirs= json \
       files-modules-and-programs-freq-cyclic1 \
       files-modules-and-programs-freq-cyclic2 \
       records \
+      objects \
+      imperative-programming
 
 
 # html/md files directory
