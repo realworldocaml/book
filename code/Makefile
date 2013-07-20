@@ -22,8 +22,8 @@ dirs= json \
       variants-termcol \
       variants-termcol-annotated \
       variants-termcol-fixed \
-
-
+      objects \
+      imperative-programming \
 
 # html/md files directory
 OBJ=         _build
