@@ -133,9 +133,10 @@ An even more alert reader will be wondering about the performance implications
 are for integer arithmetic using this tagged representation.  Since the bottom
 bit is set, any operation on the integer has to shift the bottom bit right to
 recover the "native" value.  The native code OCaml compiler generates efficient
-x86 assembly code in this case.  It takes advantage of modern processor
-instructions to hide the extra shifts as much as possible.  Addition and
-substraction are a single instruction, and multiplication is only a few more.
+x86 assembly code in this case, taking advantage of modern processor
+instructions to hide the extra shifts where possible.  Addition is a single
+`LEA` x86 instruction, subtraction can be two instructions, and multiplication
+is only a few more.
 
 </note>
 
