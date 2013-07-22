@@ -21,6 +21,7 @@ type typ = [
   | `Scheme
   | `OCaml_syntax
   | `C
+  | `CPP
   | `Java
 ]
 
@@ -43,6 +44,7 @@ let typ_of_string s : typ =
   | "ocamlsyntax" -> `OCaml_syntax
   | "java"     -> `Java
   | "c"        -> `C
+  | "cpp"      -> `CPP
   | x          -> raise (Failure ("Unknown fragment type " ^ x))
 
 let of_string s =

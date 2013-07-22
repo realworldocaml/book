@@ -36,6 +36,9 @@ let output_t_as_markdown s =
   | `JSON ->
     printf "```json\n";
     printf "%s\n```\n" buf
+  | `CPP ->
+    printf "```cpp\n";
+    printf "%s\n```\n" buf
   | `C ->
     printf "```c\n";
     printf "%s\n```\n" buf

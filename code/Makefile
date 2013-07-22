@@ -37,6 +37,7 @@ mli_src=      $(wildcard $(dirs:%=%/*.mli))
 json_src=     $(wildcard $(dirs:%=%/*.json))
 java_src=     $(wildcard $(dirs:%=%/*.java))
 c_src=        $(wildcard $(dirs:%=%/*.c))
+cpp_src=      $(wildcard $(dirs:%=%/*.cpp))
 atd_src=      $(wildcard $(dirs:%=%/*.atd))
 scm_src=      $(wildcard $(dirs:%=%/*.scm))
 syn_src=      $(wildcard $(dirs:%=%/*.syntax))
@@ -46,7 +47,7 @@ errscripts=   $(wildcard $(dirs:%=%/*.errsh))
 topscripts=   $(wildcard $(dirs:%=%/*.topscript))
 rawtscripts=   $(wildcard $(dirs:%=%/*.rawscript))
 
-all_src=      $(ml_src) $(mli_src) $(json_src) $(java_src) $(c_src) $(atd_src) $(scm_src) $(syn_src)
+all_src=      $(ml_src) $(mli_src) $(json_src) $(java_src) $(c_src) $(cpp_src) $(atd_src) $(scm_src) $(syn_src)
 all_scripts=  $(scripts:%.sh=%.out) $(errscripts:%.errsh=%.out) \
 	      $(topscripts) $(rawtscripts) $(rawscripts:%.rawsh=%.out)
 
@@ -99,6 +100,10 @@ $(OBJ)/%.java.0.html: %.java
 $(OBJ)/%.c.0.html: %.c
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -pygments c $< || (cat $@ && rm -f $@)
+
+$(OBJ)/%.cpp.0.html: %.cpp
+	@mkdir -p $(@D)
+	$(highlight) -builddir $(OBJ) -pygments cpp $< || (cat $@ && rm -f $@)
 
 $(OBJ)/%.scm.0.html: %.scm
 	@mkdir -p $(@D)
