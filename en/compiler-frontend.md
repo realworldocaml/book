@@ -52,9 +52,7 @@ The overall compilation pipeline looks like this:
         v
     Parsetree (untyped AST)
         |
-        | syntax extensions
-        v
-    Camlp4 transformation (untyped AST)
+        | camlp4 syntax extensions
         |
         | type inference and checking
         v
