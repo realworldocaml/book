@@ -12,7 +12,18 @@ dirs= json \
       files-modules-and-programs-freq-with-sig-abstract-fixed \
       files-modules-and-programs-freq-fast \
       files-modules-and-programs-freq-median \
-
+      files-modules-and-programs-freq-with-sig-mismatch \
+      files-modules-and-programs-freq-with-missing-def \
+      files-modules-and-programs-freq-with-type-mismatch \
+      files-modules-and-programs-freq-cyclic1 \
+      files-modules-and-programs-freq-cyclic2 \
+      records \
+      variants \
+      variants-termcol \
+      variants-termcol-annotated \
+      variants-termcol-fixed \
+      objects \
+      imperative-programming \
 
 # html/md files directory
 OBJ=         _build

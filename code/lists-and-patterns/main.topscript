@@ -17,7 +17,8 @@ let rec sum l =
     | hd :: tl -> hd + sum tl
   ;;
 sum [1;2;3];;  
-sum [];;
+sum []
+;;
 #part 5
 let rec drop_value l to_drop =
     match l with

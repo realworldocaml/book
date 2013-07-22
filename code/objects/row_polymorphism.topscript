@@ -1,0 +1,39 @@
+type square = < area : float; width : float >;;
+
+let square w = object
+  method area = w *. w
+  method width = w
+end;;
+
+type circle = < area : float; radius : float >;;
+
+let circle r = object
+  method area = 3.14 *. r ** 2.0
+  method radius = r
+end;;
+
+#part 1
+let remove_large l =
+  List.filter ~f:(fun s -> s#area < 10.0) l;;
+
+#part 2
+let squares : < area : float; width : float > list = 
+  [square 3.0; square 4.0; square 2.0];;
+remove_large squares;;
+
+#part 3
+let remove_large (l: < area : float > list) = 
+  List.filter ~f:(fun s -> s#area < 10.0) l;;
+remove_large (squares :> < area : float > list );;
+
+#part 4
+let hlist: < area: float; ..> list = [square 1.0; circle 3.0];;
+
+#part 5
+let shape_ref: < area: float; ..> ref = ref (square 4.0);;
+shape_ref := circle 2.0;;
+
+#part 6
+let hlist: shape list = [(square 1.0 :> shape); (circle 3.0 :> shape)];;
+let shape_ref: shape ref = ref (square 4.0 :> shape);;
+shape_ref := (circle 2.0 :> shape);;

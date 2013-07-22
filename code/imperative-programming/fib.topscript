@@ -1,0 +1,63 @@
+let time f =
+  let start = Time.now () in
+  let x = f () in
+  let stop = Time.now () in
+  printf "Time: %s\n" (Time.Span.to_string (Time.diff stop start));
+  x ;;
+
+let memoize f =
+  let table = Hashtbl.Poly.create () in
+  (fun x ->
+    match Hashtbl.find table x with
+    | Some y -> y
+    | None ->
+      let y = f x in
+      Hashtbl.add_exn table ~key:x ~data:y;
+      y
+  );;
+
+#part 1
+let rec fib i =
+  if i <= 1 then 1 else fib (i - 1) + fib (i - 2);;
+
+#part 2
+time (fun () -> fib 20);;
+time (fun () -> fib 40);;
+
+#part 3
+let fib = memoize fib;;
+time (fun () -> fib 40);;
+time (fun () -> fib 40);;
+
+#part 4
+let fib_norec fib i =
+  if i <= 1 then i
+  else fib (i - 1) + fib (i - 2) ;;
+
+#part 5
+let rec fib i = fib_norec fib i;;
+fib 5;;
+
+#part 6
+let make_rec f_norec =
+  let rec f x = f_norec f x in
+  f
+;;
+let fib = make_rec fib_norec;;
+fib 5;;
+
+#part 7
+let memo_rec f_norec x =
+   let fref = ref (fun _ -> assert false) in
+   let f = memoize (fun x -> f_norec !fref x) in
+   fref := f;
+   f x
+;;
+
+#part 8
+let fib = memo_rec fib_norec;;
+time (fun () -> fib 40);;
+
+#part 9
+let fib = memo_rec (fun fib i ->
+  if i <= 1 then 1 else fib (i - 1) + fib (i - 2));;

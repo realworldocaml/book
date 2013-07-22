@@ -2,13 +2,14 @@
 
 ocamlbuild \
     -use-ocamlfind \
-    -use-classic-display \
+    -classic-display \
     -syntax camlp4o \
     -pkg core,core_extended,async,textutils,core_bench  \
     -pkg sexplib.syntax,comparelib.syntax,fieldslib.syntax,variantslib.syntax \
     -pkg bin_prot.syntax \
     -tag thread \
     -tag debug \
+    -cflags -short-paths \
     -cflags "-w @A-4-33-41-42-43-34-44" \
     -cflags -strict-sequence \
     -cflags -principal \
