@@ -316,8 +316,8 @@ entire heap block-by-block in increasing order of memory address. If it finds a
 gray block, it adds it to the gray list and recursively marks it using the
 usual strategy for a pure heap.  Once the scan of the complete heap is
 finished, the mark phase checks again whether the heap has again become impure,
-and repeats the scan until if it is. These full-heap scans will continue until
-a successful scan completes without overflowing the gray list.
+and repeats the scan until it is pure again. These full-heap scans will
+continue until a successful scan completes without overflowing the gray list.
 
 <note>
 <title>Controlling major heap collections</title>
