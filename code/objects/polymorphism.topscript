@@ -1,9 +1,9 @@
 1;;
 #part 1
-let area sq = sq#width ** 2.;;
-let minimize sq : unit = sq#resize 1.;;
+let area sq = sq#width * sq#width;;
+let minimize sq : unit = sq#resize 1;;
 let limit sq = 
-  if (area sq) > 10. then minimize sq;;
+  if (area sq) > 100 then minimize sq;;
 
 #part 2
 let toggle sq b : unit = 
@@ -11,12 +11,12 @@ let toggle sq b : unit =
   else minimize sq;;
 
 #part 3
-let area_closed (r: < width : float >) = r#width ** 2.;;
+let area_closed (sq: < width : int >) = sq#width * sq#width;;
 let sq = object
-  method width = 3. 
+  method width = 30 
   method name = "sq" 
 end;;
 area_closed sq;;
 
 #part 4
-type square = < width : float; ..>;;
+type square = < width : int; ..>;;

@@ -1,222 +1,76 @@
 # Classes
 
-Programming with objects directly is great for encapsulation, but one
-of the main goals of object-oriented programming is code reuse
-through inheritance.  For inheritance, we need to introduce _classes_.
-In object-oriented programming, a class is a "recipe" for creating
-objects.  The recipe can be changed by adding new methods and fields,
-or it can be changed by modifying existing methods.
+Programming with objects directly is great for encapsulation, but one of the
+main goals of object-oriented programming is code re-use through inheritance.
+For inheritance, we need to introduce _classes_.  In object-oriented
+programming, a class is a "recipe" for creating objects.  The recipe can be
+changed by adding new methods and fields, or it can be changed by modifying
+existing methods.
 
 ## OCaml Classes
 
-In OCaml, class definitions must be defined as toplevel statements in
-a module.  A class is not an object, and a class definition is not an
-expression.  The syntax for a class definition uses the keyword
-`class`.
+In OCaml, class definitions must be defined as toplevel statements in a module.
+A class is not an object, and a class definition is not an expression.  The
+syntax for a class definition uses the keyword `class`.
 
 ```ocaml
-# class point =
-  object
-    val mutable x = 0
-    method get = x
-    method set y = x <- y
+# class istack = object
+    val mutable v = [0; 2]
+    
+    method pop = 
+      match v with
+        hd :: tl -> 
+          v <- tl;
+          Some hd
+      | [] -> None
+
+    method push hd = 
+      v <- hd :: v
   end;;
-class point :
+class istack :
   object
-    val mutable x : int
-    method get : int
-    method set : int -> unit
+    val mutable v : int
+    method pop : int option
+    method push : int -> unit
   end
 ```
 
-The type `class point : ... end` is a _class type_.  This particular
-type specifies that the `point` class defines a mutable field `x`, a
-method `get` that returns an `int`, and a method `set` with type `int
--> unit`.
+The `class istack : object ... end` result shows that we have created a class
+`istack` with _class type_ `object ... end`.  Like module types, class types
+are completely separate from regular OCaml types (e.g. `int`, `string`, `list`)
+and, in particular, should not be confused with object types (e.g. `< get :
+int; .. >`). The class type describes the class itself rather than the objects
+that the class creates. This particular class type specifies that the `istack`
+class defines a mutable field `v`, a method `pop` that returns an `int option`,
+and a method `push` with type `int -> unit`.
 
 To produce an object, classes are instantiated with the keyword `new`.
 
 ```ocaml
-# let p = new point;;
-val p : point = <obj>
-# p#get;;
-- : int = 0
-# p#set 5;;
+# let s = new istack;;
+val s : istack = <obj>
+# s#pop;;
+- : int option = Some 0
+# s#push 5;;
 - : unit = ()
-# p#get;;
-- : int = 5
+# s#pop;;
+- : int option = Some 5
 ```
 
-Inheritance uses an existing class to define a new one.  For example,
-the following class definition supports an addition method `moveby`
-that moves the point by a relative amount.
+You may have noticed that the object `s` has been given the type `istack`. But
+wait, we've stressed _classes are not types_, so what's up with that?  In fact,
+what we've said is entirely true, classes and class names *are not* types.
+However, for convenience, the definition of the class `istack` also defines an
+object type `istack` with the same methods as the class. This type definition
+is equivalent to:
 
 ```ocaml
-# class movable_point =
-  object (self : 'self)
-    inherit point
-    method moveby dx = self#set (self#get + dx)
-  end;;
-class movable_point :
-  object
-    val mutable x : int
-    method get : int
-    method moveby : int -> unit
-    method set : int -> unit
-  end
+type istack = < pop: int option; push: int -> unit >
 ```
 
-This new `movable_point` class also makes use of the
-`(self : 'self)` binding after the `object` keyword.  The variable
-`self` stands for the current object, allowing self-invocation, and
-the type variable `'self` stands for the type of the current object
-(which in general is a subtype of `movable_point`).
-
-
-##  An Example: Cryptokit
-
-Let's take a break from describing the object system with a more
-practical example that uses the OCaml cryptographic library.
-
-<note>
-<title>Installing the Cryptokit library</title>
-
-The Cryptokit library can be installed via OPAM via `opam install cryptokit`.
-Once that's finished compiling and installing, you just need to `#require
-"cryptokit"` in your toplevel to load the library and make the modules
-available.
-
-</note>
-
-Our first example mimics the `md5` command, which reads in an input file and
-returns a hexadecimal representation of its MD5 cryptographic hash.  Cryptokit
-defines a number of different functions and collects them together under the
-`Cryptokit.hash` class type (class types are discussed later in this chapter
-[xref](#class-types)):
-
-```ocaml
-class type hash = object
-  method add_byte : int -> unit
-  method add_char : char -> unit
-  method add_string : string -> unit
-  method add_substring : string -> int -> int -> unit
-  method hash_size : int
-  method result : string
-  method wipe : unit
-end
-
-val hash_string : hash -> string -> string
-```
-
-Concrete hash objects can be instantiated from various sub-modules in Cryptokit.  The simplest ones such as MD5 or SHA1 do not take any special input parameters to build the object. The `hmac_sha1` takes a string key to initialise the Message Authenticate Code for that particular hash function.
-
-```ocaml
-# Cryptokit.Hash.md5;;
-- : unit -> Cryptokit.hash = <fun>
-# Cryptokit.Hash.sha1;;
-- : unit -> Cryptokit.hash = <fun>
-# Cryptokit.MAC.hmac_sha1;;
-- : string -> Cryptokit.hash = <fun>
-```
-
-Hash objects hold state and are thus naturally imperative. Once instantiated,
-data is fed into them by the addition functions, the `result` is computed and
-finally the contents erased via `wipe`.  The `hash_string` convenience function
-applies the hash function fully to a string, and returns the result.  The `md5`
-command is quite straight-forward now:
-
-```ocaml
-open Core.Std
-open Cryptokit
-
-let () =
-  In_channel.(input_all stdin)
-  |> hash_string (Hash.md5 ())
-  |> transform_string (Hexa.encode ())
-  |> print_endline
-```
-
-After opening the right modules, we read in the entire standard input into an
-OCaml string.  This is then passed onto the MD5 hash function, which returns a
-binary string.  This binary is passed through the `Hexa` hexadecimal encoder,
-which returns an ASCII representation of the input.  The output of this command
-will be the same as the `md5` command (or `md5sum` in some systems).
-
-We can extend this simple example by selecting either the `md5` or `sha1` hash
-function at runtime depending on the name of our binary.  `Sys.argv` is an array
-containing the arguments the command was invoked with, and the first entry is
-the name of the binary itself.
-
-```ocaml
-open Core.Std
-open Cryptokit
-
-let () =
-  let hash_fn =
-    match Filename.basename Sys.argv.(0) with
-    |"md5" -> Hash.md5 ()
-    |"sha1" -> Hash.sha1 ()
-    |_ -> Hash.md5 ()
-  in
-  In_channel.(input_all stdin)
-  |> hash_string hash_fn
-  |> transform_string (Hexa.encode ())
-  |> print_endline
-```
-
-Now let's try something more advanced.  The `openssl` library is installed on most systems, and can be used to encrypt plaintext using several encryption strategies.  At its simplest, it will take a secret phrase and derive an appropriate key and initialisation vector.
-
-```
-$ openssl enc -nosalt -aes-128-cbc -base64 -k "ocaml" -P
-key=6217C07FF169F6AB2EB2731F855095F1
-iv =8164D5477E66E6A9EC99A8D58ACAADAF
-```
-
-We've selected the `-nosalt` option here to make the output deterministic, and the `-P` option prints out the derived key and IV and exits.  The algorithm used to derive these results is described in the `man EVP_BytesToKey` manual page (you may need to install the OpenSSL documentation packages on your system first).  We can implement this derivation function using an imperative style:
-
-```ocaml
-let md5 s = hash_string (Hash.md5 ()) s
-
-let evp_byte_to_key password tlen =
-  let o = Hexa.encode () in
-  let v = ref (md5 password) in
-  o#put_string !v;
-  while o#available_output/2 < tlen do
-    let n = md5 (!v ^ password) in
-    o#put_string n;
-    v := n;
-  done;
-  String.uppercase o#get_string
-
-let () =
-  let secret = "ocaml" in
-  let key_len = 16 * 2 in
-  let iv_len = 16 * 2 in
-  let x = evp_byte_to_key secret (key_len+iv_len) in
-  let key = String.sub x ~pos:0 ~len:key_len in
-  let iv = String.sub x ~pos:key_len ~len:iv_len in
-  Printf.printf "key=%s\niv =%s\n%!" key iv
-```
-
-The derivation algorithm takes an input password and desired total length (the addition of the key and IV length).
-It initialises a `Hexa.encode` transformer, which will accept arbitrary binary data and output a hexadecimal string (with two output bytes per input byte).  A reference stores the last digest that's been calculated, and then the algorithm iterates until it has sufficient data to satisfy the required key length.
-
-Notice how the encoder object is used as an accumulator, by using the `put_string` and `available_output` to keep track of progress.  Objects don't *require* an imperative style though, and the same algorithm can be written more functionally:
-
-```ocaml
-let evp_byte_to_key password tlen =
-  let rec aux acc v =
-    match String.length acc < tlen with
-    | true ->
-      let v = md5 (v ^ password) in
-      aux (acc^v) v
-    | false -> acc
-  in
-  let v = md5 password in
-  String.uppercase (transform_string (Hexa.encode ()) (aux v v))
-```
-
-In this version, we don't use any references, and instead a recursive function keeps track of the last digest in use and the accumulated result string.  This version isn't quite as efficient as the previous one due to the careless use of string concatenation for the accumulator, but this can easily be fixed by using the `Buffer` module instead.
+Note that this type represents any object with these methods: objects created
+using the `istack` class will have this type, but objects with this type may
+not have been created by the `istack` class.
 
 ## Class parameters and polymorphism ##
 
@@ -224,63 +78,58 @@ A class definition serves as the _constructor_ for the class.  In
 general, a class definition may have parameters that must be provided
 as arguments when the object is created with `new`.
 
-Let's build an example of an imperative singly-linked list using
-object-oriented techniques.  First, we'll want to define a class for a
-single element of the list.  We'll call it a `node`, and it will hold
-a value of type `'a`.  When defining the class, the type parameters
-are placed in square brackets before the class name in the class
-definition.  We also need a parameter `x` for the initial value.
+Let's implement a class for creating simple stack objects. When defining the
+class, the type parameters are placed in square brackets before the class name
+in the class definition.  We also need a parameter `init` for the initial
+contents of the stack.
 
 ```ocaml
-class ['a] node x =
-object
-  val mutable value : 'a = x
-  val mutable next_node : 'a node option = None
+class ['a] stack init = object
+    val mutable v : 'a list = init
+    
+    method pop = 
+      match v with
+        hd :: tl -> 
+          v <- tl;
+          Some hd
+      | [] -> None
 
-  method get = value
-  method set x = value <- x
-
-  method next = next_node
-  method set_next node = next_node <- node
+    method push hd = 
+      v <- hd :: v
 end;;
 ```
 
-The `value` is the value stored in the node, and it can be retrieved
-and changed with the `get` and `set` methods.  The `next_node` field
-is the link to the next element in the stack.  Note that the type
-parameter `['a]` in the definition uses square brackets, but other
-uses of the type can omit them (or use parentheses if there is more
-than one type parameter).
+Note that the type parameter `['a]` in the definition uses square brackets, but
+other uses of the type can omit them (or use parentheses if there is more than
+one type parameter).
 
-The type annotations on the `val` declarations are used to constrain
-type inference.  If we omit these annotations, the type inferred for
-the class will be "too polymorphic," `x` could have some type `'b` and
-`next_node` some type `'c option`.
+The type annotation on the `val` declaration is used to constrain type
+inference.  If we omit these annotations, the type inferred for the class will
+be "too polymorphic": `init` could have some type `'b list`.
 
 ```ocaml
-  class ['a] node x =
-  object
-    val mutable value = x
-    val mutable next_node = None
+# class ['a] stack init = object
+      val mutable v = init
+    
+      method pop = 
+        match v with
+          hd :: tl -> 
+            v <- tl;
+            Some hd
+        | [] -> None
 
-    method get = value
-    method set x = value <- x
-
-    method next = next_node
-    method set_next node = next_node <- node
+      method push hd = 
+        v <- hd :: v
   end;;
 Error: Some type variables are unbound in this type:
-         class ['a] node :
-           'b ->
+         class ['a] stack :
+           'b list ->
            object
-             val mutable next_node : 'c option
-             val mutable value : 'b
-             method get : 'b
-             method next : 'c option
-             method set : 'b -> unit
-             method set_next : 'c option -> unit
+             val mutable v : 'b list
+             method pop : 'b option
+             method push : 'b -> unit
            end
-       The method get has type 'b where 'b is unbound
+       The method pop has type 'b option where 'b is unbound
 ```
 
 In general, we need to provide enough constraints so that the compiler
@@ -291,40 +140,12 @@ in all three places, but the extra text may not help clarity.  A
 convenient middle ground is to annotate the fields and/or class
 parameters, and add constraints to methods only if necessary.
 
-Next, we can define the list itself.  We'll keep a field `head` that
-refers to the first element in the list, and `last` that refers to the
-final element in the list.  The method `insert` adds an element to the
-end of the list.
+## Object types as interfaces ##
 
-```ocaml
-class ['a] slist =
-object
-   val mutable first : ('a) node option = None
-   val mutable last : ('a) node option = None
-
-   method is_empty = first = None
-
-   method insert x =
-      let new_node = Some (new node x) in
-      match last with
-         Some last_node ->
-            last_node#set_next new_node;
-            last <- new_node
-       | None ->
-            first <- new_node;
-            last <- new_node
-end;;
-```
-
-## Object types ##
-
-This definition of the class `slist` is not complete, we can construct
-lists, but we also need to add the ability to traverse the elements in
-the list.  One common style for doing this is to define a class for an
-`iterator` object.  An iterator provides a generic mechanism to
-inspect and traverse the elements of a collection.  This pattern isn't
-restricted to lists, it can be used for many different kinds of
-collections.
+We may wish to traverse the elements on our stack. One common style
+for doing this in object-oriented languages is to define a class for
+an `iterator` object.  An iterator provides a generic mechanism to
+inspect and traverse the elements of a collection.
 
 There are two common styles for defining abstract interfaces like
 this.  In Java, an iterator would normally be specified with an
@@ -352,7 +173,7 @@ class Iterator {
 };
 ```
 
-OCaml support both styles.  In fact, OCaml is more flexible than these
+OCaml supports both styles.  In fact, OCaml is more flexible than these
 approaches because an object type can be implemented by any object
 with the appropriate methods; it does not have to be specified by the
 object's class _a priori_.  We'll leave abstract classes for later.
@@ -365,116 +186,144 @@ methods in an iterator.
 type 'a iterator = < get : 'a; has_value : bool; next : unit >;;
 ```
 
-Next, we'll define an actual iterator for the class `slist`.  We can
-represent the position in the list with a field `current`, following
-links as we traverse the list.
+Next, we'll define an actual iterator for lists.  We can use this to
+iterate over the contents of our stack.
 
 ```ocaml
-class ['a] slist_iterator cur =
-object (self : 'self)
-  val mutable current : 'a node option = cur
+class ['a] list_iterator init =
+object
+  val mutable current : 'a list = init
 
-  method has_value = current <> None
+  method has_value = init <> []
 
   method get =
      match current with
-        Some node -> node#get
-      | None -> raise (Invalid_argument "no value")
+        hd :: tl -> hd
+      | [] -> raise (Invalid_argument "no value")
 
   method next =
      match current with
-        Some node -> current <- node#next
-      | None -> raise (Invalid_argument "no value")
+        hd :: tl -> current <- tl
+      | [] -> raise (Invalid_argument "no value")
 end;;
 ```
 
-Finally, we add a method `iterator` to the slist class to produce an
-iterator.  To do so, we construct an `slist_iterator` that refers to
-the first node in the list, but we want to return a value with the
-object type `iterator`.  This requires an explicit coercion using the
-`:>` operator.
+Finally, we add a method `iterator` to the `stack` class to produce an
+iterator.  To do so, we construct a `list_iterator` that refers to
+the current contents of the stack.
 
 ```ocaml
-class ['a] slist = object
-...
-   method iterator = (new slist_iterator first :> 'a iterator)
-end
+method iterator : 'a iterator = new list_iterator v
+```
 
-# let l = new slist;;
-# l.insert 5;;
-# l.insert 4;;
-# let it = l#iterator;;
+```ocaml
+# let s = new stack [];;
+# s#push 5;;
+# s#push 4;;
+# let it = s#iterator;;
 # it#get;;
-- : int = 5
+- : int = 4
 # it#next;;
 - : unit = ()
 # it#get;;
-- : int = 4
+- : int = 5
 # it#next;;
 - : unit = ()
 # it#has_value;;
 - : bool = false
 ```
 
-We may also wish to define functional-style methods, `iter f` takes a
-function `f` and applies it to each of the elements of the list.
+In practise, most OCaml programmers avoid iterator objects in favour
+of functional-style techniques. For example, `iter f` takes a
+function `f` and applies it to each of the elements on the stack.
 
 ```ocaml
-method iter (f : 'a -> unit) =
-  let it = self#iterator in
-  while it#has_value do
-    f it#get;
-    it#next
-  done
+method iter f = List.iter ~f v
 ```
 
-What about functional operations similar to `List.map` or `List.fold`?
-In general, these methods take a function that produces a value of
-some other type than the elements of the set.  For example, the
-function `List.fold` has type `'a list -> ('b -> 'a -> 'b) -> 'b ->
-'b`, where `'b` is an arbitrary type.  To replicate this in the
-`slist` class, we need a method type `('b -> 'a -> 'b) -> 'b -> 'b`,
-where the method type is polymorphic over `'b`.
-
-The solution is to use a type quantifier, as shown in the following
-example.  The method type must be specified directly after the method
+What about functional operations like map and fold?  In general,
+these methods take a function that produces a value of some other
+type than the elements of the set.  For example, a `fold` method for
+our `['a] stack` class should have type `('b -> 'a -> 'b) -> 'b ->
+'b`, where the method type is polymorphic over `'b`. To express this
+we must use a type quantifier, as shown in the following example.
+Polymorphic method types must be specified directly after the method
 name, which means that method parameters must be expressed using a
 `fun` or `function` expression.
 
 ```ocaml
 method fold : 'b. ('b -> 'a -> 'b) -> 'b -> 'b =
-   (fun f x ->
-         let y = ref x in
-         let it = self#iterator in
-         while it#has_value do
-            y := f !y it#get;
-            it#next
-         done;
-         !y)
+  (fun f x -> List.fold ~f ~init v)
 ```
+
+## Inheritance
+
+Inheritance uses an existing class to define a new one.  For example,
+the following class definition inherits from our stack class for
+strings and adds a new method `print` that prints all the strings on
+the stack.
+
+```ocaml
+# class sstack init = object
+    inherit [string] stack init
+
+    method print = 
+      List.iter ~f:print_string v
+  end;;
+class sstack :
+  string list ->
+  object
+    val mutable v : string Core.Std.List.t
+    method pop : string option
+    method print : unit
+    method push : string -> unit
+  end
+```
+
+A class can override methods from classes it inherits. For example,
+this class creates stacks of integers that double the integers before
+they are pushed onto the stack.
+
+```ocaml
+# class double_stack init = object
+  inherit [int] stack init as super
+
+  method push hd =
+    super#push (hd * 2)
+  end;;
+class double_stack :
+  int list ->
+  object
+    val mutable v : int list
+    method pop : int option
+    method push : int -> unit
+  end
+```
+
+The `as super` statement above creates a special object called
+`super` which can be used to call superclass methods. Note that
+`super` is not a real object and can only be used to call methods.
 
 ## Class types ##
 
-Once we have defined the list implementation, the next step is to wrap
-it in a module or `.ml` file and give it a type so that it can be used
-in the rest of our code.  What is the type?
+To allow code in a different file or module to inherit from a class
+we must expose it and give it a class type. What is the class type?
 
-Before we begin, let's wrap up the implementation in an explicit
-module (we'll use explicit modules for illustration, but the process
-is similar when we want to define a `.mli` file).  In keeping with the
-usual style for modules, we define a type `'a t` to represent the type
-of list values.
+As an example, let's wrap up our `stack` class in an explicit module
+(we'll use explicit modules for illustration, but the process is
+similar when we want to define a `.mli` file).  In keeping with the
+usual style for modules, we define a type `'a t` to represent the
+type of our stacks.
 
 ```ocaml
-module SList = struct
-   type 'a iterator = < get : 'a; has_value : bool; next : unit >
-   type 'a t = < is_empty : bool; insert : 'a -> unit; iterator : 'a iterator >
+module Stack = struct
+   class ['a] stack init = object 
+     ... 
+   end
 
-   class ['a] node x = object ... end
-   class ['a] slist_iterator cur = object ... end
-   class ['a] slist = object ... end
+   type 'a t = 'a stack
 
-   let make () = new slist
+   let make init = new stack init
 end;;
 ```
 
@@ -484,12 +333,11 @@ maximally-abstract signature would completely hide the class
 definitions.
 
 ```ocaml
-module AbstractSList : sig
-   type 'a iterator = < get : 'a; has_value : bool; next : unit >
-   type 'a t = < is_empty : bool; insert : 'a -> unit; iterator : 'a iterator >
+module AbstractStack : sig
+   type 'a t = < pop: 'a option; push: 'a -> unit >
 
    val make : unit -> 'a t
-end = SList
+end = Stack
 ```
 
 The abstract signature is simple because we ignore the classes.  But
@@ -504,106 +352,265 @@ don't have to give a type for everything; anything you omit will be
 hidden.
 
 ```ocaml
-module VisibleSList : sig
-  type 'a iterator = < get : 'a; has_value : bool; next : unit >
-  type 'a t = < is_empty : bool; insert : 'a -> unit; iterator : 'a iterator >
+module VisibleStack : sig
+  
+  type 'a t = < pop: 'a option; push: 'a -> unit >
 
-  class ['a] node : 'a ->
+  class ['a] stack :
   object
-     method get : 'a
-     method set : 'a -> unit
-     method next : 'a node option
-     method set_next : 'a node option -> unit
+    val mutable v : 'a list
+    method pop : 'a option
+    method push : 'a -> unit
   end
 
-  class ['a] slist_iterator : 'a node option ->
-  object
-     method has_value : bool
-     method get : 'a
-     method next : unit
-  end
+  val make : unit -> 'a t
 
-  class ['a] slist :
-  object
-    val mutable first : 'a node option
-    val mutable last : 'a node option
-    method is_empty : bool
-    method insert : 'a -> unit
-    method iterator : 'a iterator
-  end
-
-  val make : unit -> 'a slist
-end = SList
+end = Stack
 ```
 
-In this signature, we've chosen to make nearly everything visible.
-The class type for `slist` specifies the types of the fields `first`
-and `last`, as well as the types of each of the methods.  We've also
-included a class type for `slist_iterator`, which is of somewhat more
-questionable value, since the type doesn't appear in the type for
-`slist` at all.
+In this signature, we've chosen to make everything visible.  The
+class type for `stack` specifies the types of the field `v`, as well
+as the types of each of the methods.
 
-One more thing, in this example the function `make` has type `unit ->
-'a slist`.  But wait, we've stressed _classes are not types_, so
-what's up with that?  In fact, what we've said is entirely true,
-classes and class names *are not* types.  However, class names can be
-used to stand for types.  When the compiler sees a class name in type
-position, it automatically constructs an object type from it by
-erasing all the fields and keeping only the method types.  In this
-case, the type expression `'a slist` is exactly equivalent to `'a t`.
+## Open Recursion
+
+Open recursion allows an object's methods to invoke other methods on
+the same object. These calls are looked up dynamically allowing a
+method in one class to call a method from another class, if both
+classes are inherited by the same object. This allows mutually
+recursive parts of an object to be defined separately.
+
+This ability to define mutually recursive methods from separate
+components is a key feature of classes: achieving similar
+functionality with datatypes or modules is much more cumbersome and
+verbose.
+
+For example, consider writing recursive functions over a simple
+document format. This format is represented as a tree with three
+different types of node:
+
+```ocaml
+type doc = 
+    Heading of string
+  | Paragraph of text_item list
+  | Definition of string list_item list
+
+and text_item =
+    Raw of string
+  | Bold of text_item list
+  | Enumerate of int list_item list
+  | Quote of doc
+
+and 'a list_item = 
+  { tag: 'a;
+    text: text_item list }
+```
+
+It is quite easy to write a function that operates by recursively
+traversing this data. However, what if you need to write many similar
+recursive functions? How can you factor out the common parts of these
+functions to avoid repetitive boilerplate?
+
+The simplest way is to use classes and open recursion. For example,
+the following class defines objects which fold over the document data:
+
+```ocaml
+class ['a] folder = object(self)
+  method doc acc doc =
+    match doc with
+      Heading _ -> acc
+    | Paragraph text -> List.fold ~f:self#text_item ~init:acc text
+    | Definition list -> List.fold ~f:self#list_item ~init:acc list
+
+  method list_item: 'b. 'a -> 'b list_item -> 'a = 
+    fun acc {tag; text} ->
+      List.fold ~f:self#text_item ~init:acc text
+
+  method text_item acc bar =
+    match bar with
+      Raw _ -> acc
+    | Bold text -> List.fold ~f:self#text_item ~init:acc text
+    | Enumerate list -> List.fold ~f:self#list_item ~init:acc list
+    | Quote doc -> self#doc acc doc
+end
+```
+
+The `object (self)` syntax binds `self` to the current object,
+allowing the `doc`, `list_item` and `text_item` methods to call each
+other.
+
+By inheriting from this class we can create functions which fold over
+the document data. For example, the `count_doc` function counts the
+number of bold tags in the document that are not within a list:
+
+```ocaml
+class counter = object
+  inherit [int] folder as super
+
+  method list_item acc li = acc
+
+  method text_item acc ti = 
+    let acc = super#text_item acc ti in
+    match ti with
+      Bold _ -> acc + 1
+    | _ -> acc
+end
+
+let count_doc = (new counter)#doc
+```
+
+Note how the `super` special object is used in `text_item` to call
+the `[int] folder` class's `text_item` method to fold over the
+children of the `text_item` node.
+
+## Private methods ##
+
+Methods can be declared _private_, which means that they may be
+called by subclasses, but they are not visible otherwise (similar to a
+_protected_ method in C++).
+
+For example, we may want to include methods in our `folder` class for
+handling each of the different cases in `doc` and `text_item`.
+However, we may not want to force subclasses of `folder` to expose
+these methods as they probably shouldn't be called directly.
+
+```ocaml
+# class ['a] folder = object(self)
+    method doc acc doc =
+      match doc with
+        Heading str -> self#heading acc str
+      | Paragraph text -> self#paragraph acc text
+      | Definition list -> self#definition acc list
+  
+    method list_item: 'b. 'a -> 'b list_item -> 'a = 
+      fun acc {tag; text} ->
+          List.fold ~f:self#text_item ~init:acc text
+  
+    method text_item acc bar =
+      match bar with
+        Raw str -> self#raw acc str
+      | Bold text -> self#bold acc text
+      | Enumerate list -> self#enumerate acc list
+      | Quote doc -> self#quote acc doc
+  
+    method private heading acc str = acc
+    method private paragraph acc text = List.fold ~f:self#text_item ~init:acc text
+    method private definition acc list = List.fold ~f:self#list_item ~init:acc list
+  
+    method private raw acc str = acc
+    method private bold acc text = List.fold ~f:self#text_item ~init:acc text
+    method private enumerate acc list = List.fold ~f:self#list_item ~init:acc list
+    method private quote acc doc = self#doc acc doc
+  end;;
+class ['a] folder :
+  object
+    method private bold : 'a -> text_item Core.Std.List.t -> 'a
+    method private definition : 'a -> string list_item Core.Std.List.t -> 'a
+    method doc : 'a -> doc -> 'a
+    method private enumerate : 'a -> int list_item Core.Std.List.t -> 'a
+    method private heading : 'a -> string -> 'a
+    method list_item : 'a -> 'b list_item -> 'a
+    method private paragraph : 'a -> text_item Core.Std.List.t -> 'a
+    method private quote : 'a -> doc -> 'a
+    method private raw : 'a -> string -> 'a
+    method text_item : 'a -> text_item -> 'a
+  end
+# let f : < doc : 'a; .. >  = new folder;;
+val f :
+  < doc : '_a -> doc -> '_a; list_item : 'b. '_a -> 'b list_item -> '_a;
+    text_item : '_a -> text_item -> '_a > =
+  <obj>
+```
+
+To be precise, the private methods are part of the class type, but
+not part of the object type. This means, for example, that the object
+`f` has no method `bold`. However, the private methods are available
+to subclasses: we can use them to simplify our `counter` class.
+
+```ocaml
+# class counter = object
+    inherit [int] folder as super
+
+    method list_item acc li = acc
+
+    method private bold acc txt = 
+      let acc = super#bold acc txt in
+       acc + 1
+  end
+```
+
+The key property of private methods is that they are visible to
+subclasses, but not anywhere else.  If you want the stronger
+guarantee that a method is _really_ private, not even accessible in
+subclasses, you can use an explicit class type that omits the method.
+In the following code, the private methods are explicitly omitted
+from the class type of `counter`, and can't be invoked in subclasses
+of `counter`.
+
+```ocaml
+class counter : object
+  method doc : int -> doc -> int
+  method list_item : int -> 'b list_item -> int
+  method text_item : int -> text_item -> int
+end = object
+  inherit [int] folder as super
+
+  method list_item acc li = acc
+
+  method private bold acc txt = 
+    let acc = super#bold acc txt in
+     acc + 1
+end
+```
 
 ### Binary methods ###
 
 A _binary method_ is a method that takes an object of `self` type.
-One common example is defining a method for equality.
+One common example is defining a method for equality. 
 
 ```ocaml
-# class square w =
+class square w =
   object (self : 'self) 
     method width = w
-    method area = self#width * self#width
+    method area = Float.of_int (self#width * self#width)
     method equals (other : 'self) = other#width = self#width
-  end;;
-class square : int ->
-  object ('a)
-    method area : int
-    method equals : 'a -> bool
-    method width : int
   end
-# class rectangle w h =
+
+class circle r =
   object (self : 'self)
-    method width = w
-    method height = h
-    method area = self#width * self#height
-    method equals (other : 'self) = other#width = self#width && other#height = self#height
-  end;;
-...
+    method radius = r
+    method area = 3.14 *. (Float.of_int self#radius) ** 2.0
+    method equals (other : 'self) = other#radius = self#radius
+  end
+```
+
+```ocaml
 # (new square 5)#equals (new square 5);;
 - : bool = true
-# (new rectangle 5 6)#equals (new rectangle 5 7);;
+# (new circle 10)#equals (new circle 7);;
 - : bool = false
 ```
 
 This works, but there is a problem lurking here.  The method `equals`
-takes an object of the exact type `square` or `rectangle`.  Because of
+takes an object of the exact type `square` or `circle`.  Because of
 this, we can't define a common base class `shape` that also includes
 an equality method.
 
 ```ocaml
-# type shape = < equals : shape -> bool; area : int >;;
-# let sq = new square 5;;
-# (sq :> shape);;
-Characters 0-13:
-  (sq :> shape);;
-  ^^^^^^^^^^^^^
-Error: Type square = < area : int; equals : square -> bool; width : int >
-       is not a subtype of shape = < area : int; equals : shape -> bool > 
-Type shape = < area : int; equals : shape -> bool > is not a subtype of
-  square = < area : int; equals : square -> bool; width : int > 
+# type shape = < equals : shape -> bool; area : float >;;
+type shape = < area : float; equals : shape -> bool >
+# (new square 5 :> shape);;
+Characters 0-23:
+  (new square 5 :> shape);;
+  ^^^^^^^^^^^^^^^^^^^^^^^
+Error: Type square = < area : float; equals : square -> bool; width : int >
+       is not a subtype of shape = < area : float; equals : shape -> bool > 
+       Type shape = < area : float; equals : shape -> bool > is not a subtype of
+       square = < area : float; equals : square -> bool; width : int > 
 ```
 
 The problem is that a `square` expects to be compared with a `square`,
-not an arbitrary shape; similarly for `rectangle`.
+not an arbitrary shape; similarly for `circle`.
 
 This problem is fundamental.  Many languages solve it either with
 narrowing (with dynamic type checking), or by method overloading.
@@ -611,7 +618,7 @@ Since OCaml has neither of these, what can we do?
 
 One proposal we could consider is, since the problematic method is
 equality, why not just drop it from the base type `shape` and use
-polymorphic equality instead?  Unfortunately, the builtin equality
+polymorphic equality instead?  Unfortunately, the built-in equality
 has very poor behavior when applied to objects.
 
 ```ocaml
@@ -619,11 +626,11 @@ has very poor behavior when applied to objects.
 - : bool = false
 ```
 
-The problem here is that the builtin polymorphic equality compares the
+The problem here is that the built-in polymorphic equality compares the
 method implementations, not their return values.  The method
 implementations (the function values that implement the methods) are
 different, so the equality comparison is false.  There are other
-reasons not to use the builtin polymorphic equality, but these false
+reasons not to use the built-in polymorphic equality, but these false
 negatives are a showstopper.
 
 If we want to define equality for shapes in general, the remaining
@@ -635,17 +642,16 @@ and implement the comparison based on the representation type.
 type shape_repr =
  | Square of int
  | Circle of int
- | Rectangle of int * int;;
  
-type shape = < repr : shape_repr; equals : shape -> bool; area : int >;;
+type shape = < repr : shape_repr; equals : shape -> bool; area : float >
 
 class square w =
-object (self : 'self)
-  method width = w
-  method area = self#width * self#width
-  method repr = Square self#width
-  method equals (other : shape) = self#repr = other#repr
-end;;
+  object (self : 'self) 
+    method width = w
+    method area = Float.of_int (self#width * self#width)
+    method repr = Square self#width
+    method equals (other : 'self) = other#width = self#width
+  end
 ```
 
 The binary method `equals` is now implemented in terms of the concrete
@@ -657,138 +663,19 @@ module system.
 ```ocaml
 module Shapes : sig
   type shape_repr
-  type shape = < repr : shape_repr; equals : shape -> bool; area -> int >
+  type shape = < repr : shape_repr; equals : shape -> bool; area: float >
   
   class square : int ->
     object
 	  method width : int
-	  method area : int
+	  method area : float
 	  method repr : shape_repr
 	  method equals : shape -> bool
 	end
 end = struct
-  type shape_repr = Square of int | Circle of int | Rectangle of int * int
+  type shape_repr = Square of int | Circle of int 
   ...
-end;;
-```
-
-## Private methods ##
-
-Methods can be declared _private_, which means that they may be
-called by subclasses, but they are not visible otherwise (similar to a
-_protected_ method in C++).
-
-To illustrate, let's build a class `vector` that contains an array of
-integers, resizing the storage array on demand.  The field `values`
-contains the actual values, and the `get`, `set`, and `length` methods
-implement the array access.  For clarity, the resizing operation is
-implemented as a private method `ensure_capacity` that resizes the
-array if necessary.
-
-```ocaml
-# class vector =
-  object (self : 'self)
-     val mutable values : int array = [||]
-  
-     method get i = values.(i)
-     method set i x =
-        self#ensure_capacity i;
-        values.(i) <- x
-     method length = Array.length values
-  
-     method private ensure_capacity i =
-        if self#length <= i then
-           let new_values = Array.create (i + 1) 0 in
-           Array.blit values 0 new_values 0 (Array.length values);
-           values <- new_values
-  end;;
-# let v = new vector;;
-# v#set 5 2;;
-# v#get 5;;
-- 2 : int
-# v#ensure_capacity 10;;
-Characters 0-1:
-  v#ensure_capacity 10;;
-  ^
-Error: This expression has type vector
-       It has no method ensure_capacity
-```
-
-To be precise, the method `ensure_capacity` is part of the class type,
-but it is not part of the object type.  This means the object `v` has
-no method `ensure_capacity`.  However, it is available to subclasses.
-We can extend the class, for example, to include a method `swap` that
-swaps two elements.
-
-```ocaml
-# class swappable_vector =
-  object (self : 'self)
-     inherit vector
-
-     method swap i j =
-        self#ensure_capacity (max i j);
-        let tmp = values.(i) in
-        values.(i) <- values.(j);
-        values.(j) <- tmp
-  end;;
-```
-
-Yet another reason for private methods is to factor the implementation
-and support recursion.  Moving along with this example, let's build a
-binary heap, which is a binary tree in heap order: where the label of
-parent elements is smaller than the labels of its children.  One
-efficient implementation is to use an array to represent the values,
-where the root is at index 0, and the children of a parent node at
-index `i` are at indexes `2 * i` and `2 * i + 1`.  To insert a node
-into the tree, we add it as a leaf, and then recursively move it up
-the tree until we restore heap order.
-
-```ocaml
-class binary_heap =
-object (self : 'self)
-   val values = new swappable_vector
-
-   method min =
-      if values#length = 0 then
-         raise (Invalid_argument "heap is empty");
-      values#get 0
-
-   method add x =
-      let pos = values#length in
-      values#set pos x;
-      self#move_up pos
-
-   method private move_up i =
-      if i > 0 then
-         let parent = (i - 1) / 2 in
-            if values#get i < values#get parent then begin
-               values#swap i parent;
-               self#move_up parent
-            end
-end;;
-```
-
-The method `move_up` implements the process of restoring heap order as
-a recursive method (though it would be straightforward to avoid the
-recursion and use iteration here).
-
-The key property of private methods is that they are visible to
-subclasses, but not anywhere else.  If you want the stronger guarantee
-that a method is _really_ private, not even accessible in subclasses,
-you can use an explicit typing that omits the method.  In the following
-code, the `move_up` method is explicitly omitted from the object type,
-and it can't be invoked in subclasses.
-
-```ocaml
-# class binary_heap :
-  object
-    method min : int
-	method add : int -> unit
-  end =
-  object (self : 'self) {
-    ...
-	method private move_up i = ...
-  end;;
+end
 ```
 
 ## Virtual classes and methods ##
@@ -800,97 +687,165 @@ dynamic dispatch, regular non-virtual methods use static dispatched.
 In OCaml, _all_ methods use dynamic dispatch, but the keyword
 _virtual_ means the method or field is not implemented.
 
-In the previous section, we defined a class `swappable_vector` that
-inherits from `array_vector` and adds a `swap` method.  In fact, the
-`swap` method could be defined for any object with `get` and `set`
-methods; it doesn't have to be the specific class `array_vector`.
+To explore this, lets extend our shapes examples to simple interactive
+graphics. For this we will use the Async concurrency library and the
+[Async_graphics](http://github.com/lpw25/async_graphics/) library, which
+provides an Async interface to OCaml's built in Graphics library. Concurrent
+programming with Async will be explored in
+[xref](#concurrent-programming-with-async), for now you can safely ignore the
+details.
 
-One way to do this is to declare the `swappable_vector` abstractly,
-declaring the methods `get` and `set`, but leaving the implementation
-for later.  However, the `swap` method can be defined immediately.
+We will extend our `shape` type to include a `draw` method. To
+display the shapes we will define a reference to a list of shapes,
+and ensure that any shapes in that list will be drawn on the display
+at regular intervals. We also define an open_display function to open
+a display and ensure that the Async scheduler is running:
 
 ```ocaml
-class virtual abstract_swappable_vector =
-object (self : 'self)
-   method virtual get : int -> int
-   method virtual set : int -> int -> unit
-   method swap i j =
-      let tmp = self#get i in
-      self#set i (self#get j);
-      self#set j tmp
-end;;
+open Async.Std
+open Async_graphics
+
+type drawable = < draw: unit >
+
+let shapes: drawable list ref = ref []
+
+let repaint () =
+  try 
+    clear_graph ();
+    List.iter ~f:(fun s -> s#draw) !shapes;
+    synchronize ()
+  with Graphic_failure _ -> ();;
+
+Clock.every (Time.Span.of_sec (1.0 /. 24.0)) repaint;;
+
+let open_display () =
+  close_graph ();
+  open_graph "";
+  auto_synchronize false;
+  if not (Scheduler.is_running ()) then ignore (Thread.create Scheduler.go ());;
 ```
 
-At some future time, we may settle on a concrete implementation for the vector.
-We can inherit from the `abstract_swappable_bvector` to get the `swap` method "for free."
-Here's one implementation using arrays.
+Now let's create classes for making squares and circles. We include
+an `on_click` method for adding event handlers to the shapes.
 
 ```ocaml
-class array_vector =
-object (self : 'self)
-   inherit abstract_swappable_vector
+class square w x y = object (self)
+  val mutable x: int = x
+  method x = x
 
-   val mutable values = [||]
-   method get i = values.(i)
-   method set i x =
-      self#ensure_capacity i;
-      values.(i) <- x
-   method length = Array.length values
+  val mutable y: int = y
+  method y = y
 
-   method private ensure_capacity i =
-      if self#length <= i then
-         let new_values = Array.create (i + 1) 0 in
-            Array.blit values 0 new_values 0 (Array.length values);
-            values <- new_values
+  val mutable width = w
+  method width = width
+
+  method draw = fill_rect x y width width
+
+  method private contains x' y' = 
+    x <= x' && x' <= x + width &&
+      y <= y' && y' <= y + width
+
+  method on_click ?start ?stop f = 
+    on_click ?start ?stop 
+      (fun {mouse_x;mouse_y} -> 
+         if self#contains mouse_x mouse_y then 
+           f mouse_x mouse_y)
+end
+
+class circle r x y = object
+  val mutable x: int = x
+  method x = x
+
+  val mutable y: int = y
+  method y = y
+
+  val mutable radius = r
+  method radius = radius
+
+  method draw = fill_circle x y radius
+
+  method private contains x' y' = 
+    let dx = abs (x' - x) in
+    let dy = abs (y' - y) in
+    let dist = sqrt (Float.of_int ((dx * dx) + (dy * dy))) in
+      dist <= (Float.of_int radius)
+
+  method on_click ?start ?stop f = 
+    on_click ?start ?stop 
+      (fun {mouse_x;mouse_y} -> 
+         if self#contains mouse_x mouse_y then 
+           f mouse_x mouse_y)
 end
 ```
 
-Here's a different implementation using `Hashtbl`.
+These classes have a lot in common, and it would be useful to factor
+out this common functionality into a superclass. We can easily move
+the definitions of `x` and `y` into a superclass, but what about
+`on_click`? Its definition depends on `contains` which has a
+different definition in each class. The solution is to create a
+_virtual_ class. This class will declare a `contains` method, but
+leave its definition to the subclasses:
 
 ```ocaml
-class hash_vector =
-object (self : 'self)
-   inherit abstract_swappable_vector
+class virtual shape x y = object (self)
+  method virtual private contains: int -> int -> bool
 
-   val table = Hashtbl.create 19
+  val mutable x: int = x
+  method x = x
 
-   method get i =
-      try Hashtbl.find table i with
-         Not_found -> 0
+  val mutable y: int = y
+  method y = y
 
-   method set = Hashtbl.add table
-end;;
+  method on_click ?start ?stop f = 
+    on_click ?start ?stop 
+      (fun {mouse_x;mouse_y} -> 
+         if self#contains mouse_x mouse_y then 
+           f mouse_x mouse_y)
+
+  method on_mousedown ?start ?stop f = 
+    on_mousedown ?start ?stop 
+      (fun {mouse_x;mouse_y} -> 
+         if self#contains mouse_x mouse_y then 
+           f mouse_x mouse_y)
+end
+```
+
+Now we can define `square` and `circle` by inheriting from `shape`:
+
+```ocaml
+class square w x y = object
+  inherit shape x y
+
+  val mutable width = w
+  method width = width
+
+  method draw = fill_rect x y width width
+
+  method private contains x' y' = 
+    x <= x' && x' <= x + width &&
+      y <= y' && y' <= y + width
+end
+
+class circle r x y = object
+  inherit shape x y
+
+  val mutable radius = r
+  method radius = radius
+
+  method draw = fill_circle x y radius
+
+  method private contains x' y' = 
+    let dx = abs (x' - x) in
+    let dy = abs (y' - y) in
+    let dist = sqrt (Float.of_int ((dx * dx) + (dy * dy))) in
+      dist <= (Float.of_int radius)
+end
 ```
 
 One way to view a `virtual` class is that it is like a functor, where
 the "inputs" are the declared, but not defined, virtual methods and
 fields.  The functor application is implemented through inheritance,
 when virtual methods are given concrete implementations.
-
-We've been mentioning that fields can be virtual too.  Here is another
-implementation of the swapper, this time with direct access to the
-array of values.
-
-```ocaml
-class virtual abstract_swappable_array_vector =
-object (self : 'self)
-   val mutable virtual values : int array
-   method private virtual ensure_capacity : int -> unit
-
-   method swap i j =
-      self#ensure_capacity (max i j);
-      let tmp = values.(i) in
-      values.(i) <- values.(j);
-      values.(j) <- tmp
-end;;
-```
-
-This level of dependency on the implementation details is possible,
-but it is hard to justify the use of a virtual class -- why not just
-define the `swap` method as part of the concrete class?  Virtual
-classes are better suited for situations where there are multiple
-(useful) implementations of the virtual parts.  In most cases, this
-will be public virtual methods.
 
 ## Multiple inheritance
 
@@ -943,7 +898,7 @@ Characters 69-74:
      val x = 2
          ^^^^^
 Warning 13: the instance variable x is overridden.
-The behaviour changed in ocaml 3.10 (previous behaviour was hiding.)
+The behavior changed in OCaml 3.10 (previous behavior was hiding.)
 class m2 : object val x : int method f : int end
 # (new m2)#f;;
 - : int = 2
@@ -1041,89 +996,169 @@ class that implements methods _A_, and you have a mixin _M_ that
 provides methods _B_ from _A_, then you can inherit from _M_ --
 "mixing" it in -- to get features _B_.
 
-That's too abstract, so let's give an example based on collections.
-In Section XXX:Objecttypes, we introduced the _iterator_ pattern,
-where an _iterator_ object is used to enumerate the elements of a
-collection.  Lots of containers can have iterators: singly-linked
-lists, dictionaries, vectors, etc.
+That's too abstract, so let's give some examples based on our
+interactive shapes. We may wish to allow a shape to be dragged by the
+mouse. We can define this functionality for any object which has
+mutable `x` and `y` fields and an `on_mousedown` method for adding
+event handlers:
 
 ```ocaml
-type 'a iterator = < get : 'a; has_value : bool; next : unit >;;
-class ['a] slist : object ... method iterator : 'a iterator end;;
-class ['a] vector : object ... method iterator : 'a iterator end;;
-class ['a] deque : object ... method iterator : 'a iterator end;;
-class ['a, 'b] map : object ... method iterator : 'b iterator end;;
-...
+class virtual draggable = object (self)
+  method virtual on_mousedown: 
+    ?start:unit Deferred.t -> 
+    ?stop:unit Deferred.t -> 
+    (int -> int -> unit) -> unit
+  val virtual mutable x: int  
+  val virtual mutable y: int  
+
+  val mutable dragging = false
+  method dragging = dragging
+
+  initializer 
+    self#on_mousedown 
+      (fun mouse_x mouse_y ->
+         let offset_x = x - mouse_x in
+         let offset_y = y - mouse_y in
+         let mouse_up = Ivar.create () in
+         let stop = Ivar.read mouse_up in
+           dragging <- true;
+           on_mouseup ~stop (fun _ -> Ivar.fill mouse_up (); dragging <- false);
+           on_mousemove ~stop
+             (fun {mouse_x;mouse_y} -> 
+                x <- mouse_x + offset_x;
+                y <- mouse_y + offset_y))
+end
 ```
 
-The collections are different is some ways, but they share a common
-pattern for iteration that we can reuse.  For a simple example, let's
-define a mixin that implements an arithmetic sum for a collection of
-integers.
+This allows us to create draggable shapes using multiple inheritance.
 
 ```ocaml
-# class virtual int_sum_mixin =
-  object (self : 'self)
-     method virtual iterator : int iterator
-     method sum =
-        let it = self#iterator in
-        let total = ref 0 in
-        while it#has_value do
-           total := !total + it#get;
-           it#next
-        done;
-        !total
-  end;;
-# class int_slist =
+# class small_square = object inherit square 10 20 20 inherit draggable end;;
+class small_square :
   object
-     inherit [int] slist
-	 inherit int_sum_mixin
-  end;;
-# let l = new int_slist;;
-val l : int_slist = <obj>
-# l#insert 5;;
-# l#insert 12;;
-# l#sum;;
-- : int = 17
-# class int_deque =
-  object
-     inherit [int] deque
-	 inherit int_sum_mixin
-  end;;
+    val mutable dragging : bool
+    val mutable width : int
+    val mutable x : int
+    val mutable y : int
+    method private contains : int -> int -> bool
+    method dragging : bool
+    method draw : unit
+    method on_click :
+      ?start:unit Async.Std.Deferred.t ->
+      ?stop:unit Async.Std.Deferred.t -> (int -> int -> unit) -> unit
+    method on_mousedown :
+      ?start:unit Async.Std.Deferred.t ->
+      ?stop:unit Async.Std.Deferred.t -> (int -> int -> unit) -> unit
+    method width : int
+    method x : int
+    method y : int
+  end
+# shapes := (new small_square :> drawable) :: !shapes;;
+- : unit = ()
 ```
 
-In this particular case, the mixin works only for a collection of
-integers, so we can't add the mixin to the polymorphic class
-definition `['a] slist` itself.  However, the result of using the
-mixin is that the integer collection has a method `sum`, and it is
-done with very little of the fuss we would need if we used object
-composition instead.
-
-The mixin pattern isn't limited to non-polymorphic classes, of course.
-We can use it to implement generic features as well.  The following
-mixin defines functional-style iteration in terms of the imperative
-iterator pattern.
+We can also use mixins to create animated shapes. Each animated shape
+has a list of update functions to be called during animation. We
+create an `animated` mixin to provide this update list and ensure
+that the functions in it are called regular intervals when the shape
+is animated.
 
 ```ocaml
-class virtual ['a] fold_mixin =
-object (self : 'self)
-   method virtual iterator : 'a iterator
-   method fold : 'b. ('b -> 'a -> 'b) -> 'b -> 'b =
-      (fun f x ->
-            let y = ref x in
-            let it = self#iterator in
-            while it#has_value do
-               y := f !y it#get;
-               it#next
-            done;
-            !y)
-end;;
+class virtual animated span = object (self)
+  method virtual on_click: 
+    ?start:unit Deferred.t -> 
+    ?stop:unit Deferred.t -> 
+    (int -> int -> unit) -> unit
+  val mutable updates: (int -> unit) list = []
+  val mutable step = 0
+  val mutable running = false
 
-class ['a] slist_with_fold =
-object
-   inherit ['a] slist
-   inherit ['a] fold_mixin
-end;;
+  method running = running
+
+  method animate = 
+    step <- 0;
+    running <- true;
+    let stop = Clock.after span >>| fun () -> running <- false in    
+      Clock.every ~stop (Time.Span.of_sec (1.0 /. 24.0)) 
+        (fun () -> 
+           step <- step + 1;
+           List.iter ~f:(fun f -> f step) updates)
+
+  initializer 
+    self#on_click (fun x y -> if not self#running then self#animate)
+end
+```
+
+We use initializers to add functions to this update list. For
+example, this class will produce circles that move to the right for a
+second when clicked:
+
+```ocaml
+class my_circle = object
+  inherit circle 20 50 50
+  inherit animated Time.Span.second
+  initializer updates <- [fun _ -> x <- x + 5]
+end
+```
+
+This initializers can also be added using mixins:
+
+```ocaml
+class virtual linear x' y' = object (self)
+  val virtual mutable updates: (int -> unit) list
+  val virtual mutable x: int
+  val virtual mutable y: int
+
+  initializer 
+    let update _ = 
+      x <- x + x';
+      y <- y + y'
+    in
+      updates <- update :: updates
+end
+
+let pi = (atan 1.0) *. 4.0
+
+class virtual harmonic offset x' y' = object (self)
+  val virtual mutable updates: (int -> unit) list
+  val virtual mutable x: int
+  val virtual mutable y: int
+
+  initializer 
+    let update step =
+      let m = sin (offset +. ((Float.of_int step) *. (pi /. 64.))) in
+      let x' = Float.to_int (m *. Float.of_int x') in
+      let y' = Float.to_int (m *. Float.of_int y') in
+        x <- x + x';
+        y <- y + y'
+    in
+      updates <- update :: updates
+end
+```
+
+Since the `linear` and `harmonic` mixins are only used for there
+side-effects, they can be inherited multiple times within the same
+object to produce a variety of different animations.
+
+```ocaml
+class my_square x y = object (self)
+  inherit square 40 x y
+  inherit draggable
+  inherit animated (Time.Span.of_int_sec 5)
+  inherit linear 5 0
+  inherit harmonic 0.0 7 ~-10
+end
+
+let my_circle = object
+  inherit circle 30 250 250
+  inherit animated (Time.Span.minute)
+  inherit harmonic 0.0 10 0
+  inherit harmonic (pi /. 2.0) 0 10
+end
+
+shapes := [(my_circle :> drawable); 
+           (new my_square 50 450 :> drawable); 
+           (new my_square 50 400 :> drawable)]
 ```
 
 <note>
