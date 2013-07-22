@@ -737,7 +737,9 @@ with no cyclic dependencies between the modules.
 As with any such stylistic debate, you should experiment with which system
 works best for you.  Everyone agrees on one thing though: no matter what order
 you write them, production code should always explicitly define an `mli` file
-for every `ml` file in the project.
+for every `ml` file in the project.  It's also perfectly fine to have an `mli`
+file without a corresponding `ml` file if you're only declaring signatures
+(such as module types).
 
 Signature files provide a place to write succinct documentation and to abstract
 internal details that shouldn't be exported.  Maintaining separate signature
