@@ -123,19 +123,15 @@ collection.
 <note>
 <title>Setting the size of the minor heap</title>
 
-The minor heap size defaults to 8MB on 64-bit platforms, unless overridden by
+The default minor heap size in OCaml is normally 2MB on 64-bit platforms, but
+this is increased to 8MB if you use Core (which generally improves performance
+but at the cost of a bigger memory profile by default).
+This setting can be overridden unless overridden by
 the `s=<words>` argument to `OCAMLRUNPARAM`.  You can change it after the
 program has started by calling the `Gc.set` function.
 
-```ocaml
-# open Gc;;
-# let c = Gc.get ();;    
-val c : Gc.control =
-  {minor_heap_size = 262144; major_heap_increment = 126976;
-   space_overhead = 80; verbose = 0; max_overhead = 500;
-   stack_limit = 1048576; allocation_policy = 0}
-# Gc.tune ~minor_heap_size:(262144 * 2) () ;;
-- : unit = ()
+```frag
+((typ ocamltop)(name gc/tune.topscript)(part 0))
 ```
 
 Changing the GC size dynamically will trigger an immediate minor heap
@@ -206,9 +202,8 @@ block of memory.  This is preferable to lots of smaller heap chunks that may be
 spread across different regions of virtual memory, and require more
 housekeeping in the OCaml runtime to keep track of them.
 
-```ocaml
-# open Core.Std;;
-# Gc.tune ~major_heap_increment:(1000448 * 4) ();;
+```frag
+((typ ocamltop)(name gc/tune.topscript)(part 1))
 ```
 
 </note>
@@ -332,12 +327,8 @@ This performs a minor collection first, and then a single slice.  The size of
 the slice is normally automatically computed by the GC to an appropriate value,
 and returns this value so that you can modify it in future calls if necessary.
 
-```ocaml
-# open Core.Std;;
-# Gc.major_slice 0 ;;
-- : int = 232340
-# Gc.full_major ();;
-- : unit = ()
+```frag
+((typ ocamltop)(name gc/tune.topscript)(part 2))
 ```
 
 The `space_overhead` setting controls how aggressive the GC is about setting
@@ -375,10 +366,8 @@ cycle, whereas the maximum value of `1000000` disables heap compaction
 completely.  The default settings should be fine unless you have unusual
 allocation patterns that are causing a higher-than-usual rate of compactions.
 
-```ocaml
-# open Core.Std;;
-# Gc.tune ~max_overhead:0 ();;
-- : unit = () 
+```frag
+((typ ocamltop)(name gc/tune.topscript)(part 3))
 ```
 
 </note>
