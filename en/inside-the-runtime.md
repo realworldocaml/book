@@ -15,23 +15,23 @@ allocation requests by the OCaml program.
 
 ## Mark and sweep garbage collection
 
-When there isn't enough memory available to satisfy an allocation
-request from the pool of allocated heap blocks, the runtime system
-invokes the *garbage collector* (or GC). An OCaml program can't
-explicitly free a value when it is done with it. Instead, the GC
-regularly determines which values are *live* and which values are
-*dead*, _i.e._ no longer in use. Dead values are collected and their
-memory made available for reuse by the application.
+When there isn't enough memory available to satisfy an allocation request from
+the pool of allocated heap blocks, the runtime system invokes the *garbage
+collector* (or GC). An OCaml program can't explicitly free a value when it is
+done with it. Instead, the GC regularly determines which values are *live* and
+which values are *dead*, _i.e._ no longer in use. Dead values are collected and
+their memory made available for reuse by the application.
 
 The garbage collector doesn't keep constant track of values as they are
 allocated and used. Instead, it regularly scans them by starting from a set of
 *root* values that the application always has access to (such as the stack).
 The GC maintains a directed graph in which heap blocks are nodes, and there is
-an edge from heap block `b1` to heap block `b2` if some field of `b1` points to
-`b2`.  All blocks reachable from the roots by following edges in the graph must
-be retained, and unreachable blocks can be reused by the application.
+an edge from heap block `b1` to heap block `b2` if some field of `b1` is a
+pointer to `b2`.
 
-The algorithm used by OCaml to perform this heap traversal is commonly known as
+All blocks reachable from the roots by following edges in the graph must be
+retained, and unreachable blocks can be reused by the application.  The
+algorithm used by OCaml to perform this heap traversal is commonly known as
 *mark and sweep* garbage collection, and we'll explain it further now.
 
 ## Generational garbage collection
