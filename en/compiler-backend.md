@@ -294,7 +294,7 @@ L2:	closure L1, 0
 ```
 
 The bytecode above has been simplified from the lambda form into a set of
-simple instructions that are executed in serial by the interpreter.
+simple instructions that are executed serially by the interpreter.
 
 There are around 140 instructions in total, but most are just minor
 variants of commonly encountered operations (_e.g._ function
