@@ -20,6 +20,8 @@ let pygmentize lang file contents =
     | "console" -> "Terminal"
     | "scheme" -> "S-expression"
     | "html" -> "Syntax"
+    | "java" -> "Java"
+    | "c" -> "C"
     | unknown -> unknown
   in
   let data = wrap_in_pretty_box ~part:0 typ file data |> Cow.Html.to_string in

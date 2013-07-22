@@ -36,6 +36,12 @@ let output_t_as_markdown s =
   | `JSON ->
     printf "```json\n";
     printf "%s\n```\n" buf
+  | `C ->
+    printf "```c\n";
+    printf "%s\n```\n" buf
+  | `Java ->
+    printf "```java\n";
+    printf "%s\n```\n" buf
   | `ATD ->
     printf "```\n";
     if t.header then printf "(* %s *)\n" t.name;
