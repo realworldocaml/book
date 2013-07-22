@@ -49,10 +49,11 @@ The overall compilation pipeline looks like this:
     Source code
         |
         | parsing and preprocessing
-        v
-    Parsetree (untyped AST)
         |
         | camlp4 syntax extensions
+        |
+        v
+    Parsetree (untyped AST)
         |
         | type inference and checking
         v
@@ -76,10 +77,12 @@ The overall compilation pipeline looks like this:
 ```
 
 Notice that the pipeline branches towards the end. OCaml has multiple compiler
-backends that reuse the early stages of compilation, but produce very
-different final outputs. The *bytecode interpreter* is portable and can even be
-transformed into Javascript. The *native code compiler* generates specialized
-executable binaries suitable for high-performance applications.
+backends that reuse the early stages of compilation, but produce very different
+final outputs. The *bytecode* can be run by a portable interpreter, and can
+even be transformed into Javascript (via [js_of_ocaml](http://ocsigen.org/js_of_ocaml))
+or C source code (via [OCamlCC](https://github.com/ocaml-bytes/ocamlcc)).
+The *native code* compiler generates specialized executable binaries suitable for
+high-performance applications.
 
 <sidebar>
 <title>Obtaining the compiler source code</title>
