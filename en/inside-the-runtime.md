@@ -97,11 +97,12 @@ megabytes in size so that it can be scanned quickly.
                           blocks
 ```
 
-The runtime stores the minor heap in two pointers (`caml_young_start` and
-`caml_young_end`, but we will drop the `caml_young` prefix for brevity) that
-delimit the start and end of the heap region.  The `base` is the memory address
-returned by the system `malloc`, and `start` is aligned against the next
-nearest word boundary from `base` to make it easier to store OCaml values.
+The runtime stores the boundaries of the minor heap in two pointers that
+delimit the start and end of the heap region (`caml_young_start` and
+`caml_young_end`, but we will drop the `caml_young` prefix for brevity). The
+`base` is the memory address returned by the system `malloc`, and `start` is
+aligned against the next nearest word boundary from `base` to make it easier to
+store OCaml values.
 
 In a fresh minor heap, the `limit` equals the `start` and the current `ptr`
 will equal the `end`.  `ptr` decreases as blocks are allocated until it reaches
