@@ -209,10 +209,10 @@ definition to become part of the first `let` binding.  This eventually results
 in a parsing error at the very end of the second function.
 
 This class of bug (due to a single errant character) can be hard to spot in a
-large body of code. Luckily, there's a great tool in OPAM called ocp-indent
-that applies structured indenting rules to your source code on a line-by-line
-basis. This not only beautifies your code layout, but it also makes this syntax
-error much easier to locate.
+large body of code. Luckily, there's a great tool available via OPAM called
+`ocp-indent` that applies structured indenting rules to your source code on a
+line-by-line basis. This not only beautifies your code layout, but it also
+makes this syntax error much easier to locate.
 
 Let's run our erronous file through ocp-indent and see how it processes it.
 
