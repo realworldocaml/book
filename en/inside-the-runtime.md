@@ -404,40 +404,8 @@ Let's see this for ourselves with a simple test program.  You'll need
 to install the Core benchmarking suite via `opam install core_bench` before
 you compile this code.
 
-```ocaml
-(* barrier_bench.ml: benchmark mutable vs immutable writes *)
-open Core.Std
-open Core_bench.Std
-
-type t1 = { mutable iters1: int; mutable count1: float }
-type t2 = { iters2: int; count2: float }
-
-let rec test_mutable t1 =
-  match t1.iters1 with
-  |0 -> ()
-  |n ->
-    t1.iters1 <- t1.iters1 - 1;
-    t1.count1 <- t1.count1 +. 1.0;
-    test_mutable t1
-
-let rec test_immutable t2 =
-  match t2.iters2 with
-  |0 -> ()
-  |n ->
-    let iters2 = n - 1 in
-    let count2 = t2.count2 +. 1.0 in
-    test_immutable { iters2; count2 }
-
-let () =
-  let iters = 1000000 in
-  let tests = [
-    Bench.Test.create ~name:"mutable" 
-      (fun () -> test_mutable { iters1=iters; count1=0.0 });
-    Bench.Test.create ~name:"immutable"
-      (fun () -> test_immutable { iters2=iters; count2=0.0 })
-  ] in
-  Bench.make_command tests |> Command.run
-
+```frag
+((typ ocaml)(name gc/barrier_bench.ml))
 ```
 
 This program defines a type `t1` that is mutable and `t2` that is immutable.
@@ -445,16 +413,8 @@ The benchmark loop iterates over both fields and increments a counter.
 Compile and execute this with some extra options to show the amount of
 garbage collection occurring.
 
-```console
-$ ocamlbuild -use-ocamlfind -package core -package core_bench -tag thread barrier_bench.native
-$ ./barrier_bench.native name alloc
-Estimated testing time 20s (change using -quota SECS).
-┌───────────┬───────────┬─────────────────────┬───────────┬────────┬──────────┬────────────┐
-│ Name      │ Time (ns) │           Time 95ci │     Minor │  Major │ Promoted │ Percentage │
-├───────────┼───────────┼─────────────────────┼───────────┼────────┼──────────┼────────────┤
-│ mutable   │ 7_954_262 │ 7_827_275-8_135_261 │ 2_000_004 │ -51.42 │   -51.42 │     100.00 │
-│ immutable │ 3_694_618 │ 3_396_611-4_037_053 │ 5_000_005 │ -28.43 │   -28.43 │      46.45 │
-└───────────┴───────────┴─────────────────────┴───────────┴────────┴──────────┴────────────┘
+```frag
+((typ console)(name gc/run_barrier_bench.out))
 ```
 
 There is a stark space/time tradeoff here. The mutable version takes
