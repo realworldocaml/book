@@ -59,14 +59,15 @@ sequences of words in RAM) to represent values such as tuples,
 records, closures or arrays.  An OCaml program implicitly allocates a
 block of memory when such a value is created.
 
-```ocaml
-# let x = { foo = 13; bar = 14 } ;;
+```frag
+((typ ocamltop)(name memory-repr/simple_record.topscript))
 ```
 
-An expression such as the record above requires a new block of memory with two
-words of available space. One word holds the `foo` field and the second word
-holds the `bar` field.  The OCaml compiler translates such an expression into
-an explicit allocation for the block from OCaml's runtime system.
+The type declaration `t` doesn't take up any memory at runtime, but the
+subsequent `let` binding allocates a new block of memory with two words of
+available space. One word holds the `foo` field and the second word holds the
+`bar` field.  The OCaml compiler translates such an expression into an explicit
+allocation for the block from OCaml's runtime system.
 
 OCaml uses a uniform memory representation in which every OCaml variable is
 stored as a *value*.  An OCaml value is a single memory word that is either an

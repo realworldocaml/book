@@ -24,6 +24,7 @@ dirs= json \
       variants-termcol-fixed \
       objects \
       imperative-programming \
+      memory-repr 
 
 # html/md files directory
 OBJ=         _build
