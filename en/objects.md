@@ -414,16 +414,8 @@ More commonly, narrowing leads to poor object-oriented style.
 Consider the following Java code, which returns the name of a shape
 object.
 
-```
-String GetShapeName(Shape s) {
-  if (s instanceof Square) {
-    return "Square";
-  } else if (s instanceof Circle) {
-    return "Circle";
-  } else {
-    return "Other";
-  }
-}
+```frag
+((typ java)(name objects/Shape.java))
 ```
 
 Most programmers would consider this code to be "wrong."  Instead
@@ -436,12 +428,8 @@ checks whether an array of shapes looks like a "barbell," composed to
 two `Circle` objects separated by a `Line`, where the circles have the
 same radius.
 
-```
-boolean IsBarbell(Shape[] s) {
-  return s.length == 3 && (s[0] instanceof Circle) &&
-    (s[1] instanceof Line) && (s[2] instanceof Circle) &&
-	((Circle) s[0]).radius() == ((Circle) s[2]).radius();
-}
+```frag
+((typ java)(name objects/IsBarbell.java))
 ```
 
 In this case, it is much less clear how to augment the `Shape` class
@@ -450,9 +438,7 @@ object-oriented programming is well-suited for this situation.
 Pattern matching seems like a better fit.
 
 ```ocaml
-let is_barbell = function
- | [Circle r1; Line _; Circle r2] when r1 == r2 -> true
- | _ -> false;;
+((typ ocaml)(name objects/is_barbell.ml))
 ```
  
 Regardless, there is a solution if you find yourself in this
