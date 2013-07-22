@@ -76,7 +76,7 @@ The overall compilation pipeline looks like this:
 ```
 
 Notice that the pipeline branches towards the end. OCaml has multiple compiler
-frontends that reuse the early stages of compilation, but produce very
+backends that reuse the early stages of compilation, but produce very
 different final outputs. The *bytecode interpreter* is portable and can even be
 transformed into Javascript. The *native code compiler* generates specialized
 executable binaries suitable for high-performance applications.
