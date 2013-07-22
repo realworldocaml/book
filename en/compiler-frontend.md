@@ -1057,7 +1057,7 @@ cross-compilation environment).
 For separate compilation to be sound, we need to ensure that all the `cmi`
 files used to type-check a module are the same across compilation runs.  If
 they vary, this raises the possibility of two modules checking different type
-signature for a common module with the same name.  This in turn lets the
+signatures for a common module with the same name.  This in turn lets the
 program completely violate the static type system and can lead to memory
 corruption and crashes.
 
