@@ -418,11 +418,12 @@ provides the common extension framework for them to use.  Type_conv registers
 the `with` grammar extension to Camlp4, and the OCamlfind packaging ensures
 that it's loaded before Variantslib or Sexplib.
 
-The two extensions generate boilerplate OCaml code based on the type
-definition. This avoids the inevitable performance hit of doing the code
-generation dynamically. It also doesn't require a Just-In-Time (JIT) runtime
-that can be a source of unpredictable dynamic behaviour.  Instead, all code is
-simply generated at compile-time via Camlp4.
+The two extensions generate boilerplate OCaml code based on the type definition
+at compilation time. This avoids the performance hit of doing the code
+generation dynamically and also doesn't require a Just-In-Time (JIT) runtime
+that can be a source of unpredictable dynamic behaviour.  Instead, all the
+extra code is simply generated at compilation time via Camlp4, and type
+information can be discarded from the runtime image.
 
 The syntax extensions accept an input AST and output a modified one.  If you're
 not familiar with the Camlp4 module in question, how do you figure out what
