@@ -37,7 +37,7 @@ class istack :
 
 The `class istack : object ... end` result shows that we have created a class
 `istack` with _class type_ `object ... end`.  Like module types, class types
-are completely separate from regular ocaml types (e.g. `int`, `string`, `list`)
+are completely separate from regular OCaml types (e.g. `int`, `string`, `list`)
 and, in particular, should not be confused with object types (e.g. `< get :
 int; .. >`). The class type describes the class itself rather than the objects
 that the class creates. This particular class type specifies that the `istack`
@@ -60,7 +60,7 @@ val s : istack = <obj>
 You may have noticed that the object `s` has been given the type `istack`. But
 wait, we've stressed _classes are not types_, so what's up with that?  In fact,
 what we've said is entirely true, classes and class names *are not* types.
-However, for convenience, the defintion of the class `istack` also defines an
+However, for convenience, the definition of the class `istack` also defines an
 object type `istack` with the same methods as the class. This type definition
 is equivalent to:
 
@@ -441,7 +441,7 @@ other.
 
 By inheriting from this class we can create functions which fold over
 the document data. For example, the `count_doc` function counts the
-numeber of bold tags in the document that are not within a list:
+number of bold tags in the document that are not within a list:
 
 ```ocaml
 class counter = object
@@ -618,7 +618,7 @@ Since OCaml has neither of these, what can we do?
 
 One proposal we could consider is, since the problematic method is
 equality, why not just drop it from the base type `shape` and use
-polymorphic equality instead?  Unfortunately, the builtin equality
+polymorphic equality instead?  Unfortunately, the built-in equality
 has very poor behavior when applied to objects.
 
 ```ocaml
@@ -626,11 +626,11 @@ has very poor behavior when applied to objects.
 - : bool = false
 ```
 
-The problem here is that the builtin polymorphic equality compares the
+The problem here is that the built-in polymorphic equality compares the
 method implementations, not their return values.  The method
 implementations (the function values that implement the methods) are
 different, so the equality comparison is false.  There are other
-reasons not to use the builtin polymorphic equality, but these false
+reasons not to use the built-in polymorphic equality, but these false
 negatives are a showstopper.
 
 If we want to define equality for shapes in general, the remaining
@@ -687,18 +687,18 @@ dynamic dispatch, regular non-virtual methods use static dispatched.
 In OCaml, _all_ methods use dynamic dispatch, but the keyword
 _virtual_ means the method or field is not implemented.
 
-To explore this, lets extend our shapes examples to simple
-interactive graphics. For this we will use the Async concurrency
-library and the
-[Async_graphics](http://gallium.inria.fr/~xleroy/software.html#cryptokit)
-library, which provides an Async interface to OCaml's builtin
-Graphics library. Concurrent programming with Async will be explored in
-[xref](#async), for now you can safely ignore the details.
+To explore this, lets extend our shapes examples to simple interactive
+graphics. For this we will use the Async concurrency library and the
+[Async_graphics](http://github.com/lpw25/async_graphics/) library, which
+provides an Async interface to OCaml's built in Graphics library. Concurrent
+programming with Async will be explored in
+[xref](#concurrent-programming-with-async), for now you can safely ignore the
+details.
 
 We will extend our `shape` type to include a `draw` method. To
 display the shapes we will define a reference to a list of shapes,
 and ensure that any shapes in that list will be drawn on the display
-at regualr intervals. We also define an open_display function to open
+at regular intervals. We also define an open_display function to open
 a display and ensure that the Async scheduler is running:
 
 ```ocaml
@@ -898,7 +898,7 @@ Characters 69-74:
      val x = 2
          ^^^^^
 Warning 13: the instance variable x is overridden.
-The behaviour changed in ocaml 3.10 (previous behaviour was hiding.)
+The behavior changed in OCaml 3.10 (previous behavior was hiding.)
 class m2 : object val x : int method f : int end
 # (new m2)#f;;
 - : int = 2
@@ -1138,7 +1138,7 @@ end
 
 Since the `linear` and `harmonic` mixins are only used for there
 side-effects, they can be inherited multiple times within the same
-obejct to produce a variety of different animations.
+object to produce a variety of different animations.
 
 ```ocaml
 class my_square x y = object (self)
