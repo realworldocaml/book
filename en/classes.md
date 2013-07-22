@@ -58,20 +58,8 @@ class, the type parameters are placed in square brackets before the class name
 in the class definition.  We also need a parameter `init` for the initial
 contents of the stack.
 
-```ocaml
-class ['a] stack init = object
-    val mutable v : 'a list = init
-    
-    method pop = 
-      match v with
-        hd :: tl -> 
-          v <- tl;
-          Some hd
-      | [] -> None
-
-    method push hd = 
-      v <- hd :: v
-end;;
+```frag
+((typ ocamltop)(name classes/stack.topscript)(part 0))
 ```
 
 Note that the type parameter `['a]` in the definition uses square brackets, but
@@ -82,29 +70,8 @@ The type annotation on the `val` declaration is used to constrain type
 inference.  If we omit these annotations, the type inferred for the class will
 be "too polymorphic": `init` could have some type `'b list`.
 
-```ocaml
-# class ['a] stack init = object
-      val mutable v = init
-    
-      method pop = 
-        match v with
-          hd :: tl -> 
-            v <- tl;
-            Some hd
-        | [] -> None
-
-      method push hd = 
-        v <- hd :: v
-  end;;
-Error: Some type variables are unbound in this type:
-         class ['a] stack :
-           'b list ->
-           object
-             val mutable v : 'b list
-             method pop : 'b option
-             method push : 'b -> unit
-           end
-       The method pop has type 'b option where 'b is unbound
+```frag
+((typ ocamltop)(name classes/stack.topscript)(part 1))
 ```
 
 In general, we need to provide enough constraints so that the compiler
@@ -124,28 +91,19 @@ inspect and traverse the elements of a collection.
 
 There are two common styles for defining abstract interfaces like
 this.  In Java, an iterator would normally be specified with an
-interface, which specifies a set of method types.  In languages
+interface, which specifies a set of method types.
+
+```frag
+((typ java)(name classes/Iterator.java))
+```
+
+In languages
 without interfaces, like C++, the specification would normally use
 _abstract_ classes to specify the methods without implementing them
 (C++ uses the "= 0" definition to mean "not implemented").
 
-```java
-// Java-style iterator, specified as an interface.
-interface <T> iterator {
-  T Get();
-  boolean HasValue();
-  void Next();
-};
-
-// Abstract class definition in C++.
-template<typename T>
-class Iterator {
- public:
-  virtual ~Iterator() {}
-  virtual T get() const = 0;
-  virtual bool has_value() const = 0;
-  virtual void next() = 0;
-};
+```frag
+((typ cpp)(name classes/citerator.cpp))
 ```
 
 OCaml supports both styles.  In fact, OCaml is more flexible than these
@@ -208,7 +166,7 @@ method iterator : 'a iterator = new list_iterator v
 - : bool = false
 ```
 
-In practise, most OCaml programmers avoid iterator objects in favour
+In practise, most OCaml programmers avoid iterator objects in favor
 of functional-style techniques. For example, `iter f` takes a
 function `f` and applies it to each of the elements on the stack.
 
