@@ -189,7 +189,7 @@ OCaml Value                        Representation
 `Foo | Bar of int`                 variants with parameters are boxed, while variants with no parameters are unboxed.
 polymorphic variants               variable space usage depending on the number of parameters.
 floating-point number              as a block with a single field containing the double-precision float.
-string                             word-aligned byte arrays that are also directly compatible with C strings.
+string                             word-aligned byte arrays with an explicit length.
 `[1; 2; 3]`                        as `1::2::3::[]` where `[]` is an int, and `h::t` a block with tag 0 and two parameters.
 tuples, records and arrays         an array of values. Arrays can be variable size, but structs and tuples are fixed size.
 records or arrays, all float       special tag for unboxed arrays of floats, or records that only have `float` fields.
