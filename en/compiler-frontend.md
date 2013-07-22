@@ -214,7 +214,7 @@ large body of code. Luckily, there's a great tool available via OPAM called
 line-by-line basis. This not only beautifies your code layout, but it also
 makes this syntax error much easier to locate.
 
-Let's run our erronous file through ocp-indent and see how it processes it.
+Let's run our erroneous file through `ocp-indent` and see how it processes it.
 
 ```console
 $ opam install ocp-indent
@@ -238,7 +238,7 @@ let () =
 
 The `add_and_print` definition has been indented as if it were part of the
 first `concat_and_print` definition, and the errant semicolon is now much
-easier to spot.  We just need to remove that semicolon and re-run ocp-indent
+easier to spot.  We just need to remove that semicolon and re-run `ocp-indent`
 to verify that the syntax is correct.
 
 ```console
@@ -264,7 +264,7 @@ val concat_and_print : string -> string -> string
 val add_and_print : int -> int -> int
 ```
 
-The [ocp-indent homepage](https://github.com/OCamlPro/ocp-indent) documents
+The `ocp-indent` [homepage](https://github.com/OCamlPro/ocp-indent) documents
 how to integrate it with your favourite editor.  All the Core libraries are
 formatted using it to ensure consistency, and it's a good idea to do this
 before publishing your own source code online.
