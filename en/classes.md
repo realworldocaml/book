@@ -13,26 +13,8 @@ In OCaml, class definitions must be defined as toplevel statements in a module.
 A class is not an object, and a class definition is not an expression.  The
 syntax for a class definition uses the keyword `class`.
 
-```ocaml
-# class istack = object
-    val mutable v = [0; 2]
-    
-    method pop = 
-      match v with
-        hd :: tl -> 
-          v <- tl;
-          Some hd
-      | [] -> None
-
-    method push hd = 
-      v <- hd :: v
-  end;;
-class istack :
-  object
-    val mutable v : int
-    method pop : int option
-    method push : int -> unit
-  end
+```frag
+((typ ocaml)(name classes/istack.topscript)(part 0))
 ```
 
 The `class istack : object ... end` result shows that we have created a class
@@ -46,15 +28,8 @@ and a method `push` with type `int -> unit`.
 
 To produce an object, classes are instantiated with the keyword `new`.
 
-```ocaml
-# let s = new istack;;
-val s : istack = <obj>
-# s#pop;;
-- : int option = Some 0
-# s#push 5;;
-- : unit = ()
-# s#pop;;
-- : int option = Some 5
+```frag
+((typ ocaml)(name classes/istack.topscript)(part 1))
 ```
 
 You may have noticed that the object `s` has been given the type `istack`. But
@@ -64,8 +39,8 @@ However, for convenience, the definition of the class `istack` also defines an
 object type `istack` with the same methods as the class. This type definition
 is equivalent to:
 
-```ocaml
-type istack = < pop: int option; push: int -> unit >
+```frag
+((typ ocaml)(name classes/istack.topscript)(part 2))
 ```
 
 Note that this type represents any object with these methods: objects created
