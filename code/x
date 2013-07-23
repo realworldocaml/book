@@ -1,0 +1,561 @@
+Pygments version 1.5, (c) 2006-2011 by Georg Brandl.
+
+Lexers:
+~~~~~~~
+* Cucumber, cucumber, Gherkin, gherkin:
+    Gherkin (filenames *.feature)
+* abap:
+    ABAP (filenames *.abap)
+* ada, ada95ada2005:
+    Ada (filenames *.adb, *.ads, *.ada)
+* ahk:
+    autohotkey (filenames *.ahk, *.ahkl)
+* antlr-as, antlr-actionscript:
+    ANTLR With ActionScript Target (filenames *.G, *.g)
+* antlr-cpp:
+    ANTLR With CPP Target (filenames *.G, *.g)
+* antlr-csharp, antlr-c#:
+    ANTLR With C# Target (filenames *.G, *.g)
+* antlr-java:
+    ANTLR With Java Target (filenames *.G, *.g)
+* antlr-objc:
+    ANTLR With ObjectiveC Target (filenames *.G, *.g)
+* antlr-perl:
+    ANTLR With Perl Target (filenames *.G, *.g)
+* antlr-python:
+    ANTLR With Python Target (filenames *.G, *.g)
+* antlr-ruby, antlr-rb:
+    ANTLR With Ruby Target (filenames *.G, *.g)
+* antlr:
+    ANTLR 
+* apacheconf, aconf, apache:
+    ApacheConf (filenames .htaccess, apache.conf, apache2.conf)
+* applescript:
+    AppleScript (filenames *.applescript)
+* as, actionscript:
+    ActionScript (filenames *.as)
+* as3, actionscript3:
+    ActionScript 3 (filenames *.as)
+* aspx-cs:
+    aspx-cs (filenames *.aspx, *.asax, *.ascx, *.ashx, *.asmx, *.axd)
+* aspx-vb:
+    aspx-vb (filenames *.aspx, *.asax, *.ascx, *.ashx, *.asmx, *.axd)
+* asy, asymptote:
+    Asymptote (filenames *.asy)
+* awk, gawk, mawk, nawk:
+    Awk (filenames *.awk)
+* basemake:
+    Base Makefile 
+* bash, sh, ksh:
+    Bash (filenames *.sh, *.ksh, *.bash, *.ebuild, *.eclass, .bashrc, bashrc, .bash_*, bash_*)
+* bat:
+    Batchfile (filenames *.bat, *.cmd)
+* bbcode:
+    BBCode 
+* befunge:
+    Befunge (filenames *.befunge)
+* blitzmax, bmax:
+    BlitzMax (filenames *.bmx)
+* boo:
+    Boo (filenames *.boo)
+* brainfuck, bf:
+    Brainfuck (filenames *.bf, *.b)
+* bro:
+    Bro (filenames *.bro)
+* c-objdump:
+    c-objdump (filenames *.c-objdump)
+* c:
+    C (filenames *.c, *.h, *.idc)
+* cfengine3, cf3:
+    CFEngine3 (filenames *.cf)
+* cfm:
+    Coldfusion HTML (filenames *.cfm, *.cfml, *.cfc)
+* cfs:
+    cfstatement 
+* cheetah, spitfire:
+    Cheetah (filenames *.tmpl, *.spt)
+* clojure, clj:
+    Clojure (filenames *.clj)
+* cmake:
+    CMake (filenames *.cmake, CMakeLists.txt)
+* coffee-script, coffeescript:
+    CoffeeScript (filenames *.coffee)
+* common-lisp, cl:
+    Common Lisp (filenames *.cl, *.lisp, *.el)
+* console:
+    Bash Session (filenames *.sh-session)
+* control:
+    Debian Control file (filenames control)
+* coq:
+    Coq (filenames *.v)
+* cpp, c++:
+    C++ (filenames *.cpp, *.hpp, *.c++, *.h++, *.cc, *.hh, *.cxx, *.hxx)
+* cpp-objdump, c++-objdumb, cxx-objdump:
+    cpp-objdump (filenames *.cpp-objdump, *.c++-objdump, *.cxx-objdump)
+* csharp, c#:
+    C# (filenames *.cs)
+* css+django, css+jinja:
+    CSS+Django/Jinja 
+* css+erb, css+ruby:
+    CSS+Ruby 
+* css+genshitext, css+genshi:
+    CSS+Genshi Text 
+* css+mako:
+    CSS+Mako 
+* css+myghty:
+    CSS+Myghty 
+* css+php:
+    CSS+PHP 
+* css+smarty:
+    CSS+Smarty 
+* css:
+    CSS (filenames *.css)
+* cython, pyx:
+    Cython (filenames *.pyx, *.pxd, *.pxi)
+* d-objdump:
+    d-objdump (filenames *.d-objdump)
+* d:
+    D (filenames *.d, *.di)
+* dart:
+    Dart (filenames *.dart)
+* delphi, pas, pascal, objectpascal:
+    Delphi (filenames *.pas)
+* diff, udiff:
+    Diff (filenames *.diff, *.patch)
+* django, jinja:
+    Django/Jinja 
+* dpatch:
+    Darcs Patch (filenames *.dpatch, *.darcspatch)
+* dtd:
+    DTD (filenames *.dtd)
+* duel, Duel Engine, Duel View, JBST, jbst, JsonML+BST:
+    Duel (filenames *.duel, *.jbst)
+* dylan:
+    Dylan (filenames *.dylan, *.dyl)
+* ec:
+    eC (filenames *.ec, *.eh)
+* ecl:
+    ECL (filenames *.ecl)
+* elixir, ex, exs:
+    Elixir (filenames *.ex, *.exs)
+* erb:
+    ERB 
+* erl:
+    Erlang erl session (filenames *.erl-sh)
+* erlang:
+    Erlang (filenames *.erl, *.hrl, *.es, *.escript)
+* evoque:
+    Evoque (filenames *.evoque)
+* factor:
+    Factor (filenames *.factor)
+* fan:
+    Fantom (filenames *.fan)
+* fancy, fy:
+    Fancy (filenames *.fy, *.fancypack)
+* felix, flx:
+    Felix (filenames *.flx, *.flxh)
+* fortran:
+    Fortran (filenames *.f, *.f90, *.F, *.F90)
+* fsharp:
+    FSharp (filenames *.fs, *.fsi)
+* gas:
+    GAS (filenames *.s, *.S)
+* genshi, kid, xml+genshi, xml+kid:
+    Genshi (filenames *.kid)
+* genshitext:
+    Genshi Text 
+* glsl:
+    GLSL (filenames *.vert, *.frag, *.geo)
+* gnuplot:
+    Gnuplot (filenames *.plot, *.plt)
+* go:
+    Go (filenames *.go)
+* gooddata-cl:
+    GoodData-CL (filenames *.gdc)
+* gosu:
+    Gosu (filenames *.gs, *.gsx, *.gsp, *.vark)
+* groff, nroff, man:
+    Groff (filenames *.[1234567], *.man)
+* groovy:
+    Groovy (filenames *.groovy)
+* gst:
+    Gosu Template (filenames *.gst)
+* haml, HAML:
+    Haml (filenames *.haml)
+* haskell, hs:
+    Haskell (filenames *.hs)
+* html+cheetah, html+spitfire:
+    HTML+Cheetah 
+* html+django, html+jinja:
+    HTML+Django/Jinja 
+* html+evoque:
+    HTML+Evoque (filenames *.html)
+* html+genshi, html+kid:
+    HTML+Genshi 
+* html+mako:
+    HTML+Mako 
+* html+myghty:
+    HTML+Myghty 
+* html+php:
+    HTML+PHP (filenames *.phtml)
+* html+smarty:
+    HTML+Smarty 
+* html+velocity:
+    HTML+Velocity 
+* html:
+    HTML (filenames *.html, *.htm, *.xhtml, *.xslt)
+* http:
+    HTTP 
+* hx, haXe:
+    haXe (filenames *.hx)
+* hybris, hy:
+    Hybris (filenames *.hy, *.hyb)
+* iex:
+    Elixir iex session 
+* ini, cfg:
+    INI (filenames *.ini, *.cfg)
+* io:
+    Io (filenames *.io)
+* ioke, ik:
+    Ioke (filenames *.ik)
+* irc:
+    IRC logs (filenames *.weechatlog)
+* jade, JADE:
+    Jade (filenames *.jade)
+* java:
+    Java (filenames *.java)
+* js+cheetah, javascript+cheetah, js+spitfire, javascript+spitfire:
+    JavaScript+Cheetah 
+* js+django, javascript+django, js+jinja, javascript+jinja:
+    JavaScript+Django/Jinja 
+* js+erb, javascript+erb, js+ruby, javascript+ruby:
+    JavaScript+Ruby 
+* js+genshitext, js+genshi, javascript+genshitext, javascript+genshi:
+    JavaScript+Genshi Text 
+* js+mako, javascript+mako:
+    JavaScript+Mako 
+* js+myghty, javascript+myghty:
+    JavaScript+Myghty 
+* js+php, javascript+php:
+    JavaScript+PHP 
+* js+smarty, javascript+smarty:
+    JavaScript+Smarty 
+* js, javascript:
+    JavaScript (filenames *.js)
+* json:
+    JSON (filenames *.json)
+* jsp:
+    Java Server Page (filenames *.jsp)
+* kotlin:
+    Kotlin (filenames *.kt)
+* lhs, literate-haskell:
+    Literate Haskell (filenames *.lhs)
+* lighty, lighttpd:
+    Lighttpd configuration file 
+* llvm:
+    LLVM (filenames *.ll)
+* logtalk:
+    Logtalk (filenames *.lgt)
+* lua:
+    Lua (filenames *.lua, *.wlua)
+* make, makefile, mf, bsdmake:
+    Makefile (filenames *.mak, Makefile, makefile, Makefile.*, GNUmakefile)
+* mako:
+    Mako (filenames *.mao)
+* maql:
+    MAQL (filenames *.maql)
+* mason:
+    Mason (filenames *.m, *.mhtml, *.mc, *.mi, autohandler, dhandler)
+* matlab:
+    Matlab (filenames *.m)
+* matlabsession:
+    Matlab session 
+* minid:
+    MiniD (filenames *.md)
+* modelica:
+    Modelica (filenames *.mo)
+* modula2, m2:
+    Modula-2 (filenames *.def, *.mod)
+* moocode:
+    MOOCode (filenames *.moo)
+* moon, moonscript:
+    MoonScript (filenames *.moon)
+* mupad:
+    MuPAD (filenames *.mu)
+* mxml:
+    MXML (filenames *.mxml)
+* myghty:
+    Myghty (filenames *.myt, autodelegate)
+* mysql:
+    MySQL 
+* nasm:
+    NASM (filenames *.asm, *.ASM)
+* nemerle:
+    Nemerle (filenames *.n)
+* newlisp:
+    NewLisp (filenames *.lsp, *.nl)
+* newspeak:
+    Newspeak (filenames *.ns2)
+* nginx:
+    Nginx configuration file 
+* nimrod, nim:
+    Nimrod (filenames *.nim, *.nimrod)
+* numpy:
+    NumPy 
+* objdump:
+    objdump (filenames *.objdump)
+* objective-c, objectivec, obj-c, objc:
+    Objective-C (filenames *.m)
+* objective-j, objectivej, obj-j, objj:
+    Objective-J (filenames *.j)
+* ocaml:
+    OCaml (filenames *.ml, *.mli, *.mll, *.mly)
+* octave:
+    Octave (filenames *.m)
+* ooc:
+    Ooc (filenames *.ooc)
+* opa:
+    Opa (filenames *.opa)
+* openedge, abl, progress:
+    OpenEdge ABL (filenames *.p, *.cls)
+* perl, pl:
+    Perl (filenames *.pl, *.pm)
+* php, php3, php4, php5:
+    PHP (filenames *.php, *.php[345])
+* plpgsql:
+    PL/pgSQL 
+* postgresql, postgres:
+    PostgreSQL SQL dialect 
+* postscript:
+    PostScript (filenames *.ps, *.eps)
+* pot, po:
+    Gettext Catalog (filenames *.pot, *.po)
+* pov:
+    POVRay (filenames *.pov, *.inc)
+* powershell, posh, ps1:
+    PowerShell (filenames *.ps1)
+* prolog:
+    Prolog (filenames *.prolog, *.pro, *.pl)
+* properties:
+    Properties (filenames *.properties)
+* protobuf:
+    Protocol Buffer (filenames *.proto)
+* psql, postgresql-console, postgres-console:
+    PostgreSQL console (psql) 
+* py3tb:
+    Python 3.0 Traceback (filenames *.py3tb)
+* pycon:
+    Python console session 
+* pypylog, pypy:
+    PyPy Log (filenames *.pypylog)
+* pytb:
+    Python Traceback (filenames *.pytb)
+* python, py:
+    Python (filenames *.py, *.pyw, *.sc, SConstruct, SConscript, *.tac)
+* python3, py3:
+    Python 3 
+* ragel-c:
+    Ragel in C Host (filenames *.rl)
+* ragel-cpp:
+    Ragel in CPP Host (filenames *.rl)
+* ragel-d:
+    Ragel in D Host (filenames *.rl)
+* ragel-em:
+    Embedded Ragel (filenames *.rl)
+* ragel-java:
+    Ragel in Java Host (filenames *.rl)
+* ragel-objc:
+    Ragel in Objective C Host (filenames *.rl)
+* ragel-ruby, ragel-rb:
+    Ragel in Ruby Host (filenames *.rl)
+* ragel:
+    Ragel 
+* raw:
+    Raw token data 
+* rb, ruby, duby:
+    Ruby (filenames *.rb, *.rbw, Rakefile, *.rake, *.gemspec, *.rbx, *.duby)
+* rbcon, irb:
+    Ruby irb session 
+* rconsole, rout:
+    RConsole (filenames *.Rout)
+* rebol:
+    REBOL (filenames *.r, *.r3)
+* redcode:
+    Redcode (filenames *.cw)
+* rhtml, html+erb, html+ruby:
+    RHTML (filenames *.rhtml)
+* rst, rest, restructuredtext:
+    reStructuredText (filenames *.rst, *.rest)
+* sass, SASS:
+    Sass (filenames *.sass)
+* scala:
+    Scala (filenames *.scala)
+* scaml, SCAML:
+    Scaml (filenames *.scaml)
+* scheme, scm:
+    Scheme (filenames *.scm, *.ss, *.rkt)
+* scilab:
+    Scilab (filenames *.sci, *.sce, *.tst)
+* scss:
+    SCSS (filenames *.scss)
+* smalltalk, squeak:
+    Smalltalk (filenames *.st)
+* smarty:
+    Smarty (filenames *.tpl)
+* sml:
+    Standard ML (filenames *.sml, *.sig, *.fun)
+* snobol:
+    Snobol (filenames *.snobol)
+* sourceslist, sources.list:
+    Debian Sourcelist (filenames sources.list)
+* splus, s, r:
+    S (filenames *.S, *.R)
+* sql:
+    SQL (filenames *.sql)
+* sqlite3:
+    sqlite3con (filenames *.sqlite3-console)
+* squidconf, squid.conf, squid:
+    SquidConf (filenames squid.conf)
+* ssp:
+    Scalate Server Page (filenames *.ssp)
+* sv:
+    systemverilog (filenames *.sv, *.svh)
+* tcl:
+    Tcl (filenames *.tcl)
+* tcsh, csh:
+    Tcsh (filenames *.tcsh, *.csh)
+* tea:
+    Tea (filenames *.tea)
+* tex, latex:
+    TeX (filenames *.tex, *.aux, *.toc)
+* text:
+    Text only (filenames *.txt)
+* trac-wiki, moin:
+    MoinMoin/Trac Wiki markup 
+* urbiscript:
+    UrbiScript (filenames *.u)
+* v:
+    verilog (filenames *.v)
+* vala, vapi:
+    Vala (filenames *.vala, *.vapi)
+* vb.net, vbnet:
+    VB.net (filenames *.vb, *.bas)
+* velocity:
+    Velocity (filenames *.vm, *.fhtml)
+* vhdl:
+    vhdl (filenames *.vhdl, *.vhd)
+* vim:
+    VimL (filenames *.vim, .vimrc, .exrc, .gvimrc, _vimrc, _exrc, _gvimrc, vimrc, gvimrc)
+* xml+cheetah, xml+spitfire:
+    XML+Cheetah 
+* xml+django, xml+jinja:
+    XML+Django/Jinja 
+* xml+erb, xml+ruby:
+    XML+Ruby 
+* xml+evoque:
+    XML+Evoque (filenames *.xml)
+* xml+mako:
+    XML+Mako 
+* xml+myghty:
+    XML+Myghty 
+* xml+php:
+    XML+PHP 
+* xml+smarty:
+    XML+Smarty 
+* xml+velocity:
+    XML+Velocity 
+* xml:
+    XML (filenames *.xml, *.xsl, *.rss, *.xslt, *.xsd, *.wsdl)
+* xquery, xqy:
+    XQuery (filenames *.xqy, *.xquery)
+* xslt:
+    XSLT (filenames *.xsl, *.xslt)
+* yaml:
+    YAML (filenames *.yaml, *.yml)
+
+Formatters:
+~~~~~~~~~~~
+* bbcode, bb:
+    Format tokens with BBcodes. These formatting codes are used by many bulletin boards, so you can highlight your sourcecode with pygments before posting it there. 
+* bmp, bitmap:
+    Create a bitmap image from source code. This uses the Python Imaging Library to generate a pixmap from the source code. (filenames *.bmp)
+* gif:
+    Create a GIF image from source code. This uses the Python Imaging Library to generate a pixmap from the source code. (filenames *.gif)
+* html:
+    Format tokens as HTML 4 ``<span>`` tags within a ``<pre>`` tag, wrapped in a ``<div>`` tag. The ``<div>``'s CSS class can be set by the `cssclass` option. (filenames *.html, *.htm)
+* img, IMG, png:
+    Create a PNG image from source code. This uses the Python Imaging Library to generate a pixmap from the source code. (filenames *.png)
+* jpg, jpeg:
+    Create a JPEG image from source code. This uses the Python Imaging Library to generate a pixmap from the source code. (filenames *.jpg)
+* latex, tex:
+    Format tokens as LaTeX code. This needs the `fancyvrb` and `color` standard packages. (filenames *.tex)
+* raw, tokens:
+    Format tokens as a raw representation for storing token streams. (filenames *.raw)
+* rtf:
+    Format tokens as RTF markup. This formatter automatically outputs full RTF documents with color information and other useful stuff. Perfect for Copy and Paste into Microsoft® Word® documents. (filenames *.rtf)
+* svg:
+    Format tokens as an SVG graphics file.  This formatter is still experimental. Each line of code is a ``<text>`` element with explicit ``x`` and ``y`` coordinates containing ``<tspan>`` elements with the individual token styles. (filenames *.svg)
+* terminal, console:
+    Format tokens with ANSI color sequences, for output in a text console. Color sequences are terminated at newlines, so that paging the output works correctly. 
+* terminal256, console256, 256:
+    Format tokens with ANSI color sequences, for output in a 256-color terminal or console. Like in `TerminalFormatter` color sequences are terminated at newlines, so that paging the output works correctly. 
+* text, null:
+    Output the text unchanged without any formatting. (filenames *.txt)
+
+Filters:
+~~~~~~~~
+* raiseonerror:
+    Raise an exception when the lexer generates an error token.
+* whitespace:
+    Convert tabs, newlines and/or spaces to visible characters.
+* tokenmerge:
+    Merges consecutive tokens with the same token type in the output stream of a lexer.
+* highlight:
+    Highlight a normal Name token with a different token type.
+* gobble:
+    Gobbles source code lines (eats initial characters).
+* codetagify:
+    Highlight special code tags in comments and docstrings.
+* keywordcase:
+    Convert keywords to lowercase or uppercase or capitalize them, which means first letter uppercase, rest lowercase.
+
+Styles:
+~~~~~~~
+* monokai:
+    This style mimics the Monokai color scheme.
+* manni:
+    A colorful style, inspired by the terminal highlighting style.
+* rrt:
+    Minimalistic "rrt" theme, based on Zap and Emacs defaults.
+* perldoc:
+    Style similar to the style used in the perldoc code blocks.
+* borland:
+    Style similar to the style used in the borland IDEs.
+* colorful:
+    A colorful style, inspired by CodeRay.
+* default:
+    The default style (inspired by Emacs 22).
+* murphy:
+    Murphy's style from CodeRay.
+* vs:
+    
+* trac:
+    Port of the default trac highlighter design.
+* tango:
+    The Crunchy default Style inspired from the color palette from the Tango Icon Theme Guidelines.
+* fruity:
+    Pygments version of the "native" vim theme.
+* autumn:
+    A colorful style, inspired by the terminal highlighting style.
+* bw:
+    
+* emacs:
+    The default style (inspired by Emacs 22).
+* vim:
+    Styles somewhat like vim 7.0
+* pastie:
+    Style similar to the pastie default style.
+* friendly:
+    A modern style based on the VIM pyte theme.
+* native:
+    Pygments version of the "native" vim theme.

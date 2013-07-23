@@ -111,14 +111,14 @@ thousands of times and also calculates statistical variance of the results.
 You'll need to `opam install core_bench` to get the library.
 
 ```frag
-((typ ocaml)(name back-end/bench_patterns.ml))
+((typ ocaml)(name back-end-bench/bench_patterns.ml))
 ```
 
 Building and executing this example will run for around 30 seconds by default,
 and you'll see the results summarised in a neat table.
 
 ```frag
-((typ console)(name back-end/run_bench_patterns.out))
+((typ console)(name back-end-bench/run_bench_patterns.out))
 ```
 
 These results confirm our earlier performance hypothesis obtained from
@@ -247,8 +247,8 @@ other libraries that aren't loaded by default.
 Information about these extra libraries can be specified while linking a
 bytecode archive.
 
-```console
-$ ocamlc -a -o mylib.cma a.cmo b.cmo -dllib -lmylib
+```frag
+((typ console)(name back-end/link_dllib.out))
 ```
 
 The `dllib` flag embeds the arguments in the archive file.  Any subsequent
@@ -260,8 +260,8 @@ You can also generate a complete standalone executable that bundles the
 `ocamlrun` interpreter with the bytecode in a single binary.  This is known as
 a *custom runtime* mode and is built as follows.
 
-```console
-$ ocamlc -a -o mylib.cma -custom a.cmo b.cmo -cclib -lmylib
+```frag
+((typ console)(name back-end/link_custom.out))
 ```
 
 The custom mode is the most similar mode to native code compilation, as both
@@ -290,51 +290,32 @@ fits together.
 
 Create two OCaml source files that contain a single print line.
 
-```console
-$ cat embed_me1.ml 
-let () = print_endline "hello embedded world 1"
-$ cat embed_me2.ml 
-let () = print_endline "hello embedded world 2"
+```frag
+((typ ocaml)(name back-end/embed_me1.ml))
+```
+
+```frag
+((typ ocaml)(name back-end/embed_me2.ml))
 ```
 
 Next, create a C file which will be your main entry point.
 
-```c
-/* main.c */
-#include <stdio.h>
-#include <caml/alloc.h>
-#include <caml/mlvalues.h>
-#include <caml/memory.h>
-#include <caml/callback.h>
-
-int 
-main (int argc, char **argv)
-{
-  puts("Before calling OCaml");
-  caml_startup (argv);
-  puts("After calling OCaml");
-  return 0;
-}
+```frag
+((typ c)(name back-end/main.c))
 ```
 
 Now compile the OCaml files into a standalone object file.
 
-```console
-$ ocamlc -output-obj -o embed_out.o embed_me1.ml embed_me2.ml
+```frag
+((typ console)(name back-end/build_embed.out))
 ```
 
 After this point, you no longer need the OCaml compiler, as `embed_out.o` has
 all of the OCaml code compiled and linked into a single object file.  Compile
-an output binary using gcc to test this out.
+an output binary using `gcc` to test this out.
 
-```console
-$ gcc -Wall -I `ocamlc -where` -L `ocamlc -where` -lcamlrun -ltermcap \
-  -o final_out embed_out.o main.c
-$ ./final_out 
-Before calling OCaml
-hello embedded world 1
-hello embedded world 2
-After calling OCaml
+```frag
+((typ console)(name back-end/build_embed_binary.out))
 ```
 
 You can inspect the commands that `ocamlc` is invoking by adding `-verbose` to
@@ -342,9 +323,8 @@ the command line to help figure out the GCC command-line if you get stuck.  You
 can even obtain the C source code to the `-output-obj` result by specifying a
 `.c` output file extension instead of the `.o` we used earlier.
 
-```console
-$ ocamlc -output-obj -o embed_out.c embed_me1.ml embed_me2.ml
-$ cat embed_out.c
+```frag
+((typ console)(name back-end/build_embed_c.out))
 ```
 
 Embedding OCaml code like this lets you write OCaml that interfaces with any
@@ -407,17 +387,14 @@ the difference is at the assembly language level now.
 First create a comparison function where we've explicitly annotated
 the types, so the compiler knows that only integers are being compared.
 
-```ocaml
-(* compare_mono.ml *)
-let cmp (a:int) (b:int) =
-  if a > b then a else b
+```frag
+((typ ocaml)(name back-end/compare_mono.ml))
 ```
 
 Now compile this into assembly and read the resulting `compare_mono.S` file.
 
-```console
-$ ocamlopt -inline 20 -nodynlink -S compare_mono.ml
-$ cat compare_mono.S
+```frag
+((typ console)(name back-end/asm_from_compare_mono.out))
 ```
 
 If you've never seen assembly language before then the contents may be rather
@@ -450,10 +427,8 @@ requires both the arguments to be immediate integers to work.  Now let's see
 what happens if our OCaml code omits the type annotations and is a polymorphic
 comparison instead.
 
-```ocaml
-(* compare_poly.ml *)
-let cmp a b =
-  if a > b then a else b
+```frag
+((typ ocaml)(name back-end/compare_poly.ml))
 ```
 
 Compiling this code with `-S` results in a significantly more complex assembly

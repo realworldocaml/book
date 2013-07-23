@@ -9,4 +9,3 @@ $ ocamlc -dlambda -c pattern_monomorphic_exhaustive.ml 2>&1
           case int 2: 102
           case int 3: 103)))
     (makeblock 0 test/1013)))
-$ rm -f *.cmo *.cmi

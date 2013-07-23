@@ -28,7 +28,8 @@ dirs= json \
       memory-repr \
       gc \
       front-end \
-      back-end
+      back-end \
+      back-end-bench
 
 # html/md files directory
 OBJ=         _build

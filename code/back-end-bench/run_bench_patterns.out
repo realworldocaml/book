@@ -4,7 +4,7 @@ Estimated testing time 30s (change using -quota SECS).
 ┌────────────────────────────────┬───────────┬──────────┐
 │ Name                           │ Time (ns) │ % of max │
 ├────────────────────────────────┼───────────┼──────────┤
-│ Polymorphic pattern            │     23.81 │   100.00 │
-│ Monomorphic incomplete pattern │     22.63 │    95.06 │
-│ Monomorphic exhaustive pattern │     20.97 │    88.07 │
+│ Polymorphic pattern            │     23.65 │   100.00 │
+│ Monomorphic incomplete pattern │     22.36 │    94.52 │
+│ Monomorphic exhaustive pattern │     20.75 │    87.73 │
 └────────────────────────────────┴───────────┴──────────┘

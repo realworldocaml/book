@@ -17,4 +17,3 @@ L2:	closure L1, 0
 	pop 1
 	setglobal Pattern_monomorphic_exhaustive!
 
-$ rm -f *.cmo *.cmi

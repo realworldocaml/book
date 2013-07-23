@@ -6,4 +6,3 @@ $ ocamlc -dlambda -c pattern_polymorphic.ml 2>&1
          (if (>= v/1009 482771474) (if (>= v/1009 884917024) 100 102)
            (if (>= v/1009 3306965) 101 103))))
     (makeblock 0 test/1008)))
-$ rm -f *.cmo *.cmi
