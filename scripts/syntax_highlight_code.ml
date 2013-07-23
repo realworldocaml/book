@@ -22,6 +22,7 @@ let pygmentize lang file contents =
     | "html" -> "Syntax"
     | "java" -> "Java"
     | "c" -> "C"
+    | "cmd" -> "Shell script"
     | "cpp" -> "C++"
     | unknown -> unknown
   in
