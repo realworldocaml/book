@@ -34,32 +34,14 @@ matches and comparing their lambda forms.
 Let's start by creating a straightforward exhaustive pattern match using normal
 variants.
 
-```ocaml
-(* pattern_monomorphic_exhaustive.ml *)
-type t = | Alice | Bob | Charlie | David
-
-let test v =
-  match v with
-  | Alice   -> 100
-  | Bob     -> 101
-  | Charlie -> 102
-  | David   -> 103
+```frag
+((typ ocaml)(name back-end/pattern_monomorphic_exhaustive.ml))
 ```
 
 The lambda output for this code looks like this.
 
-```console
-$ ocamlc -dlambda -c pattern_monomorphic_exhaustive.ml
-(setglobal Pattern_monomorphic_exhaustive!
-  (let
-    (test/1013
-       (function v/1014
-         (switch* v/1014
-          case int 0: 100
-          case int 1: 101
-          case int 2: 102
-          case int 3: 103)))
-    (makeblock 0 test/1013)))
+```frag
+((typ console)(name back-end/lambda_for_pattern_monomorphic_exhaustive.out))
 ```
 
 It's not important to understand every detail of this internal form, but
@@ -83,26 +65,14 @@ The first pattern match is *exhaustive*, so there are no unknown match cases
 that the compiler needs to check for (_e.g._ a value greater than 3).  What
 happens if we modify the code to use an incomplete pattern match instead?
 
-```ocaml
-(* pattern_monomorphic_incomplete.ml *)
-type t = | Alice | Bob | Charlie | David
-
-let test v =
-  match v with
-  | Alice   -> 100
-  | Bob     -> 101
-  | _       -> 102
+```frag
+((typ ocaml)(name back-end/pattern_monomorphic_incomplete.ml))
 ```
 
 The lambda output for this code is now quite different.
 
-```console
-$ ocamlc -dlambda -c pattern_monomorphic_incomplete.ml 
-(setglobal Pattern_monomorphic_incomplete!
-  (let
-    (test/1013
-       (function v/1014 (if (!= v/1014 1) (if (!= v/1014 0) 102 100) 101)))
-    (makeblock 0 test/1013)))
+```frag
+((typ ocaml)(name back-end/lambda_for_pattern_monomorphic_incomplete.out))
 ```
 
 The compiler has reverted to testing the value as a set of nested conditionals.
@@ -117,27 +87,14 @@ definitions *and* generates more efficient runtime code too.
 Finally, let's look at the same code, but with polymorphic variants instead of
 normal variants.
 
-```ocaml
-(* pattern_polymorphic.ml *)
-let test v =
-  match v with
-  | `Alice   -> 100
-  | `Bob     -> 101
-  | `Charlie -> 102
-  | `David   -> 103
+```frag
+((typ ocaml)(name back-end/pattern_polymorphic.ml))
 ```
 
 The lambda form for this reveals the most inefficient result yet.
 
-```console
-$ ocamlc -dlambda -c pattern_polymorphic.ml 
-(setglobal Pattern_polymorphic!
-  (let
-    (test/1008
-       (function v/1009
-         (if (>= v/1009 482771474) (if (>= v/1009 884917024) 100 102)
-           (if (>= v/1009 3306965) 101 103))))
-    (makeblock 0 test/1008)))
+```frag
+((typ ocaml)(name back-end/lambda_for_pattern_polymorphic.out))
 ```
 
 We mentioned earlier in [xref](#variants) that pattern matching over
@@ -153,70 +110,15 @@ runtime costs more accurately.  The `Core_bench` module runs the tests
 thousands of times and also calculates statistical variance of the results.
 You'll need to `opam install core_bench` to get the library.
 
-```ocaml
-(* pattern.ml: benchmark different pattern matching styles *)
-open Core.Std
-open Core_bench.Std
-
-type t = | Alice | Bob | Charlie | David
-
-let polymorphic_pattern () =
-  let test v =
-    match v with
-    | `Alice   -> 100
-    | `Bob     -> 101
-    | `Charlie -> 102
-    | `David   -> 103
-  in
-  List.iter ~f:(fun v -> ignore(test v))
-    [`Alice; `Bob; `Charlie; `David]
- 
-let monomorphic_pattern_exhaustive () =
-  let test v =
-    match v with
-    | Alice   -> 100
-    | Bob     -> 101
-    | Charlie -> 102
-    | David   -> 103
-  in
-  List.iter ~f:(fun v -> ignore(test v))
-    [ Alice; Bob; Charlie; David ]
-
- let monomorphic_pattern_incomplete () =
-  let test v =
-    match v with
-    | Alice   -> 100
-    | Bob     -> 101
-    | _       -> 102
-  in
-  List.iter ~f:(fun v -> ignore(test v))
-    [ Alice; Bob; Charlie; David ]
- 
-let tests = [
-    "Polymorphic pattern", polymorphic_pattern;
-    "Monomorphic incomplete pattern", monomorphic_pattern_incomplete;
-    "Monomorphic exhaustive pattern", monomorphic_pattern_exhaustive
-]
-
-let () =
-  List.map tests ~f:(fun (name,test) -> Bench.Test.create ~name test)
-  |> Bench.make_command
-  |> Command.run
+```frag
+((typ ocaml)(name back-end/bench_patterns.ml))
 ```
 
 Building and executing this example will run for around 30 seconds by default,
 and you'll see the results summarised in a neat table.
 
-```console
-$ ocamlbuild -use-ocamlfind -package core -package core_bench -tag thread pattern.native
-Estimated testing time 30s (change using -quota SECS).
-+────────────────────────────────+───────────+─────────────+────────────+
-│ Name                           │ Time (ns) │   Time 95ci │ Percentage │
-+────────────────────────────────+───────────+─────────────+────────────+
-│ Polymorphic pattern            │     22.38 │ 22.34-22.43 │     100.00 │
-│ Monomorphic incomplete pattern │     20.98 │ 20.95-21.02 │      93.77 │
-│ Monomorphic exhaustive pattern │     19.53 │ 19.49-19.58 │      87.25 │
-+────────────────────────────────+───────────┴─────────────+────────────+
+```frag
+((typ console)(name back-end/run_bench_patterns.out))
 ```
 
 These results confirm our earlier performance hypothesis obtained from
@@ -272,25 +174,8 @@ accumulator, exception and argument pointers, and environment and global data.
 You can display the bytecode instructions in textual form via `-dinstr`.  Try
 this on one of our earlier pattern matching examples.
 
-```console
-$ ocamlc -dinstr pattern_monomorphic_exhaustive.ml 
-	branch L2
-L1:	acc 0
-	switch 6 5 4 3/
-L6:	const 100
-	return 1
-L5:	const 101
-	return 1
-L4:	const 102
-	return 1
-L3:	const 103
-	return 1
-L2:	closure L1, 0
-	push
-	acc 0
-	makeblock 1, 0
-	pop 1
-	setglobal Pattern_monomorphic_exhaustive!
+```frag
+((typ console)(name back-end/instr_for_pattern_monomorphic_exhausive.out))
 ```
 
 The bytecode above has been simplified from the lambda form into a set of
@@ -574,36 +459,8 @@ let cmp a b =
 Compiling this code with `-S` results in a significantly more complex assembly
 output for the same function.
 
-```
-_camlCompare_poly__cmp_1008:
-        .cfi_startproc
-        subq    $24, %rsp
-        .cfi_adjust_cfa_offset  24
-.L101:
-        movq    %rax, 8(%rsp)
-        movq    %rbx, 0(%rsp)
-        movq    %rax, %rdi
-        movq    %rbx, %rsi
-        leaq    _caml_greaterthan(%rip), %rax
-        call    _caml_c_call
-.L102:
-        leaq    _caml_young_ptr(%rip), %r11
-        movq    (%r11), %r15
-        cmpq    $1, %rax
-        je      .L100
-        movq    8(%rsp), %rax
-        addq    $24, %rsp
-        .cfi_adjust_cfa_offset  -24
-        ret
-        .cfi_adjust_cfa_offset  24
-        .align  2
-.L100:
-        movq    0(%rsp), %rax
-        addq    $24, %rsp
-        .cfi_adjust_cfa_offset  -24
-        ret
-        .cfi_adjust_cfa_offset  24
-        .cfi_endproc
+```frag
+((typ gas)(name back-end/compare_poly_asm.S))
 ```
 
 The `.cfi` directives are assembler hints that contain Call Frame Information
