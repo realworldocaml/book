@@ -24,6 +24,7 @@ let pygmentize lang file contents =
     | "c" -> "C"
     | "cmd" -> "Shell script"
     | "cpp" -> "C++"
+    | "gas" -> "Assembly Language"
     | unknown -> unknown
   in
   let data = wrap_in_pretty_box ~part:0 typ file data |> Cow.Html.to_string in

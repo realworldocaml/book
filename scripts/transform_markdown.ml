@@ -27,6 +27,9 @@ let output_t_as_markdown s =
   | `Bash ->
     printf "```bash\n#!/bin/sh\n# %s\n" t.name;
     printf "%s\n```\n" buf
+  | `Gas ->
+    printf "```\n";
+    printf "%s\n```\n" buf
   | `OCaml_syntax ->
     printf "```html\n";
     printf "%s\n```\n" buf

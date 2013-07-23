@@ -27,7 +27,8 @@ dirs= json \
       imperative-programming \
       memory-repr \
       gc \
-      front-end
+      front-end \
+      back-end
 
 # html/md files directory
 OBJ=         _build
@@ -38,6 +39,7 @@ mli_src=      $(wildcard $(dirs:%=%/*.mli))
 json_src=     $(wildcard $(dirs:%=%/*.json))
 java_src=     $(wildcard $(dirs:%=%/*.java))
 c_src=        $(wildcard $(dirs:%=%/*.c))
+asm_src=      $(wildcard $(dirs:%=%/*.S))
 cmd_src=      $(wildcard $(dirs:%=%/*.cmd))
 cpp_src=      $(wildcard $(dirs:%=%/*.cpp))
 atd_src=      $(wildcard $(dirs:%=%/*.atd))
@@ -51,7 +53,8 @@ topscripts=   $(wildcard $(dirs:%=%/*.topscript))
 rawtscripts=   $(wildcard $(dirs:%=%/*.rawscript))
 
 all_src=      $(ml_src) $(mli_src) $(json_src) $(java_src) $(c_src) \
-	      $(cmd_src) $(cpp_src) $(atd_src) $(scm_src) $(syn_src) $(ascii_src)
+	      $(cmd_src) $(cpp_src) $(atd_src) $(scm_src) $(syn_src) \
+	      $(ascii_src) $(asm_src)
 all_scripts=  $(scripts:%.sh=%.out) $(errscripts:%.errsh=%.out) \
 	      $(topscripts) $(rawtscripts) $(rawscripts:%.rawsh=%.out)
 
@@ -108,6 +111,10 @@ $(OBJ)/%.ascii.0.html: %.ascii
 $(OBJ)/%.java.0.html: %.java
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -pygments java $< || (cat $@ && rm -f $@)
+
+$(OBJ)/%.S.0.html: %.S
+	@mkdir -p $(@D)
+	$(highlight) -builddir $(OBJ) -pygments gas $< || (cat $@ && rm -f $@)
 
 $(OBJ)/%.c.0.html: %.c
 	@mkdir -p $(@D)
