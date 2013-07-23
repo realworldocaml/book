@@ -12,7 +12,6 @@ let stack init = object
     v <- hd :: v
 end;;
 
-#part 1
 type shape = < area : float >;;
 
 type square = < area : float; width : float >;;
@@ -29,88 +28,70 @@ let circle r = object
   method radius = r
 end;;
 
-#part 2
+#part 1
 let shape w : shape = square w;;
 let shape w : shape = (square w :> shape);;
 
-#part 3
+#part 2
 let coin = object
-  method shape = circle 0.5
+  method shape = circle 5
   method color = "silver"
 end;;
 let map = object
-  method shape = square 1.0
+  method shape = square 10
 end;;
 
-#part 4
+#part 3
 type item = < shape : shape >;;
 let items = [ (coin :> item) ; (map :> item) ];;
 
-#part 5
+#part 4
 type num = [ `Int of int | `Float of float ];;
 type const = [ num | `String of string ];;
 let n : num = `Int 3;;
 let c : const = (n :> const);;
 
-#part 6
-let squares: square list = [ square 1.0; square 2.0 ];;
+#part 5
+let squares: square list = [ square 10; square 20 ];;
 let shapes: shape list = (squares :> shape list);;
 
-#part 7
-let square_array: square array = [| square 1.0; square 2.0 |];;
+#part 6
+let square_array: square array = [| square 10; square 20 |];;
 let shape_array: shape array = (square_array :> shape array);;
 
-#part 8
+#part 7
 let shape_to_string: shape -> string = 
     fun s -> sprintf "Shape(%F)" s#area;;
 let square_to_string: square -> string = 
     (shape_to_string :> square -> string);;
 
-#part 9
+#part 8
 module Either = struct
   type ('a, 'b) t = 
       Left of 'a
     | Right of 'b
+  let left x = Left x
+  let right x = Right x
 end;;
-let sq : (square, circle) Either.t = Either.Left (square 4.0);;
-let sh : (shape, shape) Either.t = (sq :> (shape, shape) Either.t);;
+(Either.left (square 40) :> (shape, shape) Either.t);;
 
-#part 10
-module Either : sig 
+#part 9
+module AbstractEither : sig 
   type ('a, 'b) t
   val left: 'a -> ('a, 'b) t
   val right: 'b -> ('a, 'b) t
-end = struct
-  type ('a, 'b) t = 
-    | Left of 'a
-    | Right of 'b
-  let left x = Left x
-  let right x = Right x
-end;;
-let sq : (square, circle) Either.t = Either.left (square 4.0);;
-let sh : (shape, shape) Either.t = (sq :> (shape, shape) Either.t);;
+end = Either;;
+(AbstractEither.left (square 40) :> (shape, shape) AbstractEither.t);;
 
-#part 11
-module Either : sig 
+#part 10
+module VarEither : sig 
   type (+'a, +'b) t
   val left: 'a -> ('a, 'b) t
   val right: 'b -> ('a, 'b) t
-end = struct
-  type ('a, 'b) t = 
-    | Left of 'a
-    | Right of 'b
-  let left x = Left x
-  let right x = Right x
-end;;
-let sq : (square, circle) Either.t = Either.left (square 4.0);;
-let sh : (shape, shape) Either.t = (sq :> (shape, shape) Either.t);;
+end = Either
+(VarEither.left (square 40) :> (shape, shape) VarEither.t);;
 
-#part 12
-type 'a stack = < pop: 'a option; push: 'a -> unit >;;
-let square_stack: square stack = stack [square 3.0; square 1.0];;
-let circle_stack: circle stack = stack [circle 2.0; circle 4.0];;
-
-#part 13
+#part 11
 let total_area (shape_stacks: shape stack list) =
   let stack_area acc st = 
     let rec loop acc =
@@ -122,10 +103,10 @@ let total_area (shape_stacks: shape stack list) =
   in
     List.fold ~init:0.0 ~f:stack_area shape_stacks;;
 
-#part 14
+#part 12
 total_area [(square_stack :> shape stack); (circle_stack :> shape stack)];;
 
-#part 15
+#part 13
 type 'a readonly_stack = < pop : 'a option >;;
 let total_area (shape_stacks: shape readonly_stack list) =
   let stack_area acc st = 

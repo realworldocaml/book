@@ -59,14 +59,15 @@ sequences of words in RAM) to represent values such as tuples,
 records, closures or arrays.  An OCaml program implicitly allocates a
 block of memory when such a value is created.
 
-```ocaml
-# let x = { foo = 13; bar = 14 } ;;
+```frag
+((typ ocamltop)(name memory-repr/simple_record.topscript))
 ```
 
-An expression such as the record above requires a new block of memory with two
-words of available space. One word holds the `foo` field and the second word
-holds the `bar` field.  The OCaml compiler translates such an expression into
-an explicit allocation for the block from OCaml's runtime system.
+The type declaration `t` doesn't take up any memory at runtime, but the
+subsequent `let` binding allocates a new block of memory with two words of
+available space. One word holds the `foo` field and the second word holds the
+`bar` field.  The OCaml compiler translates such an expression into an explicit
+allocation for the block from OCaml's runtime system.
 
 OCaml uses a uniform memory representation in which every OCaml variable is
 stored as a *value*.  An OCaml value is a single memory word that is either an
@@ -132,9 +133,10 @@ An even more alert reader will be wondering about the performance implications
 are for integer arithmetic using this tagged representation.  Since the bottom
 bit is set, any operation on the integer has to shift the bottom bit right to
 recover the "native" value.  The native code OCaml compiler generates efficient
-x86 assembly code in this case.  It takes advantage of modern processor
-instructions to hide the extra shifts as much as possible.  Addition and
-substraction are a single instruction, and multiplication is only a few more.
+x86 assembly code in this case, taking advantage of modern processor
+instructions to hide the extra shifts where possible.  Addition is a single
+`LEA` x86 instruction, subtraction can be two instructions, and multiplication
+is only a few more.
 
 </note>
 
@@ -187,7 +189,7 @@ OCaml Value                        Representation
 `Foo | Bar of int`                 variants with parameters are boxed, while variants with no parameters are unboxed.
 polymorphic variants               variable space usage depending on the number of parameters.
 floating-point number              as a block with a single field containing the double-precision float.
-string                             word-aligned byte arrays that are also directly compatible with C strings.
+string                             word-aligned byte arrays with an explicit length.
 `[1; 2; 3]`                        as `1::2::3::[]` where `[]` is an int, and `h::t` a block with tag 0 and two parameters.
 tuples, records and arrays         an array of values. Arrays can be variable size, but structs and tuples are fixed size.
 records or arrays, all float       special tag for unboxed arrays of floats, or records that only have `float` fields.
@@ -224,11 +226,8 @@ You can check the difference between a block and a direct integer yourself
 using the `Obj` module, which exposes the internal representation of values to
 OCaml code.
 
-```ocaml
-# Obj.is_block (Obj.repr (1,2,3)) ;;
-- : bool = true
-# Obj.is_block (Obj.repr 1) ;;
-- : bool = false
+```frag
+((typ ocamltop)(name memory-repr/reprs.topscript)(part 0))
 ```
 
 The `Obj.repr` function retrieves the runtime representation of any OCaml
@@ -242,12 +241,9 @@ values.  Individual floating-point values are stored as a block with a single
 field that contains the number.  This block has the `Double_tag` set which
 signals to the collector that the floating-point value is not to be scanned.
 
-```ocaml
-# Obj.tag (Obj.repr 1.0) ;;
-- : int = 253
-# Obj.double_tag ;;
-- : int = 253
-```ocaml
+```frag
+((typ ocamltop)(name memory-repr/reprs.topscript)(part 1))
+```
 
 Since each floating-point value is boxed in a separate memory block, it can be
 inefficient to handle large arrays of floats in comparison to unboxed integers.
@@ -265,11 +261,8 @@ that the contents are not OCaml values.
 First, let's check that float arrays do in fact have a different tag number
 from normal floating-point values.
 
-```ocaml
-# Obj.double_tag;;
-- : int = 253
-# Obj.double_array_tag;;
-- : int = 254
+```frag
+((typ ocamltop)(name memory-repr/reprs.topscript)(part 2))
 ```
 
 This tells us that float arrays have a tag value of 254.  Now let's test some
@@ -277,16 +270,8 @@ sample values using the `Obj.tag` function to check that the allocated block
 has the expected runtime tag, and also use `Obj.double_field` to retrieve a
 float from within the block.
 
-```ocaml
-# open Obj ;;
-# tag (repr [| 1.0; 2.0; 3.0 |]) ;;
-- : int = 254
-# tag (repr (1.0, 2.0, 3.0) ) ;;
-- : int = 0 
-# double_field (repr [| 1.1; 2.2; 3.3 |] ) 1 ;;
-- : float = 2.2
-# double_field (repr 1.234) 0;;
-- : float = 1.234
+```frag
+((typ ocamltop)(name memory-repr/reprs.topscript)(part 3))
 ```
 
 The first thing we tested above was that a float array has the correct unboxed
@@ -303,16 +288,8 @@ Basic variant types with no extra parameters for any of their branches are
 simply stored as an OCaml integer, starting with `0` for the first option and
 in ascending order. 
 
-```ocaml
-# open Obj ;;
-# type t = Apple | Orange | Pear ;;
-type t = Apple | Orange | Pear
-# ((magic (repr Apple)) : int) ;;
-- : int = 0
-# ((magic (repr Pear)) : int) ;;
-- : int = 2
-# is_block (repr Apple) ;;
-- : bool = false
+```frag
+((typ ocamltop)(name memory-repr/reprs.topscript)(part 4))
 ```
 
 `Obj.magic` unsafely forces a type cast between any two OCaml types; in this
@@ -325,19 +302,8 @@ stored as blocks, with the value *tags* ascending from 0 (counting from
 leftmost variants with parameters).  The parameters are stored as words in the
 block.
 
-```ocaml
-# type t = Apple | Orange of int | Pear of string | Kiwi ;;
-type t = Apple | Orange of int | Pear of string | Kiwi
-# is_block (repr (Orange 1234)) ;;
-- : bool = true
-# tag (repr (Orange 1234)) ;; 
-- : int = 0
-# tag (repr (Pear "xyz")) ;;
-- : int = 1
-# (magic (field (repr (Orange 1234)) 0) : int) ;;
-- : int = 1234
-(magic (field (repr (Pear "xyz")) 0) : string) ;;
-- : string = "xyz"
+```frag
+((typ ocamltop)(name memory-repr/reprs.topscript)(part 5))
 ```
 
 In the above example, the `Apple` and `Kiwi` values are still stored as normal
@@ -386,12 +352,8 @@ integer value is determined by applying a hash function to the *name* of the
 variant.  The hash function isn't exposed directly by the compiler, but the
 `type_conv` library from Core provides an alternative implementation.
 
-```ocaml
-# #require "type_conv" ;;
-# Pa_type_conv.hash_variant "Foo" ;;
-- : int = 3505894
-# (Obj.magic (Obj.repr `Foo) : int) ;;
-- : int = 3505894
+```frag
+((typ ocamltop)(name memory-repr/reprs.topscript)(part 6))
 ```
 
 The hash function is designed to give the same results on 32-bit and 64-bit

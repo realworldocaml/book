@@ -245,8 +245,8 @@ We can now use this module as follows.
 
 But we're still missing something: we haven't created an `mli` signature for
 `Int_interval` yet.  Note that we need to explicitly export the s-expression
-converters that were created within the ml.  For example, here's an interface
-that doesn't export the s-expression functions.
+converters that were created within the `ml` file.  For example, here's an
+interface that doesn't export the s-expression functions.
 
 ```frag
 ((typ ocaml)(name sexpr/int_interval_nosexp.mli))
