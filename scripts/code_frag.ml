@@ -24,6 +24,7 @@ type typ = [
   | `Bash
   | `CPP
   | `Java
+  | `Ascii
 ]
 
 type t = {
@@ -47,6 +48,7 @@ let typ_of_string s : typ =
   | "c"        -> `C
   | "sh"       -> `Bash
   | "cpp"      -> `CPP
+  | "ascii"    -> `Ascii
   | x          -> raise (Failure ("Unknown fragment type " ^ x))
 
 let of_string s =

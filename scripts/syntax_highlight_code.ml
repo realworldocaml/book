@@ -30,6 +30,12 @@ let pygmentize lang file contents =
   Out_channel.write_all (ofile_html file 0) ~data;
   Out_channel.write_all (ofile_md file 0) ~data:contents
 
+let raw lang file contents =
+  let data = <:html<<pre>$str:contents$</pre>&>> in
+  let data = wrap_in_pretty_box ~part:0 lang file data |> Cow.Html.to_string in
+  Out_channel.write_all (ofile_html file 0) ~data;
+  Out_channel.write_all (ofile_md file 0) ~data:contents
+  
 let cow file contents =
   (* Break the OCaml code into parts *)
   Code_frag.extract_all_ocaml_parts file contents
@@ -72,7 +78,7 @@ let console file =
   Out_channel.write_all (ofile_html file 0) ~data:buf;
   Out_channel.write_all (ofile_md file 0) ~data:(In_channel.read_all file)
 
-let do_highlight build_dir' use_cow use_rawscript use_pygments use_console file () =
+let do_highlight build_dir' use_cow use_rawscript use_pygments use_raw use_console file () =
   build_dir := build_dir';
   let buf = In_channel.read_all file in
   if use_cow then
@@ -83,7 +89,11 @@ let do_highlight build_dir' use_cow use_rawscript use_pygments use_console file 
     rawscript file
   else match use_pygments with
    | Some lang -> pygmentize lang file buf
-   | None -> raise (Failure "No flags specified")
+   | None -> begin
+      match use_raw with
+      | Some lang -> raw lang file buf
+      | None -> failwith "no flags"
+   end
 
 let () =
   Command.basic
@@ -97,6 +107,8 @@ let () =
                       ~doc:" Filter OCaml toplevel through COW"
                   +> flag "-pygments" (optional string)
                       ~doc:"lang Filter through Pygments with given [lang]"
+                  +> flag "-raw" (optional string)
+                      ~doc:"lang Wrap raw file with given [lang]"
                   +> flag "-console" no_arg
                       ~doc:" Filter shell script output into HTML"
                   +> anon ("filename" %: file)
