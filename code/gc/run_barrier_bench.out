@@ -1,0 +1,9 @@
+$ corebuild -pkg core_bench barrier_bench.native
+$ ./barrier_bench.native name alloc
+Estimated testing time 20s (change using -quota SECS).
+┌───────────┬───────────┬───────────┬───────┬──────────┬──────────┐
+│ Name      │ Time (ns) │     Minor │ Major │ Promoted │ % of max │
+├───────────┼───────────┼───────────┼───────┼──────────┼──────────┤
+│ mutable   │ 3_927_122 │ 2_000_004 │  9.03 │     9.03 │   100.00 │
+│ immutable │ 3_179_646 │ 5_000_005 │  0.02 │     0.02 │    80.97 │
+└───────────┴───────────┴───────────┴───────┴──────────┴──────────┘

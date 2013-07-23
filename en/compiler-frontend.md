@@ -49,12 +49,11 @@ The overall compilation pipeline looks like this:
     Source code
         |
         | parsing and preprocessing
+        |
+        | camlp4 syntax extensions
+        |
         v
     Parsetree (untyped AST)
-        |
-        | syntax extensions
-        v
-    Camlp4 transformation (untyped AST)
         |
         | type inference and checking
         v
@@ -78,10 +77,12 @@ The overall compilation pipeline looks like this:
 ```
 
 Notice that the pipeline branches towards the end. OCaml has multiple compiler
-frontends that reuse the early stages of compilation, but produce very
-different final outputs. The *bytecode interpreter* is portable and can even be
-transformed into Javascript. The *native code compiler* generates specialized
-executable binaries suitable for high-performance applications.
+backends that reuse the early stages of compilation, but produce very different
+final outputs. The *bytecode* can be run by a portable interpreter, and can
+even be transformed into Javascript (via [js_of_ocaml](http://ocsigen.org/js_of_ocaml))
+or C source code (via [OCamlCC](https://github.com/ocaml-bytes/ocamlcc)).
+The *native code* compiler generates specialized executable binaries suitable for
+high-performance applications.
 
 <sidebar>
 <title>Obtaining the compiler source code</title>
@@ -208,12 +209,12 @@ definition to become part of the first `let` binding.  This eventually results
 in a parsing error at the very end of the second function.
 
 This class of bug (due to a single errant character) can be hard to spot in a
-large body of code. Luckily, there's a great tool in OPAM called ocp-indent
-that applies structured indenting rules to your source code on a line-by-line
-basis. This not only beautifies your code layout, but it also makes this syntax
-error much easier to locate.
+large body of code. Luckily, there's a great tool available via OPAM called
+`ocp-indent` that applies structured indenting rules to your source code on a
+line-by-line basis. This not only beautifies your code layout, but it also
+makes this syntax error much easier to locate.
 
-Let's run our erronous file through ocp-indent and see how it processes it.
+Let's run our erroneous file through `ocp-indent` and see how it processes it.
 
 ```console
 $ opam install ocp-indent
@@ -237,7 +238,7 @@ let () =
 
 The `add_and_print` definition has been indented as if it were part of the
 first `concat_and_print` definition, and the errant semicolon is now much
-easier to spot.  We just need to remove that semicolon and re-run ocp-indent
+easier to spot.  We just need to remove that semicolon and re-run `ocp-indent`
 to verify that the syntax is correct.
 
 ```console
@@ -263,7 +264,7 @@ val concat_and_print : string -> string -> string
 val add_and_print : int -> int -> int
 ```
 
-The [ocp-indent homepage](https://github.com/OCamlPro/ocp-indent) documents
+The `ocp-indent` [homepage](https://github.com/OCamlPro/ocp-indent) documents
 how to integrate it with your favourite editor.  All the Core libraries are
 formatted using it to ensure consistency, and it's a good idea to do this
 before publishing your own source code online.
@@ -417,11 +418,12 @@ provides the common extension framework for them to use.  Type_conv registers
 the `with` grammar extension to Camlp4, and the OCamlfind packaging ensures
 that it's loaded before Variantslib or Sexplib.
 
-The two extensions generate boilerplate OCaml code based on the type
-definition. This avoids the inevitable performance hit of doing the code
-generation dynamically. It also doesn't require a Just-In-Time (JIT) runtime
-that can be a source of unpredictable dynamic behaviour.  Instead, all code is
-simply generated at compile-time via Camlp4.
+The two extensions generate boilerplate OCaml code based on the type definition
+at compilation time. This avoids the performance hit of doing the code
+generation dynamically and also doesn't require a Just-In-Time (JIT) runtime
+that can be a source of unpredictable dynamic behaviour.  Instead, all the
+extra code is simply generated at compilation time via Camlp4, and type
+information can be discarded from the runtime image.
 
 The syntax extensions accept an input AST and output a modified one.  If you're
 not familiar with the Camlp4 module in question, how do you figure out what
@@ -633,10 +635,10 @@ daunting and could be the subject of an entirely new book.
 
 The best resources to get started are:
 
-* the online [Camlp4 wiki](http://brion.inria.fr/gallium/index.php/Camlp4).
-* using OPAM to install existing Camlp4 extensions and inspecting their source code.
 * a series of [blog posts](http://ambassadortothecomputers.blogspot.co.uk/p/reading-camlp4.html) by
 Jake Donham describe the internals of Camlp4 and its syntax extension mechanism.
+* the online [Camlp4 wiki](http://brion.inria.fr/gallium/index.php/Camlp4).
+* using OPAM to install existing Camlp4 extensions and inspecting their source code.
 
 ## Static type checking
 
@@ -735,7 +737,9 @@ with no cyclic dependencies between the modules.
 As with any such stylistic debate, you should experiment with which system
 works best for you.  Everyone agrees on one thing though: no matter what order
 you write them, production code should always explicitly define an `mli` file
-for every `ml` file in the project.
+for every `ml` file in the project.  It's also perfectly fine to have an `mli`
+file without a corresponding `ml` file if you're only declaring signatures
+(such as module types).
 
 Signature files provide a place to write succinct documentation and to abstract
 internal details that shouldn't be exported.  Maintaining separate signature
@@ -1055,7 +1059,7 @@ cross-compilation environment).
 For separate compilation to be sound, we need to ensure that all the `cmi`
 files used to type-check a module are the same across compilation runs.  If
 they vary, this raises the possibility of two modules checking different type
-signature for a common module with the same name.  This in turn lets the
+signatures for a common module with the same name.  This in turn lets the
 program completely violate the static type system and can lead to memory
 corruption and crashes.
 

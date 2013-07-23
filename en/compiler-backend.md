@@ -294,7 +294,7 @@ L2:	closure L1, 0
 ```
 
 The bytecode above has been simplified from the lambda form into a set of
-simple instructions that are executed in serial by the interpreter.
+simple instructions that are executed serially by the interpreter.
 
 There are around 140 instructions in total, but most are just minor
 variants of commonly encountered operations (_e.g._ function
@@ -613,12 +613,12 @@ longer a simple register comparison.  Instead, the arguments are pushed on the
 stack (the `%rsp` register) and a C function call is invoked by placing a
 pointer to `caml_greaterthan` in `%rax` and jumping to `caml_c_call`.
 
-OCaml on 64-bit Intel architectures caches the location of the minor heap in
-the `%r11` register since it's so frequently referenced in OCaml functions.
-This register isn't guaranteed to be preserved when calling into C code (which
-can clobber `%r11` for its own purposes), and so `%r11` is restored after
-returning from the `caml_greaterthan` call.  Finally the return value of the
-comparison is popped from the stack and returned.
+OCaml on x86_64 architectures caches the location of the minor heap in the
+`%r15` register since it's so frequently referenced in OCaml functions.  The
+minor heap pointer can also be changed by the C code that's being called (e.g.
+when it allocates OCaml values), and so `%r15` is restored after returning from
+the `caml_greaterthan` call.  Finally the return value of the comparison is
+popped from the stack and returned.
 
 <tip>
 <title>Reading the implementation of the C primitives</title>

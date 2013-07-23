@@ -15,23 +15,23 @@ allocation requests by the OCaml program.
 
 ## Mark and sweep garbage collection
 
-When there isn't enough memory available to satisfy an allocation
-request from the pool of allocated heap blocks, the runtime system
-invokes the *garbage collector* (or GC). An OCaml program can't
-explicitly free a value when it is done with it. Instead, the GC
-regularly determines which values are *live* and which values are
-*dead*, _i.e._ no longer in use. Dead values are collected and their
-memory made available for reuse by the application.
+When there isn't enough memory available to satisfy an allocation request from
+the pool of allocated heap blocks, the runtime system invokes the *garbage
+collector* (or GC). An OCaml program can't explicitly free a value when it is
+done with it. Instead, the GC regularly determines which values are *live* and
+which values are *dead*, _i.e._ no longer in use. Dead values are collected and
+their memory made available for reuse by the application.
 
 The garbage collector doesn't keep constant track of values as they are
 allocated and used. Instead, it regularly scans them by starting from a set of
 *root* values that the application always has access to (such as the stack).
 The GC maintains a directed graph in which heap blocks are nodes, and there is
-an edge from heap block `b1` to heap block `b2` if some field of `b1` points to
-`b2`.  All blocks reachable from the roots by following edges in the graph must
-be retained, and unreachable blocks can be reused by the application.
+an edge from heap block `b1` to heap block `b2` if some field of `b1` is a
+pointer to `b2`.
 
-The algorithm used by OCaml to perform this heap traversal is commonly known as
+All blocks reachable from the roots by following edges in the graph must be
+retained, and unreachable blocks can be reused by the application.  The
+algorithm used by OCaml to perform this heap traversal is commonly known as
 *mark and sweep* garbage collection, and we'll explain it further now.
 
 ## Generational garbage collection
@@ -97,11 +97,12 @@ megabytes in size so that it can be scanned quickly.
                           blocks
 ```
 
-The runtime stores the minor heap in two pointers (`caml_young_start` and
-`caml_young_end`, but we will drop the `caml_young` prefix for brevity) that
-delimit the start and end of the heap region.  The `base` is the memory address
-returned by the system `malloc`, and `start` is aligned against the next
-nearest word boundary from `base` to make it easier to store OCaml values.
+The runtime stores the boundaries of the minor heap in two pointers that
+delimit the start and end of the heap region (`caml_young_start` and
+`caml_young_end`, but we will drop the `caml_young` prefix for brevity). The
+`base` is the memory address returned by the system `malloc`, and `start` is
+aligned against the next nearest word boundary from `base` to make it easier to
+store OCaml values.
 
 In a fresh minor heap, the `limit` equals the `start` and the current `ptr`
 will equal the `end`.  `ptr` decreases as blocks are allocated until it reaches
@@ -122,19 +123,15 @@ collection.
 <note>
 <title>Setting the size of the minor heap</title>
 
-The minor heap size defaults to 8MB on 64-bit platforms, unless overridden by
+The default minor heap size in OCaml is normally 2MB on 64-bit platforms, but
+this is increased to 8MB if you use Core (which generally improves performance
+but at the cost of a bigger memory profile by default).
+This setting can be overridden unless overridden by
 the `s=<words>` argument to `OCAMLRUNPARAM`.  You can change it after the
 program has started by calling the `Gc.set` function.
 
-```ocaml
-# open Gc;;
-# let c = Gc.get ();;    
-val c : Gc.control =
-  {minor_heap_size = 262144; major_heap_increment = 126976;
-   space_overhead = 80; verbose = 0; max_overhead = 500;
-   stack_limit = 1048576; allocation_policy = 0}
-# Gc.tune ~minor_heap_size:(262144 * 2) () ;;
-- : unit = ()
+```frag
+((typ ocamltop)(name gc/tune.topscript)(part 0))
 ```
 
 Changing the GC size dynamically will trigger an immediate minor heap
@@ -205,9 +202,8 @@ block of memory.  This is preferable to lots of smaller heap chunks that may be
 spread across different regions of virtual memory, and require more
 housekeeping in the OCaml runtime to keep track of them.
 
-```ocaml
-# open Core.Std;;
-# Gc.tune ~major_heap_increment:(1000448 * 4) ();;
+```frag
+((typ ocamltop)(name gc/tune.topscript)(part 1))
 ```
 
 </note>
@@ -320,8 +316,8 @@ entire heap block-by-block in increasing order of memory address. If it finds a
 gray block, it adds it to the gray list and recursively marks it using the
 usual strategy for a pure heap.  Once the scan of the complete heap is
 finished, the mark phase checks again whether the heap has again become impure,
-and repeats the scan until if it is. These full-heap scans will continue until
-a successful scan completes without overflowing the gray list.
+and repeats the scan until it is pure again. These full-heap scans will
+continue until a successful scan completes without overflowing the gray list.
 
 <note>
 <title>Controlling major heap collections</title>
@@ -331,12 +327,8 @@ This performs a minor collection first, and then a single slice.  The size of
 the slice is normally automatically computed by the GC to an appropriate value,
 and returns this value so that you can modify it in future calls if necessary.
 
-```ocaml
-# open Core.Std;;
-# Gc.major_slice 0 ;;
-- : int = 232340
-# Gc.full_major ();;
-- : unit = ()
+```frag
+((typ ocamltop)(name gc/tune.topscript)(part 2))
 ```
 
 The `space_overhead` setting controls how aggressive the GC is about setting
@@ -374,10 +366,8 @@ cycle, whereas the maximum value of `1000000` disables heap compaction
 completely.  The default settings should be fine unless you have unusual
 allocation patterns that are causing a higher-than-usual rate of compactions.
 
-```ocaml
-# open Core.Std;;
-# Gc.tune ~max_overhead:0 ();;
-- : unit = () 
+```frag
+((typ ocamltop)(name gc/tune.topscript)(part 3))
 ```
 
 </note>
@@ -414,40 +404,8 @@ Let's see this for ourselves with a simple test program.  You'll need
 to install the Core benchmarking suite via `opam install core_bench` before
 you compile this code.
 
-```ocaml
-(* barrier_bench.ml: benchmark mutable vs immutable writes *)
-open Core.Std
-open Core_bench.Std
-
-type t1 = { mutable iters1: int; mutable count1: float }
-type t2 = { iters2: int; count2: float }
-
-let rec test_mutable t1 =
-  match t1.iters1 with
-  |0 -> ()
-  |n ->
-    t1.iters1 <- t1.iters1 - 1;
-    t1.count1 <- t1.count1 +. 1.0;
-    test_mutable t1
-
-let rec test_immutable t2 =
-  match t2.iters2 with
-  |0 -> ()
-  |n ->
-    let iters2 = n - 1 in
-    let count2 = t2.count2 +. 1.0 in
-    test_immutable { iters2; count2 }
-
-let () =
-  let iters = 1000000 in
-  let tests = [
-    Bench.Test.create ~name:"mutable" 
-      (fun () -> test_mutable { iters1=iters; count1=0.0 });
-    Bench.Test.create ~name:"immutable"
-      (fun () -> test_immutable { iters2=iters; count2=0.0 })
-  ] in
-  Bench.make_command tests |> Command.run
-
+```frag
+((typ ocaml)(name gc/barrier_bench.ml))
 ```
 
 This program defines a type `t1` that is mutable and `t2` that is immutable.
@@ -455,16 +413,8 @@ The benchmark loop iterates over both fields and increments a counter.
 Compile and execute this with some extra options to show the amount of
 garbage collection occurring.
 
-```console
-$ ocamlbuild -use-ocamlfind -package core -package core_bench -tag thread barrier_bench.native
-$ ./barrier_bench.native name alloc
-Estimated testing time 20s (change using -quota SECS).
-┌───────────┬───────────┬─────────────────────┬───────────┬────────┬──────────┬────────────┐
-│ Name      │ Time (ns) │           Time 95ci │     Minor │  Major │ Promoted │ Percentage │
-├───────────┼───────────┼─────────────────────┼───────────┼────────┼──────────┼────────────┤
-│ mutable   │ 7_954_262 │ 7_827_275-8_135_261 │ 2_000_004 │ -51.42 │   -51.42 │     100.00 │
-│ immutable │ 3_694_618 │ 3_396_611-4_037_053 │ 5_000_005 │ -28.43 │   -28.43 │      46.45 │
-└───────────┴───────────┴─────────────────────┴───────────┴────────┴──────────┴────────────┘
+```frag
+((typ console)(name gc/run_barrier_bench.out))
 ```
 
 There is a stark space/time tradeoff here. The mutable version takes
@@ -480,57 +430,8 @@ scenarios using `Core_bench`, and experiment with the tradeoffs.  The
 command-line benchmark binaries have a number of useful options that affect
 garbage collection behaviour.
 
-```console
-$ ./barrier_bench.native -help
-Benchmark for mutable, immutable
-
-  barrier_bench.native [COLUMN ...]
-
-Columns that can be specified are:
-	name       - Name of the test.
-	cycles     - Number of CPU cycles (RDTSC) taken.
-	cycles-err - 95% confidence interval and R^2 error for cycles.
-	~cycles    - Cycles taken excluding major GC costs.
-	time       - Number of nano secs taken.
-	time-err   - 95% confidence interval and R^2 error for time.
-	~time      - Time (ns) taken excluding major GC costs.
-	alloc      - Allocation of major, minor and promoted words.
-	gc         - Show major and minor collections per 1000 runs.
-	percentage - Relative execution time as a percentage.
-	speedup    - Relative execution cost as a speedup.
-	samples    - Number of samples collected for profiling.
-
-R^2 error indicates how noisy the benchmark data is. A value of
-1.0 means the amortized cost of benchmark is almost exactly predicated
-and 0.0 means the reported values are not reliable at all.
-Also see: http://en.wikipedia.org/wiki/Coefficient_of_determination
-
-Major and Minor GC stats indicate how many collections happen per 1000
-runs of the benchmarked function.
-
-The following columns will be displayed by default:
-	+name time percentage
-
-To specify that a column should be displayed only if it has a non-trivial value,
-prefix the column name with a '+'.
-
-=== flags ===
-
-  [-clear-columns]     Don't display default columns. Only show user specified
-                       ones.
-  [-display STYLE]     Table style (short, tall, line or blank). Default short.
-  [-geometric SCALE]   Use geometric sampling. (default 1.01)
-  [-linear INCREMENT]  Use linear sampling to explore number of runs, example 1.
-  [-no-compactions]    Disable GC compactions.
-  [-quota SECS]        Time quota allowed per test (default 10s).
-  [-save]              Save benchmark data to <test name>.txt files.
-  [-stabilize-gc]      Stabilize GC between each sample capture.
-  [-v]                 High verbosity level.
-  [-width WIDTH]       width limit on column display (default 150).
-  [-build-info]        print info about this build and exit
-  [-version]           print the version of this build and exit
-  [-help]              print this help text and exit
-                       (alias: -?)
+```frag
+((typ console)(name gc/show_barrier_bench_help.out))
 ```
 
 The `-no-compactions` and `-stabilize-gc` options can help force a situation
@@ -582,54 +483,14 @@ Let's explore this with a small example that finalizes values of different
 types, some of which are heap-allocated and others which are compile-time
 constants.
 
-```ocaml
-(* finalizer.ml : explore finalizers for different types *)
-open Core.Std
-open Async.Std
-
-let attach_finalizer n v =
-  match Heap_block.create v with
-  | None -> printf "%20s: FAIL\n%!" n
-  | Some hb ->
-      let final _ = printf "%20s: OK\n%!" n in
-      Gc.add_finalizer hb final
-
-type t = { foo: bool }
-
-let () =
-  let alloced_float = Unix.gettimeofday () in
-  let alloced_bool = alloced_float > 0.0 in
-  let alloced_string = String.create 4 in
-  attach_finalizer "immediate int" 1;
-  attach_finalizer "immediate float" 1.0;
-  attach_finalizer "immediate variant" (`Foo "hello");
-  attach_finalizer "immediate string" "hello world";
-  attach_finalizer "immediate record" { foo=false };
-  attach_finalizer "allocated float" alloced_float;
-  attach_finalizer "allocated bool" alloced_bool;
-  attach_finalizer "allocated variant" (`Foo alloced_bool);
-  attach_finalizer "allocated string" alloced_string;
-  attach_finalizer "allocated record" { foo=alloced_bool };
-  Gc.compact ();
-  never_returns (Scheduler.go ())
+```frag
+((typ ocaml)(name gc/finalizer.ml))
 ```
 
 Building and running this should show the following output.
 
-```console
-$ ocamlfind ocamlopt -package core -package async -thread \
-  -o finalizer -linkpkg finalizer.ml
-$ ./finalizer
-       immediate int: FAIL
-     immediate float: FAIL
-   immediate variant: FAIL
-    immediate string: FAIL
-    immediate record: FAIL
-      allocated bool: FAIL
-    allocated record: OK
-    allocated string: OK
-   allocated variant: OK
-     allocated float: OK
+```frag
+((typ ocaml)(name gc/run_finalizer.out))
 ```
 
 The GC calls the finalization functions in the order of the deallocation. If

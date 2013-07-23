@@ -191,12 +191,12 @@ heavy syntax and additional runtime cost means that objects are rarely used in
 place of records.
 
 The real benefits of objects come from the class system. Classes support
-inheritance and open recursion. Open recursion allows parts of an object to be
-defined separately. This works because calls between the methods of an object
-are determined when the object is instantiated, a form of _dynamic_
-binding. This makes it possible (and necessary) for one method to refer to
-other methods in the object without knowing statically how they will be
-implemented.
+inheritance and open recursion. Open recursion allows interdependent parts of
+an object to be defined separately. This works because calls between the
+methods of an object are determined when the object is instantiated, a form of
+_dynamic_ binding. This makes it possible (and necessary) for one method to
+refer to other methods in the object without knowing statically how they will
+be implemented.
 
 In contrast, modules use static binding.  If you want to parameterize your
 module code so that some part of it can be implemented later, you would write a
@@ -230,7 +230,7 @@ shapes.  The generic type `shape` has a method to compute the area,
 and `square` and `circle` are specific kinds of shape.
 
 ```frag
-((typ ocamltop)(name objects/subtyping.topscript)(part 1))
+((typ ocaml)(name objects/subtyping.ml)(part 1))
 ```
 
 A `square` has a method `area` just like a `shape`, and an additional
@@ -238,7 +238,7 @@ method `width`.  Still, we expect a `square` to be a `shape`, and it
 is.  The coercion `:>` must be explicit.
 
 ```frag
-((typ ocamltop)(name objects/subtyping.topscript)(part 2))
+((typ ocamltop)(name objects/subtyping.topscript)(part 1))
 ```
 
 This form of object subtyping is called _width_ subtyping. Width
@@ -256,14 +256,14 @@ iff `t1` is a subtype of `t2`.
 For example, we can create two objects with a `shape` method:
 
 ```frag
-((typ ocamltop)(name objects/subtyping.topscript)(part 3))
+((typ ocamltop)(name objects/subtyping.topscript)(part 2))
 ```
 
 Both these objects have a `shape` method whose type is a subtype of the `shape`
 type, so they can both be coerced into the object type `< shape : shape >`
 
 ```frag
-((typ ocamltop)(name objects/subtyping.topscript)(part 4))
+((typ ocamltop)(name objects/subtyping.topscript)(part 3))
 ```
 
 ### Polymorphic variant subtyping
@@ -272,7 +272,7 @@ Subtyping can also be used to coerce a polymorphic variant into a larger
 polymorphic variant type.
 
 ```frag
-((typ ocamltop)(name objects/subtyping.topscript)(part 5))
+((typ ocamltop)(name objects/subtyping.topscript)(part 4))
 ```
 
 ### Variance
@@ -281,7 +281,7 @@ What about types built from object types? If a `square` is a `shape`, we expect
 a `square list` to be a `shape list`. OCaml does indeed allow such coercions:
 
 ```frag
-((typ ocamltop)(name objects/subtyping.topscript)(part 6))
+((typ ocamltop)(name objects/subtyping.topscript)(part 5))
 ```
 
 Note that this relies on lists being immutable. It would not be safe to treat a
@@ -290,7 +290,7 @@ non-square shapes into what should be an array of squares. OCaml recognises
 this and does not allow the coercion.
 
 ```frag
-((typ ocamltop)(name objects/subtyping.topscript)(part 7))
+((typ ocamltop)(name objects/subtyping.topscript)(part 6))
 ```
 
 We say that `'a list` is _covariant_ (in `'a`), whilst `'a array` is
@@ -303,7 +303,7 @@ expects its argument to be a `square` and would not know what to do with a
 with type `square -> string`.
 
 ```frag
-((typ ocamltop)(name objects/subtyping.topscript)(part 8))
+((typ ocamltop)(name objects/subtyping.topscript)(part 7))
 ```
 
 We say that `'a -> string` is _contravariant_ in `'a`. In general, function types
@@ -315,21 +315,21 @@ are contravariant in their arguments and covariant in their results.
 OCaml works out the variance of a type using that type's definition. 
 
 ```frag
-((typ ocamltop)(name objects/subtyping.topscript)(part 9))
+((typ ocamltop)(name objects/subtyping.topscript)(part 8))
 ```
 
 However, if the definition is hidden by a signature then OCaml is forced to
 assume that the type is invariant.
 
 ```frag
-((typ ocamltop)(name objects/subtyping.topscript)(part 10))
+((typ ocamltop)(name objects/subtyping.topscript)(part 9))
 ```
 
 We can fix this by adding _variance annotations_ to the type's parameters in the signature: `+`
 for covariance or `-` for contravariance.
 
 ```frag
-((typ ocamltop)(name objects/subtyping.topscript)(part 11))
+((typ ocamltop)(name objects/subtyping.topscript)(part 10))
 ```
 
 </note>
@@ -339,20 +339,20 @@ shapes by applying our `stack` function to some squares and some circles.
 
 
 ```frag
-((typ ocamltop)(name objects/subtyping.topscript)(part 12))
+((typ ocaml)(name objects/subtyping.ml)(part 2))
 ```
 
 If we wanted to write a function that took a list of such stacks and found the
 total area of their shapes, we might try:
 
 ```frag
-((typ ocamltop)(name objects/subtyping.topscript)(part 13))
+((typ ocamltop)(name objects/subtyping.topscript)(part 11))
 ```
 
 However, when we try to apply this function to our objects we get an error:
 
 ```frag
-((typ ocamltop)(name objects/subtyping.topscript)(part 14))
+((typ ocamltop)(name objects/subtyping.topscript)(part 12))
 ```
 
 As you can see, `square stack` and `circle stack` are not subtypes of `shape
@@ -372,7 +372,7 @@ define a type `readonly_stack` and confirm that we can coerce the list of
 stacks to it.
 
 ```frag
-((typ ocamltop)(name objects/subtyping.topscript)(part 15))
+((typ ocamltop)(name objects/subtyping.topscript)(part 13))
 ```
 
 Aspects of this section may seem fairly complicated, but it should be pointed
@@ -414,16 +414,8 @@ More commonly, narrowing leads to poor object-oriented style.
 Consider the following Java code, which returns the name of a shape
 object.
 
-```
-String GetShapeName(Shape s) {
-  if (s instanceof Square) {
-    return "Square";
-  } else if (s instanceof Circle) {
-    return "Circle";
-  } else {
-    return "Other";
-  }
-}
+```frag
+((typ java)(name objects/Shape.java))
 ```
 
 Most programmers would consider this code to be "wrong."  Instead
@@ -436,12 +428,8 @@ checks whether an array of shapes looks like a "barbell," composed to
 two `Circle` objects separated by a `Line`, where the circles have the
 same radius.
 
-```
-boolean IsBarbell(Shape[] s) {
-  return s.length == 3 && (s[0] instanceof Circle) &&
-    (s[1] instanceof Line) && (s[2] instanceof Circle) &&
-	((Circle) s[0]).radius() == ((Circle) s[2]).radius();
-}
+```frag
+((typ java)(name objects/IsBarbell.java))
 ```
 
 In this case, it is much less clear how to augment the `Shape` class
@@ -450,9 +438,7 @@ object-oriented programming is well-suited for this situation.
 Pattern matching seems like a better fit.
 
 ```ocaml
-let is_barbell = function
- | [Circle r1; Line _; Circle r2] when r1 == r2 -> true
- | _ -> false;;
+((typ ocaml)(name objects/is_barbell.ml))
 ```
  
 Regardless, there is a solution if you find yourself in this
