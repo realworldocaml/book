@@ -780,6 +780,44 @@ the "inputs" are the declared, but not defined, virtual methods and
 fields.  The functor application is implemented through inheritance,
 when virtual methods are given concrete implementations.
 
+## Initializers
+
+You can execute expressions during the instantiation of a class by
+placing them before the object expression or in the initial value of
+a field:
+
+```ocaml
+# class obj x = 
+    let () = printf "Creating obj %d\n" x in
+    object 
+      val field = printf "Initializing field\n"; x
+    end;;
+class obj : int -> object val field : int end
+# let o = new obj 3;;
+Creating obj 3
+Initializing field
+val o : obj = <obj>
+```
+
+However, these expressions are executed before the object has been
+created, and cannot refer to the methods of the object. If you need
+to use an object's methods during instantiation you can use an
+initializer. An initializer is an expression that will be executed
+during instantiation but after the object has been created. 
+
+For example, if we wanted to create a `growing_circle` class for
+circles that grow when clicked then we could inherit from `circle`
+and used the inherited `on_click` to add a handler for click events:
+
+```ocaml
+class growing_circle r x y = object (self)
+  inherit circle r x y
+
+  initializer
+    self#on_click (fun x y -> radius <- radius * 2)
+end
+```
+
 ## Multiple inheritance
 
 When a class inherits from more than one superclass, it is using
