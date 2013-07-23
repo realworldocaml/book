@@ -24,6 +24,7 @@ dirs= json \
       variants-termcol-fixed \
       objects \
       imperative-programming \
+      error-handling \
 
 # html/md files directory
 OBJ=         _build

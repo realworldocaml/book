@@ -1,0 +1,6 @@
+$ corebuild blow_up.byte
+$ ./blow_up.byte
+3
+Fatal error: exception Blow_up.Empty_list
+Raised at file "blow_up.ml", line 5, characters 16-26
+Called from file "blow_up.ml", line 10, characters 17-28

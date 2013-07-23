@@ -1,4 +1,4 @@
-$ ../corebuild freq.byte
+$ corebuild freq.byte
 File "freq.ml", line 4, characters 53-66:
 Error: This expression has type string -> Counter.t -> Counter.t
        but an expression was expected of type

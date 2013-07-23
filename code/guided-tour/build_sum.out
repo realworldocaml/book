@@ -1,1 +1,1 @@
-$ ocamlbuild -use-ocamlfind -tag thread -pkg core sum.native
+$ corebuild sum.native
