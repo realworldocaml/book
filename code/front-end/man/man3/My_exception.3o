@@ -1,0 +1,16 @@
+.TH "My_exception" 3 2013-07-23 OCamldoc ""
+.SH NAME
+My_exception \- all My_exception elements
+
+
+.SH Module Doc
+
+.I exception My_exception 
+.B of 
+.B (int -> int) * int
+
+.sp
+Comment for exception My_exception\&.
+.sp
+
+.sp
