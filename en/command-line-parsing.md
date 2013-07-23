@@ -514,7 +514,7 @@ everything works again.
 For example, if we remove the `verbose` flag and recompile, we'll
 get this impressively long type error:
 
-```ocaml
+```frag
 ((typ console)(name command-line-parsing/build_cal_append_broken.out))
 ```
 

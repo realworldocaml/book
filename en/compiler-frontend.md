@@ -45,35 +45,8 @@ can be reused by other applications.
 
 The overall compilation pipeline looks like this:
 
-```
-    Source code
-        |
-        | parsing and preprocessing
-        |
-        | camlp4 syntax extensions
-        |
-        v
-    Parsetree (untyped AST)
-        |
-        | type inference and checking
-        v
-    Typedtree (type-annotated AST)
-        |
-        | pattern-matching compilation
-        | elimination of modules and classes
-        v
-     Lambda
-      /   \
-     /     \ closure conversion, inlining, uncurrying,
-    v       \  data representation strategy
- Bytecode    \
-    |         +-----+
-    |              Cmm
-    |ocamlrun       |
-    |               | code generation
-    |               | assembly & linking
-    v               v
- Interpreted    Compiled
+```frag
+((typ ascii)(name front-end/pipeline.ascii))
 ```
 
 Notice that the pipeline branches towards the end. OCaml has multiple compiler

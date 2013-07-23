@@ -393,11 +393,8 @@ of the string in machine words. The `String_tag` (252) is higher than the
 collector.  The block contents are the contents of the string, with padding
 bytes to align the block on a word boundary.
 
-```ocaml
-+---------------+----------------+--------+-----------+
-| header        | 'a' 'b' 'c' 'd' 'e' 'f' | '\O' '\1' |
-+---------------+----------------+--------+-----------+
-                L data                    L padding
+```frag
+((typ ascii)(name memory-repr/string_block.ascii))
 ```
 
 On a 32-bit machine, the padding is calculated based on the modulo of the
@@ -415,8 +412,8 @@ This string representation is a clever way to ensure that the contents are
 always zero-terminated by the padding word, and still compute its length
 efficiently without scanning the whole string.  The following formula is used:
 
-```
-number_of_words_in_block * sizeof(word) - last_byte_of_block - 1
+```frag
+((typ ascii)(name memory-repr/string_size_calc.ascii))
 ```
 
 The guaranteed `NULL`-termination comes in handy when passing a string to C,
@@ -442,18 +439,8 @@ The first word of the data within the custom block is a C pointer to a `struct`
 of custom operations. The custom block cannot have pointers to OCaml blocks and
 is opaque to the garbage collector.
 
-```c
-struct custom_operations {
-  char *identifier;
-  void (*finalize)(value v);
-  int (*compare)(value v1, value v2);
-  intnat (*hash)(value v);
-  void (*serialize)(value v,
-                    /*out*/ uintnat * wsize_32 /*size in bytes*/,
-                    /*out*/ uintnat * wsize_64 /*size in bytes*/);
-  uintnat (*deserialize)(void * dst);
-  int (*compare_ext)(value v1, value v2);
-};
+```frag
+((typ c)(name memory-repr/custom_ops.c))
 ```
 
 The custom operations specify how the runtime should perform polymorphic
