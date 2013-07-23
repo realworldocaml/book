@@ -1,0 +1,17 @@
+$ corebuild doc.native
+File "doc.ml", line 42, characters 2-31:
+Warning 7: the method list_item is overridden.
+File "doc.ml", line 44, characters 2-124:
+Warning 7: the method text_item is overridden.
+File "doc.ml", line 27, characters 13-16:
+Warning 27: unused variable tag.
+File "doc.ml", line 42, characters 23-25:
+Warning 27: unused variable li.
+File "doc.ml", line 42, characters 2-31:
+Warning 7: the method list_item is overridden.
+File "doc.ml", line 44, characters 2-124:
+Warning 7: the method text_item is overridden.
+File "doc.ml", line 27, characters 13-16:
+Warning 27: unused variable tag.
+File "doc.ml", line 42, characters 23-25:
+Warning 27: unused variable li.
