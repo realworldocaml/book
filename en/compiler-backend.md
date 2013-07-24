@@ -830,7 +830,7 @@ to OCaml code beyond the runtime library, just as with the bytecode runtime.
 <title>Activating the debug runtime</title>
 
 Despite your best efforts, it is easy to introduce a bug into some components
-such as C bindings that cause heap invariants to be violated.  OCaml includes a
+such as C bindings that causes heap invariants to be violated.  OCaml includes a
 `libasmrund.a` variant of the runtime library that is compiled with extra
 debugging checks that perform extra memory integrity checks during every
 garbage collection cycle.  Running these extra checks will abort the program
