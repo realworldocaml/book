@@ -998,13 +998,8 @@ use the resulting program like any command-line utility.  In this
 example, we can just type in a sequence of numbers, one per line,
 hitting control-d to exit when the input is complete.
 
-```
-$ ./sum.native
-1
-2
-3
-94.5
-Total: 100.5
+```frag
+((typ ocamlrawtop)(name guided-tour/sum.rawscript))
 ```
 
 More work is needed to make a really usable command-line program,
