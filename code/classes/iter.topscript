@@ -74,5 +74,5 @@ class ['a] stack init = object
       v <- hd :: v
 
     method fold : 'b. ('b -> 'a -> 'b) -> 'b -> 'b =
-     (fun f x -> List.fold ~f ~init v) 
+     (fun f init -> List.fold ~f ~init v) 
   end ;;
