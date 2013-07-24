@@ -527,7 +527,7 @@ will give you some information about where the error occurred, and the
 stack of function calls that were in place at the time of the error.
 
 ```frag
-((typ ocamltop)(name error-handling/build_blow_up.out))
+((typ console)(name error-handling/build_blow_up.out))
 ```
 
 You can also capture a backtrace within your program by calling
@@ -546,11 +546,8 @@ Even using Core and compiling with debugging symbols, you can turn
 backtraces off by setting the `OCAMLRUNPARAM` environment variable to
 be empty.
 
-```bash
-$ export OCAMLRUNPARAM=
-$ ./exn.byte
-3
-Fatal error: exception Exn.Empty_list
+```frag
+((typ console)(name error-handling/build_blow_up_notrace.out))
 ```
 
 The resulting error message is considerably less informative.  You can
@@ -562,36 +559,8 @@ OCaml's exceptions are fairly fast, but they're even faster still if
 you disable backtraces.  Here's a simple benchmark that shows the
 effect, using the `core_bench` package.
 
-```ocaml
-(* file: exn_cost.ml *)
-
-open Core.Std
-open Core_bench.Std
-
-let simple_computation () =
-  List.range 0 10
-  |> List.fold ~init:0 ~f:(fun sum x -> sum + x * x)
-  |> ignore
-
-let simple_with_handler () =
-  try simple_computation () with Exit -> ()
-
-let end_with_exn () =
-  try
-    simple_computation ();
-    raise Exit
-  with Exit -> ()
-
-let () =
-  [ Bench.Test.create ~name:"simple computation"
-      (fun () -> simple_computation ());
-    Bench.Test.create ~name:"simple computation w/handler"
-      (fun () -> simple_with_handler ());
-    Bench.Test.create ~name:"end with exn"
-      (fun () -> end_with_exn ());
-  ]
-  |> Bench.make_command
-  |> Command.run
+```frag
+((typ ocaml)(name error-handling/exn_cost.ml))
 ```
 
 We're testing three cases here: a simple computation with no
@@ -602,16 +571,8 @@ exception to do the control flow back to the caller.
 If we run this with stacktraces on, the benchmark results look like
 this.
 
-```
-$ ./exn_cost.native cycles
-Estimated testing time 30s (change using -quota SECS).
-┌──────────────────────────────┬────────┬───────────┬──────────┐
-│ Name                         │ Cycles │ Time (ns) │ % of max │
-├──────────────────────────────┼────────┼───────────┼──────────┤
-│ simple computation           │ 198.32 │    116.66 │    78.36 │
-│ simple computation w/handler │ 219.23 │    128.96 │    86.62 │
-│ end with exn                 │ 253.10 │    148.88 │   100.00 │
-└──────────────────────────────┴────────┴───────────┴──────────┘
+```frag
+((typ console)(name error-handling/run_exn_cost.out))
 ```
 
 Here, we see that we lose something like 20 cycles to adding an
@@ -619,16 +580,8 @@ exception handler, and 30 more to actually throwing and catching an
 exception.  If we turn backtraces off, then the results look like
 this.
 
-```
-$ ./exn_cost.native cycles
-Estimated testing time 30s (change using -quota SECS).
-┌──────────────────────────────┬────────┬───────────┬──────────┐
-│ Name                         │ Cycles │ Time (ns) │ % of max │
-├──────────────────────────────┼────────┼───────────┼──────────┤
-│ simple computation           │ 198.84 │    116.97 │    83.86 │
-│ simple computation w/handler │ 217.17 │    127.75 │    91.60 │
-│ end with exn                 │ 237.10 │    139.47 │   100.00 │
-└──────────────────────────────┴────────┴───────────┴──────────┘
+```frag
+((typ console)(name error-handling/run_exn_cost_notrace.out))
 ```
 
 Here, the handler costs about the same, at 20 cycles, but the
@@ -646,34 +599,21 @@ help you do just that.  For example, given a piece of code that can
 throw an exception, you can capture that exception into an option as
 follows:
 
-```ocaml
-# let find alist key =
-    Option.try_with (fun () -> find_exn alist key) ;;
-val find : (string * 'a) list -> string -> 'a option = <fun>
-# find ["a",1; "b",2] "c";;
-- : int option = None
-# find ["a",1; "b",2] "b";;
-- : int option = Some 2
+```frag
+((typ ocamltop)(name error-handling/main.topscript)(part 35))
 ```
 
 And `Result` and `Or_error` have similar `try_with` functions.  So, we
 could write:
 
-```ocaml
-# let find alist key =
-    Result.try_with (fun () -> find_exn alist key) ;;
-val find : (string * 'a) list -> string -> ('a, exn) Result.t = <fun>
-# find ["a",1; "b",2] "c";;
-- : (int, exn) Result.t = Result.Error Key_not_found("c")
+```frag
+((typ ocamltop)(name error-handling/main.topscript)(part 36))
 ```
 
 And then we can re-raise that exception:
 
-```ocaml
-# Result.ok_exn (find ["a",1; "b",2] "b");;
-- : int = 2
-# Result.ok_exn (find ["a",1; "b",2] "c");;
-Exception: Key_not_found("c").
+```frag
+((typ ocamltop)(name error-handling/main.topscript)(part 37))
 ```
 
 ## Choosing an error handling strategy

@@ -169,18 +169,14 @@ let lookup_weight ~compute_weight alist key =
     | None -> 0.
     | Some data -> compute_weight data ;;
 #part 35
+let find alist key =
+    Option.try_with (fun () -> find_exn alist key) ;;
+find ["a",1; "b",2] "c";;
+find ["a",1; "b",2] "b";;
 #part 36
+let find alist key =
+    Result.try_with (fun () -> find_exn alist key) ;;
+find ["a",1; "b",2] "c";;
 #part 37
-#part 38
-#part 39
-#part 40
-#part 41
-#part 42
-#part 43
-#part 44
-#part 45
-#part 46
-#part 47
-#part 48
-#part 49
-#part 50
+Result.ok_exn (find ["a",1; "b",2] "b");;
+Result.ok_exn (find ["a",1; "b",2] "c");;o

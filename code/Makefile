@@ -27,7 +27,9 @@ dirs= json \
       imperative-programming \
       error-handling \
       memory-repr \
-      gc
+      gc \
+      functors \
+      fcm \
 
 # html/md files directory
 OBJ=         _build
