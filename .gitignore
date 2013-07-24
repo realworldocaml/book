@@ -4,7 +4,11 @@ a.out
 *.aux
 *.aux
 *.byte
-*.cm*
+*.cmo
+*.cmi
+*.cmx
+*.cmxa
+*.cma
 *.idx
 *.log
 *.native
