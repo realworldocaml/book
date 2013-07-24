@@ -416,20 +416,9 @@ file along with following command to launch the interface.
 
 Here's an example of a session with this program.
 
+```frag
+((typ console)(name fcm/query_example.rawscript))
 ```
-$ ./query_handler.byte 
->>> (unique ())
-0
->>> (unique ())
-1
->>> (ls .)
-(agentx at audit backups db empty folders jabberd lib log mail msgs named
- netboot pgsql_socket_alt root rpc run rwho spool tmp vm yp)
->>> (ls vm)
-(sleepimage swapfile0 swapfile1 swapfile2 swapfile3 swapfile4 swapfile5
- swapfile6)
-```
-
 
 ### Loading and unloading query handlers
 
