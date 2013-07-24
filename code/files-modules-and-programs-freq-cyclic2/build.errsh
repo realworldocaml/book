@@ -1,1 +1,1 @@
-../corebuild freq.byte
+corebuild freq.byte

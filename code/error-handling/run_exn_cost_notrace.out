@@ -1,0 +1,9 @@
+$ OCAMLRUNPARAM= ./exn_cost.native cycles
+Estimated testing time 30s (change using -quota SECS).
+┌──────────────────────────────┬────────┬───────────┬──────────┐
+│ Name                         │ Cycles │ Time (ns) │ % of max │
+├──────────────────────────────┼────────┼───────────┼──────────┤
+│ simple computation           │    195 │       115 │    83.79 │
+│ simple computation w/handler │    214 │       126 │    91.79 │
+│ end with exn                 │    233 │       137 │   100.00 │
+└──────────────────────────────┴────────┴───────────┴──────────┘

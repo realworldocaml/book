@@ -1,6 +1,4 @@
-$ ../corebuild freq.byte
-File "counter.ml", line 1:
-Error: The implementation counter.ml
-       does not match the interface counter.cmi:
-       The field `count' is required but not provided
+$ corebuild freq.byte
+File "counter.ml", line 18, characters 18-31:
+Error: Unbound module Counter
 Command exited with code 2.

@@ -25,11 +25,14 @@ dirs= json \
       objects \
       classes \
       imperative-programming \
+      error-handling \
       memory-repr \
       gc \
       front-end \
       back-end \
-      back-end-bench
+      back-end-bench \
+      functors \
+      fcm 
 
 # html/md files directory
 OBJ=         _build

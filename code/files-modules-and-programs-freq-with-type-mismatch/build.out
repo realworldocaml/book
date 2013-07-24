@@ -1,4 +1,4 @@
-$ ../corebuild freq.byte
+$ corebuild freq.byte
 File "counter.ml", line 1:
 Error: The implementation counter.ml
        does not match the interface counter.cmi:
