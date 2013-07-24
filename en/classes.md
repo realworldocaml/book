@@ -163,8 +163,6 @@ express this we must use a type quantifier, as shown in the following example.
 ((typ ocamltop)(name classes/iter.topscript)(part 5))
 ```
 
-TODO: fix this example.
-
 Polymorphic method types must be specified directly _after_ the method name,
 which means that method parameters must be expressed using a `fun` or
 `function` expression.
