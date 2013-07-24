@@ -37,20 +37,16 @@ through the basic mechanics of functors.
 First, let's define a signature for a module that contains a single
 value of type `int`.
 
-```ocaml
-# module type X_int = sig val x : int end;;
-module type X_int = sig val x : int end
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 0))
 ```
 
 Now we can define our functor.  We'll use `X_int` both to constrain
 the argument to the functor, and to constrain the module returned by
 the functor.
 
-```ocaml
-# module Increment (M : X_int) : X_int = struct
-    let x = M.x + 1
-  end;;
-module Increment : functor (M : X_int) -> X_int
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 1))
 ```
 
 One thing that immediately jumps out is that functors are more
@@ -64,11 +60,8 @@ though it's not mandatory.
 The following shows what happens when we omit the module type for the
 output of the functor.
 
-```ocaml
-# module Increment (M : X_int) = struct
-    let x = M.x + 1
-  end;;
-module Increment : functor (M : X_int) -> sig val x : int end
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 2))
 ```
 
 We can see that the inferred module type of the output is now written
@@ -77,13 +70,8 @@ out explicitly, rather than being a reference to the named signature
 
 We can now use `Increment` to define new modules.
 
-```ocaml
-# module Three = struct let x = 3 end;;
-  module Three : sig val x : int end
-# module Four = Increment(Three);;
-module Four : sig val x : int end
-# Four.x - Three.x;;
-- : int = 1
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 3))
 ```
 
 In this case, we applied `Increment` to a module whose signature is
@@ -94,15 +82,10 @@ module type can omit some information available in the module, either
 by dropping fields or by leaving some fields abstract.  Here's an
 example:
 
-```ocaml
-# module Three_and_more = struct
-    let x = 3
-    let y = "three"
-  end;;
-module Three_and_more : sig val x : int val y : string end
-# module Four = Increment(Three_and_more);;
-module Four : sig val x : int end
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 4))
 ```
+
 
 The rules for determining whether a module matches a given signature
 are similar in spirit to the rules in an object-oriented language that
@@ -130,12 +113,8 @@ need about the endpoints of the intervals.  This interface, which
 we'll call `Comparable`, contains just two things: a comparison
 function, and the type of the values to be compared.
 
-```ocaml
-# module type Comparable = sig
-    type t
-    val compare : t -> t -> int
-  end ;;
-module type Comparable = sig type t val compare : t -> t -> int end
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 5))
 ```
 
 The comparison function follows the standard OCaml idiom for such
@@ -145,11 +124,10 @@ number if the first element is smaller than the second.  Thus, we
 could rewrite the standard comparison functions on top of `compare` as
 shown below.
 
-```ocaml
-compare x y < 0     (* x < y *)
-compare x y = 0     (* x = y *)
-compare x y > 0     (* x > y *)
+```frag
+((typ ocaml)(name functors/compare_example.ml))
 ```
+
 
 (This idiom is a bit of a historical error.  It would be better if
 compare returned a variant with three cases for less than, greater
@@ -163,51 +141,8 @@ In addition to the type, the functor contains implementations of a
 number of useful primitives for interacting with intervals.
 
 
-```ocaml
-# module Make_interval(Endpoint : Comparable) = struct
-
-    type t = | Interval of Endpoint.t * Endpoint.t
-             | Empty
-
-    (** [create low high] creates a new interval from [low] to
-        [high].  If [low > high], then the interval is empty *)
-    let create low high =
-      if Endpoint.compare low high > 0 then Empty
-      else Interval (low,high)
-
-    (** Returns true iff the interval is empty *)
-    let is_empty = function
-      | Empty -> true
-      | Interval _ -> false
-
-    (** [contains t x] returns true iff [x] is contained in the
-        interval [t] *)
-    let contains t x =
-      match t with
-      | Empty -> false
-      | Interval (l,h) ->
-        Endpoint.compare x l >= 0 && Endpoint.compare x h <= 0
-
-    (** [intersect t1 t2] returns the intersection of the two input
-        intervals *)
-    let intersect t1 t2 =
-      let min x y = if Endpoint.compare x y <= 0 then x else y in
-      let max x y = if Endpoint.compare x y >= 0 then x else y in
-      match t1,t2 with
-      | Empty, _ | _, Empty -> Empty
-      | Interval (l1,h1), Interval (l2,h2) ->
-        create (max l1 l2) (min h1 h2)
-
-  end ;;
-module Make_interval :
-  functor (Endpoint : Comparable) ->
-    sig
-      type t = Interval of Endpoint.t * Endpoint.t | Empty
-      val create : Endpoint.t -> Endpoint.t -> t
-      val is_empty : t -> bool
-      val contains : t -> Endpoint.t -> bool
-      val intersect : t -> t -> t
-    end
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 6))
 ```
 
 We can instantiate the functor by applying it to a module with the
@@ -215,20 +150,8 @@ right signature.  In the following, rather than name the module first
 and then call the functor, we provide the functor input as an
 anonymous module.
 
-```ocaml
-# module Int_interval =
-    Make_interval(struct
-      type t = int
-      let compare = Int.compare
-    end);;
-module Int_interval :
-  sig
-    type t = Interval of int * int | Empty
-    val create : int -> int -> t
-    val is_empty : t -> bool
-    val contains : t -> int -> bool
-    val intersect : t -> t -> t
-  end
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 7))
 ```
 
 If the input interface for your functor is aligned with the standards
@@ -236,9 +159,8 @@ of the libraries you use, then you don't need to construct a custom
 module to feed to the functor.  In this case, we can directly use the
 `Int` or `String` modules provided by Core.
 
-```ocaml
-# module Int_interval = Make_interval(Int) ;;
-# module String_interval = Make_interval(String) ;;
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 8))
 ```
 
 This works because many modules in Core, including `Int` and `String`,
@@ -250,13 +172,8 @@ generally easier to navigate.
 Now we can use the newly defined `Int_interval` module like any
 ordinary module.
 
-```ocaml
-# let i1 = Int_interval.create 3 8;;
-val i1 : Int_interval.t = Int_interval.Interval (3, 8)
-# let i2 = Int_interval.create 4 10;;
-val i2 : Int_interval.t = Int_interval.Interval (4, 10)
-# Int_interval.intersect i1 i2;;
-- : Int_interval.t = Int_interval.Interval (4, 8)
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 9))
 ```
 
 This design gives us the freedom to use any comparison function we
@@ -264,36 +181,23 @@ want for comparing the endpoints.  We could, for example, create a
 type of integer interval with the order of the comparison reversed, as
 follows:
 
-```ocaml
-# module Rev_int_interval =
-    Make_interval(struct
-      type t = int
-      let compare x y = Int.compare y x
-    end);;
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 10))
 ```
 
 The behavior of `Rev_int_interval` is of course different from
 `Int_interval`, as we can see below.
 
-```ocaml
-# let interval = Int_interval.create 4 3;;
-val interval : Int_interval.t = Int_interval.Empty
-# let rev_interval = Rev_int_interval.create 4 3;;
-val rev_interval : Rev_int_interval.t = Rev_int_interval.Interval (4, 3)
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 11))
 ```
 
 Importantly, `Rev_int_interval.t` is a different type than
 `Int_interval.t`, even though its physical representation is the same.
 Indeed, the type system will prevent us from confusing them.
 
-```ocaml
-# Int_interval.contains rev_interval 3;;
-Characters 22-34:
-  Int_interval.contains rev_interval 3;;
-                        ^^^^^^^^^^^^
-Error: This expression has type Rev_int_interval.t
-       but an expression was expected of type
-         Int_interval.t = Make_interval(Int).t
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 12))
 ```
 
 This is important, because confusing the two kinds of intervals would
@@ -308,26 +212,16 @@ lower bound, but that invariant can be violated.  The invariant is
 enforced by the create function, but because `Interval.t` is not
 abstract, we can bypass the `create` function.
 
-```ocaml
-# Int_interval.create 4 3;; (* going through create *)
-- : Int_interval.t = Int_interval.Empty
-# Int_interval.Interval (4,3);; (* bypassing create *)
-- : Int_interval.t = Int_interval.Interval (4, 3)
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 13))
 ```
 
 To make `Int_interval.t` abstract, we need to restrict the output of
 `Make_interval` with an interface.  Here's an explicit interface that
 we can use for that purpose.
 
-```ocaml
-# module type Interval_intf = sig
-   type t
-   type endpoint
-   val create : endpoint -> endpoint -> t
-   val is_empty : t -> bool
-   val contains : t -> endpoint -> bool
-   val intersect : t -> t -> t
-  end;;
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 14))
 ```
 
 This interface includes the type `endpoint` to give us a way of
@@ -336,18 +230,8 @@ definition of `Make_interval`.  Notice that we added the type
 `endpoint` to the implementation of the module to match
 `Interval_intf`.
 
-```ocaml
-# module Make_interval(Endpoint : Comparable) : Interval_intf
-  = struct
-
-    type endpoint = Endpoint.t
-    type t = | Interval of Endpoint.t * Endpoint.t
-             | Empty
-
-    ....
-
-  end ;;
-module Make_interval : functor (Endpoint : Comparable) -> Interval_intf
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 15))
 ```
 
 ### Sharing constraints
@@ -356,15 +240,8 @@ The resulting module is abstract, but it's unfortunately too abstract.
 In particular, we haven't exposed the type `endpoint`, which means
 that we can't even construct an interval anymore.
 
-```ocaml
-# module Int_interval = Make_interval(Int);;
-module Int_interval : Interval_intf
-# Int_interval.create 3 4;;
-Characters 20-21:
-  Int_interval.create 3 4;;
-                      ^
-Error: This expression has type int but an expression was expected of type
-         Int_interval.endpoint
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 16))
 ```
 
 To fix this, we need to expose the fact that `endpoint` is equal to
@@ -374,35 +251,24 @@ constraint_, which allows you to tell the compiler to expose the fact
 that a given type is equal to some other type.  The syntax for a
 simple sharing constraint is as follows.
 
-```ocaml
-S with type s = t
+```frag
+((typ ocamlsyntax)(name functors/sharing_constraint.syntax))
 ```
 
-where `S` is a module type, `s` is a type inside of `S`, and `t` is a
-type defined outside of `S`.  The result of this expression is a new
-signature that's been modified so that it exposes the fact that `s` is
-equal to `t`.  One can also apply multiple sharing constraints to the
-same signature.
+The result of this expression is a new signature that's been modified
+so that it exposes the fact that `<type>` defined inside of the module
+type is equal to `<type'>` whose definition is outside of it.  One can
+also apply multiple sharing constraints to the same signature.
 
-```ocaml
-S with type s = t and s' = t'
+```frag
+((typ ocamlsyntax)(name functors/multi_sharing_constraint.syntax))
 ```
 
 We can use a sharing constraint to create a specialized
 version of `Interval_intf` for integer intervals.
 
-```ocaml
-# module type Int_interval_intf =
-    Interval_intf with type endpoint = int;;
-module type Int_interval_intf =
-  sig
-    type t
-    type endpoint = int
-    val create : endpoint -> endpoint -> t
-    val is_empty : t -> bool
-    val contains : t -> endpoint -> bool
-    val intersect : t -> t -> t
-  end
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 17))
 ```
 
 We can also use sharing constraints in the context of a functor.  The
@@ -415,28 +281,8 @@ In this case, we'd like to expose an equality between the type
 module `Endpoint` that is the functor argument.  We can do this as
 follows.
 
-```ocaml
-# module Make_interval(Endpoint : Comparable)
-      : (Interval_intf with type endpoint = Endpoint.t)
-  = struct
-
-    type endpoint = Endpoint.t
-    type t = | Interval of Endpoint.t * Endpoint.t
-             | Empty
-
-    ...
-
-  end ;;
-module Make_interval :
-  functor (Endpoint : Comparable) ->
-    sig
-      type t
-      type endpoint = Endpoint.t
-      val create : endpoint -> endpoint -> t
-      val is_empty : t -> bool
-      val contains : t -> endpoint -> bool
-      val intersect : t -> t -> t
-    end
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 18))
 ```
 
 So now, the interface is as it was, except that `endpoint` is now
@@ -444,11 +290,8 @@ known to be equal to `Endpoint.t`.  As a result of that type equality,
 we can again do things that require that `endpoint` be exposed, like
 constructing intervals.
 
-```ocaml
-# let i = Int_interval.create 3 4;;
-val i : Int_interval.t = <abstr>
-# Int_interval.contains i 5;;
-- : bool = false
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 19))
 ```
 
 ### Destructive substitution
@@ -462,49 +305,22 @@ everywhere it shows up, and deleting the definition of `endpoint` from
 the signature.  We can do just this using what's called _destructive
 substitution_.  Here's the basic syntax.
 
-```ocaml
-S with type s := t
+```frag
+((typ ocamlsyntax)(name functors/destructive_sub.syntax))
 ```
 
 The following shows how we could use this with `Make_interval`.
 
-```ocaml
-# module type Int_interval_intf =
-    Interval_intf with type endpoint := int;;
-module type Int_interval_intf =
-  sig
-    type t
-    val create : int -> int -> t
-    val is_empty : t -> bool
-    val contains : t -> int -> bool
-    val intersect : t -> t -> t
-  end
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 20))
 ```
 
 There's now no `endpoint` type: all of its occurrences of have been
 replaced by `int`.  As with sharing constraints, we can also use this
 in the context of a functor.
 
-```ocaml
-# module Make_interval(Endpoint : Comparable)
-    : Interval_intf with type endpoint := Endpoint.t =
-  struct
-
-    type t = | Interval of Endpoint.t * Endpoint.t
-             | Empty
-
-    ....
-
-  end ;;
-module Make_interval :
-  functor (Endpoint : Comparable) ->
-    sig
-      type t
-      val create : Endpoint.t -> Endpoint.t -> t
-      val is_empty : t -> bool
-      val contains : t -> Endpoint.t -> bool
-      val intersect : t -> t -> t
-    end
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 21))
 ```
 
 The interface is precisely what we want: the type `t` is abstract, the
@@ -513,15 +329,8 @@ type of the endpoint is exposed, so we can create values of type
 the constructors and thereby violating the invariants of the module,
 as you can see below.
 
-```ocaml
-# module Int_interval = Make_interval(Int);;
-# Int_interval.create 3 4;;
-- : Int_interval.t = <abstr>
-# Int_interval.Interval (4,3);;
-Characters 0-27:
-  Int_interval.Interval (4,3);;
-  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Error: Unbound constructor Int_interval.Interval
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 22))
 ```
 
 In addition, the `endpoint` type is gone from the interface, meaning
@@ -544,9 +353,8 @@ parenthesized expression whose atoms are strings, and it is a
 serialization format that is used commonly in Core.  Here's an
 example.
 
-```ocaml
-# Sexp.of_string "(This is (an s-expression))";;
-- : Sexp.t = (This is (an s-expression))
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 23))
 ```
 
 Core comes with a syntax extension called `sexplib` which can
@@ -554,15 +362,8 @@ autogenerate s-expression conversion functions from a type
 declaration.  Attaching `with sexp` to a type definition signals to
 the extension to generate the converters.  Thus, we can write:
 
-```ocaml
-# type some_type = int * string list with sexp;;
-type some_type = int * string list
-val some_type_of_sexp : Sexp.t -> int * string list = <fun>
-val sexp_of_some_type : int * string list -> Sexp.t = <fun>
-# sexp_of_some_type (33, ["one"; "two"]);;
-- : Sexp.t = (33 (one two))
-# Sexp.of_string "(44 (five six))" |> some_type_of_sexp;;
-- : int * string list = (44, ["five"; "six"])
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 24))
 ```
 
 We'll discuss s-expressions and `sexplib` in more detail in
@@ -570,21 +371,8 @@ We'll discuss s-expressions and `sexplib` in more detail in
 what happens if we attach the `with sexp` declaration to the
 definition of `t` within the functor.
 
-```ocaml
-# module Make_interval(Endpoint : Comparable)
-    : (Interval_intf with type endpoint := Endpoint.t) = struct
-
-    type t = | Interval of Endpoint.t * Endpoint.t
-             | Empty
-    with sexp
-
-    ....
-
-  end ;;
-Characters 120-123:
-        type t = | Interval of Endpoint.t * Endpoint.t
-                               ^^^^^^^^^^
-Error: Unbound value Endpoint.t_of_sexp
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 25))
 ```
 
 The problem is that `with sexp` adds code for defining the
@@ -596,12 +384,8 @@ doesn't say anything about s-expressions.
 Happily, Core comes with a built in interface for just this purpose
 called `Sexpable`, which is defined as follows:
 
-```ocaml
-module type Sexpable = sig
-  type t = int
-  val sexp_of_t : t -> Sexp.t
-  val t_of_sexp : Sexp.t -> t
-end
+```frag
+((typ ocaml)(name functors/sexpable.ml))
 ```
 
 We can modify `Make_interval` to use the `Sexpable` interface, for
@@ -612,22 +396,8 @@ substitution on the `Sexpable` interface, to avoid having multiple
 distinct type `t`'s  clashing with each other.
 
 
-```ocaml
-# module type Interval_intf_with_sexp = sig
-   include Interval_intf
-   include Sexpable with type t := t
-  end;;
-module type Interval_intf_with_sexp =
-  sig
-    type t
-    type endpoint
-    val create : endpoint -> endpoint -> t
-    val is_empty : t -> bool
-    val contains : t -> endpoint -> bool
-    val intersect : t -> t -> t
-    val t_of_sexp : Sexp.t -> t
-    val sexp_of_t : t -> Sexp.t
-  end
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 26))
 ```
 
 Equivalently, we can define a type `t` within our new module, and
@@ -636,94 +406,22 @@ apply destructive substitutions to all of the included interfaces,
 when combining multiple interfaces, since it correctly reflects that
 all of the signatures are being handled equivalently.
 
-```ocaml
-# module type Interval_intf_with_sexp = sig
-   type t
-   include Interval_intf with type t := t
-   include Sexpable      with type t := t
-  end;;
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 27))
 ```
 
 Now we can write the functor itself.  We have been careful to override
 the sexp-converter here to ensure that the data structure's invariants
 are still maintained when reading in from an s-expression.
 
-```ocaml
-# module Make_interval(Endpoint : sig
-                         type t
-                         include Comparable with type t := t
-                         include Sexpable   with type t := t
-                       end)
-    : (Interval_intf_with_sexp with type endpoint := Endpoint.t)
-  = struct
-
-    type t = | Interval of Endpoint.t * Endpoint.t
-             | Empty
-    with sexp
-
-    (** [create low high] creates a new interval from [low] to
-        [high].  If [low > high], then the interval is empty *)
-    let create low high =
-      if Endpoint.compare low high > 0 then Empty
-      else Interval (low,high)
-
-    (* put a wrapper around the autogenerated [t_of_sexp] to enforce
-       the invariants of the data structure *)
-    let t_of_sexp sexp =
-      match t_of_sexp sexp with
-      | Empty -> Empty
-      | Interval (x,y) -> create x y
-
-    (** Returns true iff the interval is empty *)
-    let is_empty = function
-      | Empty -> true
-      | Interval _ -> false
-
-    (** [contains t x] returns true iff [x] is contained in the
-        interval [t] *)
-    let contains t x =
-      match t with
-      | Empty -> false
-      | Interval (l,h) ->
-        Endpoint.compare x l >= 0 && Endpoint.compare x h <= 0
-
-    (** [intersect t1 t2] returns the intersection of the two input
-        intervals *)
-    let intersect t1 t2 =
-      let min x y = if Endpoint.compare x y <= 0 then x else y in
-      let max x y = if Endpoint.compare x y >= 0 then x else y in
-      match t1,t2 with
-      | Empty, _ | _, Empty -> Empty
-      | Interval (l1,h1), Interval (l2,h2) ->
-        create (max l1 l2) (min h1 h2)
-  end;;
-module Make_interval :
-  functor
-    (Endpoint : sig
-                  type t
-                  val compare : t -> t -> int
-                  val t_of_sexp : Sexp.t -> t
-                  val sexp_of_t : t -> Sexp.t
-                end) ->
-    sig
-      type t
-      val create : Endpoint.t -> Endpoint.t -> t
-      val is_empty : t -> bool
-      val contains : t -> Endpoint.t -> bool
-      val intersect : t -> t -> t
-      val t_of_sexp : Sexp.t -> t
-      val sexp_of_t : t -> Sexp.t
-    end
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 28))
 ```
 
 And now, we can use that sexp-converter in the ordinary way:
 
-```ocaml
-# module Int_interval = Make_interval(Int) ;;
-# Int_interval.sexp_of_t (Int_interval.create 3 4);;
-- : Sexp.t = (Interval 3 4)
-# Int_interval.sexp_of_t (Int_interval.create 4 3);;
-- : Sexp.t = Empty
+```frag
+((typ ocamltop)(name functors/main.topscript)(part 29))
 ```
 
 ## Extending modules
@@ -737,22 +435,8 @@ modifying the queues that were passed in.
 
 Here's a reasonable `mli` for such a module.
 
-```ocaml
-(* file: fqueue.mli *)
-
-type 'a t
-
-val empty : 'a t
-
-(** [enqueue el q] adds [el] to the back of [q] *)
-val enqueue : 'a t -> 'a -> 'a t
-
-(** [dequeue q] returns None if the [q] is empty, otherwise returns
-    the first element of the queue and the remainder of the queue *)
-val dequeue : 'a t -> ('a * 'a t) option
-
-(** Folds over the queue, from front to back *)
-val fold : 'a t -> init:'acc -> f:('acc -> 'a -> 'acc) -> 'acc
+```frag
+((typ ocaml)(name functors/fqueue.mli))
 ```
 
 The `Fqueue.fold` function above requires some explanation.  It
@@ -771,28 +455,8 @@ list.  If you attempt to dequeue when the output list is empty, the
 input list is reversed and becomes the new output list.  Here's an
 implementation that uses that trick.
 
-```ocaml
-(* file: fqueue.ml *)
-open Core.Std
-
-type 'a t = 'a list * 'a list
-
-let empty = ([],[])
-
-let enqueue (in_list, out_list) x =
-  (x :: in_list,out_list)
-
-let dequeue (in_list, out_list) =
-  match out_list with
-  | hd :: tl -> Some (hd, (in_list, tl))
-  | [] ->
-    match List.rev in_list with
-    | [] -> None
-    | hd :: tl -> Some (hd, ([], tl))
-
-let fold (in_list, out_list) ~init ~f =
-  let after_out = List.fold ~init ~f out_list in
-  List.fold_right ~init:after_out ~f:(fun x acc -> f acc x) in_list
+```frag
+((typ ocaml)(name functors/fqueue.ml))
 ```
 
 One problem with `Fqueue` is that the interface is quite skeletal.
@@ -816,99 +480,22 @@ see, `Foldable` contains a module signature `S` which defines the
 signature that is required to support folding; and a functor `Extend`
 that allows one to extend any module that matches `Foldable.S`.
 
-```ocaml
-(* file: foldable.ml *)
-
-open Core.Std
-
-module type S = sig
-  type 'a t
-  val fold : 'a t -> init:'acc -> f:('acc -> 'a -> 'acc) -> 'acc
-end
-
-module type Extension = sig
-  type 'a t
-  val iter    : 'a t -> f:('a -> unit) -> unit
-  val length  : 'a t -> int
-  val count   : 'a t -> f:('a -> bool) -> int
-  val for_all : 'a t -> f:('a -> bool) -> bool
-  val exists  : 'a t -> f:('a -> bool) -> bool
-end
-
-(* For extending a Foldable module *)
-module Extend(Arg : S)
-  : (Extension with type 'a t := 'a Arg.t) =
-struct
-  open Arg
-
-  let iter t ~f =
-    fold t ~init:() ~f:(fun () a -> f a)
-
-  let length t =
-    fold t ~init:0  ~f:(fun acc _ -> acc + 1)
-
-  let count t ~f =
-    fold t ~init:0  ~f:(fun count x -> count + if f x then 1 else 0)
-
-  exception Short_circuit
-
-  let for_all c ~f =
-    try iter c ~f:(fun x -> if not (f x) then raise Short_circuit); true
-    with Short_circuit -> false
-
-  let exists c ~f =
-    try iter c ~f:(fun x -> if f x then raise Short_circuit); false
-    with Short_circuit -> true
-end
+```frag
+((typ ocaml)(name functors/foldable.ml))
 ```
 
 Now we can apply this to `Fqueue`.  We can rewrite the interface of
 `Fqueue` as follows.
 
-```ocaml
-(* file: fqueue.mli *)
-open Core.Std
-
-type 'a t
-val empty : 'a t
-val enqueue : 'a t -> 'a -> 'a t
-val dequeue : 'a t -> ('a * 'a t) option
-val fold : 'a t -> init:'acc -> f:('acc -> 'a -> 'acc) -> 'acc
-
-include Foldable.Extension with type 'a t := 'a t
+```frag
+((typ ocaml)(name functors/extended_fqueue.mli))
 ```
 
 In order to apply the functor, we'll put the definition of `Fqueue` in
 a sub-module called `T`, and then call `Foldable.Extend` on `T`.
 
-```ocaml
-(* file: fqueue.ml *)
-
-open Core.Std
-
-module T = struct
-  type 'a t = 'a list * 'a list
-
-  let empty = [],[]
-
-  let enqueue (in_list,out_list) x =
-    (x :: in_list,out_list)
-
-  let dequeue (in_list, out_list) =
-    match out_list with
-    | hd :: tl -> Some (hd, (in_list, tl))
-    | [] ->
-      match List.rev in_list with
-      | [] -> None
-      | hd :: tl -> Some (hd, ([], tl))
-
-  let fold (in_list,out_list) ~init ~f =
-    let after_out = List.fold ~init ~f out_list in
-    List.fold_right ~init:after_out ~f in_list
-end
-
-include T
-include Foldable.Extend(T)
+```frag
+((typ ocaml)(name functors/extended_fqueue.ml))
 ```
 
 Core comes with a number of functors for extending modules that follow
