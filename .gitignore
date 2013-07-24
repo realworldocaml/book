@@ -1,9 +1,14 @@
 *.a
+a.out
 .*.swp
 *.aux
 *.aux
 *.byte
-*.cm*
+*.cmo
+*.cmi
+*.cmx
+*.cmxa
+*.cma
 *.idx
 *.log
 *.native
@@ -29,3 +34,4 @@ book/*.html
 build/
 stylesheets/system-xsl
 _build
+final_out

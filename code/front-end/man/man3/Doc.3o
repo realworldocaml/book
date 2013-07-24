@@ -1,0 +1,60 @@
+.TH "Doc" 3 2013-07-23 OCamldoc ""
+.SH NAME
+Doc \- example.ml: The first special comment of the file is the comment associated with the whole module.
+.SH Module
+Module   Doc
+.SH Documentation
+.sp
+Module
+.BI "Doc"
+ : 
+.B sig  end
+
+.sp
+example\&.ml: The first special comment of the file is the comment 
+associated with the whole module\&.
+.sp
+
+.sp
+
+.sp
+.sp
+
+.I exception My_exception 
+.B of 
+.B (int -> int) * int
+
+.sp
+Comment for exception My_exception\&.
+.sp
+
+.sp
+.I type weather 
+=
+ | Rain
+.B of 
+.B int
+.I "  "
+(* The comment for construtor Rain *)
+ | Sun  (* The comment for constructor Sun *)
+ 
+.sp
+Comment for type 
+.B weather
+
+.sp
+
+.sp
+
+.I val what_is_the_weather_in 
+: 
+.B [< `California | `Cambridge | `New_york ] -> weather
+.sp
+Find the current weather for a country
+.sp
+.B "Author(s)"
+:
+Anil Madhavapeddy
+.sp
+
+.sp

@@ -28,8 +28,11 @@ dirs= json \
       error-handling \
       memory-repr \
       gc \
+      front-end \
+      back-end \
+      back-end-bench \
       functors \
-      fcm \
+      fcm 
 
 # html/md files directory
 OBJ=         _build
@@ -40,17 +43,22 @@ mli_src=      $(wildcard $(dirs:%=%/*.mli))
 json_src=     $(wildcard $(dirs:%=%/*.json))
 java_src=     $(wildcard $(dirs:%=%/*.java))
 c_src=        $(wildcard $(dirs:%=%/*.c))
+asm_src=      $(wildcard $(dirs:%=%/*.S))
+cmd_src=      $(wildcard $(dirs:%=%/*.cmd))
 cpp_src=      $(wildcard $(dirs:%=%/*.cpp))
 atd_src=      $(wildcard $(dirs:%=%/*.atd))
 scm_src=      $(wildcard $(dirs:%=%/*.scm))
 syn_src=      $(wildcard $(dirs:%=%/*.syntax))
+ascii_src=    $(wildcard $(dirs:%=%/*.ascii))
 scripts=      $(wildcard $(dirs:%=%/*.sh))
 rawscripts=   $(wildcard $(dirs:%=%/*.rawsh))
 errscripts=   $(wildcard $(dirs:%=%/*.errsh))
 topscripts=   $(wildcard $(dirs:%=%/*.topscript))
 rawtscripts=   $(wildcard $(dirs:%=%/*.rawscript))
 
-all_src=      $(ml_src) $(mli_src) $(json_src) $(java_src) $(c_src) $(cpp_src) $(atd_src) $(scm_src) $(syn_src)
+all_src=      $(ml_src) $(mli_src) $(json_src) $(java_src) $(c_src) \
+	      $(cmd_src) $(cpp_src) $(atd_src) $(scm_src) $(syn_src) \
+	      $(ascii_src) $(asm_src)
 all_scripts=  $(scripts:%.sh=%.out) $(errscripts:%.errsh=%.out) \
 	      $(topscripts) $(rawtscripts) $(rawscripts:%.rawsh=%.out)
 
@@ -92,13 +100,25 @@ $(OBJ)/%.syntax.0.html: %.syntax
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -pygments html $< || (cat $@ && rm -f $@)
 
+$(OBJ)/%.cmd.0.html: %.cmd
+	@mkdir -p $(@D)
+	$(highlight) -builddir $(OBJ) -pygments bash $< || (cat $@ && rm -f $@)
+
 $(OBJ)/%.atd.0.html: %.atd
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -cow $< || (cat $@ && rm -f $@)
 
+$(OBJ)/%.ascii.0.html: %.ascii
+	@mkdir -p $(@D)
+	$(highlight) -builddir $(OBJ) -raw "Ascii Art" $< || (cat $@ && rm -f $@)
+
 $(OBJ)/%.java.0.html: %.java
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -pygments java $< || (cat $@ && rm -f $@)
+
+$(OBJ)/%.S.0.html: %.S
+	@mkdir -p $(@D)
+	$(highlight) -builddir $(OBJ) -pygments gas $< || (cat $@ && rm -f $@)
 
 $(OBJ)/%.c.0.html: %.c
 	@mkdir -p $(@D)

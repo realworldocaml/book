@@ -226,11 +226,16 @@ let parse_file file =
               eprintf "X: %s\n%!" phrase;
               match toploop_eval phrase with
               | `Normal(s, stdout, stderr) ->
-                print_part !part (sprintf "# %s \n%s" phrase s);
+                print_part !part (sprintf "# %s \n%s%s%s"
+                  phrase
+                  (if stdout = "" then "" else "\n"^stdout)
+                  (if stderr = "" then "" else "\n"^stderr)
+                  s
+                );
                 print_html_part !part (Cow.Html.to_string (Cow.Code.ocaml_fragment ("# " ^ phrase)));
                 let sout = if stdout = "" then <:html<&>> else <:html<<br />$str:stdout$>> in
                 let serr = if stderr = "" then <:html<&>> else <:html<<br />$str:stderr$>> in
-                if s <> "" then print_html_part !part (Cow.Html.to_string <:html<<div class="rwocodeout">$str:s$$sout$$serr$</div>&>>);
+                if s <> "" then print_html_part !part (Cow.Html.to_string <:html<<div class="rwocodeout">$sout$$serr$$str:s$</div>&>>);
                 []
               | `Error s ->
                 print_part !part (sprintf "# %s \n%s" phrase s);

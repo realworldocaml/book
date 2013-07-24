@@ -1,0 +1,3 @@
+$ ocamlfind ocamlc -c type_conv_example.ml
+File "type_conv_example.ml", line 6, characters 2-6:
+Error: Syntax error

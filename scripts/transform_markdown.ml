@@ -22,6 +22,14 @@ let output_t_as_markdown s =
        | 0 -> printf "# script %s\n$ utop\n" t.name
        | part -> printf "...part %d of %s\n" part t.name);
     printf "%s\n```\n" buf
+  | `Ascii -> 
+    printf "```\n%s\n```\n" buf
+  | `Bash ->
+    printf "```bash\n#!/bin/sh\n# %s\n" t.name;
+    printf "%s\n```\n" buf
+  | `Gas ->
+    printf "```\n";
+    printf "%s\n```\n" buf
   | `OCaml_syntax ->
     printf "```html\n";
     printf "%s\n```\n" buf

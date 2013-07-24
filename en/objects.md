@@ -346,13 +346,13 @@ If we wanted to write a function that took a list of such stacks and found the
 total area of their shapes, we might try:
 
 ```frag
-((typ ocamltop)(name objects/subtyping.topscript)(part 11))
+((typ ocamltop)(name objects/subtyping.topscript)(part 12))
 ```
 
 However, when we try to apply this function to our objects we get an error:
 
 ```frag
-((typ ocamltop)(name objects/subtyping.topscript)(part 12))
+((typ ocamltop)(name objects/subtyping.topscript)(part 13))
 ```
 
 As you can see, `square stack` and `circle stack` are not subtypes of `shape
@@ -372,7 +372,7 @@ define a type `readonly_stack` and confirm that we can coerce the list of
 stacks to it.
 
 ```frag
-((typ ocamltop)(name objects/subtyping.topscript)(part 13))
+((typ ocamltop)(name objects/subtyping.topscript)(part 14))
 ```
 
 Aspects of this section may seem fairly complicated, but it should be pointed

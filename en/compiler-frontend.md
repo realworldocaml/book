@@ -45,35 +45,8 @@ can be reused by other applications.
 
 The overall compilation pipeline looks like this:
 
-```
-    Source code
-        |
-        | parsing and preprocessing
-        |
-        | camlp4 syntax extensions
-        |
-        v
-    Parsetree (untyped AST)
-        |
-        | type inference and checking
-        v
-    Typedtree (type-annotated AST)
-        |
-        | pattern-matching compilation
-        | elimination of modules and classes
-        v
-     Lambda
-      /   \
-     /     \ closure conversion, inlining, uncurrying,
-    v       \  data representation strategy
- Bytecode    \
-    |         +-----+
-    |              Cmm
-    |ocamlrun       |
-    |               | code generation
-    |               | assembly & linking
-    v               v
- Interpreted    Compiled
+```frag
+((typ ascii)(name front-end/pipeline.ascii))
 ```
 
 Notice that the pipeline branches towards the end. OCaml has multiple compiler
@@ -140,29 +113,21 @@ as close to the error as possible.
 Here's an example syntax error that we obtain by performing a module assignment
 as a statement instead of as a let-binding.
 
-```ocaml
-(* broken_module.ml *)
-let () =
-  module MyString = String;
-  ()
+```frag
+((typ ocaml)(name front-end/broken_module.ml))
 ```
 
 The above code results in a syntax error when compiled.
 
-```console
-$ ocamlc -c broken_module.ml 
-File "broken_module.ml", line 3, characters 2-8:
-Error: Syntax error
+```frag
+((typ console)(name front-end/build_broken_module.out))
 ```
 
 The correct version of this source code creates the `MyString` module correctly
 via a local open, and compiles successfully.
 
-```ocaml
-(* fixed_module.ml *)
-let () =
-  let module MyString = String in
-  ()
+```frag
+((typ ocaml)(name front-end/fixed_module.ml))
 ```
 
 The syntax error points to the line and character number of the first token
@@ -176,30 +141,14 @@ Sadly, syntax errors do get more inaccurate sometimes depending on the nature
 of your mistake.  Try to spot the deliberate error in the following function
 definitions.
 
-```ocaml
-(* follow_on_function.ml *)
-let concat_and_print x y =
-  let v = x ^ y in
-  print_endline v;
-  v;
-
-let add_and_print x y =
-  let v = x + y in
-  print_endline (string_of_int v);
-  v
-
-let () =
-  let _x = add_and_print 1 2 in
-  let _y = concat_and_print "a" "b" in
-  ()
+```frag
+((typ ocaml)(name front-end/follow_on_function.ml))
 ```
 
-When you compile this file you'll get a syntax error.
+When you compile this file you'll get a syntax error again.
 
-```console
-$ ocamlc -c follow_on_function.ml
-File "follow_on_function.ml", line 12, characters 0-3:
-Error: Syntax error
+```frag
+((typ console)(name front-end/build_follow_on_function.out))
 ```
 
 The line number in the error points to the end of the `add_and_print` function,
@@ -216,24 +165,8 @@ makes this syntax error much easier to locate.
 
 Let's run our erroneous file through `ocp-indent` and see how it processes it.
 
-```console
-$ opam install ocp-indent
-$ ocp-indent follow_on_function.ml
-(* follow_on_function.ml *)
-let concat_and_print x y =
-  let v = x ^ y in
-  print_endline v;
-  v;
-
-  let add_and_print x y =
-    let v = x + y in
-    print_endline (string_of_int v);
-    v
-
-let () =
-  let _x = add_and_print 1 2 in
-  let _y = concat_and_print "a" "b" in
-  ()
+```frag
+((typ console)(name front-end/indent_follow_on_function.out))
 ```
 
 The `add_and_print` definition has been indented as if it were part of the
@@ -241,27 +174,8 @@ first `concat_and_print` definition, and the errant semicolon is now much
 easier to spot.  We just need to remove that semicolon and re-run `ocp-indent`
 to verify that the syntax is correct.
 
-```console
-$ ocp-indent follow_on_function_fixed.ml 
-(* follow_on_function_fixed.ml *)
-let concat_and_print x y =
-  let v = x ^ y in
-  print_endline v;
-  v
-
-let add_and_print x y =
-  let v = x + y in
-  print_endline (string_of_int v);
-  v
-
-let () =
-  let _x = add_and_print 1 2 in
-  let _y = concat_and_print "a" "b" in
-  ()
-
-$ ocamlc -i follow_on_function_fixed.ml 
-val concat_and_print : string -> string -> string
-val add_and_print : int -> int -> int
+```frag
+((typ console)(name front-end/indent_follow_on_function_fixed.out))
 ```
 
 The `ocp-indent` [homepage](https://github.com/OCamlPro/ocp-indent) documents
@@ -285,27 +199,8 @@ pages and even module dependency graphs that can be viewed using
 Here's a sample of some source code that's been annotated with OCamldoc
 comments.
 
-```ocaml
-(** example.ml: The first special comment of the file is the comment 
-    associated with the whole module. *)
-
-(** Comment for exception My_exception. *)
-exception My_exception of (int -> int) * int
-
-(** Comment for type [weather]  *)
-type weather =
-| Rain of int (** The comment for construtor Rain *)
-| Sun         (** The comment for constructor Sun *)
-
-(** Find the current weather for a country
-   @author Anil Madhavapeddy
-   @param location The country to get the weather for.
-*)
-let what_is_the_weather_in location =
-  match location with
-  | `Cambridge  -> Rain 100
-  | `New_york   -> Rain 20
-  | `California -> Sun
+```frag
+((typ ocaml)(name front-end/doc.ml)(header false))
 ```
 
 The OCamldoc comments are distinguished by beginning with the double
@@ -316,11 +211,8 @@ specific properties such as the author of that section of code.
 Try compiling the HTML documentation and UNIX man pages by running `ocamldoc`
 over the source file.
 
-```console
-$ mkdir -p html man/man3
-$ ocamldoc -html -d html example.ml
-$ ocamldoc -man -d man/man3 example.ml
-$ man -M man Example
+```frag
+((typ console)(name front-end/build_ocamldoc.out))
 ```
 
 You should now have HTML files inside the `html/` directory and also be able to
@@ -372,32 +264,23 @@ These libraries all extend the language in quite a minimal way by adding a
 generated from that declaration.  For example, here's a trivial use of Sexplib
 and Fieldslib.
 
-```ocaml
-(* type_conv_example.ml *)
-open Sexplib.Std
-
-type t = {
-  foo: int;
-  bar: string
-} with sexp, fields
+```frag
+((typ ocaml)(name front-end/type_conv_example.ml))
 ```
 
 Compiling this code will normally give you a syntax error if you do so without
 Camlp4 since the `with` keyword isn't normally allowed after a type
 definition.
 
-```console
-$ ocamlfind ocamlc -c type_conv_example.ml
-File "type_conv_example.ml", line 7, characters 2-6:
-Error: Syntax error
+```frag
+((typ console)(name front-end/build_type_conv_without_camlp4.out))
 ```
 
 Now add in the syntax extension packages for `fieldslib` and `sexplib`, and
 everything will compile again.
 
-```console
-$ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \
-  -package fieldslib.syntax type_conv_example.ml
+```frag
+((typ console)(name front-end/build_type_conv_with_camlp4.out))
 ```
 
 We've specified a couple of additional flags here.  The `-syntax` flag directs
@@ -412,11 +295,11 @@ code into conventional OCaml code that has no trace of the new keywords.  The
 compiler then compiles this transformed code with no knowledge of the
 preprocessor's actions.
 
-Both Fieldslib and Sexplib need this new `with` keyword, but they both
-can't register the same extension. Instead, a library called Type_conv
-provides the common extension framework for them to use.  Type_conv registers
-the `with` grammar extension to Camlp4, and the OCamlfind packaging ensures
-that it's loaded before Variantslib or Sexplib.
+Both Fieldslib and Sexplib need this new `with` keyword, but they both can't
+register the same extension. Instead, a library called Type_conv provides the
+common extension framework for them to use.  Type_conv registers the `with`
+grammar extension to Camlp4, and the OCamlfind packaging ensures that it's
+loaded before Variantslib or Sexplib.
 
 The two extensions generate boilerplate OCaml code based on the type definition
 at compilation time. This avoids the performance hit of doing the code
@@ -438,19 +321,18 @@ The `utop` top-level can run the phrases that you type through `camlp4`
 automatically. You should have at least these lines in your `~/.ocamlinit` file
 in your home directory (see [xref](#installation) for more information).
 
-```
-#use "topfind"
-#camlp4o
+```frag
+((typ ocamltop)(name front-end/camlp4_toplevel.topscript)(part 0))
 ```
 
 The first directive loads the `ocamlfind` top-level interface that lets you
 require `ocamlfind` packages (including all their dependent packages).  The
-second directive instructs the top-level to filter all phrases via Camlp4.
-You can now run `utop` and load the syntax extensions in.  We'll use the
+second directive instructs the top-level to filter all phrases via Camlp4.  You
+can now run `utop` and load the syntax extensions in.  We'll use the
 `comparelib` syntax extension for our experiments.
 
-OCaml provides a built-in polymorphic comparison operator that inspects the runtime
-representation of two values to see if they're equal.  As we noted in
+OCaml provides a built-in polymorphic comparison operator that inspects the
+runtime representation of two values to see if they're equal.  As we noted in
 [xref](#maps-and-hash-tables), the polymorphic comparison is less efficient
 than defining explicit comparison functions between values. However, it quickly
 become tedious to manually define comparison functions for complex type
@@ -458,16 +340,8 @@ definitions.
 
 Let's see how `comparelib` solves this problem by running it in `utop`.
 
-```ocaml
-# #require "comparelib.syntax" ;;
-
-# type t = { foo: string; bar : t } ;;
-type t = { foo : string; bar : t; }
-
-# type t = { foo: string; bar: t } with compare ;;
-type t = { foo : string; bar : t; }
-val compare : t -> t -> int = <fun>
-val compare_t : t -> t -> int = <fun>
+```frag
+((typ ocamltop)(name front-end/camlp4_toplevel.topscript)(part 1))
 ```
 
 The first definition of `t` is a standard OCaml phrase and results in the
@@ -484,55 +358,25 @@ automated part of its operation.
 
 Let's turn to the command-line to obtain the result of the `comparelib`
 transformation instead.  Create a file that contains the type declaration from
-earlier:
+earlier.
 
-```ocaml
-(* comparelib_test.ml *)
-type t = { 
-  foo: string; 
-  bar: t
-} with compare
+```frag
+((typ ocaml)(name front-end/comparelib_test.ml))
 ```
 
 We need to run the Camlp4 binary with the library paths to Comparelib and
 Type_conv.  Let's use a small shell script to wrap this invocation.
 
-```bash
-#!/bin/sh
-# camlp4_dump
-
-OCAMLFIND="ocamlfind query -predicates syntax,preprocessor -r"
-INCLUDE=`$OCAMLFIND -i-format comparelib.syntax`
-ARCHIVES=`$OCAMLFIND -a-format comparelib.syntax`
-camlp4o -printer o $INCLUDE $ARCHIVES $1
+```frag
+((typ sh)(name front-end/camlp4_dump.cmd))
 ```
 
 The script uses the `ocamlfind` package manager to list the include and library
 paths needed by `comparelib`.  It then invokes the `camlp4o` preprocessor with
 these paths and outputs the resulting AST to the standard output.
 
-```console
-$ sh camlp4_dump comparelib_test.ml
-type t = { foo : string; bar : t }
-
-let _ = fun (_ : t) -> ()
-  
-let rec compare : t -> t -> int =
-  fun a__001_ b__002_ ->
-    if Pervasives.( == ) a__001_ b__002_
-    then 0
-    else
-      (let ret =
-         (Pervasives.compare : string -> string -> int) a__001_.foo
-           b__002_.foo
-       in
-         if Pervasives.( <> ) ret 0
-         then ret
-         else compare a__001_.bar b__002_.bar)
-  
-let _ = compare
-let compare_t = compare
-let _ = compare_t
+```frag
+((typ console)(name front-end/process_comparelib_test.out))
 ```
 
 The output contains the original type definition accompanied by some
@@ -554,16 +398,14 @@ avoided in code that you write by hand.  If it's a unit-returning expression,
 then write a `unit` binding explicitly instead.  This will cause a type error
 if the expression changes type in the future (_e.g._ due to code refactoring).
 
-```ocaml
-let () = <expr>
+```frag
+((typ ocamlsyntax)(name front-end/let_unit.syntax))
 ```
 
 If the expression has a different type, then write it explicitly.
 
-```ocaml
-let (_:some_type) = <expr>
-let () = ignore (<expr> : some_type)
-let () = don't_wait_for (<expr>)  (* if the expression returns a unit Deferred.t *)
+```frag
+((typ ocaml)(name front-end/let_notunit.ml))
 ```
 
 The last one is used to ignore Async expressions that should run in the background
@@ -575,10 +417,8 @@ right away.  This would normally generate an "unused value" compiler warning.
 These warnings are suppressed for any variable name that's prepended with an
 underscore.
 
-```ocaml
-let fn x y =
-  let _z = x + y in
-  ()
+```frag
+((typ ocaml)(name front-end/unused_var.ml))
 ```
 
 Although you don't use `_z` in your code, this will never generate an unused
@@ -589,14 +429,18 @@ variable warning.
 ### Preprocessing module signatures
 
 Another useful feature of `type_conv` is that it can generate module signatures
-too.  Copy the earlier type definition into a `comparelib_test.mli` and rerun
-the Camlp4 dumper script.
+too.  Copy the earlier type definition into a `comparelib_test.mli` that's
+got exactly the same content.
 
-```console
-$ sh camlp4_dump comparelib_test.mli 
-type t = { foo : string; bar : t }
+```frag
+((typ ocaml)(name front-end/comparelib_test.mli))
+```
 
-val compare : t -> t -> int
+If you rerun the Camlp4 dumper script now, you'll see that different code is
+produced for signature files.
+
+```frag
+((typ console)(name front-end/process_comparelib_interface.out))
 ```
 
 The external signature generated by `comparelib` is much simpler than the
@@ -676,20 +520,16 @@ top-level.  It's also possible to generate type signatures for an entire file
 by asking the compiler to do the work for you. Create a file with a single type
 definition and value.
 
-```ocaml
-(* typedef.ml *)
-type t = Foo | Bar
-let v = Foo
+```frag
+((typ ocaml)(name front-end/typedef.ml))
 ```
 
 Now run the compiler with the `-i` flag to infer the type signature for that
 file.  This runs the type checker but doesn't compile the code any further
 after displaying the interface to the standard output.
 
-```console
-$ ocamlc -i typedef.ml
-type t = Foo | Bar
-val v : t
+```frag
+((typ console)(name front-end/infer_typedef.out))
 ```
 
 The output is the default signature for the module which represents the input
@@ -705,18 +545,8 @@ present.
 The compiler makes sure that your `ml` and `mli` files have compatible
 signatures. The type checker throws an immediate error if this isn't the case. 
 
-```console
-$ echo type t = Foo > test.ml
-$ echo type t = Bar > test.mli
-$ ocamlc -c test.mli test.ml
-File "test.ml", line 1:
-Error: The implementation test.ml does not match the interface test.cmi:
-       Type declarations do not match:
-         type t = Foo
-       is not included in
-         type t = Bar
-       File "test.ml", line 1, characters 5-12: Actual declaration
-       Their first fields have different names, Foo and Bar.
+```frag
+((typ console)(name front-end/conflicting_interfaces.out))
 ```
 
 <note>
@@ -789,46 +619,15 @@ than if you are using more explicitly typed variants or classes.
 For instance, consider this broken example that expresses some simple 
 algebraic operations over integers.
 
-```ocaml
-(* broken_poly.ml *)
-
-let rec algebra =
-  function
-  | `Add (x,y) -> (algebra x) + (algebra y)
-  | `Sub (x,y) -> (algebra x) - (algebra y)
-  | `Mul (x,y) -> (algebra x) * (algebra y)
-  | `Num x     -> x
-
-let _ =
-  algebra (
-    `Add (
-      (`Num 0),
-      (`Sub (
-          (`Num 1),
-          (`Mul (
-              (`Nu 3),(`Num 2)
-            ))
-        ))
-    ))
+```frag
+((typ ocaml)(name front-end/broken_poly.ml))
 ```
 
 There's a single character typo in the code so that it uses `Nu` instead of
 `Num`.  The resulting type error is impressive.
 
-```console
-$ ocamlc -c broken_poly.ml 
-File "broken_poly.ml", line 11, characters 10-154:
-Error: This expression has type
-         [> `Add of
-              ([< `Add of 'a * 'a
-                | `Mul of 'a * 'a
-                | `Num of int
-                | `Sub of 'a * 'a
-                > `Num ]
-               as 'a) *
-              [> `Sub of 'a * [> `Mul of [> `Nu of int ] * [> `Num of int ] ] ] ]
-       but an expression was expected of type 'a
-       The second variant type does not allow tag(s) `Nu
+```frag
+((typ console)(name front-end/build_broken_poly.out))
 ```
 
 The type error is perfectly accurate, but rather verbose and with a line number
@@ -844,46 +643,16 @@ up, outputs the difference as best it can.
 Let's see what happens with an explicit type annotation to help the compiler
 out.
 
-```ocaml
-(* broken_poly_with_annot.ml *)
-
-type t = [
-  | `Add of t * t
-  | `Sub of t * t
-  | `Mul of t * t
-  | `Num of int
-]
-
-let rec algebra (x:t) =
-  match x with
-  | `Add (x,y) -> (algebra x) + (algebra y)
-  | `Sub (x,y) -> (algebra x) - (algebra y)
-  | `Mul (x,y) -> (algebra x) * (algebra y)
-  | `Num x     -> x
-
-let _ =
-  algebra (
-    `Add (
-      (`Num 0),
-      (`Sub (
-          (`Num 1),
-          (`Mul (
-              (`Nu 3),(`Num 2)
-            ))
-        ))
-    ))
+```frag
+((typ ocaml)(name front-end/broken_poly_with_annot.ml))
 ```
 
 This code contains exactly the same error as before, but we've added a closed
 type definition of the polymorphic variants, and a type annotation to the
 `algebra` definition.  The compiler error we get is much more useful now.
 
-```console
-$ ocamlc -i broken_poly_with_annot.ml 
-File "broken_poly_with_annot.ml", line 24, characters 14-21:
-Error: This expression has type [> `Nu of int ]
-       but an expression was expected of type t
-       The second variant type does not allow tag(s) `Nu
+```frag
+((typ console)(name front-end/build_broken_poly_with_annot.out))
 ```
 
 This error points directly to the correct line number that contains the typo.
@@ -909,25 +678,14 @@ The principality check only affects a few language features:
 
 Here's an example of principality warnings when used with record disambiguation.
 
-```ocaml
-(* non_principal.ml *)
-type s = { foo: int; bar: unit }
-type t = { foo: int }
-
-let f x =
-  x.bar;
-  x.foo
+```frag
+((typ ocaml)(name front-end/non_principal.ml))
 ```
 
 Inferring the signature with `-principal` will show you a new warning.
 
-```console
-$ ocamlc -i -principal non_principal.ml 
-File "non_principal.ml", line 7, characters 4-7:
-Warning 18: this type-based field disambiguation is not principal.
-type s = { foo : int; bar : unit; }
-type t = { foo : int; }
-val f : s -> int
+```frag
+((typ console)(name front-end/build_non_principal.out))
 ```
 
 This example isn't principal since the inferred type for `x.foo` is guided by
@@ -939,25 +697,16 @@ removed from the definition of `f`, its argument would be of type `t` and not
 You can fix this either by permuting the order of the type declarations, or by
 adding an explicit type annotation.
 
-```ocaml
-(* principal.ml *)
-type s = { foo: int; bar: unit }
-type t = { foo: int }
-
-let f (x:s) =
-  x.bar;
-  x.foo
+```frag
+((typ ocaml)(name front-end/principal.ml))
 ```
 
 There is now no ambiguity about the inferred types, since we've explicitly
 given the argument a type and the order of inference of the sub-expressions no
 longer matters.
 
-```console
-$ ocamlc -i -principal principal.ml 
-type s = { foo : int; bar : unit; }
-type t = { foo : int; }
-val f : s -> int
+```frag
+((typ console)(name front-end/build_principal.out))
 ```
 
 Ideally, all code should systematically use `-principal`.  It reduces variance
@@ -1001,27 +750,21 @@ modules can be explained directly in terms of the module system.
 
 Create a file called `alice.ml` with the following contents.
 
-```ocaml
-(* alice.ml *)
-let friends = [ Bob.name ]
+```frag
+((typ ocaml)(name front-end/alice.ml))
 ```
 
 and a corresponding signature file.
 
-```ocaml
-(* alice.mli *)
-val friends : Bob.t list
+```frag
+((typ ocaml)(name front-end/alice.mli))
 ```
 
 These two files are exactly analogous to including the following code directly
 in another module that references `Alice`.
 
-```ocaml
-module Alice : sig
-  val friends : Bob.t list
-end = struct
-  let friends = [ Bob.name ]
-end
+```frag
+((typ ocaml)(name front-end/alice_combined.ml))
 ```
 
 #### Defining a module search path
@@ -1066,14 +809,8 @@ corruption and crashes.
 OCaml guards against this by recording a CRC checksum in every `cmi`.  Let's
 examine our earlier `typedef.ml` more closely.
 
-```console
-$ ocamlc -c typedef.ml
-$ ocamlobjinfo typedef.cmi
-File typedef.cmi
-Unit name: Typedef
-Interfaces imported:
-	559f8708a08ddf66822f08be4e9c3372	Typedef
-	65014ccc4d9329a2666360e6af2d7352	Pervasives
+```frag
+((typ console)(name front-end/typedef_objinfo.out))
 ```
 
 `ocamlobjinfo` examines the compiled interface and displays what other
@@ -1090,11 +827,8 @@ means that a compilation unit with the same module name may have conflicting
 type signatures in different modules.  The compiler will reject such programs
 with an error similar to this:
 
-```console
-File "foo.ml", line 1, characters 0-1:
-Error: The files /home/build/bar.cmi
-       and /usr/lib/ocaml/map.cmi make inconsistent assumptions
-       over interface Map
+```frag
+((typ console)(name front-end/inconsistent_compilation_units.out))
 ```
 
 This hash check is very conservative, but ensures that separate compilation
@@ -1114,21 +848,15 @@ the replacement modules and functions.
 There's one downside to this approach: type errors suddenly get much more
 verbose.  We can see this if you run the vanilla OCaml top-level (not `utop`).
 
-```console
-$ ocaml
-# List.map print_endline "" ;;
-Error: This expression has type string but an expression was expected of type
-         string list
+```frag
+((typ console)(name front-end/short_paths_1.out))
 ```
 
 This type error without `Core.Std` has a straightforward type error.  When
 we switch to Core, though, it gets more verbose.
 
-```console
-# open Core.Std ;;
-# List.map ~f:print_endline "" ;;
-Error: This expression has type string but an expression was expected of type
-         'a Core.Std.List.t = 'a list
+```frag
+((typ console)(name front-end/short_paths_2.out))
 ```
 
 The default `List` module in OCaml is overridden by `Core.Std.List`.  The
@@ -1140,12 +868,8 @@ causes the compiler to search all the type aliases for the shortest module
 path, and use that as the preferred output type.  The option is activated
 by passing `-short-paths` to the compiler, and works on the top-level too.
 
-```console
-$ ocaml -short-paths
-# open Core.Std;;
-# List.map ~f:print_endline "foo";;
-Error: This expression has type string but an expression was expected of type
-         'a list
+```frag
+((typ console)(name front-end/short_paths_3.out))
 ```
 
 The `utop` enhanced top-level activates short paths by default, which is why
@@ -1177,9 +901,8 @@ code at a specific location to the inferred or external types.
 One such command-line tool to display auto-completion information in your
 editor is `ocp-index`.  Install it via OPAM as follows.
 
-```console
-$ opam install ocp-index
-$ ocp-index
+```frag
+((typ console)(name front-end/install_ocp_index.out))
 ```
 
 Let's refer back to our Ncurses binding example from the beginning of
@@ -1230,46 +953,14 @@ output across compiler revisions, but they are a useful learning tool.
 
 We'll use our toy `typedef.ml` again.
 
-```ocaml
-(* typedef.ml *)
-type t = Foo | Bar
-let v = Foo
+```frag
+((typ ocaml)(name front-end/typedef.ml))
 ```
 
 Let's first look at the untyped syntax tree that's generated from the parsing phase.
 
-```console
-$ ocamlc -dparsetree typedef.ml
-[
-  structure_item (typedef.ml[1,0+0]..[1,0+18])
-    Pstr_type [
-      "t" (typedef.ml[1,0+5]..[1,0+6])
-        type_declaration (typedef.ml[1,0+5]..[1,0+18])
-          ptype_params = []
-          ptype_cstrs = []
-          ptype_kind =
-            Ptype_variant
-              [
-                (typedef.ml[1,0+9]..[1,0+12])
-                  "Foo" (typedef.ml[1,0+9]..[1,0+12])
-                  [] None
-                (typedef.ml[1,0+15]..[1,0+18])
-                  "Bar" (typedef.ml[1,0+15]..[1,0+18])
-                  [] None
-              ]
-          ptype_private = Public
-          ptype_manifest = None
-    ]
-  structure_item (typedef.ml[2,19+0]..[2,19+11])
-    Pstr_value Nonrec [
-      <def>
-        pattern (typedef.ml[2,19+4]..[2,19+5])
-          Ppat_var "v" (typedef.ml[2,19+4]..[2,19+5])
-        expression (typedef.ml[2,19+8]..[2,19+11])
-          Pexp_construct "Foo" (typedef.ml[2,19+8]..[2,19+11])
-          None false
-    ]
-]
+```frag
+((typ console)(name front-end/parsetree_typedef.out))
 ```
 
 This is rather a lot of output for a simple two-line program, but it shows just
@@ -1282,33 +973,8 @@ been type checked yet, and so the raw tokens are all included.
 The typed AST that is normally output as a compiled `cmt` file can be displayed
 in a more developer-readable form via the `-dtypedtree` option.
 
-```console
-$ ocamlc -dtypedtree typedef.ml
-[
-  structure_item (typedef.ml[1,0+0]..typedef.ml[1,0+18])
-    Pstr_type [
-      t/1008
-        type_declaration (typedef.ml[1,0+5]..typedef.ml[1,0+18])
-          ptype_params = []
-          ptype_cstrs = []
-          ptype_kind =
-            Ptype_variant
-              [
-                "Foo/1009" []
-                "Bar/1010" []
-              ]
-          ptype_private = Public
-          ptype_manifest = None
-    ]
-  structure_item (typedef.ml[2,19+0]..typedef.ml[2,19+11])
-    Pstr_value Nonrec [
-      <def>
-        pattern (typedef.ml[2,19+4]..typedef.ml[2,19+5])
-          Ppat_var "v/1011"
-        expression (typedef.ml[2,19+8]..typedef.ml[2,19+11])
-          Pexp_construct "Foo" [] false
-    ]
-]
+```frag
+((typ console)(name front-end/typedtree_typedef.out))
 ```
 
 The typed AST is more explicit than the untyped syntax tree.  For instance, the

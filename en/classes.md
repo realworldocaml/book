@@ -115,79 +115,57 @@ Let's demonstrate the technique using object types.
 First, we'll define an object type `iterator` that specifies the
 methods in an iterator.
 
-```ocaml
-type 'a iterator = < get : 'a; has_value : bool; next : unit >;;
+```frag
+((typ ocamltop)(name classes/iter.topscript)(part 0))
 ```
 
 Next, we'll define an actual iterator for lists.  We can use this to
 iterate over the contents of our stack.
 
-```ocaml
-class ['a] list_iterator init =
-object
-  val mutable current : 'a list = init
-
-  method has_value = init <> []
-
-  method get =
-     match current with
-        hd :: tl -> hd
-      | [] -> raise (Invalid_argument "no value")
-
-  method next =
-     match current with
-        hd :: tl -> current <- tl
-      | [] -> raise (Invalid_argument "no value")
-end;;
+```frag
+((typ ocamltop)(name classes/iter.topscript)(part 1))
 ```
 
 Finally, we add a method `iterator` to the `stack` class to produce an
 iterator.  To do so, we construct a `list_iterator` that refers to
 the current contents of the stack.
 
-```ocaml
-method iterator : 'a iterator = new list_iterator v
+```frag
+((typ ocamltop)(name classes/iter.topscript)(part 2))
 ```
 
-```ocaml
-# let s = new stack [];;
-# s#push 5;;
-# s#push 4;;
-# let it = s#iterator;;
-# it#get;;
-- : int = 4
-# it#next;;
-- : unit = ()
-# it#get;;
-- : int = 5
-# it#next;;
-- : unit = ()
-# it#has_value;;
-- : bool = false
+Now we can build a new stack, push some values to it, and
+iterate over them.
+
+```frag
+((typ ocamltop)(name classes/iter.topscript)(part 3))
 ```
 
-In practise, most OCaml programmers avoid iterator objects in favor
-of functional-style techniques. For example, `iter f` takes a
-function `f` and applies it to each of the elements on the stack.
+### Functional iterators
 
-```ocaml
-method iter f = List.iter ~f v
+In practise, most OCaml programmers avoid iterator objects in favor of
+functional-style techniques. For example, the alternative stack class below
+takes a function `f` and applies it to each of the elements on the stack.
+
+```frag
+((typ ocamltop)(name classes/iter.topscript)(part 4))
 ```
 
-What about functional operations like map and fold?  In general,
+What about functional operations like `map` and `fold`?  In general,
 these methods take a function that produces a value of some other
-type than the elements of the set.  For example, a `fold` method for
-our `['a] stack` class should have type `('b -> 'a -> 'b) -> 'b ->
-'b`, where the method type is polymorphic over `'b`. To express this
-we must use a type quantifier, as shown in the following example.
-Polymorphic method types must be specified directly after the method
-name, which means that method parameters must be expressed using a
-`fun` or `function` expression.
+type than the elements of the set.
 
-```ocaml
-method fold : 'b. ('b -> 'a -> 'b) -> 'b -> 'b =
-  (fun f x -> List.fold ~f ~init v)
+For example, a `fold` method for our `['a] stack` class should have type `('b
+-> 'a -> 'b) -> 'b -> 'b`, where the method type is polymorphic over `'b`. To
+express this we must use a type quantifier, as shown in the following example.
+
+```frag
+((typ ocamltop)(name classes/iter.topscript)(part 5))
 ```
+
+Polymorphic method types must be specified directly _after_ the method name,
+which means that method parameters must be expressed using a `fun` or
+`function` expression.
 
 ## Inheritance
 
@@ -196,48 +174,23 @@ the following class definition inherits from our stack class for
 strings and adds a new method `print` that prints all the strings on
 the stack.
 
-```ocaml
-# class sstack init = object
-    inherit [string] stack init
-
-    method print = 
-      List.iter ~f:print_string v
-  end;;
-class sstack :
-  string list ->
-  object
-    val mutable v : string Core.Std.List.t
-    method pop : string option
-    method print : unit
-    method push : string -> unit
-  end
+```frag
+((typ ocamltop)(name classes/stack.topscript)(part 2))
 ```
 
 A class can override methods from classes it inherits. For example,
 this class creates stacks of integers that double the integers before
 they are pushed onto the stack.
 
-```ocaml
-# class double_stack init = object
-  inherit [int] stack init as super
-
-  method push hd =
-    super#push (hd * 2)
-  end;;
-class double_stack :
-  int list ->
-  object
-    val mutable v : int list
-    method pop : int option
-    method push : int -> unit
-  end
+```frag
+((typ ocamltop)(name classes/stack.topscript)(part 3))
 ```
 
 The `as super` statement above creates a special object called
 `super` which can be used to call superclass methods. Note that
 `super` is not a real object and can only be used to call methods.
 
-## Class types ##
+## Class types
 
 To allow code in a different file or module to inherit from a class
 we must expose it and give it a class type. What is the class type?
@@ -248,16 +201,8 @@ similar when we want to define a `.mli` file).  In keeping with the
 usual style for modules, we define a type `'a t` to represent the
 type of our stacks.
 
-```ocaml
-module Stack = struct
-   class ['a] stack init = object 
-     ... 
-   end
-
-   type 'a t = 'a stack
-
-   let make init = new stack init
-end;;
+```frag
+((typ ocaml)(name classes/class_types_stack.ml)(part 0))
 ```
 
 We have multiple choices in defining the module type, depending on
@@ -265,40 +210,23 @@ how much of the implementation we want to expose.  At one extreme, a
 maximally-abstract signature would completely hide the class
 definitions.
 
-```ocaml
-module AbstractStack : sig
-   type 'a t = < pop: 'a option; push: 'a -> unit >
-
-   val make : unit -> 'a t
-end = Stack
+```frag
+((typ ocaml)(name classes/class_types_stack.ml)(part 1))
 ```
 
 The abstract signature is simple because we ignore the classes.  But
 what if we want to include them in the signature, so that other modules
 can inherit from the class definitions?  For this, we need to specify
-types for the classes, called _class types_.  Class types do not
-appear in mainstream object-oriented programming languages, so you may
-not be familiar with them, but the concept is pretty simple.  A class
-type specifies the type of each of the visible parts of the class,
-including both fields and methods.  Just like for module types, you
-don't have to give a type for everything; anything you omit will be
-hidden.
+types for the classes, called _class types_.
 
-```ocaml
-module VisibleStack : sig
-  
-  type 'a t = < pop: 'a option; push: 'a -> unit >
+Class types do not appear in mainstream object-oriented programming languages,
+so you may not be familiar with them, but the concept is pretty simple.  A
+class type specifies the type of each of the visible parts of the class,
+including both fields and methods.  Just like for module types, you don't have
+to give a type for everything; anything you omit will be hidden.
 
-  class ['a] stack :
-  object
-    val mutable v : 'a list
-    method pop : 'a option
-    method push : 'a -> unit
-  end
-
-  val make : unit -> 'a t
-
-end = Stack
+```frag
+((typ ocaml)(name classes/class_types_stack.ml)(part 2))
 ```
 
 In this signature, we've chosen to make everything visible.  The
@@ -322,21 +250,8 @@ For example, consider writing recursive functions over a simple
 document format. This format is represented as a tree with three
 different types of node:
 
-```ocaml
-type doc = 
-    Heading of string
-  | Paragraph of text_item list
-  | Definition of string list_item list
-
-and text_item =
-    Raw of string
-  | Bold of text_item list
-  | Enumerate of int list_item list
-  | Quote of doc
-
-and 'a list_item = 
-  { tag: 'a;
-    text: text_item list }
+```frag
+((typ ocaml)(name classes/doc.ml)(part 0))
 ```
 
 It is quite easy to write a function that operates by recursively
@@ -347,25 +262,8 @@ functions to avoid repetitive boilerplate?
 The simplest way is to use classes and open recursion. For example,
 the following class defines objects which fold over the document data:
 
-```ocaml
-class ['a] folder = object(self)
-  method doc acc doc =
-    match doc with
-      Heading _ -> acc
-    | Paragraph text -> List.fold ~f:self#text_item ~init:acc text
-    | Definition list -> List.fold ~f:self#list_item ~init:acc list
-
-  method list_item: 'b. 'a -> 'b list_item -> 'a = 
-    fun acc {tag; text} ->
-      List.fold ~f:self#text_item ~init:acc text
-
-  method text_item acc bar =
-    match bar with
-      Raw _ -> acc
-    | Bold text -> List.fold ~f:self#text_item ~init:acc text
-    | Enumerate list -> List.fold ~f:self#list_item ~init:acc list
-    | Quote doc -> self#doc acc doc
-end
+```frag
+((typ ocaml)(name classes/doc.ml)(part 1))
 ```
 
 The `object (self)` syntax binds `self` to the current object,
@@ -376,20 +274,8 @@ By inheriting from this class we can create functions which fold over
 the document data. For example, the `count_doc` function counts the
 number of bold tags in the document that are not within a list:
 
-```ocaml
-class counter = object
-  inherit [int] folder as super
-
-  method list_item acc li = acc
-
-  method text_item acc ti = 
-    let acc = super#text_item acc ti in
-    match ti with
-      Bold _ -> acc + 1
-    | _ -> acc
-end
-
-let count_doc = (new counter)#doc
+```frag
+((typ ocaml)(name classes/doc.ml)(part 2))
 ```
 
 Note how the `super` special object is used in `text_item` to call
@@ -407,52 +293,8 @@ handling each of the different cases in `doc` and `text_item`.
 However, we may not want to force subclasses of `folder` to expose
 these methods as they probably shouldn't be called directly.
 
-```ocaml
-# class ['a] folder = object(self)
-    method doc acc doc =
-      match doc with
-        Heading str -> self#heading acc str
-      | Paragraph text -> self#paragraph acc text
-      | Definition list -> self#definition acc list
-  
-    method list_item: 'b. 'a -> 'b list_item -> 'a = 
-      fun acc {tag; text} ->
-          List.fold ~f:self#text_item ~init:acc text
-  
-    method text_item acc bar =
-      match bar with
-        Raw str -> self#raw acc str
-      | Bold text -> self#bold acc text
-      | Enumerate list -> self#enumerate acc list
-      | Quote doc -> self#quote acc doc
-  
-    method private heading acc str = acc
-    method private paragraph acc text = List.fold ~f:self#text_item ~init:acc text
-    method private definition acc list = List.fold ~f:self#list_item ~init:acc list
-  
-    method private raw acc str = acc
-    method private bold acc text = List.fold ~f:self#text_item ~init:acc text
-    method private enumerate acc list = List.fold ~f:self#list_item ~init:acc list
-    method private quote acc doc = self#doc acc doc
-  end;;
-class ['a] folder :
-  object
-    method private bold : 'a -> text_item Core.Std.List.t -> 'a
-    method private definition : 'a -> string list_item Core.Std.List.t -> 'a
-    method doc : 'a -> doc -> 'a
-    method private enumerate : 'a -> int list_item Core.Std.List.t -> 'a
-    method private heading : 'a -> string -> 'a
-    method list_item : 'a -> 'b list_item -> 'a
-    method private paragraph : 'a -> text_item Core.Std.List.t -> 'a
-    method private quote : 'a -> doc -> 'a
-    method private raw : 'a -> string -> 'a
-    method text_item : 'a -> text_item -> 'a
-  end
-# let f : < doc : 'a; .. >  = new folder;;
-val f :
-  < doc : '_a -> doc -> '_a; list_item : 'b. '_a -> 'b list_item -> '_a;
-    text_item : '_a -> text_item -> '_a > =
-  <obj>
+```frag
+((typ ocaml)(name classes/doc.ml)(part 3))
 ```
 
 To be precise, the private methods are part of the class type, but
@@ -501,27 +343,15 @@ end
 A _binary method_ is a method that takes an object of `self` type.
 One common example is defining a method for equality. 
 
-```ocaml
-class square w =
-  object (self : 'self) 
-    method width = w
-    method area = Float.of_int (self#width * self#width)
-    method equals (other : 'self) = other#width = self#width
-  end
-
-class circle r =
-  object (self : 'self)
-    method radius = r
-    method area = 3.14 *. (Float.of_int self#radius) ** 2.0
-    method equals (other : 'self) = other#radius = self#radius
-  end
+```frag
+((typ ocamltop)(name classes/binary.topscript)(part 0))
 ```
 
-```ocaml
-# (new square 5)#equals (new square 5);;
-- : bool = true
-# (new circle 10)#equals (new circle 7);;
-- : bool = false
+We can now test different object instances for equality by using
+the `equals` binary method.
+
+```frag
+((typ ocamltop)(name classes/binary.topscript)(part 1))
 ```
 
 This works, but there is a problem lurking here.  The method `equals`
@@ -529,17 +359,8 @@ takes an object of the exact type `square` or `circle`.  Because of
 this, we can't define a common base class `shape` that also includes
 an equality method.
 
-```ocaml
-# type shape = < equals : shape -> bool; area : float >;;
-type shape = < area : float; equals : shape -> bool >
-# (new square 5 :> shape);;
-Characters 0-23:
-  (new square 5 :> shape);;
-  ^^^^^^^^^^^^^^^^^^^^^^^
-Error: Type square = < area : float; equals : square -> bool; width : int >
-       is not a subtype of shape = < area : float; equals : shape -> bool > 
-       Type shape = < area : float; equals : shape -> bool > is not a subtype of
-       square = < area : float; equals : square -> bool; width : int > 
+```frag
+((typ ocamltop)(name classes/binary.topscript)(part 2))
 ```
 
 The problem is that a `square` expects to be compared with a `square`,
@@ -549,42 +370,28 @@ This problem is fundamental.  Many languages solve it either with
 narrowing (with dynamic type checking), or by method overloading.
 Since OCaml has neither of these, what can we do?
 
-One proposal we could consider is, since the problematic method is
-equality, why not just drop it from the base type `shape` and use
-polymorphic equality instead?  Unfortunately, the built-in equality
-has very poor behavior when applied to objects.
+Since the problematic method is equality, one proposal we could consider is is
+to just drop it from the base type `shape` and use polymorphic equality
+instead.  However, the built-in polymorphic equality has very poor behavior
+when applied to objects.
 
-```ocaml
-# (object method area = 5 end) = (object method area = 5 end);;
-- : bool = false
+```frag
+((typ ocamltop)(name classes/binary.topscript)(part 3))
 ```
 
-The problem here is that the built-in polymorphic equality compares the
-method implementations, not their return values.  The method
-implementations (the function values that implement the methods) are
-different, so the equality comparison is false.  There are other
-reasons not to use the built-in polymorphic equality, but these false
-negatives are a showstopper.
+The problem here is that the built-in polymorphic equality compares the method
+implementations, not their return values.  The method implementations (the
+function values that implement the methods) are different, and so the equality
+comparison is false.  There are other reasons not to use the built-in
+polymorphic equality, but these false negatives are a showstopper.
 
-If we want to define equality for shapes in general, the remaining
-solution is to use the same approach as we described for narrowing.
-That is, introduce a _representation_ type implemented using variants,
-and implement the comparison based on the representation type.
+If we want to define equality for shapes in general, the remaining solution is
+to use the same approach as we described for narrowing.  That is, introduce a
+_representation_ type implemented using variants, and implement the comparison
+based on the representation type.
 
-```ocaml
-type shape_repr =
- | Square of int
- | Circle of int
- 
-type shape = < repr : shape_repr; equals : shape -> bool; area : float >
-
-class square w =
-  object (self : 'self) 
-    method width = w
-    method area = Float.of_int (self#width * self#width)
-    method repr = Square self#width
-    method equals (other : 'self) = other#width = self#width
-  end
+```frag
+((typ ocamltop)(name classes/binary.topscript)(part 4))
 ```
 
 The binary method `equals` is now implemented in terms of the concrete
@@ -593,22 +400,8 @@ type `shape_repr`.  In fact, the objects are now isomorphic to the
 hide the `repr` method, but you can hide the type definition using the
 module system.
 
-```ocaml
-module Shapes : sig
-  type shape_repr
-  type shape = < repr : shape_repr; equals : shape -> bool; area: float >
-  
-  class square : int ->
-    object
-	  method width : int
-	  method area : float
-	  method repr : shape_repr
-	  method equals : shape -> bool
-	end
-end = struct
-  type shape_repr = Square of int | Circle of int 
-  ...
-end
+```frag
+((typ ocaml)(name classes/binary_module.ml))
 ```
 
 ## Virtual classes and methods ##
@@ -779,6 +572,44 @@ One way to view a `virtual` class is that it is like a functor, where
 the "inputs" are the declared, but not defined, virtual methods and
 fields.  The functor application is implemented through inheritance,
 when virtual methods are given concrete implementations.
+
+## Initializers
+
+You can execute expressions during the instantiation of a class by
+placing them before the object expression or in the initial value of
+a field:
+
+```ocaml
+# class obj x = 
+    let () = printf "Creating obj %d\n" x in
+    object 
+      val field = printf "Initializing field\n"; x
+    end;;
+class obj : int -> object val field : int end
+# let o = new obj 3;;
+Creating obj 3
+Initializing field
+val o : obj = <obj>
+```
+
+However, these expressions are executed before the object has been
+created, and cannot refer to the methods of the object. If you need
+to use an object's methods during instantiation you can use an
+initializer. An initializer is an expression that will be executed
+during instantiation but after the object has been created. 
+
+For example, if we wanted to create a `growing_circle` class for
+circles that grow when clicked then we could inherit from `circle`
+and used the inherited `on_click` to add a handler for click events:
+
+```ocaml
+class growing_circle r x y = object (self)
+  inherit circle r x y
+
+  initializer
+    self#on_click (fun x y -> radius <- radius * 2)
+end
+```
 
 ## Multiple inheritance
 

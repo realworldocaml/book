@@ -1,0 +1,5 @@
+$ ocaml
+# open Core.Std ;;
+# List.map ~f:print_endline "" ;;
+Error: This expression has type string but an expression was expected of type
+         'a Core.Std.List.t = 'a list
