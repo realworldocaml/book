@@ -6,25 +6,15 @@ OCaml is an _association list_, which is simply a list of pairs of
 keys and values.  For example, you could represent a mapping between
 the 10 digits and their English names as follows.
 
-```ocaml
-# let digit_alist =
-    [ 0, "zero"; 1, "one"; 2, "two"  ; 3, "three"; 4, "four"
-    ; 5, "five"; 6, "six"; 7, "seven"; 8, "eight"; 9, "nine" ]
-  ;;
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 1))
 ```
 
 We can use functions from the `List.Assoc` module to manipulate such
 an association list.
 
-```ocaml
-# List.Assoc.find digit_alist 6;;
-- : string option = Some "six"
-# List.Assoc.find digit_alist 22;;
-- : string option = None
-# List.Assoc.add digit_alist 0 "zilch";;
-- : (int, string) List.Assoc.t =
-[(0, "zilch"); (1, "one"); (2, "two"); (3, "three"); (4, "four");
- (5, "five"); (6, "six"); (7, "seven"); (8, "eight"); (9, "nine")]
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 2))
 ```
 
 Association lists are simple and easy to use, but their performance is
@@ -45,15 +35,8 @@ Let's consider an example of how one might use a map in practice.  In
 [xref](#files-modules-and-programs), we showed a module `Counter` for
 keeping frequency counts on a set of strings.  Here's the interface.
 
-```ocaml
-(* counter.mli *)
-open Core.Std
-
-type t
-
-val empty : t
-val touch : t -> string -> t
-val to_list : t -> (string * int) list
+```frag
+((typ ocaml)(name files-modules-and-programs-freq-fast/counter.mli))
 ```
 
 The intended behavior here is straightforward.  `Counter.empty`
@@ -63,19 +46,8 @@ returns the list of non-zero frequencies.
 
 Here's the implementation.
 
-```ocaml
-(* counter.ml *)
-open Core.Std
-
-type t = int String.Map.t
-
-let empty = String.Map.empty
-
-let to_list t = Map.to_alist t
-
-let touch t s =
-  let count = Option.value ~default:0 (Map.find t s) in
-  Map.add t ~key:s ~data:(count + 1)
+```frag
+((typ ocaml)(name files-modules-and-programs-freq-fast/counter.ml))
 ```
 
 Note that in some places the above code refers to `String.Map.t`, and
@@ -104,12 +76,8 @@ way of creating a `Map.t`.  The information required to compare values
 of a given type is wrapped up in a value called a _comparator_, that
 can be used to create maps using the `Map` module directly.
 
-```ocaml
-# let digit_map = Map.of_alist_exn digit_alist
-                     ~comparator:Int.comparator;;
-val digit_map : (int, string, Int.comparator) Map.t = <abstr>
-# Map.find digit_map 3;;
-- : string option = Some "three"
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 3))
 ```
 
 The above uses `Map.of_alist_exn` which creates a map from an
@@ -120,9 +88,8 @@ The comparator is only required for operations that create maps from
 scratch.  Operations that update an existing map simply inherit the
 comparator of the map they start with.
 
-```ocaml
-# let zilch_map = Map.add digit_map ~key:0 ~data:"zilch";;
-val zilch_map : (int, string, Int.comparator) Map.t = <abstr>
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 4))
 ```
 
 The type `Map.t` has three type parameters: one for the key, one for
@@ -135,16 +102,8 @@ maps share their comparison function.  Consider, for example,
 `Map.symmetric_diff`, which computes a summary of the differences
 between two maps.
 
-```ocaml
-# let left = String.Map.of_alist_exn ["foo",1; "bar",3; "snoo", 0]
-  let right = String.Map.of_alist_exn ["foo",0; "snoo", 0]
-  let diff = Map.symmetric_diff ~data_equal:Int.equal left right
-  ;;
-val left : int String.Map.t = <abstr>
-val right : int String.Map.t = <abstr>
-val diff :
-  (string * [ `Left of int | `Right of int | `Unequal of int * int ]) list =
-  [("foo", `Unequal (1, 0)); ("bar", `Left 3)]
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 5))
 ```
 
 The type of `Map.symmetric_diff`, shown below, requires that the two
@@ -152,13 +111,8 @@ maps it compares have the same comparator type.  Each comparator has a
 fresh abstract type, so the type of a comparator identifies the
 comparator uniquely.  
 
-```ocaml
-# Map.symmetric_diff;;
-- : ('k, 'v, 'cmp) Map.t ->
-    ('k, 'v, 'cmp) Map.t ->
-    data_equal:('v -> 'v -> bool) ->
-    ('k * [ `Left of 'v | `Right of 'v | `Unequal of 'v * 'v ]) list
-= <fun>
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 6))
 ```
 
 This constraint is important because the algorithm that
@@ -172,58 +126,31 @@ sexp converters are included in the comparator to make it possible for
 users of the comparator to generate better error messages.  Here's an
 example.
 
-```ocaml
-# module Reverse = Comparator.Make(struct
-    type t = string
-    let sexp_of_t = String.sexp_of_t
-    let t_of_sexp = String.t_of_sexp
-    let compare x y = String.compare y x
-  end);;
-module Reverse :
-  sig
-    type t = string
-    val compare : t -> t -> int
-    val t_of_sexp : Sexp.t -> t
-    val sexp_of_t : t -> Sexp.t
-    type comparator
-    val comparator : (t, comparator) Comparator.t_
-  end
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 7))
 ```
 
 As you can see below, both `Reverse.comparator` and
 `String.comparator` can be used to create maps with a key type of
 `string`.
 
-```ocaml
-# let alist = ["foo", 0; "snoo", 3];;
-val alist : (string * int) list = [("foo", 0); ("snoo", 3)]
-# let ord_map = Map.of_alist_exn ~comparator:String.comparator alist;;
-val ord_map : (string, int, String.comparator) Map.t = <abstr>
-# let rev_map = Map.of_alist_exn ~comparator:Reverse.comparator alist;;
-val rev_map : (string, int, Reverse.comparator) Map.t = <abstr>
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 8))
 ```
 
 `Map.min_elt` returns the key and value for the smallest key in the
 map, which lets us see that these two maps do indeed use different
 comparison functions.
 
-```ocaml
-# Map.min_elt ord_map;;
-- : (string * int) option = Some ("foo", 0)
-# Map.min_elt rev_map;;
-- : (string * int) option = Some ("snoo", 3)
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 9))
 ```
 
 And accordingly, if we try to use `Map.symmetric_diff` on these two
 maps, we'll get a compile-timer error.
 
-```ocaml
-# Map.symmetric_diff ord_map rev_map;;
-
-Error: This expression has type (string, int, Reverse.comparator) Map.t
-       but an expression was expected of type
-         ('a, 'b, 'c) Map.t = (string, int, String.comparator) Map.t
-       Type Reverse.comparator is not compatible with type String.comparator 
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 10))
 ```
 
 ### Trees
@@ -235,9 +162,8 @@ comparator.  You can get such a representation with `Map.to_tree`,
 which returns just the tree that the map is built out of, and not
 including the comparator.
 
-```ocaml
-# let ord_tree = Map.to_tree ord_map;; 
-val ord_tree : (string, int, String.comparator) Map.Tree.t = <abstr>
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 11))
 ```
 
 Even though a `Map.Tree.t` doesn't physically include a comparator, it
@@ -251,9 +177,8 @@ Since the comparator isn't included in the tree, we need to provide
 the comparator explicitly when we, say, search for a key, as shown
 below.
 
-```ocaml
-# Map.Tree.find ~comparator:String.comparator ord_tree "snoo";;
-- : int option = Some 3
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 12))
 ```
 
 The algorithm of `Map.Tree.find` depends on the fact that it's using
@@ -262,13 +187,8 @@ stored it.  That's the invariant that the phantom type is there to
 enforce.  As you can see below, using the wrong comparator will lead
 to a type error.
 
-```ocaml
-# Map.Tree.find ~comparator:Reverse.comparator ord_tree "snoo";;
-
-Error: This expression has type (string, int, String.comparator) Map.Tree.t
-       but an expression was expected of type
-         ('a, 'b, 'c) Map.Tree.t = (string, 'b, Reverse.comparator) Map.Tree.t
-       Type String.comparator is not compatible with type Reverse.comparator 
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 13))
 ```
 
 ### The polymorphic comparator
@@ -279,30 +199,22 @@ OCaml's built-in polymorphic comparison function, which was discussed
 in [xref](#lists-and-patterns).  This comparator is found in the
 `Comparator.Poly` module, allowing us to write:
 
-```ocaml
-# Map.of_alist_exn ~comparator:Comparator.Poly.comparator digit_alist;;
-- : (int, string, Comparator.Poly.comparator) Map.t = <abstr>
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 14))
 ```
 
 Or, equivalently:
 
-```ocaml
-# Map.Poly.of_alist_exn digit_alist;;
-- : (int, string) Map.Poly.t = <abstr>
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 15))
 ```
 
 Note that maps based on the polymorphic comparator are not equivalent
 to those based on the type-specific comparators from the point of view
 of the type system.  Thus, the compiler rejects the following:
 
-```ocaml
-# Map.symmetric_diff (Map.Poly.singleton 3 "three")
-                     (Int.Map.singleton  3 "four" ) ;;
-
-Error: This expression has type 'a Int.Map.t = (int, 'a, Int.comparator) Map.t
-       but an expression was expected of type
-         ('b, 'c, 'd) Map.t = (int, string, Z.Poly.comparator) Map.t
-       Type Int.comparator is not compatible with type Z.Poly.comparator 
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 16))
 ```
 
 This is rejected for good reason: there's no guarantee that the
@@ -358,15 +270,8 @@ solution is to use Core's set type, which is similar in design and
 spirit to the map type, while having an API better tuned to working
 with sets, and a lower memory footprint.  Here's a simple example:
 
-```ocaml
-# let dedup ~comparator l =
-    List.fold l ~init:(Set.empty ~comparator) ~f:Set.add
-    |> Set.to_list
-  ;;
-val dedup : comparator:('a, 'b) Core.Comparator.t_ -> 'a list -> 'a list =
-  <fun>
-# dedup ~comparator:Int.comparator [8;3;2;3;7;8;10];;
-- : int list = [2; 3; 7; 8; 10]
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 17))
 ```
 
 In addition to the operators you would expect to have for maps, sets
@@ -398,19 +303,15 @@ OCaml heap, it works on almost every OCaml type.
 But sometimes, a structural comparison is not what you want.  Sets are
 a great example of this.  Consider the following two sets.
 
-```ocaml
-# let (s1,s2) = (Int.Set.of_list [1;2],
-                 Int.Set.of_list [2;1]);;
-val s1 : Int.Set.t = <abstr>
-val s2 : Int.Set.t = <abstr>
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 18))
 ```
 
 Logically, these two sets should be equal, and that's the result that
 you get if you call `Set.equal` on them.
 
-```ocaml
-# Set.equal s1 s2;;
-- : bool = true
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 19))
 ```
 
 But because the elements were added in different orders, the layout of
@@ -422,17 +323,15 @@ equality by way of the `=` operator.  Comparing the maps directly will
 fail at runtime because the comparators stored within the sets contain
 function values.
 
-```ocaml
-# s1 = s2;;
-Exception: (Invalid_argument "equal: functional value").
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 20))
 ```
 
 We can however use the function `Set.to_tree` to expose the underlying
 tree without the attached comparator.
 
-```ocaml
-# Set.to_tree s1 = Set.to_tree s2;;
-- : bool = false
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 21))
 ```
 
 This can cause real and quite subtle bugs.  If, for example, you use a
@@ -464,13 +363,8 @@ The module `Comparable` contains a number of functors to help you do
 just this.  The simplest one of these is `Comparable.Make`, which
 takes as an input any module that satisfies the following interface:
 
-```ocaml
-sig
-  type t
-  val sexp_of_t : t -> Sexp.t
-  val t_of_sexp : Sexp.t -> t
-  val compare : t -> t -> int
-end
+```frag
+((typ ocaml)(name maps-and-hash-tables/comparable.ml))
 ```
 
 In other words, it expects a type with a comparison function as well
@@ -486,20 +380,8 @@ The following example shows how this all fits together, following the
 same basic pattern for using functors described in
 [xref](#extending-modules).
 
-```ocaml
-# module Foo_and_bar : sig
-    type t = { foo: Int.Set.t; bar: string }
-    include Comparable.S with type t := t
-  end = struct
-    module T = struct
-      type t = { foo: Int.Set.t; bar: string } with sexp
-      let compare t1 t2 =
-        let c = Int.Set.compare t1.foo t2.foo in
-        if c <> 0 then c else String.compare t1.bar t2.bar
-    end
-    include T
-    include Comparable.Make(T)
-  end;;
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 22))
 ```
 
 We don't include the full response from the top-level because it is
@@ -510,17 +392,8 @@ strictly necessary.  Core ships with a syntax extension called
 `comparelib` which will create a comparison function from a type
 definition.  Using it, we can rewrite the above example as follows.
 
-```ocaml
-# module Foo_and_bar : sig
-    type t = { foo: Int.Set.t; bar: string }
-    include Comparable.S with type t := t
-  end = struct
-    module T = struct
-      type t = { foo: Int.Set.t; bar: string } with sexp, compare
-    end
-    include T
-    include Comparable.Make(T)
-  end;;
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 23))
 ```
 
 The comparison function created by `comparelib` for a given type will
@@ -537,17 +410,8 @@ then `comparelib` is a good way to go.
 You can also satisfy the `Comparable.S` interface using polymorphic
 compare.
 
-```ocaml
-# module Foo_and_bar : sig
-    type t = { foo: int; bar: string }
-    include Comparable.S with type t := t
-  end = struct
-    module T = struct
-      type t = { foo: int; bar: string } with sexp
-    end
-    include T
-    include Comparable.Poly(T)
-  end;;
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 24))
 ```
 
 That said, for reasons we discussed earlier, polymorphic compare
@@ -607,13 +471,8 @@ _hashable_ which includes among other things the function for hashing
 the key type.  This is analogous to the comparator used for creating
 maps.
 
-```ocaml
-# let table = Hashtbl.create ~hashable:String.hashable ();;
-val table : (string, '_a) Hashtbl.t = <abstr>
-# Hashtbl.replace table ~key:"three" ~data:3;;
-- : unit = ()
-# Hashtbl.find table "three";;
-- : int option = Some 3
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 25))
 ```
 
 The `hashable` value is included as part of the `Hashable.S`
@@ -621,25 +480,22 @@ interface, which is satisfied by most types in Core.  The `Hashable.S`
 interface also includes a `Table` sub-module which provides more
 convenient creation functions.
 
-```ocaml
-# let table = String.Table.create ();;
-val table : '_a String.Table.t = <abstr>
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 26))
 ```
 
 There is also a polymorphic `hashable` value, corresponding to the
 polymorphic hash function provided by the OCaml runtime, for cases
 where you don't have a hash function for your specific type.
 
-```ocaml
-# let table = Hashtbl.create ~hashable:Hashtbl.Poly.hashable ();;
-val table : ('_a, '_b) Hashtbl.t = <abstr>
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 27))
 ```
 
 Or, equivalently:
 
-```ocaml
-# let table = Hashtbl.Poly.create ();;
-val table : ('_a, '_b) Hashtbl.t = <abstr>
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 28))
 ```
 
 Note that, unlike the comparators used with maps and sets, hashables
@@ -664,15 +520,8 @@ extract data from.  We'll demonstrate this below, using the function
 `List.range` to allocate lists of integers of different length.
 
 
-```ocaml
-# Caml.Hashtbl.hash (List.range 0 9);;
-- : int = 209331808
-# Caml.Hashtbl.hash (List.range 0 10);;
-- : int = 182325193
-# Caml.Hashtbl.hash (List.range 0 11);;
-- : int = 182325193
-# Caml.Hashtbl.hash (List.range 0 100);;
-- : int = 182325193
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 29))
 ```
 
 As you can see, the hash function stops after the first 10 elements.
@@ -694,19 +543,8 @@ functor to build the necessary functionality; in this case,
 the "logical" (_i.e._, bit-wise) exclusive-or of the hashes from the
 component values.
 
-```ocaml
-# module Foo_and_bar : sig
-    type t = { foo: int; bar: string }
-    include Hashable.S with type t := t
-  end = struct
-    module T = struct
-      type t = { foo: int; bar: string } with sexp, compare
-      let hash t =
-        (Int.hash t.foo) lxor (String.hash t.bar)
-    end
-    include T
-    include Hashable.Make(T)
-  end;;
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 30))
 ```
 
 Note that in order to satisfy hashable, one also needs to provide a
@@ -741,58 +579,16 @@ integer keys, and cycling over the keys and updating the values they
 contain.  Note that we use the `Map.change` and `Hashtbl.change`
 functions to update the respective data structures.
 
-```ocaml
-(* file: map_vs_hash.ml *)
-
-open Core.Std
-open Core_bench.Std
-
-let map_iter ~num_keys ~iterations =
-  let rec loop i map =
-    if i <= 0 then ()
-    else loop (i - 1)
-           (Map.change map (i mod num_keys) (fun current ->
-              Some (1 + Option.value ~default:0 current)))
-  in
-  loop iterations Int.Map.empty
-
-let table_iter ~num_keys ~iterations =
-  let table = Int.Table.create ~size:num_keys () in
-  let rec loop i =
-    if i <= 0 then ()
-    else (
-      Hashtbl.change table (i mod num_keys) (fun current ->
-        Some (1 + Option.value ~default:0 current));
-      loop (i - 1)
-    )
-  in
-  loop iterations
-
-let tests ~num_keys ~iterations =
-  let test name f = Bench.Test.create f ~name in
-  [ test "map"   (fun () -> map_iter   ~num_keys ~iterations)
-  ; test "table" (fun () -> table_iter ~num_keys ~iterations)
-  ]
-
-let () =
-  tests ~num_keys:1000 ~iterations:100_000
-  |> Bench.make_command
-  |> Command.run
+```frag
+((typ ocaml)(name maps-and-hash-tables/map_vs_hash.ml))
 ```
-
 
 The results, shown below, show the hash table version to be around four
 times faster than the map version.  
 
-```
-bench $ ./map_vs_hash.native -clear-columns name time speedup
-Estimated testing time 20s (change using -quota SECS).
-┌───────┬────────────┬─────────┐
-│ Name  │  Time (ns) │ Speedup │
-├───────┼────────────┼─────────┤
-│ map   │ 31_584_468 │    1.00 │
-│ table │  8_157_439 │    3.87 │
-└───────┴────────────┴─────────┘
+
+```frag
+((typ console)(name maps-and-hash-tables/run_map_vs_hash.out))
 ```
 
 We can make the speedup smaller or larger depending on the details of
@@ -816,61 +612,15 @@ maps (or hash tables) that are built up by iteratively applying
 updates, starting from an empty map.  In the hash table implementation,
 we do this by calling `Hashtbl.copy` to get the list entries.
 
-```ocaml
-(* file: map_vs_hash2.ml *)
-
-open Core.Std
-open Core_bench.Std
-
-let create_maps ~num_keys ~iterations =
-  let rec loop i map =
-    if i <= 0 then []
-    else
-      let new_map =
-        Map.change map (i mod num_keys) (fun current ->
-          Some (1 + Option.value ~default:0 current))
-      in
-      new_map :: loop (i - 1) new_map
-  in
-  loop iterations Int.Map.empty
-
-let create_tables ~num_keys ~iterations =
-  let table = Int.Table.create ~size:num_keys () in
-  let rec loop i =
-    if i <= 0 then []
-    else (
-      Hashtbl.change table (i mod num_keys) (fun current ->
-        Some (1 + Option.value ~default:0 current));
-      let new_table = Hashtbl.copy table in
-      new_table :: loop (i - 1)
-    )
-  in
-  loop iterations
-
-let tests ~num_keys ~iterations =
-  let test name f = Bench.Test.create f ~name in
-  [ test "map"   (fun () -> ignore (create_maps   ~num_keys ~iterations))
-  ; test "table" (fun () -> ignore (create_tables ~num_keys ~iterations))
-  ]
-
-let () =
-  tests ~num_keys:50 ~iterations:1000
-  |> Bench.make_command
-  |> Command.run
+```frag
+((typ ocaml)(name maps-and-hash-tables/map_vs_hash2.ml))
 ```
 
 Unsurprisingly, maps perform far better than hash tables on this
 benchmark, in this case by more than a factor of ten.  
 
-```
-$ ./map_vs_hash2.native -clear-columns name time speedup
-Estimated testing time 20s (change using -quota SECS).
-┌───────┬───────────┬─────────┐
-│ Name  │ Time (ns) │ Speedup │
-├───────┼───────────┼─────────┤
-│ map   │   208_438 │   12.62 │
-│ table │ 2_630_707 │    1.00 │
-└───────┴───────────┴─────────┘
+```frag
+((typ console)(name maps-and-hash-tables/run_map_vs_hash2.out))
 ```
 
 These numbers can be made more extreme by increasing the size of the
