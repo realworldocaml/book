@@ -1,1 +1,1 @@
-ocamlbuild -use-ocamlfind -tag thread -pkg core cal_append.native
+corebuild cal_append.native
