@@ -2,7 +2,7 @@
 
 This chapter gives an overview of OCaml by walking through a series of
 small examples that cover most of the major features of the language.
-This should give a sense of what OCaml can do, without getting too
+This should provide a sense of what OCaml can do, without getting too
 deep into any one topic.
 
 We'll present this guided tour using the Core standard library and the
@@ -13,23 +13,23 @@ command line).  These instructions will assume you're using `utop`
 specifically.
 
 Before getting started, make sure you have a working OCaml
-installation and toplevel as you read through this chapter so you can
-try out the examples.  Look at [xref](#installation) for the details.
+installation and toplevel so you can try out the examples as you read
+through the chapter.  Look at [xref](#installation) for details.
 
 ## OCaml as a calculator
 
-Let's spin up `utop`.  Throughout the book we're going to use Core, a
-more full-featured and capable replacement for OCaml's standard
-library.  Accordingly, we'll start by opening the `Core.Std` module to
-get access to Core's libraries.  If you don't open `Core.Std` many of
-the examples below will fail.
+Throughout the book we're going to use Core, a more full-featured and
+capable replacement for OCaml's standard library.  Accordingly, after
+starting `utop` at the command line, we'll start by opening the
+`Core.Std`, which adds Core's libraries to your environment.  Note
+that if we don't open `Core.Std`, many of the examples below will
+fail.
 
 ```frag
 ((typ ocamltop)(name guided-tour/main.topscript)(part 0)) 
 ```
 
-Now that we have Core open, let's try a few simple numerical
-calculations.
+Now let's try a few simple numerical calculations.
 
 ```frag
 ((typ ocamltop)(name guided-tour/main.topscript)(part 1)) 
@@ -63,7 +63,7 @@ at you.
   which operation you're doing.
 
 We can also create a variable to name the value of a given expression,
-using the `let` keyword (also known as a _let binding_).
+using the `let` keyword.  This is known as a _let binding_.
 
 ```frag
 ((typ ocamltop)(name guided-tour/main.topscript)(part 2)) 
