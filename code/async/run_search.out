@@ -1,0 +1,20 @@
+$ corebuild -pkg cohttp.async,yojson,textwrap search.native
+$ ./search.native "Concurrent Programming" "OCaml"
+("unhandled exception"
+ ((lib/monitor.ml.Error_
+   ((exn
+     (lib/core_unix.ml.Inet_addr.Get_inet_addr api.duckduckgo.com
+      "host not found"))
+    (backtrace
+     ("Raised at file \"lib/core_unix.ml\", line 1796, characters 23-61"
+      "Called from file \"lib/result.ml\", line 101, characters 10-14"
+      "Re-raised at file \"lib/result.ml\", line 108, characters 23-26"
+      "Called from file \"lib/deferred.ml\", line 20, characters 62-65"
+      "Called from file \"lib/scheduler.ml\", line 126, characters 6-17"
+      "Called from file \"lib/jobs.ml\", line 64, characters 8-13" ""))
+    (monitor
+     (((name try_with) (here ()) (id 3) (has_seen_error true)
+       (someone_is_listening true) (kill_index 0))
+      ((name main) (here ()) (id 1) (has_seen_error true)
+       (someone_is_listening false) (kill_index 0))))))
+  (Pid 73940)))
