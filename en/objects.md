@@ -437,7 +437,7 @@ to support this kind of pattern analysis.  It is also not obvious that
 object-oriented programming is well-suited for this situation.
 Pattern matching seems like a better fit.
 
-```ocaml
+```frag
 ((typ ocaml)(name objects/is_barbell.ml))
 ```
  
