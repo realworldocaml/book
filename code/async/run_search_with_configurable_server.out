@@ -1,0 +1,16 @@
+$ corebuild -pkg cohttp.async,yojson,textwrap search_with_configurable_server.native
+$ ./search_with_configurable_server.native -servers localhost,api.duckduckgo.com "Concurrent Programming" OCaml
+("unhandled exception"
+ ((lib/monitor.ml.Error_
+   ((exn (Unix.Unix_error "Connection refused" connect 127.0.0.1:80))
+    (backtrace
+     ("Raised by primitive operation at file \"lib/unix_syscalls.ml\", line 795, characters 12-69"
+      "Called from file \"lib/deferred.ml\", line 20, characters 62-65"
+      "Called from file \"lib/scheduler.ml\", line 126, characters 6-17"
+      "Called from file \"lib/jobs.ml\", line 64, characters 8-13" ""))
+    (monitor
+     (((name Tcp.close_sock_on_error) (here ()) (id 5) (has_seen_error true)
+       (someone_is_listening true) (kill_index 0))
+      ((name main) (here ()) (id 1) (has_seen_error true)
+       (someone_is_listening false) (kill_index 0))))))
+  (Pid 74259)))

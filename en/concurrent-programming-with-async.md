@@ -41,9 +41,8 @@ systems.
 
 Consider a typical function for doing I/O in Core.
 
-```ocaml
-# In_channel.read_all;;
-- : string -> string = <fun>
+```frag
+((typ ocamltop)(name async/main.topscript)(part 1))
 ```
 
 Since the function returns a concrete string, it has to block until
@@ -51,11 +50,8 @@ the read completes.  The blocking nature of the call means that no
 progress can be made on anything else until the read is completed, as
 you can see below.
 
-```ocaml
-# Out_channel.write_all "test.txt" ~data:"This is only a test.";;
-- : unit = ()
-# In_channel.read_all "test.txt";;
-- : string = "This is only a test."
+```frag
+((typ ocamltop)(name async/main.topscript)(part 2))
 ```
 
 In Async, well-behaved functions never block.  Instead, they return a
@@ -63,27 +59,23 @@ value of type `Deferred.t` that acts as a placeholder that will
 eventually be filled in with the result.  As an example, consider the
 signature of the Async equivalent of `In_channel.read_all`.
 
-```ocaml
-# open Async.Std;;
-# Reader.file_contents;;
-- : string -> string Deferred.t = <fun>
+```frag
+((typ ocamltop)(name async/main.topscript)(part 3))
 ```
 
-Note that we opened `Async.Std`, which adds a number of new
-identifiers and modules into our environment that make using Async
-more convenient.  Opening `Async.Std` is standard practice for writing
-programs using Async, much like opening `Core.Std` is for using Core.
+We first load the Async package in the toplevel using `#require`, and
+then open `Async.Std`, which adds a number of new identifiers and
+modules into our environment that make using Async more convenient.
+Opening `Async.Std` is standard practice for writing programs using
+Async, much like opening `Core.Std` is for using Core.
 
 A deferred is essentially a handle to a value that may be computed in
 the future.  As such, if we call `Reader.file_contents`, the resulting
 deferred will initially be empty, as you can see by calling
 `Deferred.peek` on the resulting deferred.
 
-```ocaml
-# let contents = Reader.file_contents "test.txt";;
-val contents : string Deferred.t = <abstr>
-# Deferred.peek contents;;
-- : string option = None
+```frag
+((typ ocamltop)(name async/main.topscript)(part 4))
 ```
 
 The value in `contents` isn't yet determined in part because there's
@@ -96,26 +88,23 @@ when you type in an expression of type `Deferred.t`, it will make sure
 the scheduler is running and block until the deferred is determined.
 Thus, we can write:
 
-```ocaml
-# contents;;
-- : string = "This is only a test.\n"
+```frag
+((typ ocamltop)(name async/main.topscript)(part 5))
 ```
 
 If we peek again, we'll see that the value of `contents` has been
 determined.
 
-```ocaml
-# Deferred.peek contents;;
-- : string option = Some "This is only a test.\n"
+```frag
+((typ ocamltop)(name async/main.topscript)(part 6))
 ```
 
 In order to do real work with deferreds, we need a way of sequencing
 deferred computations, which we do using `Deferred.bind`.  First,
 let's consider the type-signature of bind.
 
-```ocaml
-# Deferred.bind ;;
-- : 'a Deferred.t -> ('a -> 'b Deferred.t) -> 'b Deferred.t = <fun>
+```frag
+((typ ocamltop)(name async/main.topscript)(part 7))
 ```
 
 Thus, `Deferred.bind d f` takes a deferred value `d` and a function f
@@ -128,30 +117,16 @@ running `f` once `d` is determined.
 Here's a simple use of bind for a function that replaces a file with
 an uppercase version of its contents.
 
-```ocaml
-# let uppercase_file filename =
-    Deferred.bind (Reader.file_contents filename)
-     (fun text ->
-         Writer.save filename ~contents:(String.uppercase text))
-  ;;
-val uppercase_file : string -> unit Deferred.t = <fun>
-# uppercase_file "test.txt";;
-- : unit = ()
-# Reader.file_contents "test.txt";;
-- : string = "THIS IS ONLY A TEST."
+```frag
+((typ ocamltop)(name async/main.topscript)(part 8))
 ```
 
 Writing out `Deferred.bind` explicitly can be rather verbose, and so
 `Async.Std` includes an infix operator for it: `>>=`.  Using this
 operator, we can rewrite `uppercase_file` as follows.
 
-```ocaml
-# let uppercase_file filename =
-    Reader.file_contents filename
-    >>= fun text ->
-    Writer.save filename ~contents:(String.uppercase text)
-  ;;
-val uppercase_file : string -> unit Deferred.t = <fun>
+```frag
+((typ ocamltop)(name async/main.topscript)(part 9))
 ```
 
 In the above we've dropped the parentheses around the function on the
@@ -162,46 +137,25 @@ using the bind operator.
 Now let's look at another potential use of bind.  In this case, we'll
 write a function that counts the number of lines in a file.
 
-```ocaml
-# let count_lines filename =
-    Reader.file_contents filename
-    >>= fun text ->
-    List.length (String.split text ~on:'\n')
-  ;;
+```frag
+((typ ocamltop)(name async/main.topscript)(part 10))
 ```
 
-This looks reasonable enough, but when we try to compile it, we get
-the following error.
+This looks reasonable enough, but as you can see, the compiler is
+unhappy with the code.  The issue here is that bind expects a function
+that returns a deferred, but we've provided it a function that simply
+returns the result.  To make these signatures match, we need a
+function for taking an ordinary value and wrapping it in a deferred.
+This function is a standard part of Async, and is called `return`:
 
-```
-Error: This expression has type int but an expression was expected of type
-         'a Deferred.t
-```
-
-The issue here is that bind expects a function that returns a
-deferred, but we've provided it a function that simply returns the
-result.  To make these signatures match, we need a function for taking
-an ordinary value and wrapping it in a deferred.  This function is a
-standard part of Async, and is called `return`:
-
-```
-# return;;
-- : 'a -> 'a Deferred.t = <fun>
-# let three = return 3;;
-val three : int Deferred.t = <abstr>
-# three;;
-- : int = 3
+```frag
+((typ ocamltop)(name async/main.topscript)(part 11))
 ```
 
 Using `return`, we can make `count_lines` compile.
 
-```ocaml
-# let count_lines filename =
-    Reader.file_contents filename
-    >>= fun text ->
-    return (List.length (String.split text ~on:'\n'))
-  ;;
-val count_lines : string -> int Deferred.t = <fun>
+```frag
+((typ ocamltop)(name async/main.topscript)(part 12))
 ```
 
 Together, `bind` and `return` form a design pattern in functional
@@ -213,23 +167,15 @@ Calling `bind` and `return` together is a fairly common pattern, and
 as such there is a standard shortcut for it called `Deferred.map`,
 which has the following signature:
 
-```ocaml
-# Deferred.map;;
-- : 'a Deferred.t -> f:('a -> 'b) -> 'b Deferred.t = <fun>
+```frag
+((typ ocamltop)(name async/main.topscript)(part 13))
 ```
 
 and comes with its own infix equivalent, `>>|`.  Using it, we can
 rewrite `count_lines` again a bit more succinctly:
 
-```ocaml
-# let count_lines filename =
-    Reader.file_contents filename
-    >>| fun text ->
-    List.length (String.split text ~on:'\n')
-  ;;
-val count_lines : string -> int Deferred.t = <fun>
-# count_lines "/etc/hosts";;
-- : int = 11
+```frag
+((typ ocamltop)(name async/main.topscript)(part 14))
 ```
 
 Note that `count_lines` returns a deferred, but `utop` waits for that
@@ -250,17 +196,8 @@ that corresponds to the ivar in question, using `Ivar.read`, and you
 can fill an ivar, thus causing that deferred to become determined,
 using `Ivar.fill`.  These operations are illustrated below.
 
-```ocaml
-# let ivar = Ivar.create ();;
-val ivar : '_a Ivar.t = <abstr>
-# let def = Ivar.read ivar;;
-val def : '_a Ivar.Deferred.t = <abstr>
-# Deferred.peek def;;
-- : '_a option = None
-# Ivar.fill ivar "Hello";;
-- : unit = ()
-# Deferred.peek def;;
-- : string option = Some "Hello"
+```frag
+((typ ocamltop)(name async/main.topscript)(part 15))
 ```
 
 Ivars are something of a low-level feature; operators like map, bind
@@ -274,12 +211,8 @@ guarantee that these delayed actions are executed in the same order
 they were scheduled in.  One could imagine building a module for
 handling this with the following interface.
 
-```ocaml
-# module type Delayer_intf = sig
-    type t
-    val create : Time.Span.t -> t
-    val schedule : t -> (unit -> 'a Deferred.t) -> 'a Deferred.t
-  end;;
+```frag
+((typ ocamltop)(name async/main.topscript)(part 16))
 ```
 
 An action is handed to `schedule` in the form of a deferred-returning
@@ -292,9 +225,8 @@ becomes determined.  Instead of using `bind` or `map` for scheduling
 these events, we'll use a different operator called `upon`.  Here's
 the signature of `upon`:
 
-```ocaml
-# upon;;
-- : 'a Deferred.t -> ('a -> unit) -> unit = <fun>
+```frag
+((typ ocamltop)(name async/main.topscript)(part 17))
 ```
 
 Like `bind` and `return`, `upon` schedules a callback to be executed
@@ -310,25 +242,8 @@ time span elapses.  The role of the ivar here is to take the value
 returned by the thunk and use it to fill the deferred returned by the
 provided thunk.
 
-```ocaml
-# module Delayer : Delayer_intf = struct
-    type t = { delay: Time.Span.t;
-               jobs: (unit -> unit) Queue.t;
-             }
-
-    let create delay =
-      { delay; jobs = Queue.create () }
-
-    let schedule t thunk =
-      let ivar = Ivar.create () in
-      Queue.enqueue t.jobs (fun () ->
-        upon (thunk ()) (fun x -> Ivar.fill ivar x));
-      upon (after t.delay) (fun () ->
-        let job = Queue.dequeue_exn t.jobs in
-        job ());
-      Ivar.read ivar
-  end;;
-module Delayer : Delayer_intf
+```frag
+((typ ocamltop)(name async/main.topscript)(part 18))
 ```
 
 This code isn't particularly long, but it is a bit subtle.  This is
@@ -348,22 +263,8 @@ input to an output.  Here, we'll use Async's `Reader` and `Writer`
 modules which provide a convenient abstraction for working with input
 and output channels.
 
-```ocaml
-(* filename: echo.ml *)
-open Core.Std
-open Async.Std
-
-(* Copy data from the reader to the writer, using the provided buffer
-   as scratch space *)
-let rec copy_blocks buffer r w =
-  Reader.read r buffer
-  >>= function
-  | `Eof -> return ()
-  | `Ok bytes_read ->
-    Writer.write w buffer ~len:bytes_read;
-    Writer.flushed w
-    >>= fun () ->
-    copy_blocks buffer r w
+```frag
+((typ ocaml)(name async/echo.ml)(part 0))
 ```
 
 Bind is used in the above code to sequence the operations: first, we
@@ -398,19 +299,8 @@ dispatch to `copy_blocks`.  For this, we'll use Async's `Tcp` module,
 which has a collection of utilities for creating simple TCP clients
 and servers.
 
-```ocaml
-(** Starts a TCP server, which listens on the specified port, invoking
-    copy_blocks every time a client connects. *)
-let run () =
-  let host_and_port =
-    Tcp.Server.create
-      ~on_handler_error:`Raise
-      (Tcp.on_port 8765)
-      (fun _addr r w ->
-         let buffer = String.create (16 * 1024) in
-         copy_blocks buffer r w)
-  in
-  ignore (host_and_port : (Socket.Address.Inet.t, int) Tcp.Server.t Deferred.t)
+```frag
+((typ ocaml)(name async/echo.ml)(part 1))
 ```
 
 The result of calling `Tcp.Server.create` is a `Tcp.Server.t`, which
@@ -429,11 +319,8 @@ becomes determined.
 
 Finally, we need to initiate the server and start the Async scheduler.
 
-```ocaml
-(* Call [run], and then start the scheduler *)
-let () =
-  run ();
-  never_returns (Scheduler.go ())
+```frag
+((typ ocaml)(name async/echo.ml)(part 2))
 ```
 
 One of the most common newbie errors with Async is to forget to run
@@ -445,16 +332,11 @@ It's worth noting that even though we didn't spend much explicit
 effort on thinking about multiple clients, this server is able to
 handle many concurrent clients without further modification.
 
-Now that we have the echo server, we can try it out using `netcat`.
+Now that we have the echo server, we can connect to the echo server
+using the netcat tool, which is invoked as `nc`.
 
-```
-echo_server $ ./echo.native &
-[1] 25030
-echo_server $ nc 127.0.0.1 8765
-This is an echo server
-This is an echo server
-It repeats whatever I write.
-It repeats whatever I write.
+```frag
+((typ console)(name async/run_echo.out))
 ```
 
 <note>
@@ -465,24 +347,16 @@ above.  `never_returns` is an idiom that comes from `Core` that is
 used to mark functions that don't return.  Typically, a function that
 doesn't return is inferred as having return type `'a`.
 
-```ocaml
-# let rec loop_forever () = loop_forever ();;
-val loop_forever : unit -> 'a = <fun>
-# let always_fail () = assert false;;
-val always_fail : unit -> 'a = <fun>
+```frag
+((typ ocamltop)(name async/main.topscript)(part 19))
 ```
 
 This can be surprising when you call a function like this expecting it
 to return unit, and really it never returns.  The type-checker won't
 necessarily complain in such a case.
 
-```ocaml
-# let do_stuff n =
-    let x = 3 in
-    if n > 0 then loop_forever ();
-    x + n
-  ;;
-val do_stuff : int -> int = <fun>
+```frag
+((typ ocamltop)(name async/main.topscript)(part 20))
 ```
 
 With a name like `loop_forever`, the meaning is clear enough in this
@@ -491,9 +365,8 @@ returns is less clear, and so we use the type system to make it more
 explicit by giving it a return type of `never_returns`.  To make it
 clearer how this works, let's do the same trick with `loop_forever`.
 
-```ocaml
-# let rec loop_forever () : never_returns = loop_forever ();;
-val loop_forever : unit -> never_returns = <fun>
+```frag
+((typ ocamltop)(name async/main.topscript)(part 21))
 ```
 
 The type `never_returns` is uninhabited, so a function can't return a
@@ -501,27 +374,14 @@ value of type `never_returns`, which means only functions that never
 return can have it as their return type!  Now, if we rewrite our
 `do_stuff` function, we'll get a helpful type error.
 
-```ocaml
-# let do_stuff n =
-    let x = 3 in
-    if n > 0 then loop_forever ();
-    x + n
-  ;;
-Error: This expression has type unit but an expression was expected of type
-         never_returns
+```frag
+((typ ocamltop)(name async/main.topscript)(part 22))
 ```
 
 We can resolve the error by calling the function `never_returns`.
 
-```ocaml
-# never_returns;;
-- : never_returns -> 'a = <fun>
-# let do_stuff n =
-    let x = 3 in
-    if n > 0 then never_returns (loop_forever ());
-    x + n
-  ;;
-val do_stuff : int -> int = <fun>
+```frag
+((typ ocamltop)(name async/main.topscript)(part 23))
 ```
 
 Thus, we got the compilation to go through by explicitly marking in
@@ -546,31 +406,8 @@ interface, which is the entry-point of the program.  Note the use of
 determined.  In this case, we use `Deferred.never` because the server
 in question doesn't shut down.
 
-```ocaml
-let run ~uppercase ~port =
-  let host_and_port =
-    Tcp.Server.create
-      ~on_handler_error:`Raise
-      (Tcp.on_port port)
-      (fun _addr r w ->
-        Pipe.transfer (Reader.pipe r) (Writer.pipe w)
-           ~f:(if uppercase then String.uppercase else Fn.id))
-  in
-  ignore (host_and_port : (Socket.Address.Inet.t, int) Tcp.Server.t Deferred.t);
-  Deferred.never ()
-
-let () =
-  Command.async_basic
-    ~summary:"Start an echo server"
-    Command.Spec.(
-      empty
-      +> flag "-uppercase" no_arg
-        ~doc:" Convert to uppercase before echoing back"
-      +> flag "-port" (optional_with_default 8765 int)
-        ~doc:" Port to listen on (default 8765)"
-    )
-    (fun uppercase port () -> run ~uppercase ~port)
-  |> Command.run
+```frag
+((typ ocaml)(name async/better_echo.ml))
 ```
 
 The most notable change in the above code is the use of Async's
@@ -583,10 +420,8 @@ worth discussing them in some detail.
 
 Pipes are created in connected read/write pairs, as you can see below.
 
-```ocaml
-# let (r,w) = Pipe.create ();;
-val r : '_a Pipe.Reader.t = <abstr>
-val w : '_a Pipe.Writer.t = <abstr>
+```frag
+((typ ocamltop)(name async/main.topscript)(part 24))
 ```
 
 `r` and `w` are really just read and write handles to the same
@@ -599,24 +434,15 @@ If we just try and write to the writer, we'll see that we block
 indefinitely in utop.  You can break out of the wait by hitting
 `Control-C`.
 
-```ocaml
-# Pipe.write w "Hello World!";;
-Interrupted.
+```frag
+((typ ocamlrawtop)(name async/pipe_write_break.rawscript))
 ```
 
 The deferred returned by write completes on its own once the value
 written into the pipe has been read out:
 
-```ocaml
-# let (r,w) = Pipe.create ();;
-val r : '_a Pipe.Reader.t = <abstr>
-val w : '_a Pipe.Writer.t = <abstr>
-# let write_complete = Pipe.write w "Hello World!";;
-val write_complete : unit Deferred.t = <abstr>
-# Pipe.read r;;
-- : [ `Eof | `Ok of string ] = `Ok "Hello World!"
-# write_complete;;
-- : unit = ()
+```frag
+((typ ocamltop)(name async/main.topscript)(part 25))
 ```
 
 In the function `run` above, we're taking advantage of one of the many
@@ -625,10 +451,8 @@ particular, we're using `Pipe.transfer` to set up a process that takes
 data from a reader-pipe and moves it to a writer-pipe.  Here's the
 type of `Pipe.transfer`:
 
-```ocaml
-# Pipe.transfer;;
-- : 'a Pipe.Reader.t -> 'b Pipe.Writer.t -> f:('a -> 'b) -> unit Deferred.t =
-<fun>
+```frag
+((typ ocamltop)(name async/main.topscript)(part 26))
 ```
 
 The two pipes being connected are generated by the `Reader.pipe` and
@@ -649,12 +473,8 @@ library that we introduced in [xref](#command-line-parsing).  When you
 open `Async.Std`, the `Command` module has added to it the `async_basic`
 call:
 
-```ocaml
-# Command.async_basic;;
-- : summary:string ->
-    ?readme:(unit -> string) ->
-    ('a, unit -> unit Deferred.t) Command.Spec.t -> 'a -> Command.t
-= <fun>
+```frag
+((typ ocamltop)(name async/main.topscript)(part 27))
 ```
 
 This differs from the ordinary `Command.basic` call in that the main
@@ -697,15 +517,8 @@ interface which takes care of much of the hassle.
 We'll need a function for generating the URI's that we're going to use
 to query the DuckDuckGo servers.
 
-```ocaml
-(* file: search.ml *)
-open Core.Std
-open Async.Std
-
-(* Generate a DuckDuckGo search URI from a query string *)
-let query_uri query =
-  let base_uri = Uri.of_string "http://api.duckduckgo.com/?format=json" in
-  Uri.add_query_param base_uri ("q", [query])
+```frag
+((typ ocaml)(name async/search.ml)(part 0))
 ```
 
 A `Uri.t` is constructed from the `Uri.of_string` function, and a
@@ -728,22 +541,8 @@ the key "Abstract" or "Definition", and so the code below looks under
 both keys, returning the first one for which a non-empty value is
 defined.
 
-```ocaml
-(* Extract the "Definition" or "Abstract" field from the DuckDuckGo results *)
-let get_definition_from_json json =
-  match Yojson.Safe.from_string json with
-  | `Assoc kv_list ->
-    let find key =
-      begin match List.Assoc.find kv_list key with
-      | None | Some (`String "") -> None
-      | Some s -> Some (Yojson.Safe.to_string s)
-      end
-    in
-    begin match find "Abstract" with
-    | Some _ as x -> x
-    | None -> find "Definition"
-    end
-  | _ -> None
+```frag
+((typ ocaml)(name async/search.ml)(part 1))
 ```
 
 ### Executing an HTTP client query
@@ -751,26 +550,15 @@ let get_definition_from_json json =
 Now let's look at the code for dispatching the search queries over
 HTTP, using the Cohttp library.
 
-```ocaml
-(* Execute the DuckDuckGo search *)
-let get_definition word =
-  Cohttp_async.Client.get (query_uri word)
-  >>= fun (_, body) ->
-  Pipe.to_list body
-  >>| fun strings ->
-  (word, get_definition_from_json (String.concat strings))
+```frag
+((typ ocaml)(name async/search.ml)(part 2))
 ```
 
 To better understand what's going on, it's useful to look at the type
 for `Cohttp_async.Client.get`, which we can do in utop.
 
-```ocaml
-# #require "cohttp.async";;
-# Cohttp_async.Client.get;;
-- : ?interrupt:unit Deferred.t ->
-    ?headers:Cohttp.Header.t ->
-    Uri.t -> (Cohttp.Response.r * Cohttp_async.body) Deferred.t
-= <fun>
+```frag
+((typ ocamltop)(name async/main.topscript)(part 28))
 ```
 
 The `get` call takes as a required argument a URI, and returns a
@@ -788,17 +576,8 @@ perspective, so let's write code for dispatching multiple searches in
 parallel.  First, we need code for formatting and printing out the
 search result.
 
-```ocaml
-(* Print out a word/definition pair *)
-let print_result (word,definition) =
-  printf "%s\n%s\n\n%s\n\n"
-    word
-    (String.init (String.length word) ~f:(fun _ -> '-'))
-    (match definition with
-    | None -> "No definition found"
-    | Some def ->
-      String.concat ~sep:"\n"
-        (Wrapper.wrap (Wrapper.make 70) def))
+```frag
+((typ ocaml)(name async/search.ml)(part 3))
 ```
 
 We use the `Wrapper` module from the `textwrap` package to do the
@@ -814,22 +593,16 @@ generate any output!
 The next function dispatches the searches in parallel, waits for the
 results, and then prints.
 
-```ocaml
-(* Run many searches in parallel, printing out the results after they're all
-   done. *)
-let search_and_print words =
-  Deferred.all (List.map words ~f:get_definition)
-  >>| fun results ->
-  List.iter results ~f:print_result
+```frag
+((typ ocaml)(name async/search.ml)(part 4))
 ```
 
 We used `List.map` to call `get_definition` on each word, and
 `Deferred.all` to wait for all the results.  Here's the type of
 `Deferred.all`:
 
-```ocaml
-# Deferred.all;;
-- : 'a Deferred.t list -> 'a list Deferred.t = <fun>
+```frag
+((typ ocamltop)(name async/main.topscript)(part 29))
 ```
 
 Note that the list returned by `Deferred.all` reflects the order of
@@ -839,11 +612,8 @@ what orders the queries return in.  We could rewrite this code to
 print out the results as they're received (and thus potentially out of
 order) as follows.
 
-```ocaml
-(* Run many searches in parallel, printing out the results as you go *)
-let search_and_print words =
-  Deferred.all_unit (List.map words ~f:(fun word ->
-    get_definition word >>| print_result))
+```frag
+((typ ocaml)(name async/search_out_of_order.ml)(part 1))
 ```
 
 The difference is that we both dispatch the query and print out the
@@ -854,44 +624,22 @@ returns a single `unit` deferred that becomes determined when every
 deferred on the input list is determined.  We can see the type of this
 function in utop.
 
-```ocaml
-# Deferred.all_unit;;
-- : unit Deferred.t list -> unit Deferred.t = <fun>
+```frag
+((typ ocamltop)(name async/main.topscript)(part 30))
 ```
 
 Finally, we create a command line interface using
 `Command.async_basic`.
 
-```ocaml
-let () =
-  Command.async_basic
-    ~summary:"Retrieve definitions from duckduckgo search engine"
-    Command.Spec.(
-      empty
-      +> anon (sequence ("word" %: string))
-    )
-    (fun words () -> search_and_print words)
-  |> Command.run
+```frag
+((typ ocaml)(name async/search.ml)(part 5))
 ```
 
 And that's all we need to create a simple but usable definition
 searcher.
 
-```
-$ ./search.native "Concurrent Programming" "OCaml"
-Concurrent Programming
-----------------------
-
-"Concurrent computing is a form of computing in which programs are
-designed as collections of interacting computational processes that
-may be executed in parallel."
-
-OCaml
------
-
-"OCaml, originally known as Objective Caml, is the main implementation
-of the Caml programming language, created by Xavier Leroy, Jérôme
-Vouillon, Damien Doligez, Didier Rémy and others in 1996."
+```frag
+((typ console)(name async/run_search.out))
 ```
 
 ## Exception handling
@@ -911,28 +659,8 @@ The function `maybe_raise` below blocks for half a second, and then
 either throws an exception or returns unit, alternating between the
 two behaviors on subsequent calls.  
 
-```ocaml
-# let maybe_raise =
-    let should_fail = ref false in
-    fun () ->
-      let will_fail = !should_fail in
-      should_fail := not will_fail;
-      after (Time.Span.of_sec 0.5)
-      >>= fun () ->
-      if will_fail then raise Exit else return ()
- ;;
-val maybe_raise : unit -> unit Deferred.t = <fun>
-# maybe_raise ();;
-- : unit = ()
-# maybe_raise ();;
-Exception:
-(lib/monitor.ml.Error_
- ((exn Exit) (backtrace (""))
-  (monitor
-   (((name block_on_async) (here ()) (id 5) (has_seen_error true)
-     (someone_is_listening true) (kill_index 0))
-    ((name main) (here ()) (id 1) (has_seen_error false)
-     (someone_is_listening false) (kill_index 0)))))).
+```frag
+((typ ocamltop)(name async/main.topscript)(part 31))
 ```
 
 In utop, the exception thrown by `maybe_raise ()` terminates the
@@ -943,25 +671,8 @@ So, how could we capture and handle such an exception?  You might try
 to do this using OCaml's built-in `try/with` statement, but as you can
 see below, that doesn't quite do the trick.
 
-```ocaml
-# let handle_error () =
-    try
-      maybe_raise ()
-      >>| fun () -> "success"
-    with _ -> return "failure"
-  ;;
-val handle_error : unit -> string Deferred.t = <fun>
-# handle_error ();;
-- : string = "success"
-# handle_error ();;
-Exception:
-(lib/monitor.ml.Error_
- ((exn Exit) (backtrace (""))
-  (monitor
-   (((name block_on_async) (here ()) (id 58) (has_seen_error true)
-     (someone_is_listening true) (kill_index 0))
-    ((name main) (here ()) (id 1) (has_seen_error false)
-     (someone_is_listening false) (kill_index 0)))))).
+```frag
+((typ ocamltop)(name async/main.topscript)(part 32))
 ```
 
 This didn't work because `try/with` only captures exceptions that are
@@ -972,17 +683,8 @@ throws an exception.
 We can capture this kind of asynchronous error use the `try_with`
 function provided by Async:
 
-```ocaml
-# let handle_error () =
-    try_with (fun () -> maybe_raise ())
-    >>| function
-    | Ok ()   -> "success"
-    | Error _ -> "failure"
-  ;;
-# handle_error ();;
-- : string = "success"
-# handle_error ();;
-  - : string = "failure"
+```frag
+((typ ocamltop)(name async/main.topscript)(part 33))
 ```
 
 `try_with f` takes as its argument a deferred-returning thunk `f`, and
@@ -1011,24 +713,8 @@ explicitly run jobs within a monitor using `within`, which takes a
 thunk that returns a non-deferred value, or `within'`, which takes a
 thunk that returns a deferred.  Here's an example.
 
-```ocaml
-# let blow_up () =
-    let monitor = Monitor.create ~name:"blow up monitor" () in
-    within' ~monitor maybe_raise
-  ;;
-# blow_up ();;
-- : unit = ()
-# blow_up ();;
-Exception:
-(lib/monitor.ml.Error_
- ((exn Exit) (backtrace (""))
-  (monitor
-   (((name "blow up monitor") (here ()) (id 73) (has_seen_error true)
-     (someone_is_listening false) (kill_index 0))
-    ((name block_on_async) (here ()) (id 72) (has_seen_error false)
-     (someone_is_listening true) (kill_index 0))
-    ((name main) (here ()) (id 1) (has_seen_error false)
-     (someone_is_listening false) (kill_index 0)))))).
+```frag
+((typ ocamltop)(name async/main.topscript)(part 34))
 ```
 
 In addition to the ordinary stack-trace, the exception displays the
@@ -1046,17 +732,8 @@ handling of errors, which may include re-raising errors to the parent.
 Here is a very simple example of a function that captures and ignores
 errors in the processes it spawns.
 
-```ocaml
-# let swallow_error () =
-    let monitor = Monitor.create () in
-    Stream.iter (Monitor.errors monitor) ~f:(fun _exn ->
-      printf "an error happened\n");
-    within' ~monitor (fun () ->
-      after (Time.Span.of_sec 0.5) >>= fun () -> failwith "Kaboom!")
-  ;;
-val swallow_error : unit -> 'a Deferred.t = <fun>
-# swallow_error ();;
-an error happened
+```frag
+((typ ocamltop)(name async/main.topscript)(part 35))
 ```
 
 The message "an error happened" is printed out, but the deferred
@@ -1069,21 +746,8 @@ the parent, and handles others.  Exceptions are sent to the parent
 using `Monitor.send_exn`, with `Monitor.current` being called to find
 the current monitor, which is the parent of the newly created monitor.
 
-```ocaml
-# exception Ignore_me;;
-exception Ignore_me
-# let swallow_some_errors exn_to_raise =
-    let child_monitor  = Monitor.create  () in
-    let parent_monitor = Monitor.current () in
-    Stream.iter (Monitor.errors child_monitor) ~f:(fun error ->
-      match Monitor.extract_exn error with
-      | Ignore_me -> printf "ignoring exn\n"
-      | _ -> Monitor.send_exn parent_monitor error);
-    within' ~monitor:child_monitor (fun () ->
-       after (Time.Span.of_sec 0.5)
-       >>= fun () -> raise exn_to_raise)
-  ;;
-val swallow_some_errors : exn -> 'a Deferred.t = <fun>
+```frag
+((typ ocamltop)(name async/main.topscript)(part 36))
 ```
 
 Note that we use `Monitor.extract_exn` to grab the underlying
@@ -1095,27 +759,16 @@ If we pass in an exception other than `Ignore_me`, like, say, the
 built-in exception `Not_found`, then the exception will be passed to
 the parent monitor and delivered as usual.
 
-```ocaml
-# swallow_some_errors Not_found;;
-Exception:
-(lib/monitor.ml.Error_
- ((exn Not_found) (backtrace (""))
-  (monitor
-   (((name (id 3)) (here ()) (id 3) (has_seen_error true)
-     (someone_is_listening true) (kill_index 0))
-    ((name block_on_async) (here ()) (id 2) (has_seen_error true)
-     (someone_is_listening true) (kill_index 0))
-    ((name main) (here ()) (id 1) (has_seen_error false)
-     (someone_is_listening false) (kill_index 0)))))).
+```frag
+((typ ocamltop)(name async/main.topscript)(part 37))
 ```
 
 If instead we use `Ignore_me`, the exception will be ignored, and we
 again see that the deferred never returns, but the exception was
 caught and ignored.
 
-```ocaml
-# swallow_some_errors Ignore_me;;
-ignoring exn
+```frag
+((typ ocamltop)(name async/main.topscript)(part 38))
 ```
 
 In practice, you should rarely use monitors directly, instead using
@@ -1143,13 +796,8 @@ misspecified.
 First we'll need to change `query_uri` to take an argument specifying
 the server to connect to, as follows.
 
-```ocaml
-(* Generate a DuckDuckGo search URI from a query string *)
-let query_uri ~server query =
-  let base_uri =
-    Uri.of_string (String.concat ["http://";server;"/?format=json"])
-  in
-  Uri.add_query_param base_uri ("q", [query])
+```frag
+((typ ocaml)(name async/search_with_configurable_server.ml)(part 1))
 ```
 
 and then making the appropriate changes to get the list of servers on
@@ -1158,24 +806,8 @@ over the list of servers.  Now, let's see what happens if we rebuild
 the application and run it giving it a list of servers, some of which
 won't respond to the query.
 
-```
-$ ./search_with_configurable_server.native \
-     -servers localhost,api.duckduckgo.com \
-     "Concurrent Programming" OCaml
-("unhandled exception"
- ((lib/monitor.ml.Error_
-   ((exn (Unix.Unix_error "Connection refused" connect 127.0.0.1:80))
-    (backtrace
-     ("Raised by primitive operation at file \"lib/unix_syscalls.ml\", line 793, characters 12-69"
-      "Called from file \"lib/deferred.ml\", line 24, characters 62-65"
-      "Called from file \"lib/scheduler.ml\", line 120, characters 6-17"
-      "Called from file \"lib/jobs.ml\", line 73, characters 8-13" ""))
-    (monitor
-     (((name Tcp.close_sock_on_error) (here ()) (id 3) (has_seen_error true)
-       (someone_is_listening true) (kill_index 0))
-      ((name main) (here ()) (id 1) (has_seen_error true)
-       (someone_is_listening false) (kill_index 0))))))
-  (Pid 1352)))
+```frag
+((typ console)(name async/run_search_with_configurable_server.out))
 ```
 
 As you can see, we got a "Connection refused" failure which ends the
@@ -1184,18 +816,8 @@ through successfully. We can handle the failures of individual
 connections separately by using the `try_with` function within each
 call to `get_definition`, as follows.
 
-```ocaml
-(* Execute the DuckDuckGo search *)
-let get_definition ~server word =
-  try_with (fun () ->
-    Cohttp_async.Client.get (query_uri ~server word)
-    >>= fun  (_, body) ->
-    Pipe.to_list body
-    >>| fun strings ->
-    (word, get_definition_from_json (String.concat strings)))
-  >>| function
-  | Ok (word,result) -> (word, Ok result)
-  | Error _          -> (word, Error "Unexpected failure")
+```frag
+((typ ocaml)(name async/search_with_error_handling.ml)(part 1))
 ```
 
 Here, we use `try_with` to capture the exception, which we then use
@@ -1206,38 +828,15 @@ second element is the (possibly erroneous) result.
 Now we just need to change the code for `print_result` so that it can
 handle the new type.
 
-```ocaml
-(* Print out a word/definition pair *)
-let print_result (word,definition) =
-  printf "%s\n%s\n\n%s\n\n"
-    word
-    (String.init (String.length word) ~f:(fun _ -> '-'))
-    (match definition with
-     | Error s -> "DuckDuckGo query failed: " ^ s
-     | Ok None -> "No definition found"
-     | Ok (Some def) ->
-       String.concat ~sep:"\n"
-         (Wrapper.wrap (Wrapper.make 70) def))
+```frag
+((typ ocaml)(name async/search_with_error_handling.ml)(part 2))
 ```
 
 Now, if we run that same query, we'll get individualized handling of
 the connection failures:
 
-```
-$ ./search_with_error_handling.native \
-     -servers localhost,api.duckduckgo.com \
-     "Concurrent Programming" OCaml
-Concurrent Programming
-----------------------
-
-DuckDuckGo query failed unexpectedly
-
-OCaml
------
-
-"OCaml, originally known as Objective Caml, is the main implementation
-of the Caml programming language, created by Xavier Leroy, Jérôme
-Vouillon, Damien Doligez, Didier Rémy and others in 1996."
+```frag
+((typ console)(name async/run_search_with_error_handling.out))
 ```
 
 Now, only the query that went to `localhost` failed.
@@ -1261,13 +860,8 @@ returned, returning both values as a tuple.  Here, we use the function
 `sec`, which is shorthand for creating a time-span equal to a given
 number of seconds.
 
-```ocaml
-# let string_and_float = Deferred.both
-   (after (sec 0.5)  >>| fun () -> "A")
-   (after (sec 0.25) >>| fun () -> 32.33);;
-val string_and_float : (string * float) Deferred.t = <abstr>
-# string_and_float;;
-- : string * float = ("A", 32.33)
+```frag
+((typ ocamltop)(name async/main.topscript)(part 39))
 ```
 
 Sometimes, however, we want to wait only for the first of multiple
@@ -1276,10 +870,8 @@ timeouts.  In that case, we can use the call `Deferred.any`, which,
 given a list of deferreds, returns a single deferred that will become
 determined once any of the values on the list is determined.
 
-```ocaml
-# Deferred.any [ (after (sec 0.5) >>| fun () -> "half a second")
-               ; (after (sec 10.) >>| fun () -> "ten seconds") ] ;;
-- : string = "half a second"
+```frag
+((typ ocamltop)(name async/main.topscript)(part 40))
 ```
 
 Let's use this to add timeouts to our DuckDuckGo searches.  We'll do
@@ -1287,19 +879,9 @@ this by writing a wrapper for `get_definition` that takes a timeout
 (in the form of a `Time.Span.t`) as an argument, and returns either
 the definition, or, if that takes too long, the timeout.
 
-```ocaml
-let get_definition_with_timeout ~server ~timeout word =
-  Deferred.any
-    [ (after timeout >>| fun () -> (word,Error "Timed out"))
-    ; (get_definition ~server word
-       >>| fun (word,result) ->
-       let result' = match result with
-         | Ok _ as x -> x
-         | Error _ -> Error "Unexpected failure"
-       in
-       (word,result')
-      )
-    ]
+
+```frag
+((typ ocaml)(name async/search_with_timeout.ml)(part 1))
 ```
 
 We use `>>|` above to transform the deferred values we're waiting for
@@ -1317,33 +899,16 @@ The following code shows how you can change `get_definition` and
 `get_definition_with_timeout` to cancel the `get` call if the timeout
 expires.  
 
-```ocaml
-(* Execute the DuckDuckGo search *)
-let get_definition ~server ~interrupt word =
-  try_with (fun () ->
-    Cohttp_async.Client.get ~interrupt (query_uri ~server word)
-    >>= fun  (_, body) ->
-    Pipe.to_list body
-    >>| fun strings ->
-    (word, get_definition_from_json (String.concat strings)))
-  >>| function
-  | Ok (word,result) -> (word, Ok result)
-  | Error exn        -> (word, Error exn)
+```frag
+((typ ocaml)(name async/search_with_timeout_no_leak_simple.ml)(part 1))
 ```
 
 Next, we'll modify `get_definition_with_timeout` to create a deferred
 to pass in to `get_definition` which will become determined when our
 timeout expires.
 
-```ocaml
-let get_definition_with_timeout ~server ~timeout word =
-  get_definition ~server ~interrupt:(after timeout) word
-  >>| fun (word,result) ->
-  let result' = match result with
-    | Ok _ as x -> x
-    | Error _ -> Error "Unexpected failure"
-  in
-  (word,result')
+```frag
+((typ ocaml)(name async/search_with_timeout_no_leak_simple.ml)(part 2))
 ```
 
 This will work, and will cause the connection to shutdown cleanly
@@ -1361,11 +926,8 @@ combined, using the function `choice`, with a function that is called
 if and only if that is the chosen deferred.   Here's the type
 signature of `choice` and `choose`:
 
-```ocaml
-# choice;;
-- : 'a Deferred.t -> ('a -> 'b) -> 'b Deferred.choice = <fun>
-# choose;;
-- : 'a Deferred.choice list -> 'a Deferred.t = <fun>
+```frag
+((typ ocamltop)(name async/main.topscript)(part 41))
 ```
 
 `choose` provides no guarantee that the `choice` built around the
@@ -1377,40 +939,15 @@ In the following, we use `choose` to ensure that the `interrupt`
 deferred becomes determined if and only if the timeout-deferred is
 chosen.  Here's the code.
 
-```ocaml
-let get_definition_with_timeout ~server ~timeout word =
-  let interrupt = Ivar.create () in
-  choose
-    [ choice (after timeout) (fun () ->
-       Ivar.fill interrupt ();
-       (word,Error "Timed out"))
-    ; choice (get_definition ~server ~interrupt:(Ivar.read interrupt) word)
-        (fun (word,result) ->
-           let result' = match result with
-             | Ok _ as x -> x
-             | Error _ -> Error "Unexpected failure"
-           in
-           (word,result')
-        )
-    ]
+```frag
+((typ ocaml)(name async/search_with_timeout_no_leak.ml)(part 2))
 ```
 
 Now, if we run this with a suitably small timeout, we'll see that some
 queries succeed and some fail, and the timeouts are reported as such.
 
-```
-$ ./search_with_timeout_no_leak.native "concurrent programming" ocaml -timeout 0.1s
-concurrent programming
-----------------------
-
-DuckDuckGo query failed: Timed out
-
-ocaml
------
-
-"OCaml or Objective Caml, is the main implementation of the Caml
-programming language, created by Xavier Leroy, Jérôme Vouillon,
-Damien Doligez, Didier Rémy and others in 1996."
+```frag
+((typ console)(name async/run_search_with_timeout_no_leak.out))
 ```
 
 ## Working with system threads
@@ -1459,11 +996,8 @@ in question in a separate thread.  Async's `In_thread` module provides
 multiple facilities for doing just this, `In_thread.run` being the
 simplest.   We can simply write:
 
-```ocaml
-# let def = In_thread.run (fun () -> List.range 1 10);;
-val def : int list Deferred.t = <abstr>
-# def;;
-- : int list = [1; 2; 3; 4; 5; 6; 7; 8; 9]
+```frag
+((typ ocamltop)(name async/main.topscript)(part 42))
 ```
 
 To cause `List.range 1 10` to be run on one of Async's worker
@@ -1500,42 +1034,22 @@ keeps a list of the delays after which it actually woke up, until the
 deferred it was passed becomes determined.  We can use this to see how
 responsive Async is.
 
-```ocaml
-# let log_delays d =
-    let start = Time.now () in
-    let rec loop stamps =
-      let delay = Time.diff (Time.now ()) start in
-      match Deferred.peek d with
-      | Some () -> return (delay :: stamps)
-      | None ->
-        after (sec 0.1)
-        >>= fun () ->
-        loop (delay :: stamps)
-    in
-    loop [] >>| List.rev
-  ;;
+```frag
+((typ ocamltop)(name async/main.topscript)(part 43))
 ```
 
 If we feed this function a simple timeout, it works as you might
 expect.
 
-```ocaml
-# log_delays (after (sec 1.));;
-- : Core.Span.t list =
-[0s; 101.38ms; 206.134ms; 312.682ms; 413.978ms; 522.833ms; 626.277ms;
- 727.612ms; 829.041ms; 930.538ms; 1.03186s]
+```frag
+((typ ocamltop)(name async/main.topscript)(part 44))
 ```
 
 Now, if instead of simply waiting a second, what if we have a busy
 loop running instead?
 
-```ocaml
-# let busy_loop n =
-    let x = ref None in
-    for i = 1 to n * 100_000 do x := Some i done
-  ;;
-# log_delays (Deferred.unit >>| fun () -> busy_loop 100);;
-- : Core.Span.t list = [0.000953674ms; 2.35119s]
+```frag
+((typ ocamltop)(name async/main.topscript)(part 45))
 ```
 
 As you can see, instead of waking up ten times a second, `log_delays`
@@ -1544,9 +1058,8 @@ is blocked out for nearly a second while `busy_loop` churns away.
 If, on the other hand, we use `In_thread.run` to offload this to a
 different system thread, the behavior will be different.
 
-```ocaml
-# log_delays (In_thread.run (fun () -> busy_loop 100));;
-- : Core.Span.t list = [0.000953674ms; 1.47171s; 2.23492s; 2.33602s]
+```frag
+((typ ocamltop)(name async/main.topscript)(part 46))
 ```
 
 Now `log_delays` does get a chance to run, but not nearly as often as
@@ -1563,18 +1076,8 @@ code that doesn't allocate at all, then it will never allow any other
 OCaml thread to run.  We can see this if we rewrite our busy-loop
 slightly.
 
-```ocaml
-# let noalloc_busy_loop n =
-    let rec loop n =
-      if n <= 0 then ()
-      else loop (n-1)
-    in
-    loop (n * 100_000)
-  ;;
-val noalloc_busy_loop : int -> unit = <fun>
-# log_delays (In_thread.run (fun () -> noalloc_busy_loop 500));;
-- : Core.Span.t list =
-[0.000953674ms; 977.943ms; 1.13111s; 2.30346s; 3.11876s; 4.44648s; 6.57483s]
+```frag
+((typ ocamltop)(name async/main.topscript)(part 47))
 ```
 
 Even though `noalloc_busy_loop` was running in a different thread, it

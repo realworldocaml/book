@@ -5,7 +5,8 @@ small examples that cover most of the major features of the language.
 This should provide a sense of what OCaml can do, without getting too
 deep into any one topic.
 
-We'll present this guided tour using the Core standard library and the
+Throughout the book we're going to use Core, a more full-featured and
+capable replacement for OCaml's standard library.  We'll also use the
 `utop` OCaml toplevel, a shell that lets you type in expressions and
 evaluate them interactively.  `utop` is an easier-to-use version of
 the standard toplevel (which you can start by typing `ocaml` at the
@@ -18,16 +19,14 @@ through the chapter.  Look at [xref](#installation) for details.
 
 ## OCaml as a calculator
 
-Throughout the book we're going to use Core, a more full-featured and
-capable replacement for OCaml's standard library.  Accordingly, after
-starting `utop` at the command line, we'll start by opening the
-`Core.Std`, which adds Core's libraries to your environment.  Note
-that if we don't open `Core.Std`, many of the examples below will
-fail.
+The first thing you need to do when using Core is to open `Core.Std`.
 
 ```frag
 ((typ ocamltop)(name guided-tour/main.topscript)(part 0)) 
 ```
+
+This makes the definitions in Core available, and is required for many
+of the examples in the tour and in the remainder of the book.
 
 Now let's try a few simple numerical calculations.
 
@@ -999,7 +998,7 @@ example, we can just type in a sequence of numbers, one per line,
 hitting control-d to exit when the input is complete.
 
 ```frag
-((typ ocamlrawtop)(name guided-tour/sum.rawscript))
+((typ console)(name guided-tour/sum.out))
 ```
 
 More work is needed to make a really usable command-line program,
