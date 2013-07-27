@@ -36,7 +36,7 @@ dirs= json \
       back-end-bench \
       functors \
       fcm \
-      async \
+      async
 
 # html/md files directory
 OBJ=         _build
