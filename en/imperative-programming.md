@@ -154,27 +154,20 @@ allow us to do a sequence of side-effecting operations in a row:
 first, update the bucket, then update the count.  We could have done
 this using let bindings:
 
-```ocaml
-    let () = t.buckets.(i) <- filtered_bucket in
-    t.length <- t.length - 1
+```frag
+((typ ocaml)(name imperative-programming/dictionary2.ml)(part 1))
 ```
 
 but `;` is more concise and idiomatic.  More generally,
 
-```ocaml
-<expr1>;
-<expr2>;
-...
-<exprN>
+```frag
+((typ ocamlsyntax)(name imperative-programming/semicolon.syntax))
 ```
 
 is equivalent to
 
-```ocaml
-let () = <expr1> in
-let () = <expr2> in
-...
-<exprN>
+```frag
+((typ ocamlsyntax)(name imperative-programming/let-unit.syntax))
 ```
 
 When a sequence expression `expr1; expr2` is evaluated, `expr1` is
@@ -215,14 +208,14 @@ efficiently copying values from one range of indices to another.
 Arrays also come with special syntax for retrieving an element from an
 array:
 
-```ocaml
-array.(index)
+```frag
+((typ ocamlsyntax)(name imperative-programming/array-get.syntax))
 ```
 
 and for setting an element in an array:
 
-```ocaml
-array.(index) <- expr
+```frag
+((typ ocamlsyntax)(name imperative-programming/array-set.syntax))
 ```
 
 Out-of-bounds accesses for arrays (and indeed for all the array-like
@@ -242,8 +235,13 @@ on a 64-bit machine --- to store a single entry, whereas strings use
 one byte per character.
 
 Strings also come with their own syntax for getting and setting
-values: `string.[index]` and `string.[index] <- expr` respectively,
-and string literals are bounded by quotes.  There's also a module
+values:
+
+```frag
+((typ ocamlsyntax)(name imperative-programming/string.syntax))
+```
+
+And string literals are bounded by quotes.  There's also a module
 `String` where you'll find useful functions for working with strings.
 
 #### Bigarrays
@@ -251,9 +249,12 @@ and string literals are bounded by quotes.  There's also a module
 A `Bigarray.t` is a handle to a block of memory stored outside of the
 OCaml heap.  These are mostly useful for interacting with C or Fortran
 libraries, and are discussed in
-[xref](#memory-representation-of-values).  Bigarrays too have
-their own getting and setting syntax: `bigarray.{index}` and
-`bigarray.{index} <- expr`.  There is no literal syntax for bigarrays.
+[xref](#memory-representation-of-values).  Bigarrays too have their
+own getting and setting syntax:
+
+```frag
+((typ ocamlsyntax)(name imperative-programming/bigarray.syntax))
+```
 
 ### Mutable record and object fields and ref cells
 
@@ -602,33 +603,20 @@ Understanding the algorithm isn't important here, but you should pay
 attention to the structure of the recursive calls.
 
 ```frag
-((typ ocamltop)(name imperative-programming/memo.topscript)(part 1))
+((typ ocamltop)(name imperative-programming/memo.topscript)(part 2))
 ```
 
 The thing to note is that if you call `edit_distance "OCaml" "ocaml"`,
 then that will in turn dispatch the following calls:
 
-```ocaml
-edit_distance "OCam" "ocaml"
-edit_distance "OCaml" "ocam"
-edit_distance "OCam" "ocam"
+```frag
+((typ ascii)(name imperative-programming/edit_distance.ascii))
 ```
 
 And these calls will in turn dispatch other calls:
 
-```ocaml
-edit_distance "OCam" "ocaml"
-   edit_distance "OCa" "ocaml"
-   edit_distance "OCam" "ocam"
-   edit_distance "OCa" "ocam"
-edit_distance "OCaml" "ocam"
-   edit_distance "OCam" "ocam"
-   edit_distance "OCaml" "oca"
-   edit_distance "OCam" "oca"
-edit_distance "OCam" "ocam"
-   edit_distance "OCa" "ocam"
-   edit_distance "OCam" "oca"
-   edit_distance "OCa" "oca"
+```frag
+((typ ascii)(name imperative-programming/edit_distance2.ascii))
 ```
 
 As you can see, some of these calls are repeats.  For example, there
@@ -639,13 +627,13 @@ for large strings.  We can see this by writing a small timing
 function.
 
 ```frag
-((typ ocamltop)(name imperative-programming/memo.topscript)(part 2))
+((typ ocamltop)(name imperative-programming/memo.topscript)(part 3))
 ```
 
 And now we can use this to try out some examples.
 
 ```frag
-((typ ocamltop)(name imperative-programming/memo.topscript)(part 3))
+((typ ocamltop)(name imperative-programming/memo.topscript)(part 4))
 ```
 
 Just those few extra characters made it almost four thousand times
@@ -794,8 +782,8 @@ OCaml rejects the definition because OCaml, as a strict language, has
 limits on what it can put on the right hand side of a `let rec`.  In
 particular, imagine how the following code snippet would be compiled.
 
-```ocaml
-let rec x = x + 1
+```frag
+((typ ocaml)(name imperative-programming/let_rec.ml))
 ```
 
 Note that `x` is an ordinary value, not a function.  As such, it's not
@@ -901,17 +889,15 @@ We can build this program (using `ocamlbuild` with the `_tags` file
 described in [xref](#single-file-programs)) and run it, you'll see
 that it prompts you for input, as follows:
 
-```
-$ ./time_converter.byte
-Pick a timezone:
+```frag
+((typ console)(name imperative-programming/time_converter.out))
 ```
 
 You can then type in the name of a timezone and hit return, and it
 will print out the current time in the timezone in question.
 
-```
-Pick a timezone: Europe/London
-The time in Europe/London is 2013-03-06 02:15:13.602033
+```frag
+((typ console)(name imperative-programming/time_converter2.out))
 ```
 
 We called `Out_channel.flush` on `stdout` because `out_channel`s are
@@ -1201,12 +1187,13 @@ as an example, gets a polymorphic type in this way.
 As you can see, the polymorphic type of `identity` lets it operate on
 values with different types.
 
-This is not what happens with `remember`, though.  Here's the type
-that OCaml infers for `remember`, which looks almost, but not quite,
-like the type of the identity function.
+This is not what happens with `remember`, though.  As you can see from
+the `utop` output above, the type that OCaml infers for `remember`,
+which looks almost, but not quite, like the type of the identity
+function.  Here it is again:
 
-```ocaml
-val remember : '_a -> '_a = <fun>
+```frag
+((typ ocaml)(name imperative-programming/remember_type.ml))
 ```
 
 The underscore in the type variable `'_a` tells us that the variable
@@ -1263,9 +1250,9 @@ what happens if we try to memoize the function defined above.
 
 The memoized version of the function does in fact need to be
 restricted to a single type, because it uses mutable state behind the
-scenes to cache previous invocations of the function it has passed.
-But OCaml would make the same determination even if the function in
-question did no such thing.  Consider this example:
+scenes to cache values returned by previous invocations of the
+function.  But OCaml would make the same determination even if the
+function in question did no such thing.  Consider this example:
 
 ```frag
 ((typ ocamltop)(name imperative-programming/value_restriction.topscript)(part 3))
