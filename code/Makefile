@@ -1,5 +1,5 @@
-OCAMLPARAM=_,we=+A
-export OCAMLPARAM
+#OCAMLPARAM=_,we=+A
+#export OCAMLPARAM
 
 dirs= json \
       command-line-parsing guided-tour \
