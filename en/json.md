@@ -279,7 +279,7 @@ caught statically via a type error.
 Building and printing JSON values is pretty straightforward given the
 `Yojson.Basic.json` type.  You can just construct values of type `json` and
 call the `to_string` function on them.  Let's remind ourselves of the
-`Yojson.Basic.type` again.
+`Yojson.Basic.json` type again.
 
 ```frag
 ((typ ocaml)(name json/yojson_basic.mli)(header false)(part 0))
