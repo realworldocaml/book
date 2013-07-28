@@ -48,14 +48,17 @@ OCaml, F#, Haskell, Scala and Standard ML.
 Among this worthy set of languages, OCaml stands apart because it
 manages to provide a great deal of power while remaining highly
 pragmatic. The compiler has a straightforward compilation strategy
-without excessive optimization passes, and its strict evaluation model
-makes runtime behaviour easy to predict.  The garbage collector is an
-incremental, precise implementation with no dynamic JIT compilation,
-and the runtime is simple and portable across platforms.
+that produces performant code without requiring heavy optimization and
+without the complexities of dynamic JIT compilation.  This, along with
+OCaml's strict evaluation model, makes runtime behaviour easy to
+predict.  The garbage collector is incremental, letting you avoid
+large GC-related pauses, and precise, meaning it will collect all
+unreferenced data (unlike many reference-counting collectors), and the
+runtime is simple and highly portable.
 
-It is all of this that makes OCaml a great choice for programmers who
-want to step up to a better programming language, and at the same time
-want to get practical work done.
+All of this makes OCaml a great choice for programmers who want to
+step up to a better programming language, and at the same time get
+practical work done.
 
 #### A brief history from the 1960s
 
