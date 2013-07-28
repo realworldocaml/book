@@ -15,36 +15,35 @@ design.  These features include:
 
 * _Garbage collection_ for automatic memory management, now a feature
   of almost every modern high-level language.
-* _Higher-order functions_ that can be passed around as first-class
-  values, as seen in Javascript or Scala.
-* _Static type-checking_ to reduce the number of runtime errors, as
-  enforced by Java or Scala interfaces or variable type declarations
-  in C#, Ada and Pascal.
-* _Parametric polymorphism_ to enable abstractions to be constructed
-  across different datatypes, available as C++ templates or generics
-  in Java or C#.
-* _Immutable data structures_ that cannot be destructively updated,
-  famously enforced in Haskell but also a feature often present in
-  distributed big data frameworks such as Hadoop.
-* _Algebraic datatypes_ and _pattern matching_ to define and
-  manipulate complex data structures, available in Miranda, F# and
-  Standard ML.
+* _First-class functions_ that can be passed around like ordinary
+  values, as seen in Javascript and C#.
+* _Static type-checking_ to increase performance and reduce the number
+  of runtime errors, as found in Java and C#.
+* _Parametric polymorphism_, which enables the construction of
+  abstractions that work across different datatypes, similar to
+  generics in Java and C# and templates in C++.
+* Good support for _immutable programming_, _i.e._, programming
+  without making destructive updates to data-structures.  This is
+  present in traditional functional languages like Scheme, and is also
+  found in distributed big data frameworks like Hadoop.
 * _Automatic type inference_ to avoid having to laboriously define the
   type of every single variable in a program, and instead have them
-  inferred based on how a value is used.  Available in Standard ML, F#
-  and even modern C++11 via its `auto` keyword.
+  inferred based on how a value is used.  Available in C# with
+  implicitly typed local variables, and C++11 with its `auto` keyword.
+* _Algebraic datatypes_ and _pattern matching_ to define and
+  manipulate complex data structures.  Available in Scala and F#.
 
 Some of you will know and love these features, and others will be
 completely new to them.  Most of you will have seen _some_ of them in
 other languages that you've used.  As we'll demonstrate over the
-course of this book, it turns out that there is something
-transformative about having them all together and able to interact in
-a single language.  Despite their importance, these ideas have made
-only limited inroads into mainstream languages and when they do arrive
-there, like higher-order functions in C# or parametric polymorphism in
-Java, it's typically in a limited and awkward form. The only languages
-that completely embody these ideas are statically-typed functional
-programming languages like OCaml, F#, Haskell, Scala and Standard ML.
+course of this book, there is something transformative about having
+them all together and able to interact in a single language.  Despite
+their importance, these ideas have made only limited inroads into
+mainstream languages and when they do arrive there, like higher-order
+functions in C# or parametric polymorphism in Java, it's typically in
+a limited and awkward form. The only languages that completely embody
+these ideas are statically-typed functional programming languages like
+OCaml, F#, Haskell, Scala and Standard ML.
 
 Among this worthy set of languages, OCaml stands apart because it
 manages to provide a great deal of power while remaining highly
