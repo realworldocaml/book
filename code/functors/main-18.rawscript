@@ -1,0 +1,21 @@
+# module Make_interval(Endpoint : Comparable)
+      : (Interval_intf with type endpoint = Endpoint.t)
+  = struct
+
+    type endpoint = Endpoint.t
+    type t = | Interval of Endpoint.t * Endpoint.t
+             | Empty
+
+    ...
+
+  end ;;
+module Make_interval :
+  functor (Endpoint : Comparable) ->
+    sig
+      type t
+      type endpoint = Endpoint.t
+      val create : endpoint -> endpoint -> t
+      val is_empty : t -> bool
+      val contains : t -> endpoint -> bool
+      val intersect : t -> t -> t
+    end
