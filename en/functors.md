@@ -231,7 +231,7 @@ definition of `Make_interval`.  Notice that we added the type
 `Interval_intf`.
 
 ```frag
-((typ ocamltop)(name functors/main.topscript)(part 15))
+((typ ocamlrawtop)(name functors/main-15.rawscript))
 ```
 
 ### Sharing constraints
@@ -282,7 +282,7 @@ module `Endpoint` that is the functor argument.  We can do this as
 follows.
 
 ```frag
-((typ ocamltop)(name functors/main.topscript)(part 18))
+((typ ocamlrawtop)(name functors/main-18.rawscript))
 ```
 
 So now, the interface is as it was, except that `endpoint` is now
@@ -320,7 +320,7 @@ replaced by `int`.  As with sharing constraints, we can also use this
 in the context of a functor.
 
 ```frag
-((typ ocamltop)(name functors/main.topscript)(part 21))
+((typ ocamlrawtop)(name functors/main-21.rawscript))
 ```
 
 The interface is precisely what we want: the type `t` is abstract, the
@@ -371,8 +371,9 @@ We'll discuss s-expressions and `sexplib` in more detail in
 what happens if we attach the `with sexp` declaration to the
 definition of `t` within the functor.
 
+
 ```frag
-((typ ocamltop)(name functors/main.topscript)(part 25))
+((typ ocamlrawtop)(name functors/main-25.rawscript))
 ```
 
 The problem is that `with sexp` adds code for defining the
