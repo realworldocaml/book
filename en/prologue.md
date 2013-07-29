@@ -232,10 +232,10 @@ automated everything you need via the OPAM package manager, so please
 do follow the installation instructions in [xref](#installation)
 carefully.
 
-At this stage, the Windows operating system is also unsupported, and
+At this stage, the Windows operating system is unsupported, and
 only Mac OS X, Linux, FreeBSD and OpenBSD can be expected to work
 reliably.  We realize this is a concern; there are no fundamental
-barriers to Windows support, but we're focussed on getting the main
+barriers to Windows support, but we're focused on getting the main
 content finished before getting stuck into the porting effort.
 
 </note>
