@@ -32,9 +32,9 @@ There are five fundamental properties that differentiate OOP from other styles:
   to produce a new kind of object.  This new definition can override
   some behaviour, but also share code with its parent.
 * _Open recursion_: an object's methods can invoke another method in the same
-  object using a special variable (often called self). These method calls use
-  dynamic lookup, allowing a method defined in one object to invoke methods
-  defined in another object that inherits from the first.
+  object using a special variable (often called `self` or `this`). These
+  calls use dynamic lookup, allowing a method defined in one object to
+  invoke methods defined in another object that inherits from the first.
 
 Almost every notable modern programming language has been influenced
 by OOP, and you'll have run across these terms if you've ever used
