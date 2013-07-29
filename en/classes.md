@@ -652,7 +652,6 @@ message about the override.
 
 ```ocaml
 # class m2 =
-# class m2 =
   object (self : 'self)
      val x = 1
      method f = x
