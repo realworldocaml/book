@@ -134,7 +134,7 @@ hobby, academic and commercial settings.
 
 ### The OCaml Platform
 
-Core is a comprehensive and effective standard library, but there's a
+Core is a comprehensive and effective standard library, but there's
 much more OCaml software out there.  A large community of programmers
 have been using OCaml since its first release in 1996 and have
 generated many useful libraries and tools.  We'll introduce some of
