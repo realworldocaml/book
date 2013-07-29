@@ -191,10 +191,10 @@ personal experience to construct scalable, robust computer systems.
 Real World OCaml is split into three parts:
 
 * Part I covers the basic language concepts you'll need to know when
-  building OCaml programs.  You won't need to memorise all of this
+  building OCaml programs.  You won't need to memorize all of this
   (objects, for example, are used rarely in practice), but
   understanding the concepts and examples is important.  This part
-  opens up with a guided tour to give you a quick overview of the
+  opens with a guided tour to give you a quick overview of the
   language.  It then moves onto modules, functors and objects, which
   may take some time to digest.  It is worth persevering, however: even
   though these concepts may be difficult at first, they will put you
