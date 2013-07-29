@@ -201,9 +201,9 @@ as changing a mutable record field or printing to the standard output.
 Function         Type                         Purpose
 --------         ----                         -------
 member           `string -> json -> json`     Select a named field from a JSON record.
-to_string        `json -> string`             Convert a JSON value into an OCaml `string`, and raise exception if this impossible.
-to_int           `json -> int`                Convert a JSON value into an OCaml `int`, and raise exception if this is impossible.
-filter_string    `json list -> string list`   Filter valid strings from a list of JSON fields, and return them as OCaml strings.
+to_string        `json -> string`             Convert a JSON value into an OCaml `string`. Raises an exception if this is impossible.
+to_int           `json -> int`                Convert a JSON value into an OCaml `int`. Raises an exception if this is impossible.
+filter_string    `json list -> string list`   Filter valid strings from a list of JSON fields, and return them as an OCaml list of strings.
 
 We'll go through each of these uses one-by-one now.  The examples below also
 use the `|>` pipe-forward operator that we explained earlier in
