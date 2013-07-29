@@ -6,12 +6,11 @@ This should provide a sense of what OCaml can do, without getting too
 deep into any one topic.
 
 Throughout the book we're going to use Core, a more full-featured and
-capable replacement for OCaml's standard library.  We'll also use the
-`utop` OCaml toplevel, a shell that lets you type in expressions and
-evaluate them interactively.  `utop` is an easier-to-use version of
-the standard toplevel (which you can start by typing `ocaml` at the
-command line).  These instructions will assume you're using `utop`
-specifically.
+capable replacement for OCaml's standard library.  We'll also use
+`utop`, a shell that lets you type in expressions and evaluate them
+interactively.  `utop` is an easier-to-use version of OCaml's standard
+toplevel (which you can start by typing `ocaml` at the command line).
+These instructions will assume you're using `utop` specifically.
 
 Before getting started, make sure you have a working OCaml
 installation and toplevel so you can try out the examples as you read
@@ -48,18 +47,18 @@ at you.
   and commas, which is more like the UNIX shell than it is like
   traditional programming languages like C or Java.
 - OCaml allows you to place underscores in the middle of your integer
-  literals, as a way of improving readability.  Note that underscores
-  can be placed anywhere within a number, not just every three digits.
+  literals, to improve readability.  Note that underscores can be
+  placed anywhere within a number, not just every three digits.
 - OCaml carefully distinguishes between `float`, the type for floating
   point numbers and `int`, the type for integers.  The types have
   different literals (`6.` instead of `6`) and different infix
   operators (`+.` instead of `+`), and OCaml doesn't automatically
-  cast between types.  This can be a bit of a nuisance, but it has its
-  benefits, since it prevents some kinds of bugs that arise in other
-  languages due to unexpected differences between the behavior of
-  `int` and `float`.  For example, in many languages, `1 / 3` is `0`,
-  but `1 / 3.0` is a third.  OCaml requires you to be explicit about
-  which operation you're doing.
+  cast between these types.  This can be a bit of a nuisance, but it
+  has its benefits, since it prevents some kinds of bugs that arise in
+  other languages due to unexpected differences between the behavior
+  of `int` and `float`.  For example, in many languages, `1 / 3` is
+  `0`, but `1 / 3.0` is a third.  OCaml requires you to be explicit
+  about which operation you're doing.
 
 We can also create a variable to name the value of a given expression,
 using the `let` keyword.  This is known as a _let binding_.
@@ -103,13 +102,11 @@ The `let` syntax can also be used to define a function.
 
 Functions in OCaml are values like any other, which is why we use the
 `let` keyword to bind a function to a variable name, just as we use
-`let` to bind a simple value like an integer to a variable name.
-
-When using `let` to define a function, the first identifier after the
-`let` is the function name, and each subsequent identifier is a
-different argument to the function.  Thus, `square` is a function with
-a single argument.  If no arguments are given, then we just have the
-ordinary definition of a variable that we saw earlier.
+`let` to bind a simple value like an integer to a variable name.  When
+using `let` to define a function, the first identifier after the `let`
+is the function name, and each subsequent identifier is a different
+argument to the function.  Thus, `square` is a function with a single
+argument.
 
 Now that we're creating more interesting values like functions, the
 types have gotten more interesting too.  `int -> int` is a function
@@ -122,13 +119,12 @@ haven't opened `Core.Std` as was suggested earlier.)
 ((typ ocamltop)(name guided-tour/main.topscript)(part 6)) 
 ```
 
-As a side note, the above is our first use of OCaml modules.  Here,
+The above also happens to be our first use of modules.  Here,
 `Float.of_int` refers to the `of_int` function contained in the
-`Float` module, and not, as you might expect from an object-oriented
-language, accessing a method of an object.  The `Float` module in
-particular contains `of_int` as well as many other useful functions
-for dealing with floats.  It's also worth noting that module names
-always start with a capital letter.
+`Float` module.  This is different from what you might expect from an
+object-oriented language, where dot-notation is typically used for
+accessing a method of an object.  Note that module names always start
+with a capital letter.
 
 The notation for the type-signature of a multi-argument function may
 be a little surprising at first, but we'll explain where it comes from
@@ -138,7 +134,7 @@ of the function, with the type after the final arrow being the return
 value.  Thus, `int -> int -> float` describes a function that takes
 two `int` arguments and returns a `float`.
 
-We can even write functions that take other functions as arguments.
+We can also write functions that take other functions as arguments.
 Here's an example of a function that takes three arguments: a test
 function and two integer arguments.  The function returns the sum of
 the integers that pass the test.
@@ -170,18 +166,17 @@ any explicit type information.
 
 OCaml determines the type of an expression using a technique called
 _type inference_, by which it infers the type of a given expression
-based on what it already knows about the types of variables used in
-the expression, and on constraints on the types that arise from the
-structure of the code.
+from the information it has about the types of variables along with
+constraints that are implied by the structure of the expression.
 
 As an example, let's walk through the process of inferring the type of
 `sum_if_true`.
 
-- OCaml requires that both arms of an `if` statement have the same
+- OCaml requires that both branches of an `if` statement have the same
   type, so the expression `if test first then first else 0` requires
-  that `first` must be the same type as `0`, which is `int`.
-  Similarly, from `if test second then second else 0` we can conclude
-  that `second` has type `int`.
+  that `first` must be the same type as `0`, and so `first` must be of
+  type `int`.  Similarly, from `if test second then second else 0` we
+  can infer that `second` has type `int`.
 - `test` is passed `first` as an argument.  Since `first` has type `int`, the
   input type of `test` must be `int`.
 - `test first` is used as the condition in an `if` statement, so the
@@ -194,11 +189,14 @@ determines the overall type of `sum_if_true`.
 
 Over time, you'll build a rough intuition for how the OCaml inference
 engine works, which makes it easier to reason through your programs.
-One way of making it easier to understand the types is to add explicit
-type annotations.  These annotations don't change the behavior of an
-OCaml program, but they can serve as useful documentation, as well as
-catch unintended type changes.  Here's an annotated version of
-`sum_if_true`:
+You can make it easier to understand the types of a given expression
+by adding explicit type annotations.  These annotations don't change
+the behavior of an OCaml program, but they can serve as useful
+documentation, as well as catch unintended type changes.  They can
+also be helpful in figuring out why a given piece of code fails to
+compilte.
+
+Here's an annotated version of `sum_if_true`:
 
 ```frag
 ((typ ocamltop)(name guided-tour/main.topscript)(part 9)) 
@@ -206,9 +204,8 @@ catch unintended type changes.  Here's an annotated version of
 
 In the above, we've marked every argument to the function with its
 type, with the final annotation indicating the type of the return
-value.  Such type annotations can actually go around any value in an
-OCaml program, and can be useful for figuring out why a given program
-is failing to compile.
+value.  Such type annotations can be placed on any expression in an
+OCaml program. 
 
 ### Inferring generic types
 
@@ -224,7 +221,7 @@ values, `x` and `y`, where `x` is to be returned if `test x` evaluates
 to `true`, and `y` otherwise.  So what's the type of `first_if_true`?
 There are no obvious clues such as arithmetic operators or literals to
 tell you what the type of `x` and `y` are.  That makes it seem like
-one could use this `first_if_true` on values of any type.
+one could use `first_if_true` on values of any type.
 
 Indeed, if we look at the type returned by the toplevel, we see that
 rather than choose a single concrete type, OCaml has introduced a
@@ -238,13 +235,13 @@ arguments, `x` and `y`, and of the return value of `first_if_true`.
 This kind of genericity is called _parametric polymorphism_, and is
 very similar to generics in C# and Java.
 
-The generic type of `first_if_true` allows us to write:
+The generic type of `first_if_true` allows us to write this.
 
 ```frag
 ((typ ocamltop)(name guided-tour/main.topscript)(part 11)) 
 ```
 
-as well as:
+As well as this.
 
 ```frag
 ((typ ocamltop)(name guided-tour/main.topscript)(part 12)) 
