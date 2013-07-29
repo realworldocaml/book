@@ -243,7 +243,7 @@ of `filter_string`.
 
 The `is_online` and `is_translated` fields are optional in our JSON
 schema, so no error should be raised if they are not present. The
-OCaml type is a `string option` to reflect this, and can be extracted
+OCaml type is a `bool option` to reflect this, and can be extracted
 via `to_bool_option`.  In our example JSON, only `is_online` is
 present and `is_translated` will be `None`.
 
