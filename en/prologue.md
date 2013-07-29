@@ -188,7 +188,7 @@ personal experience to construct scalable, robust computer systems.
 
 ### What to expect
 
-Real World OCaml is split into three parts and appendices:
+Real World OCaml is split into three parts:
 
 * Part I covers the basic language concepts you'll need to know when
   building OCaml programs.  You won't need to memorise all of this
