@@ -179,35 +179,31 @@ experience to construct scalable, robust systems.
 
 Real World OCaml is split into three parts:
 
-* Part I covers the language itself, opening with a guided tour
-  designed to provide a quick sketch of the language.  Don't expect to
-  understand everything in the tour; it's meant to give you a taste of
-  many different aspects of the language, but the ideas covered there
-  will be explained in more depth in the chapters that follow.
+*   Part I covers the language itself, opening with a guided tour
+    designed to provide a quick sketch of the language.  Don't expect to
+    understand everything in the tour; it's meant to give you a taste of
+    many different aspects of the language, but the ideas covered there
+    will be explained in more depth in the chapters that follow.
 
-  After covering the core language, Part I then moves onto more
-  advanced features like modules, functors and objects. which may take
-  some time to digest, but understanding these concepts is important.
-  Even beyond OCaml, these ideas will put you in good stead when
-  switching to other modern languages, many of which have drawn
-  inspiration from ML.
+    After covering the core language, Part I then moves onto more
+    advanced features like modules, functors and objects. which may take
+    some time to digest, but understanding these concepts is important.
+    Even beyond OCaml, these ideas will put you in good stead when
+    switching to other modern languages, many of which have drawn
+    inspiration from ML.
 
-* Part II builds on the basics by working through useful tools and
-  techniques for addressing common practical applications, from
-  command-line parsing to network programming.  Along the way, you'll
-  learn about functional design patterns that help combine different
-  features of the language to good effect.
+*   Part II builds on the basics by working through useful tools and
+    techniques for addressing common practical applications, from
+    command-line parsing to network programming.  Along the way, you'll
+    learn about functional design patterns that help combine different
+    features of the language to good effect.
 
-* Part III is about understanding the OCaml runtime. It's a remarkably
-  simple system in comparison to other language runtimes (such as Java
-  or the .NET CLR), and you'll need to read this to build very high
-  performance systems or to interface with C libraries.  This is also
-  where we talk about profiling and debugging techniques using tools
-  such as GNU `gdb`.
-
-Contributing your code back to the community is also important (if
-only to get bug fixes from other people!), and our appendices explain
-how to do this via OPAM and GitHub.
+*   Part III is about understanding the OCaml runtime. It's a remarkably
+    simple system in comparison to other language runtimes (such as Java
+    or the .NET CLR), and you'll need to read this to build very high
+    performance systems or to interface with C libraries.  This is also
+    where we talk about profiling and debugging techniques using tools
+    such as GNU `gdb`.
 
 <note>
 <title>Note to reviewers</title>
