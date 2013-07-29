@@ -201,9 +201,9 @@ as changing a mutable record field or printing to the standard output.
 Function         Type                         Purpose
 --------         ----                         -------
 member           `string -> json -> json`     Select a named field from a JSON record.
-to_string        `json -> string`             Convert a JSON value into an OCaml `string`, and raise exception if this impossible.
-to_int           `json -> int`                Convert a JSON value into an OCaml `int`, and raise exception if this is impossible.
-filter_string    `json list -> string list`   Filter valid strings from a list of JSON fields, and return them as OCaml strings.
+to_string        `json -> string`             Convert a JSON value into an OCaml `string`. Raises an exception if this is impossible.
+to_int           `json -> int`                Convert a JSON value into an OCaml `int`. Raises an exception if this is impossible.
+filter_string    `json list -> string list`   Filter valid strings from a list of JSON fields, and return them as an OCaml list of strings.
 
 We'll go through each of these uses one-by-one now.  The examples below also
 use the `|>` pipe-forward operator that we explained earlier in
@@ -243,7 +243,7 @@ of `filter_string`.
 
 The `is_online` and `is_translated` fields are optional in our JSON
 schema, so no error should be raised if they are not present. The
-OCaml type is a `string option` to reflect this, and can be extracted
+OCaml type is a `bool option` to reflect this, and can be extracted
 via `to_bool_option`.  In our example JSON, only `is_online` is
 present and `is_translated` will be `None`.
 
@@ -279,7 +279,7 @@ caught statically via a type error.
 Building and printing JSON values is pretty straightforward given the
 `Yojson.Basic.json` type.  You can just construct values of type `json` and
 call the `to_string` function on them.  Let's remind ourselves of the
-`Yojson.Basic.type` again.
+`Yojson.Basic.json` type again.
 
 ```frag
 ((typ ocaml)(name json/yojson_basic.mli)(header false)(part 0))
@@ -506,7 +506,7 @@ generated for us.  You can control various aspects of the serializer by passing
 flags to `atdgen`. The important ones for JSON are:
 
 * `-j-std`: Convert tuples and variants into standard JSON and
-  refuses to print NaN and infinities.  You should specify this if
+  refuse to print NaN and infinities.  You should specify this if
   you intend to interoperate with services that aren't using ATD.
 * `-j-custom-fields FUNCTION`: call a custom function for every
   unknown field encountered, instead of raising a parsing exception.

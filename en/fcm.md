@@ -1,4 +1,4 @@
-# First class modules
+# First-class modules
 
 You can think of OCaml as being broken up into two parts: a core
 language that is concerned with values and types, and a module

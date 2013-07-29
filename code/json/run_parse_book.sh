@@ -1,2 +1,2 @@
-ocamlbuild -use-ocamlfind -pkg core,yojson -tag thread parse_book.native
+corebuild -pkg yojson parse_book.native
 ./parse_book.native

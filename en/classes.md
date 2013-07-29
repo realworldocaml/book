@@ -406,18 +406,18 @@ module system.
 
 ## Virtual classes and methods ##
 
-A _virtual_ class is a class where some methods or fields are
-declared, but not implemented.  This should not be confused with the
-word "virtual" as it is used in C++.  In C++, a "virtual" method uses
-dynamic dispatch, regular non-virtual methods use static dispatched.
-In OCaml, _all_ methods use dynamic dispatch, but the keyword
-_virtual_ means the method or field is not implemented.
+A _virtual_ class is a class where some methods or fields are declared, but not
+implemented.  This should not be confused with the word `virtual` as it is used
+in C++.  In C++, a `virtual` method uses dynamic dispatch, while regular
+non-virtual methods are statically dispatched.  In OCaml, _all_ methods use
+dynamic dispatch, but the keyword `virtual` means that the method or field is
+not implemented.
 
 To explore this, lets extend our shapes examples to simple interactive
 graphics. For this we will use the Async concurrency library and the
 [Async_graphics](http://github.com/lpw25/async_graphics/) library, which
 provides an Async interface to OCaml's built in Graphics library. Concurrent
-programming with Async will be explored in
+programming with Async will be explored later in
 [xref](#concurrent-programming-with-async), for now you can safely ignore the
 details.
 
@@ -651,7 +651,6 @@ Fields have similar behavior, though the compiler produces a warning
 message about the override.
 
 ```ocaml
-# class m2 =
 # class m2 =
   object (self : 'self)
      val x = 1
