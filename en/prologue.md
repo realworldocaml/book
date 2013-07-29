@@ -104,10 +104,11 @@ predictability and performance all matter.
 A language on its own isn't enough.  You also need a rich set of
 libraries to base your applications on.  A common source of
 frustration for those learning OCaml is that the standard library that
-ships with the compiler doesn't provide a lot of features.  This
-standard library was actually developed for use within the compiler
-itself, and therefore by design covers only a small subset of the
-functionality you expect for more general-purpose use.
+ships with the compiler is limited, covering only a small subset of
+the functionality you would expect from a general-purpose standard
+library.  That's because the standard library isn't a general-purpose
+tool; it was developed for use in bootstrapping the compiler, and is
+purposefully kept small and simple.
 
 Happily, in the world of open-source software nothing stops
 alternative libraries from being written to supplement the
