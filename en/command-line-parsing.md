@@ -439,9 +439,10 @@ guarantee they remain in sync.  You don't have to understand this
 section to use the more advanced combinators, but it'll help you debug
 type errors as you use `Command` more.
 
-The type of `Command.t` looks deceptively simple: `type ('main_in,
-'main_out) t`.  You can think of `('a, 'b) t` here as a function of
-type `'a -> 'b`, but embellished with information about:
+The `Command.Spec.t` type looks deceptively simple:
+`type ('main_in, 'main_out) t`.
+You can think of `('a, 'b) t` here as a function of type
+`'a -> 'b`, but embellished with information about:
 
 * how to parse the command line
 * what the command does and how to call it

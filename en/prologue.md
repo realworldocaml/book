@@ -76,11 +76,15 @@ fledged system of its own by the 1980s.
 In 1990, Xavier Leroy and Damien Doligez built a new implementation
 called Caml Light that was based on a bytecode interpreter with a fast
 sequential garbage collector.  Over the next few years useful
-libraries appeared, such as Michel Mauny's parsing system. Efficiency
-further improved with a fast native code compiler that made OCaml's
-performance competitive with mainstream languages such as C++.  A
-module system inspired by Standard ML also provided powerful
-facilities for abstraction and larger scale programs.
+libraries appeared, such as Michel Mauny's syntax manipulation tools,
+and this helped promote the use of Caml in education and research teams.
+
+Xavier Leroy continued extending Caml Light with new features, and this
+resulted in the 1995 release of Caml Special Light.  This improved the
+executable efficiency significantly by adding a fast native code compiler that
+made Caml's performance competitive with mainstream languages such as C++. A
+module system inspired by Standard ML also provided powerful facilities for
+abstraction and made larger-scale programs easier to construct.
 
 The modern OCaml emerged in 1996, when a powerful and elegant object
 system was implemented by Didier Rémy and Jérôme Vouillon.  This
@@ -173,7 +177,7 @@ experience to construct scalable, robust systems.
 
 ### What to expect
 
-Real World OCaml is split into three parts and appendices:
+Real World OCaml is split into three parts:
 
 * Part I covers the language itself, opening with a guided tour
   designed to provide a quick sketch of the language.  Don't expect to
@@ -216,10 +220,10 @@ automated everything you need via the OPAM package manager, so please
 do follow the installation instructions in [xref](#installation)
 carefully.
 
-At this stage, the Windows operating system is also unsupported, and
+At this stage, the Windows operating system is unsupported, and
 only Mac OS X, Linux, FreeBSD and OpenBSD can be expected to work
 reliably.  We realize this is a concern; there are no fundamental
-barriers to Windows support, but we're focussed on getting the main
+barriers to Windows support, but we're focused on getting the main
 content finished before getting stuck into the porting effort.
 
 </note>

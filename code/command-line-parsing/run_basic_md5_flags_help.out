@@ -1,7 +1,7 @@
 $ ./basic_md5_with_flags.native -help
 Generate an MD5 hash of the input data
 
-  basic_md5_with_flags.native [filename]
+  basic_md5_with_flags.native [FILENAME]
 
 === flags ===
 

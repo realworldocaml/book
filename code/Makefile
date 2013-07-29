@@ -1,3 +1,6 @@
+#OCAMLPARAM=_,we=+A
+#export OCAMLPARAM
+
 dirs= json \
       command-line-parsing guided-tour \
       variables-and-functions \
@@ -33,7 +36,7 @@ dirs= json \
       back-end-bench \
       functors \
       fcm \
-      async \
+      async
 
 # html/md files directory
 OBJ=         _build
