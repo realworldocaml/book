@@ -66,8 +66,8 @@ let of_string s =
 let extract_all_ocaml_parts filename buf =
   let rec iter part parts =
     function
-    |line::lines when String.is_prefix ~prefix:"(* part " line ->
-      let part = Caml.Scanf.sscanf line "(* part %d *)" (fun p -> p) in
+    |line::lines when String.is_prefix ~prefix:"(* part " (String.lstrip line) ->
+      let part = Caml.Scanf.sscanf (String.lstrip line) "(* part %d *)" (fun p -> p) in
       let parts = (part, (Buffer.create 100)) :: parts in
       iter part parts lines
     |line::lines -> begin
