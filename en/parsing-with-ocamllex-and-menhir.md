@@ -62,7 +62,7 @@ called _parsing_.
 There are many techniques for lexing and parsing.  In the lex/yacc world, lexing
 is specified using regular expressions, and parsing is specified using
 context-free grammars.  These are concepts from formal languages; the lex/yacc
-tools constructing the machinery for you.  For `lex`, this means constructing a
+tools construct the machinery for you.  For `lex`, this means constructing a
 finite automaton; and for `yacc`, this means constructing a pushdown automaton.
 
 Parsing is a broad and often intricate topic, and our purpose here is not to
