@@ -222,7 +222,7 @@ value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
 ```
 
 That is, an object value starts with a `LEFT_BRACE`, contains some optional
-object field values (to be defined), and end with a `RIGHT_BRACE`.  The returned
+object field values (to be defined), and ends with a `RIGHT_BRACE`.  The returned
 value is `Assoc obj`, where `obj` is the sequence of object fields.  Note that
 we've left out bindings for `LEFT_BRACE` and `RIGHT_BRACE`, because their tokens
 don't have values.
