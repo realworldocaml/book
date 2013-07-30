@@ -607,10 +607,10 @@ let rec parse_and_print lexbuf =
   | None -> ()
 ```
 
-This approach, "give up on the first error," is easy to implement, but it isn't
+The "give up on the first error" approach is easy to implement but isn't
 very friendly.  In general, error handling can be pretty intricate, and we won't
 discuss it here.  However, the menhir parser defines additional mechanisms you
-can use to try and recover from errors, describe it its reference manual.
+can use to try and recover from errors, described in it its reference manual.
 
 Here is an example of a successful run on the following input file.
 
