@@ -1,2 +1,2 @@
-gcc -Wall -I`ocamlc -where` -L`ocamlc -where` -lcamlrun -ltermcap -o final_out embed_out.o main.c
+gcc -fPIC -Wall -I`ocamlc -where` -L`ocamlc -where` -ltermcap -lm -ldl -o final_out main.c embed_out.o -lcamlrun
 ./final_out
