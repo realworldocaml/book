@@ -303,7 +303,7 @@ and `string` as well as function types like `string -> int`.  But we
 haven't yet talked about any data structures.  We'll start by looking
 at a particularly simple data structure, the tuple.  A tuple is an
 ordered collection of values that can each be of different type.  You
-can create a tuple by joining values together with a comma:
+can create a tuple by joining values together with a comma.
 
 ```frag
 ((typ ocamltop)(name guided-tour/main.topscript)(part 16)) 
@@ -315,7 +315,7 @@ product of the set of elements of type `t` and the set of elements of
 type `s`.)
 
 You can extract the components of a tuple using OCaml's
-pattern matching syntax. For example:
+pattern matching syntax, as shown below.
 
 ```frag
 ((typ ocamltop)(name guided-tour/main.topscript)(part 17)) 
@@ -353,14 +353,14 @@ pervasive tool in OCaml, and as you'll see, it has surprising power.
 
 Where tuples let you combine a fixed number of items, potentially of
 different types, lists let you hold any number of items of the same
-type.  For example:
+type.  Consider the following example.
 
 ```frag
 ((typ ocamltop)(name guided-tour/main.topscript)(part 20)) 
 ```
 
 Note that you can't mix elements of different types in the same list,
-as we did with tuples.
+unlike tuples.
 
 ```frag
 ((typ ocamltop)(name guided-tour/main.topscript)(part 21)) 
@@ -388,10 +388,11 @@ of the lengths of each language as follows.
 the elements of that list.  It returns a new list with the transformed
 elements, and does not modify the original list.
 
-In this example, the function `String.length` is passed under the
-_labeled argument_ `~f`.  Labels allow you to specify arguments by
-name rather than by position.  As you can see below, we can change the
-order of labeled arguments without changing the function's behavior.
+Notably, the function passed to `List.map` is passed under a _labeled
+argument_ `~f`.  Labeled arguments are specified by name rather than
+by position, and thus allow you to change the order in which arguments
+are presented to a function without changing its behavior, as you can
+see here.
 
 ```frag
 ((typ ocamltop)(name guided-tour/main.topscript)(part 24)) 
@@ -432,8 +433,8 @@ might expect.
 In particular, rather than a list of three strings, what we have is a
 singleton list containing a three-tuple of strings.
 
-Another thing that is uncovered by this example is that commas create
-a tuple, even if there are no surrounding parens.  So, we can write:
+This example uncovers the fact that commas create a tuple, even if
+there are no surrounding parens.  So, we can write:
 
 ```frag
 ((typ ocamltop)(name guided-tour/main.topscript)(part 28)) 
@@ -500,11 +501,11 @@ statement instead.
 
 A `match` statement is a kind of juiced-up version of the switch
 statement found in `C` and `Java`.  It essentially lets you list a
-sequence of patterns (separated by `|` characters --- the one before
-the first case is optional), and the compiler then dispatches to the
-code following the first matched pattern.  And, as we've already seen,
-we can name new variables in our patterns that correspond to
-sub-structures of the value being matched.
+sequence of patterns (separated by `|`'s.  The one before the first
+case is optional), and the compiler then dispatches to the code
+following the first matching pattern.  As we've already seen, the
+pattern can mint new variables that correspond to sub-structures of
+the value being matched.
 
 Here's a new version of `my_favorite_language` that uses `match` and
 doesn't trigger a compiler warning.
@@ -513,18 +514,17 @@ doesn't trigger a compiler warning.
 ((typ ocamltop)(name guided-tour/main.topscript)(part 33)) 
 ```
 
-Note that we included a comment in the above code.  OCaml comments are
+The above code also includes our first comment.  OCaml comments are
 bounded by `(*` and `*)`, and can be nested arbitrarily and cover
-multiple lines.  There's no equivalent of C-style single line
+multiple lines.  There's no equivalent of C++-style single line
 comments that are prefixed by `//`.
 
 The first pattern, `first :: the_rest`, covers the case where
 `languages` has at least one element, since every list except for the
 empty list can be written down with one or more `::`'s.  The second
 pattern, `[]`, matches only the empty list.  These cases are
-exhaustive (every list is either empty, or has at least one element),
-and the compiler can detect that exhaustiveness, which is why it
-doesn't spit out a warning.
+exhaustive, since every list is either empty, or has at least one
+element, a fact which is verified by the compiler.
 
 
 #### Recursive list functions
@@ -573,10 +573,8 @@ function for removing sequential duplicates.
 Again, the first arm of the match is the base case, and the second is
 the inductive.  Unfortunately, this code has a problem, as is
 indicated by the warning message.  In particular we don't handle
-one-element lists.  Note how the underscore is used to indicate the
-presence of a value without specifying what that value is.
-
-We can fix this warning by adding another case to the match:
+one-element lists.  We can fix this warning by adding another case to
+the match.
 
 ```frag
 ((typ ocamltop)(name guided-tour/main.topscript)(part 36)) 
@@ -592,8 +590,7 @@ In the last few examples, our list processing code involved a lot of
 recursive functions.  In practice, this isn't usually necessary.  Most
 of the time, you'll find yourself happy to use the iteration functions
 found in the `List` module.  But it's good to know how to use
-recursion when you need to do something new that's not already
-supported.
+recursion when you need to do something new.
 
 ### Options
 
@@ -621,18 +618,18 @@ is computed and used in its place.
 ((typ ocamltop)(name guided-tour/main.topscript)(part 38))
 ```
 
-This example uses Core's `Time` module for dealing with time, the `^`
-operator for concatenating strings.  The concatenation operator is
-provided as part of the `Pervasives` module which is automatically
-opened in every OCaml program.
+This example uses Core's `Time` module for dealing with time as well
+as the `^` operator for concatenating strings.  The concatenation
+operator is provided as part of the `Pervasives` module which is
+automatically opened in every OCaml program.
 
 <note> <title> Nesting `let`s with `let` and `in` </title>
 
-As a side note, this is our first use of `let` to define a new
-variable within the body of a function.  A `let` bounded with an `in`
-can be used to introduce a new binding within any local scope,
-including a function body.  The `in` marks the beginning of the scope
-within which the new variable can be used.  Thus, we could write:
+`log_entry` was our first use of `let` to define a new variable within
+the body of a function.  A `let` bounded with an `in` can be used to
+introduce a new binding within any local scope, including a function
+body.  The `in` marks the beginning of the scope within which the new
+variable can be used.  Thus, we could write:
 
 ```frag
 ((typ ocamltop)(name guided-tour/local_let.topscript)(part 0)) 
@@ -659,24 +656,24 @@ combining them in one final expression.
 </note>
 
 Options are important because they are the standard way in OCaml to
-encode a value that might not be there --- there's no such thing as a
+encode a value that might not be there; there's no such thing as a
 `NullPointerException` in OCaml.  This is different from most other
 languages, including Java and C#, where most if not all datatypes are
 _nullable_, meaning that, whatever their type is, any given value also
 contains the possibility of being a null value.  In such languages,
 null is lurking everywhere.
 
-In OCaml, however, nulls are explicit.  A value of type `string *
-string` always actually contains two well-defined values of type
-`string`.  If you want to allow, say, the first of those to be absent,
-then you need to change the type to `string option * string`.  As
-we'll see in [xref](#error-handling), this explicitness allows the
+In OCaml, however, missing values are explicit.  A value of type
+`string * string` always actually contains two well-defined values of
+type `string`.  If you want to allow, say, the first of those to be
+absent, then you need to change the type to `string option * string`.
+As we'll see in [xref](#error-handling), this explicitness allows the
 compiler to provide a great deal of help in making sure you're
 correctly handing the possibility of missing data.
 
 ## Records and Variants
 
-So far, we've looked only at data structures that were predefined in
+So far, we've only looked at data structures that were predefined in
 the language, like lists and tuples.  But OCaml also allows us to
 define new datatypes.  Here's a toy example of a datatype representing
 a point in 2-dimensional space:
@@ -705,9 +702,9 @@ contained in the `x` field, and the variable `y_pos` to the value in
 the `y` field.
 
 We can write this more tersely using what's called _field punning_.
-When the name of the field and the name of the variable it is bound to
-in the match coincide, we don't have to write them both down.  Using
-this, our magnitude function can be rewritten as follows.
+In particular, when the name of the field and the name of the variable
+it is bound to in the match coincide, we don't have to write them both
+down.  Using this, our magnitude function can be rewritten as follows.
 
 ```frag
 ((typ ocamltop)(name guided-tour/main.topscript)(part 44)) 
@@ -720,8 +717,8 @@ We can also use dot-notation for accessing record fields:
 ```
 
 And we can of course include our newly defined types as components in
-larger types, as in the following types, each of which is a
-description of a different geometric object.
+larger types.  Here, for example, are some types for modeling
+different geometric objects that contain values of type `point2d`.
 
 ```frag
 ((typ ocamltop)(name guided-tour/main.topscript)(part 46)) 
@@ -737,10 +734,12 @@ One way of doing this is using a _variant_ type:
 ```
 
 The `|` character separates the different cases of the variant (the
-first `|` is optional), and each case has a tag, like `Circle`, `Rect`
-and `Segment`, to distinguish that case from the others.  Here's how we
-might write a function for testing whether a point is in the interior
-of some element of a list of `scene_element`s.
+first `|` is optional), and each case has a capitalized tag, like
+`Circle`, `Rect` and `Segment`, to distinguish that case from the
+others.  
+
+Here's how we might write a function for testing whether a point is in
+the interior of some element of a list of `scene_element`s.
 
 ```frag
 ((typ ocamltop)(name guided-tour/main.topscript)(part 48)) 
@@ -759,7 +758,7 @@ common in OCaml, particularly when using iteration functions like
 `List.exists`.
 
 The purpose of `List.exists` is to check if there are any elements of
-the given list in question on which the provided function evaluates to
+the list in question on which the provided function evaluates to
 `true`.  In this case, we're using `List.exists` to check if there is
 a scene element within which our point resides.
 
@@ -799,19 +798,19 @@ counted starting at zero, element `.(2)` is the third element.
 
 The `unit` type that we see above is interesting in that it has only
 one possible value, written `()`.  This means that a value of type
-`unit` doesn't convey any information.  Instead, `unit` tends to be
-used as a placeholder.  Thus, we use `unit` for the return value of an
-operation like setting a mutable field that communicates by side
-effect rather than by returning a value.  It's also used as the
-argument to functions that don't require an input value.  This is
-similar to the role that `void` plays in languages like C and Java.
+`unit` doesn't convey any information, and thus tends to be used as a
+placeholder.  Thus, we use `unit` for the return value of an operation
+like setting a mutable field that communicates by side effect rather
+than by returning a value.  It's also used as the argument to
+functions that don't require an input value.  This is similar to the
+role that `void` plays in languages like C and Java.
 
 ### Mutable record fields
 
-The array is an important mutable data structure, but it's not the only
-one.  Records, which are immutable by default, can be declared with
-specific fields as being mutable.  Here's a small example of a
-data structure for storing a running statistical summary of a
+The array is an important mutable data structure, but it's not the
+only one.  Records, which are immutable by default, can have some of
+their fields explicitly declared as mutable.  Here's a small example
+of a data structure for storing a running statistical summary of a
 collection of numbers.  Here's the basic data structure:
 
 ```frag
@@ -820,18 +819,17 @@ collection of numbers.  Here's the basic data structure:
 
 The fields in `running_sum` are designed to be easy to extend
 incrementally, and sufficient to compute means and standard
-deviations, as shown below.  (Note that there are two let-bindings in
-a row without a double semicolon between them.  That's because the
+deviations, as shown below.  Note that there are two let-bindings in a
+row without a double semicolon between them.  That's because the
 double semicolon is required only to tell utop to process the input,
-not to separate two expressions.)
+not to separate two expressions.
 
 ```frag
 ((typ ocamltop)(name guided-tour/main.topscript)(part 51)) 
 ```
 
-Note that we use the function `float` above, which is a convenient
-equivalent of `Float.of_int` which is provided by the `Pervasives`
-library.
+We use the function `float` above, which is a convenient equivalent of
+`Float.of_int` which is provided by the `Pervasives` library.
 
 We also need functions to create and update `running_sum`s:
 
@@ -891,10 +889,10 @@ because these are operators, rather than ordinary functions.
 
 Even though a `ref` is just another record type, it's important
 because it is the standard way of simulating the traditional mutable
-variable you'll find in most imperative languages.  For example, we
-can sum over the elements of a list imperatively by calling
-`List.iter` to call a simple function on every element of a list,
-using a ref to accumulate the results.
+variables you'll find in most languages.  For example, we can sum over
+the elements of a list imperatively by calling `List.iter` to call a
+simple function on every element of a list, using a ref to accumulate
+the results.
 
 ```frag
 ((typ ocamltop)(name guided-tour/main.topscript)(part 57)) 
@@ -948,10 +946,10 @@ The or operator, `||` short-circuits in a similar way to `&&`.
 
 ## A complete program
 
-So far, we've played with the basic features of the language using the
-toplevel.  Now we'll create a simple, complete standalone program
-that does something useful: sum up a list of numbers read in from the
-standard input.
+So far, we've played with the basic features of the language via
+`utop`.  Now we'll show how to create a simple standalone program.  In
+particular, we'll create a program that sums up a list of numbers read
+in from the standard input.
 
 Here's the code, which you can save in a file called `sum.ml`.  Note
 that we don't terminate expressions with `;;` here, since it's not
@@ -966,7 +964,7 @@ function `read_and_accumulate` is a recursive function that uses
 `In_channel.input_line` to read in lines one by one from the standard
 input, invoking itself at each iteration with its updated accumulated
 sum.  Note that `input_line` returns an optional value, with `None`
-indicating the end of the input.
+indicating the end of the input stream.
 
 After `read_and_accumulate` returns, the total needs to be printed.
 This is done using the `printf` command, which provides support for
@@ -978,10 +976,11 @@ so `printf` expects one additional argument of type `float`.
 
 ### Compiling and running
 
-We'll use `ocamlbuild`, a build-tool that ships with the OCaml
-compiler, to compile our program.  We'll pass in the appropriate flags
-to link in Core and turn on support for threads, which is required by
-Core.
+We'll compile our program using `corebuild`, a small wrapper on top of
+`ocamlbuild`, which itself is a build-tool that ships with the OCaml
+compiler.  The `corebuild` script is installed along with Core, and
+its purpose is to pass in the flags required for building a program
+with Core.
 
 ```frag
 ((typ console)(name guided-tour/build_sum.out))
@@ -990,9 +989,9 @@ Core.
 The `.native` suffix indicates that we're building a native-code
 executable, which we'll discuss more in
 [xref](#files-modules-and-programs).  Once the build completes, we can
-use the resulting program like any command-line utility.  In this
-example, we can just type in a sequence of numbers, one per line,
-hitting control-d to exit when the input is complete.
+use the resulting program like any command-line utility.  We can feed
+input to `build_sum.native` by typing in a sequence of numbers, one
+per line, hitting `control-d` when we're done.
 
 ```frag
 ((typ console)(name guided-tour/sum.out))
