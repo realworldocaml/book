@@ -34,6 +34,7 @@ dirs= json \
       front-end \
       back-end \
       back-end-bench \
+      back-end-embed \
       functors \
       fcm \
       async
@@ -150,7 +151,7 @@ $(OBJ)/%.out.0.html $(OBJ)/%.out.0.md: %.out
 
 # The outputs of the shell scripts should be checked in.
 %.out.full: %.sh
-	./exec_script.sh $< > $@ || (cat $@ && rm -f $@)
+	./exec_script.sh $< > $@ 2>&1 || (cat $@ && rm -f $@)
 
 %.out: %.out.full
 	egrep -v "(^ocamlfind |^\+)" < $< > $@
