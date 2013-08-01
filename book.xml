@@ -237,8 +237,8 @@
       <title>The OCaml Platform</title>
       <para>
         Core is a comprehensive and effective standard library, but
-        there's a much more OCaml software out there. A large community
-        of programmers have been using OCaml since its first release in
+        there's much more OCaml software out there. A large community of
+        programmers have been using OCaml since its first release in
         1996 and have generated many useful libraries and tools. We'll
         introduce some of these libraries in the course of the examples
         presented in the book.
@@ -300,17 +300,15 @@
             language, but the ideas covered there will be explained in
             more depth in the chapters that follow.
           </para>
+          <para>
+            After covering the core language, Part I then moves onto
+            more advanced features like modules, functors and objects.
+            which may take some time to digest, but understanding these
+            concepts is important. Even beyond OCaml, these ideas will
+            put you in good stead when switching to other modern
+            languages, many of which have drawn inspiration from ML.
+          </para>
         </listitem>
-      </itemizedlist>
-      <para>
-        After covering the core language, Part I then moves onto more
-        advanced features like modules, functors and objects. which may
-        take some time to digest, but understanding these concepts is
-        important. Even beyond OCaml, these ideas will put you in good
-        stead when switching to other modern languages, many of which
-        have drawn inspiration from ML.
-      </para>
-      <itemizedlist>
         <listitem>
           <para>
             Part II builds on the basics by working through useful tools
@@ -332,11 +330,6 @@
           </para>
         </listitem>
       </itemizedlist>
-      <para>
-        Contributing your code back to the community is also important
-        (if only to get bug fixes from other people!), and our
-        appendices explain how to do this via OPAM and GitHub.
-      </para>
       <note>
       <title>
       Note to reviewers
@@ -653,7 +646,7 @@ val square : int -&gt; int = &lt;fun&gt;
   ;; 
 val ratio : int -&gt; int -&gt; float = &lt;fun&gt;
 # ratio 4 7;; 
-- : float = 0.571428571428571397
+- : float = 0.571428571429
 </programlisting>
     <para>
       The above also happens to be our first use of modules. Here,
@@ -953,7 +946,7 @@ Exception: Division_by_zero.
         about any data structures. We'll start by looking at a
         particularly simple data structure, the tuple. A tuple is an
         ordered collection of values that can each be of different type.
-        You can create a tuple by joining values together with a comma:
+        You can create a tuple by joining values together with a comma.
       </para>
       <programlisting language="ocaml">
 ...part 16 of guided-tour/main.topscript
@@ -971,7 +964,7 @@ val another_tuple : int * string * float = (3, &quot;four&quot;, 5.)
       </para>
       <para>
         You can extract the components of a tuple using OCaml's pattern
-        matching syntax. For example:
+        matching syntax, as shown below.
       </para>
       <programlisting language="ocaml">
 ...part 17 of guided-tour/main.topscript
@@ -1025,7 +1018,7 @@ val distance : float * float -&gt; float * float -&gt; float = &lt;fun&gt;
       <para>
         Where tuples let you combine a fixed number of items,
         potentially of different types, lists let you hold any number of
-        items of the same type. For example:
+        items of the same type. Consider the following example.
       </para>
       <programlisting language="ocaml">
 ...part 20 of guided-tour/main.topscript
@@ -1034,7 +1027,7 @@ val languages : string list = [&quot;OCaml&quot;; &quot;Perl&quot;; &quot;C&quot
 </programlisting>
       <para>
         Note that you can't mix elements of different types in the same
-        list, as we did with tuples.
+        list, unlike tuples.
       </para>
       <programlisting language="ocaml">
 ...part 21 of guided-tour/main.topscript
@@ -1072,12 +1065,12 @@ Error: This expression has type string but an expression was expected of type
           modify the original list.
         </para>
         <para>
-          In this example, the function <literal>String.length</literal>
-          is passed under the <emphasis>labeled argument</emphasis>
-          <literal>~f</literal>. Labels allow you to specify arguments
-          by name rather than by position. As you can see below, we can
-          change the order of labeled arguments without changing the
-          function's behavior.
+          Notably, the function passed to <literal>List.map</literal> is
+          passed under a <emphasis>labeled argument</emphasis>
+          <literal>~f</literal>. Labeled arguments are specified by name
+          rather than by position, and thus allow you to change the
+          order in which arguments are presented to a function without
+          changing its behavior, as you can see here.
         </para>
         <programlisting language="ocaml">
 ...part 24 of guided-tour/main.topscript
@@ -1131,9 +1124,8 @@ Error: This expression has type string but an expression was expected of type
           have is a singleton list containing a three-tuple of strings.
         </para>
         <para>
-          Another thing that is uncovered by this example is that commas
-          create a tuple, even if there are no surrounding parens. So,
-          we can write:
+          This example uncovers the fact that commas create a tuple,
+          even if there are no surrounding parens. So, we can write:
         </para>
         <programlisting language="ocaml">
 ...part 28 of guided-tour/main.topscript
@@ -1192,6 +1184,11 @@ Error: This expression has type string but an expression was expected of type
 # let my_favorite_language (my_favorite :: the_rest) =
      my_favorite
   ;; 
+
+Characters 25-69:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+[]
 val my_favorite_language : 'a list -&gt; 'a = &lt;fun&gt;
 </programlisting>
         <para>
@@ -1230,12 +1227,11 @@ Exception: (Match_failure //toplevel// 0 25).
           A <literal>match</literal> statement is a kind of juiced-up
           version of the switch statement found in <literal>C</literal>
           and <literal>Java</literal>. It essentially lets you list a
-          sequence of patterns (separated by <literal>|</literal>
-          characters --- the one before the first case is optional), and
-          the compiler then dispatches to the code following the first
-          matched pattern. And, as we've already seen, we can name new
-          variables in our patterns that correspond to sub-structures of
-          the value being matched.
+          sequence of patterns (separated by <literal>|</literal>'s. The
+          one before the first case is optional), and the compiler then
+          dispatches to the code following the first matching pattern.
+          As we've already seen, the pattern can mint new variables that
+          correspond to sub-structures of the value being matched.
         </para>
         <para>
           Here's a new version of
@@ -1257,10 +1253,10 @@ val my_favorite_language : string list -&gt; string = &lt;fun&gt;
 - : string = &quot;OCaml&quot;
 </programlisting>
         <para>
-          Note that we included a comment in the above code. OCaml
-          comments are bounded by <literal>(*</literal> and
+          The above code also includes our first comment. OCaml comments
+          are bounded by <literal>(*</literal> and
           <literal>*)</literal>, and can be nested arbitrarily and cover
-          multiple lines. There's no equivalent of C-style single line
+          multiple lines. There's no equivalent of C++-style single line
           comments that are prefixed by <literal>//</literal>.
         </para>
         <para>
@@ -1269,10 +1265,9 @@ val my_favorite_language : string list -&gt; string = &lt;fun&gt;
           least one element, since every list except for the empty list
           can be written down with one or more <literal>::</literal>'s.
           The second pattern, <literal>[]</literal>, matches only the
-          empty list. These cases are exhaustive (every list is either
-          empty, or has at least one element), and the compiler can
-          detect that exhaustiveness, which is why it doesn't spit out a
-          warning.
+          empty list. These cases are exhaustive, since every list is
+          either empty, or has at least one element, a fact which is
+          verified by the compiler.
         </para>
       </sect3>
       <sect3 id="recursive-list-functions">
@@ -1345,18 +1340,19 @@ sum [1;2;3]
       if hd1 = hd2 then destutter (hd2 :: tl)
       else hd1 :: destutter (hd2 :: tl)
   ;; 
+
+Characters 29-171:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+_::[]
 val destutter : 'a list -&gt; 'a list = &lt;fun&gt;
 </programlisting>
         <para>
           Again, the first arm of the match is the base case, and the
           second is the inductive. Unfortunately, this code has a
           problem, as is indicated by the warning message. In particular
-          we don't handle one-element lists. Note how the underscore is
-          used to indicate the presence of a value without specifying
-          what that value is.
-        </para>
-        <para>
-          We can fix this warning by adding another case to the match:
+          we don't handle one-element lists. We can fix this warning by
+          adding another case to the match.
         </para>
         <programlisting language="ocaml">
 ...part 36 of guided-tour/main.topscript
@@ -1388,7 +1384,7 @@ val destutter : 'a list -&gt; 'a list = &lt;fun&gt;
           necessary. Most of the time, you'll find yourself happy to use
           the iteration functions found in the <literal>List</literal>
           module. But it's good to know how to use recursion when you
-          need to do something new that's not already supported.
+          need to do something new.
         </para>
       </sect3>
     </sect2>
@@ -1437,27 +1433,27 @@ val log_entry : Time.t option -&gt; string -&gt; string = &lt;fun&gt;
 # log_entry (Some Time.epoch) &quot;A long long time ago&quot;;; 
 - : string = &quot;1970-01-01 01:00:00 -- A long long time ago&quot;
 # log_entry None &quot;Up to the minute&quot;;; 
-- : string = &quot;2013-07-14 23:02:52 -- Up to the minute&quot;
+- : string = &quot;2013-08-01 09:31:00 -- Up to the minute&quot;
 </programlisting>
       <para>
         This example uses Core's <literal>Time</literal> module for
-        dealing with time, the <literal>^</literal> operator for
-        concatenating strings. The concatenation operator is provided as
-        part of the <literal>Pervasives</literal> module which is
-        automatically opened in every OCaml program.
+        dealing with time as well as the <literal>^</literal> operator
+        for concatenating strings. The concatenation operator is
+        provided as part of the <literal>Pervasives</literal> module
+        which is automatically opened in every OCaml program.
       </para>
       <note> <title> 
       Nesting <literal>let</literal>s with <literal>let</literal> and
       <literal>in</literal>
       </title>
       <para>
-        As a side note, this is our first use of <literal>let</literal>
-        to define a new variable within the body of a function. A
-        <literal>let</literal> bounded with an <literal>in</literal> can
-        be used to introduce a new binding within any local scope,
-        including a function body. The <literal>in</literal> marks the
-        beginning of the scope within which the new variable can be
-        used. Thus, we could write:
+        <literal>log_entry</literal> was our first use of
+        <literal>let</literal> to define a new variable within the body
+        of a function. A <literal>let</literal> bounded with an
+        <literal>in</literal> can be used to introduce a new binding
+        within any local scope, including a function body. The
+        <literal>in</literal> marks the beginning of the scope within
+        which the new variable can be used. Thus, we could write:
       </para>
       <programlisting language="ocaml">
 # script guided-tour/local_let.topscript
@@ -1498,16 +1494,16 @@ Error: Unbound value x
       </note>
       <para>
         Options are important because they are the standard way in OCaml
-        to encode a value that might not be there --- there's no such
-        thing as a <literal>NullPointerException</literal> in OCaml.
-        This is different from most other languages, including Java and
-        C#, where most if not all datatypes are
+        to encode a value that might not be there; there's no such thing
+        as a <literal>NullPointerException</literal> in OCaml. This is
+        different from most other languages, including Java and C#,
+        where most if not all datatypes are
         <emphasis>nullable</emphasis>, meaning that, whatever their type
         is, any given value also contains the possibility of being a
         null value. In such languages, null is lurking everywhere.
       </para>
       <para>
-        In OCaml, however, nulls are explicit. A value of type
+        In OCaml, however, missing values are explicit. A value of type
         <literal>string * string</literal> always actually contains two
         well-defined values of type <literal>string</literal>. If you
         want to allow, say, the first of those to be absent, then you
@@ -1522,7 +1518,7 @@ Error: Unbound value x
   <sect1 id="records-and-variants">
     <title>Records and Variants</title>
     <para>
-      So far, we've looked only at data structures that were predefined
+      So far, we've only looked at data structures that were predefined
       in the language, like lists and tuples. But OCaml also allows us
       to define new datatypes. Here's a toy example of a datatype
       representing a point in 2-dimensional space:
@@ -1561,10 +1557,10 @@ val magnitude : point2d -&gt; float = &lt;fun&gt;
     </para>
     <para>
       We can write this more tersely using what's called <emphasis>field
-      punning</emphasis>. When the name of the field and the name of the
-      variable it is bound to in the match coincide, we don't have to
-      write them both down. Using this, our magnitude function can be
-      rewritten as follows.
+      punning</emphasis>. In particular, when the name of the field and
+      the name of the variable it is bound to in the match coincide, we
+      don't have to write them both down. Using this, our magnitude
+      function can be rewritten as follows.
     </para>
     <programlisting language="ocaml">
 ...part 44 of guided-tour/main.topscript
@@ -1582,8 +1578,9 @@ val distance : point2d -&gt; point2d -&gt; float = &lt;fun&gt;
 </programlisting>
     <para>
       And we can of course include our newly defined types as components
-      in larger types, as in the following types, each of which is a
-      description of a different geometric object.
+      in larger types. Here, for example, are some types for modeling
+      different geometric objects that contain values of type
+      <literal>point2d</literal>.
     </para>
     <programlisting language="ocaml">
 ...part 46 of guided-tour/main.topscript
@@ -1616,11 +1613,14 @@ type scene_element =
     <para>
       The <literal>|</literal> character separates the different cases
       of the variant (the first <literal>|</literal> is optional), and
-      each case has a tag, like <literal>Circle</literal>,
+      each case has a capitalized tag, like <literal>Circle</literal>,
       <literal>Rect</literal> and <literal>Segment</literal>, to
-      distinguish that case from the others. Here's how we might write a
-      function for testing whether a point is in the interior of some
-      element of a list of <literal>scene_element</literal>s.
+      distinguish that case from the others.
+    </para>
+    <para>
+      Here's how we might write a function for testing whether a point
+      is in the interior of some element of a list of
+      <literal>scene_element</literal>s.
     </para>
     <programlisting language="ocaml">
 ...part 48 of guided-tour/main.topscript
@@ -1666,10 +1666,10 @@ val is_inside_scene : point2d -&gt; scene_element list -&gt; bool = &lt;fun&gt;
     </para>
     <para>
       The purpose of <literal>List.exists</literal> is to check if there
-      are any elements of the given list in question on which the
-      provided function evaluates to <literal>true</literal>. In this
-      case, we're using <literal>List.exists</literal> to check if there
-      is a scene element within which our point resides.
+      are any elements of the list in question on which the provided
+      function evaluates to <literal>true</literal>. In this case, we're
+      using <literal>List.exists</literal> to check if there is a scene
+      element within which our point resides.
     </para>
   </sect1>
   <sect1 id="imperative-programming">
@@ -1723,25 +1723,25 @@ val numbers : int array = [|1; 2; 3; 4|]
         The <literal>unit</literal> type that we see above is
         interesting in that it has only one possible value, written
         <literal>()</literal>. This means that a value of type
-        <literal>unit</literal> doesn't convey any information. Instead,
-        <literal>unit</literal> tends to be used as a placeholder. Thus,
-        we use <literal>unit</literal> for the return value of an
-        operation like setting a mutable field that communicates by side
-        effect rather than by returning a value. It's also used as the
-        argument to functions that don't require an input value. This is
-        similar to the role that <literal>void</literal> plays in
-        languages like C and Java.
+        <literal>unit</literal> doesn't convey any information, and thus
+        tends to be used as a placeholder. Thus, we use
+        <literal>unit</literal> for the return value of an operation
+        like setting a mutable field that communicates by side effect
+        rather than by returning a value. It's also used as the argument
+        to functions that don't require an input value. This is similar
+        to the role that <literal>void</literal> plays in languages like
+        C and Java.
       </para>
     </sect2>
     <sect2 id="mutable-record-fields">
       <title>Mutable record fields</title>
       <para>
         The array is an important mutable data structure, but it's not
-        the only one. Records, which are immutable by default, can be
-        declared with specific fields as being mutable. Here's a small
-        example of a data structure for storing a running statistical
-        summary of a collection of numbers. Here's the basic data
-        structure:
+        the only one. Records, which are immutable by default, can have
+        some of their fields explicitly declared as mutable. Here's a
+        small example of a data structure for storing a running
+        statistical summary of a collection of numbers. Here's the basic
+        data structure:
       </para>
       <programlisting language="ocaml">
 ...part 50 of guided-tour/main.topscript
@@ -1760,11 +1760,10 @@ type running_sum = {
       <para>
         The fields in <literal>running_sum</literal> are designed to be
         easy to extend incrementally, and sufficient to compute means
-        and standard deviations, as shown below. (Note that there are
-        two let-bindings in a row without a double semicolon between
-        them. That's because the double semicolon is required only to
-        tell utop to process the input, not to separate two
-        expressions.)
+        and standard deviations, as shown below. Note that there are two
+        let-bindings in a row without a double semicolon between them.
+        That's because the double semicolon is required only to tell
+        utop to process the input, not to separate two expressions.
       </para>
       <programlisting language="ocaml">
 ...part 51 of guided-tour/main.topscript
@@ -1776,10 +1775,9 @@ val mean : running_sum -&gt; float = &lt;fun&gt;
 val stdev : running_sum -&gt; float = &lt;fun&gt;
 </programlisting>
       <para>
-        Note that we use the function <literal>float</literal> above,
-        which is a convenient equivalent of
-        <literal>Float.of_int</literal> which is provided by the
-        <literal>Pervasives</literal> library.
+        We use the function <literal>float</literal> above, which is a
+        convenient equivalent of <literal>Float.of_int</literal> which
+        is provided by the <literal>Pervasives</literal> library.
       </para>
       <para>
         We also need functions to create and update
@@ -1823,9 +1821,9 @@ val rsum : running_sum = {sum = 0.; sum_sq = 0.; samples = 0}
 # List.iter [1.;3.;2.;-7.;4.;5.] ~f:(fun x -&gt; update rsum x);; 
 - : unit = ()
 # mean rsum;; 
-- : float = 1.33333333333333326
+- : float = 1.33333333333
 # stdev rsum;; 
-- : float = 3.94405318873307698
+- : float = 3.94405318873
 </programlisting>
     </sect2>
     <sect2 id="refs">
@@ -1891,11 +1889,11 @@ val ( := ) : 'a ref -&gt; 'a -&gt; unit = &lt;fun&gt;
       <para>
         Even though a <literal>ref</literal> is just another record
         type, it's important because it is the standard way of
-        simulating the traditional mutable variable you'll find in most
-        imperative languages. For example, we can sum over the elements
-        of a list imperatively by calling <literal>List.iter</literal>
-        to call a simple function on every element of a list, using a
-        ref to accumulate the results.
+        simulating the traditional mutable variables you'll find in most
+        languages. For example, we can sum over the elements of a list
+        imperatively by calling <literal>List.iter</literal> to call a
+        simple function on every element of a list, using a ref to
+        accumulate the results.
       </para>
       <programlisting language="ocaml">
 ...part 57 of guided-tour/main.topscript
@@ -2016,10 +2014,10 @@ Exception: (Invalid_argument &quot;index out of bounds&quot;).
   <sect1 id="a-complete-program">
     <title>A complete program</title>
     <para>
-      So far, we've played with the basic features of the language using
-      the toplevel. Now we'll create a simple, complete standalone
-      program that does something useful: sum up a list of numbers read
-      in from the standard input.
+      So far, we've played with the basic features of the language via
+      <literal>utop</literal>. Now we'll show how to create a simple
+      standalone program. In particular, we'll create a program that
+      sums up a list of numbers read in from the standard input.
     </para>
     <para>
       Here's the code, which you can save in a file called
@@ -2047,7 +2045,7 @@ let () =
       read in lines one by one from the standard input, invoking itself
       at each iteration with its updated accumulated sum. Note that
       <literal>input_line</literal> returns an optional value, with
-      <literal>None</literal> indicating the end of the input.
+      <literal>None</literal> indicating the end of the input stream.
     </para>
     <para>
       After <literal>read_and_accumulate</literal> returns, the total
@@ -2063,10 +2061,12 @@ let () =
     <sect2 id="compiling-and-running">
       <title>Compiling and running</title>
       <para>
-        We'll use <literal>ocamlbuild</literal>, a build-tool that ships
-        with the OCaml compiler, to compile our program. We'll pass in
-        the appropriate flags to link in Core and turn on support for
-        threads, which is required by Core.
+        We'll compile our program using <literal>corebuild</literal>, a
+        small wrapper on top of <literal>ocamlbuild</literal>, which
+        itself is a build-tool that ships with the OCaml compiler. The
+        <literal>corebuild</literal> script is installed along with
+        Core, and its purpose is to pass in the flags required for
+        building a program with Core.
       </para>
       <programlisting>
 # running guided-tour/build_sum.out.sh
@@ -2077,9 +2077,10 @@ $ corebuild sum.native
         building a native-code executable, which we'll discuss more in
         <xref linkend="files-modules-and-programs"/>. Once the
         build completes, we can use the resulting program like any
-        command-line utility. In this example, we can just type in a
-        sequence of numbers, one per line, hitting control-d to exit
-        when the input is complete.
+        command-line utility. We can feed input to
+        <literal>build_sum.native</literal> by typing in a sequence of
+        numbers, one per line, hitting <literal>control-d</literal> when
+        we're done.
       </para>
       <programlisting>
 # running guided-tour/sum.out.sh
@@ -2128,7 +2129,7 @@ Total: 100.5
       lowercase letter or an underscore.
     </para>
     <programlisting language="html">
-let &lt;identifier&gt; = &lt;expr&gt;
+let &lt;variable&gt; = &lt;expr&gt;
 </programlisting>
     <para>
       As we'll see when we get to the module system in
@@ -2137,10 +2138,10 @@ let &lt;identifier&gt; = &lt;expr&gt;
     </para>
     <para>
       Every variable binding has a <emphasis>scope</emphasis>, which is
-      the portion of the code that can refer to that binding. The scope
-      of a top-level let binding is everything that follows it in the
-      session, when using <literal>utop</literal>, or, when using
-      modules, for the remainder of the module.
+      the portion of the code that can refer to that binding. When using
+      <literal>utop</literal>, the scope of a top-level let binding is
+      everything that follows it in the session. When it shows up in a
+      module, the scope is the remainder of that module.
     </para>
     <para>
       Here's a simple example.
@@ -2161,15 +2162,16 @@ val z : int = 7
       the following syntax.
     </para>
     <programlisting language="html">
-let &lt;identifier&gt; = &lt;expr1&gt; in &lt;expr2&gt;
+let &lt;variable&gt; = &lt;expr1&gt; in &lt;expr2&gt;
 </programlisting>
     <para>
-      This first evaluates <emphasis><literal>expr1</literal></emphasis>
-      and then evaluates <emphasis><literal>expr2</literal></emphasis>
-      with <emphasis><literal>identifier</literal></emphasis> bound to
-      whatever value was produced by the evaluation of
-      <emphasis><literal>expr1</literal></emphasis>. Here's how it looks
-      in practice.
+      This first evaluates
+      <emphasis><literal>&lt;expr1&gt;</literal></emphasis> and then
+      evaluates <emphasis><literal>&lt;expr2&gt;</literal></emphasis>
+      with <emphasis><literal>&lt;variable&gt;</literal></emphasis>
+      bound to whatever value was produced by the evaluation of
+      <emphasis><literal>&lt;expr1&gt;</literal></emphasis>. Here's how
+      it looks in practice.
     </para>
     <programlisting language="ocaml">
 ...part 1 of variables-and-functions/main.topscript
@@ -2191,7 +2193,7 @@ val dashed_languages : string = &quot;OCaml-Perl-C++-C&quot;
     <programlisting language="ocaml">
 ...part 2 of variables-and-functions/main.topscript
 # language_list;; 
-File &quot;&quot;, line 1, characters 0-13:
+Characters -1-13:
 Error: Unbound value language_list
 </programlisting>
     <para>
@@ -2238,7 +2240,7 @@ val dashed_languages : string = &quot;OCaml-Perl-C++-C&quot;
   ;; 
 val area_of_ring : float -&gt; float -&gt; float = &lt;fun&gt;
 # area_of_ring 1. 3.;; 
-- : float = 25.1327412287183449
+- : float = 25.1327412287
 </programlisting>
     <para>
       It's important not to confuse a sequence of let bindings with the
@@ -2254,21 +2256,25 @@ val area_of_ring : float -&gt; float -&gt; float = &lt;fun&gt;
      let pi = 0. in
      area_of_circle outer_radius -. area_of_circle inner_radius
   ;; 
+
+Characters 126-128:
+Warning 26: unused variable pi.
 val area_of_ring : float -&gt; float -&gt; float = &lt;fun&gt;
 </programlisting>
     <para>
       Here, we redefined <literal>pi</literal> to be zero after the
       definition of <literal>area_of_circle</literal>. You might think
       that this would mean that the result of the computation would now
-      be zero, but you'd be wrong. In fact, the behavior of the function
-      is unchanged. That's because the original definition of
-      <literal>pi</literal> wasn't changed, it was just shadowed, so
-      that any subsequent reference to <literal>pi</literal> would see
-      the new definition of <literal>pi</literal> as zero. But there is
-      no later use of <literal>pi</literal>, so the binding doesn't make
-      a difference. And this explains the warning produced by the
-      toplevel telling us that there is an unused definition of
-      <literal>pi</literal>.
+      be zero, but in fact, the behavior of the function is unchanged.
+      That's because the original definition of <literal>pi</literal>
+      wasn't changed, it was just shadowed, which means that any
+      subsequent reference to <literal>pi</literal> would see the new
+      definition of <literal>pi</literal> as zero, but earlier
+      references would be unchanged. But there is no later use of
+      <literal>pi</literal>, so the binding of <literal>0.</literal> to
+      <literal>pi</literal> made no difference. This explains the
+      warning produced by the toplevel telling us that there is an
+      unused definition of <literal>pi</literal>.
     </para>
     <para>
       In OCaml, let bindings are immutable. As we'll see in
@@ -2279,19 +2285,21 @@ val area_of_ring : float -&gt; float -&gt; float = &lt;fun&gt;
     Why don't variables vary?
     </title>
     <para>
-      One source of confusion for people new to functional languages is
-      the fact that variables are immutable. This seems pretty
-      surprising even on linguistic terms. Isn't the whole point of a
-      variable that it can vary?
+      One source of confusion for people new to OCaml is the fact that
+      variables are immutable. This seems pretty surprising even on
+      linguistic terms. Isn't the whole point of a variable that it can
+      vary?
     </para>
     <para>
-      The answer to this is that variables in a functional language are
-      really more like variables in an equation. If you think about the
-      mathematical equation <literal>x (y + z) = x y + x z</literal>,
-      there's no notion of mutating the variables <literal>x</literal>,
-      <literal>y</literal> and <literal>z</literal>. They vary in the
-      sense that you can instantiate this equation with different
-      numbers for those variables, and it still holds.
+      The answer to this is that variables in OCaml (and in generaly in
+      functional languages) are really more like variables in an
+      equation than a variable in an imperative language. If you think
+      about the mathematical equation
+      <literal>x(y + z) = xy + xz</literal>, there's no notion of
+      mutating the variables <literal>x</literal>, <literal>y</literal>
+      and <literal>z</literal>. They vary in the sense that you can
+      instantiate this equation with different numbers for those
+      variables, and it still holds.
     </para>
     <para>
       The same is true in a functional language. A function can be
@@ -2339,6 +2347,11 @@ val strings : string list = [&quot;one&quot;; &quot;two&quot;; &quot;three&quot;
      let (first :: rest) = String.split ~on:',' line in
      String.concat ~sep:&quot;,&quot; (String.uppercase first :: rest)
   ;; 
+
+Characters 40-53:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+[]
 val upcase_first_entry : string -&gt; string = &lt;fun&gt;
 </programlisting>
       <para>
@@ -2359,21 +2372,21 @@ val upcase_first_entry : string -&gt; string = &lt;fun&gt;
 </programlisting>
       <para>
         Note that this is our first use of <literal>assert</literal>,
-        which is a function that is useful for throwing an exception in
-        an impossible case. Asserts are discussed in more detail in
-        <xref linkend="error-handling"/>
+        which is useful for marking cases that should be impossible.
+        Asserts are discussed in more detail in
+        <xref linkend="error-handling"/>.
       </para>
     </sect2>
   </sect1>
   <sect1 id="functions">
     <title>Functions</title>
     <para>
-      OCaml being a functional language, it's no surprise that functions
-      are an important and pervasive element of programming in OCaml.
-      Indeed, we've seen functions pop up already in many of the
-      examples we've looked at thus far. But while we've introduced the
-      basics of functions, we're now going to cover them in more depth,
-      starting from the foundations.
+      Given that OCaml is a functional language, it's no surprise that
+      functions are important and pervasive. Indeed, functions have come
+      up in almost every example we've done so far. This section will go
+      into more depth, explaining the details of how OCaml's functions
+      work. As you'll see, functions in OCaml differ in a variety of
+      ways from what you'll find in most mainstream languages.
     </para>
     <sect2 id="anonymous-functions">
       <title>Anonymous Functions</title>
@@ -2410,7 +2423,7 @@ val upcase_first_entry : string -&gt; string = &lt;fun&gt;
 - : int list = [2; 3; 4]
 </programlisting>
       <para>
-        Or even stuff them into a data structure.
+        You can even stuff them into a data structure.
       </para>
       <programlisting language="ocaml">
 ...part 13 of variables-and-functions/main.topscript
@@ -2423,11 +2436,11 @@ val increments : (int -&gt; int) list = [&lt;fun&gt;; &lt;fun&gt;]
         It's worth stopping for a moment to puzzle this example out,
         since this kind of higher-order use of functions can be a bit
         obscure at first. The first thing to understand is the function
-        <literal>(fun f -&gt; f 5)</literal>, which takes a function as
+        <literal>(fun g -&gt; g 5)</literal>, which takes a function as
         its argument and applies that function to the number
         <literal>5</literal>. The invocation of
         <literal>List.map</literal> applies
-        <literal>(fun f -&gt; f 5)</literal> to the elements of the
+        <literal>(fun g -&gt; g 5)</literal> to the elements of the
         <literal>increments</literal> list (which are themselves
         functions) and returns the list containing the results of these
         function applications.
@@ -2448,8 +2461,8 @@ val plusone : int -&gt; int = &lt;fun&gt;
 - : int = 4
 </programlisting>
       <para>
-        Defining named functions is so common that there is a built in
-        syntax for it. Thus, the following definition of
+        Defining named functions is so common that there is some
+        syntactic sugar for it. Thus, the following definition of
         <literal>plusone</literal> is equivalent to the definition
         above.
       </para>
@@ -2518,8 +2531,8 @@ val abs_diff : int -&gt; int -&gt; int = &lt;fun&gt;
         function of one argument, which itself returns the final result.
         Because the functions are nested, the inner expression
         <literal>abs (x - y)</literal> has access to both
-        <literal>x</literal>, which was captured by the first function
-        application, and <literal>y</literal>, which was captured by the
+        <literal>x</literal>, which was bound by the first function
+        application, and <literal>y</literal>, which was bound by the
         second one.
       </para>
       <para>
@@ -2533,6 +2546,7 @@ val abs_diff : int -&gt; int -&gt; int = &lt;fun&gt;
         parenthesized as follows.
       </para>
       <programlisting language="ocaml">
+(* variables-and-functions/abs_diff.mli  *)
 val abs_diff : int -&gt; (int -&gt; int)
 </programlisting>
       <para>
@@ -2618,7 +2632,8 @@ val abs_diff : int * int -&gt; int = &lt;fun&gt;
       <para>
         In order to define a recursive function, you need to mark the
         let binding as recursive with the <literal>rec</literal>
-        keyword, as shown in this example:
+        keyword, as shown in this function for finding the first
+        sequentially-repeated element in a list.
       </para>
       <programlisting language="ocaml">
 ...part 22 of variables-and-functions/main.topscript
@@ -2734,9 +2749,8 @@ val is_odd : int -&gt; bool = &lt;fun&gt;
         bit-shifting operation.
       </para>
       <para>
-        We can define (or redefine) the meaning of an operator as
-        follows. Here's an example of a simple vector-addition operator
-        on int pairs.
+        We can define (or redefine) the meaning of an operator. Here's
+        an example of a simple vector-addition operator on int pairs.
       </para>
       <programlisting language="ocaml">
 ...part 26 of variables-and-functions/main.topscript
@@ -2752,7 +2766,7 @@ val ( +! ) : int * int -&gt; int * int -&gt; int * int = &lt;fun&gt;
       <programlisting language="ocaml">
 ...part 27 of variables-and-functions/main.topscript
 # let (***) x y = (x ** y) ** y;; 
-File &quot;&quot;, line 1, characters 17-18:
+Characters 17-18:
 Error: This expression has type int but an expression was expected of type
          float
 </programlisting>
@@ -2944,7 +2958,7 @@ val ( *** ) : float -&gt; float -&gt; float = &lt;fun&gt;
 # Int.max 3 (-4);; 
 - : int = 3
 # Int.max 3 -4;; 
-File &quot;&quot;, line 1, characters 0-9:
+Characters -1-9:
 Error: This expression has type int -&gt; int
        but an expression was expected of type int
 </programlisting>
@@ -2955,7 +2969,7 @@ Error: This expression has type int -&gt; int
       <programlisting language="ocaml">
 ...part 30 of variables-and-functions/main.topscript
 # (Int.max 3) - 4;; 
-File &quot;&quot;, line 1, characters 1-10:
+Characters 1-10:
 Error: This expression has type int -&gt; int
        but an expression was expected of type int
 </programlisting>
@@ -2974,12 +2988,12 @@ val ( |&gt; ) : 'a -&gt; ('a -&gt; 'b) -&gt; 'b = &lt;fun&gt;
 </programlisting>
       <para>
         It's not quite obvious at first what the purpose of this
-        operator is: it just takes some value and a function, and
-        applies the function to the value. But its utility is clearer
-        when you see it in action. It works as a kind of sequencing
-        operator, similar in spirit to using pipe in the UNIX shell.
-        Consider, for example, the following code for printing out the
-        unique elements of your <literal>PATH</literal>. Note that
+        operator is: it just takes a value and a function, and applies
+        the function to the value. Despite that bland sounding
+        description, it has the useful role of a sequencing operator,
+        similar in spirit to using pipe in the UNIX shell. Consider, for
+        example, the following code for printing out the unique elements
+        of your <literal>PATH</literal>. Note that
         <literal>List.dedup</literal> below removes duplicates from a
         list by sorting the list using the provided comparison function.
       </para>
@@ -2990,6 +3004,13 @@ val ( |&gt; ) : 'a -&gt; ('a -&gt; 'b) -&gt; 'b = &lt;fun&gt;
   |&gt; List.dedup ~compare:String.compare
   |&gt; List.iter ~f:print_endline
   ;; 
+
+/bin
+/home/rwo/.opam/4.01.0dev+trunk/bin
+/usr/bin
+/usr/games
+/usr/local/bin
+/usr/local/games
 - : unit = ()
 </programlisting>
       <para>
@@ -3003,6 +3024,13 @@ val ( |&gt; ) : 'a -&gt; ('a -&gt; 'b) -&gt; 'b = &lt;fun&gt;
   let deduped_path = List.dedup ~compare:String.compare split_path in
   List.iter ~f:print_endline deduped_path
   ;; 
+
+/bin
+/home/rwo/.opam/4.01.0dev+trunk/bin
+/usr/bin
+/usr/games
+/usr/local/bin
+/usr/local/games
 - : unit = ()
 </programlisting>
       <para>
@@ -3015,6 +3043,9 @@ val ( |&gt; ) : 'a -&gt; ('a -&gt; 'b) -&gt; 'b = &lt;fun&gt;
       <programlisting language="ocaml">
 ...part 34 of variables-and-functions/main.topscript
 # List.iter ~f:print_endline [&quot;Two&quot;; &quot;lines&quot;];; 
+
+Two
+lines
 - : unit = ()
 </programlisting>
       <para>
@@ -3033,23 +3064,29 @@ val ( |&gt; ) : 'a -&gt; ('a -&gt; 'b) -&gt; 'b = &lt;fun&gt;
       <para>
         Note that <literal>|&gt;</literal> only works in the intended
         way because it is left-associative. Indeed, let's see what
-        happens if we try using a right associative operator, like (^!).
+        happens if we try using a right associative operator, like
+        (^&gt;).
       </para>
       <programlisting language="ocaml">
 ...part 36 of variables-and-functions/main.topscript
-# let (^!) = (|&gt;);; 
+# let (^&gt;) x f = f x;; 
+val ( ^&gt; ) : 'a -&gt; ('a -&gt; 'b) -&gt; 'b = &lt;fun&gt;
 # Sys.getenv_exn &quot;PATH&quot;
-  ^! String.split ~on:':'
-  ^! List.dedup ~compare:String.compare
-  ^! List.iter ~f:print_endline
+  ^&gt; String.split ~on:':'
+  ^&gt; List.dedup ~compare:String.compare
+  ^&gt; List.iter ~f:print_endline
   ;; 
-File &quot;&quot;, line 2, characters 2-4:
-Error: Unbound value ^!
+Characters 93-119:
+Error: This expression has type string list -&gt; unit
+       but an expression was expected of type
+         (string list -&gt; string list) -&gt; 'a
+       Type string list is not compatible with type
+         string list -&gt; string list 
 </programlisting>
       <para>
         The above type error is a little bewildering at first glance.
-        What's going on is that, because <literal>^!</literal> is right
-        associative, the operator is trying to feed the value
+        What's going on is that, because <literal>^&gt;</literal> is
+        right associative, the operator is trying to feed the value
         <literal>List.dedup ~compare:String.compare</literal> to the
         function <literal>List.iter ~f:print_endline</literal>. But
         <literal>List.iter ~f:print_endline</literal> expects a list of
@@ -3154,9 +3191,9 @@ val ratio : num:int -&gt; denom:int -&gt; float = &lt;fun&gt;
         OCaml also supports <emphasis>label punning</emphasis>, meaning
         that you get to drop the text after the <literal>:</literal> if
         the name of the label and the name of the variable being used
-        are the same. We've seen above how label punning works when
-        defining a function. The following shows how it can be used when
-        invoking a function.
+        are the same. We were actually already using label punning when
+        defining our labeled function above. The following shows how
+        punning can be used when invoking a function.
       </para>
       <programlisting language="ocaml">
 ...part 42 of variables-and-functions/main.topscript
@@ -3290,7 +3327,7 @@ val divide : first:int -&gt; second:int -&gt; int = &lt;fun&gt;
         <programlisting language="ocaml">
 ...part 47 of variables-and-functions/main.topscript
 # apply_to_tuple_2 divide (3,4);; 
-File &quot;&quot;, line 1, characters 17-23:
+Characters 17-23:
 Error: This expression has type first:int -&gt; second:int -&gt; int
        but an expression was expected of type second:'a -&gt; first:'b -&gt; 'c
 </programlisting>
@@ -3544,7 +3581,7 @@ val numeric_deriv :
     let dy = (f ~x ~y:y' -. base) /. delta in
     (dx,dy)
   ;; 
-File &quot;&quot;, line 5, characters 14-15:
+Characters 130-131:
 Error: This function is applied to arguments
 in an order different from other calls.
 This is only allowed when the real type is known.
@@ -3606,7 +3643,7 @@ val prepend_pound : string -&gt; string = &lt;fun&gt;
         <programlisting language="ocaml">
 ...part 60 of variables-and-functions/main.topscript
 # prepend_pound &quot;a BASH comment&quot; ~sep:&quot;:&quot;;; 
-File &quot;&quot;, line 1, characters 0-13:
+Characters -1-13:
 Error: This function has type string -&gt; string
        It is applied to too many arguments; maybe you forgot a `;'.
 </programlisting>
@@ -3660,6 +3697,9 @@ val prepend_pound : ?sep:string -&gt; string -&gt; string = &lt;fun&gt;
         <programlisting language="ocaml">
 ...part 64 of variables-and-functions/main.topscript
 # let concat x y ?(sep=&quot;&quot;) = x ^ sep ^ y ;; 
+
+Characters 15-38:
+Warning 16: this optional argument cannot be erased.
 val concat : string -&gt; string -&gt; ?sep:string -&gt; string = &lt;fun&gt;
 </programlisting>
         <para>
@@ -3807,6 +3847,9 @@ sum []
     | to_drop :: tl -&gt; drop_value tl to_drop
     | hd :: tl -&gt; hd :: drop_value tl to_drop
   ;; 
+
+Characters 114-122:
+Warning 11: this match case is unused.
 val drop_value : 'a list -&gt; 'a -&gt; 'a list = &lt;fun&gt;
 </programlisting>
     <para>
@@ -3943,17 +3986,27 @@ val plus_one_if : int -&gt; int = &lt;fun&gt;
       <programlisting language="ocaml">
 ...part 10 of lists-and-patterns/main.topscript
 # #require &quot;core_bench&quot;;; 
+
+/home/rwo/.opam/4.01.0dev+trunk/lib/textutils: added to search path
+/home/rwo/.opam/4.01.0dev+trunk/lib/textutils/textutils.cma: loaded
+/home/rwo/.opam/4.01.0dev+trunk/lib/core_bench: added to search path
+/home/rwo/.opam/4.01.0dev+trunk/lib/core_bench/core_bench.cma: loaded
 # open Core_bench.Std;; 
-Characters -1-19:
-Error: Unbound module Core_bench
 # [ Bench.Test.create ~name:&quot;plus_one_match&quot; (fun () -&gt;
       ignore (plus_one_match 10))
   ; Bench.Test.create ~name:&quot;plus_one_if&quot; (fun () -&gt;
       ignore (plus_one_if 10)) ]
   |&gt; Bench.bench
   ;; 
-Characters 179-190:
-Error: Unbound module Bench
+
+Estimated testing time 20s (change using -quota SECS).
+┌────────────────┬───────────┬──────────┐
+│ Name           │ Time (ns) │ % of max │
+├────────────────┼───────────┼──────────┤
+│ plus_one_match │     46.81 │    61.14 │
+│ plus_one_if    │     76.56 │   100.00 │
+└────────────────┴───────────┴──────────┘
+- : unit = ()
 </programlisting>
       <para>
         Here's another less artificial example. We can rewrite the
@@ -3983,8 +4036,15 @@ val sum_if : int list -&gt; int = &lt;fun&gt;
   ; Bench.Test.create ~name:&quot;sum&quot;    (fun () -&gt; ignore (sum numbers)) ]
   |&gt; Bench.bench
   ;; 
-Characters 185-196:
-Error: Unbound module Bench
+
+Estimated testing time 20s (change using -quota SECS).
+┌────────┬───────────┬──────────┐
+│ Name   │ Time (ns) │ % of max │
+├────────┼───────────┼──────────┤
+│ sum_if │   124_888 │   100.00 │
+│ sum    │    22_505 │    18.02 │
+└────────┴───────────┴──────────┘
+- : unit = ()
 </programlisting>
       <para>
         In this case, the <literal>match</literal>-based implementation
@@ -4030,6 +4090,11 @@ Error: Unbound module Bench
     | [] -&gt; []
     | 0  :: tl -&gt; drop_zero tl
   ;; 
+
+Characters 26-84:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+1::_
 val drop_zero : int list -&gt; 'a list = &lt;fun&gt;
 </programlisting>
       <para>
@@ -4069,6 +4134,13 @@ val drop_zero : int list -&gt; 'a list = &lt;fun&gt;
        [&quot;ML&quot;   ;&quot;Robin Milner&quot;  ;&quot;1973&quot;] ;
        [&quot;OCaml&quot;;&quot;Xavier Leroy&quot;  ;&quot;1996&quot;] ;
      ]);; 
+
+| language | architect      | first release |
+|----------+----------------+---------------|
+| Lisp     | John McCarthy  | 1958          |
+| C        | Dennis Ritchie | 1969          |
+| ML       | Robin Milner   | 1973          |
+| OCaml    | Xavier Leroy   | 1996          |
 - : unit = ()
 </programlisting>
     <para>
@@ -4401,7 +4473,7 @@ val render_table : string list -&gt; string list list -&gt; string = &lt;fun&gt;
 val is_ocaml_source : string -&gt; bool = &lt;fun&gt;
 # let (ml_files,other_files) =
     List.partition_tf (Sys.ls_dir &quot;.&quot;)  ~f:is_ocaml_source;; 
-val ml_files : string list = [&quot;example.ml&quot;; &quot;example.mli&quot;]
+val ml_files : string list = [&quot;example.mli&quot;; &quot;example.ml&quot;]
 val other_files : string list = [&quot;main.topscript&quot;]
 </programlisting>
         <para>
@@ -4457,7 +4529,7 @@ val other_files : string list = [&quot;main.topscript&quot;]
   ;; 
 val ls_rec : string -&gt; string list = &lt;fun&gt;
 # ls_rec &quot;.&quot;;; 
-- : string list = [&quot;./example.ml&quot;; &quot;./main.topscript&quot;; &quot;./example.mli&quot;]
+- : string list = [&quot;./main.topscript&quot;; &quot;./example.mli&quot;; &quot;./example.ml&quot;]
 </programlisting>
         <para>
           The above combination of <literal>List.map</literal> and
@@ -4520,6 +4592,9 @@ val length : 'a list -&gt; int = &lt;fun&gt;
 val make_list : int -&gt; int list = &lt;fun&gt;
 # make_list 10;
 length (make_list 10_000_000);; 
+
+Characters -1-12:
+Warning 10: this expression should have type unit.
 Stack overflow during evaluation (looping recursion?).
 </programlisting>
     <para>
@@ -4781,6 +4856,12 @@ Exception: (Invalid_argument &quot;equal: functional value&quot;).
     | x :: tl when Option.is_none x -&gt; count_some tl
     | x :: tl when Option.is_some x -&gt; 1 + count_some tl
   ;; 
+
+Characters 30-169:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+_::_
+(However, some guarded clause may match this value.)
 val count_some : 'a option list -&gt; int = &lt;fun&gt;
 </programlisting>
     <para>
@@ -6011,7 +6092,11 @@ type host_info = {
   <programlisting language="ocaml">
 ...part 1 of records/main.topscript
 # #require &quot;core_extended&quot;;; 
+
+No such package: core_extended
 # open Core_extended.Std;; 
+Characters -1-22:
+Error: Unbound module Core_extended
 # let my_host =
     let sh = Shell.sh_one_exn in
     { hostname   = sh &quot;hostname&quot;;
@@ -6019,9 +6104,8 @@ type host_info = {
       cpu_arch   = sh &quot;uname -p&quot;;
       timestamp  = Time.now ();
     };; 
-val my_host : host_info =
-  {hostname = &quot;ocaml-www1&quot;; os_name = &quot;Linux&quot;; cpu_arch = &quot;unknown&quot;;
-   timestamp = 2013-07-23 00:27:45.752075+01:00}
+Characters 27-43:
+Error: Unbound module Shell
 </programlisting>
   <para>
     You might wonder how the compiler inferred that
@@ -6038,7 +6122,8 @@ val my_host : host_info =
   <programlisting language="ocaml">
 ...part 2 of records/main.topscript
 # my_host.cpu_arch;; 
-- : string = &quot;unknown&quot;
+Characters -1-7:
+Error: Unbound value my_host
 </programlisting>
   <para>
     When declaring an OCaml type, you always have the option of
@@ -6077,7 +6162,8 @@ val first_timestamped : 'a timestamped list -&gt; 'a timestamped option = &lt;fu
        sprintf &quot;%s (%s / %s, on %s)&quot; h os c (Time.to_sec_string ts);; 
 val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
 # host_info_to_string my_host;; 
-- : string = &quot;ocaml-www1 (Linux / unknown, on 2013-07-23 00:27:45)&quot;
+Characters 20-27:
+Error: Unbound value my_host
 </programlisting>
     <para>
       Note that the pattern that we used had only a single case, rather
@@ -6142,6 +6228,11 @@ type host_info = {
                             cpu_arch = c; timestamp = ts;
                           } =
     sprintf &quot;%s (%s / %s, on %s)&quot; h os c (Time.to_sec_string ts);; 
+
+Characters 24-139:
+Warning 9: the following labels are not bound in this record pattern:
+os_release
+Either bind these labels explicitly or add '; _' to the pattern.
 val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
 </programlisting>
     <para>
@@ -6238,10 +6329,8 @@ val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
     let os_release = sh &quot;uname -r&quot; in
     let timestamp  = Time.now () in
     { hostname; os_name; cpu_arch; os_release; timestamp };; 
-val my_host : host_info =
-  {hostname = &quot;ocaml-www1&quot;; os_name = &quot;Linux&quot;; cpu_arch = &quot;unknown&quot;;
-   os_release = &quot;3.2.0-1-amd64&quot;;
-   timestamp = 2013-07-23 00:27:51.780637+01:00}
+Characters 31-47:
+Error: Unbound module Shell
 </programlisting>
     <para>
       In the above code, we defined variables corresponding to the
@@ -6872,12 +6961,12 @@ val show_field :
                 credentials = &quot;Xy2d9W&quot;; }
   ;; 
 val logon : Logon.t =
-  {Logon.session_id = &quot;26685&quot;; time = 2013-07-23 00:27:56.733853+01:00;
+  {Logon.session_id = &quot;26685&quot;; time = 2013-08-01 09:33:47.778515+01:00;
    user = &quot;yminsky&quot;; credentials = &quot;Xy2d9W&quot;}
 # show_field Logon.Fields.user Fn.id logon;; 
 - : string = &quot;user: yminsky&quot;
 # show_field Logon.Fields.time Time.to_string logon;; 
-- : string = &quot;time: 2013-07-23 00:27:56.733853+01:00&quot;
+- : string = &quot;time: 2013-08-01 09:33:47.778515+01:00&quot;
 </programlisting>
     <para>
       As a side note, the above is our first use of the
@@ -7179,6 +7268,11 @@ Error: This pattern matches values of type 'a * 'b
     | Basic basic_color -&gt; basic_color_to_int basic_color
     | RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36
     | Gray i -&gt; 232 + i ;; 
+
+Characters 19-154:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+Bold _
 val color_to_int : color -&gt; int = &lt;fun&gt;
 </programlisting>
   <para>
@@ -10433,11 +10527,11 @@ val time : (unit -&gt; 'a) -&gt; 'a = &lt;fun&gt;
 ...part 4 of imperative-programming/memo.topscript
 # time (fun () -&gt; edit_distance &quot;OCaml&quot; &quot;ocaml&quot;);; 
 
-Time: 1.41311ms
+Time: 1.40905ms
 - : int = 2
 # time (fun () -&gt; edit_distance &quot;OCaml 4.01&quot; &quot;ocaml 4.01&quot;);; 
 
-Time: 6.71776s
+Time: 6.6791s
 - : int = 2
 </programlisting>
       <para>
@@ -10473,11 +10567,11 @@ val fib : int -&gt; int = &lt;fun&gt;
 ...part 2 of imperative-programming/fib.topscript
 # time (fun () -&gt; fib 20);; 
 
-Time: 0.920773ms
+Time: 0.901937ms
 - : int = 10946
 # time (fun () -&gt; fib 40);; 
 
-Time: 13.7393s
+Time: 13.4923s
 - : int = 165580141
 </programlisting>
       <para>
@@ -10500,7 +10594,7 @@ Time: 13.7393s
 val fib : int -&gt; int = &lt;fun&gt;
 # time (fun () -&gt; fib 40);; 
 
-Time: 13.7397s
+Time: 13.4125s
 - : int = 165580141
 # time (fun () -&gt; fib 40);; 
 
@@ -10596,7 +10690,7 @@ val memo_rec : (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;
 val fib : int -&gt; int = &lt;fun&gt;
 # time (fun () -&gt; fib 40);; 
 
-Time: 0.0629425ms
+Time: 0.0610352ms
 - : int = 102334155
 </programlisting>
       <para>
@@ -10673,7 +10767,7 @@ val edit_distance : string * string -&gt; int = &lt;fun&gt;
 ...part 7 of imperative-programming/memo.topscript
 # time (fun () -&gt; edit_distance (&quot;OCaml 4.01&quot;,&quot;ocaml 4.01&quot;));; 
 
-Time: 0.549078ms
+Time: 0.546932ms
 - : int = 2
 </programlisting>
       <note> <title> 
@@ -10756,7 +10850,7 @@ Exception: Lazy.Undefined.
 val lazy_memo_rec : (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;
 # time (fun () -&gt; lazy_memo_rec fib_norec 40);; 
 
-Time: 0.0658035ms
+Time: 0.0669956ms
 - : int = 102334155
 </programlisting>
       <para>
@@ -14182,12 +14276,16 @@ In type &lt; width : int; .. &gt; as 'a the variable 'a is unbound
 # let print_pop st = Option.iter ~f:(printf &quot;Popped: %d\n&quot;) st#pop;; 
 val print_pop : &lt; pop : int option; .. &gt; -&gt; unit = &lt;fun&gt;
 # print_pop (stack [5;4;3;2;1]);; 
+
+Popped: 5
 - : unit = ()
 # let t = object
   method pop = Some (Float.to_int (Time.to_float (Time.now ())))
 end;; 
 val t : &lt; pop : int option &gt; = &lt;obj&gt;
 # print_pop t;; 
+
+Popped: 1375346073
 - : unit = ()
 </programlisting>
   </sect1>
@@ -18432,6 +18530,112 @@ module Foo_and_bar :
         val t_of_sexp : (Sexp.t -&gt; 'b) -&gt; Sexp.t -&gt; 'b t
         val sexp_of_t : ('b -&gt; Sexp.t) -&gt; 'b t -&gt; Sexp.t
       end
+    module Pooled_hashtbl :
+      sig
+        type key = t
+        type ('a, 'b) hashtbl = ('a, 'b) Pooled_hashtbl.t
+        type 'b t = (key, 'b) hashtbl
+        type ('a, 'b) t_ = 'b t
+        type 'a key_ = key
+        val hashable : key Pooled_hashtbl.Hashable.t
+        val create :
+          (key, unit -&gt; 'b t)
+          Core_kernel.Hash_set_intf.create_options_without_hashable
+        val of_alist :
+          (key, (key * 'b) list -&gt; [ `Duplicate_key of key | `Ok of 'b t ])
+          Core_kernel.Hash_set_intf.create_options_without_hashable
+        val of_alist_report_all_dups :
+          (key,
+           (key * 'b) list -&gt; [ `Duplicate_keys of key list | `Ok of 'b t ])
+          Core_kernel.Hash_set_intf.create_options_without_hashable
+        val of_alist_exn :
+          (key, (key * 'b) list -&gt; 'b t)
+          Core_kernel.Hash_set_intf.create_options_without_hashable
+        val of_alist_multi :
+          (key, (key * 'b) list -&gt; 'b list t)
+          Core_kernel.Hash_set_intf.create_options_without_hashable
+        val create_mapped :
+          (key,
+           get_key:('r -&gt; key) -&gt;
+           get_data:('r -&gt; 'b) -&gt;
+           'r list -&gt; [ `Duplicate_keys of key list | `Ok of 'b t ])
+          Core_kernel.Hash_set_intf.create_options_without_hashable
+        val create_with_key :
+          (key,
+           get_key:('r -&gt; key) -&gt;
+           'r list -&gt; [ `Duplicate_keys of key list | `Ok of 'r t ])
+          Core_kernel.Hash_set_intf.create_options_without_hashable
+        val create_with_key_exn :
+          (key, get_key:('r -&gt; key) -&gt; 'r list -&gt; 'r t)
+          Core_kernel.Hash_set_intf.create_options_without_hashable
+        val group :
+          (key,
+           get_key:('r -&gt; key) -&gt;
+           get_data:('r -&gt; 'b) -&gt; combine:('b -&gt; 'b -&gt; 'b) -&gt; 'r list -&gt; 'b t)
+          Core_kernel.Hash_set_intf.create_options_without_hashable
+        val sexp_of_key : 'a t -&gt; key -&gt; Sexp.t
+        val clear : 'a t -&gt; unit
+        val copy : 'b t -&gt; 'b t
+        val invariant : 'a t -&gt; unit
+        val fold :
+          'b t -&gt; init:'c -&gt; f:(key:key -&gt; data:'b -&gt; 'c -&gt; 'c) -&gt; 'c
+        val iter : 'b t -&gt; f:(key:key -&gt; data:'b -&gt; unit) -&gt; unit
+        val existsi : 'b t -&gt; f:(key:key -&gt; data:'b -&gt; bool) -&gt; bool
+        val exists : 'b t -&gt; f:('b -&gt; bool) -&gt; bool
+        val length : 'a t -&gt; int
+        val is_empty : 'a t -&gt; bool
+        val mem : 'a t -&gt; key -&gt; bool
+        val remove : 'a t -&gt; key -&gt; unit
+        val remove_one : 'a list t -&gt; key -&gt; unit
+        val replace : 'b t -&gt; key:key -&gt; data:'b -&gt; unit
+        val set : 'b t -&gt; key:key -&gt; data:'b -&gt; unit
+        val add : 'b t -&gt; key:key -&gt; data:'b -&gt; [ `Duplicate | `Ok ]
+        val add_exn : 'b t -&gt; key:key -&gt; data:'b -&gt; unit
+        val change : 'b t -&gt; key -&gt; ('b option -&gt; 'b option) -&gt; unit
+        val add_multi : 'b list t -&gt; key:key -&gt; data:'b -&gt; unit
+        val remove_multi : 'a list t -&gt; key -&gt; unit
+        val map : 'b t -&gt; f:('b -&gt; 'c) -&gt; 'c t
+        val mapi : 'b t -&gt; f:(key:key -&gt; data:'b -&gt; 'c) -&gt; 'c t
+        val filter_map : 'b t -&gt; f:('b -&gt; 'c option) -&gt; 'c t
+        val filter_mapi : 'b t -&gt; f:(key:key -&gt; data:'b -&gt; 'c option) -&gt; 'c t
+        val filter : 'b t -&gt; f:('b -&gt; bool) -&gt; 'b t
+        val filteri : 'b t -&gt; f:(key:key -&gt; data:'b -&gt; bool) -&gt; 'b t
+        val partition_map :
+          'b t -&gt; f:('b -&gt; [ `Fst of 'c | `Snd of 'd ]) -&gt; 'c t * 'd t
+        val partition_mapi :
+          'b t -&gt;
+          f:(key:key -&gt; data:'b -&gt; [ `Fst of 'c | `Snd of 'd ]) -&gt;
+          'c t * 'd t
+        val partition_tf : 'b t -&gt; f:('b -&gt; bool) -&gt; 'b t * 'b t
+        val partitioni_tf :
+          'b t -&gt; f:(key:key -&gt; data:'b -&gt; bool) -&gt; 'b t * 'b t
+        val find_or_add : 'b t -&gt; key -&gt; default:(unit -&gt; 'b) -&gt; 'b
+        val find : 'b t -&gt; key -&gt; 'b option
+        val find_exn : 'b t -&gt; key -&gt; 'b
+        val find_and_remove : 'b t -&gt; key -&gt; 'b option
+        val iter_vals : 'b t -&gt; f:('b -&gt; unit) -&gt; unit
+        val merge :
+          'a t -&gt;
+          'b t -&gt;
+          f:(key:key -&gt;
+             [ `Both of 'a * 'b | `Left of 'a | `Right of 'b ] -&gt; 'c option) -&gt;
+          'c t
+        val merge_into :
+          f:(key:key -&gt; 'b -&gt; 'b option -&gt; 'b option) -&gt;
+          src:'b t -&gt; dst:'b t -&gt; unit
+        val keys : 'a t -&gt; key list
+        val data : 'b t -&gt; 'b list
+        val filter_inplace : 'b t -&gt; f:('b -&gt; bool) -&gt; unit
+        val filteri_inplace : 'b t -&gt; f:(key -&gt; 'b -&gt; bool) -&gt; unit
+        val equal : 'b t -&gt; 'b t -&gt; ('b -&gt; 'b -&gt; bool) -&gt; bool
+        val to_alist : 'b t -&gt; (key * 'b) list
+        val validate :
+          name:(key -&gt; string) -&gt;
+          'b Core_kernel.Validate.check -&gt; 'b t Core_kernel.Validate.check
+        val incr : ?by:int -&gt; int t -&gt; key -&gt; unit
+        val t_of_sexp : (Sexp.t -&gt; 'b) -&gt; Sexp.t -&gt; 'b t
+        val sexp_of_t : ('b -&gt; Sexp.t) -&gt; 'b t -&gt; Sexp.t
+      end
     module Hash_set :
       sig
         type elt = t
@@ -18493,44 +18697,6 @@ module Foo_and_bar :
         val iteri : 'a t -&gt; f:(key:Key.t -&gt; data:'a -&gt; unit) -&gt; unit
         val foldi :
           'a t -&gt; init:'b -&gt; f:('b -&gt; key:Key.t -&gt; data:'a -&gt; 'b) -&gt; 'b
-      end
-    module Hash_heap :
-      sig
-        module Key :
-          sig
-            type t = Hash_set.elt
-            val compare : t -&gt; t -&gt; int
-            val hash : t -&gt; int
-            val t_of_sexp : Sexp.t -&gt; t
-            val sexp_of_t : t -&gt; Sexp.t
-          end
-        type 'a t
-        val create : ?min_size:int -&gt; ('a -&gt; 'a -&gt; int) -&gt; 'a t
-        val copy : 'a t -&gt; 'a t
-        val push :
-          'a t -&gt; key:Key.t -&gt; data:'a -&gt; [ `Key_already_present | `Ok ]
-        val push_exn : 'a t -&gt; key:Key.t -&gt; data:'a -&gt; unit
-        val replace : 'a t -&gt; key:Key.t -&gt; data:'a -&gt; unit
-        val remove : 'a t -&gt; Key.t -&gt; unit
-        val mem : 'a t -&gt; Key.t -&gt; bool
-        val top : 'a t -&gt; 'a option
-        val top_exn : 'a t -&gt; 'a
-        val top_with_key : 'a t -&gt; (Key.t * 'a) option
-        val top_with_key_exn : 'a t -&gt; Key.t * 'a
-        val pop_with_key : 'a t -&gt; (Key.t * 'a) option
-        val pop_with_key_exn : 'a t -&gt; Key.t * 'a
-        val pop : 'a t -&gt; 'a option
-        val pop_exn : 'a t -&gt; 'a
-        val cond_pop_with_key :
-          'a t -&gt; (key:Key.t -&gt; data:'a -&gt; bool) -&gt; (Key.t * 'a) option
-        val cond_pop : 'a t -&gt; ('a -&gt; bool) -&gt; 'a option
-        val find : 'a t -&gt; Key.t -&gt; 'a option
-        val find_pop : 'a t -&gt; Key.t -&gt; 'a option
-        val find_exn : 'a t -&gt; Key.t -&gt; 'a
-        val find_pop_exn : 'a t -&gt; Key.t -&gt; 'a
-        val iter : 'a t -&gt; f:(key:Key.t -&gt; data:'a -&gt; unit) -&gt; unit
-        val iter_vals : 'a t -&gt; f:('a -&gt; unit) -&gt; unit
-        val length : 'a t -&gt; int
       end
   end
 </programlisting>
@@ -19009,7 +19175,7 @@ missing anonymous argument: FILENAME
       <programlisting>
 # running command-line-parsing/run_basic_md5.out.sh
 $ ./basic_md5.native ./basic_md5.native
-b9d0eb8519a5d69e21b03ef6fdadbbc0
+98a758330e838bb943c15fb264b07685
 </programlisting>
       <para>
         And that's all it took to build our little MD5 utility! Here's a
@@ -20228,12 +20394,12 @@ let () = Command.run add
       <programlisting>
 # running command-line-parsing/md5_completion.out.sh
 $ env COMMAND_OUTPUT_INSTALLATION_BASH=1 ./basic_md5_with_flags.native
-function _jsautocom_95902 {
+function _jsautocom_12964 {
   export COMP_CWORD
   COMP_WORDS[0]=./basic_md5_with_flags.native
   COMPREPLY=($(&quot;${COMP_WORDS[@]}&quot;))
 }
-complete -F _jsautocom_95902 ./basic_md5_with_flags.native
+complete -F _jsautocom_12964 ./basic_md5_with_flags.native
 </programlisting>
       <para>
         Recall that we used the <literal>Arg_type.file</literal> to
@@ -20397,6 +20563,13 @@ add      diff     help     version
     </para>
     <programlisting language="ocaml">
 # #require &quot;yojson&quot; ;; 
+
+/home/rwo/.opam/4.01.0dev+trunk/lib/easy-format: added to search path
+/home/rwo/.opam/4.01.0dev+trunk/lib/easy-format/easy_format.cmo: loaded
+/home/rwo/.opam/4.01.0dev+trunk/lib/biniou: added to search path
+/home/rwo/.opam/4.01.0dev+trunk/lib/biniou/biniou.cma: loaded
+/home/rwo/.opam/4.01.0dev+trunk/lib/yojson: added to search path
+/home/rwo/.opam/4.01.0dev+trunk/lib/yojson/yojson.cmo: loaded
 # open Yojson ;; 
 </programlisting>
     </note>
@@ -20892,7 +21065,8 @@ val person : [&gt; `Assoc of (string * [&gt; `String of string ]) list ] =
 # Yojson.Basic.pretty_to_string person ;; 
 - : string = &quot;{ \&quot;name\&quot;: \&quot;Anil\&quot; }&quot;
 # Yojson.Basic.pretty_to_channel stdout person ;; 
-- : unit = ()
+
+{ &quot;name&quot;: &quot;Anil&quot; }- : unit = ()
 </programlisting>
     <para>
       In this case, there are no problems. Our <literal>person</literal>
@@ -20920,7 +21094,7 @@ val person : [&gt; `Assoc of (string * [&gt; `String of string ]) list ] =
 val person : [&gt; `Assoc of string * [&gt; `String of string ] ] =
   `Assoc (&quot;name&quot;, `String &quot;Anil&quot;)
 # Yojson.Basic.pretty_to_string person ;; 
-File &quot;&quot;, line 1, characters 30-36:
+Characters 30-36:
 Error: This expression has type
          [&gt; `Assoc of string * [&gt; `String of string ] ]
        but an expression was expected of type Yojson.Basic.json
@@ -20936,7 +21110,7 @@ Error: This expression has type
 ...part 5 of json/build_json.topscript
 # let (person : Yojson.Basic.json) =
   `Assoc (&quot;name&quot;, `String &quot;Anil&quot;);; 
-File &quot;&quot;, line 2, characters 2-33:
+Characters 37-68:
 Error: This expression has type 'a * 'b
        but an expression was expected of type
          (string * Yojson.Basic.json) list
@@ -21490,92 +21664,173 @@ $ ./_build/github_org_info.native janestreet
   <para>
     OCaml provides lexer and parser generators modeled on lex and yacc.
     Similar tools are available in a variety of languages, and with them
-    you can parse a variety of kinds of input, including web formats or
-    full blown programming languages.
+    you can parse a variety of kinds of input, including common web
+    formats or full blown programming languages.
   </para>
   <para>
-    Let's be more precise about these terms. By
-    <emphasis>parsing</emphasis>, we mean reading a textual input into a
-    form that is easier for a program to manipulate. For example,
-    suppose we want to read a file containing a value in JSON format.
-    JSON has a variety of values, including numbers, strings, arrays,
-    and objects, and each of these has a textual representation. For
-    example, the following text represents an object containing a string
-    labeled <literal>title</literal>, and an array containing two
-    objects, each with a name and array of zip codes.
+    In this chapter, you'll learn how to:
   </para>
-  <programlisting language="json">
-{ title: &quot;Cities&quot;,
-  cities: [{ name: &quot;Chicago&quot;, zips: [60601] },
-           { name: &quot;New York&quot;, zips: [10004] }]
+  <itemizedlist>
+    <listitem>
+      <para>
+        convert input into a structured token stream using
+        <literal>ocamllex</literal>.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        parse a token stream into an OCaml data structure using
+        <literal>menhir</literal>.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        handle simple errors in the input data.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        use all these tools to build a parser for the JSON format.
+      </para>
+    </listitem>
+  </itemizedlist>
+  <sect1 id="basic-lexing-and-parsing-concepts">
+    <title>Basic lexing and parsing concepts</title>
+    <para>
+      Let's be more precise about some of these terms. By
+      <emphasis>parsing</emphasis>, we mean reading a textual input into
+      a form that is easier for a program to manipulate.
+    </para>
+    <para>
+      For example, suppose we want to read a file containing a value in
+      JSON format. JSON has a variety of values, including numbers,
+      strings, arrays, and objects, and each of these has a textual
+      representation. For example, the following text represents an
+      object containing a string labeled <literal>title</literal>, and
+      an array containing two objects, each with a name and array of zip
+      codes.
+    </para>
+    <programlisting language="json">
+{
+  title: &quot;Cities&quot;,
+  cities: [
+    { name: &quot;Chicago&quot;,  zips: [60601] },
+    { name: &quot;New York&quot;, zips: [10004] } 
+  ]
 }
 </programlisting>
-  <para>
-    The input text is represented as a sequence of characters.
-    Manipulating it in that form would be really hard, so what we want
-    is to give it a structured type that is easier for our programs to
-    manipulate. For our example, we'll use the following type to
-    represent JSON <emphasis>abstract syntax</emphasis>.
-  </para>
-  <programlisting language="ocaml">
+    <para>
+      The input text is represented as a sequence of characters.
+      Manipulating it in that form would be really hard, so what we want
+      is to give it a structured type that is easier for our programs to
+      manipulate. For our example, we'll use the following type to
+      represent JSON <emphasis>abstract syntax</emphasis>.
+    </para>
+    <programlisting language="ocaml">
+(* parsing/json.ml  *)
 type value = [
-| `Assoc of (string * value) list
-| `Bool of bool
-| `Float of float
-| `Int of int
-| `List of value list
-| `String of string
-| `Null ]
+  | `Object of (string * value) list
+  | `Array of value array
+  | `String of string
+  | `Int of int
+  | `Float of float
+  | `True
+  | `False
+  | `Null ]
 </programlisting>
-  <para>
-    The objective of <emphasis>parsing</emphasis> is to convert the text
-    input into a value of type <literal>value</literal>. This is
-    normally done in two phase. First, <emphasis>lexical</emphasis>
-    analysis (or lexing, for short) is used to convert the text input
-    into a sequence of tokens, or words. For example, the JSON input
-    would be tokenized into a sequence of tokens like the following. In
-    most cases (and in this example), lexical analysis will choose to
-    omit white space from the token stream.
-  </para>
-  <programlisting>
+    <sect2 id="lexical-analysis">
+      <title>Lexical Analysis</title>
+      <para>
+        The overall objective of <emphasis>parsing</emphasis> is to
+        convert the text input into a value of type
+        <literal>value</literal>. This is normally done in two phases.
+      </para>
+      <para>
+        First, <emphasis>lexical</emphasis> analysis (or lexing, for
+        short) is used to convert the text input into a sequence of
+        tokens, or words. For example, the JSON input would be tokenized
+        into a sequence of tokens like the following. In most cases (and
+        in this example), lexical analysis will choose to omit white
+        space from the token stream.
+      </para>
+      <programlisting language="ocaml">
+(* parsing/tokens.ml  *)
 LEFT_BRACE, ID(&quot;title&quot;), COLON, STRING(&quot;Cities&quot;), COMMA, ID(&quot;cities&quot;), ...
 </programlisting>
-  <para>
-    The next step is to convert the token stream into a program value
-    that represents the abstract syntax tree, like the type
-    <literal>value</literal> above. This is called
-    <emphasis>parsing</emphasis>.
-  </para>
-  <programlisting>
+    </sect2>
+    <sect2 id="parsing">
+      <title>Parsing</title>
+      <para>
+        The next step is to convert the token stream into a program
+        value that represents the abstract syntax tree, like the type
+        <literal>value</literal> above. This is called
+        <emphasis>parsing</emphasis>.
+      </para>
+      <programlisting language="ocaml">
+(* parsing/parsed_example.ml  *)
 `Assoc
   [&quot;title&quot;, `String &quot;Cities&quot;;
    &quot;cities&quot;, `List
      [`Assoc [&quot;name&quot;, `String &quot;Chicago&quot;; &quot;zips&quot;, `List [Int 60601]];
-       `Assoc [&quot;name&quot;, `String &quot;New York&quot;; &quot;zips&quot;, `List [Int 10004]]]]
+      `Assoc [&quot;name&quot;, `String &quot;New York&quot;; &quot;zips&quot;, `List [Int 10004]]]]
 </programlisting>
-  <para>
-    There are many techniques for lexing and parsing. In the lex/yacc
-    world, lexing is specified using regular expressions, and parsing is
-    specified using context-free grammars. These are concepts from
-    formal languages; the lex/yacc tools constructing the machinery for
-    you. For <literal>lex</literal>, this means constructing a finite
-    automaton; and for <literal>yacc</literal>, this means constructing
-    a pushdown automaton.
-  </para>
-  <para>
-    Parsing is a broad and often intricate topic, and our purpose here
-    is not to teach all of the ins and outs of yacc and lex, but to show
-    how to use these tools in OCaml. There are online resources, and
-    most experience you may have using lex/yacc in other languages will
-    also apply in OCaml. However, there are differences, and we'll try
-    to point out the larger ones here.
-  </para>
-  <para>
-    For illustration, let's continue with the JSON example. For lexing,
-    we'll use <literal>ocamllex</literal>, and for parsing, we'll use
-    <literal>menhir</literal>, which is somewhat easier to use than
-    <literal>ocamlyacc</literal>.
-  </para>
+      <para>
+        There are many techniques for lexing and parsing that have a
+        variety of tradeoffs in the complexity of grammars that they can
+        express, how well they handle malformed input, and also how
+        resource-intensive the parsing process is.
+      </para>
+      <para>
+        In the lex/yacc world, lexing is specified using regular
+        expressions, and parsing is specified using context-free
+        grammars. These are concepts from formal languages that you
+        don't need to understand in huge detail, as the lex/yacc tools
+        construct the machinery for you. For <literal>lex</literal>,
+        this means constructing a <emphasis>finite automaton</emphasis>;
+        and for <literal>yacc</literal>, this means constructing a
+        <emphasis>pushdown automaton</emphasis>.
+      </para>
+      <para>
+        Parsing is a broad and often intricate topic, and our purpose
+        here is not to teach all of the ins and outs of yacc and lex,
+        but to show how to use these tools in OCaml. There are online
+        resources for the theoretical background, and most experience
+        you may have using lex/yacc in other languages will also apply
+        in OCaml. However, there are differences, and we'll try to point
+        out the larger ones here.
+      </para>
+      <para>
+        For illustration, let's continue with the JSON example. For
+        lexing, we'll use <literal>ocamllex</literal>, and for parsing,
+        we'll use Menhir, which is somewhat easier to use than
+        <literal>ocamlyacc</literal>.
+      </para>
+      <note>
+      <title>
+      Menhir <emphasis>vs</emphasis> <literal>ocamlyacc</literal>
+      </title>
+      <para>
+        Menhir is an alternative parser generator that is generally
+        superior to the venerable <literal>ocamlyacc</literal>, which
+        dates back quite a few years. Menhir is mostly compatible with
+        <literal>ocamlyacc</literal> grammars, and so you can usually
+        just switch to Menhir and expect older code to work (with some
+        minor differences described in the Menhir manual).
+      </para>
+      <para>
+        The biggest advantage of Menhir is that its error messages are
+        generally more human-comprehensible, and the parsers that it
+        generates are fully reentrant and can be parameterized in OCaml
+        modules more easily. We recommend that any new code you develop
+        should use Menhir instead of <literal>ocamlyacc</literal>.
+      </para>
+      <para>
+        Menhir isn't distributed directly with OCaml, but is available
+        through OPAM by running <literal>opam install menhir</literal>.
+      </para>
+      </note>
+    </sect2>
+  </sect1>
   <sect1 id="defining-a-json-parser-with-menhir">
     <title>Defining a JSON parser with menhir</title>
     <para>
@@ -21621,6 +21876,7 @@ LEFT_BRACE, ID(&quot;title&quot;), COLON, STRING(&quot;Cities&quot;), COMMA, ID(
         implement the grammar below).
       </para>
       <programlisting language="ocaml">
+(* parsing/partial_parser.mly  *)
 %token &lt;int&gt; INT
 %token &lt;float&gt; FLOAT
 %token &lt;string&gt; ID
@@ -21657,13 +21913,40 @@ exp: { () }
       <para>
         Compile this file with <literal>menhir</literal>. It will issue
         multiple warnings about unused tokens because we haven't
-        actually defined a grammar yet. It is ok to ignore the warnings
+        actually defined a grammar yet. It's ok to ignore the warnings
         for now.
       </para>
       <programlisting>
-$ menhir parser.mly
+# running parsing/build_partial_json_parser.out.sh
+$ menhir partial_parser.mly
+File &quot;partial_parser.mly&quot;, line 12, characters 7-12:
 Warning: the token COLON is unused.
-...
+File &quot;partial_parser.mly&quot;, line 13, characters 7-12:
+Warning: the token COMMA is unused.
+File &quot;partial_parser.mly&quot;, line 14, characters 7-10:
+Warning: the token EOF is unused.
+File &quot;partial_parser.mly&quot;, line 6, characters 7-12:
+Warning: the token FALSE is unused.
+File &quot;partial_parser.mly&quot;, line 2, characters 15-20:
+Warning: the token FLOAT is unused.
+File &quot;partial_parser.mly&quot;, line 3, characters 16-18:
+Warning: the token ID is unused.
+File &quot;partial_parser.mly&quot;, line 1, characters 13-16:
+Warning: the token INT is unused.
+File &quot;partial_parser.mly&quot;, line 8, characters 7-17:
+Warning: the token LEFT_BRACE is unused.
+File &quot;partial_parser.mly&quot;, line 10, characters 7-17:
+Warning: the token LEFT_BRACK is unused.
+File &quot;partial_parser.mly&quot;, line 7, characters 7-11:
+Warning: the token NULL is unused.
+File &quot;partial_parser.mly&quot;, line 9, characters 7-18:
+Warning: the token RIGHT_BRACE is unused.
+File &quot;partial_parser.mly&quot;, line 11, characters 7-18:
+Warning: the token RIGHT_BRACK is unused.
+File &quot;partial_parser.mly&quot;, line 4, characters 16-22:
+Warning: the token STRING is unused.
+File &quot;partial_parser.mly&quot;, line 5, characters 7-11:
+Warning: the token TRUE is unused.
 </programlisting>
       <para>
         The <literal>menhir</literal> tool is a parser generator,
@@ -21674,8 +21957,8 @@ Warning: the token COLON is unused.
         <literal>parser.mli</literal> contains declarations that we need
         to build a lexer.
       </para>
-      <programlisting>
-$ cat parser.mli
+      <programlisting language="ocaml">
+(* parsing/partial_parser.mli  *)
 exception Error
 
 type token = 
@@ -21714,15 +21997,54 @@ symbol: [ id1 = ] symbol1; [ id2 = ] symbol2; ...; [ idN = ] symbolN
         <literal>id1</literal>, ..., <literal>idN</literal> for the
         input symbols <literal>symbol1</literal>, ...,
         <literal>symbolN</literal>; the OCaml code computes a value for
-        the target <literal>symbol</literal>. That's too abstract, so
-        let's get down to defining productions for parsing JSON. Here is
-        the main production for a JSON value.
+        the target <literal>symbol</literal>. That's all quite abstract,
+        so let's get down to defining productions for parsing real JSON
+        values.
       </para>
-      <programlisting>
+      <para>
+        The beginning of the parser has the same token rules as before,
+        and also defines a proper entry point via the
+        <literal>prog</literal> rule.
+      </para>
+      <programlisting language="ocaml">
+(* parsing/parser.mly  *)
+%token &lt;int&gt; INT
+%token &lt;float&gt; FLOAT
+%token &lt;string&gt; ID
+%token &lt;string&gt; STRING
+%token TRUE
+%token FALSE
+%token NULL
+%token LEFT_BRACE
+%token RIGHT_BRACE
+%token LEFT_BRACK
+%token RIGHT_BRACK
+%token COLON
+%token COMMA
+%token EOF
+
+%type &lt;Json.value option&gt; prog
+
+%start prog
+
+%%
+
+prog: v = value
+    { Some v }
+  | EOF
+    { None }
+  ;
+</programlisting>
+      <para>
+        Once that's in place, we can add the main production for a JSON
+        value.
+      </para>
+      <programlisting language="ocaml">
+(* parsing/parser.mly (starting from part 1) *)
 value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
-    { `Assoc obj }
-  | LEFT_BRACK; vl = list_values; RIGHT_BRACK
-    { `List vl }
+    { `Object obj }
+  | LEFT_BRACK; vl = array_values; RIGHT_BRACK
+    { `Array vl }
   | s = STRING
     { `String s }
   | i = INT
@@ -21730,9 +22052,9 @@ value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
   | x = FLOAT
     { `Float x }
   | TRUE
-    { `Bool true }
+    { `True }
   | FALSE
-    { `Bool false }
+    { `False }
   | NULL
     { `Null }
   ;
@@ -21752,7 +22074,7 @@ value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
       <para>
         That is, an object value starts with a
         <literal>LEFT_BRACE</literal>, contains some optional object
-        field values (to be defined), and end with a
+        field values (to be defined), and ends with a
         <literal>RIGHT_BRACE</literal>. The returned value is
         <literal>Assoc obj</literal>, where <literal>obj</literal> is
         the sequence of object fields. Note that we've left out bindings
@@ -21769,7 +22091,8 @@ value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
         <literal>/* empty */</literal> is used to point out that a
         production has an empty right hand side.
       </para>
-      <programlisting>
+      <programlisting language="ocaml">
+(* parsing/parser.mly (starting from part 2) *)
 opt_object_fields: /* empty */
     { [] }
   | obj = rev_object_fields
@@ -21789,9 +22112,9 @@ rev_object_fields: k = ID; COLON; v = value
         one more field definition.
       </para>
       <para>
-        The <literal>rev_</literal> prefixed is intended to point out
-        that the fields are returned in reverse order. Why would we do
-        that? One reason is that the <literal>menhir</literal> parser
+        The <literal>rev_</literal> prefix is intended to point out that
+        the fields are returned in reverse order. Why would we do that?
+        One reason is that the <literal>menhir</literal> parser
         generator is left-recursive, which means that the constructed
         pushdown automoton uses less stack space with left-recursive
         definitions. The following right-recursive rule accepts the same
@@ -21824,72 +22147,15 @@ object_fields: k = ID; COLON; v = value
         arrays, and adding a correct <literal>%start</literal>
         production. For the <literal>%start</literal> production, we'll
         return a <literal>value option</literal>, using
-        <literal>None</literal> to represent end of file. Here is the
-        complete file.
+        <literal>None</literal> to represent end-of-file. Here's the
+        last part with the array rules fille din.
       </para>
-      <programlisting>
-%token &lt;int&gt; INT
-%token &lt;float&gt; FLOAT
-%token &lt;string&gt; ID
-%token &lt;string&gt; STRING
-%token TRUE
-%token FALSE
-%token NULL
-%token LEFT_BRACE
-%token RIGHT_BRACE
-%token LEFT_BRACK
-%token RIGHT_BRACK
-%token COLON
-%token COMMA
-%token EOF
-
-%type &lt;Json.value option&gt; prog
-
-%start prog
-
-%%
-
-prog: v = value
-    { Some v }
-  | EOF
-    { None }
-  ;
-
-value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
-    { `Assoc obj }
-  | LEFT_BRACK; vl = list_values; RIGHT_BRACK
-    { `List vl }
-  | s = STRING
-    { `String s }
-  | i = INT
-    { `Int i }
-  | x = FLOAT
-    { `Float x }
-  | TRUE
-    { `Bool true }
-  | FALSE
-    { `Bool false }
-  | NULL
-    { `Null }
-  ;
-
-
-opt_object_fields: /* empty */
-    { [] }
-  | obj = rev_object_fields
-    { List.rev obj }
-  ;
-
-rev_object_fields: k = ID; COLON; v = value
-    { [k, v] }
-  | obj = rev_object_fields; COMMA; k = ID; COLON; v = value
-    { (k, v) :: obj }
-  ;
-
-list_values: /* empty */
-    { [] }
+      <programlisting language="ocaml">
+(* parsing/parser.mly (starting from part 3) *)
+array_values: /* empty */
+    { [||] }
   | vl = rev_values
-    { List.rev vl }
+    { Array.of_list (List.rev vl) }
   ;
 
 rev_values: v = value
@@ -21902,6 +22168,10 @@ rev_values: v = value
         That's it. We can compile this with <literal>menhir</literal>,
         which will now no longer complain about unused symbols.
       </para>
+      <programlisting>
+# running parsing/build_json_parser.out.sh
+$ menhir parser.mly
+</programlisting>
     </sect2>
   </sect1>
   <sect1 id="defining-a-lexer-with-ocamllex">
@@ -21944,7 +22214,8 @@ rules...
         digit in the range 1-9, followed by zero or more digits in the
         range 0-9.
       </para>
-      <programlisting>
+      <programlisting language="ocaml">
+(* parsing/lexer.mll (starting from part 1) *)
 let int = '-'? ['1'-'9'] ['0'-'9']*
 </programlisting>
       <para>
@@ -21952,7 +22223,8 @@ let int = '-'? ['1'-'9'] ['0'-'9']*
         points and exponents. We can use multiple let-definitions for
         the different parts.
       </para>
-      <programlisting>
+      <programlisting language="ocaml">
+(* parsing/lexer.mll (starting from part 2) *)
 let digits = ['0'-'9']+
 let frac = '.' digits
 let exp = ['e' 'E'] ['-' '+']? digits
@@ -21976,11 +22248,13 @@ let float = int (frac | exp | frac exp)
         Finally, let's define identifiers and whitespace. An identifier
         (label), is an alphanumeric sequence not beginning with a digit.
       </para>
-      <programlisting>
+      <programlisting language="ocaml">
+(* parsing/lexer.mll (starting from part 3) *)
 let white = [' ' '\t']+
 let newline = '\r' | '\n' | &quot;\r\n&quot;
 
 let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
+let hex = ['0'-'9' 'a'-'f' 'A'-'F']
 </programlisting>
     </sect2>
     <sect2 id="lexing-rules">
@@ -21991,25 +22265,13 @@ let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
         has a regular expression followed by OCaml code that defines a
         semantic action. Let's write JSON parse rule.
       </para>
-      <programlisting>
-rule read = parse
-| white { read lexbuf }
-| newline { next_line lexbuf; read lexbuf }
-| int { INT (int_of_string (Lexing.lexeme lexbuf)) }
-| float { FLOAT (float_of_string (Lexing.lexeme lexbuf)) }
-| &quot;true&quot; { TRUE }
-| &quot;false&quot; { FALSE }
-| &quot;null&quot; { NULL }
-| id { ID (Lexing.lexeme lexbuf) }
-| '&quot;' { read_string (Buffer.create 17) lexbuf }
-| '{' { LEFT_BRACE }
-| '}' { RIGHT_BRACE }
-| '[' { LEFT_BRACK }
-| ']' { RIGHT_BRACK }
-| ':' { COLON }
-| ',' { COMMA }
-| _ { raise (SyntaxError (&quot;Unexpected character: &quot; ^ Lexing.lexeme lexbuf)) }
-| eof { EOF }
+      <programlisting language="ocaml">
+(* parsing/lexer.mll (starting from part 3) *)
+let white = [' ' '\t']+
+let newline = '\r' | '\n' | &quot;\r\n&quot;
+
+let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
+let hex = ['0'-'9' 'a'-'f' 'A'-'F']
 </programlisting>
       <para>
         The OCaml code for the rules has a parameter called
@@ -22017,7 +22279,8 @@ rule read = parse
         position in the input file, as well as the text that was matched
         by the regular expression. Let's skip to the third action.
       </para>
-      <programlisting>
+      <programlisting language="ocaml">
+(* parsing/lexer_int_fragment.mll  *)
 | int { INT (int_of_string (Lexing.lexeme lexbuf)) }
 </programlisting>
       <para>
@@ -22043,13 +22306,21 @@ rule read = parse
         function, which updates the line number in the
         <literal>lexbuf</literal>.
       </para>
-      <programlisting>
+      <programlisting language="ocaml">
+(* parsing/lexer.mll  *)
+{
+open Lexing
+open Parser
+
+exception SyntaxError of string
+
 let next_line lexbuf =
   let pos = lexbuf.lex_curr_p in
   lexbuf.lex_curr_p &lt;-
     { pos with pos_bol = lexbuf.lex_curr_pos;
                pos_lnum = pos.pos_lnum + 1
     }
+}
 </programlisting>
       <para>
         There are actions for each different kind of token. The string
@@ -22095,7 +22366,8 @@ let next_line lexbuf =
         the definitions can be recursive. In this case, we use recursion
         to match string literals, using the following rule definition.
       </para>
-      <programlisting>
+      <programlisting language="ocaml">
+(* parsing/lexer.mll (starting from part 5) *)
 and read_string buf = parse
 | '&quot;' { STRING (Buffer.contents buf) }
 | '\\' '/' { Buffer.add_char buf '/'; read_string buf lexbuf }
@@ -22105,12 +22377,6 @@ and read_string buf = parse
 | '\\' 'n' { Buffer.add_char buf '\n'; read_string buf lexbuf }
 | '\\' 'r' { Buffer.add_char buf '\r'; read_string buf lexbuf }
 | '\\' 't' { Buffer.add_char buf '\t'; read_string buf lexbuf }
-| '\\' 'u' hex hex hex hex
-  { let string_code = String.sub (Lexing.lexeme lexbuf) 2 4 in
-    let code = int_of_string (&quot;0x&quot; ^ string_code) in
-    add_utf8 buf code;
-    read_string buf lexbuf
-  }
 | [^ '&quot;' '\\']+
   { Buffer.add_string buf (Lexing.lexeme lexbuf);
     read_string buf lexbuf
@@ -22133,26 +22399,6 @@ and read_string buf = parse
         final step includes a recursive call to the lexer.
       </para>
       <para>
-        As specified by JSON, we also handle Unicode code points,
-        <literal>'\\' 'u' hex hex hex hex</literal>. Ocaml doesn't have
-        any built-in handling for Unicode, so in this case we choose to
-        represent the code point in UTF-8. We define the following
-        function for adding the UTF-8 encoding to the buffer.
-      </para>
-      <programlisting language="ocaml">
-let add_utf8 buf code =
-  if code &lt;= 0x7f then
-    Buffer.add_char buf (Char.chr code)
-  else if code &lt;= 0x7ff then begin
-    Buffer.add_char buf (Char.chr (0b11000000 lor ((code lsr 6) land 0x3f)));
-    Buffer.add_char buf (Char.chr (0b10000000 lor (code land 0x3f)))
-  end else begin
-    Buffer.add_char buf (Char.chr (0b11100000 lor ((code lsr 12) land 0x3f)));
-    Buffer.add_char buf (Char.chr (0b10000000 lor ((code lsr 6) land 0x3f)));
-    Buffer.add_char buf (Char.chr (0b10000000 lor (code land 0x3f)))
-  end
-</programlisting>
-      <para>
         That covers the lexer. Next, we need to combine the lexer with
         the parser to bring it all together.
       </para>
@@ -22168,7 +22414,8 @@ let add_utf8 buf code =
       a <literal>lexbuf</literal>.
     </para>
     <programlisting language="ocaml">
-val prog: (Lexing.lexbuf -&gt; token) -&gt; Lexing.lexbuf -&gt; (Json.value option)
+(* parsing/prog.mli  *)
+val prog:(Lexing.lexbuf -&gt; token) -&gt; Lexing.lexbuf -&gt; Json.value option
 </programlisting>
     <para>
       The standard lexing library <literal>Lexing</literal> provides a
@@ -22184,16 +22431,20 @@ val prog: (Lexing.lexbuf -&gt; token) -&gt; Lexing.lexbuf -&gt; (Json.value opti
       <literal>Json.value</literal>.
     </para>
     <programlisting language="ocaml">
+(* parsing-test/test.ml (starting from part 1) *)
 let rec parse_and_print lexbuf =
-  match Parser.prog Lexer.read lexbuf with
-  | Some value -&gt; Json.output_value stdout value; parse_and_print lexbuf
+  match parse_with_error lexbuf with
+  | Some value -&gt;
+      printf &quot;%a\n&quot; Json.output_value value;
+      parse_and_print lexbuf
   | None -&gt; ()
-  
-let loop filename =
-  let inx = open_in filename in
+
+let loop filename () =
+  let inx = In_channel.create filename in
   let lexbuf = Lexing.from_channel inx in
+  lexbuf.lex_curr_p &lt;- { lexbuf.lex_curr_p with pos_fname = filename };
   parse_and_print lexbuf;
-  close_in inx
+  In_channel.close inx
 </programlisting>
     <para>
       This isn't quite right yet -- we need to handle parsing errors.
@@ -22202,57 +22453,70 @@ let loop filename =
       encountering an error is to print the error and give up.
     </para>
     <programlisting language="ocaml">
+(* parsing-test/test.ml  *)
+open Core.Std
+open Lexer
+open Lexing
+
+let print_position outx lexbuf =
+  let pos = lexbuf.lex_curr_p in
+  fprintf outx &quot;%s:%d:%d&quot; pos.pos_fname pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)
+
 let parse_with_error lexbuf =
   try Parser.prog Lexer.read lexbuf with
   | SyntaxError msg -&gt;
-      Printf.fprintf stderr &quot;%a: %s\n&quot; print_position lexbuf msg;
+      fprintf stderr &quot;%a: %s\n&quot; print_position lexbuf msg;
       None
   | Parser.Error -&gt;
-      Printf.fprintf stderr &quot;%a: syntax error\n&quot; print_position lexbuf;
-      None
-
-let rec parse_and_print lexbuf =
-  match parse_with_error lexbuf with
-  | Some value -&gt; Json.output_value stdout value; parse_and_print lexbuf
-  | None -&gt; ()
+      fprintf stderr &quot;%a: syntax error\n&quot; print_position lexbuf;
+      exit (-1)
 </programlisting>
     <para>
-      This approach, &quot;give up on the first error,&quot; is easy to
-      implement, but it isn't very friendly. In general, error handling
-      can be pretty intricate, and we won't discuss it here. However,
-      the menhir parser defines additional mechanisms you can use to try
-      and recover from errors, describe it its reference manual.
+      The &quot;give up on the first error&quot; approach is easy to
+      implement but isn't very friendly. In general, error handling can
+      be pretty intricate, and we won't discuss it here. However, the
+      menhir parser defines additional mechanisms you can use to try and
+      recover from errors, described in it its reference manual.
     </para>
     <para>
-      Here is an example of a successful run on the following input
-      file.
+      Here's a test input file we can use to test the code we just
+      wrote.
     </para>
-    <programlisting>
-$ cat test1.json
+    <programlisting language="json">
 true
 false
 null
 [1, 2]
-&quot;Hello\r\n\t\b\\\/\u12345&quot;
+&quot;Hello World&quot;
 { field1: &quot;Hello&quot;,
   field2: 17e13,
   field3: [1, 2, 3],
   field4: { fieldA: 1, fieldB: &quot;Hello&quot; }
 }
-
-$ ./test test1.json
+</programlisting>
+    <para>
+      Now build and run the example using this file, and you you can see
+      the full parser in action.
+    </para>
+    <programlisting>
+# running parsing-test/build_test.out.sh
+$ ocamlbuild -use-menhir -tag thread -use-ocamlfind -pkg core test.native
+/Users/avsm/.opam/4.01.0dev+trunk/bin/ocamllex.opt -q lexer.mll
+File &quot;lexer.mll&quot;, line 1, character 1: unterminated action.
+Command exited with code 3.
+$ ./test.native test1.json
 true
 false
 null
 [1, 2]
-&quot;Hello
-       \/ሴ5&quot;
+&quot;Hello World&quot;
 { field1: &quot;Hello&quot;, field2: 170000000000000.000000, field3: [1, 2, 3], field4: { fieldA: 1, fieldB: &quot;Hello&quot; } }
 </programlisting>
     <para>
       With our simple error handling scheme, errors are fatal.
     </para>
-    <programlisting language="ocaml">
+    <programlisting>
+# running parsing-test/run_broken_test.out.sh
 $ cat test2.json
 { name: &quot;Chicago&quot;,
   zips: [12345,
@@ -22260,7 +22524,7 @@ $ cat test2.json
 { name: &quot;New York&quot;,
   zips: [10004]
 }
-$ ./test test2.json
+$ ./test.native test2.json
 test2.json:3:2: syntax error
 </programlisting>
   </sect1>
@@ -22530,6 +22794,9 @@ val l : (int * string) list = [(1, &quot;one&quot;); (2, &quot;two&quot;)]
     &lt;:sexp_of&lt;int * string&gt;&gt; x
     |&gt; Sexp.to_string
     |&gt; print_endline) ;; 
+
+(1 one)
+(2 two)
 - : unit = ()
 </programlisting>
       <para>
@@ -22670,6 +22937,13 @@ $ utop
 ...part 2 of sexpr/example_load.topscript
 # Exn.handle_uncaught ~exit:false (fun () -&gt;
     ignore (Sexp.load_sexp &quot;example_broken.scm&quot;)) ;; 
+
+Uncaught exception:
+  
+  (Sexplib.Sexp.Parse_error
+   ((location parse) (err_msg &quot;unexpected character: ')'&quot;) (text_line 4)
+    (text_char 29) (global_offset 78) (buf_pos 78)))
+
 - : unit = ()
 </programlisting>
     <para>
@@ -23333,6 +23607,7 @@ val cfg : http_server_config =
 ...part 3 of async/main.topscript
 # #require &quot;async&quot;;; 
 
+/home/rwo/.opam/4.01.0dev+trunk/lib/herelib/herelib.cma: loaded
 /home/rwo/.opam/4.01.0dev+trunk/lib/async_core: added to search path
 /home/rwo/.opam/4.01.0dev+trunk/lib/async_core/async_core.cma: loaded
 /home/rwo/.opam/4.01.0dev+trunk/lib/async_unix: added to search path
@@ -27929,7 +28204,7 @@ val c : Gc.control =
       <programlisting language="ocaml">
 ...part 2 of gc/tune.topscript
 # Gc.major_slice 0 ;; 
-- : int = 137951
+- : int = 191808
 # Gc.full_major () ;; 
 - : unit = ()
 </programlisting>
@@ -30676,7 +30951,7 @@ L2: closure L1, 0
         linking a bytecode archive.
       </para>
       <programlisting>
-# running back-end/link_dllib.out.sh
+# running back-end-embed/link_dllib.out.sh
 $ ocamlc -a -o mylib.cma a.cmo b.cmo -dllib -lmylib
 </programlisting>
       <para>
@@ -30693,7 +30968,7 @@ $ ocamlc -a -o mylib.cma a.cmo b.cmo -dllib -lmylib
         runtime</emphasis> mode and is built as follows.
       </para>
       <programlisting>
-# running back-end/link_custom.out.sh
+# running back-end-embed/link_custom.out.sh
 $ ocamlc -a -o mylib.cma -custom a.cmo b.cmo -cclib -lmylib
 </programlisting>
       <para>
@@ -30733,11 +31008,11 @@ $ ocamlc -a -o mylib.cma -custom a.cmo b.cmo -cclib -lmylib
         Create two OCaml source files that contain a single print line.
       </para>
       <programlisting language="ocaml">
-(* back-end/embed_me1.ml  *)
+(* back-end-embed/embed_me1.ml  *)
 let () = print_endline &quot;hello embedded world 1&quot;
 </programlisting>
       <programlisting language="ocaml">
-(* back-end/embed_me2.ml  *)
+(* back-end-embed/embed_me2.ml  *)
 let () = print_endline &quot;hello embedded world 2&quot;
 </programlisting>
       <para>
@@ -30753,9 +31028,10 @@ let () = print_endline &quot;hello embedded world 2&quot;
 int 
 main (int argc, char **argv)
 {
-  puts(&quot;Before calling OCaml&quot;);
+  printf(&quot;Before calling OCaml\n&quot;);
+  fflush(stdout);
   caml_startup (argv);
-  puts(&quot;After calling OCaml&quot;);
+  printf(&quot;After calling OCaml\n&quot;);
   return 0;
 }
 </programlisting>
@@ -30763,7 +31039,8 @@ main (int argc, char **argv)
         Now compile the OCaml files into a standalone object file.
       </para>
       <programlisting>
-# running back-end/build_embed.out.sh
+# running back-end-embed/build_embed.out.sh
+$ rm -f embed_out.c
 $ ocamlc -output-obj -o embed_out.o embed_me1.ml embed_me2.ml
 </programlisting>
       <para>
@@ -30773,12 +31050,12 @@ $ ocamlc -output-obj -o embed_out.o embed_me1.ml embed_me2.ml
         binary using <literal>gcc</literal> to test this out.
       </para>
       <programlisting>
-# running back-end/build_embed_binary.out.sh
-$ gcc -Wall -I`ocamlc -where` -L`ocamlc -where` -lcamlrun -ltermcap -o final_out embed_out.o main.c
+# running back-end-embed/build_embed_binary.out.sh
+$ gcc -fPIC -Wall -I`ocamlc -where` -L`ocamlc -where` -ltermcap -lm -ldl -o final_out main.c embed_out.o -lcamlrun
 $ ./final_out
+Before calling OCaml
 hello embedded world 1
 hello embedded world 2
-Before calling OCaml
 After calling OCaml
 </programlisting>
       <para>
@@ -30791,7 +31068,7 @@ After calling OCaml
         <literal>.o</literal> we used earlier.
       </para>
       <programlisting>
-# running back-end/build_embed_c.out.sh
+# running back-end-embed/build_embed_c.out.sh
 $ ocamlc -output-obj -o embed_out.c embed_me1.ml embed_me2.ml
 </programlisting>
       <para>
@@ -31042,7 +31319,7 @@ _camlCompare_poly__cmp_1008:
           quick <literal>Core_bench</literal> test with both functions.
         </para>
         <programlisting language="ocaml">
-$ cat bench_poly_and_mono.ml 
+(* back-end/bench_poly_and_mono.ml  *)
 open Core.Std
 open Core_bench.Std
 
@@ -31059,8 +31336,8 @@ let monomorphic_compare () =
     ignore(cmp 0 i)
   done
 
-let tests = [
-    &quot;Polymorphic comparison&quot;, polymorphic_compare;
+let tests =
+  [ &quot;Polymorphic comparison&quot;, polymorphic_compare;
     &quot;Monomorphic comparison&quot;, monomorphic_compare ]
 
 let () =
@@ -31073,14 +31350,35 @@ let () =
           between the two.
         </para>
         <programlisting>
-$ ./bench_poly_and_mono.native 
+# running back-end/run_bench_poly_and_mono.out.sh
+$ corebuild -pkg core_bench bench_poly_and_mono.native
+SANITIZE: a total of 9 files that should probably not be in your source tree
+  has been found. A script shell file
+  &quot;/Users/avsm/src/git/avsm/OCaml-Book/code/back-end/_build/sanitize.sh&quot; is
+  being created. Check this script and run it to remove unwanted files or use
+  other options (such as defining hygiene exceptions or using the -no-hygiene
+  option).
+IMPORTANT: I cannot work with leftover compiled files.
+ERROR: Leftover object files:
+  File compare_mono.o in . has suffix .o
+ERROR: Leftover OCaml compilation files:
+  File pattern_polymorphic.cmo in . has suffix .cmo
+  File pattern_monomorphic_incomplete.cmo in . has suffix .cmo
+  File pattern_monomorphic_exhaustive.cmo in . has suffix .cmo
+  File pattern_polymorphic.cmi in . has suffix .cmi
+  File pattern_monomorphic_incomplete.cmi in . has suffix .cmi
+  File pattern_monomorphic_exhaustive.cmi in . has suffix .cmi
+  File compare_mono.cmi in . has suffix .cmi
+  File compare_mono.cmx in . has suffix .cmx
+Exiting due to hygiene violations.
+$ ./bench_poly_and_mono.native
 Estimated testing time 20s (change using -quota SECS).
-┌────────────────────────┬───────────┬───────────────┬────────────┐
-│ Name                   │ Time (ns) │     Time 95ci │ Percentage │
-├────────────────────────┼───────────┼───────────────┼────────────┤
-│ Polymorphic comparison │    10_087 │ 10_080-10_096 │     100.00 │
-│ Monomorphic comparison │    585.51 │ 584.60-586.57 │       5.80 │
-└────────────────────────┴───────────┴───────────────┴────────────┘
+┌────────────────────────┬───────────┬──────────┐
+│ Name                   │ Time (ns) │ % of max │
+├────────────────────────┼───────────┼──────────┤
+│ Polymorphic comparison │    10_767 │   100.00 │
+│ Monomorphic comparison │       602 │     5.59 │
+└────────────────────────┴───────────┴──────────┘
 </programlisting>
         <para>
           We see that the polymorphic comparison is close to 20 times
@@ -31196,7 +31494,7 @@ Estimated testing time 20s (change using -quota SECS).
           execution.
         </para>
         <programlisting language="ocaml">
-(* alternate_list.ml : select every other value from an input list *)
+(* back-end/alternate_list.ml  *)
 open Core.Std
 
 let rec take =
@@ -31206,7 +31504,7 @@ let rec take =
 and skip =
   function
   |[] -&gt; []
-  |hd::tl -&gt; take tl
+  |_::tl -&gt; take tl
 
 let () =
   take [1;2;3;4;5;6;7;8;9]
@@ -31218,9 +31516,29 @@ let () =
           Compile and run this with debugging symbols. You should see
           the following output:
         </para>
-        <programlisting>
-$ ocamlfind ocamlopt -g -package core -thread -linkpkg -o alternate alternate_list.ml
-$ ./alternate
+        <programlisting language="ocaml">
+(* back-end/run_alternate_list.out  *)
+$ corebuild -tag debug alternate_list.native
+SANITIZE: a total of 9 files that should probably not be in your source tree
+  has been found. A script shell file
+  &quot;/Users/avsm/src/git/avsm/OCaml-Book/code/back-end/_build/sanitize.sh&quot; is
+  being created. Check this script and run it to remove unwanted files or use
+  other options (such as defining hygiene exceptions or using the -no-hygiene
+  option).
+IMPORTANT: I cannot work with leftover compiled files.
+ERROR: Leftover object files:
+  File compare_mono.o in . has suffix .o
+ERROR: Leftover OCaml compilation files:
+  File pattern_polymorphic.cmo in . has suffix .cmo
+  File pattern_monomorphic_incomplete.cmo in . has suffix .cmo
+  File pattern_monomorphic_exhaustive.cmo in . has suffix .cmo
+  File pattern_polymorphic.cmi in . has suffix .cmi
+  File pattern_monomorphic_incomplete.cmi in . has suffix .cmi
+  File pattern_monomorphic_exhaustive.cmi in . has suffix .cmi
+  File compare_mono.cmi in . has suffix .cmi
+  File compare_mono.cmx in . has suffix .cmx
+Exiting due to hygiene violations.
+$ ./alternate_list.native
 1,3,5,7,9
 </programlisting>
         <para>
@@ -31228,7 +31546,8 @@ $ ./alternate
           <literal>gdb</literal>.
         </para>
         <programlisting>
-$ gdb ./alternate
+# running back-end/gdb_alternate0.out.sh
+$ gdb ./alternate_list.native
 GNU gdb (GDB) 7.4.1-debian
 Copyright (C) 2012 Free Software Foundation, Inc.
 License GPLv3+: GNU GPL version 3 or later &lt;http://gnu.org/licenses/gpl.html&gt;
@@ -31238,7 +31557,7 @@ and &quot;show warranty&quot; for details.
 This GDB was configured as &quot;x86_64-linux-gnu&quot;.
 For bug reporting instructions, please see:
 &lt;http://www.gnu.org/software/gdb/bugs/&gt;...
-Reading symbols from /home/avsm/alternate...done.
+Reading symbols from /home/avsm/alternate_list.native...done.
 (gdb)
 </programlisting>
         <para>
@@ -31247,6 +31566,7 @@ Reading symbols from /home/avsm/alternate...done.
           first call to <literal>take</literal>.
         </para>
         <programlisting>
+# running back-end/gdb_alternate1.out.sh
 (gdb) break camlAlternate_list__take_69242 
 Breakpoint 1 at 0x5658d0: file alternate_list.ml, line 5.
 </programlisting>
@@ -31261,13 +31581,14 @@ Breakpoint 1 at 0x5658d0: file alternate_list.ml, line 5.
           Once you've set the breakpoint, start the program executing.
         </para>
         <programlisting>
+# running back-end/gdb_alternate2.out.sh
 (gdb) run
-Starting program: /home/avsm/alternate
+Starting program: /home/avsm/alternate_list.native
 [Thread debugging using libthread_db enabled]
 Using host libthread_db library &quot;/lib/x86_64-linux-gnu/libthread_db.so.1&quot;.
 
 Breakpoint 1, camlAlternate_list__take_69242 () at alternate_list.ml:5
-4     function
+4         function
 </programlisting>
         <para>
           The binary has run until the first take invocation and
@@ -31276,16 +31597,17 @@ Breakpoint 1, camlAlternate_list__take_69242 () at alternate_list.ml:5
           stacktrace after a couple of recursions.
         </para>
         <programlisting>
+# running back-end/gdb_alternate3.out.sh
 (gdb) cont
 Continuing.
 
 Breakpoint 1, camlAlternate_list__take_69242 () at alternate_list.ml:5
-4     function
+4         function
 (gdb) cont
 Continuing.
 
 Breakpoint 1, camlAlternate_list__take_69242 () at alternate_list.ml:5
-4     function
+4         function
 (gdb) bt
 #0  camlAlternate_list__take_69242 () at alternate_list.ml:4
 #1  0x00000000005658e7 in camlAlternate_list__take_69242 () at alternate_list.ml:6
@@ -31382,7 +31704,18 @@ Continuing.
           measures memory allocation versus in-place modification.
         </para>
         <programlisting>
-$ perf record -g ./barrier.native 
+# running back-end/perf_record.out.sh
+$ perf record -g ./barrier_bench.native
+Estimated testing time 20s (change using -quota SECS).
+┌───────────┬───────────┬─────────────────────┬────────────┐
+│ Name      │ Time (ns) │           Time 95ci │ Percentage │
+├───────────┼───────────┼─────────────────────┼────────────┤
+│ mutable   │ 7_306_219 │ 7_250_234-7_372_469 │      96.83 │
+│ immutable │ 7_545_126 │ 7_537_837-7_551_193 │     100.00 │
+└───────────┴───────────┴─────────────────────┴────────────┘
+[ perf record: Woken up 11 times to write data ]
+[ perf record: Captured and wrote 2.722 MB perf.data (~118926 samples) ]
+perf record -g ./barrier.native
 Estimated testing time 20s (change using -quota SECS).
 ┌───────────┬───────────┬─────────────────────┬────────────┐
 │ Name      │ Time (ns) │           Time 95ci │ Percentage │
@@ -31398,6 +31731,7 @@ Estimated testing time 20s (change using -quota SECS).
           results.
         </para>
         <programlisting>
+# running back-end/perf_report.out.sh
 $ perf report -g
 +  48.86%  barrier.native  barrier.native     [.] camlBarrier__test_immutable_69282
 +  30.22%  barrier.native  barrier.native     [.] camlBarrier__test_mutable_69279
@@ -31447,6 +31781,7 @@ $ perf report -g
           frame pointer activated.
         </para>
         <programlisting>
+# running back-end/opam_switch.out.sh
 $ opam switch 4.01.0dev+fp
 </programlisting>
         <para>
@@ -31476,10 +31811,10 @@ $ opam switch 4.01.0dev+fp
         bytecode embedding example earlier in this chapter.
       </para>
       <programlisting>
+# running back-end-embed/build_embed_native.out.sh
 $ ocamlopt -output-obj -o embed_native.o embed_me1.ml embed_me2.ml
-$ gcc -Wall -I `ocamlc -where` -L `ocamlc -where` -lasmrun -ltermcap \
-  -o final_out_native embed_native.o main.c
-./final_out_native
+$ gcc -Wall -I `ocamlc -where` -L `ocamlc -where` -lasmrun -ltermcap -o final_out.native embed_native.o main.c
+$ ./final_out.native
 Before calling OCaml
 hello embedded world 1
 hello embedded world 2
@@ -31509,8 +31844,9 @@ After calling OCaml
         <literal>-runtime-variant d</literal> flag.
       </para>
       <programlisting>
-$ ocamlopt -runtime-variant d -verbose -o hello hello.ml hello_stubs.c
-$ ./hello 
+# running back-end-embed/run_debug_hello.out.sh
+$ ocamlopt -runtime-variant d -verbose -o hello.native hello.ml
+$ ./hello.native
 ### OCaml runtime: debug mode ###
 Initial minor heap size: 2048k bytes
 Initial major heap size: 992k bytes
