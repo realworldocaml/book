@@ -1,1 +1,1 @@
-let <identifier> = <expr>
+let <variable> = <expr>

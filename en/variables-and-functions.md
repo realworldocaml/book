@@ -24,9 +24,10 @@ As we'll see when we get to the module system in
 bindings at the top-level of a module.
 
 Every variable binding has a _scope_, which is the portion of the code
-that can refer to that binding.  The scope of a top-level let binding
-is everything that follows it in the session, when using `utop`, or,
-when using modules, for the remainder of the module.
+that can refer to that binding.  When using `utop`, the scope of a
+top-level let binding is everything that follows it in the session.
+When it shows up in a module, the scope is the remainder of that
+module.
 
 Here's a simple example.
 
@@ -41,9 +42,9 @@ limited to a particular expression, using the following syntax.
 ((typ ocamlsyntax)(name variables-and-functions/let_in.syntax))
 ```
 
-This first evaluates _`expr1`_ and then evaluates _`expr2`_ with
-_`identifier`_ bound to whatever value was produced by the evaluation
-of _`expr1`_.  Here's how it looks in practice.
+This first evaluates _`<expr1>`_ and then evaluates _`<expr2>`_ with
+_`<variable>`_ bound to whatever value was produced by the evaluation
+of _`<expr1>`_.  Here's how it looks in practice.
 
 ```frag
 ((typ ocamltop)(name variables-and-functions/main.topscript)(part 1)) 
@@ -94,13 +95,14 @@ confusing bit of code.
 
 Here, we redefined `pi` to be zero after the definition of
 `area_of_circle`.  You might think that this would mean that the
-result of the computation would now be zero, but you'd be wrong.  In
-fact, the behavior of the function is unchanged.  That's because the
-original definition of `pi` wasn't changed, it was just shadowed, so
-that any subsequent reference to `pi` would see the new definition of
-`pi` as zero.  But there is no later use of `pi`, so the binding
-doesn't make a difference.  And this explains the warning produced by
-the toplevel telling us that there is an unused definition of `pi`.
+result of the computation would now be zero, but in fact, the behavior
+of the function is unchanged.  That's because the original definition
+of `pi` wasn't changed, it was just shadowed, which means that any
+subsequent reference to `pi` would see the new definition of `pi` as
+zero, but earlier references would be unchanged.  But there is no
+later use of `pi`, so the binding of `0.` to `pi` made no difference.
+This explains the warning produced by the toplevel telling us that
+there is an unused definition of `pi`.
 
 In OCaml, let bindings are immutable.  As we'll see in
 [xref](#imperative-programming-1), there are mutable values in OCaml,
@@ -108,14 +110,15 @@ but no mutable variables.
 
 <note> <title> Why don't variables vary?  </title>
 
-One source of confusion for people new to functional languages is the
-fact that variables are immutable.  This seems pretty surprising even
-on linguistic terms.  Isn't the whole point of a variable that it can
+One source of confusion for people new to OCaml is the fact that
+variables are immutable.  This seems pretty surprising even on
+linguistic terms.  Isn't the whole point of a variable that it can
 vary?
 
-The answer to this is that variables in a functional language are
-really more like variables in an equation.  If you think about the
-mathematical equation `x (y + z) = x y + x z`, there's no notion of
+The answer to this is that variables in OCaml (and in generaly in
+functional languages) are really more like variables in an equation
+than a variable in an imperative language.  If you think about the
+mathematical equation `x(y + z) = xy + xz`, there's no notion of
 mutating the variables `x`, `y` and `z`.  They vary in the sense that
 you can instantiate this equation with different numbers for those
 variables, and it still holds.
@@ -165,18 +168,18 @@ to use a match statement to handle such cases explicitly:
 ((typ ocamltop)(name variables-and-functions/main.topscript)(part 9)) 
 ```
 
-Note that this is our first use of `assert`, which is a function that
-is useful for throwing an exception in an impossible case.  Asserts
-are discussed in more detail in [xref](#error-handling)
+Note that this is our first use of `assert`, which is useful for
+marking cases that should be impossible.  Asserts are discussed in
+more detail in [xref](#error-handling).
 
 ## Functions ##
 
-OCaml being a functional language, it's no surprise that functions are
-an important and pervasive element of programming in OCaml.  Indeed,
-we've seen functions pop up already in many of the examples we've
-looked at thus far.  But while we've introduced the basics of
-functions, we're now going to cover them in more depth, starting from
-the foundations.
+Given that OCaml is a functional language, it's no surprise that
+functions are important and pervasive.  Indeed, functions have come up
+in almost every example we've done so far.  This section will go into
+more depth, explaining the details of how OCaml's functions work.  As
+you'll see, functions in OCaml differ in a variety of ways from what
+you'll find in most mainstream languages.
 
 ### Anonymous Functions ###
 
@@ -205,7 +208,7 @@ anonymous functions.
 ((typ ocamltop)(name variables-and-functions/main.topscript)(part 12)) 
 ```
 
-Or even stuff them into a data structure.
+You can even stuff them into a data structure.
 
 ```frag
 ((typ ocamltop)(name variables-and-functions/main.topscript)(part 13)) 
@@ -213,9 +216,9 @@ Or even stuff them into a data structure.
 
 It's worth stopping for a moment to puzzle this example out, since
 this kind of higher-order use of functions can be a bit obscure at
-first.  The first thing to understand is the function `(fun f -> f
+first.  The first thing to understand is the function `(fun g -> g
 5)`, which takes a function as its argument and applies that function
-to the number `5`.  The invocation of `List.map` applies `(fun f -> f
+to the number `5`.  The invocation of `List.map` applies `(fun g -> g
 5)` to the elements of the `increments` list (which are themselves
 functions) and returns the list containing the results of these
 function applications.
@@ -231,9 +234,9 @@ binding.
 ((typ ocamltop)(name variables-and-functions/main.topscript)(part 14)) 
 ```
 
-Defining named functions is so common that there is a built in syntax
-for it.  Thus, the following definition of `plusone` is equivalent to
-the definition above.
+Defining named functions is so common that there is some syntactic
+sugar for it.  Thus, the following definition of `plusone` is
+equivalent to the definition above.
 
 ```frag
 ((typ ocamltop)(name variables-and-functions/main.topscript)(part 15)) 
@@ -281,8 +284,8 @@ This rewrite makes it explicit that `abs_diff` is actually a function
 of one argument that returns another function of one argument, which
 itself returns the final result.  Because the functions are nested,
 the inner expression `abs (x - y)` has access to both `x`, which was
-captured by the first function application, and `y`, which was
-captured by the second one.
+bound by the first function application, and `y`, which was bound by
+the second one.
 
 This style of function is called a _curried_ function.  (Currying is
 named after Haskell Curry, a logician who had a significant impact on
@@ -291,8 +294,9 @@ interpreting the type signature of a curried function is the
 observation that `->` is right-associative.  The type signature of
 `abs_diff` can therefore be parenthesized as follows.  
 
-```ocaml
-val abs_diff : int -> (int -> int)
+
+```frag
+((typ ocaml)(name variables-and-functions/abs_diff.mli))
 ```
 
 The parentheses above don't change the meaning of the signature, but
@@ -351,7 +355,8 @@ also supports imperative looping constructs like `for` and `while`,
 but these are only useful when using OCaml's imperative features.)
 
 In order to define a recursive function, you need to mark the let
-binding as recursive with the `rec` keyword, as shown in this example:
+binding as recursive with the `rec` keyword, as shown in this function
+for finding the first sequentially-repeated element in a list.
 
 ```frag
 ((typ ocamltop)(name variables-and-functions/main.topscript)(part 22)) 
@@ -425,8 +430,8 @@ or is one of a handful of pre-determined strings, including `mod`, the
 modulus operator, and `lsl`, for "logical shift left", a bit-shifting
 operation.
 
-We can define (or redefine) the meaning of an operator as follows.
-Here's an example of a simple vector-addition operator on int pairs.
+We can define (or redefine) the meaning of an operator.  Here's an
+example of a simple vector-addition operator on int pairs.
 
 ```frag
 ((typ ocamltop)(name variables-and-functions/main.topscript)(part 26)) 
@@ -526,13 +531,13 @@ above.  Here's the code.
 ```
 
 It's not quite obvious at first what the purpose of this operator is:
-it just takes some value and a function, and applies the function to
-the value.  But its utility is clearer when you see it in action.  It
-works as a kind of sequencing operator, similar in spirit to using
-pipe in the UNIX shell.  Consider, for example, the following code for
-printing out the unique elements of your `PATH`.  Note that
-`List.dedup` below removes duplicates from a list by sorting the list
-using the provided comparison function.
+it just takes a value and a function, and applies the function to the
+value.  Despite that bland sounding description, it has the useful
+role of a sequencing operator, similar in spirit to using pipe in the
+UNIX shell.  Consider, for example, the following code for printing
+out the unique elements of your `PATH`.  Note that `List.dedup` below
+removes duplicates from a list by sorting the list using the provided
+comparison function.
 
 ```frag
 ((typ ocamltop)(name variables-and-functions/main.topscript)(part 32)) 
@@ -566,14 +571,14 @@ It is this later form that we're using in the `|>` pipeline above.
 
 Note that `|>` only works in the intended way because it is
 left-associative.  Indeed, let's see what happens if we try using a
-right associative operator, like (^!).
+right associative operator, like (^>).
 
 ```frag
 ((typ ocamltop)(name variables-and-functions/main.topscript)(part 36)) 
 ```
 
 The above type error is a little bewildering at first glance.  What's
-going on is that, because `^!` is right associative, the operator is
+going on is that, because `^>` is right associative, the operator is
 trying to feed the value `List.dedup ~compare:String.compare` to the
 function `List.iter ~f:print_endline`.  But `List.iter
 ~f:print_endline` expects a list of strings as its input, not a
@@ -638,9 +643,9 @@ you can see, the arguments can be provided in any order.
 
 OCaml also supports _label punning_, meaning that you get to drop the
 text after the `:` if the name of the label and the name of the
-variable being used are the same.  We've seen above how label punning
-works when defining a function.  The following shows how it can be
-used when invoking a function.
+variable being used are the same.  We were actually already using
+label punning when defining our labeled function above.  The following
+shows how punning can be used when invoking a function.
 
 ```frag
 ((typ ocamltop)(name variables-and-functions/main.topscript)(part 42)) 
