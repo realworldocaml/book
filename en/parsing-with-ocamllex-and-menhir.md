@@ -394,25 +394,6 @@ The actions beginning with a backslash `\` define what to do for escape
 sequences.  In each of these cases, the final step includes a recursive call to
 the lexer.
 
-As specified by JSON, we also handle Unicode code points, `'\\' 'u' hex hex hex
-hex`.  Ocaml doesn't have any built-in handling for Unicode, so in this case we
-choose to represent the code point in UTF-8.  We define the following function
-for adding the UTF-8 encoding to the buffer.
-
-```ocaml
-let add_utf8 buf code =
-  if code <= 0x7f then
-    Buffer.add_char buf (Char.chr code)
-  else if code <= 0x7ff then begin
-    Buffer.add_char buf (Char.chr (0b11000000 lor ((code lsr 6) land 0x3f)));
-    Buffer.add_char buf (Char.chr (0b10000000 lor (code land 0x3f)))
-  end else begin
-    Buffer.add_char buf (Char.chr (0b11100000 lor ((code lsr 12) land 0x3f)));
-    Buffer.add_char buf (Char.chr (0b10000000 lor ((code lsr 6) land 0x3f)));
-    Buffer.add_char buf (Char.chr (0b10000000 lor (code land 0x3f)))
-  end
-```
-
 That covers the lexer.  Next, we need to combine the lexer with the parser to
 bring it all together.
 
