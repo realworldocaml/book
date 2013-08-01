@@ -11,19 +11,6 @@ let next_line lexbuf =
                pos_lnum = pos.pos_lnum + 1
     }
 
-let add_utf8 buf code =
-  if code <= 0x7f then
-    Buffer.add_char buf (Char.chr code)
-  else if code <= 0x7ff then begin
-    Buffer.add_char buf (Char.chr (0b11000000 lor ((code lsr 6) land 0x3f)));
-    Buffer.add_char buf (Char.chr (0b10000000 lor (code land 0x3f)))
-  end else begin
-    Buffer.add_char buf (Char.chr (0b11100000 lor ((code lsr 12) land 0x3f)));
-    Buffer.add_char buf (Char.chr (0b10000000 lor ((code lsr 6) land 0x3f)));
-    Buffer.add_char buf (Char.chr (0b10000000 lor (code land 0x3f)))
-  end
-}
-
 (* part 1 *)
 let int = '-'? ['1'-'9'] ['0'-'9']*
 
@@ -70,12 +57,6 @@ and read_string buf = parse
 | '\\' 'n' { Buffer.add_char buf '\n'; read_string buf lexbuf }
 | '\\' 'r' { Buffer.add_char buf '\r'; read_string buf lexbuf }
 | '\\' 't' { Buffer.add_char buf '\t'; read_string buf lexbuf }
-| '\\' 'u' hex hex hex hex
-  { let string_code = String.sub (Lexing.lexeme lexbuf) 2 4 in
-    let code = int_of_string ("0x" ^ string_code) in
-    add_utf8 buf code;
-    read_string buf lexbuf
-  }
 | [^ '"' '\\']+
   { Buffer.add_string buf (Lexing.lexeme lexbuf);
     read_string buf lexbuf
