@@ -10,6 +10,7 @@ let next_line lexbuf =
     { pos with pos_bol = lexbuf.lex_curr_pos;
                pos_lnum = pos.pos_lnum + 1
     }
+}
 
 (* part 1 *)
 let int = '-'? ['1'-'9'] ['0'-'9']*
