@@ -130,11 +130,11 @@ List.iter ~f:print_endline ["Two"; "lines"];;
 #part 35
 List.iter ~f:print_endline;;
 #part 36
-let (^!) = (|>);;
+let (^>) x f = f x;;
 Sys.getenv_exn "PATH"
-  ^! String.split ~on:':'
-  ^! List.dedup ~compare:String.compare
-  ^! List.iter ~f:print_endline
+  ^> String.split ~on:':'
+  ^> List.dedup ~compare:String.compare
+  ^> List.iter ~f:print_endline
   ;;
 #part 37
 let some_or_zero = function
