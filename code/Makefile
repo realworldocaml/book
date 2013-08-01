@@ -6,6 +6,8 @@ dirs= json \
       variables-and-functions \
       lists-and-patterns \
       sexpr \
+      parsing \
+      parsing-test \
       maps-and-hash-tables \
       files-modules-and-programs \
       files-modules-and-programs-freq \
@@ -45,6 +47,8 @@ OBJ=         _build
 # All the source files
 ml_src=       $(wildcard $(dirs:%=%/*.ml))
 mli_src=      $(wildcard $(dirs:%=%/*.mli))
+mll_src=      $(wildcard $(dirs:%=%/*.mll))
+mly_src=      $(wildcard $(dirs:%=%/*.mly))
 json_src=     $(wildcard $(dirs:%=%/*.json))
 java_src=     $(wildcard $(dirs:%=%/*.java))
 c_src=        $(wildcard $(dirs:%=%/*.c))
@@ -63,7 +67,7 @@ rawtscripts=   $(wildcard $(dirs:%=%/*.rawscript))
 
 all_src=      $(ml_src) $(mli_src) $(json_src) $(java_src) $(c_src) \
 	      $(cmd_src) $(cpp_src) $(atd_src) $(scm_src) $(syn_src) \
-	      $(ascii_src) $(asm_src)
+	      $(ascii_src) $(asm_src) $(mll_src) $(mly_src)
 all_scripts=  $(scripts:%.sh=%.out) $(errscripts:%.errsh=%.out) \
 	      $(topscripts) $(rawtscripts) $(rawscripts:%.rawsh=%.out)
 
@@ -88,12 +92,21 @@ command-line-parsing/run_basic_and_default_md5.out:: command-line-parsing/build_
 command-line-parsing/run_cal_add_sub_days.out:: command-line-parsing/build_cal_add_sub_days.out
 command-line-parsing/md5_completion.out:: command-line-parsing/build_basic_md5_with_flags.out
 command-line-parsing/cal_completion.out:: command-line-parsing/build_cal_add_sub_days.out
+parsing-test/run_broken_test.out:: parsing-test/build_test.out
 
 $(OBJ)/%.mli.0.html $(OBJ)/%.mli.0.md: %.mli
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -cow $< || (cat $@ && rm -f $@)
 
 $(OBJ)/%.ml.0.html $(OBJ)/%.ml.0.md: %.ml
+	@mkdir -p $(@D)
+	$(highlight) -builddir $(OBJ) -cow $<  || (cat $@ && rm -f $@)
+
+$(OBJ)/%.mll.0.html $(OBJ)/%.mll.0.md: %.mll
+	@mkdir -p $(@D)
+	$(highlight) -builddir $(OBJ) -cow $<  || (cat $@ && rm -f $@)
+
+$(OBJ)/%.mly.0.html $(OBJ)/%.mly.0.md: %.mly
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -cow $<  || (cat $@ && rm -f $@)
 
