@@ -196,7 +196,7 @@ this work happens exactly once per list element.
 Generally, pattern matching is more efficient than the alternatives
 you might code by hand.  One notable exception is matches over
 strings, which are in fact tested sequentially, so matches containing
-a long seuqence of strings can be outperformed by a hash table.  But
+a long sequence of strings can be outperformed by a hash table.  But
 most of the time, pattern matching is a clear performance win.
 
 ### Detecting errors
