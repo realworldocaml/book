@@ -460,7 +460,7 @@ explicitly check before attaching the finalizer.
 Some constant values can be heap-allocated but never deallocated during the
 lifetime of the program, for example a list of integer constants.  `Heap_block`
 explicitly checks to see if the value is in the major or minor heap, and
-rejects most constant values.  Compiler optimisations may also duplicate some
+rejects most constant values.  Compiler optimizations may also duplicate some
 immutable values such as floating-point values in arrays. These may be
 finalised while another duplicate copy is being used by the program.
 
