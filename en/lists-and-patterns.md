@@ -387,7 +387,7 @@ are a few more functions that are useful enough to mention here.
 #### Combining list elements with `List.reduce` 
 
 `List.fold`, which we described earlier, is a very general and
-powerful function.  Sometimes, hwoever, you want something more that's
+powerful function.  Sometimes, however, you want something more that's
 simpler and thereby easier to use.  One such function is
 `List.reduce`, which is essentially a specialized version of
 `List.fold` that doesn't require an explicit starting value, and whose
