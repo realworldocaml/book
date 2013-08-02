@@ -219,7 +219,7 @@ key/value field, or it is a sequence of fields, followed by a `COMMA` and one
 more field definition.
 
 The `rev_` prefix is intended to point out that the fields are returned in
-reverse order.  Why would we do that?  One reason is that the `menhir` parser
+reverse order.  Why would we do that?  One reason is that the Menhir parser
 generator is left-recursive, which means that the constructed pushdown automaton
 uses less stack space with left-recursive definitions.  The following
 right-recursive rule accepts the same input, but during parsing it requires
