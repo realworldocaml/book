@@ -126,7 +126,7 @@ other things, but we start by declaring the tokens.
 ### Token declarations
 
 A token is declared using the syntax `%token <`_type_`>` _uid_, where the
-`<type>` is optional, and _uid_ is an capitalized identifier.  For JSON, we need
+`<type>` is optional, and _uid_ is a capitalized identifier.  For JSON, we need
 tokens for numbers, strings, identifiers, and punctuation.  To start, let's
 define just the tokens in the `parser.mly` file.  For technical reasons, we need
 to include a `%start` declaration.  For now, we'll include just a dummy grammar
