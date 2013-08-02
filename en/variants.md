@@ -150,8 +150,8 @@ that are ignored.
 ## Combining records and variants
 
 The term _algebraic data types_ is often used to describe a collection
-of types that includes variants , records and tuples.  Algebraic data
-types act as a peculialrly useful and powerful language for describing
+of types that includes variants, records and tuples.  Algebraic data
+types act as a peculiarly useful and powerful language for describing
 data.  At the heart of their utility is the fact that they combine two
 different kinds of types: _product types_, like tuples and records,
 which combine multiple different types together and are mathematically
