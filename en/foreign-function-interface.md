@@ -117,7 +117,7 @@ let initscr =
   foreign "initscr" (void @-> returning window)
 ```
 
-That's all we need to invoke our first function call to `initscr` to initalize
+That's all we need to invoke our first function call to `initscr` to initialize
 the terminal.  The `foreign` function accepts two parameters:
 
 - the C function call name, which is looked up using the `dlsym` C standard library function.
