@@ -437,7 +437,7 @@ example of a simple vector-addition operator on int pairs.
 ((typ ocamltop)(name variables-and-functions/main.topscript)(part 26)) 
 ```
 
-Note that you have to be careful when dealing with operators containg
+Note that you have to be careful when dealing with operators containing
 `*`.  Consider the following example.
 
 ```frag
