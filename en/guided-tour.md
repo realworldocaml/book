@@ -194,7 +194,7 @@ by adding explicit type annotations.  These annotations don't change
 the behavior of an OCaml program, but they can serve as useful
 documentation, as well as catch unintended type changes.  They can
 also be helpful in figuring out why a given piece of code fails to
-compilte.
+compile.
 
 Here's an annotated version of `sum_if_true`:
 
