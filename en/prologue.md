@@ -16,7 +16,7 @@ design.  These features include:
 * _Garbage collection_ for automatic memory management, now a feature
   of almost every modern high-level language.
 * _First-class functions_ that can be passed around like ordinary
-  values, as seen in Javascript and C#.
+  values, as seen in JavaScript and C#.
 * _Static type-checking_ to increase performance and reduce the number
   of runtime errors, as found in Java and C#.
 * _Parametric polymorphism_, which enables the construction of
