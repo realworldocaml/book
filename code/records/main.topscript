@@ -96,7 +96,7 @@ type log_entry =
 #part 14
 let get_session_id t = t.session_id;;
 #part 15
-let get_heatbeat_session_id (t:heartbeat) = t.session_id;;
+let get_heartbeat_session_id (t:heartbeat) = t.session_id;;
 #part 16
 let status_and_session t = (t.status_message, t.session_id);;
 let session_and_status t = (t.session_id, t.status_message);;

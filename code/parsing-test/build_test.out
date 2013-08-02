@@ -1,0 +1,11 @@
+$ ocamlbuild -use-menhir -tag thread -use-ocamlfind -pkg core test.native
+/Users/avsm/.opam/4.01.0dev+trunk/bin/ocamllex.opt -q lexer.mll
+File "lexer.mll", line 1, character 1: unterminated action.
+Command exited with code 3.
+$ ./test.native test1.json
+true
+false
+null
+[1, 2]
+"Hello World"
+{ field1: "Hello", field2: 170000000000000.000000, field3: [1, 2, 3], field4: { fieldA: 1, fieldB: "Hello" } }

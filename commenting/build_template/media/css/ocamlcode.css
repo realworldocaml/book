@@ -28,6 +28,7 @@
 .rwocode .keyword1 {
 	display: inline;
 	color: #15317E;
+        font-weight: bold;
 
 }
 .rwocode .keyword2 {
@@ -63,7 +64,7 @@
 }
 .rwocode .keyword8 {
 	display: inline;
-	color: #EE9A4D;
+	color: #885533;
 
 }
 .rwocode .comments {

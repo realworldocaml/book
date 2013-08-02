@@ -58,14 +58,14 @@ explain how they differ in more detail next.
 <sidebar>
 <title>The `Gc` module and `OCAMLRUNPARAM`</title>
 
-OCaml provides several mechanisms to query and alter the behaviour of the
+OCaml provides several mechanisms to query and alter the behavior of the
 runtime system.  The `Gc` module provides this functionality from within OCaml
 code, and we'll frequently refer to it in the rest of the chapter.  As with
 several other standard library modules, Core alters the `Gc` interface from the
 standard OCaml library.  We'll assume that you've opened `Core.Std` in our
 explanations.
 
-You can also control the behaviour of OCaml programs by setting the
+You can also control the behavior of OCaml programs by setting the
 `OCAMLRUNPARAM` environment variable before launching your application.  This
 lets you set garbage collector parameters without recompiling, for example to
 benchmark the effects of different settings.  The format of `OCAMLRUNPARAM` is
@@ -251,12 +251,12 @@ that your free list becomes fragmented.  In this situation, the GC is forced to
 perform an expensive compaction despite there being free chunks, since none of
 the chunks alone are big enough to satisfy the request.
 
-First-fit allocation focusses on reducing memory fragmentation (and hence the
+First-fit allocation focuses on reducing memory fragmentation (and hence the
 number of compactions), but at the expense of slower memory allocation.  Every
 allocation scans the free list from the beginning for a suitable free chunk,
 instead of reusing the most recent heap chunk as the next-fit allocator does.
 
-For some workloads that need more real-time behaviour under load, the reduction
+For some workloads that need more real-time behavior under load, the reduction
 in the frequency in heap compaction will outweigh the extra allocation cost.
 
 <note>
@@ -266,7 +266,7 @@ You can set the heap allocation policy via the `Gc.allocation_policy` field.
 A value of `0` (the default) sets it to next-fit, and `1` to the first-fit
 allocator.
 
-The same behaviour can be controlled at runtime by setting `a=0` or `a=1`
+The same behavior can be controlled at runtime by setting `a=0` or `a=1`
 in `OCAMLRUNPARAM`.
 
 </note>
@@ -428,16 +428,16 @@ and not allocate at all.
 The only way to know for sure is to benchmark your program under real-world
 scenarios using `Core_bench`, and experiment with the tradeoffs.  The
 command-line benchmark binaries have a number of useful options that affect
-garbage collection behaviour.
+garbage collection behavior.
 
 ```frag
 ((typ console)(name gc/show_barrier_bench_help.out))
 ```
 
 The `-no-compactions` and `-stabilize-gc` options can help force a situation
-where your application has fragmented memory.  This can simulate the behaviour
+where your application has fragmented memory.  This can simulate the behavior
 of a long-running application without you having to actually wait that long to
-recreate the behaviour in a performance unit test.
+recreate the behavior in a performance unit test.
 
 ## Attaching finalizer functions to values
 
@@ -460,9 +460,9 @@ explicitly check before attaching the finalizer.
 Some constant values can be heap-allocated but never deallocated during the
 lifetime of the program, for example a list of integer constants.  `Heap_block`
 explicitly checks to see if the value is in the major or minor heap, and
-rejects most constant values.  Compiler optimisations may also duplicate some
+rejects most constant values.  Compiler optimizations may also duplicate some
 immutable values such as floating-point values in arrays. These may be
-finalised while another duplicate copy is being used by the program.
+finalized while another duplicate copy is being used by the program.
 
 For this reason, attach finalizers only to values that you are explicitly sure
 are heap-allocated and aren't immutable.  A common use is to attach them to
@@ -494,7 +494,7 @@ Building and running this should show the following output.
 ```
 
 The GC calls the finalization functions in the order of the deallocation. If
-several values become unreachable during the same GC cycle, the finalisation
+several values become unreachable during the same GC cycle, the finalization
 functions will be called in the reverse order of the corresponding calls to
 `add_finalizer`.  Each call to `add_finalizer` adds to the set of functions
 that are run when the value becomes unreachable. You can have many finalizers

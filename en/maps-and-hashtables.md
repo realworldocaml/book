@@ -444,7 +444,7 @@ requires allocating a new backing array for the hash table and copying
 over all entries, and so it is quite an expensive operation.  That
 means adding a new element to the table is only _amortized_ constant,
 which is to say, it's constant on average over a long sequence of
-additions, but some of the indivdual additions can be quite expensive.
+additions, but some of the individual additions can be quite expensive.
 
 Another hidden cost of hash tables has to do with the hash function you
 use.  If you end up with a pathologically bad hash function that
@@ -459,7 +459,7 @@ The logarithmic behavior of Core's hash tables in the presence of hash
 collisions also helps protect against some denial-of-service attacks.
 One well-known type of attack is to send queries to a service with
 carefully chosen keys to cause many collisions.  This, in combination
-with the the quadratic behavior of hashtables, can cause the service
+with the the quadratic behavior of hash tables, can cause the service
 to become unresponsive due to high CPU load.  Core's hash tables would
 be much less susceptible to such an attack, because the amount of
 degradation would be far less.

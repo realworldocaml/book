@@ -150,8 +150,8 @@ that are ignored.
 ## Combining records and variants
 
 The term _algebraic data types_ is often used to describe a collection
-of types that includes variants , records and tuples.  Algebraic data
-types act as a peculialrly useful and powerful language for describing
+of types that includes variants, records and tuples.  Algebraic data
+types act as a peculiarly useful and powerful language for describing
 data.  At the heart of their utility is the fact that they combine two
 different kinds of types: _product types_, like tuples and records,
 which combine multiple different types together and are mathematically
@@ -320,7 +320,7 @@ is capable of evaluating a base predicate.
 Another useful operation on expressions is simplification.  The
 following simplification code is based on having some simplifying
 constructors that mirror the tags used to construct a tree.  Then
-the simplification function is reponsible for rebuilding the tree
+the simplification function is responsible for rebuilding the tree
 using these constructors.
 
 ```frag

@@ -392,7 +392,7 @@ This function interacts with an instance by unpacking it into a module
 with the associated module (`I.Query_handler`).
 
 The bundling together of the module and the value is in many ways
-reminisicent of object-oriented languages.  One key difference, is
+reminiscent of object-oriented languages.  One key difference, is
 that first-class modules allow you to package up more than just a
 functions or methods.  As we've seen, you can also include types and
 even modules.  We've only used it in a small way here, but this extra

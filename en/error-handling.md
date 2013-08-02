@@ -647,7 +647,7 @@ occur anywhere, and so you'd need to use error-aware return types
 everywhere to capture those.  And having every operation marked as one
 that might fail is no more explicit than having none of them marked.
 
-In short, for errors that are a forseeable and ordinary part of the
+In short, for errors that are a foreseeable and ordinary part of the
 execution of your production code and that are not omnipresent, error
 aware return types are typically the right solution.
 

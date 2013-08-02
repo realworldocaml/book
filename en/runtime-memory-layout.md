@@ -177,7 +177,7 @@ scanned by the collector. The most common such block is the `string` type,
 which we describe in more detail later in this chapter.
 
 The exact representation of values inside a block depends on their static OCaml
-type.  All OCaml types are distilled down into `values`, and summarised in the
+type.  All OCaml types are distilled down into `values`, and summarized in the
 table below.
 
 OCaml Value                        Representation
@@ -344,7 +344,7 @@ high numbered tags are reserved.
 
 Polymorphic variants are more flexible than normal variants when writing code,
 but are slightly less efficient at runtime. This is because there isn't as much
-static compile-time information available to optimise their memory layout.
+static compile-time information available to optimize their memory layout.
 
 A polymorphic variant without any parameters is stored as an unboxed integer
 and so only takes up one word of memory, just like a normal variant.  This
@@ -447,7 +447,7 @@ The custom operations specify how the runtime should perform polymorphic
 comparison, hashing and binary marshalling. They also optionally contain a
 *finalizer* that the runtime calls just before the block is garbage collected.
 This finalizer has nothing to do with ordinary OCaml finalizers (as created by
-`Gc.finalise` and explained in [xref](#understanding-the-garbage-collector)).
+`Gc.finalize` and explained in [xref](#understanding-the-garbage-collector)).
 They are instead used to call C cleanup functions such as `free`.
 
 ### Managing external memory with Bigarray

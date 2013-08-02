@@ -13,7 +13,7 @@ which is the most common solution in languages like Java or C#.  In
 this model, each task that may require simultaneous waiting is given
 an operating system thread of its own, so it can block without
 stopping the entire program.  Other language runtimes such as
-Javascript are single-threaded, and applications register function
+JavaScript are single-threaded, and applications register function
 callbacks to be triggered upon external events such as a timeout or
 browser click.
 

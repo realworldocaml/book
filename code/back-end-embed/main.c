@@ -7,8 +7,9 @@
 int 
 main (int argc, char **argv)
 {
-  puts("Before calling OCaml");
+  printf("Before calling OCaml\n");
+  fflush(stdout);
   caml_startup (argv);
-  puts("After calling OCaml");
+  printf("After calling OCaml\n");
   return 0;
 }

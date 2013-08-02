@@ -189,7 +189,7 @@ that accumulates a single result, and returns that instead.
 ((typ ocaml)(name json/list_excerpt.mli)(part 1))
 ```
 
-`iter` is a more specialised combinator that is only useful in OCaml due to
+`iter` is a more specialized combinator that is only useful in OCaml due to
 side-effects being allowed.  The input function is applied to every value, but
 no result is supplied. The function must instead apply some side-effect such
 as changing a mutable record field or printing to the standard output.

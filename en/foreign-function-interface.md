@@ -117,7 +117,7 @@ let initscr =
   foreign "initscr" (void @-> returning window)
 ```
 
-That's all we need to invoke our first function call to `initscr` to initalize
+That's all we need to invoke our first function call to `initscr` to initialize
 the terminal.  The `foreign` function accepts two parameters:
 
 - the C function call name, which is looked up using the `dlsym` C standard library function.
@@ -464,7 +464,7 @@ initial value, and it returns a suitably-typed pointer.  We can now call
 
 While scalar types typically have a 1-1 representation, other C types require
 extra work to convert them into OCaml. Views create new C type descriptions
-that have special behaviour when used to read or write C values.
+that have special behavior when used to read or write C values.
 
 We've already used one view in the definition of `ctime` earlier. The `string`
 view wraps the C type `char *` (written in OCaml as `ptr char`), and converts

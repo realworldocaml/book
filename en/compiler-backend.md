@@ -115,7 +115,7 @@ You'll need to `opam install core_bench` to get the library.
 ```
 
 Building and executing this example will run for around 30 seconds by default,
-and you'll see the results summarised in a neat table.
+and you'll see the results summarized in a neat table.
 
 ```frag
 ((typ console)(name back-end-bench/run_bench_patterns.out))
@@ -225,7 +225,7 @@ The individual objects in the library are linked as regular `cmo` files in the
 order specified when the library file was built.  If an object file within the
 library isn't referenced elsewhere in the program, then it isn't included in
 the final binary unless the `-linkall` flag forces its inclusion.  This
-behaviour is analogous to how C handles object files and archives (`.o` and
+behavior is analogous to how C handles object files and archives (`.o` and
 `.a` respectively).
 
 The bytecode files are then linked together with the OCaml standard library to
@@ -248,7 +248,7 @@ Information about these extra libraries can be specified while linking a
 bytecode archive.
 
 ```frag
-((typ console)(name back-end/link_dllib.out))
+((typ console)(name back-end-embed/link_dllib.out))
 ```
 
 The `dllib` flag embeds the arguments in the archive file.  Any subsequent
@@ -261,7 +261,7 @@ You can also generate a complete standalone executable that bundles the
 a *custom runtime* mode and is built as follows.
 
 ```frag
-((typ console)(name back-end/link_custom.out))
+((typ console)(name back-end-embed/link_custom.out))
 ```
 
 The custom mode is the most similar mode to native code compilation, as both
@@ -291,23 +291,23 @@ fits together.
 Create two OCaml source files that contain a single print line.
 
 ```frag
-((typ ocaml)(name back-end/embed_me1.ml))
+((typ ocaml)(name back-end-embed/embed_me1.ml))
 ```
 
 ```frag
-((typ ocaml)(name back-end/embed_me2.ml))
+((typ ocaml)(name back-end-embed/embed_me2.ml))
 ```
 
 Next, create a C file which will be your main entry point.
 
 ```frag
-((typ c)(name back-end/main.c))
+((typ c)(name back-end-embed/main.c))
 ```
 
 Now compile the OCaml files into a standalone object file.
 
 ```frag
-((typ console)(name back-end/build_embed.out))
+((typ console)(name back-end-embed/build_embed.out))
 ```
 
 After this point, you no longer need the OCaml compiler, as `embed_out.o` has
@@ -315,7 +315,7 @@ all of the OCaml code compiled and linked into a single object file.  Compile
 an output binary using `gcc` to test this out.
 
 ```frag
-((typ console)(name back-end/build_embed_binary.out))
+((typ console)(name back-end-embed/build_embed_binary.out))
 ```
 
 You can inspect the commands that `ocamlc` is invoking by adding `-verbose` to
@@ -324,7 +324,7 @@ can even obtain the C source code to the `-output-obj` result by specifying a
 `.c` output file extension instead of the `.o` we used earlier.
 
 ```frag
-((typ console)(name back-end/build_embed_c.out))
+((typ console)(name back-end-embed/build_embed_c.out))
 ```
 
 Embedding OCaml code like this lets you write OCaml that interfaces with any
@@ -476,45 +476,14 @@ that this polymorphic comparison is much heavier than the simple monomorphic
 integer comparison from earlier.  Let's confirm this hypothesis again by
 writing a quick `Core_bench` test with both functions.
 
-```ocaml
-$ cat bench_poly_and_mono.ml 
-open Core.Std
-open Core_bench.Std
-
-let polymorphic_compare () =
-  let cmp a b = if a > b then a else b in
-  for i = 0 to 1000 do
-    ignore(cmp 0 i)
-  done
-
-let monomorphic_compare () =
-  let cmp (a:int) (b:int) =
-    if a > b then a else b in
-  for i = 0 to 1000 do
-    ignore(cmp 0 i)
-  done
-
-let tests = [
-    "Polymorphic comparison", polymorphic_compare;
-    "Monomorphic comparison", monomorphic_compare ]
-
-let () =
-  List.map tests ~f:(fun (name,test) -> Bench.Test.create ~name test)
-  |> Bench.make_command
-  |> Command.run
+```frag
+((typ ocaml)(name back-end/bench_poly_and_mono.ml))
 ```
 
 Running this shows quite a significant runtime difference between the two.
 
-```console
-$ ./bench_poly_and_mono.native 
-Estimated testing time 20s (change using -quota SECS).
-┌────────────────────────┬───────────┬───────────────┬────────────┐
-│ Name                   │ Time (ns) │     Time 95ci │ Percentage │
-├────────────────────────┼───────────┼───────────────┼────────────┤
-│ Polymorphic comparison │    10_087 │ 10_080-10_096 │     100.00 │
-│ Monomorphic comparison │    585.51 │ 584.60-586.57 │       5.80 │
-└────────────────────────┴───────────┴───────────────┴────────────┘
+```frag
+((typ console)(name back-end/run_bench_poly_and_mono.out))
 ```
 
 We see that the polymorphic comparison is close to 20 times slower!  These
@@ -588,58 +557,28 @@ Let's write a mutually recursive function that selects alternating values from
 a list.  This isn't tail recursive and so our stack size will grow as we
 single-step through the execution.
 
-```ocaml
-(* alternate_list.ml : select every other value from an input list *)
-open Core.Std
-
-let rec take =
-  function
-  |[] -> []
-  |hd::tl -> hd :: (skip tl)
-and skip =
-  function
-  |[] -> []
-  |hd::tl -> take tl
-
-let () =
-  take [1;2;3;4;5;6;7;8;9]
-  |> List.map ~f:string_of_int
-  |> String.concat ~sep:","
-  |> print_endline
+```frag
+((typ ocaml)(name back-end/alternate_list.ml))
 ```
 
 Compile and run this with debugging symbols. You should see the following
 output:
 
-```console
-$ ocamlfind ocamlopt -g -package core -thread -linkpkg -o alternate alternate_list.ml
-$ ./alternate
-1,3,5,7,9
+```frag
+((typ ocaml)(name back-end/run_alternate_list.out))
 ```
 
 Now we can run this interactively within `gdb`.
 
-```console
-$ gdb ./alternate
-GNU gdb (GDB) 7.4.1-debian
-Copyright (C) 2012 Free Software Foundation, Inc.
-License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
-This is free software: you are free to change and redistribute it.
-There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
-and "show warranty" for details.
-This GDB was configured as "x86_64-linux-gnu".
-For bug reporting instructions, please see:
-<http://www.gnu.org/software/gdb/bugs/>...
-Reading symbols from /home/avsm/alternate...done.
-(gdb)
+```frag
+((typ console)(name back-end/gdb_alternate0.out))
 ```
 
 The `gdb` prompt lets you enter debug directives.  Let's set the program
 to break just before the first call to `take`.
 
-```console
-(gdb) break camlAlternate_list__take_69242 
-Breakpoint 1 at 0x5658d0: file alternate_list.ml, line 5.
+```frag
+((typ console)(name back-end/gdb_alternate1.out))
 ```
 
 We used the C symbol name by following the name mangling rules defined
@@ -649,46 +588,16 @@ a list of possible completions.
 
 Once you've set the breakpoint, start the program executing.
 
-```console
-(gdb) run
-Starting program: /home/avsm/alternate
-[Thread debugging using libthread_db enabled]
-Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
-
-Breakpoint 1, camlAlternate_list__take_69242 () at alternate_list.ml:5
-4	  function
+```frag
+((typ console)(name back-end/gdb_alternate2.out))
 ```
 
 The binary has run until the first take invocation and stopped, waiting
 for further instructions.  GDB has lots of features, so let's continue
 the program and check the stacktrace after a couple of recursions.
 
-```console
-(gdb) cont
-Continuing.
-
-Breakpoint 1, camlAlternate_list__take_69242 () at alternate_list.ml:5
-4	  function
-(gdb) cont
-Continuing.
-
-Breakpoint 1, camlAlternate_list__take_69242 () at alternate_list.ml:5
-4	  function
-(gdb) bt
-#0  camlAlternate_list__take_69242 () at alternate_list.ml:4
-#1  0x00000000005658e7 in camlAlternate_list__take_69242 () at alternate_list.ml:6
-#2  0x00000000005658e7 in camlAlternate_list__take_69242 () at alternate_list.ml:6
-#3  0x00000000005659f7 in camlAlternate_list__entry () at alternate_list.ml:14
-#4  0x0000000000560029 in caml_program ()
-#5  0x000000000080984a in caml_start_program ()
-#6  0x00000000008099a0 in ?? ()
-#7  0x0000000000000000 in ?? ()
-(gdb) clear camlAlternate_list__take_69242
-Deleted breakpoint 1 
-(gdb) cont
-Continuing.
-1,3,5,7,9
-[Inferior 1 (process 3546) exited normally]
+```frag
+((typ console)(name back-end/gdb_alternate3.out))
 ```
 
 The `cont` command resumes execution after a breakpoint has paused it, `bt`
@@ -739,26 +648,14 @@ Run Perf on a compiled binary to record information first.  We'll use our
 write barrier benchmark from earlier which measures memory allocation versus
 in-place modification.
 
-```console
-$ perf record -g ./barrier.native 
-Estimated testing time 20s (change using -quota SECS).
-┌───────────┬───────────┬─────────────────────┬────────────┐
-│ Name      │ Time (ns) │           Time 95ci │ Percentage │
-├───────────┼───────────┼─────────────────────┼────────────┤
-│ mutable   │ 7_306_219 │ 7_250_234-7_372_469 │      96.83 │
-│ immutable │ 7_545_126 │ 7_537_837-7_551_193 │     100.00 │
-└───────────┴───────────┴─────────────────────┴────────────┘
-[ perf record: Woken up 11 times to write data ]
-[ perf record: Captured and wrote 2.722 MB perf.data (~118926 samples) ]
+```frag
+((typ console)(name back-end/perf_record.out))
 ```
 
 When this completes, you can interactively explore the results.
 
-```console
-$ perf report -g
-+  48.86%  barrier.native  barrier.native     [.] camlBarrier__test_immutable_69282
-+  30.22%  barrier.native  barrier.native     [.] camlBarrier__test_mutable_69279
-+  20.22%  barrier.native  barrier.native     [.] caml_modify
+```frag
+((typ console)(name back-end/perf_report.out))
 ```
 
 This trace broadly reflects the results of the benchmark itself.  The mutable 
@@ -789,8 +686,8 @@ resolution of Perf traces.
 OPAM provides a compiler switch that compiles OCaml with the frame pointer
 activated.
 
-```console
-$ opam switch 4.01.0dev+fp
+```frag
+((typ console)(name back-end/opam_switch.out))
 ```
 
 Using the frame pointer changes the OCaml calling convention, but OPAM takes
@@ -812,15 +709,8 @@ installed as `libasmrun.a` in the OCaml standard library directory.
 Try this custom linking by using the same source files from the bytecode
 embedding example earlier in this chapter.
 
-```console
-$ ocamlopt -output-obj -o embed_native.o embed_me1.ml embed_me2.ml
-$ gcc -Wall -I `ocamlc -where` -L `ocamlc -where` -lasmrun -ltermcap \
-  -o final_out_native embed_native.o main.c
-./final_out_native
-Before calling OCaml
-hello embedded world 1
-hello embedded world 2
-After calling OCaml
+```frag
+((typ console)(name back-end-embed/build_embed_native.out))
 ```
 
 The `embed_native.o` is a standalone object file that has no further references
@@ -838,17 +728,8 @@ nearer the point of corruption and help isolate the bug in the C code.
 
 To use the debug library, just link your program with the `-runtime-variant d` flag.
 
-```
-$ ocamlopt -runtime-variant d -verbose -o hello hello.ml hello_stubs.c
-$ ./hello 
-### OCaml runtime: debug mode ###
-Initial minor heap size: 2048k bytes
-Initial major heap size: 992k bytes
-Initial space overhead: 80%
-Initial max overhead: 500%
-Initial heap increment: 992k bytes
-Initial allocation policy: 0
-Hello OCaml World!
+```frag
+((typ console)(name back-end-embed/run_debug_hello.out))
 ```
 
 If you get an error that `libasmrund.a` is not found, then this is probably

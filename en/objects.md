@@ -30,7 +30,7 @@ There are five fundamental properties that differentiate OOP from other styles:
   `b`, then we may use `a` in any context where `b` is expected.
 * _Inheritance_: the definition of one kind of object can be reused
   to produce a new kind of object.  This new definition can override
-  some behaviour, but also share code with its parent.
+  some behavior, but also share code with its parent.
 * _Open recursion_: an object's methods can invoke another method in the same
   object using a special variable (often called `self` or `this`). These
   calls use dynamic lookup, allowing a method defined in one object to
@@ -286,7 +286,7 @@ a `square list` to be a `shape list`. OCaml does indeed allow such coercions:
 
 Note that this relies on lists being immutable. It would not be safe to treat a
 `square array` as a `shape array` because it would allow you to store
-non-square shapes into what should be an array of squares. OCaml recognises
+non-square shapes into what should be an array of squares. OCaml recognizes
 this and does not allow the coercion.
 
 ```frag

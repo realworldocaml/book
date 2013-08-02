@@ -16,7 +16,7 @@ design.  These features include:
 * _Garbage collection_ for automatic memory management, now a feature
   of almost every modern high-level language.
 * _First-class functions_ that can be passed around like ordinary
-  values, as seen in Javascript and C#.
+  values, as seen in JavaScript and C#.
 * _Static type-checking_ to increase performance and reduce the number
   of runtime errors, as found in Java and C#.
 * _Parametric polymorphism_, which enables the construction of
@@ -50,7 +50,7 @@ manages to provide a great deal of power while remaining highly
 pragmatic. The compiler has a straightforward compilation strategy
 that produces performant code without requiring heavy optimization and
 without the complexities of dynamic JIT compilation.  This, along with
-OCaml's strict evaluation model, makes runtime behaviour easy to
+OCaml's strict evaluation model, makes runtime behavior easy to
 predict.  The garbage collector is incremental, letting you avoid
 large GC-related pauses, and precise, meaning it will collect all
 unreferenced data (unlike many reference-counting collectors), and the

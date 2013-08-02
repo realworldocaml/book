@@ -52,7 +52,7 @@ The overall compilation pipeline looks like this:
 Notice that the pipeline branches towards the end. OCaml has multiple compiler
 backends that reuse the early stages of compilation, but produce very different
 final outputs. The *bytecode* can be run by a portable interpreter, and can
-even be transformed into Javascript (via [js_of_ocaml](http://ocsigen.org/js_of_ocaml))
+even be transformed into JavaScript (via [js_of_ocaml](http://ocsigen.org/js_of_ocaml))
 or C source code (via [OCamlCC](https://github.com/ocaml-bytes/ocamlcc)).
 The *native code* compiler generates specialized executable binaries suitable for
 high-performance applications.
@@ -179,7 +179,7 @@ to verify that the syntax is correct.
 ```
 
 The `ocp-indent` [homepage](https://github.com/OCamlPro/ocp-indent) documents
-how to integrate it with your favourite editor.  All the Core libraries are
+how to integrate it with your favorite editor.  All the Core libraries are
 formatted using it to ensure consistency, and it's a good idea to do this
 before publishing your own source code online.
 
@@ -229,7 +229,7 @@ distinctly Web 1.0.  The tool supports plugging in custom documentation
 generators, and there are several available that provide prettier or more
 detailed output.
 
-* [Argot](http://argot.x9c.fr/) is an enchanced HTML generator that supports
+* [Argot](http://argot.x9c.fr/) is an enhanced HTML generator that supports
   code folding and searching by name or type definition.
 * [ocamldoc-generators](https://gitorious.org/ocamldoc-generators/ocamldoc-generators) add
   support for Bibtex references within comments and generating literate
@@ -304,7 +304,7 @@ loaded before Variantslib or Sexplib.
 The two extensions generate boilerplate OCaml code based on the type definition
 at compilation time. This avoids the performance hit of doing the code
 generation dynamically and also doesn't require a Just-In-Time (JIT) runtime
-that can be a source of unpredictable dynamic behaviour.  Instead, all the
+that can be a source of unpredictable dynamic behavior.  Instead, all the
 extra code is simply generated at compilation time via Camlp4, and type
 information can be discarded from the runtime image.
 
@@ -312,7 +312,7 @@ The syntax extensions accept an input AST and output a modified one.  If you're
 not familiar with the Camlp4 module in question, how do you figure out what
 changes it's made to your code?  The obvious way is to read the documentation
 that accompanies the extension.  Another approach is to use the top-level to
-explore the extension's behaviour or run Camlp4 manually yourself to see the
+explore the extension's behavior or run Camlp4 manually yourself to see the
 transformation in action.  We'll show you how to do both of these now.
 
 ### Using Camlp4 interactively
@@ -347,7 +347,7 @@ Let's see how `comparelib` solves this problem by running it in `utop`.
 The first definition of `t` is a standard OCaml phrase and results in the
 expected output.  The second one includes the `with compare` directive.  This
 is intercepted by `comparelib` and transformed into the original type
-definition with two new functions also incuded.
+definition with two new functions also included.
 
 ### Running Camlp4 from the command line
 
@@ -611,7 +611,7 @@ source of your error more accurately.  These annotations shouldn't actually
 change your types and can be removed once your code is correct. However, they
 act as anchors to locate errors while you're still writing your code.
 
-Manual type annotations are particulary useful if you use lots of
+Manual type annotations are particularly useful if you use lots of
 polymorphic variants or objects.  Type inference with row polymorphism can
 generate some very large signatures, and errors tend to propagate more widely
 than if you are using more explicitly typed variants or classes.
@@ -879,7 +879,7 @@ situations where the type aliasing information is useful to know, and would be
 lost in the error if the shortest module path is always picked.
 
 You'll need to choose for yourself if you prefer short paths or the default
-behaviour in your own projects, and pass the `-short-paths` flag to the
+behavior in your own projects, and pass the `-short-paths` flag to the
 compiler if you need it.
 
 ## The typed syntax tree
@@ -943,7 +943,7 @@ Ncurses.window val Ncurses.window Ctypes.typ
 
 As you can imagine, autocompletion is invaluable on larger codebases.  See the
 [ocp-index](https://github.com/ocamlpro/ocp-index) homepage for more
-information on how to integrate it with your favourite editor.
+information on how to integrate it with your favorite editor.
 
 ### Examining the typed syntax tree directly
 

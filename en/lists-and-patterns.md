@@ -196,7 +196,7 @@ this work happens exactly once per list element.
 Generally, pattern matching is more efficient than the alternatives
 you might code by hand.  One notable exception is matches over
 strings, which are in fact tested sequentially, so matches containing
-a long seuqence of strings can be outperformed by a hash table.  But
+a long sequence of strings can be outperformed by a hash table.  But
 most of the time, pattern matching is a clear performance win.
 
 ### Detecting errors
@@ -387,7 +387,7 @@ are a few more functions that are useful enough to mention here.
 #### Combining list elements with `List.reduce` 
 
 `List.fold`, which we described earlier, is a very general and
-powerful function.  Sometimes, hwoever, you want something more that's
+powerful function.  Sometimes, however, you want something more that's
 simpler and thereby easier to use.  One such function is
 `List.reduce`, which is essentially a specialized version of
 `List.fold` that doesn't require an explicit starting value, and whose
