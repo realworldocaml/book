@@ -347,7 +347,7 @@ Let's see how `comparelib` solves this problem by running it in `utop`.
 The first definition of `t` is a standard OCaml phrase and results in the
 expected output.  The second one includes the `with compare` directive.  This
 is intercepted by `comparelib` and transformed into the original type
-definition with two new functions also incuded.
+definition with two new functions also included.
 
 ### Running Camlp4 from the command line
 
