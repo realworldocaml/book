@@ -1,0 +1,2 @@
+symbol: [ id1 = ] symbol1; [ id2 = ] symbol2; ...; [ idN = ] symbolN
+   { OCaml code }

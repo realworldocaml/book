@@ -182,10 +182,10 @@ we also defines a proper entry point via the `prog` rule.
 The `%start` declaration is mandatory for every grammar, and the symbols become
 the name of a function whose signature is published in the `mli` signature that
 is generated after calling `menhir`.  Each start symbol also must have an OCaml
-type associated with it.  We've defined this separately via the `%type`
-keyword in our example above, but it can also be directly written into the `%start` declaration.  For more complex grammars, you can improve the
-quality of error messages by adding extra `%type` rules for other
-non-starting symbols too.
+type associated with it.  We've defined this separately via the `%type` keyword
+in our example above, but it can also be directly written into the `%start`
+declaration.  For more complex grammars, you can improve the quality of error
+messages by adding extra `%type` rules for other non-starting symbols too.
 
 Once that's in place, we can add the main production for a JSON value.
 
@@ -196,21 +196,18 @@ Once that's in place, we can add the main production for a JSON value.
 We can read it like this: a JSON `value` is either an object bracketed by curly
 braces, or an array bracketed by square braces. or a string, integer, float,
 etc.  In each of the productions, the right hand side specifies the expected
-sequence.  For example, the object is specified with the curly-bracket
-production.
+sequence.
 
-```
-value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
-    { `Assoc obj }
-```
+For example, an association list starts with a `LEFT_BRACE` token, contains
+some optional object field values (to be defined in another rule), and ends
+with a `RIGHT_BRACE`.  The returned value is an `Assoc obj` polymorphic
+variant, where `obj` is the sequence of object fields.  Note that we've left
+out bindings for `LEFT_BRACE` and `RIGHT_BRACE`, because their tokens don't
+have values.
 
-That is, an object value starts with a `LEFT_BRACE`, contains some optional
-object field values (to be defined), and ends with a `RIGHT_BRACE`.  The returned
-value is `Assoc obj`, where `obj` is the sequence of object fields.  Note that
-we've left out bindings for `LEFT_BRACE` and `RIGHT_BRACE`, because their tokens
-don't have values.
+### Parsing lists and sequences
 
-Next, let's define the object fields.  In the following rules, the
+Next, let's define the JSON object fields.  In the following rules, the
 `opt_object_fields` are either empty, or a non-empty sequence of fields in
 reverse order.  Note that if you wish to have comments in the rule definitions,
 you have to use C comment delimiters.  By convention, the C comment `/*
@@ -231,41 +228,40 @@ uses less stack space with left-recursive definitions.  The following
 right-recursive rule accepts the same input, but during parsing it requires
 linear stack space to read object field definitions.
 
-```
-/* Inefficient right-recursive rule */
-object_fields: k = ID; COLON; v = value
-    { [k, v] }
-  | k = ID; COLON; v = value; COMMA; obj = object_fields
-    { (k, v) :: obj }
+```frag
+((typ ocaml)(name parsing/right_rec_rule.ml))
 ```
 
 Alternatively, we could keep the left-recursive definition and simply construct
 the returned value in left-to-right order.  This is fine, though less efficient.
 You will have to choose your technique according to circumstances.
 
-```
-/* Quadratic left-recursive rule */
-object_fields: k = ID; COLON; v = value
-    { [k, v] }
-  | obj = rev_object_fields; COMMA; k = ID; COLON; v = value
-    { obj @ [k, v] }
-  ;
+```frag
+((typ ocaml)(name parsing/quadratic_rule.ml))
 ```
 
-Finally, we can finish off the grammar by defining the rules for arrays, and
-adding a correct `%start` production.  For the `%start` production, we'll return
-a `value option`, using `None` to represent end-of-file.  Here's the last part
-with the array rules filled in.
+Assembling lists like this is a pretty common requirement in most realistic
+grammars, and the above rules (while useful for illustrating how parsing works)
+are rather verbose.  Menhir features an extended standard library of built-in
+rules to simplify this handling.  These rules are detailed in the Menhir manual,
+but include optional values, pairs of values with optional separators, 
+and lists of elements (also with optional separators).
+
+A complete version of the JSON grammar using these more succinct Menhir rules
+is shown below.  Notice the use of `separated_list` to parse both JSON objects
+and lists with one rule.
 
 ```frag
-((typ ocaml)(name parsing/parser.mly)(part 3))
+((typ ocaml)(name parsing/short_parser.mly))
 ```
 
-That's it.  We can compile this with `menhir`, which will now no longer complain
-about unused symbols.
+We can now compile this with Menhir, which will now no longer complain about
+unused symbols.  The best way to invoke Menhir is using `corebuild` with the
+`-use-menhir` flag: this tells the build system to switch to using `menhir`
+instead of `ocamlyacc` to handle files with the `.mly` suffix.
 
 ```frag
-((typ console)(name parsing/build_json_parser.out))
+((typ console)(name parsing-test/build_json_parser.out))
 ```
 
 ## Defining a lexer with ocamllex

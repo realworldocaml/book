@@ -26,10 +26,11 @@ prog: v = value
   ;
 
 (* part 1 *)
-value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
-    { `Object obj }
+value:
+    LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
+    { `Assoc obj }
   | LEFT_BRACK; vl = array_values; RIGHT_BRACK
-    { `Array vl }
+    { `List vl }
   | s = STRING
     { `String s }
   | i = INT
@@ -37,9 +38,9 @@ value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
   | x = FLOAT
     { `Float x }
   | TRUE
-    { `True }
+    { `Bool true }
   | FALSE
-    { `False }
+    { `Bool false }
   | NULL
     { `Null }
   ;
@@ -59,9 +60,9 @@ rev_object_fields: k = ID; COLON; v = value
 
 (* part 3 *)
 array_values: /* empty */
-    { [||] }
+    { [] }
   | vl = rev_values
-    { Array.of_list (List.rev vl) }
+    { List.rev vl }
   ;
 
 rev_values: v = value

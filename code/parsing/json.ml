@@ -1,36 +1,35 @@
 type value = [
-  | `Object of (string * value) list
-  | `Array of value array
+  | `Assoc of (string * value) list
+  | `List of value list
   | `String of string
   | `Int of int
   | `Float of float
-  | `True
-  | `False
+  | `Bool of bool
   | `Null ]
 
 (* part 1 *)
-open Printf
+open Core.Std
 let rec output_value outc = function
-  | `Object obj -> print_object outc obj
-  | `Array arr -> print_array outc arr
-  | `String s -> printf "\"%s\"" s
-  | `Int i -> printf "%d" i
-  | `Float x -> printf "%f" x
-  | `True -> output_string outc "true"
-  | `False -> output_string outc "false"
-  | `Null -> output_string outc "null"
+  | `Assoc obj  -> print_assoc outc obj
+  | `List l     -> print_list outc l
+  | `String s   -> printf "\"%s\"" s
+  | `Int i      -> printf "%d" i
+  | `Float x    -> printf "%f" x
+  | `Bool true  -> output_string outc "true"
+  | `Bool false -> output_string outc "false"
+  | `Null       -> output_string outc "null"
 
-and print_object outc obj =
+and print_assoc outc obj =
   output_string outc "{ ";
   let sep = ref "" in
-  List.iter (fun (key, value) ->
+  List.iter ~f:(fun (key, value) ->
       printf "%s%s: %a" !sep key output_value value;
       sep := ", ") obj;
   output_string outc " }"
 
-and print_array outc arr =
+and print_list outc arr =
   output_string outc "[";
-  Array.iteri (fun i v ->
+  List.iteri ~f:(fun i v ->
       if i > 0 then
         output_string outc ", ";
       output_value outc v) arr;

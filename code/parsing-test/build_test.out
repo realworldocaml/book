@@ -1,7 +1,4 @@
 $ ocamlbuild -use-menhir -tag thread -use-ocamlfind -pkg core test.native
-/Users/avsm/.opam/4.01.0dev+trunk/bin/ocamllex.opt -q lexer.mll
-File "lexer.mll", line 1, character 1: unterminated action.
-Command exited with code 3.
 $ ./test.native test1.json
 true
 false
