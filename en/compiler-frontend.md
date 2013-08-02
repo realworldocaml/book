@@ -179,7 +179,7 @@ to verify that the syntax is correct.
 ```
 
 The `ocp-indent` [homepage](https://github.com/OCamlPro/ocp-indent) documents
-how to integrate it with your favourite editor.  All the Core libraries are
+how to integrate it with your favorite editor.  All the Core libraries are
 formatted using it to ensure consistency, and it's a good idea to do this
 before publishing your own source code online.
 
@@ -229,7 +229,7 @@ distinctly Web 1.0.  The tool supports plugging in custom documentation
 generators, and there are several available that provide prettier or more
 detailed output.
 
-* [Argot](http://argot.x9c.fr/) is an enchanced HTML generator that supports
+* [Argot](http://argot.x9c.fr/) is an enhanced HTML generator that supports
   code folding and searching by name or type definition.
 * [ocamldoc-generators](https://gitorious.org/ocamldoc-generators/ocamldoc-generators) add
   support for Bibtex references within comments and generating literate
@@ -943,7 +943,7 @@ Ncurses.window val Ncurses.window Ctypes.typ
 
 As you can imagine, autocompletion is invaluable on larger codebases.  See the
 [ocp-index](https://github.com/ocamlpro/ocp-index) homepage for more
-information on how to integrate it with your favourite editor.
+information on how to integrate it with your favorite editor.
 
 ### Examining the typed syntax tree directly
 
