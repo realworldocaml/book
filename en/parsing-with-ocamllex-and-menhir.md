@@ -81,8 +81,8 @@ in OCaml.  However, there are differences, and we'll try to point out the
 larger ones here.
 
 For illustration, let's continue with the JSON example.  For lexing, we'll use
-`ocamllex`, and for parsing, we'll use Menhir, which is somewhat easier to
-use than `ocamlyacc`.
+`ocamllex`, and for parsing, we'll use Menhir, which is the modern alternative
+to `ocamlyacc`.
 
 <note>
 <title>Menhir _vs_ `ocamlyacc`</title>
@@ -104,7 +104,7 @@ running `opam install menhir`.
 
 </note>
 
-## Defining a JSON parser with menhir
+## Defining a JSON parser with Menhir
 
 The process of building a parser is interleaved between constructing the lexer
 and parser; you will have to do them simultaneously.  The first step is to
@@ -224,7 +224,7 @@ more field definition.
 
 The `rev_` prefix is intended to point out that the fields are returned in
 reverse order.  Why would we do that?  One reason is that the `menhir` parser
-generator is left-recursive, which means that the constructed pushdown automoton
+generator is left-recursive, which means that the constructed pushdown automaton
 uses less stack space with left-recursive definitions.  The following
 right-recursive rule accepts the same input, but during parsing it requires
 linear stack space to read object field definitions.
