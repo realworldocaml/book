@@ -374,8 +374,8 @@ when a prefix of the input is matched by more than one pattern.
 ### Recursive rules
 
 Unlike many other lexer generators, `ocamllex` allows the definition of multiple
-lexer in the same file, and the definitions can be recursive.  In this case, we
-use recursion to match string literals, using the following rule definition.
+lexers in the same file, and the definitions can be recursive.  In this case, we
+use recursion to match string literals using the following rule definition.
 
 ```frag
 ((typ ocaml)(name parsing/lexer.mll)(part 5))
