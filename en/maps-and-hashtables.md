@@ -459,7 +459,7 @@ The logarithmic behavior of Core's hash tables in the presence of hash
 collisions also helps protect against some denial-of-service attacks.
 One well-known type of attack is to send queries to a service with
 carefully chosen keys to cause many collisions.  This, in combination
-with the the quadratic behavior of hashtables, can cause the service
+with the the quadratic behavior of hash tables, can cause the service
 to become unresponsive due to high CPU load.  Core's hash tables would
 be much less susceptible to such an attack, because the amount of
 degradation would be far less.
