@@ -142,7 +142,7 @@ larger expression.
 ```
 
 The declaration `<:sexp_of<int * string>>` simply gets expanded to the
-sexp-converter for the type `int * string`.  This is useful whever you
+sexp-converter for the type `int * string`.  This is useful whenever you
 need a sexp-converter for an anonymous type.
 
 The syntax extensions bundled with Core almost all have the same basic
