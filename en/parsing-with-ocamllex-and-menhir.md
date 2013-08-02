@@ -189,7 +189,7 @@ Once that's in place, we can add the main production for a JSON value.
 
 We can read it like this: a JSON `value` is either an object bracketed by curly
 braces, or an array bracketed by square braces. or a string, integer, float,
-etc.  In each of the productions, the right hand side specfies the expected
+etc.  In each of the productions, the right hand side specifies the expected
 sequence.  For example, the object is specified with the curly-bracket
 production.
 
