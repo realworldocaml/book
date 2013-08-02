@@ -69,8 +69,8 @@ process is.
 In the lex/yacc world, lexing is specified using regular expressions, and
 parsing is specified using context-free grammars.  These are concepts from
 formal languages that you don't need to understand in huge detail, as the
-lex/yacc tools construct the machinery for you.  For `lex`, this means
-constructing a _finite automaton_; and for `yacc`, this means constructing a
+lex/yacc tools construct the machinery for you.  For lex, this means
+constructing a _finite automaton_; and for yacc, this means constructing a
 _pushdown automaton_.
 
 Parsing is a broad and often intricate topic, and our purpose here is not to
@@ -115,12 +115,8 @@ input), so we'll start with the parser first.
 A parser file has suffix `.mly` (we'll use the name `parser.mly`) and it
 contains several parts in the following sequence:
 
-```
-  declarations
-  %%
-  rules
-  %%
-  optional OCaml code
+```frag
+((typ ocamlsyntax)(name parsing/yacc.syntax))
 ```
   
 The `%%` are section separators; they have to be on a line by themselves.  The
@@ -239,7 +235,7 @@ object_fields: k = ID; COLON; v = value
 
 Alternatively, we could keep the left-recursive definition and simply construct
 the returned value in left-to-right order.  This is fine, though less efficient.
-You will have to choose you technique according to circumstances.
+You will have to choose your technique according to circumstances.
 
 ```
 /* Quadratic left-recursive rule */
