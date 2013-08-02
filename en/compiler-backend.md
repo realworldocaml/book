@@ -225,7 +225,7 @@ The individual objects in the library are linked as regular `cmo` files in the
 order specified when the library file was built.  If an object file within the
 library isn't referenced elsewhere in the program, then it isn't included in
 the final binary unless the `-linkall` flag forces its inclusion.  This
-behaviour is analogous to how C handles object files and archives (`.o` and
+behavior is analogous to how C handles object files and archives (`.o` and
 `.a` respectively).
 
 The bytecode files are then linked together with the OCaml standard library to

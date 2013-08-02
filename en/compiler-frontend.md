@@ -304,7 +304,7 @@ loaded before Variantslib or Sexplib.
 The two extensions generate boilerplate OCaml code based on the type definition
 at compilation time. This avoids the performance hit of doing the code
 generation dynamically and also doesn't require a Just-In-Time (JIT) runtime
-that can be a source of unpredictable dynamic behaviour.  Instead, all the
+that can be a source of unpredictable dynamic behavior.  Instead, all the
 extra code is simply generated at compilation time via Camlp4, and type
 information can be discarded from the runtime image.
 
@@ -312,7 +312,7 @@ The syntax extensions accept an input AST and output a modified one.  If you're
 not familiar with the Camlp4 module in question, how do you figure out what
 changes it's made to your code?  The obvious way is to read the documentation
 that accompanies the extension.  Another approach is to use the top-level to
-explore the extension's behaviour or run Camlp4 manually yourself to see the
+explore the extension's behavior or run Camlp4 manually yourself to see the
 transformation in action.  We'll show you how to do both of these now.
 
 ### Using Camlp4 interactively
@@ -879,7 +879,7 @@ situations where the type aliasing information is useful to know, and would be
 lost in the error if the shortest module path is always picked.
 
 You'll need to choose for yourself if you prefer short paths or the default
-behaviour in your own projects, and pass the `-short-paths` flag to the
+behavior in your own projects, and pass the `-short-paths` flag to the
 compiler if you need it.
 
 ## The typed syntax tree
