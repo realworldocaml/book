@@ -251,7 +251,7 @@ that your free list becomes fragmented.  In this situation, the GC is forced to
 perform an expensive compaction despite there being free chunks, since none of
 the chunks alone are big enough to satisfy the request.
 
-First-fit allocation focusses on reducing memory fragmentation (and hence the
+First-fit allocation focuses on reducing memory fragmentation (and hence the
 number of compactions), but at the expense of slower memory allocation.  Every
 allocation scans the free list from the beginning for a suitable free chunk,
 instead of reusing the most recent heap chunk as the next-fit allocator does.
