@@ -115,7 +115,7 @@ variables are immutable.  This seems pretty surprising even on
 linguistic terms.  Isn't the whole point of a variable that it can
 vary?
 
-The answer to this is that variables in OCaml (and in generaly in
+The answer to this is that variables in OCaml (and generally in
 functional languages) are really more like variables in an equation
 than a variable in an imperative language.  If you think about the
 mathematical equation `x(y + z) = xy + xz`, there's no notion of
