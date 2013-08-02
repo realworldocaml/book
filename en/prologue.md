@@ -50,7 +50,7 @@ manages to provide a great deal of power while remaining highly
 pragmatic. The compiler has a straightforward compilation strategy
 that produces performant code without requiring heavy optimization and
 without the complexities of dynamic JIT compilation.  This, along with
-OCaml's strict evaluation model, makes runtime behaviour easy to
+OCaml's strict evaluation model, makes runtime behavior easy to
 predict.  The garbage collector is incremental, letting you avoid
 large GC-related pauses, and precise, meaning it will collect all
 unreferenced data (unlike many reference-counting collectors), and the
