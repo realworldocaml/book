@@ -423,9 +423,10 @@ encountering an error is to print the error and give up.
 ```
 
 The "give up on the first error" approach is easy to implement but isn't
-very friendly.  In general, error handling can be pretty intricate, and we won't
-discuss it here.  However, the Menhir parser defines additional mechanisms you
-can use to try and recover from errors, described in its reference [manual](http://gallium.inria.fr/~fpottier/menhir/).
+very friendly.  In general, error handling can be pretty intricate, and we
+won't discuss it here.  However, the Menhir parser defines additional
+mechanisms you can use to try and recover from errors. These are described in
+detail in its reference [manual](http://gallium.inria.fr/~fpottier/menhir/).
 
 Here's a test input file we can use to test the code we just wrote.
 
