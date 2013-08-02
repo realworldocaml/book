@@ -16,10 +16,10 @@ let next_line lexbuf =
 let int = '-'? ['1'-'9'] ['0'-'9']*
 
 (* part 2 *)
-let digits = ['0'-'9']+
-let frac = '.' digits
-let exp = ['e' 'E'] ['-' '+']? digits
-let float = int (frac | exp | frac exp)
+let digits = ['0'-'9']
+let frac = '.' digits*
+let exp = ['e' 'E'] ['-' '+']? digits+
+let float = digits* frac? exp?
 
 (* part 3 *)
 let white = [' ' '\t']+
@@ -30,23 +30,23 @@ let hex = ['0'-'9' 'a'-'f' 'A'-'F']
 
 (* part 4 *)
 rule read = parse
-| white { read lexbuf }
-| newline { next_line lexbuf; read lexbuf }
-| int { INT (int_of_string (Lexing.lexeme lexbuf)) }
-| float { FLOAT (float_of_string (Lexing.lexeme lexbuf)) }
-| "true" { TRUE }
-| "false" { FALSE }
-| "null" { NULL }
-| id { ID (Lexing.lexeme lexbuf) }
-| '"' { read_string (Buffer.create 17) lexbuf }
-| '{' { LEFT_BRACE }
-| '}' { RIGHT_BRACE }
-| '[' { LEFT_BRACK }
-| ']' { RIGHT_BRACK }
-| ':' { COLON }
-| ',' { COMMA }
-| _ { raise (SyntaxError ("Unexpected character: " ^ Lexing.lexeme lexbuf)) }
-| eof { EOF }
+| white    { read lexbuf }
+| newline  { next_line lexbuf; read lexbuf }
+| int      { INT (int_of_string (Lexing.lexeme lexbuf)) }
+| float    { FLOAT (float_of_string (Lexing.lexeme lexbuf)) }
+| "true"   { TRUE }
+| "false"  { FALSE }
+| "null"   { NULL }
+| id       { ID (Lexing.lexeme lexbuf) }
+| '"'      { read_string (Buffer.create 17) lexbuf }
+| '{'      { LEFT_BRACE }
+| '}'      { RIGHT_BRACE }
+| '['      { LEFT_BRACK }
+| ']'      { RIGHT_BRACK }
+| ':'      { COLON }
+| ','      { COMMA }
+| _ { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
+| eof      { EOF }
 
 (* part 5 *)
 and read_string buf = parse

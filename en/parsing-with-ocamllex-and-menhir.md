@@ -272,32 +272,43 @@ define a lexer using `ocamllex`.  In this case, the specification is placed in a
 file with a `.mll` suffix (we'll use the name `lexer.mll`).  A lexer file has
 several parts in the following sequence.
 
-```
-{ OCaml code }
-let definitions...
-rules...
-{ OCaml code }
+```frag
+((typ ocamlsyntax)(name parsing/lex.syntax))
 ```
 
 ### Let-definitions for regular expressions
 
 The OCaml code for the header and trailer is optional.  The let-definitions are
-used to ease the definition of regular expressions.  They are optional, but very
-useful.  To get started, we know that we'll need to match numbers and strings,
-so let's define names for the regular expressions that specify their form.
+used to ease the definition of regular expressions by defining utility
+functions.  They are optional, but very useful.  To get started, let's define a
+utility function that can track the location of tokens across line breaks.
 
-An integer is a sequence of digits, optionally preceded by a minus sign.
-Leading zeroes are not allowed.  The question mark means that the preceding
-symbol `-` is optional.  The square brackets ['1'-'9'] define a character range,
-meaning that the first digit of the integer should be 1-9.  The final range
-`['0'-'9']*` includes star `*`, which means zero-or-more occurrences of the
-characters 0-9.  Read formally then, an `int` has an optional minus sign,
-followed by a digit in the range 1-9, followed by zero or more digits in the
-range 0-9.
+```frag
+((typ ocaml)(name parsing/lexer.mll)(part 0))
+```
+
+The `Lexing` module defines a `lexbuf` structure that holds all of the lexer
+state, including the current location within the source file.  The `next_line`
+function simply accesses the `lex_curr_p` field that holds the current location
+and updates its line number.  This is intended to be called from within the
+lexing regular expressions that we'll define next.
+
+To get started with our rules, we know that we'll need to match numbers and
+strings, so let's define names for the regular expressions that specify their
+form.
 
 ```frag
 ((typ ocaml)(name parsing/lexer.mll)(part 1))
 ```
+
+An integer is a sequence of digits, optionally preceded by a minus sign.
+Leading zeroes are not allowed.  The question mark means that the preceding
+symbol `-` is optional.  The square brackets ['1'-'9'] define a character
+range, meaning that the first digit of the integer should be 1-9.  The final
+range `['0'-'9']*` includes the star `*`, which means zero-or-more occurrences of
+the characters 0-9.  Read formally then, an `int` has an optional minus sign,
+followed by a digit in the range 1-9, followed by zero or more digits in the
+range 0-9.
 
 Floating-point numbers are similar, but we deal with decimal points and
 exponents.  We can use multiple let-definitions for the different parts.
@@ -306,12 +317,10 @@ exponents.  We can use multiple let-definitions for the different parts.
 ((typ ocaml)(name parsing/lexer.mll)(part 2))
 ```
 
-The `digits` expression has a `+` symbol, meaning that `digits` has one or more
-occurrences of digits in the range 0-9.  A fractional part `frac` has a decimal
-point followed by some digits; an exponent `exp` begins with an `e` followed by
-some digits; and a `float` has an integer part, and one or both of a `frac` and
-`exp` part.  The vertical bar is a choice; the expression `(frac | exp | frac
-exp)` is either a `frac`, or an `exp`, or a `frac` followed by an `exp`.
+The `digits` expression defines a single character regexp in the range 0-9.  A
+fractional part `frac` has a compulsary decimal point followed by some optional
+digits; an exponent `exp` begins with an `e` followed by some digits; and a
+`float` has an integer part, and one, both or none of a `frac` and `exp` part. 
 
 Finally, let's define identifiers and whitespace.  An identifier (label), is an
 alphanumeric sequence not beginning with a digit.
@@ -320,41 +329,39 @@ alphanumeric sequence not beginning with a digit.
 ((typ ocaml)(name parsing/lexer.mll)(part 3))
 ```
 
+
 ### Lexing rules
 
 The lexing rules are specified as a set of `parse` rules.  A `parse` rule has a
 regular expression followed by OCaml code that defines a semantic action.  Let's
-write JSON parse rule.
+write the rule for JSON next.
 
 ```frag
-((typ ocaml)(name parsing/lexer.mll)(part 3))
+((typ ocaml)(name parsing/lexer.mll)(part 4))
 ```
 
-The OCaml code for the rules has a parameter called `lexbuf` that defines the
-input, including the position in the input file, as well as the text that was
-matched by the regular expression.  Let's skip to the third action.
+The rules are structured very similarly to pattern matches, except that the
+variants are replaced by regular expressions on the left hand side.  The right
+hand side clause is the parsed OCaml return value of that rule.  The OCaml code
+for the rules has a parameter called `lexbuf` that defines the input, including
+the position in the input file, as well as the text that was matched by the
+regular expression.
+
+The first `white { read lexbuf }` calls the lexer recursively.  That is, it
+skips the input whitespace and returns the following token.  The action
+`newline { next_line lexbuf; read lexbuf }` is similar, but we use it to
+advance the line number for the lexer using the utility function that we
+defined at the top of the file.  Let's skip to the third action.
 
 ```frag
 ((typ ocaml)(name parsing/lexer_int_fragment.mll))
 ```
 
-This action specifies that when the input matches the `int` regular expression
-(defined as `'-'? ['1'-'9'] ['0'-'9']*`, then the lexer should return the
-expression `INT (int_of_string (Lexing.lexeme lexbuf))`.  The expression
-`Lexing.lexeme lexbuf` returns the complete string matched by the regular
-expression.  In this case, the string represents a number, so we use the
-`int_of_string` function to convert it to a number.
-
-Going back to the first actions, the first `white { read lexbuf }` calls the
-lexer recursively.  That's, it skips the input whitespace and returns the
-following token.  The action `newline { next_line lexbuf; read lexbuf }` is
-similar, but we use it to advance the line number for the lexer.  Here is the
-definition of the `next_line` function, which updates the line number in the
-`lexbuf`.
-
-```frag
-((typ ocaml)(name parsing/lexer.mll)(part 0))
-```
+This action specifies that when the input matches the `int` regular expression,
+then the lexer should return the expression `INT (int_of_string (Lexing.lexeme
+lexbuf))`.  The expression `Lexing.lexeme lexbuf` returns the complete string
+matched by the regular expression.  In this case, the string represents a
+number, so we use the `int_of_string` function to convert it to a number.
 
 There are actions for each different kind of token.  The string expressions like
 `"true" { TRUE }` are used for keywords, and the special characters have actions
@@ -395,6 +402,29 @@ the lexer.
 That covers the lexer.  Next, we need to combine the lexer with the parser to
 bring it all together.
 
+<note>
+<title>Handling Unicode</title>
+
+We've glossed over an important detail here: parsing Unicode characters to
+handle the full spectrum of the world's writing systems.  OCaml has several
+third-party solutions to handling Unicode, with varying degrees of flexibility
+and complexity.
+
+* [Camomile](http://camomile.sourceforge.net) supports the full spectrum
+of Unicode character types, conversion from around 200 encodings, and collation
+and locale-sensitive case mappings.
+* [Ulex](http://www.cduce.org/ulex) is a lexer generator for Unicode that can
+serve as a Unicode-aware replacement for `ocamllex`.
+* [Uutf](http://erratique.ch/software/uutf) is a non-blocking streaming
+Unicode codec for OCaml, available as a standalone library.  It is accompanied
+by the [Uunf](http://erratique.ch/software/uunf) text normalization and 
+[Uucd](http://erratique.ch/software/uucd) Unicode character database libraries.
+There is also a robust parser for [JSON](http://erratique.ch/software/jsonm) available that illustrates the use of Uutf in your own libraries.
+
+All of these libraries are available via OPAM under their respective names.
+
+</note>
+
 ## Bringing it all together
 
 For the final part, we need to compose the lexer and parser.  As we saw in the
@@ -404,6 +434,21 @@ type definition in `parser.mli`, the parsing function expects a lexer of type
 ```frag
 ((typ ocaml)(name parsing/prog.mli))
 ```
+
+Before we start with the lexing, let's first define some functions to handle
+parsing errors.  There are currently two errors: `Parser.Error` and
+`Lexer.SyntaxError`.  A simple solution when encountering an error is to print
+the error and give up, which we do below.
+
+```frag
+((typ ocaml)(name parsing-test/test.ml)(part 0))
+```
+
+The "give up on the first error" approach is easy to implement but isn't very
+friendly.  In general, error handling can be pretty intricate, and we won't
+discuss it here.  However, the Menhir parser defines additional mechanisms you
+can use to try and recover from errors. These are described in detail in its
+reference [manual](http://gallium.inria.fr/~fpottier/menhir/).
 
 The standard lexing library `Lexing` provides a function `from_channel` to read
 the input from a channel.  The following function describes the structure, where
@@ -415,20 +460,6 @@ passed with the lexing function `Lexer.read` to the `Parser.prog` function.
 ```frag
 ((typ ocaml)(name parsing-test/test.ml)(part 1))
 ```
-
-This isn't quite right yet -- we need to handle parsing errors.  Currently there
-are two errors, `Parser.Error` and `Lexer.SyntaxError`.  A simple solution when
-encountering an error is to print the error and give up.
-
-```frag
-((typ ocaml)(name parsing-test/test.ml)(part 0))
-```
-
-The "give up on the first error" approach is easy to implement but isn't
-very friendly.  In general, error handling can be pretty intricate, and we
-won't discuss it here.  However, the Menhir parser defines additional
-mechanisms you can use to try and recover from errors. These are described in
-detail in its reference [manual](http://gallium.inria.fr/~fpottier/menhir/).
 
 Here's a test input file we can use to test the code we just wrote.
 
@@ -443,8 +474,16 @@ parser in action.
 ((typ console)(name parsing-test/build_test.out))
 ```
 
-With our simple error handling scheme, errors are fatal.
+With our simple error handling scheme, errors are fatal and cause the program
+to terminate with a non-zero exit code.
 
 ```frag
 ((typ console)(name parsing-test/run_broken_test.out))
 ```
+
+That wraps up our parsing tutorial.  As an aside, notice that the JSON
+polymorphic variant type that we defined in this chapter is actually
+structurally compatible with the Yojson representation explained earlier in
+[xref](#handling-json-data).  That means that you can take this parser and use
+it with the helper functions in Yojson to build more sophisticated
+applications.
