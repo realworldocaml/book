@@ -320,7 +320,7 @@ is capable of evaluating a base predicate.
 Another useful operation on expressions is simplification.  The
 following simplification code is based on having some simplifying
 constructors that mirror the tags used to construct a tree.  Then
-the simplification function is reponsible for rebuilding the tree
+the simplification function is responsible for rebuilding the tree
 using these constructors.
 
 ```frag
