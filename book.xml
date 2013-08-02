@@ -13663,7 +13663,7 @@ val dispatch :
       </para>
       <para>
         The bundling together of the module and the value is in many
-        ways reminisicent of object-oriented languages. One key
+        ways reminiscent of object-oriented languages. One key
         difference, is that first-class modules allow you to package up
         more than just a functions or methods. As we've seen, you can
         also include types and even modules. We've only used it in a
@@ -14053,7 +14053,7 @@ val unique_handler : Sexp.t -&gt; query_handler_instance = &lt;fun&gt;
       <para>
         <emphasis>Inheritance</emphasis>: the definition of one kind of
         object can be reused to produce a new kind of object. This new
-        definition can override some behaviour, but also share code with
+        definition can override some behavior, but also share code with
         its parent.
       </para>
     </listitem>
@@ -14545,7 +14545,7 @@ val shapes : shape list = [&lt;obj&gt;; &lt;obj&gt;]
         safe to treat a <literal>square array</literal> as a
         <literal>shape array</literal> because it would allow you to
         store non-square shapes into what should be an array of squares.
-        OCaml recognises this and does not allow the coercion.
+        OCaml recognizes this and does not allow the coercion.
       </para>
       <programlisting language="ocaml">
 ...part 6 of objects/subtyping.topscript
@@ -18271,7 +18271,7 @@ module Foo_and_bar :
       expensive operation. That means adding a new element to the table
       is only <emphasis>amortized</emphasis> constant, which is to say,
       it's constant on average over a long sequence of additions, but
-      some of the indivdual additions can be quite expensive.
+      some of the individual additions can be quite expensive.
     </para>
     <para>
       Another hidden cost of hash tables has to do with the hash
@@ -18928,7 +18928,7 @@ Estimated testing time 20s (change using -quota SECS).
     declaration.
   </para>
   <para>
-    Command is simple to use for simpel applications, but also also
+    Command is simple to use for simple applications, but also also
     scales well as your needs grow more complex. In particular, Command
     provides a sophisticated subcommand mode that grouping related
     commands together as the number of options grow. You may already be
@@ -20806,7 +20806,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
 val iter : 'a list -&gt; f:('a -&gt; unit) -&gt; unit
 </programlisting>
     <para>
-      <literal>iter</literal> is a more specialised combinator that is
+      <literal>iter</literal> is a more specialized combinator that is
       only useful in OCaml due to side-effects being allowed. The input
       function is applied to every value, but no result is supplied. The
       function must instead apply some side-effect such as changing a
@@ -21729,13 +21729,12 @@ $ ./_build/github_org_info.native janestreet
     <programlisting language="ocaml">
 (* parsing/json.ml  *)
 type value = [
-  | `Object of (string * value) list
-  | `Array of value array
+  | `Assoc of (string * value) list
+  | `List of value list
   | `String of string
   | `Int of int
   | `Float of float
-  | `True
-  | `False
+  | `Bool of bool
   | `Null ]
 </programlisting>
     <sect2 id="lexical-analysis">
@@ -21783,11 +21782,11 @@ LEFT_BRACE, ID(&quot;title&quot;), COLON, STRING(&quot;Cities&quot;), COMMA, ID(
       <para>
         In the lex/yacc world, lexing is specified using regular
         expressions, and parsing is specified using context-free
-        grammars. These are concepts from formal languages that you
-        don't need to understand in huge detail, as the lex/yacc tools
-        construct the machinery for you. For lex, this means
-        constructing a <emphasis>finite automaton</emphasis>; and for
-        yacc, this means constructing a <emphasis>pushdown
+        grammars. These are concepts from formal languages, but the
+        lex/yacc tools construct much of the machinery for you by
+        generating OCaml code from your specifications. For lex, this
+        means constructing a <emphasis>finite automaton</emphasis>; and
+        for yacc, this means constructing a <emphasis>pushdown
         automaton</emphasis>.
       </para>
       <para>
@@ -21904,17 +21903,19 @@ exp: { () }
         specifications mean that a token carries a value. The
         <literal>INT</literal> token carries an integer value with it,
         <literal>FLOAT</literal> has a <literal>float</literal> value,
-        etc. Most of the remaining tokens, like <literal>TRUE</literal>,
-        <literal>FALSE</literal>, the punctuation, aren't associated
-        with any value, so we omit the
+        and both <literal>ID</literal> and <literal>STRING</literal>
+        carry a <literal>string</literal> value. The remaining tokens,
+        such as <literal>TRUE</literal>, <literal>FALSE</literal> or the
+        punctuation, aren't associated with any value and so we can omit
+        the
         <literal>&lt;</literal><emphasis>type</emphasis><literal>&gt;</literal>
         specification.
       </para>
       <para>
-        Compile this file with <literal>menhir</literal>. It will issue
-        multiple warnings about unused tokens because we haven't
-        actually defined a grammar yet. It's ok to ignore the warnings
-        for now.
+        Compile this file with the <literal>menhir</literal>
+        command-line tool. It will issue multiple warnings about unused
+        tokens because we haven't actually defined a grammar yet. It's
+        ok to ignore these warnings for now.
       </para>
       <programlisting>
 # running parsing/build_partial_json_parser.out.sh
@@ -21950,12 +21951,12 @@ Warning: the token TRUE is unused.
 </programlisting>
       <para>
         The <literal>menhir</literal> tool is a parser generator,
-        meaning it generates the code to perform parsing from the
+        meaning it generates the OCaml code to perform parsing from the
         <literal>parser.mly</literal> description. The
         <literal>parser.ml</literal> contains an automaton
         implementation, and is generally difficult to read. However, the
-        <literal>parser.mli</literal> contains declarations that we need
-        to build a lexer.
+        <literal>parser.mli</literal> contains more human-readable
+        declarations that we need to build a lexer.
       </para>
       <programlisting language="ocaml">
 (* parsing/partial_parser.mli  *)
@@ -21988,22 +21989,21 @@ val exp: (Lexing.lexbuf -&gt; token) -&gt; Lexing.lexbuf -&gt; (unit)
         rule contains a set of productions. Abstractly, a production
         looks like the following.
       </para>
-      <programlisting>
+      <programlisting language="html">
 symbol: [ id1 = ] symbol1; [ id2 = ] symbol2; ...; [ idN = ] symbolN
    { OCaml code }
 </programlisting>
       <para>
         A production can be interpreted as follows: given values
-        <literal>id1</literal>, ..., <literal>idN</literal> for the
-        input symbols <literal>symbol1</literal>, ...,
-        <literal>symbolN</literal>; the OCaml code computes a value for
-        the target <literal>symbol</literal>. That's all quite abstract,
-        so let's get down to defining productions for parsing real JSON
-        values.
+        <literal>id1...idN</literal> for the input symbols
+        <literal>symbol1...symbolN</literal>, the OCaml code computes a
+        value for the target <literal>symbol</literal>. That's all quite
+        abstract, so let's get down to defining productions for parsing
+        real JSON values.
       </para>
       <para>
-        The beginning of the parser has the same token rules as before,
-        and also defines a proper entry point via the
+        The beginning of the JSON parser has the same token rules as
+        before. This time, we also defines a proper entry point via the
         <literal>prog</literal> rule.
       </para>
       <programlisting language="ocaml">
@@ -22036,15 +22036,29 @@ prog: v = value
   ;
 </programlisting>
       <para>
+        The <literal>%start</literal> declaration is mandatory for every
+        grammar, and the symbols become the name of a function whose
+        signature is published in the <literal>mli</literal> signature
+        that is generated after calling <literal>menhir</literal>. Each
+        start symbol also must have an OCaml type associated with it.
+        We've defined this separately via the <literal>%type</literal>
+        keyword in our example above, but it can also be directly
+        written into the <literal>%start</literal> declaration. For more
+        complex grammars, you can improve the quality of error messages
+        by adding extra <literal>%type</literal> rules for other
+        non-starting symbols too.
+      </para>
+      <para>
         Once that's in place, we can add the main production for a JSON
         value.
       </para>
       <programlisting language="ocaml">
 (* parsing/parser.mly (starting from part 1) *)
-value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
-    { `Object obj }
+value:
+    LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
+    { `Assoc obj }
   | LEFT_BRACK; vl = array_values; RIGHT_BRACK
-    { `Array vl }
+    { `List vl }
   | s = STRING
     { `String s }
   | i = INT
@@ -22052,9 +22066,9 @@ value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
   | x = FLOAT
     { `Float x }
   | TRUE
-    { `True }
+    { `Bool true }
   | FALSE
-    { `False }
+    { `Bool false }
   | NULL
     { `Null }
   ;
@@ -22064,30 +22078,28 @@ value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
         either an object bracketed by curly braces, or an array
         bracketed by square braces. or a string, integer, float, etc. In
         each of the productions, the right hand side specifies the
-        expected sequence. For example, the object is specified with the
-        curly-bracket production.
-      </para>
-      <programlisting>
-value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
-    { `Assoc obj }
-</programlisting>
-      <para>
-        That is, an object value starts with a
-        <literal>LEFT_BRACE</literal>, contains some optional object
-        field values (to be defined), and ends with a
-        <literal>RIGHT_BRACE</literal>. The returned value is
-        <literal>Assoc obj</literal>, where <literal>obj</literal> is
-        the sequence of object fields. Note that we've left out bindings
-        for <literal>LEFT_BRACE</literal> and
-        <literal>RIGHT_BRACE</literal>, because their tokens don't have
-        values.
+        expected sequence.
       </para>
       <para>
-        Next, let's define the object fields. In the following rules,
-        the <literal>opt_object_fields</literal> are either empty, or a
-        non-empty sequence of fields in reverse order. Note that if you
-        wish to have comments in the rule definitions, you have to use C
-        comment delimiters. By convention, the C comment
+        For example, an association list starts with a
+        <literal>LEFT_BRACE</literal> token, contains some optional
+        object field values (to be defined in another rule), and ends
+        with a <literal>RIGHT_BRACE</literal>. The returned value is an
+        <literal>Assoc obj</literal> polymorphic variant, where
+        <literal>obj</literal> is the sequence of object fields. Note
+        that we've left out bindings for <literal>LEFT_BRACE</literal>
+        and <literal>RIGHT_BRACE</literal>, because their tokens don't
+        have values.
+      </para>
+    </sect2>
+    <sect2 id="parsing-lists-and-sequences">
+      <title>Parsing lists and sequences</title>
+      <para>
+        Next, let's define the JSON object fields. In the following
+        rules, the <literal>opt_object_fields</literal> are either
+        empty, or a non-empty sequence of fields in reverse order. Note
+        that if you wish to have comments in the rule definitions, you
+        have to use C comment delimiters. By convention, the C comment
         <literal>/* empty */</literal> is used to point out that a
         production has an empty right hand side.
       </para>
@@ -22121,9 +22133,11 @@ rev_object_fields: k = ID; COLON; v = value
         during parsing it requires linear stack space to read object
         field definitions.
       </para>
-      <programlisting>
+      <programlisting language="ocaml">
+(* parsing/right_rec_rule.ml  *)
 /* Inefficient right-recursive rule */
-object_fields: k = ID; COLON; v = value
+object_fields:
+    k = ID; COLON; v = value
     { [k, v] }
   | k = ID; COLON; v = value; COMMA; obj = object_fields
     { (k, v) :: obj }
@@ -22134,43 +22148,88 @@ object_fields: k = ID; COLON; v = value
         is fine, though less efficient. You will have to choose your
         technique according to circumstances.
       </para>
-      <programlisting>
+      <programlisting language="ocaml">
+(* parsing/quadratic_rule.ml  *)
 /* Quadratic left-recursive rule */
-object_fields: k = ID; COLON; v = value
+object_fields:
+    k = ID; COLON; v = value
     { [k, v] }
   | obj = rev_object_fields; COMMA; k = ID; COLON; v = value
     { obj @ [k, v] }
   ;
 </programlisting>
       <para>
-        Finally, we can finish off the grammar by defining the rules for
-        arrays, and adding a correct <literal>%start</literal>
-        production. For the <literal>%start</literal> production, we'll
-        return a <literal>value option</literal>, using
-        <literal>None</literal> to represent end-of-file. Here's the
-        last part with the array rules fille din.
+        Assembling lists like this is a pretty common requirement in
+        most realistic grammars, and the above rules (while useful for
+        illustrating how parsing works) are rather verbose. Menhir
+        features an extended standard library of built-in rules to
+        simplify this handling. These rules are detailed in the Menhir
+        manual, but include optional values, pairs of values with
+        optional separators, and lists of elements (also with optional
+        separators).
+      </para>
+      <para>
+        A complete version of the JSON grammar using these more succinct
+        Menhir rules is shown below. Notice the use of
+        <literal>separated_list</literal> to parse both JSON objects and
+        lists with one rule.
       </para>
       <programlisting language="ocaml">
-(* parsing/parser.mly (starting from part 3) *)
-array_values: /* empty */
-    { [||] }
-  | vl = rev_values
-    { Array.of_list (List.rev vl) }
-  ;
+(* parsing/short_parser.mly  *)
+%token &lt;int&gt; INT
+%token &lt;float&gt; FLOAT
+%token &lt;string&gt; ID
+%token &lt;string&gt; STRING
+%token TRUE
+%token FALSE
+%token NULL
+%token LEFT_BRACE
+%token RIGHT_BRACE
+%token LEFT_BRACK
+%token RIGHT_BRACK
+%token COLON
+%token COMMA
+%token EOF
 
-rev_values: v = value
-    { [v] }
-  | vl = rev_values; COMMA; v = value
-    { v :: vl }
-  ;
+%start &lt;Json.value option&gt; prog
+
+%%
+
+prog:
+    v = value { Some v }
+  | EOF       { None   } ;
+
+value:
+    LEFT_BRACE; obj = obj_fields; RIGHT_BRACE { `Assoc obj  }
+  | LEFT_BRACK; vl = list_fields; RIGHT_BRACK { `List vl    }
+  | s = STRING                                { `String s   }
+  | i = INT                                   { `Int i      }
+  | x = FLOAT                                 { `Float x    }
+  | TRUE                                      { `Bool true  }
+  | FALSE                                     { `Bool false }
+  | NULL                                      { `Null       } ;
+
+obj_fields:
+    obj = separated_list(COMMA, obj_field)    { obj } ;
+
+obj_field:
+    k = ID; COLON; v = value                  { (k, v) } ;
+
+list_fields:
+    vl = separated_list(COMMA, value)         { vl } ;
 </programlisting>
       <para>
-        That's it. We can compile this with <literal>menhir</literal>,
-        which will now no longer complain about unused symbols.
+        We can now compile this with Menhir, which will now no longer
+        complain about unused symbols. The best way to invoke Menhir is
+        using <literal>corebuild</literal> with the
+        <literal>-use-menhir</literal> flag: this tells the build system
+        to switch to using <literal>menhir</literal> instead of
+        <literal>ocamlyacc</literal> to handle files with the
+        <literal>.mly</literal> suffix.
       </para>
       <programlisting>
-# running parsing/build_json_parser.out.sh
-$ menhir parser.mly
+# running parsing-test/build_json_parser.out.sh
+$ corebuild -use-menhir parser.mly
 </programlisting>
     </sect2>
   </sect1>
@@ -22185,7 +22244,7 @@ $ menhir parser.mly
       the name <literal>lexer.mll</literal>). A lexer file has several
       parts in the following sequence.
     </para>
-    <programlisting>
+    <programlisting language="html">
 { OCaml code }
 let definitions...
 rules...
@@ -22196,28 +22255,58 @@ rules...
       <para>
         The OCaml code for the header and trailer is optional. The
         let-definitions are used to ease the definition of regular
-        expressions. They are optional, but very useful. To get started,
-        we know that we'll need to match numbers and strings, so let's
-        define names for the regular expressions that specify their
-        form.
+        expressions by defining utility functions. They are optional,
+        but very useful. To get started, let's define a utility function
+        that can track the location of tokens across line breaks.
       </para>
+      <programlisting language="ocaml">
+(* parsing/lexer.mll  *)
+{
+open Lexing
+open Parser
+
+exception SyntaxError of string
+
+let next_line lexbuf =
+  let pos = lexbuf.lex_curr_p in
+  lexbuf.lex_curr_p &lt;-
+    { pos with pos_bol = lexbuf.lex_curr_pos;
+               pos_lnum = pos.pos_lnum + 1
+    }
+}
+</programlisting>
+      <para>
+        The <literal>Lexing</literal> module defines a
+        <literal>lexbuf</literal> structure that holds all of the lexer
+        state, including the current location within the source file.
+        The <literal>next_line</literal> function simply accesses the
+        <literal>lex_curr_p</literal> field that holds the current
+        location and updates its line number. This is intended to be
+        called from within the lexing regular expressions that we'll
+        define next.
+      </para>
+      <para>
+        To get started with our rules, we know that we'll need to match
+        numbers and strings, so let's define names for the regular
+        expressions that specify their form.
+      </para>
+      <programlisting language="ocaml">
+(* parsing/lexer.mll (starting from part 1) *)
+let int = '-'? ['1'-'9'] ['0'-'9']*
+</programlisting>
       <para>
         An integer is a sequence of digits, optionally preceded by a
         minus sign. Leading zeroes are not allowed. The question mark
         means that the preceding symbol <literal>-</literal> is
         optional. The square brackets ['1'-'9'] define a character
         range, meaning that the first digit of the integer should be
-        1-9. The final range <literal>['0'-'9']*</literal> includes star
-        <literal>*</literal>, which means zero-or-more occurrences of
-        the characters 0-9. Read formally then, an
+        1-9. The final range <literal>['0'-'9']*</literal> includes the
+        star <literal>*</literal>, which means zero-or-more occurrences
+        of the characters 0-9. Read formally then, an
         <literal>int</literal> has an optional minus sign, followed by a
         digit in the range 1-9, followed by zero or more digits in the
         range 0-9.
       </para>
-      <programlisting language="ocaml">
-(* parsing/lexer.mll (starting from part 1) *)
-let int = '-'? ['1'-'9'] ['0'-'9']*
-</programlisting>
       <para>
         Floating-point numbers are similar, but we deal with decimal
         points and exponents. We can use multiple let-definitions for
@@ -22225,24 +22314,20 @@ let int = '-'? ['1'-'9'] ['0'-'9']*
       </para>
       <programlisting language="ocaml">
 (* parsing/lexer.mll (starting from part 2) *)
-let digits = ['0'-'9']+
-let frac = '.' digits
-let exp = ['e' 'E'] ['-' '+']? digits
-let float = int (frac | exp | frac exp)
+let digits = ['0'-'9']
+let frac = '.' digits*
+let exp = ['e' 'E'] ['-' '+']? digits+
+let float = digits* frac? exp?
 </programlisting>
       <para>
-        The <literal>digits</literal> expression has a
-        <literal>+</literal> symbol, meaning that
-        <literal>digits</literal> has one or more occurrences of digits
-        in the range 0-9. A fractional part <literal>frac</literal> has
-        a decimal point followed by some digits; an exponent
-        <literal>exp</literal> begins with an <literal>e</literal>
-        followed by some digits; and a <literal>float</literal> has an
-        integer part, and one or both of a <literal>frac</literal> and
-        <literal>exp</literal> part. The vertical bar is a choice; the
-        expression <literal>(frac | exp | frac exp)</literal> is either
-        a <literal>frac</literal>, or an <literal>exp</literal>, or a
-        <literal>frac</literal> followed by an <literal>exp</literal>.
+        The <literal>digits</literal> expression defines a single
+        character regexp in the range 0-9. A fractional part
+        <literal>frac</literal> has a compulsary decimal point followed
+        by some optional digits; an exponent <literal>exp</literal>
+        begins with an <literal>e</literal> followed by some digits; and
+        a <literal>float</literal> has an integer part, and one, both or
+        none of a <literal>frac</literal> and <literal>exp</literal>
+        part.
       </para>
       <para>
         Finally, let's define identifiers and whitespace. An identifier
@@ -22263,21 +22348,46 @@ let hex = ['0'-'9' 'a'-'f' 'A'-'F']
         The lexing rules are specified as a set of
         <literal>parse</literal> rules. A <literal>parse</literal> rule
         has a regular expression followed by OCaml code that defines a
-        semantic action. Let's write JSON parse rule.
+        semantic action. Let's write the rule for JSON next.
       </para>
       <programlisting language="ocaml">
-(* parsing/lexer.mll (starting from part 3) *)
-let white = [' ' '\t']+
-let newline = '\r' | '\n' | &quot;\r\n&quot;
-
-let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
-let hex = ['0'-'9' 'a'-'f' 'A'-'F']
+(* parsing/lexer.mll (starting from part 4) *)
+rule read = parse
+| white    { read lexbuf }
+| newline  { next_line lexbuf; read lexbuf }
+| int      { INT (int_of_string (Lexing.lexeme lexbuf)) }
+| float    { FLOAT (float_of_string (Lexing.lexeme lexbuf)) }
+| &quot;true&quot;   { TRUE }
+| &quot;false&quot;  { FALSE }
+| &quot;null&quot;   { NULL }
+| id       { ID (Lexing.lexeme lexbuf) }
+| '&quot;'      { read_string (Buffer.create 17) lexbuf }
+| '{'      { LEFT_BRACE }
+| '}'      { RIGHT_BRACE }
+| '['      { LEFT_BRACK }
+| ']'      { RIGHT_BRACK }
+| ':'      { COLON }
+| ','      { COMMA }
+| _ { raise (SyntaxError (&quot;Unexpected char: &quot; ^ Lexing.lexeme lexbuf)) }
+| eof      { EOF }
 </programlisting>
       <para>
-        The OCaml code for the rules has a parameter called
-        <literal>lexbuf</literal> that defines the input, including the
-        position in the input file, as well as the text that was matched
-        by the regular expression. Let's skip to the third action.
+        The rules are structured very similarly to pattern matches,
+        except that the variants are replaced by regular expressions on
+        the left hand side. The right hand side clause is the parsed
+        OCaml return value of that rule. The OCaml code for the rules
+        has a parameter called <literal>lexbuf</literal> that defines
+        the input, including the position in the input file, as well as
+        the text that was matched by the regular expression.
+      </para>
+      <para>
+        The first <literal>white { read lexbuf }</literal> calls the
+        lexer recursively. That is, it skips the input whitespace and
+        returns the following token. The action
+        <literal>newline { next_line lexbuf; read lexbuf }</literal> is
+        similar, but we use it to advance the line number for the lexer
+        using the utility function that we defined at the top of the
+        file. Let's skip to the third action.
       </para>
       <programlisting language="ocaml">
 (* parsing/lexer_int_fragment.mll  *)
@@ -22285,9 +22395,8 @@ let hex = ['0'-'9' 'a'-'f' 'A'-'F']
 </programlisting>
       <para>
         This action specifies that when the input matches the
-        <literal>int</literal> regular expression (defined as
-        <literal>'-'? ['1'-'9'] ['0'-'9']*</literal>, then the lexer
-        should return the expression
+        <literal>int</literal> regular expression, then the lexer should
+        return the expression
         <literal>INT (int_of_string (Lexing.lexeme lexbuf))</literal>.
         The expression <literal>Lexing.lexeme lexbuf</literal> returns
         the complete string matched by the regular expression. In this
@@ -22295,33 +22404,6 @@ let hex = ['0'-'9' 'a'-'f' 'A'-'F']
         <literal>int_of_string</literal> function to convert it to a
         number.
       </para>
-      <para>
-        Going back to the first actions, the first
-        <literal>white { read lexbuf }</literal> calls the lexer
-        recursively. That's, it skips the input whitespace and returns
-        the following token. The action
-        <literal>newline { next_line lexbuf; read lexbuf }</literal> is
-        similar, but we use it to advance the line number for the lexer.
-        Here is the definition of the <literal>next_line</literal>
-        function, which updates the line number in the
-        <literal>lexbuf</literal>.
-      </para>
-      <programlisting language="ocaml">
-(* parsing/lexer.mll  *)
-{
-open Lexing
-open Parser
-
-exception SyntaxError of string
-
-let next_line lexbuf =
-  let pos = lexbuf.lex_curr_p in
-  lexbuf.lex_curr_p &lt;-
-    { pos with pos_bol = lexbuf.lex_curr_pos;
-               pos_lnum = pos.pos_lnum + 1
-    }
-}
-</programlisting>
       <para>
         There are actions for each different kind of token. The string
         expressions like <literal>&quot;true&quot; { TRUE }</literal>
@@ -22402,6 +22484,53 @@ and read_string buf = parse
         That covers the lexer. Next, we need to combine the lexer with
         the parser to bring it all together.
       </para>
+      <note>
+      <title>
+      Handling Unicode
+      </title>
+      <para>
+        We've glossed over an important detail here: parsing Unicode
+        characters to handle the full spectrum of the world's writing
+        systems. OCaml has several third-party solutions to handling
+        Unicode, with varying degrees of flexibility and complexity.
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <ulink url="http://camomile.sourceforge.net">Camomile</ulink>
+            supports the full spectrum of Unicode character types,
+            conversion from around 200 encodings, and collation and
+            locale-sensitive case mappings.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <ulink url="http://www.cduce.org/ulex">Ulex</ulink> is a
+            lexer generator for Unicode that can serve as a
+            Unicode-aware replacement for <literal>ocamllex</literal>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <ulink url="http://erratique.ch/software/uutf">Uutf</ulink>
+            is a non-blocking streaming Unicode codec for OCaml,
+            available as a standalone library. It is accompanied by the
+            <ulink url="http://erratique.ch/software/uunf">Uunf</ulink>
+            text normalization and
+            <ulink url="http://erratique.ch/software/uucd">Uucd</ulink>
+            Unicode character database libraries. There is also a robust
+            parser for
+            <ulink url="http://erratique.ch/software/jsonm">JSON</ulink>
+            available that illustrates the use of Uutf in your own
+            libraries.
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        All of these libraries are available via OPAM under their
+        respective names.
+      </para>
+      </note>
     </sect2>
   </sect1>
   <sect1 id="bringing-it-all-together">
@@ -22417,6 +22546,43 @@ and read_string buf = parse
 (* parsing/prog.mli  *)
 val prog:(Lexing.lexbuf -&gt; token) -&gt; Lexing.lexbuf -&gt; Json.value option
 </programlisting>
+    <para>
+      Before we start with the lexing, let's first define some functions
+      to handle parsing errors. There are currently two errors:
+      <literal>Parser.Error</literal> and
+      <literal>Lexer.SyntaxError</literal>. A simple solution when
+      encountering an error is to print the error and give up, which we
+      do below.
+    </para>
+    <programlisting language="ocaml">
+(* parsing-test/test.ml  *)
+open Core.Std
+open Lexer
+open Lexing
+
+let print_position outx lexbuf =
+  let pos = lexbuf.lex_curr_p in
+  fprintf outx &quot;%s:%d:%d&quot; pos.pos_fname
+    pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)
+
+let parse_with_error lexbuf =
+  try Parser.prog Lexer.read lexbuf with
+  | SyntaxError msg -&gt;
+    fprintf stderr &quot;%a: %s\n&quot; print_position lexbuf msg;
+    None
+  | Parser.Error -&gt;
+    fprintf stderr &quot;%a: syntax error\n&quot; print_position lexbuf;
+    exit (-1)
+</programlisting>
+    <para>
+      The &quot;give up on the first error&quot; approach is easy to
+      implement but isn't very friendly. In general, error handling can
+      be pretty intricate, and we won't discuss it here. However, the
+      Menhir parser defines additional mechanisms you can use to try and
+      recover from errors. These are described in detail in its
+      reference
+      <ulink url="http://gallium.inria.fr/~fpottier/menhir/">manual</ulink>.
+    </para>
     <para>
       The standard lexing library <literal>Lexing</literal> provides a
       function <literal>from_channel</literal> to read the input from a
@@ -22435,8 +22601,8 @@ val prog:(Lexing.lexbuf -&gt; token) -&gt; Lexing.lexbuf -&gt; Json.value option
 let rec parse_and_print lexbuf =
   match parse_with_error lexbuf with
   | Some value -&gt;
-      printf &quot;%a\n&quot; Json.output_value value;
-      parse_and_print lexbuf
+    printf &quot;%a\n&quot; Json.output_value value;
+    parse_and_print lexbuf
   | None -&gt; ()
 
 let loop filename () =
@@ -22447,40 +22613,6 @@ let loop filename () =
   In_channel.close inx
 </programlisting>
     <para>
-      This isn't quite right yet -- we need to handle parsing errors.
-      Currently there are two errors, <literal>Parser.Error</literal>
-      and <literal>Lexer.SyntaxError</literal>. A simple solution when
-      encountering an error is to print the error and give up.
-    </para>
-    <programlisting language="ocaml">
-(* parsing-test/test.ml  *)
-open Core.Std
-open Lexer
-open Lexing
-
-let print_position outx lexbuf =
-  let pos = lexbuf.lex_curr_p in
-  fprintf outx &quot;%s:%d:%d&quot; pos.pos_fname pos.pos_lnum (pos.pos_cnum - pos.pos_bol + 1)
-
-let parse_with_error lexbuf =
-  try Parser.prog Lexer.read lexbuf with
-  | SyntaxError msg -&gt;
-      fprintf stderr &quot;%a: %s\n&quot; print_position lexbuf msg;
-      None
-  | Parser.Error -&gt;
-      fprintf stderr &quot;%a: syntax error\n&quot; print_position lexbuf;
-      exit (-1)
-</programlisting>
-    <para>
-      The &quot;give up on the first error&quot; approach is easy to
-      implement but isn't very friendly. In general, error handling can
-      be pretty intricate, and we won't discuss it here. However, the
-      Menhir parser defines additional mechanisms you can use to try and
-      recover from errors. These are described in detail in its
-      reference
-      <ulink url="http://gallium.inria.fr/~fpottier/menhir/">manual</ulink>.
-    </para>
-    <para>
       Here's a test input file we can use to test the code we just
       wrote.
     </para>
@@ -22488,7 +22620,7 @@ let parse_with_error lexbuf =
 true
 false
 null
-[1, 2]
+[1, 2, 3., 4.0, .5, 5.5e5, 6.3]
 &quot;Hello World&quot;
 { field1: &quot;Hello&quot;,
   field2: 17e13,
@@ -22503,19 +22635,17 @@ null
     <programlisting>
 # running parsing-test/build_test.out.sh
 $ ocamlbuild -use-menhir -tag thread -use-ocamlfind -pkg core test.native
-/Users/avsm/.opam/4.01.0dev+trunk/bin/ocamllex.opt -q lexer.mll
-File &quot;lexer.mll&quot;, line 1, character 1: unterminated action.
-Command exited with code 3.
 $ ./test.native test1.json
 true
 false
 null
-[1, 2]
+[1, 2, 3.000000, 4.000000, 0.500000, 550000.000000, 6.300000]
 &quot;Hello World&quot;
 { field1: &quot;Hello&quot;, field2: 170000000000000.000000, field3: [1, 2, 3], field4: { fieldA: 1, fieldB: &quot;Hello&quot; } }
 </programlisting>
     <para>
-      With our simple error handling scheme, errors are fatal.
+      With our simple error handling scheme, errors are fatal and cause
+      the program to terminate with a non-zero exit code.
     </para>
     <programlisting>
 # running parsing-test/run_broken_test.out.sh
@@ -22527,8 +22657,17 @@ $ cat test2.json
   zips: [10004]
 }
 $ ./test.native test2.json
-test2.json:3:2: syntax error
+bash: ./test.native: No such file or directory
 </programlisting>
+    <para>
+      That wraps up our parsing tutorial. As an aside, notice that the
+      JSON polymorphic variant type that we defined in this chapter is
+      actually structurally compatible with the Yojson representation
+      explained earlier in
+      <xref linkend="handling-json-data"/>. That means that
+      you can take this parser and use it with the helper functions in
+      Yojson to build more sophisticated applications.
+    </para>
   </sect1>
 </chapter><chapter id="data-serialization-with-s-expressions">
   <title>Data Serialization with S-Expressions</title>
@@ -22805,8 +22944,8 @@ val l : (int * string) list = [(1, &quot;one&quot;); (2, &quot;two&quot;)]
         The declaration
         <literal>&lt;:sexp_of&lt;int * string&gt;&gt;</literal> simply
         gets expanded to the sexp-converter for the type
-        <literal>int * string</literal>. This is useful whever you need
-        a sexp-converter for an anonymous type.
+        <literal>int * string</literal>. This is useful whenever you
+        need a sexp-converter for an anonymous type.
       </para>
       <para>
         The syntax extensions bundled with Core almost all have the same
@@ -25625,7 +25764,7 @@ let initscr =
 </programlisting>
     <para>
       That's all we need to invoke our first function call to
-      <literal>initscr</literal> to initalize the terminal. The
+      <literal>initscr</literal> to initialize the terminal. The
       <literal>foreign</literal> function accepts two parameters:
     </para>
     <itemizedlist>
@@ -26096,7 +26235,7 @@ val t_ptr : time_t ptr = &lt;abstr&gt;
       <para>
         While scalar types typically have a 1-1 representation, other C
         types require extra work to convert them into OCaml. Views
-        create new C type descriptions that have special behaviour when
+        create new C type descriptions that have special behavior when
         used to read or write C values.
       </para>
       <para>
@@ -27048,7 +27187,7 @@ val x : t = {foo = 13; bar = 14}
     <para>
       The exact representation of values inside a block depends on their
       static OCaml type. All OCaml types are distilled down into
-      <literal>values</literal>, and summarised in the table below.
+      <literal>values</literal>, and summarized in the table below.
     </para>
     <informaltable>
       <tgroup cols="2">
@@ -27402,7 +27541,7 @@ Obj.tag (Obj.repr (Pear &quot;xyz&quot;)) ;;
       Polymorphic variants are more flexible than normal variants when
       writing code, but are slightly less efficient at runtime. This is
       because there isn't as much static compile-time information
-      available to optimise their memory layout.
+      available to optimize their memory layout.
     </para>
     <para>
       A polymorphic variant without any parameters is stored as an
@@ -27594,7 +27733,7 @@ struct custom_operations {
       optionally contain a <emphasis>finalizer</emphasis> that the
       runtime calls just before the block is garbage collected. This
       finalizer has nothing to do with ordinary OCaml finalizers (as
-      created by <literal>Gc.finalise</literal> and explained in
+      created by <literal>Gc.finalize</literal> and explained in
       <xref linkend="understanding-the-garbage-collector"/>).
       They are instead used to call C cleanup functions such as
       <literal>free</literal>.
@@ -27749,7 +27888,7 @@ struct custom_operations {
     <literal>OCAMLRUNPARAM</literal>
     </title>
     <para>
-      OCaml provides several mechanisms to query and alter the behaviour
+      OCaml provides several mechanisms to query and alter the behavior
       of the runtime system. The <literal>Gc</literal> module provides
       this functionality from within OCaml code, and we'll frequently
       refer to it in the rest of the chapter. As with several other
@@ -27758,8 +27897,8 @@ struct custom_operations {
       you've opened <literal>Core.Std</literal> in our explanations.
     </para>
     <para>
-      You can also control the behaviour of OCaml programs by setting
-      the <literal>OCAMLRUNPARAM</literal> environment variable before
+      You can also control the behavior of OCaml programs by setting the
+      <literal>OCAMLRUNPARAM</literal> environment variable before
       launching your application. This lets you set garbage collector
       parameters without recompiling, for example to benchmark the
       effects of different settings. The format of
@@ -28050,7 +28189,7 @@ val c : Gc.control =
           chunks alone are big enough to satisfy the request.
         </para>
         <para>
-          First-fit allocation focusses on reducing memory fragmentation
+          First-fit allocation focuses on reducing memory fragmentation
           (and hence the number of compactions), but at the expense of
           slower memory allocation. Every allocation scans the free list
           from the beginning for a suitable free chunk, instead of
@@ -28058,7 +28197,7 @@ val c : Gc.control =
           does.
         </para>
         <para>
-          For some workloads that need more real-time behaviour under
+          For some workloads that need more real-time behavior under
           load, the reduction in the frequency in heap compaction will
           outweigh the extra allocation cost.
         </para>
@@ -28073,7 +28212,7 @@ val c : Gc.control =
           <literal>1</literal> to the first-fit allocator.
         </para>
         <para>
-          The same behaviour can be controlled at runtime by setting
+          The same behavior can be controlled at runtime by setting
           <literal>a=0</literal> or <literal>a=1</literal> in
           <literal>OCAMLRUNPARAM</literal>.
         </para>
@@ -28376,7 +28515,7 @@ Estimated testing time 20s (change using -quota SECS).
           under real-world scenarios using
           <literal>Core_bench</literal>, and experiment with the
           tradeoffs. The command-line benchmark binaries have a number
-          of useful options that affect garbage collection behaviour.
+          of useful options that affect garbage collection behavior.
         </para>
         <programlisting>
 # running gc/show_barrier_bench_help.out.sh
@@ -28436,9 +28575,9 @@ prefix the column name with a '+'.
           The <literal>-no-compactions</literal> and
           <literal>-stabilize-gc</literal> options can help force a
           situation where your application has fragmented memory. This
-          can simulate the behaviour of a long-running application
+          can simulate the behavior of a long-running application
           without you having to actually wait that long to recreate the
-          behaviour in a performance unit test.
+          behavior in a performance unit test.
         </para>
       </sect3>
     </sect2>
@@ -28471,9 +28610,9 @@ prefix the column name with a '+'.
       during the lifetime of the program, for example a list of integer
       constants. <literal>Heap_block</literal> explicitly checks to see
       if the value is in the major or minor heap, and rejects most
-      constant values. Compiler optimisations may also duplicate some
+      constant values. Compiler optimizations may also duplicate some
       immutable values such as floating-point values in arrays. These
-      may be finalised while another duplicate copy is being used by the
+      may be finalized while another duplicate copy is being used by the
       program.
     </para>
     <para>
@@ -28557,7 +28696,7 @@ $ ./finalizer.native
     <para>
       The GC calls the finalization functions in the order of the
       deallocation. If several values become unreachable during the same
-      GC cycle, the finalisation functions will be called in the reverse
+      GC cycle, the finalization functions will be called in the reverse
       order of the corresponding calls to
       <literal>add_finalizer</literal>. Each call to
       <literal>add_finalizer</literal> adds to the set of functions that
@@ -29015,10 +29154,10 @@ let () =
       <para>
         The <literal>ocp-indent</literal>
         <ulink url="https://github.com/OCamlPro/ocp-indent">homepage</ulink>
-        documents how to integrate it with your favourite editor. All
-        the Core libraries are formatted using it to ensure consistency,
-        and it's a good idea to do this before publishing your own
-        source code online.
+        documents how to integrate it with your favorite editor. All the
+        Core libraries are formatted using it to ensure consistency, and
+        it's a good idea to do this before publishing your own source
+        code online.
       </para>
     </sect2>
     <sect2 id="generating-documentation-from-interfaces">
@@ -29105,7 +29244,7 @@ $ man -M man Doc
         <listitem>
           <para>
             <ulink url="http://argot.x9c.fr/">Argot</ulink> is an
-            enchanced HTML generator that supports code folding and
+            enhanced HTML generator that supports code folding and
             searching by name or type definition.
           </para>
         </listitem>
@@ -29235,7 +29374,7 @@ $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax -package fieldslib
       type definition at compilation time. This avoids the performance
       hit of doing the code generation dynamically and also doesn't
       require a Just-In-Time (JIT) runtime that can be a source of
-      unpredictable dynamic behaviour. Instead, all the extra code is
+      unpredictable dynamic behavior. Instead, all the extra code is
       simply generated at compilation time via Camlp4, and type
       information can be discarded from the runtime image.
     </para>
@@ -29245,7 +29384,7 @@ $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax -package fieldslib
       how do you figure out what changes it's made to your code? The
       obvious way is to read the documentation that accompanies the
       extension. Another approach is to use the top-level to explore the
-      extension's behaviour or run Camlp4 manually yourself to see the
+      extension's behavior or run Camlp4 manually yourself to see the
       transformation in action. We'll show you how to do both of these
       now.
     </para>
@@ -29316,7 +29455,7 @@ val compare_t : t -&gt; t -&gt; int = &lt;fun&gt;
         includes the <literal>with compare</literal> directive. This is
         intercepted by <literal>comparelib</literal> and transformed
         into the original type definition with two new functions also
-        incuded.
+        included.
       </para>
     </sect2>
     <sect2 id="running-camlp4-from-the-command-line">
@@ -29751,9 +29890,9 @@ bash: $: command not found
           you're still writing your code.
         </para>
         <para>
-          Manual type annotations are particulary useful if you use lots
-          of polymorphic variants or objects. Type inference with row
-          polymorphism can generate some very large signatures, and
+          Manual type annotations are particularly useful if you use
+          lots of polymorphic variants or objects. Type inference with
+          row polymorphism can generate some very large signatures, and
           errors tend to propagate more widely than if you are using
           more explicitly typed variants or classes.
         </para>
@@ -30241,7 +30380,7 @@ Error: This expression has type string but an expression was expected of type
       </para>
       <para>
         You'll need to choose for yourself if you prefer short paths or
-        the default behaviour in your own projects, and pass the
+        the default behavior in your own projects, and pass the
         <literal>-short-paths</literal> flag to the compiler if you need
         it.
       </para>
@@ -30326,7 +30465,7 @@ Ncurses.window val Ncurses.window Ctypes.typ
         codebases. See the
         <ulink url="https://github.com/ocamlpro/ocp-index">ocp-index</ulink>
         homepage for more information on how to integrate it with your
-        favourite editor.
+        favorite editor.
       </para>
     </sect2>
     <sect2 id="examining-the-typed-syntax-tree-directly">
@@ -30735,7 +30874,7 @@ let () =
 </programlisting>
       <para>
         Building and executing this example will run for around 30
-        seconds by default, and you'll see the results summarised in a
+        seconds by default, and you'll see the results summarized in a
         neat table.
       </para>
       <programlisting>
@@ -30920,9 +31059,8 @@ L2: closure L1, 0
         isn't referenced elsewhere in the program, then it isn't
         included in the final binary unless the
         <literal>-linkall</literal> flag forces its inclusion. This
-        behaviour is analogous to how C handles object files and
-        archives (<literal>.o</literal> and <literal>.a</literal>
-        respectively).
+        behavior is analogous to how C handles object files and archives
+        (<literal>.o</literal> and <literal>.a</literal> respectively).
       </para>
       <para>
         The bytecode files are then linked together with the OCaml
