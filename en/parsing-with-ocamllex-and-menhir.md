@@ -62,14 +62,13 @@ called _parsing_.
 ```
 
 There are many techniques for lexing and parsing that have a variety of
-tradeoffs in the complexity of grammars that they can express, how well
-they handle malformed input, and also how resource-intensive the parsing
-process is.
+tradeoffs in the complexity of grammars that they can express, how well they
+handle malformed input, and also how resource-intensive the parsing process is.
 
 In the lex/yacc world, lexing is specified using regular expressions, and
 parsing is specified using context-free grammars.  These are concepts from
-formal languages that you don't need to understand in huge detail, as the
-lex/yacc tools construct the machinery for you.  For lex, this means
+formal languages, but the lex/yacc tools construct much of the machinery for
+you by generating OCaml code from your specifications.  For lex, this means
 constructing a _finite automaton_; and for yacc, this means constructing a
 _pushdown automaton_.
 
@@ -87,17 +86,16 @@ to `ocamlyacc`.
 <note>
 <title>Menhir _vs_ `ocamlyacc`</title>
 
-Menhir is an alternative parser generator that is generally superior to
-the venerable `ocamlyacc`, which dates back quite a few years.  Menhir
-is mostly compatible with `ocamlyacc` grammars, and so you can usually
-just switch to Menhir and expect older code to work (with some minor
-differences described in the Menhir manual).
+Menhir is an alternative parser generator that is generally superior to the
+venerable `ocamlyacc`, which dates back quite a few years.  Menhir is mostly
+compatible with `ocamlyacc` grammars, and so you can usually just switch to
+Menhir and expect older code to work (with some minor differences described in
+the Menhir manual).
 
-The biggest advantage of Menhir is that its error messages are generally
-more human-comprehensible, and the parsers that it generates are fully
-reentrant and can be parameterized in OCaml modules more easily.  We
-recommend that any new code you develop should use Menhir instead of
-`ocamlyacc`.
+The biggest advantage of Menhir is that its error messages are generally more
+human-comprehensible, and the parsers that it generates are fully reentrant and
+can be parameterized in OCaml modules more easily.  We recommend that any new
+code you develop should use Menhir instead of `ocamlyacc`.
 
 Menhir isn't distributed directly with OCaml, but is available through OPAM by
 running `opam install menhir`.
@@ -138,22 +136,23 @@ below).
 ```
 
 The `<`_type_`>` specifications mean that a token carries a value.  The `INT`
-token carries an integer value with it, `FLOAT` has a `float` value, etc.  Most
-of the remaining tokens, like `TRUE`, `FALSE`, the punctuation, aren't associated
-with any value, so we omit the `<`_type_`>` specification.
+token carries an integer value with it, `FLOAT` has a `float` value, and both
+`ID` and `STRING` carry a `string` value.  The remaining tokens, such as
+`TRUE`, `FALSE` or the punctuation, aren't associated with any value and so we
+can omit the `<`_type_`>` specification.
 
-Compile this file with `menhir`.  It will issue multiple warnings about unused
-tokens because we haven't actually defined a grammar yet.  It's ok to ignore
-the warnings for now.
+Compile this file with the `menhir` command-line tool.  It will issue multiple
+warnings about unused tokens because we haven't actually defined a grammar yet.
+It's ok to ignore these warnings for now.
 
 ```frag
 ((typ console)(name parsing/build_partial_json_parser.out))
 ```
 
-The `menhir` tool is a parser generator, meaning it generates the code to
+The `menhir` tool is a parser generator, meaning it generates the OCaml code to
 perform parsing from the `parser.mly` description.  The `parser.ml` contains an
 automaton implementation, and is generally difficult to read.  However, the
-`parser.mli` contains declarations that we need to build a lexer.
+`parser.mli` contains more human-readable declarations that we need to build a lexer.
 
 ```frag
 ((typ ocaml)(name parsing/partial_parser.mli))
@@ -164,22 +163,29 @@ automaton implementation, and is generally difficult to read.  However, the
 The grammar itself is specified using a set of rules, where a rule contains a
 set of productions.  Abstractly, a production looks like the following.
 
-```
-symbol: [ id1 = ] symbol1; [ id2 = ] symbol2; ...; [ idN = ] symbolN
-   { OCaml code }
+```frag
+((typ ocamlsyntax)(name parsing/production.syntax))
 ```
 
-A production can be interpreted as follows: given values `id1`, ..., `idN` for
-the input symbols `symbol1`, ..., `symbolN`; the OCaml code computes a value
-for the target `symbol`.  That's all quite abstract, so let's get down to
-defining productions for parsing real JSON values.
+A production can be interpreted as follows: given values `id1...idN` for the
+input symbols `symbol1...symbolN`, the OCaml code computes a value for the
+target `symbol`.  That's all quite abstract, so let's get down to defining
+productions for parsing real JSON values.
 
-The beginning of the parser has the same token rules as before, and also
-defines a proper entry point via the `prog` rule.
+The beginning of the JSON parser has the same token rules as before. This time,
+we also defines a proper entry point via the `prog` rule.
 
 ```frag
 ((typ ocaml)(name parsing/parser.mly)(part 0))
 ```
+
+The `%start` declaration is mandatory for every grammar, and the symbols become
+the name of a function whose signature is published in the `mli` signature that
+is generated after calling `menhir`.  Each start symbol also must have an OCaml
+type associated with it.  We've defined this separately via the `%type`
+keyword in our example above, but it can also be directly written into the `%start` declaration.  For more complex grammars, you can improve the
+quality of error messages by adding extra `%type` rules for other
+non-starting symbols too.
 
 Once that's in place, we can add the main production for a JSON value.
 
