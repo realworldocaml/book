@@ -611,7 +611,7 @@ source of your error more accurately.  These annotations shouldn't actually
 change your types and can be removed once your code is correct. However, they
 act as anchors to locate errors while you're still writing your code.
 
-Manual type annotations are particulary useful if you use lots of
+Manual type annotations are particularly useful if you use lots of
 polymorphic variants or objects.  Type inference with row polymorphism can
 generate some very large signatures, and errors tend to propagate more widely
 than if you are using more explicitly typed variants or classes.
