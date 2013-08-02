@@ -64,7 +64,7 @@
       <listitem>
         <para>
           <emphasis>First-class functions</emphasis> that can be passed
-          around like ordinary values, as seen in Javascript and C#.
+          around like ordinary values, as seen in JavaScript and C#.
         </para>
       </listitem>
       <listitem>
@@ -129,10 +129,10 @@
       pragmatic. The compiler has a straightforward compilation strategy
       that produces performant code without requiring heavy optimization
       and without the complexities of dynamic JIT compilation. This,
-      along with OCaml's strict evaluation model, makes runtime
-      behaviour easy to predict. The garbage collector is incremental,
-      letting you avoid large GC-related pauses, and precise, meaning it
-      will collect all unreferenced data (unlike many reference-counting
+      along with OCaml's strict evaluation model, makes runtime behavior
+      easy to predict. The garbage collector is incremental, letting you
+      avoid large GC-related pauses, and precise, meaning it will
+      collect all unreferenced data (unlike many reference-counting
       collectors), and the runtime is simple and highly portable.
     </para>
     <para>
@@ -774,7 +774,7 @@ val even : int -&gt; bool = &lt;fun&gt;
         annotations don't change the behavior of an OCaml program, but
         they can serve as useful documentation, as well as catch
         unintended type changes. They can also be helpful in figuring
-        out why a given piece of code fails to compilte.
+        out why a given piece of code fails to compile.
       </para>
       <para>
         Here's an annotated version of <literal>sum_if_true</literal>:
@@ -2291,7 +2291,7 @@ val area_of_ring : float -&gt; float -&gt; float = &lt;fun&gt;
       vary?
     </para>
     <para>
-      The answer to this is that variables in OCaml (and in generaly in
+      The answer to this is that variables in OCaml (and generally in
       functional languages) are really more like variables in an
       equation than a variable in an imperative language. If you think
       about the mathematical equation
@@ -2761,7 +2761,7 @@ val ( +! ) : int * int -&gt; int * int -&gt; int * int = &lt;fun&gt;
 </programlisting>
       <para>
         Note that you have to be careful when dealing with operators
-        containg <literal>*</literal>. Consider the following example.
+        containing <literal>*</literal>. Consider the following example.
       </para>
       <programlisting language="ocaml">
 ...part 27 of variables-and-functions/main.topscript
@@ -4059,7 +4059,7 @@ Estimated testing time 20s (change using -quota SECS).
         Generally, pattern matching is more efficient than the
         alternatives you might code by hand. One notable exception is
         matches over strings, which are in fact tested sequentially, so
-        matches containing a long seuqence of strings can be
+        matches containing a long sequence of strings can be
         outperformed by a hash table. But most of the time, pattern
         matching is a clear performance win.
       </para>
@@ -4363,7 +4363,7 @@ val render_table : string list -&gt; string list list -&gt; string = &lt;fun&gt;
         <literal>List.reduce</literal></title>
         <para>
           <literal>List.fold</literal>, which we described earlier, is a
-          very general and powerful function. Sometimes, hwoever, you
+          very general and powerful function. Sometimes, however, you
           want something more that's simpler and thereby easier to use.
           One such function is <literal>List.reduce</literal>, which is
           essentially a specialized version of
@@ -5074,7 +5074,7 @@ $ ocamlfind ocamlc -linkpkg -thread -package core freq.ml -o freq
       <literal>-package core</literal> is asking
       <literal>ocamlfind</literal> to link in the Core library,
       <literal>-linkpkg</literal> asks ocamlfind to link in the packages
-      as is necessary for buliding an executable, while
+      as is necessary for building an executable, while
       <literal>-thread</literal> turns on threading support, which is
       required for Core.
     </para>
@@ -6453,8 +6453,8 @@ val get_session_id : logon -&gt; string = &lt;fun&gt;
     </para>
     <programlisting language="ocaml">
 ...part 15 of records/main.topscript
-# let get_heatbeat_session_id (t:heartbeat) = t.session_id;; 
-val get_heatbeat_session_id : heartbeat -&gt; string = &lt;fun&gt;
+# let get_heartbeat_session_id (t:heartbeat) = t.session_id;; 
+val get_heartbeat_session_id : heartbeat -&gt; string = &lt;fun&gt;
 </programlisting>
     <para>
       While it's possible to resolve ambiguous field names using type
@@ -6961,12 +6961,12 @@ val show_field :
                 credentials = &quot;Xy2d9W&quot;; }
   ;; 
 val logon : Logon.t =
-  {Logon.session_id = &quot;26685&quot;; time = 2013-08-01 09:33:47.778515+01:00;
+  {Logon.session_id = &quot;26685&quot;; time = 2013-08-02 02:55:32.573968+01:00;
    user = &quot;yminsky&quot;; credentials = &quot;Xy2d9W&quot;}
 # show_field Logon.Fields.user Fn.id logon;; 
 - : string = &quot;user: yminsky&quot;
 # show_field Logon.Fields.time Time.to_string logon;; 
-- : string = &quot;time: 2013-08-01 09:33:47.778515+01:00&quot;
+- : string = &quot;time: 2013-08-02 02:55:32.573968+01:00&quot;
 </programlisting>
     <para>
       As a side note, the above is our first use of the
@@ -7326,8 +7326,8 @@ Error: This pattern matches values of type 'a * 'b
     <title>Combining records and variants</title>
     <para>
       The term <emphasis>algebraic data types</emphasis> is often used
-      to describe a collection of types that includes variants , records
-      and tuples. Algebraic data types act as a peculialrly useful and
+      to describe a collection of types that includes variants, records
+      and tuples. Algebraic data types act as a peculiarly useful and
       powerful language for describing data. At the heart of their
       utility is the fact that they combine two different kinds of
       types: <emphasis>product types</emphasis>, like tuples and
@@ -7696,7 +7696,7 @@ val eval : 'a expr -&gt; ('a -&gt; bool) -&gt; bool = &lt;fun&gt;
       Another useful operation on expressions is simplification. The
       following simplification code is based on having some simplifying
       constructors that mirror the tags used to construct a tree. Then
-      the simplification function is reponsible for rebuilding the tree
+      the simplification function is responsible for rebuilding the tree
       using these constructors.
     </para>
     <programlisting language="ocaml">
@@ -9387,7 +9387,7 @@ val find : (string * 'a) list -&gt; string -&gt; ('a, exn) Result.t = &lt;fun&gt
       having none of them marked.
     </para>
     <para>
-      In short, for errors that are a forseeable and ordinary part of
+      In short, for errors that are a foreseeable and ordinary part of
       the execution of your production code and that are not
       omnipresent, error aware return types are typically the right
       solution.
@@ -18288,7 +18288,7 @@ module Foo_and_bar :
       hash collisions also helps protect against some denial-of-service
       attacks. One well-known type of attack is to send queries to a
       service with carefully chosen keys to cause many collisions. This,
-      in combination with the the quadratic behavior of hashtables, can
+      in combination with the the quadratic behavior of hash tables, can
       cause the service to become unresponsive due to high CPU load.
       Core's hash tables would be much less susceptible to such an
       attack, because the amount of degradation would be far less.
@@ -21771,8 +21771,8 @@ LEFT_BRACE, ID(&quot;title&quot;), COLON, STRING(&quot;Cities&quot;), COMMA, ID(
 `Assoc
   [&quot;title&quot;, `String &quot;Cities&quot;;
    &quot;cities&quot;, `List
-     [`Assoc [&quot;name&quot;, `String &quot;Chicago&quot;; &quot;zips&quot;, `List [Int 60601]];
-      `Assoc [&quot;name&quot;, `String &quot;New York&quot;; &quot;zips&quot;, `List [Int 10004]]]]
+     [`Assoc [&quot;name&quot;, `String &quot;Chicago&quot;; &quot;zips&quot;, `List [`Int 60601]];
+      `Assoc [&quot;name&quot;, `String &quot;New York&quot;; &quot;zips&quot;, `List [`Int 10004]]]]
 </programlisting>
       <para>
         There are many techniques for lexing and parsing that have a
@@ -21785,10 +21785,10 @@ LEFT_BRACE, ID(&quot;title&quot;), COLON, STRING(&quot;Cities&quot;), COMMA, ID(
         expressions, and parsing is specified using context-free
         grammars. These are concepts from formal languages that you
         don't need to understand in huge detail, as the lex/yacc tools
-        construct the machinery for you. For <literal>lex</literal>,
-        this means constructing a <emphasis>finite automaton</emphasis>;
-        and for <literal>yacc</literal>, this means constructing a
-        <emphasis>pushdown automaton</emphasis>.
+        construct the machinery for you. For lex, this means
+        constructing a <emphasis>finite automaton</emphasis>; and for
+        yacc, this means constructing a <emphasis>pushdown
+        automaton</emphasis>.
       </para>
       <para>
         Parsing is a broad and often intricate topic, and our purpose
@@ -21802,7 +21802,7 @@ LEFT_BRACE, ID(&quot;title&quot;), COLON, STRING(&quot;Cities&quot;), COMMA, ID(
       <para>
         For illustration, let's continue with the JSON example. For
         lexing, we'll use <literal>ocamllex</literal>, and for parsing,
-        we'll use Menhir, which is somewhat easier to use than
+        we'll use Menhir, which is the modern alternative to
         <literal>ocamlyacc</literal>.
       </para>
       <note>
@@ -21832,7 +21832,7 @@ LEFT_BRACE, ID(&quot;title&quot;), COLON, STRING(&quot;Cities&quot;), COMMA, ID(
     </sect2>
   </sect1>
   <sect1 id="defining-a-json-parser-with-menhir">
-    <title>Defining a JSON parser with menhir</title>
+    <title>Defining a JSON parser with Menhir</title>
     <para>
       The process of building a parser is interleaved between
       constructing the lexer and parser; you will have to do them
@@ -21846,12 +21846,12 @@ LEFT_BRACE, ID(&quot;title&quot;), COLON, STRING(&quot;Cities&quot;), COMMA, ID(
       name <literal>parser.mly</literal>) and it contains several parts
       in the following sequence:
     </para>
-    <programlisting>
-  declarations
-  %%
-  rules
-  %%
-  optional OCaml code
+    <programlisting language="html">
+&lt;declarations&gt;
+%%
+&lt;rules&gt;
+%%
+&lt;optional OCaml code&gt;
 </programlisting>
     <para>
       The <literal>%%</literal> are section separators; they have to be
@@ -21866,7 +21866,7 @@ LEFT_BRACE, ID(&quot;title&quot;), COLON, STRING(&quot;Cities&quot;), COMMA, ID(
         <literal>%token &lt;</literal><emphasis>type</emphasis><literal>&gt;</literal>
         <emphasis>uid</emphasis>, where the
         <literal>&lt;type&gt;</literal> is optional, and
-        <emphasis>uid</emphasis> is an capitalized identifier. For JSON,
+        <emphasis>uid</emphasis> is a capitalized identifier. For JSON,
         we need tokens for numbers, strings, identifiers, and
         punctuation. To start, let's define just the tokens in the
         <literal>parser.mly</literal> file. For technical reasons, we
@@ -22063,7 +22063,7 @@ value: LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
         We can read it like this: a JSON <literal>value</literal> is
         either an object bracketed by curly braces, or an array
         bracketed by square braces. or a string, integer, float, etc. In
-        each of the productions, the right hand side specfies the
+        each of the productions, the right hand side specifies the
         expected sequence. For example, the object is specified with the
         curly-bracket production.
       </para>
@@ -22114,12 +22114,12 @@ rev_object_fields: k = ID; COLON; v = value
       <para>
         The <literal>rev_</literal> prefix is intended to point out that
         the fields are returned in reverse order. Why would we do that?
-        One reason is that the <literal>menhir</literal> parser
-        generator is left-recursive, which means that the constructed
-        pushdown automoton uses less stack space with left-recursive
-        definitions. The following right-recursive rule accepts the same
-        input, but during parsing it requires linear stack space to read
-        object field definitions.
+        One reason is that the Menhir parser generator is
+        left-recursive, which means that the constructed pushdown
+        automaton uses less stack space with left-recursive definitions.
+        The following right-recursive rule accepts the same input, but
+        during parsing it requires linear stack space to read object
+        field definitions.
       </para>
       <programlisting>
 /* Inefficient right-recursive rule */
@@ -22131,7 +22131,7 @@ object_fields: k = ID; COLON; v = value
       <para>
         Alternatively, we could keep the left-recursive definition and
         simply construct the returned value in left-to-right order. This
-        is fine, though less efficient. You will have to choose you
+        is fine, though less efficient. You will have to choose your
         technique according to circumstances.
       </para>
       <programlisting>
@@ -22362,9 +22362,9 @@ let next_line lexbuf =
       <title>Recursive rules</title>
       <para>
         Unlike many other lexer generators, <literal>ocamllex</literal>
-        allows the definition of multiple lexer in the same file, and
+        allows the definition of multiple lexers in the same file, and
         the definitions can be recursive. In this case, we use recursion
-        to match string literals, using the following rule definition.
+        to match string literals using the following rule definition.
       </para>
       <programlisting language="ocaml">
 (* parsing/lexer.mll (starting from part 5) *)
@@ -22475,8 +22475,10 @@ let parse_with_error lexbuf =
       The &quot;give up on the first error&quot; approach is easy to
       implement but isn't very friendly. In general, error handling can
       be pretty intricate, and we won't discuss it here. However, the
-      menhir parser defines additional mechanisms you can use to try and
-      recover from errors, described in it its reference manual.
+      Menhir parser defines additional mechanisms you can use to try and
+      recover from errors. These are described in detail in its
+      reference
+      <ulink url="http://gallium.inria.fr/~fpottier/menhir/">manual</ulink>.
     </para>
     <para>
       Here's a test input file we can use to test the code we just
@@ -23546,7 +23548,7 @@ val cfg : http_server_config =
     C#. In this model, each task that may require simultaneous waiting
     is given an operating system thread of its own, so it can block
     without stopping the entire program. Other language runtimes such as
-    Javascript are single-threaded, and applications register function
+    JavaScript are single-threaded, and applications register function
     callbacks to be triggered upon external events such as a timeout or
     browser click.
   </para>
@@ -28700,7 +28702,7 @@ $ ./finalizer.native
       multiple compiler backends that reuse the early stages of
       compilation, but produce very different final outputs. The
       <emphasis>bytecode</emphasis> can be run by a portable
-      interpreter, and can even be transformed into Javascript (via
+      interpreter, and can even be transformed into JavaScript (via
       <ulink url="http://ocsigen.org/js_of_ocaml">js_of_ocaml</ulink>)
       or C source code (via
       <ulink url="https://github.com/ocaml-bytes/ocamlcc">OCamlCC</ulink>).
