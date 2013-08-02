@@ -15,7 +15,7 @@ all of this by letting you declare all your command-line options in
 one place, and deriving all of the above functionality from that
 declaration.
 
-Command is simple to use for simpel applications, but also also scales
+Command is simple to use for simple applications, but also also scales
 well as your needs grow more complex.  In particular, Command provides
 a sophisticated subcommand mode that grouping related commands
 together as the number of options grow.  You may already be familiar

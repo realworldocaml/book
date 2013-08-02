@@ -286,7 +286,7 @@ a `square list` to be a `shape list`. OCaml does indeed allow such coercions:
 
 Note that this relies on lists being immutable. It would not be safe to treat a
 `square array` as a `shape array` because it would allow you to store
-non-square shapes into what should be an array of squares. OCaml recognises
+non-square shapes into what should be an array of squares. OCaml recognizes
 this and does not allow the coercion.
 
 ```frag

@@ -444,7 +444,7 @@ requires allocating a new backing array for the hash table and copying
 over all entries, and so it is quite an expensive operation.  That
 means adding a new element to the table is only _amortized_ constant,
 which is to say, it's constant on average over a long sequence of
-additions, but some of the indivdual additions can be quite expensive.
+additions, but some of the individual additions can be quite expensive.
 
 Another hidden cost of hash tables has to do with the hash function you
 use.  If you end up with a pathologically bad hash function that
