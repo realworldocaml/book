@@ -249,7 +249,7 @@ object_fields: k = ID; COLON; v = value
 Finally, we can finish off the grammar by defining the rules for arrays, and
 adding a correct `%start` production.  For the `%start` production, we'll return
 a `value option`, using `None` to represent end-of-file.  Here's the last part
-with the array rules fille din.
+with the array rules filled in.
 
 ```frag
 ((typ ocaml)(name parsing/parser.mly)(part 3))
