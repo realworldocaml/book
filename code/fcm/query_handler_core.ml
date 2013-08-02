@@ -9,7 +9,7 @@ module type Query_handler = sig
   (** The name of the query-handling service *)
   val name : string
 
-  (** The state o fthe query handler *)
+  (** The state of the query handler *)
   type t
 
   (** Create a new query handler from a config *)
