@@ -344,7 +344,7 @@ high numbered tags are reserved.
 
 Polymorphic variants are more flexible than normal variants when writing code,
 but are slightly less efficient at runtime. This is because there isn't as much
-static compile-time information available to optimise their memory layout.
+static compile-time information available to optimize their memory layout.
 
 A polymorphic variant without any parameters is stored as an unboxed integer
 and so only takes up one word of memory, just like a normal variant.  This
