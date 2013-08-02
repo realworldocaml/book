@@ -30,7 +30,7 @@ There are five fundamental properties that differentiate OOP from other styles:
   `b`, then we may use `a` in any context where `b` is expected.
 * _Inheritance_: the definition of one kind of object can be reused
   to produce a new kind of object.  This new definition can override
-  some behaviour, but also share code with its parent.
+  some behavior, but also share code with its parent.
 * _Open recursion_: an object's methods can invoke another method in the same
   object using a special variable (often called `self` or `this`). These
   calls use dynamic lookup, allowing a method defined in one object to
