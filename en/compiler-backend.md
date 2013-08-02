@@ -115,7 +115,7 @@ You'll need to `opam install core_bench` to get the library.
 ```
 
 Building and executing this example will run for around 30 seconds by default,
-and you'll see the results summarised in a neat table.
+and you'll see the results summarized in a neat table.
 
 ```frag
 ((typ console)(name back-end-bench/run_bench_patterns.out))

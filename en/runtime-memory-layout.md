@@ -177,7 +177,7 @@ scanned by the collector. The most common such block is the `string` type,
 which we describe in more detail later in this chapter.
 
 The exact representation of values inside a block depends on their static OCaml
-type.  All OCaml types are distilled down into `values`, and summarised in the
+type.  All OCaml types are distilled down into `values`, and summarized in the
 table below.
 
 OCaml Value                        Representation
