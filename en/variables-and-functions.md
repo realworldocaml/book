@@ -656,62 +656,65 @@ Labeled arguments are useful in a few different cases:
   - When defining a function with lots of arguments.  Beyond a certain
     number, arguments are easier to remember by name than by position.
 
+  - When the meaning of a particular argument is unclear from the type
+    alone.  Consider a function for creating a hash table whose first
+    argument is the initial size of the array backing the hashtable,
+    and the second is a Boolean flag which indicates whether that
+    array will ever shrink when elements are removed.  
+
+    ```frag
+    ((typ ocaml)(name variables-and-functions/htable_sig1.ml))
+    ```
+
+    The above signature makes it hard to divine the meaning of those
+    two arguments.  but with labeled arguments, we can make the intent
+    immediately clear.
+
+    ```frag
+    ((typ ocaml)(name variables-and-functions/htable_sig2.ml))
+    ```
+
+    Choosing label names well is especially important for Boolean
+    values, since it's often easy to get confused about whether a
+    value being true is meant ot enable or disable a given feature.
+
   - When defining functions that have multiple arguments that might
     get confused with each other.  This is most at issue when the
     arguments are of the same type.  For example, consider this
-    signature for a function for extracting a substring of another
-    string.
+    signature for a function that extracts a substring.
 
-    ```ocaml
-    val substring: string -> int -> int -> string
+    ```frag
+    ((typ ocaml)(name variables-and-functions/substring_sig1.ml))
     ```
 
-    where the two ints are the starting position and length of the
-    substring to extract.  Labeled arguments can make this signature
-    clearer:
+    Here, the two ints are the starting position and length of the
+    substring to extract, respectively.  We can can make this fact
+    more obvious from the signature by adding labels.
 
-    ```ocaml
-    val substring: string -> pos:int -> len:int -> string
+    ```frag
+    ((typ ocaml)(name variables-and-functions/substring_sig2.ml))
     ```
 
     This improves the readability of both the signature and of client
     code that makes use of `substring`, and makes it harder to
     accidentally swap the position and the length.
 
-  - When the meaning of a particular argument is unclear from the type
-    alone.  For example, consider a function for creating a hash table
-    where the first argument is the initial size of the table, and the
-    second argument is a flag which, when true, indicates that the
-    hash table will reduce its size when the hash table contains few
-    elements.  The following signature doesn't give you much of a hint
-    as to the meaning of the arguments.
-
-    ```ocaml
-    val create_hashtable : int -> bool -> ('a,'b) Hashtable.t
-    ```
-
-    but with labeled arguments, we can make the intent much clearer.
-
-    ```ocaml
-    val create_hashtable : init_size:int -> allow_shrinking:bool -> ('a,'b) Hashtable.t
-    ```
-
   - When you want flexibility on the order in which arguments are
     passed.  Consider a function like `List.iter`, that takes two
     arguments: a function, and a list of elements to call that
     function on.  A common pattern is to partially apply `List.iter`
     by giving it just the function, as in the following example from
-    earlier in the chapter.  This requires putting the function
-    argument first.
+    earlier in the chapter.
 
     ```frag
     ((typ ocamltop)(name variables-and-functions/main.topscript)(part 43)) 
     ```
 
-    In other cases, you want to put the function argument second.  One
-    common reason is readability.  In particular, a multi-line
-    function passed as an argument to another function is easiest to
-    read when it is the final argument to that function.
+    This requires that we put the function argument first.  In other
+    cases, you want to put the function argument second.  One common
+    reason is readability.  In particular, a multi-line function
+    passed as an argument to another function is easiest to read when
+    it is the final argument to that function.
 
 #### Higher-order functions and labels ####
 
@@ -735,8 +738,8 @@ arguments were listed.
 ((typ ocamltop)(name variables-and-functions/main.topscript)(part 45)) 
 ```
 
-It turns out this order of listing matters.  In particular, if we
-define a function that has a different order
+It turns out this order matters.  In particular, if we define a
+function that has a different order
 
 ```frag
 ((typ ocamltop)(name variables-and-functions/main.topscript)(part 46)) 
@@ -754,17 +757,16 @@ But, it works smoothly with the original `apply_to_tuple`.
 ((typ ocamltop)(name variables-and-functions/main.topscript)(part 48)) 
 ```
 
-So, even though the order of labeled arguments usually doesn't matter,
-it will sometimes bite you in higher-ordered contexts, where you're
-passing functions as arguments to other functions as we were in the
-above examples.
+As a result, when passing labeled functions as arguments, you need to
+take care to be consistent in your ordering of labeled arguments in
+higher-order contexts.
 
 ### Optional arguments ###
 
 An optional argument is like a labeled argument that the caller can
 choose whether or not to provide.  Optional arguments are passed in
 using the same syntax as labeled arguments, and, like labeled
-arguments, optional arguments can be provided in any order.
+arguments, can be provided in any order.
 
 Here's an example of a string concatenation function with an optional
 separator.  This function uses the `^` operator for simple pairwise
@@ -779,10 +781,10 @@ optional.  And while the caller can pass a value of type `string` for
 `sep`, internally to the function, `sep` is seen as a `string option`,
 with `None` appearing when `sep` is not provided by the caller.
 
-In the above example, we had a bit of code to substitute in the empty
-string when no argument was provided.  This is a common enough pattern
+The above example needed a bit of boilerplate to choose a default
+separator when none was provided.  This is a common enough pattern
 that there's an explicit syntax for providing a default value, which
-allows us to write `concat` even more concisely.
+allows us to write `concat` more concisely.
 
 ```frag
 ((typ ocamltop)(name variables-and-functions/main.topscript)(part 50)) 
@@ -796,10 +798,10 @@ those options.  They also allow you to extend an API with new
 functionality without changing existing code that calls that function.
 
 The downside is that the caller may be unaware that there is a choice
-to be made, and so may unknowingly (and wrongly) pick that default
+to be made, and so may unknowingly (and wrongly) pick the default
 behavior.  Optional arguments really only make sense when the extra
-concision of omitting the argument overwhelms the corresponding loss
-of explicitness.
+concision of omitting the argument outweighs the corresponding loss of
+explicitness.
 
 This means that rarely used functions should not have optional
 arguments.  A good rule of thumb is to avoid optional arguments for

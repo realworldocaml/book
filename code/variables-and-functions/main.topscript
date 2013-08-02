@@ -114,13 +114,12 @@ Int.max 3 -4;;
 #part 31
 let (|>) x f = f x ;;
 #part 32
-Sys.getenv_exn "PATH"
-  |> String.split ~on:':'
+let path = "/usr/bin:/usr/local/bin:/bin:/sbin";;
+  String.split ~on:':' path
   |> List.dedup ~compare:String.compare
   |> List.iter ~f:print_endline
   ;;
 #part 33
-let path = Sys.getenv_exn "PATH" in
   let split_path = String.split ~on:':' path in
   let deduped_path = List.dedup ~compare:String.compare split_path in
   List.iter ~f:print_endline deduped_path
@@ -131,8 +130,7 @@ List.iter ~f:print_endline ["Two"; "lines"];;
 List.iter ~f:print_endline;;
 #part 36
 let (^>) x f = f x;;
-Sys.getenv_exn "PATH"
-  ^> String.split ~on:':'
+  ^> String.split ~on:':' path
   ^> List.dedup ~compare:String.compare
   ^> List.iter ~f:print_endline
   ;;
@@ -165,8 +163,7 @@ let num = 3 in
 let denom = 4 in
 ratio ~num ~denom;;
 #part 43
-Sys.getenv_exn "PATH"
-  |> String.split ~on:':'
+  String.split ~on:':' path
   |> List.dedup ~compare:String.compare
   |> List.iter ~f:print_endline
   ;;
