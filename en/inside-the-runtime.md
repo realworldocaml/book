@@ -494,7 +494,7 @@ Building and running this should show the following output.
 ```
 
 The GC calls the finalization functions in the order of the deallocation. If
-several values become unreachable during the same GC cycle, the finalisation
+several values become unreachable during the same GC cycle, the finalization
 functions will be called in the reverse order of the corresponding calls to
 `add_finalizer`.  Each call to `add_finalizer` adds to the set of functions
 that are run when the value becomes unreachable. You can have many finalizers
