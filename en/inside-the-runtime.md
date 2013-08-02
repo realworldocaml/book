@@ -462,7 +462,7 @@ lifetime of the program, for example a list of integer constants.  `Heap_block`
 explicitly checks to see if the value is in the major or minor heap, and
 rejects most constant values.  Compiler optimizations may also duplicate some
 immutable values such as floating-point values in arrays. These may be
-finalised while another duplicate copy is being used by the program.
+finalized while another duplicate copy is being used by the program.
 
 For this reason, attach finalizers only to values that you are explicitly sure
 are heap-allocated and aren't immutable.  A common use is to attach them to
