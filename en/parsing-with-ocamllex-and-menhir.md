@@ -1,9 +1,13 @@
 # Parsing with OCamllex and Menhir
 
-# CR yminsky: The sue of lex and yacc throughout the early part of the
-# chapter is a little confusing.  Are we talking about lex and yacc
-# specifically?  Or lex-and-yacc-like tools?  All told I'd prefer we
-# spoke less about lex and yacc, and more about lexing and parsing.
+Parsing is an important 
+
+```
+CR yminsky: The sue of lex and yacc throughout the early part of the
+chapter is a little confusing.  Are we talking about lex and yacc
+specifically?  Or lex-and-yacc-like tools?  All told I'd prefer we
+spoke less about lex and yacc, and more about lexing and parsing.
+```
 
 OCaml provides lexer and parser generators modeled on the traditional
 UNIX parsing tools lex and yacc.  Similar tools are available in a
@@ -52,9 +56,11 @@ value.
 
 ### Lexical Analysis
 
+```
 # CR yminsky: Hrm.  This is awkward.  We're defining parsing as both
 # parsing+lexing, as well as just the parsing phase (ex lexing).  Not
 # sure how to clean that up.
+```
 
 The overall objective of _parsing_ is to convert the text input into a
 value of type `value`.  This is normally done in two phases.
@@ -133,8 +139,10 @@ input), so we'll start with the parser first.
 A parser file has suffix `.mly` (we'll use the name `parser.mly`) and it
 contains several parts in the following sequence:
 
+```
 # CR yminsky: The last line of the following fragment does not
 # highlight correctly.
+```
 
 ```frag
 ((typ ocamlsyntax)(name parsing/yacc.syntax))
@@ -144,14 +152,18 @@ The `%%` are section separators; they have to be on a line by themselves.  The
 declarations include token and type specifications, precedence directives, and
 other things, but we start by declaring the tokens.
 
+```
 # CR yminsky: "and other things" is something of a weak phrase.  Can
 # we say something about the nature of the other things?
+```
 
 ### Token declarations
 
+```
 # CR yminsky: Hmm, this is awkward, since in most places, we use angle
 # brackets to mark holes in a syntax declaration.  Maybe we should
 # change the formatting of that.
+```
 
 A token is declared using the syntax `%token <`_type_`>` _uid_, where
 the `<type>` is optional, and _uid_ is a capitalized identifier.  For
@@ -177,17 +189,21 @@ partial_parser.mly`), we'll see multiple warnings about unused tokens
 because we haven't actually defined a grammar yet.  It's ok to ignore
 the warnings for now.
 
+```
 # CR yminsky: Maybe omit the example below.  It seems unhelpful to the
 # reader to show them a long sequence of boring error messages.
+```
 
 
 ```frag
 ((typ console)(name parsing/build_partial_json_parser.out))
 ```
 
+```
 # CR yminsky: When you say below that the file "contains an
 # automaton", it seems too jargony and hard to grok for someone who is
 # a parser ingenue.  
+```
 
 The `menhir` tool is a parser generator, meaning it generates the code
 to perform parsing from the `parser.mly` description, in the form of
@@ -195,25 +211,30 @@ two files, `parser.ml` and `parser.mli`.  The implementation contained
 in `parser.ml` is difficult to read, but `parser.mli` exposes a more
 comprehensible interface, containing what we'll need to build a lexer.
 
+```
 # CR yminsky: Shouldn't the above say "parser" rather than "lexer"?
+```
 
 ```frag
 ((typ ocaml)(name parsing/partial_parser.mli))
 ```
 
+```
 # CR yminsky: Don't we need something here to explain what `exp` above
 # is?  Maybe say: "The function `exp` takes two arguments: a function
 # for extracting a token from a Lexbuf.t, as well as a `Lexbuf.t`,
 # returning a parsed value, which in this case is a value of type
 # `unit`, since for now the grammar specification is trivial."
-
+```
 
 ### Specifying the grammar rules
 
 The grammar itself is specified using a set of rules, where a rule contains a
 set of productions.  Abstractly, a production looks like the following.
 
+```
 # CR yminsky: This still needs to be moved to the new toolchain, no?
+```
 
 ```
 symbol: [ id1 = ] symbol1; [ id2 = ] symbol2; ...; [ idN = ] symbolN
