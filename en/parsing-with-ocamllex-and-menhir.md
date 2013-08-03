@@ -1,36 +1,54 @@
 # Parsing with OCamllex and Menhir
 
-OCaml provides lexer and parser generators modeled on lex and yacc.  Similar
-tools are available in a variety of languages, and with them you can parse a
-variety of kinds of input, including common web formats or full blown programming
-languages.
+Parsing is an important 
+
+```
+CR yminsky: The use of lex and yacc throughout the early part of the
+chapter is a little confusing.  Are we talking about lex and yacc
+specifically?  Or lex-and-yacc-like tools?  All told I'd prefer we
+spoke less about lex and yacc, and more about lexing and parsing.
+```
+
+OCaml provides lexer and parser generators modeled on the traditional
+UNIX parsing tools lex and yacc.  Similar tools are available in a
+variety of languages, and with them you can parse a variety of kinds
+of input, from simple web formats like XML and JSON to full blown
+programming languages.
 
 In this chapter, you'll learn how to:
 
-* convert input into a structured token stream using `ocamllex`.
-* parse a token stream into an OCaml data structure using `menhir`.
-* handle simple errors in the input data.
-* use all these tools to build a parser for the JSON format.
+* convert input into a structured token stream using `ocamllex`
+* parse a token stream into an OCaml data structure using `menhir`
+* handle simple errors in the input data
 
-## Basic lexing and parsing concepts
+We'll do this in the course of walking through the implementation of a
+parser for the JSON format.
 
-Let's be more precise about some of these terms.  By _parsing_, we mean reading a
-textual input into a form that is easier for a program to manipulate.
+## Lexing and parsing
 
-For example, suppose we want to read a file containing a value in JSON format.
-JSON has a variety of values, including numbers, strings, arrays, and objects,
-and each of these has a textual representation.  For example, the following
-text represents an object containing a string labeled `title`, and an array
-containing two objects, each with a name and array of zip codes.
+Let's be more precise about some of these terms.  By _parsing_, we
+mean reading a textual input into a form that is easier for a program
+to manipulate.
+
+For example, suppose we want to read a file containing a value in JSON
+format.  JSON has a variety of kinds of values, including numbers,
+strings, arrays, and objects, each with its own textual
+representation.  For example, the following text represents an object
+containing a string labeled `title`, and an array containing two
+objects, each with a name and array of zip codes.
 
 ```frag
 ((typ json)(name parsing/example.json))
 ```
 
-The input text is represented as a sequence of characters.  Manipulating it in
-that form would be really hard, so what we want is to give it a structured type
-that is easier for our programs to manipulate.  For our example, we'll use the
-following type to represent JSON _abstract syntax_.
+The input text starts out as a string, which is essentially a sequence
+of characters.  But this form of the data is awkward to work with.
+For example, it would be painful to write a function that found the
+set of zip-codes for a given city by just searching through the
+sequence of characters.  But this kind of task is quite a lot easier
+when it's done against a more structured representation.  In this
+case, we'll use the following type to represent an arbitrary JSON
+value.
 
 ```frag
 ((typ ocaml)(name parsing/json.ml)(part 0))
@@ -38,8 +56,14 @@ following type to represent JSON _abstract syntax_.
 
 ### Lexical Analysis
 
-The overall objective of _parsing_ is to convert the text input into a value of type
-`value`.  This is normally done in two phases.
+```
+# CR yminsky: Hrm.  This is awkward.  We're defining parsing as both
+# parsing+lexing, as well as just the parsing phase (ex lexing).  Not
+# sure how to clean that up.
+```
+
+The overall objective of _parsing_ is to convert the text input into a
+value of type `value`.  This is normally done in two phases.
 
 First, _lexical_ analysis (or lexing, for short) is used to convert the text
 input into a sequence of tokens, or words.  For example, the JSON input would
@@ -72,16 +96,16 @@ you by generating OCaml code from your specifications.  For lex, this means
 constructing a _finite automaton_; and for yacc, this means constructing a
 _pushdown automaton_.
 
-Parsing is a broad and often intricate topic, and our purpose here is not to
-teach all of the ins and outs of yacc and lex, but to show how to use these
-tools in OCaml.  There are online resources for the theoretical background, and
-most experience you may have using lex/yacc in other languages will also apply
-in OCaml.  However, there are differences, and we'll try to point out the
-larger ones here.
+Parsing is a broad and often intricate topic, and our purpose here is
+not to teach all of the ins and outs of lex and yacc, but to show how
+to use these tools in OCaml.  There are online resources for the
+theoretical background, and most experience you may have using
+lex/yacc in other languages will also apply in OCaml.  However, there
+are differences, and we'll try to point out the larger ones here.
 
-For illustration, let's continue with the JSON example.  For lexing, we'll use
-`ocamllex`, and for parsing, we'll use Menhir, which is the modern alternative
-to `ocamlyacc`.
+For illustration, let's continue with the JSON example.  For lexing,
+we'll use `ocamllex`, and for parsing, we'll use Menhir, which is the
+modern alternative to `ocamlyacc`.
 
 <note>
 <title>Menhir _vs_ `ocamlyacc`</title>
@@ -113,6 +137,11 @@ input), so we'll start with the parser first.
 A parser file has suffix `.mly` (we'll use the name `parser.mly`) and it
 contains several parts in the following sequence:
 
+```
+# CR yminsky: The last line of the following fragment does not
+# highlight correctly.
+```
+
 ```frag
 ((typ ocamlsyntax)(name parsing/yacc.syntax))
 ```
@@ -121,15 +150,27 @@ The `%%` are section separators; they have to be on a line by themselves.  The
 declarations include token and type specifications, precedence directives, and
 other things, but we start by declaring the tokens.
 
+```
+# CR yminsky: "and other things" is something of a weak phrase.  Can
+# we say something about the nature of the other things?
+```
+
 ### Token declarations
 
-A token is declared using the syntax `%token <`_type_`>` _uid_, where the
-`<type>` is optional, and _uid_ is a capitalized identifier.  For JSON, we need
-tokens for numbers, strings, identifiers, and punctuation.  To start, let's
-define just the tokens in the `parser.mly` file.  For technical reasons, we need
-to include a `%start` declaration.  For now, we'll include just a dummy grammar
-specification `exp: { () }` (we'll replace this when we implement the grammar
-below).
+```
+# CR yminsky: Hmm, this is awkward, since in most places, we use angle
+# brackets to mark holes in a syntax declaration.  Maybe we should
+# change the formatting of that.
+```
+
+A token is declared using the syntax `%token <`_type_`>` _uid_, where
+the `<type>` is optional, and _uid_ is a capitalized identifier.  For
+JSON, we need tokens for numbers, strings, identifiers, and
+punctuation.  To start, let's define just the tokens in the
+`parser.mly` file.  For technical reasons, we need to include a
+`%start` declaration.  For now, we'll include just a dummy grammar
+specification `exp: { () }` (we'll replace this when we implement the
+grammar below).
 
 ```frag
 ((typ ocaml)(name parsing/partial_parser.mly))
@@ -141,21 +182,46 @@ token carries an integer value with it, `FLOAT` has a `float` value, and both
 `TRUE`, `FALSE` or the punctuation, aren't associated with any value and so we
 can omit the `<`_type_`>` specification.
 
-Compile this file with the `menhir` command-line tool.  It will issue multiple
-warnings about unused tokens because we haven't actually defined a grammar yet.
-It's ok to ignore these warnings for now.
+If we compile this file with `menhir` (by running `menhir
+partial_parser.mly`), we'll see multiple warnings about unused tokens
+because we haven't actually defined a grammar yet.  It's ok to ignore
+the warnings for now.
+
+```
+# CR yminsky: Maybe omit the example below.  It seems unhelpful to the
+# reader to show them a long sequence of boring error messages.
+```
 
 ```frag
 ((typ console)(name parsing/build_partial_json_parser.out))
 ```
 
-The `menhir` tool is a parser generator, meaning it generates the OCaml code to
-perform parsing from the `parser.mly` description.  The `parser.ml` contains an
-automaton implementation, and is generally difficult to read.  However, the
-`parser.mli` contains more human-readable declarations that we need to build a lexer.
+```
+# CR yminsky: When you say below that the file "contains an
+# automaton", it seems too jargony and hard to grok for someone who is
+# a parser ingenue.  
+```
+
+The `menhir` tool is a parser generator, meaning it generates the code
+to perform parsing from the `parser.mly` description, in the form of
+two files, `parser.ml` and `parser.mli`.  The implementation contained
+in `parser.ml` is difficult to read, but `parser.mli` exposes a more
+comprehensible interface, containing what we'll need to build a lexer.
+
+```
+# CR yminsky: Shouldn't the above say "parser" rather than "lexer"?
+```
 
 ```frag
 ((typ ocaml)(name parsing/partial_parser.mli))
+```
+
+```
+# CR yminsky: Don't we need something here to explain what `exp` above
+# is?  Maybe say: "The function `exp` takes two arguments: a function
+# for extracting a token from a Lexbuf.t, as well as a `Lexbuf.t`,
+# returning a parsed value, which in this case is a value of type
+# `unit`, since for now the grammar specification is trivial."
 ```
 
 ### Specifying the grammar rules
