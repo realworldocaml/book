@@ -1,0 +1,33 @@
+$ corebuild -pkg async_graphics verbose_shapes.native succinct_shapes.native
+File "succinct_shapes.ml", line 17, characters 11-28:
+Warning 9: the following labels are not bound in this record pattern:
+button, keypressed, key
+Either bind these labels explicitly or add '; _' to the pattern.
+File "succinct_shapes.ml", line 23, characters 11-28:
+Warning 9: the following labels are not bound in this record pattern:
+button, keypressed, key
+Either bind these labels explicitly or add '; _' to the pattern.
+File "succinct_shapes.ml", line 90, characters 16-33:
+Warning 9: the following labels are not bound in this record pattern:
+button, keypressed, key
+Either bind these labels explicitly or add '; _' to the pattern.
+File "succinct_shapes.ml", line 62, characters 23-24:
+Warning 27: unused variable x.
+File "succinct_shapes.ml", line 62, characters 25-26:
+Warning 27: unused variable y.
+File "succinct_shapes.ml", line 17, characters 11-28:
+Warning 9: the following labels are not bound in this record pattern:
+button, keypressed, key
+Either bind these labels explicitly or add '; _' to the pattern.
+File "succinct_shapes.ml", line 23, characters 11-28:
+Warning 9: the following labels are not bound in this record pattern:
+button, keypressed, key
+Either bind these labels explicitly or add '; _' to the pattern.
+File "succinct_shapes.ml", line 90, characters 16-33:
+Warning 9: the following labels are not bound in this record pattern:
+button, keypressed, key
+Either bind these labels explicitly or add '; _' to the pattern.
+File "succinct_shapes.ml", line 62, characters 23-24:
+Warning 27: unused variable x.
+File "succinct_shapes.ml", line 62, characters 25-26:
+Warning 27: unused variable y.

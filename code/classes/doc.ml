@@ -17,8 +17,8 @@ and 'a list_item =
 open Core.Std
 
 class ['a] folder = object(self)
-  method doc acc doc =
-    match doc with
+  method doc acc =
+    function
       Heading _ -> acc
     | Paragraph text -> List.fold ~f:self#text_item ~init:acc text
     | Definition list -> List.fold ~f:self#list_item ~init:acc list
@@ -27,8 +27,8 @@ class ['a] folder = object(self)
     fun acc {tag; text} ->
       List.fold ~f:self#text_item ~init:acc text
 
-  method text_item acc bar =
-    match bar with
+  method text_item acc =
+    function
       Raw _ -> acc
     | Bold text -> List.fold ~f:self#text_item ~init:acc text
     | Enumerate list -> List.fold ~f:self#list_item ~init:acc list
@@ -51,9 +51,9 @@ end
 let count_doc = (new counter)#doc
 
 (* part 3 *)
-class ['a] folder = object(self)
-  method doc acc doc =
-    match doc with
+class ['a] folder2 = object(self)
+  method doc acc =
+    function
       Heading str -> self#heading acc str
     | Paragraph text -> self#paragraph acc text
     | Definition list -> self#definition acc list
@@ -62,8 +62,8 @@ class ['a] folder = object(self)
     fun acc {tag; text} ->
       List.fold ~f:self#text_item ~init:acc text
 
-  method text_item acc bar =
-    match bar with
+  method text_item acc =
+    function
       Raw str -> self#raw acc str
     | Bold text -> self#bold acc text
     | Enumerate list -> self#enumerate acc list
@@ -83,4 +83,18 @@ class ['a] folder = object(self)
   method private quote acc doc = self#doc acc doc
 end
 
-let f : < doc : 'a; .. >  = new folder
+let f :
+  < doc : int -> doc -> int;
+    list_item : 'a . int -> 'a list_item -> int;
+    text_item : int -> text_item -> int >  = new folder2
+
+(* part 4 *)
+class counter = object
+  inherit [int] folder as super
+
+  method list_item acc li = acc
+
+  method private bold acc txt = 
+    let acc = super#bold acc txt in
+    acc + 1
+end

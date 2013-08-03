@@ -297,48 +297,30 @@ these methods as they probably shouldn't be called directly.
 ((typ ocaml)(name classes/doc.ml)(part 3))
 ```
 
+The final statement that builds the value `f` shows how the instantiation of a
+`folder2` object has a type that hides the private methods.
+
 To be precise, the private methods are part of the class type, but
 not part of the object type. This means, for example, that the object
 `f` has no method `bold`. However, the private methods are available
 to subclasses: we can use them to simplify our `counter` class.
 
-```ocaml
-# class counter = object
-    inherit [int] folder as super
-
-    method list_item acc li = acc
-
-    method private bold acc txt = 
-      let acc = super#bold acc txt in
-       acc + 1
-  end
+```frag
+((typ ocaml)(name classes/doc.ml)(part 4))
 ```
 
-The key property of private methods is that they are visible to
-subclasses, but not anywhere else.  If you want the stronger
-guarantee that a method is _really_ private, not even accessible in
-subclasses, you can use an explicit class type that omits the method.
-In the following code, the private methods are explicitly omitted
-from the class type of `counter`, and can't be invoked in subclasses
-of `counter`.
+The key property of private methods is that they are visible to subclasses, but
+not anywhere else.  If you want the stronger guarantee that a method is
+_really_ private, not even accessible in subclasses, you can use an explicit
+class type that omits the method.  In the following code, the private methods
+are explicitly omitted from the class type of `counter_with_sig`, and can't be
+invoked in subclasses of `counter_with_sig`.
 
-```ocaml
-class counter : object
-  method doc : int -> doc -> int
-  method list_item : int -> 'b list_item -> int
-  method text_item : int -> text_item -> int
-end = object
-  inherit [int] folder as super
-
-  method list_item acc li = acc
-
-  method private bold acc txt = 
-    let acc = super#bold acc txt in
-     acc + 1
-end
+```frag
+((typ ocaml)(name classes/doc2.ml)(part 3))
 ```
 
-### Binary methods ###
+### Binary methods
 
 A _binary method_ is a method that takes an object of `self` type.
 One common example is defining a method for equality. 
@@ -404,7 +386,7 @@ module system.
 ((typ ocaml)(name classes/binary_module.ml))
 ```
 
-## Virtual classes and methods ##
+## Virtual classes and methods
 
 A _virtual_ class is a class where some methods or fields are declared, but not
 implemented.  This should not be confused with the word `virtual` as it is used
@@ -414,158 +396,61 @@ dynamic dispatch, but the keyword `virtual` means that the method or field is
 not implemented.
 
 To explore this, lets extend our shapes examples to simple interactive
-graphics. For this we will use the Async concurrency library and the
+graphics.  We will use the Async concurrency library and the
 [Async_graphics](http://github.com/lpw25/async_graphics/) library, which
-provides an Async interface to OCaml's built in Graphics library. Concurrent
-programming with Async will be explored later in
+provides an asynchronous interface to OCaml's built in Graphics library.
+Concurrent programming with Async will be explored later in
 [xref](#concurrent-programming-with-async), for now you can safely ignore the
-details.
+details.  You just need to run `opam install async_graphics` to get the library
+installed on your system.
 
-We will extend our `shape` type to include a `draw` method. To
-display the shapes we will define a reference to a list of shapes,
-and ensure that any shapes in that list will be drawn on the display
-at regular intervals. We also define an open_display function to open
-a display and ensure that the Async scheduler is running:
+### Defining a Drawable module
 
-```ocaml
-open Async.Std
-open Async_graphics
-
-type drawable = < draw: unit >
-
-let shapes: drawable list ref = ref []
-
-let repaint () =
-  try 
-    clear_graph ();
-    List.iter ~f:(fun s -> s#draw) !shapes;
-    synchronize ()
-  with Graphic_failure _ -> ();;
-
-Clock.every (Time.Span.of_sec (1.0 /. 24.0)) repaint;;
-
-let open_display () =
-  close_graph ();
-  open_graph "";
-  auto_synchronize false;
-  if not (Scheduler.is_running ()) then ignore (Thread.create Scheduler.go ());;
+Let's start with by creating a `Drawable` module to hold the base logic to
+handle the display.
+ 
+```frag
+((typ ocaml)(name classes-async/drawable.ml))
 ```
 
-Now let's create classes for making squares and circles. We include
-an `on_click` method for adding event handlers to the shapes.
+We first define our `shape` object type to include a `draw` method, and a
+reference to a list of shapes to display them.  Any shapes in that list will be
+drawn on the display at regular intervals via the `repaint` function. Finally,
+we also define an `open_display` function to open a graphical display and
+ensure that the Async scheduler is running.
 
-```ocaml
-class square w x y = object (self)
-  val mutable x: int = x
-  method x = x
+Now let's a new module that contains classes for making squares and circles. We
+include an `on_click` method for adding event handlers to the shapes.
 
-  val mutable y: int = y
-  method y = y
-
-  val mutable width = w
-  method width = width
-
-  method draw = fill_rect x y width width
-
-  method private contains x' y' = 
-    x <= x' && x' <= x + width &&
-      y <= y' && y' <= y + width
-
-  method on_click ?start ?stop f = 
-    on_click ?start ?stop 
-      (fun {mouse_x;mouse_y} -> 
-         if self#contains mouse_x mouse_y then 
-           f mouse_x mouse_y)
-end
-
-class circle r x y = object
-  val mutable x: int = x
-  method x = x
-
-  val mutable y: int = y
-  method y = y
-
-  val mutable radius = r
-  method radius = radius
-
-  method draw = fill_circle x y radius
-
-  method private contains x' y' = 
-    let dx = abs (x' - x) in
-    let dy = abs (y' - y) in
-    let dist = sqrt (Float.of_int ((dx * dx) + (dy * dy))) in
-      dist <= (Float.of_int radius)
-
-  method on_click ?start ?stop f = 
-    on_click ?start ?stop 
-      (fun {mouse_x;mouse_y} -> 
-         if self#contains mouse_x mouse_y then 
-           f mouse_x mouse_y)
-end
+```frag
+((typ ocaml)(name classes-async/verbose_shapes.ml)(part 0))
 ```
 
-These classes have a lot in common, and it would be useful to factor
-out this common functionality into a superclass. We can easily move
-the definitions of `x` and `y` into a superclass, but what about
-`on_click`? Its definition depends on `contains` which has a
-different definition in each class. The solution is to create a
-_virtual_ class. This class will declare a `contains` method, but
-leave its definition to the subclasses:
+The `square` class is pretty straightforward, and the `circle` class below also
+looks very similar.
 
-```ocaml
-class virtual shape x y = object (self)
-  method virtual private contains: int -> int -> bool
-
-  val mutable x: int = x
-  method x = x
-
-  val mutable y: int = y
-  method y = y
-
-  method on_click ?start ?stop f = 
-    on_click ?start ?stop 
-      (fun {mouse_x;mouse_y} -> 
-         if self#contains mouse_x mouse_y then 
-           f mouse_x mouse_y)
-
-  method on_mousedown ?start ?stop f = 
-    on_mousedown ?start ?stop 
-      (fun {mouse_x;mouse_y} -> 
-         if self#contains mouse_x mouse_y then 
-           f mouse_x mouse_y)
-end
+```frag
+((typ ocaml)(name classes-async/verbose_shapes.ml)(part 1))
 ```
 
-Now we can define `square` and `circle` by inheriting from `shape`:
+These classes have a lot in common, and it would be useful to factor out this
+common functionality into a superclass. We can easily move the definitions of
+`x` and `y` into a superclass, but what about `on_click`? Its definition
+depends on `contains` which has a different definition in each class. The
+solution is to create a _virtual_ class. This class will declare a `contains`
+method, but leave its definition to the subclasses.
 
-```ocaml
-class square w x y = object
-  inherit shape x y
+Here is the more succinct definition, starting with a virtual `square` class
+that implements `on_click` and `on_mousedown`.
 
-  val mutable width = w
-  method width = width
+```frag
+((typ ocaml)(name classes-async/succinct_shapes.ml)(part 0))
+```
 
-  method draw = fill_rect x y width width
+Now we can define `square` and `circle` by inheriting from `shape`.
 
-  method private contains x' y' = 
-    x <= x' && x' <= x + width &&
-      y <= y' && y' <= y + width
-end
-
-class circle r x y = object
-  inherit shape x y
-
-  val mutable radius = r
-  method radius = radius
-
-  method draw = fill_circle x y radius
-
-  method private contains x' y' = 
-    let dx = abs (x' - x) in
-    let dy = abs (y' - y) in
-    let dist = sqrt (Float.of_int ((dx * dx) + (dy * dy))) in
-      dist <= (Float.of_int radius)
-end
+```frag
+((typ ocaml)(name classes-async/succinct_shapes.ml)(part 1))
 ```
 
 One way to view a `virtual` class is that it is like a functor, where
@@ -579,17 +464,8 @@ You can execute expressions during the instantiation of a class by
 placing them before the object expression or in the initial value of
 a field:
 
-```ocaml
-# class obj x = 
-    let () = printf "Creating obj %d\n" x in
-    object 
-      val field = printf "Initializing field\n"; x
-    end;;
-class obj : int -> object val field : int end
-# let o = new obj 3;;
-Creating obj 3
-Initializing field
-val o : obj = <obj>
+```frag
+((typ ocamltop)(name classes/initializer.topscript))
 ```
 
 However, these expressions are executed before the object has been
@@ -598,17 +474,13 @@ to use an object's methods during instantiation you can use an
 initializer. An initializer is an expression that will be executed
 during instantiation but after the object has been created. 
 
-For example, if we wanted to create a `growing_circle` class for
-circles that grow when clicked then we could inherit from `circle`
-and used the inherited `on_click` to add a handler for click events:
+For example, suppose we wanted to extend our previous shapes module with a
+`growing_circle` class for circles that expand when clicked.  We could inherit
+from `circle` and used the inherited `on_click` to add a handler for click
+events.
 
-```ocaml
-class growing_circle r x y = object (self)
-  inherit circle r x y
-
-  initializer
-    self#on_click (fun x y -> radius <- radius * 2)
-end
+```frag
+((typ ocaml)(name classes-async/succinct_shapes.ml)(part 2))
 ```
 
 ## Multiple inheritance
@@ -622,175 +494,81 @@ tree, so it should be used with care.
 
 ### How names are resolved
 
-The main "trickiness" of multiple inheritance is due to naming -- what
-happens when a method or field with some name is defined in more than
-one class?
+TODO CR: this has changed in 4.01 and multiple definitions are no longer
+allowed.
 
-If there is one thing to remember about inheritance in OCaml, it is
-this: inheritance is like textual inclusion.  If there is more than
-one definition for a name, the last definition wins.  Let's look at
-some artificial, but illustrative, examples.
+The main trickiness of multiple inheritance is due to naming -- what happens
+when a method or field with some name is defined in more than one class?
 
-First, let's consider what happens when we define a method more than
-once.  In the following example, the method `get` is defined twice;
-the second definition "wins," meaning that it overrides the first one.
+If there is one thing to remember about inheritance in OCaml, it is this:
+inheritance is like textual inclusion.  If there is more than one definition
+for a name, the last definition wins.  Let's look at some artificial, but
+illustrative, examples.
 
-```ocaml
-# class m1 =
-object (self : 'self)
-   method get = 1
-   method f = self#get
-   method get = 2
-end;;
-class m1 : object method f : int method get : int end
-# (new m1)#f;;
-- : int = 2
+First, let's consider what happens when we define a method more than once.  In
+the following example, the method `get` is defined twice; the second definition
+wins, meaning that it overrides the first one.
+
+```frag
+((typ ocamltop)(name classes/multiple_inheritance.topscript)(part 0))
 ```
 
 Fields have similar behavior, though the compiler produces a warning
 message about the override.
 
-```ocaml
-# class m2 =
-  object (self : 'self)
-     val x = 1
-     method f = x
-     val x = 2
-  end;;
-Characters 69-74:
-     val x = 2
-         ^^^^^
-Warning 13: the instance variable x is overridden.
-The behavior changed in OCaml 3.10 (previous behavior was hiding.)
-class m2 : object val x : int method f : int end
-# (new m2)#f;;
-- : int = 2
+```frag
+((typ ocamltop)(name classes/multiple_inheritance.topscript)(part 1))
 ```
 
-Of course, it is unlikely that you will define two methods or two
-fields of the same name in the same class.  However, the rules for
-inheritance follow the same pattern: the last definition wins.  In the
-following definition, the `inherit` declaration comes last, so the
-method definition `method get = 2` overrides the previous definition,
-always returning 2.
+Of course, it is unlikely that you will define two methods or two fields of the
+same name in the same class.  However, the rules for inheritance follow the
+same pattern: the last definition wins.
 
-```ocaml
-# class m4 = object method get = 2 end;;
-# class m5 =
-  object
-    val mutable x = 1
-    method get = x
-    method set x' = x <- x'
-    inherit m4
-  end;;
-class m5 : object val mutable x : int method get : int method set : int -> unit end
-# let x = new m5;;
-val x : m5 = <obj>
-# x#set 5;;
-- : unit = ()
-# x#get;;
-- : int = 2
+In the following definition, the `inherit` declaration comes last, so the
+method definition `method get = 2` overrides the previous definition, always
+returning 2.
+
+```frag
+((typ ocamltop)(name classes/multiple_inheritance.topscript)(part 2))
 ```
 
-To reiterate, to understand what inheritance means, replace each
-`inherit` directive with its definition, and take the last definition
-of each method or field.  This holds even for private methods.
-However, it does _not_ hold for private methods that are "really"
-private, meaning that they have been hidden by a type constraint.  In
-the following definitions, there are three definitions of the private
-method `g`.  However, the definition of `g` in `m8` is not overridden,
-because it is not part of the class type for `m8`.
+To reiterate, to understand what inheritance means, replace each `inherit`
+directive with its definition, and take the last definition of each method or
+field.  This holds even for private methods.  However, it does _not_ hold for
+private methods that are "really" private, meaning that they have been hidden
+by a type constraint.
 
-```ocaml
-# class m6 =
-  object (self : 'self)
-     method f1 = self#g
-     method private g = 1
-  end;;
-class m6 : object method f1 : int method private g : int end
-# class m7 =
-  object (self : 'self)
-     method f2 = self#g
-     method private g = 2
-  end;;
-class m7 : object method f2 : int method private g : int end
-# class m8 : object method f3 : int end =
-  object (self : 'self)
-     method f3 = self#g
-     method private g = 3
-  end;;
-class m8 : object method f3 : int end
-# class m9 =
-  object (self : 'self)
-     inherit m6
-     inherit m7
-     inherit m8
-  end;;
-# class m9 :
-  object
-    method f1 : int
-    method f2 : int
-    method f3 : int
-    method private g : int
-  end
-# let x = new m9;;
-val x : m9 = <obj>
-# x#f1;;
-- : int = 2
-# x#f3;;
-- : int = 3
+In the following definitions, there are three definitions of the private method
+`g`.  However, the definition of `g` in `m8` is not overridden, because it is
+not part of the class type for `m8`.
+
+```frag
+((typ ocamltop)(name classes/multiple_inheritance.topscript)(part 3))
 ```
 
 ### Mixins
 
-When should you use multiple inheritance?  If you ask multiple people,
-you're likely to get multiple (perhaps heated) answers.  Some will
-argue that multiple inheritance is overly complicated; others will
-argue that inheritance is problematic in general, and one should use
-object composition instead.  But regardless of who you talk to, you
-will rarely hear that multiple inheritance is great and you should use
-it widely.
+When should you use multiple inheritance?  If you ask multiple people, you're
+likely to get multiple (perhaps heated) answers.  Some will argue that multiple
+inheritance is overly complicated; others will argue that inheritance is
+problematic in general, and one should use object composition instead.  But
+regardless of who you talk to, you will rarely hear that multiple inheritance
+is great and you should use it widely.
 
-In any case, if you're programming with objects, there's one general
-pattern for multiple inheritance that is both useful and reasonably
-simple, the _mixin_ pattern.  Generically, a _mixin_ is just a virtual
-class that implements a feature based on another one.  If you have a
-class that implements methods _A_, and you have a mixin _M_ that
-provides methods _B_ from _A_, then you can inherit from _M_ --
-"mixing" it in -- to get features _B_.
+In any case, if you're programming with objects, there's one general pattern
+for multiple inheritance that is both useful and reasonably simple, the _mixin_
+pattern.  Generically, a _mixin_ is just a virtual class that implements a
+feature based on another one.  If you have a class that implements methods _A_,
+and you have a mixin _M_ that provides methods _B_ from _A_, then you can
+inherit from _M_ -- "mixing" it in -- to get features _B_.
 
-That's too abstract, so let's give some examples based on our
-interactive shapes. We may wish to allow a shape to be dragged by the
-mouse. We can define this functionality for any object which has
-mutable `x` and `y` fields and an `on_mousedown` method for adding
-event handlers:
+That's too abstract, so let's give some examples based on our interactive
+shapes. We may wish to allow a shape to be dragged by the mouse. We can define
+this functionality for any object which has mutable `x` and `y` fields and an
+`on_mousedown` method for adding event handlers:
 
-```ocaml
-class virtual draggable = object (self)
-  method virtual on_mousedown: 
-    ?start:unit Deferred.t -> 
-    ?stop:unit Deferred.t -> 
-    (int -> int -> unit) -> unit
-  val virtual mutable x: int  
-  val virtual mutable y: int  
-
-  val mutable dragging = false
-  method dragging = dragging
-
-  initializer 
-    self#on_mousedown 
-      (fun mouse_x mouse_y ->
-         let offset_x = x - mouse_x in
-         let offset_y = y - mouse_y in
-         let mouse_up = Ivar.create () in
-         let stop = Ivar.read mouse_up in
-           dragging <- true;
-           on_mouseup ~stop (fun _ -> Ivar.fill mouse_up (); dragging <- false);
-           on_mousemove ~stop
-             (fun {mouse_x;mouse_y} -> 
-                x <- mouse_x + offset_x;
-                y <- mouse_y + offset_y))
-end
+```frag
+((typ ocaml)(name classes-async/succinct_shapes.ml)(part 3))
 ```
 
 This allows us to create draggable shapes using multiple inheritance.

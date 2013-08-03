@@ -29,6 +29,7 @@ dirs= json \
       variants-termcol-fixed \
       objects \
       classes \
+      classes-async \
       imperative-programming \
       error-handling \
       memory-repr \

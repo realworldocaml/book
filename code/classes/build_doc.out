@@ -1,4 +1,4 @@
-$ corebuild doc.native
+$ corebuild doc.native doc2.native
 File "doc.ml", line 42, characters 2-31:
 Warning 7: the method list_item is overridden.
 File "doc.ml", line 44, characters 2-124:
@@ -7,6 +7,12 @@ File "doc.ml", line 27, characters 13-16:
 Warning 27: unused variable tag.
 File "doc.ml", line 42, characters 23-25:
 Warning 27: unused variable li.
+File "doc.ml", line 62, characters 13-16:
+Warning 27: unused variable tag.
+File "doc.ml", line 72, characters 29-32:
+Warning 27: unused variable str.
+File "doc.ml", line 78, characters 25-28:
+Warning 27: unused variable str.
 File "doc.ml", line 42, characters 2-31:
 Warning 7: the method list_item is overridden.
 File "doc.ml", line 44, characters 2-124:
@@ -15,3 +21,9 @@ File "doc.ml", line 27, characters 13-16:
 Warning 27: unused variable tag.
 File "doc.ml", line 42, characters 23-25:
 Warning 27: unused variable li.
+File "doc.ml", line 62, characters 13-16:
+Warning 27: unused variable tag.
+File "doc.ml", line 72, characters 29-32:
+Warning 27: unused variable str.
+File "doc.ml", line 78, characters 25-28:
+Warning 27: unused variable str.
