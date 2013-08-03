@@ -98,3 +98,18 @@ class counter = object
     let acc = super#bold acc txt in
     acc + 1
 end
+
+(* part 5 *)
+class counter_with_sig : object
+  method doc : int -> doc -> int
+  method list_item : int -> 'b list_item -> int
+  method text_item : int -> text_item -> int
+end = object
+  inherit [int] folder as super
+
+  method list_item acc li = acc
+
+  method private bold acc txt = 
+    let acc = super#bold acc txt in
+    acc + 1
+end

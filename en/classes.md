@@ -317,7 +317,7 @@ are explicitly omitted from the class type of `counter_with_sig`, and can't be
 invoked in subclasses of `counter_with_sig`.
 
 ```frag
-((typ ocaml)(name classes/doc2.ml)(part 3))
+((typ ocaml)(name classes/doc.ml)(part 5))
 ```
 
 ### Binary methods
