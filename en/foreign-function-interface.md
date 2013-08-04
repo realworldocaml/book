@@ -341,37 +341,32 @@ view wraps the C type `char *` (written in OCaml as `ptr char`), and converts
 between the C and OCaml string representations each time the value is written
 or read.
 
-Here is the type signature of the `view` function.
+Here is the type signature of the `Ctypes.view` function.
 
-```ocaml
-(* Ctypes *)
-val view : read:('a -> 'b) -> write:('b -> 'a) -> 'a typ -> 'b typ
+```frag
+((typ ocaml)(name ctypes/ctypes.mli)(part 2))
 ```
 
-Next, we have the conversion functions to convert between an OCaml `string` and
-a C character buffer.
+Ctypes has some internal low-level functions conversion functions that map
+between an OCaml `string` and a C character buffer by copying the contents
+into the respective data structure.  They have the following type signature.
 
-```ocaml
-val string_of_char_ptr : char ptr -> string
-val char_ptr_of_string : string -> char ptr
+```frag
+((typ ocaml)(name ctypes/ctypes.mli)(part 3))
 ```
 
-The definition of `string` that uses views is quite simple and is written using
-these conversion functions.
+Given these functions, the definition of the `Ctypes.string` value that uses
+views is quite simple.
 
-```ocaml
-let string = 
-  view 
-    ~read:string_of_char_ptr 
-    ~write:char_ptr_of_string 
-    (char ptr)
+```frag
+((typ ocaml)(name ctypes/ctypes_impl.ml)(part 0))
 ```
 
-The type of this `string` function is a normal `typ`, with no external sign of
-the use of the view function.
+The type of this `string` function is a normal `typ` with no external sign of
+the use of the view function. 
 
-```ocaml
-val string : string typ
+```frag
+((typ ocaml)(name ctypes/ctypes.mli)(part 4))
 ```
 
 <note>
@@ -388,7 +383,10 @@ encountered.
 
 This means you need to be careful when passing OCaml strings to C buffers that
 don't contain any null values within the OCaml string, or else the C string
-will be truncated at the first null instance.
+will be truncated at the first null instance.  Ctypes also defaults to a *copying*
+interface for strings, which means that you shouldn't use them when you want
+the library to mutate the buffer in-place.  In that situation, use the Ctypes
+`Bigarray` support to pass memory by reference instead.
 
 </note>
 

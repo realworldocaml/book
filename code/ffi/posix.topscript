@@ -23,5 +23,3 @@ ctime (time' ()) ;;
 let t_ptr = allocate time_t (time' ()) ;;
 #part 7
 ctime t_ptr ;;
-
-
