@@ -462,7 +462,7 @@ initial value, and it returns a suitably-typed pointer.  We can now call
 
 ### Using views to map complex values
 
-While scalar types typically have a 1-1 representation, other C types require
+While scalar types typically have a 1:1 representation, other C types require
 extra work to convert them into OCaml. Views create new C type descriptions
 that have special behavior when used to read or write C values.
 
