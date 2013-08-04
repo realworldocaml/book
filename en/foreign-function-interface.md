@@ -512,7 +512,7 @@ perspective, they're very different in terms of their memory representations.
 
 OCaml strings are stored in the OCaml heap with a header that explicitly
 defines their length.  C buffers are also fixed-length, but by convention a C
-string is terminated by a null (a `0` byte) character.  The C string functions
+string is terminated by a null (a `\0` byte) character.  The C string functions
 calculate their length by scanning the buffer until the first null character is
 encountered.
 
