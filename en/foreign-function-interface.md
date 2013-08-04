@@ -84,12 +84,8 @@ value.
 Let's begin by defining the basic values we need, starting with the `WINDOW`
 state pointer.
 
-```ocaml
-(* ncurses.ml 1/3 *)
-open Ctypes
-
-type window = unit ptr
-let window : window typ = ptr void
+```frag
+((typ ocaml)(name ffi/ncurses.ml)(part 0))
 ```
 
 We don't know the internal representation of the window pointer, so we treat it
@@ -98,12 +94,8 @@ good enough for now.  The second statement defines an OCaml value that
 represents the `WINDOW` C pointer.  This value is used later in the Ctypes
 function definitions.
 
-```ocaml
-(* ncurses.ml 2/3 *)
-open Foreign
-
-let initscr =
-  foreign "initscr" (void @-> returning window)
+```frag
+((typ ocaml)(name ffi/ncurses.ml)(part 1))
 ```
 
 That's all we need to invoke our first function call to `initscr` to initialize
@@ -116,34 +108,8 @@ the terminal.  The `foreign` function accepts two parameters:
 
 The remainder of the Ncurses binding simply expands on these definitions.
 
-```ocaml
-(* ncurses.ml 3/3 *)
-let endwin =
-  foreign "endwin" (void @-> returning void)
-
-let refresh =
-  foreign "refresh" (void @-> returning void)
-
-let wrefresh =
-  foreign "wrefresh" (window @-> returning void)
-
-let newwin =
-  foreign "newwin" (int @-> int @-> int @-> int @-> returning window)
-
-let mvwaddch =
-  foreign "mvwaddch" (window @-> int @-> int @-> char @-> returning void)
-
-let addstr =
-  foreign "addstr" (string @-> returning void)
-
-let mvwaddstr =
-  foreign "mvwaddstr" (window @-> int @-> int @-> string @-> returning void)
-
-let box =
-  foreign "box" (window @-> int @-> int @-> returning void)
-
-let cbreak =
-  foreign "cbreak" (void @-> returning void)
+```frag
+((typ ocaml)(name ffi/ncurses.ml)(part 2))
 ```
 
 These definitions are all straightforward mappings from the C declarations in
@@ -153,30 +119,23 @@ specific length) onto C character buffers (whose length is defined by a
 terminating null character that immediately follows the string data).
 
 The module signature for `ncurses.mli` looks much like a normal OCaml
-signature. You can infer it directly from the `ncurses.ml` by running:
+signature. You can infer it directly from the `ncurses.ml` by running
+a special build target.
 
-```console
-$ ocamlfind ocamlc -i -package ctypes.foreign ncurses.ml
+```frag
+((typ console)(name ffi/infer_ncurses.out))
 ```
 
-The OCaml signature can be customized to improve its safety for external
-callers by making some of its internals more abstract.
+The `inferred.mli` target instructs the compiler to generate the default
+signature for a module file, and places it in the `_build` directory as a
+normal output.  You should normally copy it out into your source directory and
+customize it improve its safety for external callers by making some of its
+internals more abstract.
 
-```ocaml
-(* ncurses.mli *)
-type window
+Here's the customized interface that we can safely use from other libraries.
 
-val window    : window Ctypes.typ
-val initscr   : unit   -> window
-val endwin    : unit   -> unit
-val refresh   : unit   -> unit
-val wrefresh  : window -> unit
-val newwin    : int    -> int -> int -> int -> window
-val mvwaddch  : window -> int -> int -> char -> unit
-val addstr    : string -> unit
-val mvwaddstr : window -> int -> int -> string -> unit
-val box       : window -> int -> int -> unit
-val cbreak    : unit   -> unit
+```frag
+((typ ocaml)(name ffi/ncurses.mli))
 ```
 
 The `window` type is left abstract in the signature to ensure that window
