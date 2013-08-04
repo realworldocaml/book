@@ -637,10 +637,10 @@ val gettimeofday : timeval structure ptr -> timezone structure ptr -> int = <fun
 ```
 
 You need to be a little careful not to get all the open modules mixed up here.
-Both Pervasives and Ctypes define different `float` functions.  The Ctypes
-module we opened up earlier overrides the Pervasives definition.  As seen above
-though, you just need to locally open Pervasives again to bring the usual
-`float` function back in scope,
+Both `Pervasives` and `Ctypes` define different `float` functions.  The
+`Ctypes` module we opened up earlier overrides the `Pervasives` definition.  As
+seen above though, you just need to locally open `Pervasives` again to bring
+the usual `float` function back in scope,
 
 #### Recap: a time-printing command
 
