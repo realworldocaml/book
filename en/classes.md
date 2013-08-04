@@ -393,7 +393,9 @@ implemented.  This should not be confused with the word `virtual` as it is used
 in C++.  In C++, a `virtual` method uses dynamic dispatch, while regular
 non-virtual methods are statically dispatched.  In OCaml, _all_ methods use
 dynamic dispatch, but the keyword `virtual` means that the method or field is
-not implemented.
+not implemented.  A class containing virtual methods must also be flagged
+`virtual` and cannot be directly instantiated (i.e. no object of this class can
+be created).
 
 To explore this, lets extend our shapes examples to simple interactive
 graphics.  We will use the Async concurrency library and the
