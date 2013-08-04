@@ -249,7 +249,7 @@ is.  The coercion `:>` must be explicit.
 ```
 
 This form of object subtyping is called _width_ subtyping. Width
-subtyping means that an object type _A_ is a a subtype of _B_, if _A_
+subtyping means that an object type _A_ is a subtype of _B_, if _A_
 has all of the methods of _B_, and possibly more.  A `square` is a
 subtype of `shape` because it implements all of the methods of `shape`
 (the `area` method).
@@ -431,7 +431,7 @@ to define a method to return the name of the shape.  Instead of
 calling `GetShapeName(s)`, we should call `s.Name()` instead.
 
 However, the situation is not always so obvious.  The following code
-checks whether an array of shapes looks like a "barbell," composed to
+checks whether an array of shapes looks like a "barbell," composed of
 two `Circle` objects separated by a `Line`, where the circles have the
 same radius.
 
