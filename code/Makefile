@@ -41,7 +41,8 @@ dirs= json \
       functors \
       fcm \
       async \
-      ffi
+      ffi \
+      ctypes
 
 # html/md files directory
 OBJ=         _build

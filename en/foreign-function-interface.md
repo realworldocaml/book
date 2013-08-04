@@ -113,14 +113,19 @@ The remainder of the Ncurses binding simply expands on these definitions.
 ```
 
 These definitions are all straightforward mappings from the C declarations in
-the Ncurses header file.  The scalar C types such as `int` come pre-defined in
-Ctypes. The `string` in these definitions maps from OCaml strings (which have a
-specific length) onto C character buffers (whose length is defined by a
-terminating null character that immediately follows the string data).
+the Ncurses header file.  Note that the `string` and `int` values here are
+nothing to do with OCaml type declarations; instead, they are values that come
+from opening the `Ctypes` module at the top of the file.
+
+Most of the parameters in the Ncurses example represent fairly simple scalar C
+types except for `window` (a pointer to the library state), and `string`, which
+maps from OCaml strings that have a specific length onto C character buffers
+whose length is defined by a terminating null character that immediately
+follows the string data.
 
 The module signature for `ncurses.mli` looks much like a normal OCaml
-signature. You can infer it directly from the `ncurses.ml` by running
-a special build target.
+signature. You can infer it directly from the `ncurses.ml` by running a special
+build target.
 
 ```frag
 ((typ console)(name ffi/infer_ncurses.out))
@@ -196,9 +201,8 @@ chapter by using some POSIX date functions as running examples.
 First, let's look at how to define basic scalar C types.  Every C type is
 represented by an OCaml equivalent via the single type definition below.
 
-```ocaml
-(* Ctypes *)
-type 'a typ
+```frag
+((typ ocaml)(name ctypes/ctypes.mli)(part 0))
 ```
 
 `Ctypes.typ` is the type of values that represents C types to OCaml.  There are
@@ -208,48 +212,21 @@ two types associated with each instance of `typ`:
 * the corresponding OCaml type.  The `'a` type parameter contains the OCaml type
   such that a value of type `t typ` is used to read and write OCaml values of type `t`.
 
-There are various other uses of `typ` values within Ctypes.
+There are various other uses of `typ` values within Ctypes, such as:
 
 * constructing function types for binding native functions.
 * constructing pointers for reading and writing locations in C-managed storage.
-* describing the fields of arrays, structures and unions.
+* describing component fields of structures, unions and arrays.
 
 Here are the definitions for most of the standard C99 scalar types, including
 some platform-dependent ones.
 
-```ocaml
-(* Ctypes *)
-val void  : unit typ
-val char : char typ
-val schar : int typ
-val short : int typ
-val int   : int typ
-val long  : long typ
-val llong  : llong typ
-val nativeint : nativeint typ
-
-val int8_t : int typ
-val int16_t : int typ
-val int32_t : int32 typ
-val int64_t : int64 typ
-val uchar : uchar typ
-val uchar : uchar typ
-val uint8_t : uint8 typ
-val uint16_t : uint16 typ
-val uint32_t : uint32 typ
-val uint64_t : uint64 typ
-val size_t : size_t typ
-val ushort : ushort typ
-val uint : uint typ
-val ulong : ulong typ
-val ullong : ullong typ
-
-val float : float typ
-val double : float typ
+```frag
+((typ ocaml)(name ctypes/ctypes.mli)(part 1))
 ```
 
-These values are all of type `'a typ`, where the value name (_e.g._ `void`) tells
-you the C type and the `'a` component (_e.g._ `unit`) is the OCaml
+These values are all of type `'a typ`, where the value name (_e.g._ `void`)
+tells you the C type and the `'a` component (_e.g._ `unit`) is the OCaml
 representation of that C type.  Most of the mappings are straightforward, but
 some of them need a bit more explanation.
 
