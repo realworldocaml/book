@@ -431,7 +431,7 @@ to define a method to return the name of the shape.  Instead of
 calling `GetShapeName(s)`, we should call `s.Name()` instead.
 
 However, the situation is not always so obvious.  The following code
-checks whether an array of shapes looks like a "barbell," composed to
+checks whether an array of shapes looks like a "barbell," composed of
 two `Circle` objects separated by a `Line`, where the circles have the
 same radius.
 
