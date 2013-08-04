@@ -54,6 +54,7 @@ mly_src=      $(wildcard $(dirs:%=%/*.mly))
 json_src=     $(wildcard $(dirs:%=%/*.json))
 java_src=     $(wildcard $(dirs:%=%/*.java))
 c_src=        $(wildcard $(dirs:%=%/*.c))
+h_src=        $(wildcard $(dirs:%=%/*.h))
 asm_src=      $(wildcard $(dirs:%=%/*.S))
 cmd_src=      $(wildcard $(dirs:%=%/*.cmd))
 cpp_src=      $(wildcard $(dirs:%=%/*.cpp))
@@ -69,7 +70,7 @@ rawtscripts=   $(wildcard $(dirs:%=%/*.rawscript))
 
 all_src=      $(ml_src) $(mli_src) $(json_src) $(java_src) $(c_src) \
 	      $(cmd_src) $(cpp_src) $(atd_src) $(scm_src) $(syn_src) \
-	      $(ascii_src) $(asm_src) $(mll_src) $(mly_src)
+	      $(ascii_src) $(asm_src) $(mll_src) $(mly_src) $(h_src)
 all_scripts=  $(scripts:%.sh=%.out) $(errscripts:%.errsh=%.out) \
 	      $(topscripts) $(rawtscripts) $(rawscripts:%.rawsh=%.out)
 
@@ -141,6 +142,10 @@ $(OBJ)/%.S.0.html: %.S
 	$(highlight) -builddir $(OBJ) -pygments gas $< || (cat $@ && rm -f $@)
 
 $(OBJ)/%.c.0.html: %.c
+	@mkdir -p $(@D)
+	$(highlight) -builddir $(OBJ) -pygments c $< || (cat $@ && rm -f $@)
+
+$(OBJ)/%.h.0.html: %.h
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -pygments c $< || (cat $@ && rm -f $@)
 
