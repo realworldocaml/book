@@ -145,66 +145,41 @@ to an Ncurses library call.
 
 Now compile a "hello world" terminal drawing program to tie this all together.
 
-```ocaml
-(* hello.ml *)
-open Ncurses
-
-let () =
-  let main_window = initscr () in
-  cbreak ();
-  let small_window = newwin 10 10 5 5 in
-  mvwaddstr main_window 1 2 "Hello";
-  mvwaddstr small_window 2 2 "World";
-  box small_window 0 0;
-  refresh ();
-  Unix.sleep 1;
-  wrefresh small_window;
-  Unix.sleep 5;
-  endwin ()
+```frag
+((typ ocaml)(name ffi/hello.ml))
 ```
 
-The `hello` executable is compiled by linking against the `ctypes.foreign`
+The `hello` executable is compiled by linking with the `ctypes.foreign`
 OCamlfind package.
 
-```console
-$ ocamlfind ocamlopt -linkpkg -package ctypes.foreign -cclib -lncurses \
-    ncurses.mli ncurses.ml hello.ml -o hello
+```frag
+((typ console)(name ffi/build_hello.out))
 ```
 
-Running `./hello` should now display a Hello World in your terminal!
+Running `./hello.native` should now display a Hello World in your terminal!
 
 <note>
-<title>Reliable dynamic linking of external libraries</title>
+<title>On build directives for Ctypes</title>
 
-The command-line above includes `-cclib -lncurses` to make the OCaml compiler
-link the executable to the `ncurses` C library, which in turns makes the C
-symbols available to the program when it starts.  You'll get an error when you
-run the binary if you omit that link directive.
+The command-line above include some important extra link directives.  The
+`-lflags` instructs `ocamlbuild` to pass the next comma-separated set of
+arguments through to the `ocaml` command when linking a binary.  OCaml in turn
+uses `-cclib` to pass directives through to the system compiler (normally `gcc`
+or `clang`).  We first need to link to the `ncurses` C library to make the
+symbols available to Ctypes, and `-cclib,-lncurses` does that.
 
-```console
-$ ocamlfind ocamlopt -linkpkg -package ctypes -package unix \
-  ncurses.mli ncurses.ml hello.ml -o hello_broken
-$ ./hello_broken 
-Fatal error: exception Dl.DL_error("dlsym(RTLD_DEFAULT, initscr): symbol not found")
-```
+The next two directives pass `-Wl --no-as-needed` to the system C compiler.  The
+`-Wl` is interpreted by the compiler as a directive for the system linker `ld`,
+to which it passes `--no-as-needed`.  Several modern OS distributions (such as
+Ubuntu 11.10 onwards) configure the system linker to only link in libraries
+that directly contain symbols used by the program.  However, when we use
+Ctypes, those symbols are not referenced until runtime, which results an
+exception due to the library not being available.
 
-There's one additional twist on modern versions of GCC (as included in recent
-Ubuntus).  The `--as-needed` flag is passed to the linker by default, which
-instructs it to only link libraries that actually contain symbols used by the
-program at build time.  This must be disabled when using Ctypes 0.1, as it will
-drop any libraries that might be opened at runtime by the `foreign` function.
-
-So on Ubuntu, you'll need to compile with this option disabled to ensure that
-the Ncurses library dependency isn't dropped at compile time.
-
-```console
-$ ocamlfind ocamlopt -linkpkg -package ctypes.foreign \
-    -cclib '-Wl,--no-as-needed -lncurses' \
-    ncurses.mli ncurses.ml hello.ml -o hello
-```
-
-*Note to reviewers*: this will be fixed in a future Ctypes release, so is
-only needed when using Ctypes 0.1.
+The `--no-as-needed` flag disables this behavior and ensures all the specified
+libraries are linked despite not being directly used.  The flag isn't needed on
+all operating systems, but should be recognized by all modern linkers and not
+cause any harm if you specify it by default.
 
 </note>
 

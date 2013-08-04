@@ -8,5 +8,5 @@ val newwin : int -> int -> int -> int -> window
 val mvwaddch : window -> int -> int -> char -> unit
 val addstr : string -> unit
 val mvwaddstr : window -> int -> int -> string -> unit
-val box : window -> int -> int -> unit
-val cbreak : unit -> unit
+val box : window -> char -> char -> unit
+val cbreak : unit -> int
