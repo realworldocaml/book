@@ -42,7 +42,7 @@ C++, Java, C#, Ruby, Python or JavaScript.
 
 </note>
 
-## OCaml objects ##
+## OCaml objects
 
 If you already know about object oriented programming in a language like Java
 or C++, the OCaml object system may come as a surprise.  Foremost is the
@@ -78,9 +78,14 @@ object) uses the `#` character.
 ((typ ocamltop)(name objects/stack.topscript)(part 2))
 ```
 
-Objects can also be constructed by functions.  If we want to specify
-the initial value of the object, we can define a function that takes
-the value and returns an object.
+Note that unlike functions, methods can have zero parameters, since the method
+call is routed to a concrete object instance.  That's why the `push` and `pop`
+methods do not have a `unit` argument, as the equivalent functional versions
+would.
+
+Objects can also be constructed by functions.  If we want to specify the
+initial value of the object, we can define a function that takes the value and
+returns an object.
 
 ```frag
 ((typ ocamltop)(name objects/stack.topscript)(part 3))
