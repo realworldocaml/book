@@ -1,11 +1,12 @@
 type value = [
   | `Assoc of (string * value) list
-  | `List of value list
-  | `String of string
-  | `Int of int
-  | `Float of float
   | `Bool of bool
-  | `Null ]
+  | `Float of float
+  | `Int of int
+  | `List of value list
+  | `Null
+  | `String of string
+]
 
 (* part 1 *)
 open Core.Std

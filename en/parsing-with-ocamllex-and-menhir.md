@@ -1,111 +1,104 @@
 # Parsing with OCamllex and Menhir
 
-Parsing is an important 
+Many programming tasks start with the interpretion of some form of
+structured textual data.  _Parsing_ is the process of converting such
+data into data structures that are easy to program against.  For
+simple formats, it's often enough to parse the data in an ad-hoc way,
+_e.g._, by breaking up the data into lines, and then using regular
+expressions for breaking those lines down into their component pieces.
 
-```
-CR yminsky: The use of lex and yacc throughout the early part of the
-chapter is a little confusing.  Are we talking about lex and yacc
-specifically?  Or lex-and-yacc-like tools?  All told I'd prefer we
-spoke less about lex and yacc, and more about lexing and parsing.
-```
+But this simplistic approach tends to fall down when parsing more
+complicated data, particularly data with the kind of recursive
+structure you find in full-blown programming languages or flexible
+data formats like JSON and XML.  Parsing such formats accurately and
+efficiently while providing useful error messages is a complex task.
 
-OCaml provides lexer and parser generators modeled on the traditional
-UNIX parsing tools lex and yacc.  Similar tools are available in a
-variety of languages, and with them you can parse a variety of kinds
-of input, from simple web formats like XML and JSON to full blown
-programming languages.
+Often, you can find an existing parsing library that handles these
+issues for you, as we did in [xref](#handling-json-data).  But there
+are tools to help simplify the task when you do need to write a
+parser, in the form of _parser generators_.  A parser generator takes
+a _grammar_, which is a specification of the data format that you want
+to parse, and uses that to generate a parser.
 
-In this chapter, you'll learn how to:
-
-* convert input into a structured token stream using `ocamllex`
-* parse a token stream into an OCaml data structure using `menhir`
-* handle simple errors in the input data
-
-We'll do this in the course of walking through the implementation of a
-parser for the JSON format.
+Parser generators have a long history, including venerable tools like
+`lex` and `yacc` that date back to the early 1970's.  OCaml has its
+own alternatives, including `ocamllex`, which replaces `yacc`, and
+`ocamlyacc` and `menhir`, which are replacements for `yacc`.  which
+We'll explore these tools in the course of walking through the
+implementation of a parser for the JSON format.
 
 ## Lexing and parsing
 
-Let's be more precise about some of these terms.  By _parsing_, we
-mean reading a textual input into a form that is easier for a program
-to manipulate.
+Parsing is traditionally broken down into two parts: _lexical
+analysis_, which is a kind of simplified parsing phase that converts a
+stream of characters into a stream of logical tokens; and full-on
+parsing, which involves converting a stream of tokens into the final
+representation, which is often in the form of a tree-like
+data-structure called an _abstract syntax-tree_, or AST.  
 
-For example, suppose we want to read a file containing a value in JSON
-format.  JSON has a variety of kinds of values, including numbers,
-strings, arrays, and objects, each with its own textual
-representation.  For example, the following text represents an object
-containing a string labeled `title`, and an array containing two
-objects, each with a name and array of zip codes.
+It's confusing that the term parsing is applied to both the overall
+process of converting textual data to structured data, and also more
+specifically to the second phase of converting a stream of tokens to
+an AST, so from here on in, we'll use the term parsing to refer only
+to this second phase.
+
+Let's consider these two phases in the context of the JSON format.  As
+discussed in [xref](#handling-json-data), JSON has a variety of kinds
+of values, including numbers, strings, arrays, and objects, each with
+its own textual representation.  For example, the following text
+represents an object containing a string labeled `title`, and an array
+containing two objects, each with a name and array of zip codes.
 
 ```frag
 ((typ json)(name parsing/example.json))
 ```
 
-The input text starts out as a string, which is essentially a sequence
-of characters.  But this form of the data is awkward to work with.
-For example, it would be painful to write a function that found the
-set of zip-codes for a given city by just searching through the
-sequence of characters.  But this kind of task is quite a lot easier
-when it's done against a more structured representation.  In this
-case, we'll use the following type to represent an arbitrary JSON
-value.
+We could use a type like the following for specifying a token.
 
 ```frag
-((typ ocaml)(name parsing/json.ml)(part 0))
+((typ ocaml)(name parsing/manual_token_type.ml))
 ```
 
-### Lexical Analysis
+Note that this representation loses some information about the
+original text.  For example, white space is not represented.  It's
+common, and indeed useful, for the token stream to forget some details
+of the original text that are not required for understanding its
+meaning.
 
-```
-# CR yminsky: Hrm.  This is awkward.  We're defining parsing as both
-# parsing+lexing, as well as just the parsing phase (ex lexing).  Not
-# sure how to clean that up.
-```
-
-The overall objective of _parsing_ is to convert the text input into a
-value of type `value`.  This is normally done in two phases.
-
-First, _lexical_ analysis (or lexing, for short) is used to convert the text
-input into a sequence of tokens, or words.  For example, the JSON input would
-be tokenized into a sequence of tokens like the following.  In most cases (and
-in this example), lexical analysis will choose to omit white space from the
-token stream.
+If we converted the above example into a list of these tokens, it
+would look something like this.
 
 ```frag
 ((typ ocaml)(name parsing/tokens.ml))
 ```
 
-### Parsing
+This kind of representation is easier to work with than the original
+text, since it gets rid of some unimportant syntactic details and adds
+useful structure.  But it's still a good deal more low-level than the
+kind of tree data structure we used for representing JSON data in
+[xref](#handling-json-data), shown below.
 
-The next step is to convert the token stream into a program value that
-represents the abstract syntax tree, like the type `value` above.  This is
-called _parsing_.
+```frag
+((typ ocaml)(name parsing/json.ml)(part 0))
+```
+
+The above type is effectively an AST, and the job of the parser we'll
+write will be to convert a token stream into a value of this type, as
+shown below.
 
 ```frag
 ((typ ocaml)(name parsing/parsed_example.ml))
 ```
 
-There are many techniques for lexing and parsing that have a variety of
-tradeoffs in the complexity of grammars that they can express, how well they
-handle malformed input, and also how resource-intensive the parsing process is.
+There are many techniques for lexing and parsing that have a variety
+of tradeoffs in the complexity of grammars that they can express, how
+well they handle malformed input, and also how resource-intensive the
+parsing process is.
 
-In the lex/yacc world, lexing is specified using regular expressions, and
-parsing is specified using context-free grammars.  These are concepts from
-formal languages, but the lex/yacc tools construct much of the machinery for
-you by generating OCaml code from your specifications.  For lex, this means
-constructing a _finite automaton_; and for yacc, this means constructing a
-_pushdown automaton_.
-
-Parsing is a broad and often intricate topic, and our purpose here is
-not to teach all of the ins and outs of lex and yacc, but to show how
-to use these tools in OCaml.  There are online resources for the
-theoretical background, and most experience you may have using
-lex/yacc in other languages will also apply in OCaml.  However, there
-are differences, and we'll try to point out the larger ones here.
-
-For illustration, let's continue with the JSON example.  For lexing,
-we'll use `ocamllex`, and for parsing, we'll use Menhir, which is the
-modern alternative to `ocamlyacc`.
+In our case, we'll use `ocamllex` for the lexical analysis phase, and
+`menhir` to generate our parser.  `menhir` is a more modern
+alternative to `ocamlyacc`, which is shipped along with `ocamllex`
+with the OCaml compiler.
 
 <note>
 <title>Menhir _vs_ `ocamlyacc`</title>
@@ -128,11 +121,11 @@ running `opam install menhir`.
 
 ## Defining a JSON parser with Menhir
 
-The process of building a parser is interleaved between constructing the lexer
-and parser; you will have to do them simultaneously.  The first step is to
-define the set of tokens that will be produced by the lexer.  For various
-reasons, the tokens are specified by the parser (to specify what it expects as
-input), so we'll start with the parser first.
+The process of building a parser is interleaved between constructing
+the lexer and parser.  The first step is to define the set of tokens
+that will be produced by the lexer.  For various reasons, the tokens
+are specified by the parser (to specify what it expects as input), so
+we'll start with the parser first.
 
 A parser file has suffix `.mly` (we'll use the name `parser.mly`) and it
 contains several parts in the following sequence:
@@ -146,14 +139,10 @@ contains several parts in the following sequence:
 ((typ ocamlsyntax)(name parsing/yacc.syntax))
 ```
   
-The `%%` are section separators; they have to be on a line by themselves.  The
-declarations include token and type specifications, precedence directives, and
-other things, but we start by declaring the tokens.
-
-```
-# CR yminsky: "and other things" is something of a weak phrase.  Can
-# we say something about the nature of the other things?
-```
+The `%%` are section separators; they have to be on a line by
+themselves.  The declarations include token and type specifications,
+precedence directives, and other output directives.  We'll start by
+just declaring the tokens.
 
 ### Token declarations
 
