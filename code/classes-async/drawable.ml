@@ -19,6 +19,4 @@ let () =
 let open_display () =
   close_graph ();
   open_graph "";
-  auto_synchronize false;
-  if not (Scheduler.is_running ()) then
-    ignore (Thread.create Scheduler.go ())
+  auto_synchronize false

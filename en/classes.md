@@ -444,13 +444,13 @@ Here is the more succinct definition, starting with a virtual `square` class
 that implements `on_click` and `on_mousedown`.
 
 ```frag
-((typ ocaml)(name classes-async/succinct_shapes.ml)(part 0))
+((typ ocaml)(name classes-async/shapes.ml)(part 0))
 ```
 
 Now we can define `square` and `circle` by inheriting from `shape`.
 
 ```frag
-((typ ocaml)(name classes-async/succinct_shapes.ml)(part 1))
+((typ ocaml)(name classes-async/shapes.ml)(part 1))
 ```
 
 One way to view a `virtual` class is that it is like a functor, where
@@ -480,7 +480,7 @@ from `circle` and used the inherited `on_click` to add a handler for click
 events.
 
 ```frag
-((typ ocaml)(name classes-async/succinct_shapes.ml)(part 2))
+((typ ocaml)(name classes-async/shapes.ml)(part 2))
 ```
 
 ## Multiple inheritance
@@ -568,139 +568,77 @@ this functionality for any object which has mutable `x` and `y` fields and an
 `on_mousedown` method for adding event handlers:
 
 ```frag
-((typ ocaml)(name classes-async/succinct_shapes.ml)(part 3))
+((typ ocaml)(name classes-async/shapes.ml)(part 3))
 ```
 
 This allows us to create draggable shapes using multiple inheritance.
 
-```ocaml
-# class small_square = object inherit square 10 20 20 inherit draggable end;;
-class small_square :
-  object
-    val mutable dragging : bool
-    val mutable width : int
-    val mutable x : int
-    val mutable y : int
-    method private contains : int -> int -> bool
-    method dragging : bool
-    method draw : unit
-    method on_click :
-      ?start:unit Async.Std.Deferred.t ->
-      ?stop:unit Async.Std.Deferred.t -> (int -> int -> unit) -> unit
-    method on_mousedown :
-      ?start:unit Async.Std.Deferred.t ->
-      ?stop:unit Async.Std.Deferred.t -> (int -> int -> unit) -> unit
-    method width : int
-    method x : int
-    method y : int
-  end
-# shapes := (new small_square :> drawable) :: !shapes;;
-- : unit = ()
+```frag
+((typ ocaml)(name classes-async/shapes.ml)(part 4))
 ```
 
-We can also use mixins to create animated shapes. Each animated shape
-has a list of update functions to be called during animation. We
-create an `animated` mixin to provide this update list and ensure
-that the functions in it are called regular intervals when the shape
-is animated.
+We can also use mixins to create animated shapes. Each animated shape has a
+list of update functions to be called during animation. We create an `animated`
+mixin to provide this update list and ensure that the functions in it are
+called regular intervals when the shape is animated.
 
-```ocaml
-class virtual animated span = object (self)
-  method virtual on_click: 
-    ?start:unit Deferred.t -> 
-    ?stop:unit Deferred.t -> 
-    (int -> int -> unit) -> unit
-  val mutable updates: (int -> unit) list = []
-  val mutable step = 0
-  val mutable running = false
-
-  method running = running
-
-  method animate = 
-    step <- 0;
-    running <- true;
-    let stop = Clock.after span >>| fun () -> running <- false in    
-      Clock.every ~stop (Time.Span.of_sec (1.0 /. 24.0)) 
-        (fun () -> 
-           step <- step + 1;
-           List.iter ~f:(fun f -> f step) updates)
-
-  initializer 
-    self#on_click (fun x y -> if not self#running then self#animate)
-end
+```frag
+((typ ocaml)(name classes-async/shapes.ml)(part 5))
 ```
 
 We use initializers to add functions to this update list. For
 example, this class will produce circles that move to the right for a
 second when clicked:
 
-```ocaml
-class my_circle = object
-  inherit circle 20 50 50
-  inherit animated Time.Span.second
-  initializer updates <- [fun _ -> x <- x + 5]
-end
+```frag
+((typ ocaml)(name classes-async/shapes.ml)(part 6))
 ```
 
 This initializers can also be added using mixins:
 
-```ocaml
-class virtual linear x' y' = object (self)
-  val virtual mutable updates: (int -> unit) list
-  val virtual mutable x: int
-  val virtual mutable y: int
-
-  initializer 
-    let update _ = 
-      x <- x + x';
-      y <- y + y'
-    in
-      updates <- update :: updates
-end
-
-let pi = (atan 1.0) *. 4.0
-
-class virtual harmonic offset x' y' = object (self)
-  val virtual mutable updates: (int -> unit) list
-  val virtual mutable x: int
-  val virtual mutable y: int
-
-  initializer 
-    let update step =
-      let m = sin (offset +. ((Float.of_int step) *. (pi /. 64.))) in
-      let x' = Float.to_int (m *. Float.of_int x') in
-      let y' = Float.to_int (m *. Float.of_int y') in
-        x <- x + x';
-        y <- y + y'
-    in
-      updates <- update :: updates
-end
+```frag
+((typ ocaml)(name classes-async/shapes.ml)(part 7))
 ```
 
 Since the `linear` and `harmonic` mixins are only used for there
 side-effects, they can be inherited multiple times within the same
 object to produce a variety of different animations.
 
-```ocaml
-class my_square x y = object (self)
-  inherit square 40 x y
-  inherit draggable
-  inherit animated (Time.Span.of_int_sec 5)
-  inherit linear 5 0
-  inherit harmonic 0.0 7 ~-10
-end
-
-let my_circle = object
-  inherit circle 30 250 250
-  inherit animated (Time.Span.minute)
-  inherit harmonic 0.0 10 0
-  inherit harmonic (pi /. 2.0) 0 10
-end
-
-shapes := [(my_circle :> drawable); 
-           (new my_square 50 450 :> drawable); 
-           (new my_square 50 400 :> drawable)]
+```frag
+((typ ocaml)(name classes-async/shapes.ml)(part 8))
 ```
+
+Now all we have to do is to glue it together by initializing the
+display, creating some shapes, and running the scheduler.
+
+```frag
+((typ ocaml)(name classes-async/shapes.ml)(part 9))
+```
+
+Finally, build the binary by linking against the `async_graphics` package,
+which will pull in all the other dependencies.
+
+```frag
+((typ console)(name classes-async/build_shapes.out))
+```
+
+When you run the binary, a new graphical window should appear (on MacOS X, you
+will need to install the X11 package first, which you will be prompted for).
+Try clicking on the various widgets, and gasp in awe at the sophisticated
+animations that unfold as a result.
+
+The graphics library described here is the one built into OCaml, and is more
+useful as a learning tool than anything else.  There are several third-party
+libraries that provide more sophisticated bindings to various graphics
+subsystems.
+
+*   [Lablgtk](http://lablgtk.forge.ocamlcore.org) is a strongly-typed interface
+    to the GTK widget library.
+*   [LablGL](https://forge.ocamlcore.org/projects/lablgl/) is an interface between
+    OCaml and OpenGL, a widely supported standard for 3D rendering.
+*   [js_of_ocaml](http://ocsigen.org/js_of_ocaml/api/Js) compiles OCaml code to
+    Javascript, and has bindings to WebGL.  This is the emerging standard for
+    3D rendering in web browsers.
 
 <note>
 <title>Production note</title>
