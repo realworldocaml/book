@@ -38,16 +38,13 @@ the OCaml library.
 
 Once that's done, Ctypes is available via OPAM as usual.
 
-```
-$ brew install libffi     # for MacOS X users
-$ opam install ctypes
-$ utop
-# require "ctypes.foreign" ;;
+```frag
+((typ console)(name ffi/install.out))
 ```
 
 You'll also need the Ncurses library for the first example. This comes
-pre-installed on many operating systems such as MacOS X. Debian Linux provides
-it as the `ncurses-dev` package.
+pre-installed on many operating systems such as MacOS X and Debian Linux
+provides it as the `ncurses-dev` package.
 
 </note>
 
@@ -59,7 +56,7 @@ Pine, and console web browsers such as Lynx.
 
 The full C interface is quite large and is explained in the online
 [documentation](http://www.gnu.org/software/ncurses/).  We'll just use the
-smaller excerpt that's shown below since we just want to demonstrate Ctypes in
+small excerpt that's shown below since we just want to demonstrate Ctypes in
 action.
 
 ```c

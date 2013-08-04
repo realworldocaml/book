@@ -40,7 +40,8 @@ dirs= json \
       back-end-embed \
       functors \
       fcm \
-      async
+      async \
+      ffi
 
 # html/md files directory
 OBJ=         _build
