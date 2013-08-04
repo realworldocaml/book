@@ -41,3 +41,17 @@ val char_ptr_of_string : string -> char ptr
 
 (* part 4 *)
 val string    : string.typ
+
+(* part 5 *)
+module Array : sig
+  type 'a t = 'a array
+
+  val get : 'a t -> int -> 'a
+  val set : 'a t -> int -> 'a -> unit
+  val of_list : 'a typ -> 'a list -> 'a t
+  val to_list : 'a t -> 'a list
+  val length : 'a t -> int
+  val start : 'a t -> 'a ptr
+  val from_ptr : 'a ptr -> int -> 'a t
+  val make : 'a typ -> ?initial:'a -> int -> 'a t
+end

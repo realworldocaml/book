@@ -489,59 +489,14 @@ the usual `float` function back in scope,
 We built up a lot of bindings in the earlier section, so let's recap them
 with a complete example that ties it together with a command-line frontend.
 
-```ocaml
-(* datetime.ml: display time in various formats *)
-open Core.Std
-open Ctypes
-open PosixTypes
-open Foreign
-
-let time     = foreign "time" (ptr time_t @-> returning time_t)
-let difftime = foreign "difftime" (time_t @-> time_t @-> returning double)
-let ctime    = foreign "ctime" (ptr time_t @-> returning string)
-
-type timeval
-let timeval : timeval structure typ = structure "timeval"
-let tv_sec   = timeval *:* long 
-let tv_usec  = timeval *:* long 
-let ()       = seal timeval
-
-type timezone
-let timezone : timezone structure typ = structure "timezone"
-
-let gettimeofday = foreign "gettimeofday"
-    (ptr timeval @-> ptr timezone @-> returning_checking_errno int)
-
-let time' () = time (from_voidp time_t null)
-
-let gettimeofday' () =
-  let tv = make timeval in
-  ignore(gettimeofday (addr tv) (from_voidp timezone null));
-  let secs = Signed.Long.(to_int (getf tv tv_sec)) in
-  let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
-  Pervasives.(float secs +. float usecs /. 1_000_000.)
-
-let float_time () = printf "%f%!\n" (gettimeofday' ())
-
-let ascii_time () =
-  let t_ptr = allocate time_t (time' ()) in
-  printf "%s%!" (ctime t_ptr)
-
-let () =
-  let open Command in
-  basic ~summary:"Display the current time in various formats"
-    Spec.(empty +> flag "-a" no_arg ~doc:" Human-readable output format")
-    (fun human -> if human then ascii_time else float_time)
-  |> Command.run 
+```frag
+((typ ocaml)(name ffi/datetime.ml))
 ```
 
-This can be compiled as usual with ocamlfind and ocamlopt.
+This can be compiled and run in the usual way.
 
-```console
-$ ocamlfind ocamlopt -o datetime -package core -package ctypes.foreign \
-  -thread -linkpkg datetime.ml
-$ ./datetime -a
-Sat Jun  8 19:28:59 2013
+```frag
+((typ ocaml)(name ffi/build_datetime.out))
 ```
 
 <sidebar>
@@ -550,17 +505,15 @@ Sat Jun  8 19:28:59 2013
 The alert reader may be curious why all these function definitions have to be
 terminated by `returning`.
 
-```ocaml
-val time: ptr time_t @-> returning time_t
-val difftime: time_t @-> time_t @-> returning double
+```frag
+((typ ocaml)(name ffi/return_frag.ml)(part 0))
 ```
 
 The `returning` function may appear superfluous here. Why couldn't we simply
 give the types as follows?
 
-``` ocaml
-val time: ptr time_t @-> time_t
-val difftime: time_t @-> time_t @-> double
+```frag
+((typ ocaml)(name ffi/return_frag.ml)(part 1))
 ```
 
 The reason involves higher types and two differences between the way that
@@ -572,43 +525,34 @@ an actual function.
 Secondly, OCaml functions are typically defined in a curried style. The signature of 
 a two-argument function is written as follows:
 
-``` ocaml
-val curried : int -> int -> int
+```frag
+((typ ocaml)(name ffi/return_frag.ml)(part 2))
 ```
 
 but this really means
 
-``` ocaml
-val curried : int -> (int -> int)
+```frag
+((typ ocaml)(name ffi/return_frag.ml)(part 3))
 ```
 
 and the arguments can be supplied one at a time to create a closure.  In
 contrast, C functions receive their arguments all at once.  The equivalent C
 function type is the following:
 
-```c
-int uncurried_C(int, int);
+```frag
+((typ c)(name ffi/return_c_frag.h))
 ```
 
 and the arguments must always be supplied together:
 
-```c
-uncurried_C(3, 4);
+```frag
+((typ c)(name ffi/return_c_frag.c))
 ```
 
 A C function that's written in curried style looks very different:
 
-```c
-/* A function that accepts an int, and returns a function pointer that
-   accepts a second int and returns an int. */
-typedef int (function_t)(int);
-function_t *curried_C(int);
-
-/* supply both arguments */
-curried_C(3)(4);
-
-/* supply one argument at a time */
-function_t *f = curried_C(3); f(4);
+```frag
+((typ c)(name ffi/return_c_uncurried.c))
 ```
 
 The OCaml type of `uncurried_C` when bound by Ctypes is `int -> int -> int`: a
@@ -628,19 +572,8 @@ function definitions.
 Arrays in C are contiguous blocks of the same value.  Any of the basic types
 defined earlier can be allocated as blocks via the `Array` module.
 
-```ocaml
-module Array : sig
-  type 'a t = 'a array
-
-  val get : 'a t -> int -> 'a
-  val set : 'a t -> int -> 'a -> unit
-  val of_list : 'a typ -> 'a list -> 'a t
-  val to_list : 'a t -> 'a list
-  val length : 'a t -> int
-  val start : 'a t -> 'a ptr
-  val from_ptr : 'a ptr -> int -> 'a t
-  val make : 'a typ -> ?initial:'a -> int -> 'a t
-end
+```frag
+((typ ocaml)(name ctypes/ctypes.mli)(part 5))
 ```
 
 The array functions are similar to the standard library `Array` module except
@@ -680,43 +613,32 @@ It's also straightforward to pass OCaml function values to C.  The C standard
 library function `qsort` has the following signature that requires a function
 pointer to use.
 
-```c
-void qsort(void *base, size_t nmemb, size_t size,
-           int(*compar)(const void *, const void *));
+```frag
+((typ c)(name ffi/qsort.h))
 ```
 
 C programmers often use `typedef` to make type definitions involving function
 pointers easier to read.  Using a typedef, the type of `qsort` looks a little
 more palatable.
 
-```c
-typedef int(compare_t)(const void *, const void *);
-void qsort(void *base, size_t nmemb, size_t size, compare_t *);
+```frag
+((typ c)(name ffi/qsort_typedef.h))
 ```
 
 This also happens to be a close mapping to the corresponding Ctypes definition.
 Since type descriptions are regular values, we can just use `let` in place of
 `typedef` and end up with working OCaml bindings to `qsort`.
 
-```ocaml
-let compare_t = ptr void @-> ptr void @-> returning int
-
-let qsort = foreign "qsort"
-   (ptr void @-> size_t @-> size_t @-> funptr compare_t @-> returning void)
+```frag
+((typ ocamltop)(name ffi/qsort.topscript))
 ```
 
 We only use `compare_t` once (in the `qsort` definition), so you can choose to
 inline it in the OCaml code if you prefer. The resulting `qsort` value is a
-higher-order function, as shown by its type.
-
-```ocaml
-val qsort: void ptr -> size_t -> size_t ->
-           (void ptr -> void ptr -> int) -> unit
-```
-
-As before, let's define a wrapper function to make `qsort` easier to use.  The
-second and third arguments to `qsort` specify the length (number of elements)
-of the array and the element size.
+higher-order function, as shown by its type.  As before, let's define a wrapper
+function to make `qsort` easier to use.  The second and third arguments to
+`qsort` specify the length (number of elements) of the array and the element
+size.
 
 Arrays created using Ctypes have a richer runtime structure than C arrays, so
 we don't need to pass size information around.  Furthermore, we can use OCaml
@@ -727,67 +649,22 @@ polymorphism in place of the unsafe `void ptr` type.
 Below is a command-line tool that uses the `qsort` binding to sort all of
 the integers supplied on the standard input.
 
-```
-(* qsort.ml: quicksort integers from stdin *)
-open Core.Std
-open Ctypes
-open PosixTypes
-open Foreign
-
-let compare_t = ptr void @-> ptr void @-> returning int
-
-let qsort = foreign "qsort"
-   (ptr void @-> size_t @-> size_t @-> funptr compare_t @-> 
-    returning void)
-
-let qsort' cmp arr =
-  let open Unsigned.Size_t in
-  let ty = Array.element_type arr in
-  let len = of_int (Array.length arr) in
-  let elsize = of_int (sizeof ty) in
-  let start = to_voidp (Array.start arr) in
-  let compare l r = cmp (!@ (from_voidp ty l)) (!@ (from_voidp ty r)) in
-  qsort start len elsize compare;
-  arr
-
-let sort_stdin () =
-  In_channel.input_lines stdin
-  |> List.map ~f:int_of_string
-  |> Array.of_list int
-  |> qsort' Int.compare
-  |> Array.to_list
-  |> List.iter ~f:(fun a -> printf "%d\n" a)
-
-let () =
-  Command.basic ~summary:"Sort integers on standard input"
-    Command.Spec.empty sort_stdin
-  |> Command.run
+```frag
+((typ ocaml)(name ffi/qsort.ml))
 ```
 
-Compile it in the usual way with ocamlfind, but also examine the inferred interface
-of the module.
+Compile it in the usual way with corebuild and test it against some input
+data, and also build the inferred interface so we can examine it more closely.
 
-```console
-$ ocamlfind ocamlopt -package core -package ctypes.foreign -thread -linkpkg \
-    -o qsort qsort.ml
-$ ./qsort
-5
-3
-2
-1
-# press <Control-D> to end the standard input
-1
-2
-3
-5
-$ ocamlfind ocamlopt -i -package core -package ctypes.foreign -thread qsort.ml
-val compare_t : (unit Ctypes.ptr -> unit Ctypes.ptr -> int) Ctypes.fn
-val qsort :
-  unit Ctypes.ptr ->
-  PosixTypes.size_t ->
-  PosixTypes.size_t -> (unit Ctypes.ptr -> unit Ctypes.ptr -> int) -> unit
-val qsort' : ('a -> 'a -> int) -> 'a Ctypes.array -> 'a Ctypes.array
-val sort_stdin : unit -> unit
+```frag
+((typ console)(name ffi/build_qsort.out))
+```
+
+The inferred interface shows us the types of the raw `qsort` binding and
+also the `qsort'` wrapper function.
+
+```frag
+((typ ocaml)(name ffi/qsort.mli))
 ```
 
 The `qsort'` wrapper function has a much more canonical OCaml interface than
@@ -805,11 +682,10 @@ scope since we opened `Ctypes` at the start of the file.
 <note>
 <title>Lifetime of allocated Ctypes</title>
 
-Values allocated via Ctypes (_i.e._ using `allocate`, `Array.make` and
-so on) will not be garbage-collected as long as they are reachable
-from OCaml values.  The system memory they occupy is freed when they
-do become unreachable, via a finalizer function registered with the
-GC.
+Values allocated via Ctypes (_i.e._ using `allocate`, `Array.make` and so on)
+will not be garbage-collected as long as they are reachable from OCaml values.
+The system memory they occupy is freed when they do become unreachable, via a
+finalizer function registered with the GC.
 
 The definition of reachability for Ctypes values is a little different from
 conventional OCaml values though.  The allocation functions return an
@@ -823,15 +699,15 @@ protects the whole object from collection.
 A corollary of the above rule is that pointers written into the C heap don't
 have any effect on reachability.  For example, if you have a C-managed array of
 pointers to structs then you'll need some additional way of keeping the structs
-around to protect them from collection.  You could achieve this via a global array
-of values on the OCaml side that would keep them live until they're no longer
-needed.
+around to protect them from collection.  You could achieve this via a global
+array of values on the OCaml side that would keep them live until they're no
+longer needed.
 
 </note>
 
 ## Learning more about C bindings
 
-The Ctypes [distribution](http://github.com/ocamllabs/ocaml-types) contains a
+The Ctypes [distribution](http://github.com/ocamllabs/ocaml-ctypes) contains a
 number of larger-scale examples, including:
 
 * bindings to the POSIX `fts` API which demonstrates C callbacks more comprehensively.
