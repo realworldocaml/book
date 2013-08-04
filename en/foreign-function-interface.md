@@ -189,7 +189,7 @@ conversions, reading and writing through pointers, using OCaml functions as
 function pointers to C code, as well as struct and union definitions.
 
 We'll go over some of these features in more detail for the remainder of the
-chapter, using some POSIX date functions as running examples.
+chapter by using some POSIX date functions as running examples.
 
 ## Basic scalar C types
 
