@@ -249,7 +249,7 @@ is.  The coercion `:>` must be explicit.
 ```
 
 This form of object subtyping is called _width_ subtyping. Width
-subtyping means that an object type _A_ is a a subtype of _B_, if _A_
+subtyping means that an object type _A_ is a subtype of _B_, if _A_
 has all of the methods of _B_, and possibly more.  A `square` is a
 subtype of `shape` because it implements all of the methods of `shape`
 (the `area` method).
