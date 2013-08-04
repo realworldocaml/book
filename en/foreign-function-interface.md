@@ -248,7 +248,7 @@ functions.
 
 We've already seen a simple use of pointers in the Ncurses example.  Let's
 start a new example by binding some POSIX functions.  The `time` function
-returns the current calendar time, and has the following C signature:
+returns the current calendar time and has the following C function prototype:
 
 ```c
 time_t time(time_t *);
