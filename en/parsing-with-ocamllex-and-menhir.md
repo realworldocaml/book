@@ -17,15 +17,39 @@ Often, you can find an existing parsing library that handles these
 issues for you, as we did in [xref](#handling-json-data).  But there
 are tools to help simplify the task when you do need to write a
 parser, in the form of _parser generators_.  A parser generator takes
-a _grammar_, which is a specification of the data format that you want
-to parse, and uses that to generate a parser.
+a specification of the data format that you want to parse, and uses
+that to generate a parser.
 
 Parser generators have a long history, including venerable tools like
 `lex` and `yacc` that date back to the early 1970's.  OCaml has its
 own alternatives, including `ocamllex`, which replaces `yacc`, and
-`ocamlyacc` and `menhir`, which are replacements for `yacc`.  which
-We'll explore these tools in the course of walking through the
+`ocamlyacc` and `menhir`, which are replacements for `yacc`.  We'll
+explore these tools in the course of walking through the
 implementation of a parser for the JSON format.
+
+Parsing is a broad and often intricate topic, and our purpose here is
+not to teach all of the theoretical issues, but to provide a pragmatic
+introduction of how to build a parser in OCaml.
+
+<note>
+<title>Menhir _vs_ `ocamlyacc`</title>
+
+Menhir is an alternative parser generator that is generally superior
+to the venerable `ocamlyacc`, which dates back quite a few years.
+Menhir is mostly compatible with `ocamlyacc` grammars, and so you can
+usually just switch to Menhir and expect older code to work (with some
+minor differences described in the Menhir manual).
+
+The biggest advantage of Menhir is that its error messages are
+generally more human-comprehensible, and the parsers that it generates
+are fully reentrant and can be parameterized in OCaml modules more
+easily.  We recommend that any new code you develop should use Menhir
+instead of `ocamlyacc`.
+
+Menhir isn't distributed directly with OCaml, but is available through
+OPAM by running `opam install menhir`.
+
+</note>
 
 ## Lexing and parsing
 
@@ -42,10 +66,10 @@ specifically to the second phase of converting a stream of tokens to
 an AST, so from here on in, we'll use the term parsing to refer only
 to this second phase.
 
-Let's consider these two phases in the context of the JSON format.  As
-discussed in [xref](#handling-json-data), JSON has a variety of kinds
-of values, including numbers, strings, arrays, and objects, each with
-its own textual representation.  For example, the following text
+Let's consider lexing and parsing in the context of the JSON format.
+As discussed in [xref](#handling-json-data), JSON has a variety of
+kinds of values, including numbers, strings, arrays, and objects, each
+with its own textual representation.  For example, the following text
 represents an object containing a string labeled `title`, and an array
 containing two objects, each with a name and array of zip codes.
 
@@ -75,7 +99,7 @@ would look something like this.
 This kind of representation is easier to work with than the original
 text, since it gets rid of some unimportant syntactic details and adds
 useful structure.  But it's still a good deal more low-level than the
-kind of tree data structure we used for representing JSON data in
+simple AST we used for representing JSON data in
 [xref](#handling-json-data), shown below.
 
 ```frag
@@ -90,50 +114,15 @@ shown below.
 ((typ ocaml)(name parsing/parsed_example.ml))
 ```
 
-There are many techniques for lexing and parsing that have a variety
-of tradeoffs in the complexity of grammars that they can express, how
-well they handle malformed input, and also how resource-intensive the
-parsing process is.
-
-In our case, we'll use `ocamllex` for the lexical analysis phase, and
-`menhir` to generate our parser.  `menhir` is a more modern
-alternative to `ocamlyacc`, which is shipped along with `ocamllex`
-with the OCaml compiler.
-
-<note>
-<title>Menhir _vs_ `ocamlyacc`</title>
-
-Menhir is an alternative parser generator that is generally superior to the
-venerable `ocamlyacc`, which dates back quite a few years.  Menhir is mostly
-compatible with `ocamlyacc` grammars, and so you can usually just switch to
-Menhir and expect older code to work (with some minor differences described in
-the Menhir manual).
-
-The biggest advantage of Menhir is that its error messages are generally more
-human-comprehensible, and the parsers that it generates are fully reentrant and
-can be parameterized in OCaml modules more easily.  We recommend that any new
-code you develop should use Menhir instead of `ocamlyacc`.
-
-Menhir isn't distributed directly with OCaml, but is available through OPAM by
-running `opam install menhir`.
-
-</note>
-
 ## Defining a JSON parser with Menhir
 
-The process of building a parser is interleaved between constructing
-the lexer and parser.  The first step is to define the set of tokens
-that will be produced by the lexer.  For various reasons, the tokens
-are specified by the parser (to specify what it expects as input), so
-we'll start with the parser first.
+The process of building a lexer and a parser are interconnected.  The
+first step is to define the set of tokens which are what the lexer and
+the parser use to communicate.  With `menhir` and `ocamllex`, the set
+of tokens is in our case specified along with the parser.
 
-A parser file has suffix `.mly` (we'll use the name `parser.mly`) and it
-contains several parts in the following sequence:
-
-```
-# CR yminsky: The last line of the following fragment does not
-# highlight correctly.
-```
+A parser-specification file has suffix `.mly` and contains several
+parts in the following sequence:
 
 ```frag
 ((typ ocamlsyntax)(name parsing/yacc.syntax))
@@ -146,20 +135,14 @@ just declaring the tokens.
 
 ### Token declarations
 
-```
-# CR yminsky: Hmm, this is awkward, since in most places, we use angle
-# brackets to mark holes in a syntax declaration.  Maybe we should
-# change the formatting of that.
-```
-
 A token is declared using the syntax `%token <`_type_`>` _uid_, where
 the `<type>` is optional, and _uid_ is a capitalized identifier.  For
 JSON, we need tokens for numbers, strings, identifiers, and
 punctuation.  To start, let's define just the tokens in the
 `parser.mly` file.  For technical reasons, we need to include a
 `%start` declaration.  For now, we'll include just a dummy grammar
-specification `exp: { () }` (we'll replace this when we implement the
-grammar below).
+specification `exp: { () }`, which we'll replace this when we
+implement the grammar below.
 
 ```frag
 ((typ ocaml)(name parsing/partial_parser.mly))
@@ -176,41 +159,16 @@ partial_parser.mly`), we'll see multiple warnings about unused tokens
 because we haven't actually defined a grammar yet.  It's ok to ignore
 the warnings for now.
 
-```
-# CR yminsky: Maybe omit the example below.  It seems unhelpful to the
-# reader to show them a long sequence of boring error messages.
-```
-
-```frag
-((typ console)(name parsing/build_partial_json_parser.out))
-```
-
-```
-# CR yminsky: When you say below that the file "contains an
-# automaton", it seems too jargony and hard to grok for someone who is
-# a parser ingenue.  
-```
-
 The `menhir` tool is a parser generator, meaning it generates the code
 to perform parsing from the `parser.mly` description, in the form of
 two files, `parser.ml` and `parser.mli`.  The implementation contained
 in `parser.ml` is difficult to read, but `parser.mli` exposes a more
-comprehensible interface, containing what we'll need to build a lexer.
-
-```
-# CR yminsky: Shouldn't the above say "parser" rather than "lexer"?
-```
+comprehensible interface, the only important part of which for now is
+the token type that will be generated by the lexer and consumed by the
+parser.
 
 ```frag
 ((typ ocaml)(name parsing/partial_parser.mli))
-```
-
-```
-# CR yminsky: Don't we need something here to explain what `exp` above
-# is?  Maybe say: "The function `exp` takes two arguments: a function
-# for extracting a token from a Lexbuf.t, as well as a `Lexbuf.t`,
-# returning a parsed value, which in this case is a value of type
-# `unit`, since for now the grammar specification is trivial."
 ```
 
 ### Specifying the grammar rules
