@@ -59,16 +59,8 @@ The full C interface is quite large and is explained in the online
 small excerpt that's shown below since we just want to demonstrate Ctypes in
 action.
 
-```c
-// <ncurses.h>
-typedef struct _win_st WINDOW;
-
-WINDOW *initscr   (void);
-WINDOW *newwin    (int, int, int, int);
-void    endwin    (void);
-void    refresh   (void);
-void    wrefresh  (WINDOW *);
-void    mvwaddstr (WINDOW *, int, int, char *);
+```frag
+((typ c)(name ffi/ncurses.h))
 ```
 
 The Ncurses functions either operate on the current pseudo-terminal or on a
