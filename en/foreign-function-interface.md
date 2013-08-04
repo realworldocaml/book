@@ -401,22 +401,15 @@ Let's improve the timer function that we wrote earlier.  The POSIX function
 `gettimeofday` retrieves the time with microsecond resolution.  The signature
 of `gettimeofday` is as follows, including the structure definitions.
 
-```c
-struct timeval {
-  long tv_sec;
-  long tv_usec;
-};
-
-int gettimeofday(struct timeval *, struct timezone *tv);
+```frag
+((typ c)(name ffi/timeval_headers.h))
 ```
 
-Using Ctypes, we can describe this type as follows in our top-level.
+Using Ctypes, we can describe this type as follows in our top-level, continuing
+on from the previous definitions.
 
-```ocaml
-# type timeval;;
-type timeval
-# let timeval : timeval structure typ = structure "timeval" ;;
-val timeval : timeval structure typ = <abstr>
+```frag
+((typ ocamltop)(name ffi/posix.topscript)(part 8))
 ```
 
 The first command defines a new OCaml type `timeval` that we'll use to
@@ -434,13 +427,8 @@ in `foreign` calls or use it to create values.
 The `timeval` structure definition still doesn't have any fields, so we need to
 add those next.
 
-```ocaml
-# let tv_sec  = timeval *:* long ;;
-val tv_sec : (Signed.long, timeval structure) field = <abstr>
-# let tv_usec = timeval *:* long ;;
-val tv_usec : (Signed.long, timeval structure) field = <abstr>
-# seal timeval ;;
-- : unit = ()
+```frag
+((typ ocamltop)(name ffi/posix.topscript)(part 9))
 ```
 
 The `*:*` operator appends a field to the structure, as shown with `tv_sec` and
@@ -460,11 +448,8 @@ adding fields to a sealed structure is an error.
 Since `gettimeofday` needs a `struct timezone` pointer for its second
 argument, we also need to define a second structure type.
 
-``` ocaml
-# type timezone ;;
-type timezone
-# let timezone : timezone structure typ = structure "timezone" ;;
-val timezone : timezone structure typ = <abstr>
+```frag
+((typ ocamltop)(name ffi/posix.topscript)(part 10))
 ```
 
 We don't ever need to create `struct timezone` values, so we can leave this
@@ -472,12 +457,10 @@ struct as incomplete without adding any fields or sealing it.  If you ever try
 to use it in a situation where its concrete size needs to be known, the library
 will raise an `IncompleteType` exception.
 
-We're finally ready to bind to `gettimeofday`.
+We're finally ready to bind to `gettimeofday` now.
 
-```ocaml
-# let gettimeofday = foreign "gettimeofday"
-    (ptr timeval @-> ptr timezone @-> returning_checking_errno int) ;;
-val gettimeofday : timeval structure ptr -> timezone structure ptr -> int = <fun>
+```frag
+((typ ocamltop)(name ffi/posix.topscript)(part 11))
 ```
 
 There's one other new feature here: the `returning_checking_errno` function
@@ -491,17 +474,8 @@ functions `make`, `addr` and `getf` create a structure value, retrieve the
 address of a structure value, and retrieve the value of a field from a
 structure.
  
-``` ocaml
-# let gettimeofday' () =
-  let tv = make timeval in
-  ignore(gettimeofday (addr tv) (from_voidp timezone null));
-  let secs = Signed.Long.(to_int (getf tv tv_sec)) in
-  let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
-  Pervasives.(float secs +. float usecs /. 1000000.0) ;;
-val gettimeofday : timeval structure ptr -> timezone structure ptr -> int = <fun>
-
-# gettimeofday' () ;;
-- : float = 1370714234.606070
+```frag
+((typ ocamltop)(name ffi/posix.topscript)(part 12))
 ```
 
 You need to be a little careful not to get all the open modules mixed up here.

@@ -23,3 +23,24 @@ ctime (time' ()) ;;
 let t_ptr = allocate time_t (time' ()) ;;
 #part 7
 ctime t_ptr ;;
+#part 8
+type timeval ;;
+let timeval : timeval structure typ = structure "timeval" ;;
+#part 9
+let tv_sec  = timeval *:* long ;;
+let tv_usec = timeval *:* long ;;
+seal timeval ;;
+#part 10
+type timezone ;;
+let timezone : timezone structure typ = structure "timezone" ;;
+#part 11
+let gettimeofday = foreign "gettimeofday"
+    (ptr timeval @-> ptr timezone @-> returning_checking_errno int) ;;
+#part 12
+let gettimeofday' () =
+  let tv = make timeval in
+  ignore(gettimeofday (addr tv) (from_voidp timezone null));
+  let secs = Signed.Long.(to_int (getf tv tv_sec)) in
+  let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
+  Pervasives.(float secs +. float usecs /. 1000000.0) ;;
+gettimeofday' () ;;
