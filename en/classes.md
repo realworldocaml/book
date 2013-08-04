@@ -82,7 +82,7 @@ in all three places, but the extra text may not help clarity.  A
 convenient middle ground is to annotate the fields and/or class
 parameters, and add constraints to methods only if necessary.
 
-## Object types as interfaces ##
+## Object types as interfaces
 
 We may wish to traverse the elements on our stack. One common style
 for doing this in object-oriented languages is to define a class for
