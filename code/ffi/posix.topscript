@@ -15,3 +15,13 @@ let t1 =
     Unix.sleep 2;
     let t2 = time' () in 
     difftime t2 t1 ;;
+#part 4
+let ctime = foreign "ctime" (ptr time_t @-> returning string) ;;
+#part 5
+ctime (time' ()) ;;
+#part 6
+let t_ptr = allocate time_t (time' ()) ;;
+#part 7
+ctime t_ptr ;;
+
+

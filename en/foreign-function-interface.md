@@ -288,8 +288,8 @@ that passes the null pointer through.
 
 Since `time_t` is an abstract type, we can't actually do anything useful with
 it directly. We need to bind a second function to do anything useful with the
-return values from `time`.  We'll move on to `difftime`; the second C function in our
-prototype list above.
+return values from `time`.  We'll move on to `difftime`; the second C function
+in our prototype list above.
 
 ```frag
 ((typ ocamltop)(name ffi/posix.topscript)(part 3))
@@ -302,44 +302,32 @@ The binding to `difftime` above is sufficient to compare two `time_t` values.
 Let's look at a slightly less trivial example where we pass a non-null pointer
 to a function.  Continuing with the theme from earlier, we'll bind to the
 `ctime` function which converts a `time_t` value to a human-readable string.
-The C signature of `ctime` is as follows:
 
-```c
-char *ctime(const time_t *timep);
+```frag
+((typ ocamltop)(name ffi/posix.topscript)(part 4))
 ```
 
-The corresponding binding can be written in the top-level to add to our growing
-collection.
-
-```ocaml
-# let ctime = foreign "ctime" (ptr time_t @-> returning string) ;;
-val ctime : time_t ptr -> string = <fun>
-```
-
+The binding is continued in the top-level to add to our growing collection.
 However, we can't just pass the result of `time` to `ctime`.
 
-```ocaml
-# ctime (time' ());;
-Error: This expression has type time_t but an expression was expected
-of type time_t ptr
+```frag
+((typ ocamltop)(name ffi/posix.topscript)(part 5))
 ```
 
 This is because `ctime` needs a pointer to the `time_t` rather than passing it
 by value.  We thus need to allocate some memory for the `time_t` and obtain its
 memory address.
 
-``` ocaml
-# let t_ptr = allocate time_t (time' ()) ;;
-val t_ptr : time_t ptr = <abstr>
+```frag
+((typ ocamltop)(name ffi/posix.topscript)(part 6))
 ```
 
 The `allocate` function takes the type of the memory to be allocated and the
 initial value, and it returns a suitably-typed pointer.  We can now call
 `ctime` passing the pointer as an argument:
 
-```ocaml
-# ctime t_ptr;;
-- : string = "Sat Jun  8 12:20:42 2013\n"
+```frag
+((typ ocamltop)(name ffi/posix.topscript)(part 7))
 ```
 
 ### Using views to map complex values
