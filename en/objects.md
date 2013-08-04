@@ -213,7 +213,9 @@ open recursion is a big win.  Two good examples are Xavier Leroy's
 [Cryptokit](http://gallium.inria.fr/~xleroy/software.html#cryptokit), which
 provides a variety of cryptographic primitives that can be combined in
 building-block style, and the [Camlimages](http://cristal.inria.fr/camlimages/)
-library which manipulates various graphical file formats.
+library which manipulates various graphical file formats.  Camlimages also
+provides a module-based version of the same library, letting you choose between
+functional and object-oriented styles depending on your problem domain.
 
 We'll introduce you to classes, and examples using open recursion, in
 [xref](#classes).
