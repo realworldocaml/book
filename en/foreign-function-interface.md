@@ -1,7 +1,7 @@
 # Foreign Function Interface
 
 OCaml has several options available to interact with non-OCaml code.  The
-compiler can link to external system libraries via C code, and also produce
+compiler can link with external system libraries via C code and also produce
 standalone native object files that can be embedded within other non-OCaml
 applications. 
 
