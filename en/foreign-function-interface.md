@@ -517,8 +517,8 @@ calculate their length by scanning the buffer until the first null character is
 encountered.
 
 This means you need to be careful when passing OCaml strings to C buffers that
-don't contain any null values within the OCaml string, or else the C
-string will be rudely truncated.
+don't contain any null values within the OCaml string, or else the C string
+will be truncated at the first null instance.
 
 </note>
 
