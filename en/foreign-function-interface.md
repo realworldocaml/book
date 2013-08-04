@@ -93,7 +93,7 @@ let window : window typ = ptr void
 ```
 
 We don't know the internal representation of the window pointer, so we treat it
-as a C void pointer.  We'll improve on this later on in the chapter, but it's
+as a C void pointer.  We'll improve on this later on in the chapter, but that's
 good enough for now.  The second statement defines an OCaml value that
 represents the `WINDOW` C pointer.  This value is used later in the Ctypes
 function definitions.
