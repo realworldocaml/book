@@ -247,13 +247,13 @@ writing through pointers, and passing and returning pointers to and from
 functions. 
 
 We've already seen a simple use of pointers in the Ncurses example.  Let's
-start a new example by binding some POSIX functions.  The `time` function
-returns the current calendar time and has the following C function prototype:
+start a new example by binding the following POSIX functions.
 
-```c
-time_t time(time_t *);
+```frag
+((typ c)(name ffi/posix_headers.h))
 ```
 
+The `time` function returns the current calendar time and is a simple start.
 The first step is to open some of the Ctypes modules.
 
 * The `Ctypes` module provides functions for describing C types in OCaml.
@@ -262,14 +262,8 @@ The first step is to open some of the Ctypes modules.
 
 We can now create a binding to `time` directly from the top-level.
 
-```ocaml
-$ utop
-# require "ctypes.foreign" ;;
-# open Ctypes ;;
-# open PosixTypes ;;
-# open Foreign ;;
-# let time = foreign "time" (ptr time_t @-> returning time_t) ;;
-val time : time_t ptr -> time_t = <fun>
+```frag
+((typ ocamltop)(name ffi/posix.topscript)(part 0))
 ```
 
 The `foreign` function is the main link between OCaml and C.  It takes two
@@ -278,42 +272,30 @@ of the bound function.  In the `time` binding, the function type specifies one
 argument of type `ptr time_t` and a return type of `time_t`.
 
 We can now call `time` immediately in the same top-level.  The argument is
-actually optional, so we'll just pass a null pointer that has been coerced
-into becoming a null pointer to `time_t`.
+actually optional, so we'll just pass a null pointer that has been coerced into
+becoming a null pointer to `time_t`.
 
-```ocaml
-# let cur_time = time (from_voidp time_t null) ;;
-val cur_time : time_t = <abstr>
+```frag
+((typ ocamltop)(name ffi/posix.topscript)(part 1))
 ```
 
 Since we're going to call `time` a few times, let's create a wrapper function
 that passes the null pointer through.
 
-```ocaml
-# let time' () = time (from_voidp time_t null) ;;
-val time' : unit -> time_t = <fun>
+```frag
+((typ ocamltop)(name ffi/posix.topscript)(part 2))
 ```
 
 Since `time_t` is an abstract type, we can't actually do anything useful with
 it directly. We need to bind a second function to do anything useful with the
-return values from `time`.  We'll use the standard C function `difftime`, which
-has the following signature:
+return values from `time`.  We'll move on to `difftime`; the second C function in our
+prototype list above.
 
-```c
-double difftime(time_t, time_t);
+```frag
+((typ ocamltop)(name ffi/posix.topscript)(part 3))
 ```
 
-A binding to `difftime` is sufficient to compare two `time_t` values.
-
-```ocaml
-# let difftime = foreign "difftime" (time_t @-> time_t @-> returning double) ;;
-val difftime : time_t -> time_t -> float = <fun>
-# let t1 = time' () in
-  Unix.sleep 2;
-  let t2 = time' () in 
-  difftime t2 t1 ;;
- - : float = 2.
-```
+The binding to `difftime` above is sufficient to compare two `time_t` values.
 
 ### Allocating typed memory for pointers
 

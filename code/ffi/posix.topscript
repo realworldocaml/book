@@ -1,0 +1,17 @@
+#require "ctypes.foreign" ;;
+open Ctypes ;;
+open PosixTypes ;;
+open Foreign ;;
+let time = foreign "time" (ptr time_t @-> returning time_t) ;;
+#part 1
+let cur_time = time (from_voidp time_t null) ;;
+#part 2
+let time' () = time (from_voidp time_t null) ;;
+#part 3
+let difftime =
+    foreign "difftime" (time_t @-> time_t @-> returning double) ;;
+let t1 =
+    time' () in
+    Unix.sleep 2;
+    let t2 = time' () in 
+    difftime t2 t1 ;;
