@@ -532,6 +532,14 @@ returning 2.
 ((typ ocamltop)(name classes/multiple_inheritance.topscript)(part 2))
 ```
 
+If, however, we move the `inherit` declaration before the method definitions,
+the new behavior overrides the inherited methods, returning the value we just
+set.
+
+```frag
+((typ ocamltop)(name classes/multiple_inheritance.topscript)(part 3))
+```
+
 To reiterate, to understand what inheritance means, replace each `inherit`
 directive with its definition, and take the last definition of each method or
 field.  This holds even for private methods.  However, it does _not_ hold for
@@ -543,7 +551,7 @@ In the following definitions, there are three definitions of the private method
 not part of the class type for `m8`.
 
 ```frag
-((typ ocamltop)(name classes/multiple_inheritance.topscript)(part 3))
+((typ ocamltop)(name classes/multiple_inheritance.topscript)(part 4))
 ```
 
 ### Mixins

@@ -25,6 +25,17 @@ let x = new m5 ;;
 x#set 5 ;;
 x#get ;;
 #part 3
+class m5a =
+  object
+    inherit m4
+    val mutable x = 1
+    method get = x
+    method set x' = x <- x'
+  end ;;
+let x = new m5a ;;
+x#set 5 ;;
+x#get ;;
+#part 4
 class m6 =
   object (self : 'self)
      method f1 = self#g
