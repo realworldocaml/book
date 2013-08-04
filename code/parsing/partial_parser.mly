@@ -17,4 +17,5 @@
 
 %%
 
-exp: { () }
+(* exp: { () }*)
+  exp: v = value v
