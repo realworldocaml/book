@@ -3541,13 +3541,13 @@ val numeric_deriv :
           Even worse, it would be perfectly consistent for
           <literal>f</literal> to take an optional argument instead of a
           labeled one, which could lead to this type signature for
-          <literal>numeric_deriv</literal>:
+          <literal>numeric_deriv</literal>.
         </para>
         <programlisting language="ocaml">
+(* variables-and-functions/numerical_deriv_alt_sig.mli  *)
 val numeric_deriv :
   delta:float -&gt;
-  x:float -&gt; y:float -&gt; f:(?x:float -&gt; y:float -&gt; float) -&gt; float * float =
-  &lt;fun&gt;
+  x:float -&gt; y:float -&gt; f:(?x:float -&gt; y:float -&gt; float) -&gt; float * float
 </programlisting>
         <para>
           Since there are multiple plausible types to choose from, OCaml
@@ -13883,6 +13883,14 @@ let () =
   cli loader.Loader.active
 </programlisting>
       <para>
+        Now link this into a command line interface to experiment with
+        it.
+      </para>
+      <programlisting>
+# running fcm/build_query_handler_loader.out.sh
+$ corebuild query_handler_loader.byte
+</programlisting>
+      <para>
         The resulting command line interface behaves much as you'd
         expect, starting out with no query handlers available, but
         giving you the ability to load and unload them. Here's an
@@ -13890,6 +13898,8 @@ let () =
         <literal>loader</literal> itself as the only active handler.
       </para>
       <programlisting>
+# running fcm/loader_cli1.out.sh
+$ ./query_handler_loader.byte
 &gt;&gt;&gt; (loader known_services)
 (ls unique)
 &gt;&gt;&gt; (loader active_services)
@@ -13899,6 +13909,7 @@ let () =
         If we try to use one of the inactive queries, it will fail.
       </para>
       <programlisting>
+# running fcm/loader_cli2.out.sh
 &gt;&gt;&gt; (ls .)
 Could not find matching handler: ls
 </programlisting>
@@ -13909,6 +13920,7 @@ Could not find matching handler: ls
         be reloaded with a different config.
       </para>
       <programlisting>
+# running fcm/loader_cli3.out.sh
 &gt;&gt;&gt; (loader (load ls /var))
 ()
 &gt;&gt;&gt; (ls /var)
@@ -13924,8 +13936,16 @@ Could not find matching handler: ls
         the list of known handlers), and can't be unloaded.
       </para>
       <programlisting>
-&gt;&gt;&gt; (loader (unload loader))
-It's unwise to unload yourself
+# running fcm/loader_cli3.out.sh
+&gt;&gt;&gt; (loader (load ls /var))
+()
+&gt;&gt;&gt; (ls /var)
+(agentx at audit backups db empty folders jabberd lib log mail msgs named
+ netboot pgsql_socket_alt root rpc run rwho spool tmp vm yp)
+&gt;&gt;&gt; (loader (unload ls))
+()
+&gt;&gt;&gt; (ls /var)
+Could not find matching handler: ls
 </programlisting>
       <para>
         We can push this dynamism yet further using libraries like
@@ -21809,9 +21829,9 @@ $ ./_build/github_org_info.native janestreet
     structured textual data. <emphasis>Parsing</emphasis> is the process
     of converting such data into data structures that are easy to
     program against. For simple formats, it's often enough to parse the
-    data in an ad-hoc way, <emphasis>e.g.</emphasis>, by breaking up the
-    data into lines, and then using regular expressions for breaking
-    those lines down into their component pieces.
+    data in an ad-hoc way, say, by breaking up the data into lines, and
+    then using regular expressions for breaking those lines down into
+    their component pieces.
   </para>
   <para>
     But this simplistic approach tends to fall down when parsing more
@@ -21822,22 +21842,22 @@ $ ./_build/github_org_info.native janestreet
   </para>
   <para>
     Often, you can find an existing parsing library that handles these
-    issues for you, as we did in
-    <xref linkend="handling-json-data"/>. But there are tools
-    to help simplify the task when you do need to write a parser, in the
-    form of <emphasis>parser generators</emphasis>. A parser generator
-    takes a specification of the data format that you want to parse, and
-    uses that to generate a parser.
+    issues for you. But there are tools to help simplify the task when
+    you do need to write a parser, in the form of <emphasis>parser
+    generators</emphasis>. A parser generator creates a parser from a
+    specification of the data format that you want to parse, and uses
+    that to generate a parser.
   </para>
   <para>
-    Parser generators have a long history, including venerable tools
-    like <literal>lex</literal> and <literal>yacc</literal> that date
-    back to the early 1970's. OCaml has its own alternatives, including
-    <literal>ocamllex</literal>, which replaces <literal>yacc</literal>,
+    Parser generators have a long history, including tools like
+    <literal>lex</literal> and <literal>yacc</literal> that date back to
+    the early 1970's. OCaml has its own alternatives, including
+    <literal>ocamllex</literal>, which replaces <literal>lex</literal>,
     and <literal>ocamlyacc</literal> and <literal>menhir</literal>,
     which are replacements for <literal>yacc</literal>. We'll explore
     these tools in the course of walking through the implementation of a
-    parser for the JSON format.
+    parser for the JSON serialization format that we discussed in
+    <xref linkend="handling-json-data"/>.
   </para>
   <para>
     Parsing is a broad and often intricate topic, and our purpose here
@@ -21888,13 +21908,10 @@ $ ./_build/github_org_info.native janestreet
     </para>
     <para>
       Let's consider lexing and parsing in the context of the JSON
-      format. As discussed in
-      <xref linkend="handling-json-data"/>, JSON has a variety
-      of kinds of values, including numbers, strings, arrays, and
-      objects, each with its own textual representation. For example,
-      the following text represents an object containing a string
-      labeled <literal>title</literal>, and an array containing two
-      objects, each with a name and array of zip codes.
+      format. Here's an example of a snippet of text that represents a
+      JSON object containing a string labeled <literal>title</literal>,
+      and an array containing two objects, each with a name and array of
+      zip codes.
     </para>
     <programlisting language="json">
 {
@@ -21906,7 +21923,11 @@ $ ./_build/github_org_info.native janestreet
 }
 </programlisting>
     <para>
-      We could use a type like the following for specifying a token.
+      At a syntactic level, we can think of a JSON file as a series of
+      simple logical units, like curly braces, square brackets, commas,
+      colons, identifiers, numbers, and quoted strings. Thus, we could
+      represent our JSON text as a sequence of tokens of the following
+      type.
     </para>
     <programlisting language="ocaml">
 (* parsing/manual_token_type.ml  *)
@@ -21961,9 +21982,13 @@ type value = [
 ]
 </programlisting>
     <para>
-      The above type is effectively an AST, and the job of the parser
-      we'll write will be to convert a token stream into a value of this
-      type, as shown below.
+      This representation is much richer than our token stream,
+      capturing the fact that JSON values can be nested inside each
+      other, and that JSON has a variety of value types, including
+      numbers, strings, arrays, and objects. The above type is
+      effectively an AST, and the job of the parser we'll write will be
+      to convert a token stream into a value of this type, as shown
+      below.
     </para>
     <programlisting language="ocaml">
 (* parsing/parsed_example.ml  *)
@@ -21974,153 +21999,27 @@ type value = [
       `Assoc [&quot;name&quot;, `String &quot;New York&quot;; &quot;zips&quot;, `List [`Int 10004]]]]
 </programlisting>
   </sect1>
-  <sect1 id="defining-a-json-parser-with-menhir">
-    <title>Defining a JSON parser with Menhir</title>
-    <para>
-      The process of building a lexer and a parser are interconnected.
-      The first step is to define the set of tokens which are what the
-      lexer and the parser use to communicate. With
-      <literal>menhir</literal> and <literal>ocamllex</literal>, the set
-      of tokens is in our case specified along with the parser.
-    </para>
+  <sect1 id="defining-a-parser">
+    <title>Defining a parser</title>
     <para>
       A parser-specification file has suffix <literal>.mly</literal> and
-      contains several parts in the following sequence:
+      contains several sections that are broken up by separator lines
+      consisting of the characters <literal>%%</literal> on a line by
+      themselves. The first section of the file is for declarations,
+      including token and type specifications, precedence directives,
+      and other output directives, and the second section is for
+      specifying the grammar of the language to be parsed.
     </para>
-    <programlisting language="html">
-&lt;declarations&gt;
-%%
-&lt;rules&gt;
-%%
-&lt;optional_ocaml_code&gt;
-</programlisting>
     <para>
-      The <literal>%%</literal> are section separators; they have to be
-      on a line by themselves. The declarations include token and type
-      specifications, precedence directives, and other output
-      directives. We'll start by just declaring the tokens.
+      We'll start by declaring the list of tokens. A token is declared
+      using the syntax
+      <literal>%token &lt;</literal><emphasis>type</emphasis><literal>&gt;</literal>
+      <emphasis>uid</emphasis>, where the
+      <literal>&lt;type&gt;</literal> is optional, and
+      <emphasis>uid</emphasis> is a capitalized identifier. For JSON, we
+      need tokens for numbers, strings, identifiers, and punctuation.
     </para>
-    <sect2 id="token-declarations">
-      <title>Token declarations</title>
-      <para>
-        A token is declared using the syntax
-        <literal>%token &lt;</literal><emphasis>type</emphasis><literal>&gt;</literal>
-        <emphasis>uid</emphasis>, where the
-        <literal>&lt;type&gt;</literal> is optional, and
-        <emphasis>uid</emphasis> is a capitalized identifier. For JSON,
-        we need tokens for numbers, strings, identifiers, and
-        punctuation. To start, let's define just the tokens in the
-        <literal>parser.mly</literal> file. For technical reasons, we
-        need to include a <literal>%start</literal> declaration. For
-        now, we'll include just a dummy grammar specification
-        <literal>exp: { () }</literal>, which we'll replace this when we
-        implement the grammar below.
-      </para>
-      <programlisting language="ocaml">
-(* parsing/partial_parser.mly  *)
-%token &lt;int&gt; INT
-%token &lt;float&gt; FLOAT
-%token &lt;string&gt; ID
-%token &lt;string&gt; STRING
-%token TRUE
-%token FALSE
-%token NULL
-%token LEFT_BRACE
-%token RIGHT_BRACE
-%token LEFT_BRACK
-%token RIGHT_BRACK
-%token COLON
-%token COMMA
-%token EOF
-
-%start &lt;unit&gt; exp
-
-%%
-
-exp: { () }
-</programlisting>
-      <para>
-        The
-        <literal>&lt;</literal><emphasis>type</emphasis><literal>&gt;</literal>
-        specifications mean that a token carries a value. The
-        <literal>INT</literal> token carries an integer value with it,
-        <literal>FLOAT</literal> has a <literal>float</literal> value,
-        and both <literal>ID</literal> and <literal>STRING</literal>
-        carry a <literal>string</literal> value. The remaining tokens,
-        such as <literal>TRUE</literal>, <literal>FALSE</literal> or the
-        punctuation, aren't associated with any value and so we can omit
-        the
-        <literal>&lt;</literal><emphasis>type</emphasis><literal>&gt;</literal>
-        specification.
-      </para>
-      <para>
-        If we compile this file with <literal>menhir</literal> (by
-        running <literal>menhir partial_parser.mly</literal>), we'll see
-        multiple warnings about unused tokens because we haven't
-        actually defined a grammar yet. It's ok to ignore the warnings
-        for now.
-      </para>
-      <para>
-        The <literal>menhir</literal> tool is a parser generator,
-        meaning it generates the code to perform parsing from the
-        <literal>parser.mly</literal> description, in the form of two
-        files, <literal>parser.ml</literal> and
-        <literal>parser.mli</literal>. The implementation contained in
-        <literal>parser.ml</literal> is difficult to read, but
-        <literal>parser.mli</literal> exposes a more comprehensible
-        interface, the only important part of which for now is the token
-        type that will be generated by the lexer and consumed by the
-        parser.
-      </para>
-      <programlisting language="ocaml">
-(* parsing/partial_parser.mli  *)
-exception Error
-
-type token = 
-  | TRUE
-  | STRING of (string)
-  | RIGHT_BRACK
-  | RIGHT_BRACE
-  | NULL
-  | LEFT_BRACK
-  | LEFT_BRACE
-  | INT of (int)
-  | ID of (string)
-  | FLOAT of (float)
-  | FALSE
-  | EOF
-  | COMMA
-  | COLON
-
-
-val exp: (Lexing.lexbuf -&gt; token) -&gt; Lexing.lexbuf -&gt; (unit)
-</programlisting>
-    </sect2>
-    <sect2 id="specifying-the-grammar-rules">
-      <title>Specifying the grammar rules</title>
-      <para>
-        The grammar itself is specified using a set of rules, where a
-        rule contains a set of productions. Abstractly, a production
-        looks like the following.
-      </para>
-      <programlisting language="html">
-symbol: [ id1 = ] symbol1; [ id2 = ] symbol2; ...; [ idN = ] symbolN
-   { OCaml code }
-</programlisting>
-      <para>
-        A production can be interpreted as follows: given values
-        <literal>id1...idN</literal> for the input symbols
-        <literal>symbol1...symbolN</literal>, the OCaml code computes a
-        value for the target <literal>symbol</literal>. That's all quite
-        abstract, so let's get down to defining productions for parsing
-        real JSON values.
-      </para>
-      <para>
-        The beginning of the JSON parser has the same token rules as
-        before. This time, we also defines a proper entry point via the
-        <literal>prog</literal> rule.
-      </para>
-      <programlisting language="ocaml">
+    <programlisting language="ocaml">
 (* parsing/parser.mly  *)
 %token &lt;int&gt; INT
 %token &lt;float&gt; FLOAT
@@ -22136,40 +22035,90 @@ symbol: [ id1 = ] symbol1; [ id2 = ] symbol2; ...; [ idN = ] symbolN
 %token COLON
 %token COMMA
 %token EOF
-
-%type &lt;Json.value option&gt; prog
-
-%start prog
-
-%%
-
-prog: v = value
-    { Some v }
-  | EOF
-    { None }
-  ;
 </programlisting>
+    <para>
+      The
+      <literal>&lt;</literal><emphasis>type</emphasis><literal>&gt;</literal>
+      specifications mean that a token carries a value. The
+      <literal>INT</literal> token carries an integer value with it,
+      <literal>FLOAT</literal> has a <literal>float</literal> value, and
+      both <literal>ID</literal> and <literal>STRING</literal> carry a
+      <literal>string</literal> value. The remaining tokens, such as
+      <literal>TRUE</literal>, <literal>FALSE</literal> or the
+      punctuation, aren't associated with any value and so we can omit
+      the
+      <literal>&lt;</literal><emphasis>type</emphasis><literal>&gt;</literal>
+      specification.
+    </para>
+    <sect2 id="describing-the-grammar">
+      <title>Describing the grammar</title>
       <para>
-        The <literal>%start</literal> declaration is mandatory for every
-        grammar, and the symbols become the name of a function whose
-        signature is published in the <literal>mli</literal> signature
-        that is generated after calling <literal>menhir</literal>. Each
-        start symbol also must have an OCaml type associated with it.
-        We've defined this separately via the <literal>%type</literal>
-        keyword in our example above, but it can also be directly
-        written into the <literal>%start</literal> declaration. For more
-        complex grammars, you can improve the quality of error messages
-        by adding extra <literal>%type</literal> rules for other
-        non-starting symbols too.
+        The next thing we need to do is to specify the grammar of a JSON
+        expression. <literal>menhir</literal>, like many parsers,
+        expresses grammars as <emphasis>context free
+        grammars</emphasis>. You can think of a context-free grammar as
+        a set of abstract names, called <emphasis>non-terminal
+        symbols</emphasis>, along with a collection of rules for
+        transforming a non-terminal symbol into a sequence, where each
+        element of the sequence is either a token or another
+        non-terminal symbol. A sequence of tokens is parsable by a
+        grammar if you can apply the grammar's rules to produce a series
+        of transformations, starting at a distinguished <emphasis>start
+        symbol</emphasis>, that produces the token sequence in question.
       </para>
       <para>
-        Once that's in place, we can add the main production for a JSON
-        value.
+        We'll start describing the JSON grammar by declaring the
+        start-symbol to be the non-terminal symbol
+        <literal>prog</literal>, and by declaring that when parsed, a
+        <literal>prog</literal> value should be converted into an OCaml
+        value of type <literal>Json.value option</literal>. We then end
+        the declaration section of the parser with a
+        <literal>%%</literal>.
       </para>
       <programlisting language="ocaml">
 (* parsing/parser.mly (starting from part 1) *)
+%start &lt;Json.value option&gt; prog
+%%
+</programlisting>
+      <para>
+        Once that's in place, we can start specifying the productions.
+        In <literal>menhir</literal>, productions are organized into
+        <emphasis>rules</emphasis>, where each rule lists all the
+        possible productions for a given non-terminal. Here, for
+        example, is the rule for <literal>prog</literal>.
+      </para>
+      <programlisting language="ocaml">
+(* parsing/parser.mly (starting from part 2) *)
+prog:
+  | EOF       { None }
+  | v = value { Some v }
+  ;
+</programlisting>
+      <para>
+        The syntax for this is reminiscent of an OCaml match statement.
+        The pipes separate the individual productions, and the code in
+        curly-braces is OCaml code that generates the OCaml value
+        corresponding to the production in question. In the case of
+        <literal>prog</literal>, we have two cases: either there's an
+        <literal>EOF</literal>, which means the text is empty, and so
+        there's no JSON value to read, and so we return the OCaml value
+        <literal>None</literal>; or we have an instance of the
+        <literal>value</literal> non-terminal, which corresponds to a
+        well-formed JSON value, in which case we wrap the corresponding
+        <literal>Json.value</literal> in a <literal>Some</literal> tag.
+        Note that in the <literal>value</literal> case, we wrote
+        <literal>v = value</literal> to bind the OCaml value that
+        corresponds to to the variable <literal>v</literal>, which we
+        can then use within the curly-braces for that production.
+      </para>
+      <para>
+        Now let's consider a more complicated example, the rule for the
+        <literal>value</literal> symbol.
+      </para>
+      <programlisting language="ocaml">
+(* parsing/parser.mly (starting from part 3) *)
 value:
-    LEFT_BRACE; obj = opt_object_fields; RIGHT_BRACE
+  | LEFT_BRACE; obj = object_fields; RIGHT_BRACE
     { `Assoc obj }
   | LEFT_BRACK; vl = array_values; RIGHT_BRACK
     { `List vl }
@@ -22188,87 +22137,87 @@ value:
   ;
 </programlisting>
       <para>
-        We can read it like this: a JSON <literal>value</literal> is
-        either an object bracketed by curly braces, or an array
-        bracketed by square braces. or a string, integer, float, etc. In
-        each of the productions, the right hand side specifies the
-        expected sequence.
+        According to these rules, a JSON <literal>value</literal> is
+        either:
       </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            an object bracketed by curly braces,
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            an array bracketed by square braces,
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            a string, integer, float, bool, or null value.
+          </para>
+        </listitem>
+      </itemizedlist>
       <para>
-        For example, an association list starts with a
-        <literal>LEFT_BRACE</literal> token, contains some optional
-        object field values (to be defined in another rule), and ends
-        with a <literal>RIGHT_BRACE</literal>. The returned value is an
-        <literal>Assoc obj</literal> polymorphic variant, where
-        <literal>obj</literal> is the sequence of object fields. Note
-        that we've left out bindings for <literal>LEFT_BRACE</literal>
-        and <literal>RIGHT_BRACE</literal>, because their tokens don't
-        have values.
+        In each of the productions, the OCaml code in curly-braces shows
+        what to transform the object in question to. Note that we still
+        have two non-terminals whose definitions we depend on here, but
+        have not yet defined: <literal>object_fields</literal> and
+        <literal>array_values</literal>. We'll look at how these are
+        parsed next.
       </para>
     </sect2>
-    <sect2 id="parsing-lists-and-sequences">
-      <title>Parsing lists and sequences</title>
+    <sect2 id="parsing-sequences">
+      <title>Parsing sequences</title>
       <para>
-        Next, let's define the JSON object fields. In the following
-        rules, the <literal>opt_object_fields</literal> are either
-        empty, or a non-empty sequence of fields in reverse order. Note
-        that if you wish to have comments in the rule definitions, you
-        have to use C comment delimiters. By convention, the C comment
-        <literal>/* empty */</literal> is used to point out that a
-        production has an empty right hand side.
+        The rule for <literal>object_fields</literal> is shown below,
+        and is really just a thin wrapper that reverses the list
+        returned by the following rule for
+        <literal>rev_object_fields</literal>. Note that the first
+        production in <literal>rev_object_fields</literal> has an empty
+        left-hand side. That's because what we're matching on in this
+        case is an empty sequence of tokens. The comment
+        <literal>/* empty */</literal> is used to make this clear.
+        C-style comment syntax is used within the body of a rule.
       </para>
       <programlisting language="ocaml">
-(* parsing/parser.mly (starting from part 2) *)
-opt_object_fields: /* empty */
-    { [] }
-  | obj = rev_object_fields
-    { List.rev obj }
-  ;
+(* parsing/parser.mly (starting from part 4) *)
+object_fields: obj = rev_object_fields { List.rev obj };
 
-rev_object_fields: k = ID; COLON; v = value
-    { [k, v] }
+rev_object_fields:
+  | /* empty */ { [] }
   | obj = rev_object_fields; COMMA; k = ID; COLON; v = value
     { (k, v) :: obj }
   ;
 </programlisting>
       <para>
-        The rule <literal>rev_object_fields</literal> is defined
-        recursively. It has either one key/value field, or it is a
-        sequence of fields, followed by a <literal>COMMA</literal> and
-        one more field definition.
-      </para>
-      <para>
-        The <literal>rev_</literal> prefix is intended to point out that
-        the fields are returned in reverse order. Why would we do that?
-        One reason is that the Menhir parser generator is
-        left-recursive, which means that the constructed pushdown
-        automaton uses less stack space with left-recursive definitions.
-        The following right-recursive rule accepts the same input, but
-        during parsing it requires linear stack space to read object
-        field definitions.
+        The rules are structured as they are because
+        <literal>menhir</literal> generates left-recursive parsers,
+        which means that the constructed pushdown automaton uses less
+        stack space with left-recursive definitions. The following
+        right-recursive rule accepts the same input, but during parsing
+        it requires linear stack space to read object field definitions.
       </para>
       <programlisting language="ocaml">
-(* parsing/right_rec_rule.ml  *)
+(* parsing/right_rec_rule.mly (starting from part 4) *)
 /* Inefficient right-recursive rule */
 object_fields:
-    k = ID; COLON; v = value
-    { [k, v] }
+  | /* empty */ { [] }
   | k = ID; COLON; v = value; COMMA; obj = object_fields
     { (k, v) :: obj }
 </programlisting>
       <para>
         Alternatively, we could keep the left-recursive definition and
         simply construct the returned value in left-to-right order. This
-        is fine, though less efficient. You will have to choose your
-        technique according to circumstances.
+        is is even less efficient, since the complexity of building thes
+        list incrementally in this way is quadratic in the length of the
+        list.
       </para>
       <programlisting language="ocaml">
-(* parsing/quadratic_rule.ml  *)
+(* parsing/quadratic_rule.mly (starting from part 4) *)
 /* Quadratic left-recursive rule */
 object_fields:
-    k = ID; COLON; v = value
-    { [k, v] }
-  | obj = rev_object_fields; COMMA; k = ID; COLON; v = value
+  | /* empty */ { [] }
+  | obj = object_fields; COMMA; k = ID; COLON; v = value
     { obj @ [k, v] }
   ;
 </programlisting>
@@ -22278,43 +22227,24 @@ object_fields:
         illustrating how parsing works) are rather verbose. Menhir
         features an extended standard library of built-in rules to
         simplify this handling. These rules are detailed in the Menhir
-        manual, but include optional values, pairs of values with
+        manual, and include optional values, pairs of values with
         optional separators, and lists of elements (also with optional
         separators).
       </para>
       <para>
-        A complete version of the JSON grammar using these more succinct
-        Menhir rules is shown below. Notice the use of
+        A version of the JSON grammar using these more succinct Menhir
+        rules is shown below. Notice the use of
         <literal>separated_list</literal> to parse both JSON objects and
         lists with one rule.
       </para>
       <programlisting language="ocaml">
-(* parsing/short_parser.mly  *)
-%token &lt;int&gt; INT
-%token &lt;float&gt; FLOAT
-%token &lt;string&gt; ID
-%token &lt;string&gt; STRING
-%token TRUE
-%token FALSE
-%token NULL
-%token LEFT_BRACE
-%token RIGHT_BRACE
-%token LEFT_BRACK
-%token RIGHT_BRACK
-%token COLON
-%token COMMA
-%token EOF
-
-%start &lt;Json.value option&gt; prog
-
-%%
-
+(* parsing/short_parser.mly (starting from part 1) *)
 prog:
-    v = value { Some v }
+  | v = value { Some v }
   | EOF       { None   } ;
 
 value:
-    LEFT_BRACE; obj = obj_fields; RIGHT_BRACE { `Assoc obj  }
+  | LEFT_BRACE; obj = obj_fields; RIGHT_BRACE { `Assoc obj  }
   | LEFT_BRACK; vl = list_fields; RIGHT_BRACK { `List vl    }
   | s = STRING                                { `String s   }
   | i = INT                                   { `Int i      }
@@ -22333,22 +22263,23 @@ list_fields:
     vl = separated_list(COMMA, value)         { vl } ;
 </programlisting>
       <para>
-        We can now compile this with Menhir, which will now no longer
-        complain about unused symbols. The best way to invoke Menhir is
-        using <literal>corebuild</literal> with the
-        <literal>-use-menhir</literal> flag: this tells the build system
+        We can invoke <literal>menhir</literal> by using
+        <literal>corebuild</literal> with the
+        <literal>-use-menhir</literal> flag. This tells the build system
         to switch to using <literal>menhir</literal> instead of
         <literal>ocamlyacc</literal> to handle files with the
         <literal>.mly</literal> suffix.
       </para>
       <programlisting>
-# running parsing-test/build_json_parser.out.sh
-$ corebuild -use-menhir parser.mly
+# running parsing/build_short_parser.out.sh
+$ corebuild -use-menhir short_parser.mli
+menhir --raw-depend --ocamldep 'ocamlfind ocamldep -modules' short_parser.mly &gt; short_parser.mly.depends
+menhir --ocamlc 'ocamlfind ocamlc -w A-4-33-41-42-43-34-44 -strict-sequence -principal -g -annot -bin-annot -short-paths -thread -syntax camlp4o -package bin_prot.syntax -package sexplib.syntax,comparelib.syntax,fieldslib.syntax,variantslib.syntax -package core' --infer short_parser.mly
 </programlisting>
     </sect2>
   </sect1>
-  <sect1 id="defining-a-lexer-with-ocamllex">
-    <title>Defining a lexer with ocamllex</title>
+  <sect1 id="defining-a-lexer">
+    <title>Defining a lexer</title>
     <para>
       For the next part, we need to define a lexer to tokenize the input
       text, meaning that we break the input into a sequence of words or
@@ -22535,11 +22466,11 @@ rule read = parse
         <listitem>
           <para>
             The longest match always wins. For example, the first input
-            <literal>trueX: 167</literal> matches the regular expression
-            <literal>&quot;true&quot;</literal> for 4 characters, and it
-            matches <literal>id</literal> for 5 characters. The longer
-            match wins, and the return value is
-            <literal>ID   &quot;trueX&quot;</literal>.
+            <literal>trueX:   167</literal> matches the regular
+            expression <literal>&quot;true&quot;</literal> for 4
+            characters, and it matches <literal>id</literal> for 5
+            characters. The longer match wins, and the return value is
+            <literal>ID &quot;trueX&quot;</literal>.
           </para>
         </listitem>
         <listitem>
@@ -22749,6 +22680,9 @@ null
     <programlisting>
 # running parsing-test/build_test.out.sh
 $ ocamlbuild -use-menhir -tag thread -use-ocamlfind -pkg core test.native
+/home/rwo/.opam/4.01.0dev+trunk/bin/ocamllex.opt -q lexer.mll
+menhir --raw-depend --ocamldep 'ocamlfind ocamldep -modules' parser.mly &gt; parser.mly.depends
+menhir --ocamlc 'ocamlfind ocamlc -thread -package core' --infer parser.mly
 $ ./test.native test1.json
 true
 false
@@ -22771,7 +22705,7 @@ $ cat test2.json
   zips: [10004]
 }
 $ ./test.native test2.json
-bash: ./test.native: No such file or directory
+test2.json:3:2: syntax error
 </programlisting>
     <para>
       That wraps up our parsing tutorial. As an aside, notice that the
@@ -27526,7 +27460,7 @@ val x : t = {foo = 13; bar = 14}
   <sect1 id="tuples-records-and-arrays">
     <title>Tuples, records and arrays</title>
     <programlisting>
-+---------+----------+----------- - - - - 
++---------+----------+----------- - - - -
 | header  | value[0] | value[1] | ....
 +---------+----------+----------+- - - - -
 </programlisting>
@@ -27585,7 +27519,7 @@ $ utop
         collector that the contents are not OCaml values.
       </para>
       <programlisting>
-+---------+----------+----------- - - - - 
++---------+----------+----------- - - - -
 | header  | float[0] | float[1] | ....
 +---------+----------+----------+- - - - -
 </programlisting>
@@ -30454,7 +30388,7 @@ end
           system and can lead to memory corruption and crashes.
         </para>
         <para>
-          OCaml guards against this by recording a CRC checksum in every
+          OCaml guards against this by recording a MD5 checksum in every
           <literal>cmi</literal>. Let's examine our earlier
           <literal>typedef.ml</literal> more closely.
         </para>
@@ -32361,643 +32295,8 @@ Hello OCaml World!
 </chapter></part><appendix id="installation">
   <title>Installation</title>
   <para>
-    The easiest way to use OCaml is via the binary packages available
-    for many operating systems. For day-to-day code development however,
-    it's much easier to use a source-code manager that lets you modify
-    individual libraries and automatically recompile all the
-    dependencies.
+    <emphasis>TODO CR</emphasis> this is all moving online.
   </para>
-  <para>
-    An important difference between OCaml and scripting languages such
-    as Python or Ruby is the static type safety that means that you
-    can't just mix-and-match compiled libraries. Interfaces are checked
-    when libraries are compiled, so when an interface is changed, all
-    the dependent libraries must also be recompiled. Source-based
-    package managers automate this process for you and make development
-    life much easier.
-  </para>
-  <para>
-    To work through Real World OCaml, you'll need three major components
-    installed:
-  </para>
-  <itemizedlist>
-    <listitem>
-      <para>
-        The OCaml compiler itself.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        The OPAM source package manager, through which we'll install
-        several extra libraries.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        The <literal>utop</literal> interactive toplevel, a modern
-        interactive toplevel with command history and tab completion.
-      </para>
-    </listitem>
-  </itemizedlist>
-  <para>
-    Let's get started with how to install OCaml on various operating
-    systems, and we'll get OPAM and <literal>utop</literal> running
-    after that.
-  </para>
-  <sect1 id="getting-ocaml">
-    <title>Getting OCaml</title>
-    <para>
-      The OCaml compiler is available as a binary distribution on many
-      operating systems. This is the simplest and preferred installation
-      route, but we'll also describe how to do a manual installation as
-      a last resort.
-    </para>
-    <sect2 id="mac-os-x">
-      <title>Mac OS X</title>
-      <para>
-        The
-        <ulink url="http://github.com/mxcl/homebrew">Homebrew</ulink>
-        package manager has an OCaml installer, which is usually updated
-        pretty quickly to the latest stable release. Make sure that you
-        have the latest XCode (and Command Line Tools for XCode)
-        installed from the App Store before starting the OCaml
-        installation.
-      </para>
-      <programlisting>
-$ brew install ocaml
-$ brew install pcre
-</programlisting>
-      <para>
-        The Perl-compatible Regular Expression library (PCRE) is used by
-        the Core suite. It's not strictly needed to use OCaml, but is a
-        commonly used library that we're installing now to save time
-        later.
-      </para>
-      <para>
-        Another popular package manager on Mac OS X is
-        <ulink url="http://macports.org">MacPorts</ulink>, which also
-        has an OCaml port. As with Homebrew, make sure you have XCode
-        installed and have followed the rest of the MacPorts
-        installation instructions, and then type in:
-      </para>
-      <programlisting>
-$ sudo port install ocaml
-$ sudo port install ocaml-pcre
-</programlisting>
-    </sect2>
-    <sect2 id="debian-linux">
-      <title>Debian Linux</title>
-      <para>
-        On Debian Linux, you should install OCaml via binary packages.
-        You'll need at least OCaml version 3.12.1 to bootstrap OPAM,
-        which means using Debian Wheezy or greater. Don't worry about
-        getting the absolute latest version of the compiler, as you just
-        need one new enough to compile the OPAM package manager, after
-        which you'll use OPAM to manage your compiler installation.
-      </para>
-      <programlisting>
-$ sudo apt-get install ocaml ocaml-native-compilers camlp4-extra
-$ sudo apt-get install git libpcre3-dev curl build-essential m4
-</programlisting>
-      <para>
-        Notice that we've installed a few more packages than just the
-        OCaml compiler here. The second command line installs enough
-        system packages to let you build your own OCaml packages. You
-        may find that some OCaml libraries require more system libraries
-        (for example, <literal>libssl-dev</literal>), but we'll
-        highlight these in the book when we introduce the library.
-      </para>
-    </sect2>
-    <sect2 id="fedora-and-red-hat">
-      <title>Fedora and Red Hat</title>
-      <para>
-        OCaml has been included in the basic distribution since Fedora
-        8. To install the latest compiler, just run:
-      </para>
-      <programlisting>
-# yum install ocaml
-# yum install pcre-devel
-</programlisting>
-      <para>
-        The PCRE package is used by Core and is just included here for
-        convenience later.
-      </para>
-    </sect2>
-    <sect2 id="arch-linux">
-      <title>Arch Linux</title>
-      <para>
-        Arch Linux provides OCaml 4.00.1 (or later) in the standard
-        repositories, so the easiest method of installation is using
-        <literal>pacman</literal>:
-      </para>
-      <programlisting>
-$ pacman -Sy ocaml
-</programlisting>
-    </sect2>
-    <sect2 id="windows">
-      <title>Windows</title>
-      <para>
-        Windows is not currently supported by the examples in Real World
-        OCaml, although it is being worked on. Until that's ready, we
-        recommend using a virtual machine running Debian Linux on your
-        local machine.
-      </para>
-    </sect2>
-    <sect2 id="building-from-source">
-      <title>Building from source</title>
-      <para>
-        To install OCaml from source code, first make sure that you have
-        a C compilation environment (usually either
-        <literal>gcc</literal> or <literal>llvm</literal> installed).
-      </para>
-      <programlisting>
-$ curl -OL https://github.com/ocaml/ocaml/archive/trunk.tar.gz
-$ tar -zxvf trunk.tar.gz
-$ cd ocaml-trunk
-$ ./configure
-$ make world world.opt
-$ sudo make install
-</programlisting>
-      <para>
-        The final step requires administrator privilege to install in
-        your system directory. You can also install it in your home
-        directory by passing the <literal>prefix</literal> option to the
-        configuration script:
-      </para>
-      <programlisting>
-$ ./configure -prefix $HOME/my-ocaml
-</programlisting>
-      <para>
-        Once the installation is completed into this custom location,
-        you will need to add <literal>$HOME/my-ocaml/bin</literal> to
-        your <literal>PATH</literal>, normally by editing the
-        <literal>~/.bash_profile</literal> file. You shouldn't really to
-        do this unless you have special reasons, so try to install
-        binary packages before trying a source installation.
-      </para>
-      <note>
-      <title>
-      Note to reviewers
-      </title>
-      <para>
-        We instruct you install the unreleased trunk version of OCaml in
-        these instructions, as we take advantage of some recent
-        additions to the language that simplify explanations in the
-        book. The 4.01 release will happen before the book is released,
-        but you may run into &quot;bleeding edge&quot; bugs with the
-        trunk release. Leave a comment here if you do and we'll address
-        them.
-      </para>
-      </note>
-    </sect2>
-  </sect1>
-  <sect1 id="getting-opam">
-    <title>Getting OPAM</title>
-    <para>
-      OPAM manages multiple simultaneous OCaml compiler and library
-      installations, tracks library versions across upgrades, and
-      recompiles dependencies automatically if they get out of date.
-      It's used throughout Real World OCaml as the mechanism to retrieve
-      and use third-party libraries.
-    </para>
-    <para>
-      Before installing OPAM, make sure that you have the OCaml compiler
-      installed as described above. Once installed, the entire OPAM
-      database is held in your home directory (normally
-      <literal>$HOME/.opam</literal>). If something goes wrong, just
-      delete this <literal>.opam</literal> directory and start over from
-      a clean slate. If youre using a beta version of OPAM, please
-      upgrade it to at least version 1.0.0 or greater before proceeding.
-    </para>
-    <sect2 id="mac-os-x-1">
-      <title>Mac OS X</title>
-      <para>
-        Source installation of OPAM will take a minute or so on a modern
-        machine. There is a Homebrew package for the latest OPAM:
-      </para>
-      <programlisting>
-$ brew update
-$ brew install opam
-</programlisting>
-      <para>
-        And on MacPorts, install it like this:
-      </para>
-      <programlisting>
-$ sudo port install opam
-</programlisting>
-    </sect2>
-    <sect2 id="debian-linux-1">
-      <title>Debian Linux</title>
-      <para>
-        OPAM has recently been packaged for Debian and will soon be part
-        of the unstable distribution. If you're on an earlier stable
-        distribution such as <literal>wheezy</literal>, you can either
-        compile from source, or cherry-pick just the OPAM binary package
-        from <literal>unstable</literal> by:
-      </para>
-      <programlisting>
-# apt-get update
-# apt-get -t unstable install opam
-</programlisting>
-      <note>
-      <title>
-      Note to reviewers
-      </title>
-      <para>
-        The binary packages for OPAM are not yet available as of the
-        17th June 2013, but the package is in the <literal>NEW</literal>
-        queue. It should be available by the the time the book is
-        released, and these instructions will be updated accordingly.
-      </para>
-      </note>
-    </sect2>
-    <sect2 id="fedora-and-red-hat-1">
-      <title>Fedora and Red Hat</title>
-      <para>
-        There is currently no RPM available for Fedora or Red Hat, so
-        please install OPAM via the source code instructions for the
-        moment.
-      </para>
-    </sect2>
-    <sect2 id="arch-linux-1">
-      <title>Arch Linux</title>
-      <para>
-        OPAM is available in the Arch User Repository (AUR) in two
-        packages. You'll need both <literal>ocaml</literal> and the
-        <literal>base-devel</literal> packages installed first:
-      </para>
-      <itemizedlist>
-        <listitem>
-          <para>
-            <literal>opam</literal> contains the most recent stable
-            release, and is the recommended package.
-          </para>
-        </listitem>
-        <listitem>
-          <para>
-            <literal>opam-git</literal> builds the package from the
-            latest upstream source, and should only be used if you are
-            looking for a specific bleeding-edge feature.
-          </para>
-        </listitem>
-      </itemizedlist>
-      <para>
-        Run these commands to install the stable OPAM package:
-      </para>
-      <programlisting>
-$ sudo pacman -Sy base-devel
-$ wget https://aur.archlinux.org/packages/op/opam/opam.tar.gz
-$ tar -xvf opam.tar.gz &amp;&amp; cd opam
-$ makepkg
-$ sudo pacman -U opam-_version_.pkg.tar.gz
-</programlisting>
-    </sect2>
-    <sect2 id="source-installation">
-      <title>Source Installation</title>
-      <para>
-        If the binary packages aren't available for your system, you'll
-        need to install the latest OPAM release from source. The
-        distribution only requires the OCaml compiler to be installed,
-        so this should be straightforward. Download the latest version
-        from the
-        <ulink url="https://github.com/OCamlPro/opam/tags">homepage</ulink>.
-      </para>
-      <programlisting>
-$ curl -OL https://github.com/OCamlPro/opam/archive/latest.tar.gz
-$ tar -zxvf latest.tar.gz
-$ cd opam-latest
-$ ./configure &amp;&amp; make
-$ sudo make install
-</programlisting>
-      <note>
-      <title>
-      Note to reviewers
-      </title>
-      <para>
-        The OPAM instructions will be simplified when integrated
-        upstream into Debian and Fedora, which is ongoing. Until then,
-        we're leaving source-code installation instructions here. Please
-        leave a comment with any amended instructions you encounter.
-      </para>
-      </note>
-
-    </sect2>
-  </sect1>
-  <sect1 id="configuring-the-opam-package-manager">
-    <title>Configuring the OPAM package manager</title>
-    <para>
-      The entire OPAM package database is held in the
-      <literal>.opam</literal> directory in your home directory,
-      including compiler installations. On Linux and Mac OS X, this will
-      be the <literal>~/.opam</literal> directory. You shouldn't switch
-      to an admin user to install packages as nothing will be installed
-      outside of this directory. If you run into problems, just delete
-      the whole <literal>~/.opam</literal> directory and follow the
-      installations instructions from the <literal>opam init</literal>
-      stage again.
-    </para>
-    <para>
-      Let's begin by initialising the OPAM package database. This will
-      require an active Internet connection, and ask you a few
-      interactive questions at the end. It's safe to answer yes to these
-      unless you want to manually control the configuration steps
-      yourself as an advanced user.
-    </para>
-    <programlisting>
-$ opam init
-&lt;...&gt;
-=-=-=-= Configuring OPAM =-=-=-=
-Do you want to update your configuration to use OPAM ? [Y/n] y
-[1/4] Do you want to update your shell configuration file ? [default: ~/.profile] y
-[2/4] Do you want to update your ~/.ocamlinit ? [Y/n] y
-[3/4] Do you want to install the auto-complete scripts ? [Y/n] y
-[4/4] Do you want to install the `opam-switch-eval` script ? [Y/n] y
-User configuration:
-  ~/.ocamlinit is already up-to-date.
-  ~/.profile is already up-to-date.
-Gloabal configuration:
-  Updating &lt;root&gt;/opam-init/init.sh
-    auto-completion : [true]
-    opam-switch-eval: [true]
-  Updating &lt;root&gt;/opam-init/init.zsh
-    auto-completion : [true]
-    opam-switch-eval: [true]
-  Updating &lt;root&gt;/opam-init/init.csh
-    auto-completion : [true]
-    opam-switch-eval: [true]
-</programlisting>
-    <para>
-      You only need to run this command once, and it will create the
-      <literal>~/.opam</literal> directory and sync with the latest
-      package list from the online OPAM database.
-    </para>
-    <para>
-      When the <literal>init</literal> command finishes, you'll see some
-      instructions about environment variables. OPAM never installs
-      files into your system directories (which would require
-      administrator privileges). Instead, it puts them into your home
-      directory by default, and can output a set of shell commands which
-      configures your shell with the right <literal>PATH</literal>
-      variables so that packages will just work. This requires just one
-      command:
-    </para>
-    <programlisting>
-$ eval `opam config -env`
-</programlisting>
-    <para>
-      This evaluates the results of running
-      <literal>opam config env</literal> in your current shell, and sets
-      the variables so that subsequent commands will use them. This only
-      works with your current shell, and it can be automated for all
-      future shells by adding the line to your login scripts. On Mac OS
-      X or Debian, this is usually the
-      <literal>~/.bash_profile</literal> file if you're using the
-      default shell. If you've switched to another shell, it might be
-      <literal>~/.zshrc</literal> instead. OPAM isn't unusual in this
-      approach; the SSH <literal>ssh-agent</literal> also works
-      similarly, so if you're having any problems just hunt around in
-      your configuration scripts to see how that's being invoked.
-    </para>
-    <para>
-      If you answered <literal>yes</literal> to the auto-complete
-      scripts question during <literal>opam init</literal>, this should
-      have all been set up for you. You can verify this worked by
-      listing the available packages:
-    </para>
-    <programlisting>
-$ opam list
-</programlisting>
-    <note>
-    <title>
-    Note to reviewers
-    </title>
-    <para>
-      OPAM 1.0.0 places the login commands into your
-      <literal>~/.profile</literal> directory, which isn't always
-      executed if your shell is <literal>bash</literal>. This has been
-      fixed in subsequent versions, but for now you'll need to manually
-      copy the contents of <literal>~/.profile</literal> over to
-      <literal>~/.bash_profile</literal> via:
-    </para>
-    <programlisting>
-$ cat ~/.profile &gt;&gt; ~/.bash_profile
-</programlisting>
-    </note>
-    <para>
-      The most important package we need to install is Core, which is
-      the replacement standard library that all of the examples in this
-      book use. Before doing this, let's make sure you have exactly the
-      right compiler version you need. We've made some minor
-      modifications to the way the OCaml compiler displays type
-      signatures, and the next command will install a patched
-      <literal>4.01.0</literal> compiler with this functionality
-      enabled.
-    </para>
-    <programlisting>
-$ opam switch 4.01.0dev+trunk
-</programlisting>
-    <para>
-      This step will take about 5-10 minutes on a modern machine, and
-      will download and install (within the <literal>~/.opam</literal>
-      directory) a custom OCaml compiler. OPAM supports multiple such
-      installations, and you'll find this very useful if you ever decide
-      to hack on the internals of the compiler itself, or you want to
-      experiment with the latest release without sacrificing your
-      current installation. You only need to install this compiler once,
-      and future updates will be much faster as they only recompile
-      libraries within the compiler installation.
-    </para>
-    <para>
-      The new compiler will be installed into
-      <literal>~/.opam/4.01.0dev+trunk</literal> and any libraries you
-      install for it will be tracked separately from your system
-      installation. You can have any number of compilers installed
-      simultaneously, but only one can be active at any time. Browse
-      through the available compilers by running
-      <literal>opam switch list</literal>.
-    </para>
-    <para>
-      Finally, we're ready to install the Core libraries. Run this:
-    </para>
-    <programlisting>
-$ opam install core core_extended async
-</programlisting>
-    <para>
-      This will take about five or ten minutes to build, and will
-      install a series of packages. OPAM figures out the dependencies
-      you need automatically, but the three packages that really matter
-      are:
-    </para>
-    <itemizedlist>
-      <listitem>
-        <para>
-          <literal>core</literal> is the main, well-supported Core
-          distribution from Jane Street.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <literal>core_extended</literal> contains a number of
-          experimental, but useful, extension libraries that are under
-          review for inclusion in Core. We use some of these in places,
-          but much less than Core itself.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <literal>async</literal> is the network programming library
-          that we use in Part II to communicate with other hosts. You
-          can skip this for the initial installation until you get to
-          Part II, if you prefer.
-        </para>
-      </listitem>
-    </itemizedlist>
-    <sect2 id="editing-environment">
-      <title>Editing Environment</title>
-      <para>
-        There's one last tool you need before getting started on the
-        examples. The default <literal>ocaml</literal> command gives us
-        an interactive command-line to experiment with code without
-        compiling it. However, it's quite a spartan experience and so we
-        use a more modern alternative.
-      </para>
-      <programlisting>
-$ opam install utop
-</programlisting>
-      <para>
-        The <literal>utop</literal> package is an interactive
-        command-line interface to OCaml that has tab-completion,
-        persistent history and integration with Emacs so that you can
-        run it within your editing environment.
-      </para>
-      <para>
-        Remember from earlier that OPAM never installs files directly
-        into your system directories, and this applies to
-        <literal>utop</literal> too. You'll find the binary in
-        <literal>~/.opam/4.01.0dev+trunk/bin</literal>. However, just
-        typing in <literal>utop</literal> from your shell should just
-        work, due to the <literal>opam config env</literal> step that
-        configures your shell. Don't forget to automate this as
-        described earlier, as it makes life much easier when developing
-        OCaml code!
-      </para>
-    </sect2>
-    <sect2 id="command-line">
-      <title>Command Line</title>
-      <para>
-        The <literal>utop</literal> tool provides a convenient
-        interactive toplevel, with full command history, command macros
-        and module name completion. When you first run
-        <literal>utop</literal>, you'll find yourself at an interactive
-        prompt with a bar at the bottom of the screen. The bottom bar
-        dynamically updates as you write text, and contains the possible
-        names of modules or variables that are valid at that point in
-        the phrase you are entering. You can press the
-        <literal>&lt;tab&gt;</literal> key to complete the phrase with
-        the first choice.
-      </para>
-      <para>
-        The <literal>~/.ocamlinit</literal> file in your home directory
-        initialises <literal>utop</literal> with common libraries and
-        syntax extensions so you don't need to type them in every time.
-        Now that you have Core installed, you should update it to load
-        it every time you start <literal>utop</literal>, by adding this
-        to it:
-      </para>
-      <programlisting language="ocaml">
-#use &quot;topfind&quot;
-#camlp4o
-#require &quot;core.top&quot;
-#require &quot;core.syntax&quot;
-</programlisting>
-      <para>
-        You can also optionally add some more useful libraries that are
-        used in the book, such as <literal>Core_extended</literal> and
-        <literal>Async</literal>. You can also open the Core module by
-        default if that's all you ever use the top-level for. Just
-        append these lines to the <literal>.ocamlinit</literal> file if
-        that's what you prefer.
-      </para>
-      <programlisting>
-#require &quot;core_extended&quot;
-#require &quot;async&quot;
-open Core.Std
-</programlisting>
-      <para>
-        When you run <literal>utop</literal> with these initialization
-        rules, it should start up with Core opened and ready to use.
-      </para>
-    </sect2>
-    <sect2 id="editors">
-      <title>Editors</title>
-      <note>
-      <title>
-      Note to reviewers
-      </title>
-      <para>
-        The instructions for editor setup are still being compiled. If
-        you have a relevant tip or HOWTO, then we'd
-        <emphasis>really</emphasis> appreciate you leaving a note here
-        with a pointer or direct instructions.
-      </para>
-      </note>
-      <sect3 id="emacs">
-        <title>Emacs</title>
-        <para>
-          TODO: Emacs users have tuareg and
-          <ulink url="http://www.typerex.org/">Typerex</ulink>.
-        </para>
-        <para>
-          To use <literal>utop</literal> directly in Emacs, add the
-          following line to your <literal>~/.emacs</literal> file:
-        </para>
-        <programlisting language="scheme">
-(autoload 'utop &quot;utop&quot; &quot;Toplevel for OCaml&quot; t)
-</programlisting>
-        <para>
-          You also need to make the <literal>utop.el</literal> file
-          available to your Emacs installation. The OPAM version of
-          <literal>utop</literal> installs it into the
-          <literal>~/.opam</literal> hierarchy, for example in
-          <literal>~/.opam/system/share/emacs/site-lisp/utop.el</literal>.
-          You may need to replace <literal>system</literal> with your
-          current compiler switch, such as
-          <literal>4.01.0dev+trunk</literal>.
-        </para>
-        <para>
-          Once this successfully loads in Emacs, you can run utop by
-          executing the command <literal>utop</literal> in Emacs. There
-          are more details instructions at the
-          <ulink url="https://github.com/diml/utop#integration-with-emacs">utop
-          homepage</ulink>.
-        </para>
-      </sect3>
-      <sect3 id="vim">
-        <title>Vim</title>
-        <para>
-          TODO: Vim users can use the built-in style, and
-          <ulink url="http://github.com/avsm/ocaml-annot">ocaml-annot</ulink>
-          may also be useful.
-        </para>
-      </sect3>
-      <sect3 id="eclipse">
-        <title>Eclipse</title>
-        <para>
-          Eclipse is a popular IDE usually used for Java development.
-          The OCaml Development Tools (ODT) project provides equivalent
-          IDE features for editing and compiling OCaml code, such as
-          automatic compilation and name completion.
-        </para>
-        <para>
-          ODT is distributed as a set of plugins for the Eclipse IDE
-          environment from the
-          <ulink url="http://ocamldt.free.fr">homepage</ulink>. You just
-          have to copy these plugins into your Eclipse distribution in
-          order to access the new OCaml facilities.
-        </para>
-      </sect3>
-    </sect2>
-  </sect1>
 </appendix><appendix id="packaging">
   <title>Packaging</title>
   <note>
