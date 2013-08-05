@@ -2739,7 +2739,7 @@ val is_odd : int -&gt; bool = &lt;fun&gt;
         identifiers. This set includes identifiers that are sequences of
         characters from the following set:
       </para>
-      <programlisting>
+      <programlisting language="html">
 ! $ % &amp; * + - . / : &lt; = &gt; ? @ ^ | ~
 </programlisting>
       <para>
@@ -2999,18 +2999,17 @@ val ( |&gt; ) : 'a -&gt; ('a -&gt; 'b) -&gt; 'b = &lt;fun&gt;
       </para>
       <programlisting language="ocaml">
 ...part 32 of variables-and-functions/main.topscript
-# Sys.getenv_exn &quot;PATH&quot;
-  |&gt; String.split ~on:':'
+# let path = &quot;/usr/bin:/usr/local/bin:/bin:/sbin&quot;;; 
+val path : string = &quot;/usr/bin:/usr/local/bin:/bin:/sbin&quot;
+#   String.split ~on:':' path
   |&gt; List.dedup ~compare:String.compare
   |&gt; List.iter ~f:print_endline
   ;; 
 
 /bin
-/home/rwo/.opam/4.01.0dev+trunk/bin
+/sbin
 /usr/bin
-/usr/games
 /usr/local/bin
-/usr/local/games
 - : unit = ()
 </programlisting>
       <para>
@@ -3019,18 +3018,15 @@ val ( |&gt; ) : 'a -&gt; ('a -&gt; 'b) -&gt; 'b = &lt;fun&gt;
       </para>
       <programlisting language="ocaml">
 ...part 33 of variables-and-functions/main.topscript
-# let path = Sys.getenv_exn &quot;PATH&quot; in
-  let split_path = String.split ~on:':' path in
+#   let split_path = String.split ~on:':' path in
   let deduped_path = List.dedup ~compare:String.compare split_path in
   List.iter ~f:print_endline deduped_path
   ;; 
 
 /bin
-/home/rwo/.opam/4.01.0dev+trunk/bin
+/sbin
 /usr/bin
-/usr/games
 /usr/local/bin
-/usr/local/games
 - : unit = ()
 </programlisting>
       <para>
@@ -3071,17 +3067,10 @@ lines
 ...part 36 of variables-and-functions/main.topscript
 # let (^&gt;) x f = f x;; 
 val ( ^&gt; ) : 'a -&gt; ('a -&gt; 'b) -&gt; 'b = &lt;fun&gt;
-# Sys.getenv_exn &quot;PATH&quot;
-  ^&gt; String.split ~on:':'
+#   ^&gt; String.split ~on:':' path
   ^&gt; List.dedup ~compare:String.compare
   ^&gt; List.iter ~f:print_endline
   ;; 
-Characters 93-119:
-Error: This expression has type string list -&gt; unit
-       but an expression was expected of type
-         (string list -&gt; string list) -&gt; 'a
-       Type string list is not compatible with type
-         string list -&gt; string list 
 </programlisting>
       <para>
         The above type error is a little bewildering at first glance.
@@ -3215,22 +3204,49 @@ ratio ~num ~denom;;
         </listitem>
         <listitem>
           <para>
+            When the meaning of a particular argument is unclear from
+            the type alone. Consider a function for creating a hash
+            table whose first argument is the initial size of the array
+            backing the hashtable, and the second is a Boolean flag
+            which indicates whether that array will ever shrink when
+            elements are removed.
+          </para>
+          <programlisting>
+((typ ocaml)(name variables-and-functions/htable_sig1.ml))
+</programlisting>
+          <para>
+            The above signature makes it hard to divine the meaning of
+            those two arguments. but with labeled arguments, we can make
+            the intent immediately clear.
+          </para>
+          <programlisting>
+((typ ocaml)(name variables-and-functions/htable_sig2.ml))
+</programlisting>
+          <para>
+            Choosing label names well is especially important for
+            Boolean values, since it's often easy to get confused about
+            whether a value being true is meant ot enable or disable a
+            given feature.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
             When defining functions that have multiple arguments that
             might get confused with each other. This is most at issue
             when the arguments are of the same type. For example,
-            consider this signature for a function for extracting a
-            substring of another string.
+            consider this signature for a function that extracts a
+            substring.
           </para>
-          <programlisting language="ocaml">
-val substring: string -&gt; int -&gt; int -&gt; string
+          <programlisting>
+((typ ocaml)(name variables-and-functions/substring_sig1.ml))
 </programlisting>
           <para>
-            where the two ints are the starting position and length of
-            the substring to extract. Labeled arguments can make this
-            signature clearer:
+            Here, the two ints are the starting position and length of
+            the substring to extract, respectively. We can can make this
+            fact more obvious from the signature by adding labels.
           </para>
-          <programlisting language="ocaml">
-val substring: string -&gt; pos:int -&gt; len:int -&gt; string
+          <programlisting>
+((typ ocaml)(name variables-and-functions/substring_sig2.ml))
 </programlisting>
           <para>
             This improves the readability of both the signature and of
@@ -3241,28 +3257,6 @@ val substring: string -&gt; pos:int -&gt; len:int -&gt; string
         </listitem>
         <listitem>
           <para>
-            When the meaning of a particular argument is unclear from
-            the type alone. For example, consider a function for
-            creating a hash table where the first argument is the
-            initial size of the table, and the second argument is a flag
-            which, when true, indicates that the hash table will reduce
-            its size when the hash table contains few elements. The
-            following signature doesn't give you much of a hint as to
-            the meaning of the arguments.
-          </para>
-          <programlisting language="ocaml">
-val create_hashtable : int -&gt; bool -&gt; ('a,'b) Hashtable.t
-</programlisting>
-          <para>
-            but with labeled arguments, we can make the intent much
-            clearer.
-          </para>
-          <programlisting language="ocaml">
-val create_hashtable : init_size:int -&gt; allow_shrinking:bool -&gt; ('a,'b) Hashtable.t
-</programlisting>
-        </listitem>
-        <listitem>
-          <para>
             When you want flexibility on the order in which arguments
             are passed. Consider a function like
             <literal>List.iter</literal>, that takes two arguments: a
@@ -3270,14 +3264,14 @@ val create_hashtable : init_size:int -&gt; allow_shrinking:bool -&gt; ('a,'b) Ha
             common pattern is to partially apply
             <literal>List.iter</literal> by giving it just the function,
             as in the following example from earlier in the chapter.
-            This requires putting the function argument first.
           </para>
           <programlisting>
 ((typ ocamltop)(name variables-and-functions/main.topscript)(part 43)) 
 </programlisting>
           <para>
-            In other cases, you want to put the function argument
-            second. One common reason is readability. In particular, a
+            This requires that we put the function argument first. In
+            other cases, you want to put the function argument second.
+            One common reason is readability. In particular, a
             multi-line function passed as an argument to another
             function is easiest to read when it is the final argument to
             that function.
@@ -3312,8 +3306,8 @@ val apply_to_tuple : (first:'a -&gt; second:'b -&gt; 'c) -&gt; 'a * 'b -&gt; 'c 
 val apply_to_tuple_2 : (second:'a -&gt; first:'b -&gt; 'c) -&gt; 'b * 'a -&gt; 'c = &lt;fun&gt;
 </programlisting>
         <para>
-          It turns out this order of listing matters. In particular, if
-          we define a function that has a different order
+          It turns out this order matters. In particular, if we define a
+          function that has a different order
         </para>
         <programlisting language="ocaml">
 ...part 46 of variables-and-functions/main.topscript
@@ -3343,10 +3337,9 @@ val apply_to_tuple : (first:'a -&gt; second:'b -&gt; 'c) -&gt; 'a * 'b -&gt; 'c 
 - : int = 0
 </programlisting>
         <para>
-          So, even though the order of labeled arguments usually doesn't
-          matter, it will sometimes bite you in higher-ordered contexts,
-          where you're passing functions as arguments to other functions
-          as we were in the above examples.
+          As a result, when passing labeled functions as arguments, you
+          need to take care to be consistent in your ordering of labeled
+          arguments in higher-order contexts.
         </para>
       </sect3>
     </sect2>
@@ -3356,8 +3349,7 @@ val apply_to_tuple : (first:'a -&gt; second:'b -&gt; 'c) -&gt; 'a * 'b -&gt; 'c 
         An optional argument is like a labeled argument that the caller
         can choose whether or not to provide. Optional arguments are
         passed in using the same syntax as labeled arguments, and, like
-        labeled arguments, optional arguments can be provided in any
-        order.
+        labeled arguments, can be provided in any order.
       </para>
       <para>
         Here's an example of a string concatenation function with an
@@ -3387,11 +3379,11 @@ val concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;fun&gt;
         caller.
       </para>
       <para>
-        In the above example, we had a bit of code to substitute in the
-        empty string when no argument was provided. This is a common
+        The above example needed a bit of boilerplate to choose a
+        default separator when none was provided. This is a common
         enough pattern that there's an explicit syntax for providing a
         default value, which allows us to write
-        <literal>concat</literal> even more concisely.
+        <literal>concat</literal> more concisely.
       </para>
       <programlisting language="ocaml">
 ...part 50 of variables-and-functions/main.topscript
@@ -3409,9 +3401,9 @@ val concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;fun&gt;
       </para>
       <para>
         The downside is that the caller may be unaware that there is a
-        choice to be made, and so may unknowingly (and wrongly) pick
-        that default behavior. Optional arguments really only make sense
-        when the extra concision of omitting the argument overwhelms the
+        choice to be made, and so may unknowingly (and wrongly) pick the
+        default behavior. Optional arguments really only make sense when
+        the extra concision of omitting the argument outweighs the
         corresponding loss of explicitness.
       </para>
       <para>
@@ -6275,11 +6267,9 @@ $ ocaml -warn-help | egrep '\b9\b'
     </para>
     <para>
       The warnings used for building the examples in this book are
-      specified with the following flag.
+      specified with the following flag:
+      <literal>-w @A-4-33-41-42-43-34-44</literal>.
     </para>
-    <programlisting>
--w @A-4-33-41-42-43-34-44
-</programlisting>
     <para>
       The syntax of this can be found by running
       <literal>ocaml -help</literal>, but this particular invocation
@@ -14139,6 +14129,13 @@ val s : &lt; pop : int option; push : int -&gt; unit &gt; = &lt;obj&gt;
 - : int option = Some 4
 </programlisting>
     <para>
+      Note that unlike functions, methods can have zero parameters,
+      since the method call is routed to a concrete object instance.
+      That's why the <literal>push</literal> and <literal>pop</literal>
+      methods do not have a <literal>unit</literal> argument, as the
+      equivalent functional versions would.
+    </para>
+    <para>
       Objects can also be constructed by functions. If we want to
       specify the initial value of the object, we can define a function
       that takes the value and returns an object.
@@ -14392,6 +14389,9 @@ Some (4, &lt;obj&gt;)
       combined in building-block style, and the
       <ulink url="http://cristal.inria.fr/camlimages/">Camlimages</ulink>
       library which manipulates various graphical file formats.
+      Camlimages also provides a module-based version of the same
+      library, letting you choose between functional and object-oriented
+      styles depending on your problem domain.
     </para>
     <para>
       We'll introduce you to classes, and examples using open recursion,
@@ -14458,7 +14458,7 @@ val shape : int -&gt; shape = &lt;fun&gt;
       <para>
         This form of object subtyping is called
         <emphasis>width</emphasis> subtyping. Width subtyping means that
-        an object type <emphasis>A</emphasis> is a a subtype of
+        an object type <emphasis>A</emphasis> is a subtype of
         <emphasis>B</emphasis>, if <emphasis>A</emphasis> has all of the
         methods of <emphasis>B</emphasis>, and possibly more. A
         <literal>square</literal> is a subtype of
@@ -14833,7 +14833,7 @@ String GetShapeName(Shape s) {
       <para>
         However, the situation is not always so obvious. The following
         code checks whether an array of shapes looks like a
-        &quot;barbell,&quot; composed to two <literal>Circle</literal>
+        &quot;barbell,&quot; composed of two <literal>Circle</literal>
         objects separated by a <literal>Line</literal>, where the
         circles have the same radius.
       </para>
@@ -14855,7 +14855,7 @@ boolean IsBarbell(Shape[] s) {
 (* objects/is_barbell.ml  *)
 let is_barbell =
   function
-  | [Circle r1; Line _; Circle r2] when r1 == r2 -&gt; true
+  | [Circle r1; Line _; Circle r2] when r1 = r2 -&gt; true
   | _ -&gt; false
 </programlisting>
       <para>
@@ -15589,8 +15589,8 @@ and 'a list_item =
 open Core.Std
 
 class ['a] folder = object(self)
-  method doc acc doc =
-    match doc with
+  method doc acc =
+    function
       Heading _ -&gt; acc
     | Paragraph text -&gt; List.fold ~f:self#text_item ~init:acc text
     | Definition list -&gt; List.fold ~f:self#list_item ~init:acc list
@@ -15599,8 +15599,8 @@ class ['a] folder = object(self)
     fun acc {tag; text} -&gt;
       List.fold ~f:self#text_item ~init:acc text
 
-  method text_item acc bar =
-    match bar with
+  method text_item acc =
+    function
       Raw _ -&gt; acc
     | Bold text -&gt; List.fold ~f:self#text_item ~init:acc text
     | Enumerate list -&gt; List.fold ~f:self#list_item ~init:acc list
@@ -15661,9 +15661,9 @@ let count_doc = (new counter)#doc
     </para>
     <programlisting language="ocaml">
 (* classes/doc.ml (starting from part 3) *)
-class ['a] folder = object(self)
-  method doc acc doc =
-    match doc with
+class ['a] folder2 = object(self)
+  method doc acc =
+    function
       Heading str -&gt; self#heading acc str
     | Paragraph text -&gt; self#paragraph acc text
     | Definition list -&gt; self#definition acc list
@@ -15672,8 +15672,8 @@ class ['a] folder = object(self)
     fun acc {tag; text} -&gt;
       List.fold ~f:self#text_item ~init:acc text
 
-  method text_item acc bar =
-    match bar with
+  method text_item acc =
+    function
       Raw str -&gt; self#raw acc str
     | Bold text -&gt; self#bold acc text
     | Enumerate list -&gt; self#enumerate acc list
@@ -15693,8 +15693,16 @@ class ['a] folder = object(self)
   method private quote acc doc = self#doc acc doc
 end
 
-let f : &lt; doc : 'a; .. &gt;  = new folder
+let f :
+  &lt; doc : int -&gt; doc -&gt; int;
+    list_item : 'a . int -&gt; 'a list_item -&gt; int;
+    text_item : int -&gt; text_item -&gt; int &gt;  = new folder2
 </programlisting>
+    <para>
+      The final statement that builds the value <literal>f</literal>
+      shows how the instantiation of a <literal>folder2</literal> object
+      has a type that hides the private methods.
+    </para>
     <para>
       To be precise, the private methods are part of the class type, but
       not part of the object type. This means, for example, that the
@@ -15703,15 +15711,16 @@ let f : &lt; doc : 'a; .. &gt;  = new folder
       use them to simplify our <literal>counter</literal> class.
     </para>
     <programlisting language="ocaml">
-# class counter = object
-    inherit [int] folder as super
+(* classes/doc.ml (starting from part 4) *)
+class counter = object
+  inherit [int] folder as super
 
-    method list_item acc li = acc
+  method list_item acc li = acc
 
-    method private bold acc txt = 
-      let acc = super#bold acc txt in
-       acc + 1
-  end
+  method private bold acc txt = 
+    let acc = super#bold acc txt in
+    acc + 1
+end
 </programlisting>
     <para>
       The key property of private methods is that they are visible to
@@ -15720,11 +15729,12 @@ let f : &lt; doc : 'a; .. &gt;  = new folder
       not even accessible in subclasses, you can use an explicit class
       type that omits the method. In the following code, the private
       methods are explicitly omitted from the class type of
-      <literal>counter</literal>, and can't be invoked in subclasses of
-      <literal>counter</literal>.
+      <literal>counter_with_sig</literal>, and can't be invoked in
+      subclasses of <literal>counter_with_sig</literal>.
     </para>
     <programlisting language="ocaml">
-class counter : object
+(* classes/doc.ml (starting from part 5) *)
+class counter_with_sig : object
   method doc : int -&gt; doc -&gt; int
   method list_item : int -&gt; 'b list_item -&gt; int
   method text_item : int -&gt; text_item -&gt; int
@@ -15735,7 +15745,7 @@ end = object
 
   method private bold acc txt = 
     let acc = super#bold acc txt in
-     acc + 1
+    acc + 1
 end
 </programlisting>
     <sect2 id="binary-methods">
@@ -15908,28 +15918,33 @@ end
       dispatch, while regular non-virtual methods are statically
       dispatched. In OCaml, <emphasis>all</emphasis> methods use dynamic
       dispatch, but the keyword <literal>virtual</literal> means that
-      the method or field is not implemented.
+      the method or field is not implemented. A class containing virtual
+      methods must also be flagged <literal>virtual</literal> and cannot
+      be directly instantiated (i.e. no object of this class can be
+      created).
     </para>
     <para>
       To explore this, lets extend our shapes examples to simple
-      interactive graphics. For this we will use the Async concurrency
-      library and the
+      interactive graphics. We will use the Async concurrency library
+      and the
       <ulink url="http://github.com/lpw25/async_graphics/">Async_graphics</ulink>
-      library, which provides an Async interface to OCaml's built in
-      Graphics library. Concurrent programming with Async will be
+      library, which provides an asynchronous interface to OCaml's built
+      in Graphics library. Concurrent programming with Async will be
       explored later in
       <xref linkend="concurrent-programming-with-async"/>, for
-      now you can safely ignore the details.
+      now you can safely ignore the details. You just need to run
+      <literal>opam install async_graphics</literal> to get the library
+      installed on your system.
     </para>
-    <para>
-      We will extend our <literal>shape</literal> type to include a
-      <literal>draw</literal> method. To display the shapes we will
-      define a reference to a list of shapes, and ensure that any shapes
-      in that list will be drawn on the display at regular intervals. We
-      also define an open_display function to open a display and ensure
-      that the Async scheduler is running:
-    </para>
-    <programlisting language="ocaml">
+    <sect2 id="defining-a-drawable-module">
+      <title>Defining a Drawable module</title>
+      <para>
+        Let's start with by creating a <literal>Drawable</literal>
+        module to hold the base logic to handle the display.
+      </para>
+      <programlisting language="ocaml">
+(* classes-async/drawable.ml  *)
+open Core.Std
 open Async.Std
 open Async_graphics
 
@@ -15942,22 +15957,37 @@ let repaint () =
     clear_graph ();
     List.iter ~f:(fun s -&gt; s#draw) !shapes;
     synchronize ()
-  with Graphic_failure _ -&gt; ();;
+  with Graphic_failure _ -&gt; ()
 
-Clock.every (Time.Span.of_sec (1.0 /. 24.0)) repaint;;
+let () = 
+  Clock.every (Time.Span.of_sec (1.0 /. 24.0)) repaint
 
 let open_display () =
   close_graph ();
   open_graph &quot;&quot;;
-  auto_synchronize false;
-  if not (Scheduler.is_running ()) then ignore (Thread.create Scheduler.go ());;
+  auto_synchronize false
 </programlisting>
-    <para>
-      Now let's create classes for making squares and circles. We
-      include an <literal>on_click</literal> method for adding event
-      handlers to the shapes.
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        We first define our <literal>shape</literal> object type to
+        include a <literal>draw</literal> method, and a reference to a
+        list of shapes to display them. Any shapes in that list will be
+        drawn on the display at regular intervals via the
+        <literal>repaint</literal> function. Finally, we also define an
+        <literal>open_display</literal> function to open a graphical
+        display and ensure that the Async scheduler is running.
+      </para>
+      <para>
+        Now let's a new module that contains classes for making squares
+        and circles. We include an <literal>on_click</literal> method
+        for adding event handlers to the shapes.
+      </para>
+      <programlisting language="ocaml">
+(* classes-async/verbose_shapes.ml  *)
+open Core.Std
+open Async.Std
+open Async_graphics
+open Drawable
+
 class square w x y = object (self)
   val mutable x: int = x
   method x = x
@@ -15970,18 +16000,25 @@ class square w x y = object (self)
 
   method draw = fill_rect x y width width
 
-  method private contains x' y' = 
+  method private contains x' y' =
     x &lt;= x' &amp;&amp; x' &lt;= x + width &amp;&amp;
       y &lt;= y' &amp;&amp; y' &lt;= y + width
 
-  method on_click ?start ?stop f = 
-    on_click ?start ?stop 
-      (fun {mouse_x;mouse_y} -&gt; 
-         if self#contains mouse_x mouse_y then 
+  method on_click ?start ?stop f =
+    on_click ?start ?stop
+      (fun {mouse_x;mouse_y;_} -&gt;
+         if self#contains mouse_x mouse_y then
            f mouse_x mouse_y)
 end
-
-class circle r x y = object
+</programlisting>
+      <para>
+        The <literal>square</literal> class is pretty straightforward,
+        and the <literal>circle</literal> class below also looks very
+        similar.
+      </para>
+      <programlisting language="ocaml">
+(* classes-async/verbose_shapes.ml (starting from part 1) *)
+class circle r x y = object (self)
   val mutable x: int = x
   method x = x
 
@@ -15993,32 +16030,42 @@ class circle r x y = object
 
   method draw = fill_circle x y radius
 
-  method private contains x' y' = 
+  method private contains x' y' =
     let dx = abs (x' - x) in
     let dy = abs (y' - y) in
     let dist = sqrt (Float.of_int ((dx * dx) + (dy * dy))) in
       dist &lt;= (Float.of_int radius)
 
-  method on_click ?start ?stop f = 
-    on_click ?start ?stop 
-      (fun {mouse_x;mouse_y} -&gt; 
-         if self#contains mouse_x mouse_y then 
+  method on_click ?start ?stop f =
+    on_click ?start ?stop
+      (fun {mouse_x;mouse_y;_} -&gt;
+         if self#contains mouse_x mouse_y then
            f mouse_x mouse_y)
 end
 </programlisting>
-    <para>
-      These classes have a lot in common, and it would be useful to
-      factor out this common functionality into a superclass. We can
-      easily move the definitions of <literal>x</literal> and
-      <literal>y</literal> into a superclass, but what about
-      <literal>on_click</literal>? Its definition depends on
-      <literal>contains</literal> which has a different definition in
-      each class. The solution is to create a
-      <emphasis>virtual</emphasis> class. This class will declare a
-      <literal>contains</literal> method, but leave its definition to
-      the subclasses:
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        These classes have a lot in common, and it would be useful to
+        factor out this common functionality into a superclass. We can
+        easily move the definitions of <literal>x</literal> and
+        <literal>y</literal> into a superclass, but what about
+        <literal>on_click</literal>? Its definition depends on
+        <literal>contains</literal> which has a different definition in
+        each class. The solution is to create a
+        <emphasis>virtual</emphasis> class. This class will declare a
+        <literal>contains</literal> method, but leave its definition to
+        the subclasses.
+      </para>
+      <para>
+        Here is the more succinct definition, starting with a virtual
+        <literal>square</literal> class that implements
+        <literal>on_click</literal> and <literal>on_mousedown</literal>.
+      </para>
+      <programlisting language="ocaml">
+(* classes-async/shapes.ml  *)
+open Core.Std
+open Async.Std
+open Async_graphics
+
 class virtual shape x y = object (self)
   method virtual private contains: int -&gt; int -&gt; bool
 
@@ -16028,25 +16075,26 @@ class virtual shape x y = object (self)
   val mutable y: int = y
   method y = y
 
-  method on_click ?start ?stop f = 
-    on_click ?start ?stop 
-      (fun {mouse_x;mouse_y} -&gt; 
-         if self#contains mouse_x mouse_y then 
+  method on_click ?start ?stop f =
+    on_click ?start ?stop
+      (fun {mouse_x;mouse_y} -&gt;  
+         if self#contains mouse_x mouse_y then
            f mouse_x mouse_y)
 
-  method on_mousedown ?start ?stop f = 
-    on_mousedown ?start ?stop 
-      (fun {mouse_x;mouse_y} -&gt; 
-         if self#contains mouse_x mouse_y then 
+  method on_mousedown ?start ?stop f =
+    on_mousedown ?start ?stop
+      (fun {mouse_x;mouse_y} -&gt;
+         if self#contains mouse_x mouse_y then
            f mouse_x mouse_y)
 end
 </programlisting>
-    <para>
-      Now we can define <literal>square</literal> and
-      <literal>circle</literal> by inheriting from
-      <literal>shape</literal>:
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        Now we can define <literal>square</literal> and
+        <literal>circle</literal> by inheriting from
+        <literal>shape</literal>.
+      </para>
+      <programlisting language="ocaml">
+(* classes-async/shapes.ml (starting from part 1) *)
 class square w x y = object
   inherit shape x y
 
@@ -16057,8 +16105,8 @@ class square w x y = object
 
   method private contains x' y' = 
     x &lt;= x' &amp;&amp; x' &lt;= x + width &amp;&amp;
-      y &lt;= y' &amp;&amp; y' &lt;= y + width
-end
+    y &lt;= y' &amp;&amp; y' &lt;= y + width 
+end 
 
 class circle r x y = object
   inherit shape x y
@@ -16068,20 +16116,21 @@ class circle r x y = object
 
   method draw = fill_circle x y radius
 
-  method private contains x' y' = 
+  method private contains x' y' =
     let dx = abs (x' - x) in
     let dy = abs (y' - y) in
     let dist = sqrt (Float.of_int ((dx * dx) + (dy * dy))) in
-      dist &lt;= (Float.of_int radius)
+    dist &lt;= (Float.of_int radius)
 end
 </programlisting>
-    <para>
-      One way to view a <literal>virtual</literal> class is that it is
-      like a functor, where the &quot;inputs&quot; are the declared, but
-      not defined, virtual methods and fields. The functor application
-      is implemented through inheritance, when virtual methods are given
-      concrete implementations.
-    </para>
+      <para>
+        One way to view a <literal>virtual</literal> class is that it is
+        like a functor, where the &quot;inputs&quot; are the declared,
+        but not defined, virtual methods and fields. The functor
+        application is implemented through inheritance, when virtual
+        methods are given concrete implementations.
+      </para>
+    </sect2>
   </sect1>
   <sect1 id="initializers">
     <title>Initializers</title>
@@ -16091,13 +16140,16 @@ end
       of a field:
     </para>
     <programlisting language="ocaml">
+# script classes/initializer.topscript
+$ utop
 # class obj x = 
     let () = printf &quot;Creating obj %d\n&quot; x in
     object 
       val field = printf &quot;Initializing field\n&quot;; x
-    end;;
+    end ;; 
 class obj : int -&gt; object val field : int end
-# let o = new obj 3;;
+# let o = new obj 3 ;; 
+
 Creating obj 3
 Initializing field
 val o : obj = &lt;obj&gt;
@@ -16111,13 +16163,14 @@ val o : obj = &lt;obj&gt;
       created.
     </para>
     <para>
-      For example, if we wanted to create a
-      <literal>growing_circle</literal> class for circles that grow when
-      clicked then we could inherit from <literal>circle</literal> and
-      used the inherited <literal>on_click</literal> to add a handler
-      for click events:
+      For example, suppose we wanted to extend our previous shapes
+      module with a <literal>growing_circle</literal> class for circles
+      that expand when clicked. We could inherit from
+      <literal>circle</literal> and used the inherited
+      <literal>on_click</literal> to add a handler for click events.
     </para>
     <programlisting language="ocaml">
+(* classes-async/shapes.ml (starting from part 2) *)
 class growing_circle r x y = object (self)
   inherit circle r x y
 
@@ -16140,9 +16193,13 @@ end
     <sect2 id="how-names-are-resolved">
       <title>How names are resolved</title>
       <para>
-        The main &quot;trickiness&quot; of multiple inheritance is due
-        to naming -- what happens when a method or field with some name
-        is defined in more than one class?
+        TODO CR: this has changed in 4.01 and multiple definitions are
+        no longer allowed.
+      </para>
+      <para>
+        The main trickiness of multiple inheritance is due to naming --
+        what happens when a method or field with some name is defined in
+        more than one class?
       </para>
       <para>
         If there is one thing to remember about inheritance in OCaml, it
@@ -16154,64 +16211,92 @@ end
         First, let's consider what happens when we define a method more
         than once. In the following example, the method
         <literal>get</literal> is defined twice; the second definition
-        &quot;wins,&quot; meaning that it overrides the first one.
+        wins, meaning that it overrides the first one.
       </para>
       <programlisting language="ocaml">
+# script classes/multiple_inheritance.topscript
+$ utop
 # class m1 =
-object (self : 'self)
-   method get = 1
-   method f = self#get
-   method get = 2
-end;;
-class m1 : object method f : int method get : int end
-# (new m1)#f;;
-- : int = 2
+    object (self : 'self)
+     method get = 1
+     method f = self#get
+     method get = 2
+  end  ;; 
+Characters 87-101:
+Error: The method `get' has multiple definitions in this object
+# (new m1)#f ;; 
+Characters 1-7:
+Error: Unbound class m1
 </programlisting>
       <para>
         Fields have similar behavior, though the compiler produces a
         warning message about the override.
       </para>
       <programlisting language="ocaml">
+...part 1 of classes/multiple_inheritance.topscript
 # class m2 =
   object (self : 'self)
      val x = 1
      method f = x
      val x = 2
-  end;;
-Characters 69-74:
-     val x = 2
-         ^^^^^
-Warning 13: the instance variable x is overridden.
-The behavior changed in OCaml 3.10 (previous behavior was hiding.)
-class m2 : object val x : int method f : int end
-# (new m2)#f;;
-- : int = 2
+  end ;; 
+Characters 73-82:
+Error: The instance variable `x' has multiple definitions in this object
 </programlisting>
       <para>
         Of course, it is unlikely that you will define two methods or
         two fields of the same name in the same class. However, the
         rules for inheritance follow the same pattern: the last
-        definition wins. In the following definition, the
-        <literal>inherit</literal> declaration comes last, so the method
-        definition <literal>method get = 2</literal> overrides the
-        previous definition, always returning 2.
+        definition wins.
+      </para>
+      <para>
+        In the following definition, the <literal>inherit</literal>
+        declaration comes last, so the method definition
+        <literal>method get = 2</literal> overrides the previous
+        definition, always returning 2.
       </para>
       <programlisting language="ocaml">
-# class m4 = object method get = 2 end;;
+...part 2 of classes/multiple_inheritance.topscript
+# class m4 = object method get = 2 end ;; 
+class m4 : object method get : int end
 # class m5 =
   object
     val mutable x = 1
     method get = x
     method set x' = x &lt;- x'
     inherit m4
-  end;;
-class m5 : object val mutable x : int method get : int method set : int -&gt; unit end
-# let x = new m5;;
+  end ;; 
+class m5 :
+  object val mutable x : int method get : int method set : int -&gt; unit end
+# let x = new m5 ;; 
 val x : m5 = &lt;obj&gt;
-# x#set 5;;
+# x#set 5 ;; 
 - : unit = ()
-# x#get;;
+# x#get ;; 
 - : int = 2
+</programlisting>
+      <para>
+        If, however, we move the <literal>inherit</literal> declaration
+        before the method definitions, the new behavior overrides the
+        inherited methods, returning the value we just set.
+      </para>
+      <programlisting language="ocaml">
+...part 3 of classes/multiple_inheritance.topscript
+# class m5a =
+  object
+    inherit m4
+    val mutable x = 1
+    method get = x
+    method set x' = x &lt;- x'
+  end ;; 
+class m5a :
+  object val mutable x : int method get : int method set : int -&gt; unit end
+# let x = new m5a ;; 
+val x : m5a = &lt;obj&gt;
+# x#set 5 ;; 
+- : unit = ()
+# x#get ;; 
+- : int = 5
 </programlisting>
       <para>
         To reiterate, to understand what inheritance means, replace each
@@ -16220,49 +16305,53 @@ val x : m5 = &lt;obj&gt;
         even for private methods. However, it does
         <emphasis>not</emphasis> hold for private methods that are
         &quot;really&quot; private, meaning that they have been hidden
-        by a type constraint. In the following definitions, there are
-        three definitions of the private method <literal>g</literal>.
-        However, the definition of <literal>g</literal> in
-        <literal>m8</literal> is not overridden, because it is not part
-        of the class type for <literal>m8</literal>.
+        by a type constraint.
+      </para>
+      <para>
+        In the following definitions, there are three definitions of the
+        private method <literal>g</literal>. However, the definition of
+        <literal>g</literal> in <literal>m8</literal> is not overridden,
+        because it is not part of the class type for
+        <literal>m8</literal>.
       </para>
       <programlisting language="ocaml">
+...part 4 of classes/multiple_inheritance.topscript
 # class m6 =
   object (self : 'self)
      method f1 = self#g
      method private g = 1
-  end;;
+  end ;; 
 class m6 : object method f1 : int method private g : int end
 # class m7 =
   object (self : 'self)
      method f2 = self#g
      method private g = 2
-  end;;
+  end ;; 
 class m7 : object method f2 : int method private g : int end
 # class m8 : object method f3 : int end =
   object (self : 'self)
      method f3 = self#g
      method private g = 3
-  end;;
+  end ;; 
 class m8 : object method f3 : int end
 # class m9 =
   object (self : 'self)
      inherit m6
      inherit m7
      inherit m8
-  end;;
-# class m9 :
+  end ;; 
+class m9 :
   object
     method f1 : int
     method f2 : int
     method f3 : int
     method private g : int
   end
-# let x = new m9;;
+# let x = new m9 ;; 
 val x : m9 = &lt;obj&gt;
-# x#f1;;
+# x#f1 ;; 
 - : int = 2
-# x#f3;;
+# x#f3 ;; 
 - : int = 3
 </programlisting>
     </sect2>
@@ -16298,6 +16387,7 @@ val x : m9 = &lt;obj&gt;
         event handlers:
       </para>
       <programlisting language="ocaml">
+(* classes-async/shapes.ml (starting from part 3) *)
 class virtual draggable = object (self)
   method virtual on_mousedown: 
     ?start:unit Deferred.t -&gt; 
@@ -16316,12 +16406,15 @@ class virtual draggable = object (self)
          let offset_y = y - mouse_y in
          let mouse_up = Ivar.create () in
          let stop = Ivar.read mouse_up in
-           dragging &lt;- true;
-           on_mouseup ~stop (fun _ -&gt; Ivar.fill mouse_up (); dragging &lt;- false);
-           on_mousemove ~stop
-             (fun {mouse_x;mouse_y} -&gt; 
-                x &lt;- mouse_x + offset_x;
-                y &lt;- mouse_y + offset_y))
+         dragging &lt;- true;
+         on_mouseup ~stop
+           (fun _ -&gt;
+              Ivar.fill mouse_up ();
+              dragging &lt;- false);
+         on_mousemove ~stop
+           (fun {mouse_x;mouse_y} -&gt;
+              x &lt;- mouse_x + offset_x;
+              y &lt;- mouse_y + offset_y))
 end
 </programlisting>
       <para>
@@ -16329,28 +16422,11 @@ end
         inheritance.
       </para>
       <programlisting language="ocaml">
-# class small_square = object inherit square 10 20 20 inherit draggable end;;
-class small_square :
-  object
-    val mutable dragging : bool
-    val mutable width : int
-    val mutable x : int
-    val mutable y : int
-    method private contains : int -&gt; int -&gt; bool
-    method dragging : bool
-    method draw : unit
-    method on_click :
-      ?start:unit Async.Std.Deferred.t -&gt;
-      ?stop:unit Async.Std.Deferred.t -&gt; (int -&gt; int -&gt; unit) -&gt; unit
-    method on_mousedown :
-      ?start:unit Async.Std.Deferred.t -&gt;
-      ?stop:unit Async.Std.Deferred.t -&gt; (int -&gt; int -&gt; unit) -&gt; unit
-    method width : int
-    method x : int
-    method y : int
-  end
-# shapes := (new small_square :&gt; drawable) :: !shapes;;
-- : unit = ()
+(* classes-async/shapes.ml (starting from part 4) *)
+class small_square = object
+  inherit square 20 40 40
+  inherit draggable 
+end
 </programlisting>
       <para>
         We can also use mixins to create animated shapes. Each animated
@@ -16360,6 +16436,7 @@ class small_square :
         called regular intervals when the shape is animated.
       </para>
       <programlisting language="ocaml">
+(* classes-async/shapes.ml (starting from part 5) *)
 class virtual animated span = object (self)
   method virtual on_click: 
     ?start:unit Deferred.t -&gt; 
@@ -16371,16 +16448,20 @@ class virtual animated span = object (self)
 
   method running = running
 
-  method animate = 
+  method animate =
     step &lt;- 0;
     running &lt;- true;
-    let stop = Clock.after span &gt;&gt;| fun () -&gt; running &lt;- false in    
-      Clock.every ~stop (Time.Span.of_sec (1.0 /. 24.0)) 
-        (fun () -&gt; 
-           step &lt;- step + 1;
-           List.iter ~f:(fun f -&gt; f step) updates)
+    let stop =
+      Clock.after span
+      &gt;&gt;| fun () -&gt; running &lt;- false 
+    in
+    Clock.every ~stop (Time.Span.of_sec (1.0 /. 24.0))
+      (fun () -&gt;
+         step &lt;- step + 1;
+         List.iter ~f:(fun f -&gt; f step) updates
+      )
 
-  initializer 
+  initializer
     self#on_click (fun x y -&gt; if not self#running then self#animate)
 end
 </programlisting>
@@ -16390,6 +16471,7 @@ end
         for a second when clicked:
       </para>
       <programlisting language="ocaml">
+(* classes-async/shapes.ml (starting from part 6) *)
 class my_circle = object
   inherit circle 20 50 50
   inherit animated Time.Span.second
@@ -16400,17 +16482,18 @@ end
         This initializers can also be added using mixins:
       </para>
       <programlisting language="ocaml">
+(* classes-async/shapes.ml (starting from part 7) *)
 class virtual linear x' y' = object (self)
   val virtual mutable updates: (int -&gt; unit) list
   val virtual mutable x: int
   val virtual mutable y: int
 
-  initializer 
-    let update _ = 
+  initializer
+    let update _ =
       x &lt;- x + x';
       y &lt;- y + y'
     in
-      updates &lt;- update :: updates
+    updates &lt;- update :: updates
 end
 
 let pi = (atan 1.0) *. 4.0
@@ -16420,15 +16503,15 @@ class virtual harmonic offset x' y' = object (self)
   val virtual mutable x: int
   val virtual mutable y: int
 
-  initializer 
+  initializer
     let update step =
       let m = sin (offset +. ((Float.of_int step) *. (pi /. 64.))) in
       let x' = Float.to_int (m *. Float.of_int x') in
       let y' = Float.to_int (m *. Float.of_int y') in
-        x &lt;- x + x';
-        y &lt;- y + y'
+      x &lt;- x + x';
+      y &lt;- y + y'
     in
-      updates &lt;- update :: updates
+    updates &lt;- update :: updates
 end
 </programlisting>
       <para>
@@ -16438,6 +16521,7 @@ end
         same object to produce a variety of different animations.
       </para>
       <programlisting language="ocaml">
+(* classes-async/shapes.ml (starting from part 8) *)
 class my_square x y = object (self)
   inherit square 40 x y
   inherit draggable
@@ -16452,11 +16536,70 @@ let my_circle = object
   inherit harmonic 0.0 10 0
   inherit harmonic (pi /. 2.0) 0 10
 end
-
-shapes := [(my_circle :&gt; drawable); 
-           (new my_square 50 450 :&gt; drawable); 
-           (new my_square 50 400 :&gt; drawable)]
 </programlisting>
+      <para>
+        Now all we have to do is to glue it together by initializing the
+        display, creating some shapes, and running the scheduler.
+      </para>
+      <programlisting language="ocaml">
+(* classes-async/shapes.ml (starting from part 9) *)
+let () =
+  let open Drawable in
+  open_display ();
+  let shapes = [ 
+     (my_circle :&gt; drawable); 
+     (new my_square 50 350 :&gt; drawable); 
+     (new my_square 50 200 :&gt; drawable);
+     (new growing_circle 20 70 70 :&gt; drawable);
+  ] in
+  Drawable.shapes := shapes;
+  never_returns (Scheduler.go ())
+</programlisting>
+      <para>
+        Finally, build the binary by linking against the
+        <literal>async_graphics</literal> package, which will pull in
+        all the other dependencies.
+      </para>
+      <programlisting>
+# running classes-async/build_shapes.out.sh
+$ corebuild -pkg async_graphics shapes.native
+</programlisting>
+      <para>
+        When you run the binary, a new graphical window should appear
+        (on MacOS X, you will need to install the X11 package first,
+        which you will be prompted for). Try clicking on the various
+        widgets, and gasp in awe at the sophisticated animations that
+        unfold as a result.
+      </para>
+      <para>
+        The graphics library described here is the one built into OCaml,
+        and is more useful as a learning tool than anything else. There
+        are several third-party libraries that provide more
+        sophisticated bindings to various graphics subsystems.
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <ulink url="http://lablgtk.forge.ocamlcore.org">Lablgtk</ulink>
+            is a strongly-typed interface to the GTK widget library.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <ulink url="https://forge.ocamlcore.org/projects/lablgl/">LablGL</ulink>
+            is an interface between OCaml and OpenGL, a widely supported
+            standard for 3D rendering.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <ulink url="http://ocsigen.org/js_of_ocaml/api/Js">js_of_ocaml</ulink>
+            compiles OCaml code to Javascript, and has bindings to
+            WebGL. This is the emerging standard for 3D rendering in web
+            browsers.
+          </para>
+        </listitem>
+      </itemizedlist>
       <note>
       <title>
       Production note
@@ -21662,53 +21805,96 @@ $ ./_build/github_org_info.native janestreet
 </chapter><chapter id="parsing-with-ocamllex-and-menhir">
   <title>Parsing with OCamllex and Menhir</title>
   <para>
-    OCaml provides lexer and parser generators modeled on lex and yacc.
-    Similar tools are available in a variety of languages, and with them
-    you can parse a variety of kinds of input, including common web
-    formats or full blown programming languages.
+    Many programming tasks start with the interpretion of some form of
+    structured textual data. <emphasis>Parsing</emphasis> is the process
+    of converting such data into data structures that are easy to
+    program against. For simple formats, it's often enough to parse the
+    data in an ad-hoc way, <emphasis>e.g.</emphasis>, by breaking up the
+    data into lines, and then using regular expressions for breaking
+    those lines down into their component pieces.
   </para>
   <para>
-    In this chapter, you'll learn how to:
+    But this simplistic approach tends to fall down when parsing more
+    complicated data, particularly data with the kind of recursive
+    structure you find in full-blown programming languages or flexible
+    data formats like JSON and XML. Parsing such formats accurately and
+    efficiently while providing useful error messages is a complex task.
   </para>
-  <itemizedlist>
-    <listitem>
-      <para>
-        convert input into a structured token stream using
-        <literal>ocamllex</literal>.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        parse a token stream into an OCaml data structure using
-        <literal>menhir</literal>.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        handle simple errors in the input data.
-      </para>
-    </listitem>
-    <listitem>
-      <para>
-        use all these tools to build a parser for the JSON format.
-      </para>
-    </listitem>
-  </itemizedlist>
-  <sect1 id="basic-lexing-and-parsing-concepts">
-    <title>Basic lexing and parsing concepts</title>
+  <para>
+    Often, you can find an existing parsing library that handles these
+    issues for you, as we did in
+    <xref linkend="handling-json-data"/>. But there are tools
+    to help simplify the task when you do need to write a parser, in the
+    form of <emphasis>parser generators</emphasis>. A parser generator
+    takes a specification of the data format that you want to parse, and
+    uses that to generate a parser.
+  </para>
+  <para>
+    Parser generators have a long history, including venerable tools
+    like <literal>lex</literal> and <literal>yacc</literal> that date
+    back to the early 1970's. OCaml has its own alternatives, including
+    <literal>ocamllex</literal>, which replaces <literal>yacc</literal>,
+    and <literal>ocamlyacc</literal> and <literal>menhir</literal>,
+    which are replacements for <literal>yacc</literal>. We'll explore
+    these tools in the course of walking through the implementation of a
+    parser for the JSON format.
+  </para>
+  <para>
+    Parsing is a broad and often intricate topic, and our purpose here
+    is not to teach all of the theoretical issues, but to provide a
+    pragmatic introduction of how to build a parser in OCaml.
+  </para>
+  <note>
+  <title>
+  Menhir <emphasis>vs</emphasis> <literal>ocamlyacc</literal>
+  </title>
+  <para>
+    Menhir is an alternative parser generator that is generally superior
+    to the venerable <literal>ocamlyacc</literal>, which dates back
+    quite a few years. Menhir is mostly compatible with
+    <literal>ocamlyacc</literal> grammars, and so you can usually just
+    switch to Menhir and expect older code to work (with some minor
+    differences described in the Menhir manual).
+  </para>
+  <para>
+    The biggest advantage of Menhir is that its error messages are
+    generally more human-comprehensible, and the parsers that it
+    generates are fully reentrant and can be parameterized in OCaml
+    modules more easily. We recommend that any new code you develop
+    should use Menhir instead of <literal>ocamlyacc</literal>.
+  </para>
+  <para>
+    Menhir isn't distributed directly with OCaml, but is available
+    through OPAM by running <literal>opam install menhir</literal>.
+  </para>
+  </note>
+  <sect1 id="lexing-and-parsing">
+    <title>Lexing and parsing</title>
     <para>
-      Let's be more precise about some of these terms. By
-      <emphasis>parsing</emphasis>, we mean reading a textual input into
-      a form that is easier for a program to manipulate.
+      Parsing is traditionally broken down into two parts:
+      <emphasis>lexical analysis</emphasis>, which is a kind of
+      simplified parsing phase that converts a stream of characters into
+      a stream of logical tokens; and full-on parsing, which involves
+      converting a stream of tokens into the final representation, which
+      is often in the form of a tree-like data-structure called an
+      <emphasis>abstract syntax-tree</emphasis>, or AST.
     </para>
     <para>
-      For example, suppose we want to read a file containing a value in
-      JSON format. JSON has a variety of values, including numbers,
-      strings, arrays, and objects, and each of these has a textual
-      representation. For example, the following text represents an
-      object containing a string labeled <literal>title</literal>, and
-      an array containing two objects, each with a name and array of zip
-      codes.
+      It's confusing that the term parsing is applied to both the
+      overall process of converting textual data to structured data, and
+      also more specifically to the second phase of converting a stream
+      of tokens to an AST, so from here on in, we'll use the term
+      parsing to refer only to this second phase.
+    </para>
+    <para>
+      Let's consider lexing and parsing in the context of the JSON
+      format. As discussed in
+      <xref linkend="handling-json-data"/>, JSON has a variety
+      of kinds of values, including numbers, strings, arrays, and
+      objects, each with its own textual representation. For example,
+      the following text represents an object containing a string
+      labeled <literal>title</literal>, and an array containing two
+      objects, each with a name and array of zip codes.
     </para>
     <programlisting language="json">
 {
@@ -21720,52 +21906,66 @@ $ ./_build/github_org_info.native janestreet
 }
 </programlisting>
     <para>
-      The input text is represented as a sequence of characters.
-      Manipulating it in that form would be really hard, so what we want
-      is to give it a structured type that is easier for our programs to
-      manipulate. For our example, we'll use the following type to
-      represent JSON <emphasis>abstract syntax</emphasis>.
+      We could use a type like the following for specifying a token.
+    </para>
+    <programlisting language="ocaml">
+(* parsing/manual_token_type.ml  *)
+type token =
+  | TRUE
+  | STRING of string
+  | RIGHT_BRACK
+  | RIGHT_BRACE
+  | NULL
+  | LEFT_BRACK
+  | LEFT_BRACE
+  | INT of int
+  | ID of string
+  | FLOAT of float
+  | FALSE
+  | EOF
+  | COMMA
+  | COLON
+</programlisting>
+    <para>
+      Note that this representation loses some information about the
+      original text. For example, white space is not represented. It's
+      common, and indeed useful, for the token stream to forget some
+      details of the original text that are not required for
+      understanding its meaning.
+    </para>
+    <para>
+      If we converted the above example into a list of these tokens, it
+      would look something like this.
+    </para>
+    <programlisting language="ocaml">
+(* parsing/tokens.ml  *)
+[ LEFT_BRACE; ID(&quot;title&quot;); COLON; STRING(&quot;Cities&quot;); COMMA; ID(&quot;cities&quot;); ...
+</programlisting>
+    <para>
+      This kind of representation is easier to work with than the
+      original text, since it gets rid of some unimportant syntactic
+      details and adds useful structure. But it's still a good deal more
+      low-level than the simple AST we used for representing JSON data
+      in <xref linkend="handling-json-data"/>, shown below.
     </para>
     <programlisting language="ocaml">
 (* parsing/json.ml  *)
 type value = [
   | `Assoc of (string * value) list
-  | `List of value list
-  | `String of string
-  | `Int of int
-  | `Float of float
   | `Bool of bool
-  | `Null ]
+  | `Float of float
+  | `Int of int
+  | `List of value list
+  | `Null
+  | `String of string
+]
 </programlisting>
-    <sect2 id="lexical-analysis">
-      <title>Lexical Analysis</title>
-      <para>
-        The overall objective of <emphasis>parsing</emphasis> is to
-        convert the text input into a value of type
-        <literal>value</literal>. This is normally done in two phases.
-      </para>
-      <para>
-        First, <emphasis>lexical</emphasis> analysis (or lexing, for
-        short) is used to convert the text input into a sequence of
-        tokens, or words. For example, the JSON input would be tokenized
-        into a sequence of tokens like the following. In most cases (and
-        in this example), lexical analysis will choose to omit white
-        space from the token stream.
-      </para>
-      <programlisting language="ocaml">
-(* parsing/tokens.ml  *)
-LEFT_BRACE, ID(&quot;title&quot;), COLON, STRING(&quot;Cities&quot;), COMMA, ID(&quot;cities&quot;), ...
-</programlisting>
-    </sect2>
-    <sect2 id="parsing">
-      <title>Parsing</title>
-      <para>
-        The next step is to convert the token stream into a program
-        value that represents the abstract syntax tree, like the type
-        <literal>value</literal> above. This is called
-        <emphasis>parsing</emphasis>.
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      The above type is effectively an AST, and the job of the parser
+      we'll write will be to convert a token stream into a value of this
+      type, as shown below.
+    </para>
+    <programlisting language="ocaml">
 (* parsing/parsed_example.ml  *)
 `Assoc
   [&quot;title&quot;, `String &quot;Cities&quot;;
@@ -21773,90 +21973,32 @@ LEFT_BRACE, ID(&quot;title&quot;), COLON, STRING(&quot;Cities&quot;), COMMA, ID(
      [`Assoc [&quot;name&quot;, `String &quot;Chicago&quot;; &quot;zips&quot;, `List [`Int 60601]];
       `Assoc [&quot;name&quot;, `String &quot;New York&quot;; &quot;zips&quot;, `List [`Int 10004]]]]
 </programlisting>
-      <para>
-        There are many techniques for lexing and parsing that have a
-        variety of tradeoffs in the complexity of grammars that they can
-        express, how well they handle malformed input, and also how
-        resource-intensive the parsing process is.
-      </para>
-      <para>
-        In the lex/yacc world, lexing is specified using regular
-        expressions, and parsing is specified using context-free
-        grammars. These are concepts from formal languages, but the
-        lex/yacc tools construct much of the machinery for you by
-        generating OCaml code from your specifications. For lex, this
-        means constructing a <emphasis>finite automaton</emphasis>; and
-        for yacc, this means constructing a <emphasis>pushdown
-        automaton</emphasis>.
-      </para>
-      <para>
-        Parsing is a broad and often intricate topic, and our purpose
-        here is not to teach all of the ins and outs of yacc and lex,
-        but to show how to use these tools in OCaml. There are online
-        resources for the theoretical background, and most experience
-        you may have using lex/yacc in other languages will also apply
-        in OCaml. However, there are differences, and we'll try to point
-        out the larger ones here.
-      </para>
-      <para>
-        For illustration, let's continue with the JSON example. For
-        lexing, we'll use <literal>ocamllex</literal>, and for parsing,
-        we'll use Menhir, which is the modern alternative to
-        <literal>ocamlyacc</literal>.
-      </para>
-      <note>
-      <title>
-      Menhir <emphasis>vs</emphasis> <literal>ocamlyacc</literal>
-      </title>
-      <para>
-        Menhir is an alternative parser generator that is generally
-        superior to the venerable <literal>ocamlyacc</literal>, which
-        dates back quite a few years. Menhir is mostly compatible with
-        <literal>ocamlyacc</literal> grammars, and so you can usually
-        just switch to Menhir and expect older code to work (with some
-        minor differences described in the Menhir manual).
-      </para>
-      <para>
-        The biggest advantage of Menhir is that its error messages are
-        generally more human-comprehensible, and the parsers that it
-        generates are fully reentrant and can be parameterized in OCaml
-        modules more easily. We recommend that any new code you develop
-        should use Menhir instead of <literal>ocamlyacc</literal>.
-      </para>
-      <para>
-        Menhir isn't distributed directly with OCaml, but is available
-        through OPAM by running <literal>opam install menhir</literal>.
-      </para>
-      </note>
-    </sect2>
   </sect1>
   <sect1 id="defining-a-json-parser-with-menhir">
     <title>Defining a JSON parser with Menhir</title>
     <para>
-      The process of building a parser is interleaved between
-      constructing the lexer and parser; you will have to do them
-      simultaneously. The first step is to define the set of tokens that
-      will be produced by the lexer. For various reasons, the tokens are
-      specified by the parser (to specify what it expects as input), so
-      we'll start with the parser first.
+      The process of building a lexer and a parser are interconnected.
+      The first step is to define the set of tokens which are what the
+      lexer and the parser use to communicate. With
+      <literal>menhir</literal> and <literal>ocamllex</literal>, the set
+      of tokens is in our case specified along with the parser.
     </para>
     <para>
-      A parser file has suffix <literal>.mly</literal> (we'll use the
-      name <literal>parser.mly</literal>) and it contains several parts
-      in the following sequence:
+      A parser-specification file has suffix <literal>.mly</literal> and
+      contains several parts in the following sequence:
     </para>
     <programlisting language="html">
 &lt;declarations&gt;
 %%
 &lt;rules&gt;
 %%
-&lt;optional OCaml code&gt;
+&lt;optional_ocaml_code&gt;
 </programlisting>
     <para>
       The <literal>%%</literal> are section separators; they have to be
       on a line by themselves. The declarations include token and type
-      specifications, precedence directives, and other things, but we
-      start by declaring the tokens.
+      specifications, precedence directives, and other output
+      directives. We'll start by just declaring the tokens.
     </para>
     <sect2 id="token-declarations">
       <title>Token declarations</title>
@@ -21871,8 +22013,8 @@ LEFT_BRACE, ID(&quot;title&quot;), COLON, STRING(&quot;Cities&quot;), COMMA, ID(
         <literal>parser.mly</literal> file. For technical reasons, we
         need to include a <literal>%start</literal> declaration. For
         now, we'll include just a dummy grammar specification
-        <literal>exp: { () }</literal> (we'll replace this when we
-        implement the grammar below).
+        <literal>exp: { () }</literal>, which we'll replace this when we
+        implement the grammar below.
       </para>
       <programlisting language="ocaml">
 (* parsing/partial_parser.mly  *)
@@ -21912,51 +22054,23 @@ exp: { () }
         specification.
       </para>
       <para>
-        Compile this file with the <literal>menhir</literal>
-        command-line tool. It will issue multiple warnings about unused
-        tokens because we haven't actually defined a grammar yet. It's
-        ok to ignore these warnings for now.
+        If we compile this file with <literal>menhir</literal> (by
+        running <literal>menhir partial_parser.mly</literal>), we'll see
+        multiple warnings about unused tokens because we haven't
+        actually defined a grammar yet. It's ok to ignore the warnings
+        for now.
       </para>
-      <programlisting>
-# running parsing/build_partial_json_parser.out.sh
-$ menhir partial_parser.mly
-File &quot;partial_parser.mly&quot;, line 12, characters 7-12:
-Warning: the token COLON is unused.
-File &quot;partial_parser.mly&quot;, line 13, characters 7-12:
-Warning: the token COMMA is unused.
-File &quot;partial_parser.mly&quot;, line 14, characters 7-10:
-Warning: the token EOF is unused.
-File &quot;partial_parser.mly&quot;, line 6, characters 7-12:
-Warning: the token FALSE is unused.
-File &quot;partial_parser.mly&quot;, line 2, characters 15-20:
-Warning: the token FLOAT is unused.
-File &quot;partial_parser.mly&quot;, line 3, characters 16-18:
-Warning: the token ID is unused.
-File &quot;partial_parser.mly&quot;, line 1, characters 13-16:
-Warning: the token INT is unused.
-File &quot;partial_parser.mly&quot;, line 8, characters 7-17:
-Warning: the token LEFT_BRACE is unused.
-File &quot;partial_parser.mly&quot;, line 10, characters 7-17:
-Warning: the token LEFT_BRACK is unused.
-File &quot;partial_parser.mly&quot;, line 7, characters 7-11:
-Warning: the token NULL is unused.
-File &quot;partial_parser.mly&quot;, line 9, characters 7-18:
-Warning: the token RIGHT_BRACE is unused.
-File &quot;partial_parser.mly&quot;, line 11, characters 7-18:
-Warning: the token RIGHT_BRACK is unused.
-File &quot;partial_parser.mly&quot;, line 4, characters 16-22:
-Warning: the token STRING is unused.
-File &quot;partial_parser.mly&quot;, line 5, characters 7-11:
-Warning: the token TRUE is unused.
-</programlisting>
       <para>
         The <literal>menhir</literal> tool is a parser generator,
-        meaning it generates the OCaml code to perform parsing from the
-        <literal>parser.mly</literal> description. The
-        <literal>parser.ml</literal> contains an automaton
-        implementation, and is generally difficult to read. However, the
-        <literal>parser.mli</literal> contains more human-readable
-        declarations that we need to build a lexer.
+        meaning it generates the code to perform parsing from the
+        <literal>parser.mly</literal> description, in the form of two
+        files, <literal>parser.ml</literal> and
+        <literal>parser.mli</literal>. The implementation contained in
+        <literal>parser.ml</literal> is difficult to read, but
+        <literal>parser.mli</literal> exposes a more comprehensible
+        interface, the only important part of which for now is the token
+        type that will be generated by the lexer and consumed by the
+        parser.
       </para>
       <programlisting language="ocaml">
 (* parsing/partial_parser.mli  *)
@@ -25605,7 +25719,7 @@ val noalloc_busy_loop : int -&gt; unit = &lt;fun&gt;
   <title>Foreign Function Interface</title>
   <para>
     OCaml has several options available to interact with non-OCaml code.
-    The compiler can link to external system libraries via C code, and
+    The compiler can link with external system libraries via C code and
     also produce standalone native object files that can be embedded
     within other non-OCaml applications.
   </para>
@@ -25671,6 +25785,7 @@ val noalloc_busy_loop : int -&gt; unit = &lt;fun&gt;
       Once that's done, Ctypes is available via OPAM as usual.
     </para>
     <programlisting>
+# running ffi/install.out.sh
 $ brew install libffi     # for MacOS X users
 $ opam install ctypes
 $ utop
@@ -25678,7 +25793,7 @@ $ utop
 </programlisting>
     <para>
       You'll also need the Ncurses library for the first example. This
-      comes pre-installed on many operating systems such as MacOS X.
+      comes pre-installed on many operating systems such as MacOS X and
       Debian Linux provides it as the <literal>ncurses-dev</literal>
       package.
     </para>
@@ -25695,19 +25810,23 @@ $ utop
     <para>
       The full C interface is quite large and is explained in the online
       <ulink url="http://www.gnu.org/software/ncurses/">documentation</ulink>.
-      We'll just use the smaller excerpt that's shown below since we
-      just want to demonstrate Ctypes in action.
+      We'll just use the small excerpt that's shown below since we just
+      want to demonstrate Ctypes in action.
     </para>
     <programlisting language="c">
-// &lt;ncurses.h&gt;
 typedef struct _win_st WINDOW;
+typedef unsigned int chtype;
 
 WINDOW *initscr   (void);
 WINDOW *newwin    (int, int, int, int);
 void    endwin    (void);
 void    refresh   (void);
 void    wrefresh  (WINDOW *);
+void    addstr (const char *);
+int     mvwaddch  (WINDOW *, int, int, const chtype);
 void    mvwaddstr (WINDOW *, int, int, char *);
+void    box (WINDOW *, chtype, chtype);
+int     cbreak (void);
 </programlisting>
     <para>
       The Ncurses functions either operate on the current
@@ -25741,7 +25860,7 @@ void    mvwaddstr (WINDOW *, int, int, char *);
       the <literal>WINDOW</literal> state pointer.
     </para>
     <programlisting language="ocaml">
-(* ncurses.ml 1/3 *)
+(* ffi/ncurses.ml  *)
 open Ctypes
 
 type window = unit ptr
@@ -25750,13 +25869,13 @@ let window : window typ = ptr void
     <para>
       We don't know the internal representation of the window pointer,
       so we treat it as a C void pointer. We'll improve on this later on
-      in the chapter, but it's good enough for now. The second statement
-      defines an OCaml value that represents the
+      in the chapter, but that's good enough for now. The second
+      statement defines an OCaml value that represents the
       <literal>WINDOW</literal> C pointer. This value is used later in
       the Ctypes function definitions.
     </para>
     <programlisting language="ocaml">
-(* ncurses.ml 2/3 *)
+(* ffi/ncurses.ml (starting from part 1) *)
 open Foreign
 
 let initscr =
@@ -25789,7 +25908,11 @@ let initscr =
       definitions.
     </para>
     <programlisting language="ocaml">
-(* ncurses.ml 3/3 *)
+(* ffi/ncurses.ml (starting from part 2) *)
+let newwin =
+  foreign &quot;newwin&quot; 
+    (int @-&gt; int @-&gt; int @-&gt; int @-&gt; returning window)
+
 let endwin =
   foreign &quot;endwin&quot; (void @-&gt; returning void)
 
@@ -25799,60 +25922,75 @@ let refresh =
 let wrefresh =
   foreign &quot;wrefresh&quot; (window @-&gt; returning void)
 
-let newwin =
-  foreign &quot;newwin&quot; (int @-&gt; int @-&gt; int @-&gt; int @-&gt; returning window)
-
-let mvwaddch =
-  foreign &quot;mvwaddch&quot; (window @-&gt; int @-&gt; int @-&gt; char @-&gt; returning void)
-
 let addstr =
   foreign &quot;addstr&quot; (string @-&gt; returning void)
 
+let mvwaddch =
+  foreign &quot;mvwaddch&quot;
+    (window @-&gt; int @-&gt; int @-&gt; char @-&gt; returning void)
+
 let mvwaddstr =
-  foreign &quot;mvwaddstr&quot; (window @-&gt; int @-&gt; int @-&gt; string @-&gt; returning void)
+  foreign &quot;mvwaddstr&quot;
+    (window @-&gt; int @-&gt; int @-&gt; string @-&gt; returning void)
 
 let box =
-  foreign &quot;box&quot; (window @-&gt; int @-&gt; int @-&gt; returning void)
+  foreign &quot;box&quot; (window @-&gt; char @-&gt; char @-&gt; returning void)
 
 let cbreak =
-  foreign &quot;cbreak&quot; (void @-&gt; returning void)
+  foreign &quot;cbreak&quot; (void @-&gt; returning int)
 </programlisting>
     <para>
       These definitions are all straightforward mappings from the C
-      declarations in the Ncurses header file. The scalar C types such
-      as <literal>int</literal> come pre-defined in Ctypes. The
-      <literal>string</literal> in these definitions maps from OCaml
-      strings (which have a specific length) onto C character buffers
-      (whose length is defined by a terminating null character that
-      immediately follows the string data).
+      declarations in the Ncurses header file. Note that the
+      <literal>string</literal> and <literal>int</literal> values here
+      are nothing to do with OCaml type declarations; instead, they are
+      values that come from opening the <literal>Ctypes</literal> module
+      at the top of the file.
+    </para>
+    <para>
+      Most of the parameters in the Ncurses example represent fairly
+      simple scalar C types except for <literal>window</literal> (a
+      pointer to the library state), and <literal>string</literal>,
+      which maps from OCaml strings that have a specific length onto C
+      character buffers whose length is defined by a terminating null
+      character that immediately follows the string data.
     </para>
     <para>
       The module signature for <literal>ncurses.mli</literal> looks much
       like a normal OCaml signature. You can infer it directly from the
-      <literal>ncurses.ml</literal> by running:
+      <literal>ncurses.ml</literal> by running a special build target.
     </para>
     <programlisting>
-$ ocamlfind ocamlc -i -package ctypes.foreign ncurses.ml
+# running ffi/infer_ncurses.out.sh
+$ corebuild -pkg ctypes.foreign ncurses.inferred.mli
+$ cp _build/ncurses.inferred.mli .
 </programlisting>
     <para>
-      The OCaml signature can be customized to improve its safety for
-      external callers by making some of its internals more abstract.
+      The <literal>inferred.mli</literal> target instructs the compiler
+      to generate the default signature for a module file, and places it
+      in the <literal>_build</literal> directory as a normal output. You
+      should normally copy it out into your source directory and
+      customize it improve its safety for external callers by making
+      some of its internals more abstract.
+    </para>
+    <para>
+      Here's the customized interface that we can safely use from other
+      libraries.
     </para>
     <programlisting language="ocaml">
-(* ncurses.mli *)
+(* ffi/ncurses.mli  *)
 type window
-
-val window    : window Ctypes.typ
-val initscr   : unit   -&gt; window
-val endwin    : unit   -&gt; unit
-val refresh   : unit   -&gt; unit
-val wrefresh  : window -&gt; unit
-val newwin    : int    -&gt; int -&gt; int -&gt; int -&gt; window
-val mvwaddch  : window -&gt; int -&gt; int -&gt; char -&gt; unit
-val addstr    : string -&gt; unit
+val window : window Ctypes.typ
+val initscr : unit -&gt; window
+val endwin : unit -&gt; unit
+val refresh : unit -&gt; unit
+val wrefresh : window -&gt; unit
+val newwin : int -&gt; int -&gt; int -&gt; int -&gt; window
+val mvwaddch : window -&gt; int -&gt; int -&gt; char -&gt; unit
+val addstr : string -&gt; unit
 val mvwaddstr : window -&gt; int -&gt; int -&gt; string -&gt; unit
-val box       : window -&gt; int -&gt; int -&gt; unit
-val cbreak    : unit   -&gt; unit
+val box : window -&gt; char -&gt; char -&gt; unit
+val cbreak : unit -&gt; int
 </programlisting>
     <para>
       The <literal>window</literal> type is left abstract in the
@@ -25866,16 +26004,16 @@ val cbreak    : unit   -&gt; unit
       tie this all together.
     </para>
     <programlisting language="ocaml">
-(* hello.ml *)
+(* ffi/hello.ml  *)
 open Ncurses
 
 let () =
   let main_window = initscr () in
-  cbreak ();
+  ignore(cbreak ());
   let small_window = newwin 10 10 5 5 in
   mvwaddstr main_window 1 2 &quot;Hello&quot;;
   mvwaddstr small_window 2 2 &quot;World&quot;;
-  box small_window 0 0;
+  box small_window '\000' '\000';
   refresh ();
   Unix.sleep 1;
   wrefresh small_window;
@@ -25884,56 +26022,50 @@ let () =
 </programlisting>
     <para>
       The <literal>hello</literal> executable is compiled by linking
-      against the <literal>ctypes.foreign</literal> OCamlfind package.
+      with the <literal>ctypes.foreign</literal> OCamlfind package.
     </para>
     <programlisting>
-$ ocamlfind ocamlopt -linkpkg -package ctypes.foreign -cclib -lncurses \
-    ncurses.mli ncurses.ml hello.ml -o hello
+# running ffi/build_hello.out.sh
+$ corebuild -pkg ctypes.foreign -lflags -cclib,-lncurses,-cclib,-Wl,-cclib,--no-as-needed hello.native 
 </programlisting>
     <para>
-      Running <literal>./hello</literal> should now display a Hello
-      World in your terminal!
+      Running <literal>./hello.native</literal> should now display a
+      Hello World in your terminal!
     </para>
     <note>
     <title>
-    Reliable dynamic linking of external libraries
+    On build directives for Ctypes
     </title>
     <para>
-      The command-line above includes
-      <literal>-cclib -lncurses</literal> to make the OCaml compiler
-      link the executable to the <literal>ncurses</literal> C library,
-      which in turns makes the C symbols available to the program when
-      it starts. You'll get an error when you run the binary if you omit
-      that link directive.
-    </para>
-    <programlisting>
-$ ocamlfind ocamlopt -linkpkg -package ctypes -package unix \
-  ncurses.mli ncurses.ml hello.ml -o hello_broken
-$ ./hello_broken 
-Fatal error: exception Dl.DL_error(&quot;dlsym(RTLD_DEFAULT, initscr): symbol not found&quot;)
-</programlisting>
-    <para>
-      There's one additional twist on modern versions of GCC (as
-      included in recent Ubuntus). The <literal>--as-needed</literal>
-      flag is passed to the linker by default, which instructs it to
-      only link libraries that actually contain symbols used by the
-      program at build time. This must be disabled when using Ctypes
-      0.1, as it will drop any libraries that might be opened at runtime
-      by the <literal>foreign</literal> function.
+      The command-line above include some important extra link
+      directives. The <literal>-lflags</literal> instructs
+      <literal>ocamlbuild</literal> to pass the next comma-separated set
+      of arguments through to the <literal>ocaml</literal> command when
+      linking a binary. OCaml in turn uses <literal>-cclib</literal> to
+      pass directives through to the system compiler (normally
+      <literal>gcc</literal> or <literal>clang</literal>). We first need
+      to link to the <literal>ncurses</literal> C library to make the
+      symbols available to Ctypes, and
+      <literal>-cclib,-lncurses</literal> does that.
     </para>
     <para>
-      So on Ubuntu, you'll need to compile with this option disabled to
-      ensure that the Ncurses library dependency isn't dropped at
-      compile time.
+      The next two directives pass <literal>-Wl --no-as-needed</literal>
+      to the system C compiler. The <literal>-Wl</literal> is
+      interpreted by the compiler as a directive for the system linker
+      <literal>ld</literal>, to which it passes
+      <literal>--no-as-needed</literal>. Several modern OS distributions
+      (such as Ubuntu 11.10 onwards) configure the system linker to only
+      link in libraries that directly contain symbols used by the
+      program. However, when we use Ctypes, those symbols are not
+      referenced until runtime, which results an exception due to the
+      library not being available.
     </para>
-    <programlisting>
-$ ocamlfind ocamlopt -linkpkg -package ctypes.foreign \
-    -cclib '-Wl,--no-as-needed -lncurses' \
-    ncurses.mli ncurses.ml hello.ml -o hello
-</programlisting>
     <para>
-      <emphasis>Note to reviewers</emphasis>: this will be fixed in a
-      future Ctypes release, so is only needed when using Ctypes 0.1.
+      The <literal>--no-as-needed</literal> flag disables this behavior
+      and ensures all the specified libraries are linked despite not
+      being directly used. The flag isn't needed on all operating
+      systems, but should be recognized by all modern linkers and not
+      cause any harm if you specify it by default.
     </para>
     </note>
     <para>
@@ -25945,7 +26077,7 @@ $ ocamlfind ocamlopt -linkpkg -package ctypes.foreign \
     </para>
     <para>
       We'll go over some of these features in more detail for the
-      remainder of the chapter, using some POSIX date functions as
+      remainder of the chapter by using some POSIX date functions as
       running examples.
     </para>
   </sect1>
@@ -25957,7 +26089,7 @@ $ ocamlfind ocamlopt -linkpkg -package ctypes.foreign \
       definition below.
     </para>
     <programlisting language="ocaml">
-(* Ctypes *)
+(* ctypes/ctypes.mli  *)
 type 'a typ
 </programlisting>
     <para>
@@ -25983,7 +26115,7 @@ type 'a typ
     </itemizedlist>
     <para>
       There are various other uses of <literal>typ</literal> values
-      within Ctypes.
+      within Ctypes, such as:
     </para>
     <itemizedlist>
       <listitem>
@@ -25999,7 +26131,7 @@ type 'a typ
       </listitem>
       <listitem>
         <para>
-          describing the fields of arrays, structures and unions.
+          describing component fields of structures, unions and arrays.
         </para>
       </listitem>
     </itemizedlist>
@@ -26008,34 +26140,34 @@ type 'a typ
       types, including some platform-dependent ones.
     </para>
     <programlisting language="ocaml">
-(* Ctypes *)
-val void  : unit typ
-val char : char typ
-val schar : int typ
-val short : int typ
-val int   : int typ
-val long  : long typ
-val llong  : llong typ
+(* ctypes/ctypes.mli (starting from part 1) *)
+val void      : unit typ
+val char      : char typ
+val schar     : int typ
+val short     : int typ
+val int       : int typ
+val long      : long typ
+val llong     : llong typ
 val nativeint : nativeint typ
 
-val int8_t : int typ
-val int16_t : int typ
-val int32_t : int32 typ
-val int64_t : int64 typ
-val uchar : uchar typ
-val uchar : uchar typ
-val uint8_t : uint8 typ
-val uint16_t : uint16 typ
-val uint32_t : uint32 typ
-val uint64_t : uint64 typ
-val size_t : size_t typ
-val ushort : ushort typ
-val uint : uint typ
-val ulong : ulong typ
-val ullong : ullong typ
+val int8_t    : int typ
+val int16_t   : int typ
+val int32_t   : int32 typ
+val int64_t   : int64 typ
+val uchar     : uchar typ
+val uchar     : uchar typ
+val uint8_t   : uint8 typ
+val uint16_t  : uint16 typ
+val uint32_t  : uint32 typ
+val uint64_t  : uint64 typ
+val size_t    : size_t typ
+val ushort    : ushort typ
+val uint      : uint typ
+val ulong     : ulong typ
+val ullong    : ullong typ
 
-val float : float typ
-val double : float typ
+val float     : float typ
+val double    : float typ
 </programlisting>
     <para>
       These values are all of type <literal>'a typ</literal>, where the
@@ -26085,15 +26217,18 @@ val double : float typ
     </para>
     <para>
       We've already seen a simple use of pointers in the Ncurses
-      example. Let's start a new example by binding some POSIX
-      functions. The <literal>time</literal> function returns the
-      current calendar time, and has the following C signature:
+      example. Let's start a new example by binding the following POSIX
+      functions.
     </para>
     <programlisting language="c">
 time_t time(time_t *);
+double difftime(time_t, time_t);
+char *ctime(const time_t *timep);
 </programlisting>
     <para>
-      The first step is to open some of the Ctypes modules.
+      The <literal>time</literal> function returns the current calendar
+      time and is a simple start. The first step is to open some of the
+      Ctypes modules.
     </para>
     <itemizedlist>
       <listitem>
@@ -26121,12 +26256,17 @@ time_t time(time_t *);
       from the top-level.
     </para>
     <programlisting language="ocaml">
+# script ffi/posix.topscript
 $ utop
-# require &quot;ctypes.foreign&quot; ;;
-# open Ctypes ;;
-# open PosixTypes ;;
-# open Foreign ;;
-# let time = foreign &quot;time&quot; (ptr time_t @-&gt; returning time_t) ;;
+# #require &quot;ctypes.foreign&quot; ;; 
+
+/home/rwo/.opam/4.01.0dev+trunk/lib/ctypes: added to search path
+/home/rwo/.opam/4.01.0dev+trunk/lib/ctypes/ctypes.cma: loaded
+/home/rwo/.opam/4.01.0dev+trunk/lib/ctypes/ctypes-foreign.cma: loaded
+# open Ctypes ;; 
+# open PosixTypes ;; 
+# open Foreign ;; 
+# let time = foreign &quot;time&quot; (ptr time_t @-&gt; returning time_t) ;; 
 val time : time_t ptr -&gt; time_t = &lt;fun&gt;
 </programlisting>
     <para>
@@ -26144,7 +26284,8 @@ val time : time_t ptr -&gt; time_t = &lt;fun&gt;
       <literal>time_t</literal>.
     </para>
     <programlisting language="ocaml">
-# let cur_time = time (from_voidp time_t null) ;;
+...part 1 of ffi/posix.topscript
+# let cur_time = time (from_voidp time_t null) ;; 
 val cur_time : time_t = &lt;abstr&gt;
 </programlisting>
     <para>
@@ -26153,32 +26294,34 @@ val cur_time : time_t = &lt;abstr&gt;
       through.
     </para>
     <programlisting language="ocaml">
-# let time' () = time (from_voidp time_t null) ;;
+...part 2 of ffi/posix.topscript
+# let time' () = time (from_voidp time_t null) ;; 
 val time' : unit -&gt; time_t = &lt;fun&gt;
 </programlisting>
     <para>
       Since <literal>time_t</literal> is an abstract type, we can't
       actually do anything useful with it directly. We need to bind a
       second function to do anything useful with the return values from
-      <literal>time</literal>. We'll use the standard C function
-      <literal>difftime</literal>, which has the following signature:
-    </para>
-    <programlisting language="c">
-double difftime(time_t, time_t);
-</programlisting>
-    <para>
-      A binding to <literal>difftime</literal> is sufficient to compare
-      two <literal>time_t</literal> values.
+      <literal>time</literal>. We'll move on to
+      <literal>difftime</literal>; the second C function in our
+      prototype list above.
     </para>
     <programlisting language="ocaml">
-# let difftime = foreign &quot;difftime&quot; (time_t @-&gt; time_t @-&gt; returning double) ;;
+...part 3 of ffi/posix.topscript
+# let difftime =
+    foreign &quot;difftime&quot; (time_t @-&gt; time_t @-&gt; returning double) ;; 
 val difftime : time_t -&gt; time_t -&gt; float = &lt;fun&gt;
-# let t1 = time' () in
-  Unix.sleep 2;
-  let t2 = time' () in 
-  difftime t2 t1 ;;
- - : float = 2.
+# let t1 =
+    time' () in
+    Unix.sleep 2;
+    let t2 = time' () in 
+    difftime t2 t1 ;; 
+- : float = 2.
 </programlisting>
+    <para>
+      The binding to <literal>difftime</literal> above is sufficient to
+      compare two <literal>time_t</literal> values.
+    </para>
     <sect2 id="allocating-typed-memory-for-pointers">
       <title>Allocating typed memory for pointers</title>
       <para>
@@ -26186,28 +26329,24 @@ val difftime : time_t -&gt; time_t -&gt; float = &lt;fun&gt;
         non-null pointer to a function. Continuing with the theme from
         earlier, we'll bind to the <literal>ctime</literal> function
         which converts a <literal>time_t</literal> value to a
-        human-readable string. The C signature of
-        <literal>ctime</literal> is as follows:
-      </para>
-      <programlisting language="c">
-char *ctime(const time_t *timep);
-</programlisting>
-      <para>
-        The corresponding binding can be written in the top-level to add
-        to our growing collection.
+        human-readable string.
       </para>
       <programlisting language="ocaml">
-# let ctime = foreign &quot;ctime&quot; (ptr time_t @-&gt; returning string) ;;
+...part 4 of ffi/posix.topscript
+# let ctime = foreign &quot;ctime&quot; (ptr time_t @-&gt; returning string) ;; 
 val ctime : time_t ptr -&gt; string = &lt;fun&gt;
 </programlisting>
       <para>
-        However, we can't just pass the result of
+        The binding is continued in the top-level to add to our growing
+        collection. However, we can't just pass the result of
         <literal>time</literal> to <literal>ctime</literal>.
       </para>
       <programlisting language="ocaml">
-# ctime (time' ());;
-Error: This expression has type time_t but an expression was expected
-of type time_t ptr
+...part 5 of ffi/posix.topscript
+# ctime (time' ()) ;; 
+Characters 7-15:
+Error: This expression has type time_t but an expression was expected of type
+         time_t ptr
 </programlisting>
       <para>
         This is because <literal>ctime</literal> needs a pointer to the
@@ -26216,7 +26355,8 @@ of type time_t ptr
         <literal>time_t</literal> and obtain its memory address.
       </para>
       <programlisting language="ocaml">
-# let t_ptr = allocate time_t (time' ()) ;;
+...part 6 of ffi/posix.topscript
+# let t_ptr = allocate time_t (time' ()) ;; 
 val t_ptr : time_t ptr = &lt;abstr&gt;
 </programlisting>
       <para>
@@ -26226,14 +26366,15 @@ val t_ptr : time_t ptr = &lt;abstr&gt;
         passing the pointer as an argument:
       </para>
       <programlisting language="ocaml">
-# ctime t_ptr;;
-- : string = &quot;Sat Jun  8 12:20:42 2013\n&quot;
+...part 7 of ffi/posix.topscript
+# ctime t_ptr ;; 
+- : string = &quot;Mon Aug  5 01:15:37 2013\n&quot;
 </programlisting>
     </sect2>
     <sect2 id="using-views-to-map-complex-values">
       <title>Using views to map complex values</title>
       <para>
-        While scalar types typically have a 1-1 representation, other C
+        While scalar types typically have a 1:1 representation, other C
         types require extra work to convert them into OCaml. Views
         create new C type descriptions that have special behavior when
         used to read or write C values.
@@ -26247,26 +26388,35 @@ val t_ptr : time_t ptr = &lt;abstr&gt;
         written or read.
       </para>
       <para>
-        Here is the type signature of the <literal>view</literal>
+        Here is the type signature of the <literal>Ctypes.view</literal>
         function.
       </para>
       <programlisting language="ocaml">
-(* Ctypes *)
-val view : read:('a -&gt; 'b) -&gt; write:('b -&gt; 'a) -&gt; 'a typ -&gt; 'b typ
+(* ctypes/ctypes.mli (starting from part 2) *)
+val view :
+  read:('a -&gt; 'b) -&gt;
+  write:('b -&gt; 'a) -&gt;
+  'a typ -&gt; 'b typ
 </programlisting>
       <para>
-        Next, we have the conversion functions to convert between an
-        OCaml <literal>string</literal> and a C character buffer.
+        Ctypes has some internal low-level functions conversion
+        functions that map between an OCaml <literal>string</literal>
+        and a C character buffer by copying the contents into the
+        respective data structure. They have the following type
+        signature.
       </para>
       <programlisting language="ocaml">
+(* ctypes/ctypes.mli (starting from part 3) *)
 val string_of_char_ptr : char ptr -&gt; string
 val char_ptr_of_string : string -&gt; char ptr
 </programlisting>
       <para>
-        The definition of <literal>string</literal> that uses views is
-        quite simple and is written using these conversion functions.
+        Given these functions, the definition of the
+        <literal>Ctypes.string</literal> value that uses views is quite
+        simple.
       </para>
       <programlisting language="ocaml">
+(* ctypes/ctypes_impl.ml  *)
 let string = 
   view 
     ~read:string_of_char_ptr 
@@ -26275,11 +26425,12 @@ let string =
 </programlisting>
       <para>
         The type of this <literal>string</literal> function is a normal
-        <literal>typ</literal>, with no external sign of the use of the
+        <literal>typ</literal> with no external sign of the use of the
         view function.
       </para>
       <programlisting language="ocaml">
-val string : string typ
+(* ctypes/ctypes.mli (starting from part 4) *)
+val string    : string.typ
 </programlisting>
       <note>
       <title>
@@ -26294,14 +26445,19 @@ val string : string typ
         OCaml strings are stored in the OCaml heap with a header that
         explicitly defines their length. C buffers are also
         fixed-length, but by convention a C string is terminated by a
-        null (a <literal>0</literal> byte) character. The C string
+        null (a <literal>\0</literal> byte) character. The C string
         functions calculate their length by scanning the buffer until
         the first null character is encountered.
       </para>
       <para>
         This means you need to be careful when passing OCaml strings to
         C buffers that don't contain any null values within the OCaml
-        string, or else the C string will be rudely truncated.
+        string, or else the C string will be truncated at the first null
+        instance. Ctypes also defaults to a <emphasis>copying</emphasis>
+        interface for strings, which means that you shouldn't use them
+        when you want the library to mutate the buffer in-place. In that
+        situation, use the Ctypes <literal>Bigarray</literal> support to
+        pass memory by reference instead.
       </para>
       </note>
     </sect2>
@@ -26332,12 +26488,13 @@ int gettimeofday(struct timeval *, struct timezone *tv);
 </programlisting>
       <para>
         Using Ctypes, we can describe this type as follows in our
-        top-level.
+        top-level, continuing on from the previous definitions.
       </para>
       <programlisting language="ocaml">
-# type timeval;;
+...part 8 of ffi/posix.topscript
+# type timeval ;; 
 type timeval
-# let timeval : timeval structure typ = structure &quot;timeval&quot; ;;
+# let timeval : timeval structure typ = structure &quot;timeval&quot; ;; 
 val timeval : timeval structure typ = &lt;abstr&gt;
 </programlisting>
       <para>
@@ -26363,11 +26520,12 @@ val timeval : timeval structure typ = &lt;abstr&gt;
         doesn't have any fields, so we need to add those next.
       </para>
       <programlisting language="ocaml">
-# let tv_sec  = timeval *:* long ;;
+...part 9 of ffi/posix.topscript
+# let tv_sec  = timeval *:* long ;; 
 val tv_sec : (Signed.long, timeval structure) field = &lt;abstr&gt;
-# let tv_usec = timeval *:* long ;;
+# let tv_usec = timeval *:* long ;; 
 val tv_usec : (Signed.long, timeval structure) field = &lt;abstr&gt;
-# seal timeval ;;
+# seal timeval ;; 
 - : unit = ()
 </programlisting>
       <para>
@@ -26396,9 +26554,10 @@ val tv_usec : (Signed.long, timeval structure) field = &lt;abstr&gt;
         argument, we also need to define a second structure type.
       </para>
       <programlisting language="ocaml">
-# type timezone ;;
+...part 10 of ffi/posix.topscript
+# type timezone ;; 
 type timezone
-# let timezone : timezone structure typ = structure &quot;timezone&quot; ;;
+# let timezone : timezone structure typ = structure &quot;timezone&quot; ;; 
 val timezone : timezone structure typ = &lt;abstr&gt;
 </programlisting>
       <para>
@@ -26409,12 +26568,15 @@ val timezone : timezone structure typ = &lt;abstr&gt;
         will raise an <literal>IncompleteType</literal> exception.
       </para>
       <para>
-        We're finally ready to bind to <literal>gettimeofday</literal>.
+        We're finally ready to bind to <literal>gettimeofday</literal>
+        now.
       </para>
       <programlisting language="ocaml">
+...part 11 of ffi/posix.topscript
 # let gettimeofday = foreign &quot;gettimeofday&quot;
-    (ptr timeval @-&gt; ptr timezone @-&gt; returning_checking_errno int) ;;
-val gettimeofday : timeval structure ptr -&gt; timezone structure ptr -&gt; int = &lt;fun&gt;
+    (ptr timeval @-&gt; ptr timezone @-&gt; returning_checking_errno int) ;; 
+val gettimeofday : timeval structure ptr -&gt; timezone structure ptr -&gt; int =
+  &lt;fun&gt;
 </programlisting>
       <para>
         There's one other new feature here: the
@@ -26434,24 +26596,27 @@ val gettimeofday : timeval structure ptr -&gt; timezone structure ptr -&gt; int 
         from a structure.
       </para>
       <programlisting language="ocaml">
+...part 12 of ffi/posix.topscript
 # let gettimeofday' () =
   let tv = make timeval in
   ignore(gettimeofday (addr tv) (from_voidp timezone null));
   let secs = Signed.Long.(to_int (getf tv tv_sec)) in
   let usecs = Signed.Long.(to_int (getf tv tv_usec)) in
-  Pervasives.(float secs +. float usecs /. 1000000.0) ;;
-val gettimeofday : timeval structure ptr -&gt; timezone structure ptr -&gt; int = &lt;fun&gt;
-
-# gettimeofday' () ;;
-- : float = 1370714234.606070
+  Pervasives.(float secs +. float usecs /. 1000000.0) ;; 
+val gettimeofday' : unit -&gt; float = &lt;fun&gt;
+# gettimeofday' () ;; 
+- : float = 1375661738.54
 </programlisting>
       <para>
         You need to be a little careful not to get all the open modules
-        mixed up here. Both Pervasives and Ctypes define different
-        <literal>float</literal> functions. The Ctypes module we opened
-        up earlier overrides the Pervasives definition. As seen above
-        though, you just need to locally open Pervasives again to bring
-        the usual <literal>float</literal> function back in scope,
+        mixed up here. Both <literal>Pervasives</literal> and
+        <literal>Ctypes</literal> define different
+        <literal>float</literal> functions. The
+        <literal>Ctypes</literal> module we opened up earlier overrides
+        the <literal>Pervasives</literal> definition. As seen above
+        though, you just need to locally open
+        <literal>Pervasives</literal> again to bring the usual
+        <literal>float</literal> function back in scope,
       </para>
       <sect3 id="recap-a-time-printing-command">
         <title>Recap: a time-printing command</title>
@@ -26461,7 +26626,7 @@ val gettimeofday : timeval structure ptr -&gt; timezone structure ptr -&gt; int 
           a command-line frontend.
         </para>
         <programlisting language="ocaml">
-(* datetime.ml: display time in various formats *)
+(* ffi/datetime.ml  *)
 open Core.Std
 open Ctypes
 open PosixTypes
@@ -26503,16 +26668,18 @@ let () =
   basic ~summary:&quot;Display the current time in various formats&quot;
     Spec.(empty +&gt; flag &quot;-a&quot; no_arg ~doc:&quot; Human-readable output format&quot;)
     (fun human -&gt; if human then ascii_time else float_time)
-  |&gt; Command.run 
+  |&gt; Command.run
 </programlisting>
         <para>
-          This can be compiled as usual with ocamlfind and ocamlopt.
+          This can be compiled and run in the usual way.
         </para>
-        <programlisting>
-$ ocamlfind ocamlopt -o datetime -package core -package ctypes.foreign \
-  -thread -linkpkg datetime.ml
-$ ./datetime -a
-Sat Jun  8 19:28:59 2013
+        <programlisting language="ocaml">
+(* ffi/build_datetime.out  *)
+$ corebuild -pkg ctypes.foreign datetime.native
+$ ./datetime.native
+1375659006.077398
+$ ./datetime.native -a
+Mon Aug  5 00:30:06 2013
 </programlisting>
         <sidebar>
         <title>
@@ -26524,6 +26691,8 @@ Sat Jun  8 19:28:59 2013
           <literal>returning</literal>.
         </para>
         <programlisting language="ocaml">
+(* ffi/return_frag.ml  *)
+(* correct types *)
 val time: ptr time_t @-&gt; returning time_t
 val difftime: time_t @-&gt; time_t @-&gt; returning double
 </programlisting>
@@ -26533,6 +26702,8 @@ val difftime: time_t @-&gt; time_t @-&gt; returning double
           follows?
         </para>
         <programlisting language="ocaml">
+(* ffi/return_frag.ml (starting from part 1) *)
+(* incorrect types *)
 val time: ptr time_t @-&gt; time_t
 val difftime: time_t @-&gt; time_t @-&gt; double
 </programlisting>
@@ -26549,12 +26720,14 @@ val difftime: time_t @-&gt; time_t @-&gt; double
           follows:
         </para>
         <programlisting language="ocaml">
+(* ffi/return_frag.ml (starting from part 2) *)
 val curried : int -&gt; int -&gt; int
 </programlisting>
         <para>
           but this really means
         </para>
         <programlisting language="ocaml">
+(* ffi/return_frag.ml (starting from part 3) *)
 val curried : int -&gt; (int -&gt; int)
 </programlisting>
         <para>
@@ -26576,8 +26749,8 @@ uncurried_C(3, 4);
           different:
         </para>
         <programlisting language="c">
-/* A function that accepts an int, and returns a function pointer that
-   accepts a second int and returns an int. */
+/* A function that accepts an int, and returns a function
+   pointer that accepts a second int and returns an int. */
 typedef int (function_t)(int);
 function_t *curried_C(int);
 
@@ -26614,6 +26787,7 @@ function_t *f = curried_C(3); f(4);
         <literal>Array</literal> module.
       </para>
       <programlisting language="ocaml">
+(* ctypes/ctypes.mli (starting from part 5) *)
 module Array : sig
   type 'a t = 'a array
 
@@ -26737,6 +26911,7 @@ void qsort(void *base, size_t nmemb, size_t size,
     </para>
     <programlisting language="c">
 typedef int(compare_t)(const void *, const void *);
+
 void qsort(void *base, size_t nmemb, size_t size, compare_t *);
 </programlisting>
     <para>
@@ -26747,25 +26922,32 @@ void qsort(void *base, size_t nmemb, size_t size, compare_t *);
       to <literal>qsort</literal>.
     </para>
     <programlisting language="ocaml">
-let compare_t = ptr void @-&gt; ptr void @-&gt; returning int
+# script ffi/qsort.topscript
+$ utop
+# #require &quot;ctypes.foreign&quot; ;; 
 
-let qsort = foreign &quot;qsort&quot;
-   (ptr void @-&gt; size_t @-&gt; size_t @-&gt; funptr compare_t @-&gt; returning void)
+/home/rwo/.opam/4.01.0dev+trunk/lib/ctypes: added to search path
+/home/rwo/.opam/4.01.0dev+trunk/lib/ctypes/ctypes.cma: loaded
+/home/rwo/.opam/4.01.0dev+trunk/lib/ctypes/ctypes-foreign.cma: loaded
+# open Ctypes ;; 
+# open PosixTypes ;; 
+# open Foreign ;; 
+# let compare_t = ptr void @-&gt; ptr void @-&gt; returning int ;; 
+val compare_t : (unit ptr -&gt; unit ptr -&gt; int) fn = &lt;abstr&gt;
+# let qsort = foreign &quot;qsort&quot;
+   (ptr void @-&gt; size_t @-&gt; size_t @-&gt;
+    funptr compare_t @-&gt; returning void) ;; 
+val qsort :
+  unit ptr -&gt; size_t -&gt; size_t -&gt; (unit ptr -&gt; unit ptr -&gt; int) -&gt; unit =
+  &lt;fun&gt;
 </programlisting>
     <para>
       We only use <literal>compare_t</literal> once (in the
       <literal>qsort</literal> definition), so you can choose to inline
       it in the OCaml code if you prefer. The resulting
       <literal>qsort</literal> value is a higher-order function, as
-      shown by its type.
-    </para>
-    <programlisting language="ocaml">
-val qsort: void ptr -&gt; size_t -&gt; size_t -&gt;
-           (void ptr -&gt; void ptr -&gt; int) -&gt; unit
-</programlisting>
-    <para>
-      As before, let's define a wrapper function to make
-      <literal>qsort</literal> easier to use. The second and third
+      shown by its type. As before, let's define a wrapper function to
+      make <literal>qsort</literal> easier to use. The second and third
       arguments to <literal>qsort</literal> specify the length (number
       of elements) of the array and the element size.
     </para>
@@ -26782,8 +26964,8 @@ val qsort: void ptr -&gt; size_t -&gt; size_t -&gt;
         <literal>qsort</literal> binding to sort all of the integers
         supplied on the standard input.
       </para>
-      <programlisting>
-(* qsort.ml: quicksort integers from stdin *)
+      <programlisting language="ocaml">
+(* ffi/qsort.ml  *)
 open Core.Std
 open Ctypes
 open PosixTypes
@@ -26792,8 +26974,8 @@ open Foreign
 let compare_t = ptr void @-&gt; ptr void @-&gt; returning int
 
 let qsort = foreign &quot;qsort&quot;
-   (ptr void @-&gt; size_t @-&gt; size_t @-&gt; funptr compare_t @-&gt; 
-    returning void)
+    (ptr void @-&gt; size_t @-&gt; size_t @-&gt; funptr compare_t @-&gt; 
+       returning void)
 
 let qsort' cmp arr =
   let open Unsigned.Size_t in
@@ -26819,23 +27001,35 @@ let () =
   |&gt; Command.run
 </programlisting>
       <para>
-        Compile it in the usual way with ocamlfind, but also examine the
-        inferred interface of the module.
+        Compile it in the usual way with corebuild and test it against
+        some input data, and also build the inferred interface so we can
+        examine it more closely.
       </para>
       <programlisting>
-$ ocamlfind ocamlopt -package core -package ctypes.foreign -thread -linkpkg \
-    -o qsort qsort.ml
-$ ./qsort
+# running ffi/build_qsort.out.sh
+$ corebuild -pkg ctypes.foreign qsort.native
+$ cat input.txt
 5
 3
 2
 1
-# press &lt;Control-D&gt; to end the standard input
+4
+$ ./qsort.native &lt; input.txt
 1
 2
 3
+4
 5
-$ ocamlfind ocamlopt -i -package core -package ctypes.foreign -thread qsort.ml
+$ corebuild -pkg ctypes.foreign qsort.inferred.mli
+$ cp _build/qsort.inferred.mli qsort.mli
+</programlisting>
+      <para>
+        The inferred interface shows us the types of the raw
+        <literal>qsort</literal> binding and also the
+        <literal>qsort'</literal> wrapper function.
+      </para>
+      <programlisting language="ocaml">
+(* ffi/qsort.mli  *)
 val compare_t : (unit Ctypes.ptr -&gt; unit Ctypes.ptr -&gt; int) Ctypes.fn
 val qsort :
   unit Ctypes.ptr -&gt;
@@ -26904,7 +27098,7 @@ val sort_stdin : unit -&gt; unit
     <title>Learning more about C bindings</title>
     <para>
       The Ctypes
-      <ulink url="http://github.com/ocamllabs/ocaml-types">distribution</ulink>
+      <ulink url="http://github.com/ocamllabs/ocaml-ctypes">distribution</ulink>
       contains a number of larger-scale examples, including:
     </para>
     <itemizedlist>
@@ -30426,43 +30620,35 @@ $ ocp-index
         module defined bindings for the Ncurses library. First, compile
         the interfaces with <literal>-bin-annot</literal> so that we can
         obtain the <literal>cmt</literal> and <literal>cmti</literal>
-        files.
+        files, and then run <literal>ocp-index</literal> in completion
+        mode.
       </para>
-      <programlisting>
-$ ocamlfind ocamlopt -bin-annot -c -package ctypes.foreign \
-    ncurses.mli ncurses.ml
-</programlisting>
-      <para>
-        Next, run <literal>ocp-index</literal> in completion mode. You
-        pass it a set of directories to search for
-        <literal>cmt</literal> files in, and a fragment of text to
-        autocomplete.
-      </para>
-      <programlisting>
+      <programlisting language="ocaml">
+(* ocp-index/index_ncurses.out  *)
+$ corebuild -pkg ctypes.foreign -tag bin_annot ncurses.cmi
 $ ocp-index complete -I . Ncur
 Ncurses module
-
 $ ocp-index complete -I . Ncurses.a
 Ncurses.addstr val string -&gt; unit
-Ncurses.addch val char -&gt; unit
-
 $ ocp-index complete -I . Ncurses.
-Ncurses.cbreak val unit -&gt; unit
-Ncurses.box val Ncurses.window -&gt; int -&gt; int -&gt; unit
-Ncurses.mvwaddstr val Ncurses.window -&gt; int -&gt; int -&gt; string -&gt; unit
-Ncurses.mvwaddch val Ncurses.window -&gt; int -&gt; int -&gt; char -&gt; unit
-Ncurses.addstr val string -&gt; unit
-Ncurses.addch val char -&gt; unit
-Ncurses.newwin val int -&gt; int -&gt; int -&gt; int -&gt; Ncurses.window
-Ncurses.refresh val unit -&gt; unit
-Ncurses.endwin val unit -&gt; unit
-Ncurses.initscr val unit -&gt; Ncurses.window
-Ncurses.wrefresh val Ncurses.window -&gt; unit
 Ncurses.window val Ncurses.window Ctypes.typ
+Ncurses.wrefresh val Ncurses.window -&gt; unit
+Ncurses.initscr val unit -&gt; Ncurses.window
+Ncurses.endwin val unit -&gt; unit
+Ncurses.refresh val unit -&gt; unit
+Ncurses.newwin val int -&gt; int -&gt; int -&gt; int -&gt; Ncurses.window
+Ncurses.mvwaddch val Ncurses.window -&gt; int -&gt; int -&gt; char -&gt; unit
+Ncurses.mvwaddstr val Ncurses.window -&gt; int -&gt; int -&gt; string -&gt; unit
+Ncurses.addstr val string -&gt; unit
+Ncurses.box val Ncurses.window -&gt; char -&gt; char -&gt; unit
+Ncurses.cbreak val unit -&gt; int
 </programlisting>
       <para>
-        As you can imagine, autocompletion is invaluable on larger
-        codebases. See the
+        You need to pass
+        <literal>ocp-indexz a set of directories to search for</literal>cmt`
+        files in, and a fragment of text to autocomplete. As you can
+        imagine, autocompletion is invaluable on larger codebases. See
+        the
         <ulink url="https://github.com/ocamlpro/ocp-index">ocp-index</ulink>
         homepage for more information on how to integrate it with your
         favorite editor.
@@ -31333,16 +31519,16 @@ $ ocamlopt -inline 20 -nodynlink -S compare_mono.ml
         </para>
         <programlisting>
 _camlCompare_mono__cmp_1008:
-    .cfi_startproc
+        .cfi_startproc
 .L101:
-    cmpq    %rbx, %rax
-    jle .L100
-    ret
-    .align  2
+        cmpq    %rbx, %rax
+        jle     .L100
+        ret
+        .align  2
 .L100:
-    movq    %rbx, %rax
-    ret
-    .cfi_endproc
+        movq    %rbx, %rax
+        ret
+        .cfi_endproc
 </programlisting>
         <para>
           The <literal>_camlCompare_mono__cmp_1008</literal> is an
