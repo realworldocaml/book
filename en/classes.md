@@ -496,9 +496,6 @@ tree, so it should be used with care.
 
 ### How names are resolved
 
-TODO CR: this has changed in 4.01 and multiple definitions are no longer
-allowed.
-
 The main trickiness of multiple inheritance is due to naming -- what happens
 when a method or field with some name is defined in more than one class?
 
@@ -507,24 +504,25 @@ inheritance is like textual inclusion.  If there is more than one definition
 for a name, the last definition wins.  Let's look at some artificial, but
 illustrative, examples.
 
-First, let's consider what happens when we define a method more than once.  In
-the following example, the method `get` is defined twice; the second definition
-wins, meaning that it overrides the first one.
+First, defining a method more than once within the same object is forbidden and
+results in a type error.  In the following example, the method `get` is defined
+twice.
 
 ```frag
 ((typ ocamltop)(name classes/multiple_inheritance.topscript)(part 0))
 ```
 
-Fields have similar behavior, though the compiler produces a warning
-message about the override.
+Fields have similar behavior and multiple definitions in the same object
+are also rejected.
 
 ```frag
 ((typ ocamltop)(name classes/multiple_inheritance.topscript)(part 1))
 ```
 
-Of course, it is unlikely that you will define two methods or two fields of the
-same name in the same class.  However, the rules for inheritance follow the
-same pattern: the last definition wins.
+Of course, it is unlikely that you will ever want to define two methods or two
+fields of the same name in the same class.  Inheritance does permit you to have
+multiple definitions, but only by following the rules for inheritance: the last
+definition wins.
 
 In the following definition, the `inherit` declaration comes last, so the
 method definition `method get = 2` overrides the previous definition, always

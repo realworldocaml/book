@@ -4,7 +4,6 @@ class m1 =
      method f = self#get
      method get = 2
   end  ;;
-(new m1)#f ;;
 #part 1
 class m2 =
   object (self : 'self)
