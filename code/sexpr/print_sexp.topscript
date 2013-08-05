@@ -1,0 +1,6 @@
+let a x = Sexp.Atom x ;;
+let l x = Sexp.List x ;;
+let sexp = l [
+    a "this";
+    l [a "is"; a "an"];
+    l [ a "s"; a "expression"] ] ;;

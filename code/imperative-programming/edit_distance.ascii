@@ -1,0 +1,3 @@
+edit_distance "OCam" "ocaml"
+edit_distance "OCaml" "ocam"
+edit_distance "OCam" "ocam"

@@ -1,0 +1,12 @@
+# module Make_interval(Endpoint : Comparable)
+    : (Interval_intf with type endpoint := Endpoint.t) = struct
+
+    type t = | Interval of Endpoint.t * Endpoint.t
+             | Empty
+    with sexp
+
+    ...
+
+  end ;;
+  Characters 136-146:
+    Error: Unbound value Endpoint.t_of_sexp

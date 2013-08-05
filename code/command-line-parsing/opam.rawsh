@@ -1,0 +1,4 @@
+$ opam config env
+$ opam remote list -k git
+$ opam install --help
+$ opam install cryptokit --verbose

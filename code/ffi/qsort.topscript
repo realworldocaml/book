@@ -1,0 +1,8 @@
+#require "ctypes.foreign" ;;
+open Ctypes ;;
+open PosixTypes ;;
+open Foreign ;;
+let compare_t = ptr void @-> ptr void @-> returning int ;;
+let qsort = foreign "qsort"
+   (ptr void @-> size_t @-> size_t @->
+    funptr compare_t @-> returning void) ;;

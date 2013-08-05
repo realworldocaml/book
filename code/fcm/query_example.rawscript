@@ -1,0 +1,11 @@
+$ ./query_handler.byte 
+>>> (unique ())
+0
+>>> (unique ())
+1
+>>> (ls .)
+(agentx at audit backups db empty folders jabberd lib log mail msgs named
+ netboot pgsql_socket_alt root rpc run rwho spool tmp vm yp)
+>>> (ls vm)
+(sleepimage swapfile0 swapfile1 swapfile2 swapfile3 swapfile4 swapfile5
+ swapfile6)

@@ -1,0 +1,4 @@
+                <---- size ---->
+ base --- start ---------------- end
+          limit      ptr <------
+                          blocks

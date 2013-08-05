@@ -1,0 +1,37 @@
+# module Logon = struct
+    type t =
+      { session_id: string;
+        time: Time.t;
+        user: string;
+        credentials: string;
+      }
+    with fields
+  end;;
+module Logon :
+  sig
+    type t = {
+      session_id : string;
+      time : Time.t;
+      user : string;
+      credentials : string;
+    }
+    val credentials : t -> string
+    val user : t -> string
+    val time : t -> Time.t
+    val session_id : t -> string
+    module Fields :
+      sig
+        val names : string list
+        val credentials :
+          ([< `Read | `Set_and_create ], t, string) Field.t_with_perm
+        val user :
+          ([< `Read | `Set_and_create ], t, string) Field.t_with_perm
+        val time :
+          ([< `Read | `Set_and_create ], t, Time.t) Field.t_with_perm
+        val session_id :
+          ([< `Read | `Set_and_create ], t, string) Field.t_with_perm
+
+        [ ... many definitions omitted ... ]
+
+      end
+  end

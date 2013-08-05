@@ -1,0 +1,1 @@
+env COMMAND_OUTPUT_INSTALLATION_BASH=1 ./basic_md5_with_flags.native

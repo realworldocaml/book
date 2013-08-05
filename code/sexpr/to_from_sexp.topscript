@@ -1,0 +1,3 @@
+Int.sexp_of_t 3 ;;
+List.sexp_of_t ;;
+List.sexp_of_t Int.sexp_of_t [1; 2; 3] ;;

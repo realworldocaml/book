@@ -1,0 +1,1 @@
+ocamlc -i typedef.ml

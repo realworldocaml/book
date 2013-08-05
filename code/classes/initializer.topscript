@@ -1,0 +1,6 @@
+class obj x = 
+    let () = printf "Creating obj %d\n" x in
+    object 
+      val field = printf "Initializing field\n"; x
+    end ;;
+let o = new obj 3 ;;

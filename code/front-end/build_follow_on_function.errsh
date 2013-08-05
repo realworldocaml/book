@@ -1,0 +1,1 @@
+ocamlc -c follow_on_function.ml

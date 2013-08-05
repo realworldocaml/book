@@ -1,0 +1,2 @@
+cat test2.json
+./test.native test2.json

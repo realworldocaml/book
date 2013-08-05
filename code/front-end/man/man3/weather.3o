@@ -1,0 +1,22 @@
+.TH "weather" 3 2013-07-23 OCamldoc ""
+.SH NAME
+weather \- all weather elements
+
+
+.SH Module Doc
+.I type weather 
+=
+ | Rain
+.B of 
+.B int
+.I "  "
+(* The comment for construtor Rain *)
+ | Sun  (* The comment for constructor Sun *)
+ 
+.sp
+Comment for type 
+.B weather
+
+.sp
+
+.sp
