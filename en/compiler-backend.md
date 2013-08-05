@@ -272,6 +272,11 @@ a *custom runtime* mode and is built as follows.
 ((typ console)(name back-end-embed/link_custom.out))
 ```
 
+OCamlbuild takes care of much of the details of this with its built-in rules.
+The `%.byte` rule that you've been using throughout the book builds a bytecode
+executable and adding the `custom` tag will bundle the interpreter
+with it too.
+
 The custom mode is the most similar mode to native code compilation, as both
 generate standalone executables.  There are quite a few other options available
 for compiling bytecode (notably with shared libraries or building custom
