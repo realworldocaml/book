@@ -65,7 +65,7 @@ block of memory when such a value is created.
 
 The type declaration `t` doesn't take up any memory at runtime, but the
 subsequent `let` binding allocates a new block of memory with two words of
-available space. One word holds the `foo` field and the second word holds the
+available space. One word holds the `foo` field and the other word holds the
 `bar` field.  The OCaml compiler translates such an expression into an explicit
 allocation for the block from OCaml's runtime system.
 
