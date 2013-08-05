@@ -699,6 +699,9 @@ embedding example earlier in this chapter.
 
 The `embed_native.o` is a standalone object file that has no further references
 to OCaml code beyond the runtime library, just as with the bytecode runtime.
+Do remember that the link order of the libraries is significant on modern GNU
+toolchains (especially as used in Ubuntu 11.10 upwards) that resolve symbols from
+left-to-right in a single pass.
 
 <tip>
 <title>Activating the debug runtime</title>
