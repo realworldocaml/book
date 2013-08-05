@@ -251,7 +251,7 @@ with any amended instructions you encounter.
 </note>
 
 
-## Configuring the OPAM package manager
+## Configuring OPAM
 
 The entire OPAM package database is held in the `.opam` directory in
 your home directory, including compiler installations. On Linux and
