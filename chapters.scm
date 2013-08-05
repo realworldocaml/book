@@ -143,8 +143,3 @@
  (file "installing-ocaml")
  (note "90% complete")
  )
-((part Appendix)
- (name "packaging")
- (file "packaging-and-build-systems")
- (note "25% done, on Anil's stack")
- )

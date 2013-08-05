@@ -92,13 +92,13 @@ asks ocamlfind to link in the packages as is necessary for building an
 executable, while `-thread` turns on threading support, which is
 required for Core.
 
-While this works well enough for a one-file project, more complicated
-projects require a tool to orchestrate the build.  One good tool for
-this task is `ocamlbuild`, which is shipped with the OCaml compiler.
-We'll talk more about `ocamlbuild` in [xref](#packaging), but for now,
-we'll just use a simple wrapper around `ocamlbuild` called `corebuild`
-that sets build parameters appropriately for building against Core and
-its related libraries.
+While this works well enough for a one-file project, more complicated projects
+require a tool to orchestrate the build.  One good tool for this task is
+`ocamlbuild`, which is shipped with the OCaml compiler.  We'll talk more about
+`ocamlbuild` in [xref](#the-compiler-frontend-parsing-and-type-checking), but
+for now, we'll just use a simple wrapper around `ocamlbuild` called `corebuild`
+that sets build parameters appropriately for building against Core and its
+related libraries.
 
 ```frag
 ((typ console)(name files-modules-and-programs-freq/build.out))
