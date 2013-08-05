@@ -35,6 +35,7 @@ dirs= json \
       memory-repr \
       gc \
       front-end \
+      principal \
       back-end \
       back-end-bench \
       back-end-embed \

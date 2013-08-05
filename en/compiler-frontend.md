@@ -715,6 +715,14 @@ longer matters.
 ((typ console)(name front-end/build_principal.out))
 ```
 
+The `ocamlbuild` equivalent is to add the tag `principal` to your build.
+The `corebuild` wrapper script actually adds this by default, but it does
+no harm to explicitly repeat it, as below.
+
+```frag
+((typ console)(name principal/build_principal.out))
+```
+
 Ideally, all code should systematically use `-principal`.  It reduces variance
 in type inference and enforces the notion of a single known type.  However,
 there are drawbacks to this mode: type inference is slower and the `cmi` files
