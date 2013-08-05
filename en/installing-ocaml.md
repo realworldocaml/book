@@ -187,7 +187,6 @@ distribution.  If you're on an earlier stable distribution such as `wheezy`, you
 can either compile from source, or cherry-pick just the OPAM binary package from
 `unstable` by:
 
-
 ```console
 # apt-get update
 # apt-get -t unstable install opam
@@ -196,11 +195,22 @@ can either compile from source, or cherry-pick just the OPAM binary package from
 <note>
 <title>Note to reviewers</title>
 
-The binary packages for OPAM are not yet available as of the 17th June 2013,
+The binary packages for OPAM are not yet available as of the 5th August 2013,
 but the package is in the `NEW` queue.  It should be available by the the time
 the book is released, and these instructions will be updated accordingly.
 
 </note>
+
+### Ubuntu Raring
+
+OPAM is available as a Personal Package Archive on Ubuntu Raring for both i386
+and x86_64.  To install it, just run:
+
+```console
+$ add-apt-repository ppa:avsm/ppa
+$ apt-get update
+$ apt-get install ocaml opam
+```
 
 ### Fedora and Red Hat
 
