@@ -385,6 +385,14 @@ for each field in the record.  If you're using the extension in your compiler
 command-line, this generated code is then compiled as if you had typed it in
 yourself.
 
+Note that although the generated code uses `Pervasives.compare`, it is also
+annotated with a `string` type.  This lets the compiler use a specialized
+string comparison function and not actually call the runtime polymorphic
+comparison function.  This has implications for correctness too: recall from
+[xref](#maps-and-hash-tables) that `comparelib` provides reliable comparison
+functions that work for values that are logically the same but that have
+differing internal representations (e.g. `Int.Set.t`).
+
 <note>
 <title>A style note: wildcards in `let` bindings</title>
 
