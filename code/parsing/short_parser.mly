@@ -16,13 +16,13 @@
 %start <Json.value option> prog
 
 %%
-
+(* part 1 *)
 prog:
-    v = value { Some v }
+  | v = value { Some v }
   | EOF       { None   } ;
 
 value:
-    LEFT_BRACE; obj = obj_fields; RIGHT_BRACE { `Assoc obj  }
+  | LEFT_BRACE; obj = obj_fields; RIGHT_BRACE { `Assoc obj  }
   | LEFT_BRACK; vl = list_fields; RIGHT_BRACK { `List vl    }
   | s = STRING                                { `String s   }
   | i = INT                                   { `Int i      }
