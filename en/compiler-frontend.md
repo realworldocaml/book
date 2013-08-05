@@ -603,7 +603,13 @@ messages).
 
 It's often said that the hardest part of writing OCaml code is getting past the
 type checker -- but once the code does compile, it works correctly the first
-time! 
+time!   This is an exaggeration of course, but it can certainly feel true when
+moving from a dynamically typed language. The OCaml static type system protects
+you from certain classes of bugs such as memory errors and abstraction
+violations by rejecting your program at compilation time rather than by
+generating an error at runtime.  Learning how to navigate the type checker's
+compile-time feedback is key to building robust libraries and applications that
+take full advantage of these static checks.
 
 There are a couple of tricks to make it easier to quickly locate type errors in
 your code. The first is to introduce manual type annotations to narrow down the
