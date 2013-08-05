@@ -690,3 +690,29 @@ very OS-specific.
 
 </note>
 
+## Alternative command-line parsers
+
+This rounds up our tour of the `Command` library.   This isn't the only
+way to parse command-line arguments of course; there are several alternatives 
+available on OPAM.  Three of the most prominent ones are:
+
+*   The `Arg` module from the OCaml standard library, which is used by the
+    compiler itself to handle its command-line interface.  Command is generally
+    more featureful than Arg (mainly via support for sub-commands, the `step`
+    combinator to transform inputs, and help generation), but there's absolutely
+    nothing wrong with using Arg either.
+
+    You can use the `Command.Spec.flags_of_args_exn` function to convert Arg
+    specifications into ones compatible with Command.  This is quite often
+    used to help port older non-Core code into the Core standard library world.
+
+*   [ocaml-getopt](https://forge.ocamlcore.org/projects/ocaml-getopt/) provides
+    the general command-line syntax of GNU `getopt` and `getopt_long`.  The GNU
+    conventions are widely used in the open-source world, and this library lets
+    your OCaml programs obey the same rules.
+
+*   [Cmdliner](http://erratique.ch/software/cmdliner) is a mix between the Command
+    and Getopt libraries.  It allows for the declarative definition of command-line
+    interfaces, but exposes a more `getopt`-like interface.  It also automates the
+    generation of UNIX `man` pages as part of the specification.  Cmdliner is the
+    parser used by OPAM to manage its command-line.
