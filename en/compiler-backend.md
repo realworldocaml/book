@@ -44,8 +44,9 @@ The lambda output for this code looks like this.
 ((typ console)(name back-end/lambda_for_pattern_monomorphic_exhaustive.out))
 ```
 
-It's not important to understand every detail of this internal form, but
-some interesting points emerge from reading it.
+It's not important to understand every detail of this internal form and it is
+explicitly undocumented since it can change across compiler revisions.  Despite
+these caveats, some interesting points emerge from reading it.
 
 * There are no mention of modules or types any more.  Global values are
   created via `setglobal` and OCaml values are constructed by `makeblock`.  The
