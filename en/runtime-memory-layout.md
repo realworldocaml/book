@@ -153,11 +153,8 @@ array of OCaml fields are present, their contents are all treated as more valid
 OCaml values. The garbage collector always inspects fields and follows them as
 part of the collection process described earlier.
 
-```
-+------------------------+---------+----------+----------+----------+----
-| size of block in words |  color  | tag byte | value[0] | value[1] | ...
-+------------------------+---------+----------+----------+----------+----
- <-either 22 or 54 bits-> <-2 bit-> <--8 bit-->
+```frag
+((typ ascii)(name memory-repr/block.ascii))
 ```
 
 The `size` field records the length of the block in memory words.  This is 22
@@ -210,10 +207,8 @@ registers to further improve the efficiency of using unboxed integers.
 
 ## Tuples, records and arrays
 
-```
-+---------+----------+----------- - - - - 
-| header  | value[0] | value[1] | ....
-+---------+----------+----------+- - - - -
+```frag
+((typ ascii)(name memory-repr/tuple_layout.ascii))
 ```
 
 Tuples, records and arrays are all represented identically at runtime as a
@@ -252,10 +247,8 @@ types. These are stored in a block that contains the floats packed directly in
 the data section, with the `Double_array_tag` set to signal to the collector
 that the contents are not OCaml values.
 
-```
-+---------+----------+----------- - - - - 
-| header  | float[0] | float[1] | ....
-+---------+----------+----------+- - - - -
+```frag
+((typ ascii)(name memory-repr/float_array_layout.ascii))
 ```
 
 First, let's check that float arrays do in fact have a different tag number
