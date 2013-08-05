@@ -630,7 +630,7 @@ are fully manifest in your type definitions, making the errors that
 your code might generate explicit and impossible to ignore.
 
 The right tradeoff depends on your application.  If you're writing a
-rough and ready program where getting to done quickly is key, and
+rough and ready program where getting it done quickly is key, and
 failure is not that expensive, then using exceptions extensively may
 be the way to go.  If, on the other hand, you're writing production
 software whose failure is costly, then you should probably lean in the
