@@ -882,13 +882,10 @@ as it is `x:float -> y:float -> float`.
 
 Even worse, it would be perfectly consistent for `f` to take an
 optional argument instead of a labeled one, which could lead to this
-type signature for `numeric_deriv`:
+type signature for `numeric_deriv`.
 
-```ocaml
-val numeric_deriv :
-  delta:float ->
-  x:float -> y:float -> f:(?x:float -> y:float -> float) -> float * float =
-  <fun>
+```frag
+((typ ocaml)(name variables-and-functions/numerical_deriv_alt_sig.mli))
 ```
 
 Since there are multiple plausible types to choose from, OCaml needs
