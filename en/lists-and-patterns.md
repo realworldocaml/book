@@ -37,10 +37,8 @@ following is a rough graphical representation of how the list `1 :: 2
 the box containing `3`) points to the empty list.
 
 
-```
-+---+---+   +---+---+   +---+---+
-| 1 | *---->| 2 | *---->| 3 | *---->||
-+---+---+   +---+---+   +---+---+
+```frag
+((typ ascii)(name lists-and-patterns/lists_layout.ascii))
 ```
 
 Each `::` essentially adds a new block to the picture above.  Such a
