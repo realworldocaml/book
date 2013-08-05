@@ -861,6 +861,52 @@ into it, just clean out your intermediate files and recompile from scratch.
 
 </sidebar>
 
+### Packing modules together
+
+The module-to-file mapping described so far rigidly enforces a 1:1 mapping
+between a top-level module and a file.  It's often convenient to split larger
+modules into separate files to make editing and version control easier, but
+still compile them all into a single OCaml module.
+
+The `-pack` compiler option accepts a list of compiled object files (`.cmo` in
+bytecode and `.cmx` for native code) and their associated `.cmi` compiled
+interfaces, and combines them into a single module that contains them as
+sub-modules of the output.  Packing thus generates an entirely new `.cmo` (or
+`.cmx` file) and `.cmi` that includes the input modules.  
+
+Packing for native code introduces an additional requirement: the modules that
+are intended to be packed must be compiled with the `-for-pack` argument that
+specifies the eventual name of the pack.   The easiest way to handle packing is
+to let `ocamlbuild` figure out the command-line arguments for you, so let's
+try that out next with a simple example.
+
+First, create a couple of toy modules called `A.ml` and `B.ml` that contain a
+single value.  You will also need a `_tags` file that adds the `-for-pack`
+option for the `cmx` files (but careful to exclude the pack target itself).
+Finally, the `X.mlpack` file contains the list of modules that are intended to
+be packed under module `X`.  There are special rules in `ocamlbuild` that tell
+it how to map `%.mlpack` files to the packed `%.cmx` or `%.cmo` equivalent.
+
+```
+((typ console)(name packing/show_files.out))
+```
+
+You can now run `corebuild` to build the `X.cmx` file directly, but let's create
+a new module to link against `X` to complete the example.
+
+```frag
+((typ ocaml)(name packing/test.ml))
+```
+
+You can now compile this test module and see that its inferred interface is the
+result of using the packed contents of `X`.  We further verify this by
+examining the imported interfaces in `Test` and confirming that neither `A` nor
+`B` are mentioned in there and that only the packed `X` module is used.
+
+```frag
+((typ console)(name packing/build_test.out))
+```
+
 ### Shorter module paths in type errors
 
 Core uses the OCaml module system quite extensively to provide a complete

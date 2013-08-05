@@ -35,6 +35,7 @@ dirs= json \
       memory-repr \
       gc \
       front-end \
+      packing \
       principal \
       back-end \
       back-end-bench \
@@ -191,6 +192,6 @@ clean:
 
 clean-%:
 	find $* -name \*.out | xargs rm
-	rm -rf $(OBJ)/$*
+	rm -rf $*/_build
 
 .PRECIOUS: $(all_src) $(all_scripts)
