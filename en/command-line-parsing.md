@@ -109,13 +109,13 @@ passed in the same order as they were bound in the specification
 <note>
 <title>The extra `unit` argument to callbacks</title>
 
-The callback above needs an extra `unit` argument after `file`.  This
-is to ensure that specifications can work even when they are empty
-(_i.e._ the `Command.Spec.empty` value).
+The callback above needs an extra `unit` argument after `filename`.  This is to
+ensure that specifications can work even when they are empty (_i.e._ the
+`Command.Spec.empty` value).
 
 Every OCaml function needs at least one argument, so the final `unit`
-guarantees that it will not be evaluated immediately as a value if
-there are no other arguments.
+guarantees that it will not be evaluated immediately as a value if there are no
+other arguments.
 
 </note>
 
