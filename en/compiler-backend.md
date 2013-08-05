@@ -400,6 +400,7 @@ the types, so the compiler knows that only integers are being compared.
 ```
 
 Now compile this into assembly and read the resulting `compare_mono.S` file.
+This file extension may be lowercase on some platforms such as Linux.
 
 ```frag
 ((typ console)(name back-end/asm_from_compare_mono.out))
@@ -752,5 +753,5 @@ Extension      Purpose
 .o             Compiled native object file of the module implementation.
 .cmx           Contains extra information for linking and cross-module optimization of the object file.
 .cmxa and .a   Library of `cmx` and `o` units, stored in the `cmxa` and `a` files respectively.  These files are always needed together.
-.S             Assembly language output if `-S` is specified.
+.S _or_ .s     Assembly language output if `-S` is specified.
 
