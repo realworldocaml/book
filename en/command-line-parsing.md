@@ -334,20 +334,18 @@ flag isn't supplied, as with the anonymous arguments in earlier
 examples.  Here's a list of some of the functions that you can wrap
 flags in to control how they are parsed.
 
-Flag function            OCaml type
--------------            ----------
-`required` _arg_         _arg_ and error if not present
-`optional` _arg_         _arg_ `option`
-`optional_with_default`  _arg_ with a default if not present
-`listed` _arg_           _arg_ `list`, flag may appear multiple times
-`no_arg`                 `bool` that is true if flag is present.
+Flag function                         OCaml type
+-------------                         ----------
+`required` _arg_                      _arg_ and error if not present
+`optional` _arg_                      _arg_ `option`
+`optional_with_default` _val_ _arg_   _arg_ with default _val_ if not present
+`listed` _arg_                        _arg_ `list`, flag may appear multiple times
+`no_arg`                              `bool` that is true if flag is present.
 
 The flags affect the type of the callback function in exactly the same
 way as anonymous arguments do.  This lets you change the specification
 and ensure that all the callback functions are updated appropriately,
 without runtime errors.
-
-TODO: show example of listed.
 
 ## Grouping sub-commands together
 
