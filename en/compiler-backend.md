@@ -167,12 +167,19 @@ The big advantage of using bytecode is simplicity, portability and compilation
 speed.  The mapping from the lambda form to bytecode is straightforward, and
 this results in predictable (but slow) execution speed.
 
-The interpreter uses the OCaml stack and an accumulator to store values. It
-only has seven registers in total: the program counter, stack pointer,
-accumulator, exception and argument pointers, and environment and global data.
+The bytecode interpreter implements a stack-based virtual machine.  The OCaml
+stack and an associated accumulator stores values that consist of:
 
-You can display the bytecode instructions in textual form via `-dinstr`.  Try
-this on one of our earlier pattern matching examples.
+*   _long_ values corresponding to an OCaml `int` type.
+*   _block_ values that contain the block header and a memory address with the
+    data fields that contain further OCaml values indexed by an integer.
+*   _code offset_ values that are relative to the starting code address.
+
+The interpreter virtual machine only has seven registers in total: the program
+counter, stack pointer, accumulator, exception and argument pointers, and
+environment and global data.  You can display the bytecode instructions in
+textual form via `-dinstr`.  Try this on one of our earlier pattern matching
+examples.
 
 ```frag
 ((typ console)(name back-end/instr_for_pattern_monomorphic_exhausive.out))
