@@ -613,16 +613,19 @@ embedded environment.
 ### Profiling native code 
 
 The recording and analysis of where your application spends its execution time
-is known as *performance profiling*.
-OCaml native code binaries can be profiled just like any other C binary, by
-using the name mangling described earlier to map between OCaml variable names
-and the profiler output.
+is known as *performance profiling*.  OCaml native code binaries can be
+profiled just like any other C binary, by using the name mangling described
+earlier to map between OCaml variable names and the profiler output.
 
 Most profiling tools benefit from having some instrumentation included in the
 binary.  OCaml supports two such tools:
 
 * GNU Gprof to measure execution time and call graphs.
 * The [Perf](https://perf.wiki.kernel.org/) profiling framework in modern versions of Linux.
+
+Note that many other tools that operate on native binaries such as Valgrind
+will work just fine with OCaml as long as the program is linked with the `-g`
+flag to embed debugging symbols. 
 
 #### Gprof
 
