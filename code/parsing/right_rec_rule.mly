@@ -42,22 +42,23 @@ value:
   ;
 
 (* part 4 *)
-object_fields: obj = rev_object_fields { List.rev obj };
-
-rev_object_fields:
+/* Inefficient right-recursive rule */
+object_fields:
   | /* empty */ { [] }
-  | obj = rev_object_fields; COMMA; k = ID; COLON; v = value
+  | k = ID; COLON; v = value; COMMA; obj = object_fields
     { (k, v) :: obj }
-  ;
 
 (* part 5 *)
-array_values:
-  | /* empty */ { [] }
-  | vl = rev_values { List.rev vl }
+array_values: /* empty */
+    { [] }
+  | vl = rev_values
+    { List.rev vl }
   ;
 
-rev_values:
-  | v = value { [v] }
+rev_values: v = value
+    { [v] }
   | vl = rev_values; COMMA; v = value
     { v :: vl }
   ;
+
+

@@ -42,18 +42,18 @@ value:
   ;
 
 (* part 4 *)
-object_fields: obj = rev_object_fields { List.rev obj };
-
-rev_object_fields:
+/* Quadratic left-recursive rule */
+object_fields:
   | /* empty */ { [] }
-  | obj = rev_object_fields; COMMA; k = ID; COLON; v = value
-    { (k, v) :: obj }
+  | obj = object_fields; COMMA; k = ID; COLON; v = value
+    { obj @ [k, v] }
   ;
 
 (* part 5 *)
 array_values:
   | /* empty */ { [] }
-  | vl = rev_values { List.rev vl }
+  | vl = rev_values
+    { List.rev vl }
   ;
 
 rev_values:

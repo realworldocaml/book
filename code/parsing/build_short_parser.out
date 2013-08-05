@@ -1,0 +1,3 @@
+$ corebuild -use-menhir short_parser.mli
+menhir --raw-depend --ocamldep 'ocamlfind ocamldep -modules' short_parser.mly > short_parser.mly.depends
+menhir --ocamlc 'ocamlfind ocamlc -w A-4-33-41-42-43-34-44 -strict-sequence -principal -g -annot -bin-annot -short-paths -thread -syntax camlp4o -package bin_prot.syntax -package sexplib.syntax,comparelib.syntax,fieldslib.syntax,variantslib.syntax -package core' --infer short_parser.mly
