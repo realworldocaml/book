@@ -80,20 +80,22 @@ the library.
 
 ### Fedora and Red Hat
 
-OCaml has been included in the basic distribution since Fedora 8.  To install the
-latest compiler, just run:
+OCaml has been included in the basic distribution since Fedora 8.  To install
+the latest compiler, just run:
 
 ```
 # yum install ocaml
+# yum install ocaml-camlp4-devel
 # yum install pcre-devel
 ```
 
-The PCRE package is used by Core and is just included here for convenience later.
+The PCRE package is used by Core and is just included here for convenience
+later.
 
 ### Arch Linux
 
-Arch Linux provides OCaml 4.00.1 (or later) in the standard repositories, so the
-easiest method of installation is using `pacman`:
+Arch Linux provides OCaml 4.00.1 (or later) in the standard repositories, so
+the easiest method of installation is using `pacman`:
 
 ```
 $ pacman -Sy ocaml
