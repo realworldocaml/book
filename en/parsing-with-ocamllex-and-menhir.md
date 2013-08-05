@@ -67,17 +67,18 @@ an AST, so from here on in, we'll use the term parsing to refer only
 to this second phase.
 
 Let's consider lexing and parsing in the context of the JSON format.
-As discussed in [xref](#handling-json-data), JSON has a variety of
-kinds of values, including numbers, strings, arrays, and objects, each
-with its own textual representation.  For example, the following text
-represents an object containing a string labeled `title`, and an array
-containing two objects, each with a name and array of zip codes.
+Here's an example of a snippet of text that represents a JSON object
+containing a string labeled `title`, and an array containing two
+objects, each with a name and array of zip codes.
 
 ```frag
 ((typ json)(name parsing/example.json))
 ```
 
-We could use a type like the following for specifying a token.
+At a syntactic level, we can think of a JSON file as a series of
+simple logical units, like curly braces, square brackets, commas,
+colons, identifiers, numbers, and quoted strings.  Thus, we could
+represent our JSON text as a sequence of tokens of the following type.
 
 ```frag
 ((typ ocaml)(name parsing/manual_token_type.ml))
@@ -106,20 +107,18 @@ simple AST we used for representing JSON data in
 ((typ ocaml)(name parsing/json.ml)(part 0))
 ```
 
-The above type is effectively an AST, and the job of the parser we'll
-write will be to convert a token stream into a value of this type, as
-shown below.
+This representation is much richer than our token stream, capturing
+the fact that JSON values can be nested inside each other, and that
+JSON has a variety of value types, including numbers, strings, arrays,
+and objects.  The above type is effectively an AST, and the job of the
+parser we'll write will be to convert a token stream into a value of
+this type, as shown below.
 
 ```frag
 ((typ ocaml)(name parsing/parsed_example.ml))
 ```
 
-## Defining a JSON parser with Menhir
-
-The process of building a lexer and a parser are interconnected.  The
-first step is to define the set of tokens which are what the lexer and
-the parser use to communicate.  With `menhir` and `ocamllex`, the set
-of tokens is in our case specified along with the parser.
+## Defining a parser
 
 A parser-specification file has suffix `.mly` and contains several
 parts in the following sequence:
@@ -130,13 +129,14 @@ parts in the following sequence:
   
 The `%%` are section separators; they have to be on a line by
 themselves.  The declarations include token and type specifications,
-precedence directives, and other output directives.  We'll start by
-declaring the tokens.
+precedence directives, and other output directives.  
 
-A token is declared using the syntax `%token <`_type_`>` _uid_, where
-the `<type>` is optional, and _uid_ is a capitalized identifier.  For
-JSON, we need tokens for numbers, strings, identifiers, and
-punctuation. 
+### Specifying the tokens
+
+We'll start by declaring the list of tokens.  A token is declared
+using the syntax `%token <`_type_`>` _uid_, where the `<type>` is
+optional, and _uid_ is a capitalized identifier.  For JSON, we need
+tokens for numbers, strings, identifiers, and punctuation.
 
 ```frag
 ((typ ocaml)(name parsing/parser.mly)(part 0))
@@ -149,32 +149,28 @@ remaining tokens, such as `TRUE`, `FALSE` or the punctuation, aren't
 associated with any value and so we can omit the `<`_type_`>`
 specification.
 
-### Specifying the Grammar
+### Describing the grammar
 
 The next thing we need to do is to specify the grammar of a JSON
-expression.  `menhir`, like many parsers, uses _context free
-grammars_.  You can think of a context-free grammar as a set of
-abstract names, called _non-terminal symbols_, along with a collection
-of rules for transforming a non-terminal symbol into a sequence, where
-each element of the sequence could be a token or could be another
-non-terminal symbol.  A sequence of tokens follows the grammar if
-there is a sequence of transformations, starting at a distinguished
-_start symbol_, that produces the token sequence in question.
+expression.  `menhir`, like many parsers, expresses grammars as
+_context free grammars_.  You can think of a context-free grammar as a
+set of abstract names, called _non-terminal symbols_, along with a
+collection of rules for transforming a non-terminal symbol into a
+sequence, where each element of the sequence is either a token or
+another non-terminal symbol.  A sequence of tokens is parsable by a
+grammar if you can apply the grammar's rules to produce a series of
+transformations, starting at a distinguished _start symbol_, that
+produces the token sequence in question.
 
 We'll start describing the JSON grammar by declaring the start-symbol
 to be the non-terminal symbol `prog`, and by declaring that when
 parsed, a `prog` value should be converted into an OCaml value of type
-`Json.value option`.  We thyen end the declaration section of the
+`Json.value option`.  We then end the declaration section of the
 parser with a `%%`.
 
 ```frag
 ((typ ocaml)(name parsing/parser.mly)(part 1))
 ```
-
-For more complex grammars, you can improve the quality of error
-messages by adding extra `%type` rules for non-terminal symbols other
-than the start symbol, but a type declaration is required for the
-start symbol.
 
 Once that's in place, we can start specifying the productions.  In
 `menhir`, productions are organized into `rules`, where each rule
@@ -185,16 +181,18 @@ for example, is the rule for `prog`.
 ((typ ocaml)(name parsing/parser.mly)(part 2))
 ```
 
-The syntax for this is reminiscent of an OCaml match statement, and it
-is indeed roughly analogous.  The pipes separate the individual
-productions, and the code in curly-braces is OCaml code that generates
-the OCaml value corresponding to the production in question.  In the
-case of `prog`, we either have an `EOF`, which translates to the OCaml
-value `None`, or we have an instance of the `value` non-terminal,
-which corresponds to a well-formed JSON value, in which case we wrap
-the corresponding `Json.value` in an option.  Note that in the `value`
-case, we wrote `v = value` to bind the OCaml value that corresponds to
-to the name `v`.
+The syntax for this is reminiscent of an OCaml match statement.  The
+pipes separate the individual productions, and the code in
+curly-braces is OCaml code that generates the OCaml value
+corresponding to the production in question.  In the case of `prog`,
+we have two cases: either there's an `EOF`, which means the text is
+empty, and so there's no JSON value to read, and so we return the
+OCaml value `None`; or we have an instance of the `value`
+non-terminal, which corresponds to a well-formed JSON value, in which
+case we wrap the corresponding `Json.value` in a `Some` tag.  Note
+that in the `value` case, we wrote `v = value` to bind the OCaml value
+that corresponds to to the variable `v`, which we can then use within
+the curly-braces for that production.
 
 Now let's consider a more complicated example, the rule for the
 `value` symbol.
@@ -207,7 +205,7 @@ According to these rules, a JSON `value` is either:
 
 - an object bracketed by curly braces,
 - an array bracketed by square braces,
-- a string, integer, float, or other atomic type.  
+- a string, integer, float, bool, or null value.
 
 In each of the productions, the OCaml code in curly-braces shows what
 to transform the object in question to.  Note that we still have two
@@ -265,22 +263,22 @@ objects and lists with one rule.
 ((typ ocaml)(name parsing/short_parser.mly)(part 1))
 ```
 
-The best way to invoke Menhir is using `corebuild` with the
-`-use-menhir` flag: this tells the build system to switch to using
-`menhir` instead of `ocamlyacc` to handle files with the `.mly`
-suffix.
+We can invoke `menhir` by using `corebuild` with the `-use-menhir`
+flag.  This tells the build system to switch to using `menhir` instead
+of `ocamlyacc` to handle files with the `.mly` suffix.
 
 ```frag
 ((typ console)(name parsing/build_short_parser.out))
 ```
 
-## Defining a lexer with ocamllex
+## Defining a lexer
 
-For the next part, we need to define a lexer to tokenize the input text, meaning
-that we break the input into a sequence of words or tokens.  For this, we'll
-define a lexer using `ocamllex`.  In this case, the specification is placed in a
-file with a `.mll` suffix (we'll use the name `lexer.mll`).  A lexer file has
-several parts in the following sequence.
+For the next part, we need to define a lexer to tokenize the input
+text, meaning that we break the input into a sequence of words or
+tokens.  For this, we'll define a lexer using `ocamllex`.  In this
+case, the specification is placed in a file with a `.mll` suffix
+(we'll use the name `lexer.mll`).  A lexer file has several parts in
+the following sequence.
 
 ```frag
 ((typ ocamlsyntax)(name parsing/lex.syntax))
@@ -288,52 +286,57 @@ several parts in the following sequence.
 
 ### Let-definitions for regular expressions
 
-The OCaml code for the header and trailer is optional.  The let-definitions are
-used to ease the definition of regular expressions by defining utility
-functions.  They are optional, but very useful.  To get started, let's define a
-utility function that can track the location of tokens across line breaks.
+The OCaml code for the header and trailer is optional.  The
+let-definitions are used to ease the definition of regular expressions
+by defining utility functions.  They are optional, but very useful.
+To get started, let's define a utility function that can track the
+location of tokens across line breaks.
 
 ```frag
 ((typ ocaml)(name parsing/lexer.mll)(part 0))
 ```
 
-The `Lexing` module defines a `lexbuf` structure that holds all of the lexer
-state, including the current location within the source file.  The `next_line`
-function simply accesses the `lex_curr_p` field that holds the current location
-and updates its line number.  This is intended to be called from within the
-lexing regular expressions that we'll define next.
+The `Lexing` module defines a `lexbuf` structure that holds all of the
+lexer state, including the current location within the source file.
+The `next_line` function simply accesses the `lex_curr_p` field that
+holds the current location and updates its line number.  This is
+intended to be called from within the lexing regular expressions that
+we'll define next.
 
-To get started with our rules, we know that we'll need to match numbers and
-strings, so let's define names for the regular expressions that specify their
-form.
+To get started with our rules, we know that we'll need to match
+numbers and strings, so let's define names for the regular expressions
+that specify their form.
 
 ```frag
 ((typ ocaml)(name parsing/lexer.mll)(part 1))
 ```
 
-An integer is a sequence of digits, optionally preceded by a minus sign.
-Leading zeroes are not allowed.  The question mark means that the preceding
-symbol `-` is optional.  The square brackets ['1'-'9'] define a character
-range, meaning that the first digit of the integer should be 1-9.  The final
-range `['0'-'9']*` includes the star `*`, which means zero-or-more occurrences of
-the characters 0-9.  Read formally then, an `int` has an optional minus sign,
-followed by a digit in the range 1-9, followed by zero or more digits in the
-range 0-9.
+An integer is a sequence of digits, optionally preceded by a minus
+sign.  Leading zeroes are not allowed.  The question mark means that
+the preceding symbol `-` is optional.  The square brackets ['1'-'9']
+define a character range, meaning that the first digit of the integer
+should be 1-9.  The final range `['0'-'9']*` includes the star `*`,
+which means zero-or-more occurrences of the characters 0-9.  Read
+formally then, an `int` has an optional minus sign, followed by a
+digit in the range 1-9, followed by zero or more digits in the range
+0-9.
 
-Floating-point numbers are similar, but we deal with decimal points and
-exponents.  We can use multiple let-definitions for the different parts.
+Floating-point numbers are similar, but we deal with decimal points
+and exponents.  We can use multiple let-definitions for the different
+parts.
 
 ```frag
 ((typ ocaml)(name parsing/lexer.mll)(part 2))
 ```
 
-The `digits` expression defines a single character regexp in the range 0-9.  A
-fractional part `frac` has a compulsary decimal point followed by some optional
-digits; an exponent `exp` begins with an `e` followed by some digits; and a
-`float` has an integer part, and one, both or none of a `frac` and `exp` part. 
+The `digits` expression defines a single character regexp in the range
+0-9.  A fractional part `frac` has a compulsary decimal point followed
+by some optional digits; an exponent `exp` begins with an `e` followed
+by some digits; and a `float` has an integer part, and one, both or
+none of a `frac` and `exp` part.
 
-Finally, let's define identifiers and whitespace.  An identifier (label), is an
-alphanumeric sequence not beginning with a digit.
+Finally, let's define identifiers and whitespace.  An identifier
+(label), is an alphanumeric sequence not beginning with a digit.
 
 ```frag
 ((typ ocaml)(name parsing/lexer.mll)(part 3))
@@ -342,130 +345,144 @@ alphanumeric sequence not beginning with a digit.
 
 ### Lexing rules
 
-The lexing rules are specified as a set of `parse` rules.  A `parse` rule has a
-regular expression followed by OCaml code that defines a semantic action.  Let's
-write the rule for JSON next.
+The lexing rules are specified as a set of `parse` rules.  A `parse`
+rule has a regular expression followed by OCaml code that defines a
+semantic action.  Let's write the rule for JSON next.
 
 ```frag
 ((typ ocaml)(name parsing/lexer.mll)(part 4))
 ```
 
-The rules are structured very similarly to pattern matches, except that the
-variants are replaced by regular expressions on the left hand side.  The right
-hand side clause is the parsed OCaml return value of that rule.  The OCaml code
-for the rules has a parameter called `lexbuf` that defines the input, including
-the position in the input file, as well as the text that was matched by the
-regular expression.
+The rules are structured very similarly to pattern matches, except
+that the variants are replaced by regular expressions on the left hand
+side.  The right hand side clause is the parsed OCaml return value of
+that rule.  The OCaml code for the rules has a parameter called
+`lexbuf` that defines the input, including the position in the input
+file, as well as the text that was matched by the regular expression.
 
-The first `white { read lexbuf }` calls the lexer recursively.  That is, it
-skips the input whitespace and returns the following token.  The action
-`newline { next_line lexbuf; read lexbuf }` is similar, but we use it to
-advance the line number for the lexer using the utility function that we
-defined at the top of the file.  Let's skip to the third action.
+The first `white { read lexbuf }` calls the lexer recursively.  That
+is, it skips the input whitespace and returns the following token.
+The action `newline { next_line lexbuf; read lexbuf }` is similar, but
+we use it to advance the line number for the lexer using the utility
+function that we defined at the top of the file.  Let's skip to the
+third action.
 
 ```frag
 ((typ ocaml)(name parsing/lexer_int_fragment.mll))
 ```
 
-This action specifies that when the input matches the `int` regular expression,
-then the lexer should return the expression `INT (int_of_string (Lexing.lexeme
-lexbuf))`.  The expression `Lexing.lexeme lexbuf` returns the complete string
-matched by the regular expression.  In this case, the string represents a
-number, so we use the `int_of_string` function to convert it to a number.
+This action specifies that when the input matches the `int` regular
+expression, then the lexer should return the expression `INT
+(int_of_string (Lexing.lexeme lexbuf))`.  The expression
+`Lexing.lexeme lexbuf` returns the complete string matched by the
+regular expression.  In this case, the string represents a number, so
+we use the `int_of_string` function to convert it to a number.
 
-There are actions for each different kind of token.  The string expressions like
-`"true" { TRUE }` are used for keywords, and the special characters have actions
-too, like `'{' { LEFT_BRACE }`.
+There are actions for each different kind of token.  The string
+expressions like `"true" { TRUE }` are used for keywords, and the
+special characters have actions too, like `'{' { LEFT_BRACE }`.
 
-Some of these patterns overlap.  For example, the regular expression `"true"` is
-also matched by the `id` pattern.  `ocamllex` used the following disambiguation
-when a prefix of the input is matched by more than one pattern.
+Some of these patterns overlap.  For example, the regular expression
+`"true"` is also matched by the `id` pattern.  `ocamllex` used the
+following disambiguation when a prefix of the input is matched by more
+than one pattern.
 
-* The longest match always wins.  For example, the first input `trueX: 167`
-  matches the regular expression `"true"` for 4 characters, and it matches `id`
-  for 5 characters.  The longer match wins, and the return value is `ID
-  "trueX"`.
+* The longest match always wins.  For example, the first input `trueX:
+  167` matches the regular expression `"true"` for 4 characters, and
+  it matches `id` for 5 characters.  The longer match wins, and the
+  return value is `ID "trueX"`.
 
-* If all matches have the same length, then the first action wins.  If the input
-  were `true: 167`, then both `"true"` and `id` match the first 4 characters;
-  `"true"` is first, so the return value is `TRUE`.
+* If all matches have the same length, then the first action wins.  If
+  the input were `true: 167`, then both `"true"` and `id` match the
+  first 4 characters; `"true"` is first, so the return value is
+  `TRUE`.
   
 ### Recursive rules
 
-Unlike many other lexer generators, `ocamllex` allows the definition of multiple
-lexers in the same file, and the definitions can be recursive.  In this case, we
-use recursion to match string literals using the following rule definition.
+Unlike many other lexer generators, `ocamllex` allows the definition
+of multiple lexers in the same file, and the definitions can be
+recursive.  In this case, we use recursion to match string literals
+using the following rule definition.
 
 ```frag
 ((typ ocaml)(name parsing/lexer.mll)(part 5))
 ```
 
-This rule takes a `buf : Buffer.t` as an argument.  If we reach the terminating
-double quote `"`, then we return the contents of the buffer as a `STRING`.
+This rule takes a `buf : Buffer.t` as an argument.  If we reach the
+terminating double quote `"`, then we return the contents of the
+buffer as a `STRING`.
 
-The other cases are for handling the string contents.  The action `[^ '"' '\\']+
-{ ... }` matches normal input that does not contain a double-quote or backslash.
-The actions beginning with a backslash `\` define what to do for escape
-sequences.  In each of these cases, the final step includes a recursive call to
-the lexer.
+The other cases are for handling the string contents.  The action `[^
+'"' '\\']+ { ... }` matches normal input that does not contain a
+double-quote or backslash.  The actions beginning with a backslash `\`
+define what to do for escape sequences.  In each of these cases, the
+final step includes a recursive call to the lexer.
 
-That covers the lexer.  Next, we need to combine the lexer with the parser to
-bring it all together.
+That covers the lexer.  Next, we need to combine the lexer with the
+parser to bring it all together.
 
 <note>
 <title>Handling Unicode</title>
 
-We've glossed over an important detail here: parsing Unicode characters to
-handle the full spectrum of the world's writing systems.  OCaml has several
-third-party solutions to handling Unicode, with varying degrees of flexibility
-and complexity.
+We've glossed over an important detail here: parsing Unicode
+characters to handle the full spectrum of the world's writing systems.
+OCaml has several third-party solutions to handling Unicode, with
+varying degrees of flexibility and complexity.
 
-* [Camomile](http://camomile.sourceforge.net) supports the full spectrum
-of Unicode character types, conversion from around 200 encodings, and collation
-and locale-sensitive case mappings.
-* [Ulex](http://www.cduce.org/ulex) is a lexer generator for Unicode that can
-serve as a Unicode-aware replacement for `ocamllex`.
-* [Uutf](http://erratique.ch/software/uutf) is a non-blocking streaming
-Unicode codec for OCaml, available as a standalone library.  It is accompanied
-by the [Uunf](http://erratique.ch/software/uunf) text normalization and 
-[Uucd](http://erratique.ch/software/uucd) Unicode character database libraries.
-There is also a robust parser for [JSON](http://erratique.ch/software/jsonm) available that illustrates the use of Uutf in your own libraries.
+* [Camomile](http://camomile.sourceforge.net) supports the full
+  spectrum of Unicode character types, conversion from around 200
+  encodings, and collation and locale-sensitive case mappings.
+* [Ulex](http://www.cduce.org/ulex) is a lexer generator for Unicode
+  that can serve as a Unicode-aware replacement for `ocamllex`.
+* [Uutf](http://erratique.ch/software/uutf) is a non-blocking
+  streaming Unicode codec for OCaml, available as a standalone
+  library.  It is accompanied by the
+  [Uunf](http://erratique.ch/software/uunf) text normalization and
+  [Uucd](http://erratique.ch/software/uucd) Unicode character database
+  libraries. There is also a robust parser for
+  [JSON](http://erratique.ch/software/jsonm) available that
+  illustrates the use of Uutf in your own libraries.
 
-All of these libraries are available via OPAM under their respective names.
+All of these libraries are available via OPAM under their respective
+names.
 
 </note>
 
 ## Bringing it all together
 
-For the final part, we need to compose the lexer and parser.  As we saw in the
-type definition in `parser.mli`, the parsing function expects a lexer of type
-`Lexing.lexbuf -> token`, and it also expects a `lexbuf`.
+For the final part, we need to compose the lexer and parser.  As we
+saw in the type definition in `parser.mli`, the parsing function
+expects a lexer of type `Lexing.lexbuf -> token`, and it also expects
+a `lexbuf`.
 
 ```frag
 ((typ ocaml)(name parsing/prog.mli))
 ```
 
-Before we start with the lexing, let's first define some functions to handle
-parsing errors.  There are currently two errors: `Parser.Error` and
-`Lexer.SyntaxError`.  A simple solution when encountering an error is to print
-the error and give up, which we do below.
+Before we start with the lexing, let's first define some functions to
+handle parsing errors.  There are currently two errors: `Parser.Error`
+and `Lexer.SyntaxError`.  A simple solution when encountering an error
+is to print the error and give up, which we do below.
 
 ```frag
 ((typ ocaml)(name parsing-test/test.ml)(part 0))
 ```
 
-The "give up on the first error" approach is easy to implement but isn't very
-friendly.  In general, error handling can be pretty intricate, and we won't
-discuss it here.  However, the Menhir parser defines additional mechanisms you
-can use to try and recover from errors. These are described in detail in its
-reference [manual](http://gallium.inria.fr/~fpottier/menhir/).
+The "give up on the first error" approach is easy to implement but
+isn't very friendly.  In general, error handling can be pretty
+intricate, and we won't discuss it here.  However, the Menhir parser
+defines additional mechanisms you can use to try and recover from
+errors. These are described in detail in its reference
+[manual](http://gallium.inria.fr/~fpottier/menhir/).
 
-The standard lexing library `Lexing` provides a function `from_channel` to read
-the input from a channel.  The following function describes the structure, where
-the `Lexing.from_channel` function is used to construct a `lexbuf`, which is
-passed with the lexing function `Lexer.read` to the `Parser.prog` function.
-`Parsing.prog` returns `None` when it reaches end of file.  We define a function
-`Json.output_value`, not shown here, to print a `Json.value`.
+The standard lexing library `Lexing` provides a function
+`from_channel` to read the input from a channel.  The following
+function describes the structure, where the `Lexing.from_channel`
+function is used to construct a `lexbuf`, which is passed with the
+lexing function `Lexer.read` to the `Parser.prog` function.
+`Parsing.prog` returns `None` when it reaches end of file.  We define
+a function `Json.output_value`, not shown here, to print a
+`Json.value`.
 
 ```frag
 ((typ ocaml)(name parsing-test/test.ml)(part 1))
@@ -477,15 +494,15 @@ Here's a test input file we can use to test the code we just wrote.
 ((typ json)(name parsing-test/test1.json))
 ```
 
-Now build and run the example using this file, and you you can see the full
-parser in action.
+Now build and run the example using this file, and you you can see the
+full parser in action.
 
 ```frag
 ((typ console)(name parsing-test/build_test.out))
 ```
 
-With our simple error handling scheme, errors are fatal and cause the program
-to terminate with a non-zero exit code.
+With our simple error handling scheme, errors are fatal and cause the
+program to terminate with a non-zero exit code.
 
 ```frag
 ((typ console)(name parsing-test/run_broken_test.out))
@@ -493,7 +510,7 @@ to terminate with a non-zero exit code.
 
 That wraps up our parsing tutorial.  As an aside, notice that the JSON
 polymorphic variant type that we defined in this chapter is actually
-structurally compatible with the Yojson representation explained earlier in
-[xref](#handling-json-data).  That means that you can take this parser and use
-it with the helper functions in Yojson to build more sophisticated
-applications.
+structurally compatible with the Yojson representation explained
+earlier in [xref](#handling-json-data).  That means that you can take
+this parser and use it with the helper functions in Yojson to build
+more sophisticated applications.
