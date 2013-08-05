@@ -121,17 +121,11 @@ this type, as shown below.
 ## Defining a parser
 
 A parser-specification file has suffix `.mly` and contains several
-parts in the following sequence:
-
-```frag
-((typ ocamlsyntax)(name parsing/yacc.syntax))
-```
-  
-The `%%` are section separators; they have to be on a line by
-themselves.  The declarations include token and type specifications,
-precedence directives, and other output directives.  
-
-### Specifying the tokens
+sections that are broken up by separator lines consisting of the
+characters `%%` on a line by themselves.  The first section of the
+file is for declarations, including token and type specifications,
+precedence directives, and other output directives, and the second
+section is for specifying the grammar of the language to be parsed.
 
 We'll start by declaring the list of tokens.  A token is declared
 using the syntax `%token <`_type_`>` _uid_, where the `<type>` is
@@ -173,7 +167,7 @@ parser with a `%%`.
 ```
 
 Once that's in place, we can start specifying the productions.  In
-`menhir`, productions are organized into `rules`, where each rule
+`menhir`, productions are organized into _rules_, where each rule
 lists all the possible productions for a given non-terminal.  Here,
 for example, is the rule for `prog`.
 
