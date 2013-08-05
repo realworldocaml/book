@@ -422,8 +422,8 @@ function is chosen from one of a specialized set of identifiers.  This
 set includes identifiers that are sequences of characters from the
 following set:
 
-```
-! $ % & * + - . / : < = > ? @ ^ | ~
+```frag
+((typ ocamlsyntax)(name variables-and-functions/operators.syntax))
 ```
 
 or is one of a handful of pre-determined strings, including `mod`, the
