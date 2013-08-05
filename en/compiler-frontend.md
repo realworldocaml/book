@@ -453,9 +453,10 @@ see these all these transformations precisely.
 Syntax extensions are a powerful extension mechanism that can completely alter
 your source code's layout and style.  Core includes a very conservative set of
 extensions that take care to minimize the syntax changes.  There are a number
-of third-party libraries that are much more ambitious -- some introduce
-whitespace-sensitive indentation while others build entirely new embedded
-languages using OCaml as a host language.
+of third-party libraries that are much more ambitious --- some introduce
+whitespace-sensitive indentation, while others build entirely new embedded
+languages using OCaml as a host language, and yet others introduce conditional
+compilation for macros or optional logging.
 
 While it's tempting to compress all your boiler-plate code into Camlp4
 extensions, it can make your source code much harder for other people to
