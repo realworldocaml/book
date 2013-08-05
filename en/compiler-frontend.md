@@ -907,6 +907,26 @@ examining the imported interfaces in `Test` and confirming that neither `A` nor
 ((typ console)(name packing/build_test.out))
 ```
 
+<warning>
+<title>Packing and search paths</title>
+
+One very common build error that happens with packing is confusion resulting from
+building the packed `cmi` in the same directory as the sub-modules.  When you
+add this directory to your module search path, the sub-modules are also visible.
+If you forget to include the top-level prefix (e.g `X.A`) and instead use a
+sub-module directly (`A`), then this will compile and link fine.
+
+However, the types of `A` and `X.A` are _not_ automatically equivalent, and so
+the type checker will complain if you attempt to mix-and-match the packed and
+unpacked versions of the library.
+
+This mostly only happens with unit tests since they are built at the same time
+as the library.  You can avoid it by being aware of the need to open the packed
+module from the test, or only using the library after it has been installed
+(and hence not exposing the intermediate compiled modules).
+
+</warning>
+
 ### Shorter module paths in type errors
 
 Core uses the OCaml module system quite extensively to provide a complete
