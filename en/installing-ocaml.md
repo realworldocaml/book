@@ -300,22 +300,24 @@ environment variables.  OPAM never installs files into your system
 directories (which would require administrator privileges).  Instead,
 it puts them into your home directory by default, and can output a set
 of shell commands which configures your shell with the right `PATH`
-variables so that packages will just work.  This requires just one
-command:
+variables so that packages will just work.
+
+If you choose not to follow the OPAM instructions to add itself
+to your shell profile, you can still configure it on-the-fly in your
+current shell with just one command.
 
 ```
 $ eval `opam config -env`
 ```
 
-This evaluates the results of running `opam config env` in your
-current shell, and sets the variables so that subsequent commands will
-use them.  This only works with your current shell, and it can be
-automated for all future shells by adding the line to your login
-scripts.  On Mac OS X or Debian, this is usually the `~/.bash_profile`
-file if you're using the default shell.  If you've switched to another
-shell, it might be `~/.zshrc` instead.  OPAM isn't unusual in this
-approach; the SSH `ssh-agent` also works similarly, so if you're
-having any problems just hunt around in your configuration scripts to
+This evaluates the results of running `opam config env` in your current shell
+and sets the variables so that subsequent commands will use them.  This _only_
+works with your current shell and it can be only be automated for future shells
+by adding the line to your login scripts.  On Mac OS X or Debian, this is
+usually the `~/.bash_profile` file if you're using the default shell.  If
+you've switched to another shell, it might be `~/.zshrc` instead.  OPAM isn't
+unusual in this approach; the SSH `ssh-agent` also works similarly, so if
+you're having any problems just hunt around in your configuration scripts to
 see how that's being invoked.
 
 If you answered `yes` to the auto-complete scripts question during
