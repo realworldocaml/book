@@ -908,40 +908,16 @@ editor is `ocp-index`.  Install it via OPAM as follows.
 Let's refer back to our Ncurses binding example from the beginning of
 [xref](#foreign-function-interface).  This module defined bindings for the
 Ncurses library.  First, compile the interfaces with `-bin-annot` so that we
-can obtain the `cmt` and `cmti` files.
+can obtain the `cmt` and `cmti` files, and then run `ocp-index` in completion
+mode.
 
-```console
-$ ocamlfind ocamlopt -bin-annot -c -package ctypes.foreign \
-    ncurses.mli ncurses.ml
+```frag
+((typ ocaml)(name ocp-index/index_ncurses.out))
 ```
 
-Next, run `ocp-index` in completion mode.  You pass it a set of directories to
-search for `cmt` files in, and a fragment of text to autocomplete.
-
-```console
-$ ocp-index complete -I . Ncur
-Ncurses module
-
-$ ocp-index complete -I . Ncurses.a
-Ncurses.addstr val string -> unit
-Ncurses.addch val char -> unit
-
-$ ocp-index complete -I . Ncurses.
-Ncurses.cbreak val unit -> unit
-Ncurses.box val Ncurses.window -> int -> int -> unit
-Ncurses.mvwaddstr val Ncurses.window -> int -> int -> string -> unit
-Ncurses.mvwaddch val Ncurses.window -> int -> int -> char -> unit
-Ncurses.addstr val string -> unit
-Ncurses.addch val char -> unit
-Ncurses.newwin val int -> int -> int -> int -> Ncurses.window
-Ncurses.refresh val unit -> unit
-Ncurses.endwin val unit -> unit
-Ncurses.initscr val unit -> Ncurses.window
-Ncurses.wrefresh val Ncurses.window -> unit
-Ncurses.window val Ncurses.window Ctypes.typ
-```
-
-As you can imagine, autocompletion is invaluable on larger codebases.  See the
+You need to pass `ocp-indexz a set of directories to search for `cmt` files in,
+and a fragment of text to autocomplete.  As you can imagine, autocompletion is
+invaluable on larger codebases.  See the
 [ocp-index](https://github.com/ocamlpro/ocp-index) homepage for more
 information on how to integrate it with your favorite editor.
 
