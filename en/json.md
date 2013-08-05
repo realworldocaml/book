@@ -90,9 +90,8 @@ definition:
 * Some of the type definitions are _recursive_ (that is, one of the
   algebraic data types includes a reference to the name of the type
   being defined). Fields such as `Assoc` can contain references to
-  more JSON fields, and thus precisely describe the underlying JSON
-  data structure.  The JSON `List` can contain fields of different types,
-  unlike the OCaml `list` whose contents must be uniform.
+  further JSON fields and the `List` can contain JSON fields of different
+  types, unlike the OCaml `list` whose contents must be of a uniform type.
 * The definition specifically includes a `Null` variant for empty
   fields.  OCaml doesn't allow null values by default, so this must be
   encoded like any other value.
