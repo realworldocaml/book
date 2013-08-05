@@ -498,9 +498,14 @@ We first create an instance of the loader query handler, and then add
 that instance to the loader's active table.  We can then just launch
 the command-line interface, passing it the active table.
 
-
 ```frag
 ((typ ocaml)(name fcm/query_handler_loader.ml)(part 1))
+```
+
+Now link this into a command line interface to experiment with it.
+
+```frag
+((typ console)(name fcm/build_query_handler_loader.out))
 ```
 
 The resulting command line interface behaves much as you'd expect,
@@ -509,18 +514,14 @@ ability to load and unload them.  Here's an example of it in action.
 As you can see, we start out with `loader` itself as the only active
 handler.
 
-```
->>> (loader known_services)
-(ls unique)
->>> (loader active_services)
-(loader)
+```frag
+((typ console)(name fcm/loader_cli1.out))
 ```
 
 If we try to use one of the inactive queries, it will fail. 
 
-```
->>> (ls .)
-Could not find matching handler: ls
+```frag
+((typ console)(name fcm/loader_cli2.out))
 ```
 
 But, we can load the `ls` handler with a config of our choice, at
@@ -528,24 +529,15 @@ which point, it will be available for use.  And once we unload it, it
 will be unavailable yet again, and could be reloaded with a different
 config.
 
-```
->>> (loader (load ls /var))
-()
->>> (ls /var)
-(agentx at audit backups db empty folders jabberd lib log mail msgs named
- netboot pgsql_socket_alt root rpc run rwho spool tmp vm yp)
->>> (loader (unload ls))
-()
->>> (ls /var)
-Could not find matching handler: ls
+```frag
+((typ console)(name fcm/loader_cli3.out))
 ```
 
 Notably, the loader can't be itself loaded (since it's not on the list
 of known handlers), and can't be unloaded.
 
-```
->>> (loader (unload loader))
-It's unwise to unload yourself
+```frag
+((typ console)(name fcm/loader_cli3.out))
 ```
 
 We can push this dynamism yet further using libraries like
