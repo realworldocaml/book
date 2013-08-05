@@ -806,7 +806,7 @@ signatures for a common module with the same name.  This in turn lets the
 program completely violate the static type system and can lead to memory
 corruption and crashes.
 
-OCaml guards against this by recording a CRC checksum in every `cmi`.  Let's
+OCaml guards against this by recording a MD5 checksum in every `cmi`.  Let's
 examine our earlier `typedef.ml` more closely.
 
 ```frag
