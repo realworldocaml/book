@@ -90,11 +90,8 @@ according to the generational hypothesis.
 The minor heap is a contiguous chunk of virtual memory that is usually a few
 megabytes in size so that it can be scanned quickly.
 
-```
-                <---- size ---->
- base --- start ---------------- end
-          limit      ptr <------
-                          blocks
+```frag
+((typ ascii)(name gc/minor_heap.ascii))
 ```
 
 The runtime stores the boundaries of the minor heap in two pointers that

@@ -402,18 +402,8 @@ scary.  While you'll need to learn x86 assembly to fully understand it, we'll
 try to give you some basic instructions to spot patterns in this section.  The
 excerpt of the implementation of the `cmp` function can be found below.
 
-```
-_camlCompare_mono__cmp_1008:
-	.cfi_startproc
-.L101:
-	cmpq	%rbx, %rax
-	jle	.L100
-	ret
-	.align	2
-.L100:
-	movq	%rbx, %rax
-	ret
-	.cfi_endproc
+```frag
+((typ gas)(name back-end/cmp.S))
 ```
 
 The `_camlCompare_mono__cmp_1008` is an assembly label that has been computed

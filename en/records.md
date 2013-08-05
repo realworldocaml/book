@@ -136,11 +136,7 @@ environment.  You don't typically enable all warnings, but the
 defaults that ship with the compiler are pretty good.
 
 The warnings used for building the examples in this book are specified
-with the following flag.
-
-```
--w @A-4-33-41-42-43-34-44
-```
+with the following flag: ```-w @A-4-33-41-42-43-34-44```.
 
 The syntax of this can be found by running `ocaml -help`, but this
 particular invocation turns on all warnings as errors, disabling only
