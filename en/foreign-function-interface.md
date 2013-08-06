@@ -101,7 +101,7 @@ function definitions.
 That's all we need to invoke our first function call to `initscr` to initialize
 the terminal.  The `foreign` function accepts two parameters:
 
-- the C function call name, which is looked up using the `dlsym` C standard library function.
+- the C function call name, which is looked up using the `dlsym` POSIX function.
 - a value that defines the complete set of C function arguments and its return type.
   The `@->` operator adds an argument to the C parameter list and `returning`
   terminates the parameter list with the return type.
