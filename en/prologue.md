@@ -209,13 +209,12 @@ Real World OCaml is split into three parts:
 <note>
 <title>Note to reviewers</title>
 
-Real World OCaml uses some tools that we've developed while writing
-this book.  Some of these resulted in improvements to the OCaml
-compiler, which means that you will need to ensure that you have an
-up-to-date development environment (using the 4.01.0 compiler).  We've
-automated everything you need via the OPAM package manager, so please
-do follow the installation instructions in [xref](#installation)
-carefully.
+Real World OCaml uses some tools that we've developed while writing this book.
+Some of these resulted in improvements to the OCaml compiler, which means that
+you will need to ensure that you have an up-to-date development environment
+(using the 4.01.0 compiler).  We've automated everything you need to do via the
+OPAM package manager, so please do follow the installation instructions in
+[xref](#installation) carefully.
 
 At this stage, the Windows operating system is unsupported, and
 only Mac OS X, Linux, FreeBSD and OpenBSD can be expected to work
