@@ -317,7 +317,7 @@ to your shell profile, you can still configure it on-the-fly in your
 current shell with just one command.
 
 ```
-$ eval `opam config -env`
+$ eval `opam config env`
 ```
 
 This evaluates the results of running `opam config env` in your current shell
