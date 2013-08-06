@@ -9,13 +9,13 @@ chapter [xref](#classes), we'll introduce you to classes and inheritance.
 <note>
 <title>What is Object-Oriented Programming?</title>
 
-Object-oriented programming (often shorted to OOP) is a programming style
-that encapsulates computation and data within logical *objects*.  Each
-object contains some data stored in *fields*, and has
-*method* functions that can be invoked against the data within the object.
-The code definition behind an object is called a *class*, and objects are
-constructed from a class definition by calling a constructor with the
-data that the object will use to build itself.
+Object-oriented programming (often shorted to OOP) is a programming style that
+encapsulates computation and data within logical *objects*.  Each object
+contains some data stored in *fields*, and has *method* functions that can be
+invoked against the data within the object (also called "sending a message" to
+the object).  The code definition behind an object is called a *class*, and
+objects are constructed from a class definition by calling a constructor with
+the data that the object will use to build itself.
 
 There are five fundamental properties that differentiate OOP from other styles:
 
@@ -71,8 +71,7 @@ head of `v`, and a method `push` that adds an integer to the head of
 The object type is enclosed in angle brackets `< ... >`, containing just the
 types of the methods.  Fields, like `v`, are not part of the public
 interface of an object.  All interaction with an object is through its methods.
-The syntax for a method invocation (also called "sending a message" to the
-object) uses the `#` character.
+The syntax for a method invocation uses the `#` character.
 
 ```frag
 ((typ ocamltop)(name objects/stack.topscript)(part 2))
