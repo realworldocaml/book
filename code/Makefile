@@ -165,7 +165,7 @@ $(OBJ)/%.scm.0.html: %.scm
 
 $(OBJ)/%.topscript.0.md $(OBJ)/%.topscript.0.html: %.topscript
 	@mkdir -p $(@D)
-	cd $(*D) && $(runtop) $(*F).topscript -builddir "../$(@D)"
+	cd $(*D) && $(runtop) $(*F).topscript -fullfile "$<" -builddir "../$(@D)"
 
 $(OBJ)/%.rawscript.0.md $(OBJ)/%.rawscript.0.html: %.rawscript
 	@mkdir -p $(@D)
