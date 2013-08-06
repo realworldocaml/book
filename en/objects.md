@@ -128,18 +128,20 @@ We can manually _close_ an object type using a type annotation:
 
 The `..` in an open object type is an elision, standing for "possibly more
 methods."  It may not be apparent from the syntax, but an elided object type is
-actually polymorphic.  If we try to write a type definition, we get an obscure
-error.
+actually polymorphic.  For example, if we try to write a type definition, we
+get an "unbound type variable" error.
 
 ```frag
 ((typ ocamltop)(name objects/polymorphism.topscript)(part 4))
 ```
 
-A `..` in an object type is called a _row variable_ and this typing scheme is
-called _row polymorphism_.  Even though `..` doesn't look like a type variable,
-it actually is.  Row polymorphism is also used in polymorphic variant types,
-and there is a close relationship between objects and polymorphic variants:
-objects are to records what polymorphic variants are to ordinary variants.
+This is because `..` is really a special kind of type variable called a _row
+variable_.
+
+This kind of typing scheme using row variables is called _row polymorphism_.
+Row polymorphism is also used in polymorphic variant types, and there is a
+close relationship between objects and polymorphic variants: objects are to
+records what polymorphic variants are to ordinary variants.
 
 </note>
 
