@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 8be99fe104476d679a74874f7972befa)
+# DO NOT EDIT (digest: 25a975184e710c9f3fe8de206fa358b4)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -17,7 +17,6 @@
 "lib/rwo.cmxs": use_rwo
 "lib/code_frag.cmx": for-pack(Rwo)
 "lib/para_frag.cmx": for-pack(Rwo)
-"lib/xhtml.cmx": for-pack(Rwo)
 "lib/xml_tree.cmx": for-pack(Rwo)
 <lib/*.ml{,i}>: pkg_uri
 <lib/*.ml{,i}>: pkg_xmlm
