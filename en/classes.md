@@ -155,7 +155,7 @@ these methods take a function that produces a value of some other
 type than the elements of the set.
 
 For example, a `fold` method for our `['a] stack` class should have type `('b
--> 'a -> 'b) -> 'b -> 'b`, where the method type is polymorphic over `'b`. To
+-> 'a -> 'b) -> 'b -> 'b`, where the `'b` is polymorphic. To
 express this we must use a type quantifier, as shown in the following example.
 
 ```frag
