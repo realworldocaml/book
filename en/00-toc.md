@@ -1,2 +1,2 @@
 % Real World OCaml
-% Jason Hickey; Anil Madhavapeddy; Yaron Minsky
+% Yaron Minsky; Anil Madhavapeddy; Jason Hickey

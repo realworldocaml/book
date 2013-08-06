@@ -226,58 +226,55 @@ content finished before getting stuck into the porting effort.
 
 ## About the Authors
 
-### Jason Hickey
+### Yaron Minsky
 
-Jason Hickey is a Software Engineer at Google Inc. in Mountain
-View, California.  He is part of the team that designs and develops
-the global computing infrastructure used to support Google services,
-including the software systems for managing and scheduling massively
-distributed computing resources.
+Yaron Minsky heads the Technology group at Jane Street, a proprietary trading
+firm that is the largest industrial user of OCaml.  He was responsible for
+introducing OCaml to the company and for managing the company's transition to
+using OCaml for all of its core infrastructure.  Today, billions of dollars
+worth of securities transactions flow each day through those systems.
 
-Prior to joining Google, Jason was an Assistant Professor of Computer
-Science at Caltech, where his research was in reliable and
-fault-tolerant computing systems, including programming language
-design, formal methods, compilers, and new models of distributed
-computation.  He obtained his PhD in Computer Science from Cornell
-University, where he studied programming languages.  He is the author
-of the MetaPRL system, a logical framework for design and analysis of
-large software systems; and OMake, an advanced build system for large
-software projects.  He is the author of the textbook, _An Introduction
-to Objective Caml_ (unpublished).
+Yaron obtained his PhD in Computer Science from Cornell University, where he
+studied distributed systems.  Yaron has lectured, blogged and written about
+OCaml for years, with articles published in Communications of the ACM and the
+Journal of Functional Programming.  He chairs the steering committee of the
+Commercial Users of Functional Programming, and is a member of the steering
+committee for the International Conference on Functional Programming.
+
 
 ### Anil Madhavapeddy
 
-Anil Madhavapeddy is a Senior Research Fellow at the University of
-Cambridge, based in the Systems Research Group. He was on the original
-team that developed the Xen hypervisor, and helped develop an
-industry-leading cloud management toolstack written entirely in
-OCaml. This XenServer product has been deployed on millions of
-physical hosts, and drives critical infrastructure for many Fortune
-500 companies.
+Anil Madhavapeddy is a Senior Research Fellow at the University of Cambridge,
+based in the Systems Research Group. He was on the original team that developed
+the Xen hypervisor and helped develop an industry-leading cloud management
+toolstack written entirely in OCaml. This XenServer product has been deployed
+on millions of physical hosts, and drives critical infrastructure for many
+Fortune 500 companies.
 
-Prior to obtaining his PhD in 2006 from the University of Cambridge,
-Anil had a diverse background in industry at NetApp, NASA and Internet
-Vision.  He is an active member of the open-source development
-community with the OpenBSD operating system, is on the steering
-committee of the Commercial Uses of Functional Programming ACM
-workshop, and serves on the boards of startup companies where OCaml is
-extensively used.  He has also developed the Mirage unikernel system
-that is written entirely in OCaml from the device drivers up.
+Prior to obtaining his PhD in 2006 from the University of Cambridge, Anil had a
+diverse background in industry at NetApp, NASA, and Internet Vision.  He is an
+active member of the open-source development community with the OpenBSD
+operating system, is on the steering committee of the ACM Commercial Uses of
+Functional Programming workshop, and serves on the boards of startup companies
+where OCaml is extensively used.  He has also developed the Mirage unikernel
+system that is written entirely in OCaml from the device drivers up.
 
-### Yaron Minsky
+### Jason Hickey
 
-Yaron Minsky heads the Technology group at Jane Street, a proprietary
-trading firm that is the largest industrial user of OCaml.  He was
-responsible for introducing OCaml to the company and for managing the
-company's transition to using OCaml for all of its core
-infrastructure.  Today, billions of dollars worth of securities
-transactions flow each day through those systems.
+Jason Hickey is a Software Engineer at Google Inc. in Mountain View,
+California.  He is part of the team that designs and develops the global
+computing infrastructure used to support Google services, including the
+software systems for managing and scheduling massively distributed computing
+resources.
 
-Yaron obtained his PhD in Computer Science from Cornell University,
-where he studied distributed systems.  Yaron has lectured, blogged and
-written about OCaml for years, with articles published in
-Communications of the ACM and the Journal of Functional Programming.
-He chairs the steering committee of the Commercial Users of Functional
-Programming, and is a member of the steering committee for the
-International Conference on Functional Programming.
+Prior to joining Google, Jason was an Assistant Professor of Computer Science
+at Caltech, where he researched reliable and fault-tolerant computing systems,
+including programming language design, formal methods, compilers, and new
+models of distributed computation.  He obtained his PhD in Computer Science
+from Cornell University, where he studied programming languages.  He is the
+author of the MetaPRL system, a logical framework for design and analysis of
+large software systems; and OMake, an advanced build system for large software
+projects.  He is the author of the textbook, _An Introduction to Objective
+Caml_ (unpublished).
+
 
