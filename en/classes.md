@@ -421,8 +421,9 @@ drawn on the display at regular intervals via the `repaint` function. Finally,
 we also define an `open_display` function to open a graphical display and
 ensure that the Async scheduler is running.
 
-Now let's a new module that contains classes for making squares and circles. We
-include an `on_click` method for adding event handlers to the shapes.
+Now let's create a new module that contains classes for making squares and
+circles. We include an `on_click` method for adding event handlers to the
+shapes.
 
 ```frag
 ((typ ocaml)(name classes-async/verbose_shapes.ml)(part 0))
