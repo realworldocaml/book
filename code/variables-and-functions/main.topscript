@@ -130,6 +130,7 @@ List.iter ~f:print_endline ["Two"; "lines"];;
 List.iter ~f:print_endline;;
 #part 36
 let (^>) x f = f x;;
+Sys.getenv_exn "PATH"
   ^> String.split ~on:':' path
   ^> List.dedup ~compare:String.compare
   ^> List.iter ~f:print_endline
