@@ -95,13 +95,13 @@ same idioms required runtime checks in languages such as C++ or Java.  In 2000,
 Jacques Garrigue extended OCaml with several new features such as polymorphic
 methods and variants and labeled and optional arguments.
 
-The last decade has seen OCaml attract a significant user base and language
-improvements have been steadily added to support the growing codebases that use
-the language both commercially and for academic use.  First-class modules,
-Generalized Algebraic Data Types (GADTs) and dynamic linking have improved the
-flexibility of the language and there is fast native code support for x86_64,
-ARM, PowerPC, and Sparc, making OCaml a good choice for systems where resource
-usage, predictability, and performance all matter.
+The last decade has seen OCaml attract a significant user base.  Language
+improvements have been steadily added to support the growing commercial and
+academic codebases written in OCaml.  First-class modules, Generalized
+Algebraic Data Types (GADTs) and dynamic linking have improved the flexibility
+of the language and there is fast native code support for x86_64, ARM, PowerPC,
+and Sparc, making OCaml a good choice for systems where resource usage,
+predictability, and performance all matter.
 
 ### The Core Standard Library
 
