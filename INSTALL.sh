@@ -12,3 +12,5 @@ opam install --yes \
   cohttp \
   async_graphics \
   menhir 
+
+echo You also need Pygments installed (python-pygments in Debian)
