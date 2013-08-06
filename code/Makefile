@@ -84,8 +84,8 @@ all_src_html= $(all_src:%=$(OBJ)/%.0.html) $(all_scripts:%=$(OBJ)/%.0.html)
 all_src_md=   $(all_src:%=$(OBJ)/%.0.md) $(all_scripts:%=$(OBJ)/%.0.md)
 
 # Binaries we run
-runtop=      $(realpath ../scripts/_build/run_core_toplevel.byte)
-highlight=   $(realpath ../scripts/_build/syntax_highlight_code.native)
+runtop=      rwo-run-toplevel
+highlight=   rwo-syntax-highlight
 
 .PHONY: all
 all: $(all_src_html) $(all_src_md)
