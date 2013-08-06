@@ -65,8 +65,8 @@ Note that the type parameter `['a]` in the definition uses square brackets, but
 other uses of the type can omit them (or use parentheses if there is more than
 one type parameter).
 
-The type annotation on the `val` declaration is used to constrain type
-inference.  If we omit these annotations, the type inferred for the class will
+The type annotation on the declaration of `v` is used to constrain type
+inference.  If we omit this annotation, the type inferred for the class will
 be "too polymorphic": `init` could have some type `'b list`.
 
 ```frag
