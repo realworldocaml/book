@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 20d3688fcb74fc5c8a0b1377d517f44d)
+# DO NOT EDIT (digest: b7368a7ed6c723ea7d662be077523bbc)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -23,6 +23,7 @@
 <lib/*.ml{,i}>: pkg_core
 # Executable rwo-run-toplevel
 "bin/rwo_run_toplevel.byte": use_rwo
+"bin/rwo_run_toplevel.byte": pkg_unix
 "bin/rwo_run_toplevel.byte": pkg_compiler-libs.toplevel
 "bin/rwo_run_toplevel.byte": pkg_uri
 "bin/rwo_run_toplevel.byte": pkg_xmlm
@@ -30,8 +31,8 @@
 "bin/rwo_run_toplevel.byte": pkg_str
 "bin/rwo_run_toplevel.byte": pkg_cow
 "bin/rwo_run_toplevel.byte": pkg_core
+<bin/*.ml{,i}>: pkg_unix
 <bin/*.ml{,i}>: pkg_compiler-libs.toplevel
-"bin/rwo_run_toplevel.byte": custom
 # Executable rwo-syntax-highlight
 "bin/rwo_syntax_highlight.native": use_rwo
 "bin/rwo_syntax_highlight.native": pkg_uri

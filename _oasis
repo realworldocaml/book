@@ -16,9 +16,9 @@ Library rwo
 Executable "rwo-run-toplevel"
   Path:               bin
   MainIs:             rwo_run_toplevel.ml
-  Custom:             true
+  Custom:             false
   CompiledObject:     byte
-  BuildDepends:       compiler-libs.toplevel, rwo
+  BuildDepends:       unix, compiler-libs.toplevel, rwo
 
 Executable "rwo-syntax-highlight"
   Path:               bin

@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: 6c97edafe358103cc69ebffb00389236) *)
+(* DO NOT EDIT (digest: da5c2e24858da256b0afc87e5fdf9812) *)
 module OASISGettext = struct
 (* # 21 "src/oasis/OASISGettext.ml" *)
 
@@ -234,19 +234,21 @@ module MyOCamlbuildFindlib = struct
     Ocamlbuild_pack.Lexers.blank_sep_strings
 
   let split s ch =
-    let x = 
-      ref [] 
+    let buf = Buffer.create 13 in
+    let x = ref [] in
+    let flush () = 
+      x := (Buffer.contents buf) :: !x;
+      Buffer.clear buf
     in
-    let rec go s =
-      let pos = 
-        String.index s ch 
-      in
-        x := (String.before s pos)::!x;
-        go (String.after s (pos + 1))
-    in
-      try
-        go s
-      with Not_found -> !x
+      String.iter 
+        (fun c ->
+           if c = ch then 
+             flush ()
+           else
+             Buffer.add_char buf c)
+        s;
+      flush ();
+      List.rev !x
 
   let split_nl s = split s '\n'
 
@@ -281,17 +283,27 @@ module MyOCamlbuildFindlib = struct
           
           (* When one link an OCaml library/binary/package, one should use -linkpkg *)
           flag ["ocaml"; "link"; "program"] & A"-linkpkg";
+          flag ["ocaml"; "link"; "output_obj"] & A"-linkpkg";
           
           (* For each ocamlfind package one inject the -package option when
            * compiling, computing dependencies, generating documentation and
            * linking. *)
           List.iter 
             begin fun pkg ->
-              flag ["ocaml"; "compile";  "pkg_"^pkg] & S[A"-package"; A pkg];
-              flag ["ocaml"; "ocamldep"; "pkg_"^pkg] & S[A"-package"; A pkg];
-              flag ["ocaml"; "doc";      "pkg_"^pkg] & S[A"-package"; A pkg];
-              flag ["ocaml"; "link";     "pkg_"^pkg] & S[A"-package"; A pkg];
-              flag ["ocaml"; "infer_interface"; "pkg_"^pkg] & S[A"-package"; A pkg];
+              let base_args = [A"-package"; A pkg] in
+              let syn_args = [A"-syntax"; A "camlp4o"] in
+              let args =
+  			  (* heuristic to identify syntax extensions: 
+  				 whether they end in ".syntax"; some might not *)
+                if Filename.check_suffix pkg "syntax"
+                then syn_args @ base_args
+                else base_args
+              in
+              flag ["ocaml"; "compile";  "pkg_"^pkg] & S args;
+              flag ["ocaml"; "ocamldep"; "pkg_"^pkg] & S args;
+              flag ["ocaml"; "doc";      "pkg_"^pkg] & S args;
+              flag ["ocaml"; "link";     "pkg_"^pkg] & S base_args;
+              flag ["ocaml"; "infer_interface"; "pkg_"^pkg] & S args;
             end 
             (find_packages ());
 
@@ -452,6 +464,24 @@ module MyOCamlbuildBase = struct
               )
               t.lib_c;
 
+            (* Add output_obj rules mapped to .nobj.o *)
+            let native_output_obj x =
+              OC.link_gen "cmx" "cmxa" !Options.ext_lib [!Options.ext_obj; "cmi"] 
+                OC.ocamlopt_link_prog
+                (fun tags -> tags++"ocaml"++"link"++"native"++"output_obj") x
+            in
+            rule "ocaml: cmx* and o* -> .nobj.o" ~prod:"%.nobj.o" ~deps:["%.cmx"; "%.o"]
+              (native_output_obj "%.cmx" "%.nobj.o");
+
+            (* Add output_obj rules mapped to .bobj.o *)
+            let bytecode_output_obj x =
+              OC.link_gen "cmo" "cma" !Options.ext_lib [!Options.ext_obj; "cmi"] 
+                OC.ocamlc_link_prog
+                (fun tags -> tags++"ocaml"++"link"++"byte"++"output_obj") x
+            in
+            rule "ocaml: cmo* -> .nobj.o" ~prod:"%.bobj.o" ~deps:["%.cmo"]
+              (bytecode_output_obj "%.cmo" "%.bobj.o");
+
               (* Add flags *)
               List.iter
               (fun (tags, cond_specs) ->
@@ -473,7 +503,7 @@ module MyOCamlbuildBase = struct
 end
 
 
-# 476 "myocamlbuild.ml"
+# 506 "myocamlbuild.ml"
 open Ocamlbuild_plugin;;
 let package_default =
   {
@@ -486,6 +516,6 @@ let package_default =
 
 let dispatch_default = MyOCamlbuildBase.dispatch_default package_default;;
 
-# 490 "myocamlbuild.ml"
+# 520 "myocamlbuild.ml"
 (* OASIS_STOP *)
 Ocamlbuild_plugin.dispatch dispatch_default;;
