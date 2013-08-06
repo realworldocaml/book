@@ -383,7 +383,7 @@ Browse through the available compilers by running `opam switch list`.
 Finally, we're ready to install the Core libraries.  Run this:
 
 ```
-$ opam install core core_extended async
+$ opam install core core_extended core_bench async
 ```
 
 This will take about five or ten minutes to build, and will install a series of
@@ -391,6 +391,8 @@ packages.  OPAM figures out the dependencies you need automatically, but the
 three packages that really matter are:
 
 * `core` is the main, well-supported Core distribution from Jane Street.
+* `core_bench` is a benchmarking library that makes it easy to test the
+  performance profile of functions via a command-line interface.
 * `core_extended` contains a number of experimental, but useful,
   extension libraries that are under review for inclusion in Core.  We
   use some of these in places, but much less than Core itself.
