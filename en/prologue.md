@@ -27,9 +27,10 @@ design.  These features include:
   present in traditional functional languages like Scheme, and is also
   found in distributed big data frameworks like Hadoop.
 * _Automatic type inference_ to avoid having to laboriously define the
-  type of every single variable in a program, and instead have them
+  type of every single variable in a program and instead have them
   inferred based on how a value is used.  Available in C# with
-  implicitly typed local variables, and C++11 with its `auto` keyword.
+  implicitly typed local variables and in a limited form in C++11
+  with its `auto` keyword.
 * _Algebraic datatypes_ and _pattern matching_ to define and
   manipulate complex data structures.  Available in Scala and F#.
 
