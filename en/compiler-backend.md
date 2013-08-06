@@ -464,13 +464,13 @@ integer comparison from earlier.  Let's confirm this hypothesis again by
 writing a quick `Core_bench` test with both functions.
 
 ```frag
-((typ ocaml)(name back-end/bench_poly_and_mono.ml))
+((typ ocaml)(name back-end-bench/bench_poly_and_mono.ml))
 ```
 
 Running this shows quite a significant runtime difference between the two.
 
 ```frag
-((typ console)(name back-end/run_bench_poly_and_mono.out))
+((typ console)(name back-end-bench/run_bench_poly_and_mono.out))
 ```
 
 We see that the polymorphic comparison is close to 20 times slower!  These
@@ -552,7 +552,7 @@ Compile and run this with debugging symbols. You should see the following
 output:
 
 ```frag
-((typ ocaml)(name back-end/run_alternate_list.out))
+((typ ocaml)(name back-end-bench/run_alternate_list.out))
 ```
 
 Now we can run this interactively within `gdb`.

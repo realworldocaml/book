@@ -184,7 +184,7 @@ let () =
 (** End of uTop code *)
 
 open Core.Std
-let parse_file file =
+let parse_file fullfile file =
   eprintf "C: init\n%!";
   reset_toplevel ();
   List.iter initial_phrases ~f:(fun phrase ->
@@ -255,7 +255,7 @@ let parse_file file =
     fun ~key ~data ->
       let code = Cow.Html.of_string (String.strip (Buffer.contents data)) in
       let data =
-        Code_frag.wrap_in_pretty_box ~part:key "OCaml UTop" file code
+        Code_frag.wrap_in_pretty_box ~part:key "OCaml UTop" fullfile code
         |> Cow.Html.to_string in
       eprintf "W: %s\n%!" (ofile_html file key);
       Out_channel.write_all (ofile_html file key) ~data)
@@ -266,7 +266,9 @@ let () =
     Command.Spec.(empty 
                   +> flag "-builddir" (optional_with_default "." string)
                       ~doc:"dir prepend build directory to output files"
+                  +> flag "-fullfile" (required string)
+                      ~doc:"filename full subdir/filename for prettyprinting in HTML"
                   +> anon (sequence ("file" %: file))
                  )
-    (fun bd files () -> build_dir := bd; List.iter ~f:parse_file files)
+    (fun bd fullfile files () -> build_dir := bd; List.iter ~f:(parse_file fullfile) files)
   |> Command.run

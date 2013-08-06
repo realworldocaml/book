@@ -100,7 +100,7 @@ that sets build parameters appropriately for building against Core and its
 related libraries.
 
 ```frag
-((typ console)(name files-modules-and-programs-freq/build.out))
+((typ console)(name files-modules-and-programs-freq-obuild/build.out))
 ```
 
 If we'd invoked `ocamlbuild` with a target of `freq.native` instead of
@@ -113,7 +113,7 @@ will vary from platform to platform, since the binary itself will
 differ between platforms.
 
 ```frag
-((typ console)(name files-modules-and-programs-freq/test.out))
+((typ console)(name files-modules-and-programs-freq-obuild/test.out))
 ```
 
 <note><title>Bytecode vs native code</title>
