@@ -115,9 +115,9 @@ To install OCaml from source code, first make sure that you have a C
 compilation environment (usually either `gcc` or `llvm` installed).
 
 ```
-$ curl -OL https://github.com/ocaml/ocaml/archive/trunk.tar.gz
-$ tar -zxvf trunk.tar.gz
-$ cd ocaml-trunk
+$ curl -OL https://github.com/ocaml/ocaml/archive/4.01.tar.gz
+$ tar -zxvf 4.01.tar.gz
+$ cd ocaml-4.01
 $ ./configure
 $ make world world.opt
 $ sudo make install
