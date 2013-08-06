@@ -127,8 +127,8 @@ let concat_toplevel_phrases lines =
   |> List.filter ~f:(function |"" -> false |_ -> true)
 
 let wrap_in_pretty_box ~part typ file (buf:Cow.Xml.t) =
-  let repourl = sprintf "http://github.com/realworldocaml/code/" in
-  let fileurl = sprintf "http://github.com/realworldocaml/code/TODO/%s" file in
+  let repourl = sprintf "http://github.com/realworldocaml/examples/" in
+  let fileurl = sprintf "http://github.com/realworldocaml/examples/blob/master/code/%s" file in
   let part =
     match part with
     | 0 -> []
