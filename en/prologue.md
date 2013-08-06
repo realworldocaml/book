@@ -144,7 +144,7 @@ The installation and management of these third-party libraries is made
 much easier via a package management tool known as OPAM.  We'll
 explain more about OPAM as the book unfolds, but it forms the basis of
 the Platform, which is a set of tools and libraries that, along with
-the OCaml compiler, let you build realistic applications quickly and
+the OCaml compiler, let you build real-world applications quickly and
 effectively.
 
 We'll also use OPAM for installing the `utop` command-line interface.
