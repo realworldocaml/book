@@ -1,3 +1,5 @@
+*.out
+*.out.full
 *.a
 a.out
 .*.swp
