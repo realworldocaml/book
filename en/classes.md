@@ -505,58 +505,32 @@ when a method or field with some name is defined in more than one class?
 
 If there is one thing to remember about inheritance in OCaml, it is this:
 inheritance is like textual inclusion.  If there is more than one definition
-for a name, the last definition wins.  Let's look at some artificial, but
-illustrative, examples.
+for a name, the last definition wins.  
 
-First, defining a method more than once within the same object is forbidden and
-results in a type error.  In the following example, the method `get` is defined
-twice.
+For example, consider this class which inherits from `square` and defines a new
+`draw` method that uses `draw_rect` instead of `fill_rect` to draw the square.
 
 ```frag
-((typ ocamltop)(name classes/multiple_inheritance.topscript)(part 0))
+((typ ocaml)(name classes-async/multiple_inheritance.ml)(part 1))
 ```
 
-Fields have similar behavior and multiple definitions in the same object
-are also rejected.
+Since the `inherit` declaration comes before the method definition, the new
+`draw` method overrides the old one, and the square is drawn using
+`draw_rect`. But, what if we had defined `square_outline` as follows?
 
 ```frag
-((typ ocamltop)(name classes/multiple_inheritance.topscript)(part 1))
+((typ ocaml)(name classes-async/multiple_inheritance_wrong.ml)(part 1))
 ```
 
-Of course, it is unlikely that you will ever want to define two methods or two
-fields of the same name in the same class.  Inheritance does permit you to have
-multiple definitions, but only by following the rules for inheritance: the last
-definition wins.
-
-In the following definition, the `inherit` declaration comes last, so the
-method definition `method get = 2` overrides the previous definition, always
-returning 2.
-
-```frag
-((typ ocamltop)(name classes/multiple_inheritance.topscript)(part 2))
-```
-
-If, however, we move the `inherit` declaration before the method definitions,
-the new behavior overrides the inherited methods, returning the value we just
-set.
-
-```frag
-((typ ocamltop)(name classes/multiple_inheritance.topscript)(part 3))
-```
+Here the `inherit` declaration comes after the method definition, so the `draw`
+method from `square` will override the other definition, and the square will
+be drawn using `fill_rect`.
 
 To reiterate, to understand what inheritance means, replace each `inherit`
 directive with its definition, and take the last definition of each method or
-field.  This holds even for private methods.  However, it does _not_ hold for
-private methods that are "really" private, meaning that they have been hidden
-by a type constraint.
-
-In the following definitions, there are three definitions of the private method
-`g`.  However, the definition of `g` in `m8` is not overridden, because it is
-not part of the class type for `m8`.
-
-```frag
-((typ ocamltop)(name classes/multiple_inheritance.topscript)(part 4))
-```
+field.  Note that the methods and fields added by an inheritance are those
+listed in its class type, so private methods that are hidden by the type will
+not be included.
 
 ### Mixins
 
