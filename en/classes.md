@@ -155,16 +155,17 @@ these methods take a function that produces a value of some other
 type than the elements of the set.
 
 For example, a `fold` method for our `['a] stack` class should have type `('b
--> 'a -> 'b) -> 'b -> 'b`, where the `'b` is polymorphic. To
-express this we must use a type quantifier, as shown in the following example.
+-> 'a -> 'b) -> 'b -> 'b`, where the `'b` is polymorphic. To express a
+ploymorphic method type like this we must use a type quantifier, as shown in
+the following example.
 
 ```frag
 ((typ ocamltop)(name classes/iter.topscript)(part 5))
 ```
 
-Polymorphic method types must be specified directly _after_ the method name,
-which means that method parameters must be expressed using a `fun` or
-`function` expression.
+The type quantifier `'b.` can be read as "for all `'b`".  Type quantifiers can
+only be used _directly after_ the method name, which means that method
+parameters must be expressed using a `fun` or `function` expression.
 
 ## Inheritance
 
