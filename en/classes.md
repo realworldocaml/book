@@ -443,7 +443,7 @@ depends on `contains` which has a different definition in each class. The
 solution is to create a _virtual_ class. This class will declare a `contains`
 method, but leave its definition to the subclasses.
 
-Here is the more succinct definition, starting with a virtual `square` class
+Here is the more succinct definition, starting with a virtual `shape` class
 that implements `on_click` and `on_mousedown`.
 
 ```frag
