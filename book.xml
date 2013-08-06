@@ -189,15 +189,14 @@
         and optional arguments.
       </para>
       <para>
-        The last decade has seen OCaml attract a significant user base
-        and language improvements have been steadily added to support
-        the growing codebases that use the language both commercially
-        and for academic use. First-class modules, Generalized Algebraic
-        Data Types (GADTs) and dynamic linking have improved the
-        flexibility of the language and there is fast native code
-        support for x86_64, ARM, PowerPC, and Sparc, making OCaml a good
-        choice for systems where resource usage, predictability, and
-        performance all matter.
+        The last decade has seen OCaml attract a significant user base.
+        Language improvements have been steadily added to support the
+        growing commercial and academic codebases written in OCaml.
+        First-class modules, Generalized Algebraic Data Types (GADTs)
+        and dynamic linking have improved the flexibility of the
+        language and there is fast native code support for x86_64, ARM,
+        PowerPC, and Sparc, making OCaml a good choice for systems where
+        resource usage, predictability, and performance all matter.
       </para>
     </sect2>
     <sect2 id="the-core-standard-library">
@@ -251,7 +250,7 @@
         is made much easier via a package management tool known as OPAM.
         We'll explain more about OPAM as the book unfolds, but it forms
         the basis of the Platform, which is a set of tools and libraries
-        that, along with the OCaml compiler, let you build realistic
+        that, along with the OCaml compiler, let you build real-world
         applications quickly and effectively.
       </para>
       <para>
@@ -345,8 +344,8 @@
         writing this book. Some of these resulted in improvements to the
         OCaml compiler, which means that you will need to ensure that
         you have an up-to-date development environment (using the 4.01.0
-        compiler). We've automated everything you need via the OPAM
-        package manager, so please do follow the installation
+        compiler). We've automated everything you need to do via the
+        OPAM package manager, so please do follow the installation
         instructions in <xref linkend="installation"/>
         carefully.
       </para>
