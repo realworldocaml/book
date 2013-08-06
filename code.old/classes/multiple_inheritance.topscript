@@ -1,12 +1,12 @@
 class m1 =
-    object (self : 'self)
+    object (self)
      method get = 1
      method f = self#get
      method get = 2
   end  ;;
 #part 1
 class m2 =
-  object (self : 'self)
+  object (self)
      val x = 1
      method f = x
      val x = 2
@@ -36,17 +36,17 @@ x#set 5 ;;
 x#get ;;
 #part 4
 class m6 =
-  object (self : 'self)
+  object (self)
      method f1 = self#g
      method private g = 1
   end ;;
 class m7 =
-  object (self : 'self)
+  object (self)
      method f2 = self#g
      method private g = 2
   end ;;
 class m8 : object method f3 : int end =
-  object (self : 'self)
+  object (self)
      method f3 = self#g
      method private g = 3
   end ;;
