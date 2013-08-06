@@ -13,4 +13,5 @@ opam install --yes \
   async_graphics \
   menhir 
 
-echo You also need Pygments installed (python-pygments in Debian)
+echo You also need Pygments installed.
+echo This is python-pygments in Debian
