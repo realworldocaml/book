@@ -96,7 +96,7 @@ arguments:
 * `readme` is for longer help text when the command is called with
   `-help`.  The `readme` argument is a function that is only evaluated
   when the help text is actually needed.
-* The specification and the callback function follow as non-labelled
+* The specification and the callback function follow as non-labeled
   arguments.
 
 The callback function is where all the work happens after the
@@ -301,7 +301,7 @@ reverts to using standard input just as our previous `maybe` and
 then it opens up each file and runs them through `do_hash`
 sequentially.
 
-## Adding labelled flags to the command line
+## Adding labeled flags to the command line
 
 You aren't just limited to anonymous arguments on the command-line.  A
 *flag* is a named field that can be followed by an optional argument.
@@ -318,7 +318,7 @@ below.
 ```
 
 The specification now uses the `flag` function to define the two new
-labelled command-line arguments.  The `doc` string is formatted so
+labeled command-line arguments.  The `doc` string is formatted so
 that the first word is the short name that appears in the usage text,
 with the remainder being the full help text.  Notice that the `-t`
 flag has no argument, and so we prepend its `doc` text with a blank
@@ -577,11 +577,11 @@ The first half of the `Spec.t` shows that the callback type is `Date.t
 -> int`, whereas the resulting value expected from the next
 specification in the chain is a `Date.t -> int option`.
 
-### Adding labelled arguments to callbacks
+### Adding labeled arguments to callbacks
 
 The `step` chaining lets you control the types of your callbacks very
 easily.  This can help you match existing interfaces or make things
-more explicit by adding labelled arguments.
+more explicit by adding labeled arguments.
 
 ```frag
 ((typ ocaml)(name command-line-parsing/cal_add_labels.ml))
@@ -589,9 +589,9 @@ more explicit by adding labelled arguments.
 
 This `cal_add_labels` example goes back to our non-interactive
 calendar addition program, but the `add_days` main function now
-expects labelled arguments.  The `step` function in the specification
+expects labeled arguments.  The `step` function in the specification
 simply converts the default `base` and `days` arguments into a
-labelled function.
+labeled function.
 
 Labelled arguments are more verbose but can also help prevent errors
 with command-line arguments with similar types but different names and

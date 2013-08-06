@@ -687,7 +687,7 @@ The principality check only affects a few language features:
 
 * polymorphic methods for objects.
 * permuting the order of labeled arguments in a function from their type definition.
-* discarding optional labelled arguments.
+* discarding optional labeled arguments.
 * generalized algebraic data types (GADTs) present from OCaml 4.0 onwards.
 * automatic disambiguation of record field and constructor names (since OCaml 4.1)
 
