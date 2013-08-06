@@ -140,7 +140,7 @@ trying a source installation.
 <note>
 <title>Note to reviewers</title>
 
-We instruct you install the unreleased 4.01 branch version of OCaml
+We instruct you to install the unreleased 4.01 branch version of OCaml
 in these instructions, as we take advantage of some recent additions
 to the language that simplify explanations in the book.  The 4.01
 release will happen before the book is released, but you may run
