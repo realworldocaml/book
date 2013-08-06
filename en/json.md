@@ -422,7 +422,7 @@ installed via OPAM:
 ```
 
 The command-line tool will be installed within your `~/.opam` directory,
-and will already be on your `PATH` from running `opam config env`.  See
+and should already be on your `PATH` from running `opam config env`.  See
 [xref](#installation) if this isn't working.
 
 </note>
