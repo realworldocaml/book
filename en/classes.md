@@ -10,8 +10,7 @@ existing methods.
 ## OCaml Classes
 
 In OCaml, class definitions must be defined as toplevel statements in a module.
-A class is not an object, and a class definition is not an expression.  The
-syntax for a class definition uses the keyword `class`.
+The syntax for a class definition uses the keyword `class`.
 
 ```frag
 ((typ ocaml)(name classes/istack.topscript)(part 0))
