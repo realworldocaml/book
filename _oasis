@@ -11,7 +11,7 @@ Library rwo
   Path: lib
   Findlibname: rwo
   Modules: Code_frag,Para_frag,Xml_tree
-  BuildDepends:	uri (>= 1.3.8), xmlm, cmdliner, str, cow, core (>= 109.36.00)
+  BuildDepends:	uri (>= 1.3.8), xmlm, cmdliner, str, cow, core (>= 109.35.00)
 
 Executable "rwo-run-toplevel"
   Path:               bin
