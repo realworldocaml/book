@@ -35,7 +35,6 @@
 
 
 
-
 <preface id="prologue">
   <title>Prologue</title>
   <sect1 id="why-ocaml">
@@ -1433,7 +1432,7 @@ val log_entry : Time.t option -&gt; string -&gt; string = &lt;fun&gt;
 # log_entry (Some Time.epoch) &quot;A long long time ago&quot;;; 
 - : string = &quot;1970-01-01 01:00:00 -- A long long time ago&quot;
 # log_entry None &quot;Up to the minute&quot;;; 
-- : string = &quot;2013-08-01 09:31:00 -- Up to the minute&quot;
+- : string = &quot;2013-08-06 13:42:45 -- Up to the minute&quot;
 </programlisting>
       <para>
         This example uses Core's <literal>Time</literal> module for
@@ -3067,10 +3066,17 @@ lines
 ...part 36 of variables-and-functions/main.topscript
 # let (^&gt;) x f = f x;; 
 val ( ^&gt; ) : 'a -&gt; ('a -&gt; 'b) -&gt; 'b = &lt;fun&gt;
-#   ^&gt; String.split ~on:':' path
+# Sys.getenv_exn &quot;PATH&quot;
+  ^&gt; String.split ~on:':' path
   ^&gt; List.dedup ~compare:String.compare
   ^&gt; List.iter ~f:print_endline
   ;; 
+Characters 98-124:
+Error: This expression has type string list -&gt; unit
+       but an expression was expected of type
+         (string list -&gt; string list) -&gt; 'a
+       Type string list is not compatible with type
+         string list -&gt; string list 
 </programlisting>
       <para>
         The above type error is a little bewildering at first glance.
@@ -3995,8 +4001,8 @@ Estimated testing time 20s (change using -quota SECS).
 ┌────────────────┬───────────┬──────────┐
 │ Name           │ Time (ns) │ % of max │
 ├────────────────┼───────────┼──────────┤
-│ plus_one_match │     46.81 │    61.14 │
-│ plus_one_if    │     76.56 │   100.00 │
+│ plus_one_match │     46.81 │    68.21 │
+│ plus_one_if    │     68.63 │   100.00 │
 └────────────────┴───────────┴──────────┘
 - : unit = ()
 </programlisting>
@@ -4033,8 +4039,8 @@ Estimated testing time 20s (change using -quota SECS).
 ┌────────┬───────────┬──────────┐
 │ Name   │ Time (ns) │ % of max │
 ├────────┼───────────┼──────────┤
-│ sum_if │   124_888 │   100.00 │
-│ sum    │    22_505 │    18.02 │
+│ sum_if │   110_544 │   100.00 │
+│ sum    │    22_353 │    20.22 │
 └────────┴───────────┴──────────┘
 - : unit = ()
 </programlisting>
@@ -4433,7 +4439,7 @@ val render_table : string list -&gt; string list list -&gt; string = &lt;fun&gt;
       Some ext)
   |&gt; List.dedup
   ;; 
-- : string list = [&quot;ml&quot;; &quot;mli&quot;; &quot;topscript&quot;]
+- : string list = [&quot;ascii&quot;; &quot;ml&quot;; &quot;mli&quot;; &quot;topscript&quot;]
 </programlisting>
         <para>
           The above is also an example of an or-patterns, which allows
@@ -4466,7 +4472,7 @@ val is_ocaml_source : string -&gt; bool = &lt;fun&gt;
 # let (ml_files,other_files) =
     List.partition_tf (Sys.ls_dir &quot;.&quot;)  ~f:is_ocaml_source;; 
 val ml_files : string list = [&quot;example.mli&quot;; &quot;example.ml&quot;]
-val other_files : string list = [&quot;main.topscript&quot;]
+val other_files : string list = [&quot;main.topscript&quot;; &quot;lists_layout.ascii&quot;]
 </programlisting>
         <para>
           Note the use of a nested or-pattern in
@@ -4521,7 +4527,8 @@ val other_files : string list = [&quot;main.topscript&quot;]
   ;; 
 val ls_rec : string -&gt; string list = &lt;fun&gt;
 # ls_rec &quot;.&quot;;; 
-- : string list = [&quot;./main.topscript&quot;; &quot;./example.mli&quot;; &quot;./example.ml&quot;]
+- : string list =
+[&quot;./main.topscript&quot;; &quot;./example.mli&quot;; &quot;./example.ml&quot;; &quot;./lists_layout.ascii&quot;]
 </programlisting>
         <para>
           The above combination of <literal>List.map</literal> and
@@ -5056,7 +5063,7 @@ Error: Unbound module Core
     </para>
     <programlisting>
 # running files-modules-and-programs-freq/simple_build.out.sh
-$ ocamlfind ocamlc -linkpkg -thread -package core freq.ml -o freq
+$ ocamlfind ocamlc -linkpkg -thread -package core freq.ml -o freq.byte
 </programlisting>
     <para>
       Here we're using <literal>ocamlfind</literal>, a tool which itself
@@ -5076,13 +5083,14 @@ $ ocamlfind ocamlc -linkpkg -thread -package core freq.ml -o freq
       good tool for this task is <literal>ocamlbuild</literal>, which is
       shipped with the OCaml compiler. We'll talk more about
       <literal>ocamlbuild</literal> in
-      <xref linkend="packaging"/>, but for now, we'll just use
-      a simple wrapper around <literal>ocamlbuild</literal> called
-      <literal>corebuild</literal> that sets build parameters
-      appropriately for building against Core and its related libraries.
+      <xref linkend="the-compiler-frontend-parsing-and-type-checking"/>,
+      but for now, we'll just use a simple wrapper around
+      <literal>ocamlbuild</literal> called <literal>corebuild</literal>
+      that sets build parameters appropriately for building against Core
+      and its related libraries.
     </para>
     <programlisting>
-# running files-modules-and-programs-freq/build.out.sh
+# running files-modules-and-programs-freq-obuild/build.out.sh
 $ corebuild freq.byte
 </programlisting>
     <para>
@@ -5100,18 +5108,18 @@ $ corebuild freq.byte
       platforms.
     </para>
     <programlisting>
-# running files-modules-and-programs-freq/test.out.sh
+# running files-modules-and-programs-freq-obuild/test.out.sh
 $ strings `which ocamlopt` | ./freq.byte
- 14: movq
- 10: cmpq
-  9: &quot;, &amp;
-  7: .globl
-  6: addq
-  6: leaq
-  6: &quot;, (
   6: +pci_expr =
   6: -pci_params =
   6: .pci_virt = %a
+  4: #lsr
+  4: #lsl
+  4: $lxor
+  4: #lor
+  4: $land
+  4: #mod
+  3: 6  .section .rdata,&quot;dr&quot;
 </programlisting>
     <note><title>
     Bytecode vs native code
@@ -5288,7 +5296,6 @@ $ corebuild counter.inferred.mli
 $ cat _build/counter.inferred.mli
 val touch :
   ('a, int) Core.Std.List.Assoc.t -&gt; 'a -&gt; ('a, int) Core.Std.List.Assoc.t
-$ 
 </programlisting>
     <para>
       The generated code is basically equivalent to the
@@ -6085,10 +6092,14 @@ type host_info = {
 ...part 1 of records/main.topscript
 # #require &quot;core_extended&quot;;; 
 
-No such package: core_extended
+/home/rwo/.opam/4.01.0dev+trunk/lib/pcre: added to search path
+/home/rwo/.opam/4.01.0dev+trunk/lib/pcre/pcre.cma: loaded
+/home/rwo/.opam/4.01.0dev+trunk/lib/textutils: added to search path
+/home/rwo/.opam/4.01.0dev+trunk/lib/textutils/textutils.cma: loaded
+/home/rwo/.opam/4.01.0dev+trunk/lib/custom_printf/custom_printf.cma: loaded
+/home/rwo/.opam/4.01.0dev+trunk/lib/core_extended: added to search path
+/home/rwo/.opam/4.01.0dev+trunk/lib/core_extended/core_extended.cma: loaded
 # open Core_extended.Std;; 
-Characters -1-22:
-Error: Unbound module Core_extended
 # let my_host =
     let sh = Shell.sh_one_exn in
     { hostname   = sh &quot;hostname&quot;;
@@ -6096,8 +6107,9 @@ Error: Unbound module Core_extended
       cpu_arch   = sh &quot;uname -p&quot;;
       timestamp  = Time.now ();
     };; 
-Characters 27-43:
-Error: Unbound module Shell
+val my_host : host_info =
+  {hostname = &quot;ocaml-www1&quot;; os_name = &quot;Linux&quot;; cpu_arch = &quot;unknown&quot;;
+   timestamp = 2013-08-06 13:45:25.433447+01:00}
 </programlisting>
   <para>
     You might wonder how the compiler inferred that
@@ -6114,8 +6126,7 @@ Error: Unbound module Shell
   <programlisting language="ocaml">
 ...part 2 of records/main.topscript
 # my_host.cpu_arch;; 
-Characters -1-7:
-Error: Unbound value my_host
+- : string = &quot;unknown&quot;
 </programlisting>
   <para>
     When declaring an OCaml type, you always have the option of
@@ -6154,8 +6165,7 @@ val first_timestamped : 'a timestamped list -&gt; 'a timestamped option = &lt;fu
        sprintf &quot;%s (%s / %s, on %s)&quot; h os c (Time.to_sec_string ts);; 
 val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
 # host_info_to_string my_host;; 
-Characters 20-27:
-Error: Unbound value my_host
+- : string = &quot;ocaml-www1 (Linux / unknown, on 2013-08-06 13:45:25)&quot;
 </programlisting>
     <para>
       Note that the pattern that we used had only a single case, rather
@@ -6319,8 +6329,10 @@ val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
     let os_release = sh &quot;uname -r&quot; in
     let timestamp  = Time.now () in
     { hostname; os_name; cpu_arch; os_release; timestamp };; 
-Characters 31-47:
-Error: Unbound module Shell
+val my_host : host_info =
+  {hostname = &quot;ocaml-www1&quot;; os_name = &quot;Linux&quot;; cpu_arch = &quot;unknown&quot;;
+   os_release = &quot;3.2.0-1-amd64&quot;;
+   timestamp = 2013-08-06 13:45:31.945705+01:00}
 </programlisting>
     <para>
       In the above code, we defined variables corresponding to the
@@ -6951,12 +6963,12 @@ val show_field :
                 credentials = &quot;Xy2d9W&quot;; }
   ;; 
 val logon : Logon.t =
-  {Logon.session_id = &quot;26685&quot;; time = 2013-08-02 02:55:32.573968+01:00;
+  {Logon.session_id = &quot;26685&quot;; time = 2013-08-06 13:45:37.164935+01:00;
    user = &quot;yminsky&quot;; credentials = &quot;Xy2d9W&quot;}
 # show_field Logon.Fields.user Fn.id logon;; 
 - : string = &quot;user: yminsky&quot;
 # show_field Logon.Fields.time Time.to_string logon;; 
-- : string = &quot;time: 2013-08-02 02:55:32.573968+01:00&quot;
+- : string = &quot;time: 2013-08-06 13:45:37.164935+01:00&quot;
 </programlisting>
     <para>
       As a side note, the above is our first use of the
@@ -9263,9 +9275,9 @@ Estimated testing time 30s (change using -quota SECS).
 ┌──────────────────────────────┬────────┬───────────┬──────────┐
 │ Name                         │ Cycles │ Time (ns) │ % of max │
 ├──────────────────────────────┼────────┼───────────┼──────────┤
-│ simple computation           │    194 │       114 │    78.76 │
-│ simple computation w/handler │    216 │       127 │    87.64 │
-│ end with exn                 │    247 │       145 │   100.00 │
+│ simple computation           │    267 │       112 │    75.97 │
+│ simple computation w/handler │    297 │       124 │    84.35 │
+│ end with exn                 │    352 │       147 │   100.00 │
 └──────────────────────────────┴────────┴───────────┴──────────┘
 </programlisting>
       <para>
@@ -9281,9 +9293,9 @@ Estimated testing time 30s (change using -quota SECS).
 ┌──────────────────────────────┬────────┬───────────┬──────────┐
 │ Name                         │ Cycles │ Time (ns) │ % of max │
 ├──────────────────────────────┼────────┼───────────┼──────────┤
-│ simple computation           │    195 │       115 │    83.79 │
-│ simple computation w/handler │    214 │       126 │    91.79 │
-│ end with exn                 │    233 │       137 │   100.00 │
+│ simple computation           │    268 │       112 │    82.22 │
+│ simple computation w/handler │    297 │       124 │    91.27 │
+│ end with exn                 │    326 │       136 │   100.00 │
 └──────────────────────────────┴────────┴───────────┴──────────┘
 </programlisting>
       <para>
@@ -9355,7 +9367,7 @@ val find : (string * 'a) list -&gt; string -&gt; ('a, exn) Result.t = &lt;fun&gt
     </para>
     <para>
       The right tradeoff depends on your application. If you're writing
-      a rough and ready program where getting to done quickly is key,
+      a rough and ready program where getting it done quickly is key,
       and failure is not that expensive, then using exceptions
       extensively may be the way to go. If, on the other hand, you're
       writing production software whose failure is costly, then you
@@ -10517,11 +10529,11 @@ val time : (unit -&gt; 'a) -&gt; 'a = &lt;fun&gt;
 ...part 4 of imperative-programming/memo.topscript
 # time (fun () -&gt; edit_distance &quot;OCaml&quot; &quot;ocaml&quot;);; 
 
-Time: 1.40905ms
+Time: 1.405ms
 - : int = 2
 # time (fun () -&gt; edit_distance &quot;OCaml 4.01&quot; &quot;ocaml 4.01&quot;);; 
 
-Time: 6.6791s
+Time: 6.74967s
 - : int = 2
 </programlisting>
       <para>
@@ -10557,11 +10569,11 @@ val fib : int -&gt; int = &lt;fun&gt;
 ...part 2 of imperative-programming/fib.topscript
 # time (fun () -&gt; fib 20);; 
 
-Time: 0.901937ms
+Time: 0.844002ms
 - : int = 10946
 # time (fun () -&gt; fib 40);; 
 
-Time: 13.4923s
+Time: 12.775s
 - : int = 165580141
 </programlisting>
       <para>
@@ -10584,11 +10596,11 @@ Time: 13.4923s
 val fib : int -&gt; int = &lt;fun&gt;
 # time (fun () -&gt; fib 40);; 
 
-Time: 13.4125s
+Time: 12.7761s
 - : int = 165580141
 # time (fun () -&gt; fib 40);; 
 
-Time: 0.00309944ms
+Time: 0.00286102ms
 - : int = 165580141
 </programlisting>
       <para>
@@ -10680,7 +10692,7 @@ val memo_rec : (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;
 val fib : int -&gt; int = &lt;fun&gt;
 # time (fun () -&gt; fib 40);; 
 
-Time: 0.0610352ms
+Time: 0.0600815ms
 - : int = 102334155
 </programlisting>
       <para>
@@ -10757,7 +10769,7 @@ val edit_distance : string * string -&gt; int = &lt;fun&gt;
 ...part 7 of imperative-programming/memo.topscript
 # time (fun () -&gt; edit_distance (&quot;OCaml 4.01&quot;,&quot;ocaml 4.01&quot;));; 
 
-Time: 0.546932ms
+Time: 0.498056ms
 - : int = 2
 </programlisting>
       <note> <title> 
@@ -10840,7 +10852,7 @@ Exception: Lazy.Undefined.
 val lazy_memo_rec : (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;
 # time (fun () -&gt; lazy_memo_rec fib_norec 40);; 
 
-Time: 0.0669956ms
+Time: 0.0638962ms
 - : int = 102334155
 </programlisting>
       <para>
@@ -14302,7 +14314,7 @@ end;;
 val t : &lt; pop : int option &gt; = &lt;obj&gt;
 # print_pop t;; 
 
-Popped: 1375346073
+Popped: 1375793180
 - : unit = ()
 </programlisting>
   </sect1>
@@ -15732,8 +15744,8 @@ let f :
     </para>
     <programlisting language="ocaml">
 (* classes/doc.ml (starting from part 4) *)
-class counter = object
-  inherit [int] folder as super
+class counter_with_private_method = object
+  inherit [int] folder2 as super
 
   method list_item acc li = acc
 
@@ -15759,7 +15771,7 @@ class counter_with_sig : object
   method list_item : int -&gt; 'b list_item -&gt; int
   method text_item : int -&gt; text_item -&gt; int
 end = object
-  inherit [int] folder as super
+  inherit [int] folder2 as super
 
   method list_item acc li = acc
 
@@ -16213,10 +16225,6 @@ end
     <sect2 id="how-names-are-resolved">
       <title>How names are resolved</title>
       <para>
-        TODO CR: this has changed in 4.01 and multiple definitions are
-        no longer allowed.
-      </para>
-      <para>
         The main trickiness of multiple inheritance is due to naming --
         what happens when a method or field with some name is defined in
         more than one class?
@@ -16228,10 +16236,9 @@ end
         look at some artificial, but illustrative, examples.
       </para>
       <para>
-        First, let's consider what happens when we define a method more
-        than once. In the following example, the method
-        <literal>get</literal> is defined twice; the second definition
-        wins, meaning that it overrides the first one.
+        First, defining a method more than once within the same object
+        is forbidden and results in a type error. In the following
+        example, the method <literal>get</literal> is defined twice.
       </para>
       <programlisting language="ocaml">
 # script classes/multiple_inheritance.topscript
@@ -16244,13 +16251,10 @@ $ utop
   end  ;; 
 Characters 87-101:
 Error: The method `get' has multiple definitions in this object
-# (new m1)#f ;; 
-Characters 1-7:
-Error: Unbound class m1
 </programlisting>
       <para>
-        Fields have similar behavior, though the compiler produces a
-        warning message about the override.
+        Fields have similar behavior and multiple definitions in the
+        same object are also rejected.
       </para>
       <programlisting language="ocaml">
 ...part 1 of classes/multiple_inheritance.topscript
@@ -16264,10 +16268,11 @@ Characters 73-82:
 Error: The instance variable `x' has multiple definitions in this object
 </programlisting>
       <para>
-        Of course, it is unlikely that you will define two methods or
-        two fields of the same name in the same class. However, the
-        rules for inheritance follow the same pattern: the last
-        definition wins.
+        Of course, it is unlikely that you will ever want to define two
+        methods or two fields of the same name in the same class.
+        Inheritance does permit you to have multiple definitions, but
+        only by following the rules for inheritance: the last definition
+        wins.
       </para>
       <para>
         In the following definition, the <literal>inherit</literal>
@@ -16583,6 +16588,58 @@ let () =
       <programlisting>
 # running classes-async/build_shapes.out.sh
 $ corebuild -pkg async_graphics shapes.native
+File &quot;shapes.ml&quot;, line 16, characters 11-28:
+Warning 9: the following labels are not bound in this record pattern:
+button, keypressed, key
+Either bind these labels explicitly or add '; _' to the pattern.
+File &quot;shapes.ml&quot;, line 22, characters 11-28:
+Warning 9: the following labels are not bound in this record pattern:
+button, keypressed, key
+Either bind these labels explicitly or add '; _' to the pattern.
+File &quot;shapes.ml&quot;, line 89, characters 16-33:
+Warning 9: the following labels are not bound in this record pattern:
+button, keypressed, key
+Either bind these labels explicitly or add '; _' to the pattern.
+File &quot;shapes.ml&quot;, line 61, characters 23-24:
+Warning 27: unused variable x.
+File &quot;shapes.ml&quot;, line 61, characters 25-26:
+Warning 27: unused variable y.
+File &quot;shapes.ml&quot;, line 126, characters 23-24:
+Warning 27: unused variable x.
+File &quot;shapes.ml&quot;, line 126, characters 25-26:
+Warning 27: unused variable y.
+File &quot;shapes.ml&quot;, line 137, characters 37-41:
+Warning 27: unused variable self.
+File &quot;shapes.ml&quot;, line 152, characters 46-50:
+Warning 27: unused variable self.
+File &quot;shapes.ml&quot;, line 169, characters 30-34:
+Warning 27: unused variable self.
+File &quot;shapes.ml&quot;, line 16, characters 11-28:
+Warning 9: the following labels are not bound in this record pattern:
+button, keypressed, key
+Either bind these labels explicitly or add '; _' to the pattern.
+File &quot;shapes.ml&quot;, line 22, characters 11-28:
+Warning 9: the following labels are not bound in this record pattern:
+button, keypressed, key
+Either bind these labels explicitly or add '; _' to the pattern.
+File &quot;shapes.ml&quot;, line 89, characters 16-33:
+Warning 9: the following labels are not bound in this record pattern:
+button, keypressed, key
+Either bind these labels explicitly or add '; _' to the pattern.
+File &quot;shapes.ml&quot;, line 61, characters 23-24:
+Warning 27: unused variable x.
+File &quot;shapes.ml&quot;, line 61, characters 25-26:
+Warning 27: unused variable y.
+File &quot;shapes.ml&quot;, line 126, characters 23-24:
+Warning 27: unused variable x.
+File &quot;shapes.ml&quot;, line 126, characters 25-26:
+Warning 27: unused variable y.
+File &quot;shapes.ml&quot;, line 137, characters 37-41:
+Warning 27: unused variable self.
+File &quot;shapes.ml&quot;, line 152, characters 46-50:
+Warning 27: unused variable self.
+File &quot;shapes.ml&quot;, line 169, characters 30-34:
+Warning 27: unused variable self.
 </programlisting>
       <para>
         When you run the binary, a new graphical window should appear
@@ -18955,8 +19012,8 @@ Estimated testing time 20s (change using -quota SECS).
 ┌───────┬────────────┬─────────┐
 │ Name  │  Time (ns) │ Speedup │
 ├───────┼────────────┼─────────┤
-│ map   │ 32_395_648 │    1.00 │
-│ table │  6_144_613 │    5.27 │
+│ map   │ 32_013_288 │    1.00 │
+│ table │  7_978_395 │    4.01 │
 └───────┴────────────┴─────────┘
 </programlisting>
     <para>
@@ -19034,14 +19091,14 @@ let () =
     <programlisting>
 # running maps-and-hash-tables/run_map_vs_hash2.out.sh
 $ corebuild -pkg core_bench map_vs_hash2.native
-$ ./map_vs_hash2.native -clear-columns name time speedup
+$ ./map_vs_hash2.native -ascii -clear-columns name time speedup
 Estimated testing time 20s (change using -quota SECS).
-┌───────┬───────────┬─────────┐
-│ Name  │ Time (ns) │ Speedup │
-├───────┼───────────┼─────────┤
-│ map   │   198_556 │   11.71 │
-│ table │ 2_324_590 │    1.00 │
-└───────┴───────────┴─────────┘
+                               
+  Name    Time (ns)   Speedup  
+ ------- ----------- --------- 
+  map       216_669     11.72  
+  table   2_538_555      1.00  
+                               
 </programlisting>
     <para>
       These numbers can be made more extreme by increasing the size of
@@ -19251,8 +19308,8 @@ let command =
       </title>
       <para>
         The callback above needs an extra <literal>unit</literal>
-        argument after <literal>file</literal>. This is to ensure that
-        specifications can work even when they are empty
+        argument after <literal>filename</literal>. This is to ensure
+        that specifications can work even when they are empty
         (<emphasis>i.e.</emphasis> the
         <literal>Command.Spec.empty</literal> value).
       </para>
@@ -19338,7 +19395,7 @@ missing anonymous argument: FILENAME
       <programlisting>
 # running command-line-parsing/run_basic_md5.out.sh
 $ ./basic_md5.native ./basic_md5.native
-98a758330e838bb943c15fb264b07685
+c9970914b335e160e5597aef11c2c0fa
 </programlisting>
       <para>
         And that's all it took to build our little MD5 utility! Here's a
@@ -19509,7 +19566,8 @@ $ ./basic_md5_as_filename.native nonexistent
 Fatal error: exception Sys_error(&quot;nonexistent: No such file or directory&quot;)
 Raised by primitive operation at file &quot;pervasives.ml&quot;, line 292, characters 20-46
 Called from file &quot;lib/in_channel.ml&quot;, line 19, characters 46-65
-Called from file &quot;lib/command.ml&quot;, line 1356, characters 4-54
+Called from file &quot;lib/command.ml&quot;, line 1387, characters 4-54
+Called from file &quot;basic_md5_as_filename.ml&quot;, line 21, characters 2-54
 </programlisting>
     <sect2 id="defining-custom-argument-types">
       <title>Defining custom argument types</title>
@@ -19563,7 +19621,7 @@ let () =
       <programlisting>
 # running command-line-parsing/run_basic_md5_with_custom_arg.out.sh
 $ ./basic_md5_with_custom_arg.native /etc/passwd
-5ca39672bb3fbd2534cd477f0b1b6eca
+8cfb68a5622dd12932df658a54698aad
 $ ./basic_md5_with_custom_arg.native /dev/null
 '/dev/null' is not a regular file.
 </programlisting>
@@ -19870,9 +19928,11 @@ $ ./basic_md5_with_flags.native -s &quot;ocaml rocks&quot;
           <row>
             <entry>
               <literal>optional_with_default</literal>
+              <emphasis>val</emphasis> <emphasis>arg</emphasis>
             </entry>
             <entry>
-              <emphasis>arg</emphasis> with a default if not present
+              <emphasis>arg</emphasis> with default
+              <emphasis>val</emphasis> if not present
             </entry>
           </row>
           <row>
@@ -19900,9 +19960,6 @@ $ ./basic_md5_with_flags.native -s &quot;ocaml rocks&quot;
       same way as anonymous arguments do. This lets you change the
       specification and ensure that all the callback functions are
       updated appropriately, without runtime errors.
-    </para>
-    <para>
-      TODO: show example of listed.
     </para>
   </sect1>
   <sect1 id="grouping-sub-commands-together">
@@ -20557,12 +20614,12 @@ let () = Command.run add
       <programlisting>
 # running command-line-parsing/md5_completion.out.sh
 $ env COMMAND_OUTPUT_INSTALLATION_BASH=1 ./basic_md5_with_flags.native
-function _jsautocom_12964 {
+function _jsautocom_682 {
   export COMP_CWORD
   COMP_WORDS[0]=./basic_md5_with_flags.native
   COMPREPLY=($(&quot;${COMP_WORDS[@]}&quot;))
 }
-complete -F _jsautocom_12964 ./basic_md5_with_flags.native
+complete -F _jsautocom_682 ./basic_md5_with_flags.native
 </programlisting>
       <para>
         Recall that we used the <literal>Arg_type.file</literal> to
@@ -20611,8 +20668,56 @@ add      diff     help     version
         are very OS-specific.
       </para>
       </note>
-
     </sect2>
+  </sect1>
+  <sect1 id="alternative-command-line-parsers">
+    <title>Alternative command-line parsers</title>
+    <para>
+      This rounds up our tour of the <literal>Command</literal> library.
+      This isn't the only way to parse command-line arguments of course;
+      there are several alternatives available on OPAM. Three of the
+      most prominent ones are:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          The <literal>Arg</literal> module from the OCaml standard
+          library, which is used by the compiler itself to handle its
+          command-line interface. Command is generally more featureful
+          than Arg (mainly via support for sub-commands, the
+          <literal>step</literal> combinator to transform inputs, and
+          help generation), but there's absolutely nothing wrong with
+          using Arg either.
+        </para>
+        <para>
+          You can use the
+          <literal>Command.Spec.flags_of_args_exn</literal> function to
+          convert Arg specifications into ones compatible with Command.
+          This is quite often used to help port older non-Core code into
+          the Core standard library world.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <ulink url="https://forge.ocamlcore.org/projects/ocaml-getopt/">ocaml-getopt</ulink>
+          provides the general command-line syntax of GNU
+          <literal>getopt</literal> and <literal>getopt_long</literal>.
+          The GNU conventions are widely used in the open-source world,
+          and this library lets your OCaml programs obey the same rules.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <ulink url="http://erratique.ch/software/cmdliner">Cmdliner</ulink>
+          is a mix between the Command and Getopt libraries. It allows
+          for the declarative definition of command-line interfaces, but
+          exposes a more <literal>getopt</literal>-like interface. It
+          also automates the generation of UNIX <literal>man</literal>
+          pages as part of the specification. Cmdliner is the parser
+          used by OPAM to manage its command-line.
+        </para>
+      </listitem>
+    </itemizedlist>
   </sect1>
 </chapter><chapter id="handling-json-data">
   <title>Handling JSON data</title>
@@ -20766,12 +20871,11 @@ type json = [
           Some of the type definitions are
           <emphasis>recursive</emphasis> (that is, one of the algebraic
           data types includes a reference to the name of the type being
-          defined). Fields such as <literal>Assoc</literal> can contain
-          references to more JSON fields, and thus precisely describe
-          the underlying JSON data structure. The JSON
-          <literal>List</literal> can contain fields of different types,
-          unlike the OCaml <literal>list</literal> whose contents must
-          be uniform.
+          defined). <literal>Assoc</literal> types can contain
+          references to further JSON values and the
+          <literal>List</literal> type can contain JSON values of
+          different types, unlike the OCaml <literal>list</literal>
+          whose contents must be of a uniform type.
         </para>
       </listitem>
       <listitem>
@@ -21790,9 +21894,9 @@ Warning 32: unused value string_of__1.
       </para>
       <programlisting>
 # running json/run_github_org.out.sh
-$ ./_build/github_org_info.native mirage
+$ ./github_org_info.native mirage
 Mirage account (131943) with 36 public repos
-$ ./_build/github_org_info.native janestreet
+$ ./github_org_info.native janestreet
 ??? (3384712) with 34 public repos
 </programlisting>
       <para>
@@ -22880,14 +22984,11 @@ $ utop
 # running sexpr/list_top_packages.out.sh
 $ ocamlfind list | grep top
 compiler-libs.toplevel (version: [distributed with Ocaml])
-core.top            (version: 109.32.00)
-ctypes.top          (version: 0.1)
+core.top            (version: 109.36.00)
 lwt.simple-top      (version: 2.4.3)
 num-top             (version: 1.3.3)
 sexplib.top         (version: 109.20.00)
 uri.top             (version: 1.3.8)
-utop                (version: 1.5)
-utop.camlp4         (version: 1.5)
 </programlisting>
     <para>
       The <literal>core.top</literal> package (which you should have
@@ -23374,7 +23475,7 @@ Uncaught exception:
 
 Raised at file &quot;lib/conv.ml&quot;, line 281, characters 36-72
 Called from file &quot;lib/core_int.ml&quot;, line 6, characters 7-14
-Called from file &quot;lib/std_internal.ml&quot;, line 112, characters 7-33
+Called from file &quot;lib/std_internal.ml&quot;, line 115, characters 7-33
 Called from file &quot;lib/exn.ml&quot;, line 87, characters 6-10
 </programlisting>
       <para>
@@ -24824,24 +24925,20 @@ let () =
 # running async/run_search.out.sh
 $ corebuild -pkg cohttp.async,yojson,textwrap search.native
 $ ./search.native &quot;Concurrent Programming&quot; &quot;OCaml&quot;
-(&quot;unhandled exception&quot;
- ((lib/monitor.ml.Error_
-   ((exn
-     (lib/core_unix.ml.Inet_addr.Get_inet_addr api.duckduckgo.com
-      &quot;host not found&quot;))
-    (backtrace
-     (&quot;Raised at file \&quot;lib/core_unix.ml\&quot;, line 1796, characters 23-61&quot;
-      &quot;Called from file \&quot;lib/result.ml\&quot;, line 101, characters 10-14&quot;
-      &quot;Re-raised at file \&quot;lib/result.ml\&quot;, line 108, characters 23-26&quot;
-      &quot;Called from file \&quot;lib/deferred.ml\&quot;, line 20, characters 62-65&quot;
-      &quot;Called from file \&quot;lib/scheduler.ml\&quot;, line 126, characters 6-17&quot;
-      &quot;Called from file \&quot;lib/jobs.ml\&quot;, line 64, characters 8-13&quot; &quot;&quot;))
-    (monitor
-     (((name try_with) (here ()) (id 3) (has_seen_error true)
-       (someone_is_listening true) (kill_index 0))
-      ((name main) (here ()) (id 1) (has_seen_error true)
-       (someone_is_listening false) (kill_index 0))))))
-  (Pid 73940)))
+Concurrent Programming
+----------------------
+
+&quot;Concurrent computing is a form of computing in which programs are
+designed as collections of interacting computational processes that
+may be executed in parallel.&quot;
+
+OCaml
+-----
+
+&quot;OCaml, originally known as Objective Caml, is the main implementation
+of the Caml programming language, created by Xavier Leroy, Jérôme
+Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
+
 </programlisting>
     </sect2>
   </sect1>
@@ -25129,18 +25226,18 @@ $ corebuild -pkg cohttp.async,yojson,textwrap search_with_configurable_server.na
 $ ./search_with_configurable_server.native -servers localhost,api.duckduckgo.com &quot;Concurrent Programming&quot; OCaml
 (&quot;unhandled exception&quot;
  ((lib/monitor.ml.Error_
-   ((exn (Unix.Unix_error &quot;Connection refused&quot; connect 127.0.0.1:80))
+   ((exn (&quot;Yojson.Json_error(\&quot;Blank input data\&quot;)&quot;))
     (backtrace
-     (&quot;Raised by primitive operation at file \&quot;lib/unix_syscalls.ml\&quot;, line 795, characters 12-69&quot;
+     (&quot;Raised at file \&quot;common.ml\&quot;, line 5, characters 25-39&quot;
+      &quot;Called from file \&quot;search_with_configurable_server.ml\&quot;, line 14, characters 8-36&quot;
+      &quot;Called from file \&quot;search_with_configurable_server.ml\&quot;, line 34, characters 9-57&quot;
       &quot;Called from file \&quot;lib/deferred.ml\&quot;, line 20, characters 62-65&quot;
-      &quot;Called from file \&quot;lib/scheduler.ml\&quot;, line 126, characters 6-17&quot;
-      &quot;Called from file \&quot;lib/jobs.ml\&quot;, line 64, characters 8-13&quot; &quot;&quot;))
+      &quot;Called from file \&quot;lib/scheduler.ml\&quot;, line 125, characters 6-17&quot;
+      &quot;Called from file \&quot;lib/jobs.ml\&quot;, line 65, characters 8-13&quot; &quot;&quot;))
     (monitor
-     (((name Tcp.close_sock_on_error) (here ()) (id 5) (has_seen_error true)
-       (someone_is_listening true) (kill_index 0))
-      ((name main) (here ()) (id 1) (has_seen_error true)
+     (((name main) (here ()) (id 1) (has_seen_error true)
        (someone_is_listening false) (kill_index 0))))))
-  (Pid 74259)))
+  (Pid 4588)))
 </programlisting>
       <para>
         As you can see, we got a &quot;Connection refused&quot; failure
@@ -25207,7 +25304,9 @@ DuckDuckGo query failed: Unexpected failure
 OCaml
 -----
 
-DuckDuckGo query failed: Unexpected failure
+&quot;OCaml, originally known as Objective Caml, is the main implementation
+of the Caml programming language, created by Xavier Leroy, Jérôme
+Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
 
 </programlisting>
       <para>
@@ -25410,12 +25509,12 @@ $ ./search_with_timeout_no_leak.native &quot;concurrent programming&quot; ocaml 
 concurrent programming
 ----------------------
 
-DuckDuckGo query failed: Unexpected failure
+DuckDuckGo query failed: Timed out
 
 ocaml
 -----
 
-DuckDuckGo query failed: Unexpected failure
+DuckDuckGo query failed: Timed out
 
 </programlisting>
   </sect1>
@@ -25960,7 +26059,7 @@ let () =
     </para>
     <programlisting>
 # running ffi/build_hello.out.sh
-$ corebuild -pkg ctypes.foreign -lflags -cclib,-lncurses,-cclib,-Wl,-cclib,--no-as-needed hello.native 
+$ corebuild -pkg ctypes.foreign -lflags -cclib,-lncurses hello.native 
 </programlisting>
     <para>
       Running <literal>./hello.native</literal> should now display a
@@ -26302,7 +26401,7 @@ val t_ptr : time_t ptr = &lt;abstr&gt;
       <programlisting language="ocaml">
 ...part 7 of ffi/posix.topscript
 # ctime t_ptr ;; 
-- : string = &quot;Mon Aug  5 01:15:37 2013\n&quot;
+- : string = &quot;Tue Aug  6 13:49:55 2013\n&quot;
 </programlisting>
     </sect2>
     <sect2 id="using-views-to-map-complex-values">
@@ -26539,7 +26638,7 @@ val gettimeofday : timeval structure ptr -&gt; timezone structure ptr -&gt; int 
   Pervasives.(float secs +. float usecs /. 1000000.0) ;; 
 val gettimeofday' : unit -&gt; float = &lt;fun&gt;
 # gettimeofday' () ;; 
-- : float = 1375661738.54
+- : float = 1375793396.19
 </programlisting>
       <para>
         You need to be a little careful not to get all the open modules
@@ -26611,9 +26710,9 @@ let () =
 (* ffi/build_datetime.out  *)
 $ corebuild -pkg ctypes.foreign datetime.native
 $ ./datetime.native
-1375659006.077398
+1375792480.733939
 $ ./datetime.native -a
-Mon Aug  5 00:30:06 2013
+Tue Aug  6 13:34:40 2013
 </programlisting>
         <sidebar>
         <title>
@@ -27166,7 +27265,7 @@ val x : t = {foo = 13; bar = 14}
       memory at runtime, but the subsequent <literal>let</literal>
       binding allocates a new block of memory with two words of
       available space. One word holds the <literal>foo</literal> field
-      and the second word holds the <literal>bar</literal> field. The
+      and the other word holds the <literal>bar</literal> field. The
       OCaml compiler translates such an expression into an explicit
       allocation for the block from OCaml's runtime system.
     </para>
@@ -28473,7 +28572,7 @@ val c : Gc.control =
       <programlisting language="ocaml">
 ...part 2 of gc/tune.topscript
 # Gc.major_slice 0 ;; 
-- : int = 191808
+- : int = 255745
 # Gc.full_major () ;; 
 - : unit = ()
 </programlisting>
@@ -28619,14 +28718,14 @@ let () =
         <programlisting>
 # running gc/run_barrier_bench.out.sh
 $ corebuild -pkg core_bench barrier_bench.native
-$ ./barrier_bench.native name alloc
+$ ./barrier_bench.native -ascii name alloc
 Estimated testing time 20s (change using -quota SECS).
-┌───────────┬───────────┬───────────┬───────┬──────────┬──────────┐
-│ Name      │ Time (ns) │     Minor │ Major │ Promoted │ % of max │
-├───────────┼───────────┼───────────┼───────┼──────────┼──────────┤
-│ mutable   │ 3_927_122 │ 2_000_004 │  9.03 │     9.03 │   100.00 │
-│ immutable │ 3_179_646 │ 5_000_005 │  0.02 │     0.02 │    80.97 │
-└───────────┴───────────┴───────────┴───────┴──────────┴──────────┘
+                                                                   
+  Name        Time (ns)       Minor   Major   Promoted   % of max  
+ ----------- ----------- ----------- ------- ---------- ---------- 
+  mutable     6_338_938   2_000_004    9.05       9.05     100.00  
+  immutable   4_792_764   5_000_005    0.03       0.03      75.61  
+                                                                   
 </programlisting>
         <para>
           There is a stark space/time tradeoff here. The mutable version
@@ -28682,9 +28781,11 @@ prefix the column name with a '+'.
 
 === flags ===
 
+  [-ascii]             Display data in simple ascii based tables.
   [-clear-columns]     Don't display default columns. Only show user specified
                        ones.
-  [-display STYLE]     Table style (short, tall, line or blank). Default short.
+  [-display STYLE]     Table style (short, tall, line, blank or column). Default
+                       short.
   [-geometric SCALE]   Use geometric sampling. (default 1.01)
   [-linear INCREMENT]  Use linear sampling to explore number of runs, example 1.
   [-no-compactions]    Disable GC compactions.
@@ -29665,6 +29766,19 @@ let _ = compare_t
         generated code is then compiled as if you had typed it in
         yourself.
       </para>
+      <para>
+        Note that although the generated code uses
+        <literal>Pervasives.compare</literal>, it is also annotated with
+        a <literal>string</literal> type. This lets the compiler use a
+        specialized string comparison function and not actually call the
+        runtime polymorphic comparison function. This has implications
+        for correctness too: recall from
+        <xref linkend="maps-and-hash-tables"/> that
+        <literal>comparelib</literal> provides reliable comparison
+        functions that work for values that are logically the same but
+        that have differing internal representations (e.g.
+        <literal>Int.Set.t</literal>).
+      </para>
       <note>
       <title>
       A style note: wildcards in <literal>let</literal> bindings
@@ -29765,9 +29879,11 @@ val compare : t -&gt; t -&gt; int
         completely alter your source code's layout and style. Core
         includes a very conservative set of extensions that take care to
         minimize the syntax changes. There are a number of third-party
-        libraries that are much more ambitious -- some introduce
-        whitespace-sensitive indentation while others build entirely new
-        embedded languages using OCaml as a host language.
+        libraries that are much more ambitious --- some introduce
+        whitespace-sensitive indentation, while others build entirely
+        new embedded languages using OCaml as a host language, and yet
+        others introduce conditional compilation for macros or optional
+        logging.
       </para>
       <para>
         While it's tempting to compress all your boiler-plate code into
@@ -30006,7 +30122,15 @@ bash: $: command not found
         <para>
           It's often said that the hardest part of writing OCaml code is
           getting past the type checker -- but once the code does
-          compile, it works correctly the first time!
+          compile, it works correctly the first time! This is an
+          exaggeration of course, but it can certainly feel true when
+          moving from a dynamically typed language. The OCaml static
+          type system protects you from certain classes of bugs such as
+          memory errors and abstraction violations by rejecting your
+          program at compilation time rather than by generating an error
+          at runtime. Learning how to navigate the type checker's
+          compile-time feedback is key to building robust libraries and
+          applications that take full advantage of these static checks.
         </para>
         <para>
           There are a couple of tricks to make it easier to quickly
@@ -30203,6 +30327,8 @@ let f x =
         <programlisting>
 # running front-end/build_non_principal.out.sh
 $ ocamlc -i -principal non_principal.ml
+File &quot;non_principal.ml&quot;, line 6, characters 4-7:
+Warning 18: this type-based field disambiguation is not principal.
 type s = { foo : int; bar : unit; }
 type t = { foo : int; }
 val f : s -&gt; int
@@ -30241,6 +30367,19 @@ $ ocamlc -i -principal principal.ml
 type s = { foo : int; bar : unit; }
 type t = { foo : int; }
 val f : s -&gt; int
+</programlisting>
+        <para>
+          The <literal>ocamlbuild</literal> equivalent is to add the tag
+          <literal>principal</literal> to your build. The
+          <literal>corebuild</literal> wrapper script actually adds this
+          by default, but it does no harm to explicitly repeat it, as
+          below.
+        </para>
+        <programlisting>
+# running principal/build_principal.out.sh
+$ corebuild -tag principal principal.cmi non_principal.cmi
+File &quot;non_principal.ml&quot;, line 6, characters 4-7:
+Warning 18: this type-based field disambiguation is not principal.
 </programlisting>
         <para>
           Ideally, all code should systematically use
@@ -30440,6 +30579,114 @@ Error: The files /home/build/bar.cmi
         </para>
         </sidebar>
       </sect3>
+    </sect2>
+    <sect2 id="packing-modules-together">
+      <title>Packing modules together</title>
+      <para>
+        The module-to-file mapping described so far rigidly enforces a
+        1:1 mapping between a top-level module and a file. It's often
+        convenient to split larger modules into separate files to make
+        editing and version control easier, but still compile them all
+        into a single OCaml module.
+      </para>
+      <para>
+        The <literal>-pack</literal> compiler option accepts a list of
+        compiled object files (<literal>.cmo</literal> in bytecode and
+        <literal>.cmx</literal> for native code) and their associated
+        <literal>.cmi</literal> compiled interfaces, and combines them
+        into a single module that contains them as sub-modules of the
+        output. Packing thus generates an entirely new
+        <literal>.cmo</literal> (or <literal>.cmx</literal> file) and
+        <literal>.cmi</literal> that includes the input modules.
+      </para>
+      <para>
+        Packing for native code introduces an additional requirement:
+        the modules that are intended to be packed must be compiled with
+        the <literal>-for-pack</literal> argument that specifies the
+        eventual name of the pack. The easiest way to handle packing is
+        to let <literal>ocamlbuild</literal> figure out the command-line
+        arguments for you, so let's try that out next with a simple
+        example.
+      </para>
+      <para>
+        First, create a couple of toy modules called
+        <literal>A.ml</literal> and <literal>B.ml</literal> that contain
+        a single value. You will also need a <literal>_tags</literal>
+        file that adds the <literal>-for-pack</literal> option for the
+        <literal>cmx</literal> files (but careful to exclude the pack
+        target itself). Finally, the <literal>X.mlpack</literal> file
+        contains the list of modules that are intended to be packed
+        under module <literal>X</literal>. There are special rules in
+        <literal>ocamlbuild</literal> that tell it how to map
+        <literal>%.mlpack</literal> files to the packed
+        <literal>%.cmx</literal> or <literal>%.cmo</literal> equivalent.
+      </para>
+      <programlisting>
+((typ console)(name packing/show_files.out))
+</programlisting>
+      <para>
+        You can now run <literal>corebuild</literal> to build the
+        <literal>X.cmx</literal> file directly, but let's create a new
+        module to link against <literal>X</literal> to complete the
+        example.
+      </para>
+      <programlisting language="ocaml">
+(* packing/test.ml  *)
+let v = X.A.v
+let w = X.B.w
+</programlisting>
+      <para>
+        You can now compile this test module and see that its inferred
+        interface is the result of using the packed contents of
+        <literal>X</literal>. We further verify this by examining the
+        imported interfaces in <literal>Test</literal> and confirming
+        that neither <literal>A</literal> nor <literal>B</literal> are
+        mentioned in there and that only the packed <literal>X</literal>
+        module is used.
+      </para>
+      <programlisting>
+# running packing/build_test.out.sh
+$ corebuild test.inferred.mli test.cmi
+$ cat _build/test.inferred.mli
+val v : string
+val w : int
+$ ocamlobjinfo _build/test.cmi
+File _build/test.cmi
+Unit name: Test
+Interfaces imported:
+    906fc1b74451f0c24ceaa085e0f26e5f    Test
+    36b5bc8227dc9914c6d9fd9bdcfadb45    Pervasives
+    25f4b4e10ec64c56b2987f5900045fec    X
+</programlisting>
+      <warning>
+      <title>
+      Packing and search paths
+      </title>
+      <para>
+        One very common build error that happens with packing is
+        confusion resulting from building the packed
+        <literal>cmi</literal> in the same directory as the sub-modules.
+        When you add this directory to your module search path, the
+        sub-modules are also visible. If you forget to include the
+        top-level prefix (e.g <literal>X.A</literal>) and instead use a
+        sub-module directly (<literal>A</literal>), then this will
+        compile and link fine.
+      </para>
+      <para>
+        However, the types of <literal>A</literal> and
+        <literal>X.A</literal> are <emphasis>not</emphasis>
+        automatically equivalent, and so the type checker will complain
+        if you attempt to mix-and-match the packed and unpacked versions
+        of the library.
+      </para>
+      <para>
+        This mostly only happens with unit tests since they are built at
+        the same time as the library. You can avoid it by being aware of
+        the need to open the packed module from the test, or only using
+        the library after it has been installed (and hence not exposing
+        the intermediate compiled modules).
+      </para>
+      </warning>
     </sect2>
     <sect2 id="shorter-module-paths-in-type-errors">
       <title>Shorter module paths in type errors</title>
@@ -30816,7 +31063,9 @@ $ ocamlc -dlambda -c pattern_monomorphic_exhaustive.ml 2&gt;&amp;1
 </programlisting>
       <para>
         It's not important to understand every detail of this internal
-        form, but some interesting points emerge from reading it.
+        form and it is explicitly undocumented since it can change
+        across compiler revisions. Despite these caveats, some
+        interesting points emerge from reading it.
       </para>
       <itemizedlist>
         <listitem>
@@ -31005,9 +31254,9 @@ Estimated testing time 30s (change using -quota SECS).
 ┌────────────────────────────────┬───────────┬──────────┐
 │ Name                           │ Time (ns) │ % of max │
 ├────────────────────────────────┼───────────┼──────────┤
-│ Polymorphic pattern            │     23.65 │   100.00 │
-│ Monomorphic incomplete pattern │     22.36 │    94.52 │
-│ Monomorphic exhaustive pattern │     20.75 │    87.73 │
+│ Polymorphic pattern            │     31.75 │   100.00 │
+│ Monomorphic incomplete pattern │     29.09 │    91.61 │
+│ Monomorphic exhaustive pattern │     26.37 │    83.06 │
 └────────────────────────────────┴───────────┴──────────┘
 </programlisting>
       <para>
@@ -31082,13 +31331,36 @@ Estimated testing time 30s (change using -quota SECS).
       execution speed.
     </para>
     <para>
-      The interpreter uses the OCaml stack and an accumulator to store
-      values. It only has seven registers in total: the program counter,
-      stack pointer, accumulator, exception and argument pointers, and
-      environment and global data.
+      The bytecode interpreter implements a stack-based virtual machine.
+      The OCaml stack and an associated accumulator stores values that
+      consist of:
     </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          <emphasis>long</emphasis> values corresponding to an OCaml
+          <literal>int</literal> type.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis>block</emphasis> values that contain the block
+          header and a memory address with the data fields that contain
+          further OCaml values indexed by an integer.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis>code offset</emphasis> values that are relative to
+          the starting code address.
+        </para>
+      </listitem>
+    </itemizedlist>
     <para>
-      You can display the bytecode instructions in textual form via
+      The interpreter virtual machine only has seven registers in total:
+      the program counter, stack pointer, accumulator, exception and
+      argument pointers, and environment and global data. You can
+      display the bytecode instructions in textual form via
       <literal>-dinstr</literal>. Try this on one of our earlier pattern
       matching examples.
     </para>
@@ -31232,6 +31504,13 @@ $ ocamlc -a -o mylib.cma a.cmo b.cmo -dllib -lmylib
 $ ocamlc -a -o mylib.cma -custom a.cmo b.cmo -cclib -lmylib
 </programlisting>
       <para>
+        OCamlbuild takes care of much of the details of this with its
+        built-in rules. The <literal>%.byte</literal> rule that you've
+        been using throughout the book builds a bytecode executable and
+        adding the <literal>custom</literal> tag will bundle the
+        interpreter with it too.
+      </para>
+      <para>
         The custom mode is the most similar mode to native code
         compilation, as both generate standalone executables. There are
         quite a few other options available for compiling bytecode
@@ -31311,8 +31590,8 @@ $ ocamlc -output-obj -o embed_out.o embed_me1.ml embed_me2.ml
       </para>
       <programlisting>
 # running back-end-embed/build_embed_binary.out.sh
-$ gcc -fPIC -Wall -I`ocamlc -where` -L`ocamlc -where` -ltermcap -lm -ldl -o final_out main.c embed_out.o -lcamlrun
-$ ./final_out
+$ gcc -fPIC -Wall -I`ocamlc -where` -L`ocamlc -where` -ltermcap -lm -ldl -o finalbc.native main.c embed_out.o -lcamlrun
+$ ./finalbc.native
 Before calling OCaml
 hello embedded world 1
 hello embedded world 2
@@ -31437,7 +31716,8 @@ let cmp (a:int) (b:int) =
 </programlisting>
         <para>
           Now compile this into assembly and read the resulting
-          <literal>compare_mono.S</literal> file.
+          <literal>compare_mono.S</literal> file. This file extension
+          may be lowercase on some platforms such as Linux.
         </para>
         <programlisting>
 # running back-end/asm_from_compare_mono.out.sh
@@ -31545,29 +31825,6 @@ _camlCompare_poly__cmp_1008:
           <literal>caml_greaterthan</literal> call. Finally the return
           value of the comparison is popped from the stack and returned.
         </para>
-        <tip>
-        <title>
-        Reading the implementation of the C primitives
-        </title>
-        <para>
-          If you have a copy of the OCaml source tree handy, it's worth
-          reading through the definition of
-          <literal>caml_greaterthan()</literal>. The built-in primitives
-          for polymorphic comparison can be found in
-          <literal>caml/byterun/compare.c</literal>.
-        </para>
-        <para>
-          The key function is <literal>compare_val()</literal>, which
-          directly examines the runtime representation of two OCaml
-          values to decide which is greater. This requires the header
-          tag to be examined, and recursive structures must be tested
-          step-by-step.
-        </para>
-        <para>
-          Avoiding running all of this code is why you should try to
-          write explicit comparison functions in OCaml instead.
-        </para>
-        </tip>
       </sect3>
       <sect3 id="benchmarking-polymorphic-comparison">
         <title>Benchmarking polymorphic comparison</title>
@@ -31579,7 +31836,7 @@ _camlCompare_poly__cmp_1008:
           quick <literal>Core_bench</literal> test with both functions.
         </para>
         <programlisting language="ocaml">
-(* back-end/bench_poly_and_mono.ml  *)
+(* back-end-bench/bench_poly_and_mono.ml  *)
 open Core.Std
 open Core_bench.Std
 
@@ -31610,35 +31867,16 @@ let () =
           between the two.
         </para>
         <programlisting>
-# running back-end/run_bench_poly_and_mono.out.sh
+# running back-end-bench/run_bench_poly_and_mono.out.sh
 $ corebuild -pkg core_bench bench_poly_and_mono.native
-SANITIZE: a total of 9 files that should probably not be in your source tree
-  has been found. A script shell file
-  &quot;/Users/avsm/src/git/avsm/OCaml-Book/code/back-end/_build/sanitize.sh&quot; is
-  being created. Check this script and run it to remove unwanted files or use
-  other options (such as defining hygiene exceptions or using the -no-hygiene
-  option).
-IMPORTANT: I cannot work with leftover compiled files.
-ERROR: Leftover object files:
-  File compare_mono.o in . has suffix .o
-ERROR: Leftover OCaml compilation files:
-  File pattern_polymorphic.cmo in . has suffix .cmo
-  File pattern_monomorphic_incomplete.cmo in . has suffix .cmo
-  File pattern_monomorphic_exhaustive.cmo in . has suffix .cmo
-  File pattern_polymorphic.cmi in . has suffix .cmi
-  File pattern_monomorphic_incomplete.cmi in . has suffix .cmi
-  File pattern_monomorphic_exhaustive.cmi in . has suffix .cmi
-  File compare_mono.cmi in . has suffix .cmi
-  File compare_mono.cmx in . has suffix .cmx
-Exiting due to hygiene violations.
-$ ./bench_poly_and_mono.native
+$ ./bench_poly_and_mono.native -ascii
 Estimated testing time 20s (change using -quota SECS).
-┌────────────────────────┬───────────┬──────────┐
-│ Name                   │ Time (ns) │ % of max │
-├────────────────────────┼───────────┼──────────┤
-│ Polymorphic comparison │    10_767 │   100.00 │
-│ Monomorphic comparison │       602 │     5.59 │
-└────────────────────────┴───────────┴──────────┘
+                                                 
+  Name                     Time (ns)   % of max  
+ ------------------------ ----------- ---------- 
+  Polymorphic comparison      13_518     100.00  
+  Monomorphic comparison         816       6.03  
+                                                 
 </programlisting>
         <para>
           We see that the polymorphic comparison is close to 20 times
@@ -31777,27 +32015,8 @@ let () =
           the following output:
         </para>
         <programlisting language="ocaml">
-(* back-end/run_alternate_list.out  *)
+(* back-end-bench/run_alternate_list.out  *)
 $ corebuild -tag debug alternate_list.native
-SANITIZE: a total of 9 files that should probably not be in your source tree
-  has been found. A script shell file
-  &quot;/Users/avsm/src/git/avsm/OCaml-Book/code/back-end/_build/sanitize.sh&quot; is
-  being created. Check this script and run it to remove unwanted files or use
-  other options (such as defining hygiene exceptions or using the -no-hygiene
-  option).
-IMPORTANT: I cannot work with leftover compiled files.
-ERROR: Leftover object files:
-  File compare_mono.o in . has suffix .o
-ERROR: Leftover OCaml compilation files:
-  File pattern_polymorphic.cmo in . has suffix .cmo
-  File pattern_monomorphic_incomplete.cmo in . has suffix .cmo
-  File pattern_monomorphic_exhaustive.cmo in . has suffix .cmo
-  File pattern_polymorphic.cmi in . has suffix .cmi
-  File pattern_monomorphic_incomplete.cmi in . has suffix .cmi
-  File pattern_monomorphic_exhaustive.cmi in . has suffix .cmi
-  File compare_mono.cmi in . has suffix .cmi
-  File compare_mono.cmx in . has suffix .cmx
-Exiting due to hygiene violations.
 $ ./alternate_list.native
 1,3,5,7,9
 </programlisting>
@@ -31932,6 +32151,12 @@ Continuing.
           </para>
         </listitem>
       </itemizedlist>
+      <para>
+        Note that many other tools that operate on native binaries such
+        as Valgrind will work just fine with OCaml as long as the
+        program is linked with the <literal>-g</literal> flag to embed
+        debugging symbols.
+      </para>
       <sect3 id="gprof">
         <title>Gprof</title>
         <para>
@@ -32073,8 +32298,8 @@ $ opam switch 4.01.0dev+fp
       <programlisting>
 # running back-end-embed/build_embed_native.out.sh
 $ ocamlopt -output-obj -o embed_native.o embed_me1.ml embed_me2.ml
-$ gcc -Wall -I `ocamlc -where` -L `ocamlc -where` -lasmrun -ltermcap -o final_out.native embed_native.o main.c
-$ ./final_out.native
+$ gcc -Wall -I `ocamlc -where` -o final.native embed_native.o main.c -L `ocamlc -where` -lasmrun -ltermcap -lm -ldl
+$ ./final.native
 Before calling OCaml
 hello embedded world 1
 hello embedded world 2
@@ -32083,7 +32308,10 @@ After calling OCaml
       <para>
         The <literal>embed_native.o</literal> is a standalone object
         file that has no further references to OCaml code beyond the
-        runtime library, just as with the bytecode runtime.
+        runtime library, just as with the bytecode runtime. Do remember
+        that the link order of the libraries is significant on modern
+        GNU toolchains (especially as used in Ubuntu 11.10 upwards) that
+        resolve symbols from left-to-right in a single pass.
       </para>
       <tip>
       <title>
@@ -32281,7 +32509,7 @@ Hello OCaml World!
           </row>
           <row>
             <entry>
-              .S
+              .S <emphasis>or</emphasis> .s
             </entry>
             <entry>
               Assembly language output if <literal>-S</literal> is
@@ -32295,28 +32523,658 @@ Hello OCaml World!
 </chapter></part><appendix id="installation">
   <title>Installation</title>
   <para>
-    <emphasis>TODO CR</emphasis> this is all moving online.
+    The easiest way to use OCaml is via the binary packages available
+    for many operating systems. For day-to-day code development however,
+    it's much easier to use a source-code manager that lets you modify
+    individual libraries and automatically recompile all the
+    dependencies.
   </para>
-</appendix><appendix id="packaging">
-  <title>Packaging</title>
-  <note>
-  <title>
-  Note to reviewers
-  </title>
   <para>
-    This chapter hasn't been completed yet. Since this content can
-    change rather fast, we may place this information online rather than
-    directly in the final book.
+    An important difference between OCaml and scripting languages such
+    as Python or Ruby is the static type safety that means that you
+    can't just mix-and-match compiled libraries. Interfaces are checked
+    when libraries are compiled, so when an interface is changed, all
+    the dependent libraries must also be recompiled. Source-based
+    package managers automate this process for you and make development
+    life much easier.
   </para>
-  </note>
-  <sect1 id="the-ocamlfind-frontend">
-    <title>The OCamlfind frontend</title>
+  <para>
+    To work through Real World OCaml, you'll need three major components
+    installed:
+  </para>
+  <itemizedlist>
+    <listitem>
+      <para>
+        The OCaml compiler itself.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        The OPAM source package manager, through which we'll install
+        several extra libraries.
+      </para>
+    </listitem>
+    <listitem>
+      <para>
+        The <literal>utop</literal> interactive toplevel, a modern
+        interactive toplevel with command history and tab completion.
+      </para>
+    </listitem>
+  </itemizedlist>
+  <para>
+    Let's get started with how to install OCaml on various operating
+    systems, and we'll get OPAM and <literal>utop</literal> running
+    after that.
+  </para>
+  <sect1 id="getting-ocaml">
+    <title>Getting OCaml</title>
     <para>
+      The OCaml compiler is available as a binary distribution on many
+      operating systems. This is the simplest and preferred installation
+      route, but we'll also describe how to do a manual installation as
+      a last resort.
     </para>
+    <sect2 id="mac-os-x">
+      <title>Mac OS X</title>
+      <para>
+        The
+        <ulink url="http://github.com/mxcl/homebrew">Homebrew</ulink>
+        package manager has an OCaml installer, which is usually updated
+        pretty quickly to the latest stable release. Make sure that you
+        have the latest XCode (and Command Line Tools for XCode)
+        installed from the App Store before starting the OCaml
+        installation.
+      </para>
+      <programlisting>
+$ brew install ocaml
+$ brew install pcre
+</programlisting>
+      <para>
+        The Perl-compatible Regular Expression library (PCRE) is used by
+        the Core suite. It's not strictly needed to use OCaml, but is a
+        commonly used library that we're installing now to save time
+        later.
+      </para>
+      <para>
+        Another popular package manager on Mac OS X is
+        <ulink url="http://macports.org">MacPorts</ulink>, which also
+        has an OCaml port. As with Homebrew, make sure you have XCode
+        installed and have followed the rest of the MacPorts
+        installation instructions, and then type in:
+      </para>
+      <programlisting>
+$ sudo port install ocaml
+$ sudo port install ocaml-pcre
+</programlisting>
+    </sect2>
+    <sect2 id="debian-linux">
+      <title>Debian Linux</title>
+      <para>
+        On Debian Linux, you should install OCaml via binary packages.
+        You'll need at least OCaml version 3.12.1 to bootstrap OPAM,
+        which means using Debian Wheezy or greater. Don't worry about
+        getting the absolute latest version of the compiler, as you just
+        need one new enough to compile the OPAM package manager, after
+        which you'll use OPAM to manage your compiler installation.
+      </para>
+      <programlisting>
+$ sudo apt-get install ocaml ocaml-native-compilers camlp4-extra
+$ sudo apt-get install git libpcre3-dev curl build-essential m4
+</programlisting>
+      <para>
+        Notice that we've installed a few more packages than just the
+        OCaml compiler here. The second command line installs enough
+        system packages to let you build your own OCaml packages. You
+        may find that some OCaml libraries require more system libraries
+        (for example, <literal>libssl-dev</literal>), but we'll
+        highlight these in the book when we introduce the library.
+      </para>
+    </sect2>
+    <sect2 id="fedora-and-red-hat">
+      <title>Fedora and Red Hat</title>
+      <para>
+        OCaml has been included in the basic distribution since Fedora
+        8. To install the latest compiler, just run:
+      </para>
+      <programlisting>
+# yum install ocaml
+# yum install ocaml-camlp4-devel
+# yum install pcre-devel
+</programlisting>
+      <para>
+        The PCRE package is used by Core and is just included here for
+        convenience later.
+      </para>
+    </sect2>
+    <sect2 id="arch-linux">
+      <title>Arch Linux</title>
+      <para>
+        Arch Linux provides OCaml 4.00.1 (or later) in the standard
+        repositories, so the easiest method of installation is using
+        <literal>pacman</literal>:
+      </para>
+      <programlisting>
+$ pacman -Sy ocaml
+</programlisting>
+    </sect2>
+    <sect2 id="windows">
+      <title>Windows</title>
+      <para>
+        Windows is not currently supported by the examples in Real World
+        OCaml, although it is being worked on. Until that's ready, we
+        recommend using a virtual machine running Debian Linux on your
+        local machine.
+      </para>
+    </sect2>
+    <sect2 id="building-from-source">
+      <title>Building from source</title>
+      <para>
+        To install OCaml from source code, first make sure that you have
+        a C compilation environment (usually either
+        <literal>gcc</literal> or <literal>llvm</literal> installed).
+      </para>
+      <programlisting>
+$ curl -OL https://github.com/ocaml/ocaml/archive/trunk.tar.gz
+$ tar -zxvf trunk.tar.gz
+$ cd ocaml-trunk
+$ ./configure
+$ make world world.opt
+$ sudo make install
+</programlisting>
+      <para>
+        The final step requires administrator privilege to install in
+        your system directory. You can also install it in your home
+        directory by passing the <literal>prefix</literal> option to the
+        configuration script:
+      </para>
+      <programlisting>
+$ ./configure -prefix $HOME/my-ocaml
+</programlisting>
+      <para>
+        Once the installation is completed into this custom location,
+        you will need to add <literal>$HOME/my-ocaml/bin</literal> to
+        your <literal>PATH</literal>, normally by editing the
+        <literal>~/.bash_profile</literal> file. You shouldn't really to
+        do this unless you have special reasons, so try to install
+        binary packages before trying a source installation.
+      </para>
+      <note>
+      <title>
+      Note to reviewers
+      </title>
+      <para>
+        We instruct you install the unreleased trunk version of OCaml in
+        these instructions, as we take advantage of some recent
+        additions to the language that simplify explanations in the
+        book. The 4.01 release will happen before the book is released,
+        but you may run into &quot;bleeding edge&quot; bugs with the
+        trunk release. Leave a comment here if you do and we'll address
+        them.
+      </para>
+      </note>
+    </sect2>
   </sect1>
-  <sect1 id="distributing-applications-with-opam">
-    <title>Distributing applications with OPAM</title>
+  <sect1 id="getting-opam">
+    <title>Getting OPAM</title>
     <para>
+      OPAM manages multiple simultaneous OCaml compiler and library
+      installations, tracks library versions across upgrades, and
+      recompiles dependencies automatically if they get out of date.
+      It's used throughout Real World OCaml as the mechanism to retrieve
+      and use third-party libraries.
     </para>
+    <para>
+      Before installing OPAM, make sure that you have the OCaml compiler
+      installed as described above. Once installed, the entire OPAM
+      database is held in your home directory (normally
+      <literal>$HOME/.opam</literal>). If something goes wrong, just
+      delete this <literal>.opam</literal> directory and start over from
+      a clean slate. If youre using a beta version of OPAM, please
+      upgrade it to at least version 1.0.0 or greater before proceeding.
+    </para>
+    <sect2 id="mac-os-x-1">
+      <title>Mac OS X</title>
+      <para>
+        Source installation of OPAM will take a minute or so on a modern
+        machine. There is a Homebrew package for the latest OPAM:
+      </para>
+      <programlisting>
+$ brew update
+$ brew install opam
+</programlisting>
+      <para>
+        And on MacPorts, install it like this:
+      </para>
+      <programlisting>
+$ sudo port install opam
+</programlisting>
+    </sect2>
+    <sect2 id="debian-linux-1">
+      <title>Debian Linux</title>
+      <para>
+        OPAM has recently been packaged for Debian and will soon be part
+        of the unstable distribution. If you're on an earlier stable
+        distribution such as <literal>wheezy</literal>, you can either
+        compile from source, or cherry-pick just the OPAM binary package
+        from <literal>unstable</literal> by:
+      </para>
+      <programlisting>
+# apt-get update
+# apt-get -t unstable install opam
+</programlisting>
+      <note>
+      <title>
+      Note to reviewers
+      </title>
+      <para>
+        The binary packages for OPAM are not yet available as of the 5th
+        August 2013, but the package is in the <literal>NEW</literal>
+        queue. It should be available by the the time the book is
+        released, and these instructions will be updated accordingly.
+      </para>
+      </note>
+    </sect2>
+    <sect2 id="ubuntu-raring">
+      <title>Ubuntu Raring</title>
+      <para>
+        OPAM is available as a Personal Package Archive on Ubuntu Raring
+        for both i386 and x86_64. To install it, just run:
+      </para>
+      <programlisting>
+$ add-apt-repository ppa:avsm/ppa
+$ apt-get update
+$ apt-get install ocaml opam
+</programlisting>
+    </sect2>
+    <sect2 id="fedora-and-red-hat-1">
+      <title>Fedora and Red Hat</title>
+      <para>
+        There is currently no RPM available for Fedora or Red Hat, so
+        please install OPAM via the source code instructions for the
+        moment.
+      </para>
+    </sect2>
+    <sect2 id="arch-linux-1">
+      <title>Arch Linux</title>
+      <para>
+        OPAM is available in the Arch User Repository (AUR) in two
+        packages. You'll need both <literal>ocaml</literal> and the
+        <literal>base-devel</literal> packages installed first:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <literal>opam</literal> contains the most recent stable
+            release, and is the recommended package.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <literal>opam-git</literal> builds the package from the
+            latest upstream source, and should only be used if you are
+            looking for a specific bleeding-edge feature.
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Run these commands to install the stable OPAM package:
+      </para>
+      <programlisting>
+$ sudo pacman -Sy base-devel
+$ wget https://aur.archlinux.org/packages/op/opam/opam.tar.gz
+$ tar -xvf opam.tar.gz &amp;&amp; cd opam
+$ makepkg
+$ sudo pacman -U opam-_version_.pkg.tar.gz
+</programlisting>
+    </sect2>
+    <sect2 id="source-installation">
+      <title>Source Installation</title>
+      <para>
+        If the binary packages aren't available for your system, you'll
+        need to install the latest OPAM release from source. The
+        distribution only requires the OCaml compiler to be installed,
+        so this should be straightforward. Download the latest version
+        from the
+        <ulink url="https://github.com/OCamlPro/opam/tags">homepage</ulink>.
+      </para>
+      <programlisting>
+$ curl -OL https://github.com/OCamlPro/opam/archive/latest.tar.gz
+$ tar -zxvf latest.tar.gz
+$ cd opam-latest
+$ ./configure &amp;&amp; make
+$ sudo make install
+</programlisting>
+      <note>
+      <title>
+      Note to reviewers
+      </title>
+      <para>
+        The OPAM instructions will be simplified when integrated
+        upstream into Debian and Fedora, which is ongoing. Until then,
+        we're leaving source-code installation instructions here. Please
+        leave a comment with any amended instructions you encounter.
+      </para>
+      </note>
+
+    </sect2>
+  </sect1>
+  <sect1 id="configuring-opam">
+    <title>Configuring OPAM</title>
+    <para>
+      The entire OPAM package database is held in the
+      <literal>.opam</literal> directory in your home directory,
+      including compiler installations. On Linux and Mac OS X, this will
+      be the <literal>~/.opam</literal> directory. You shouldn't switch
+      to an admin user to install packages as nothing will be installed
+      outside of this directory. If you run into problems, just delete
+      the whole <literal>~/.opam</literal> directory and follow the
+      installations instructions from the <literal>opam init</literal>
+      stage again.
+    </para>
+    <para>
+      Let's begin by initialising the OPAM package database. This will
+      require an active Internet connection, and ask you a few
+      interactive questions at the end. It's safe to answer yes to these
+      unless you want to manually control the configuration steps
+      yourself as an advanced user.
+    </para>
+    <programlisting>
+$ opam init
+&lt;...&gt;
+=-=-=-= Configuring OPAM =-=-=-=
+Do you want to update your configuration to use OPAM ? [Y/n] y
+[1/4] Do you want to update your shell configuration file ? [default: ~/.profile] y
+[2/4] Do you want to update your ~/.ocamlinit ? [Y/n] y
+[3/4] Do you want to install the auto-complete scripts ? [Y/n] y
+[4/4] Do you want to install the `opam-switch-eval` script ? [Y/n] y
+User configuration:
+  ~/.ocamlinit is already up-to-date.
+  ~/.profile is already up-to-date.
+Gloabal configuration:
+  Updating &lt;root&gt;/opam-init/init.sh
+    auto-completion : [true]
+    opam-switch-eval: [true]
+  Updating &lt;root&gt;/opam-init/init.zsh
+    auto-completion : [true]
+    opam-switch-eval: [true]
+  Updating &lt;root&gt;/opam-init/init.csh
+    auto-completion : [true]
+    opam-switch-eval: [true]
+</programlisting>
+    <para>
+      You only need to run this command once, and it will create the
+      <literal>~/.opam</literal> directory and sync with the latest
+      package list from the online OPAM database.
+    </para>
+    <para>
+      When the <literal>init</literal> command finishes, you'll see some
+      instructions about environment variables. OPAM never installs
+      files into your system directories (which would require
+      administrator privileges). Instead, it puts them into your home
+      directory by default, and can output a set of shell commands which
+      configures your shell with the right <literal>PATH</literal>
+      variables so that packages will just work.
+    </para>
+    <para>
+      If you choose not to follow the OPAM instructions to add itself to
+      your shell profile, you can still configure it on-the-fly in your
+      current shell with just one command.
+    </para>
+    <programlisting>
+$ eval `opam config -env`
+</programlisting>
+    <para>
+      This evaluates the results of running
+      <literal>opam config env</literal> in your current shell and sets
+      the variables so that subsequent commands will use them. This
+      <emphasis>only</emphasis> works with your current shell and it can
+      be only be automated for future shells by adding the line to your
+      login scripts. On Mac OS X or Debian, this is usually the
+      <literal>~/.bash_profile</literal> file if you're using the
+      default shell. If you've switched to another shell, it might be
+      <literal>~/.zshrc</literal> instead. OPAM isn't unusual in this
+      approach; the SSH <literal>ssh-agent</literal> also works
+      similarly, so if you're having any problems just hunt around in
+      your configuration scripts to see how that's being invoked.
+    </para>
+    <para>
+      If you answered <literal>yes</literal> to the auto-complete
+      scripts question during <literal>opam init</literal>, this should
+      have all been set up for you. You can verify this worked by
+      listing the available packages:
+    </para>
+    <programlisting>
+$ opam list
+</programlisting>
+    <note>
+    <title>
+    Note to reviewers
+    </title>
+    <para>
+      OPAM 1.0.0 places the login commands into your
+      <literal>~/.profile</literal> directory, which isn't always
+      executed if your shell is <literal>bash</literal>. This has been
+      fixed in subsequent versions, but for now you'll need to manually
+      copy the contents of <literal>~/.profile</literal> over to
+      <literal>~/.bash_profile</literal> via:
+    </para>
+    <programlisting>
+$ cat ~/.profile &gt;&gt; ~/.bash_profile
+</programlisting>
+    </note>
+    <para>
+      The most important package we need to install is Core, which is
+      the replacement standard library that all of the examples in this
+      book use. Before doing this, let's make sure you have exactly the
+      right compiler version you need. We've made some minor
+      modifications to the way the OCaml compiler displays type
+      signatures, and the next command will install a patched
+      <literal>4.01.0</literal> compiler with this functionality
+      enabled.
+    </para>
+    <programlisting>
+$ opam switch 4.01.0dev+trunk
+</programlisting>
+    <para>
+      This step will take about 5-10 minutes on a modern machine, and
+      will download and install (within the <literal>~/.opam</literal>
+      directory) a custom OCaml compiler. OPAM supports multiple such
+      installations, and you'll find this very useful if you ever decide
+      to hack on the internals of the compiler itself, or you want to
+      experiment with the latest release without sacrificing your
+      current installation. You only need to install this compiler once,
+      and future updates will be much faster as they only recompile
+      libraries within the compiler installation.
+    </para>
+    <para>
+      The new compiler will be installed into
+      <literal>~/.opam/4.01.0dev+trunk</literal> and any libraries you
+      install for it will be tracked separately from your system
+      installation. You can have any number of compilers installed
+      simultaneously, but only one can be active at any time. Browse
+      through the available compilers by running
+      <literal>opam switch list</literal>.
+    </para>
+    <para>
+      Finally, we're ready to install the Core libraries. Run this:
+    </para>
+    <programlisting>
+$ opam install core core_extended async
+</programlisting>
+    <para>
+      This will take about five or ten minutes to build, and will
+      install a series of packages. OPAM figures out the dependencies
+      you need automatically, but the three packages that really matter
+      are:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          <literal>core</literal> is the main, well-supported Core
+          distribution from Jane Street.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>core_extended</literal> contains a number of
+          experimental, but useful, extension libraries that are under
+          review for inclusion in Core. We use some of these in places,
+          but much less than Core itself.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>async</literal> is the network programming library
+          that we use in Part II to communicate with other hosts. You
+          can skip this for the initial installation until you get to
+          Part II, if you prefer.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <sect2 id="editing-environment">
+      <title>Editing Environment</title>
+      <para>
+        There's one last tool you need before getting started on the
+        examples. The default <literal>ocaml</literal> command gives us
+        an interactive command-line to experiment with code without
+        compiling it. However, it's quite a spartan experience and so we
+        use a more modern alternative.
+      </para>
+      <programlisting>
+$ opam install utop
+</programlisting>
+      <para>
+        The <literal>utop</literal> package is an interactive
+        command-line interface to OCaml that has tab-completion,
+        persistent history and integration with Emacs so that you can
+        run it within your editing environment.
+      </para>
+      <para>
+        Remember from earlier that OPAM never installs files directly
+        into your system directories, and this applies to
+        <literal>utop</literal> too. You'll find the binary in
+        <literal>~/.opam/4.01.0dev+trunk/bin</literal>. However, just
+        typing in <literal>utop</literal> from your shell should just
+        work, due to the <literal>opam config env</literal> step that
+        configures your shell. Don't forget to automate this as
+        described earlier, as it makes life much easier when developing
+        OCaml code!
+      </para>
+    </sect2>
+    <sect2 id="command-line">
+      <title>Command Line</title>
+      <para>
+        The <literal>utop</literal> tool provides a convenient
+        interactive toplevel, with full command history, command macros
+        and module name completion. When you first run
+        <literal>utop</literal>, you'll find yourself at an interactive
+        prompt with a bar at the bottom of the screen. The bottom bar
+        dynamically updates as you write text, and contains the possible
+        names of modules or variables that are valid at that point in
+        the phrase you are entering. You can press the
+        <literal>&lt;tab&gt;</literal> key to complete the phrase with
+        the first choice.
+      </para>
+      <para>
+        The <literal>~/.ocamlinit</literal> file in your home directory
+        initialises <literal>utop</literal> with common libraries and
+        syntax extensions so you don't need to type them in every time.
+        Now that you have Core installed, you should update it to load
+        it every time you start <literal>utop</literal>, by adding this
+        to it:
+      </para>
+      <programlisting language="ocaml">
+#use &quot;topfind&quot;
+#camlp4o
+#require &quot;core.top&quot;
+#require &quot;core.syntax&quot;
+</programlisting>
+      <para>
+        You can also optionally add some more useful libraries that are
+        used in the book, such as <literal>Core_extended</literal> and
+        <literal>Async</literal>. You can also open the Core module by
+        default if that's all you ever use the top-level for. Just
+        append these lines to the <literal>.ocamlinit</literal> file if
+        that's what you prefer.
+      </para>
+      <programlisting>
+#require &quot;core_extended&quot;
+#require &quot;async&quot;
+open Core.Std
+</programlisting>
+      <para>
+        When you run <literal>utop</literal> with these initialization
+        rules, it should start up with Core opened and ready to use.
+      </para>
+    </sect2>
+    <sect2 id="editors">
+      <title>Editors</title>
+      <note>
+      <title>
+      Note to reviewers
+      </title>
+      <para>
+        The instructions for editor setup are still being compiled. If
+        you have a relevant tip or HOWTO, then we'd
+        <emphasis>really</emphasis> appreciate you leaving a note here
+        with a pointer or direct instructions.
+      </para>
+      </note>
+      <sect3 id="emacs">
+        <title>Emacs</title>
+        <para>
+          TODO: Emacs users have tuareg and
+          <ulink url="http://www.typerex.org/">Typerex</ulink>.
+        </para>
+        <para>
+          To use <literal>utop</literal> directly in Emacs, add the
+          following line to your <literal>~/.emacs</literal> file:
+        </para>
+        <programlisting language="scheme">
+(autoload 'utop &quot;utop&quot; &quot;Toplevel for OCaml&quot; t)
+</programlisting>
+        <para>
+          You also need to make the <literal>utop.el</literal> file
+          available to your Emacs installation. The OPAM version of
+          <literal>utop</literal> installs it into the
+          <literal>~/.opam</literal> hierarchy, for example in
+          <literal>~/.opam/system/share/emacs/site-lisp/utop.el</literal>.
+          You may need to replace <literal>system</literal> with your
+          current compiler switch, such as
+          <literal>4.01.0dev+trunk</literal>.
+        </para>
+        <para>
+          Once this successfully loads in Emacs, you can run utop by
+          executing the command <literal>utop</literal> in Emacs. There
+          are more details instructions at the
+          <ulink url="https://github.com/diml/utop#integration-with-emacs">utop
+          homepage</ulink>.
+        </para>
+      </sect3>
+      <sect3 id="vim">
+        <title>Vim</title>
+        <para>
+          TODO: Vim users can use the built-in style, and
+          <ulink url="http://github.com/avsm/ocaml-annot">ocaml-annot</ulink>
+          may also be useful.
+        </para>
+      </sect3>
+      <sect3 id="eclipse">
+        <title>Eclipse</title>
+        <para>
+          Eclipse is a popular IDE usually used for Java development.
+          The OCaml Development Tools (ODT) project provides equivalent
+          IDE features for editing and compiling OCaml code, such as
+          automatic compilation and name completion.
+        </para>
+        <para>
+          ODT is distributed as a set of plugins for the Eclipse IDE
+          environment from the
+          <ulink url="http://ocamldt.free.fr">homepage</ulink>. You just
+          have to copy these plugins into your Eclipse distribution in
+          order to access the new OCaml facilities.
+        </para>
+      </sect3>
+    </sect2>
   </sect1>
 </appendix></book>
