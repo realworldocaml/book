@@ -39,6 +39,7 @@ release.  Make sure that you have the latest XCode (and Command Line Tools for
 XCode) installed from the App Store before starting the OCaml installation.
 
 ```
+$ brew update
 $ brew install ocaml
 $ brew install pcre
 ```
