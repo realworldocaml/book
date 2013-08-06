@@ -112,7 +112,7 @@ The type system will complain if it sees incompatible uses of the same method:
 ((typ ocamltop)(name objects/polymorphism.topscript)(part 2))
 ```
 
-The `..` in the inferred object types are ellipsis, standing for any other
+The `..` in the inferred object types are ellipses, standing for any other
 methods.  The type `< width : float; .. >` specifies an object that must have
 at least an `width` method, and possibly some others as well. Such object types
 are said to be _open_.
