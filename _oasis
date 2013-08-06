@@ -1,0 +1,29 @@
+OASISFormat: 0.3
+Name:        cohttp
+Version:     1.0.0
+Synopsis:    Real World OCaml build scripts
+Authors:     Anil Madhavapeddy
+License:     ISC
+Plugins:     META (0.3), DevFiles (0.3)
+BuildTools:  ocamlbuild
+
+Library rwo
+  Path: lib
+  Pack: true
+  Findlibname: rwo
+  Modules: Code_frag,Html_code_highlight,Para_frag,Xhtml,Xml_tree
+  BuildDepends:	uri (>= 1.3.8), xmlm, cmdliner, str, cow, core (>= 109.36.00)
+
+Executable rwo_run_toplevel
+  Path:               bin
+  MainIs:             rwo_run_toplevel.ml
+  Custom:             true
+  CompiledObject:     byte
+  BuildDepends:       compiler-libs.toplevel, rwo
+
+Executable rwo_syntax_highlight
+  Path:               bin
+  MainIs:             rwo_syntax_highlight.ml
+  Custom:             true
+  CompiledObject:     native
+  BuildDepends:       rwo
