@@ -198,10 +198,11 @@ Real World OCaml is split into three parts:
     learn about functional design patterns that help combine different
     features of the language to good effect.
 
-*   Part III is about understanding the OCaml runtime. It's a remarkably
-    simple system in comparison to other language runtimes (such as Java
-    or the .NET CLR), and you'll need to read this to build very high
-    performance systems or to interface with C libraries.  This is also
+*   Part III discusses OCaml's runtime system and compiler toolchain. It
+    is remarkably simple when compared to some other language implementations
+    (such as Java's or .NET's CLR). 
+    Reading this part will enable you to  build very high
+    performance systems, or to interface with C libraries.  This is also
     where we talk about profiling and debugging techniques using tools
     such as GNU `gdb`.
 
