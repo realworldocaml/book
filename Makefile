@@ -2,6 +2,8 @@ trunk:
 	./gen-book.sh -m trunk
 
 depend:
+	./clone-repos.sh
+	cd examples && git pull
 	cd scripts && ./build.sh
 	cd code && $(MAKE)
 
