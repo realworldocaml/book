@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 25a975184e710c9f3fe8de206fa358b4)
+# DO NOT EDIT (digest: 34a27098601b5e5456748cc09cffae82)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -15,16 +15,13 @@
 "_darcs": not_hygienic
 # Library rwo
 "lib/rwo.cmxs": use_rwo
-"lib/code_frag.cmx": for-pack(Rwo)
-"lib/para_frag.cmx": for-pack(Rwo)
-"lib/xml_tree.cmx": for-pack(Rwo)
 <lib/*.ml{,i}>: pkg_uri
 <lib/*.ml{,i}>: pkg_xmlm
 <lib/*.ml{,i}>: pkg_cmdliner
 <lib/*.ml{,i}>: pkg_str
 <lib/*.ml{,i}>: pkg_cow
 <lib/*.ml{,i}>: pkg_core
-# Executable rwo_run_toplevel
+# Executable rwo-run-toplevel
 "bin/rwo_run_toplevel.byte": use_rwo
 "bin/rwo_run_toplevel.byte": pkg_compiler-libs.toplevel
 "bin/rwo_run_toplevel.byte": pkg_uri
@@ -35,7 +32,7 @@
 "bin/rwo_run_toplevel.byte": pkg_core
 <bin/*.ml{,i}>: pkg_compiler-libs.toplevel
 "bin/rwo_run_toplevel.byte": custom
-# Executable rwo_syntax_highlight
+# Executable rwo-syntax-highlight
 "bin/rwo_syntax_highlight.native": use_rwo
 "bin/rwo_syntax_highlight.native": pkg_uri
 "bin/rwo_syntax_highlight.native": pkg_xmlm

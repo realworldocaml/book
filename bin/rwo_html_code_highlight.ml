@@ -16,7 +16,6 @@
  *)
 
 open Core.Std
-open Rwo
 
 let subst_with_code_frag _attr (c:Cow.Xml.t) : Cow.Xml.t =
   try
