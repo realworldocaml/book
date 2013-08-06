@@ -163,17 +163,16 @@ traditional functional-programming techniques like higher-order
 functions and immutable data types, as well as aspects of OCaml's
 powerful type and module systems.
 
-If you've learned some OCaml before, this book may surprise you with
-some differences from your past experience.  Core redefines most of
-the standard modules to be much more consistent, and so you'll need to
-adapt older code to work with Core.  We believe the Core model is
-worth learning; it's been successfully used on large,
-multi-million-line codebases and removes a big barrier to building
-sophisticated applications in OCaml.  There will always exist code
-that uses only the compiler standard library of course, but there are
-other online resources available to learn that.  Real World OCaml
-focuses on the techniques the authors have used in their personal
-experience to construct scalable, robust systems.
+If you've learned some OCaml before, this book may surprise you with some
+differences from your past experience.  Core redefines most of the standard
+modules to be much more consistent, and so you'll need to adapt older code to
+work with Core.  We believe the Core model is worth learning; it's been
+successfully used on large, multi-million-line codebases and removes a big
+barrier to building sophisticated applications in OCaml.  Code that uses only
+the traditional compiler standard library will always exist, but there are
+other online resources to learn how that works.  Real World OCaml focuses on
+the techniques the authors have used in their personal experience to construct
+scalable, robust software systems.
 
 ### What to expect
 
