@@ -14036,11 +14036,11 @@ val unique_handler : Sexp.t -&gt; query_handler_instance = &lt;fun&gt;
     style that encapsulates computation and data within logical
     <emphasis>objects</emphasis>. Each object contains some data stored
     in <emphasis>fields</emphasis>, and has <emphasis>method</emphasis>
-    functions that can be invoked against the data within the object.
-    The code definition behind an object is called a
-    <emphasis>class</emphasis>, and objects are constructed from a class
-    definition by calling a constructor with the data that the object
-    will use to build itself.
+    functions that can be invoked against the data within the object
+    (also called &quot;sending a message&quot; to the object). The code
+    definition behind an object is called a <emphasis>class</emphasis>,
+    and objects are constructed from a class definition by calling a
+    constructor with the data that the object will use to build itself.
   </para>
   <para>
     There are five fundamental properties that differentiate OOP from
@@ -14114,10 +14114,8 @@ val unique_handler : Sexp.t -&gt; query_handler_instance = &lt;fun&gt;
       OCaml is entirely different. Classes are used to construct objects
       and support inheritance, but classes are not types. Instead,
       objects have <emphasis>object types</emphasis>, and if you want to
-      use objects, you aren't required to use classes at all (though, as
-      we will see, if we choose to use classes, we can use the class
-      name as a shorthand for the type of objects created from that
-      class). Here's an example of a simple object.
+      use objects, you aren't required to use classes at all. Here's an
+      example of a simple object.
     </para>
     <programlisting language="ocaml">
 ...part 1 of objects/stack.topscript
@@ -14147,8 +14145,7 @@ val s : &lt; pop : int option; push : int -&gt; unit &gt; = &lt;obj&gt;
       <literal>&lt; ... &gt;</literal>, containing just the types of the
       methods. Fields, like <literal>v</literal>, are not part of the
       public interface of an object. All interaction with an object is
-      through its methods. The syntax for a method invocation (also
-      called &quot;sending a message&quot; to the object) uses the
+      through its methods. The syntax for a method invocation uses the
       <literal>#</literal> character.
     </para>
     <programlisting language="ocaml">
@@ -14238,11 +14235,11 @@ Error: This expression has type &lt; resize : [&gt; `Fullscreen ] -&gt; unit; ..
 </programlisting>
     <para>
       The <literal>..</literal> in the inferred object types are
-      ellipsis, standing for any other methods. The type
-      <literal>&lt; width : float; .. &gt;</literal> specifies an object
-      that must have at least an <literal>width</literal> method, and
-      possibly some others as well. Such object types are said to be
-      <emphasis>open</emphasis>.
+      ellipses, standing for other unspecified methods that the object
+      may have. The type <literal>&lt; width : float; .. &gt;</literal>
+      specifies an object that must have at least an
+      <literal>width</literal> method, and possibly some others as well.
+      Such object types are said to be <emphasis>open</emphasis>.
     </para>
     <para>
       We can manually <emphasis>close</emphasis> an object type using a
@@ -14271,8 +14268,8 @@ Error: This expression has type &lt; name : string; width : int &gt;
       The <literal>..</literal> in an open object type is an elision,
       standing for &quot;possibly more methods.&quot; It may not be
       apparent from the syntax, but an elided object type is actually
-      polymorphic. If we try to write a type definition, we get an
-      obscure error.
+      polymorphic. For example, if we try to write a type definition, we
+      get an &quot;unbound type variable&quot; error.
     </para>
     <programlisting language="ocaml">
 ...part 4 of objects/polymorphism.topscript
@@ -14282,14 +14279,15 @@ Error: A type variable is unbound in this type declaration.
 In type &lt; width : int; .. &gt; as 'a the variable 'a is unbound
 </programlisting>
     <para>
-      A <literal>..</literal> in an object type is called a
-      <emphasis>row variable</emphasis> and this typing scheme is called
-      <emphasis>row polymorphism</emphasis>. Even though
-      <literal>..</literal> doesn't look like a type variable, it
-      actually is. Row polymorphism is also used in polymorphic variant
-      types, and there is a close relationship between objects and
-      polymorphic variants: objects are to records what polymorphic
-      variants are to ordinary variants.
+      This is because <literal>..</literal> is really a special kind of
+      type variable called a <emphasis>row variable</emphasis>.
+    </para>
+    <para>
+      This kind of typing scheme using row variables is called
+      <emphasis>row polymorphism</emphasis>. Row polymorphism is also
+      used in polymorphic variant types, and there is a close
+      relationship between objects and polymorphic variants: objects are
+      to records what polymorphic variants are to ordinary variants.
     </para>
     </note>
     <para>
@@ -15036,9 +15034,8 @@ Error: This expression has type &lt; area : float; radius : int &gt;
     <title>OCaml Classes</title>
     <para>
       In OCaml, class definitions must be defined as toplevel statements
-      in a module. A class is not an object, and a class definition is
-      not an expression. The syntax for a class definition uses the
-      keyword <literal>class</literal>.
+      in a module. The syntax for a class definition uses the keyword
+      <literal>class</literal>.
     </para>
     <programlisting language="ocaml">
 (* classes/istack.topscript  *)
@@ -15162,10 +15159,10 @@ class ['a] stack :
       parameter).
     </para>
     <para>
-      The type annotation on the <literal>val</literal> declaration is
-      used to constrain type inference. If we omit these annotations,
-      the type inferred for the class will be &quot;too
-      polymorphic&quot;: <literal>init</literal> could have some type
+      The type annotation on the declaration of <literal>v</literal> is
+      used to constrain type inference. If we omit this annotation, the
+      type inferred for the class will be &quot;too polymorphic&quot;:
+      <literal>init</literal> could have some type
       <literal>'b list</literal>.
     </para>
     <programlisting language="ocaml">
@@ -15272,7 +15269,7 @@ type 'a iterator = &lt; get : 'a; has_value : bool; next : unit &gt;
   object
     val mutable current : 'a list = init
 
-    method has_value = init &lt;&gt; []
+    method has_value = current &lt;&gt; []
 
     method get =
       match current with
@@ -15349,7 +15346,7 @@ val it : int iterator = &lt;obj&gt;
 # it#next ;; 
 - : unit = ()
 # it#has_value ;; 
-- : bool = true
+- : bool = false
 </programlisting>
     <sect2 id="functional-iterators">
       <title>Functional iterators</title>
@@ -15396,9 +15393,9 @@ class ['a] stack :
         For example, a <literal>fold</literal> method for our
         <literal>['a] stack</literal> class should have type
         <literal>('b -&gt; 'a -&gt; 'b) -&gt; 'b -&gt; 'b</literal>,
-        where the method type is polymorphic over <literal>'b</literal>.
-        To express this we must use a type quantifier, as shown in the
-        following example.
+        where the <literal>'b</literal> is polymorphic. To express a
+        polymorphic method type like this we must use a type quantifier,
+        as shown in the following example.
       </para>
       <programlisting language="ocaml">
 ...part 5 of classes/iter.topscript
@@ -15428,10 +15425,11 @@ class ['a] stack :
   end
 </programlisting>
       <para>
-        Polymorphic method types must be specified directly
-        <emphasis>after</emphasis> the method name, which means that
-        method parameters must be expressed using a
-        <literal>fun</literal> or <literal>function</literal>
+        The type quantifier <literal>'b.</literal> can be read as
+        &quot;for all <literal>'b</literal>&quot;. Type quantifiers can
+        only be used <emphasis>directly after</emphasis> the method
+        name, which means that method parameters must be expressed using
+        a <literal>fun</literal> or <literal>function</literal>
         expression.
       </para>
     </sect2>
@@ -15780,14 +15778,15 @@ end = object
     acc + 1
 end
 </programlisting>
-    <sect2 id="binary-methods">
-      <title>Binary methods</title>
-      <para>
-        A <emphasis>binary method</emphasis> is a method that takes an
-        object of <literal>self</literal> type. One common example is
-        defining a method for equality.
-      </para>
-      <programlisting language="ocaml">
+  </sect1>
+  <sect1 id="binary-methods">
+    <title>Binary methods</title>
+    <para>
+      A <emphasis>binary method</emphasis> is a method that takes an
+      object of <literal>self</literal> type. One common example is
+      defining a method for equality.
+    </para>
+    <programlisting language="ocaml">
 # script classes/binary.topscript
 $ utop
 # class square w =
@@ -15817,25 +15816,30 @@ class circle :
     method radius : int
   end
 </programlisting>
-      <para>
-        We can now test different object instances for equality by using
-        the <literal>equals</literal> binary method.
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      Note how we can use the type annotation
+      <literal>(self: 'self)</literal> to obtain the type of the current
+      object.
+    </para>
+    <para>
+      We can now test different object instances for equality by using
+      the <literal>equals</literal> binary method.
+    </para>
+    <programlisting language="ocaml">
 ...part 1 of classes/binary.topscript
 # (new square 5)#equals (new square 5) ;; 
 - : bool = true
 # (new circle 10)#equals (new circle 7) ;; 
 - : bool = false
 </programlisting>
-      <para>
-        This works, but there is a problem lurking here. The method
-        <literal>equals</literal> takes an object of the exact type
-        <literal>square</literal> or <literal>circle</literal>. Because
-        of this, we can't define a common base class
-        <literal>shape</literal> that also includes an equality method.
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      This works, but there is a problem lurking here. The method
+      <literal>equals</literal> takes an object of the exact type
+      <literal>square</literal> or <literal>circle</literal>. Because of
+      this, we can't define a common base class <literal>shape</literal>
+      that also includes an equality method.
+    </para>
+    <programlisting language="ocaml">
 ...part 2 of classes/binary.topscript
 # type shape = &lt; equals : shape -&gt; bool; area : float &gt; ;; 
 type shape = &lt; area : float; equals : shape -&gt; bool &gt;
@@ -15847,46 +15851,45 @@ Error: Type square = &lt; area : float; equals : square -&gt; bool; width : int 
        is not a subtype of
          square = &lt; area : float; equals : square -&gt; bool; width : int &gt; 
 </programlisting>
-      <para>
-        The problem is that a <literal>square</literal> expects to be
-        compared with a <literal>square</literal>, not an arbitrary
-        shape; similarly for <literal>circle</literal>.
-      </para>
-      <para>
-        This problem is fundamental. Many languages solve it either with
-        narrowing (with dynamic type checking), or by method
-        overloading. Since OCaml has neither of these, what can we do?
-      </para>
-      <para>
-        Since the problematic method is equality, one proposal we could
-        consider is is to just drop it from the base type
-        <literal>shape</literal> and use polymorphic equality instead.
-        However, the built-in polymorphic equality has very poor
-        behavior when applied to objects.
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      The problem is that a <literal>square</literal> expects to be
+      compared with a <literal>square</literal>, not an arbitrary shape;
+      similarly for <literal>circle</literal>.
+    </para>
+    <para>
+      This problem is fundamental. Many languages solve it either with
+      narrowing (with dynamic type checking), or by method overloading.
+      Since OCaml has neither of these, what can we do?
+    </para>
+    <para>
+      Since the problematic method is equality, one proposal we could
+      consider is is to just drop it from the base type
+      <literal>shape</literal> and use polymorphic equality instead.
+      However, the built-in polymorphic equality has very poor behavior
+      when applied to objects.
+    </para>
+    <programlisting language="ocaml">
 ...part 3 of classes/binary.topscript
 # (object method area = 5 end) = (object method area = 5 end) ;; 
 - : bool = false
 </programlisting>
-      <para>
-        The problem here is that the built-in polymorphic equality
-        compares the method implementations, not their return values.
-        The method implementations (the function values that implement
-        the methods) are different, and so the equality comparison is
-        false. There are other reasons not to use the built-in
-        polymorphic equality, but these false negatives are a
-        showstopper.
-      </para>
-      <para>
-        If we want to define equality for shapes in general, the
-        remaining solution is to use the same approach as we described
-        for narrowing. That is, introduce a
-        <emphasis>representation</emphasis> type implemented using
-        variants, and implement the comparison based on the
-        representation type.
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      The problem here is that the built-in polymorphic equality
+      compares the method implementations, not their return values. The
+      method implementations (the function values that implement the
+      methods) are different, and so the equality comparison is false.
+      There are other reasons not to use the built-in polymorphic
+      equality, but these false negatives are a showstopper.
+    </para>
+    <para>
+      If we want to define equality for shapes in general, the remaining
+      solution is to use the same approach as we described for
+      narrowing. That is, introduce a
+      <emphasis>representation</emphasis> type implemented using
+      variants, and implement the comparison based on the representation
+      type.
+    </para>
+    <programlisting language="ocaml">
 ...part 4 of classes/binary.topscript
 # type shape_repr =
  | Square of int
@@ -15911,15 +15914,15 @@ class square :
     method width : int
   end
 </programlisting>
-      <para>
-        The binary method <literal>equals</literal> is now implemented
-        in terms of the concrete type <literal>shape_repr</literal>. In
-        fact, the objects are now isomorphic to the
-        <literal>shape_repr</literal> type. When using this pattern, you
-        will not be able to hide the <literal>repr</literal> method, but
-        you can hide the type definition using the module system.
-      </para>
-      <programlisting language="ocaml">
+    <para>
+      The binary method <literal>equals</literal> is now implemented in
+      terms of the concrete type <literal>shape_repr</literal>. In fact,
+      the objects are now isomorphic to the
+      <literal>shape_repr</literal> type. When using this pattern, you
+      will not be able to hide the <literal>repr</literal> method, but
+      you can hide the type definition using the module system.
+    </para>
+    <programlisting language="ocaml">
 (* classes/binary_module.ml  *)
 module Shapes : sig
   type shape_repr
@@ -15938,7 +15941,6 @@ end = struct
   ...
 end
 </programlisting>
-    </sect2>
   </sect1>
   <sect1 id="virtual-classes-and-methods">
     <title>Virtual classes and methods</title>
@@ -16009,9 +16011,9 @@ let open_display () =
         display and ensure that the Async scheduler is running.
       </para>
       <para>
-        Now let's a new module that contains classes for making squares
-        and circles. We include an <literal>on_click</literal> method
-        for adding event handlers to the shapes.
+        Now let's create a new module that contains classes for making
+        squares and circles. We include an <literal>on_click</literal>
+        method for adding event handlers to the shapes.
       </para>
       <programlisting language="ocaml">
 (* classes-async/verbose_shapes.ml  *)
@@ -16089,7 +16091,7 @@ end
       </para>
       <para>
         Here is the more succinct definition, starting with a virtual
-        <literal>square</literal> class that implements
+        <literal>shape</literal> class that implements
         <literal>on_click</literal> and <literal>on_mousedown</literal>.
       </para>
       <programlisting language="ocaml">
@@ -16244,12 +16246,12 @@ end
 # script classes/multiple_inheritance.topscript
 $ utop
 # class m1 =
-    object (self : 'self)
+    object (self)
      method get = 1
      method f = self#get
      method get = 2
   end  ;; 
-Characters 87-101:
+Characters 79-93:
 Error: The method `get' has multiple definitions in this object
 </programlisting>
       <para>
@@ -16259,12 +16261,12 @@ Error: The method `get' has multiple definitions in this object
       <programlisting language="ocaml">
 ...part 1 of classes/multiple_inheritance.topscript
 # class m2 =
-  object (self : 'self)
+  object (self)
      val x = 1
      method f = x
      val x = 2
   end ;; 
-Characters 73-82:
+Characters 65-74:
 Error: The instance variable `x' has multiple definitions in this object
 </programlisting>
       <para>
@@ -16342,19 +16344,19 @@ val x : m5a = &lt;obj&gt;
       <programlisting language="ocaml">
 ...part 4 of classes/multiple_inheritance.topscript
 # class m6 =
-  object (self : 'self)
+  object (self)
      method f1 = self#g
      method private g = 1
   end ;; 
 class m6 : object method f1 : int method private g : int end
 # class m7 =
-  object (self : 'self)
+  object (self)
      method f2 = self#g
      method private g = 2
   end ;; 
 class m7 : object method f2 : int method private g : int end
 # class m8 : object method f3 : int end =
-  object (self : 'self)
+  object (self)
      method f3 = self#g
      method private g = 3
   end ;; 
@@ -26082,10 +26084,11 @@ $ corebuild -pkg ctypes.foreign -lflags -cclib,-lncurses hello.native
       <literal>-cclib,-lncurses</literal> does that.
     </para>
     <para>
-      The next two directives pass <literal>-Wl --no-as-needed</literal>
-      to the system C compiler. The <literal>-Wl</literal> is
-      interpreted by the compiler as a directive for the system linker
-      <literal>ld</literal>, to which it passes
+      On some distributions such as Ubuntu, you'll also need to add
+      <literal>-cclib,-Xlinker,-cclib,--no-as-needed</literal> to the
+      <literal>-lflags</literal> directive. <literal>-Xlinker</literal>
+      is interpreted by the compiler as a directive for the system
+      linker <literal>ld</literal>, to which it passes
       <literal>--no-as-needed</literal>. Several modern OS distributions
       (such as Ubuntu 11.10 onwards) configure the system linker to only
       link in libraries that directly contain symbols used by the
@@ -26096,9 +26099,9 @@ $ corebuild -pkg ctypes.foreign -lflags -cclib,-lncurses hello.native
     <para>
       The <literal>--no-as-needed</literal> flag disables this behavior
       and ensures all the specified libraries are linked despite not
-      being directly used. The flag isn't needed on all operating
-      systems, but should be recognized by all modern linkers and not
-      cause any harm if you specify it by default.
+      being directly used. The flag unfortunately doesn't work
+      everywhere (notably, MacOS X should <emphasis>not</emphasis> have
+      this passed to it).
     </para>
     </note>
     <para>
@@ -32921,7 +32924,7 @@ Gloabal configuration:
       current shell with just one command.
     </para>
     <programlisting>
-$ eval `opam config -env`
+$ eval `opam config env`
 </programlisting>
     <para>
       This evaluates the results of running
