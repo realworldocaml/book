@@ -512,10 +512,10 @@ flags to `atdgen`. The important ones for JSON are:
 * `-j-defaults`: always explicitly output a JSON value if possible.
   This requires the default value for that field to be defined in the ATD specification.
 
-The full ATD specification is quite sophisticated and well documented online
-at its homepage.  The ATD compiler can also target formats other than JSON,
-and outputs code for other languages such as Java if you need more
-interoperability.
+The full [ATD specification](http://mjambon.com/atdgen/atdgen-manual.html) is
+quite sophisticated and documented online.  The ATD compiler can also target
+formats other than JSON and outputs code for other languages (such as Java) if
+you need more interoperability.
 
 There are also several similar projects that automate the code generation
 process. [Piqi](http://piqi.org) supports conversions between XML. JSON, and
