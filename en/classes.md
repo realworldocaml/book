@@ -364,11 +364,10 @@ when applied to objects.
 ((typ ocamltop)(name classes/binary.topscript)(part 3))
 ```
 
-The problem here is that the built-in polymorphic equality compares the method
-implementations, not their return values.  The method implementations (the
-function values that implement the methods) are different, and so the equality
-comparison is false.  There are other reasons not to use the built-in
-polymorphic equality, but these false negatives are a showstopper.
+The problem here is that two objects are considered equal by the built-in
+polymorphic equality if and only if they are physically equal.  There are other
+reasons not to use the built-in polymorphic equality, but these false negatives
+are a showstopper.
 
 If we want to define equality for shapes in general, the remaining solution is
 to use the same approach as we described for narrowing.  That is, introduce a
