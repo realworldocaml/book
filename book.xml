@@ -130,9 +130,10 @@
       that produces performant code without requiring heavy optimization
       and without the complexities of dynamic JIT compilation. This,
       along with OCaml's strict evaluation model, makes runtime behavior
-      easy to predict. The garbage collector is incremental, letting you
-      avoid large GC-related pauses, and precise, meaning it will
-      collect all unreferenced data (unlike many reference-counting
+      easy to predict. The garbage collector is
+      <emphasis>incremental</emphasis>, letting you avoid large
+      GC-related pauses, and <emphasis>precise</emphasis>, meaning it
+      will collect all unreferenced data (unlike many reference-counting
       collectors), and the runtime is simple and highly portable.
     </para>
     <para>
@@ -158,18 +159,20 @@
         1980s.
       </para>
       <para>
-        In 1990, Xavier Leroy and Damien Doligez built a new
-        implementation called Caml Light that was based on a bytecode
-        interpreter with a fast sequential garbage collector. Over the
-        next few years useful libraries appeared, such as Michel Mauny's
-        syntax manipulation tools, and this helped promote the use of
-        Caml in education and research teams.
+        The first implementation of Caml appeared in 1987, initially
+        created by Ascander Saurez and later continued by Pierre Weis
+        and Michel Mauny. In 1990, Xavier Leroy and Damien Doligez built
+        a new implementation called Caml Light that was based on a
+        bytecode interpreter with a fast sequential garbage collector.
+        Over the next few years useful libraries appeared, such as
+        Michel Mauny's syntax manipulation tools, and this helped
+        promote the use of Caml in education and research teams.
       </para>
       <para>
         Xavier Leroy continued extending Caml Light with new features,
-        and this resulted in the 1995 release of Caml Special Light.
-        This improved the executable efficiency significantly by adding
-        a fast native code compiler that made Caml's performance
+        which resulted in the 1995 release of Caml Special Light. This
+        improved the executable efficiency significantly by adding a
+        fast native code compiler that made Caml's performance
         competitive with mainstream languages such as C++. A module
         system inspired by Standard ML also provided powerful facilities
         for abstraction and made larger-scale programs easier to
@@ -182,18 +185,18 @@
         common OO idioms in a statically type-safe way, whereas the same
         idioms required runtime checks in languages such as C++ or Java.
         In 2000, Jacques Garrigue extended OCaml with several new
-        features such as polymorphic methods and variants and labelled
+        features such as polymorphic methods and variants and labeled
         and optional arguments.
       </para>
       <para>
-        The last decade has seen OCaml attract a significant user base,
+        The last decade has seen OCaml attract a significant user base
         and language improvements have been steadily added to support
         the growing codebases that use the language both commercially
         and for academic use. First-class modules, Generalized Algebraic
         Data Types (GADTs) and dynamic linking have improved the
-        flexibility of the language, and there is fast native code
-        support for x86_64, ARM, PowerPC and Sparc, making OCaml a good
-        choice for systems where resource usage, predictability and
+        flexibility of the language and there is fast native code
+        support for x86_64, ARM, PowerPC, and Sparc, making OCaml a good
+        choice for systems where resource usage, predictability, and
         performance all matter.
       </para>
     </sect2>
@@ -274,16 +277,17 @@
     </para>
     <para>
       If you've learned some OCaml before, this book may surprise you
-      with some differences from your past experience. Core redefines
-      most of the standard modules to be much more consistent, and so
-      you'll need to adapt older code to work with Core. We believe the
-      Core model is worth learning; it's been successfully used on
-      large, multi-million-line codebases and removes a big barrier to
-      building sophisticated applications in OCaml. There will always
-      exist code that uses only the compiler standard library of course,
-      but there are other online resources available to learn that. Real
-      World OCaml focuses on the techniques the authors have used in
-      their personal experience to construct scalable, robust systems.
+      with some differences from your experience. Core redefines most of
+      the standard modules to be much more consistent, so you'll need to
+      adapt older code to work with Core. We believe the Core model is
+      worth learning; it's been successfully used on large,
+      multi-million-line codebases and removes a big barrier to building
+      sophisticated applications in OCaml. Code that uses only the
+      traditional compiler standard library will always exist, but there
+      are other online resources to learn how that works. Real World
+      OCaml focuses on the techniques the authors have used in their
+      personal experience to construct scalable, robust software
+      systems.
     </para>
     <sect2 id="what-to-expect">
       <title>What to expect</title>
@@ -302,10 +306,10 @@
           </para>
           <para>
             After covering the core language, Part I then moves onto
-            more advanced features like modules, functors and objects.
-            which may take some time to digest, but understanding these
-            concepts is important. Even beyond OCaml, these ideas will
-            put you in good stead when switching to other modern
+            more advanced features like modules, functors and objects,
+            which may take some time to digest. Understanding these
+            concepts is important, though. These ideas will put you in
+            good stead even beyond OCaml when switching to other modern
             languages, many of which have drawn inspiration from ML.
           </para>
         </listitem>
@@ -313,20 +317,22 @@
           <para>
             Part II builds on the basics by working through useful tools
             and techniques for addressing common practical applications,
-            from command-line parsing to network programming. Along the
-            way, you'll learn about functional design patterns that help
-            combine different features of the language to good effect.
+            from command-line parsing to asynchronous network
+            programming. Along the way, you'll see how some of the
+            concepts from Part I are glued together into real libraries
+            and tools that combine different features of the language to
+            good effect.
           </para>
         </listitem>
         <listitem>
           <para>
-            Part III is about understanding the OCaml runtime. It's a
-            remarkably simple system in comparison to other language
-            runtimes (such as Java or the .NET CLR), and you'll need to
-            read this to build very high performance systems or to
-            interface with C libraries. This is also where we talk about
-            profiling and debugging techniques using tools such as GNU
-            <literal>gdb</literal>.
+            Part III discusses OCaml's runtime system and compiler
+            toolchain. It is remarkably simple when compared to some
+            other language implementations (such as Java's or .NET's
+            CLR). Reading this part will enable you to build very high
+            performance systems, or to interface with C libraries. This
+            is also where we talk about profiling and debugging
+            techniques using tools such as GNU <literal>gdb</literal>.
           </para>
         </listitem>
       </itemizedlist>
@@ -19293,7 +19299,7 @@ let command =
         <listitem>
           <para>
             The specification and the callback function follow as
-            non-labelled arguments.
+            non-labeled arguments.
           </para>
         </listitem>
       </itemizedlist>
@@ -19804,8 +19810,8 @@ let () =
       </para>
     </sect2>
   </sect1>
-  <sect1 id="adding-labelled-flags-to-the-command-line">
-    <title>Adding labelled flags to the command line</title>
+  <sect1 id="adding-labeled-flags-to-the-command-line">
+    <title>Adding labeled flags to the command line</title>
     <para>
       You aren't just limited to anonymous arguments on the
       command-line. A <emphasis>flag</emphasis> is a named field that
@@ -19862,7 +19868,7 @@ let () = Command.run command
 </programlisting>
     <para>
       The specification now uses the <literal>flag</literal> function to
-      define the two new labelled command-line arguments. The
+      define the two new labeled command-line arguments. The
       <literal>doc</literal> string is formatted so that the first word
       is the short name that appears in the usage text, with the
       remainder being the full help text. Notice that the
@@ -20452,12 +20458,12 @@ $ utop
         chain is a <literal>Date.t -&gt; int option</literal>.
       </para>
     </sect2>
-    <sect2 id="adding-labelled-arguments-to-callbacks">
-      <title>Adding labelled arguments to callbacks</title>
+    <sect2 id="adding-labeled-arguments-to-callbacks">
+      <title>Adding labeled arguments to callbacks</title>
       <para>
         The <literal>step</literal> chaining lets you control the types
         of your callbacks very easily. This can help you match existing
-        interfaces or make things more explicit by adding labelled
+        interfaces or make things more explicit by adding labeled
         arguments.
       </para>
       <programlisting language="ocaml">
@@ -20484,11 +20490,11 @@ let () = Command.run add
       <para>
         This <literal>cal_add_labels</literal> example goes back to our
         non-interactive calendar addition program, but the
-        <literal>add_days</literal> main function now expects labelled
+        <literal>add_days</literal> main function now expects labeled
         arguments. The <literal>step</literal> function in the
         specification simply converts the default
         <literal>base</literal> and <literal>days</literal> arguments
-        into a labelled function.
+        into a labeled function.
       </para>
       <para>
         Labelled arguments are more verbose but can also help prevent
@@ -20735,8 +20741,8 @@ add      diff     help     version
     depending on what your problem is.
   </para>
   <para>
-    We'll start by using the popular and simple JSON data format, and
-    then look at other serialization formats later in in the book. This
+    We'll start by using the popular and simple JSON data format and
+    then look at other serialization formats later in the book. This
     chapter introduces you to a couple of new techniques that glue
     together the basic ideas from Part I of the book by using:
   </para>
@@ -21529,8 +21535,8 @@ $ atdgen -version
 </programlisting>
     <para>
       The command-line tool will be installed within your
-      <literal>~/.opam</literal> directory, and will already be on your
-      <literal>PATH</literal> from running
+      <literal>~/.opam</literal> directory, and should already be on
+      your <literal>PATH</literal> from running
       <literal>opam config env</literal>. See
       <xref linkend="installation"/> if this isn't working.
     </para>
@@ -21726,10 +21732,12 @@ val string_of_authorization_response :
         </listitem>
       </itemizedlist>
       <para>
-        The full ATD specification is quite sophisticated and well
-        documented online at its homepage. The ATD compiler can also
-        target formats other than JSON, and outputs code for other
-        languages such as Java if you need more interoperability.
+        The full
+        <ulink url="http://mjambon.com/atdgen/atdgen-manual.html">ATD
+        specification</ulink> is quite sophisticated and documented
+        online. The ATD compiler can also target formats other than JSON
+        and outputs code for other languages (such as Java) if you need
+        more interoperability.
       </para>
       <para>
         There are also several similar projects that automate the code
@@ -30295,7 +30303,7 @@ Error: This expression has type [&gt; `Nu of int ]
           </listitem>
           <listitem>
             <para>
-              discarding optional labelled arguments.
+              discarding optional labeled arguments.
             </para>
           </listitem>
           <listitem>
