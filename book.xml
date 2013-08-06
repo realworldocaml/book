@@ -94,9 +94,10 @@
         <para>
           <emphasis>Automatic type inference</emphasis> to avoid having
           to laboriously define the type of every single variable in a
-          program, and instead have them inferred based on how a value
-          is used. Available in C# with implicitly typed local
-          variables, and C++11 with its <literal>auto</literal> keyword.
+          program and instead have them inferred based on how a value is
+          used. Available in C# with implicitly typed local variables
+          and in a limited form in C++11 with its
+          <literal>auto</literal> keyword.
         </para>
       </listitem>
       <listitem>
@@ -356,52 +357,6 @@
   </sect1>
   <sect1 id="about-the-authors">
     <title>About the Authors</title>
-    <sect2 id="jason-hickey">
-      <title>Jason Hickey</title>
-      <para>
-        Jason Hickey is a Software Engineer at Google Inc. in Mountain
-        View, California. He is part of the team that designs and
-        develops the global computing infrastructure used to support
-        Google services, including the software systems for managing and
-        scheduling massively distributed computing resources.
-      </para>
-      <para>
-        Prior to joining Google, Jason was an Assistant Professor of
-        Computer Science at Caltech, where his research was in reliable
-        and fault-tolerant computing systems, including programming
-        language design, formal methods, compilers, and new models of
-        distributed computation. He obtained his PhD in Computer Science
-        from Cornell University, where he studied programming languages.
-        He is the author of the MetaPRL system, a logical framework for
-        design and analysis of large software systems; and OMake, an
-        advanced build system for large software projects. He is the
-        author of the textbook, <emphasis>An Introduction to Objective
-        Caml</emphasis> (unpublished).
-      </para>
-    </sect2>
-    <sect2 id="anil-madhavapeddy">
-      <title>Anil Madhavapeddy</title>
-      <para>
-        Anil Madhavapeddy is a Senior Research Fellow at the University
-        of Cambridge, based in the Systems Research Group. He was on the
-        original team that developed the Xen hypervisor, and helped
-        develop an industry-leading cloud management toolstack written
-        entirely in OCaml. This XenServer product has been deployed on
-        millions of physical hosts, and drives critical infrastructure
-        for many Fortune 500 companies.
-      </para>
-      <para>
-        Prior to obtaining his PhD in 2006 from the University of
-        Cambridge, Anil had a diverse background in industry at NetApp,
-        NASA and Internet Vision. He is an active member of the
-        open-source development community with the OpenBSD operating
-        system, is on the steering committee of the Commercial Uses of
-        Functional Programming ACM workshop, and serves on the boards of
-        startup companies where OCaml is extensively used. He has also
-        developed the Mirage unikernel system that is written entirely
-        in OCaml from the device drivers up.
-      </para>
-    </sect2>
     <sect2 id="yaron-minsky">
       <title>Yaron Minsky</title>
       <para>
@@ -421,6 +376,52 @@
         the Commercial Users of Functional Programming, and is a member
         of the steering committee for the International Conference on
         Functional Programming.
+      </para>
+    </sect2>
+    <sect2 id="anil-madhavapeddy">
+      <title>Anil Madhavapeddy</title>
+      <para>
+        Anil Madhavapeddy is a Senior Research Fellow at the University
+        of Cambridge, based in the Systems Research Group. He was on the
+        original team that developed the Xen hypervisor and helped
+        develop an industry-leading cloud management toolstack written
+        entirely in OCaml. This XenServer product has been deployed on
+        millions of physical hosts, and drives critical infrastructure
+        for many Fortune 500 companies.
+      </para>
+      <para>
+        Prior to obtaining his PhD in 2006 from the University of
+        Cambridge, Anil had a diverse background in industry at NetApp,
+        NASA, and Internet Vision. He is an active member of the
+        open-source development community with the OpenBSD operating
+        system, is on the steering committee of the ACM Commercial Uses
+        of Functional Programming workshop, and serves on the boards of
+        startup companies where OCaml is extensively used. He has also
+        developed the Mirage unikernel system that is written entirely
+        in OCaml from the device drivers up.
+      </para>
+    </sect2>
+    <sect2 id="jason-hickey">
+      <title>Jason Hickey</title>
+      <para>
+        Jason Hickey is a Software Engineer at Google Inc. in Mountain
+        View, California. He is part of the team that designs and
+        develops the global computing infrastructure used to support
+        Google services, including the software systems for managing and
+        scheduling massively distributed computing resources.
+      </para>
+      <para>
+        Prior to joining Google, Jason was an Assistant Professor of
+        Computer Science at Caltech, where he researched reliable and
+        fault-tolerant computing systems, including programming language
+        design, formal methods, compilers, and new models of distributed
+        computation. He obtained his PhD in Computer Science from
+        Cornell University, where he studied programming languages. He
+        is the author of the MetaPRL system, a logical framework for
+        design and analysis of large software systems; and OMake, an
+        advanced build system for large software projects. He is the
+        author of the textbook, <emphasis>An Introduction to Objective
+        Caml</emphasis> (unpublished).
       </para>
     </sect2>
   </sect1>
@@ -25925,7 +25926,7 @@ let initscr =
       <listitem>
         <para>
           the C function call name, which is looked up using the
-          <literal>dlsym</literal> C standard library function.
+          <literal>dlsym</literal> POSIX function.
         </para>
       </listitem>
       <listitem>
@@ -32589,6 +32590,7 @@ Hello OCaml World!
         installation.
       </para>
       <programlisting>
+$ brew update
 $ brew install ocaml
 $ brew install pcre
 </programlisting>
@@ -32979,11 +32981,11 @@ $ cat ~/.profile &gt;&gt; ~/.bash_profile
 $ opam switch 4.01.0dev+trunk
 </programlisting>
     <para>
-      This step will take about 5-10 minutes on a modern machine, and
-      will download and install (within the <literal>~/.opam</literal>
-      directory) a custom OCaml compiler. OPAM supports multiple such
-      installations, and you'll find this very useful if you ever decide
-      to hack on the internals of the compiler itself, or you want to
+      This step will take around ten or fifteen minutes on a modern
+      machine, and will download and install the OCaml compiler within
+      the <literal>~/.opam</literal> directory). OPAM supports multiple
+      compiler installations, and you'll find this very useful if you
+      ever decide to hack on the internals of the compiler or want to
       experiment with the latest release without sacrificing your
       current installation. You only need to install this compiler once,
       and future updates will be much faster as they only recompile
