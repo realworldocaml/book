@@ -140,11 +140,11 @@ trying a source installation.
 <note>
 <title>Note to reviewers</title>
 
-We instruct you install the unreleased trunk version of OCaml
+We instruct you install the unreleased 4.01 branch version of OCaml
 in these instructions, as we take advantage of some recent additions
 to the language that simplify explanations in the book.  The 4.01
 release will happen before the book is released, but you may run
-into "bleeding edge" bugs with the trunk release.  Leave a comment
+into "bleeding edge" bugs with the release.  Leave a comment
 here if you do and we'll address them.
 
 </note>
@@ -161,7 +161,7 @@ Before installing OPAM, make sure that you have the OCaml compiler
 installed as described above.  Once installed, the entire OPAM
 database is held in your home directory (normally `$HOME/.opam`).  If
 something goes wrong, just delete this `.opam` directory and start
-over from a clean slate.  If youre using a beta version of OPAM,
+over from a clean slate.  If you're using a beta version of OPAM,
 please upgrade it to at least version 1.0.0 or greater before
 proceeding.
 
