@@ -26,3 +26,10 @@ Executable "rwo-syntax-highlight"
   Custom:             true
   CompiledObject:     native
   BuildDepends:       rwo
+
+Executable "rwo-html-code-highlight"
+  Path:               bin
+  MainIs:             rwo_html_code_highlight.ml
+  Custom:             true
+  CompiledObject:     native
+  BuildDepends:       rwo

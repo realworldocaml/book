@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 34a27098601b5e5456748cc09cffae82)
+# DO NOT EDIT (digest: 20d3688fcb74fc5c8a0b1377d517f44d)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -40,6 +40,15 @@
 "bin/rwo_syntax_highlight.native": pkg_str
 "bin/rwo_syntax_highlight.native": pkg_cow
 "bin/rwo_syntax_highlight.native": pkg_core
+"bin/rwo_syntax_highlight.native": custom
+# Executable rwo-html-code-highlight
+"bin/rwo_html_code_highlight.native": use_rwo
+"bin/rwo_html_code_highlight.native": pkg_uri
+"bin/rwo_html_code_highlight.native": pkg_xmlm
+"bin/rwo_html_code_highlight.native": pkg_cmdliner
+"bin/rwo_html_code_highlight.native": pkg_str
+"bin/rwo_html_code_highlight.native": pkg_cow
+"bin/rwo_html_code_highlight.native": pkg_core
 <bin/*.ml{,i}>: use_rwo
 <bin/*.ml{,i}>: pkg_uri
 <bin/*.ml{,i}>: pkg_xmlm
@@ -47,7 +56,7 @@
 <bin/*.ml{,i}>: pkg_str
 <bin/*.ml{,i}>: pkg_cow
 <bin/*.ml{,i}>: pkg_core
-"bin/rwo_syntax_highlight.native": custom
+"bin/rwo_html_code_highlight.native": custom
 # OASIS_STOP
 true: syntax_camlp4o, pkg_sexplib.syntax, pkg_cow.syntax
 true: thread
