@@ -8,9 +8,9 @@ other times you want something that is easy for humans to edit.  To this end,
 OCaml libraries provide several techniques for data serialization depending on
 what your problem is.
 
-We'll start by using the popular and simple JSON data format, and then look at
-other serialization formats later in in the book.  This chapter introduces you
-to a couple of new techniques that glue together the basic ideas from Part I of
+We'll start by using the popular and simple JSON data format and then look at
+other serialization formats later in the book.  This chapter introduces you to
+a couple of new techniques that glue together the basic ideas from Part I of
 the book by using:
 
 * _polymorphic variants_ to write more extensible libraries and protocols (but
