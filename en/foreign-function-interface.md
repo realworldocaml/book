@@ -173,18 +173,18 @@ uses `-cclib` to pass directives through to the system compiler (normally `gcc`
 or `clang`).  We first need to link to the `ncurses` C library to make the
 symbols available to Ctypes, and `-cclib,-lncurses` does that.
 
-The next two directives pass `-Wl --no-as-needed` to the system C compiler.  The
-`-Wl` is interpreted by the compiler as a directive for the system linker `ld`,
-to which it passes `--no-as-needed`.  Several modern OS distributions (such as
+On some distributions such as Ubuntu, you'll also need to add
+`-cclib,-Xlinker,-cclib,--no-as-needed` to the `-lflags` directive.  `-Xlinker`
+is interpreted by the compiler as a directive for the system linker `ld`, to
+which it passes `--no-as-needed`.  Several modern OS distributions (such as
 Ubuntu 11.10 onwards) configure the system linker to only link in libraries
 that directly contain symbols used by the program.  However, when we use
 Ctypes, those symbols are not referenced until runtime, which results an
 exception due to the library not being available.
 
 The `--no-as-needed` flag disables this behavior and ensures all the specified
-libraries are linked despite not being directly used.  The flag isn't needed on
-all operating systems, but should be recognized by all modern linkers and not
-cause any harm if you specify it by default.
+libraries are linked despite not being directly used.  The flag unfortunately
+doesn't work everywhere (notably, MacOS X should _not_ have this passed to it).
 
 </note>
 
