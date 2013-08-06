@@ -363,6 +363,7 @@ enabled.
 
 ```
 $ opam switch 4.01.0dev+trunk
+$ eval `opam config env`
 ```
 
 This step will take around ten or fifteen minutes on a modern machine, and will
