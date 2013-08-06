@@ -195,6 +195,7 @@ clean:
 clean-%:
 	find $* -name \*.out | xargs rm
 	rm -rf $*/_build
+	rm -rf _build/$*
 
 distclean:
 	for i in $(dirs); do $(MAKE) clean-$$i; done
