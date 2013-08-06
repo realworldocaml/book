@@ -364,14 +364,13 @@ enabled.
 $ opam switch 4.01.0dev+trunk
 ```
 
-This step will take about 5-10 minutes on a modern machine, and will
-download and install (within the `~/.opam` directory) a custom OCaml
-compiler.  OPAM supports multiple such installations, and you'll find
-this very useful if you ever decide to hack on the internals of the
-compiler itself, or you want to experiment with the latest release
-without sacrificing your current installation.  You only need to
-install this compiler once, and future updates will be much faster as
-they only recompile libraries within the compiler installation.
+This step will take around ten or fifteen minutes on a modern machine, and will
+download and install the OCaml compiler within the `~/.opam` directory).  OPAM
+supports multiple compiler installations, and you'll find this very useful if
+you ever decide to hack on the internals of the compiler or want to experiment
+with the latest release without sacrificing your current installation.  You
+only need to install this compiler once, and future updates will be much faster
+as they only recompile libraries within the compiler installation.
 
 The new compiler will be installed into `~/.opam/4.01.0dev+trunk`
 and any libraries you install for it will be tracked separately from
