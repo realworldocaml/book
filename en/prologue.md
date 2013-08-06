@@ -186,22 +186,23 @@ Real World OCaml is split into three parts:
     will be explained in more depth in the chapters that follow.
 
     After covering the core language, Part I then moves onto more
-    advanced features like modules, functors and objects. which may take
-    some time to digest, but understanding these concepts is important.
-    Even beyond OCaml, these ideas will put you in good stead when
+    advanced features like modules, functors and objects, which may take
+    some time to digest.  Understanding these concepts is important, though.
+    These ideas will put you in good stead even beyond OCaml when
     switching to other modern languages, many of which have drawn
     inspiration from ML.
 
 *   Part II builds on the basics by working through useful tools and
     techniques for addressing common practical applications, from
-    command-line parsing to network programming.  Along the way, you'll
-    learn about functional design patterns that help combine different
+    command-line parsing to asynchronous network programming.
+    Along the way, you'll see how some of the concepts from Part I are
+    glued together into real libraries and tools that combine different
     features of the language to good effect.
 
 *   Part III discusses OCaml's runtime system and compiler toolchain. It
     is remarkably simple when compared to some other language implementations
     (such as Java's or .NET's CLR). 
-    Reading this part will enable you to  build very high
+    Reading this part will enable you to build very high
     performance systems, or to interface with C libraries.  This is also
     where we talk about profiling and debugging techniques using tools
     such as GNU `gdb`.
