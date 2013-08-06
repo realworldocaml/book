@@ -580,7 +580,7 @@ second when clicked:
 ((typ ocaml)(name classes-async/shapes.ml)(part 6))
 ```
 
-This initializers can also be added using mixins:
+These initializers can also be added using mixins:
 
 ```frag
 ((typ ocaml)(name classes-async/shapes.ml)(part 7))
