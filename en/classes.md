@@ -319,7 +319,7 @@ invoked in subclasses of `counter_with_sig`.
 ((typ ocaml)(name classes/doc.ml)(part 5))
 ```
 
-### Binary methods
+## Binary methods
 
 A _binary method_ is a method that takes an object of `self` type.
 One common example is defining a method for equality. 
@@ -327,6 +327,9 @@ One common example is defining a method for equality.
 ```frag
 ((typ ocamltop)(name classes/binary.topscript)(part 0))
 ```
+
+Note how we can use the type annotation `(self: 'self)` to obtain the type of
+the current object.
 
 We can now test different object instances for equality by using
 the `equals` binary method.
