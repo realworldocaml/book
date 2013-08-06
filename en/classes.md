@@ -10,8 +10,7 @@ existing methods.
 ## OCaml Classes
 
 In OCaml, class definitions must be defined as toplevel statements in a module.
-A class is not an object, and a class definition is not an expression.  The
-syntax for a class definition uses the keyword `class`.
+The syntax for a class definition uses the keyword `class`.
 
 ```frag
 ((typ ocaml)(name classes/istack.topscript)(part 0))
@@ -66,8 +65,8 @@ Note that the type parameter `['a]` in the definition uses square brackets, but
 other uses of the type can omit them (or use parentheses if there is more than
 one type parameter).
 
-The type annotation on the `val` declaration is used to constrain type
-inference.  If we omit these annotations, the type inferred for the class will
+The type annotation on the declaration of `v` is used to constrain type
+inference.  If we omit this annotation, the type inferred for the class will
 be "too polymorphic": `init` could have some type `'b list`.
 
 ```frag
@@ -156,16 +155,17 @@ these methods take a function that produces a value of some other
 type than the elements of the set.
 
 For example, a `fold` method for our `['a] stack` class should have type `('b
--> 'a -> 'b) -> 'b -> 'b`, where the method type is polymorphic over `'b`. To
-express this we must use a type quantifier, as shown in the following example.
+-> 'a -> 'b) -> 'b -> 'b`, where the `'b` is polymorphic. To express a
+polymorphic method type like this we must use a type quantifier, as shown in
+the following example.
 
 ```frag
 ((typ ocamltop)(name classes/iter.topscript)(part 5))
 ```
 
-Polymorphic method types must be specified directly _after_ the method name,
-which means that method parameters must be expressed using a `fun` or
-`function` expression.
+The type quantifier `'b.` can be read as "for all `'b`".  Type quantifiers can
+only be used _directly after_ the method name, which means that method
+parameters must be expressed using a `fun` or `function` expression.
 
 ## Inheritance
 
@@ -320,7 +320,7 @@ invoked in subclasses of `counter_with_sig`.
 ((typ ocaml)(name classes/doc.ml)(part 5))
 ```
 
-### Binary methods
+## Binary methods
 
 A _binary method_ is a method that takes an object of `self` type.
 One common example is defining a method for equality. 
@@ -328,6 +328,9 @@ One common example is defining a method for equality.
 ```frag
 ((typ ocamltop)(name classes/binary.topscript)(part 0))
 ```
+
+Note how we can use the type annotation `(self: 'self)` to obtain the type of
+the current object.
 
 We can now test different object instances for equality by using
 the `equals` binary method.
@@ -421,8 +424,9 @@ drawn on the display at regular intervals via the `repaint` function. Finally,
 we also define an `open_display` function to open a graphical display and
 ensure that the Async scheduler is running.
 
-Now let's a new module that contains classes for making squares and circles. We
-include an `on_click` method for adding event handlers to the shapes.
+Now let's create a new module that contains classes for making squares and
+circles. We include an `on_click` method for adding event handlers to the
+shapes.
 
 ```frag
 ((typ ocaml)(name classes-async/verbose_shapes.ml)(part 0))
@@ -442,7 +446,7 @@ depends on `contains` which has a different definition in each class. The
 solution is to create a _virtual_ class. This class will declare a `contains`
 method, but leave its definition to the subclasses.
 
-Here is the more succinct definition, starting with a virtual `square` class
+Here is the more succinct definition, starting with a virtual `shape` class
 that implements `on_click` and `on_mousedown`.
 
 ```frag

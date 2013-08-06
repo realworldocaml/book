@@ -9,13 +9,13 @@ chapter [xref](#classes), we'll introduce you to classes and inheritance.
 <note>
 <title>What is Object-Oriented Programming?</title>
 
-Object-oriented programming (often shorted to OOP) is a programming style
-that encapsulates computation and data within logical *objects*.  Each
-object contains some data stored in *fields*, and has
-*method* functions that can be invoked against the data within the object.
-The code definition behind an object is called a *class*, and objects are
-constructed from a class definition by calling a constructor with the
-data that the object will use to build itself.
+Object-oriented programming (often shorted to OOP) is a programming style that
+encapsulates computation and data within logical *objects*.  Each object
+contains some data stored in *fields*, and has *method* functions that can be
+invoked against the data within the object (also called "sending a message" to
+the object).  The code definition behind an object is called a *class*, and
+objects are constructed from a class definition by calling a constructor with
+the data that the object will use to build itself.
 
 There are five fundamental properties that differentiate OOP from other styles:
 
@@ -55,10 +55,8 @@ anywhere a stack is expected.
 
 OCaml is entirely different.  Classes are used to construct objects and support
 inheritance, but classes are not types.  Instead, objects have _object types_,
-and if you want to use objects, you aren't required to use classes at all
-(though, as we will see, if we choose to use classes, we can use the class name
-as a shorthand for the type of objects created from that class).  Here's an
-example of a simple object.
+and if you want to use objects, you aren't required to use classes at all.
+Here's an example of a simple object.
 
 ```frag
 ((typ ocamltop)(name objects/stack.topscript)(part 1))
@@ -71,8 +69,7 @@ head of `v`, and a method `push` that adds an integer to the head of
 The object type is enclosed in angle brackets `< ... >`, containing just the
 types of the methods.  Fields, like `v`, are not part of the public
 interface of an object.  All interaction with an object is through its methods.
-The syntax for a method invocation (also called "sending a message" to the
-object) uses the `#` character.
+The syntax for a method invocation uses the `#` character.
 
 ```frag
 ((typ ocamltop)(name objects/stack.topscript)(part 2))
@@ -113,10 +110,10 @@ The type system will complain if it sees incompatible uses of the same method:
 ((typ ocamltop)(name objects/polymorphism.topscript)(part 2))
 ```
 
-The `..` in the inferred object types are ellipsis, standing for any other
-methods.  The type `< width : float; .. >` specifies an object that must have
-at least an `width` method, and possibly some others as well. Such object types
-are said to be _open_.
+The `..` in the inferred object types are ellipses, standing for other
+unspecified methods that the object may have.  The type `< width : float; .. >`
+specifies an object that must have at least an `width` method, and possibly
+some others as well. Such object types are said to be _open_.
 
 We can manually _close_ an object type using a type annotation:
 
@@ -129,18 +126,20 @@ We can manually _close_ an object type using a type annotation:
 
 The `..` in an open object type is an elision, standing for "possibly more
 methods."  It may not be apparent from the syntax, but an elided object type is
-actually polymorphic.  If we try to write a type definition, we get an obscure
-error.
+actually polymorphic.  For example, if we try to write a type definition, we
+get an "unbound type variable" error.
 
 ```frag
 ((typ ocamltop)(name objects/polymorphism.topscript)(part 4))
 ```
 
-A `..` in an object type is called a _row variable_ and this typing scheme is
-called _row polymorphism_.  Even though `..` doesn't look like a type variable,
-it actually is.  Row polymorphism is also used in polymorphic variant types,
-and there is a close relationship between objects and polymorphic variants:
-objects are to records what polymorphic variants are to ordinary variants.
+This is because `..` is really a special kind of type variable called a _row
+variable_.
+
+This kind of typing scheme using row variables is called _row polymorphism_.
+Row polymorphism is also used in polymorphic variant types, and there is a
+close relationship between objects and polymorphic variants: objects are to
+records what polymorphic variants are to ordinary variants.
 
 </note>
 
