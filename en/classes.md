@@ -156,7 +156,7 @@ type than the elements of the set.
 
 For example, a `fold` method for our `['a] stack` class should have type `('b
 -> 'a -> 'b) -> 'b -> 'b`, where the `'b` is polymorphic. To express a
-ploymorphic method type like this we must use a type quantifier, as shown in
+polymorphic method type like this we must use a type quantifier, as shown in
 the following example.
 
 ```frag
