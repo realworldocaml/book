@@ -162,7 +162,7 @@ let external_reviewers =
    @ js_interns
 
 let is_public = function
-  | "beta1" -> true
+  | "beta2" -> true
   | _ -> false
 
 let allowed_users ~milestone = 
