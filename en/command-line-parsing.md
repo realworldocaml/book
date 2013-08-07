@@ -17,19 +17,19 @@ declaration.
 
 Command is simple to use for simple applications, but also also scales
 well as your needs grow more complex.  In particular, Command provides
-a sophisticated subcommand mode that grouping related commands
-together as the number of options grow.  You may already be familiar
-with this command-line style from the Git or Mercurial version control
-systems.
+a sophisticated subcommand mode that groups related commands together
+as the complexity of your user interface grows.  You may already be
+familiar with this command-line style from the Git or Mercurial
+version control systems.
 
 In this chapter, we'll:
 
-* learn how to use Command to construct basic and grouped command-line
+* Learn how to use Command to construct basic and grouped command-line
   interfaces.
-* see examples that extend the cryptographic utility from
+* See examples that extend the cryptographic utility from
   [xref](#classes) and build a simple equivalent to the `md5` and
   `shasum` utilities.
-* demonstrate how _functional combinators_ can be used to declare
+* Demonstrate how _functional combinators_ can be used to declare
   complex command line interfaces in a type-safe and elegant way.
 
 ## Basic command-line parsing
@@ -57,26 +57,26 @@ interactive input) if certain inputs are encountered.
 ### Anonymous arguments
 
 Let's build the specification for a single argument that is passed
-directly on the command-line (this is known as an _anonymous_
-argument).
+directly on the command-line.  This is known as an _anonymous_
+argument.
 
 ```frag
 ((typ ocaml)(name command-line-parsing/basic_md5.ml)(part 1))
 ```
 
-The specification functions are all defined in the `Command.Spec`
-module and initialized to an `empty` value. Parameters are
-subsequently added via the `+>` combinator (which is available since
-we opened `Command.Spec` into our default environment).  We've then
-defined a single `filename` anonymous argument to capture the input
-filename to `do_hash`.
+The `Command.Spec` module defines the tools you'll need to build up a
+command-line specification.  We start with the `empty` value, and add
+parameters to that using the `+>` combinator.  (Both of these values
+come from `Command.Spec`.)  
 
-Anonymous parameters are created using the `%:` operator. This binds a
-textual name (used in the help text to identify the parameter) to an
-OCaml conversion function that parses the command-line string
-fragments into a higher-level OCaml data type.  In the example above
-this is just `Command.Spec.string`, but we'll see more complex
-conversion options later in the chapter.
+In this case, we defined a single anonymous argument called `filename`
+which takes a value of type `string`.  Anonymous parameters are
+created using the `%:` operator, which binds a textual name (used in
+the help text to identify the parameter) to an OCaml conversion
+function that parses the command-line string fragments into a
+higher-level OCaml data type.  In the example above this is just
+`Command.Spec.string`, but we'll see more complex conversion options
+later in the chapter.
 
 ### Defining basic commands
 
@@ -88,8 +88,9 @@ The simplest way is to directly create a command-line interface via the
 ((typ ocaml)(name command-line-parsing/basic_md5.ml)(part 2))
 ```
 
-`Command.basic` defines a concrete parser that takes the following extra
-arguments:
+`Command.basic` defines a complete command-line interface that takes
+the following extra arguments, in addition to the ones defined in the
+specification.
 
 * `summary` is a required one-line description to go at the top of the
   command help screen.
@@ -131,8 +132,8 @@ call away.
 `Command.run` takes a couple of optional arguments that are useful to
 identify which version of the binary you are running in production.
 Let's build the complete MD5 example first so that we can see this in
-action.  Run `opam install cryptokit` to install Cryptokit if you
-didn't do so earlier in [xref](#classes).
+action.  Makes sure to run `opam install cryptokit` if you didn't do
+so when reading [xref](#classes).
 
 ```frag
 ((typ ocaml)(name command-line-parsing/build_basic_md5.out))
@@ -147,7 +148,7 @@ You can now query the version information for the binary you just compiled.
 The versions that you see in the output were defined via the optional
 arguments to `Command.run`.  You can leave these blank in your own
 programs or get your build system to generate them directly from your
-version control system (_e.g._  by running `hg tip` to generate a build
+version control system (_e.g._  by running `hg id` to generate a build
 revision number, in the case of Mercurial).
 
 ```frag
@@ -175,8 +176,8 @@ slightly more succinct by removing intermediate variables.
 ((typ ocaml)(name command-line-parsing/basic_md5_succinct.ml))
 ```
 
-We'll now go through some of the more advanced features of the library
-for the rest of the chapter.
+Now that we have the basics in place, the rest of the chapter will
+examine some of the more advanced features of `Command`.
 
 ## Argument types
 
@@ -251,9 +252,9 @@ results in a compile-time error.
 
 This is because changing the argument type has also changed the type
 of the callback function. It now wants a `string option` instead of a
-`string` since the value has become optional.  We can quickly adapt
-our example to use the new information and read from standard input if
-no file is specified.
+`string` since the value has become optional.  We can adapt our
+example to use the new information and read from standard input if no
+file is specified.
 
 ```frag
 ((typ ocaml)(name command-line-parsing/basic_md5_with_optional_file.ml))
@@ -287,8 +288,9 @@ have the same behavior.
 ### Sequences of arguments
 
 One last transformation that's useful is to obtain lists of anonymous
-arguments rather than a single one.  We can modify our MD5 code to
-accept a list of files on the command-line rather than just one.
+arguments rather than a single one.  As an example, let's modify our
+MD5 code to take a collection of files to process on the command line.
+
 
 ```frag
 ((typ ocaml)(name command-line-parsing/basic_md5_sequence.ml))
@@ -418,37 +420,44 @@ work and see the date parsing in action.
 
 ## Advanced control over parsing
 
-The use of the spec functions has been somewhat magic so far: we just
-build them up with the '+>' combinator and things seem to work.  As
-your programs get larger and more complex, you'll want to factor out
-common functionality between specifications.  Some other times, you'll
-need to interrupt the parsing to perform special processing, such as
-requesting an interactive passphrase from the user before proceeding.
-We'll show you some new combinators that let you do this now.
+The functions for generating a specification may seem like magic.  In
+particular, even if you know how to use them, it's not entirely clear
+how they work, and in particular, why the types work out the way they
+do.
 
-<note>
-<title>The types behind `Command.Spec`</title>
+Understanding the details of how these specifications fit together
+becomes more useful as your command line interfaces get more complex.
+In particular, you may want to factor out common functionality between
+specifications, or interrupt the parsing to perform special
+processing, such as requesting an interactive passphrase from the user
+before proceeding.  All of this is helped by a deeper understanding of
+the `Command` library.
+
+In the following, we'll explain the logic behind the combinators we've
+already described, and show you some new combinators that let you use
+`Command` even more effectively.
+
+### The types behind `Command.Spec`
 
 The Command module's safety relies on the specification's output
 values precisely matching the callback function which invokes the main
-program. Any mismatch here will inevitably result in a dynamic
-failure, and so Command uses some interesting type abstraction to
-guarantee they remain in sync.  You don't have to understand this
-section to use the more advanced combinators, but it'll help you debug
-type errors as you use `Command` more.
+program. In order to prevent any such mismatches, Command uses some
+interesting type machinery to guarantee they remain in sync.  You
+don't have to understand this section to use the more advanced
+combinators, but it'll help you debug type errors as you use `Command`
+more.
 
-The `Command.Spec.t` type looks deceptively simple:
-`type ('main_in, 'main_out) t`.
-You can think of `('a, 'b) t` here as a function of type
-`'a -> 'b`, but embellished with information about:
+The `Command.Spec.t` type looks deceptively simple: `('a, 'b) t`.  You
+can think of `('a, 'b) t` here as a function of type `'a -> 'b`, but
+embellished with information about:
 
 * how to parse the command line
 * what the command does and how to call it
 * how to auto-complete a partial command line
 
-The type of a specification transforms a `'main_in` to a `'main_out`
-value.  For instance, a value of `Spec.t` might have type `(arg1 ->
-... -> argN -> 'r, 'r) Spec.t`.
+The type of a specification transforms a `'a` to a `'b` value.  For
+instance, a value of `Spec.t` might have type `(arg1 -> ... -> argN ->
+'r, 'r) Spec.t`.
 
 Such a value transforms a main function of type `arg1 -> ... -> argN
 -> 'r` by supplying all the argument values, leaving a main function
@@ -482,8 +491,6 @@ function, since if zero command-line arguments are specified
 (_i.e._ `Spec.empty`), the callback would otherwise have no arguments
 and be evaluated immediately.  That's why you have to supply an
 additional `()` to the callback function in all the previous examples.
-
-</note>
 
 ### Composing specification fragments together
 
