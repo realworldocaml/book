@@ -699,7 +699,7 @@ very OS-specific.
 
 This rounds up our tour of the Command library.   This isn't the only
 way to parse command-line arguments of course; there are several alternatives 
-available on OPAM.  Three of the most prominent ones are:
+available on OPAM.  Three of the most prominent ones are introduced below.
 
 *   The `Arg` module from the OCaml standard library, which is used by the
     compiler itself to handle its command-line interface.  Command is generally
