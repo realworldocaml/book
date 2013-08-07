@@ -381,7 +381,7 @@ same basic pattern for using functors described in
 [xref](#extending-modules).
 
 ```frag
-((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 22))
+((typ ocamlrawtop)(name maps-and-hash-tables/main-22.rawscript))
 ```
 
 We don't include the full response from the top-level because it is
@@ -393,7 +393,7 @@ strictly necessary.  Core ships with a syntax extension called
 definition.  Using it, we can rewrite the above example as follows.
 
 ```frag
-((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 23))
+((typ ocamlrawtop)(name maps-and-hash-tables/main-23.rawscript))
 ```
 
 The comparison function created by `comparelib` for a given type will
@@ -411,7 +411,7 @@ You can also satisfy the `Comparable.S` interface using polymorphic
 compare.
 
 ```frag
-((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 24))
+((typ ocamlrawtop)(name maps-and-hash-tables/main-24.rawscript))
 ```
 
 That said, for reasons we discussed earlier, polymorphic compare
@@ -544,7 +544,7 @@ the "logical" (_i.e._, bit-wise) exclusive-or of the hashes from the
 component values.
 
 ```frag
-((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 30))
+((typ ocamlrawtop)(name maps-and-hash-tables/main-30.rawscript))
 ```
 
 Note that in order to satisfy hashable, one also needs to provide a
