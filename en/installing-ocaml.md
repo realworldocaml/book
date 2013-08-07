@@ -447,19 +447,19 @@ to load it every time you start `utop`, by adding this to it:
 #require "core.syntax"
 ```
 
-You can also optionally add some more useful libraries that are used in
-the book, such as `Core_extended` and `Async`.  You can also open the Core
-module by default if that's all you ever use the top-level for.  Just append
-these lines to the `.ocamlinit` file if that's what you prefer.
+If you only use Core libraries (and this will be the case for beginners who are
+working their way through Real World OCaml as their first taste of the
+language), then you can also open the Core module by default.  Just append this
+line to the `.ocamlinit` file.
 
-```
-#require "core_extended"
-#require "async"
+```ocaml
 open Core.Std
-```
+```ocaml
 
 When you run `utop` with these initialization rules, it should start up with
-Core opened and ready to use.
+Core opened and ready to use.  If you don't open `Core.Std` by default, then
+you must remember to open it before running any of the interactive examples in
+the book.
 
 ### Editors
 
