@@ -174,7 +174,7 @@ let swallow_error () =
     within' ~monitor (fun () ->
       after (Time.Span.of_sec 0.5) >>= fun () -> failwith "Kaboom!")
   ;;
-swallow_error ();;
+(* swallow_error ();; *)
 #part 36
 exception Ignore_me;;
 let swallow_some_errors exn_to_raise =
@@ -191,7 +191,7 @@ let swallow_some_errors exn_to_raise =
 #part 37
 swallow_some_errors Not_found;;
 #part 38
-swallow_some_errors Ignore_me;;
+(* swallow_some_errors Ignore_me;; *)
 #part 39
 let string_and_float = Deferred.both
    (after (sec 0.5)  >>| fun () -> "A")
@@ -239,56 +239,3 @@ let noalloc_busy_loop n =
     loop (n * 100_000)
   ;;
 log_delays (In_thread.run (fun () -> noalloc_busy_loop 500));;
-#part 48
-#part 49
-#part 50
-#part 51
-#part 52
-#part 53
-#part 54
-#part 55
-#part 56
-#part 57
-#part 58
-#part 59
-#part 60
-#part 61
-#part 62
-#part 63
-#part 64
-#part 65
-#part 66
-#part 67
-#part 68
-#part 69
-#part 70
-#part 71
-#part 72
-#part 73
-#part 74
-#part 75
-#part 76
-#part 77
-#part 78
-#part 79
-#part 80
-#part 81
-#part 82
-#part 83
-#part 84
-#part 85
-#part 86
-#part 87
-#part 88
-#part 89
-#part 90
-#part 91
-#part 92
-#part 93
-#part 94
-#part 95
-#part 96
-#part 97
-#part 98
-#part 99
-#part 100
