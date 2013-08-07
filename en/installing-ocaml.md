@@ -26,10 +26,9 @@ systems, and we'll get OPAM and `utop` running after that.
 
 ## Getting OCaml
 
-The OCaml compiler is available as a binary distribution on many
-operating systems.  This is the simplest and preferred installation
-route, but we'll also describe how to do a manual installation as a
-last resort.
+The OCaml compiler is available as a binary distribution on many operating
+systems.  This is the simplest and preferred installation route, but we'll also
+describe how to do a manual installation as a last resort.
 
 ### Mac OS X
 
