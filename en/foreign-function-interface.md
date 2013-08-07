@@ -7,10 +7,10 @@ applications.
 
 The mechanism by which code in one programming language can invoke routines in
 another different programming language is called a *foreign function
-interface*.  This chapter will teach you:
+interface*.  This chapter will:
 
-* how to call routines in C libraries directly from your OCaml code.
-* build higher-level abstractions in OCaml from the low-level C bindings.
+* show how to call routines in C libraries directly from your OCaml code.
+* teach you how to build higher-level abstractions in OCaml from the low-level C bindings.
 * work through some full examples for binding a terminal interface and UNIX date/time functions.
 
 ## The Ctypes library
