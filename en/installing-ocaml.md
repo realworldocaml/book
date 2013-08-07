@@ -239,9 +239,13 @@ $ sudo pacman -U opam-_version_.pkg.tar.gz
 ### Source Installation
 
 If the binary packages aren't available for your system, you'll need to install
-the latest OPAM release from source.  The distribution only requires the OCaml
-compiler to be installed, so this should be straightforward.  Download
-the latest version from the [homepage](https://github.com/OCamlPro/opam/tags).
+the latest OPAM release from source.  You can follow the online [quick install
+guide](http://opam.ocamlpro.com/doc/Quick_Install.html) or read the summary
+below.
+
+ The distribution only requires the OCaml compiler to be installed, so this
+should be straightforward.  Download the latest version from the
+[homepage](https://github.com/OCamlPro/opam/tags).
 
 ```console
 $ curl -OL https://github.com/OCamlPro/opam/archive/latest.tar.gz
@@ -260,7 +264,6 @@ source-code installation instructions here. Please leave a comment
 with any amended instructions you encounter.
 
 </note>
-
 
 ## Configuring OPAM
 
