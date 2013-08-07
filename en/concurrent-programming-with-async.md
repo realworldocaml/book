@@ -740,7 +740,7 @@ Here is a very simple example of a function that captures and ignores
 errors in the processes it spawns.
 
 ```frag
-((typ ocamltop)(name async/main.topscript)(part 35))
+((typ ocamlrawtop)(name async/main-35.rawscript))
 ```
 
 The message "an error happened" is printed out, but the deferred
@@ -775,7 +775,7 @@ again see that the deferred never returns, but the exception was
 caught and ignored.
 
 ```frag
-((typ ocamltop)(name async/main.topscript)(part 38))
+((typ ocamlrawtop)(name async/main-38.rawscript))
 ```
 
 In practice, you should rarely use monitors directly, instead using
