@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+    
+        <meta charset="utf-8"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW"/>
+        
+        <title>Chapter 11. Objects / Real World OCaml</title>
+        
+        <link rel="stylesheet" href="../../media/css/main.css"/>
+        
+        <script src="../../media/js/require.js" data-main="../../media/js/main.js"> </script>
+        <script>
+            require.config({
+                config: {
+                    gitHub: {
+                        user: 'ocamllabs',
+                        repo: 'rwo\u002Dcomments',
+                        milestone: 'beta2',
+                        page: 'objects.html'
+                    }
+                }
+            });
+        </script>
+        
+    
+    </head>
+    
+    <body>
+    
+        <div class="body">
+        
+            <header class="header">
+                <h1><img src="../../media/img/header.png" width="213" height="59" alt="Real World OCaml, by Jason Hickey, Anil Madhavapeddy and Yaron Minsky"/></h1>
+            </header>
+    
+            <nav class="navigation">
+                <ul>
+                    <li>
+                        <a href="index.html">Table of Contents</a>
+                    </li>
+                    
+                        <li>
+                            <a href="prologue.html">Prologue</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt01.html">I. Language Concepts</a>
+                            
+                                 
+                                    <ul>
+                                        
+                                            <li>
+                                                <a href="a-guided-tour.html">1. A Guided Tour</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="variables-and-functions.html">2. Variables and Functions</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="lists-and-patterns.html">3. Lists and Patterns</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="files-modules-and-programs.html">4. Files, Modules and Programs</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="records.html">5. Records</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="variants.html">6. Variants</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="error-handling.html">7. Error Handling</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="imperative-programming-1.html">8. Imperative Programming</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="functors.html">9. Functors</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="first-class-modules.html">10. First-Class Modules</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="objects.html" class="here">11. Objects</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="classes.html">12. Classes</a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt02.html">II. Tools and Techniques</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt03.html">III. The Runtime System</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="installation.html">A. Installation</a>
+                            
+                                
+                            
+                        </li>
+                    
+                </ul>
+            </nav>
+        
+            <article class="page">
+        
+                <h1>Chapter 11. Objects</h1>
+                
+                
+
+    <p id="idp9164352">
+    We've already seen several tools that OCaml provides for organizing
+    programs, particularly modules. In addition, OCaml also supports
+    object-oriented programming. There are objects, classes, and their
+    associated types. In this chapter, we'll introduce you to OCaml
+    objects and subtyping. In the next chapter
+    <a href="classes.html">Chapter 12, <i>Classes</i></a>, we'll introduce you to classes
+    and inheritance.
+  </p><aside class="note"><h1>
+  What is Object-Oriented Programming?
+  </h1><p id="idp9166608">
+    Object-oriented programming (often shorted to OOP) is a programming
+    style that encapsulates computation and data within logical
+    <span><em>objects</em></span>. Each object contains some data stored
+    in <span><em>fields</em></span>, and has <span><em>method</em></span>
+    functions that can be invoked against the data within the object
+    (also called &quot;sending a message&quot; to the object). The code
+    definition behind an object is called a <span><em>class</em></span>,
+    and objects are constructed from a class definition by calling a
+    constructor with the data that the object will use to build itself.
+  </p><p id="idp9169232">
+    There are five fundamental properties that differentiate OOP from
+    other styles:
+  </p><ul><li><p id="idp9170240">
+<span><em>Abstraction</em></span>: the details of the
+        implementation are hidden in the object, and the external
+        interface is just the set of publicly-accessible methods.
+      </p></li><li><p id="idp9171600">
+<span><em>Dynamic lookup</em></span>: when a message is sent to
+        an object, the method to be executed is determined by the
+        implementation of the object, not by some static property of the
+        program. In other words, different objects may react to the same
+        message in different ways.
+      </p></li><li><p id="idp9173088">
+<span><em>Subtyping</em></span>: if an object
+        <code>a</code> has all the functionality of an object
+        <code>b</code>, then we may use <code>a</code> in
+        any context where <code>b</code> is expected.
+      </p></li><li><p id="idp9177152">
+<span><em>Inheritance</em></span>: the definition of one kind of
+        object can be reused to produce a new kind of object. This new
+        definition can override some behavior, but also share code with
+        its parent.
+      </p></li><li><p id="idp9178560">
+<span><em>Open recursion</em></span>: an object's methods can
+        invoke another method in the same object using a special
+        variable (often called <code>self</code> or
+        <code>this</code>). These calls use dynamic lookup,
+        allowing a method defined in one object to invoke methods
+        defined in another object that inherits from the first.
+      </p></li></ul><p id="idp9181360">
+    Almost every notable modern programming language has been influenced
+    by OOP, and you'll have run across these terms if you've ever used
+    C++, Java, C#, Ruby, Python or JavaScript.
+  </p></aside><section><h1 id="ocaml-objects">OCaml objects</h1><p id="idp9183168">
+      If you already know about object oriented programming in a
+      language like Java or C++, the OCaml object system may come as a
+      surprise. Foremost is the complete separation of objects, and
+      their types, from the class system in OCaml. In a language like
+      Java, a class name is also used as the type of objects created by
+      instantiating it, and the relationships between these object types
+      correspond to inheritance. For example, if we implement a class
+      <code>Deque</code> in Java by inheriting from a class
+      <code>Stack</code>, we would be allowed to pass a deque
+      anywhere a stack is expected.
+    </p><p id="idp9185600">
+      OCaml is entirely different. Classes are used to construct objects
+      and support inheritance, but classes are not types. Instead,
+      objects have <span><em>object types</em></span>, and if you want to
+      use objects, you aren't required to use classes at all. Here's an
+      example of a simple object.
+    </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> s <span class="keyword2">=</span> <span class="keyword4">object</span>
+  <span class="keyword4">val</span> <span class="keyword1">mutable</span> v <span class="keyword2">=</span> <span class="keyword2">[</span><span class="keyword8">0</span><span class="keyword2">;</span> <span class="keyword8">2</span><span class="keyword2">]</span>
+
+  <span class="keyword4">method</span> pop <span class="keyword2">=</span>
+    <span class="keyword1">match</span> v <span class="keyword1">with</span>
+    <span class="keyword2">|</span> hd <span class="keyword2">:</span><span class="keyword2">:</span> tl -<span class="keyword2">&gt;</span> 
+       v <span class="keyword2">&lt;</span>- tl<span class="keyword2">;</span>
+       <span class="keyword6">Some </span>hd
+    <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span> -<span class="keyword2">&gt;</span> <span class="keyword6">None
+</span>
+  <span class="keyword4">method</span> push hd <span class="keyword2">=</span> 
+    v <span class="keyword2">&lt;</span>- hd <span class="keyword2">:</span><span class="keyword2">:</span> v
+<span class="keyword4">end</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val s : &lt; pop : int option; push : int -&gt; unit &gt; = &lt;obj&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/stack.topscript">objects/stack.topscript</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9187456">
+      The object has an integer list value <code>v</code>, a
+      method <code>pop</code> that returns the head of
+      <code>v</code>, and a method <code>push</code> that
+      adds an integer to the head of <code>v</code>.
+    </p><p id="idp9191520">
+      The object type is enclosed in angle brackets
+      <code>&lt; ... &gt;</code>, containing just the types of the
+      methods. Fields, like <code>v</code>, are not part of the
+      public interface of an object. All interaction with an object is
+      through its methods. The syntax for a method invocation uses the
+      <code>#</code> character.
+    </p><div class="rwocode"><pre><code># s<span class="keyword7">#pop</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int option = Some 0
+</div># s<span class="keyword7">#push</span> <span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : unit = ()
+</div># s<span class="keyword7">#pop</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int option = Some 4
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/stack.topscript">objects/stack.topscript</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9195024">
+      Note that unlike functions, methods can have zero parameters,
+      since the method call is routed to a concrete object instance.
+      That's why the <code>push</code> and <code>pop</code>
+      methods do not have a <code>unit</code> argument, as the
+      equivalent functional versions would.
+    </p><p id="idp9197776">
+      Objects can also be constructed by functions. If we want to
+      specify the initial value of the object, we can define a function
+      that takes the value and returns an object.
+    </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> stack init <span class="keyword2">=</span> <span class="keyword4">object</span>
+  <span class="keyword4">val</span> <span class="keyword1">mutable</span> v <span class="keyword2">=</span> init
+
+  <span class="keyword4">method</span> pop <span class="keyword2">=</span>
+    <span class="keyword1">match</span> v <span class="keyword1">with</span>
+      hd <span class="keyword2">:</span><span class="keyword2">:</span> tl -<span class="keyword2">&gt;</span> 
+        v <span class="keyword2">&lt;</span>- tl<span class="keyword2">;</span>
+        <span class="keyword6">Some </span>hd
+    <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span> -<span class="keyword2">&gt;</span> <span class="keyword6">None
+</span>
+  <span class="keyword4">method</span> push hd <span class="keyword2">=</span> 
+    v <span class="keyword2">&lt;</span>- hd <span class="keyword2">:</span><span class="keyword2">:</span> v
+<span class="keyword4">end</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val stack : 'a list -&gt; &lt; pop : 'a option; push : 'a -&gt; unit &gt; = &lt;fun&gt;
+</div># <span class="keyword4">let</span> s <span class="keyword2">=</span> stack <span class="keyword2">[</span><span class="keyword8">3</span><span class="keyword2">;</span> <span class="keyword8">2</span><span class="keyword2">;</span> <span class="keyword8">1</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val s : &lt; pop : int option; push : int -&gt; unit &gt; = &lt;obj&gt;
+</div># s<span class="keyword7">#pop</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int option = Some 3
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/stack.topscript">objects/stack.topscript</a> , continued (part 3) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9199104">
+      Note that the types of the function <code>stack</code> and
+      the returned object now use the polymorphic type
+      <code>'a</code>. When <code>stack</code> is invoked on
+      a concrete value <code>[3; 2; 1]</code>, we get the same
+      object type as before, with type <code>int</code> for the
+      values on the stack.
+    </p></section><section><h1 id="object-polymorphism">Object polymorphism</h1><p id="idp9204448">
+      Like polymorphic variants, methods can be used without an explicit
+      type declaration.
+    </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> area sq <span class="keyword2">=</span> sq<span class="keyword7">#width</span> <span class="keyword2">*</span> sq<span class="keyword7">#width</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val area : &lt; width : int; .. &gt; -&gt; int = &lt;fun&gt;
+</div># <span class="keyword4">let</span> minimize sq <span class="keyword2">:</span> unit <span class="keyword2">=</span> sq<span class="keyword7">#resize</span> <span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val minimize : &lt; resize : int -&gt; unit; .. &gt; -&gt; unit = &lt;fun&gt;
+</div># <span class="keyword4">let</span> limit sq <span class="keyword2">=</span> 
+  <span class="keyword1">if</span> <span class="keyword2">(</span>area sq<span class="keyword2">)</span> <span class="keyword2">&gt;</span> <span class="keyword8">100</span> <span class="keyword1">then</span> minimize sq<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val limit : &lt; resize : int -&gt; unit; width : int; .. &gt; -&gt; unit = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/polymorphism.topscript">objects/polymorphism.topscript</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9205680">
+      As you can see object types are inferred automatically from the
+      methods that are invoked on them.
+    </p><p id="idp9206192">
+      The type system will complain if it sees incompatible uses of the
+      same method:
+    </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> toggle sq b <span class="keyword2">:</span> unit <span class="keyword2">=</span> 
+  <span class="keyword1">if</span> b <span class="keyword1">then</span> sq<span class="keyword7">#resize</span> <span class="keyword6">`Fullscreen
+</span>  <span class="keyword1">else</span> minimize sq<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 76-78:
+Error: This expression has type &lt; resize : [&gt; `Fullscreen ] -&gt; unit; .. &gt;
+       but an expression was expected of type &lt; resize : int -&gt; unit; .. &gt;
+       Types for method resize are incompatible
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/polymorphism.topscript">objects/polymorphism.topscript</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9207424">
+      The <code>..</code> in the inferred object types are
+      ellipses, standing for other unspecified methods that the object
+      may have. The type <code>&lt; width : float; .. &gt;</code>
+      specifies an object that must have at least an
+      <code>width</code> method, and possibly some others as well.
+      Such object types are said to be <span><em>open</em></span>.
+    </p><p id="idp9210720">
+      We can manually <span><em>close</em></span> an object type using a
+      type annotation:
+    </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> area_closed <span class="keyword2">(</span>sq<span class="keyword2">:</span> <span class="keyword2">&lt;</span> width <span class="keyword2">:</span> <span class="keyword3">int</span> <span class="keyword2">&gt;</span><span class="keyword2">)</span> <span class="keyword2">=</span> sq<span class="keyword7">#width</span> <span class="keyword2">*</span> sq<span class="keyword7">#width</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val area_closed : &lt; width : int &gt; -&gt; int = &lt;fun&gt;
+</div># <span class="keyword4">let</span> sq <span class="keyword2">=</span> <span class="keyword4">object</span>
+  <span class="keyword4">method</span> width <span class="keyword2">=</span> <span class="keyword8">30</span> 
+  <span class="keyword4">method</span> name <span class="keyword2">=</span> <span class="keyword7">&quot;sq&quot;</span> 
+<span class="keyword4">end</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val sq : &lt; name : string; width : int &gt; = &lt;obj&gt;
+</div># area_closed sq<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 12-14:
+Error: This expression has type &lt; name : string; width : int &gt;
+       but an expression was expected of type &lt; width : int &gt;
+       The second object type has no method name
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/polymorphism.topscript">objects/polymorphism.topscript</a> , continued (part 3) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><aside class="note"><h1>
+    Elisions are polymorphic
+    </h1><p id="idp9213040">
+      The <code>..</code> in an open object type is an elision,
+      standing for &quot;possibly more methods.&quot; It may not be
+      apparent from the syntax, but an elided object type is actually
+      polymorphic. For example, if we try to write a type definition, we
+      get an &quot;unbound type variable&quot; error.
+    </p><div class="rwocode"><pre><code># <span class="keyword4">type</span> square <span class="keyword2">=</span> <span class="keyword2">&lt;</span> width <span class="keyword2">:</span> <span class="keyword3">int</span><span class="keyword2">;</span> ..<span class="keyword2">&gt;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 5-32:
+Error: A type variable is unbound in this type declaration.
+In type &lt; width : int; .. &gt; as 'a the variable 'a is unbound
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/polymorphism.topscript">objects/polymorphism.topscript</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9215440">
+      This is because <code>..</code> is really a special kind of
+      type variable called a <span><em>row variable</em></span>.
+    </p><p id="idp9217040">
+      This kind of typing scheme using row variables is called
+      <span><em>row polymorphism</em></span>. Row polymorphism is also
+      used in polymorphic variant types, and there is a close
+      relationship between objects and polymorphic variants: objects are
+      to records what polymorphic variants are to ordinary variants.
+    </p></aside><p id="idp9218304">
+      An object of type
+      <code>&lt; pop : int option; .. &gt;</code> can be any
+      object with a method <code>pop : int option</code>, it
+      doesn't matter how it is implemented. When the method
+      <code>#pop</code> is invoked, the actual method that is run
+      is determined by the object.
+    </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> print_pop st <span class="keyword2">=</span> <span class="keyword5">Option.</span>iter ~f<span class="keyword2">:</span><span class="keyword2">(</span>printf <span class="keyword7">&quot;Popped: %d\n&quot;</span><span class="keyword2">)</span> st<span class="keyword7">#pop</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val print_pop : &lt; pop : int option; .. &gt; -&gt; unit = &lt;fun&gt;
+</div># print_pop <span class="keyword2">(</span>stack <span class="keyword2">[</span><span class="keyword8">5</span><span class="keyword2">;</span><span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">1</span><span class="keyword2">]</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"><br/>Popped: 5
+- : unit = ()
+</div># <span class="keyword4">let</span> t <span class="keyword2">=</span> <span class="keyword4">object</span>
+  <span class="keyword4">method</span> pop <span class="keyword2">=</span> <span class="keyword6">Some </span><span class="keyword2">(</span><span class="keyword5">Float.</span>to_int <span class="keyword2">(</span><span class="keyword5">Time.</span>to_float <span class="keyword2">(</span><span class="keyword5">Time.</span>now <span class="keyword2">(</span><span class="keyword2">)</span><span class="keyword2">)</span><span class="keyword2">)</span><span class="keyword2">)</span>
+<span class="keyword4">end</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val t : &lt; pop : int option &gt; = &lt;obj&gt;
+</div># print_pop t<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"><br/>Popped: 1375864265
+- : unit = ()
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/stack.topscript">objects/stack.topscript</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></section><section><h1 id="immutable-objects">Immutable objects</h1><p id="idp9223008">
+      Many people consider object-oriented programming to be
+      intrinsically imperative, where an object is like a state machine.
+      Sending a message to an object causes it to change state, possibly
+      sending messages to other objects.
+    </p><p id="idp9223664">
+      Indeed, in many programs, this makes sense, but it is by no means
+      required. Let's define a function that creates immutable stack
+      objects.
+    </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> imm_stack init <span class="keyword2">=</span> <span class="keyword4">object</span>
+  <span class="keyword4">val</span> v <span class="keyword2">=</span> init
+
+  <span class="keyword4">method</span> pop <span class="keyword2">=</span>
+    <span class="keyword1">match</span> v <span class="keyword1">with</span>
+    <span class="keyword2">|</span> hd <span class="keyword2">:</span><span class="keyword2">:</span> tl -<span class="keyword2">&gt;</span> <span class="keyword6">Some </span><span class="keyword2">(</span>hd, <span class="keyword2">{</span><span class="keyword2">&lt;</span> v <span class="keyword2">=</span> tl <span class="keyword2">&gt;</span><span class="keyword2">}</span><span class="keyword2">)</span>
+    <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span> -<span class="keyword2">&gt;</span> <span class="keyword6">None </span>
+
+  <span class="keyword4">method</span> push hd <span class="keyword2">=</span> 
+    <span class="keyword2">{</span><span class="keyword2">&lt;</span> v <span class="keyword2">=</span> hd <span class="keyword2">:</span><span class="keyword2">:</span> v <span class="keyword2">&gt;</span><span class="keyword2">}</span>
+<span class="keyword4">end</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val imm_stack :
+  'a list -&gt; (&lt; pop : ('a * 'b) option; push : 'a -&gt; 'b &gt; as 'b) = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/immutable.topscript">objects/immutable.topscript</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9224960">
+      The key parts of this implementation are in the
+      <code>pop</code> and <code>push</code> methods. The
+      expression <code>{&lt; ... &gt;}</code> produces a copy of
+      the current object, with the same type, and the specified fields
+      updated. In other words, the <code>push hd</code> method
+      produces a copy of the object, with <code>v</code> replaced
+      by <code>hd :: v</code>. The original object is not
+      modified.
+    </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> s <span class="keyword2">=</span> imm_stack <span class="keyword2">[</span><span class="keyword8">3</span><span class="keyword2">;</span> <span class="keyword8">2</span><span class="keyword2">;</span> <span class="keyword8">1</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val s : &lt; pop : (int * 'a) option; push : int -&gt; 'a &gt; as 'a = &lt;obj&gt;
+</div># <span class="keyword4">let</span> t <span class="keyword2">=</span> s<span class="keyword7">#push</span> <span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val t : &lt; pop : (int * 'a) option; push : int -&gt; 'a &gt; as 'a = &lt;obj&gt;
+</div># s<span class="keyword7">#pop</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : (int * (&lt; pop : 'a; push : int -&gt; 'b &gt; as 'b)) option as 'a =
+Some (3, &lt;obj&gt;)
+</div># t<span class="keyword7">#pop</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : (int * (&lt; pop : 'a; push : int -&gt; 'b &gt; as 'b)) option as 'a =
+Some (4, &lt;obj&gt;)
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/immutable.topscript">objects/immutable.topscript</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9230608">
+      There are some restriction on the use of the expression
+      <code>{&lt; ... &gt;}</code>. It can be used only within a
+      method body, and only the values of fields may be updated. Method
+      implementations are fixed at the time the object is created, they
+      cannot be changed dynamically.
+    </p></section><section><h1 id="when-to-use-objects">When to use objects</h1><p id="idp9233168">
+      You might wonder when to use objects in OCaml, which has a
+      multitude of alternative mechanisms to express the similar
+      concepts. First-class modules are more expressive (a module can
+      include types, while classes and objects cannot). Modules,
+      functors, and datatypes also offer a wide range of ways to express
+      program structure. In fact, many seasoned OCaml programmers rarely
+      use classes and objects, if at all.
+    </p><p id="idp9234032">
+      Objects have some advantages over records: they don't require type
+      definitions and their support for row polymorphism makes them more
+      flexible. However, the heavy syntax and additional runtime cost
+      means that objects are rarely used in place of records.
+    </p><p id="idp9234720">
+      The real benefits of objects come from the class system. Classes
+      support inheritance and open recursion. Open recursion allows
+      interdependent parts of an object to be defined separately. This
+      works because calls between the methods of an object are
+      determined when the object is instantiated, a form of
+      <span><em>dynamic</em></span> binding. This makes it possible (and
+      necessary) for one method to refer to other methods in the object
+      without knowing statically how they will be implemented.
+    </p><p id="idp9236064">
+      In contrast, modules use static binding. If you want to
+      parameterize your module code so that some part of it can be
+      implemented later, you would write a function or functor. This is
+      more explicit, but often more verbose than overriding a method in
+      a class.
+    </p><p id="idp9236752">
+      In general, a rule of thumb is: use classes and objects in
+      situations where open recursion is a big win. Two good examples
+      are Xavier Leroy's
+      <a href="http://gallium.inria.fr/~xleroy/software.html#cryptokit" target="_top">Cryptokit</a>,
+      which provides a variety of cryptographic primitives that can be
+      combined in building-block style, and the
+      <a href="http://cristal.inria.fr/camlimages/" target="_top">Camlimages</a>
+      library which manipulates various graphical file formats.
+      Camlimages also provides a module-based version of the same
+      library, letting you choose between functional and object-oriented
+      styles depending on your problem domain.
+    </p><p id="idp9239152">
+      We'll introduce you to classes, and examples using open recursion,
+      in <a href="classes.html">Chapter 12, <i>Classes</i></a>.
+    </p></section><section><h1 id="subtyping">Subtyping</h1><p id="idp9241584">
+      Subtyping is a central concept in object-oriented programming. It
+      governs when an object with one type <span><em>A</em></span> can be
+      used in an expression that expects an object of another type
+      <span><em>B</em></span>. When this is true, we say that
+      <span><em>A</em></span> is a <span><em>subtype</em></span> of
+      <span><em>B</em></span>. Actually, more concretely, subtyping
+      determines when the coercion operator <code>e :&gt; t</code>
+      can be applied. This coercion works only if the expression
+      <code>e</code> has some type <code>s</code> and
+      <code>s</code> is a subtype of <code>t</code>.
+    </p><section><h1 id="width-subtyping">Width subtyping</h1><p id="idp9249024">
+        To explore this, let's define some simple object types for
+        geometric shapes. The generic type <code>shape</code> has
+        a method to compute the area, and <code>square</code> and
+        <code>circle</code> are specific kinds of shape.
+      </p><div class="rwocode"><pre><code><span class="keyword4">type</span> shape <span class="keyword2">=</span> <span class="keyword2">&lt;</span> area <span class="keyword2">:</span> <span class="keyword3">float</span> <span class="keyword2">&gt;</span>
+
+<span class="keyword4">type</span> square <span class="keyword2">=</span> <span class="keyword2">&lt;</span> area <span class="keyword2">:</span> <span class="keyword3">float</span><span class="keyword2">;</span> width <span class="keyword2">:</span> <span class="keyword3">int</span> <span class="keyword2">&gt;</span>
+
+<span class="keyword4">let</span> square w <span class="keyword2">=</span> <span class="keyword4">object</span>
+  <span class="keyword4">method</span> area <span class="keyword2">=</span> <span class="keyword5">Float.</span>of_int <span class="keyword2">(</span>w <span class="keyword2">*</span> w<span class="keyword2">)</span>
+  <span class="keyword4">method</span> width <span class="keyword2">=</span> w
+<span class="keyword4">end</span>
+
+<span class="keyword4">type</span> circle <span class="keyword2">=</span> <span class="keyword2">&lt;</span> area <span class="keyword2">:</span> <span class="keyword3">float</span><span class="keyword2">;</span> radius <span class="keyword2">:</span> <span class="keyword3">int</span> <span class="keyword2">&gt;</span>
+
+<span class="keyword4">let</span> circle r <span class="keyword2">=</span> <span class="keyword4">object</span>
+  <span class="keyword4">method</span> area <span class="keyword2">=</span> <span class="keyword8">3</span>.<span class="keyword8">14</span> <span class="keyword2">*</span>. <span class="keyword2">(</span><span class="keyword5">Float.</span>of_int r<span class="keyword2">)</span> <span class="keyword2">*</span><span class="keyword2">*</span> <span class="keyword8">2</span>.<span class="keyword8">0</span>
+  <span class="keyword4">method</span> radius <span class="keyword2">=</span> r
+<span class="keyword4">end</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/subtyping.ml">objects/subtyping.ml</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9252464">
+        A <code>square</code> has a method <code>area</code>
+        just like a <code>shape</code>, and an additional method
+        <code>width</code>. Still, we expect a
+        <code>square</code> to be a <code>shape</code>, and
+        it is. The coercion <code>:&gt;</code> must be explicit.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> shape w <span class="keyword2">:</span> shape <span class="keyword2">=</span> square w<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 22-30:
+Error: This expression has type &lt; area : float; width : int &gt;
+       but an expression was expected of type shape
+       The second object type has no method width
+</div># <span class="keyword4">let</span> shape w <span class="keyword2">:</span> shape <span class="keyword2">=</span> <span class="keyword2">(</span>square w <span class="keyword2">:</span><span class="keyword2">&gt;</span> shape<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val shape : int -&gt; shape = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/subtyping.topscript">objects/subtyping.topscript</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9258720">
+        This form of object subtyping is called
+        <span><em>width</em></span> subtyping. Width subtyping means that
+        an object type <span><em>A</em></span> is a subtype of
+        <span><em>B</em></span>, if <span><em>A</em></span> has all of the
+        methods of <span><em>B</em></span>, and possibly more. A
+        <code>square</code> is a subtype of
+        <code>shape</code> because it implements all of the
+        methods of <code>shape</code> (the <code>area</code>
+        method).
+      </p></section><section><h1 id="depth-subtyping">Depth subtyping</h1><p id="idp9265552">
+        We can also use <span><em>depth</em></span> subtyping with
+        objects. Depth subtyping, in its most general form, says that an
+        object type <code>&lt; m: t1 &gt;</code> is a subtype of
+        <code>&lt; m: t2 &gt;</code> iff <code>t1</code> is
+        a subtype of <code>t2</code>.
+      </p><p id="idp9269424">
+        For example, we can create two objects with a
+        <code>shape</code> method:
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> coin <span class="keyword2">=</span> <span class="keyword4">object</span>
+  <span class="keyword4">method</span> shape <span class="keyword2">=</span> circle <span class="keyword8">5</span>
+  <span class="keyword4">method</span> color <span class="keyword2">=</span> <span class="keyword7">&quot;silver&quot;</span>
+<span class="keyword4">end</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val coin : &lt; color : string; shape : &lt; area : float; radius : int &gt; &gt; = &lt;obj&gt;
+</div># <span class="keyword4">let</span> map <span class="keyword2">=</span> <span class="keyword4">object</span>
+  <span class="keyword4">method</span> shape <span class="keyword2">=</span> square <span class="keyword8">10</span>
+<span class="keyword4">end</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val map : &lt; shape : &lt; area : float; width : int &gt; &gt; = &lt;obj&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/subtyping.topscript">objects/subtyping.topscript</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9271344">
+        Both these objects have a <code>shape</code> method whose
+        type is a subtype of the <code>shape</code> type, so they
+        can both be coerced into the object type
+        <code>&lt; shape : shape &gt;</code>
+</p><div class="rwocode"><pre><code># <span class="keyword4">type</span> item <span class="keyword2">=</span> <span class="keyword2">&lt;</span> shape <span class="keyword2">:</span> shape <span class="keyword2">&gt;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">type item = &lt; shape : shape &gt;
+</div># <span class="keyword4">let</span> items <span class="keyword2">=</span> <span class="keyword2">[</span> <span class="keyword2">(</span>coin <span class="keyword2">:</span><span class="keyword2">&gt;</span> item<span class="keyword2">)</span> <span class="keyword2">;</span> <span class="keyword2">(</span>map <span class="keyword2">:</span><span class="keyword2">&gt;</span> item<span class="keyword2">)</span> <span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val items : item list = [&lt;obj&gt;; &lt;obj&gt;]
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/subtyping.topscript">objects/subtyping.topscript</a> , continued (part 3) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></section><section><h1 id="polymorphic-variant-subtyping">Polymorphic variant subtyping</h1><p id="idp9276080">
+        Subtyping can also be used to coerce a polymorphic variant into
+        a larger polymorphic variant type.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">type</span> num <span class="keyword2">=</span> <span class="keyword2">[</span> <span class="keyword6">`Int </span><span class="keyword2">of</span> <span class="keyword3">int</span> <span class="keyword2">|</span> <span class="keyword6">`Float </span><span class="keyword2">of</span> <span class="keyword3">float</span> <span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">type num = [ `Float of float | `Int of int ]
+</div># <span class="keyword4">type</span> const <span class="keyword2">=</span> <span class="keyword2">[</span> num <span class="keyword2">|</span> <span class="keyword6">`String </span><span class="keyword2">of</span> <span class="keyword3">string</span> <span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">type const = [ `Float of float | `Int of int | `String of string ]
+</div># <span class="keyword4">let</span> n <span class="keyword2">:</span> num <span class="keyword2">=</span> <span class="keyword6">`Int </span><span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val n : num = `Int 3
+</div># <span class="keyword4">let</span> c <span class="keyword2">:</span> const <span class="keyword2">=</span> <span class="keyword2">(</span>n <span class="keyword2">:</span><span class="keyword2">&gt;</span> const<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val c : const = `Int 3
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/subtyping.topscript">objects/subtyping.topscript</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></section><section><h1 id="variance">Variance</h1><p id="idp9278624">
+        What about types built from object types? If a
+        <code>square</code> is a <code>shape</code>, we
+        expect a <code>square list</code> to be a
+        <code>shape list</code>. OCaml does indeed allow such
+        coercions:
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> squares<span class="keyword2">:</span> square <span class="keyword3">list</span> <span class="keyword2">=</span> <span class="keyword2">[</span> square <span class="keyword8">10</span><span class="keyword2">;</span> square <span class="keyword8">20</span> <span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val squares : square list = [&lt;obj&gt;; &lt;obj&gt;]
+</div># <span class="keyword4">let</span> shapes<span class="keyword2">:</span> shape <span class="keyword3">list</span> <span class="keyword2">=</span> <span class="keyword2">(</span>squares <span class="keyword2">:</span><span class="keyword2">&gt;</span> shape <span class="keyword3">list</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val shapes : shape list = [&lt;obj&gt;; &lt;obj&gt;]
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/subtyping.topscript">objects/subtyping.topscript</a> , continued (part 5) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9282752">
+        Note that this relies on lists being immutable. It would not be
+        safe to treat a <code>square array</code> as a
+        <code>shape array</code> because it would allow you to
+        store non-square shapes into what should be an array of squares.
+        OCaml recognizes this and does not allow the coercion.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> square_array<span class="keyword2">:</span> square <span class="keyword3">array</span> <span class="keyword2">=</span> <span class="keyword2">[|</span> square <span class="keyword8">10</span><span class="keyword2">;</span> square <span class="keyword8">20</span> <span class="keyword2">|]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val square_array : square array = [|&lt;obj&gt;; &lt;obj&gt;|]
+</div># <span class="keyword4">let</span> shape_array<span class="keyword2">:</span> shape <span class="keyword3">array</span> <span class="keyword2">=</span> <span class="keyword2">(</span>square_array <span class="keyword2">:</span><span class="keyword2">&gt;</span> shape <span class="keyword3">array</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 31-60:
+Error: Type square array is not a subtype of shape array 
+       Type square = &lt; area : float; width : int &gt;
+       is not compatible with type shape = &lt; area : float &gt; 
+       The second object type has no method width
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/subtyping.topscript">objects/subtyping.topscript</a> , continued (part 6) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9285584">
+        We say that <code>'a list</code> is
+        <span><em>covariant</em></span> (in <code>'a</code>),
+        whilst <code>'a array</code> is
+        <span><em>invariant</em></span>.
+      </p><p id="idp9289024">
+        Subtyping function types requires a third class of variance. A
+        function with type <code>square -&gt; string</code> cannot
+        be used with type <code>shape -&gt; string</code> because
+        it expects its argument to be a <code>square</code> and
+        would not know what to do with a <code>circle</code>.
+        However, a function with type
+        <code>shape -&gt; string</code> <span><em>can</em></span>
+        safely be used with type <code>square -&gt; string</code>.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> shape_to_string<span class="keyword2">:</span> shape -<span class="keyword2">&gt;</span> <span class="keyword3">string</span> <span class="keyword2">=</span> 
+    <span class="keyword1">fun</span> s -<span class="keyword2">&gt;</span> sprintf <span class="keyword7">&quot;Shape(%F)&quot;</span> s<span class="keyword7">#area</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val shape_to_string : shape -&gt; string = &lt;fun&gt;
+</div># <span class="keyword4">let</span> square_to_string<span class="keyword2">:</span> square -<span class="keyword2">&gt;</span> <span class="keyword3">string</span> <span class="keyword2">=</span> 
+    <span class="keyword2">(</span>shape_to_string <span class="keyword2">:</span><span class="keyword2">&gt;</span> square -<span class="keyword2">&gt;</span> <span class="keyword3">string</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val square_to_string : square -&gt; string = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/subtyping.topscript">objects/subtyping.topscript</a> , continued (part 7) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9295088">
+        We say that <code>'a -&gt; string</code> is
+        <span><em>contravariant</em></span> in <code>'a</code>. In
+        general, function types are contravariant in their arguments and
+        covariant in their results.
+      </p><aside class="note"><h1>
+      Variance annotations
+      </h1><p id="idp9298176">
+        OCaml works out the variance of a type using that type's
+        definition.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">module</span> <span class="keyword6">Either </span><span class="keyword2">=</span> <span class="keyword4">struct</span>
+  <span class="keyword4">type</span> <span class="keyword2">(</span>'a, 'b<span class="keyword2">)</span> t <span class="keyword2">=</span> 
+      <span class="keyword6">Left </span><span class="keyword2">of</span> 'a
+    <span class="keyword2">|</span> <span class="keyword6">Right </span><span class="keyword2">of</span> 'b
+  <span class="keyword4">let</span> left x <span class="keyword2">=</span> <span class="keyword6">Left </span>x
+  <span class="keyword4">let</span> right x <span class="keyword2">=</span> <span class="keyword6">Right </span>x
+<span class="keyword4">end</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module Either :
+  sig
+    type ('a, 'b) t = Left of 'a | Right of 'b
+    val left : 'a -&gt; ('a, 'b) t
+    val right : 'a -&gt; ('b, 'a) t
+  end
+</div># <span class="keyword2">(</span><span class="keyword5">Either.</span>left <span class="keyword2">(</span>square <span class="keyword8">40</span><span class="keyword2">)</span> <span class="keyword2">:</span><span class="keyword2">&gt;</span> <span class="keyword2">(</span>shape, shape<span class="keyword2">)</span> <span class="keyword5">Either.</span>t<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : (shape, shape) Either.t = Either.Left &lt;obj&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/subtyping.topscript">objects/subtyping.topscript</a> , continued (part 8) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9299408">
+        However, if the definition is hidden by a signature then OCaml
+        is forced to assume that the type is invariant.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">module</span> <span class="keyword6">AbstractEither </span><span class="keyword2">:</span> <span class="keyword4">sig</span> 
+  <span class="keyword4">type</span> <span class="keyword2">(</span>'a, 'b<span class="keyword2">)</span> t
+  <span class="keyword4">val</span> left<span class="keyword2">:</span> 'a -<span class="keyword2">&gt;</span> <span class="keyword2">(</span>'a, 'b<span class="keyword2">)</span> t
+  <span class="keyword4">val</span> right<span class="keyword2">:</span> 'b -<span class="keyword2">&gt;</span> <span class="keyword2">(</span>'a, 'b<span class="keyword2">)</span> t
+<span class="keyword4">end</span> <span class="keyword2">=</span> Either<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module AbstractEither :
+  sig
+    type ('a, 'b) t
+    val left : 'a -&gt; ('a, 'b) t
+    val right : 'b -&gt; ('a, 'b) t
+  end
+</div># <span class="keyword2">(</span><span class="keyword5">AbstractEither.</span>left <span class="keyword2">(</span>square <span class="keyword8">40</span><span class="keyword2">)</span> <span class="keyword2">:</span><span class="keyword2">&gt;</span> <span class="keyword2">(</span>shape, shape<span class="keyword2">)</span> <span class="keyword5">AbstractEither.</span>t<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 1-32:
+Error: This expression cannot be coerced to type
+         (shape, shape) AbstractEither.t;
+       it has type (&lt; area : float; width : int &gt;, 'a) AbstractEither.t
+       but is here used with type (shape, shape) AbstractEither.t
+       Type &lt; area : float; width : int &gt; is not compatible with type
+         shape = &lt; area : float &gt; 
+       The second object type has no method width
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/subtyping.topscript">objects/subtyping.topscript</a> , continued (part 9) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9300672">
+        We can fix this by adding <span><em>variance
+        annotations</em></span> to the type's parameters in the
+        signature: <code>+</code> for covariance or
+        <code>-</code> for contravariance.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">module</span> <span class="keyword6">VarEither </span><span class="keyword2">:</span> <span class="keyword4">sig</span> 
+  <span class="keyword4">type</span> <span class="keyword2">(</span><span class="keyword2">+</span>'a, <span class="keyword2">+</span>'b<span class="keyword2">)</span> t
+  <span class="keyword4">val</span> left<span class="keyword2">:</span> 'a -<span class="keyword2">&gt;</span> <span class="keyword2">(</span>'a, 'b<span class="keyword2">)</span> t
+  <span class="keyword4">val</span> right<span class="keyword2">:</span> 'b -<span class="keyword2">&gt;</span> <span class="keyword2">(</span>'a, 'b<span class="keyword2">)</span> t
+<span class="keyword4">end</span> <span class="keyword2">=</span> Either<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module VarEither :
+  sig
+    type (+'a, +'b) t
+    val left : 'a -&gt; ('a, 'b) t
+    val right : 'b -&gt; ('a, 'b) t
+  end
+</div># <span class="keyword2">(</span><span class="keyword5">VarEither.</span>left <span class="keyword2">(</span>square <span class="keyword8">40</span><span class="keyword2">)</span> <span class="keyword2">:</span><span class="keyword2">&gt;</span> <span class="keyword2">(</span>shape, shape<span class="keyword2">)</span> <span class="keyword5">VarEither.</span>t<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : (shape, shape) VarEither.t = &lt;abstr&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/subtyping.topscript">objects/subtyping.topscript</a> , continued (part 10) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></aside><p id="idp9303872">
+        For a more concrete example of variance, let's create some
+        stacks containing shapes by applying our
+        <code>stack</code> function to some squares and some
+        circles.
+      </p><div class="rwocode"><pre><code><span class="keyword4">type</span> 'a stack <span class="keyword2">=</span> <span class="keyword2">&lt;</span> pop<span class="keyword2">:</span> 'a option<span class="keyword2">;</span> push<span class="keyword2">:</span> 'a -<span class="keyword2">&gt;</span> unit <span class="keyword2">&gt;</span>
+
+<span class="keyword4">let</span> square_stack<span class="keyword2">:</span> square stack <span class="keyword2">=</span> stack <span class="keyword2">[</span>square <span class="keyword8">30</span><span class="keyword2">;</span> square <span class="keyword8">10</span><span class="keyword2">]</span>
+
+<span class="keyword4">let</span> circle_stack<span class="keyword2">:</span> circle stack <span class="keyword2">=</span> stack <span class="keyword2">[</span>circle <span class="keyword8">20</span><span class="keyword2">;</span> circle <span class="keyword8">40</span><span class="keyword2">]</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/subtyping.ml">objects/subtyping.ml</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9305888">
+        If we wanted to write a function that took a list of such stacks
+        and found the total area of their shapes, we might try:
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> total_area <span class="keyword2">(</span>shape_stacks<span class="keyword2">:</span> shape stack <span class="keyword3">list</span><span class="keyword2">)</span> <span class="keyword2">=</span>
+  <span class="keyword4">let</span> stack_area acc st <span class="keyword2">=</span> 
+    <span class="keyword4">let</span> <span class="keyword4">rec</span> loop acc <span class="keyword2">=</span>
+      <span class="keyword1">match</span> st<span class="keyword7">#pop</span> <span class="keyword1">with</span>
+      <span class="keyword2">|</span> <span class="keyword6">Some </span>s -<span class="keyword2">&gt;</span> loop <span class="keyword2">(</span>acc <span class="keyword2">+</span>. s<span class="keyword7">#area</span><span class="keyword2">)</span>
+      <span class="keyword2">|</span> <span class="keyword6">None </span>-<span class="keyword2">&gt;</span> acc
+    <span class="keyword4">in</span>
+      loop acc
+  <span class="keyword4">in</span>
+    <span class="keyword5">List.</span>fold ~init<span class="keyword2">:</span><span class="keyword8">0</span>.<span class="keyword8">0</span> ~f<span class="keyword2">:</span>stack_area shape_stacks<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 30-41:
+Error: Unbound type constructor stack
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/subtyping.topscript">objects/subtyping.topscript</a> , continued (part 12) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9307168">
+        However, when we try to apply this function to our objects we
+        get an error:
+      </p><div class="rwocode"><pre><code># total_area <span class="keyword2">[</span><span class="keyword2">(</span>square_stack <span class="keyword2">:</span><span class="keyword2">&gt;</span> shape stack<span class="keyword2">)</span><span class="keyword2">;</span> <span class="keyword2">(</span>circle_stack <span class="keyword2">:</span><span class="keyword2">&gt;</span> shape stack<span class="keyword2">)</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters -1-10:
+Error: Unbound value total_area
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/subtyping.topscript">objects/subtyping.topscript</a> , continued (part 13) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9308400">
+        As you can see, <code>square stack</code> and
+        <code>circle stack</code> are not subtypes of
+        <code>shape stack</code>. The problem is with the
+        <code>push</code> method. For
+        <code>shape stack</code>, the <code>push</code>
+        method takes an arbitrary <code>shape</code>. So if we
+        could coerce a <code>square stack</code> to a
+        <code>shape stack</code>, then it would be possible to
+        push an arbitrary shape onto <code>square stack</code>,
+        which would be an error.
+      </p><p id="idp9316176">
+        Another way of looking at this is that
+        <code>&lt; push: 'a -&gt; unit; .. &gt;</code> is
+        contravariant in <code>'a</code>, so
+        <code>&lt; push: square -&gt; unit; pop: square option &gt;</code>
+        cannot be a subtype of
+        <code>&lt; push: shape -&gt; unit; pop: shape option &gt;</code>.
+      </p><p id="idp9319744">
+        Still, the <code>total_area</code> function should be
+        fine, in principle. It doesn't call <code>push</code>, so
+        it isn't making that error. To make it work, we need to use a
+        more precise type that indicates we are not going to be using
+        the set method. We define a type
+        <code>readonly_stack</code> and confirm that we can coerce
+        the list of stacks to it.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">type</span> 'a readonly_stack <span class="keyword2">=</span> <span class="keyword2">&lt;</span> pop <span class="keyword2">:</span> 'a option <span class="keyword2">&gt;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">type 'a readonly_stack = &lt; pop : 'a option &gt;
+</div># <span class="keyword4">let</span> total_area <span class="keyword2">(</span>shape_stacks<span class="keyword2">:</span> shape readonly_stack <span class="keyword3">list</span><span class="keyword2">)</span> <span class="keyword2">=</span>
+  <span class="keyword4">let</span> stack_area acc st <span class="keyword2">=</span> 
+    <span class="keyword4">let</span> <span class="keyword4">rec</span> loop acc <span class="keyword2">=</span>
+      <span class="keyword1">match</span> st<span class="keyword7">#pop</span> <span class="keyword1">with</span>
+      <span class="keyword2">|</span> <span class="keyword6">Some </span>s -<span class="keyword2">&gt;</span> loop <span class="keyword2">(</span>acc <span class="keyword2">+</span>. s<span class="keyword7">#area</span><span class="keyword2">)</span>
+      <span class="keyword2">|</span> <span class="keyword6">None </span>-<span class="keyword2">&gt;</span> acc
+    <span class="keyword4">in</span>
+      loop acc
+  <span class="keyword4">in</span>
+    <span class="keyword5">List.</span>fold ~init<span class="keyword2">:</span><span class="keyword8">0</span>.<span class="keyword8">0</span> ~f<span class="keyword2">:</span>stack_area shape_stacks<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val total_area : shape readonly_stack list -&gt; float = &lt;fun&gt;
+</div># total_area <span class="keyword2">[</span><span class="keyword2">(</span>square_stack <span class="keyword2">:</span><span class="keyword2">&gt;</span> shape readonly_stack<span class="keyword2">)</span><span class="keyword2">;</span> <span class="keyword2">(</span>circle_stack <span class="keyword2">:</span><span class="keyword2">&gt;</span> shape readonly_stack<span class="keyword2">)</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 13-25:
+Error: Unbound value square_stack
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/subtyping.topscript">objects/subtyping.topscript</a> , continued (part 14) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9323344">
+        Aspects of this section may seem fairly complicated, but it
+        should be pointed out that this typing
+        <span><em>works</em></span>, and in the end the type annotations
+        are fairly minor. In most typed object-oriented languages, these
+        coercions would simply not be possible. For example, in C++, a
+        STL type <code>list&lt;T&gt;</code> is invariant in
+        <code>T</code>, it is simply not possible to use
+        <code>list&lt;square&gt;</code> where
+        <code>list&lt;shape&gt;</code> is expected (at least
+        safely). The situation is similar in Java, although Java has an
+        escape hatch that allows the program to fall back to dynamic
+        typing. The situation in OCaml is much better; it works, it is
+        statically checked, and the annotations are pretty simple.
+      </p></section><section><h1 id="narrowing">Narrowing</h1><p id="idp9328864">
+        Narrowing, also called <span><em>down casting</em></span>, is the
+        ability to coerce an object to one of its subtypes. For example,
+        if we have a list of shapes <code>shape list</code>, we
+        might know (for some reason) what the actual type of each shape
+        is. Perhaps we know that all objects in the list have type
+        <code>square</code>. In this case,
+        <span><em>narrowing</em></span> would allow the re-casting of the
+        object from type <code>shape</code> to type
+        <code>square</code>. Many languages support narrowing
+        through dynamic type checking. For example, in Java, a coercion
+        <code>(Square) x</code> is allowed if the value
+        <code>x</code> has type <code>Square</code> or one
+        of its subtypes; otherwise the coercion throws an exception.
+      </p><p id="idp9335680">
+        Narrowing is <span><em>not permitted</em></span> in OCaml.
+        Period.
+      </p><p id="idp9336560">
+        Why? There are two reasonable explanations, one based on a
+        design principle, and another technical (the technical reason is
+        simple: it is hard to implement).
+      </p><p id="idp9337152">
+        The design argument is this: narrowing violates abstraction. In
+        fact, with a structural typing system like in OCaml, narrowing
+        would essentially provide the ability to enumerate the methods
+        in an object. To check whether an object <code>obj</code>
+        has some method <code>foo : int</code>, one would attempt
+        a coercion <code>(obj :&gt; &lt; foo : int &gt;)</code>.
+      </p><p id="idp9340064">
+        More commonly, narrowing leads to poor object-oriented style.
+        Consider the following Java code, which returns the name of a
+        shape object.
+      </p><div class="rwocode"><pre><code><div class="highlight"><span class="n">String</span> <span class="nf">GetShapeName</span><span class="o">(</span><span class="n">Shape</span> <span class="n">s</span><span class="o">)</span> <span class="o">{</span>
+  <span class="k">if</span> <span class="o">(</span><span class="n">s</span> <span class="k">instanceof</span> <span class="n">Square</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="s">&quot;Square&quot;</span><span class="o">;</span>
+  <span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">s</span> <span class="k">instanceof</span> <span class="n">Circle</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="s">&quot;Circle&quot;</span><span class="o">;</span>
+  <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="s">&quot;Other&quot;</span><span class="o">;</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</div></code></pre><div class="rwocodeinfo">Java ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/Shape.java">objects/Shape.java</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9341344">
+        Most programmers would consider this code to be
+        &quot;wrong.&quot; Instead of performing a case analysis on the
+        type of object, it would be better to define a method to return
+        the name of the shape. Instead of calling
+        <code>GetShapeName(s)</code>, we should call
+        <code>s.Name()</code> instead.
+      </p><p id="idp9343824">
+        However, the situation is not always so obvious. The following
+        code checks whether an array of shapes looks like a
+        &quot;barbell,&quot; composed of two <code>Circle</code>
+        objects separated by a <code>Line</code>, where the
+        circles have the same radius.
+      </p><div class="rwocode"><pre><code><div class="highlight"><span class="kt">boolean</span> <span class="nf">IsBarbell</span><span class="o">(</span><span class="n">Shape</span><span class="o">[]</span> <span class="n">s</span><span class="o">)</span> <span class="o">{</span>
+  <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="na">length</span> <span class="o">==</span> <span class="mi">3</span> <span class="o">&amp;&amp;</span> <span class="o">(</span><span class="n">s</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="k">instanceof</span> <span class="n">Circle</span><span class="o">)</span> <span class="o">&amp;&amp;</span>
+    <span class="o">(</span><span class="n">s</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span> <span class="k">instanceof</span> <span class="n">Line</span><span class="o">)</span> <span class="o">&amp;&amp;</span> <span class="o">(</span><span class="n">s</span><span class="o">[</span><span class="mi">2</span><span class="o">]</span> <span class="k">instanceof</span> <span class="n">Circle</span><span class="o">)</span> <span class="o">&amp;&amp;</span>
+        <span class="o">((</span><span class="n">Circle</span><span class="o">)</span> <span class="n">s</span><span class="o">[</span><span class="mi">0</span><span class="o">]).</span><span class="na">radius</span><span class="o">()</span> <span class="o">==</span> <span class="o">((</span><span class="n">Circle</span><span class="o">)</span> <span class="n">s</span><span class="o">[</span><span class="mi">2</span><span class="o">]).</span><span class="na">radius</span><span class="o">();</span>
+<span class="o">}</span>
+</div></code></pre><div class="rwocodeinfo">Java ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/IsBarbell.java">objects/IsBarbell.java</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9346736">
+        In this case, it is much less clear how to augment the
+        <code>Shape</code> class to support this kind of pattern
+        analysis. It is also not obvious that object-oriented
+        programming is well-suited for this situation. Pattern matching
+        seems like a better fit.
+      </p><div class="rwocode"><pre><code><span class="keyword4">let</span> is_barbell <span class="keyword2">=</span>
+  <span class="keyword1">function</span>
+  <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword6">Circle </span>r1<span class="keyword2">;</span> <span class="keyword6">Line </span><span class="keyword8">_</span><span class="keyword2">;</span> <span class="keyword6">Circle </span>r2<span class="keyword2">]</span> <span class="keyword1">when</span> r1 <span class="keyword2">=</span> r2 -<span class="keyword2">&gt;</span> true
+  <span class="keyword2">|</span> <span class="keyword8">_</span> -<span class="keyword2">&gt;</span> false</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/is_barbell.ml">objects/is_barbell.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9348848">
+        Regardless, there is a solution if you find yourself in this
+        situation, which is to augment the classes with variants. You
+        can define a method <code>variant</code> that injects the
+        actual object into a variant type.
+      </p><div class="rwocode"><pre><code><span class="keyword4">type</span> shape <span class="keyword2">=</span> <span class="keyword2">&lt;</span> variant <span class="keyword2">:</span> repr<span class="keyword2">;</span> area <span class="keyword2">:</span> <span class="keyword3">float</span><span class="keyword2">&gt;</span>
+<span class="keyword4">and</span> circle <span class="keyword2">=</span> <span class="keyword2">&lt;</span> variant <span class="keyword2">:</span> repr<span class="keyword2">;</span> area <span class="keyword2">:</span> <span class="keyword3">float</span><span class="keyword2">;</span> radius <span class="keyword2">:</span> <span class="keyword3">int</span> <span class="keyword2">&gt;</span>
+<span class="keyword4">and</span> line <span class="keyword2">=</span> <span class="keyword2">&lt;</span> variant <span class="keyword2">:</span> repr<span class="keyword2">;</span> area <span class="keyword2">:</span> <span class="keyword3">float</span><span class="keyword2">;</span> length <span class="keyword2">:</span> <span class="keyword3">int</span> <span class="keyword2">&gt;</span>
+<span class="keyword4">and</span> repr <span class="keyword2">=</span>
+ <span class="keyword2">|</span> <span class="keyword6">Circle </span><span class="keyword2">of</span> circle
+ <span class="keyword2">|</span> <span class="keyword6">Line </span><span class="keyword2">of</span> line<span class="keyword2">;</span><span class="keyword2">;</span>
+
+<span class="keyword4">let</span> is_barbell <span class="keyword2">=</span> <span class="keyword1">function</span>
+ <span class="keyword2">|</span> <span class="keyword2">[</span>s1<span class="keyword2">;</span> s2<span class="keyword2">;</span> s3<span class="keyword2">]</span> -<span class="keyword2">&gt;</span>
+   <span class="keyword2">(</span><span class="keyword1">match</span> s1<span class="keyword7">#variant</span>, s2<span class="keyword7">#variant</span>, s3<span class="keyword7">#variant</span> <span class="keyword1">with</span>
+     <span class="keyword2">|</span> <span class="keyword6">Circle </span>c1, <span class="keyword6">Line </span><span class="keyword8">_</span>, <span class="keyword6">Circle </span>c2 <span class="keyword1">when</span> c1<span class="keyword7">#radius</span> <span class="keyword2">=</span> c2<span class="keyword7">#radius</span> -<span class="keyword2">&gt;</span> true
+     <span class="keyword2">|</span> <span class="keyword8">_</span> -<span class="keyword2">&gt;</span> false<span class="keyword2">)</span>
+ <span class="keyword2">|</span> <span class="keyword8">_</span> -<span class="keyword2">&gt;</span> false<span class="keyword2">;</span><span class="keyword2">;</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/narrowing.ml">objects/narrowing.ml</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9350912">
+        This pattern works, but it has drawbacks. In particular, the
+        recursive type definition should make it clear that this pattern
+        is essentially equivalent to using variants, and that objects do
+        not provide much value here.
+      </p></section><section><h1 id="subtyping-vs.-row-polymorphism">Subtyping vs. row polymorphism</h1><p id="idp9352896">
+        There is a great deal of overlap between subtyping and row
+        polymorphism. Row polymorphism is in general preferred over
+        subtyping because it does not require explicit coercions, and it
+        preserves more type information, allowing functions like the
+        following:
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> remove_large l <span class="keyword2">=</span>
+  <span class="keyword5">List.</span>filter ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> s -<span class="keyword2">&gt;</span> s<span class="keyword7">#area</span> <span class="keyword2">&lt;</span><span class="keyword2">=</span> <span class="keyword8">100</span><span class="keyword2">)</span> l<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val remove_large : (&lt; area : int; .. &gt; as 'a) list -&gt; 'a list = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/row_polymorphism.topscript">objects/row_polymorphism.topscript</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9354336">
+        The return type of this function is built from the open object
+        type of its argument, preserving any additional methods that it
+        may have.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> squares <span class="keyword2">:</span> <span class="keyword2">&lt;</span> area <span class="keyword2">:</span> <span class="keyword3">float</span><span class="keyword2">;</span> width <span class="keyword2">:</span> <span class="keyword3">int</span> <span class="keyword2">&gt;</span> <span class="keyword3">list</span> <span class="keyword2">=</span> 
+  <span class="keyword2">[</span>square <span class="keyword8">5</span><span class="keyword2">;</span> square <span class="keyword8">15</span><span class="keyword2">;</span> square <span class="keyword8">10</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val squares : &lt; area : float; width : int &gt; list = [&lt;obj&gt;; &lt;obj&gt;; &lt;obj&gt;]
+</div># remove_large squares<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 13-20:
+Error: This expression has type &lt; area : float; width : int &gt; list
+       but an expression was expected of type &lt; area : int; .. &gt; list
+       Types for method area are incompatible
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/row_polymorphism.topscript">objects/row_polymorphism.topscript</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9355648">
+        Writing a similar function with a closed type and applying it
+        using subtyping does not preserve the methods of the argument:
+        the returned object is only known to have an
+        <code>area</code> method.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> remove_large <span class="keyword2">(</span>l<span class="keyword2">:</span> <span class="keyword2">&lt;</span> area <span class="keyword2">:</span> <span class="keyword3">float</span> <span class="keyword2">&gt;</span> <span class="keyword3">list</span><span class="keyword2">)</span> <span class="keyword2">=</span> 
+  <span class="keyword5">List.</span>filter ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> s -<span class="keyword2">&gt;</span> s<span class="keyword7">#area</span> <span class="keyword2">&lt;</span><span class="keyword2">=</span> <span class="keyword8">100</span><span class="keyword2">)</span> l<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 84-87:
+Error: This expression has type int but an expression was expected of type
+         float
+</div># remove_large <span class="keyword2">(</span>squares <span class="keyword2">:</span><span class="keyword2">&gt;</span> <span class="keyword2">&lt;</span> area <span class="keyword2">:</span> <span class="keyword3">float</span> <span class="keyword2">&gt;</span> <span class="keyword3">list</span> <span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 14-21:
+Error: This expression has type &lt; area : float &gt; list
+       but an expression was expected of type &lt; area : int; .. &gt; list
+       Types for method area are incompatible
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/row_polymorphism.topscript">objects/row_polymorphism.topscript</a> , continued (part 3) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9357712">
+        However, there are some situations where we cannot use row
+        polymorphism. For example, lists of heterogeneous elements can
+        not be created using row polymorphism:
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> hlist<span class="keyword2">:</span> <span class="keyword2">&lt;</span> area<span class="keyword2">:</span> <span class="keyword3">float</span><span class="keyword2">;</span> ..<span class="keyword2">&gt;</span> <span class="keyword3">list</span> <span class="keyword2">=</span> <span class="keyword2">[</span>square <span class="keyword8">10</span><span class="keyword2">;</span> circle <span class="keyword8">30</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 49-58:
+Error: This expression has type &lt; area : float; radius : int &gt;
+       but an expression was expected of type &lt; area : float; width : int &gt;
+       The second object type has no method radius
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/row_polymorphism.topscript">objects/row_polymorphism.topscript</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9359040">
+        Since row polymorphism is a form of polymorphism, it also does
+        not work well with references:
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> shape_ref<span class="keyword2">:</span> <span class="keyword2">&lt;</span> area<span class="keyword2">:</span> <span class="keyword3">float</span><span class="keyword2">;</span> ..<span class="keyword2">&gt;</span> ref <span class="keyword2">=</span> ref <span class="keyword2">(</span>square <span class="keyword8">40</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val shape_ref : &lt; area : float; width : int &gt; ref = {contents = &lt;obj&gt;}
+</div># shape_ref <span class="keyword2">:</span><span class="keyword2">=</span> circle <span class="keyword8">20</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 13-22:
+Error: This expression has type &lt; area : float; radius : int &gt;
+       but an expression was expected of type &lt; area : float; width : int &gt;
+       The second object type has no method radius
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/row_polymorphism.topscript">objects/row_polymorphism.topscript</a> , continued (part 5) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp9360288">
+        In both these cases we must use subtyping:
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> shape_ref<span class="keyword2">:</span> <span class="keyword2">&lt;</span> area<span class="keyword2">:</span> <span class="keyword3">float</span><span class="keyword2">;</span> ..<span class="keyword2">&gt;</span> ref <span class="keyword2">=</span> ref <span class="keyword2">(</span>square <span class="keyword8">40</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val shape_ref : &lt; area : float; width : int &gt; ref = {contents = &lt;obj&gt;}
+</div># shape_ref <span class="keyword2">:</span><span class="keyword2">=</span> circle <span class="keyword8">20</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 13-22:
+Error: This expression has type &lt; area : float; radius : int &gt;
+       but an expression was expected of type &lt; area : float; width : int &gt;
+       The second object type has no method radius
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/objects/row_polymorphism.topscript">objects/row_polymorphism.topscript</a> , continued (part 5) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><aside class="note"><h1>
+      Production note
+      </h1><p id="idp9362176">
+        This chapter contains significant external contributions from
+        Leo White.
+      </p></aside></section></section>
+
+
+                
+            </article>
+            
+            
+    
+                <nav class="pagination">
+                    
+                        <a rel="previous" href="first-class-modules.html">
+                            &lt; Previous
+                        </a>
+                    
+                    
+                        <a rel="next" href="classes.html">
+                            Next &gt;
+                        </a>
+                    
+                </nav>
+            
+            
+            
+            <footer class="footer">
+                <p>Copyright 2012-2013, Jason Hickey, Anil Madhavapeddy and Yaron Minsky. Licensed under <a href="http://creativecommons.org/licenses/by-nc-nd/3.0/us/">CC BY-NC-ND 3.0 US</a>.</p>
+            </footer>
+            
+        </div>
+    
+    </body>
+
+</html>

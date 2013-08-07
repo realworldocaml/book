@@ -1,0 +1,24 @@
+.index ul {
+    list-style: none;
+    margin-left: 40px;
+}
+
+.index a {
+    color: #000000;
+}
+
+.index > ul {
+    margin-left: 25px;
+}
+
+.index ul > li {
+    margin-bottom: 0;
+}
+
+.index > ul > li > a {
+    font-size: 18px;
+}
+
+.index > ul > li > ul > li > a {
+    font-size: 16px;
+}
