@@ -671,7 +671,7 @@ As we'll see in [xref](#error-handling), this explicitness allows the
 compiler to provide a great deal of help in making sure you're
 correctly handing the possibility of missing data.
 
-## Records and Variants
+## Records and variants
 
 So far, we've only looked at data structures that were predefined in
 the language, like lists and tuples.  But OCaml also allows us to
