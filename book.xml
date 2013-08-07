@@ -31651,35 +31651,35 @@ $ opam install core core_extended core_bench async
         </para>
       </listitem>
     </itemizedlist>
-    <sect2 id="editing-environment">
-      <title>Editing Environment</title>
-      <para>
-        There's one last tool you need before getting started on the
-        examples. The default <literal>ocaml</literal> command gives us
-        an interactive command-line to experiment with code without
-        compiling it. However, it's quite a spartan experience and so we
-        use a more modern alternative.
-      </para>
-      <programlisting>
+  </sect1>
+  <sect1 id="editing-environment">
+    <title>Editing Environment</title>
+    <para>
+      There's one last tool you need before getting started on the
+      examples. The default <literal>ocaml</literal> command gives us an
+      interactive command-line to experiment with code without compiling
+      it. However, it's quite a spartan experience and so we use a more
+      modern alternative.
+    </para>
+    <programlisting>
 $ opam install utop
 </programlisting>
-      <para>
-        The <literal>utop</literal> package is an interactive
-        command-line interface to OCaml that has tab-completion,
-        persistent history and integration with Emacs so that you can
-        run it within your editing environment.
-      </para>
-      <para>
-        Remember from earlier that OPAM never installs files directly
-        into your system directories, and this applies to
-        <literal>utop</literal> too. You'll find the binary in
-        <literal>~/.opam/4.01.0dev+trunk/bin</literal>. However, typing
-        in <literal>utop</literal> from your shell should just work, due
-        to the <literal>opam config env</literal> step that configures
-        your shell. Don't forget to automate this as described earlier
-        as it makes life much easier when developing OCaml code!
-      </para>
-    </sect2>
+    <para>
+      The <literal>utop</literal> package is an interactive command-line
+      interface to OCaml that has tab-completion, persistent history and
+      integration with Emacs so that you can run it within your editing
+      environment.
+    </para>
+    <para>
+      Remember from earlier that OPAM never installs files directly into
+      your system directories, and this applies to
+      <literal>utop</literal> too. You'll find the binary in
+      <literal>~/.opam/4.01.0dev+trunk/bin</literal>. However, typing in
+      <literal>utop</literal> from your shell should just work, due to
+      the <literal>opam config env</literal> step that configures your
+      shell. Don't forget to automate this as described earlier as it
+      makes life much easier when developing OCaml code!
+    </para>
     <sect2 id="command-line">
       <title>Command Line</title>
       <para>
