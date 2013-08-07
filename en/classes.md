@@ -364,11 +364,10 @@ when applied to objects.
 ((typ ocamltop)(name classes/binary.topscript)(part 3))
 ```
 
-The problem here is that the built-in polymorphic equality compares the method
-implementations, not their return values.  The method implementations (the
-function values that implement the methods) are different, and so the equality
-comparison is false.  There are other reasons not to use the built-in
-polymorphic equality, but these false negatives are a showstopper.
+The problem here is that two objects are considered equal by the built-in
+polymorphic equality if and only if they are physically equal.  There are other
+reasons not to use the built-in polymorphic equality, but these false negatives
+are a showstopper.
 
 If we want to define equality for shapes in general, the remaining solution is
 to use the same approach as we described for narrowing.  That is, introduce a
@@ -418,11 +417,12 @@ handle the display.
 ((typ ocaml)(name classes-async/drawable.ml))
 ```
 
-We first define our `shape` object type to include a `draw` method, and a
+We first define our `drawable` object type to include a `draw` method, and a
 reference to a list of shapes to display them.  Any shapes in that list will be
 drawn on the display at regular intervals via the `repaint` function. Finally,
-we also define an `open_display` function to open a graphical display and
-ensure that the Async scheduler is running.
+we also define an `open_display` function to open a graphical display.
+
+### Create some simple drawable shapes
 
 Now let's create a new module that contains classes for making squares and
 circles. We include an `on_click` method for adding event handlers to the
@@ -580,7 +580,7 @@ second when clicked:
 ((typ ocaml)(name classes-async/shapes.ml)(part 6))
 ```
 
-This initializers can also be added using mixins:
+These initializers can also be added using mixins:
 
 ```frag
 ((typ ocaml)(name classes-async/shapes.ml)(part 7))
