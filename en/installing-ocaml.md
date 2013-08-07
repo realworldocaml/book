@@ -441,6 +441,7 @@ to load it every time you start `utop`, by adding this to it:
 
 ```ocaml
 #use "topfind"
+#thread
 #camlp4o
 #require "core.top"
 #require "core.syntax"
