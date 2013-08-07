@@ -960,11 +960,11 @@ queries succeed and some fail, and the timeouts are reported as such.
 ## Working with system threads
 
 OCaml does have built-in support for true system threads, _i.e._,
-kernel-level threads that can be interleaved at any time with each
-other.  We discussed in the beginning of the chapter why Async is
-generally a better choice than system threads, but even if you mostly
-use Async, OCaml's system threads are sometimes necessary, and it's
-worth understanding them.
+kernel-level threads whose interleaving is controlled by the kernel.
+We discussed in the beginning of the chapter why Async is generally a
+better choice than system threads, but even if you mostly use Async,
+OCaml's system threads are sometimes necessary, and it's worth
+understanding them.
 
 The most surprising aspect of OCaml's system threads is that they
 don't afford you any access to physical parallelism on the machine.
@@ -979,21 +979,22 @@ operating system calls that have no non-blocking alternative, which
 means that you can't run them directly in a system like Async without
 blocking out the entire system.  For this reason, Async maintains a
 thread pool for running such calls.  Most of the time, as a user of
-Async you don't need to think about this, but it's worth knowing that
-it's happening.
+Async you don't need to think about this, but it is happening under
+the covers.
 
 Another reasonably common reason to have multiple threads is to deal
 with non-OCaml libraries that have their own event loop or for
 whatever reason need their own threads.  In that case, it's sometimes
-useful to run some OCaml code on the C thread as part of the
-communication between your main program and the C library.  C bindings
-are discussed in more detail in [xref](#foreign-function-interface).
+useful to run some OCaml code on the foreign thread as part of the
+communication to your main program.  OCaml's foreign function
+interface is discussed in more detail in
+[xref](#foreign-function-interface).
 
 Another occasional motivation for using true system threads is to
 interoperate with compute-intensive OCaml code that otherwise would
 block the Async runtime.  In Async, if you have a long-running
 computation that never calls `bind` or `map`, then that computation
-will block out the entire system until it completes.  
+will block out the entire system until it completes.
 
 One way of dealing with this is to explicitly break up the calculation
 into smaller pieces that are separated by binds.  But sometimes this
@@ -1001,13 +1002,13 @@ explicit yielding is impractical, since it may involve intrusive
 changes to an existing codebase.  Another solution is to run the code
 in question in a separate thread.  Async's `In_thread` module provides
 multiple facilities for doing just this, `In_thread.run` being the
-simplest.   We can simply write:
+simplest.  We can simply write
 
 ```frag
 ((typ ocamltop)(name async/main.topscript)(part 42))
 ```
 
-To cause `List.range 1 10` to be run on one of Async's worker
+to cause `List.range 1 10` to be run on one of Async's worker
 threads.  When the computation is complete, the result is placed in
 the deferred, where it can be used in the ordinary way from Async.
 
@@ -1015,13 +1016,14 @@ the deferred, where it can be used in the ordinary way from Async.
 <title>Thread-safety and locking </title>
 
 Once you start working with system threads, you'll need to be careful
-about locking your data-structures.  Most OCaml data-structures do not
-have well-defined semantics when accessed concurrently by multiple
-threads.  The issues you can run into range from runtime exceptions to
-corrupted data-structures to, in some rare cases, segfaults.  That
-means you should always use mutexes when sharing data between
-different systems threads.  Even data-structures that seem like they
-should be safe, like lazy values, can have undefined behavior when
+about locking your data-structures.  Most mutable OCaml
+data-structures do not have well-defined semantics when accessed
+concurrently by multiple threads.  The issues you can run into range
+from runtime exceptions to corrupted data-structures to, in some rare
+cases, segfaults.  That means you should always use mutexes when
+sharing mutable data between different systems threads.  Even
+data-structures that seem like they should be safe but are mutable
+under the covers, like lazy values, can have undefined behavior when
 accessed from multiple threads.
 
 There are two commonly available mutex packages for OCaml: the `Mutex`
@@ -1036,9 +1038,9 @@ result, creating a `Nano_mutex.t` is 20x faster than creating a
 
 Interoperability between Async and system threads can be quite tricky,
 so let's work through some of the issues.  Consider the following
-function tries which schedules itself to wake up every `100ms`, and
-keeps a list of the delays after which it actually woke up, until the
-deferred it was passed becomes determined.  We can use this to see how
+function which schedules itself to wake up every `100ms`, and keeps a
+list of the delays after which it actually woke up, until the deferred
+it was passed becomes determined.  We can use this to see how
 responsive Async is.
 
 ```frag
@@ -1060,7 +1062,8 @@ loop running instead?
 ```
 
 As you can see, instead of waking up ten times a second, `log_delays`
-is blocked out for nearly a second while `busy_loop` churns away.
+is blocked out for much longer than that while `busy_loop` churns
+away.
 
 If, on the other hand, we use `In_thread.run` to offload this to a
 different system thread, the behavior will be different.
@@ -1081,7 +1084,7 @@ allocation.  OCaml's threads only get a chance to give up the runtime
 lock when they interact with the allocator, so if there's a piece of
 code that doesn't allocate at all, then it will never allow any other
 OCaml thread to run.  We can see this if we rewrite our busy-loop
-slightly.
+slightly so it doesn't allocate.
 
 ```frag
 ((typ ocamltop)(name async/main.topscript)(part 47))
@@ -1090,13 +1093,11 @@ slightly.
 Even though `noalloc_busy_loop` was running in a different thread, it
 didn't let `log_delays` run at all.
 
-DANGER WILL ROBINSON.  Why doesn't this work as I expect?  Did the
-compiler change somehow?
-
 Overall, combining Async and threads is quite tricky, but it can be
 done safely and easily if you follow the following hold:
 
-- There is no shared state between the various threads involved.
+- There is no shared mutable state between the various threads
+  involved.
 - The computations executed by `In_thread.run` do not make any calls
   to the async library.
 
