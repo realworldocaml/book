@@ -402,7 +402,7 @@ three packages that really matter are:
   communicate with other hosts.  You can skip this for the initial
   installation until you get to Part II, if you prefer.
 
-### Editing Environment
+## Editing Environment
 
 There's one last tool you need before getting started on the examples.
 The default `ocaml` command gives us an interactive command-line to
