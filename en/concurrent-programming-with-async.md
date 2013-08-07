@@ -8,20 +8,24 @@ applications are typically _concurrent_, needing to wait for multiple
 different events at the same time, responding immediately to whatever
 event happens first.
 
-A common approach to concurrency is to use preemptive system threads,
-which is the most common solution in languages like Java or C#.  In
-this model, each task that may require simultaneous waiting is given
-an operating system thread of its own, so it can block without
-stopping the entire program.  Other language runtimes such as
-JavaScript are single-threaded, and applications register function
-callbacks to be triggered upon external events such as a timeout or
-browser click.
+One approach to concurrency is to use preemptive system threads, which
+is the dominant approach in languages like Java or C#.  In this model,
+each task that may require simultaneous waiting is given an operating
+system thread of its own, so it can block without stopping the entire
+program.  
+
+Another approach is to have a single-threaded program where that
+single thread runs an _event loop_, whose job is to react to external
+events like timeouts or mouse clicks by invoking a callback function
+that has been registered for that purpose.  This approach shows up in
+languages like JavaScript that have single-threaded runtimes as well
+as in many GUI toolkits.
 
 Each of these mechanisms has its own trade-offs. System threads
 require significant memory and other resources per thread.  Also, the
 operating system can arbitrarily interleave the execution of system
 threads, requiring the programmer to carefully protect shared
-resources with locks and condition variables, which can be exceedingly
+resources with locks and condition variables, which is exceedingly
 error-prone.
 
 Single-threaded event-driven systems, on the other hand, execute a
@@ -47,8 +51,8 @@ Consider a typical function for doing I/O in Core.
 
 Since the function returns a concrete string, it has to block until
 the read completes.  The blocking nature of the call means that no
-progress can be made on anything else until the read is completed, as
-you can see below.
+progress can be made on anything else until the read is completed.
+Here's an example.
 
 ```frag
 ((typ ocamltop)(name async/main.topscript)(part 2))
@@ -107,12 +111,16 @@ let's consider the type-signature of bind.
 ((typ ocamltop)(name async/main.topscript)(part 7))
 ```
 
-Thus, `Deferred.bind d f` takes a deferred value `d` and a function f
-that is to be run with the value of `d` once it's determined.  The
-call to `Deferred.bind` returns a new deferred that becomes determined
-when the deferred returned by `f` is determined.  It also implicitly
-registers with the scheduler an _Async job_ that is responsible for
-running `f` once `d` is determined.
+`Deferred.bind d f` takes a deferred value `d` and a function f that
+is to be run with the value of `d` once it's determined.  You can
+think of `Deferred.bind` as a kind of sequencing operator, and what
+we're doing is essentially taking an asynchronous computation `d` and
+tacking on another stage comprised by the actions of the function `f`.
+
+At a more concrete level, the call to `Deferred.bind` returns a new
+deferred that becomes determined when the deferred returned by `f` is
+determined.  It also implicitly registers with the scheduler an _Async
+job_ that is responsible for running `f` once `d` is determined.
 
 Here's a simple use of bind for a function that replaces a file with
 an uppercase version of its contents.
@@ -208,8 +216,8 @@ that can't be constructed naturally otherwise.
 As an example, imagine we wanted a way of scheduling a sequence of
 actions that would run after a fixed delay.  In addition, we'd like to
 guarantee that these delayed actions are executed in the same order
-they were scheduled in.  One could imagine building a module for
-handling this with the following interface.
+they were scheduled in.  Here's a reasonable signature that captures
+this idea.
 
 ```frag
 ((typ ocamltop)(name async/main.topscript)(part 16))
@@ -219,11 +227,8 @@ An action is handed to `schedule` in the form of a deferred-returning
 thunk (a thunk is a function whose argument is of type `unit`).  A
 deferred is handed back to the caller of `schedule` that will
 eventually be filled with the contents of the deferred value returned
-by the thunk to be scheduled.  We can implement this using an ivar
-which we fill after the thunk is called and the deferred it returns
-becomes determined.  Instead of using `bind` or `map` for scheduling
-these events, we'll use a different operator called `upon`.  Here's
-the signature of `upon`:
+by the thunk to be scheduled.  To implement this, we'll use a new
+operator called `upon`, which has the following signature.
 
 ```frag
 ((typ ocamltop)(name async/main.topscript)(part 17))
@@ -238,25 +243,26 @@ where every call to `schedule` adds a thunk to the queue, and also
 schedules a job in the future to grab a thunk off the queue and run
 it.  The waiting will be done using the function `after` which takes a
 time span and returns a deferred which becomes determined after that
-time span elapses.  The role of the ivar here is to take the value
-returned by the thunk and use it to fill the deferred returned by the
-provided thunk.
+time span elapses.  
 
 ```frag
 ((typ ocamltop)(name async/main.topscript)(part 18))
 ```
 
-This code isn't particularly long, but it is a bit subtle.  This is
-typical of code that involves ivars and `upon`, and because of this,
-you should stick to the simpler map/bind/return style of working with
-deferreds when you can.
+This code isn't particularly long, but it is a bit subtle.  In
+particular, note how the queue of thunks is used to ensure that the
+enqueued actions are run in order, even if the thunks scheduled by
+`upon` are run out-of-order.  This is kind of subtlety typical of code
+that involves ivars and `upon`, and because of this, you should stick
+to the simpler map/bind/return style of working with deferreds when
+you can.
 
 ## Examples: an echo server
 
 Now that we have the basics of Async under our belt, let's look at a
-small complete standalone Async program. In particular, we'll write
-an echo server, _i.e._, a program that accepts connections from
-clients and spits back every line of text sent to it.
+small standalone Async program. In particular, we'll write an echo
+server, _i.e._, a program that accepts connections from clients and
+spits back whatever is sent to it.
 
 The first step is to create a function that can copy data from an
 input to an output.  Here, we'll use Async's `Reader` and `Writer`
@@ -283,21 +289,22 @@ pushback in your servers, then a stopped client can cause your program
 to leak memory, since you'll need to allocate space for the data
 that's been read in but not yet written out.
 
-Another memory leak you might be concerned with is the chain of
-deferreds that is built up as you go through the loop.  After all,
+You might also be concerned that the chain of deferreds that is built
+up as you go through the loop would lead to a memory leak.  After all,
 this code constructs an ever-growing chain of binds, each of which
 creates a deferred.  In this case, however, all of the deferreds
 should become determined precisely when the final deferred in the
 chain is determined, in this case, when the `Eof` condition is hit.
 Because of this, we could safely replace all of these deferreds with a
-single deferred.  Async has logic to do just this, which is
-essentially a form of tail-call optimization.
+single deferred.  Async has logic to do just this, and so there's no
+memory leak after all.  This is essentially a form of tail-call
+optimization, lifted to the Async monad.
 
 `copy_blocks` provides the logic for handling a client connection, but
 we still need to set up a server to receive such connections and
 dispatch to `copy_blocks`.  For this, we'll use Async's `Tcp` module,
-which has a collection of utilities for creating simple TCP clients
-and servers.
+which has a collection of utilities for creating TCP clients and
+servers.
 
 ```frag
 ((typ ocaml)(name async/echo.ml)(part 1))
