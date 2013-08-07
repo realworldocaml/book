@@ -415,13 +415,12 @@ The `utop` package is an interactive command-line interface to OCaml
 that has tab-completion, persistent history and integration with Emacs
 so that you can run it within your editing environment.
 
-Remember from earlier that OPAM never installs files directly into
-your system directories, and this applies to `utop` too.  You'll find
-the binary in `~/.opam/4.01.0dev+trunk/bin`.  However, just typing
-in `utop` from your shell should just work, due to the `opam config
-env` step that configures your shell.  Don't forget to automate this
-as described earlier, as it makes life much easier when developing
-OCaml code!
+Remember from earlier that OPAM never installs files directly into your system
+directories, and this applies to `utop` too.  You'll find the binary in
+`~/.opam/4.01.0dev+trunk/bin`.  However, typing in `utop` from your shell
+should just work, due to the `opam config env` step that configures your shell.
+Don't forget to automate this as described earlier as it makes life much
+easier when developing OCaml code!
 
 ### Command Line
 
