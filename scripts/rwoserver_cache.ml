@@ -322,5 +322,5 @@ let _ =
     Memcache.cache ""
     >>= fun c ->
     let spec = { Cohttp_lwt_unix.Server.callback=(callback c); conn_closed } in
-      Cohttp_lwt_unix.Server.create ~address:"0.0.0.0" ~port:443 spec
+      Cohttp_lwt_unix.Server.create ~address:"127.0.0.1" ~port:8000 spec
   )
