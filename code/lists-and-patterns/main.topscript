@@ -62,11 +62,17 @@ let plus_one_match x =
 #part 10
 #require "core_bench";;
 open Core_bench.Std;;
+let run_bench tests =
+  Bench.bench
+    ~ascii_table:true
+    ~display:Textutils.Ascii_table.Display.column_titles 
+    tests
+;;
 [ Bench.Test.create ~name:"plus_one_match" (fun () ->
       ignore (plus_one_match 10))
   ; Bench.Test.create ~name:"plus_one_if" (fun () ->
       ignore (plus_one_if 10)) ]
-  |> Bench.bench
+  |> run_bench
   ;;
 #part 11
 let rec sum_if l =
@@ -77,7 +83,7 @@ let rec sum_if l =
 let numbers = List.range 0 1000 in
   [ Bench.Test.create ~name:"sum_if" (fun () -> ignore (sum_if numbers))
   ; Bench.Test.create ~name:"sum"    (fun () -> ignore (sum numbers)) ]
-  |> Bench.bench
+  |> run_bench
   ;;
 #part 13
 let rec drop_zero l =
