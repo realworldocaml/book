@@ -378,7 +378,8 @@ let parse_file fullfile file =
                 print_html_part !part (Cow.Html.to_string (Cow.Code.ocaml_fragment ("# " ^ phrase)));
                 let sout = if stdout = "" then <:html<&>> else <:html<<br />$str:stdout$>> in
                 let serr = if stderr = "" then <:html<&>> else <:html<<br />$str:stderr$>> in
-                if s <> "" then print_html_part !part (Cow.Html.to_string <:html<<div class="rwocodeout">$sout$$serr$$str:s$</div>&>>);
+                let s = if s ="" then " " else s in
+                print_html_part !part (Cow.Html.to_string <:html<<div class="rwocodeout">$sout$$serr$$str:s$</div>&>>);
                 []
               | `Error s ->
                 print_part !part (sprintf "# %s \n%s" phrase s);
