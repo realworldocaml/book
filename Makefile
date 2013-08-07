@@ -7,7 +7,7 @@ depend:
 	cd scripts && ./build.sh
 	cd code && $(MAKE)
 
-milestone-%: all
+milestone-%: trunk
 	./gen-book.sh -p -m $*
 
 html:
