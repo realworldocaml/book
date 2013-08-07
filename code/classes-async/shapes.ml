@@ -13,15 +13,15 @@ class virtual shape x y = object (self)
 
   method on_click ?start ?stop f =
     on_click ?start ?stop
-      (fun {mouse_x;mouse_y} ->  
-         if self#contains mouse_x mouse_y then
-           f mouse_x mouse_y)
+      (fun ev ->  
+         if self#contains ev.mouse_x ev.mouse_y then
+           f ev.mouse_x ev.mouse_y)
 
   method on_mousedown ?start ?stop f =
     on_mousedown ?start ?stop
-      (fun {mouse_x;mouse_y} ->
-         if self#contains mouse_x mouse_y then
-           f mouse_x mouse_y)
+      (fun ev ->
+         if self#contains ev.mouse_x ev.mouse_y then
+           f ev.mouse_x ev.mouse_y)
 end
 
 (* part 1 *)
@@ -58,7 +58,7 @@ class growing_circle r x y = object (self)
   inherit circle r x y
 
   initializer
-    self#on_click (fun x y -> radius <- radius * 2)
+    self#on_click (fun _x _y -> radius <- radius * 2)
 end
 
 (* part 3 *)
@@ -86,9 +86,9 @@ class virtual draggable = object (self)
               Ivar.fill mouse_up ();
               dragging <- false);
          on_mousemove ~stop
-           (fun {mouse_x;mouse_y} ->
-              x <- mouse_x + offset_x;
-              y <- mouse_y + offset_y))
+           (fun ev ->
+              x <- ev.mouse_x + offset_x;
+              y <- ev.mouse_y + offset_y))
 end
 
 (* part 4 *)
@@ -123,7 +123,7 @@ class virtual animated span = object (self)
       )
 
   initializer
-    self#on_click (fun x y -> if not self#running then self#animate)
+    self#on_click (fun _x _y -> if not self#running then self#animate)
 end
 
 (* part 6 *)
@@ -134,7 +134,7 @@ class my_circle = object
 end
 
 (* part 7 *)
-class virtual linear x' y' = object (self)
+class virtual linear x' y' = object
   val virtual mutable updates: (int -> unit) list
   val virtual mutable x: int
   val virtual mutable y: int
@@ -149,7 +149,7 @@ end
 
 let pi = (atan 1.0) *. 4.0
 
-class virtual harmonic offset x' y' = object (self)
+class virtual harmonic offset x' y' = object
   val virtual mutable updates: (int -> unit) list
   val virtual mutable x: int
   val virtual mutable y: int
@@ -166,7 +166,7 @@ class virtual harmonic offset x' y' = object (self)
 end
 
 (* part 8 *)
-class my_square x y = object (self)
+class my_square x y = object
   inherit square 40 x y
   inherit draggable
   inherit animated (Time.Span.of_int_sec 5)
