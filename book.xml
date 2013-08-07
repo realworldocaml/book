@@ -940,7 +940,7 @@ Exception: Division_by_zero.
     </sect2>
   </sect1>
   <sect1 id="tuples-lists-options-and-pattern-matching">
-    <title>Tuples, Lists, Options and Pattern Matching</title>
+    <title>Tuples, lists, options and pattern matching</title>
     <sect2 id="tuples">
       <title>Tuples</title>
       <para>
@@ -1438,7 +1438,7 @@ val log_entry : Time.t option -&gt; string -&gt; string = &lt;fun&gt;
 # log_entry (Some Time.epoch) &quot;A long long time ago&quot;;; 
 - : string = &quot;1970-01-01 01:00:00 -- A long long time ago&quot;
 # log_entry None &quot;Up to the minute&quot;;; 
-- : string = &quot;2013-08-06 13:42:45 -- Up to the minute&quot;
+- : string = &quot;2013-08-07 09:27:32 -- Up to the minute&quot;
 </programlisting>
       <para>
         This example uses Core's <literal>Time</literal> module for
@@ -2706,7 +2706,7 @@ val is_odd : int -&gt; bool = &lt;fun&gt;
       </para>
     </sect2>
     <sect2 id="prefix-and-infix-operators">
-      <title>Prefix and Infix operators</title>
+      <title>Prefix and infix operators</title>
       <para>
         So far, we've seen examples of functions used in both prefix and
         infix style:
@@ -3159,7 +3159,7 @@ val some_or_default : 'a -&gt; 'a option -&gt; 'a = &lt;fun&gt;
       </para>
     </sect2>
     <sect2 id="labeled-arguments">
-      <title>Labeled Arguments</title>
+      <title>Labeled arguments</title>
       <para>
         Up until now, the functions we've defined have specified their
         arguments positionally, <emphasis>i.e.</emphasis>, by the order
@@ -3730,7 +3730,7 @@ val concat : string -&gt; string -&gt; ?sep:string -&gt; string = &lt;fun&gt;
     illustrate the other.
   </para>
   <sect1 id="list-basics">
-    <title>List Basics</title>
+    <title>List basics</title>
     <para>
       An OCaml list is an immutable, finite sequence of elements of the
       same type. As we've seen, OCaml lists can be generated using a
@@ -4007,8 +4007,8 @@ Estimated testing time 20s (change using -quota SECS).
 ┌────────────────┬───────────┬──────────┐
 │ Name           │ Time (ns) │ % of max │
 ├────────────────┼───────────┼──────────┤
-│ plus_one_match │     46.81 │    68.21 │
-│ plus_one_if    │     68.63 │   100.00 │
+│ plus_one_match │     46.81 │    68.20 │
+│ plus_one_if    │     68.64 │   100.00 │
 └────────────────┴───────────┴──────────┘
 - : unit = ()
 </programlisting>
@@ -4045,8 +4045,8 @@ Estimated testing time 20s (change using -quota SECS).
 ┌────────┬───────────┬──────────┐
 │ Name   │ Time (ns) │ % of max │
 ├────────┼───────────┼──────────┤
-│ sum_if │   110_544 │   100.00 │
-│ sum    │    22_353 │    20.22 │
+│ sum_if │   110_524 │   100.00 │
+│ sum    │    22_358 │    20.23 │
 └────────┴───────────┴──────────┘
 - : unit = ()
 </programlisting>
@@ -4600,6 +4600,8 @@ length (make_list 10_000_000);;
 
 Characters -1-12:
 Warning 10: this expression should have type unit.
+Characters -1-12:
+Warning 10: this expression should have type unit.
 Stack overflow during evaluation (looping recursion?).
 </programlisting>
     <para>
@@ -4956,7 +4958,7 @@ val count_some : 'a option list -&gt; int = &lt;fun&gt;
     and module signatures.
   </para>
   <sect1 id="single-file-programs">
-    <title>Single File Programs</title>
+    <title>Single file programs</title>
     <para>
       We'll start with an example: a utility that reads lines from
       <literal>stdin</literal> and computes a frequency count of the
@@ -5238,7 +5240,7 @@ let () =
 </programlisting>
   </sect1>
   <sect1 id="signatures-and-abstract-types">
-    <title>Signatures and Abstract Types</title>
+    <title>Signatures and abstract types</title>
     <para>
       While we've pushed some of the logic to the
       <literal>Counter</literal> module, the code in
@@ -6115,7 +6117,7 @@ type host_info = {
     };; 
 val my_host : host_info =
   {hostname = &quot;ocaml-www1&quot;; os_name = &quot;Linux&quot;; cpu_arch = &quot;unknown&quot;;
-   timestamp = 2013-08-06 13:45:25.433447+01:00}
+   timestamp = 2013-08-07 09:30:11.054066+01:00}
 </programlisting>
   <para>
     You might wonder how the compiler inferred that
@@ -6171,7 +6173,7 @@ val first_timestamped : 'a timestamped list -&gt; 'a timestamped option = &lt;fu
        sprintf &quot;%s (%s / %s, on %s)&quot; h os c (Time.to_sec_string ts);; 
 val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
 # host_info_to_string my_host;; 
-- : string = &quot;ocaml-www1 (Linux / unknown, on 2013-08-06 13:45:25)&quot;
+- : string = &quot;ocaml-www1 (Linux / unknown, on 2013-08-07 09:30:11)&quot;
 </programlisting>
     <para>
       Note that the pattern that we used had only a single case, rather
@@ -6338,7 +6340,7 @@ val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
 val my_host : host_info =
   {hostname = &quot;ocaml-www1&quot;; os_name = &quot;Linux&quot;; cpu_arch = &quot;unknown&quot;;
    os_release = &quot;3.2.0-1-amd64&quot;;
-   timestamp = 2013-08-06 13:45:31.945705+01:00}
+   timestamp = 2013-08-07 09:30:17.398365+01:00}
 </programlisting>
     <para>
       In the above code, we defined variables corresponding to the
@@ -6969,12 +6971,12 @@ val show_field :
                 credentials = &quot;Xy2d9W&quot;; }
   ;; 
 val logon : Logon.t =
-  {Logon.session_id = &quot;26685&quot;; time = 2013-08-06 13:45:37.164935+01:00;
+  {Logon.session_id = &quot;26685&quot;; time = 2013-08-07 09:30:22.563708+01:00;
    user = &quot;yminsky&quot;; credentials = &quot;Xy2d9W&quot;}
 # show_field Logon.Fields.user Fn.id logon;; 
 - : string = &quot;user: yminsky&quot;
 # show_field Logon.Fields.time Time.to_string logon;; 
-- : string = &quot;time: 2013-08-06 13:45:37.164935+01:00&quot;
+- : string = &quot;time: 2013-08-07 09:30:22.563708+01:00&quot;
 </programlisting>
     <para>
       As a side note, the above is our first use of the
@@ -9281,8 +9283,8 @@ Estimated testing time 30s (change using -quota SECS).
 ┌──────────────────────────────┬────────┬───────────┬──────────┐
 │ Name                         │ Cycles │ Time (ns) │ % of max │
 ├──────────────────────────────┼────────┼───────────┼──────────┤
-│ simple computation           │    267 │       112 │    75.97 │
-│ simple computation w/handler │    297 │       124 │    84.35 │
+│ simple computation           │    268 │       112 │    76.04 │
+│ simple computation w/handler │    297 │       124 │    84.32 │
 │ end with exn                 │    352 │       147 │   100.00 │
 └──────────────────────────────┴────────┴───────────┴──────────┘
 </programlisting>
@@ -9299,9 +9301,9 @@ Estimated testing time 30s (change using -quota SECS).
 ┌──────────────────────────────┬────────┬───────────┬──────────┐
 │ Name                         │ Cycles │ Time (ns) │ % of max │
 ├──────────────────────────────┼────────┼───────────┼──────────┤
-│ simple computation           │    268 │       112 │    82.22 │
-│ simple computation w/handler │    297 │       124 │    91.27 │
-│ end with exn                 │    326 │       136 │   100.00 │
+│ simple computation           │    267 │       111 │    82.21 │
+│ simple computation w/handler │    296 │       124 │    91.29 │
+│ end with exn                 │    324 │       135 │   100.00 │
 └──────────────────────────────┴────────┴───────────┴──────────┘
 </programlisting>
       <para>
@@ -9824,7 +9826,7 @@ let () = &lt;expr2&gt; in
         modified in much the same way as record fields.
       </para>
       <sect3 id="ref-cells">
-        <title>Ref Cells</title>
+        <title>Ref cells</title>
         <para>
           Variables in OCaml are never mutable --- they can refer to
           mutable data, but what the variable points to can't be
@@ -10535,11 +10537,11 @@ val time : (unit -&gt; 'a) -&gt; 'a = &lt;fun&gt;
 ...part 4 of imperative-programming/memo.topscript
 # time (fun () -&gt; edit_distance &quot;OCaml&quot; &quot;ocaml&quot;);; 
 
-Time: 1.405ms
+Time: 1.41001ms
 - : int = 2
 # time (fun () -&gt; edit_distance &quot;OCaml 4.01&quot; &quot;ocaml 4.01&quot;);; 
 
-Time: 6.74967s
+Time: 6.78891s
 - : int = 2
 </programlisting>
       <para>
@@ -10579,7 +10581,7 @@ Time: 0.844002ms
 - : int = 10946
 # time (fun () -&gt; fib 40);; 
 
-Time: 12.775s
+Time: 12.774s
 - : int = 165580141
 </programlisting>
       <para>
@@ -10602,11 +10604,11 @@ Time: 12.775s
 val fib : int -&gt; int = &lt;fun&gt;
 # time (fun () -&gt; fib 40);; 
 
-Time: 12.7761s
+Time: 12.7741s
 - : int = 165580141
 # time (fun () -&gt; fib 40);; 
 
-Time: 0.00286102ms
+Time: 0.00405312ms
 - : int = 165580141
 </programlisting>
       <para>
@@ -10698,7 +10700,7 @@ val memo_rec : (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;
 val fib : int -&gt; int = &lt;fun&gt;
 # time (fun () -&gt; fib 40);; 
 
-Time: 0.0600815ms
+Time: 0.056982ms
 - : int = 102334155
 </programlisting>
       <para>
@@ -10775,7 +10777,7 @@ val edit_distance : string * string -&gt; int = &lt;fun&gt;
 ...part 7 of imperative-programming/memo.topscript
 # time (fun () -&gt; edit_distance (&quot;OCaml 4.01&quot;,&quot;ocaml 4.01&quot;));; 
 
-Time: 0.498056ms
+Time: 0.495911ms
 - : int = 2
 </programlisting>
       <note> <title> 
@@ -10858,7 +10860,7 @@ Exception: Lazy.Undefined.
 val lazy_memo_rec : (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;
 # time (fun () -&gt; lazy_memo_rec fib_norec 40);; 
 
-Time: 0.0638962ms
+Time: 0.0619888ms
 - : int = 102334155
 </programlisting>
       <para>
@@ -10870,7 +10872,7 @@ Time: 0.0638962ms
     </sect2>
   </sect1>
   <sect1 id="input-and-output">
-    <title>Input and Output</title>
+    <title>Input and output</title>
     <para>
       Imperative programming is about more than modifying in-memory
       data-structures. Any function that doesn't boil down to a
@@ -11531,7 +11533,7 @@ Error: This expression has type string but an expression was expected of type
       <literal>remember_three</literal> was never called!
     </para>
     <sect2 id="the-value-restriction">
-      <title>The Value Restriction</title>
+      <title>The value restriction</title>
       <para>
         So, when does the compiler infer weakly polymorphic types? As
         we've seen, we need weakly polymorphic types when a value of
@@ -12966,7 +12968,7 @@ include Foldable.Extend(Fqueue)
     </para>
   </sect1>
 </chapter><chapter id="first-class-modules">
-  <title>First-class modules</title>
+  <title>First-Class Modules</title>
   <para>
     You can think of OCaml as being broken up into two parts: a core
     language that is concerned with values and types, and a module
@@ -14206,7 +14208,7 @@ val s : &lt; pop : int option; push : int -&gt; unit &gt; = &lt;obj&gt;
     </para>
   </sect1>
   <sect1 id="object-polymorphism">
-    <title>Object Polymorphism</title>
+    <title>Object polymorphism</title>
     <para>
       Like polymorphic variants, methods can be used without an explicit
       type declaration.
@@ -14318,7 +14320,7 @@ end;;
 val t : &lt; pop : int option &gt; = &lt;obj&gt;
 # print_pop t;; 
 
-Popped: 1375793180
+Popped: 1375864265
 - : unit = ()
 </programlisting>
   </sect1>
@@ -14924,7 +14926,7 @@ let is_barbell = function
       </para>
     </sect2>
     <sect2 id="subtyping-vs.-row-polymorphism">
-      <title>Subtyping vs. Row Polymorphism</title>
+      <title>Subtyping vs. row polymorphism</title>
       <para>
         There is a great deal of overlap between subtyping and row
         polymorphism. Row polymorphism is in general preferred over
@@ -15037,7 +15039,7 @@ Error: This expression has type &lt; area : float; radius : int &gt;
     modifying existing methods.
   </para>
   <sect1 id="ocaml-classes">
-    <title>OCaml Classes</title>
+    <title>OCaml classes</title>
     <para>
       In OCaml, class definitions must be defined as toplevel statements
       in a module. The syntax for a class definition uses the keyword
@@ -15573,7 +15575,7 @@ end = Stack
     </para>
   </sect1>
   <sect1 id="open-recursion">
-    <title>Open Recursion</title>
+    <title>Open recursion</title>
     <para>
       Open recursion allows an object's methods to invoke other methods
       on the same object. These calls are looked up dynamically allowing
@@ -15977,7 +15979,7 @@ end
       installed on your system.
     </para>
     <sect2 id="defining-a-drawable-module">
-      <title>Defining a Drawable module</title>
+      <title>Defining a <literal>Drawable</literal> module</title>
       <para>
         Let's start with by creating a <literal>Drawable</literal>
         module to hold the base logic to handle the display.
@@ -16026,7 +16028,6 @@ let open_display () =
 open Core.Std
 open Async.Std
 open Async_graphics
-open Drawable
 
 class square w x y = object (self)
   val mutable x: int = x
@@ -16046,9 +16047,9 @@ class square w x y = object (self)
 
   method on_click ?start ?stop f =
     on_click ?start ?stop
-      (fun {mouse_x;mouse_y;_} -&gt;
-         if self#contains mouse_x mouse_y then
-           f mouse_x mouse_y)
+      (fun ev -&gt;
+         if self#contains ev.mouse_x ev.mouse_y then
+           f ev.mouse_x ev.mouse_y)
 end
 </programlisting>
       <para>
@@ -16078,9 +16079,9 @@ class circle r x y = object (self)
 
   method on_click ?start ?stop f =
     on_click ?start ?stop
-      (fun {mouse_x;mouse_y;_} -&gt;
-         if self#contains mouse_x mouse_y then
-           f mouse_x mouse_y)
+      (fun ev -&gt;
+         if self#contains ev.mouse_x ev.mouse_y then
+           f ev.mouse_x ev.mouse_y)
 end
 </programlisting>
       <para>
@@ -16117,15 +16118,15 @@ class virtual shape x y = object (self)
 
   method on_click ?start ?stop f =
     on_click ?start ?stop
-      (fun {mouse_x;mouse_y} -&gt;  
-         if self#contains mouse_x mouse_y then
-           f mouse_x mouse_y)
+      (fun ev -&gt;  
+         if self#contains ev.mouse_x ev.mouse_y then
+           f ev.mouse_x ev.mouse_y)
 
   method on_mousedown ?start ?stop f =
     on_mousedown ?start ?stop
-      (fun {mouse_x;mouse_y} -&gt;
-         if self#contains mouse_x mouse_y then
-           f mouse_x mouse_y)
+      (fun ev -&gt;
+         if self#contains ev.mouse_x ev.mouse_y then
+           f ev.mouse_x ev.mouse_y)
 end
 </programlisting>
       <para>
@@ -16215,7 +16216,7 @@ class growing_circle r x y = object (self)
   inherit circle r x y
 
   initializer
-    self#on_click (fun x y -&gt; radius &lt;- radius * 2)
+    self#on_click (fun _x _y -&gt; radius &lt;- radius * 2)
 end
 </programlisting>
   </sect1>
@@ -16240,153 +16241,50 @@ end
       <para>
         If there is one thing to remember about inheritance in OCaml, it
         is this: inheritance is like textual inclusion. If there is more
-        than one definition for a name, the last definition wins. Let's
-        look at some artificial, but illustrative, examples.
+        than one definition for a name, the last definition wins.
       </para>
       <para>
-        First, defining a method more than once within the same object
-        is forbidden and results in a type error. In the following
-        example, the method <literal>get</literal> is defined twice.
+        For example, consider this class which inherits from
+        <literal>square</literal> and defines a new
+        <literal>draw</literal> method that uses
+        <literal>draw_rect</literal> instead of
+        <literal>fill_rect</literal> to draw the square.
       </para>
       <programlisting language="ocaml">
-# script classes/multiple_inheritance.topscript
-$ utop
-# class m1 =
-    object (self)
-     method get = 1
-     method f = self#get
-     method get = 2
-  end  ;; 
-Characters 79-93:
-Error: The method `get' has multiple definitions in this object
+(* classes-async/multiple_inheritance.ml (starting from part 1) *)
+class square_outline w x y = object
+  inherit square w x y
+  method draw = draw_rect x y width width
+end
 </programlisting>
       <para>
-        Fields have similar behavior and multiple definitions in the
-        same object are also rejected.
+        Since the <literal>inherit</literal> declaration comes before
+        the method definition, the new <literal>draw</literal> method
+        overrides the old one, and the square is drawn using
+        <literal>draw_rect</literal>. But, what if we had defined
+        <literal>square_outline</literal> as follows?
       </para>
       <programlisting language="ocaml">
-...part 1 of classes/multiple_inheritance.topscript
-# class m2 =
-  object (self)
-     val x = 1
-     method f = x
-     val x = 2
-  end ;; 
-Characters 65-74:
-Error: The instance variable `x' has multiple definitions in this object
+(* classes-async/multiple_inheritance_wrong.ml (starting from part 1) *)
+class square_outline w x y = object
+  method draw = draw_rect x y w w
+  inherit square w x y
+end
 </programlisting>
       <para>
-        Of course, it is unlikely that you will ever want to define two
-        methods or two fields of the same name in the same class.
-        Inheritance does permit you to have multiple definitions, but
-        only by following the rules for inheritance: the last definition
-        wins.
+        Here the <literal>inherit</literal> declaration comes after the
+        method definition, so the <literal>draw</literal> method from
+        <literal>square</literal> will override the other definition,
+        and the square will be drawn using <literal>fill_rect</literal>.
       </para>
-      <para>
-        In the following definition, the <literal>inherit</literal>
-        declaration comes last, so the method definition
-        <literal>method get = 2</literal> overrides the previous
-        definition, always returning 2.
-      </para>
-      <programlisting language="ocaml">
-...part 2 of classes/multiple_inheritance.topscript
-# class m4 = object method get = 2 end ;; 
-class m4 : object method get : int end
-# class m5 =
-  object
-    val mutable x = 1
-    method get = x
-    method set x' = x &lt;- x'
-    inherit m4
-  end ;; 
-class m5 :
-  object val mutable x : int method get : int method set : int -&gt; unit end
-# let x = new m5 ;; 
-val x : m5 = &lt;obj&gt;
-# x#set 5 ;; 
-- : unit = ()
-# x#get ;; 
-- : int = 2
-</programlisting>
-      <para>
-        If, however, we move the <literal>inherit</literal> declaration
-        before the method definitions, the new behavior overrides the
-        inherited methods, returning the value we just set.
-      </para>
-      <programlisting language="ocaml">
-...part 3 of classes/multiple_inheritance.topscript
-# class m5a =
-  object
-    inherit m4
-    val mutable x = 1
-    method get = x
-    method set x' = x &lt;- x'
-  end ;; 
-class m5a :
-  object val mutable x : int method get : int method set : int -&gt; unit end
-# let x = new m5a ;; 
-val x : m5a = &lt;obj&gt;
-# x#set 5 ;; 
-- : unit = ()
-# x#get ;; 
-- : int = 5
-</programlisting>
       <para>
         To reiterate, to understand what inheritance means, replace each
         <literal>inherit</literal> directive with its definition, and
-        take the last definition of each method or field. This holds
-        even for private methods. However, it does
-        <emphasis>not</emphasis> hold for private methods that are
-        &quot;really&quot; private, meaning that they have been hidden
-        by a type constraint.
+        take the last definition of each method or field. Note that the
+        methods and fields added by an inheritance are those listed in
+        its class type, so private methods that are hidden by the type
+        will not be included.
       </para>
-      <para>
-        In the following definitions, there are three definitions of the
-        private method <literal>g</literal>. However, the definition of
-        <literal>g</literal> in <literal>m8</literal> is not overridden,
-        because it is not part of the class type for
-        <literal>m8</literal>.
-      </para>
-      <programlisting language="ocaml">
-...part 4 of classes/multiple_inheritance.topscript
-# class m6 =
-  object (self)
-     method f1 = self#g
-     method private g = 1
-  end ;; 
-class m6 : object method f1 : int method private g : int end
-# class m7 =
-  object (self)
-     method f2 = self#g
-     method private g = 2
-  end ;; 
-class m7 : object method f2 : int method private g : int end
-# class m8 : object method f3 : int end =
-  object (self)
-     method f3 = self#g
-     method private g = 3
-  end ;; 
-class m8 : object method f3 : int end
-# class m9 =
-  object (self : 'self)
-     inherit m6
-     inherit m7
-     inherit m8
-  end ;; 
-class m9 :
-  object
-    method f1 : int
-    method f2 : int
-    method f3 : int
-    method private g : int
-  end
-# let x = new m9 ;; 
-val x : m9 = &lt;obj&gt;
-# x#f1 ;; 
-- : int = 2
-# x#f3 ;; 
-- : int = 3
-</programlisting>
     </sect2>
     <sect2 id="mixins">
       <title>Mixins</title>
@@ -16445,9 +16343,9 @@ class virtual draggable = object (self)
               Ivar.fill mouse_up ();
               dragging &lt;- false);
          on_mousemove ~stop
-           (fun {mouse_x;mouse_y} -&gt;
-              x &lt;- mouse_x + offset_x;
-              y &lt;- mouse_y + offset_y))
+           (fun ev -&gt;
+              x &lt;- ev.mouse_x + offset_x;
+              y &lt;- ev.mouse_y + offset_y))
 end
 </programlisting>
       <para>
@@ -16495,7 +16393,7 @@ class virtual animated span = object (self)
       )
 
   initializer
-    self#on_click (fun x y -&gt; if not self#running then self#animate)
+    self#on_click (fun _x _y -&gt; if not self#running then self#animate)
 end
 </programlisting>
       <para>
@@ -16516,7 +16414,7 @@ end
       </para>
       <programlisting language="ocaml">
 (* classes-async/shapes.ml (starting from part 7) *)
-class virtual linear x' y' = object (self)
+class virtual linear x' y' = object
   val virtual mutable updates: (int -&gt; unit) list
   val virtual mutable x: int
   val virtual mutable y: int
@@ -16531,7 +16429,7 @@ end
 
 let pi = (atan 1.0) *. 4.0
 
-class virtual harmonic offset x' y' = object (self)
+class virtual harmonic offset x' y' = object
   val virtual mutable updates: (int -&gt; unit) list
   val virtual mutable x: int
   val virtual mutable y: int
@@ -16555,7 +16453,7 @@ end
       </para>
       <programlisting language="ocaml">
 (* classes-async/shapes.ml (starting from part 8) *)
-class my_square x y = object (self)
+class my_square x y = object
   inherit square 40 x y
   inherit draggable
   inherit animated (Time.Span.of_int_sec 5)
@@ -16596,58 +16494,6 @@ let () =
       <programlisting>
 # running classes-async/build_shapes.out.sh
 $ corebuild -pkg async_graphics shapes.native
-File &quot;shapes.ml&quot;, line 16, characters 11-28:
-Warning 9: the following labels are not bound in this record pattern:
-button, keypressed, key
-Either bind these labels explicitly or add '; _' to the pattern.
-File &quot;shapes.ml&quot;, line 22, characters 11-28:
-Warning 9: the following labels are not bound in this record pattern:
-button, keypressed, key
-Either bind these labels explicitly or add '; _' to the pattern.
-File &quot;shapes.ml&quot;, line 89, characters 16-33:
-Warning 9: the following labels are not bound in this record pattern:
-button, keypressed, key
-Either bind these labels explicitly or add '; _' to the pattern.
-File &quot;shapes.ml&quot;, line 61, characters 23-24:
-Warning 27: unused variable x.
-File &quot;shapes.ml&quot;, line 61, characters 25-26:
-Warning 27: unused variable y.
-File &quot;shapes.ml&quot;, line 126, characters 23-24:
-Warning 27: unused variable x.
-File &quot;shapes.ml&quot;, line 126, characters 25-26:
-Warning 27: unused variable y.
-File &quot;shapes.ml&quot;, line 137, characters 37-41:
-Warning 27: unused variable self.
-File &quot;shapes.ml&quot;, line 152, characters 46-50:
-Warning 27: unused variable self.
-File &quot;shapes.ml&quot;, line 169, characters 30-34:
-Warning 27: unused variable self.
-File &quot;shapes.ml&quot;, line 16, characters 11-28:
-Warning 9: the following labels are not bound in this record pattern:
-button, keypressed, key
-Either bind these labels explicitly or add '; _' to the pattern.
-File &quot;shapes.ml&quot;, line 22, characters 11-28:
-Warning 9: the following labels are not bound in this record pattern:
-button, keypressed, key
-Either bind these labels explicitly or add '; _' to the pattern.
-File &quot;shapes.ml&quot;, line 89, characters 16-33:
-Warning 9: the following labels are not bound in this record pattern:
-button, keypressed, key
-Either bind these labels explicitly or add '; _' to the pattern.
-File &quot;shapes.ml&quot;, line 61, characters 23-24:
-Warning 27: unused variable x.
-File &quot;shapes.ml&quot;, line 61, characters 25-26:
-Warning 27: unused variable y.
-File &quot;shapes.ml&quot;, line 126, characters 23-24:
-Warning 27: unused variable x.
-File &quot;shapes.ml&quot;, line 126, characters 25-26:
-Warning 27: unused variable y.
-File &quot;shapes.ml&quot;, line 137, characters 37-41:
-Warning 27: unused variable self.
-File &quot;shapes.ml&quot;, line 152, characters 46-50:
-Warning 27: unused variable self.
-File &quot;shapes.ml&quot;, line 169, characters 30-34:
-Warning 27: unused variable self.
 </programlisting>
       <para>
         When you run the binary, a new graphical window should appear
@@ -17317,7 +17163,8 @@ end
         <xref linkend="extending-modules"/>.
       </para>
       <programlisting language="ocaml">
-...part 22 of maps-and-hash-tables/main.topscript
+# script maps-and-hash-tables/main-22.rawscript
+$ utop
 # module Foo_and_bar : sig
     type t = { foo: Int.Set.t; bar: string }
     include Comparable.S with type t := t
@@ -17330,363 +17177,17 @@ end
     end
     include T
     include Comparable.Make(T)
-  end;; 
+  end;;
 module Foo_and_bar :
-  sig
-    type t = { foo : Int.Set.t; bar : string; }
-    val ( &gt;= ) : t -&gt; t -&gt; bool
-    val ( &lt;= ) : t -&gt; t -&gt; bool
-    val ( = ) : t -&gt; t -&gt; bool
-    val ( &gt; ) : t -&gt; t -&gt; bool
-    val ( &lt; ) : t -&gt; t -&gt; bool
-    val ( &lt;&gt; ) : t -&gt; t -&gt; bool
-    val equal : t -&gt; t -&gt; bool
-    val compare : t -&gt; t -&gt; int
-    val min : t -&gt; t -&gt; t
-    val max : t -&gt; t -&gt; t
-    val ascending : t -&gt; t -&gt; int
-    val descending : t -&gt; t -&gt; int
-    val between : t -&gt; low:t -&gt; high:t -&gt; bool
-    module Replace_polymorphic_compare :
-      sig
-        val ( &gt;= ) : t -&gt; t -&gt; bool
-        val ( &lt;= ) : t -&gt; t -&gt; bool
-        val ( = ) : t -&gt; t -&gt; bool
-        val ( &gt; ) : t -&gt; t -&gt; bool
-        val ( &lt; ) : t -&gt; t -&gt; bool
-        val ( &lt;&gt; ) : t -&gt; t -&gt; bool
-        val equal : t -&gt; t -&gt; bool
-        val compare : t -&gt; t -&gt; int
-        val min : t -&gt; t -&gt; t
-        val max : t -&gt; t -&gt; t
-      end
-    type comparator
-    val comparator : (t, comparator) Core_kernel.Comparator.t_
-    val validate_lbound :
-      min:t Comparable.bound -&gt; t Core_kernel.Validate.check
-    val validate_ubound :
-      max:t Comparable.bound -&gt; t Core_kernel.Validate.check
-    val validate_bound :
-      min:t Comparable.bound -&gt;
-      max:t Comparable.bound -&gt; t Core_kernel.Validate.check
-    module Map :
-      sig
-        module Key :
-          sig
-            type t = t
-            val compare : t -&gt; t -&gt; int
-            val t_of_sexp : Sexp.t -&gt; t
-            val sexp_of_t : t -&gt; Sexp.t
-            type comparator = comparator
-            val comparator : (t, comparator) Core_kernel.Comparator.t_
-          end
-        module Tree :
-          sig
-            type 'a t = (Key.t, 'a, comparator) Map.Tree.t
-            val empty : 'a t
-            val singleton : Key.t -&gt; 'a -&gt; 'a t
-            val of_alist :
-              (Key.t * 'a) list -&gt; [ `Duplicate_key of Key.t | `Ok of 'a t ]
-            val of_alist_exn : (Key.t * 'a) list -&gt; 'a t
-            val of_alist_multi : (Key.t * 'a) list -&gt; 'a list t
-            val of_alist_fold :
-              (Key.t * 'a) list -&gt; init:'b -&gt; f:('b -&gt; 'a -&gt; 'b) -&gt; 'b t
-            val of_sorted_array :
-              (Key.t * 'a) array -&gt; 'a t Core_kernel.Or_error.t
-            val of_sorted_array_unchecked : (Key.t * 'a) array -&gt; 'a t
-            val of_tree : 'a t -&gt; 'a t
-            val invariants : 'a t -&gt; bool
-            val is_empty : 'a t -&gt; bool
-            val length : 'a t -&gt; int
-            val add : 'a t -&gt; key:Key.t -&gt; data:'a -&gt; 'a t
-            val add_multi : 'a list t -&gt; key:Key.t -&gt; data:'a -&gt; 'a list t
-            val change : 'a t -&gt; Key.t -&gt; ('a option -&gt; 'a option) -&gt; 'a t
-            val find : 'a t -&gt; Key.t -&gt; 'a option
-            val find_exn : 'a t -&gt; Key.t -&gt; 'a
-            val remove : 'a t -&gt; Key.t -&gt; 'a t
-            val mem : 'a t -&gt; Key.t -&gt; bool
-            val iter : 'a t -&gt; f:(key:Key.t -&gt; data:'a -&gt; unit) -&gt; unit
-            val iter2 :
-              'a t -&gt;
-              'b t -&gt;
-              f:(key:Key.t -&gt;
-                 data:[ `Both of 'a * 'b | `Left of 'a | `Right of 'b ] -&gt;
-                 unit) -&gt;
-              unit
-            val map : 'a t -&gt; f:('a -&gt; 'b) -&gt; 'b t
-            val mapi : 'a t -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b) -&gt; 'b t
-            val fold :
-              'a t -&gt; init:'b -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b -&gt; 'b) -&gt; 'b
-            val fold_right :
-              'a t -&gt; init:'b -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b -&gt; 'b) -&gt; 'b
-            val filter : 'a t -&gt; f:(key:Key.t -&gt; data:'a -&gt; bool) -&gt; 'a t
-            val filter_map : 'a t -&gt; f:('a -&gt; 'b option) -&gt; 'b t
-            val filter_mapi :
-              'a t -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b option) -&gt; 'b t
-            val compare_direct : ('a -&gt; 'a -&gt; int) -&gt; 'a t -&gt; 'a t -&gt; int
-            val equal : ('a -&gt; 'a -&gt; bool) -&gt; 'a t -&gt; 'a t -&gt; bool
-            val keys : 'a t -&gt; Key.t list
-            val data : 'a t -&gt; 'a list
-            val to_alist : 'a t -&gt; (Key.t * 'a) list
-            val validate :
-              name:(Key.t -&gt; string) -&gt;
-              'a Core_kernel.Validate.check -&gt;
-              'a t Core_kernel.Validate.check
-            val merge :
-              'a t -&gt;
-              'b t -&gt;
-              f:(key:Key.t -&gt;
-                 [ `Both of 'a * 'b | `Left of 'a | `Right of 'b ] -&gt;
-                 'c option) -&gt;
-              'c t
-            val symmetric_diff :
-              'a t -&gt;
-              'a t -&gt;
-              data_equal:('a -&gt; 'a -&gt; bool) -&gt;
-              (Key.t * [ `Left of 'a | `Right of 'a | `Unequal of 'a * 'a ])
-              list
-            val min_elt : 'a t -&gt; (Key.t * 'a) option
-            val min_elt_exn : 'a t -&gt; Key.t * 'a
-            val max_elt : 'a t -&gt; (Key.t * 'a) option
-            val max_elt_exn : 'a t -&gt; Key.t * 'a
-            val for_all : 'a t -&gt; f:('a -&gt; bool) -&gt; bool
-            val exists : 'a t -&gt; f:('a -&gt; bool) -&gt; bool
-            val fold_range_inclusive :
-              'a t -&gt;
-              min:Key.t -&gt;
-              max:Key.t -&gt;
-              init:'b -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b -&gt; 'b) -&gt; 'b
-            val range_to_alist :
-              'a t -&gt; min:Key.t -&gt; max:Key.t -&gt; (Key.t * 'a) list
-            val prev_key : 'a t -&gt; Key.t -&gt; (Key.t * 'a) option
-            val next_key : 'a t -&gt; Key.t -&gt; (Key.t * 'a) option
-            val rank : 'a t -&gt; Key.t -&gt; int option
-            val to_tree : 'a t -&gt; 'a t
-            val t_of_sexp : (Sexp.t -&gt; 'a) -&gt; Sexp.t -&gt; 'a t
-            val sexp_of_t : ('a -&gt; Sexp.t) -&gt; 'a t -&gt; Sexp.t
-          end
-        type 'a t = (Key.t, 'a, comparator) Map.t
-        val empty : 'a t
-        val singleton : Key.t -&gt; 'a -&gt; 'a t
-        val of_alist :
-          (Key.t * 'a) list -&gt; [ `Duplicate_key of Key.t | `Ok of 'a t ]
-        val of_alist_exn : (Key.t * 'a) list -&gt; 'a t
-        val of_alist_multi : (Key.t * 'a) list -&gt; 'a list t
-        val of_alist_fold :
-          (Key.t * 'a) list -&gt; init:'b -&gt; f:('b -&gt; 'a -&gt; 'b) -&gt; 'b t
-        val of_sorted_array :
-          (Key.t * 'a) array -&gt; 'a t Core_kernel.Or_error.t
-        val of_sorted_array_unchecked : (Key.t * 'a) array -&gt; 'a t
-        val of_tree : 'a Tree.t -&gt; 'a t
-        val invariants : 'a t -&gt; bool
-        val is_empty : 'a t -&gt; bool
-        val length : 'a t -&gt; int
-        val add : 'a t -&gt; key:Key.t -&gt; data:'a -&gt; 'a t
-        val add_multi : 'a list t -&gt; key:Key.t -&gt; data:'a -&gt; 'a list t
-        val change : 'a t -&gt; Key.t -&gt; ('a option -&gt; 'a option) -&gt; 'a t
-        val find : 'a t -&gt; Key.t -&gt; 'a option
-        val find_exn : 'a t -&gt; Key.t -&gt; 'a
-        val remove : 'a t -&gt; Key.t -&gt; 'a t
-        val mem : 'a t -&gt; Key.t -&gt; bool
-        val iter : 'a t -&gt; f:(key:Key.t -&gt; data:'a -&gt; unit) -&gt; unit
-        val iter2 :
-          'a t -&gt;
-          'b t -&gt;
-          f:(key:Key.t -&gt;
-             data:[ `Both of 'a * 'b | `Left of 'a | `Right of 'b ] -&gt; unit) -&gt;
-          unit
-        val map : 'a t -&gt; f:('a -&gt; 'b) -&gt; 'b t
-        val mapi : 'a t -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b) -&gt; 'b t
-        val fold :
-          'a t -&gt; init:'b -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b -&gt; 'b) -&gt; 'b
-        val fold_right :
-          'a t -&gt; init:'b -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b -&gt; 'b) -&gt; 'b
-        val filter : 'a t -&gt; f:(key:Key.t -&gt; data:'a -&gt; bool) -&gt; 'a t
-        val filter_map : 'a t -&gt; f:('a -&gt; 'b option) -&gt; 'b t
-        val filter_mapi :
-          'a t -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b option) -&gt; 'b t
-        val compare_direct : ('a -&gt; 'a -&gt; int) -&gt; 'a t -&gt; 'a t -&gt; int
-        val equal : ('a -&gt; 'a -&gt; bool) -&gt; 'a t -&gt; 'a t -&gt; bool
-        val keys : 'a t -&gt; Key.t list
-        val data : 'a t -&gt; 'a list
-        val to_alist : 'a t -&gt; (Key.t * 'a) list
-        val validate :
-          name:(Key.t -&gt; string) -&gt;
-          'a Core_kernel.Validate.check -&gt; 'a t Core_kernel.Validate.check
-        val merge :
-          'a t -&gt;
-          'b t -&gt;
-          f:(key:Key.t -&gt;
-             [ `Both of 'a * 'b | `Left of 'a | `Right of 'b ] -&gt; 'c option) -&gt;
-          'c t
-        val symmetric_diff :
-          'a t -&gt;
-          'a t -&gt;
-          data_equal:('a -&gt; 'a -&gt; bool) -&gt;
-          (Key.t * [ `Left of 'a | `Right of 'a | `Unequal of 'a * 'a ]) list
-        val min_elt : 'a t -&gt; (Key.t * 'a) option
-        val min_elt_exn : 'a t -&gt; Key.t * 'a
-        val max_elt : 'a t -&gt; (Key.t * 'a) option
-        val max_elt_exn : 'a t -&gt; Key.t * 'a
-        val for_all : 'a t -&gt; f:('a -&gt; bool) -&gt; bool
-        val exists : 'a t -&gt; f:('a -&gt; bool) -&gt; bool
-        val fold_range_inclusive :
-          'a t -&gt;
-          min:Key.t -&gt;
-          max:Key.t -&gt; init:'b -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b -&gt; 'b) -&gt; 'b
-        val range_to_alist :
-          'a t -&gt; min:Key.t -&gt; max:Key.t -&gt; (Key.t * 'a) list
-        val prev_key : 'a t -&gt; Key.t -&gt; (Key.t * 'a) option
-        val next_key : 'a t -&gt; Key.t -&gt; (Key.t * 'a) option
-        val rank : 'a t -&gt; Key.t -&gt; int option
-        val to_tree : 'a t -&gt; 'a Tree.t
-        val t_of_sexp : (Sexp.t -&gt; 'a) -&gt; Sexp.t -&gt; 'a t
-        val sexp_of_t : ('a -&gt; Sexp.t) -&gt; 'a t -&gt; Sexp.t
-        val compare : ('a -&gt; 'a -&gt; int) -&gt; 'a t -&gt; 'a t -&gt; int
-      end
-    module Set :
-      sig
-        module Elt :
-          sig
-            type t = Map.Key.t
-            val compare : t -&gt; t -&gt; int
-            val t_of_sexp : Sexp.t -&gt; t
-            val sexp_of_t : t -&gt; Sexp.t
-            type comparator = Map.Key.comparator
-            val comparator : (t, comparator) Core_kernel.Comparator.t_
-          end
-        module Tree :
-          sig
-            type t = (Elt.t, comparator) Set.Tree.t
-            val length : t -&gt; int
-            val is_empty : t -&gt; bool
-            val iter : t -&gt; f:(Elt.t -&gt; unit) -&gt; unit
-            val fold :
-              t -&gt; init:'accum -&gt; f:('accum -&gt; Elt.t -&gt; 'accum) -&gt; 'accum
-            val exists : t -&gt; f:(Elt.t -&gt; bool) -&gt; bool
-            val for_all : t -&gt; f:(Elt.t -&gt; bool) -&gt; bool
-            val count : t -&gt; f:(Elt.t -&gt; bool) -&gt; int
-            val find : t -&gt; f:(Elt.t -&gt; bool) -&gt; Elt.t option
-            val find_map : t -&gt; f:(Elt.t -&gt; 'a option) -&gt; 'a option
-            val to_list : t -&gt; Elt.t list
-            val to_array : t -&gt; Elt.t array
-            val invariants : t -&gt; bool
-            val mem : t -&gt; Elt.t -&gt; bool
-            val add : t -&gt; Elt.t -&gt; t
-            val remove : t -&gt; Elt.t -&gt; t
-            val union : t -&gt; t -&gt; t
-            val inter : t -&gt; t -&gt; t
-            val diff : t -&gt; t -&gt; t
-            val compare_direct : t -&gt; t -&gt; int
-            val equal : t -&gt; t -&gt; bool
-            val subset : t -&gt; t -&gt; bool
-            val fold_until :
-              t -&gt;
-              init:'b -&gt;
-              f:('b -&gt; Elt.t -&gt; [ `Continue of 'b | `Stop of 'b ]) -&gt; 'b
-            val fold_right : t -&gt; init:'b -&gt; f:(Elt.t -&gt; 'b -&gt; 'b) -&gt; 'b
-            val iter2 :
-              t -&gt;
-              t -&gt;
-              f:([ `Both of Elt.t * Elt.t | `Left of Elt.t | `Right of Elt.t ] -&gt;
-                 unit) -&gt;
-              unit
-            val filter : t -&gt; f:(Elt.t -&gt; bool) -&gt; t
-            val partition_tf : t -&gt; f:(Elt.t -&gt; bool) -&gt; t * t
-            val elements : t -&gt; Elt.t list
-            val min_elt : t -&gt; Elt.t option
-            val min_elt_exn : t -&gt; Elt.t
-            val max_elt : t -&gt; Elt.t option
-            val max_elt_exn : t -&gt; Elt.t
-            val choose : t -&gt; Elt.t option
-            val choose_exn : t -&gt; Elt.t
-            val split : t -&gt; Elt.t -&gt; t * bool * t
-            val group_by : t -&gt; equiv:(Elt.t -&gt; Elt.t -&gt; bool) -&gt; t list
-            val find_exn : t -&gt; f:(Elt.t -&gt; bool) -&gt; Elt.t
-            val find_index : t -&gt; int -&gt; Elt.t option
-            val remove_index : t -&gt; int -&gt; t
-            val to_tree : t -&gt; t
-            val empty : t
-            val singleton : Elt.t -&gt; t
-            val union_list : t list -&gt; t
-            val of_list : Elt.t list -&gt; t
-            val of_array : Elt.t array -&gt; t
-            val of_sorted_array : Elt.t array -&gt; t Core_kernel.Or_error.t
-            val of_sorted_array_unchecked : Elt.t array -&gt; t
-            val stable_dedup_list : Elt.t list -&gt; Elt.t list
-            val map : ('a, 'b) Set.Tree.t -&gt; f:('a -&gt; Elt.t) -&gt; t
-            val filter_map :
-              ('a, 'b) Set.Tree.t -&gt; f:('a -&gt; Elt.t option) -&gt; t
-            val of_tree : t -&gt; t
-            val t_of_sexp : Sexp.t -&gt; t
-            val sexp_of_t : t -&gt; Sexp.t
-            val compare : t -&gt; t -&gt; int
-          end
-        type t = (Elt.t, comparator) Set.t
-        val length : t -&gt; int
-        val is_empty : t -&gt; bool
-        val iter : t -&gt; f:(Elt.t -&gt; unit) -&gt; unit
-        val fold :
-          t -&gt; init:'accum -&gt; f:('accum -&gt; Elt.t -&gt; 'accum) -&gt; 'accum
-        val exists : t -&gt; f:(Elt.t -&gt; bool) -&gt; bool
-        val for_all : t -&gt; f:(Elt.t -&gt; bool) -&gt; bool
-        val count : t -&gt; f:(Elt.t -&gt; bool) -&gt; int
-        val find : t -&gt; f:(Elt.t -&gt; bool) -&gt; Elt.t option
-        val find_map : t -&gt; f:(Elt.t -&gt; 'a option) -&gt; 'a option
-        val to_list : t -&gt; Elt.t list
-        val to_array : t -&gt; Elt.t array
-        val invariants : t -&gt; bool
-        val mem : t -&gt; Elt.t -&gt; bool
-        val add : t -&gt; Elt.t -&gt; t
-        val remove : t -&gt; Elt.t -&gt; t
-        val union : t -&gt; t -&gt; t
-        val inter : t -&gt; t -&gt; t
-        val diff : t -&gt; t -&gt; t
-        val compare_direct : t -&gt; t -&gt; int
-        val equal : t -&gt; t -&gt; bool
-        val subset : t -&gt; t -&gt; bool
-        val fold_until :
-          t -&gt;
-          init:'b -&gt;
-          f:('b -&gt; Elt.t -&gt; [ `Continue of 'b | `Stop of 'b ]) -&gt; 'b
-        val fold_right : t -&gt; init:'b -&gt; f:(Elt.t -&gt; 'b -&gt; 'b) -&gt; 'b
-        val iter2 :
-          t -&gt;
-          t -&gt;
-          f:([ `Both of Elt.t * Elt.t | `Left of Elt.t | `Right of Elt.t ] -&gt;
-             unit) -&gt;
-          unit
-        val filter : t -&gt; f:(Elt.t -&gt; bool) -&gt; t
-        val partition_tf : t -&gt; f:(Elt.t -&gt; bool) -&gt; t * t
-        val elements : t -&gt; Elt.t list
-        val min_elt : t -&gt; Elt.t option
-        val min_elt_exn : t -&gt; Elt.t
-        val max_elt : t -&gt; Elt.t option
-        val max_elt_exn : t -&gt; Elt.t
-        val choose : t -&gt; Elt.t option
-        val choose_exn : t -&gt; Elt.t
-        val split : t -&gt; Elt.t -&gt; t * bool * t
-        val group_by : t -&gt; equiv:(Elt.t -&gt; Elt.t -&gt; bool) -&gt; t list
-        val find_exn : t -&gt; f:(Elt.t -&gt; bool) -&gt; Elt.t
-        val find_index : t -&gt; int -&gt; Elt.t option
-        val remove_index : t -&gt; int -&gt; t
-        val to_tree : t -&gt; Tree.t
-        val empty : t
-        val singleton : Elt.t -&gt; t
-        val union_list : t list -&gt; t
-        val of_list : Elt.t list -&gt; t
-        val of_array : Elt.t array -&gt; t
-        val of_sorted_array : Elt.t array -&gt; t Core_kernel.Or_error.t
-        val of_sorted_array_unchecked : Elt.t array -&gt; t
-        val stable_dedup_list : Elt.t list -&gt; Elt.t list
-        val map : ('a, 'b) Set.t -&gt; f:('a -&gt; Elt.t) -&gt; t
-        val filter_map : ('a, 'b) Set.t -&gt; f:('a -&gt; Elt.t option) -&gt; t
-        val of_tree : Tree.t -&gt; t
-        val t_of_sexp : Sexp.t -&gt; t
-        val sexp_of_t : t -&gt; Sexp.t
-        val compare : t -&gt; t -&gt; int
-      end
-  end
+sig
+  type t = { foo : Int.Set.t; bar : string; }
+  val ( &gt;= ) : t -&gt; t -&gt; bool
+  val ( &lt;= ) : t -&gt; t -&gt; bool
+  val ( = ) : t -&gt; t -&gt; bool
+
+    ...
+
+end
 </programlisting>
       <para>
         We don't include the full response from the top-level because it
@@ -17701,7 +17202,8 @@ module Foo_and_bar :
         rewrite the above example as follows.
       </para>
       <programlisting language="ocaml">
-...part 23 of maps-and-hash-tables/main.topscript
+# script maps-and-hash-tables/main-23.rawscript
+$ utop
 # module Foo_and_bar : sig
     type t = { foo: Int.Set.t; bar: string }
     include Comparable.S with type t := t
@@ -17711,363 +17213,17 @@ module Foo_and_bar :
     end
     include T
     include Comparable.Make(T)
-  end;; 
+  end;;
 module Foo_and_bar :
-  sig
-    type t = { foo : Int.Set.t; bar : string; }
-    val ( &gt;= ) : t -&gt; t -&gt; bool
-    val ( &lt;= ) : t -&gt; t -&gt; bool
-    val ( = ) : t -&gt; t -&gt; bool
-    val ( &gt; ) : t -&gt; t -&gt; bool
-    val ( &lt; ) : t -&gt; t -&gt; bool
-    val ( &lt;&gt; ) : t -&gt; t -&gt; bool
-    val equal : t -&gt; t -&gt; bool
-    val compare : t -&gt; t -&gt; int
-    val min : t -&gt; t -&gt; t
-    val max : t -&gt; t -&gt; t
-    val ascending : t -&gt; t -&gt; int
-    val descending : t -&gt; t -&gt; int
-    val between : t -&gt; low:t -&gt; high:t -&gt; bool
-    module Replace_polymorphic_compare :
-      sig
-        val ( &gt;= ) : t -&gt; t -&gt; bool
-        val ( &lt;= ) : t -&gt; t -&gt; bool
-        val ( = ) : t -&gt; t -&gt; bool
-        val ( &gt; ) : t -&gt; t -&gt; bool
-        val ( &lt; ) : t -&gt; t -&gt; bool
-        val ( &lt;&gt; ) : t -&gt; t -&gt; bool
-        val equal : t -&gt; t -&gt; bool
-        val compare : t -&gt; t -&gt; int
-        val min : t -&gt; t -&gt; t
-        val max : t -&gt; t -&gt; t
-      end
-    type comparator
-    val comparator : (t, comparator) Core_kernel.Comparator.t_
-    val validate_lbound :
-      min:t Comparable.bound -&gt; t Core_kernel.Validate.check
-    val validate_ubound :
-      max:t Comparable.bound -&gt; t Core_kernel.Validate.check
-    val validate_bound :
-      min:t Comparable.bound -&gt;
-      max:t Comparable.bound -&gt; t Core_kernel.Validate.check
-    module Map :
-      sig
-        module Key :
-          sig
-            type t = t
-            val compare : t -&gt; t -&gt; int
-            val t_of_sexp : Sexp.t -&gt; t
-            val sexp_of_t : t -&gt; Sexp.t
-            type comparator = comparator
-            val comparator : (t, comparator) Core_kernel.Comparator.t_
-          end
-        module Tree :
-          sig
-            type 'a t = (Key.t, 'a, comparator) Map.Tree.t
-            val empty : 'a t
-            val singleton : Key.t -&gt; 'a -&gt; 'a t
-            val of_alist :
-              (Key.t * 'a) list -&gt; [ `Duplicate_key of Key.t | `Ok of 'a t ]
-            val of_alist_exn : (Key.t * 'a) list -&gt; 'a t
-            val of_alist_multi : (Key.t * 'a) list -&gt; 'a list t
-            val of_alist_fold :
-              (Key.t * 'a) list -&gt; init:'b -&gt; f:('b -&gt; 'a -&gt; 'b) -&gt; 'b t
-            val of_sorted_array :
-              (Key.t * 'a) array -&gt; 'a t Core_kernel.Or_error.t
-            val of_sorted_array_unchecked : (Key.t * 'a) array -&gt; 'a t
-            val of_tree : 'a t -&gt; 'a t
-            val invariants : 'a t -&gt; bool
-            val is_empty : 'a t -&gt; bool
-            val length : 'a t -&gt; int
-            val add : 'a t -&gt; key:Key.t -&gt; data:'a -&gt; 'a t
-            val add_multi : 'a list t -&gt; key:Key.t -&gt; data:'a -&gt; 'a list t
-            val change : 'a t -&gt; Key.t -&gt; ('a option -&gt; 'a option) -&gt; 'a t
-            val find : 'a t -&gt; Key.t -&gt; 'a option
-            val find_exn : 'a t -&gt; Key.t -&gt; 'a
-            val remove : 'a t -&gt; Key.t -&gt; 'a t
-            val mem : 'a t -&gt; Key.t -&gt; bool
-            val iter : 'a t -&gt; f:(key:Key.t -&gt; data:'a -&gt; unit) -&gt; unit
-            val iter2 :
-              'a t -&gt;
-              'b t -&gt;
-              f:(key:Key.t -&gt;
-                 data:[ `Both of 'a * 'b | `Left of 'a | `Right of 'b ] -&gt;
-                 unit) -&gt;
-              unit
-            val map : 'a t -&gt; f:('a -&gt; 'b) -&gt; 'b t
-            val mapi : 'a t -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b) -&gt; 'b t
-            val fold :
-              'a t -&gt; init:'b -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b -&gt; 'b) -&gt; 'b
-            val fold_right :
-              'a t -&gt; init:'b -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b -&gt; 'b) -&gt; 'b
-            val filter : 'a t -&gt; f:(key:Key.t -&gt; data:'a -&gt; bool) -&gt; 'a t
-            val filter_map : 'a t -&gt; f:('a -&gt; 'b option) -&gt; 'b t
-            val filter_mapi :
-              'a t -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b option) -&gt; 'b t
-            val compare_direct : ('a -&gt; 'a -&gt; int) -&gt; 'a t -&gt; 'a t -&gt; int
-            val equal : ('a -&gt; 'a -&gt; bool) -&gt; 'a t -&gt; 'a t -&gt; bool
-            val keys : 'a t -&gt; Key.t list
-            val data : 'a t -&gt; 'a list
-            val to_alist : 'a t -&gt; (Key.t * 'a) list
-            val validate :
-              name:(Key.t -&gt; string) -&gt;
-              'a Core_kernel.Validate.check -&gt;
-              'a t Core_kernel.Validate.check
-            val merge :
-              'a t -&gt;
-              'b t -&gt;
-              f:(key:Key.t -&gt;
-                 [ `Both of 'a * 'b | `Left of 'a | `Right of 'b ] -&gt;
-                 'c option) -&gt;
-              'c t
-            val symmetric_diff :
-              'a t -&gt;
-              'a t -&gt;
-              data_equal:('a -&gt; 'a -&gt; bool) -&gt;
-              (Key.t * [ `Left of 'a | `Right of 'a | `Unequal of 'a * 'a ])
-              list
-            val min_elt : 'a t -&gt; (Key.t * 'a) option
-            val min_elt_exn : 'a t -&gt; Key.t * 'a
-            val max_elt : 'a t -&gt; (Key.t * 'a) option
-            val max_elt_exn : 'a t -&gt; Key.t * 'a
-            val for_all : 'a t -&gt; f:('a -&gt; bool) -&gt; bool
-            val exists : 'a t -&gt; f:('a -&gt; bool) -&gt; bool
-            val fold_range_inclusive :
-              'a t -&gt;
-              min:Key.t -&gt;
-              max:Key.t -&gt;
-              init:'b -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b -&gt; 'b) -&gt; 'b
-            val range_to_alist :
-              'a t -&gt; min:Key.t -&gt; max:Key.t -&gt; (Key.t * 'a) list
-            val prev_key : 'a t -&gt; Key.t -&gt; (Key.t * 'a) option
-            val next_key : 'a t -&gt; Key.t -&gt; (Key.t * 'a) option
-            val rank : 'a t -&gt; Key.t -&gt; int option
-            val to_tree : 'a t -&gt; 'a t
-            val t_of_sexp : (Sexp.t -&gt; 'a) -&gt; Sexp.t -&gt; 'a t
-            val sexp_of_t : ('a -&gt; Sexp.t) -&gt; 'a t -&gt; Sexp.t
-          end
-        type 'a t = (Key.t, 'a, comparator) Map.t
-        val empty : 'a t
-        val singleton : Key.t -&gt; 'a -&gt; 'a t
-        val of_alist :
-          (Key.t * 'a) list -&gt; [ `Duplicate_key of Key.t | `Ok of 'a t ]
-        val of_alist_exn : (Key.t * 'a) list -&gt; 'a t
-        val of_alist_multi : (Key.t * 'a) list -&gt; 'a list t
-        val of_alist_fold :
-          (Key.t * 'a) list -&gt; init:'b -&gt; f:('b -&gt; 'a -&gt; 'b) -&gt; 'b t
-        val of_sorted_array :
-          (Key.t * 'a) array -&gt; 'a t Core_kernel.Or_error.t
-        val of_sorted_array_unchecked : (Key.t * 'a) array -&gt; 'a t
-        val of_tree : 'a Tree.t -&gt; 'a t
-        val invariants : 'a t -&gt; bool
-        val is_empty : 'a t -&gt; bool
-        val length : 'a t -&gt; int
-        val add : 'a t -&gt; key:Key.t -&gt; data:'a -&gt; 'a t
-        val add_multi : 'a list t -&gt; key:Key.t -&gt; data:'a -&gt; 'a list t
-        val change : 'a t -&gt; Key.t -&gt; ('a option -&gt; 'a option) -&gt; 'a t
-        val find : 'a t -&gt; Key.t -&gt; 'a option
-        val find_exn : 'a t -&gt; Key.t -&gt; 'a
-        val remove : 'a t -&gt; Key.t -&gt; 'a t
-        val mem : 'a t -&gt; Key.t -&gt; bool
-        val iter : 'a t -&gt; f:(key:Key.t -&gt; data:'a -&gt; unit) -&gt; unit
-        val iter2 :
-          'a t -&gt;
-          'b t -&gt;
-          f:(key:Key.t -&gt;
-             data:[ `Both of 'a * 'b | `Left of 'a | `Right of 'b ] -&gt; unit) -&gt;
-          unit
-        val map : 'a t -&gt; f:('a -&gt; 'b) -&gt; 'b t
-        val mapi : 'a t -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b) -&gt; 'b t
-        val fold :
-          'a t -&gt; init:'b -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b -&gt; 'b) -&gt; 'b
-        val fold_right :
-          'a t -&gt; init:'b -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b -&gt; 'b) -&gt; 'b
-        val filter : 'a t -&gt; f:(key:Key.t -&gt; data:'a -&gt; bool) -&gt; 'a t
-        val filter_map : 'a t -&gt; f:('a -&gt; 'b option) -&gt; 'b t
-        val filter_mapi :
-          'a t -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b option) -&gt; 'b t
-        val compare_direct : ('a -&gt; 'a -&gt; int) -&gt; 'a t -&gt; 'a t -&gt; int
-        val equal : ('a -&gt; 'a -&gt; bool) -&gt; 'a t -&gt; 'a t -&gt; bool
-        val keys : 'a t -&gt; Key.t list
-        val data : 'a t -&gt; 'a list
-        val to_alist : 'a t -&gt; (Key.t * 'a) list
-        val validate :
-          name:(Key.t -&gt; string) -&gt;
-          'a Core_kernel.Validate.check -&gt; 'a t Core_kernel.Validate.check
-        val merge :
-          'a t -&gt;
-          'b t -&gt;
-          f:(key:Key.t -&gt;
-             [ `Both of 'a * 'b | `Left of 'a | `Right of 'b ] -&gt; 'c option) -&gt;
-          'c t
-        val symmetric_diff :
-          'a t -&gt;
-          'a t -&gt;
-          data_equal:('a -&gt; 'a -&gt; bool) -&gt;
-          (Key.t * [ `Left of 'a | `Right of 'a | `Unequal of 'a * 'a ]) list
-        val min_elt : 'a t -&gt; (Key.t * 'a) option
-        val min_elt_exn : 'a t -&gt; Key.t * 'a
-        val max_elt : 'a t -&gt; (Key.t * 'a) option
-        val max_elt_exn : 'a t -&gt; Key.t * 'a
-        val for_all : 'a t -&gt; f:('a -&gt; bool) -&gt; bool
-        val exists : 'a t -&gt; f:('a -&gt; bool) -&gt; bool
-        val fold_range_inclusive :
-          'a t -&gt;
-          min:Key.t -&gt;
-          max:Key.t -&gt; init:'b -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b -&gt; 'b) -&gt; 'b
-        val range_to_alist :
-          'a t -&gt; min:Key.t -&gt; max:Key.t -&gt; (Key.t * 'a) list
-        val prev_key : 'a t -&gt; Key.t -&gt; (Key.t * 'a) option
-        val next_key : 'a t -&gt; Key.t -&gt; (Key.t * 'a) option
-        val rank : 'a t -&gt; Key.t -&gt; int option
-        val to_tree : 'a t -&gt; 'a Tree.t
-        val t_of_sexp : (Sexp.t -&gt; 'a) -&gt; Sexp.t -&gt; 'a t
-        val sexp_of_t : ('a -&gt; Sexp.t) -&gt; 'a t -&gt; Sexp.t
-        val compare : ('a -&gt; 'a -&gt; int) -&gt; 'a t -&gt; 'a t -&gt; int
-      end
-    module Set :
-      sig
-        module Elt :
-          sig
-            type t = Map.Key.t
-            val compare : t -&gt; t -&gt; int
-            val t_of_sexp : Sexp.t -&gt; t
-            val sexp_of_t : t -&gt; Sexp.t
-            type comparator = Map.Key.comparator
-            val comparator : (t, comparator) Core_kernel.Comparator.t_
-          end
-        module Tree :
-          sig
-            type t = (Elt.t, comparator) Set.Tree.t
-            val length : t -&gt; int
-            val is_empty : t -&gt; bool
-            val iter : t -&gt; f:(Elt.t -&gt; unit) -&gt; unit
-            val fold :
-              t -&gt; init:'accum -&gt; f:('accum -&gt; Elt.t -&gt; 'accum) -&gt; 'accum
-            val exists : t -&gt; f:(Elt.t -&gt; bool) -&gt; bool
-            val for_all : t -&gt; f:(Elt.t -&gt; bool) -&gt; bool
-            val count : t -&gt; f:(Elt.t -&gt; bool) -&gt; int
-            val find : t -&gt; f:(Elt.t -&gt; bool) -&gt; Elt.t option
-            val find_map : t -&gt; f:(Elt.t -&gt; 'a option) -&gt; 'a option
-            val to_list : t -&gt; Elt.t list
-            val to_array : t -&gt; Elt.t array
-            val invariants : t -&gt; bool
-            val mem : t -&gt; Elt.t -&gt; bool
-            val add : t -&gt; Elt.t -&gt; t
-            val remove : t -&gt; Elt.t -&gt; t
-            val union : t -&gt; t -&gt; t
-            val inter : t -&gt; t -&gt; t
-            val diff : t -&gt; t -&gt; t
-            val compare_direct : t -&gt; t -&gt; int
-            val equal : t -&gt; t -&gt; bool
-            val subset : t -&gt; t -&gt; bool
-            val fold_until :
-              t -&gt;
-              init:'b -&gt;
-              f:('b -&gt; Elt.t -&gt; [ `Continue of 'b | `Stop of 'b ]) -&gt; 'b
-            val fold_right : t -&gt; init:'b -&gt; f:(Elt.t -&gt; 'b -&gt; 'b) -&gt; 'b
-            val iter2 :
-              t -&gt;
-              t -&gt;
-              f:([ `Both of Elt.t * Elt.t | `Left of Elt.t | `Right of Elt.t ] -&gt;
-                 unit) -&gt;
-              unit
-            val filter : t -&gt; f:(Elt.t -&gt; bool) -&gt; t
-            val partition_tf : t -&gt; f:(Elt.t -&gt; bool) -&gt; t * t
-            val elements : t -&gt; Elt.t list
-            val min_elt : t -&gt; Elt.t option
-            val min_elt_exn : t -&gt; Elt.t
-            val max_elt : t -&gt; Elt.t option
-            val max_elt_exn : t -&gt; Elt.t
-            val choose : t -&gt; Elt.t option
-            val choose_exn : t -&gt; Elt.t
-            val split : t -&gt; Elt.t -&gt; t * bool * t
-            val group_by : t -&gt; equiv:(Elt.t -&gt; Elt.t -&gt; bool) -&gt; t list
-            val find_exn : t -&gt; f:(Elt.t -&gt; bool) -&gt; Elt.t
-            val find_index : t -&gt; int -&gt; Elt.t option
-            val remove_index : t -&gt; int -&gt; t
-            val to_tree : t -&gt; t
-            val empty : t
-            val singleton : Elt.t -&gt; t
-            val union_list : t list -&gt; t
-            val of_list : Elt.t list -&gt; t
-            val of_array : Elt.t array -&gt; t
-            val of_sorted_array : Elt.t array -&gt; t Core_kernel.Or_error.t
-            val of_sorted_array_unchecked : Elt.t array -&gt; t
-            val stable_dedup_list : Elt.t list -&gt; Elt.t list
-            val map : ('a, 'b) Set.Tree.t -&gt; f:('a -&gt; Elt.t) -&gt; t
-            val filter_map :
-              ('a, 'b) Set.Tree.t -&gt; f:('a -&gt; Elt.t option) -&gt; t
-            val of_tree : t -&gt; t
-            val t_of_sexp : Sexp.t -&gt; t
-            val sexp_of_t : t -&gt; Sexp.t
-            val compare : t -&gt; t -&gt; int
-          end
-        type t = (Elt.t, comparator) Set.t
-        val length : t -&gt; int
-        val is_empty : t -&gt; bool
-        val iter : t -&gt; f:(Elt.t -&gt; unit) -&gt; unit
-        val fold :
-          t -&gt; init:'accum -&gt; f:('accum -&gt; Elt.t -&gt; 'accum) -&gt; 'accum
-        val exists : t -&gt; f:(Elt.t -&gt; bool) -&gt; bool
-        val for_all : t -&gt; f:(Elt.t -&gt; bool) -&gt; bool
-        val count : t -&gt; f:(Elt.t -&gt; bool) -&gt; int
-        val find : t -&gt; f:(Elt.t -&gt; bool) -&gt; Elt.t option
-        val find_map : t -&gt; f:(Elt.t -&gt; 'a option) -&gt; 'a option
-        val to_list : t -&gt; Elt.t list
-        val to_array : t -&gt; Elt.t array
-        val invariants : t -&gt; bool
-        val mem : t -&gt; Elt.t -&gt; bool
-        val add : t -&gt; Elt.t -&gt; t
-        val remove : t -&gt; Elt.t -&gt; t
-        val union : t -&gt; t -&gt; t
-        val inter : t -&gt; t -&gt; t
-        val diff : t -&gt; t -&gt; t
-        val compare_direct : t -&gt; t -&gt; int
-        val equal : t -&gt; t -&gt; bool
-        val subset : t -&gt; t -&gt; bool
-        val fold_until :
-          t -&gt;
-          init:'b -&gt;
-          f:('b -&gt; Elt.t -&gt; [ `Continue of 'b | `Stop of 'b ]) -&gt; 'b
-        val fold_right : t -&gt; init:'b -&gt; f:(Elt.t -&gt; 'b -&gt; 'b) -&gt; 'b
-        val iter2 :
-          t -&gt;
-          t -&gt;
-          f:([ `Both of Elt.t * Elt.t | `Left of Elt.t | `Right of Elt.t ] -&gt;
-             unit) -&gt;
-          unit
-        val filter : t -&gt; f:(Elt.t -&gt; bool) -&gt; t
-        val partition_tf : t -&gt; f:(Elt.t -&gt; bool) -&gt; t * t
-        val elements : t -&gt; Elt.t list
-        val min_elt : t -&gt; Elt.t option
-        val min_elt_exn : t -&gt; Elt.t
-        val max_elt : t -&gt; Elt.t option
-        val max_elt_exn : t -&gt; Elt.t
-        val choose : t -&gt; Elt.t option
-        val choose_exn : t -&gt; Elt.t
-        val split : t -&gt; Elt.t -&gt; t * bool * t
-        val group_by : t -&gt; equiv:(Elt.t -&gt; Elt.t -&gt; bool) -&gt; t list
-        val find_exn : t -&gt; f:(Elt.t -&gt; bool) -&gt; Elt.t
-        val find_index : t -&gt; int -&gt; Elt.t option
-        val remove_index : t -&gt; int -&gt; t
-        val to_tree : t -&gt; Tree.t
-        val empty : t
-        val singleton : Elt.t -&gt; t
-        val union_list : t list -&gt; t
-        val of_list : Elt.t list -&gt; t
-        val of_array : Elt.t array -&gt; t
-        val of_sorted_array : Elt.t array -&gt; t Core_kernel.Or_error.t
-        val of_sorted_array_unchecked : Elt.t array -&gt; t
-        val stable_dedup_list : Elt.t list -&gt; Elt.t list
-        val map : ('a, 'b) Set.t -&gt; f:('a -&gt; Elt.t) -&gt; t
-        val filter_map : ('a, 'b) Set.t -&gt; f:('a -&gt; Elt.t option) -&gt; t
-        val of_tree : Tree.t -&gt; t
-        val t_of_sexp : Sexp.t -&gt; t
-        val sexp_of_t : t -&gt; Sexp.t
-        val compare : t -&gt; t -&gt; int
-      end
-  end
+sig
+  type t = { foo : Int.Set.t; bar : string; }
+  val ( &gt;= ) : t -&gt; t -&gt; bool
+  val ( &lt;= ) : t -&gt; t -&gt; bool
+  val ( = ) : t -&gt; t -&gt; bool
+
+  ...
+
+end
 </programlisting>
       <para>
         The comparison function created by <literal>comparelib</literal>
@@ -18089,7 +17245,8 @@ module Foo_and_bar :
         interface using polymorphic compare.
       </para>
       <programlisting language="ocaml">
-...part 24 of maps-and-hash-tables/main.topscript
+# script maps-and-hash-tables/main-24.rawscript
+$ utop
 # module Foo_and_bar : sig
     type t = { foo: int; bar: string }
     include Comparable.S with type t := t
@@ -18099,363 +17256,18 @@ module Foo_and_bar :
     end
     include T
     include Comparable.Poly(T)
-  end;; 
+  end;;
 module Foo_and_bar :
-  sig
-    type t = { foo : int; bar : string; }
-    val ( &gt;= ) : t -&gt; t -&gt; bool
-    val ( &lt;= ) : t -&gt; t -&gt; bool
-    val ( = ) : t -&gt; t -&gt; bool
-    val ( &gt; ) : t -&gt; t -&gt; bool
-    val ( &lt; ) : t -&gt; t -&gt; bool
-    val ( &lt;&gt; ) : t -&gt; t -&gt; bool
-    val equal : t -&gt; t -&gt; bool
-    val compare : t -&gt; t -&gt; int
-    val min : t -&gt; t -&gt; t
-    val max : t -&gt; t -&gt; t
-    val ascending : t -&gt; t -&gt; int
-    val descending : t -&gt; t -&gt; int
-    val between : t -&gt; low:t -&gt; high:t -&gt; bool
-    module Replace_polymorphic_compare :
-      sig
-        val ( &gt;= ) : t -&gt; t -&gt; bool
-        val ( &lt;= ) : t -&gt; t -&gt; bool
-        val ( = ) : t -&gt; t -&gt; bool
-        val ( &gt; ) : t -&gt; t -&gt; bool
-        val ( &lt; ) : t -&gt; t -&gt; bool
-        val ( &lt;&gt; ) : t -&gt; t -&gt; bool
-        val equal : t -&gt; t -&gt; bool
-        val compare : t -&gt; t -&gt; int
-        val min : t -&gt; t -&gt; t
-        val max : t -&gt; t -&gt; t
-      end
-    type comparator
-    val comparator : (t, comparator) Core_kernel.Comparator.t_
-    val validate_lbound :
-      min:t Comparable.bound -&gt; t Core_kernel.Validate.check
-    val validate_ubound :
-      max:t Comparable.bound -&gt; t Core_kernel.Validate.check
-    val validate_bound :
-      min:t Comparable.bound -&gt;
-      max:t Comparable.bound -&gt; t Core_kernel.Validate.check
-    module Map :
-      sig
-        module Key :
-          sig
-            type t = t
-            val compare : t -&gt; t -&gt; int
-            val t_of_sexp : Sexp.t -&gt; t
-            val sexp_of_t : t -&gt; Sexp.t
-            type comparator = comparator
-            val comparator : (t, comparator) Core_kernel.Comparator.t_
-          end
-        module Tree :
-          sig
-            type 'a t = (Key.t, 'a, comparator) Map.Tree.t
-            val empty : 'a t
-            val singleton : Key.t -&gt; 'a -&gt; 'a t
-            val of_alist :
-              (Key.t * 'a) list -&gt; [ `Duplicate_key of Key.t | `Ok of 'a t ]
-            val of_alist_exn : (Key.t * 'a) list -&gt; 'a t
-            val of_alist_multi : (Key.t * 'a) list -&gt; 'a list t
-            val of_alist_fold :
-              (Key.t * 'a) list -&gt; init:'b -&gt; f:('b -&gt; 'a -&gt; 'b) -&gt; 'b t
-            val of_sorted_array :
-              (Key.t * 'a) array -&gt; 'a t Core_kernel.Or_error.t
-            val of_sorted_array_unchecked : (Key.t * 'a) array -&gt; 'a t
-            val of_tree : 'a t -&gt; 'a t
-            val invariants : 'a t -&gt; bool
-            val is_empty : 'a t -&gt; bool
-            val length : 'a t -&gt; int
-            val add : 'a t -&gt; key:Key.t -&gt; data:'a -&gt; 'a t
-            val add_multi : 'a list t -&gt; key:Key.t -&gt; data:'a -&gt; 'a list t
-            val change : 'a t -&gt; Key.t -&gt; ('a option -&gt; 'a option) -&gt; 'a t
-            val find : 'a t -&gt; Key.t -&gt; 'a option
-            val find_exn : 'a t -&gt; Key.t -&gt; 'a
-            val remove : 'a t -&gt; Key.t -&gt; 'a t
-            val mem : 'a t -&gt; Key.t -&gt; bool
-            val iter : 'a t -&gt; f:(key:Key.t -&gt; data:'a -&gt; unit) -&gt; unit
-            val iter2 :
-              'a t -&gt;
-              'b t -&gt;
-              f:(key:Key.t -&gt;
-                 data:[ `Both of 'a * 'b | `Left of 'a | `Right of 'b ] -&gt;
-                 unit) -&gt;
-              unit
-            val map : 'a t -&gt; f:('a -&gt; 'b) -&gt; 'b t
-            val mapi : 'a t -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b) -&gt; 'b t
-            val fold :
-              'a t -&gt; init:'b -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b -&gt; 'b) -&gt; 'b
-            val fold_right :
-              'a t -&gt; init:'b -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b -&gt; 'b) -&gt; 'b
-            val filter : 'a t -&gt; f:(key:Key.t -&gt; data:'a -&gt; bool) -&gt; 'a t
-            val filter_map : 'a t -&gt; f:('a -&gt; 'b option) -&gt; 'b t
-            val filter_mapi :
-              'a t -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b option) -&gt; 'b t
-            val compare_direct : ('a -&gt; 'a -&gt; int) -&gt; 'a t -&gt; 'a t -&gt; int
-            val equal : ('a -&gt; 'a -&gt; bool) -&gt; 'a t -&gt; 'a t -&gt; bool
-            val keys : 'a t -&gt; Key.t list
-            val data : 'a t -&gt; 'a list
-            val to_alist : 'a t -&gt; (Key.t * 'a) list
-            val validate :
-              name:(Key.t -&gt; string) -&gt;
-              'a Core_kernel.Validate.check -&gt;
-              'a t Core_kernel.Validate.check
-            val merge :
-              'a t -&gt;
-              'b t -&gt;
-              f:(key:Key.t -&gt;
-                 [ `Both of 'a * 'b | `Left of 'a | `Right of 'b ] -&gt;
-                 'c option) -&gt;
-              'c t
-            val symmetric_diff :
-              'a t -&gt;
-              'a t -&gt;
-              data_equal:('a -&gt; 'a -&gt; bool) -&gt;
-              (Key.t * [ `Left of 'a | `Right of 'a | `Unequal of 'a * 'a ])
-              list
-            val min_elt : 'a t -&gt; (Key.t * 'a) option
-            val min_elt_exn : 'a t -&gt; Key.t * 'a
-            val max_elt : 'a t -&gt; (Key.t * 'a) option
-            val max_elt_exn : 'a t -&gt; Key.t * 'a
-            val for_all : 'a t -&gt; f:('a -&gt; bool) -&gt; bool
-            val exists : 'a t -&gt; f:('a -&gt; bool) -&gt; bool
-            val fold_range_inclusive :
-              'a t -&gt;
-              min:Key.t -&gt;
-              max:Key.t -&gt;
-              init:'b -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b -&gt; 'b) -&gt; 'b
-            val range_to_alist :
-              'a t -&gt; min:Key.t -&gt; max:Key.t -&gt; (Key.t * 'a) list
-            val prev_key : 'a t -&gt; Key.t -&gt; (Key.t * 'a) option
-            val next_key : 'a t -&gt; Key.t -&gt; (Key.t * 'a) option
-            val rank : 'a t -&gt; Key.t -&gt; int option
-            val to_tree : 'a t -&gt; 'a t
-            val t_of_sexp : (Sexp.t -&gt; 'a) -&gt; Sexp.t -&gt; 'a t
-            val sexp_of_t : ('a -&gt; Sexp.t) -&gt; 'a t -&gt; Sexp.t
-          end
-        type 'a t = (Key.t, 'a, comparator) Map.t
-        val empty : 'a t
-        val singleton : Key.t -&gt; 'a -&gt; 'a t
-        val of_alist :
-          (Key.t * 'a) list -&gt; [ `Duplicate_key of Key.t | `Ok of 'a t ]
-        val of_alist_exn : (Key.t * 'a) list -&gt; 'a t
-        val of_alist_multi : (Key.t * 'a) list -&gt; 'a list t
-        val of_alist_fold :
-          (Key.t * 'a) list -&gt; init:'b -&gt; f:('b -&gt; 'a -&gt; 'b) -&gt; 'b t
-        val of_sorted_array :
-          (Key.t * 'a) array -&gt; 'a t Core_kernel.Or_error.t
-        val of_sorted_array_unchecked : (Key.t * 'a) array -&gt; 'a t
-        val of_tree : 'a Tree.t -&gt; 'a t
-        val invariants : 'a t -&gt; bool
-        val is_empty : 'a t -&gt; bool
-        val length : 'a t -&gt; int
-        val add : 'a t -&gt; key:Key.t -&gt; data:'a -&gt; 'a t
-        val add_multi : 'a list t -&gt; key:Key.t -&gt; data:'a -&gt; 'a list t
-        val change : 'a t -&gt; Key.t -&gt; ('a option -&gt; 'a option) -&gt; 'a t
-        val find : 'a t -&gt; Key.t -&gt; 'a option
-        val find_exn : 'a t -&gt; Key.t -&gt; 'a
-        val remove : 'a t -&gt; Key.t -&gt; 'a t
-        val mem : 'a t -&gt; Key.t -&gt; bool
-        val iter : 'a t -&gt; f:(key:Key.t -&gt; data:'a -&gt; unit) -&gt; unit
-        val iter2 :
-          'a t -&gt;
-          'b t -&gt;
-          f:(key:Key.t -&gt;
-             data:[ `Both of 'a * 'b | `Left of 'a | `Right of 'b ] -&gt; unit) -&gt;
-          unit
-        val map : 'a t -&gt; f:('a -&gt; 'b) -&gt; 'b t
-        val mapi : 'a t -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b) -&gt; 'b t
-        val fold :
-          'a t -&gt; init:'b -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b -&gt; 'b) -&gt; 'b
-        val fold_right :
-          'a t -&gt; init:'b -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b -&gt; 'b) -&gt; 'b
-        val filter : 'a t -&gt; f:(key:Key.t -&gt; data:'a -&gt; bool) -&gt; 'a t
-        val filter_map : 'a t -&gt; f:('a -&gt; 'b option) -&gt; 'b t
-        val filter_mapi :
-          'a t -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b option) -&gt; 'b t
-        val compare_direct : ('a -&gt; 'a -&gt; int) -&gt; 'a t -&gt; 'a t -&gt; int
-        val equal : ('a -&gt; 'a -&gt; bool) -&gt; 'a t -&gt; 'a t -&gt; bool
-        val keys : 'a t -&gt; Key.t list
-        val data : 'a t -&gt; 'a list
-        val to_alist : 'a t -&gt; (Key.t * 'a) list
-        val validate :
-          name:(Key.t -&gt; string) -&gt;
-          'a Core_kernel.Validate.check -&gt; 'a t Core_kernel.Validate.check
-        val merge :
-          'a t -&gt;
-          'b t -&gt;
-          f:(key:Key.t -&gt;
-             [ `Both of 'a * 'b | `Left of 'a | `Right of 'b ] -&gt; 'c option) -&gt;
-          'c t
-        val symmetric_diff :
-          'a t -&gt;
-          'a t -&gt;
-          data_equal:('a -&gt; 'a -&gt; bool) -&gt;
-          (Key.t * [ `Left of 'a | `Right of 'a | `Unequal of 'a * 'a ]) list
-        val min_elt : 'a t -&gt; (Key.t * 'a) option
-        val min_elt_exn : 'a t -&gt; Key.t * 'a
-        val max_elt : 'a t -&gt; (Key.t * 'a) option
-        val max_elt_exn : 'a t -&gt; Key.t * 'a
-        val for_all : 'a t -&gt; f:('a -&gt; bool) -&gt; bool
-        val exists : 'a t -&gt; f:('a -&gt; bool) -&gt; bool
-        val fold_range_inclusive :
-          'a t -&gt;
-          min:Key.t -&gt;
-          max:Key.t -&gt; init:'b -&gt; f:(key:Key.t -&gt; data:'a -&gt; 'b -&gt; 'b) -&gt; 'b
-        val range_to_alist :
-          'a t -&gt; min:Key.t -&gt; max:Key.t -&gt; (Key.t * 'a) list
-        val prev_key : 'a t -&gt; Key.t -&gt; (Key.t * 'a) option
-        val next_key : 'a t -&gt; Key.t -&gt; (Key.t * 'a) option
-        val rank : 'a t -&gt; Key.t -&gt; int option
-        val to_tree : 'a t -&gt; 'a Tree.t
-        val t_of_sexp : (Sexp.t -&gt; 'a) -&gt; Sexp.t -&gt; 'a t
-        val sexp_of_t : ('a -&gt; Sexp.t) -&gt; 'a t -&gt; Sexp.t
-        val compare : ('a -&gt; 'a -&gt; int) -&gt; 'a t -&gt; 'a t -&gt; int
-      end
-    module Set :
-      sig
-        module Elt :
-          sig
-            type t = Map.Key.t
-            val compare : t -&gt; t -&gt; int
-            val t_of_sexp : Sexp.t -&gt; t
-            val sexp_of_t : t -&gt; Sexp.t
-            type comparator = Map.Key.comparator
-            val comparator : (t, comparator) Core_kernel.Comparator.t_
-          end
-        module Tree :
-          sig
-            type t = (Elt.t, comparator) Set.Tree.t
-            val length : t -&gt; int
-            val is_empty : t -&gt; bool
-            val iter : t -&gt; f:(Elt.t -&gt; unit) -&gt; unit
-            val fold :
-              t -&gt; init:'accum -&gt; f:('accum -&gt; Elt.t -&gt; 'accum) -&gt; 'accum
-            val exists : t -&gt; f:(Elt.t -&gt; bool) -&gt; bool
-            val for_all : t -&gt; f:(Elt.t -&gt; bool) -&gt; bool
-            val count : t -&gt; f:(Elt.t -&gt; bool) -&gt; int
-            val find : t -&gt; f:(Elt.t -&gt; bool) -&gt; Elt.t option
-            val find_map : t -&gt; f:(Elt.t -&gt; 'a option) -&gt; 'a option
-            val to_list : t -&gt; Elt.t list
-            val to_array : t -&gt; Elt.t array
-            val invariants : t -&gt; bool
-            val mem : t -&gt; Elt.t -&gt; bool
-            val add : t -&gt; Elt.t -&gt; t
-            val remove : t -&gt; Elt.t -&gt; t
-            val union : t -&gt; t -&gt; t
-            val inter : t -&gt; t -&gt; t
-            val diff : t -&gt; t -&gt; t
-            val compare_direct : t -&gt; t -&gt; int
-            val equal : t -&gt; t -&gt; bool
-            val subset : t -&gt; t -&gt; bool
-            val fold_until :
-              t -&gt;
-              init:'b -&gt;
-              f:('b -&gt; Elt.t -&gt; [ `Continue of 'b | `Stop of 'b ]) -&gt; 'b
-            val fold_right : t -&gt; init:'b -&gt; f:(Elt.t -&gt; 'b -&gt; 'b) -&gt; 'b
-            val iter2 :
-              t -&gt;
-              t -&gt;
-              f:([ `Both of Elt.t * Elt.t | `Left of Elt.t | `Right of Elt.t ] -&gt;
-                 unit) -&gt;
-              unit
-            val filter : t -&gt; f:(Elt.t -&gt; bool) -&gt; t
-            val partition_tf : t -&gt; f:(Elt.t -&gt; bool) -&gt; t * t
-            val elements : t -&gt; Elt.t list
-            val min_elt : t -&gt; Elt.t option
-            val min_elt_exn : t -&gt; Elt.t
-            val max_elt : t -&gt; Elt.t option
-            val max_elt_exn : t -&gt; Elt.t
-            val choose : t -&gt; Elt.t option
-            val choose_exn : t -&gt; Elt.t
-            val split : t -&gt; Elt.t -&gt; t * bool * t
-            val group_by : t -&gt; equiv:(Elt.t -&gt; Elt.t -&gt; bool) -&gt; t list
-            val find_exn : t -&gt; f:(Elt.t -&gt; bool) -&gt; Elt.t
-            val find_index : t -&gt; int -&gt; Elt.t option
-            val remove_index : t -&gt; int -&gt; t
-            val to_tree : t -&gt; t
-            val empty : t
-            val singleton : Elt.t -&gt; t
-            val union_list : t list -&gt; t
-            val of_list : Elt.t list -&gt; t
-            val of_array : Elt.t array -&gt; t
-            val of_sorted_array : Elt.t array -&gt; t Core_kernel.Or_error.t
-            val of_sorted_array_unchecked : Elt.t array -&gt; t
-            val stable_dedup_list : Elt.t list -&gt; Elt.t list
-            val map : ('a, 'b) Set.Tree.t -&gt; f:('a -&gt; Elt.t) -&gt; t
-            val filter_map :
-              ('a, 'b) Set.Tree.t -&gt; f:('a -&gt; Elt.t option) -&gt; t
-            val of_tree : t -&gt; t
-            val t_of_sexp : Sexp.t -&gt; t
-            val sexp_of_t : t -&gt; Sexp.t
-            val compare : t -&gt; t -&gt; int
-          end
-        type t = (Elt.t, comparator) Set.t
-        val length : t -&gt; int
-        val is_empty : t -&gt; bool
-        val iter : t -&gt; f:(Elt.t -&gt; unit) -&gt; unit
-        val fold :
-          t -&gt; init:'accum -&gt; f:('accum -&gt; Elt.t -&gt; 'accum) -&gt; 'accum
-        val exists : t -&gt; f:(Elt.t -&gt; bool) -&gt; bool
-        val for_all : t -&gt; f:(Elt.t -&gt; bool) -&gt; bool
-        val count : t -&gt; f:(Elt.t -&gt; bool) -&gt; int
-        val find : t -&gt; f:(Elt.t -&gt; bool) -&gt; Elt.t option
-        val find_map : t -&gt; f:(Elt.t -&gt; 'a option) -&gt; 'a option
-        val to_list : t -&gt; Elt.t list
-        val to_array : t -&gt; Elt.t array
-        val invariants : t -&gt; bool
-        val mem : t -&gt; Elt.t -&gt; bool
-        val add : t -&gt; Elt.t -&gt; t
-        val remove : t -&gt; Elt.t -&gt; t
-        val union : t -&gt; t -&gt; t
-        val inter : t -&gt; t -&gt; t
-        val diff : t -&gt; t -&gt; t
-        val compare_direct : t -&gt; t -&gt; int
-        val equal : t -&gt; t -&gt; bool
-        val subset : t -&gt; t -&gt; bool
-        val fold_until :
-          t -&gt;
-          init:'b -&gt;
-          f:('b -&gt; Elt.t -&gt; [ `Continue of 'b | `Stop of 'b ]) -&gt; 'b
-        val fold_right : t -&gt; init:'b -&gt; f:(Elt.t -&gt; 'b -&gt; 'b) -&gt; 'b
-        val iter2 :
-          t -&gt;
-          t -&gt;
-          f:([ `Both of Elt.t * Elt.t | `Left of Elt.t | `Right of Elt.t ] -&gt;
-             unit) -&gt;
-          unit
-        val filter : t -&gt; f:(Elt.t -&gt; bool) -&gt; t
-        val partition_tf : t -&gt; f:(Elt.t -&gt; bool) -&gt; t * t
-        val elements : t -&gt; Elt.t list
-        val min_elt : t -&gt; Elt.t option
-        val min_elt_exn : t -&gt; Elt.t
-        val max_elt : t -&gt; Elt.t option
-        val max_elt_exn : t -&gt; Elt.t
-        val choose : t -&gt; Elt.t option
-        val choose_exn : t -&gt; Elt.t
-        val split : t -&gt; Elt.t -&gt; t * bool * t
-        val group_by : t -&gt; equiv:(Elt.t -&gt; Elt.t -&gt; bool) -&gt; t list
-        val find_exn : t -&gt; f:(Elt.t -&gt; bool) -&gt; Elt.t
-        val find_index : t -&gt; int -&gt; Elt.t option
-        val remove_index : t -&gt; int -&gt; t
-        val to_tree : t -&gt; Tree.t
-        val empty : t
-        val singleton : Elt.t -&gt; t
-        val union_list : t list -&gt; t
-        val of_list : Elt.t list -&gt; t
-        val of_array : Elt.t array -&gt; t
-        val of_sorted_array : Elt.t array -&gt; t Core_kernel.Or_error.t
-        val of_sorted_array_unchecked : Elt.t array -&gt; t
-        val stable_dedup_list : Elt.t list -&gt; Elt.t list
-        val map : ('a, 'b) Set.t -&gt; f:('a -&gt; Elt.t) -&gt; t
-        val filter_map : ('a, 'b) Set.t -&gt; f:('a -&gt; Elt.t option) -&gt; t
-        val of_tree : Tree.t -&gt; t
-        val t_of_sexp : Sexp.t -&gt; t
-        val sexp_of_t : t -&gt; Sexp.t
-        val compare : t -&gt; t -&gt; int
-      end
-  end
+sig
+  type t = { foo : int; bar : string; }
+  val ( &gt;= ) : t -&gt; t -&gt; bool
+  val ( &lt;= ) : t -&gt; t -&gt; bool
+  val ( = ) : t -&gt; t -&gt; bool
+
+  ...
+
+end
+
 </programlisting>
       <para>
         That said, for reasons we discussed earlier, polymorphic compare
@@ -18632,7 +17444,8 @@ val table : ('_a, '_b) Hashtbl.t = &lt;abstr&gt;
         exclusive-or of the hashes from the component values.
       </para>
       <programlisting language="ocaml">
-...part 30 of maps-and-hash-tables/main.topscript
+# script maps-and-hash-tables/main-30.rawscript
+$ utop
 # module Foo_and_bar : sig
     type t = { foo: int; bar: string }
     include Hashable.S with type t := t
@@ -18644,289 +17457,18 @@ val table : ('_a, '_b) Hashtbl.t = &lt;abstr&gt;
     end
     include T
     include Hashable.Make(T)
-  end;; 
+  end;;
 module Foo_and_bar :
-  sig
-    type t = { foo : int; bar : string; }
-    module Hashable : sig type t = t end
-    val hash : t -&gt; int
-    val compare : t -&gt; t -&gt; int
-    val hashable : t Pooled_hashtbl.Hashable.t
-    module Table :
-      sig
-        type key = t
-        type ('a, 'b) hashtbl = ('a, 'b) Hashtbl.t
-        type 'b t = (key, 'b) hashtbl
-        type ('a, 'b) t_ = 'b t
-        type 'a key_ = key
-        val hashable : key Pooled_hashtbl.Hashable.t
-        val create :
-          (key, unit -&gt; 'b t)
-          Core_kernel.Hash_set_intf.create_options_without_hashable
-        val of_alist :
-          (key, (key * 'b) list -&gt; [ `Duplicate_key of key | `Ok of 'b t ])
-          Core_kernel.Hash_set_intf.create_options_without_hashable
-        val of_alist_report_all_dups :
-          (key,
-           (key * 'b) list -&gt; [ `Duplicate_keys of key list | `Ok of 'b t ])
-          Core_kernel.Hash_set_intf.create_options_without_hashable
-        val of_alist_exn :
-          (key, (key * 'b) list -&gt; 'b t)
-          Core_kernel.Hash_set_intf.create_options_without_hashable
-        val of_alist_multi :
-          (key, (key * 'b) list -&gt; 'b list t)
-          Core_kernel.Hash_set_intf.create_options_without_hashable
-        val create_mapped :
-          (key,
-           get_key:('r -&gt; key) -&gt;
-           get_data:('r -&gt; 'b) -&gt;
-           'r list -&gt; [ `Duplicate_keys of key list | `Ok of 'b t ])
-          Core_kernel.Hash_set_intf.create_options_without_hashable
-        val create_with_key :
-          (key,
-           get_key:('r -&gt; key) -&gt;
-           'r list -&gt; [ `Duplicate_keys of key list | `Ok of 'r t ])
-          Core_kernel.Hash_set_intf.create_options_without_hashable
-        val create_with_key_exn :
-          (key, get_key:('r -&gt; key) -&gt; 'r list -&gt; 'r t)
-          Core_kernel.Hash_set_intf.create_options_without_hashable
-        val group :
-          (key,
-           get_key:('r -&gt; key) -&gt;
-           get_data:('r -&gt; 'b) -&gt; combine:('b -&gt; 'b -&gt; 'b) -&gt; 'r list -&gt; 'b t)
-          Core_kernel.Hash_set_intf.create_options_without_hashable
-        val sexp_of_key : 'a t -&gt; key -&gt; Sexp.t
-        val clear : 'a t -&gt; unit
-        val copy : 'b t -&gt; 'b t
-        val invariant : 'a t -&gt; unit
-        val fold :
-          'b t -&gt; init:'c -&gt; f:(key:key -&gt; data:'b -&gt; 'c -&gt; 'c) -&gt; 'c
-        val iter : 'b t -&gt; f:(key:key -&gt; data:'b -&gt; unit) -&gt; unit
-        val existsi : 'b t -&gt; f:(key:key -&gt; data:'b -&gt; bool) -&gt; bool
-        val exists : 'b t -&gt; f:('b -&gt; bool) -&gt; bool
-        val length : 'a t -&gt; int
-        val is_empty : 'a t -&gt; bool
-        val mem : 'a t -&gt; key -&gt; bool
-        val remove : 'a t -&gt; key -&gt; unit
-        val remove_one : 'a list t -&gt; key -&gt; unit
-        val replace : 'b t -&gt; key:key -&gt; data:'b -&gt; unit
-        val set : 'b t -&gt; key:key -&gt; data:'b -&gt; unit
-        val add : 'b t -&gt; key:key -&gt; data:'b -&gt; [ `Duplicate | `Ok ]
-        val add_exn : 'b t -&gt; key:key -&gt; data:'b -&gt; unit
-        val change : 'b t -&gt; key -&gt; ('b option -&gt; 'b option) -&gt; unit
-        val add_multi : 'b list t -&gt; key:key -&gt; data:'b -&gt; unit
-        val remove_multi : 'a list t -&gt; key -&gt; unit
-        val map : 'b t -&gt; f:('b -&gt; 'c) -&gt; 'c t
-        val mapi : 'b t -&gt; f:(key:key -&gt; data:'b -&gt; 'c) -&gt; 'c t
-        val filter_map : 'b t -&gt; f:('b -&gt; 'c option) -&gt; 'c t
-        val filter_mapi : 'b t -&gt; f:(key:key -&gt; data:'b -&gt; 'c option) -&gt; 'c t
-        val filter : 'b t -&gt; f:('b -&gt; bool) -&gt; 'b t
-        val filteri : 'b t -&gt; f:(key:key -&gt; data:'b -&gt; bool) -&gt; 'b t
-        val partition_map :
-          'b t -&gt; f:('b -&gt; [ `Fst of 'c | `Snd of 'd ]) -&gt; 'c t * 'd t
-        val partition_mapi :
-          'b t -&gt;
-          f:(key:key -&gt; data:'b -&gt; [ `Fst of 'c | `Snd of 'd ]) -&gt;
-          'c t * 'd t
-        val partition_tf : 'b t -&gt; f:('b -&gt; bool) -&gt; 'b t * 'b t
-        val partitioni_tf :
-          'b t -&gt; f:(key:key -&gt; data:'b -&gt; bool) -&gt; 'b t * 'b t
-        val find_or_add : 'b t -&gt; key -&gt; default:(unit -&gt; 'b) -&gt; 'b
-        val find : 'b t -&gt; key -&gt; 'b option
-        val find_exn : 'b t -&gt; key -&gt; 'b
-        val find_and_remove : 'b t -&gt; key -&gt; 'b option
-        val iter_vals : 'b t -&gt; f:('b -&gt; unit) -&gt; unit
-        val merge :
-          'a t -&gt;
-          'b t -&gt;
-          f:(key:key -&gt;
-             [ `Both of 'a * 'b | `Left of 'a | `Right of 'b ] -&gt; 'c option) -&gt;
-          'c t
-        val merge_into :
-          f:(key:key -&gt; 'b -&gt; 'b option -&gt; 'b option) -&gt;
-          src:'b t -&gt; dst:'b t -&gt; unit
-        val keys : 'a t -&gt; key list
-        val data : 'b t -&gt; 'b list
-        val filter_inplace : 'b t -&gt; f:('b -&gt; bool) -&gt; unit
-        val filteri_inplace : 'b t -&gt; f:(key -&gt; 'b -&gt; bool) -&gt; unit
-        val equal : 'b t -&gt; 'b t -&gt; ('b -&gt; 'b -&gt; bool) -&gt; bool
-        val to_alist : 'b t -&gt; (key * 'b) list
-        val validate :
-          name:(key -&gt; string) -&gt;
-          'b Core_kernel.Validate.check -&gt; 'b t Core_kernel.Validate.check
-        val incr : ?by:int -&gt; int t -&gt; key -&gt; unit
-        val t_of_sexp : (Sexp.t -&gt; 'b) -&gt; Sexp.t -&gt; 'b t
-        val sexp_of_t : ('b -&gt; Sexp.t) -&gt; 'b t -&gt; Sexp.t
-      end
-    module Pooled_hashtbl :
-      sig
-        type key = t
-        type ('a, 'b) hashtbl = ('a, 'b) Pooled_hashtbl.t
-        type 'b t = (key, 'b) hashtbl
-        type ('a, 'b) t_ = 'b t
-        type 'a key_ = key
-        val hashable : key Pooled_hashtbl.Hashable.t
-        val create :
-          (key, unit -&gt; 'b t)
-          Core_kernel.Hash_set_intf.create_options_without_hashable
-        val of_alist :
-          (key, (key * 'b) list -&gt; [ `Duplicate_key of key | `Ok of 'b t ])
-          Core_kernel.Hash_set_intf.create_options_without_hashable
-        val of_alist_report_all_dups :
-          (key,
-           (key * 'b) list -&gt; [ `Duplicate_keys of key list | `Ok of 'b t ])
-          Core_kernel.Hash_set_intf.create_options_without_hashable
-        val of_alist_exn :
-          (key, (key * 'b) list -&gt; 'b t)
-          Core_kernel.Hash_set_intf.create_options_without_hashable
-        val of_alist_multi :
-          (key, (key * 'b) list -&gt; 'b list t)
-          Core_kernel.Hash_set_intf.create_options_without_hashable
-        val create_mapped :
-          (key,
-           get_key:('r -&gt; key) -&gt;
-           get_data:('r -&gt; 'b) -&gt;
-           'r list -&gt; [ `Duplicate_keys of key list | `Ok of 'b t ])
-          Core_kernel.Hash_set_intf.create_options_without_hashable
-        val create_with_key :
-          (key,
-           get_key:('r -&gt; key) -&gt;
-           'r list -&gt; [ `Duplicate_keys of key list | `Ok of 'r t ])
-          Core_kernel.Hash_set_intf.create_options_without_hashable
-        val create_with_key_exn :
-          (key, get_key:('r -&gt; key) -&gt; 'r list -&gt; 'r t)
-          Core_kernel.Hash_set_intf.create_options_without_hashable
-        val group :
-          (key,
-           get_key:('r -&gt; key) -&gt;
-           get_data:('r -&gt; 'b) -&gt; combine:('b -&gt; 'b -&gt; 'b) -&gt; 'r list -&gt; 'b t)
-          Core_kernel.Hash_set_intf.create_options_without_hashable
-        val sexp_of_key : 'a t -&gt; key -&gt; Sexp.t
-        val clear : 'a t -&gt; unit
-        val copy : 'b t -&gt; 'b t
-        val invariant : 'a t -&gt; unit
-        val fold :
-          'b t -&gt; init:'c -&gt; f:(key:key -&gt; data:'b -&gt; 'c -&gt; 'c) -&gt; 'c
-        val iter : 'b t -&gt; f:(key:key -&gt; data:'b -&gt; unit) -&gt; unit
-        val existsi : 'b t -&gt; f:(key:key -&gt; data:'b -&gt; bool) -&gt; bool
-        val exists : 'b t -&gt; f:('b -&gt; bool) -&gt; bool
-        val length : 'a t -&gt; int
-        val is_empty : 'a t -&gt; bool
-        val mem : 'a t -&gt; key -&gt; bool
-        val remove : 'a t -&gt; key -&gt; unit
-        val remove_one : 'a list t -&gt; key -&gt; unit
-        val replace : 'b t -&gt; key:key -&gt; data:'b -&gt; unit
-        val set : 'b t -&gt; key:key -&gt; data:'b -&gt; unit
-        val add : 'b t -&gt; key:key -&gt; data:'b -&gt; [ `Duplicate | `Ok ]
-        val add_exn : 'b t -&gt; key:key -&gt; data:'b -&gt; unit
-        val change : 'b t -&gt; key -&gt; ('b option -&gt; 'b option) -&gt; unit
-        val add_multi : 'b list t -&gt; key:key -&gt; data:'b -&gt; unit
-        val remove_multi : 'a list t -&gt; key -&gt; unit
-        val map : 'b t -&gt; f:('b -&gt; 'c) -&gt; 'c t
-        val mapi : 'b t -&gt; f:(key:key -&gt; data:'b -&gt; 'c) -&gt; 'c t
-        val filter_map : 'b t -&gt; f:('b -&gt; 'c option) -&gt; 'c t
-        val filter_mapi : 'b t -&gt; f:(key:key -&gt; data:'b -&gt; 'c option) -&gt; 'c t
-        val filter : 'b t -&gt; f:('b -&gt; bool) -&gt; 'b t
-        val filteri : 'b t -&gt; f:(key:key -&gt; data:'b -&gt; bool) -&gt; 'b t
-        val partition_map :
-          'b t -&gt; f:('b -&gt; [ `Fst of 'c | `Snd of 'd ]) -&gt; 'c t * 'd t
-        val partition_mapi :
-          'b t -&gt;
-          f:(key:key -&gt; data:'b -&gt; [ `Fst of 'c | `Snd of 'd ]) -&gt;
-          'c t * 'd t
-        val partition_tf : 'b t -&gt; f:('b -&gt; bool) -&gt; 'b t * 'b t
-        val partitioni_tf :
-          'b t -&gt; f:(key:key -&gt; data:'b -&gt; bool) -&gt; 'b t * 'b t
-        val find_or_add : 'b t -&gt; key -&gt; default:(unit -&gt; 'b) -&gt; 'b
-        val find : 'b t -&gt; key -&gt; 'b option
-        val find_exn : 'b t -&gt; key -&gt; 'b
-        val find_and_remove : 'b t -&gt; key -&gt; 'b option
-        val iter_vals : 'b t -&gt; f:('b -&gt; unit) -&gt; unit
-        val merge :
-          'a t -&gt;
-          'b t -&gt;
-          f:(key:key -&gt;
-             [ `Both of 'a * 'b | `Left of 'a | `Right of 'b ] -&gt; 'c option) -&gt;
-          'c t
-        val merge_into :
-          f:(key:key -&gt; 'b -&gt; 'b option -&gt; 'b option) -&gt;
-          src:'b t -&gt; dst:'b t -&gt; unit
-        val keys : 'a t -&gt; key list
-        val data : 'b t -&gt; 'b list
-        val filter_inplace : 'b t -&gt; f:('b -&gt; bool) -&gt; unit
-        val filteri_inplace : 'b t -&gt; f:(key -&gt; 'b -&gt; bool) -&gt; unit
-        val equal : 'b t -&gt; 'b t -&gt; ('b -&gt; 'b -&gt; bool) -&gt; bool
-        val to_alist : 'b t -&gt; (key * 'b) list
-        val validate :
-          name:(key -&gt; string) -&gt;
-          'b Core_kernel.Validate.check -&gt; 'b t Core_kernel.Validate.check
-        val incr : ?by:int -&gt; int t -&gt; key -&gt; unit
-        val t_of_sexp : (Sexp.t -&gt; 'b) -&gt; Sexp.t -&gt; 'b t
-        val sexp_of_t : ('b -&gt; Sexp.t) -&gt; 'b t -&gt; Sexp.t
-      end
-    module Hash_set :
-      sig
-        type elt = t
-        type 'a hash_set = 'a Hash_set.t
-        type t = elt hash_set
-        type 'a t_ = t
-        type 'a elt_ = elt
-        val create :
-          ('a, unit -&gt; t)
-          Core_kernel.Hash_set_intf.create_options_without_hashable
-        val of_list :
-          ('a, elt list -&gt; t)
-          Core_kernel.Hash_set_intf.create_options_without_hashable
-        val t_of_sexp : Sexp.t -&gt; t
-        val sexp_of_t : t -&gt; Sexp.t
-      end
-    module Hash_queue :
-      sig
-        module Key :
-          sig
-            type t = Hash_set.elt
-            val compare : t -&gt; t -&gt; int
-            val hash : t -&gt; int
-            val t_of_sexp : Sexp.t -&gt; t
-            val sexp_of_t : t -&gt; Sexp.t
-          end
-        type 'a t
-        val length : 'a t -&gt; int
-        val is_empty : 'a t -&gt; bool
-        val iter : 'a t -&gt; f:('a -&gt; unit) -&gt; unit
-        val fold :
-          'a t -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt; 'accum
-        val exists : 'a t -&gt; f:('a -&gt; bool) -&gt; bool
-        val for_all : 'a t -&gt; f:('a -&gt; bool) -&gt; bool
-        val count : 'a t -&gt; f:('a -&gt; bool) -&gt; int
-        val find : 'a t -&gt; f:('a -&gt; bool) -&gt; 'a option
-        val find_map : 'a t -&gt; f:('a -&gt; 'b option) -&gt; 'b option
-        val to_list : 'a t -&gt; 'a list
-        val to_array : 'a t -&gt; 'a array
-        val invariant : 'a t -&gt; unit
-        val create : unit -&gt; 'a t
-        val clear : 'a t -&gt; unit
-        val mem : 'a t -&gt; Key.t -&gt; bool
-        val lookup : 'a t -&gt; Key.t -&gt; 'a option
-        val lookup_exn : 'a t -&gt; Key.t -&gt; 'a
-        val enqueue : 'a t -&gt; Key.t -&gt; 'a -&gt; [ `Key_already_present | `Ok ]
-        val enqueue_exn : 'a t -&gt; Key.t -&gt; 'a -&gt; unit
-        val first : 'a t -&gt; 'a option
-        val keys : 'a t -&gt; Key.t list
-        val dequeue : 'a t -&gt; 'a option
-        val dequeue_exn : 'a t -&gt; 'a
-        val dequeue_with_key : 'a t -&gt; (Key.t * 'a) option
-        val dequeue_with_key_exn : 'a t -&gt; Key.t * 'a
-        val dequeue_all : 'a t -&gt; f:('a -&gt; unit) -&gt; unit
-        val remove : 'a t -&gt; Key.t -&gt; [ `No_such_key | `Ok ]
-        val remove_exn : 'a t -&gt; Key.t -&gt; unit
-        val replace : 'a t -&gt; Key.t -&gt; 'a -&gt; [ `No_such_key | `Ok ]
-        val replace_exn : 'a t -&gt; Key.t -&gt; 'a -&gt; unit
-        val iteri : 'a t -&gt; f:(key:Key.t -&gt; data:'a -&gt; unit) -&gt; unit
-        val foldi :
-          'a t -&gt; init:'b -&gt; f:('b -&gt; key:Key.t -&gt; data:'a -&gt; 'b) -&gt; 'b
-      end
-  end
+sig
+  type t = { foo : int; bar : string; }
+  module Hashable : sig type t = t end
+  val hash : t -&gt; int
+  val compare : t -&gt; t -&gt; int
+  val hashable : t Pooled_hashtbl.Hashable.t
+
+  ...
+
+end
 </programlisting>
       <para>
         Note that in order to satisfy hashable, one also needs to
@@ -19015,14 +17557,14 @@ let () =
     <programlisting>
 # running maps-and-hash-tables/run_map_vs_hash.out.sh
 $ corebuild -pkg core_bench map_vs_hash.native
-$ ./map_vs_hash.native -clear-columns name time speedup
+$ ./map_vs_hash.native -ascii -clear-columns name time speedup
 Estimated testing time 20s (change using -quota SECS).
-┌───────┬────────────┬─────────┐
-│ Name  │  Time (ns) │ Speedup │
-├───────┼────────────┼─────────┤
-│ map   │ 32_013_288 │    1.00 │
-│ table │  7_978_395 │    4.01 │
-└───────┴────────────┴─────────┘
+                                
+  Name     Time (ns)   Speedup  
+ ------- ------------ --------- 
+  map     31_962_207      1.00  
+  table    7_974_747      4.01  
+                                
 </programlisting>
     <para>
       We can make the speedup smaller or larger depending on the details
@@ -19104,8 +17646,8 @@ Estimated testing time 20s (change using -quota SECS).
                                
   Name    Time (ns)   Speedup  
  ------- ----------- --------- 
-  map       216_669     11.72  
-  table   2_538_555      1.00  
+  map       216_142     11.83  
+  table   2_556_684      1.00  
                                
 </programlisting>
     <para>
@@ -19158,10 +17700,10 @@ Estimated testing time 20s (change using -quota SECS).
   <para>
     Command is simple to use for simple applications, but also also
     scales well as your needs grow more complex. In particular, Command
-    provides a sophisticated subcommand mode that grouping related
-    commands together as the number of options grow. You may already be
-    familiar with this command-line style from the Git or Mercurial
-    version control systems.
+    provides a sophisticated subcommand mode that groups related
+    commands together as the complexity of your user interface grows.
+    You may already be familiar with this command-line style from the
+    Git or Mercurial version control systems.
   </para>
   <para>
     In this chapter, we'll:
@@ -19169,13 +17711,13 @@ Estimated testing time 20s (change using -quota SECS).
   <itemizedlist>
     <listitem>
       <para>
-        learn how to use Command to construct basic and grouped
+        Learn how to use Command to construct basic and grouped
         command-line interfaces.
       </para>
     </listitem>
     <listitem>
       <para>
-        see examples that extend the cryptographic utility from
+        See examples that extend the cryptographic utility from
         <xref linkend="classes"/> and build a simple
         equivalent to the <literal>md5</literal> and
         <literal>shasum</literal> utilities.
@@ -19183,7 +17725,7 @@ Estimated testing time 20s (change using -quota SECS).
     </listitem>
     <listitem>
       <para>
-        demonstrate how <emphasis>functional combinators</emphasis> can
+        Demonstrate how <emphasis>functional combinators</emphasis> can
         be used to declare complex command line interfaces in a
         type-safe and elegant way.
       </para>
@@ -19229,8 +17771,8 @@ let do_hash file =
       <title>Anonymous arguments</title>
       <para>
         Let's build the specification for a single argument that is
-        passed directly on the command-line (this is known as an
-        <emphasis>anonymous</emphasis> argument).
+        passed directly on the command-line. This is known as an
+        <emphasis>anonymous</emphasis> argument.
       </para>
       <programlisting language="ocaml">
 (* command-line-parsing/basic_md5.ml (starting from part 1) *)
@@ -19240,23 +17782,22 @@ let spec =
   +&gt; anon (&quot;filename&quot; %: string)
 </programlisting>
       <para>
-        The specification functions are all defined in the
-        <literal>Command.Spec</literal> module and initialized to an
-        <literal>empty</literal> value. Parameters are subsequently
-        added via the <literal>+&gt;</literal> combinator (which is
-        available since we opened <literal>Command.Spec</literal> into
-        our default environment). We've then defined a single
-        <literal>filename</literal> anonymous argument to capture the
-        input filename to <literal>do_hash</literal>.
+        The <literal>Command.Spec</literal> module defines the tools
+        you'll need to build up a command-line specification. We start
+        with the <literal>empty</literal> value, and add parameters to
+        that using the <literal>+&gt;</literal> combinator. (Both of
+        these values come from <literal>Command.Spec</literal>.)
       </para>
       <para>
-        Anonymous parameters are created using the <literal>%:</literal>
-        operator. This binds a textual name (used in the help text to
-        identify the parameter) to an OCaml conversion function that
-        parses the command-line string fragments into a higher-level
-        OCaml data type. In the example above this is just
-        <literal>Command.Spec.string</literal>, but we'll see more
-        complex conversion options later in the chapter.
+        In this case, we defined a single anonymous argument called
+        <literal>filename</literal> which takes a value of type
+        <literal>string</literal>. Anonymous parameters are created
+        using the <literal>%:</literal> operator, which binds a textual
+        name (used in the help text to identify the parameter) to an
+        OCaml conversion function that parses the command-line string
+        fragments into a higher-level OCaml data type. In the example
+        above this is just <literal>Command.Spec.string</literal>, but
+        we'll see more complex conversion options later in the chapter.
       </para>
     </sect2>
     <sect2 id="defining-basic-commands">
@@ -19277,8 +17818,9 @@ let command =
     (fun filename () -&gt; do_hash filename)
 </programlisting>
       <para>
-        <literal>Command.basic</literal> defines a concrete parser that
-        takes the following extra arguments:
+        <literal>Command.basic</literal> defines a complete command-line
+        interface that takes the following extra arguments, in addition
+        to the ones defined in the specification.
       </para>
       <itemizedlist>
         <listitem>
@@ -19343,10 +17885,9 @@ let () =
         <literal>Command.run</literal> takes a couple of optional
         arguments that are useful to identify which version of the
         binary you are running in production. Let's build the complete
-        MD5 example first so that we can see this in action. Run
-        <literal>opam install cryptokit</literal> to install Cryptokit
-        if you didn't do so earlier in
-        <xref linkend="classes"/>.
+        MD5 example first so that we can see this in action. Makes sure
+        to run <literal>opam install cryptokit</literal> if you didn't
+        do so when reading <xref linkend="classes"/>.
       </para>
       <programlisting language="ocaml">
 (* command-line-parsing/build_basic_md5.out  *)
@@ -19368,7 +17909,7 @@ RWO
         optional arguments to <literal>Command.run</literal>. You can
         leave these blank in your own programs or get your build system
         to generate them directly from your version control system
-        (<emphasis>e.g.</emphasis> by running <literal>hg tip</literal>
+        (<emphasis>e.g.</emphasis> by running <literal>hg id</literal>
         to generate a build revision number, in the case of Mercurial).
       </para>
       <programlisting>
@@ -19433,8 +17974,8 @@ let () =
   Command.run ~version:&quot;1.0&quot; ~build_info:&quot;RWO&quot; command
 </programlisting>
       <para>
-        We'll now go through some of the more advanced features of the
-        library for the rest of the chapter.
+        Now that we have the basics in place, the rest of the chapter
+        will examine some of the more advanced features of Command.
       </para>
     </sect2>
   </sect1>
@@ -19672,8 +18213,8 @@ Command exited with code 2.
         type of the callback function. It now wants a
         <literal>string option</literal> instead of a
         <literal>string</literal> since the value has become optional.
-        We can quickly adapt our example to use the new information and
-        read from standard input if no file is specified.
+        We can adapt our example to use the new information and read
+        from standard input if no file is specified.
       </para>
       <programlisting language="ocaml">
 (* command-line-parsing/basic_md5_with_optional_file.ml  *)
@@ -19766,9 +18307,9 @@ $ cat /etc/passwd | ./basic_md5_with_default_file.native
       <title>Sequences of arguments</title>
       <para>
         One last transformation that's useful is to obtain lists of
-        anonymous arguments rather than a single one. We can modify our
-        MD5 code to accept a list of files on the command-line rather
-        than just one.
+        anonymous arguments rather than a single one. As an example,
+        let's modify our MD5 code to take a collection of files to
+        process on the command line.
       </para>
       <programlisting language="ocaml">
 (* command-line-parsing/basic_md5_sequence.ml  *)
@@ -19896,11 +18437,11 @@ $ ./basic_md5_with_flags.native -s &quot;ocaml rocks&quot;
 </programlisting>
     <para>
       The <literal>-s</literal> flag in our specification requires a
-      <literal>string</literal> argument and isn't optional. The
-      <literal>Command</literal> parser outputs an error message if the
-      flag isn't supplied, as with the anonymous arguments in earlier
-      examples. Here's a list of some of the functions that you can wrap
-      flags in to control how they are parsed.
+      <literal>string</literal> argument and isn't optional. The Command
+      parser outputs an error message if the flag isn't supplied, as
+      with the anonymous arguments in earlier examples. Here's a list of
+      some of the functions that you can wrap flags in to control how
+      they are parsed.
     </para>
     <informaltable>
       <tgroup cols="2">
@@ -20131,68 +18672,74 @@ $ ./cal_add_sub_days.native diff 2012-12-25 2012-11-01
   <sect1 id="advanced-control-over-parsing">
     <title>Advanced control over parsing</title>
     <para>
-      The use of the spec functions has been somewhat magic so far: we
-      just build them up with the '+&gt;' combinator and things seem to
-      work. As your programs get larger and more complex, you'll want to
-      factor out common functionality between specifications. Some other
-      times, you'll need to interrupt the parsing to perform special
-      processing, such as requesting an interactive passphrase from the
-      user before proceeding. We'll show you some new combinators that
-      let you do this now.
-    </para>
-    <note>
-    <title>
-    The types behind <literal>Command.Spec</literal>
-    </title>
-    <para>
-      The Command module's safety relies on the specification's output
-      values precisely matching the callback function which invokes the
-      main program. Any mismatch here will inevitably result in a
-      dynamic failure, and so Command uses some interesting type
-      abstraction to guarantee they remain in sync. You don't have to
-      understand this section to use the more advanced combinators, but
-      it'll help you debug type errors as you use
-      <literal>Command</literal> more.
+      The functions for generating a specification may seem like magic.
+      In particular, even if you know how to use them, it's not entirely
+      clear how they work, and in particular, why the types work out the
+      way they do.
     </para>
     <para>
-      The <literal>Command.Spec.t</literal> type looks deceptively
-      simple: <literal>type ('main_in, 'main_out) t</literal>. You can
-      think of <literal>('a, 'b) t</literal> here as a function of type
-      <literal>'a -&gt; 'b</literal>, but embellished with information
-      about:
-    </para>
-    <itemizedlist>
-      <listitem>
-        <para>
-          how to parse the command line
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          what the command does and how to call it
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          how to auto-complete a partial command line
-        </para>
-      </listitem>
-    </itemizedlist>
-    <para>
-      The type of a specification transforms a
-      <literal>'main_in</literal> to a <literal>'main_out</literal>
-      value. For instance, a value of <literal>Spec.t</literal> might
-      have type
-      <literal>(arg1 -&gt; ... -&gt; argN -&gt; 'r, 'r) Spec.t</literal>.
+      Understanding the details of how these specifications fit together
+      becomes more useful as your command line interfaces get more
+      complex. In particular, you may want to factor out common
+      functionality between specifications, or interrupt the parsing to
+      perform special processing, such as requesting an interactive
+      passphrase from the user before proceeding. All of this is helped
+      by a deeper understanding of the Command library.
     </para>
     <para>
-      Such a value transforms a main function of type
-      <literal>arg1 -&gt; ... -&gt; argN -&gt; 'r</literal> by supplying
-      all the argument values, leaving a main function that returns a
-      value of type <literal>'r</literal>. Let's look at some examples
-      of specs, and their types:
+      In the following, we'll explain the logic behind the combinators
+      we've already described and show you some new combinators that let
+      you use Command even more effectively.
     </para>
-    <programlisting language="ocaml">
+    <sect2 id="the-types-behind-command.spec">
+      <title>The types behind <literal>Command.Spec</literal></title>
+      <para>
+        The Command module's safety relies on the specification's output
+        values precisely matching the callback function which invokes
+        the main program. In order to prevent any such mismatches,
+        Command uses some interesting type machinery to guarantee they
+        remain in sync. You don't have to understand this section to use
+        the more advanced combinators, but it'll help you debug type
+        errors as you use Command more.
+      </para>
+      <para>
+        The <literal>Command.Spec.t</literal> type looks deceptively
+        simple: <literal>('a, 'b) t</literal>. You can think of
+        <literal>('a, 'b) t</literal> here as a function of type
+        <literal>'a -&gt; 'b</literal>, but embellished with information
+        about:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            how to parse the command line
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            what the command does and how to call it
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            how to auto-complete a partial command line
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        The type of a specification transforms a <literal>'a</literal>
+        to a <literal>'b</literal> value. For instance, a value of
+        <literal>Spec.t</literal> might have type
+        <literal>(arg1 -&gt; ... -&gt; argN -&gt; 'r, 'r) Spec.t</literal>.
+      </para>
+      <para>
+        Such a value transforms a main function of type
+        <literal>arg1 -&gt; ... -&gt; argN -&gt; 'r</literal> by
+        supplying all the argument values, leaving a main function that
+        returns a value of type <literal>'r</literal>. Let's look at
+        some examples of specs, and their types:
+      </para>
+      <programlisting language="ocaml">
 # script command-line-parsing/command_types.topscript
 $ utop
 # Command.Spec.empty ;; 
@@ -20200,23 +18747,23 @@ $ utop
 # Command.Spec.(empty +&gt; anon (&quot;foo&quot; %: int)) ;; 
 - : (int -&gt; '_a, '_a) Command.Spec.t = &lt;abstr&gt;
 </programlisting>
-    <para>
-      The empty specification is simple as it doesn't add any parameters
-      to the callback type. The second example adds an
-      <literal>int</literal> anonymous parameter that is reflected in
-      the inferred type. One forms a command by combining a spec of type
-      <literal>('main, unit) Spec.t</literal> with a function of type
-      <literal>'main</literal>. The combinators we've shown so far
-      incrementally build the type of <literal>'main</literal> according
-      to the command-line parameters it expects, so the resulting type
-      of <literal>'main</literal> is something like
-      <literal>arg1 -&gt; ... -&gt; argN -&gt; unit</literal>.
-    </para>
-    <para>
-      The type of <literal>Command.basic</literal> should make more
-      sense now:
-    </para>
-    <programlisting language="ocaml">
+      <para>
+        The empty specification is simple as it doesn't add any
+        parameters to the callback type. The second example adds an
+        <literal>int</literal> anonymous parameter that is reflected in
+        the inferred type. One forms a command by combining a spec of
+        type <literal>('main, unit) Spec.t</literal> with a function of
+        type <literal>'main</literal>. The combinators we've shown so
+        far incrementally build the type of <literal>'main</literal>
+        according to the command-line parameters it expects, so the
+        resulting type of <literal>'main</literal> is something like
+        <literal>arg1 -&gt; ... -&gt; argN -&gt; unit</literal>.
+      </para>
+      <para>
+        The type of <literal>Command.basic</literal> should make more
+        sense now:
+      </para>
+      <programlisting language="ocaml">
 # script command-line-parsing/basic.topscript
 $ utop
 # Command.basic ;; 
@@ -20225,20 +18772,20 @@ $ utop
     ('main, unit -&gt; unit) Command.Spec.t -&gt; 'main -&gt; Command.t
 = &lt;fun&gt;
 </programlisting>
-    <para>
-      The parameters to <literal>Spec.t</literal> are important here.
-      They show that the callback function for a spec should consume
-      identical arguments to the supplied <literal>main</literal>
-      function, except for an additional <literal>unit</literal>
-      argument. This final <literal>unit</literal> is there to make sure
-      the callback is evaluated as a function, since if zero
-      command-line arguments are specified (<emphasis>i.e.</emphasis>
-      <literal>Spec.empty</literal>), the callback would otherwise have
-      no arguments and be evaluated immediately. That's why you have to
-      supply an additional <literal>()</literal> to the callback
-      function in all the previous examples.
-    </para>
-    </note>
+      <para>
+        The parameters to <literal>Spec.t</literal> are important here.
+        They show that the callback function for a spec should consume
+        identical arguments to the supplied <literal>main</literal>
+        function, except for an additional <literal>unit</literal>
+        argument. This final <literal>unit</literal> is there to make
+        sure the callback is evaluated as a function, since if zero
+        command-line arguments are specified (<emphasis>i.e.</emphasis>
+        <literal>Spec.empty</literal>), the callback would otherwise
+        have no arguments and be evaluated immediately. That's why you
+        have to supply an additional <literal>()</literal> to the
+        callback function in all the previous examples.
+      </para>
+    </sect2>
     <sect2 id="composing-specification-fragments-together">
       <title>Composing specification fragments together</title>
       <para>
@@ -20622,12 +19169,12 @@ let () = Command.run add
       <programlisting>
 # running command-line-parsing/md5_completion.out.sh
 $ env COMMAND_OUTPUT_INSTALLATION_BASH=1 ./basic_md5_with_flags.native
-function _jsautocom_682 {
+function _jsautocom_13612 {
   export COMP_CWORD
   COMP_WORDS[0]=./basic_md5_with_flags.native
   COMPREPLY=($(&quot;${COMP_WORDS[@]}&quot;))
 }
-complete -F _jsautocom_682 ./basic_md5_with_flags.native
+complete -F _jsautocom_13612 ./basic_md5_with_flags.native
 </programlisting>
       <para>
         Recall that we used the <literal>Arg_type.file</literal> to
@@ -20681,10 +19228,10 @@ add      diff     help     version
   <sect1 id="alternative-command-line-parsers">
     <title>Alternative command-line parsers</title>
     <para>
-      This rounds up our tour of the <literal>Command</literal> library.
-      This isn't the only way to parse command-line arguments of course;
-      there are several alternatives available on OPAM. Three of the
-      most prominent ones are:
+      This rounds up our tour of the Command library. This isn't the
+      only way to parse command-line arguments of course; there are
+      several alternatives available on OPAM. Three of the most
+      prominent ones are introduced below.
     </para>
     <itemizedlist>
       <listitem>
@@ -22170,8 +20717,10 @@ type value = [
         The next thing we need to do is to specify the grammar of a JSON
         expression. <literal>menhir</literal>, like many parsers,
         expresses grammars as <emphasis>context free
-        grammars</emphasis>. You can think of a context-free grammar as
-        a set of abstract names, called <emphasis>non-terminal
+        grammars</emphasis>. (More precisely, <literal>menhir</literal>
+        supports LR(1) grammars, but we will ignore that technical
+        distinction here.) You can think of a context-free grammar as a
+        set of abstract names, called <emphasis>non-terminal
         symbols</emphasis>, along with a collection of rules for
         transforming a non-terminal symbol into a sequence, where each
         element of the sequence is either a token or another
@@ -23841,22 +22390,27 @@ val cfg : http_server_config =
     immediately to whatever event happens first.
   </para>
   <para>
-    A common approach to concurrency is to use preemptive system
-    threads, which is the most common solution in languages like Java or
-    C#. In this model, each task that may require simultaneous waiting
-    is given an operating system thread of its own, so it can block
-    without stopping the entire program. Other language runtimes such as
-    JavaScript are single-threaded, and applications register function
-    callbacks to be triggered upon external events such as a timeout or
-    browser click.
+    One approach to concurrency is to use preemptive system threads,
+    which is the dominant approach in languages like Java or C#. In this
+    model, each task that may require simultaneous waiting is given an
+    operating system thread of its own, so it can block without stopping
+    the entire program.
+  </para>
+  <para>
+    Another approach is to have a single-threaded program where that
+    single thread runs an <emphasis>event loop</emphasis>, whose job is
+    to react to external events like timeouts or mouse clicks by
+    invoking a callback function that has been registered for that
+    purpose. This approach shows up in languages like JavaScript that
+    have single-threaded runtimes as well as in many GUI toolkits.
   </para>
   <para>
     Each of these mechanisms has its own trade-offs. System threads
     require significant memory and other resources per thread. Also, the
     operating system can arbitrarily interleave the execution of system
     threads, requiring the programmer to carefully protect shared
-    resources with locks and condition variables, which can be
-    exceedingly error-prone.
+    resources with locks and condition variables, which is exceedingly
+    error-prone.
   </para>
   <para>
     Single-threaded event-driven systems, on the other hand, execute a
@@ -23887,7 +22441,7 @@ val cfg : http_server_config =
       Since the function returns a concrete string, it has to block
       until the read completes. The blocking nature of the call means
       that no progress can be made on anything else until the read is
-      completed, as you can see below.
+      completed. Here's an example.
     </para>
     <programlisting language="ocaml">
 ...part 2 of async/main.topscript
@@ -23958,7 +22512,7 @@ val contents : string Deferred.t = &lt;abstr&gt;
     <programlisting language="ocaml">
 ...part 5 of async/main.topscript
 # contents;; 
-- : string Deferred.t = &lt;abstr&gt;
+- : string = &quot;This is only a test.&quot;
 </programlisting>
     <para>
       If we peek again, we'll see that the value of
@@ -23967,7 +22521,7 @@ val contents : string Deferred.t = &lt;abstr&gt;
     <programlisting language="ocaml">
 ...part 6 of async/main.topscript
 # Deferred.peek contents;; 
-- : string option = None
+- : string option = Some &quot;This is only a test.&quot;
 </programlisting>
     <para>
       In order to do real work with deferreds, we need a way of
@@ -23981,9 +22535,17 @@ val contents : string Deferred.t = &lt;abstr&gt;
 - : 'a Deferred.t -&gt; ('a -&gt; 'b Deferred.t) -&gt; 'b Deferred.t = &lt;fun&gt;
 </programlisting>
     <para>
-      Thus, <literal>Deferred.bind d f</literal> takes a deferred value
+      <literal>Deferred.bind d f</literal> takes a deferred value
       <literal>d</literal> and a function f that is to be run with the
-      value of <literal>d</literal> once it's determined. The call to
+      value of <literal>d</literal> once it's determined. You can think
+      of <literal>Deferred.bind</literal> as a kind of sequencing
+      operator, and what we're doing is essentially taking an
+      asynchronous computation <literal>d</literal> and tacking on
+      another stage comprised by the actions of the function
+      <literal>f</literal>.
+    </para>
+    <para>
+      At a more concrete level, the call to
       <literal>Deferred.bind</literal> returns a new deferred that
       becomes determined when the deferred returned by
       <literal>f</literal> is determined. It also implicitly registers
@@ -24004,7 +22566,7 @@ val contents : string Deferred.t = &lt;abstr&gt;
   ;; 
 val uppercase_file : string -&gt; unit Deferred.t = &lt;fun&gt;
 # uppercase_file &quot;test.txt&quot;;; 
-- : unit Deferred.t = &lt;abstr&gt;
+- : unit = ()
 </programlisting>
     <para>
       Writing out <literal>Deferred.bind</literal> explicitly can be
@@ -24059,7 +22621,7 @@ Error: This expression has type int but an expression was expected of type
 # let three = return 3;; 
 val three : int Deferred.t = &lt;abstr&gt;
 # three;; 
-- : int Deferred.t = &lt;abstr&gt;
+- : int = 3
 </programlisting>
     <para>
       Using <literal>return</literal>, we can make
@@ -24107,7 +22669,7 @@ val count_lines : string -&gt; int Deferred.t = &lt;fun&gt;
   ;; 
 val count_lines : string -&gt; int Deferred.t = &lt;fun&gt;
 # count_lines &quot;/etc/hosts&quot;;; 
-- : int Deferred.t = &lt;abstr&gt;
+- : int = 12
 </programlisting>
     <para>
       Note that <literal>count_lines</literal> returns a deferred, but
@@ -24158,8 +22720,8 @@ val def : '_a Deferred.t = &lt;abstr&gt;
         As an example, imagine we wanted a way of scheduling a sequence
         of actions that would run after a fixed delay. In addition, we'd
         like to guarantee that these delayed actions are executed in the
-        same order they were scheduled in. One could imagine building a
-        module for handling this with the following interface.
+        same order they were scheduled in. Here's a reasonable signature
+        that captures this idea.
       </para>
       <programlisting language="ocaml">
 ...part 16 of async/main.topscript
@@ -24181,13 +22743,9 @@ module type Delayer_intf =
         argument is of type <literal>unit</literal>). A deferred is
         handed back to the caller of <literal>schedule</literal> that
         will eventually be filled with the contents of the deferred
-        value returned by the thunk to be scheduled. We can implement
-        this using an ivar which we fill after the thunk is called and
-        the deferred it returns becomes determined. Instead of using
-        <literal>bind</literal> or <literal>map</literal> for scheduling
-        these events, we'll use a different operator called
-        <literal>upon</literal>. Here's the signature of
-        <literal>upon</literal>:
+        value returned by the thunk to be scheduled. To implement this,
+        we'll use a new operator called <literal>upon</literal>, which
+        has the following signature.
       </para>
       <programlisting language="ocaml">
 ...part 17 of async/main.topscript
@@ -24207,9 +22765,7 @@ module type Delayer_intf =
         grab a thunk off the queue and run it. The waiting will be done
         using the function <literal>after</literal> which takes a time
         span and returns a deferred which becomes determined after that
-        time span elapses. The role of the ivar here is to take the
-        value returned by the thunk and use it to fill the deferred
-        returned by the provided thunk.
+        time span elapses.
       </para>
       <programlisting language="ocaml">
 ...part 18 of async/main.topscript
@@ -24233,8 +22789,11 @@ module type Delayer_intf =
 module Delayer : Delayer_intf
 </programlisting>
       <para>
-        This code isn't particularly long, but it is a bit subtle. This
-        is typical of code that involves ivars and
+        This code isn't particularly long, but it is a bit subtle. In
+        particular, note how the queue of thunks is used to ensure that
+        the enqueued actions are run in order, even if the thunks
+        scheduled by <literal>upon</literal> are run out-of-order. This
+        is kind of subtlety typical of code that involves ivars and
         <literal>upon</literal>, and because of this, you should stick
         to the simpler map/bind/return style of working with deferreds
         when you can.
@@ -24245,10 +22804,9 @@ module Delayer : Delayer_intf
     <title>Examples: an echo server</title>
     <para>
       Now that we have the basics of Async under our belt, let's look at
-      a small complete standalone Async program. In particular, we'll
-      write an echo server, <emphasis>i.e.</emphasis>, a program that
-      accepts connections from clients and spits back every line of text
-      sent to it.
+      a small standalone Async program. In particular, we'll write an
+      echo server, <emphasis>i.e.</emphasis>, a program that accepts
+      connections from clients and spits back whatever is sent to it.
     </para>
     <para>
       The first step is to create a function that can copy data from an
@@ -24295,22 +22853,24 @@ let rec copy_blocks buffer r w =
       written out.
     </para>
     <para>
-      Another memory leak you might be concerned with is the chain of
-      deferreds that is built up as you go through the loop. After all,
-      this code constructs an ever-growing chain of binds, each of which
-      creates a deferred. In this case, however, all of the deferreds
-      should become determined precisely when the final deferred in the
-      chain is determined, in this case, when the <literal>Eof</literal>
-      condition is hit. Because of this, we could safely replace all of
-      these deferreds with a single deferred. Async has logic to do just
-      this, which is essentially a form of tail-call optimization.
+      You might also be concerned that the chain of deferreds that is
+      built up as you go through the loop would lead to a memory leak.
+      After all, this code constructs an ever-growing chain of binds,
+      each of which creates a deferred. In this case, however, all of
+      the deferreds should become determined precisely when the final
+      deferred in the chain is determined, in this case, when the
+      <literal>Eof</literal> condition is hit. Because of this, we could
+      safely replace all of these deferreds with a single deferred.
+      Async has logic to do just this, and so there's no memory leak
+      after all. This is essentially a form of tail-call optimization,
+      lifted to the Async monad.
     </para>
     <para>
       <literal>copy_blocks</literal> provides the logic for handling a
       client connection, but we still need to set up a server to receive
       such connections and dispatch to <literal>copy_blocks</literal>.
       For this, we'll use Async's <literal>Tcp</literal> module, which
-      has a collection of utilities for creating simple TCP clients and
+      has a collection of utilities for creating TCP clients and
       servers.
     </para>
     <programlisting language="ocaml">
@@ -24588,9 +23148,9 @@ val w : '_a Pipe.Writer.t = &lt;abstr&gt;
 # let write_complete = Pipe.write w &quot;Hello World!&quot;;; 
 val write_complete : unit Deferred.t = &lt;abstr&gt;
 # Pipe.read r;; 
-- : [ `Eof | `Ok of string ] Deferred.t = &lt;abstr&gt;
+- : [ `Eof | `Ok of string ] = `Ok &quot;Hello World!&quot;
 # write_complete;; 
-- : unit Deferred.t = &lt;abstr&gt;
+- : unit = ()
 </programlisting>
       <para>
         In the function <literal>run</literal> above, we're taking
@@ -24986,9 +23546,16 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
  ;; 
 val maybe_raise : unit -&gt; unit Deferred.t = &lt;fun&gt;
 # maybe_raise ();; 
-- : unit Deferred.t = &lt;abstr&gt;
+- : unit = ()
 # maybe_raise ();; 
-- : unit Deferred.t = &lt;abstr&gt;
+Exception:
+(lib/monitor.ml.Error_
+ ((exn Exit) (backtrace (&quot;&quot;))
+  (monitor
+   (((name block_on_async) (here ()) (id 46) (has_seen_error true)
+     (someone_is_listening true) (kill_index 0))
+    ((name main) (here ()) (id 1) (has_seen_error false)
+     (someone_is_listening false) (kill_index 0)))))).
 </programlisting>
     <para>
       In utop, the exception thrown by <literal>maybe_raise ()</literal>
@@ -25012,9 +23579,16 @@ val maybe_raise : unit -&gt; unit Deferred.t = &lt;fun&gt;
   ;; 
 val handle_error : unit -&gt; string Deferred.t = &lt;fun&gt;
 # handle_error ();; 
-- : string Deferred.t = &lt;abstr&gt;
+- : string = &quot;success&quot;
 # handle_error ();; 
-- : string Deferred.t = &lt;abstr&gt;
+Exception:
+(lib/monitor.ml.Error_
+ ((exn Exit) (backtrace (&quot;&quot;))
+  (monitor
+   (((name block_on_async) (here ()) (id 50) (has_seen_error true)
+     (someone_is_listening true) (kill_index 0))
+    ((name main) (here ()) (id 1) (has_seen_error false)
+     (someone_is_listening false) (kill_index 0)))))).
 </programlisting>
     <para>
       This didn't work because <literal>try/with</literal> only captures
@@ -25036,9 +23610,9 @@ val handle_error : unit -&gt; string Deferred.t = &lt;fun&gt;
   ;; 
 val handle_error : unit -&gt; string Deferred.t = &lt;fun&gt;
 # handle_error ();; 
-- : string Deferred.t = &lt;abstr&gt;
+- : string = &quot;success&quot;
 # handle_error ();; 
-- : string Deferred.t = &lt;abstr&gt;
+- : string = &quot;failure&quot;
 </programlisting>
     <para>
       <literal>try_with f</literal> takes as its argument a
@@ -25087,9 +23661,18 @@ val handle_error : unit -&gt; string Deferred.t = &lt;fun&gt;
   ;; 
 val blow_up : unit -&gt; unit Deferred.t = &lt;fun&gt;
 # blow_up ();; 
-- : unit Deferred.t = &lt;abstr&gt;
+- : unit = ()
 # blow_up ();; 
-- : unit Deferred.t = &lt;abstr&gt;
+Exception:
+(lib/monitor.ml.Error_
+ ((exn Exit) (backtrace (&quot;&quot;))
+  (monitor
+   (((name &quot;blow up monitor&quot;) (here ()) (id 62) (has_seen_error true)
+     (someone_is_listening false) (kill_index 0))
+    ((name block_on_async) (here ()) (id 61) (has_seen_error false)
+     (someone_is_listening true) (kill_index 0))
+    ((name main) (here ()) (id 1) (has_seen_error false)
+     (someone_is_listening false) (kill_index 0)))))).
 </programlisting>
       <para>
         In addition to the ordinary stack-trace, the exception displays
@@ -25111,17 +23694,19 @@ val blow_up : unit -&gt; unit Deferred.t = &lt;fun&gt;
         captures and ignores errors in the processes it spawns.
       </para>
       <programlisting language="ocaml">
-...part 35 of async/main.topscript
+# script async/main-35.rawscript
+$ utop
 # let swallow_error () =
     let monitor = Monitor.create () in
     Stream.iter (Monitor.errors monitor) ~f:(fun _exn -&gt;
       printf &quot;an error happened\n&quot;);
     within' ~monitor (fun () -&gt;
       after (Time.Span.of_sec 0.5) &gt;&gt;= fun () -&gt; failwith &quot;Kaboom!&quot;)
-  ;; 
+  ;;
 val swallow_error : unit -&gt; 'a Deferred.t = &lt;fun&gt;
-# swallow_error ();; 
-- : 'a Deferred.t = &lt;abstr&gt;
+# swallow_error ();;
+an error happened
+
 </programlisting>
       <para>
         The message &quot;an error happened&quot; is printed out, but
@@ -25170,7 +23755,16 @@ val swallow_some_errors : exn -&gt; 'a Deferred.t = &lt;fun&gt;
       <programlisting language="ocaml">
 ...part 37 of async/main.topscript
 # swallow_some_errors Not_found;; 
-- : 'a Deferred.t = &lt;abstr&gt;
+Exception:
+(lib/monitor.ml.Error_
+ ((exn Not_found) (backtrace (&quot;&quot;))
+  (monitor
+   (((name (id 66)) (here ()) (id 66) (has_seen_error true)
+     (someone_is_listening true) (kill_index 0))
+    ((name block_on_async) (here ()) (id 65) (has_seen_error true)
+     (someone_is_listening true) (kill_index 0))
+    ((name main) (here ()) (id 1) (has_seen_error false)
+     (someone_is_listening false) (kill_index 0)))))).
 </programlisting>
       <para>
         If instead we use <literal>Ignore_me</literal>, the exception
@@ -25178,9 +23772,10 @@ val swallow_some_errors : exn -&gt; 'a Deferred.t = &lt;fun&gt;
         returns, but the exception was caught and ignored.
       </para>
       <programlisting language="ocaml">
-...part 38 of async/main.topscript
-# swallow_some_errors Ignore_me;; 
-- : 'a Deferred.t = &lt;abstr&gt;
+# script async/main-38.rawscript
+$ utop
+# swallow_some_errors Ignore_me;;
+ignoring exn
 </programlisting>
       <para>
         In practice, you should rarely use monitors directly, instead
@@ -25247,7 +23842,7 @@ $ ./search_with_configurable_server.native -servers localhost,api.duckduckgo.com
     (monitor
      (((name main) (here ()) (id 1) (has_seen_error true)
        (someone_is_listening false) (kill_index 0))))))
-  (Pid 4588)))
+  (Pid 16994)))
 </programlisting>
       <para>
         As you can see, we got a &quot;Connection refused&quot; failure
@@ -25336,7 +23931,7 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
     </sect2>
   </sect1>
   <sect1 id="timeouts-cancellation-and-choices">
-    <title>Timeouts, Cancellation and Choices</title>
+    <title>Timeouts, cancellation and choices</title>
     <para>
       In a concurrent program, one often needs to combine results from
       multiple distinct concurrent sub-computations going on in the same
@@ -25357,7 +23952,7 @@ Vouillon, Damien Doligez, Didier Rémy and others in 1996.&quot;
    (after (sec 0.25) &gt;&gt;| fun () -&gt; 32.33);; 
 val string_and_float : (string * float) Deferred.t = &lt;abstr&gt;
 # string_and_float;; 
-- : (string * float) Deferred.t = &lt;abstr&gt;
+- : string * float = (&quot;A&quot;, 32.33)
 </programlisting>
     <para>
       Sometimes, however, we want to wait only for the first of multiple
@@ -25371,7 +23966,7 @@ val string_and_float : (string * float) Deferred.t = &lt;abstr&gt;
 ...part 40 of async/main.topscript
 # Deferred.any [ (after (sec 0.5) &gt;&gt;| fun () -&gt; &quot;half a second&quot;)
                ; (after (sec 10.) &gt;&gt;| fun () -&gt; &quot;ten seconds&quot;) ] ;; 
-- : string Deferred.t = &lt;abstr&gt;
+- : string = &quot;half a second&quot;
 </programlisting>
     <para>
       Let's use this to add timeouts to our DuckDuckGo searches. We'll
@@ -25532,12 +24127,11 @@ DuckDuckGo query failed: Timed out
     <title>Working with system threads</title>
     <para>
       OCaml does have built-in support for true system threads,
-      <emphasis>i.e.</emphasis>, kernel-level threads that can be
-      interleaved at any time with each other. We discussed in the
-      beginning of the chapter why Async is generally a better choice
-      than system threads, but even if you mostly use Async, OCaml's
-      system threads are sometimes necessary, and it's worth
-      understanding them.
+      <emphasis>i.e.</emphasis>, kernel-level threads whose interleaving
+      is controlled by the kernel. We discussed in the beginning of the
+      chapter why Async is generally a better choice than system
+      threads, but even if you mostly use Async, OCaml's system threads
+      are sometimes necessary, and it's worth understanding them.
     </para>
     <para>
       The most surprising aspect of OCaml's system threads is that they
@@ -25556,15 +24150,15 @@ DuckDuckGo query failed: Timed out
       Async without blocking out the entire system. For this reason,
       Async maintains a thread pool for running such calls. Most of the
       time, as a user of Async you don't need to think about this, but
-      it's worth knowing that it's happening.
+      it is happening under the covers.
     </para>
     <para>
       Another reasonably common reason to have multiple threads is to
       deal with non-OCaml libraries that have their own event loop or
       for whatever reason need their own threads. In that case, it's
-      sometimes useful to run some OCaml code on the C thread as part of
-      the communication between your main program and the C library. C
-      bindings are discussed in more detail in
+      sometimes useful to run some OCaml code on the foreign thread as
+      part of the communication to your main program. OCaml's foreign
+      function interface is discussed in more detail in
       <xref linkend="foreign-function-interface"/>.
     </para>
     <para>
@@ -25583,17 +24177,17 @@ DuckDuckGo query failed: Timed out
       solution is to run the code in question in a separate thread.
       Async's <literal>In_thread</literal> module provides multiple
       facilities for doing just this, <literal>In_thread.run</literal>
-      being the simplest. We can simply write:
+      being the simplest. We can simply write
     </para>
     <programlisting language="ocaml">
 ...part 42 of async/main.topscript
 # let def = In_thread.run (fun () -&gt; List.range 1 10);; 
 val def : int list Deferred.t = &lt;abstr&gt;
 # def;; 
-- : int list Deferred.t = &lt;abstr&gt;
+- : int list = [1; 2; 3; 4; 5; 6; 7; 8; 9]
 </programlisting>
     <para>
-      To cause <literal>List.range 1 10</literal> to be run on one of
+      to cause <literal>List.range 1 10</literal> to be run on one of
       Async's worker threads. When the computation is complete, the
       result is placed in the deferred, where it can be used in the
       ordinary way from Async.
@@ -25604,15 +24198,15 @@ val def : int list Deferred.t = &lt;abstr&gt;
     </title>
     <para>
       Once you start working with system threads, you'll need to be
-      careful about locking your data-structures. Most OCaml
+      careful about locking your data-structures. Most mutable OCaml
       data-structures do not have well-defined semantics when accessed
       concurrently by multiple threads. The issues you can run into
       range from runtime exceptions to corrupted data-structures to, in
       some rare cases, segfaults. That means you should always use
-      mutexes when sharing data between different systems threads. Even
-      data-structures that seem like they should be safe, like lazy
-      values, can have undefined behavior when accessed from multiple
-      threads.
+      mutexes when sharing mutable data between different systems
+      threads. Even data-structures that seem like they should be safe
+      but are mutable under the covers, like lazy values, can have
+      undefined behavior when accessed from multiple threads.
     </para>
     <para>
       There are two commonly available mutex packages for OCaml: the
@@ -25629,7 +24223,7 @@ val def : int list Deferred.t = &lt;abstr&gt;
     <para>
       Interoperability between Async and system threads can be quite
       tricky, so let's work through some of the issues. Consider the
-      following function tries which schedules itself to wake up every
+      following function which schedules itself to wake up every
       <literal>100ms</literal>, and keeps a list of the delays after
       which it actually woke up, until the deferred it was passed
       becomes determined. We can use this to see how responsive Async
@@ -25659,7 +24253,9 @@ val log_delays : unit Deferred.t -&gt; Core.Span.t list Deferred.t = &lt;fun&gt;
     <programlisting language="ocaml">
 ...part 44 of async/main.topscript
 # log_delays (after (sec 1.));; 
-- : Core.Span.t list Deferred.t = &lt;abstr&gt;
+- : Core.Span.t list =
+[0.000953674ms; 100.245ms; 200.445ms; 300.641ms; 400.838ms; 501.036ms;
+ 601.235ms; 701.444ms; 801.635ms; 901.824ms; 1.00203s]
 </programlisting>
     <para>
       Now, if instead of simply waiting a second, what if we have a busy
@@ -25673,12 +24269,12 @@ val log_delays : unit Deferred.t -&gt; Core.Span.t list Deferred.t = &lt;fun&gt;
   ;; 
 val busy_loop : int -&gt; unit = &lt;fun&gt;
 # log_delays (Deferred.unit &gt;&gt;| fun () -&gt; busy_loop 100);; 
-- : Core.Span.t list Deferred.t = &lt;abstr&gt;
+- : Core.Span.t list = [0.000953674ms; 242.403ms]
 </programlisting>
     <para>
       As you can see, instead of waking up ten times a second,
-      <literal>log_delays</literal> is blocked out for nearly a second
-      while <literal>busy_loop</literal> churns away.
+      <literal>log_delays</literal> is blocked out for much longer than
+      that while <literal>busy_loop</literal> churns away.
     </para>
     <para>
       If, on the other hand, we use <literal>In_thread.run</literal> to
@@ -25688,7 +24284,7 @@ val busy_loop : int -&gt; unit = &lt;fun&gt;
     <programlisting language="ocaml">
 ...part 46 of async/main.topscript
 # log_delays (In_thread.run (fun () -&gt; busy_loop 100));; 
-- : Core.Span.t list Deferred.t = &lt;abstr&gt;
+- : Core.Span.t list = [0.00190735ms; 243.808ms]
 </programlisting>
     <para>
       Now <literal>log_delays</literal> does get a chance to run, but
@@ -25704,7 +24300,7 @@ val busy_loop : int -&gt; unit = &lt;fun&gt;
       runtime lock when they interact with the allocator, so if there's
       a piece of code that doesn't allocate at all, then it will never
       allow any other OCaml thread to run. We can see this if we rewrite
-      our busy-loop slightly.
+      our busy-loop slightly so it doesn't allocate.
     </para>
     <programlisting language="ocaml">
 ...part 47 of async/main.topscript
@@ -25717,16 +24313,12 @@ val busy_loop : int -&gt; unit = &lt;fun&gt;
   ;; 
 val noalloc_busy_loop : int -&gt; unit = &lt;fun&gt;
 # log_delays (In_thread.run (fun () -&gt; noalloc_busy_loop 500));; 
-- : Core.Span.t list Deferred.t = &lt;abstr&gt;
+- : Core.Span.t list = [0.000953674ms; 898.273ms]
 </programlisting>
     <para>
       Even though <literal>noalloc_busy_loop</literal> was running in a
       different thread, it didn't let <literal>log_delays</literal> run
       at all.
-    </para>
-    <para>
-      DANGER WILL ROBINSON. Why doesn't this work as I expect? Did the
-      compiler change somehow?
     </para>
     <para>
       Overall, combining Async and threads is quite tricky, but it can
@@ -25735,7 +24327,8 @@ val noalloc_busy_loop : int -&gt; unit = &lt;fun&gt;
     <itemizedlist>
       <listitem>
         <para>
-          There is no shared state between the various threads involved.
+          There is no shared mutable state between the various threads
+          involved.
         </para>
       </listitem>
       <listitem>
@@ -25769,20 +24362,19 @@ val noalloc_busy_loop : int -&gt; unit = &lt;fun&gt;
   <para>
     The mechanism by which code in one programming language can invoke
     routines in another different programming language is called a
-    <emphasis>foreign function interface</emphasis>. This chapter will
-    teach you:
+    <emphasis>foreign function interface</emphasis>. This chapter will:
   </para>
   <itemizedlist>
     <listitem>
       <para>
-        how to call routines in C libraries directly from your OCaml
-        code.
+        show how to call routines in C libraries directly from your
+        OCaml code.
       </para>
     </listitem>
     <listitem>
       <para>
-        build higher-level abstractions in OCaml from the low-level C
-        bindings.
+        teach you how to build higher-level abstractions in OCaml from
+        the low-level C bindings.
       </para>
     </listitem>
     <listitem>
@@ -26412,7 +25004,7 @@ val t_ptr : time_t ptr = &lt;abstr&gt;
       <programlisting language="ocaml">
 ...part 7 of ffi/posix.topscript
 # ctime t_ptr ;; 
-- : string = &quot;Tue Aug  6 13:49:55 2013\n&quot;
+- : string = &quot;Wed Aug  7 09:34:47 2013\n&quot;
 </programlisting>
     </sect2>
     <sect2 id="using-views-to-map-complex-values">
@@ -26649,7 +25241,7 @@ val gettimeofday : timeval structure ptr -&gt; timezone structure ptr -&gt; int 
   Pervasives.(float secs +. float usecs /. 1000000.0) ;; 
 val gettimeofday' : unit -&gt; float = &lt;fun&gt;
 # gettimeofday' () ;; 
-- : float = 1375793396.19
+- : float = 1375864488.47
 </programlisting>
       <para>
         You need to be a little careful not to get all the open modules
@@ -26721,9 +25313,9 @@ let () =
 (* ffi/build_datetime.out  *)
 $ corebuild -pkg ctypes.foreign datetime.native
 $ ./datetime.native
-1375792480.733939
+1375863928.770533
 $ ./datetime.native -a
-Tue Aug  6 13:34:40 2013
+Wed Aug  7 09:25:28 2013
 </programlisting>
         <sidebar>
         <title>
@@ -28583,7 +27175,7 @@ val c : Gc.control =
       <programlisting language="ocaml">
 ...part 2 of gc/tune.topscript
 # Gc.major_slice 0 ;; 
-- : int = 255745
+- : int = 259635
 # Gc.full_major () ;; 
 - : unit = ()
 </programlisting>
@@ -28734,8 +27326,8 @@ Estimated testing time 20s (change using -quota SECS).
                                                                    
   Name        Time (ns)       Minor   Major   Promoted   % of max  
  ----------- ----------- ----------- ------- ---------- ---------- 
-  mutable     6_338_938   2_000_004    9.05       9.05     100.00  
-  immutable   4_792_764   5_000_005    0.03       0.03      75.61  
+  mutable     6_288_134   2_000_004    9.05       9.05     100.00  
+  immutable   4_538_738   5_000_005    0.03       0.03      72.18  
                                                                    
 </programlisting>
         <para>
@@ -30052,12 +28644,17 @@ val v : t
       </para>
       <programlisting>
 # running front-end/conflicting_interfaces.out.sh
-$ $ echo type t = Foo &gt; test.ml
-bash: $: command not found
-$ $ echo type t = Bar &gt; test.mli
-bash: $: command not found
-$ $ ocamlc -c test.mli test.ml
-bash: $: command not found
+$ echo type t = Foo &gt; test.ml
+$ echo type t = Bar &gt; test.mli
+$ ocamlc -c test.mli test.ml
+File &quot;test.ml&quot;, line 1:
+Error: The implementation test.ml does not match the interface test.cmi:
+       Type declarations do not match:
+         type t = Foo
+       is not included in
+         type t = Bar
+       File &quot;test.ml&quot;, line 1, characters 5-12: Actual declaration
+       Fields number 1 have different names, Foo and Bar.
 </programlisting>
       <note>
       <title>
@@ -31266,8 +29863,8 @@ Estimated testing time 30s (change using -quota SECS).
 │ Name                           │ Time (ns) │ % of max │
 ├────────────────────────────────┼───────────┼──────────┤
 │ Polymorphic pattern            │     31.75 │   100.00 │
-│ Monomorphic incomplete pattern │     29.09 │    91.61 │
-│ Monomorphic exhaustive pattern │     26.37 │    83.06 │
+│ Monomorphic incomplete pattern │     29.20 │    91.98 │
+│ Monomorphic exhaustive pattern │     26.47 │    83.39 │
 └────────────────────────────────┴───────────┴──────────┘
 </programlisting>
       <para>
@@ -31885,8 +30482,8 @@ Estimated testing time 20s (change using -quota SECS).
                                                  
   Name                     Time (ns)   % of max  
  ------------------------ ----------- ---------- 
-  Polymorphic comparison      13_518     100.00  
-  Monomorphic comparison         816       6.03  
+  Polymorphic comparison      13_514     100.00  
+  Monomorphic comparison         814       6.02  
                                                  
 </programlisting>
         <para>
@@ -32686,9 +31283,9 @@ $ pacman -Sy ocaml
         <literal>gcc</literal> or <literal>llvm</literal> installed).
       </para>
       <programlisting>
-$ curl -OL https://github.com/ocaml/ocaml/archive/trunk.tar.gz
-$ tar -zxvf trunk.tar.gz
-$ cd ocaml-trunk
+$ curl -OL https://github.com/ocaml/ocaml/archive/4.01.tar.gz
+$ tar -zxvf 4.01.tar.gz
+$ cd ocaml-4.01
 $ ./configure
 $ make world world.opt
 $ sudo make install
@@ -32715,13 +31312,12 @@ $ ./configure -prefix $HOME/my-ocaml
       Note to reviewers
       </title>
       <para>
-        We instruct you install the unreleased trunk version of OCaml in
-        these instructions, as we take advantage of some recent
+        We instruct you to install the unreleased 4.01 branch version of
+        OCaml in these instructions, as we take advantage of some recent
         additions to the language that simplify explanations in the
         book. The 4.01 release will happen before the book is released,
         but you may run into &quot;bleeding edge&quot; bugs with the
-        trunk release. Leave a comment here if you do and we'll address
-        them.
+        release. Leave a comment here if you do and we'll address them.
       </para>
       </note>
     </sect2>
@@ -32741,7 +31337,7 @@ $ ./configure -prefix $HOME/my-ocaml
       database is held in your home directory (normally
       <literal>$HOME/.opam</literal>). If something goes wrong, just
       delete this <literal>.opam</literal> directory and start over from
-      a clean slate. If youre using a beta version of OPAM, please
+      a clean slate. If you're using a beta version of OPAM, please
       upgrade it to at least version 1.0.0 or greater before proceeding.
     </para>
     <sect2 id="mac-os-x-1">
@@ -32843,10 +31439,15 @@ $ sudo pacman -U opam-_version_.pkg.tar.gz
       <title>Source Installation</title>
       <para>
         If the binary packages aren't available for your system, you'll
-        need to install the latest OPAM release from source. The
-        distribution only requires the OCaml compiler to be installed,
-        so this should be straightforward. Download the latest version
-        from the
+        need to install the latest OPAM release from source. You can
+        follow the online
+        <ulink url="http://opam.ocamlpro.com/doc/Quick_Install.html">quick
+        install guide</ulink> or read the summary below.
+      </para>
+      <para>
+        The distribution only requires the OCaml compiler to be
+        installed, so this should be straightforward. Download the
+        latest version from the
         <ulink url="https://github.com/OCamlPro/opam/tags">homepage</ulink>.
       </para>
       <programlisting>
@@ -32867,7 +31468,6 @@ $ sudo make install
         leave a comment with any amended instructions you encounter.
       </para>
       </note>
-
     </sect2>
   </sect1>
   <sect1 id="configuring-opam">
@@ -32986,6 +31586,7 @@ $ cat ~/.profile &gt;&gt; ~/.bash_profile
     </para>
     <programlisting>
 $ opam switch 4.01.0dev+trunk
+$ eval `opam config env`
 </programlisting>
     <para>
       This step will take around ten or fifteen minutes on a modern
@@ -33011,7 +31612,7 @@ $ opam switch 4.01.0dev+trunk
       Finally, we're ready to install the Core libraries. Run this:
     </para>
     <programlisting>
-$ opam install core core_extended async
+$ opam install core core_extended core_bench async
 </programlisting>
     <para>
       This will take about five or ten minutes to build, and will
@@ -33024,6 +31625,13 @@ $ opam install core core_extended async
         <para>
           <literal>core</literal> is the main, well-supported Core
           distribution from Jane Street.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <literal>core_bench</literal> is a benchmarking library that
+          makes it easy to test the performance profile of functions via
+          a command-line interface.
         </para>
       </listitem>
       <listitem>
@@ -33065,12 +31673,11 @@ $ opam install utop
         Remember from earlier that OPAM never installs files directly
         into your system directories, and this applies to
         <literal>utop</literal> too. You'll find the binary in
-        <literal>~/.opam/4.01.0dev+trunk/bin</literal>. However, just
-        typing in <literal>utop</literal> from your shell should just
-        work, due to the <literal>opam config env</literal> step that
-        configures your shell. Don't forget to automate this as
-        described earlier, as it makes life much easier when developing
-        OCaml code!
+        <literal>~/.opam/4.01.0dev+trunk/bin</literal>. However, typing
+        in <literal>utop</literal> from your shell should just work, due
+        to the <literal>opam config env</literal> step that configures
+        your shell. Don't forget to automate this as described earlier
+        as it makes life much easier when developing OCaml code!
       </para>
     </sect2>
     <sect2 id="command-line">
@@ -33097,26 +31704,27 @@ $ opam install utop
       </para>
       <programlisting language="ocaml">
 #use &quot;topfind&quot;
+#thread
 #camlp4o
 #require &quot;core.top&quot;
 #require &quot;core.syntax&quot;
 </programlisting>
       <para>
-        You can also optionally add some more useful libraries that are
-        used in the book, such as <literal>Core_extended</literal> and
-        <literal>Async</literal>. You can also open the Core module by
-        default if that's all you ever use the top-level for. Just
-        append these lines to the <literal>.ocamlinit</literal> file if
-        that's what you prefer.
+        If you only use Core libraries (and this will be the case for
+        beginners who are working their way through Real World OCaml as
+        their first taste of the language), then you can also open the
+        Core module by default. Just append this line to the
+        <literal>.ocamlinit</literal> file.
       </para>
-      <programlisting>
-#require &quot;core_extended&quot;
-#require &quot;async&quot;
+      <programlisting language="ocaml">
 open Core.Std
 </programlisting>
       <para>
         When you run <literal>utop</literal> with these initialization
-        rules, it should start up with Core opened and ready to use.
+        rules, it should start up with Core opened and ready to use. If
+        you don't open <literal>Core.Std</literal> by default, then you
+        must remember to open it before running any of the interactive
+        examples in the book.
       </para>
     </sect2>
     <sect2 id="editors">
