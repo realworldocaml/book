@@ -130,7 +130,7 @@ values, even without mutation.
 </note>
 
 
-### Pattern matching and `let` ###
+### Pattern matching and `let`
 
 Another useful feature of let bindings is that they support the use of
 _patterns_ on the left-hand side.  Consider the following code, which
@@ -172,7 +172,7 @@ Note that this is our first use of `assert`, which is useful for
 marking cases that should be impossible.  Asserts are discussed in
 more detail in [xref](#error-handling).
 
-## Functions ##
+## Functions
 
 Given that OCaml is a functional language, it's no surprise that
 functions are important and pervasive.  Indeed, functions have come up
@@ -181,7 +181,7 @@ more depth, explaining the details of how OCaml's functions work.  As
 you'll see, functions in OCaml differ in a variety of ways from what
 you'll find in most mainstream languages.
 
-### Anonymous Functions ###
+### Anonymous Functions
 
 We'll start by looking at the most basic style of function declaration
 in OCaml: the _anonymous function_.  An anonymous function is a
@@ -394,7 +394,7 @@ In addition, having a non-recursive form makes it easier to create a
 new definition that extends and supersedes an existing one by
 shadowing it.
 
-### Prefix and Infix operators ###
+### Prefix and infix operators ###
 
 So far, we've seen examples of functions used in both prefix and infix
 style:
@@ -619,7 +619,7 @@ passed to `List.map`.  In other words, `some_or_default 100` is a
 function that was created by feeding just the first argument to
 `some_or_default`.
 
-### Labeled Arguments ###
+### Labeled arguments ###
 
 Up until now, the functions we've defined have specified their arguments
 positionally, _i.e._, by the order in which the arguments are passed to

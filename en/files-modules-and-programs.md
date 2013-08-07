@@ -12,7 +12,7 @@ In this chapter, we'll show you how to build an OCaml program from a
 collection of files, as well as the basics of working with modules and
 module signatures.
 
-## Single File Programs ##
+## Single file programs ##
 
 We'll start with an example: a utility that reads lines from `stdin`
 and computes a frequency count of the lines that have been read in.
@@ -190,7 +190,7 @@ compiled.
 ((typ ocaml)(name files-modules-and-programs-freq-with-counter/freq.ml))
 ```
 
-## Signatures and Abstract Types
+## Signatures and abstract types
 
 While we've pushed some of the logic to the `Counter` module, the code
 in `freq.ml` can still depend on the details of the implementation of

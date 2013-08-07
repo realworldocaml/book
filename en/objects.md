@@ -93,7 +93,7 @@ polymorphic type `'a`.  When `stack` is invoked on a concrete value `[3; 2; 1]`,
 we get the same object type as before, with type `int` for the values on the 
 stack.
 
-## Object Polymorphism ##
+## Object polymorphism ##
 
 Like polymorphic variants, methods can be used without an explicit type declaration.
 
@@ -461,7 +461,7 @@ recursive type definition should make it clear that this pattern is
 essentially equivalent to using variants, and that objects do not
 provide much value here.
 
-### Subtyping vs. Row Polymorphism ###
+### Subtyping vs. row polymorphism ###
 
 There is a great deal of overlap between subtyping and row polymorphism. Row
 polymorphism is in general preferred over subtyping because it does not require

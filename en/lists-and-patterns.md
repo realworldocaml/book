@@ -5,7 +5,7 @@ OCaml: lists and pattern matching.  Both of these were discussed in
 [xref](#a-guided-tour), but we'll go into more depth here, presenting
 the two topics together and using one to help illustrate the other.
 
-## List Basics
+## List basics
 
 An OCaml list is an immutable, finite sequence of elements of the same
 type.  As we've seen, OCaml lists can be generated using a

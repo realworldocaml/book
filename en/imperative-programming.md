@@ -265,7 +265,7 @@ using the `<-` operator, _i.e._, `record.field <- expr`.
 As we'll see in [xref](#objects), fields of an object can similarly be declared
 as mutable, and can then be modified in much the same way as record fields.
 
-#### Ref Cells
+#### Ref cells
 
 Variables in OCaml are never mutable --- they can refer to mutable
 data, but what the variable points to can't be changed.  Sometimes,
@@ -827,7 +827,7 @@ cases can lead to code whose behavior is easier to think about.
 
 </note>
 
-## Input and Output
+## Input and output
 
 Imperative programming is about more than modifying in-memory
 data-structures.  Any function that doesn't boil down to a
@@ -1213,7 +1213,7 @@ as you can see below.
 Note that the type of `remember` was settled by the definition of
 `remember_three`, even though `remember_three` was never called!
 
-### The Value Restriction
+### The value restriction
 
 So, when does the compiler infer weakly polymorphic types?  As we've
 seen, we need weakly polymorphic types when a value of unknown type is

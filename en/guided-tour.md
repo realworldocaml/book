@@ -294,7 +294,7 @@ the exception.
 
 </note>
 
-## Tuples, Lists, Options and Pattern Matching
+## Tuples, lists, options and pattern matching
 
 ### Tuples
 

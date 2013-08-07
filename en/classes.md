@@ -7,7 +7,7 @@ programming, a class is a "recipe" for creating objects.  The recipe can be
 changed by adding new methods and fields, or it can be changed by modifying
 existing methods.
 
-## OCaml Classes
+## OCaml classes
 
 In OCaml, class definitions must be defined as toplevel statements in a module.
 The syntax for a class definition uses the keyword `class`.
@@ -233,7 +233,7 @@ In this signature, we've chosen to make everything visible.  The
 class type for `stack` specifies the types of the field `v`, as well
 as the types of each of the methods.
 
-## Open Recursion
+## Open recursion
 
 Open recursion allows an object's methods to invoke other methods on
 the same object. These calls are looked up dynamically allowing a
@@ -409,7 +409,7 @@ Concurrent programming with Async will be explored later in
 details.  You just need to run `opam install async_graphics` to get the library
 installed on your system.
 
-### Defining a Drawable module
+### Defining a `Drawable` module
 
 Let's start with by creating a `Drawable` module to hold the base logic to
 handle the display.

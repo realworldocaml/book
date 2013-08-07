@@ -855,7 +855,7 @@ to implement such functionality directly, you may want to use the
 `Monitor.protect` call, which is analogous to the `protect` call
 described in [xref](#cleaning-up-in-the-presence-of-exceptions).
 
-## Timeouts, Cancellation and Choices
+## Timeouts, cancellation and choices
 
 In a concurrent program, one often needs to combine results from
 multiple distinct concurrent sub-computations going on in the same
