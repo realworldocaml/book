@@ -459,7 +459,7 @@ interest to us).
 
 For example, the GitHub `scope` field above is defined as a variant type with
 each option starting with an uppercase letter as is conventional for OCaml
-variants. However, the the JSON values that come back from Github are actually
+variants. However, the the JSON values that come back from GitHub are actually
 lowercase, and so aren't exactly the same as the option name.
 
 The annotation `<json name="user">` signals that the JSON value of the field is
@@ -522,17 +522,17 @@ process. [Piqi](http://piqi.org) supports conversions between XML. JSON, and
 the Google protobuf format, and [Thrift](http://thrift.apache.org) supports
 many other programming languages and includes OCaml bindings.
 
-### Example: Querying Github organization information
+### Example: Querying GitHub organization information
 
-Let's finish up with an example of some live JSON parsing from Github, and
+Let's finish up with an example of some live JSON parsing from GitHub, and
 build a tool to query organization information via their API.  Start by looking
 at the online [API documentation](http://developer.github.com/v3/orgs/) for
-Github to see what the JSON schema for retrieving the organization information
+GitHub to see what the JSON schema for retrieving the organization information
 looks like. 
 
 Now create an ATD file that covers the fields we need.  Any extra fields
 present in the response will be ignored by the ATD parser, so we don't need
-a completely exhaustive specification of every field that Github might send
+a completely exhaustive specification of every field that GitHub might send
 back.
 
 ```frag
