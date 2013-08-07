@@ -3,7 +3,7 @@ let client_secret = "bedb38e9f556b832b0da4b61db5d70dbe114be71"
 
 (* List of allowed Github users per milestone *)
 let authors = ["yminsky";"jyh";"avsm";"andyoram"]
-let trusted = ["stedolan"; "lpw25"; "raphael-proust"; "amirmc"; "mshinwell";"dsheets";"samoht";"jsgf"]
+let trusted = ["stedolan"; "lpw25"; "raphael-proust"; "amirmc"; "mshinwell";"dsheets";"samoht";"jsgf"; "bolinfest"]
 
 let from_anil =
   [ "mcclurmc"                (* Mike McClurg <mike.mcclurg@citrix.com> *)

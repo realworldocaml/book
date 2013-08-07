@@ -177,7 +177,7 @@ slightly more succinct by removing intermediate variables.
 ```
 
 Now that we have the basics in place, the rest of the chapter will
-examine some of the more advanced features of `Command`.
+examine some of the more advanced features of Command.
 
 ## Argument types
 
@@ -331,7 +331,7 @@ space.  The help text for the above code looks like this.
 ```
 
 The `-s` flag in our specification requires a `string` argument and
-isn't optional. The `Command` parser outputs an error message if the
+isn't optional. The Command parser outputs an error message if the
 flag isn't supplied, as with the anonymous arguments in earlier
 examples.  Here's a list of some of the functions that you can wrap
 flags in to control how they are parsed.
@@ -431,11 +431,11 @@ In particular, you may want to factor out common functionality between
 specifications, or interrupt the parsing to perform special
 processing, such as requesting an interactive passphrase from the user
 before proceeding.  All of this is helped by a deeper understanding of
-the `Command` library.
+the Command library.
 
 In the following, we'll explain the logic behind the combinators we've
-already described, and show you some new combinators that let you use
-`Command` even more effectively.
+already described and show you some new combinators that let you use
+Command even more effectively.
 
 ### The types behind `Command.Spec`
 
@@ -444,7 +444,7 @@ values precisely matching the callback function which invokes the main
 program. In order to prevent any such mismatches, Command uses some
 interesting type machinery to guarantee they remain in sync.  You
 don't have to understand this section to use the more advanced
-combinators, but it'll help you debug type errors as you use `Command`
+combinators, but it'll help you debug type errors as you use Command
 more.
 
 The `Command.Spec.t` type looks deceptively simple: `('a, 'b) t`.  You
@@ -697,7 +697,7 @@ very OS-specific.
 
 ## Alternative command-line parsers
 
-This rounds up our tour of the `Command` library.   This isn't the only
+This rounds up our tour of the Command library.   This isn't the only
 way to parse command-line arguments of course; there are several alternatives 
 available on OPAM.  Three of the most prominent ones are:
 
