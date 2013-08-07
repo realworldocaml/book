@@ -1,7 +1,6 @@
 open Core.Std
 open Async.Std
 open Async_graphics
-open Drawable
 
 class square w x y = object (self)
   val mutable x: int = x
@@ -21,9 +20,9 @@ class square w x y = object (self)
 
   method on_click ?start ?stop f =
     on_click ?start ?stop
-      (fun {mouse_x;mouse_y;_} ->
-         if self#contains mouse_x mouse_y then
-           f mouse_x mouse_y)
+      (fun ev ->
+         if self#contains ev.mouse_x ev.mouse_y then
+           f ev.mouse_x ev.mouse_y)
 end
 
 (* part 1 *)
@@ -47,7 +46,7 @@ class circle r x y = object (self)
 
   method on_click ?start ?stop f =
     on_click ?start ?stop
-      (fun {mouse_x;mouse_y;_} ->
-         if self#contains mouse_x mouse_y then
-           f mouse_x mouse_y)
+      (fun ev ->
+         if self#contains ev.mouse_x ev.mouse_y then
+           f ev.mouse_x ev.mouse_y)
 end
