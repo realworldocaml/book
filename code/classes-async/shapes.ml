@@ -182,14 +182,24 @@ let my_circle = object
 end
 
 (* part 9 *)
-let () =
-  let open Drawable in
-  open_display ();
+
+type drawable = < draw: unit >
+
+let main () =
   let shapes = [ 
      (my_circle :> drawable); 
      (new my_square 50 350 :> drawable); 
      (new my_square 50 200 :> drawable);
      (new growing_circle 20 70 70 :> drawable);
   ] in
-  Drawable.shapes := shapes;
-  never_returns (Scheduler.go ())
+  let repaint () =
+    clear_graph ();
+    List.iter ~f:(fun s -> s#draw) shapes;
+    synchronize ()
+  in 
+    open_graph "";
+    auto_synchronize false;
+    Clock.every (Time.Span.of_sec (1.0 /. 24.0)) repaint
+
+let () = never_returns (Scheduler.go_main main ())
+  
