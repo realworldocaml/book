@@ -2,6 +2,9 @@ open Core.Std
 open Async.Std
 open Async_graphics
 
+type drawable = < draw: unit >
+
+(* part 1 *)
 class virtual shape x y = object (self)
   method virtual private contains: int -> int -> bool
 
@@ -24,7 +27,7 @@ class virtual shape x y = object (self)
            f ev.mouse_x ev.mouse_y)
 end
 
-(* part 1 *)
+(* part 2 *)
 class square w x y = object
   inherit shape x y
 
@@ -53,7 +56,7 @@ class circle r x y = object
     dist <= (Float.of_int radius)
 end
 
-(* part 2 *)
+(* part 3 *)
 class growing_circle r x y = object (self)
   inherit circle r x y
 
@@ -61,7 +64,7 @@ class growing_circle r x y = object (self)
     self#on_click (fun _x _y -> radius <- radius * 2)
 end
 
-(* part 3 *)
+(* part 4 *)
 class virtual draggable = object (self)
   method virtual on_mousedown: 
     ?start:unit Deferred.t -> 
@@ -91,13 +94,13 @@ class virtual draggable = object (self)
               y <- ev.mouse_y + offset_y))
 end
 
-(* part 4 *)
+(* part 5 *)
 class small_square = object
   inherit square 20 40 40
   inherit draggable 
 end
 
-(* part 5 *)
+(* part 6 *)
 class virtual animated span = object (self)
   method virtual on_click: 
     ?start:unit Deferred.t -> 
@@ -126,14 +129,14 @@ class virtual animated span = object (self)
     self#on_click (fun _x _y -> if not self#running then self#animate)
 end
 
-(* part 6 *)
+(* part 7 *)
 class my_circle = object
   inherit circle 20 50 50
   inherit animated Time.Span.second
   initializer updates <- [fun _ -> x <- x + 5]
 end
 
-(* part 7 *)
+(* part 8 *)
 class virtual linear x' y' = object
   val virtual mutable updates: (int -> unit) list
   val virtual mutable x: int
@@ -165,7 +168,7 @@ class virtual harmonic offset x' y' = object
     updates <- update :: updates
 end
 
-(* part 8 *)
+(* part 9 *)
 class my_square x y = object
   inherit square 40 x y
   inherit draggable
@@ -181,9 +184,7 @@ let my_circle = object
   inherit harmonic (pi /. 2.0) 0 10
 end
 
-(* part 9 *)
-
-type drawable = < draw: unit >
+(* part 10 *)
 
 let main () =
   let shapes = [ 
