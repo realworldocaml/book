@@ -201,5 +201,5 @@ let main () =
     auto_synchronize false;
     Clock.every (Time.Span.of_sec (1.0 /. 24.0)) repaint
 
-let () = never_returns (Scheduler.go_main main ())
+let () = never_returns (Scheduler.go_main ~main ())
   
