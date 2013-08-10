@@ -408,25 +408,16 @@ Concurrent programming with Async will be explored later in
 details.  You just need to run `opam install async_graphics` to get the library
 installed on your system.
 
-### Defining a `Drawable` module
-
-Let's start with by creating a `Drawable` module to hold the base logic to
-handle the display.
- 
+We will give each shape a `draw` method describing how to draw the shape on the
+Async_graphics display:
 ```frag
-((typ ocaml)(name classes-async/drawable.ml))
+((typ ocaml)(name classes-async/shapes.ml)(part 0))
 ```
 
-We first define our `drawable` object type to include a `draw` method, and a
-reference to a list of shapes to display them.  Any shapes in that list will be
-drawn on the display at regular intervals via the `repaint` function. Finally,
-we also define an `open_display` function to open a graphical display.
+### Create some simple shapes
 
-### Create some simple drawable shapes
-
-Now let's create a new module that contains classes for making squares and
-circles. We include an `on_click` method for adding event handlers to the
-shapes.
+Now let's add classes for making squares and circles. We include an `on_click`
+method for adding event handlers to the shapes.
 
 ```frag
 ((typ ocaml)(name classes-async/verbose_shapes.ml)(part 0))
@@ -450,13 +441,13 @@ Here is the more succinct definition, starting with a virtual `shape` class
 that implements `on_click` and `on_mousedown`.
 
 ```frag
-((typ ocaml)(name classes-async/shapes.ml)(part 0))
+((typ ocaml)(name classes-async/shapes.ml)(part 1))
 ```
 
 Now we can define `square` and `circle` by inheriting from `shape`.
 
 ```frag
-((typ ocaml)(name classes-async/shapes.ml)(part 1))
+((typ ocaml)(name classes-async/shapes.ml)(part 2))
 ```
 
 One way to view a `virtual` class is that it is like a functor, where
@@ -486,7 +477,7 @@ from `circle` and used the inherited `on_click` to add a handler for click
 events.
 
 ```frag
-((typ ocaml)(name classes-async/shapes.ml)(part 2))
+((typ ocaml)(name classes-async/shapes.ml)(part 3))
 ```
 
 ## Multiple inheritance
@@ -554,13 +545,13 @@ this functionality for any object which has mutable `x` and `y` fields and an
 `on_mousedown` method for adding event handlers:
 
 ```frag
-((typ ocaml)(name classes-async/shapes.ml)(part 3))
+((typ ocaml)(name classes-async/shapes.ml)(part 4))
 ```
 
 This allows us to create draggable shapes using multiple inheritance.
 
 ```frag
-((typ ocaml)(name classes-async/shapes.ml)(part 4))
+((typ ocaml)(name classes-async/shapes.ml)(part 5))
 ```
 
 We can also use mixins to create animated shapes. Each animated shape has a
@@ -569,7 +560,7 @@ mixin to provide this update list and ensure that the functions in it are
 called regular intervals when the shape is animated.
 
 ```frag
-((typ ocaml)(name classes-async/shapes.ml)(part 5))
+((typ ocaml)(name classes-async/shapes.ml)(part 6))
 ```
 
 We use initializers to add functions to this update list. For
@@ -577,13 +568,13 @@ example, this class will produce circles that move to the right for a
 second when clicked:
 
 ```frag
-((typ ocaml)(name classes-async/shapes.ml)(part 6))
+((typ ocaml)(name classes-async/shapes.ml)(part 7))
 ```
 
 These initializers can also be added using mixins:
 
 ```frag
-((typ ocaml)(name classes-async/shapes.ml)(part 7))
+((typ ocaml)(name classes-async/shapes.ml)(part 8))
 ```
 
 Since the `linear` and `harmonic` mixins are only used for there
@@ -591,15 +582,21 @@ side-effects, they can be inherited multiple times within the same
 object to produce a variety of different animations.
 
 ```frag
-((typ ocaml)(name classes-async/shapes.ml)(part 8))
-```
-
-Now all we have to do is to glue it together by initializing the
-display, creating some shapes, and running the scheduler.
-
-```frag
 ((typ ocaml)(name classes-async/shapes.ml)(part 9))
 ```
+
+### Displaying the animated shapes
+
+We finish our shapes module by creating a `main` function to draw some shapes on
+the graphical display, and running that function using the Async scheduler.
+
+```frag
+((typ ocaml)(name classes-async/shapes.ml)(part 10))
+```
+
+Our `main` function creates a list of shapses to be displayed, and defines a
+`repaint` function that actually draws them on the display. Then we open a
+graphical display and ask Async to run `repaint` at regular intervals.
 
 Finally, build the binary by linking against the `async_graphics` package,
 which will pull in all the other dependencies.
