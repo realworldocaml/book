@@ -408,8 +408,8 @@ Concurrent programming with Async will be explored later in
 details.  You just need to run `opam install async_graphics` to get the library
 installed on your system.
 
-We will give each shape a `draw` method describing how to draw the shape on the
-Async_graphics display:
+We will give each shape a `draw` method that describes how to draw the shape on
+the `Async_graphics` display:
 ```frag
 ((typ ocaml)(name classes-async/shapes.ml)(part 0))
 ```
@@ -594,8 +594,8 @@ the graphical display, and running that function using the Async scheduler.
 ((typ ocaml)(name classes-async/shapes.ml)(part 10))
 ```
 
-Our `main` function creates a list of shapses to be displayed, and defines a
-`repaint` function that actually draws them on the display. Then we open a
+Our `main` function creates a list of shapes to be displayed and defines a
+`repaint` function that actually draws them on the display. We then open a
 graphical display and ask Async to run `repaint` at regular intervals.
 
 Finally, build the binary by linking against the `async_graphics` package,
