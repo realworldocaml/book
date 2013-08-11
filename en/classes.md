@@ -62,8 +62,8 @@ parameter `init` for the initial contents of the stack.
 ```
 
 Note that the type parameter `['a]` in the definition uses square brackets, but
-other uses of the type can omit them (or use parentheses if there is more than
-one type parameter).
+for other uses of the type they are omited (or replaced with parentheses if
+there is more than one type parameter).
 
 The type annotation on the declaration of `v` is used to constrain type
 inference.  If we omit this annotation, the type inferred for the class will
