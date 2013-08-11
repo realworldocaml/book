@@ -31,17 +31,17 @@ The compiler dumps the lambda form in an s-expression syntax if you add the
 how the OCaml pattern matching engine works by building three different pattern
 matches and comparing their lambda forms.
 
-Let's start by creating a straightforward exhaustive pattern match using normal
-variants.
+Let's start by creating a straightforward exhaustive pattern match using 
+four normal variants.
 
 ```frag
-((typ ocaml)(name back-end/pattern_monomorphic_exhaustive.ml))
+((typ ocaml)(name back-end/pattern_monomorphic_large.ml))
 ```
 
 The lambda output for this code looks like this.
 
 ```frag
-((typ console)(name back-end/lambda_for_pattern_monomorphic_exhaustive.out))
+((typ console)(name back-end/lambda_for_pattern_monomorphic_large.out))
 ```
 
 It's not important to understand every detail of this internal form and it is
@@ -62,37 +62,31 @@ these caveats, some interesting points emerge from reading it.
   dynamic checks.  Unwise use of unsafe features such as the
   `Obj.magic` module can still easily induce crashes at this level.
 
-The first pattern match is *exhaustive*, so there are no unknown match cases
-that the compiler needs to check for (_e.g._ a value greater than 3).  What
-happens if we modify the code to use an incomplete pattern match instead?
+The compiler computes a jump table in order to handle all four cases.  If we
+drop the number of variants to just two, then there's no need for the complexity
+of computing this table.
 
 ```frag
-((typ ocaml)(name back-end/pattern_monomorphic_incomplete.ml))
+((typ ocaml)(name back-end/pattern_monomorphic_small.ml))
 ```
 
 The lambda output for this code is now quite different.
 
 ```frag
-((typ ocaml)(name back-end/lambda_for_pattern_monomorphic_incomplete.out))
+((typ ocaml)(name back-end/lambda_for_pattern_monomorphic_small.out))
 ```
 
-The compiler has reverted to testing the value as a set of nested conditionals.
-The lambda code above first checks to see if the value is `Alice`, then if it's
-`Bob` and finally falls back to the default `102` return value for everything
-else.
-
-Exhaustive pattern matching is thus a better coding style at several levels.
-It rewards you with more useful compile-time warnings when you modify type
-definitions *and* generates more efficient runtime code too.
-
-Finally, let's look at the same code, but with polymorphic variants instead of
-normal variants.
+The compiler emits simpler conditional jumps rather than setting up a jump
+table, since it statically determines that the range of possible variants is
+small enough.  Finally, let's look at the same code, but with polymorphic
+variants instead of normal variants.
 
 ```frag
 ((typ ocaml)(name back-end/pattern_polymorphic.ml))
 ```
 
-The lambda form for this reveals the most inefficient result yet.
+The lambda form for this also shows up the runtime representation of
+polymorphic variants.
 
 ```frag
 ((typ ocaml)(name back-end/lambda_for_pattern_polymorphic.out))
@@ -101,8 +95,31 @@ The lambda form for this reveals the most inefficient result yet.
 We mentioned earlier in [xref](#variants) that pattern matching over
 polymorphic variants is slightly less efficient, and it should be clearer why
 this is the case now.  Polymorphic variants have a runtime value that's
-calculated by hashing the variant name, and so the compiler has to test each of
-these possible hash values in sequence.
+calculated by hashing the variant name, and so the compiler can't use a jump
+table as it does for normal variants.  Instead, it creates a decision tree that
+compares the hash values against the input variable in as few comparisons as
+possible.
+
+<note>
+<title>Learning more about pattern matching compilation</title>
+
+Pattern matching is an important part of OCaml programming. You'll often
+encounter deeply nested pattern matches over complex data structures in real
+code.  A good paper that describes the fundamental algorithms implemented in
+OCaml is ["Optimizing pattern matching"](http://dl.acm.org/citation.cfm?id=507641) by
+Fabrice Le Fessant and Luc Maranget.
+
+The paper describes the backtracking algorithm used in classical pattern
+matching compilation, and also several OCaml-specific optimizations such as the
+use of exhaustiveness information and control flow optimizations via static
+exceptions.
+
+It's not essential that you understand all of this just to use pattern matching
+of course, but it'll give you insight as to why pattern matching is such a
+lightweight language construct to use in OCaml code.
+
+</note>
+
 
 ### Benchmarking pattern matching
 
@@ -133,26 +150,6 @@ The lambda form is primarily a stepping stone to the bytecode executable format
 that we'll cover next.  It's often easier to look at the textual output from
 this stage than to wade through the native assembly code from compiled
 executables.
-
-<note>
-<title>Learning more about pattern matching compilation</title>
-
-Pattern matching is an important part of OCaml programming. You'll often
-encounter deeply nested pattern matches over complex data structures in real
-code.  A good paper that describes the fundamental algorithms implemented in
-OCaml is ["Optimizing pattern matching"](http://dl.acm.org/citation.cfm?id=507641) by
-Fabrice Le Fessant and Luc Maranget.
-
-The paper describes the backtracking algorithm used in classical pattern
-matching compilation, and also several OCaml-specific optimizations such as the
-use of exhaustiveness information and control flow optimizations via static
-exceptions.
-
-It's not essential that you understand all of this just to use pattern matching
-of course, but it'll give you insight as to why pattern matching is such a
-lightweight language construct to use in OCaml code.
-
-</note>
 
 ## Generating portable bytecode
 
