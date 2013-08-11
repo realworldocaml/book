@@ -225,7 +225,7 @@ Subtyping is a central concept in object-oriented programming.  It
 governs when an object with one type _A_ can be used in an expression
 that expects an object of another type _B_.  When this is true, we say
 that _A_ is a _subtype_ of _B_.  Actually, more concretely, subtyping
-determines when the coercion operator `e :> t` can be applied.  This
+restricts when the coercion operator `e :> t` can be applied.  This
 coercion works only if the expression `e` has some type `s` and `s` is
 a subtype of `t`.
 
