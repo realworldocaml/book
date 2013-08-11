@@ -14,7 +14,7 @@ end;;
 
 #part 1
 let remove_large l =
-  List.filter ~f:(fun s -> s#area <= 100) l;;
+  List.filter ~f:(fun s -> s#area <= 100.) l;;
 
 #part 2
 let squares : < area : float; width : int > list = 
@@ -23,7 +23,7 @@ remove_large squares;;
 
 #part 3
 let remove_large (l: < area : float > list) = 
-  List.filter ~f:(fun s -> s#area <= 100) l;;
+  List.filter ~f:(fun s -> s#area <= 100.) l;;
 remove_large (squares :> < area : float > list );;
 
 #part 4
