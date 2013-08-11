@@ -10041,7 +10041,7 @@ val nums : int array = [|1; 2; 3; 4; 5|]
 </programlisting>
     <para>
       In the above, we used <literal>incr</literal> and
-      <literal>decr</literal>, which are build-in functions for
+      <literal>decr</literal>, which are built-in functions for
       incrementing and decrementing an <literal>int ref</literal> by
       one, respectively.
     </para>
@@ -16011,13 +16011,16 @@ end
     <para>
       We will give each shape a <literal>draw</literal> method that
       describes how to draw the shape on the
-      <literal>Async_graphics</literal> display: ```ocaml
-      <lineannotation>(* classes-async/shapes.ml *)</lineannotation>
-      open Core.Std open Async.Std open Async_graphics
+      <literal>Async_graphics</literal> display:
     </para>
-    <para>
-      type drawable = &lt; draw: unit &gt; ```
-    </para>
+    <programlisting language="ocaml">
+&lt;lineannotation&gt;(* classes-async/shapes.ml  *)&lt;/lineannotation&gt;
+open Core.Std
+open Async.Std
+open Async_graphics
+
+type drawable = &lt; draw: unit &gt;
+</programlisting>
     <sect2 id="create-some-simple-shapes">
       <title>Create some simple shapes</title>
       <para>
