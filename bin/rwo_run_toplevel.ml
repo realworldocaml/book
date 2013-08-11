@@ -30,7 +30,7 @@ let ofile_html file part = sprintf "%s/%s.%d.html" !build_dir file part
 
 type outcome = [
   | `Normal of string * string * string (* exec output, stdout, stderr *)
-  | `Error of string
+  | `Error of string * string * string
 ]
 
 let is_ready_for_read fd =
@@ -227,16 +227,16 @@ let toploop_eval phrase =
       let out, err = get_stdout_stderr_and_restore () in
       print_string out;
       prerr_string err;
-      let backtrace_enabled = Printexc.backtrace_status () in
-      if not backtrace_enabled then Printexc.record_backtrace true;
-      (try Errors.report_error Format.str_formatter e
-       with exn ->
+      (try
+        Errors.report_error Format.str_formatter e;
+        `Error(Format.flush_str_formatter (), out, err)
+       with exn -> (
          printf "Code.toploop_eval: the following error was raised during \
                  error reporting for %S:\n%s\nError backtrace:\n%s\n%!"
            phrase (Printexc.to_string exn) (Printexc.get_backtrace ());
+        `Error("", out,err)
+       )
       );
-      if not backtrace_enabled then Printexc.record_backtrace false;
-      `Error(Format.flush_str_formatter ())
   )
 
 
@@ -333,7 +333,7 @@ let parse_file fullfile file =
   List.iter initial_phrases ~f:(fun phrase ->
       match toploop_eval (phrase ^ " ;;") with
       | `Normal _ -> ()
-      | `Error s -> eprintf "Failed (%s): %s\n" s phrase; exit (-1)
+      | `Error (s,_,_) -> eprintf "Failed (%s): %s\n" s phrase; exit (-1)
     );
   let parts = Int.Table.create () in
   let html_parts = Int.Table.create () in
@@ -368,7 +368,7 @@ let parse_file fullfile file =
               let phrase = String.concat ~sep:"\n" (List.rev (line :: acc)) in
               eprintf "X: %s\n%!" phrase;
               match toploop_eval phrase with
-              | `Normal(s, stdout, stderr) ->
+              | `Normal(s, stdout, stderr) |`Error (s,stdout,stderr) ->
                 print_part !part (sprintf "# %s \n%s%s%s"
                   phrase
                   (if stdout = "" then "" else "\n"^stdout)
@@ -380,11 +380,6 @@ let parse_file fullfile file =
                 let serr = if stderr = "" then <:html<&>> else <:html<<br />$str:stderr$>> in
                 let s = if s ="" then " " else s in
                 print_html_part !part (Cow.Html.to_string <:html<<div class="rwocodeout">$sout$$serr$$str:s$</div>&>>);
-                []
-              | `Error s ->
-                print_part !part (sprintf "# %s \n%s" phrase s);
-                print_html_part !part (Cow.Html.to_string (Cow.Code.ocaml_fragment ("# " ^ phrase)));
-                if s <> "" then print_html_part !part (Cow.Html.to_string <:html<<div class="rwocodeout">$str:s$</div>&>>);
                 []
             end else
               line::acc
