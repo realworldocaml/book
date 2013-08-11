@@ -28,6 +28,12 @@ let circle r = object
   method radius = r
 end;;
 
+type 'a stack = < pop: 'a option; push: 'a -> unit >;;
+
+let square_stack: square stack = stack [square 30; square 10];;
+
+let circle_stack: circle stack = stack [circle 20; circle 40];;
+
 #part 1
 let shape w : shape = square w;;
 let shape w : shape = (square w :> shape);;
@@ -92,13 +98,6 @@ end = Either;;
 (VarEither.left (square 40) :> (shape, shape) VarEither.t);;
 
 #part 11
-type 'a stack = < pop: 'a option; push: 'a -> unit >
-
-let square_stack: square stack = stack [square 30; square 10]
-
-let circle_stack: circle stack = stack [circle 20; circle 40]
-
-#part 12
 let total_area (shape_stacks: shape stack list) =
   let stack_area acc st = 
     let rec loop acc =
@@ -110,10 +109,10 @@ let total_area (shape_stacks: shape stack list) =
   in
     List.fold ~init:0.0 ~f:stack_area shape_stacks;;
 
-#part 13
+#part 12
 total_area [(square_stack :> shape stack); (circle_stack :> shape stack)];;
 
-#part 14
+#part 13
 type 'a readonly_stack = < pop : 'a option >;;
 let total_area (shape_stacks: shape readonly_stack list) =
   let stack_area acc st = 
