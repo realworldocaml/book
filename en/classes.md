@@ -408,6 +408,7 @@ installed on your system.
 
 We will give each shape a `draw` method that describes how to draw the shape on
 the `Async_graphics` display:
+
 ```frag
 ((typ ocaml)(name classes-async/shapes.ml)(part 0))
 ```
