@@ -536,7 +536,7 @@ Notably, the loader can't be itself loaded (since it's not on the list
 of known handlers), and can't be unloaded.
 
 ```frag
-((typ console)(name fcm/loader_cli3.out))
+((typ console)(name fcm/loader_cli4.out))
 ```
 
 We can push this dynamism yet further using libraries like
