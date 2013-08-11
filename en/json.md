@@ -128,8 +128,7 @@ the JSON record is stored in a file called `book.json`.
 ((typ ocaml)(name json/read_json.ml))
 ```
 
-You can build this by writing a `_tags` file to define the package
-dependencies, and then running `ocamlbuild`.
+You can build this by running <command>corebuild</command>.
 
 ```frag
 ((typ console)(name json/run_read_json.out))
