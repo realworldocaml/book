@@ -500,7 +500,7 @@ Now, let's use `Logon.Fields.iter` and `show_field` to print out all
 the fields of a `Logon` record.
 
 ```frag
-((typ ocamltop)(name records/main.topscript)(part 26))
+((typ ocamltop)(name records/main.topscript)(part 36))
 ```
 
 One nice side effect of this approach is that it helps you adapt your
