@@ -5680,10 +5680,10 @@ Error: Unbound value foo
       <literal>open</literal> is essential when you want to modify your
       environment for a standard library like Core, but it's generally
       good style to keep opening of modules to a minimum. Opening a
-      module is basically a tradeoff between terseness and explicitness
-      --- the more modules you open, the fewer module qualifications you
-      need, and the harder it is to look at an identifier and figure out
-      where it comes from.
+      module is basically a tradeoff between terseness and
+      explicitness—the more modules you open, the fewer module
+      qualifications you need, and the harder it is to look at an
+      identifier and figure out where it comes from.
     </para>
     <para>
       Here's some general advice on how to deal with opens.
@@ -7739,7 +7739,7 @@ And
 val eval : 'a expr -&gt; ('a -&gt; bool) -&gt; bool = &lt;fun&gt;
 </programlisting>
     <para>
-      The structure of the code is pretty straightforward --- we're just
+      The structure of the code is pretty straightforward—we're just
       pattern matching over the structure of the data, doing the
       appropriate calculation based on which tag we see. To use this
       evaluator on a concrete example, we just need to write the
@@ -9464,7 +9464,7 @@ val find : (string * 'a) list -&gt; string -&gt; ('a, exn) Result.t = &lt;fun&gt
     potentially returns different results, every time it's called.
   </para>
   <para>
-    Pure code is the default in OCaml, and for good reason --- it's
+    Pure code is the default in OCaml, and for good reason—it's
     generally easier to reason about, less error prone and more
     composable. But imperative code is of fundamental importance to any
     practical programming language because real-world tasks require that
@@ -9821,9 +9821,9 @@ let () = &lt;expr2&gt; in
           <literal>string</literal> in place of a
           <literal>Char.t array</literal> (a <literal>Char.t</literal>
           is an 8-bit character) is that the former is considerably more
-          space efficient; an array uses one word --- 8 bytes on a
-          64-bit machine --- to store a single entry, whereas strings
-          use one byte per character.
+          space efficient; an array uses one word—8 bytes on a 64-bit
+          machine—to store a single entry, whereas strings use one byte
+          per character.
         </para>
         <para>
           Strings also come with their own syntax for getting and
@@ -9872,13 +9872,13 @@ let () = &lt;expr2&gt; in
       <sect3 id="ref-cells">
         <title>Ref cells</title>
         <para>
-          Variables in OCaml are never mutable --- they can refer to
-          mutable data, but what the variable points to can't be
-          changed. Sometimes, though, you want to do exactly what you
-          would do with a mutable variable in another language: define a
-          single, mutable value. In OCaml this is typically achieved
-          using a <literal>ref</literal>, which is essentially a
-          container with a single mutable polymorphic field.
+          Variables in OCaml are never mutable—they can refer to mutable
+          data, but what the variable points to can't be changed.
+          Sometimes, though, you want to do exactly what you would do
+          with a mutable variable in another language: define a single,
+          mutable value. In OCaml this is typically achieved using a
+          <literal>ref</literal>, which is essentially a container with
+          a single mutable polymorphic field.
         </para>
         <para>
           The definition for the ref type is as follows:
@@ -9975,10 +9975,10 @@ val ( := ) : 'a ref -&gt; 'a -&gt; unit = &lt;fun&gt;
     </para>
     <para>
       The <literal>for</literal> loop is the simpler of the two. Indeed,
-      we've already seen the <literal>for</literal> loop in action ---
-      the <literal>iter</literal> function in
-      <literal>Dictionary</literal> is built using it. Here's a simple
-      example of <literal>for</literal>.
+      we've already seen the <literal>for</literal> loop in action—the
+      <literal>iter</literal> function in <literal>Dictionary</literal>
+      is built using it. Here's a simple example of
+      <literal>for</literal>.
     </para>
     <programlisting language="ocaml">
 ...part 1 of imperative-programming/for.topscript
@@ -10760,7 +10760,7 @@ Time: 0.0579357ms
         call falls out of scope when the <literal>fib</literal> call
         returns. That means that, unlike ordinary memoization, calling
         <literal>memo_rec</literal> on a function does not create a
-        memory leak --- the memoization table is collected after the
+        memory leak—the memoization table is collected after the
         computation completes.
       </para>
       <para>
@@ -11151,7 +11151,7 @@ val fmt : (int -&gt; float -&gt; string -&gt; 'c, 'b, 'c) format = &lt;abstr&gt;
         If this looks different from everything else you've seen so far,
         that's because it is. This is really a special case in the type
         system. Most of the time, you don't need to worry about this
-        special handling of format strings --- you can just use
+        special handling of format strings—you can just use
         <literal>printf</literal> and not worry about the details. But
         it's useful to keep the broad outlines of the story in the back
         of your head.
@@ -16242,9 +16242,9 @@ end
     <sect2 id="how-names-are-resolved">
       <title>How names are resolved</title>
       <para>
-        The main trickiness of multiple inheritance is due to naming --
-        what happens when a method or field with some name is defined in
-        more than one class?
+        The main trickiness of multiple inheritance is due to
+        naming—what happens when a method or field with some name is
+        defined in more than one class?
       </para>
       <para>
         If there is one thing to remember about inheritance in OCaml, it
@@ -16314,8 +16314,8 @@ end
         have a class that implements methods <emphasis>A</emphasis>, and
         you have a mixin <emphasis>M</emphasis> that provides methods
         <emphasis>B</emphasis> from <emphasis>A</emphasis>, then you can
-        inherit from <emphasis>M</emphasis> -- &quot;mixing&quot; it in
-        -- to get features <emphasis>B</emphasis>.
+        inherit from <emphasis>M</emphasis>—&quot;mixing&quot; it in—to
+        get features <emphasis>B</emphasis>.
       </para>
       <para>
         That's too abstract, so let's give some examples based on our
@@ -23674,7 +23674,7 @@ val handle_error : unit -&gt; string Deferred.t = &lt;fun&gt;
         job that spawned it.
       </para>
       <para>
-        Monitors are arranged in a tree -- when a new monitor is created
+        Monitors are arranged in a tree—when a new monitor is created
         (say, using <literal>Monitor.create</literal>) it is a child of
         the current monitor. You can explicitly run jobs within a
         monitor using <literal>within</literal>, which takes a thunk
@@ -27596,7 +27596,7 @@ $ ./finalizer.native
   <title>The Compiler Frontend: Parsing and Type Checking</title>
   <para>
     Compiling source code into executable programs is a fairly complex
-    process that involves quite a few tools -- preprocessors, compilers,
+    process that involves quite a few tools—preprocessors, compilers,
     runtime libraries, linkers and assemblers. It's important to
     understand how these fit together to help with your day-to-day
     workflow of developing, debugging and deploying applications.
@@ -28512,7 +28512,7 @@ val compare : t -&gt; t -&gt; int
         completely alter your source code's layout and style. Core
         includes a very conservative set of extensions that take care to
         minimize the syntax changes. There are a number of third-party
-        libraries that are much more ambitious --- some introduce
+        libraries that are much more ambitious—some introduce
         whitespace-sensitive indentation, while others build entirely
         new embedded languages using OCaml as a host language, and yet
         others introduce conditional compilation for macros or optional
@@ -28759,14 +28759,14 @@ Error: The implementation test.ml does not match the interface test.cmi:
         <title>Adding type annotations to find errors</title>
         <para>
           It's often said that the hardest part of writing OCaml code is
-          getting past the type checker -- but once the code does
-          compile, it works correctly the first time! This is an
-          exaggeration of course, but it can certainly feel true when
-          moving from a dynamically typed language. The OCaml static
-          type system protects you from certain classes of bugs such as
-          memory errors and abstraction violations by rejecting your
-          program at compilation time rather than by generating an error
-          at runtime. Learning how to navigate the type checker's
+          getting past the type checker—but once the code does compile,
+          it works correctly the first time! This is an exaggeration of
+          course, but it can certainly feel true when moving from a
+          dynamically typed language. The OCaml static type system
+          protects you from certain classes of bugs such as memory
+          errors and abstraction violations by rejecting your program at
+          compilation time rather than by generating an error at
+          runtime. Learning how to navigate the type checker's
           compile-time feedback is key to building robust libraries and
           applications that take full advantage of these static checks.
         </para>
