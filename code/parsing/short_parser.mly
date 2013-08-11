@@ -1,6 +1,5 @@
 %token <int> INT
 %token <float> FLOAT
-%token <string> ID
 %token <string> STRING
 %token TRUE
 %token FALSE
@@ -35,7 +34,7 @@ obj_fields:
     obj = separated_list(COMMA, obj_field)    { obj } ;
 
 obj_field:
-    k = ID; COLON; v = value                  { (k, v) } ;
+    k = STRING; COLON; v = value              { (k, v) } ;
 
 list_fields:
     vl = separated_list(COMMA, value)         { vl } ;

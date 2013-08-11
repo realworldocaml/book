@@ -24,7 +24,7 @@ and print_assoc outc obj =
   output_string outc "{ ";
   let sep = ref "" in
   List.iter ~f:(fun (key, value) ->
-      printf "%s%s: %a" !sep key output_value value;
+      printf "%s\"%s\": %a" !sep key output_value value;
       sep := ", ") obj;
   output_string outc " }"
 
