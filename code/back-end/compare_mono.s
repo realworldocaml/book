@@ -1,58 +1,55 @@
 	.data
-	.globl	camlCompare_mono__data_begin
-camlCompare_mono__data_begin:
+	.globl	_camlCompare_mono__data_begin
+_camlCompare_mono__data_begin:
 	.text
-	.globl	camlCompare_mono__code_begin
-camlCompare_mono__code_begin:
+	.globl	_camlCompare_mono__code_begin
+_camlCompare_mono__code_begin:
+	nop
 	.data
 	.quad	1024
-	.globl	camlCompare_mono
-camlCompare_mono:
+	.globl	_camlCompare_mono
+_camlCompare_mono:
 	.space	8
 	.data
 	.quad	3319
-camlCompare_mono__1:
-	.quad	caml_curry2
+_camlCompare_mono__1:
+	.quad	_caml_curry2
 	.quad	5
-	.quad	camlCompare_mono__cmp_1008
+	.quad	_camlCompare_mono__cmp_1008
 	.text
-	.align	16
-	.globl	camlCompare_mono__cmp_1008
-camlCompare_mono__cmp_1008:
+	.align	4
+	.globl	_camlCompare_mono__cmp_1008
+_camlCompare_mono__cmp_1008:
 	.cfi_startproc
 .L101:
 	cmpq	%rbx, %rax
 	jle	.L100
 	ret
-	.align	4
+	.align	2
 .L100:
 	movq	%rbx, %rax
 	ret
 	.cfi_endproc
-	.type	camlCompare_mono__cmp_1008,@function
-	.size	camlCompare_mono__cmp_1008,.-camlCompare_mono__cmp_1008
 	.text
-	.align	16
-	.globl	camlCompare_mono__entry
-camlCompare_mono__entry:
+	.align	4
+	.globl	_camlCompare_mono__entry
+_camlCompare_mono__entry:
 	.cfi_startproc
 .L102:
-	leaq	camlCompare_mono__1(%rip), %rax
-	movq	%rax, camlCompare_mono(%rip)
+	leaq	_camlCompare_mono__1(%rip), %rax
+	movq	%rax, _camlCompare_mono(%rip)
 	movq	$1, %rax
 	ret
 	.cfi_endproc
-	.type	camlCompare_mono__entry,@function
-	.size	camlCompare_mono__entry,.-camlCompare_mono__entry
 	.data
 	.text
-	.globl	camlCompare_mono__code_end
-camlCompare_mono__code_end:
+	nop
+	.globl	_camlCompare_mono__code_end
+_camlCompare_mono__code_end:
 	.data
-	.globl	camlCompare_mono__data_end
-camlCompare_mono__data_end:
+	.globl	_camlCompare_mono__data_end
+_camlCompare_mono__data_end:
 	.long	0
-	.globl	camlCompare_mono__frametable
-camlCompare_mono__frametable:
+	.globl	_camlCompare_mono__frametable
+_camlCompare_mono__frametable:
 	.quad	0
-	.section .note.GNU-stack,"",%progbits
