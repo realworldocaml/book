@@ -113,8 +113,8 @@ The type system will complain if it sees incompatible uses of the same method:
 
 The `..` in the inferred object types are ellipses, standing for other
 unspecified methods that the object may have.  The type `< width : float; .. >`
-specifies an object that must have at least an `width` method, and possibly
-some others as well. Such object types are said to be _open_.
+specifies an object that must have at least a `width` method, and possibly some
+others as well. Such object types are said to be _open_.
 
 We can manually _close_ an object type using a type annotation:
 
