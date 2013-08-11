@@ -180,7 +180,7 @@ textual form via `-dinstr`.  Try this on one of our earlier pattern matching
 examples.
 
 ```frag
-((typ console)(name back-end/instr_for_pattern_monomorphic_exhausive.out))
+((typ console)(name back-end/instr_for_pattern_monomorphic_small.out))
 ```
 
 The bytecode above has been simplified from the lambda form into a set of
