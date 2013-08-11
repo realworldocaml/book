@@ -29,6 +29,6 @@ class square w =
     method width = w
     method area = Float.of_int (self#width * self#width)
     method repr = Square self#width
-    method equals (other : 'self) = other#width = self#width
+    method equals (other : 'self) = other#repr = self#repr
   end ;;
 
