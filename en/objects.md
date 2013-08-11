@@ -463,10 +463,11 @@ provide much value here.
 
 ### Subtyping vs. row polymorphism ###
 
-There is a great deal of overlap between subtyping and row polymorphism. Row
-polymorphism is in general preferred over subtyping because it does not require
-explicit coercions, and it preserves more type information, allowing functions
-like the following:
+There is considerable overlap between subtyping and row polymorphism. Both
+mechanisms allow you to write functions that can be applied to objects of
+different types. In these cases, row polymorphism is usually preferred over
+subtyping because it does not require explicit coercions, and it preserves more
+type information, allowing functions like the following:
 
 ```frag
 ((typ ocamltop)(name objects/row_polymorphism.topscript)(part 1))
@@ -487,16 +488,17 @@ known to have an `area` method.
 ((typ ocamltop)(name objects/row_polymorphism.topscript)(part 3))
 ```
 
-However, there are some situations where we cannot use row polymorphism. For
-example, lists of heterogeneous elements can not be created using row
-polymorphism:
+However, there are some situations where we cannot use row polymorphism. In
+particular, row polymorphism cannot be used to place different types of object
+in the same container. For example, lists of heterogeneous elements cannot be
+created using row polymorphism:
 
 ```frag
 ((typ ocamltop)(name objects/row_polymorphism.topscript)(part 4))
 ```
 
-Since row polymorphism is a form of polymorphism, it also does not work well
-with references:
+Similarly, we cannot use row polymorphism to store different types of object in
+the same reference:
 
 ```frag
 ((typ ocamltop)(name objects/row_polymorphism.topscript)(part 5))
