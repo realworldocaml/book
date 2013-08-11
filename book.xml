@@ -1440,7 +1440,7 @@ val log_entry : Time.t option -&gt; string -&gt; string = &lt;fun&gt;
 # log_entry (Some Time.epoch) &quot;A long long time ago&quot;;; 
 - : string = &quot;1970-01-01 01:00:00 -- A long long time ago&quot;
 # log_entry None &quot;Up to the minute&quot;;; 
-- : string = &quot;2013-08-11 17:36:34 -- Up to the minute&quot;
+- : string = &quot;2013-08-11 22:03:26 -- Up to the minute&quot;
 </programlisting>
       <para>
         This example uses Core's <literal>Time</literal> module for
@@ -4033,7 +4033,7 @@ Estimated testing time 20s (change using -quota SECS).
                                          
   Name             Time (ns)   % of max  
  ---------------- ----------- ---------- 
-  plus_one_match       46.85      68.26  
+  plus_one_match       46.81      68.21  
   plus_one_if          68.63     100.00  
                                          
 - : unit = ()
@@ -4072,7 +4072,7 @@ Estimated testing time 20s (change using -quota SECS).
   Name     Time (ns)   % of max  
  -------- ----------- ---------- 
   sum_if     110_533     100.00  
-  sum         22_348      20.22  
+  sum         22_347      20.22  
                                  
 - : unit = ()
 </programlisting>
@@ -6162,7 +6162,7 @@ type host_info = {
     };; 
 val my_host : host_info =
   {hostname = &quot;ocaml-www1&quot;; os_name = &quot;Linux&quot;; cpu_arch = &quot;unknown&quot;;
-   timestamp = 2013-08-11 17:39:15.907992+01:00}
+   timestamp = 2013-08-11 22:06:05.098029+01:00}
 </programlisting>
   <para>
     You might wonder how the compiler inferred that
@@ -6218,7 +6218,7 @@ val first_timestamped : 'a timestamped list -&gt; 'a timestamped option = &lt;fu
        sprintf &quot;%s (%s / %s, on %s)&quot; h os c (Time.to_sec_string ts);; 
 val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
 # host_info_to_string my_host;; 
-- : string = &quot;ocaml-www1 (Linux / unknown, on 2013-08-11 17:39:15)&quot;
+- : string = &quot;ocaml-www1 (Linux / unknown, on 2013-08-11 22:06:05)&quot;
 </programlisting>
     <para>
       Note that the pattern that we used had only a single case, rather
@@ -6385,7 +6385,7 @@ val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
 val my_host : host_info =
   {hostname = &quot;ocaml-www1&quot;; os_name = &quot;Linux&quot;; cpu_arch = &quot;unknown&quot;;
    os_release = &quot;3.2.0-1-amd64&quot;;
-   timestamp = 2013-08-11 17:39:22.408068+01:00}
+   timestamp = 2013-08-11 22:06:11.410322+01:00}
 </programlisting>
     <para>
       In the above code, we defined variables corresponding to the
@@ -7016,12 +7016,12 @@ val show_field :
                 credentials = &quot;Xy2d9W&quot;; }
   ;; 
 val logon : Logon.t =
-  {Logon.session_id = &quot;26685&quot;; time = 2013-08-11 17:39:27.665242+01:00;
+  {Logon.session_id = &quot;26685&quot;; time = 2013-08-11 22:06:16.571369+01:00;
    user = &quot;yminsky&quot;; credentials = &quot;Xy2d9W&quot;}
 # show_field Logon.Fields.user Fn.id logon;; 
 - : string = &quot;user: yminsky&quot;
 # show_field Logon.Fields.time Time.to_string logon;; 
-- : string = &quot;time: 2013-08-11 17:39:27.665242+01:00&quot;
+- : string = &quot;time: 2013-08-11 22:06:16.571369+01:00&quot;
 </programlisting>
     <para>
       As a side note, the above is our first use of the
@@ -9328,8 +9328,8 @@ Estimated testing time 30s (change using -quota SECS).
                                                                 
   Name                           Cycles   Time (ns)   % of max  
  ------------------------------ -------- ----------- ---------- 
-  simple computation                279         117      76.75  
-  simple computation w/handler      308         129      84.56  
+  simple computation                279         116      76.68  
+  simple computation w/handler      308         129      84.64  
   end with exn                      364         152     100.00  
                                                                 
 </programlisting>
@@ -9346,8 +9346,8 @@ Estimated testing time 30s (change using -quota SECS).
                                                                 
   Name                           Cycles   Time (ns)   % of max  
  ------------------------------ -------- ----------- ---------- 
-  simple computation                279         117      83.49  
-  simple computation w/handler      308         129      92.03  
+  simple computation                279         117      83.46  
+  simple computation w/handler      308         129      92.11  
   end with exn                      335         140     100.00  
                                                                 
 </programlisting>
@@ -10582,11 +10582,11 @@ val time : (unit -&gt; 'a) -&gt; 'a = &lt;fun&gt;
 ...part 4 of imperative-programming/memo.topscript
 # time (fun () -&gt; edit_distance &quot;OCaml&quot; &quot;ocaml&quot;);; 
 
-Time: 1.40905ms
+Time: 1.4112ms
 - : int = 2
 # time (fun () -&gt; edit_distance &quot;OCaml 4.01&quot; &quot;ocaml 4.01&quot;);; 
 
-Time: 6.78195s
+Time: 6.78466s
 - : int = 2
 </programlisting>
       <para>
@@ -10622,11 +10622,11 @@ val fib : int -&gt; int = &lt;fun&gt;
 ...part 2 of imperative-programming/fib.topscript
 # time (fun () -&gt; fib 20);; 
 
-Time: 0.844955ms
+Time: 0.858068ms
 - : int = 10946
 # time (fun () -&gt; fib 40);; 
 
-Time: 12.776s
+Time: 12.7729s
 - : int = 165580141
 </programlisting>
       <para>
@@ -10649,11 +10649,11 @@ Time: 12.776s
 val fib : int -&gt; int = &lt;fun&gt;
 # time (fun () -&gt; fib 40);; 
 
-Time: 12.7757s
+Time: 12.7729s
 - : int = 165580141
 # time (fun () -&gt; fib 40);; 
 
-Time: 0.00405312ms
+Time: 0.00286102ms
 - : int = 165580141
 </programlisting>
       <para>
@@ -10745,7 +10745,7 @@ val memo_rec : (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;
 val fib : int -&gt; int = &lt;fun&gt;
 # time (fun () -&gt; fib 40);; 
 
-Time: 0.0579357ms
+Time: 0.056982ms
 - : int = 102334155
 </programlisting>
       <para>
@@ -10822,7 +10822,7 @@ val edit_distance : string * string -&gt; int = &lt;fun&gt;
 ...part 7 of imperative-programming/memo.topscript
 # time (fun () -&gt; edit_distance (&quot;OCaml 4.01&quot;,&quot;ocaml 4.01&quot;));; 
 
-Time: 0.515938ms
+Time: 0.49901ms
 - : int = 2
 </programlisting>
       <note> <title> 
@@ -10905,7 +10905,7 @@ Exception: Lazy.Undefined.
 val lazy_memo_rec : (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;
 # time (fun () -&gt; lazy_memo_rec fib_norec 40);; 
 
-Time: 0.0648499ms
+Time: 0.0631809ms
 - : int = 102334155
 </programlisting>
       <para>
@@ -14365,7 +14365,7 @@ end;;
 val t : &lt; pop : int option &gt; = &lt;obj&gt;
 # print_pop t;; 
 
-Popped: 1376239212
+Popped: 1376255219
 - : unit = ()
 </programlisting>
   </sect1>
@@ -17589,8 +17589,8 @@ Estimated testing time 20s (change using -quota SECS).
                                 
   Name     Time (ns)   Speedup  
  ------- ------------ --------- 
-  map     31_701_703      1.00  
-  table    7_209_275      4.40  
+  map     31_644_032      1.00  
+  table    7_211_672      4.39  
                                 
 </programlisting>
     <para>
@@ -17673,8 +17673,8 @@ Estimated testing time 20s (change using -quota SECS).
                                
   Name    Time (ns)   Speedup  
  ------- ----------- --------- 
-  map       218_704     12.03  
-  table   2_630_855      1.00  
+  map       218_180     12.04  
+  table   2_627_099      1.00  
                                
 </programlisting>
     <para>
@@ -19198,12 +19198,12 @@ let () = Command.run add
       <programlisting>
 # running command-line-parsing/md5_completion.out.sh
 $ env COMMAND_OUTPUT_INSTALLATION_BASH=1 ./basic_md5_with_flags.native
-function _jsautocom_6908 {
+function _jsautocom_15563 {
   export COMP_CWORD
   COMP_WORDS[0]=./basic_md5_with_flags.native
   COMPREPLY=($(&quot;${COMP_WORDS[@]}&quot;))
 }
-complete -F _jsautocom_6908 ./basic_md5_with_flags.native
+complete -F _jsautocom_15563 ./basic_md5_with_flags.native
 </programlisting>
       <para>
         Recall that we used the <literal>Arg_type.file</literal> to
@@ -23872,7 +23872,7 @@ $ ./search_with_configurable_server.native -servers localhost,api.duckduckgo.com
     (monitor
      (((name main) (here ()) (id 1) (has_seen_error true)
        (someone_is_listening false) (kill_index 0))))))
-  (Pid 10407)))
+  (Pid 18924)))
 </programlisting>
       <para>
         As you can see, we got a &quot;Connection refused&quot; failure
@@ -24284,8 +24284,8 @@ val log_delays : unit Deferred.t -&gt; Core.Span.t list Deferred.t = &lt;fun&gt;
 ...part 44 of async/main.topscript
 # log_delays (after (sec 1.));; 
 - : Core.Span.t list =
-[0.000953674ms; 100.186ms; 200.385ms; 300.59ms; 400.773ms; 500.972ms;
- 601.172ms; 701.38ms; 801.588ms; 901.774ms; 1.00197s]
+[0.000953674ms; 100.237ms; 200.437ms; 300.63ms; 400.832ms; 501.034ms;
+ 601.233ms; 701.43ms; 801.631ms; 901.831ms; 1.00202s]
 </programlisting>
     <para>
       Now, if instead of simply waiting a second, what if we have a busy
@@ -24299,7 +24299,7 @@ val log_delays : unit Deferred.t -&gt; Core.Span.t list Deferred.t = &lt;fun&gt;
   ;; 
 val busy_loop : int -&gt; unit = &lt;fun&gt;
 # log_delays (Deferred.unit &gt;&gt;| fun () -&gt; busy_loop 100);; 
-- : Core.Span.t list = [0.00214577ms; 242.604ms]
+- : Core.Span.t list = [0.000953674ms; 242.903ms]
 </programlisting>
     <para>
       As you can see, instead of waking up ten times a second,
@@ -24314,7 +24314,7 @@ val busy_loop : int -&gt; unit = &lt;fun&gt;
     <programlisting language="ocaml">
 ...part 46 of async/main.topscript
 # log_delays (In_thread.run (fun () -&gt; busy_loop 100));; 
-- : Core.Span.t list = [0.000953674ms; 244.33ms]
+- : Core.Span.t list = [0.000953674ms; 244.311ms]
 </programlisting>
     <para>
       Now <literal>log_delays</literal> does get a chance to run, but
@@ -24343,7 +24343,7 @@ val busy_loop : int -&gt; unit = &lt;fun&gt;
   ;; 
 val noalloc_busy_loop : int -&gt; unit = &lt;fun&gt;
 # log_delays (In_thread.run (fun () -&gt; noalloc_busy_loop 500));; 
-- : Core.Span.t list = [0.00190735ms; 886.717ms]
+- : Core.Span.t list = [0.00214577ms; 916.779ms]
 </programlisting>
     <para>
       Even though <literal>noalloc_busy_loop</literal> was running in a
@@ -25034,7 +25034,7 @@ val t_ptr : time_t ptr = &lt;abstr&gt;
       <programlisting language="ocaml">
 ...part 7 of ffi/posix.topscript
 # ctime t_ptr ;; 
-- : string = &quot;Sun Aug 11 17:43:59 2013\n&quot;
+- : string = &quot;Sun Aug 11 22:10:43 2013\n&quot;
 </programlisting>
     </sect2>
     <sect2 id="using-views-to-map-complex-values">
@@ -25271,7 +25271,7 @@ val gettimeofday : timeval structure ptr -&gt; timezone structure ptr -&gt; int 
   Pervasives.(float secs +. float usecs /. 1000000.0) ;; 
 val gettimeofday' : unit -&gt; float = &lt;fun&gt;
 # gettimeofday' () ;; 
-- : float = 1376239440.
+- : float = 1376255444.09
 </programlisting>
       <para>
         You need to be a little careful not to get all the open modules
@@ -25343,9 +25343,9 @@ let () =
 (* ffi/build_datetime.out  *)
 $ corebuild -pkg ctypes.foreign datetime.native
 $ ./datetime.native
-1376238867.561975
+1376254883.481972
 $ ./datetime.native -a
-Sun Aug 11 17:34:27 2013
+Sun Aug 11 22:01:23 2013
 </programlisting>
         <sidebar>
         <title>
@@ -27357,8 +27357,8 @@ Estimated testing time 20s (change using -quota SECS).
                                                                    
   Name        Time (ns)       Minor   Major   Promoted   % of max  
  ----------- ----------- ----------- ------- ---------- ---------- 
-  mutable     6_472_893   2_000_004    9.05       9.05     100.00  
-  immutable   4_951_597   5_000_005    0.03       0.03      76.50  
+  mutable     6_306_192   2_000_004    9.05       9.05     100.00  
+  immutable   4_682_185   5_000_005    0.03       0.03      74.25  
                                                                    
 </programlisting>
         <para>
@@ -29893,9 +29893,9 @@ Estimated testing time 30s (change using -quota SECS).
                                                          
   Name                             Time (ns)   % of max  
  -------------------------------- ----------- ---------- 
-  Polymorphic pattern                  29.40     100.00  
-  Monomorphic incomplete pattern       28.03      95.33  
-  Monomorphic exhaustive pattern       25.91      88.11  
+  Polymorphic pattern                  29.46     100.00  
+  Monomorphic incomplete pattern       28.06      95.25  
+  Monomorphic exhaustive pattern       26.04      88.38  
                                                          
 </programlisting>
       <para>
@@ -30513,7 +30513,7 @@ Estimated testing time 20s (change using -quota SECS).
                                                  
   Name                     Time (ns)   % of max  
  ------------------------ ----------- ---------- 
-  Polymorphic comparison      13_920     100.00  
+  Polymorphic comparison      13_914     100.00  
   Monomorphic comparison         815       5.86  
                                                  
 </programlisting>
