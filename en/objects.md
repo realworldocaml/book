@@ -387,7 +387,7 @@ Aspects of this section may seem fairly complicated, but it should be pointed
 out that this typing _works_, and in the end the type annotations are fairly
 minor.  In most typed object-oriented languages, these coercions would simply
 not be possible.  For example, in C++, a STL type `list<T>` is invariant in
-`T`, it is simply not possible to use `list<square>` where `list<shape>` is
+`T`, so it is simply not possible to use `list<square>` where `list<shape>` is
 expected (at least safely).  The situation is similar in Java, although Java
 has an escape hatch that allows the program to fall back to dynamic typing.
 The situation in OCaml is much better; it works, it is statically checked, and
