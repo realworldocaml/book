@@ -140,7 +140,7 @@ and you'll see the results summarized in a neat table.
 ```
 
 These results confirm our earlier performance hypothesis obtained from
-inspecting the lambda code. The shortest running time comes from the exhaustive
+inspecting the lambda code. The shortest running time comes from the small conditional
 pattern match and polymorphic variant pattern matching is the slowest.  There
 isn't a hugely significant difference in these examples, but you can use the
 same techniques to peer into the innards of your own source code and narrow
