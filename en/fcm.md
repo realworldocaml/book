@@ -215,10 +215,9 @@ of other values you're working with.
 
 <note><title> More on locally abstract types </title>
 
-One of the key properties of locally abstract types is that they are
-dealt with as abstract types within the function they're defined
-within, but are polymorphic from the outside.  Consider the following
-example.
+One of the key properties of locally abstract types is that they're dealt with
+as abstract types in the function they're defined within, but are polymorphic
+from the outside.  Consider the following example.
 
 ```frag
 ((typ ocamltop)(name fcm/main.topscript)(part 19))
