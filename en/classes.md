@@ -52,18 +52,18 @@ A class definition serves as the _constructor_ for the class.  In
 general, a class definition may have parameters that must be provided
 as arguments when the object is created with `new`.
 
-Let's implement a class for creating simple stack objects. When defining the
-class, the type parameters are placed in square brackets before the class name
-in the class definition.  We also need a parameter `init` for the initial
-contents of the stack.
+Let's implement a variant of the `istack` class that can hold any values, not
+just integers. When defining the class, the type parameters are placed in
+square brackets before the class name in the class definition.  We also add a
+parameter `init` for the initial contents of the stack.
 
 ```frag
 ((typ ocamltop)(name classes/stack.topscript)(part 0))
 ```
 
 Note that the type parameter `['a]` in the definition uses square brackets, but
-other uses of the type can omit them (or use parentheses if there is more than
-one type parameter).
+for other uses of the type they are omited (or replaced with parentheses if
+there is more than one type parameter).
 
 The type annotation on the declaration of `v` is used to constrain type
 inference.  If we omit this annotation, the type inferred for the class will
@@ -397,12 +397,12 @@ not implemented.  A class containing virtual methods must also be flagged
 `virtual` and cannot be directly instantiated (i.e. no object of this class can
 be created).
 
-To explore this, lets extend our shapes examples to simple interactive
+To explore this, let's extend our shapes examples to simple interactive
 graphics.  We will use the Async concurrency library and the
 [Async_graphics](http://github.com/lpw25/async_graphics/) library, which
 provides an asynchronous interface to OCaml's built in Graphics library.
 Concurrent programming with Async will be explored later in
-[xref](#concurrent-programming-with-async), for now you can safely ignore the
+[xref](#concurrent-programming-with-async); for now you can safely ignore the
 details.  You just need to run `opam install async_graphics` to get the library
 installed on your system.
 

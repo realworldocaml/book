@@ -32,9 +32,10 @@ There are five fundamental properties that differentiate OOP from other styles:
   to produce a new kind of object.  This new definition can override
   some behavior, but also share code with its parent.
 * _Open recursion_: an object's methods can invoke another method in the same
-  object using a special variable (often called `self` or `this`). These
-  calls use dynamic lookup, allowing a method defined in one object to
-  invoke methods defined in another object that inherits from the first.
+  object using a special variable (often called `self` or `this`). When objects
+  are created from classes, these calls use dynamic lookup, allowing a method
+  defined in one class to invoke methods defined in another class that inherits
+  from the first.
 
 Almost every notable modern programming language has been influenced
 by OOP, and you'll have run across these terms if you've ever used
@@ -112,8 +113,8 @@ The type system will complain if it sees incompatible uses of the same method:
 
 The `..` in the inferred object types are ellipses, standing for other
 unspecified methods that the object may have.  The type `< width : float; .. >`
-specifies an object that must have at least an `width` method, and possibly
-some others as well. Such object types are said to be _open_.
+specifies an object that must have at least a `width` method, and possibly some
+others as well. Such object types are said to be _open_.
 
 We can manually _close_ an object type using a type annotation:
 
@@ -198,11 +199,11 @@ The real benefits of objects come from the class system. Classes support
 inheritance and open recursion. Open recursion allows interdependent parts of
 an object to be defined separately. This works because calls between the
 methods of an object are determined when the object is instantiated, a form of
-_dynamic_ binding. This makes it possible (and necessary) for one method to
+_late_ binding. This makes it possible (and necessary) for one method to
 refer to other methods in the object without knowing statically how they will
 be implemented.
 
-In contrast, modules use static binding.  If you want to parameterize your
+In contrast, modules use early binding.  If you want to parameterize your
 module code so that some part of it can be implemented later, you would write a
 function or functor.  This is more explicit, but often more verbose than
 overriding a method in a class.
@@ -225,7 +226,7 @@ Subtyping is a central concept in object-oriented programming.  It
 governs when an object with one type _A_ can be used in an expression
 that expects an object of another type _B_.  When this is true, we say
 that _A_ is a _subtype_ of _B_.  Actually, more concretely, subtyping
-determines when the coercion operator `e :> t` can be applied.  This
+restricts when the coercion operator `e :> t` can be applied.  This
 coercion works only if the expression `e` has some type `s` and `s` is
 a subtype of `t`.
 
@@ -275,7 +276,8 @@ type, so they can both be coerced into the object type `< shape : shape >`
 ### Polymorphic variant subtyping
 
 Subtyping can also be used to coerce a polymorphic variant into a larger
-polymorphic variant type.
+polymorphic variant type. A polymorphic variant type _A_ is a subtype of _B_,
+if the tags of _A_ are a subset of the tags of _B_.
 
 ```frag
 ((typ ocamltop)(name objects/subtyping.topscript)(part 4))
@@ -293,7 +295,7 @@ a `square list` to be a `shape list`. OCaml does indeed allow such coercions:
 Note that this relies on lists being immutable. It would not be safe to treat a
 `square array` as a `shape array` because it would allow you to store
 non-square shapes into what should be an array of squares. OCaml recognizes
-this and does not allow the coercion.
+this and does not allow the coercion:
 
 ```frag
 ((typ ocamltop)(name objects/subtyping.topscript)(part 6))
@@ -352,13 +354,13 @@ If we wanted to write a function that took a list of such stacks and found the
 total area of their shapes, we might try:
 
 ```frag
-((typ ocamltop)(name objects/subtyping.topscript)(part 12))
+((typ ocamltop)(name objects/subtyping.topscript)(part 11))
 ```
 
 However, when we try to apply this function to our objects we get an error:
 
 ```frag
-((typ ocamltop)(name objects/subtyping.topscript)(part 13))
+((typ ocamltop)(name objects/subtyping.topscript)(part 12))
 ```
 
 As you can see, `square stack` and `circle stack` are not subtypes of `shape
@@ -378,14 +380,14 @@ define a type `readonly_stack` and confirm that we can coerce the list of
 stacks to it.
 
 ```frag
-((typ ocamltop)(name objects/subtyping.topscript)(part 14))
+((typ ocamltop)(name objects/subtyping.topscript)(part 13))
 ```
 
 Aspects of this section may seem fairly complicated, but it should be pointed
 out that this typing _works_, and in the end the type annotations are fairly
 minor.  In most typed object-oriented languages, these coercions would simply
 not be possible.  For example, in C++, a STL type `list<T>` is invariant in
-`T`, it is simply not possible to use `list<square>` where `list<shape>` is
+`T`, so it is simply not possible to use `list<square>` where `list<shape>` is
 expected (at least safely).  The situation is similar in Java, although Java
 has an escape hatch that allows the program to fall back to dynamic typing.
 The situation in OCaml is much better; it works, it is statically checked, and
@@ -463,10 +465,11 @@ provide much value here.
 
 ### Subtyping vs. row polymorphism ###
 
-There is a great deal of overlap between subtyping and row polymorphism. Row
-polymorphism is in general preferred over subtyping because it does not require
-explicit coercions, and it preserves more type information, allowing functions
-like the following:
+There is considerable overlap between subtyping and row polymorphism. Both
+mechanisms allow you to write functions that can be applied to objects of
+different types. In these cases, row polymorphism is usually preferred over
+subtyping because it does not require explicit coercions, and it preserves more
+type information, allowing functions like the following:
 
 ```frag
 ((typ ocamltop)(name objects/row_polymorphism.topscript)(part 1))
@@ -487,16 +490,17 @@ known to have an `area` method.
 ((typ ocamltop)(name objects/row_polymorphism.topscript)(part 3))
 ```
 
-However, there are some situations where we cannot use row polymorphism. For
-example, lists of heterogeneous elements can not be created using row
-polymorphism:
+However, there are some situations where we cannot use row polymorphism. In
+particular, row polymorphism cannot be used to place different types of object
+in the same container. For example, lists of heterogeneous elements cannot be
+created using row polymorphism:
 
 ```frag
 ((typ ocamltop)(name objects/row_polymorphism.topscript)(part 4))
 ```
 
-Since row polymorphism is a form of polymorphism, it also does not work well
-with references:
+Similarly, we cannot use row polymorphism to store different types of object in
+the same reference:
 
 ```frag
 ((typ ocamltop)(name objects/row_polymorphism.topscript)(part 5))
@@ -505,7 +509,7 @@ with references:
 In both these cases we must use subtyping:
 
 ```frag
-((typ ocamltop)(name objects/row_polymorphism.topscript)(part 5))
+((typ ocamltop)(name objects/row_polymorphism.topscript)(part 6))
 ```
 
 <note>
