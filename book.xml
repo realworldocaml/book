@@ -56,7 +56,7 @@
       <listitem>
         <para>
           <emphasis>Garbage collection</emphasis> for automatic memory
-          management, now a feature of almost every modern high-level
+          m>anagement, now a feature of almost every modern high-level
           language.
         </para>
       </listitem>
@@ -476,7 +476,7 @@ $ utop
       Now let's try a few simple numerical calculations.
     </para>
     <programlisting language="ocaml">
-...part 1 of guided-tour/main.topscript
+<lineannotation>...part 1 of guided-tour/main.topscript</lineannotation>
 # 3 + 4;; 
 - : int = 7
 # 8 / 3;; 
