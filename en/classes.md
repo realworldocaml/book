@@ -402,7 +402,7 @@ graphics.  We will use the Async concurrency library and the
 [Async_graphics](http://github.com/lpw25/async_graphics/) library, which
 provides an asynchronous interface to OCaml's built in Graphics library.
 Concurrent programming with Async will be explored later in
-[xref](#concurrent-programming-with-async), for now you can safely ignore the
+[xref](#concurrent-programming-with-async); for now you can safely ignore the
 details.  You just need to run `opam install async_graphics` to get the library
 installed on your system.
 
