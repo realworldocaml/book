@@ -52,10 +52,10 @@ A class definition serves as the _constructor_ for the class.  In
 general, a class definition may have parameters that must be provided
 as arguments when the object is created with `new`.
 
-Let's implement a class for creating simple stack objects. When defining the
-class, the type parameters are placed in square brackets before the class name
-in the class definition.  We also need a parameter `init` for the initial
-contents of the stack.
+Let's implement a variant of the `istack` class that can hold any values, not
+just integers. When defining the class, the type parameters are placed in
+square brackets before the class name in the class definition.  We also add a
+parameter `init` for the initial contents of the stack.
 
 ```frag
 ((typ ocamltop)(name classes/stack.topscript)(part 0))
