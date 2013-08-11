@@ -489,7 +489,7 @@ tree, so it should be used with care.
 
 ### How names are resolved
 
-The main trickiness of multiple inheritance is due to naming -- what happens
+The main trickiness of multiple inheritance is due to naming&#x2014;what happens
 when a method or field with some name is defined in more than one class?
 
 If there is one thing to remember about inheritance in OCaml, it is this:
@@ -535,7 +535,7 @@ for multiple inheritance that is both useful and reasonably simple, the _mixin_
 pattern.  Generically, a _mixin_ is just a virtual class that implements a
 feature based on another one.  If you have a class that implements methods _A_,
 and you have a mixin _M_ that provides methods _B_ from _A_, then you can
-inherit from _M_ -- "mixing" it in -- to get features _B_.
+inherit from _M_&#x2014;"mixing" it in&#x2014;to get features _B_.
 
 That's too abstract, so let's give some examples based on our interactive
 shapes. We may wish to allow a shape to be dragged by the mouse. We can define

@@ -1,7 +1,7 @@
 # The Compiler Frontend: Parsing and Type Checking
 
 Compiling source code into executable programs is a fairly complex process that
-involves quite a few tools -- preprocessors, compilers, runtime libraries,
+involves quite a few tools&#x2014;preprocessors, compilers, runtime libraries,
 linkers and assemblers.  It's important to understand how these fit together to
 help with your day-to-day workflow of developing, debugging and deploying
 applications.
@@ -461,7 +461,7 @@ see these all these transformations precisely.
 Syntax extensions are a powerful extension mechanism that can completely alter
 your source code's layout and style.  Core includes a very conservative set of
 extensions that take care to minimize the syntax changes.  There are a number
-of third-party libraries that are much more ambitious --- some introduce
+of third-party libraries that are much more ambitious&#x2014;some introduce
 whitespace-sensitive indentation, while others build entirely new embedded
 languages using OCaml as a host language, and yet others introduce conditional
 compilation for macros or optional logging.
@@ -611,7 +611,7 @@ messages).
 #### Adding type annotations to find errors
 
 It's often said that the hardest part of writing OCaml code is getting past the
-type checker -- but once the code does compile, it works correctly the first
+type checker&#x2014;but once the code does compile, it works correctly the first
 time!   This is an exaggeration of course, but it can certainly feel true when
 moving from a dynamically typed language. The OCaml static type system protects
 you from certain classes of bugs such as memory errors and abstraction

@@ -423,7 +423,7 @@ definition of various identifiers.  Here's an example.
 `open` is essential when you want to modify your environment for a
 standard library like Core, but it's generally good style to keep
 opening of modules to a minimum.  Opening a module is basically a
-tradeoff between terseness and explicitness --- the more modules you
+tradeoff between terseness and explicitness&#x2014;the more modules you
 open, the fewer module qualifications you need, and the harder it is
 to look at an identifier and figure out where it comes from.
 
