@@ -303,15 +303,17 @@
             language, but the ideas covered there will be explained in
             more depth in the chapters that follow.
           </para>
-          <para>
-            After covering the core language, Part I then moves onto
-            more advanced features like modules, functors and objects,
-            which may take some time to digest. Understanding these
-            concepts is important, though. These ideas will put you in
-            good stead even beyond OCaml when switching to other modern
-            languages, many of which have drawn inspiration from ML.
-          </para>
         </listitem>
+      </itemizedlist>
+      <para>
+        After covering the core language, Part I then moves onto more
+        advanced features like modules, functors and objects, which may
+        take some time to digest. Understanding these concepts is
+        important, though. These ideas will put you in good stead even
+        beyond OCaml when switching to other modern languages, many of
+        which have drawn inspiration from ML.
+      </para>
+      <itemizedlist>
         <listitem>
           <para>
             Part II builds on the basics by working through useful tools
@@ -1438,7 +1440,7 @@ val log_entry : Time.t option -&gt; string -&gt; string = &lt;fun&gt;
 # log_entry (Some Time.epoch) &quot;A long long time ago&quot;;; 
 - : string = &quot;1970-01-01 01:00:00 -- A long long time ago&quot;
 # log_entry None &quot;Up to the minute&quot;;; 
-- : string = &quot;2013-08-07 09:27:32 -- Up to the minute&quot;
+- : string = &quot;2013-08-11 17:36:34 -- Up to the minute&quot;
 </programlisting>
       <para>
         This example uses Core's <literal>Time</literal> module for
@@ -1521,7 +1523,7 @@ Error: Unbound value x
     </sect2>
   </sect1>
   <sect1 id="records-and-variants">
-    <title>Records and Variants</title>
+    <title>Records and variants</title>
     <para>
       So far, we've only looked at data structures that were predefined
       in the language, like lists and tuples. But OCaml also allows us
@@ -3223,24 +3225,28 @@ ratio ~num ~denom;;
             which indicates whether that array will ever shrink when
             elements are removed.
           </para>
-          <programlisting>
-((typ ocaml)(name variables-and-functions/htable_sig1.ml))
-</programlisting>
-          <para>
-            The above signature makes it hard to divine the meaning of
-            those two arguments. but with labeled arguments, we can make
-            the intent immediately clear.
-          </para>
-          <programlisting>
-((typ ocaml)(name variables-and-functions/htable_sig2.ml))
-</programlisting>
-          <para>
-            Choosing label names well is especially important for
-            Boolean values, since it's often easy to get confused about
-            whether a value being true is meant ot enable or disable a
-            given feature.
-          </para>
         </listitem>
+      </itemizedlist>
+      <programlisting language="ocaml">
+(* variables-and-functions/htable_sig1.ml  *)
+val create_hashtable : int -&gt; bool -&gt; ('a,'b) Hashtable.t
+</programlisting>
+      <para>
+        The above signature makes it hard to divine the meaning of those
+        two arguments. but with labeled arguments, we can make the
+        intent immediately clear.
+      </para>
+      <programlisting language="ocaml">
+(* variables-and-functions/htable_sig2.ml  *)
+val create_hashtable :
+  init_size:int -&gt; allow_shrinking:bool -&gt; ('a,'b) Hashtable.t
+</programlisting>
+      <para>
+        Choosing label names well is especially important for Boolean
+        values, since it's often easy to get confused about whether a
+        value being true is meant ot enable or disable a given feature.
+      </para>
+      <itemizedlist>
         <listitem>
           <para>
             When defining functions that have multiple arguments that
@@ -3249,24 +3255,28 @@ ratio ~num ~denom;;
             consider this signature for a function that extracts a
             substring.
           </para>
-          <programlisting>
-((typ ocaml)(name variables-and-functions/substring_sig1.ml))
-</programlisting>
-          <para>
-            Here, the two ints are the starting position and length of
-            the substring to extract, respectively. We can can make this
-            fact more obvious from the signature by adding labels.
-          </para>
-          <programlisting>
-((typ ocaml)(name variables-and-functions/substring_sig2.ml))
-</programlisting>
-          <para>
-            This improves the readability of both the signature and of
-            client code that makes use of <literal>substring</literal>,
-            and makes it harder to accidentally swap the position and
-            the length.
-          </para>
         </listitem>
+      </itemizedlist>
+      <programlisting language="ocaml">
+(* variables-and-functions/substring_sig1.ml  *)
+val substring: string -&gt; int -&gt; int -&gt; string
+</programlisting>
+      <para>
+        Here, the two ints are the starting position and length of the
+        substring to extract, respectively. We can can make this fact
+        more obvious from the signature by adding labels.
+      </para>
+      <programlisting language="ocaml">
+(* variables-and-functions/substring_sig2.ml  *)
+val substring: string -&gt; pos:int -&gt; len:int -&gt; string
+</programlisting>
+      <para>
+        This improves the readability of both the signature and of
+        client code that makes use of <literal>substring</literal>, and
+        makes it harder to accidentally swap the position and the
+        length.
+      </para>
+      <itemizedlist>
         <listitem>
           <para>
             When you want flexibility on the order in which arguments
@@ -3277,19 +3287,28 @@ ratio ~num ~denom;;
             <literal>List.iter</literal> by giving it just the function,
             as in the following example from earlier in the chapter.
           </para>
-          <programlisting>
-((typ ocamltop)(name variables-and-functions/main.topscript)(part 43)) 
-</programlisting>
-          <para>
-            This requires that we put the function argument first. In
-            other cases, you want to put the function argument second.
-            One common reason is readability. In particular, a
-            multi-line function passed as an argument to another
-            function is easiest to read when it is the final argument to
-            that function.
-          </para>
         </listitem>
       </itemizedlist>
+      <programlisting language="ocaml">
+...part 43 of variables-and-functions/main.topscript
+#   String.split ~on:':' path
+  |&gt; List.dedup ~compare:String.compare
+  |&gt; List.iter ~f:print_endline
+  ;; 
+
+/bin
+/sbin
+/usr/bin
+/usr/local/bin
+- : unit = ()
+</programlisting>
+      <para>
+        This requires that we put the function argument first. In other
+        cases, you want to put the function argument second. One common
+        reason is readability. In particular, a multi-line function
+        passed as an argument to another function is easiest to read
+        when it is the final argument to that function.
+      </para>
       <sect3 id="higher-order-functions-and-labels">
         <title>Higher-order functions and labels</title>
         <para>
@@ -3996,20 +4015,27 @@ val plus_one_if : int -&gt; int = &lt;fun&gt;
 /home/rwo/.opam/4.01.0dev+trunk/lib/core_bench: added to search path
 /home/rwo/.opam/4.01.0dev+trunk/lib/core_bench/core_bench.cma: loaded
 # open Core_bench.Std;; 
+# let run_bench tests =
+  Bench.bench
+    ~ascii_table:true
+    ~display:Textutils.Ascii_table.Display.column_titles 
+    tests
+;; 
+val run_bench : Bench.Test.t list -&gt; unit = &lt;fun&gt;
 # [ Bench.Test.create ~name:&quot;plus_one_match&quot; (fun () -&gt;
       ignore (plus_one_match 10))
   ; Bench.Test.create ~name:&quot;plus_one_if&quot; (fun () -&gt;
       ignore (plus_one_if 10)) ]
-  |&gt; Bench.bench
+  |&gt; run_bench
   ;; 
 
 Estimated testing time 20s (change using -quota SECS).
-┌────────────────┬───────────┬──────────┐
-│ Name           │ Time (ns) │ % of max │
-├────────────────┼───────────┼──────────┤
-│ plus_one_match │     46.81 │    68.20 │
-│ plus_one_if    │     68.64 │   100.00 │
-└────────────────┴───────────┴──────────┘
+                                         
+  Name             Time (ns)   % of max  
+ ---------------- ----------- ---------- 
+  plus_one_match       46.85      68.26  
+  plus_one_if          68.63     100.00  
+                                         
 - : unit = ()
 </programlisting>
       <para>
@@ -4038,16 +4064,16 @@ val sum_if : int list -&gt; int = &lt;fun&gt;
 # let numbers = List.range 0 1000 in
   [ Bench.Test.create ~name:&quot;sum_if&quot; (fun () -&gt; ignore (sum_if numbers))
   ; Bench.Test.create ~name:&quot;sum&quot;    (fun () -&gt; ignore (sum numbers)) ]
-  |&gt; Bench.bench
+  |&gt; run_bench
   ;; 
 
 Estimated testing time 20s (change using -quota SECS).
-┌────────┬───────────┬──────────┐
-│ Name   │ Time (ns) │ % of max │
-├────────┼───────────┼──────────┤
-│ sum_if │   110_524 │   100.00 │
-│ sum    │    22_358 │    20.23 │
-└────────┴───────────┴──────────┘
+                                 
+  Name     Time (ns)   % of max  
+ -------- ----------- ---------- 
+  sum_if     110_533     100.00  
+  sum         22_348      20.22  
+                                 
 - : unit = ()
 </programlisting>
       <para>
@@ -5678,22 +5704,30 @@ Error: Unbound value foo
           <emphasis>local open</emphasis>. There are two syntaxes for
           local opens. For example, you can write:
         </para>
-        <programlisting>
-((typ ocamltop)(name files-modules-and-programs/main.topscript)(part 1))
-</programlisting>
-        <para>
-          In the above, <literal>of_int</literal> and the infix
-          operators are the ones from the <literal>Int64</literal>
-          module.
-        </para>
-        <para>
-          There's another even more lightweight syntax for local opens,
-          which is particularly useful for small expressions:
-        </para>
-        <programlisting>
-((typ ocamltop)(name files-modules-and-programs/main.topscript)(part 2))
-</programlisting>
       </listitem>
+    </itemizedlist>
+    <programlisting language="ocaml">
+...part 1 of files-modules-and-programs/main.topscript
+# let average x y =
+    let open Int64 in
+    x + y / of_int 2;; 
+val average : int64 -&gt; int64 -&gt; int64 = &lt;fun&gt;
+</programlisting>
+    <para>
+      In the above, <literal>of_int</literal> and the infix operators
+      are the ones from the <literal>Int64</literal> module.
+    </para>
+    <para>
+      There's another even more lightweight syntax for local opens,
+      which is particularly useful for small expressions:
+    </para>
+    <programlisting language="ocaml">
+...part 2 of files-modules-and-programs/main.topscript
+# let average x y =
+    Int64.(x + y / of_int 2);; 
+val average : int64 -&gt; int64 -&gt; int64 = &lt;fun&gt;
+</programlisting>
+    <itemizedlist>
       <listitem>
         <para>
           An alternative to local opens that makes your code terser
@@ -5701,24 +5735,34 @@ Error: Unbound value foo
           name of a module. So, when using the
           <literal>Counter.median</literal> type, instead of writing:
         </para>
-        <programlisting>
-((typ ocaml)(name files-modules-and-programs-freq-median/use_median_1.ml)(part 1))
-</programlisting>
-        <para>
-          you could write:
-        </para>
-        <programlisting>
-((typ ocaml)(name files-modules-and-programs-freq-median/use_median_2.ml)(part 1))
-</programlisting>
-        <para>
-          Because the module name <literal>C</literal> only exists for a
-          short scope, it's easy to read and remember what
-          <literal>C</literal> stands for. Rebinding modules to very
-          short names at the toplevel of your module is usually a
-          mistake.
-        </para>
       </listitem>
     </itemizedlist>
+    <programlisting language="ocaml">
+(* files-modules-and-programs-freq-median/use_median_1.ml (starting from part 1) *)
+let print_median m =
+  match m with
+  | Counter.Median string -&gt; printf &quot;True median:\n   %s\n&quot; string
+  | Counter.Before_and_after (before, after) -&gt;
+    printf &quot;Before and after median:\n   %s\n   %s\n&quot; before after
+</programlisting>
+    <para>
+      you could write:
+    </para>
+    <programlisting language="ocaml">
+(* files-modules-and-programs-freq-median/use_median_2.ml (starting from part 1) *)
+let print_median m =
+  let module C = Counter in
+  match m with
+  | C.Median string -&gt; printf &quot;True median:\n   %s\n&quot; string
+  | C.Before_and_after (before, after) -&gt;
+    printf &quot;Before and after median:\n   %s\n   %s\n&quot; before after
+</programlisting>
+    <para>
+      Because the module name <literal>C</literal> only exists for a
+      short scope, it's easy to read and remember what
+      <literal>C</literal> stands for. Rebinding modules to very short
+      names at the toplevel of your module is usually a mistake.
+    </para>
   </sect1>
   <sect1 id="including-modules">
     <title>Including modules</title>
@@ -6117,7 +6161,7 @@ type host_info = {
     };; 
 val my_host : host_info =
   {hostname = &quot;ocaml-www1&quot;; os_name = &quot;Linux&quot;; cpu_arch = &quot;unknown&quot;;
-   timestamp = 2013-08-07 09:30:11.054066+01:00}
+   timestamp = 2013-08-11 17:39:15.907992+01:00}
 </programlisting>
   <para>
     You might wonder how the compiler inferred that
@@ -6173,7 +6217,7 @@ val first_timestamped : 'a timestamped list -&gt; 'a timestamped option = &lt;fu
        sprintf &quot;%s (%s / %s, on %s)&quot; h os c (Time.to_sec_string ts);; 
 val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
 # host_info_to_string my_host;; 
-- : string = &quot;ocaml-www1 (Linux / unknown, on 2013-08-07 09:30:11)&quot;
+- : string = &quot;ocaml-www1 (Linux / unknown, on 2013-08-11 17:39:15)&quot;
 </programlisting>
     <para>
       Note that the pattern that we used had only a single case, rather
@@ -6340,7 +6384,7 @@ val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
 val my_host : host_info =
   {hostname = &quot;ocaml-www1&quot;; os_name = &quot;Linux&quot;; cpu_arch = &quot;unknown&quot;;
    os_release = &quot;3.2.0-1-amd64&quot;;
-   timestamp = 2013-08-07 09:30:17.398365+01:00}
+   timestamp = 2013-08-11 17:39:22.408068+01:00}
 </programlisting>
     <para>
       In the above code, we defined variables corresponding to the
@@ -6971,12 +7015,12 @@ val show_field :
                 credentials = &quot;Xy2d9W&quot;; }
   ;; 
 val logon : Logon.t =
-  {Logon.session_id = &quot;26685&quot;; time = 2013-08-07 09:30:22.563708+01:00;
+  {Logon.session_id = &quot;26685&quot;; time = 2013-08-11 17:39:27.665242+01:00;
    user = &quot;yminsky&quot;; credentials = &quot;Xy2d9W&quot;}
 # show_field Logon.Fields.user Fn.id logon;; 
 - : string = &quot;user: yminsky&quot;
 # show_field Logon.Fields.time Time.to_string logon;; 
-- : string = &quot;time: 2013-08-07 09:30:22.563708+01:00&quot;
+- : string = &quot;time: 2013-08-11 17:39:27.665242+01:00&quot;
 </programlisting>
     <para>
       As a side note, the above is our first use of the
@@ -9278,15 +9322,15 @@ let () =
       <programlisting>
 # running error-handling/run_exn_cost.out.sh
 $ corebuild -pkg core_bench exn_cost.native
-$ ./exn_cost.native cycles
+$ ./exn_cost.native -ascii cycles
 Estimated testing time 30s (change using -quota SECS).
-┌──────────────────────────────┬────────┬───────────┬──────────┐
-│ Name                         │ Cycles │ Time (ns) │ % of max │
-├──────────────────────────────┼────────┼───────────┼──────────┤
-│ simple computation           │    268 │       112 │    76.04 │
-│ simple computation w/handler │    297 │       124 │    84.32 │
-│ end with exn                 │    352 │       147 │   100.00 │
-└──────────────────────────────┴────────┴───────────┴──────────┘
+                                                                
+  Name                           Cycles   Time (ns)   % of max  
+ ------------------------------ -------- ----------- ---------- 
+  simple computation                279         117      76.75  
+  simple computation w/handler      308         129      84.56  
+  end with exn                      364         152     100.00  
+                                                                
 </programlisting>
       <para>
         Here, we see that we lose something like 20 cycles to adding an
@@ -9296,15 +9340,15 @@ Estimated testing time 30s (change using -quota SECS).
       </para>
       <programlisting>
 # running error-handling/run_exn_cost_notrace.out.sh
-$ OCAMLRUNPARAM= ./exn_cost.native cycles
+$ OCAMLRUNPARAM= ./exn_cost.native -ascii cycles
 Estimated testing time 30s (change using -quota SECS).
-┌──────────────────────────────┬────────┬───────────┬──────────┐
-│ Name                         │ Cycles │ Time (ns) │ % of max │
-├──────────────────────────────┼────────┼───────────┼──────────┤
-│ simple computation           │    267 │       111 │    82.21 │
-│ simple computation w/handler │    296 │       124 │    91.29 │
-│ end with exn                 │    324 │       135 │   100.00 │
-└──────────────────────────────┴────────┴───────────┴──────────┘
+                                                                
+  Name                           Cycles   Time (ns)   % of max  
+ ------------------------------ -------- ----------- ---------- 
+  simple computation                279         117      83.49  
+  simple computation w/handler      308         129      92.03  
+  end with exn                      335         140     100.00  
+                                                                
 </programlisting>
       <para>
         Here, the handler costs about the same, at 20 cycles, but the
@@ -10537,11 +10581,11 @@ val time : (unit -&gt; 'a) -&gt; 'a = &lt;fun&gt;
 ...part 4 of imperative-programming/memo.topscript
 # time (fun () -&gt; edit_distance &quot;OCaml&quot; &quot;ocaml&quot;);; 
 
-Time: 1.41001ms
+Time: 1.40905ms
 - : int = 2
 # time (fun () -&gt; edit_distance &quot;OCaml 4.01&quot; &quot;ocaml 4.01&quot;);; 
 
-Time: 6.78891s
+Time: 6.78195s
 - : int = 2
 </programlisting>
       <para>
@@ -10577,11 +10621,11 @@ val fib : int -&gt; int = &lt;fun&gt;
 ...part 2 of imperative-programming/fib.topscript
 # time (fun () -&gt; fib 20);; 
 
-Time: 0.844002ms
+Time: 0.844955ms
 - : int = 10946
 # time (fun () -&gt; fib 40);; 
 
-Time: 12.774s
+Time: 12.776s
 - : int = 165580141
 </programlisting>
       <para>
@@ -10604,7 +10648,7 @@ Time: 12.774s
 val fib : int -&gt; int = &lt;fun&gt;
 # time (fun () -&gt; fib 40);; 
 
-Time: 12.7741s
+Time: 12.7757s
 - : int = 165580141
 # time (fun () -&gt; fib 40);; 
 
@@ -10700,7 +10744,7 @@ val memo_rec : (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;
 val fib : int -&gt; int = &lt;fun&gt;
 # time (fun () -&gt; fib 40);; 
 
-Time: 0.056982ms
+Time: 0.0579357ms
 - : int = 102334155
 </programlisting>
       <para>
@@ -10777,7 +10821,7 @@ val edit_distance : string * string -&gt; int = &lt;fun&gt;
 ...part 7 of imperative-programming/memo.topscript
 # time (fun () -&gt; edit_distance (&quot;OCaml 4.01&quot;,&quot;ocaml 4.01&quot;));; 
 
-Time: 0.495911ms
+Time: 0.515938ms
 - : int = 2
 </programlisting>
       <note> <title> 
@@ -10860,7 +10904,7 @@ Exception: Lazy.Undefined.
 val lazy_memo_rec : (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;
 # time (fun () -&gt; lazy_memo_rec fib_norec 40);; 
 
-Time: 0.0619888ms
+Time: 0.0648499ms
 - : int = 102334155
 </programlisting>
       <para>
@@ -13290,8 +13334,8 @@ val bump_list : (module Bumpable with type t = 'a) -&gt; 'a list -&gt; 'a list =
     More on locally abstract types
     </title>
     <para>
-      One of the key properties of locally abstract types is that they
-      are dealt with as abstract types within the function they're
+      One of the key properties of locally abstract types is that
+      they're dealt with as abstract types in the function they're
       defined within, but are polymorphic from the outside. Consider the
       following example.
     </para>
@@ -14320,7 +14364,7 @@ end;;
 val t : &lt; pop : int option &gt; = &lt;obj&gt;
 # print_pop t;; 
 
-Popped: 1375864265
+Popped: 1376239212
 - : unit = ()
 </programlisting>
   </sect1>
@@ -15862,12 +15906,10 @@ Error: Type square = &lt; area : float; equals : square -&gt; bool; width : int 
     <para>
       The problem is that a <literal>square</literal> expects to be
       compared with a <literal>square</literal>, not an arbitrary shape;
-      similarly for <literal>circle</literal>.
-    </para>
-    <para>
-      This problem is fundamental. Many languages solve it either with
-      narrowing (with dynamic type checking), or by method overloading.
-      Since OCaml has neither of these, what can we do?
+      similarly for <literal>circle</literal>. This problem is
+      fundamental. Many languages solve it either with narrowing (with
+      dynamic type checking), or by method overloading. Since OCaml has
+      neither of these, what can we do?
     </para>
     <para>
       Since the problematic method is equality, one proposal we could
@@ -15882,11 +15924,9 @@ Error: Type square = &lt; area : float; equals : square -&gt; bool; width : int 
 - : bool = false
 </programlisting>
     <para>
-      The problem here is that the built-in polymorphic equality
-      compares the method implementations, not their return values. The
-      method implementations (the function values that implement the
-      methods) are different, and so the equality comparison is false.
-      There are other reasons not to use the built-in polymorphic
+      The problem here is that two objects are considered equal by the
+      built-in polymorphic equality if and only if they are physically
+      equal. There are other reasons not to use the built-in polymorphic
       equality, but these false negatives are a showstopper.
     </para>
     <para>
@@ -15956,7 +15996,7 @@ end
       A <emphasis>virtual</emphasis> class is a class where some methods
       or fields are declared, but not implemented. This should not be
       confused with the word <literal>virtual</literal> as it is used in
-      C++. In C++, a <literal>virtual</literal> method uses dynamic
+      C++. A <literal>virtual</literal> method in C++ uses dynamic
       dispatch, while regular non-virtual methods are statically
       dispatched. In OCaml, <emphasis>all</emphasis> methods use dynamic
       dispatch, but the keyword <literal>virtual</literal> means that
@@ -15978,50 +16018,22 @@ end
       <literal>opam install async_graphics</literal> to get the library
       installed on your system.
     </para>
-    <sect2 id="defining-a-drawable-module">
-      <title>Defining a <literal>Drawable</literal> module</title>
+    <para>
+      We will give each shape a <literal>draw</literal> method that
+      describes how to draw the shape on the
+      <literal>Async_graphics</literal> display: ```ocaml (*
+      classes-async/shapes.ml *) open Core.Std open Async.Std open
+      Async_graphics
+    </para>
+    <para>
+      type drawable = &lt; draw: unit &gt; ```
+    </para>
+    <sect2 id="create-some-simple-shapes">
+      <title>Create some simple shapes</title>
       <para>
-        Let's start with by creating a <literal>Drawable</literal>
-        module to hold the base logic to handle the display.
-      </para>
-      <programlisting language="ocaml">
-(* classes-async/drawable.ml  *)
-open Core.Std
-open Async.Std
-open Async_graphics
-
-type drawable = &lt; draw: unit &gt;
-
-let shapes: drawable list ref = ref []
-
-let repaint () =
-  try 
-    clear_graph ();
-    List.iter ~f:(fun s -&gt; s#draw) !shapes;
-    synchronize ()
-  with Graphic_failure _ -&gt; ()
-
-let () = 
-  Clock.every (Time.Span.of_sec (1.0 /. 24.0)) repaint
-
-let open_display () =
-  close_graph ();
-  open_graph &quot;&quot;;
-  auto_synchronize false
-</programlisting>
-      <para>
-        We first define our <literal>shape</literal> object type to
-        include a <literal>draw</literal> method, and a reference to a
-        list of shapes to display them. Any shapes in that list will be
-        drawn on the display at regular intervals via the
-        <literal>repaint</literal> function. Finally, we also define an
-        <literal>open_display</literal> function to open a graphical
-        display and ensure that the Async scheduler is running.
-      </para>
-      <para>
-        Now let's create a new module that contains classes for making
-        squares and circles. We include an <literal>on_click</literal>
-        method for adding event handlers to the shapes.
+        Now let's add classes for making squares and circles. We include
+        an <literal>on_click</literal> method for adding event handlers
+        to the shapes.
       </para>
       <programlisting language="ocaml">
 (* classes-async/verbose_shapes.ml  *)
@@ -16102,11 +16114,7 @@ end
         <literal>on_click</literal> and <literal>on_mousedown</literal>.
       </para>
       <programlisting language="ocaml">
-(* classes-async/shapes.ml  *)
-open Core.Std
-open Async.Std
-open Async_graphics
-
+(* classes-async/shapes.ml (starting from part 1) *)
 class virtual shape x y = object (self)
   method virtual private contains: int -&gt; int -&gt; bool
 
@@ -16135,7 +16143,7 @@ end
         <literal>shape</literal>.
       </para>
       <programlisting language="ocaml">
-(* classes-async/shapes.ml (starting from part 1) *)
+(* classes-async/shapes.ml (starting from part 2) *)
 class square w x y = object
   inherit shape x y
 
@@ -16211,7 +16219,7 @@ val o : obj = &lt;obj&gt;
       <literal>on_click</literal> to add a handler for click events.
     </para>
     <programlisting language="ocaml">
-(* classes-async/shapes.ml (starting from part 2) *)
+(* classes-async/shapes.ml (starting from part 3) *)
 class growing_circle r x y = object (self)
   inherit circle r x y
 
@@ -16318,7 +16326,7 @@ end
         event handlers:
       </para>
       <programlisting language="ocaml">
-(* classes-async/shapes.ml (starting from part 3) *)
+(* classes-async/shapes.ml (starting from part 4) *)
 class virtual draggable = object (self)
   method virtual on_mousedown: 
     ?start:unit Deferred.t -&gt; 
@@ -16353,7 +16361,7 @@ end
         inheritance.
       </para>
       <programlisting language="ocaml">
-(* classes-async/shapes.ml (starting from part 4) *)
+(* classes-async/shapes.ml (starting from part 5) *)
 class small_square = object
   inherit square 20 40 40
   inherit draggable 
@@ -16367,7 +16375,7 @@ end
         called regular intervals when the shape is animated.
       </para>
       <programlisting language="ocaml">
-(* classes-async/shapes.ml (starting from part 5) *)
+(* classes-async/shapes.ml (starting from part 6) *)
 class virtual animated span = object (self)
   method virtual on_click: 
     ?start:unit Deferred.t -&gt; 
@@ -16402,7 +16410,7 @@ end
         for a second when clicked:
       </para>
       <programlisting language="ocaml">
-(* classes-async/shapes.ml (starting from part 6) *)
+(* classes-async/shapes.ml (starting from part 7) *)
 class my_circle = object
   inherit circle 20 50 50
   inherit animated Time.Span.second
@@ -16410,10 +16418,10 @@ class my_circle = object
 end
 </programlisting>
       <para>
-        This initializers can also be added using mixins:
+        These initializers can also be added using mixins:
       </para>
       <programlisting language="ocaml">
-(* classes-async/shapes.ml (starting from part 7) *)
+(* classes-async/shapes.ml (starting from part 8) *)
 class virtual linear x' y' = object
   val virtual mutable updates: (int -&gt; unit) list
   val virtual mutable x: int
@@ -16452,7 +16460,7 @@ end
         same object to produce a variety of different animations.
       </para>
       <programlisting language="ocaml">
-(* classes-async/shapes.ml (starting from part 8) *)
+(* classes-async/shapes.ml (starting from part 9) *)
 class my_square x y = object
   inherit square 40 x y
   inherit draggable
@@ -16468,24 +16476,42 @@ let my_circle = object
   inherit harmonic (pi /. 2.0) 0 10
 end
 </programlisting>
+    </sect2>
+    <sect2 id="displaying-the-animated-shapes">
+      <title>Displaying the animated shapes</title>
       <para>
-        Now all we have to do is to glue it together by initializing the
-        display, creating some shapes, and running the scheduler.
+        We finish our shapes module by creating a
+        <literal>main</literal> function to draw some shapes on the
+        graphical display, and running that function using the Async
+        scheduler.
       </para>
       <programlisting language="ocaml">
-(* classes-async/shapes.ml (starting from part 9) *)
-let () =
-  let open Drawable in
-  open_display ();
+(* classes-async/shapes.ml (starting from part 10) *)
+let main () =
   let shapes = [ 
      (my_circle :&gt; drawable); 
      (new my_square 50 350 :&gt; drawable); 
      (new my_square 50 200 :&gt; drawable);
      (new growing_circle 20 70 70 :&gt; drawable);
   ] in
-  Drawable.shapes := shapes;
-  never_returns (Scheduler.go ())
+  let repaint () =
+    clear_graph ();
+    List.iter ~f:(fun s -&gt; s#draw) shapes;
+    synchronize ()
+  in 
+    open_graph &quot;&quot;;
+    auto_synchronize false;
+    Clock.every (Time.Span.of_sec (1.0 /. 24.0)) repaint
+
+let () = never_returns (Scheduler.go_main ~main ())
 </programlisting>
+      <para>
+        Our <literal>main</literal> function creates a list of shapes to
+        be displayed and defines a <literal>repaint</literal> function
+        that actually draws them on the display. We then open a
+        graphical display and ask Async to run
+        <literal>repaint</literal> at regular intervals.
+      </para>
       <para>
         Finally, build the binary by linking against the
         <literal>async_graphics</literal> package, which will pull in
@@ -17562,8 +17588,8 @@ Estimated testing time 20s (change using -quota SECS).
                                 
   Name     Time (ns)   Speedup  
  ------- ------------ --------- 
-  map     31_962_207      1.00  
-  table    7_974_747      4.01  
+  map     31_701_703      1.00  
+  table    7_209_275      4.40  
                                 
 </programlisting>
     <para>
@@ -17646,8 +17672,8 @@ Estimated testing time 20s (change using -quota SECS).
                                
   Name    Time (ns)   Speedup  
  ------- ----------- --------- 
-  map       216_142     11.83  
-  table   2_556_684      1.00  
+  map       218_704     12.03  
+  table   2_630_855      1.00  
                                
 </programlisting>
     <para>
@@ -17944,7 +17970,7 @@ missing anonymous argument: FILENAME
       <programlisting>
 # running command-line-parsing/run_basic_md5.out.sh
 $ ./basic_md5.native ./basic_md5.native
-c9970914b335e160e5597aef11c2c0fa
+b5ee7de449a2e0c6c01d4f2d898926de
 </programlisting>
       <para>
         And that's all it took to build our little MD5 utility! Here's a
@@ -18112,11 +18138,13 @@ let () =
     <programlisting>
 # running command-line-parsing/run_basic_md5_as_filename.out.sh
 $ ./basic_md5_as_filename.native nonexistent
-Fatal error: exception Sys_error(&quot;nonexistent: No such file or directory&quot;)
+Uncaught exception:
+  
+  (Sys_error &quot;nonexistent: No such file or directory&quot;)
+
 Raised by primitive operation at file &quot;pervasives.ml&quot;, line 292, characters 20-46
 Called from file &quot;lib/in_channel.ml&quot;, line 19, characters 46-65
-Called from file &quot;lib/command.ml&quot;, line 1387, characters 4-54
-Called from file &quot;basic_md5_as_filename.ml&quot;, line 21, characters 2-54
+Called from file &quot;lib/exn.ml&quot;, line 87, characters 6-10
 </programlisting>
     <sect2 id="defining-custom-argument-types">
       <title>Defining custom argument types</title>
@@ -19169,12 +19197,12 @@ let () = Command.run add
       <programlisting>
 # running command-line-parsing/md5_completion.out.sh
 $ env COMMAND_OUTPUT_INSTALLATION_BASH=1 ./basic_md5_with_flags.native
-function _jsautocom_13612 {
+function _jsautocom_6908 {
   export COMP_CWORD
   COMP_WORDS[0]=./basic_md5_with_flags.native
   COMPREPLY=($(&quot;${COMP_WORDS[@]}&quot;))
 }
-complete -F _jsautocom_13612 ./basic_md5_with_flags.native
+complete -F _jsautocom_6908 ./basic_md5_with_flags.native
 </programlisting>
       <para>
         Recall that we used the <literal>Arg_type.file</literal> to
@@ -19244,14 +19272,15 @@ add      diff     help     version
           help generation), but there's absolutely nothing wrong with
           using Arg either.
         </para>
-        <para>
-          You can use the
-          <literal>Command.Spec.flags_of_args_exn</literal> function to
-          convert Arg specifications into ones compatible with Command.
-          This is quite often used to help port older non-Core code into
-          the Core standard library world.
-        </para>
       </listitem>
+    </itemizedlist>
+    <para>
+      You can use the <literal>Command.Spec.flags_of_args_exn</literal>
+      function to convert Arg specifications into ones compatible with
+      Command. This is quite often used to help port older non-Core code
+      into the Core standard library world.
+    </para>
+    <itemizedlist>
       <listitem>
         <para>
           <ulink url="https://forge.ocamlcore.org/projects/ocaml-getopt/">ocaml-getopt</ulink>
@@ -20158,7 +20187,7 @@ type authorization_response = {
         For example, the GitHub <literal>scope</literal> field above is
         defined as a variant type with each option starting with an
         uppercase letter as is conventional for OCaml variants. However,
-        the the JSON values that come back from Github are actually
+        the the JSON values that come back from GitHub are actually
         lowercase, and so aren't exactly the same as the option name.
       </para>
       <para>
@@ -20295,20 +20324,20 @@ val string_of_authorization_response :
       </para>
     </sect2>
     <sect2 id="example-querying-github-organization-information">
-      <title>Example: Querying Github organization information</title>
+      <title>Example: Querying GitHub organization information</title>
       <para>
         Let's finish up with an example of some live JSON parsing from
-        Github, and build a tool to query organization information via
+        GitHub, and build a tool to query organization information via
         their API. Start by looking at the online
         <ulink url="http://developer.github.com/v3/orgs/">API
-        documentation</ulink> for Github to see what the JSON schema for
+        documentation</ulink> for GitHub to see what the JSON schema for
         retrieving the organization information looks like.
       </para>
       <para>
         Now create an ATD file that covers the fields we need. Any extra
         fields present in the response will be ignored by the ATD
         parser, so we don't need a completely exhaustive specification
-        of every field that Github might send back.
+        of every field that GitHub might send back.
       </para>
       <programlisting>
 (* json/github_org.atd *)
@@ -21129,10 +21158,10 @@ rule read = parse
         <listitem>
           <para>
             The longest match always wins. For example, the first input
-            <literal>trueX:   167</literal> matches the regular
-            expression <literal>&quot;true&quot;</literal> for 4
-            characters, and it matches <literal>id</literal> for 5
-            characters. The longer match wins, and the return value is
+            <literal>trueX: 167</literal> matches the regular expression
+            <literal>&quot;true&quot;</literal> for 4 characters, and it
+            matches <literal>id</literal> for 5 characters. The longer
+            match wins, and the return value is
             <literal>ID &quot;trueX&quot;</literal>.
           </para>
         </listitem>
@@ -21543,7 +21572,7 @@ $ utop
 # running sexpr/list_top_packages.out.sh
 $ ocamlfind list | grep top
 compiler-libs.toplevel (version: [distributed with Ocaml])
-core.top            (version: 109.36.00)
+core.top            (version: 109.37.00)
 lwt.simple-top      (version: 2.4.3)
 num-top             (version: 1.3.3)
 sexplib.top         (version: 109.20.00)
@@ -23842,7 +23871,7 @@ $ ./search_with_configurable_server.native -servers localhost,api.duckduckgo.com
     (monitor
      (((name main) (here ()) (id 1) (has_seen_error true)
        (someone_is_listening false) (kill_index 0))))))
-  (Pid 16994)))
+  (Pid 10407)))
 </programlisting>
       <para>
         As you can see, we got a &quot;Connection refused&quot; failure
@@ -24254,8 +24283,8 @@ val log_delays : unit Deferred.t -&gt; Core.Span.t list Deferred.t = &lt;fun&gt;
 ...part 44 of async/main.topscript
 # log_delays (after (sec 1.));; 
 - : Core.Span.t list =
-[0.000953674ms; 100.245ms; 200.445ms; 300.641ms; 400.838ms; 501.036ms;
- 601.235ms; 701.444ms; 801.635ms; 901.824ms; 1.00203s]
+[0.000953674ms; 100.186ms; 200.385ms; 300.59ms; 400.773ms; 500.972ms;
+ 601.172ms; 701.38ms; 801.588ms; 901.774ms; 1.00197s]
 </programlisting>
     <para>
       Now, if instead of simply waiting a second, what if we have a busy
@@ -24269,7 +24298,7 @@ val log_delays : unit Deferred.t -&gt; Core.Span.t list Deferred.t = &lt;fun&gt;
   ;; 
 val busy_loop : int -&gt; unit = &lt;fun&gt;
 # log_delays (Deferred.unit &gt;&gt;| fun () -&gt; busy_loop 100);; 
-- : Core.Span.t list = [0.000953674ms; 242.403ms]
+- : Core.Span.t list = [0.00214577ms; 242.604ms]
 </programlisting>
     <para>
       As you can see, instead of waking up ten times a second,
@@ -24284,7 +24313,7 @@ val busy_loop : int -&gt; unit = &lt;fun&gt;
     <programlisting language="ocaml">
 ...part 46 of async/main.topscript
 # log_delays (In_thread.run (fun () -&gt; busy_loop 100));; 
-- : Core.Span.t list = [0.00190735ms; 243.808ms]
+- : Core.Span.t list = [0.000953674ms; 244.33ms]
 </programlisting>
     <para>
       Now <literal>log_delays</literal> does get a chance to run, but
@@ -24313,7 +24342,7 @@ val busy_loop : int -&gt; unit = &lt;fun&gt;
   ;; 
 val noalloc_busy_loop : int -&gt; unit = &lt;fun&gt;
 # log_delays (In_thread.run (fun () -&gt; noalloc_busy_loop 500));; 
-- : Core.Span.t list = [0.000953674ms; 898.273ms]
+- : Core.Span.t list = [0.00190735ms; 886.717ms]
 </programlisting>
     <para>
       Even though <literal>noalloc_busy_loop</literal> was running in a
@@ -25004,7 +25033,7 @@ val t_ptr : time_t ptr = &lt;abstr&gt;
       <programlisting language="ocaml">
 ...part 7 of ffi/posix.topscript
 # ctime t_ptr ;; 
-- : string = &quot;Wed Aug  7 09:34:47 2013\n&quot;
+- : string = &quot;Sun Aug 11 17:43:59 2013\n&quot;
 </programlisting>
     </sect2>
     <sect2 id="using-views-to-map-complex-values">
@@ -25241,7 +25270,7 @@ val gettimeofday : timeval structure ptr -&gt; timezone structure ptr -&gt; int 
   Pervasives.(float secs +. float usecs /. 1000000.0) ;; 
 val gettimeofday' : unit -&gt; float = &lt;fun&gt;
 # gettimeofday' () ;; 
-- : float = 1375864488.47
+- : float = 1376239440.
 </programlisting>
       <para>
         You need to be a little careful not to get all the open modules
@@ -25313,9 +25342,9 @@ let () =
 (* ffi/build_datetime.out  *)
 $ corebuild -pkg ctypes.foreign datetime.native
 $ ./datetime.native
-1375863928.770533
+1376238867.561975
 $ ./datetime.native -a
-Wed Aug  7 09:25:28 2013
+Sun Aug 11 17:34:27 2013
 </programlisting>
         <sidebar>
         <title>
@@ -26307,8 +26336,9 @@ type t = Apple | Orange of int | Pear of string | Kiwi
 # Obj.is_block (Obj.repr (Orange 1234)) ;; 
 - : bool = true
 # Obj.tag (Obj.repr (Orange 1234)) ;; 
-Obj.tag (Obj.repr (Pear &quot;xyz&quot;)) ;; 
 - : int = 0
+# Obj.tag (Obj.repr (Pear &quot;xyz&quot;)) ;; 
+- : int = 1
 # (Obj.magic (Obj.field (Obj.repr (Orange 1234)) 0) : int) ;; 
 - : int = 1234
 # (Obj.magic (Obj.field (Obj.repr (Pear &quot;xyz&quot;)) 0) : string) ;; 
@@ -27175,7 +27205,7 @@ val c : Gc.control =
       <programlisting language="ocaml">
 ...part 2 of gc/tune.topscript
 # Gc.major_slice 0 ;; 
-- : int = 259635
+- : int = 259895
 # Gc.full_major () ;; 
 - : unit = ()
 </programlisting>
@@ -27326,8 +27356,8 @@ Estimated testing time 20s (change using -quota SECS).
                                                                    
   Name        Time (ns)       Minor   Major   Promoted   % of max  
  ----------- ----------- ----------- ------- ---------- ---------- 
-  mutable     6_288_134   2_000_004    9.05       9.05     100.00  
-  immutable   4_538_738   5_000_005    0.03       0.03      72.18  
+  mutable     6_472_893   2_000_004    9.05       9.05     100.00  
+  immutable   4_951_597   5_000_005    0.03       0.03      76.50  
                                                                    
 </programlisting>
         <para>
@@ -29857,15 +29887,15 @@ let () =
       <programlisting>
 # running back-end-bench/run_bench_patterns.out.sh
 $ corebuild -pkg core_bench bench_patterns.native
-$ ./bench_patterns.native
+$ ./bench_patterns.native -ascii
 Estimated testing time 30s (change using -quota SECS).
-┌────────────────────────────────┬───────────┬──────────┐
-│ Name                           │ Time (ns) │ % of max │
-├────────────────────────────────┼───────────┼──────────┤
-│ Polymorphic pattern            │     31.75 │   100.00 │
-│ Monomorphic incomplete pattern │     29.20 │    91.98 │
-│ Monomorphic exhaustive pattern │     26.47 │    83.39 │
-└────────────────────────────────┴───────────┴──────────┘
+                                                         
+  Name                             Time (ns)   % of max  
+ -------------------------------- ----------- ---------- 
+  Polymorphic pattern                  29.40     100.00  
+  Monomorphic incomplete pattern       28.03      95.33  
+  Monomorphic exhaustive pattern       25.91      88.11  
+                                                         
 </programlisting>
       <para>
         These results confirm our earlier performance hypothesis
@@ -30482,8 +30512,8 @@ Estimated testing time 20s (change using -quota SECS).
                                                  
   Name                     Time (ns)   % of max  
  ------------------------ ----------- ---------- 
-  Polymorphic comparison      13_514     100.00  
-  Monomorphic comparison         814       6.02  
+  Polymorphic comparison      13_920     100.00  
+  Monomorphic comparison         815       5.86  
                                                  
 </programlisting>
         <para>
@@ -30625,7 +30655,7 @@ let () =
         <programlisting language="ocaml">
 (* back-end-bench/run_alternate_list.out  *)
 $ corebuild -tag debug alternate_list.native
-$ ./alternate_list.native
+$ ./alternate_list.native -ascii
 1,3,5,7,9
 </programlisting>
         <para>
@@ -31500,18 +31530,18 @@ Do you want to update your configuration to use OPAM ? [Y/n] y
 [3/4] Do you want to install the auto-complete scripts ? [Y/n] y
 [4/4] Do you want to install the `opam-switch-eval` script ? [Y/n] y
 User configuration:
-  ~/.ocamlinit is already up-to-date.
-  ~/.profile is already up-to-date.
+~/.ocamlinit is already up-to-date.
+~/.profile is already up-to-date.
 Gloabal configuration:
-  Updating &lt;root&gt;/opam-init/init.sh
-    auto-completion : [true]
-    opam-switch-eval: [true]
-  Updating &lt;root&gt;/opam-init/init.zsh
-    auto-completion : [true]
-    opam-switch-eval: [true]
-  Updating &lt;root&gt;/opam-init/init.csh
-    auto-completion : [true]
-    opam-switch-eval: [true]
+Updating &lt;root&gt;/opam-init/init.sh
+auto-completion : [true]
+opam-switch-eval: [true]
+Updating &lt;root&gt;/opam-init/init.zsh
+auto-completion : [true]
+opam-switch-eval: [true]
+Updating &lt;root&gt;/opam-init/init.csh
+auto-completion : [true]
+opam-switch-eval: [true]
 </programlisting>
     <para>
       You only need to run this command once, and it will create the
