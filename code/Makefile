@@ -189,11 +189,11 @@ $(OBJ)/%.out.0.html $(OBJ)/%.out.0.md: %.out
 	cp $< $@
 
 clean:
-	find . -name \*.out | xargs rm
+	find . -name \*.out | xargs rm -f
 	rm -rf $(OBJ)
 
 clean-%:
-	find $* -name \*.out | xargs rm
+	find $* -name \*.out | xargs rm -f
 	rm -rf $*/_build
 	rm -rf _build/$*
 
