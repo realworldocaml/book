@@ -115,7 +115,9 @@ You may wonder why `limit` is required at all, since it always seems to equal
 `start`.  It's because the easiest way for the runtime to schedule a minor heap
 collection is by setting `limit` to equal `end`.  The next allocation will
 never have enough space after this is done and will always trigger a garbage
-collection.
+collection. There are various internal reasons for such early collections, such
+as handling pending UNIX signals, and they don't ordinally matter for
+application code.
 
 <note>
 <title>Setting the size of the minor heap</title>
