@@ -337,29 +337,23 @@
           </para>
         </listitem>
       </itemizedlist>
-      <note>
-      <title>
-      Note to reviewers
-      </title>
       <para>
         Real World OCaml uses some tools that we've developed while
         writing this book. Some of these resulted in improvements to the
         OCaml compiler, which means that you will need to ensure that
-        you have an up-to-date development environment (using the 4.01.0
-        compiler). We've automated everything you need to do via the
-        OPAM package manager, so please do follow the installation
-        instructions in <xref linkend="installation"/>
-        carefully.
+        you have an up-to-date development environment (using the 4.1
+        version of the compiler). We've automated everything you need to
+        do via the OPAM package manager, so please do follow the
+        installation instructions in
+        <xref linkend="installation"/> carefully.
       </para>
       <para>
-        At this stage, the Windows operating system is unsupported, and
-        only Mac OS X, Linux, FreeBSD and OpenBSD can be expected to
-        work reliably. We realize this is a concern; there are no
-        fundamental barriers to Windows support, but we're focused on
-        getting the main content finished before getting stuck into the
-        porting effort.
+        As of publication, the Windows operating system is unsupported
+        by Core, and so only Mac OS X, Linux, FreeBSD and OpenBSD can be
+        expected to work reliably. Please check the online installaton
+        instructions for updates regarding Windows, or install a Linux
+        virtual machine to work through the book as it stands.
       </para>
-      </note>
     </sect2>
   </sect1>
   <sect1 id="about-the-authors">
@@ -5100,12 +5094,12 @@ Error: Unbound module Core
 $ ocamlfind ocamlc -linkpkg -thread -package core freq.ml -o freq.byte
 </programlisting>
     <para>
-      Here we're using <literal>ocamlfind</literal>, a tool which itself
+      Here we're using <command>ocamlfind</command>, a tool which itself
       invokes other parts of the OCaml toolchain (in this case,
       <command>ocamlc</command>) with the appropriate flags to link in
       particular libraries and packages. Here,
       <literal>-package core</literal> is asking
-      <literal>ocamlfind</literal> to link in the Core library,
+      <command>ocamlfind</command> to link in the Core library,
       <literal>-linkpkg</literal> asks ocamlfind to link in the packages
       as is necessary for building an executable, while
       <literal>-thread</literal> turns on threading support, which is
@@ -5363,9 +5357,9 @@ val empty : t
 (** Bump the frequency count for the given string. *)
 val touch : t -&gt; string -&gt; t
 
-(* Converts the set of frequency counts to an association list.  Every strings
-   in the list will show up at most once, and the integers will be at least
-   1. *)
+(** Converts the set of frequency counts to an association list.  Every string
+    in the list will show up at most once, and the integers will be at least
+    1. *)
 val to_list : t -&gt; (string * int) list
 </programlisting>
     <para>
@@ -5380,8 +5374,8 @@ val to_list : t -&gt; (string * int) list
       module's interface, and as such is a natural place to document the
       module as well. We also started our comments with a double
       asterisk to cause them to be picked up by the
-      <literal>ocamldoc</literal> tool when generating API
-      documentation. We'll discuss <literal>ocamldoc</literal> more in
+      <command>ocamldoc</command> tool when generating API
+      documentation. We'll discuss <command>ocamldoc</command> more in
       <xref linkend="the-compiler-frontend-parsing-and-type-checking"/>.
     </para>
     <para>
@@ -7068,23 +7062,25 @@ val logon : Logon.t =
       <literal>Logon</literal> record.
     </para>
     <programlisting language="ocaml">
-...part 26 of records/main.topscript
-# type client_info =
-   { addr: Unix.Inet_addr.t;
-     port: int;
-     user: string;
-     credentials: string;
-     mutable last_heartbeat_time: Time.t;
-     mutable last_heartbeat_status: string;
-   };; 
-type client_info = {
-  addr : UnixLabels.inet_addr;
-  port : int;
-  user : string;
-  credentials : string;
-  mutable last_heartbeat_time : Time.t;
-  mutable last_heartbeat_status : string;
-}
+...part 36 of records/main.topscript
+# let print_logon logon =
+    let print to_string field =
+      printf &quot;%s\n&quot; (show_field field to_string logon)
+    in
+    Logon.Fields.iter
+      ~session_id:(print Fn.id)
+      ~time:(print Time.to_string)
+      ~user:(print Fn.id)
+      ~credentials:(print Fn.id)
+  ;; 
+val print_logon : Logon.t -&gt; unit = &lt;fun&gt;
+# print_logon logon;; 
+
+session_id: 26685
+time: 2013-08-11 22:06:16.571369+01:00
+user: yminsky
+credentials: Xy2d9W
+- : unit = ()
 </programlisting>
     <para>
       One nice side effect of this approach is that it helps you adapt
@@ -14001,16 +13997,9 @@ Could not find matching handler: ls
         the list of known handlers), and can't be unloaded.
       </para>
       <programlisting>
-# running fcm/loader_cli3.out.sh
-&gt;&gt;&gt; (loader (load ls /var))
-()
-&gt;&gt;&gt; (ls /var)
-(agentx at audit backups db empty folders jabberd lib log mail msgs named
- netboot pgsql_socket_alt root rpc run rwho spool tmp vm yp)
-&gt;&gt;&gt; (loader (unload ls))
-()
-&gt;&gt;&gt; (ls /var)
-Could not find matching handler: ls
+# running fcm/loader_cli4.out.sh
+&gt;&gt;&gt; (loader (unload loader))
+It's unwise to unload yourself
 </programlisting>
       <para>
         We can push this dynamism yet further using libraries like
@@ -20111,10 +20100,10 @@ $ atdgen -version
 </programlisting>
     <para>
       The command-line tool will be installed within your
-      <literal>~/.opam</literal> directory, and should already be on
-      your <literal>PATH</literal> from running
-      <literal>opam config env</literal>. See
-      <xref linkend="installation"/> if this isn't working.
+      <filename>~/.opam</filename> directory, and should already be on
+      your <literal>PATH</literal> from running <command>opam config
+      env</command>. See <xref linkend="installation"/> if
+      this isn't working.
     </para>
     </note>
     <sect2 id="atd-basics">
@@ -20122,7 +20111,7 @@ $ atdgen -version
       <para>
         The idea behind ATD is to specify the format of the JSON in a
         separate file, and then run a compiler
-        (<literal>atdgen</literal>) that outputs OCaml code to construct
+        (<command>atdgen</command>) that outputs OCaml code to construct
         and parse JSON values. This means that you don't need to write
         any OCaml parsing code at all, as it will all be autogenerated
         for you.
@@ -20205,13 +20194,13 @@ type authorization_response = {
       <title>Compiling ATD specifications to OCaml</title>
       <para>
         The ATD specification we defined above can be compiled to OCaml
-        code using the <literal>atdgen</literal> command-line tool.
+        code using the <command>atdgen</command> command-line tool.
         Let's run the compiler twice, to generate some OCaml type
         definitions and also a JSON serializing module that converts
         between input data and those type definitions.
       </para>
       <para>
-        The <literal>atdgen</literal> command will generate some new
+        The <command>atdgen</command> command will generate some new
         files in your current directory. <literal>Github_t.ml</literal>
         and <literal>Github_t.mli</literal> will contain an OCaml module
         with types defines that correspond to the ATD file.
@@ -20281,7 +20270,7 @@ val string_of_authorization_response :
         and all the OCaml boilerplate to convert between JSON and a
         strongly typed record has been generated for us. You can control
         various aspects of the serializer by passing flags to
-        <literal>atdgen</literal>. The important ones for JSON are:
+        <command>atdgen</command>. The important ones for JSON are:
       </para>
       <itemizedlist>
         <listitem>
@@ -20541,10 +20530,10 @@ $ ./github_org_info.native janestreet
   </para>
   <para>
     Parser generators have a long history, including tools like
-    <literal>lex</literal> and <literal>yacc</literal> that date back to
+    <command>lex</command> and <literal>yacc</literal> that date back to
     the early 1970's. OCaml has its own alternatives, including
-    <literal>ocamllex</literal>, which replaces <literal>lex</literal>,
-    and <literal>ocamlyacc</literal> and <literal>menhir</literal>,
+    <command>ocamllex</command>, which replaces <command>lex</command>,
+    and <command>ocamlyacc</command> and <command>menhir</command>,
     which are replacements for <literal>yacc</literal>. We'll explore
     these tools in the course of walking through the implementation of a
     parser for the JSON serialization format that we discussed in
@@ -20557,13 +20546,13 @@ $ ./github_org_info.native janestreet
   </para>
   <note>
   <title>
-  Menhir <emphasis>vs</emphasis> <literal>ocamlyacc</literal>
+  Menhir <emphasis>vs</emphasis> <command>ocamlyacc</command>
   </title>
   <para>
     Menhir is an alternative parser generator that is generally superior
-    to the venerable <literal>ocamlyacc</literal>, which dates back
+    to the venerable <command>ocamlyacc</command>, which dates back
     quite a few years. Menhir is mostly compatible with
-    <literal>ocamlyacc</literal> grammars, and so you can usually just
+    <command>ocamlyacc</command> grammars, and so you can usually just
     switch to Menhir and expect older code to work (with some minor
     differences described in the Menhir manual).
   </para>
@@ -20572,7 +20561,7 @@ $ ./github_org_info.native janestreet
     generally more human-comprehensible, and the parsers that it
     generates are fully reentrant and can be parameterized in OCaml
     modules more easily. We recommend that any new code you develop
-    should use Menhir instead of <literal>ocamlyacc</literal>.
+    should use Menhir instead of <command>ocamlyacc</command>.
   </para>
   <para>
     Menhir isn't distributed directly with OCaml, but is available
@@ -20606,10 +20595,10 @@ $ ./github_org_info.native janestreet
     </para>
     <programlisting language="json">
 {
-  title: &quot;Cities&quot;,
-  cities: [
-    { name: &quot;Chicago&quot;,  zips: [60601] },
-    { name: &quot;New York&quot;, zips: [10004] } 
+  &quot;title&quot;: &quot;Cities&quot;,
+  &quot;cities&quot;: [
+    { &quot;name&quot;: &quot;Chicago&quot;,  &quot;zips&quot;: [60601] },
+    { &quot;name&quot;: &quot;New York&quot;, &quot;zips&quot;: [10004] } 
   ]
 }
 </programlisting>
@@ -20733,11 +20722,10 @@ type value = [
       specifications mean that a token carries a value. The
       <literal>INT</literal> token carries an integer value with it,
       <literal>FLOAT</literal> has a <literal>float</literal> value, and
-      both <literal>ID</literal> and <literal>STRING</literal> carry a
-      <literal>string</literal> value. The remaining tokens, such as
-      <literal>TRUE</literal>, <literal>FALSE</literal> or the
-      punctuation, aren't associated with any value and so we can omit
-      the
+      <literal>STRING</literal> carries a <literal>string</literal>
+      value. The remaining tokens, such as <literal>TRUE</literal>,
+      <literal>FALSE</literal> or the punctuation, aren't associated
+      with any value and so we can omit the
       <literal>&lt;</literal><emphasis>type</emphasis><literal>&gt;</literal>
       specification.
     </para>
@@ -20745,9 +20733,9 @@ type value = [
       <title>Describing the grammar</title>
       <para>
         The next thing we need to do is to specify the grammar of a JSON
-        expression. <literal>menhir</literal>, like many parsers,
+        expression. <command>menhir</command>, like many parsers,
         expresses grammars as <emphasis>context free
-        grammars</emphasis>. (More precisely, <literal>menhir</literal>
+        grammars</emphasis>. (More precisely, <command>menhir</command>
         supports LR(1) grammars, but we will ignore that technical
         distinction here.) You can think of a context-free grammar as a
         set of abstract names, called <emphasis>non-terminal
@@ -20760,13 +20748,12 @@ type value = [
         symbol</emphasis>, that produces the token sequence in question.
       </para>
       <para>
-        We'll start describing the JSON grammar by declaring the
-        start-symbol to be the non-terminal symbol
-        <literal>prog</literal>, and by declaring that when parsed, a
-        <literal>prog</literal> value should be converted into an OCaml
-        value of type <literal>Json.value option</literal>. We then end
-        the declaration section of the parser with a
-        <literal>%%</literal>.
+        We'll start describing the JSON grammar by declaring the start
+        symbol to be the non-terminal symbol <literal>prog</literal>,
+        and by declaring that when parsed, a <literal>prog</literal>
+        value should be converted into an OCaml value of type
+        <literal>Json.value option</literal>. We then end the
+        declaration section of the parser with a <literal>%%</literal>.
       </para>
       <programlisting language="ocaml">
 (* parsing/parser.mly (starting from part 1) *)
@@ -20775,7 +20762,7 @@ type value = [
 </programlisting>
       <para>
         Once that's in place, we can start specifying the productions.
-        In <literal>menhir</literal>, productions are organized into
+        In <command>menhir</command>, productions are organized into
         <emphasis>rules</emphasis>, where each rule lists all the
         possible productions for a given non-terminal. Here, for
         example, is the rule for <literal>prog</literal>.
@@ -20884,7 +20871,7 @@ rev_object_fields:
 </programlisting>
       <para>
         The rules are structured as they are because
-        <literal>menhir</literal> generates left-recursive parsers,
+        <command>menhir</command> generates left-recursive parsers,
         which means that the constructed pushdown automaton uses less
         stack space with left-recursive definitions. The following
         right-recursive rule accepts the same input, but during parsing
@@ -20950,17 +20937,17 @@ obj_fields:
     obj = separated_list(COMMA, obj_field)    { obj } ;
 
 obj_field:
-    k = ID; COLON; v = value                  { (k, v) } ;
+    k = STRING; COLON; v = value              { (k, v) } ;
 
 list_fields:
     vl = separated_list(COMMA, value)         { vl } ;
 </programlisting>
       <para>
-        We can invoke <literal>menhir</literal> by using
-        <literal>corebuild</literal> with the
+        We can invoke <command>menhir</command> by using
+        <command>corebuild</command> with the
         <literal>-use-menhir</literal> flag. This tells the build system
-        to switch to using <literal>menhir</literal> instead of
-        <literal>ocamlyacc</literal> to handle files with the
+        to switch to using <command>menhir</command> instead of
+        <command>ocamlyacc</command> to handle files with the
         <literal>.mly</literal> suffix.
       </para>
       <programlisting>
@@ -20977,7 +20964,7 @@ menhir --ocamlc 'ocamlfind ocamlc -w A-4-33-41-42-43-34-44 -strict-sequence -pri
       For the next part, we need to define a lexer to tokenize the input
       text, meaning that we break the input into a sequence of words or
       tokens. For this, we'll define a lexer using
-      <literal>ocamllex</literal>. In this case, the specification is
+      <command>ocamllex</command>. In this case, the specification is
       placed in a file with a <literal>.mll</literal> suffix (we'll use
       the name <literal>lexer.mll</literal>). A lexer file has several
       parts in the following sequence.
@@ -21098,7 +21085,6 @@ rule read = parse
 | &quot;true&quot;   { TRUE }
 | &quot;false&quot;  { FALSE }
 | &quot;null&quot;   { NULL }
-| id       { ID (Lexing.lexeme lexbuf) }
 | '&quot;'      { read_string (Buffer.create 17) lexbuf }
 | '{'      { LEFT_BRACE }
 | '}'      { RIGHT_BRACE }
@@ -21152,7 +21138,7 @@ rule read = parse
         Some of these patterns overlap. For example, the regular
         expression <literal>&quot;true&quot;</literal> is also matched
         by the <literal>id</literal> pattern.
-        <literal>ocamllex</literal> used the following disambiguation
+        <command>ocamllex</command> used the following disambiguation
         when a prefix of the input is matched by more than one pattern.
       </para>
       <itemizedlist>
@@ -21181,7 +21167,7 @@ rule read = parse
     <sect2 id="recursive-rules">
       <title>Recursive rules</title>
       <para>
-        Unlike many other lexer generators, <literal>ocamllex</literal>
+        Unlike many other lexer generators, <command>ocamllex</command>
         allows the definition of multiple lexers in the same file, and
         the definitions can be recursive. In this case, we use recursion
         to match string literals using the following rule definition.
@@ -21245,7 +21231,7 @@ and read_string buf = parse
           <para>
             <ulink url="http://www.cduce.org/ulex">Ulex</ulink> is a
             lexer generator for Unicode that can serve as a
-            Unicode-aware replacement for <literal>ocamllex</literal>.
+            Unicode-aware replacement for <command>ocamllex</command>.
           </para>
         </listitem>
         <listitem>
@@ -21360,10 +21346,10 @@ false
 null
 [1, 2, 3., 4.0, .5, 5.5e5, 6.3]
 &quot;Hello World&quot;
-{ field1: &quot;Hello&quot;,
-  field2: 17e13,
-  field3: [1, 2, 3],
-  field4: { fieldA: 1, fieldB: &quot;Hello&quot; }
+{ &quot;field1&quot;: &quot;Hello&quot;,
+  &quot;field2&quot;: 17e13,
+  &quot;field3&quot;: [1, 2, 3],
+  &quot;field4&quot;: { &quot;fieldA&quot;: 1, &quot;fieldB&quot;: &quot;Hello&quot; }
 }
 </programlisting>
     <para>
@@ -21566,7 +21552,7 @@ $ utop
       This is due to OCaml's facility for installing custom
       <emphasis>toplevel printers</emphasis> that can rewrite some
       values into more toplevel-friendly equivalents. They are generally
-      installed as <literal>ocamlfind</literal> packages ending in
+      installed as <command>ocamlfind</command> packages ending in
       <literal>top</literal>.
     </para>
     <programlisting>
@@ -28032,17 +28018,18 @@ let () =
         interpret comments for their own ends.
       </para>
       <para>
-        The OCamldoc tool uses specially formatted comments in the
-        source code to generate documentation bundles. These comments
-        are combined with the function definitions and signatures and
-        output as structured documentation in a variety of formats. It
-        can generate HTML pages, LaTeX and PDF documents, UNIX manual
-        pages and even module dependency graphs that can be viewed using
+        The <command>ocamldoc</command> tool uses specially formatted
+        comments in the source code to generate documentation bundles.
+        These comments are combined with the function definitions and
+        signatures and output as structured documentation in a variety
+        of formats. It can generate HTML pages, LaTeX and PDF documents,
+        UNIX manual pages and even module dependency graphs that can be
+        viewed using
         <ulink url="http://www.graphviz.org">Graphviz</ulink>.
       </para>
       <para>
         Here's a sample of some source code that's been annotated with
-        OCamldoc comments.
+        <command>ocamldoc</command> comments.
       </para>
       <programlisting language="ocaml">
 (** example.ml: The first special comment of the file is the comment 
@@ -28067,15 +28054,15 @@ let what_is_the_weather_in location =
   | `California -&gt; Sun
 </programlisting>
       <para>
-        The OCamldoc comments are distinguished by beginning with the
-        double asterisk. There are formatting conventions for the
-        contents of the comment to mark metadata. For instance, the
-        <literal>@tag</literal> fields mark specific properties such as
-        the author of that section of code.
+        The <command>ocamldoc</command> comments are distinguished by
+        beginning with the double asterisk. There are formatting
+        conventions for the contents of the comment to mark metadata.
+        For instance, the <literal>@tag</literal> fields mark specific
+        properties such as the author of that section of code.
       </para>
       <para>
         Try compiling the HTML documentation and UNIX man pages by
-        running <literal>ocamldoc</literal> over the source file.
+        running <command>ocamldoc</command> over the source file.
       </para>
       <programlisting>
 # running front-end/build_ocamldoc.out.sh
@@ -28095,13 +28082,14 @@ $ man -M man Doc
       </para>
       <tip>
       <title>
-      Using custom OCamldoc generators
+      Using custom <command>ocamldoc</command> generators
       </title>
       <para>
-        The default HTML output stylesheets from OCamldoc are pretty
-        spartan and distinctly Web 1.0. The tool supports plugging in
-        custom documentation generators, and there are several available
-        that provide prettier or more detailed output.
+        The default HTML output stylesheets from
+        <command>ocamldoc</command> are pretty spartan and distinctly
+        Web 1.0. The tool supports plugging in custom documentation
+        generators, and there are several available that provide
+        prettier or more detailed output.
       </para>
       <itemizedlist>
         <listitem>
@@ -28209,7 +28197,7 @@ $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax -package fieldslib
     <para>
       We've specified a couple of additional flags here. The
       <literal>-syntax</literal> flag directs
-      <literal>ocamlfind</literal> to add the <literal>-pp</literal>
+      <command>ocamlfind</command> to add the <literal>-pp</literal>
       flag to the compiler command-line. This flag instructs the
       compiler to run the preprocessor during its parsing phase.
     </para>
@@ -28219,7 +28207,7 @@ $ ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax -package fieldslib
       name is a convention that indicates these libraries are
       preprocessors that should be run during parsing. The syntax
       extension modules are dynamically loaded into the
-      <literal>camlp4o</literal> command which rewrites the input source
+      <command>camlp4o</command> command which rewrites the input source
       code into conventional OCaml code that has no trace of the new
       keywords. The compiler then compiles this transformed code with no
       knowledge of the preprocessor's actions.
@@ -28279,9 +28267,9 @@ Findlib has been successfully loaded. Additional directives:
 # #camlp4o ;; 
 </programlisting>
       <para>
-        The first directive loads the <literal>ocamlfind</literal>
+        The first directive loads the <command>ocamlfind</command>
         top-level interface that lets you require
-        <literal>ocamlfind</literal> packages (including all their
+        <command>ocamlfind</command> packages (including all their
         dependent packages). The second directive instructs the
         top-level to filter all phrases via Camlp4. You can now run
         <literal>utop</literal> and load the syntax extensions in. We'll
@@ -28358,10 +28346,10 @@ ARCHIVES=`$OCAMLFIND -a-format comparelib.syntax`
 camlp4o -printer o $INCLUDE $ARCHIVES $1
 </programlisting>
       <para>
-        The script uses the <literal>ocamlfind</literal> package manager
+        The script uses the <command>ocamlfind</command> package manager
         to list the include and library paths needed by
         <literal>comparelib</literal>. It then invokes the
-        <literal>camlp4o</literal> preprocessor with these paths and
+        <command>camlp4o</command> preprocessor with these paths and
         outputs the resulting AST to the standard output.
       </para>
       <programlisting>
@@ -29008,7 +28996,7 @@ type t = { foo : int; }
 val f : s -&gt; int
 </programlisting>
         <para>
-          The <literal>ocamlbuild</literal> equivalent is to add the tag
+          The <command>ocamlbuild</command> equivalent is to add the tag
           <literal>principal</literal> to your build. The
           <literal>corebuild</literal> wrapper script actually adds this
           by default, but it does no harm to explicitly repeat it, as
@@ -29243,7 +29231,7 @@ Error: The files /home/build/bar.cmi
         the modules that are intended to be packed must be compiled with
         the <literal>-for-pack</literal> argument that specifies the
         eventual name of the pack. The easiest way to handle packing is
-        to let <literal>ocamlbuild</literal> figure out the command-line
+        to let <command>ocamlbuild</command> figure out the command-line
         arguments for you, so let's try that out next with a simple
         example.
       </para>
@@ -29256,7 +29244,7 @@ Error: The files /home/build/bar.cmi
         target itself). Finally, the <literal>X.mlpack</literal> file
         contains the list of modules that are intended to be packed
         under module <literal>X</literal>. There are special rules in
-        <literal>ocamlbuild</literal> that tell it how to map
+        <command>ocamlbuild</command> that tell it how to map
         <literal>%.mlpack</literal> files to the packed
         <literal>%.cmx</literal> or <literal>%.cmo</literal> equivalent.
       </para>
@@ -29670,10 +29658,10 @@ $ ocamlc -dtypedtree typedef.ml 2&gt;&amp;1
       </para>
       <para>
         Let's start by creating a straightforward exhaustive pattern
-        match using normal variants.
+        match using four normal variants.
       </para>
       <programlisting language="ocaml">
-(* back-end/pattern_monomorphic_exhaustive.ml  *)
+(* back-end/pattern_monomorphic_large.ml  *)
 type t = | Alice | Bob | Charlie | David
 
 let test v =
@@ -29687,9 +29675,9 @@ let test v =
         The lambda output for this code looks like this.
       </para>
       <programlisting>
-# running back-end/lambda_for_pattern_monomorphic_exhaustive.out.sh
-$ ocamlc -dlambda -c pattern_monomorphic_exhaustive.ml 2&gt;&amp;1
-(setglobal Pattern_monomorphic_exhaustive!
+# running back-end/lambda_for_pattern_monomorphic_large.out.sh
+$ ocamlc -dlambda -c pattern_monomorphic_large.ml 2&gt;&amp;1
+(setglobal Pattern_monomorphic_large!
   (let
     (test/1013
        (function v/1014
@@ -29742,51 +29730,35 @@ $ ocamlc -dlambda -c pattern_monomorphic_exhaustive.ml 2&gt;&amp;1
         </listitem>
       </itemizedlist>
       <para>
-        The first pattern match is <emphasis>exhaustive</emphasis>, so
-        there are no unknown match cases that the compiler needs to
-        check for (<emphasis>e.g.</emphasis> a value greater than 3).
-        What happens if we modify the code to use an incomplete pattern
-        match instead?
+        The compiler computes a jump table in order to handle all four
+        cases. If we drop the number of variants to just two, then
+        there's no need for the complexity of computing this table.
       </para>
       <programlisting language="ocaml">
-(* back-end/pattern_monomorphic_incomplete.ml  *)
-type t = | Alice | Bob | Charlie | David
+(* back-end/pattern_monomorphic_small.ml  *)
+type t = | Alice | Bob 
 
 let test v =
   match v with
   | Alice   -&gt; 100
   | Bob     -&gt; 101
-  | _       -&gt; 102
 </programlisting>
       <para>
         The lambda output for this code is now quite different.
       </para>
       <programlisting language="ocaml">
-(* back-end/lambda_for_pattern_monomorphic_incomplete.out  *)
-$ ocamlc -dlambda -c pattern_monomorphic_incomplete.ml 2&gt;&amp;1
-(setglobal Pattern_monomorphic_incomplete!
-  (let
-    (test/1013
-       (function v/1014 (if (!= v/1014 1) (if (!= v/1014 0) 102 100) 101)))
-    (makeblock 0 test/1013)))
+(* back-end/lambda_for_pattern_monomorphic_small.out  *)
+$ ocamlc -dlambda -c pattern_monomorphic_small.ml 2&gt;&amp;1
+(setglobal Pattern_monomorphic_small!
+  (let (test/1011 (function v/1012 (if (!= v/1012 0) 101 100)))
+    (makeblock 0 test/1011)))
 </programlisting>
       <para>
-        The compiler has reverted to testing the value as a set of
-        nested conditionals. The lambda code above first checks to see
-        if the value is <literal>Alice</literal>, then if it's
-        <literal>Bob</literal> and finally falls back to the default
-        <literal>102</literal> return value for everything else.
-      </para>
-      <para>
-        Exhaustive pattern matching is thus a better coding style at
-        several levels. It rewards you with more useful compile-time
-        warnings when you modify type definitions
-        <emphasis>and</emphasis> generates more efficient runtime code
-        too.
-      </para>
-      <para>
-        Finally, let's look at the same code, but with polymorphic
-        variants instead of normal variants.
+        The compiler emits simpler conditional jumps rather than setting
+        up a jump table, since it statically determines that the range
+        of possible variants is small enough. Finally, let's look at the
+        same code, but with polymorphic variants instead of normal
+        variants.
       </para>
       <programlisting language="ocaml">
 (* back-end/pattern_polymorphic.ml  *)
@@ -29796,10 +29768,11 @@ let test v =
   | `Bob     -&gt; 101
   | `Charlie -&gt; 102
   | `David   -&gt; 103
+  | `Eve     -&gt; 104
 </programlisting>
       <para>
-        The lambda form for this reveals the most inefficient result
-        yet.
+        The lambda form for this also shows up the runtime
+        representation of polymorphic variants.
       </para>
       <programlisting language="ocaml">
 (* back-end/lambda_for_pattern_polymorphic.out  *)
@@ -29817,101 +29790,10 @@ $ ocamlc -dlambda -c pattern_polymorphic.ml 2&gt;&amp;1
         that pattern matching over polymorphic variants is slightly less
         efficient, and it should be clearer why this is the case now.
         Polymorphic variants have a runtime value that's calculated by
-        hashing the variant name, and so the compiler has to test each
-        of these possible hash values in sequence.
-      </para>
-    </sect2>
-    <sect2 id="benchmarking-pattern-matching">
-      <title>Benchmarking pattern matching</title>
-      <para>
-        Let's benchmark these three pattern matching techniques to
-        quantify their runtime costs more accurately. The
-        <literal>Core_bench</literal> module runs the tests thousands of
-        times and also calculates statistical variance of the results.
-        You'll need to <literal>opam install core_bench</literal> to get
-        the library.
-      </para>
-      <programlisting language="ocaml">
-(* back-end-bench/bench_patterns.ml  *)
-open Core.Std
-open Core_bench.Std
-
-type t = | Alice | Bob | Charlie | David
-
-let polymorphic_pattern () =
-  let test v =
-    match v with
-    | `Alice   -&gt; 100
-    | `Bob     -&gt; 101
-    | `Charlie -&gt; 102
-    | `David   -&gt; 103
-  in
-  List.iter ~f:(fun v -&gt; ignore(test v))
-    [`Alice; `Bob; `Charlie; `David]
-
-let monomorphic_pattern_exhaustive () =
-  let test v =
-    match v with
-    | Alice   -&gt; 100
-    | Bob     -&gt; 101
-    | Charlie -&gt; 102
-    | David   -&gt; 103 in
-  List.iter ~f:(fun v -&gt; ignore(test v))
-    [ Alice; Bob; Charlie; David ]
-
-let monomorphic_pattern_incomplete () =
-  let test v =
-    match v with
-    | Alice   -&gt; 100
-    | Bob     -&gt; 101
-    | _       -&gt; 102
-  in
-  List.iter ~f:(fun v -&gt; ignore(test v))
-    [ Alice; Bob; Charlie; David ]
-
-let tests = [
-  &quot;Polymorphic pattern&quot;, polymorphic_pattern;
-  &quot;Monomorphic incomplete pattern&quot;, monomorphic_pattern_incomplete;
-  &quot;Monomorphic exhaustive pattern&quot;, monomorphic_pattern_exhaustive
-]
-
-let () =
-  List.map tests ~f:(fun (name,test) -&gt; Bench.Test.create ~name test)
-  |&gt; Bench.make_command
-  |&gt; Command.run
-</programlisting>
-      <para>
-        Building and executing this example will run for around 30
-        seconds by default, and you'll see the results summarized in a
-        neat table.
-      </para>
-      <programlisting>
-# running back-end-bench/run_bench_patterns.out.sh
-$ corebuild -pkg core_bench bench_patterns.native
-$ ./bench_patterns.native -ascii
-Estimated testing time 30s (change using -quota SECS).
-                                                         
-  Name                             Time (ns)   % of max  
- -------------------------------- ----------- ---------- 
-  Polymorphic pattern                  29.46     100.00  
-  Monomorphic incomplete pattern       28.06      95.25  
-  Monomorphic exhaustive pattern       26.04      88.38  
-                                                         
-</programlisting>
-      <para>
-        These results confirm our earlier performance hypothesis
-        obtained from inspecting the lambda code. The shortest running
-        time comes from the exhaustive pattern match and polymorphic
-        variant pattern matching is the slowest. There isn't a hugely
-        significant difference in these examples, but you can use the
-        same techniques to peer into the innards of your own source code
-        and narrow down any performance hotspots.
-      </para>
-      <para>
-        The lambda form is primarily a stepping stone to the bytecode
-        executable format that we'll cover next. It's often easier to
-        look at the textual output from this stage than to wade through
-        the native assembly code from compiled executables.
+        hashing the variant name, and so the compiler can't use a jump
+        table as it does for normal variants. Instead, it creates a
+        decision tree that compares the hash values against the input
+        variable in as few comparisons as possible.
       </para>
       <note>
       <title>
@@ -29939,6 +29821,102 @@ Estimated testing time 30s (change using -quota SECS).
         in OCaml code.
       </para>
       </note>
+
+    </sect2>
+    <sect2 id="benchmarking-pattern-matching">
+      <title>Benchmarking pattern matching</title>
+      <para>
+        Let's benchmark these three pattern matching techniques to
+        quantify their runtime costs more accurately. The
+        <literal>Core_bench</literal> module runs the tests thousands of
+        times and also calculates statistical variance of the results.
+        You'll need to <literal>opam install core_bench</literal> to get
+        the library.
+      </para>
+      <programlisting language="ocaml">
+(* back-end-bench/bench_patterns.ml  *)
+open Core.Std
+open Core_bench.Std
+
+type t = | Alice | Bob 
+type s = | A | B | C | D | E
+
+let polymorphic_pattern () =
+  let test v =
+    match v with
+    | `Alice   -&gt; 100
+    | `Bob     -&gt; 101
+    | `Charlie -&gt; 102
+    | `David   -&gt; 103
+    | `Eve     -&gt; 104
+  in
+  List.iter ~f:(fun v -&gt; ignore(test v))
+    [`Alice; `Bob; `Charlie; `David]
+
+let monomorphic_pattern_small () =
+  let test v =
+    match v with
+    | Alice   -&gt; 100
+    | Bob     -&gt; 101 in
+  List.iter ~f:(fun v -&gt; ignore(test v))
+    [ Alice; Bob ]
+
+let monomorphic_pattern_large () =
+  let test v =
+    match v with
+    | A       -&gt; 100
+    | B       -&gt; 101
+    | C       -&gt; 102
+    | D       -&gt; 103
+    | E       -&gt; 104
+  in
+  List.iter ~f:(fun v -&gt; ignore(test v))
+    [ A; B; C; D ]
+
+let tests = [
+  &quot;Polymorphic pattern&quot;, polymorphic_pattern;
+  &quot;Monomorphic larger pattern&quot;, monomorphic_pattern_large;
+  &quot;Monomorphic small pattern&quot;, monomorphic_pattern_small;
+]
+
+let () =
+  List.map tests ~f:(fun (name,test) -&gt; Bench.Test.create ~name test)
+  |&gt; Bench.make_command
+  |&gt; Command.run
+</programlisting>
+      <para>
+        Building and executing this example will run for around 30
+        seconds by default, and you'll see the results summarized in a
+        neat table.
+      </para>
+      <programlisting>
+# running back-end-bench/run_bench_patterns.out.sh
+$ corebuild -pkg core_bench bench_patterns.native
+$ ./bench_patterns.native -ascii
+Estimated testing time 30s (change using -quota SECS).
+                                                     
+  Name                         Time (ns)   % of max  
+ ---------------------------- ----------- ---------- 
+  Polymorphic pattern              31.58     100.00  
+  Monomorphic larger pattern       29.24      92.58  
+  Monomorphic small pattern        16.15      51.14  
+                                                     
+</programlisting>
+      <para>
+        These results confirm our earlier performance hypothesis
+        obtained from inspecting the lambda code. The shortest running
+        time comes from the small conditional pattern match and
+        polymorphic variant pattern matching is the slowest. There isn't
+        a hugely significant difference in these examples, but you can
+        use the same techniques to peer into the innards of your own
+        source code and narrow down any performance hotspots.
+      </para>
+      <para>
+        The lambda form is primarily a stepping stone to the bytecode
+        executable format that we'll cover next. It's often easier to
+        look at the textual output from this stage than to wade through
+        the native assembly code from compiled executables.
+      </para>
     </sect2>
   </sect1>
   <sect1 id="generating-portable-bytecode">
@@ -30004,25 +29982,24 @@ Estimated testing time 30s (change using -quota SECS).
       matching examples.
     </para>
     <programlisting>
-# running back-end/instr_for_pattern_monomorphic_exhausive.out.sh
-$ ocamlc -dinstr pattern_monomorphic_exhaustive.ml 2&gt;&amp;1
+# running back-end/instr_for_pattern_monomorphic_small.out.sh
+$ ocamlc -dinstr pattern_monomorphic_small.ml 2&gt;&amp;1
     branch L2
 L1: acc 0
-    switch 6 5 4 3/
-L6: const 100
+    push
+    const 0
+    neqint
+    branchifnot L3
+    const 101
     return 1
-L5: const 101
-    return 1
-L4: const 102
-    return 1
-L3: const 103
+L3: const 100
     return 1
 L2: closure L1, 0
     push
     acc 0
     makeblock 1, 0
     pop 1
-    setglobal Pattern_monomorphic_exhaustive!
+    setglobal Pattern_monomorphic_small!
 
 </programlisting>
     <para>
@@ -30513,7 +30490,7 @@ Estimated testing time 20s (change using -quota SECS).
                                                  
   Name                     Time (ns)   % of max  
  ------------------------ ----------- ---------- 
-  Polymorphic comparison      13_914     100.00  
+  Polymorphic comparison      13_919     100.00  
   Monomorphic comparison         815       5.86  
                                                  
 </programlisting>
