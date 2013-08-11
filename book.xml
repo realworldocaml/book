@@ -17603,7 +17603,7 @@ Estimated testing time 20s (change using -quota SECS).
       data structure to do it with.
     </para>
     <para>
-      Here's a benchmark to demonstrates this. In it, we create a list
+      Here's a benchmark that demonstrates this. In it, we create a list
       of maps (or hash tables) that are built up by iteratively applying
       updates, starting from an empty map. In the hash table
       implementation, we do this by calling
@@ -26769,7 +26769,10 @@ struct custom_operations {
       collection</emphasis> to move all live blocks in the minor heap to
       the major heap. This takes work proportional to the number of live
       blocks in the minor heap, which is typically small according to
-      the generational hypothesis.
+      the generational hypothesis. The minor collection <emphasis>stops
+      the world</emphasis> (that it, halts the application) while it
+      runs, which is why it's so important that it complete quickly to
+      let the application resume running with minimal interruption.
     </para>
     <sect2 id="allocating-on-the-minor-heap">
       <title>Allocating on the minor heap</title>
@@ -26820,7 +26823,9 @@ struct custom_operations {
         collection is by setting <literal>limit</literal> to equal
         <literal>end</literal>. The next allocation will never have
         enough space after this is done and will always trigger a
-        garbage collection.
+        garbage collection. There are various internal reasons for such
+        early collections, such as handling pending UNIX signals, and
+        they don't ordinally matter for application code.
       </para>
       <note>
       <title>
@@ -26899,13 +26904,13 @@ val c : Gc.control =
       </listitem>
     </itemizedlist>
     <para>
-      A major garbage collection must <emphasis>stop the
-      world</emphasis> (that is, halt the application) to ensure that
+      A major garbage collection must also stop the world to ensure that
       blocks can be moved around without this being observed by the live
       application. The mark-and-sweep phases run incrementally over
       slices of the heap to avoid pausing the application for long
-      periods of time. Only the compaction phase touches all the memory
-      in one go, and is a relatively rare operation.
+      periods of time, and also precede each slice with a fast minor
+      collection. Only the compaction phase touches all the memory in
+      one go, and is a relatively rare operation.
     </para>
     <sect2 id="allocating-on-the-major-heap">
       <title>Allocating on the major heap</title>
