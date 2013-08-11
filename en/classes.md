@@ -397,7 +397,7 @@ not implemented.  A class containing virtual methods must also be flagged
 `virtual` and cannot be directly instantiated (i.e. no object of this class can
 be created).
 
-To explore this, lets extend our shapes examples to simple interactive
+To explore this, let's extend our shapes examples to simple interactive
 graphics.  We will use the Async concurrency library and the
 [Async_graphics](http://github.com/lpw25/async_graphics/) library, which
 provides an asynchronous interface to OCaml's built in Graphics library.
