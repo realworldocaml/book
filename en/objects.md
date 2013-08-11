@@ -198,11 +198,11 @@ The real benefits of objects come from the class system. Classes support
 inheritance and open recursion. Open recursion allows interdependent parts of
 an object to be defined separately. This works because calls between the
 methods of an object are determined when the object is instantiated, a form of
-_dynamic_ binding. This makes it possible (and necessary) for one method to
+_late_ binding. This makes it possible (and necessary) for one method to
 refer to other methods in the object without knowing statically how they will
 be implemented.
 
-In contrast, modules use static binding.  If you want to parameterize your
+In contrast, modules use early binding.  If you want to parameterize your
 module code so that some part of it can be implemented later, you would write a
 function or functor.  This is more explicit, but often more verbose than
 overriding a method in a class.
