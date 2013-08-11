@@ -284,13 +284,13 @@ everything will compile again.
 ```
 
 We've specified a couple of additional flags here.  The `-syntax` flag directs
-`ocamlfind` to add the `-pp` flag to the compiler command-line.  This flag
+<command>ocamlfind</command> to add the `-pp` flag to the compiler command-line.  This flag
 instructs the compiler to run the preprocessor during its parsing phase.
 
 The `-package` flag imports other OCaml libraries. The `.syntax` suffix in the
 package name is a convention that indicates these libraries are preprocessors
 that should be run during parsing.  The syntax extension modules are
-dynamically loaded into the `camlp4o` command which rewrites the input source
+dynamically loaded into the <command>camlp4o</command> command which rewrites the input source
 code into conventional OCaml code that has no trace of the new keywords.  The
 compiler then compiles this transformed code with no knowledge of the
 preprocessor's actions.
@@ -325,8 +325,8 @@ in your home directory (see [xref](#installation) for more information).
 ((typ ocamltop)(name front-end/camlp4_toplevel.topscript)(part 0))
 ```
 
-The first directive loads the `ocamlfind` top-level interface that lets you
-require `ocamlfind` packages (including all their dependent packages).  The
+The first directive loads the <command>ocamlfind</command> top-level interface that lets you
+require <command>ocamlfind</command> packages (including all their dependent packages).  The
 second directive instructs the top-level to filter all phrases via Camlp4.  You
 can now run `utop` and load the syntax extensions in.  We'll use the
 `comparelib` syntax extension for our experiments.
@@ -371,8 +371,8 @@ Type_conv.  Let's use a small shell script to wrap this invocation.
 ((typ sh)(name front-end/camlp4_dump.cmd))
 ```
 
-The script uses the `ocamlfind` package manager to list the include and library
-paths needed by `comparelib`.  It then invokes the `camlp4o` preprocessor with
+The script uses the <command>ocamlfind</command> package manager to list the include and library
+paths needed by `comparelib`.  It then invokes the <command>camlp4o</command> preprocessor with
 these paths and outputs the resulting AST to the standard output.
 
 ```frag

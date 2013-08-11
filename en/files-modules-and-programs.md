@@ -84,9 +84,9 @@ somewhat more complex invocation to get Core linked in:
 ((typ console)(name files-modules-and-programs-freq/simple_build.out))
 ```
 
-Here we're using `ocamlfind`, a tool which itself invokes other parts of the
+Here we're using <command>ocamlfind</command>, a tool which itself invokes other parts of the
 OCaml toolchain (in this case, <command>ocamlc</command>) with the appropriate flags to link in
-particular libraries and packages.  Here, `-package core` is asking `ocamlfind`
+particular libraries and packages.  Here, `-package core` is asking <command>ocamlfind</command>
 to link in the Core library, `-linkpkg` asks ocamlfind to link in the packages
 as is necessary for building an executable, while `-thread` turns on threading
 support, which is required for Core.
