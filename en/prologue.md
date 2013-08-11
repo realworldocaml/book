@@ -206,23 +206,17 @@ Real World OCaml is split into three parts:
     where we talk about profiling and debugging techniques using tools
     such as GNU `gdb`.
 
-<note>
-<title>Note to reviewers</title>
-
 Real World OCaml uses some tools that we've developed while writing this book.
 Some of these resulted in improvements to the OCaml compiler, which means that
 you will need to ensure that you have an up-to-date development environment
-(using the 4.01.0 compiler).  We've automated everything you need to do via the
-OPAM package manager, so please do follow the installation instructions in
-[xref](#installation) carefully.
+(using the 4.1 version of the compiler).  We've automated everything you need
+to do via the OPAM package manager, so please do follow the installation
+instructions in [xref](#installation) carefully.
 
-At this stage, the Windows operating system is unsupported, and
-only Mac OS X, Linux, FreeBSD and OpenBSD can be expected to work
-reliably.  We realize this is a concern; there are no fundamental
-barriers to Windows support, but we're focused on getting the main
-content finished before getting stuck into the porting effort.
-
-</note>
+As of publication, the Windows operating system is unsupported by Core, and so
+only Mac OS X, Linux, FreeBSD and OpenBSD can be expected to work reliably.
+Please check the online installaton instructions for updates regarding Windows,
+or install a Linux virtual machine to work through the book as it stands.
 
 ## About the Authors
 
