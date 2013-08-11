@@ -509,7 +509,7 @@ the same reference:
 In both these cases we must use subtyping:
 
 ```frag
-((typ ocamltop)(name objects/row_polymorphism.topscript)(part 5))
+((typ ocamltop)(name objects/row_polymorphism.topscript)(part 6))
 ```
 
 <note>
