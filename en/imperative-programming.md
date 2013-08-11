@@ -350,7 +350,7 @@ Here's a simple example of a function for reversing an array in-place.
 ((typ ocamltop)(name imperative-programming/for.topscript)(part 3))
 ```
 
-In the above, we used `incr` and `decr`, which are build-in functions
+In the above, we used `incr` and `decr`, which are built-in functions
 for incrementing and decrementing an `int ref` by one, respectively.
 
 ## Example: Doubly-linked lists
