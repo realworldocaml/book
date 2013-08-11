@@ -348,12 +348,10 @@ an equality method.
 ((typ ocamltop)(name classes/binary.topscript)(part 2))
 ```
 
-The problem is that a `square` expects to be compared with a `square`,
-not an arbitrary shape; similarly for `circle`.
-
-This problem is fundamental.  Many languages solve it either with
-narrowing (with dynamic type checking), or by method overloading.
-Since OCaml has neither of these, what can we do?
+The problem is that a `square` expects to be compared with a `square`, not an
+arbitrary shape; similarly for `circle`.  This problem is fundamental.  Many
+languages solve it either with narrowing (with dynamic type checking), or by
+method overloading.  Since OCaml has neither of these, what can we do?
 
 Since the problematic method is equality, one proposal we could consider is is
 to just drop it from the base type `shape` and use polymorphic equality
@@ -392,7 +390,7 @@ module system.
 
 A _virtual_ class is a class where some methods or fields are declared, but not
 implemented.  This should not be confused with the word `virtual` as it is used
-in C++.  In C++, a `virtual` method uses dynamic dispatch, while regular
+in C++.  A `virtual` method in C++ uses dynamic dispatch, while regular
 non-virtual methods are statically dispatched.  In OCaml, _all_ methods use
 dynamic dispatch, but the keyword `virtual` means that the method or field is
 not implemented.  A class containing virtual methods must also be flagged
