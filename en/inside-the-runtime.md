@@ -83,7 +83,10 @@ operation that requires just a couple of CPU instructions.
 To garbage collect the minor heap, OCaml uses *copying collection* to move all
 live blocks in the minor heap to the major heap.  This takes work proportional
 to the number of live blocks in the minor heap, which is typically small
-according to the generational hypothesis.
+according to the generational hypothesis.  The minor collection *stops the
+world* (that it, halts the application) while it runs, which is why it's so
+important that it complete quickly to let the application resume running with
+minimal interruption.
 
 ### Allocating on the minor heap
 
@@ -162,12 +165,12 @@ algorithm that operates in several phases.
   in long-running programs, and normally occurs much less frequently than the mark
   and sweep phases. 
 
-A major garbage collection must *stop the world* (that is, halt the
-application) to ensure that blocks can be moved around without this being
-observed by the live application. The mark-and-sweep phases run incrementally
-over slices of the heap to avoid pausing the application for long periods of
-time.  Only the compaction phase touches all the memory in one go, and is a
-relatively rare operation.
+A major garbage collection must also stop the world to ensure that blocks can
+be moved around without this being observed by the live application. The
+mark-and-sweep phases run incrementally over slices of the heap to avoid
+pausing the application for long periods of time, and also precede each slice
+with a fast minor collection.  Only the compaction phase touches all the memory
+in one go, and is a relatively rare operation.
 
 ### Allocating on the major heap
 
