@@ -7,8 +7,8 @@ executable code.
 In this chapter, we'll cover the following topics:
 
 * the untyped intermediate lambda code where pattern matching is optimized.
-* the bytecode <command>ocamlc</command> compiler and `ocamlrun` interpreter.
-* the native code `ocamlopt` code generator, and debugging and profiling native code.
+* the bytecode <command>ocamlc</command> compiler and <command>ocamlrun</command> interpreter.
+* the native code <command>ocamlopt</command> code generator, and debugging and profiling native code.
 
 ## The untyped lambda form
 
@@ -161,8 +161,8 @@ executable code.  The OCaml tool-chain branches into two separate compilers at
 this point.  We'll describe the bytecode compiler first, which
 consists of two pieces:
 
-* `ocamlc` compiles files into a bytecode that is a close mapping to the lambda form.
-* `ocamlrun` is a portable interpreter that executes the bytecode.
+* <command>ocamlc</command> compiles files into a bytecode that is a close mapping to the lambda form.
+* <command>ocamlrun</command> is a portable interpreter that executes the bytecode.
 
 The big advantage of using bytecode is simplicity, portability and compilation
 speed.  The mapping from the lambda form to bytecode is straightforward, and
@@ -218,7 +218,7 @@ budding language hacker.
 
 ### Compiling and linking bytecode 
 
-The `ocamlc` command compiles individual `ml` files into bytecode files that
+The <command>ocamlc</command> command compiles individual `ml` files into bytecode files that
 have a `cmo` extension.  The compiled bytecode files are matched with the
 associated `cmi` interface which contains the type signature exported to
 other compilation units.
@@ -265,7 +265,7 @@ This in turn lets the interpreter dynamically load the external library symbols
 when it executes the bytecode.
 
 You can also generate a complete standalone executable that bundles the
-`ocamlrun` interpreter with the bytecode in a single binary.  This is known as
+<command>ocamlrun</command> interpreter with the bytecode in a single binary.  This is known as
 a *custom runtime* mode and is built as follows.
 
 ```frag
@@ -286,11 +286,11 @@ runtimes).  Full details can be found in the
 ### Embedding OCaml bytecode in C
 
 A consequence of using the bytecode compiler is that the final link phase must
-be performed by `ocamlc`.  However, you might sometimes want to embed your OCaml
+be performed by <command>ocamlc</command>.  However, you might sometimes want to embed your OCaml
 code inside an existing C application.  OCaml also supports this mode of operation
 via the `-output-obj` directive.
 
-This mode causes `ocamlc` to output a C object file that containing the
+This mode causes <command>ocamlc</command> to output a C object file that containing the
 bytecode for the OCaml part of the program, as well as a `caml_startup`
 function.  All of the OCaml modules are linked into this object file as
 bytecode, just as they would be for an executable.
@@ -331,7 +331,7 @@ an output binary using `gcc` to test this out.
 ((typ console)(name back-end-embed/build_embed_binary.out))
 ```
 
-You can inspect the commands that `ocamlc` is invoking by adding `-verbose` to
+You can inspect the commands that <command>ocamlc</command> is invoking by adding `-verbose` to
 the command line to help figure out the GCC command-line if you get stuck.  You
 can even obtain the C source code to the `-output-obj` result by specifying a
 `.c` output file extension instead of the `.o` we used earlier.
@@ -356,8 +356,8 @@ interpreter doesn't perform.  Care is taken to ensure compatibility with the
 bytecode runtime, so the same code should run identically when compiled with
 either toolchain.
 
-The `ocamlopt` command is the frontend to the native code compiler, and has a
-very similar interface to `ocamlc`.  It also accepts `ml` and `mli` files, but
+The <command>ocamlopt</command> command is the frontend to the native code compiler, and has a
+very similar interface to <command>ocamlc</command>.  It also accepts `ml` and `mli` files, but
 compiles them to:
 
 * A `.o` file containing native object code.
@@ -379,7 +379,7 @@ important optimization and have slower binaries.
 ### Inspecting assembly output
 
 The native code compiler generates assembly language that is then passed to the
-system assembler for compiling into object files.  You can get `ocamlopt` to
+system assembler for compiling into object files.  You can get <command>ocamlopt</command> to
 output the assembly by passing the `-S` flag to the compiler command-line.
 
 The assembly code is highly architecture specific, so the discussion below
@@ -514,7 +514,7 @@ functions:
 * The variable name is also suffixed by a `_` and a number.  This is
   the result of the lambda compilation that replaces each variable name
   with a unique value within the module.  You can determine this number
-  by examining the `-dlambda` output from `ocamlopt`.
+  by examining the `-dlambda` output from <command>ocamlopt</command>.
 
 Anonymous functions are hard to predict without inspecting intermediate
 compiler output.  If you need to debug them it's usually easier to modify the
@@ -737,7 +737,7 @@ OPAM switch.
 We've seen how the compiler uses intermediate files to store various stages of
 the compilation toolchain.  Here's a cheat sheet of all them in one place.
 
-Here are the intermediate files generated by `ocamlc`:
+Here are the intermediate files generated by <command>ocamlc</command>:
 
 Extension  Purpose
 ---------  -------
