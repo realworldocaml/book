@@ -189,26 +189,26 @@ Whitespace and source code comments are removed during parsing and aren't
 significant in determining the semantics of the program.  However, other tools
 in the OCaml distribution can interpret comments for their own ends.
 
-The OCamldoc tool uses specially formatted comments in the source code to
+The <command>ocamldoc</command> tool uses specially formatted comments in the source code to
 generate documentation bundles. These comments are combined with the function
 definitions and signatures and output as structured documentation in a variety
 of formats. It can generate HTML pages, LaTeX and PDF documents, UNIX manual
 pages and even module dependency graphs that can be viewed using
 [Graphviz](http://www.graphviz.org).
 
-Here's a sample of some source code that's been annotated with OCamldoc
+Here's a sample of some source code that's been annotated with <command>ocamldoc</command>
 comments.
 
 ```frag
 ((typ ocaml)(name front-end/doc.ml)(header false))
 ```
 
-The OCamldoc comments are distinguished by beginning with the double
+The <command>ocamldoc</command> comments are distinguished by beginning with the double
 asterisk.  There are formatting conventions for the contents of the
 comment to mark metadata.  For instance, the `@tag` fields mark
 specific properties such as the author of that section of code.
 
-Try compiling the HTML documentation and UNIX man pages by running `ocamldoc`
+Try compiling the HTML documentation and UNIX man pages by running <command>ocamldoc</command>
 over the source file.
 
 ```frag
@@ -222,9 +222,9 @@ the [OCaml manual](http://caml.inria.fr/pub/docs/manual-ocaml/manual029.html)
 for the complete list.
 
 <tip>
-<title>Using custom OCamldoc generators</title>
+<title>Using custom <command>ocamldoc</command> generators</title>
 
-The default HTML output stylesheets from OCamldoc are pretty spartan and
+The default HTML output stylesheets from <command>ocamldoc</command> are pretty spartan and
 distinctly Web 1.0.  The tool supports plugging in custom documentation
 generators, and there are several available that provide prettier or more
 detailed output.
@@ -724,7 +724,7 @@ longer matters.
 ((typ console)(name front-end/build_principal.out))
 ```
 
-The `ocamlbuild` equivalent is to add the tag `principal` to your build.
+The <command>ocamlbuild</command> equivalent is to add the tag `principal` to your build.
 The `corebuild` wrapper script actually adds this by default, but it does
 no harm to explicitly repeat it, as below.
 
@@ -877,14 +877,14 @@ sub-modules of the output.  Packing thus generates an entirely new `.cmo` (or
 Packing for native code introduces an additional requirement: the modules that
 are intended to be packed must be compiled with the `-for-pack` argument that
 specifies the eventual name of the pack.   The easiest way to handle packing is
-to let `ocamlbuild` figure out the command-line arguments for you, so let's
+to let <command>ocamlbuild</command> figure out the command-line arguments for you, so let's
 try that out next with a simple example.
 
 First, create a couple of toy modules called `A.ml` and `B.ml` that contain a
 single value.  You will also need a `_tags` file that adds the `-for-pack`
 option for the `cmx` files (but careful to exclude the pack target itself).
 Finally, the `X.mlpack` file contains the list of modules that are intended to
-be packed under module `X`.  There are special rules in `ocamlbuild` that tell
+be packed under module `X`.  There are special rules in <command>ocamlbuild</command> that tell
 it how to map `%.mlpack` files to the packed `%.cmx` or `%.cmo` equivalent.
 
 ```

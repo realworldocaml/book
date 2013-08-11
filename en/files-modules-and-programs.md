@@ -264,8 +264,8 @@ We also used this opportunity to document the module.  The `mli` file
 is the place where you specify your module's interface, and as such is
 a natural place to document the module as well.  We also started our
 comments with a double asterisk to cause them to be picked up by the
-`ocamldoc` tool when generating API documentation.  We'll discuss
-`ocamldoc` more in
+<command>ocamldoc</command> tool when generating API documentation.  We'll discuss
+<command>ocamldoc</command> more in
 [xref](#the-compiler-frontend-parsing-and-type-checking).
 
 Here's a rewrite of `counter.ml` to match the new `counter.mli`.
