@@ -138,7 +138,7 @@ tokens for numbers, strings, identifiers, and punctuation.
 
 The `<`_type_`>` specifications mean that a token carries a value.
 The `INT` token carries an integer value with it, `FLOAT` has a
-`float` value, and both `ID` and `STRING` carry a `string` value.  The
+`float` value, and `STRING` carries a `string` value.  The
 remaining tokens, such as `TRUE`, `FALSE` or the punctuation, aren't
 associated with any value and so we can omit the `<`_type_`>`
 specification.
