@@ -4,7 +4,7 @@ class ['a] list_iterator init =
   object
     val mutable current : 'a list = init
 
-    method has_value = init <> []
+    method has_value = current <> []
 
     method get =
       match current with

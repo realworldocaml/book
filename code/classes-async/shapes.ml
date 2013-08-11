@@ -2,6 +2,9 @@ open Core.Std
 open Async.Std
 open Async_graphics
 
+type drawable = < draw: unit >
+
+(* part 1 *)
 class virtual shape x y = object (self)
   method virtual private contains: int -> int -> bool
 
@@ -13,18 +16,18 @@ class virtual shape x y = object (self)
 
   method on_click ?start ?stop f =
     on_click ?start ?stop
-      (fun {mouse_x;mouse_y} ->  
-         if self#contains mouse_x mouse_y then
-           f mouse_x mouse_y)
+      (fun ev ->  
+         if self#contains ev.mouse_x ev.mouse_y then
+           f ev.mouse_x ev.mouse_y)
 
   method on_mousedown ?start ?stop f =
     on_mousedown ?start ?stop
-      (fun {mouse_x;mouse_y} ->
-         if self#contains mouse_x mouse_y then
-           f mouse_x mouse_y)
+      (fun ev ->
+         if self#contains ev.mouse_x ev.mouse_y then
+           f ev.mouse_x ev.mouse_y)
 end
 
-(* part 1 *)
+(* part 2 *)
 class square w x y = object
   inherit shape x y
 
@@ -53,15 +56,15 @@ class circle r x y = object
     dist <= (Float.of_int radius)
 end
 
-(* part 2 *)
+(* part 3 *)
 class growing_circle r x y = object (self)
   inherit circle r x y
 
   initializer
-    self#on_click (fun x y -> radius <- radius * 2)
+    self#on_click (fun _x _y -> radius <- radius * 2)
 end
 
-(* part 3 *)
+(* part 4 *)
 class virtual draggable = object (self)
   method virtual on_mousedown: 
     ?start:unit Deferred.t -> 
@@ -86,18 +89,18 @@ class virtual draggable = object (self)
               Ivar.fill mouse_up ();
               dragging <- false);
          on_mousemove ~stop
-           (fun {mouse_x;mouse_y} ->
-              x <- mouse_x + offset_x;
-              y <- mouse_y + offset_y))
+           (fun ev ->
+              x <- ev.mouse_x + offset_x;
+              y <- ev.mouse_y + offset_y))
 end
 
-(* part 4 *)
+(* part 5 *)
 class small_square = object
   inherit square 20 40 40
   inherit draggable 
 end
 
-(* part 5 *)
+(* part 6 *)
 class virtual animated span = object (self)
   method virtual on_click: 
     ?start:unit Deferred.t -> 
@@ -123,18 +126,18 @@ class virtual animated span = object (self)
       )
 
   initializer
-    self#on_click (fun x y -> if not self#running then self#animate)
+    self#on_click (fun _x _y -> if not self#running then self#animate)
 end
 
-(* part 6 *)
+(* part 7 *)
 class my_circle = object
   inherit circle 20 50 50
   inherit animated Time.Span.second
   initializer updates <- [fun _ -> x <- x + 5]
 end
 
-(* part 7 *)
-class virtual linear x' y' = object (self)
+(* part 8 *)
+class virtual linear x' y' = object
   val virtual mutable updates: (int -> unit) list
   val virtual mutable x: int
   val virtual mutable y: int
@@ -149,7 +152,7 @@ end
 
 let pi = (atan 1.0) *. 4.0
 
-class virtual harmonic offset x' y' = object (self)
+class virtual harmonic offset x' y' = object
   val virtual mutable updates: (int -> unit) list
   val virtual mutable x: int
   val virtual mutable y: int
@@ -165,8 +168,8 @@ class virtual harmonic offset x' y' = object (self)
     updates <- update :: updates
 end
 
-(* part 8 *)
-class my_square x y = object (self)
+(* part 9 *)
+class my_square x y = object
   inherit square 40 x y
   inherit draggable
   inherit animated (Time.Span.of_int_sec 5)
@@ -181,15 +184,23 @@ let my_circle = object
   inherit harmonic (pi /. 2.0) 0 10
 end
 
-(* part 9 *)
-let () =
-  let open Drawable in
-  open_display ();
+(* part 10 *)
+
+let main () =
   let shapes = [ 
      (my_circle :> drawable); 
      (new my_square 50 350 :> drawable); 
      (new my_square 50 200 :> drawable);
      (new growing_circle 20 70 70 :> drawable);
   ] in
-  Drawable.shapes := shapes;
-  never_returns (Scheduler.go ())
+  let repaint () =
+    clear_graph ();
+    List.iter ~f:(fun s -> s#draw) shapes;
+    synchronize ()
+  in 
+    open_graph "";
+    auto_synchronize false;
+    Clock.every (Time.Span.of_sec (1.0 /. 24.0)) repaint
+
+let () = never_returns (Scheduler.go_main ~main ())
+  

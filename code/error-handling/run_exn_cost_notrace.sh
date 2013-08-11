@@ -1,1 +1,1 @@
-OCAMLRUNPARAM= ./exn_cost.native cycles
+OCAMLRUNPARAM= ./exn_cost.native -ascii cycles
