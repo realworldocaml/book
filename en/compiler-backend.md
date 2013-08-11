@@ -7,7 +7,7 @@ executable code.
 In this chapter, we'll cover the following topics:
 
 * the untyped intermediate lambda code where pattern matching is optimized.
-* the bytecode `ocamlc` compiler and `ocamlrun` interpreter.
+* the bytecode <command>ocamlc</command> compiler and `ocamlrun` interpreter.
 * the native code `ocamlopt` code generator, and debugging and profiling native code.
 
 ## The untyped lambda form
