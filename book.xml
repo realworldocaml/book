@@ -14126,9 +14126,10 @@ val unique_handler : Sexp.t -&gt; query_handler_instance = &lt;fun&gt;
         <emphasis>Open recursion</emphasis>: an object's methods can
         invoke another method in the same object using a special
         variable (often called <literal>self</literal> or
-        <literal>this</literal>). These calls use dynamic lookup,
-        allowing a method defined in one object to invoke methods
-        defined in another object that inherits from the first.
+        <literal>this</literal>). When objects are created from classes,
+        these calls use dynamic lookup, allowing a method defined in one
+        class to invoke methods defined in another class that inherits
+        from the first.
       </para>
     </listitem>
   </itemizedlist>
@@ -14279,7 +14280,7 @@ Error: This expression has type &lt; resize : [&gt; `Fullscreen ] -&gt; unit; ..
       The <literal>..</literal> in the inferred object types are
       ellipses, standing for other unspecified methods that the object
       may have. The type <literal>&lt; width : float; .. &gt;</literal>
-      specifies an object that must have at least an
+      specifies an object that must have at least a
       <literal>width</literal> method, and possibly some others as well.
       Such object types are said to be <emphasis>open</emphasis>.
     </para>
@@ -14441,12 +14442,12 @@ Some (4, &lt;obj&gt;)
       interdependent parts of an object to be defined separately. This
       works because calls between the methods of an object are
       determined when the object is instantiated, a form of
-      <emphasis>dynamic</emphasis> binding. This makes it possible (and
+      <emphasis>late</emphasis> binding. This makes it possible (and
       necessary) for one method to refer to other methods in the object
       without knowing statically how they will be implemented.
     </para>
     <para>
-      In contrast, modules use static binding. If you want to
+      In contrast, modules use early binding. If you want to
       parameterize your module code so that some part of it can be
       implemented later, you would write a function or functor. This is
       more explicit, but often more verbose than overriding a method in
@@ -14479,7 +14480,7 @@ Some (4, &lt;obj&gt;)
       <emphasis>B</emphasis>. When this is true, we say that
       <emphasis>A</emphasis> is a <emphasis>subtype</emphasis> of
       <emphasis>B</emphasis>. Actually, more concretely, subtyping
-      determines when the coercion operator <literal>e :&gt; t</literal>
+      restricts when the coercion operator <literal>e :&gt; t</literal>
       can be applied. This coercion works only if the expression
       <literal>e</literal> has some type <literal>s</literal> and
       <literal>s</literal> is a subtype of <literal>t</literal>.
@@ -14582,7 +14583,10 @@ val items : item list = [&lt;obj&gt;; &lt;obj&gt;]
       <title>Polymorphic variant subtyping</title>
       <para>
         Subtyping can also be used to coerce a polymorphic variant into
-        a larger polymorphic variant type.
+        a larger polymorphic variant type. A polymorphic variant type
+        <emphasis>A</emphasis> is a subtype of <emphasis>B</emphasis>,
+        if the tags of <emphasis>A</emphasis> are a subset of the tags
+        of <emphasis>B</emphasis>.
       </para>
       <programlisting language="ocaml">
 ...part 4 of objects/subtyping.topscript
@@ -14617,7 +14621,7 @@ val shapes : shape list = [&lt;obj&gt;; &lt;obj&gt;]
         safe to treat a <literal>square array</literal> as a
         <literal>shape array</literal> because it would allow you to
         store non-square shapes into what should be an array of squares.
-        OCaml recognizes this and does not allow the coercion.
+        OCaml recognizes this and does not allow the coercion:
       </para>
       <programlisting language="ocaml">
 ...part 6 of objects/subtyping.topscript
@@ -14756,24 +14760,8 @@ let circle_stack: circle stack = stack [circle 20; circle 40]
         and found the total area of their shapes, we might try:
       </para>
       <programlisting language="ocaml">
-...part 12 of objects/subtyping.topscript
-# total_area [(square_stack :&gt; shape stack); (circle_stack :&gt; shape stack)];; 
-Characters 12-41:
-Error: Type square stack = &lt; pop : square option; push : square -&gt; unit &gt;
-       is not a subtype of
-         shape stack = &lt; pop : shape option; push : shape -&gt; unit &gt; 
-       Type shape = &lt; area : float &gt; is not a subtype of
-         square = &lt; area : float; width : int &gt; 
-</programlisting>
-      <para>
-        However, when we try to apply this function to our objects we
-        get an error:
-      </para>
-      <programlisting language="ocaml">
-...part 13 of objects/subtyping.topscript
-# type 'a readonly_stack = &lt; pop : 'a option &gt;;; 
-type 'a readonly_stack = &lt; pop : 'a option &gt;
-# let total_area (shape_stacks: shape readonly_stack list) =
+...part 11 of objects/subtyping.topscript
+# let total_area (shape_stacks: shape stack list) =
   let stack_area acc st = 
     let rec loop acc =
       match st#pop with
@@ -14783,9 +14771,21 @@ type 'a readonly_stack = &lt; pop : 'a option &gt;
       loop acc
   in
     List.fold ~init:0.0 ~f:stack_area shape_stacks;; 
-val total_area : shape readonly_stack list -&gt; float = &lt;fun&gt;
-# total_area [(square_stack :&gt; shape readonly_stack); (circle_stack :&gt; shape readonly_stack)];; 
-- : float = 7280.
+val total_area : shape stack list -&gt; float = &lt;fun&gt;
+</programlisting>
+      <para>
+        However, when we try to apply this function to our objects we
+        get an error:
+      </para>
+      <programlisting language="ocaml">
+...part 12 of objects/subtyping.topscript
+# total_area [(square_stack :&gt; shape stack); (circle_stack :&gt; shape stack)];; 
+Characters 12-41:
+Error: Type square stack = &lt; pop : square option; push : square -&gt; unit &gt;
+       is not a subtype of
+         shape stack = &lt; pop : shape option; push : shape -&gt; unit &gt; 
+       Type shape = &lt; area : float &gt; is not a subtype of
+         square = &lt; area : float; width : int &gt; 
 </programlisting>
       <para>
         As you can see, <literal>square stack</literal> and
@@ -14817,7 +14817,7 @@ val total_area : shape readonly_stack list -&gt; float = &lt;fun&gt;
         the list of stacks to it.
       </para>
       <programlisting language="ocaml">
-...part 14 of objects/subtyping.topscript
+...part 13 of objects/subtyping.topscript
 # type 'a readonly_stack = &lt; pop : 'a option &gt;;; 
 type 'a readonly_stack = &lt; pop : 'a option &gt;
 # let total_area (shape_stacks: shape readonly_stack list) =
@@ -14832,8 +14832,7 @@ type 'a readonly_stack = &lt; pop : 'a option &gt;
     List.fold ~init:0.0 ~f:stack_area shape_stacks;; 
 val total_area : shape readonly_stack list -&gt; float = &lt;fun&gt;
 # total_area [(square_stack :&gt; shape readonly_stack); (circle_stack :&gt; shape readonly_stack)];; 
-Characters 13-25:
-Error: Unbound value square_stack
+- : float = 7280.
 </programlisting>
       <para>
         Aspects of this section may seem fairly complicated, but it
@@ -14842,7 +14841,7 @@ Error: Unbound value square_stack
         are fairly minor. In most typed object-oriented languages, these
         coercions would simply not be possible. For example, in C++, a
         STL type <literal>list&lt;T&gt;</literal> is invariant in
-        <literal>T</literal>, it is simply not possible to use
+        <literal>T</literal>, so it is simply not possible to use
         <literal>list&lt;square&gt;</literal> where
         <literal>list&lt;shape&gt;</literal> is expected (at least
         safely). The situation is similar in Java, although Java has an
@@ -14969,11 +14968,12 @@ let is_barbell = function
     <sect2 id="subtyping-vs.-row-polymorphism">
       <title>Subtyping vs. row polymorphism</title>
       <para>
-        There is a great deal of overlap between subtyping and row
-        polymorphism. Row polymorphism is in general preferred over
-        subtyping because it does not require explicit coercions, and it
-        preserves more type information, allowing functions like the
-        following:
+        There is considerable overlap between subtyping and row
+        polymorphism. Both mechanisms allow you to write functions that
+        can be applied to objects of different types. In these cases,
+        row polymorphism is usually preferred over subtyping because it
+        does not require explicit coercions, and it preserves more type
+        information, allowing functions like the following:
       </para>
       <programlisting language="ocaml">
 ...part 1 of objects/row_polymorphism.topscript
@@ -15010,8 +15010,10 @@ val remove_large : &lt; area : float &gt; list -&gt; &lt; area : float &gt; list
 </programlisting>
       <para>
         However, there are some situations where we cannot use row
-        polymorphism. For example, lists of heterogeneous elements can
-        not be created using row polymorphism:
+        polymorphism. In particular, row polymorphism cannot be used to
+        place different types of object in the same container. For
+        example, lists of heterogeneous elements cannot be created using
+        row polymorphism:
       </para>
       <programlisting language="ocaml">
 ...part 4 of objects/row_polymorphism.topscript
@@ -15022,8 +15024,8 @@ Error: This expression has type &lt; area : float; radius : int &gt;
        The second object type has no method radius
 </programlisting>
       <para>
-        Since row polymorphism is a form of polymorphism, it also does
-        not work well with references:
+        Similarly, we cannot use row polymorphism to store different
+        types of object in the same reference:
       </para>
       <programlisting language="ocaml">
 ...part 5 of objects/row_polymorphism.topscript
@@ -15039,14 +15041,16 @@ Error: This expression has type &lt; area : float; radius : int &gt;
         In both these cases we must use subtyping:
       </para>
       <programlisting language="ocaml">
-...part 5 of objects/row_polymorphism.topscript
-# let shape_ref: &lt; area: float; ..&gt; ref = ref (square 40);; 
-val shape_ref : &lt; area : float; width : int &gt; ref = {contents = &lt;obj&gt;}
-# shape_ref := circle 20;; 
-Characters 13-22:
-Error: This expression has type &lt; area : float; radius : int &gt;
-       but an expression was expected of type &lt; area : float; width : int &gt;
-       The second object type has no method radius
+...part 6 of objects/row_polymorphism.topscript
+# let hlist: shape list = [(square 10 :&gt; shape); (circle 30 :&gt; shape)];; 
+Characters 11-16:
+Error: Unbound type constructor shape
+# let shape_ref: shape ref = ref (square 40 :&gt; shape);; 
+Characters 15-20:
+Error: Unbound type constructor shape
+# shape_ref := (circle 20 :&gt; shape);; 
+Characters 27-32:
+Error: Unbound type constructor shape
 </programlisting>
       <note>
       <title>
@@ -15163,11 +15167,11 @@ type istack = &lt; pop : int option; push : int -&gt; unit &gt;
       <literal>new</literal>.
     </para>
     <para>
-      Let's implement a class for creating simple stack objects. When
-      defining the class, the type parameters are placed in square
-      brackets before the class name in the class definition. We also
-      need a parameter <literal>init</literal> for the initial contents
-      of the stack.
+      Let's implement a variant of the <literal>istack</literal> class
+      that can hold any values, not just integers. When defining the
+      class, the type parameters are placed in square brackets before
+      the class name in the class definition. We also add a parameter
+      <literal>init</literal> for the initial contents of the stack.
     </para>
     <programlisting language="ocaml">
 # script classes/stack.topscript
@@ -15195,9 +15199,9 @@ class ['a] stack :
 </programlisting>
     <para>
       Note that the type parameter <literal>['a]</literal> in the
-      definition uses square brackets, but other uses of the type can
-      omit them (or use parentheses if there is more than one type
-      parameter).
+      definition uses square brackets, but for other uses of the type
+      they are omited (or replaced with parentheses if there is more
+      than one type parameter).
     </para>
     <para>
       The type annotation on the declaration of <literal>v</literal> is
@@ -15995,14 +15999,14 @@ end
       created).
     </para>
     <para>
-      To explore this, lets extend our shapes examples to simple
+      To explore this, let's extend our shapes examples to simple
       interactive graphics. We will use the Async concurrency library
       and the
       <ulink url="http://github.com/lpw25/async_graphics/">Async_graphics</ulink>
       library, which provides an asynchronous interface to OCaml's built
       in Graphics library. Concurrent programming with Async will be
       explored later in
-      <xref linkend="concurrent-programming-with-async"/>, for
+      <xref linkend="concurrent-programming-with-async"/>; for
       now you can safely ignore the details. You just need to run
       <literal>opam install async_graphics</literal> to get the library
       installed on your system.
@@ -19535,9 +19539,7 @@ let () =
   print_endline (if json1 = json2 then &quot;OK&quot; else &quot;FAIL&quot;)
 </programlisting>
     <para>
-      You can build this by writing a <literal>_tags</literal> file to
-      define the package dependencies, and then running
-      <literal>ocamlbuild</literal>.
+      You can build this by running <command>corebuild</command>.
     </para>
     <programlisting>
 # running json/run_read_json.out.sh
