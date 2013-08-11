@@ -19,10 +19,10 @@ you do need to write a parser, in the form of _parser generators_.  A
 parser generator creates a parser from a specification of the data
 format that you want to parse, and uses that to generate a parser.
 
-Parser generators have a long history, including tools like `lex` and
+Parser generators have a long history, including tools like <command>lex</command> and
 `yacc` that date back to the early 1970's.  OCaml has its own
-alternatives, including `ocamllex`, which replaces `lex`, and
-`ocamlyacc` and `menhir`, which are replacements for `yacc`.  We'll
+alternatives, including <command>ocamllex</command>, which replaces <command>lex</command>, and
+<command>ocamlyacc</command> and <command>menhir</command>, which are replacements for `yacc`.  We'll
 explore these tools in the course of walking through the
 implementation of a parser for the JSON serialization format that we
 discussed in [xref](#handling-json-data).
@@ -32,11 +32,11 @@ not to teach all of the theoretical issues, but to provide a pragmatic
 introduction of how to build a parser in OCaml.
 
 <note>
-<title>Menhir _vs_ `ocamlyacc`</title>
+<title>Menhir _vs_ <command>ocamlyacc</command></title>
 
 Menhir is an alternative parser generator that is generally superior
-to the venerable `ocamlyacc`, which dates back quite a few years.
-Menhir is mostly compatible with `ocamlyacc` grammars, and so you can
+to the venerable <command>ocamlyacc</command>, which dates back quite a few years.
+Menhir is mostly compatible with <command>ocamlyacc</command> grammars, and so you can
 usually just switch to Menhir and expect older code to work (with some
 minor differences described in the Menhir manual).
 
@@ -44,7 +44,7 @@ The biggest advantage of Menhir is that its error messages are
 generally more human-comprehensible, and the parsers that it generates
 are fully reentrant and can be parameterized in OCaml modules more
 easily.  We recommend that any new code you develop should use Menhir
-instead of `ocamlyacc`.
+instead of <command>ocamlyacc</command>.
 
 Menhir isn't distributed directly with OCaml, but is available through
 OPAM by running `opam install menhir`.
@@ -146,8 +146,8 @@ specification.
 ### Describing the grammar
 
 The next thing we need to do is to specify the grammar of a JSON
-expression.  `menhir`, like many parsers, expresses grammars as
-_context free grammars_.  (More precisely, `menhir` supports LR(1)
+expression.  <command>menhir</command>, like many parsers, expresses grammars as
+_context free grammars_.  (More precisely, <command>menhir</command> supports LR(1)
 grammars, but we will ignore that technical distinction here.) You can
 think of a context-free grammar as a set of abstract names, called
 _non-terminal symbols_, along with a collection of rules for
@@ -158,7 +158,7 @@ grammar's rules to produce a series of transformations, starting at a
 distinguished _start symbol_, that produces the token sequence in
 question.
 
-We'll start describing the JSON grammar by declaring the start-symbol
+We'll start describing the JSON grammar by declaring the start symbol
 to be the non-terminal symbol `prog`, and by declaring that when
 parsed, a `prog` value should be converted into an OCaml value of type
 `Json.value option`.  We then end the declaration section of the
@@ -169,7 +169,7 @@ parser with a `%%`.
 ```
 
 Once that's in place, we can start specifying the productions.  In
-`menhir`, productions are organized into _rules_, where each rule
+<command>menhir</command>, productions are organized into _rules_, where each rule
 lists all the possible productions for a given non-terminal.  Here,
 for example, is the rule for `prog`.
 
@@ -223,7 +223,7 @@ syntax is used within the body of a rule.
 ((typ ocaml)(name parsing/parser.mly)(part 4))
 ```
 
-The rules are structured as they are because `menhir` generates
+The rules are structured as they are because <command>menhir</command> generates
 left-recursive parsers, which means that the constructed pushdown
 automaton uses less stack space with left-recursive definitions.  The
 following right-recursive rule accepts the same input, but during
@@ -259,9 +259,9 @@ objects and lists with one rule.
 ((typ ocaml)(name parsing/short_parser.mly)(part 1))
 ```
 
-We can invoke `menhir` by using `corebuild` with the `-use-menhir`
-flag.  This tells the build system to switch to using `menhir` instead
-of `ocamlyacc` to handle files with the `.mly` suffix.
+We can invoke <command>menhir</command> by using <command>corebuild</command> with the `-use-menhir`
+flag.  This tells the build system to switch to using <command>menhir</command> instead
+of <command>ocamlyacc</command> to handle files with the `.mly` suffix.
 
 ```frag
 ((typ console)(name parsing/build_short_parser.out))
@@ -271,7 +271,7 @@ of `ocamlyacc` to handle files with the `.mly` suffix.
 
 For the next part, we need to define a lexer to tokenize the input
 text, meaning that we break the input into a sequence of words or
-tokens.  For this, we'll define a lexer using `ocamllex`.  In this
+tokens.  For this, we'll define a lexer using <command>ocamllex</command>.  In this
 case, the specification is placed in a file with a `.mll` suffix
 (we'll use the name `lexer.mll`).  A lexer file has several parts in
 the following sequence.
@@ -379,7 +379,7 @@ expressions like `"true" { TRUE }` are used for keywords, and the
 special characters have actions too, like `'{' { LEFT_BRACE }`.
 
 Some of these patterns overlap.  For example, the regular expression
-`"true"` is also matched by the `id` pattern.  `ocamllex` used the
+`"true"` is also matched by the `id` pattern.  <command>ocamllex</command> used the
 following disambiguation when a prefix of the input is matched by more
 than one pattern.
 
@@ -395,7 +395,7 @@ than one pattern.
   
 ### Recursive rules
 
-Unlike many other lexer generators, `ocamllex` allows the definition
+Unlike many other lexer generators, <command>ocamllex</command> allows the definition
 of multiple lexers in the same file, and the definitions can be
 recursive.  In this case, we use recursion to match string literals
 using the following rule definition.
@@ -429,7 +429,7 @@ varying degrees of flexibility and complexity.
   spectrum of Unicode character types, conversion from around 200
   encodings, and collation and locale-sensitive case mappings.
 * [Ulex](http://www.cduce.org/ulex) is a lexer generator for Unicode
-  that can serve as a Unicode-aware replacement for `ocamllex`.
+  that can serve as a Unicode-aware replacement for <command>ocamllex</command>.
 * [Uutf](http://erratique.ch/software/uutf) is a non-blocking
   streaming Unicode codec for OCaml, available as a standalone
   library.  It is accompanied by the
