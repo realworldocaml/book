@@ -5102,7 +5102,7 @@ $ ocamlfind ocamlc -linkpkg -thread -package core freq.ml -o freq.byte
     <para>
       Here we're using <literal>ocamlfind</literal>, a tool which itself
       invokes other parts of the OCaml toolchain (in this case,
-      <literal>ocamlc</literal>) with the appropriate flags to link in
+      <command>ocamlc</command>) with the appropriate flags to link in
       particular libraries and packages. Here,
       <literal>-package core</literal> is asking
       <literal>ocamlfind</literal> to link in the Core library,
@@ -5136,7 +5136,7 @@ $ corebuild freq.byte
     <para>
       We can run the resulting executable from the command-line. The
       following line extracts strings from the
-      <literal>ocamlopt</literal> binary, reporting the most frequently
+      <command>ocamlopt</command> binary, reporting the most frequently
       occurring ones. Note that the specific results will vary from
       platform to platform, since the binary itself will differ between
       platforms.
@@ -5159,11 +5159,11 @@ $ strings `which ocamlopt` | ./freq.byte
     Bytecode vs native code
     </title>
     <para>
-      OCaml ships with two compilers: the <literal>ocamlc</literal>
-      bytecode compiler and the <literal>ocamlopt</literal> native-code
-      compiler. Programs compiled with <literal>ocamlc</literal> are
+      OCaml ships with two compilers: the <command>ocamlc</command>
+      bytecode compiler and the <command>ocamlopt</command> native-code
+      compiler. Programs compiled with <command>ocamlc</command> are
       interpreted by a virtual machine, while programs compiled with
-      <literal>ocamlopt</literal> are compiled to native machine code to
+      <command>ocamlopt</command> are compiled to native machine code to
       be run on a specific operating system and processor architecture.
     </para>
     <para>
@@ -5172,7 +5172,7 @@ $ strings `which ocamlopt` | ./freq.byte
       of. First, the bytecode compiler can be used on more
       architectures, and has some tools that are not available for
       native code. For example, the OCaml debugger only works with
-      bytecode (although <literal>gdb</literal>, the Gnu Debugger, works
+      bytecode (although <command>gdb</command>, the GNU Debugger, works
       with OCaml native-code applications). The bytecode compiler is
       also quicker than the native-code compiler. In addition, in order
       to run a bytecode executable you typically need to have OCaml
@@ -5185,7 +5185,8 @@ $ strings `which ocamlopt` | ./freq.byte
       built using the native-code compiler, but it sometimes makes sense
       to use bytecode for development builds. And, of course, bytecode
       makes sense when targeting a platform not supported by the
-      native-code compiler.
+      native-code compiler. We'll cover both compilers in more detail in
+      <xref linkend="the-compiler-backend-byte-code-and-native-code"/>.
     </para>
     </note>
 
@@ -19153,7 +19154,7 @@ let () = Command.run add
               Ports System
             </entry>
             <entry>
-              <literal>/usr/ports/shells/bash-completion</literal>
+              <filename>/usr/ports/shells/bash-completion</filename>
             </entry>
           </row>
         </tbody>
@@ -29628,13 +29629,13 @@ $ ocamlc -dtypedtree typedef.ml 2&gt;&amp;1
     </listitem>
     <listitem>
       <para>
-        the bytecode <literal>ocamlc</literal> compiler and
-        <literal>ocamlrun</literal> interpreter.
+        the bytecode <command>ocamlc</command> compiler and
+        <command>ocamlrun</command> interpreter.
       </para>
     </listitem>
     <listitem>
       <para>
-        the native code <literal>ocamlopt</literal> code generator, and
+        the native code <command>ocamlopt</command> code generator, and
         debugging and profiling native code.
       </para>
     </listitem>
@@ -29951,13 +29952,13 @@ Estimated testing time 30s (change using -quota SECS).
     <itemizedlist>
       <listitem>
         <para>
-          <literal>ocamlc</literal> compiles files into a bytecode that
+          <command>ocamlc</command> compiles files into a bytecode that
           is a close mapping to the lambda form.
         </para>
       </listitem>
       <listitem>
         <para>
-          <literal>ocamlrun</literal> is a portable interpreter that
+          <command>ocamlrun</command> is a portable interpreter that
           executes the bytecode.
         </para>
       </listitem>
@@ -30066,7 +30067,7 @@ L2: closure L1, 0
     <sect2 id="compiling-and-linking-bytecode">
       <title>Compiling and linking bytecode</title>
       <para>
-        The <literal>ocamlc</literal> command compiles individual
+        The <command>ocamlc</command> command compiles individual
         <literal>ml</literal> files into bytecode files that have a
         <literal>cmo</literal> extension. The compiled bytecode files
         are matched with the associated <literal>cmi</literal> interface
@@ -30133,7 +30134,7 @@ $ ocamlc -a -o mylib.cma a.cmo b.cmo -dllib -lmylib
       </para>
       <para>
         You can also generate a complete standalone executable that
-        bundles the <literal>ocamlrun</literal> interpreter with the
+        bundles the <command>ocamlrun</command> interpreter with the
         bytecode in a single binary. This is known as a <emphasis>custom
         runtime</emphasis> mode and is built as follows.
       </para>
@@ -30161,13 +30162,13 @@ $ ocamlc -a -o mylib.cma -custom a.cmo b.cmo -cclib -lmylib
       <title>Embedding OCaml bytecode in C</title>
       <para>
         A consequence of using the bytecode compiler is that the final
-        link phase must be performed by <literal>ocamlc</literal>.
+        link phase must be performed by <command>ocamlc</command>.
         However, you might sometimes want to embed your OCaml code
         inside an existing C application. OCaml also supports this mode
         of operation via the <literal>-output-obj</literal> directive.
       </para>
       <para>
-        This mode causes <literal>ocamlc</literal> to output a C object
+        This mode causes <command>ocamlc</command> to output a C object
         file that containing the bytecode for the OCaml part of the
         program, as well as a <literal>caml_startup</literal> function.
         All of the OCaml modules are linked into this object file as
@@ -30236,7 +30237,7 @@ hello embedded world 2
 After calling OCaml
 </programlisting>
       <para>
-        You can inspect the commands that <literal>ocamlc</literal> is
+        You can inspect the commands that <command>ocamlc</command> is
         invoking by adding <literal>-verbose</literal> to the command
         line to help figure out the GCC command-line if you get stuck.
         You can even obtain the C source code to the
@@ -30271,9 +30272,9 @@ $ ocamlc -output-obj -o embed_out.c embed_me1.ml embed_me2.ml
       compiled with either toolchain.
     </para>
     <para>
-      The <literal>ocamlopt</literal> command is the frontend to the
+      The <command>ocamlopt</command> command is the frontend to the
       native code compiler, and has a very similar interface to
-      <literal>ocamlc</literal>. It also accepts <literal>ml</literal>
+      <command>ocamlc</command>. It also accepts <literal>ml</literal>
       and <literal>mli</literal> files, but compiles them to:
     </para>
     <itemizedlist>
@@ -30317,7 +30318,7 @@ $ ocamlc -output-obj -o embed_out.c embed_me1.ml embed_me2.ml
       <para>
         The native code compiler generates assembly language that is
         then passed to the system assembler for compiling into object
-        files. You can get <literal>ocamlopt</literal> to output the
+        files. You can get <command>ocamlopt</command> to output the
         assembly by passing the <literal>-S</literal> flag to the
         compiler command-line.
       </para>
@@ -30585,7 +30586,7 @@ Estimated testing time 20s (change using -quota SECS).
               the lambda compilation that replaces each variable name
               with a unique value within the module. You can determine
               this number by examining the <literal>-dlambda</literal>
-              output from <literal>ocamlopt</literal>.
+              output from <command>ocamlopt</command>.
             </para>
           </listitem>
         </itemizedlist>
@@ -31001,7 +31002,7 @@ Hello OCaml World!
     </para>
     <para>
       Here are the intermediate files generated by
-      <literal>ocamlc</literal>:
+      <command>ocamlc</command>:
     </para>
     <informaltable>
       <tgroup cols="2">
