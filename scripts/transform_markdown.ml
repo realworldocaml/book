@@ -64,7 +64,7 @@ let filter_markdown =
     match In_channel.(input_line stdin) with 
     | None -> ()
     | Some line -> begin
-        match state,line with
+        match state, (String.lstrip line) with
         |`searching, "```frag"   -> filter (`found_frag (Buffer.create 1024))
         |`searching, line        -> print_endline line; filter `searching
         |`found_frag buf , "```" -> output_t_as_markdown (Buffer.contents buf); filter `searching
