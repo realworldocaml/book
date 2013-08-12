@@ -419,14 +419,14 @@ Now let's add classes for making squares and circles. We include an `on_click`
 method for adding event handlers to the shapes.
 
 ```frag
-((typ ocaml)(name classes-async/verbose_shapes.ml)(part 0))
+((typ ocaml)(name classes-async/verbose_shapes.ml)(part 1))
 ```
 
 The `square` class is pretty straightforward, and the `circle` class below also
 looks very similar.
 
 ```frag
-((typ ocaml)(name classes-async/verbose_shapes.ml)(part 1))
+((typ ocaml)(name classes-async/verbose_shapes.ml)(part 2))
 ```
 
 These classes have a lot in common, and it would be useful to factor out this
