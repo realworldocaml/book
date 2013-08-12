@@ -166,7 +166,7 @@ let wrap_in_docbook_box ~part typ file buf =
     | 0 -> []
     | part -> <:html<, continued (part $int:part$)>>
   in
-  let info = <:xml<<lineannotation>$str:typ$, <filename>$str:file$</filename> $part$</lineannotation>
+  let info = <:xml<<lineannotation>$str:typ$, <filename>$str:file$</filename>$part$</lineannotation>
 $buf$>> in
   Cow.Xml.to_string info
 
