@@ -1,3 +1,5 @@
+type shape = < area : float >;;
+
 type square = < area : float; width : int >;;
 
 let square w = object
