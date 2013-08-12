@@ -476,11 +476,11 @@ $ utop
       Now let's try a few simple numerical calculations.
     </para>
     <programlisting language="ocaml">
-...part 1 of guided-tour/main.topscript
-# 3 + 4;; 
-- : int = 7
-# 8 / 3;; 
-- : int = 2
+<lineannotation>Part 1 of guided-tour/main.topscript</lineannotation>
+<prompt># </prompt><userinput>3 + 4;;</userinput>
+<computeroutput>- : int = 7</computeroutput>
+<prompt># </prompt><userinput>8 / 3;;</userinput>
+<computeroutput>- : int = 2</computeroutput>
 # 3.5 +. 6.;; 
 - : float = 9.5
 # 30_000_000 / 300_000;; 
