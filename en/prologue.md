@@ -178,33 +178,35 @@ robust software systems.
 
 Real World OCaml is split into three parts:
 
-*   Part I covers the language itself, opening with a guided tour
-    designed to provide a quick sketch of the language.  Don't expect to
-    understand everything in the tour; it's meant to give you a taste of
-    many different aspects of the language, but the ideas covered there
-    will be explained in more depth in the chapters that follow.
+Part I covers the language itself, opening with a guided tour
+designed to provide a quick sketch of the language.  Don't expect to
+understand everything in the tour; it's meant to give you a taste of
+many different aspects of the language, but the ideas covered there
+will be explained in more depth in the chapters that follow.
 
-    After covering the core language, Part I then moves onto more
-    advanced features like modules, functors and objects, which may take
-    some time to digest.  Understanding these concepts is important, though.
-    These ideas will put you in good stead even beyond OCaml when
-    switching to other modern languages, many of which have drawn
-    inspiration from ML.
+After covering the core language, Part I then moves onto more
+advanced features like modules, functors and objects, which may take
+some time to digest.  Understanding these concepts is important, though.
+These ideas will put you in good stead even beyond OCaml when
+switching to other modern languages, many of which have drawn
+inspiration from ML.
 
-*   Part II builds on the basics by working through useful tools and
-    techniques for addressing common practical applications, from
-    command-line parsing to asynchronous network programming.
-    Along the way, you'll see how some of the concepts from Part I are
-    glued together into real libraries and tools that combine different
-    features of the language to good effect.
+Part II builds on the basics by working through useful tools and
+techniques for addressing common practical applications, from
+command-line parsing to asynchronous network programming.
+Along the way, you'll see how some of the concepts from Part I are
+glued together into real libraries and tools that combine different
+features of the language to good effect.
 
-*   Part III discusses OCaml's runtime system and compiler toolchain. It
-    is remarkably simple when compared to some other language implementations
-    (such as Java's or .NET's CLR). 
-    Reading this part will enable you to build very high
-    performance systems, or to interface with C libraries.  This is also
-    where we talk about profiling and debugging techniques using tools
-    such as GNU `gdb`.
+Part III discusses OCaml's runtime system and compiler toolchain. It
+is remarkably simple when compared to some other language implementations
+(such as Java's or .NET's CLR). 
+Reading this part will enable you to build very high
+performance systems, or to interface with C libraries.  This is also
+where we talk about profiling and debugging techniques using tools
+such as GNU `gdb`.
+
+### Installation Instructions 
 
 Real World OCaml uses some tools that we've developed while writing this book.
 Some of these resulted in improvements to the OCaml compiler, which means that
@@ -217,6 +219,19 @@ As of publication, the Windows operating system is unsupported by Core, and so
 only Mac OS X, Linux, FreeBSD and OpenBSD can be expected to work reliably.
 Please check the online installaton instructions for updates regarding Windows,
 or install a Linux virtual machine to work through the book as it stands.
+
+### Code Examples
+
+All of the code examples in this book are available freely online under a
+public-domain-like license.  You are most welcome to copy and use any of the
+snippets as you see fit in your own code, without any attribution or other
+restrictions on their use.
+
+The code repository is available online at:
+<https://github.com/realworldocaml/examples>.  Every code snippet in the book
+has a header which tells you the filename in that repository to the find the
+source code, shell script, or ancillary data file that the snippet was sourced
+from.
 
 ## About the Authors
 
