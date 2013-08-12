@@ -68,7 +68,7 @@ let cow file contents =
       let data = Cow.Html.to_string html in
       Out_channel.write_all (ofile_html file part) ~data;
       Out_channel.write_all (ofile_md file part) ~data:buf;
-      let data = wrap_in_docbook_box ~part "OCaml" file <:xml<$str:contents$>> in
+      let data = wrap_in_docbook_box ~part "OCaml" file <:xml<$str:buf$>> in
       Out_channel.write_all (ofile_xml file part) ~data
     )
 
