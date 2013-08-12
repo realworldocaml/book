@@ -64,4 +64,4 @@
 <bin/*.ml{,i}>: pkg_threads
 "bin/rwo_html_code_highlight.native": custom
 # OASIS_STOP
-true: syntax_camlp4o, pkg_sexplib.syntax, pkg_cow.syntax
+true: syntax_camlp4o, pkg_sexplib.syntax, pkg_cow.syntax, short_paths, annot
