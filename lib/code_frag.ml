@@ -70,6 +70,23 @@ let typ_of_string s : typ =
   | "gas"      -> `Gas
   | x          -> raise (Failure ("Unknown fragment type " ^ x))
 
+let typ_to_docbook_language (t:typ) =
+  match t with
+  | `OCaml             -> "ocaml"
+  | `OCaml_toplevel    -> ""
+  | `OCaml_rawtoplevel -> ""
+  | `Console           -> "console"
+  | `JSON              -> "json"
+  | `ATD               -> "ocaml"
+  | `Scheme            -> "scheme"
+  | `OCaml_syntax      -> ""
+  | `Java              -> "java"
+  | `C                 -> "c"
+  | `Bash              -> "bash"
+  | `CPP               -> "c"
+  | `Ascii             -> ""
+  | `Gas               -> "gas"
+
 let of_string s =
   try
     String.strip s |> Sexp.of_string |> t_of_sexp
@@ -142,6 +159,16 @@ let concat_toplevel_phrases lines =
       |`phrase _ -> failwith "unterminated phrase"
       |`output (res,acc) -> List.rev (combine acc :: res))
   |> List.filter ~f:(function |"" -> false |_ -> true)
+
+let wrap_in_docbook_box ~part typ file buf =
+  let part = 
+    match part with
+    | 0 -> []
+    | part -> <:html<, continued (part $int:part$)>>
+  in
+  let info = <:xml<<lineannotation>$str:typ$, <filename>$str:file$</filename> $part$</lineannotation>
+$buf$>> in
+  Cow.Xml.to_string info
 
 let wrap_in_pretty_box ~part typ file (buf:Cow.Xml.t) =
   let repourl = sprintf "http://github.com/realworldocaml/examples/" in

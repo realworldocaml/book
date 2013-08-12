@@ -25,7 +25,7 @@ let reset_toplevel () =
   Clflags.real_paths := false
 
 let build_dir = ref "."
-let ofile file part = sprintf "%s/%s.%d.md" !build_dir file part
+let ofile file part = sprintf "%s/%s.%d.xml" !build_dir file part
 let ofile_html file part = sprintf "%s/%s.%d.html" !build_dir file part
 
 type outcome = [
@@ -338,13 +338,27 @@ let parse_file fullfile file =
   let parts = Int.Table.create () in
   let html_parts = Int.Table.create () in
   let part = ref 0 in
-  let print_part key s =
+  let wrap_lines_in_userinput buf =
+    String.split_lines buf
+    |> List.map ~f:(fun l -> <:xml<<userinput>$str:l$</userinput>
+>>)
+  in
+  let wrap_lines_in_output buf =
+    match buf with
+    |"" -> []
+    |buf ->
+      String.split_lines buf
+      |> List.map ~f:(fun l -> <:xml<<computeroutput>$str:l$</computeroutput>
+>>) in
+  let print_part ~phrase ~sout ~serr ~out key =
+    let i = wrap_lines_in_userinput phrase in
+    let x = <:xml<<prompt># </prompt>$list:i$$list:(wrap_lines_in_output sout)$$list:(wrap_lines_in_output serr)$$list:(wrap_lines_in_output out)$>> in
     match Hashtbl.find parts key with
     | None ->
-      let buf = Buffer.create 100 in
+      let buf = ref x in
       Hashtbl.replace parts ~key ~data:buf;
-      Buffer.add_string buf s
-    | Some buf -> Buffer.add_string buf s
+    | Some buf ->
+      buf := x @ !buf
   in
   let print_html_part key s =
     match Hashtbl.find html_parts key with
@@ -369,12 +383,7 @@ let parse_file fullfile file =
               eprintf "X: %s\n%!" phrase;
               match toploop_eval phrase with
               | `Normal(s, stdout, stderr) |`Error (s,stdout,stderr) ->
-                print_part !part (sprintf "# %s \n%s%s%s"
-                  phrase
-                  (if stdout = "" then "" else "\n"^stdout)
-                  (if stderr = "" then "" else "\n"^stderr)
-                  s
-                );
+                print_part ~phrase ~sout:stdout ~serr:stderr ~out:s !part; 
                 print_html_part !part (Cow.Html.to_string (Cow.Code.ocaml_fragment ("# " ^ phrase)));
                 let sout = if stdout = "" then <:html<&>> else <:html<<br />$str:stdout$>> in
                 let serr = if stderr = "" then <:html<&>> else <:html<<br />$str:stderr$>> in
@@ -389,7 +398,8 @@ let parse_file fullfile file =
   Hashtbl.iter parts ~f:(
     fun ~key ~data ->
       eprintf "W: %s\n%!" (ofile file key);
-      Out_channel.write_all (ofile file key) ~data:(Buffer.contents data));
+      let data = Cow.Xml.to_string !data in
+      Out_channel.write_all (ofile file key) ~data);
   Hashtbl.iter html_parts ~f:(
     fun ~key ~data ->
       let code = Cow.Html.of_string (String.strip (Buffer.contents data)) in

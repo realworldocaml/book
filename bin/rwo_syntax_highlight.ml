@@ -24,6 +24,7 @@ open Code_frag
 let build_dir = ref ""
 let ofile_html file part = sprintf "%s/%s.%d.html" !build_dir file part
 let ofile_md file part   = sprintf "%s/%s.%d.md"   !build_dir file part
+let ofile_xml file part  = sprintf "%s/%s.%d.xml"  !build_dir file part
 
 (* Run a buffer through Pygments to colorize it *)
 let pygmentize lang file contents =
@@ -44,15 +45,19 @@ let pygmentize lang file contents =
     | "gas" -> "Assembly Language"
     | unknown -> unknown
   in
-  let data = wrap_in_pretty_box ~part:0 typ file data |> Cow.Html.to_string in
-  Out_channel.write_all (ofile_html file 0) ~data;
-  Out_channel.write_all (ofile_md file 0) ~data:contents
+  let data_html = wrap_in_pretty_box ~part:0 typ file data |> Cow.Html.to_string in
+  Out_channel.write_all (ofile_html file 0) ~data:data_html;
+  Out_channel.write_all (ofile_md file 0) ~data:contents;
+  let data = wrap_in_docbook_box ~part:0 typ file <:xml<$str:contents$>> in
+  Out_channel.write_all (ofile_xml file 0) ~data
 
 let raw lang file contents =
   let data = <:html<<pre>$str:contents$</pre>&>> in
   let data = wrap_in_pretty_box ~part:0 lang file data |> Cow.Html.to_string in
   Out_channel.write_all (ofile_html file 0) ~data;
-  Out_channel.write_all (ofile_md file 0) ~data:contents
+  Out_channel.write_all (ofile_md file 0) ~data:contents;
+  let data = wrap_in_docbook_box ~part:0 lang file <:html<$str:contents$>> in
+  Out_channel.write_all (ofile_xml file 0) ~data
   
 let cow file contents =
   (* Break the OCaml code into parts *)
@@ -63,6 +68,8 @@ let cow file contents =
       let data = Cow.Html.to_string html in
       Out_channel.write_all (ofile_html file part) ~data;
       Out_channel.write_all (ofile_md file part) ~data:buf;
+      let data = wrap_in_docbook_box ~part "OCaml" file <:xml<$str:contents$>> in
+      Out_channel.write_all (ofile_xml file part) ~data
     )
 
 let rawscript file =
@@ -74,12 +81,24 @@ let rawscript file =
       Cow.Code.ocaml_fragment line
     else
       <:html<<div class="rwocodeout">$str:line$</div>&>>)
-  |> fun olines ->
+  |> fun olines_html ->
+  Code_frag.concat_toplevel_phrases (In_channel.read_lines file)
+  |> List.map ~f:(fun line ->
+    let line = if line = "" then " " else line in
+    if String.is_suffix ~suffix:";;" line then
+      <:xml<<userinput>$str:line$</userinput>
+>>
+    else
+      <:xml<<computeroutput>$str:line$</computeroutput>
+>>)
+  |> fun olines_xml ->
   let buf =
-    wrap_in_pretty_box ~part:0 "OCaml toplevel" file (List.concat olines)
+    wrap_in_pretty_box ~part:0 "OCaml toplevel" file (List.concat olines_html)
     |> Cow.Html.to_string in
   Out_channel.write_all (ofile_html file 0) ~data:buf;
-  Out_channel.write_all (ofile_md file 0) ~data:(In_channel.read_all file)
+  Out_channel.write_all (ofile_md file 0) ~data:(In_channel.read_all file);
+  let data = wrap_in_docbook_box ~part:0 "OCaml Utop" file (List.concat olines_xml) in
+  Out_channel.write_all (ofile_xml file 0) ~data
 
 let console file = 
   (* Run lines starting with $ through pygments, pass rest through *)
@@ -90,11 +109,24 @@ let console file =
         (run_through_pygmentize "console" line) :: acc
       else (<:html<<div class="rwocodeout">$str:line$</div>&>>) :: acc
     ))) in
+  let olines_xml = List.rev (In_channel.with_file file ~f:(
+    In_channel.fold_lines ~init:[] ~f:(fun acc line ->
+      let line = if line = "" then " " else line in
+      if String.is_prefix ~prefix:"$ " line then (
+        let rest = String.sub line ~pos:2 ~len:(String.length line - 2) in
+        let dollar = "$" in
+        (<:xml<<prompt>$str:dollar$ </prompt><userinput>$str:rest$</userinput>
+>>) :: acc
+      ) else (<:xml<<computeroutput>$str:line$</computeroutput>
+>>) :: acc
+    ))) in
   let buf =
     wrap_in_pretty_box ~part:0 "Terminal" file (List.concat olines)
     |> Cow.Html.to_string in
   Out_channel.write_all (ofile_html file 0) ~data:buf;
-  Out_channel.write_all (ofile_md file 0) ~data:(In_channel.read_all file)
+  Out_channel.write_all (ofile_md file 0) ~data:(In_channel.read_all file);
+  let data = wrap_in_docbook_box ~part:0 "Terminal" file (List.concat olines_xml) in
+  Out_channel.write_all (ofile_xml file 0) ~data
 
 let do_highlight build_dir' use_cow use_rawscript use_pygments use_raw use_console file () =
   build_dir := build_dir';
