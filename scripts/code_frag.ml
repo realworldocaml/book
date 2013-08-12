@@ -32,7 +32,7 @@ type t = {
   typ: string;
   name: string;
   part: int with default(0);
-                 header: bool with default(true)
+  header: bool with default(true)
 } with sexp
 
 let typ_of_string s : typ =
@@ -52,6 +52,30 @@ let typ_of_string s : typ =
   | "ascii"    -> `Ascii
   | "gas"      -> `Gas
   | x          -> raise (Failure ("Unknown fragment type " ^ x))
+
+let file_of_t ~ext t =
+  sprintf "code/_build/%s.%d.%s" t.name t.part ext
+
+let read ~ext t =
+  In_channel.read_all (file_of_t ~ext t)
+
+(* Convert typ to a Docbook language tag *)
+let typ_to_docbook_language (t:typ) =
+  match t with
+  | `OCaml             -> "ocaml"
+  | `OCaml_toplevel    -> ""
+  | `OCaml_rawtoplevel -> ""
+  | `Console           -> "console"
+  | `JSON              -> "json"
+  | `ATD               -> "ocaml"
+  | `Scheme            -> "scheme"
+  | `OCaml_syntax      -> ""
+  | `Java              -> "java"
+  | `C                 -> "c"
+  | `Bash              -> "bash"
+  | `CPP               -> "c"
+  | `Ascii             -> ""
+  | `Gas               -> "gas"
 
 let of_string s =
   try

@@ -5,6 +5,14 @@
 open Core.Std
 open Chapter
 
+let string_of_data d =
+  let b = Buffer.create 100 in
+  List.iter ~f:(function
+    |`Data x -> Buffer.add_string b x
+    |_ -> failwith "unexpected tag in data"
+  ) d;
+  Buffer.contents b
+
 let mk_tag ?(attrs=[]) tag_name contents =                                                                            
   let attrs : Xmlm.attribute list = List.map ~f:(fun (k,v) -> ("",k),v) attrs in                                         
   let tag = ("", tag_name), attrs in                                                                                  
@@ -83,6 +91,22 @@ module Transform = struct
         ) children
     |_ -> failwith "<book> tag not found"
 
+  (* Substitute a <programlisting> tag with the appropriate code block *)
+  let rewrite_programlisting it =
+    let rec aux = function
+      | `El ( (("","programlisting"),_), contents) ->
+        let open Code_frag in
+        let cf = of_string (string_of_data contents) in
+        let contents = 
+          try Cow.Xml.of_string (read ~ext:"xml" cf) 
+          with _ -> [`Data "???"] in (* TODO temporary *)
+        let lang = typ_to_docbook_language (typ_of_string cf.typ) in
+        mk_tag ~attrs:[("language",lang)] "programlisting" contents
+      | `El (tag, children) ->
+        `El (tag, List.map ~f:aux children)
+      | x -> x
+    in aux it
+
   (* Given a list of input chapters and the book XML, output
    * a book with <part> tags and the desired chapters.
    * If [public] is true then only show public chapters and stub out rest *)
@@ -131,7 +155,8 @@ let apply_transform parts_file book public =
     let o = Xmlm.make_output (`Channel stdout) in
     Xmlm.make_input (`Channel (open_in book))
     |> Xml_tree.in_tree
-    |> fun (dtd, t) -> Transform.rewrite_linkend t
+    |> fun (dtd, t) ->    Transform.rewrite_linkend t
+                       |> Transform.rewrite_programlisting
                        |> Transform.add_parts public parts
                        |> fun t -> Xml_tree.out_tree o (dtd, t)
   with Xmlm.Error ((line,col),e) -> (
