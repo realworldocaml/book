@@ -3,7 +3,7 @@ class istack = object
 
     method pop =
       match v with
-        hd :: tl ->
+      | hd :: tl ->
           v <- tl;
           Some hd
       | [] -> None

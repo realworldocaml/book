@@ -20,8 +20,7 @@ module VisibleStack : sig
   
   type 'a t = < pop: 'a option; push: 'a -> unit >
 
-  class ['a] stack :
-  object
+  class ['a] stack : object
     val mutable v : 'a list
     method pop : 'a option
     method push : 'a -> unit

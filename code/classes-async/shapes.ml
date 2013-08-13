@@ -5,7 +5,7 @@ open Async_graphics
 type drawable = < draw: unit >
 
 (* part 1 *)
-class virtual shape x y = object (self)
+class virtual shape x y = object(self)
   method virtual private contains: int -> int -> bool
 
   val mutable x: int = x
@@ -57,7 +57,7 @@ class circle r x y = object
 end
 
 (* part 3 *)
-class growing_circle r x y = object (self)
+class growing_circle r x y = object(self)
   inherit circle r x y
 
   initializer
@@ -65,7 +65,7 @@ class growing_circle r x y = object (self)
 end
 
 (* part 4 *)
-class virtual draggable = object (self)
+class virtual draggable = object(self)
   method virtual on_mousedown: 
     ?start:unit Deferred.t -> 
     ?stop:unit Deferred.t -> 
@@ -101,7 +101,7 @@ class small_square = object
 end
 
 (* part 6 *)
-class virtual animated span = object (self)
+class virtual animated span = object(self)
   method virtual on_click: 
     ?start:unit Deferred.t -> 
     ?stop:unit Deferred.t -> 

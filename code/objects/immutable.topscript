@@ -1,19 +1,19 @@
 1;;
 #part 1
 let imm_stack init = object
-  val v = init
+    val v = init
 
-  method pop =
-    match v with
-    | hd :: tl -> Some (hd, {< v = tl >})
-    | [] -> None 
+    method pop =
+      match v with
+      | hd :: tl -> Some (hd, {< v = tl >})
+      | [] -> None 
 
-  method push hd = 
-    {< v = hd :: v >}
-end;;
+    method push hd = 
+      {< v = hd :: v >}
+  end ;;
 
 #part 2
-let s = imm_stack [3; 2; 1];;
-let t = s#push 4;;
-s#pop;;
-t#pop;;
+let s = imm_stack [3; 2; 1] ;;
+let t = s#push 4 ;;
+s#pop ;;
+t#pop ;;
