@@ -207,17 +207,26 @@ Real World OCaml is split into three parts:
     about profiling and debugging techniques using tools such as GNU
     `gdb`.
 
-Real World OCaml uses some tools that we've developed while writing this book.
-Some of these resulted in improvements to the OCaml compiler, which means that
-you will need to ensure that you have an up-to-date development environment
-(using the 4.1 version of the compiler).  We've automated everything you need
-to do via the OPAM package manager, so please do follow the installation
-instructions in [xref](#installation) carefully.
+This book is not intended as a reference manual.  We aim to teach you
+about the language, and about libraries tools and techniques that will
+help you be a more effective OCaml programmer.  But it's no
+replacement for API documentation or the OCaml manual and man pages.
+You can find documentation for all of the libraries and tools
+referenced in the book [online](http://realworldocaml.org/doc).
 
-As of publication, the Windows operating system is unsupported by Core, and so
-only Mac OS X, Linux, FreeBSD and OpenBSD can be expected to work reliably.
-Please check the online installaton instructions for updates regarding Windows,
-or install a Linux virtual machine to work through the book as it stands.
+Real World OCaml uses some tools that we've developed while writing
+this book.  Some of these resulted in improvements to the OCaml
+compiler, which means that you will need to ensure that you have an
+up-to-date development environment (using the 4.01 version of the
+compiler).  We've automated everything you need to do via the OPAM
+package manager, so please do follow the installation instructions in
+[xref](#installation) carefully.
+
+As of publication, the Windows operating system is unsupported by
+Core, and so only Mac OS X, Linux, FreeBSD and OpenBSD can be expected
+to work reliably.  Please check the online installaton instructions
+for updates regarding Windows, or install a Linux virtual machine to
+work through the book as it stands.
 
 ## About the Authors
 
