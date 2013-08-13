@@ -983,11 +983,11 @@ so `printf` expects one additional argument of type `float`.
 
 ### Compiling and running
 
-We'll compile our program using `corebuild`, a small wrapper on top of
-`ocamlbuild`, which itself is a build-tool that ships with the OCaml
-compiler.  The `corebuild` script is installed along with Core, and
-its purpose is to pass in the flags required for building a program
-with Core.
+We'll compile our program using <command>corebuild</command>, a small
+wrapper on top of <command>ocamlbuild</command>, a build-tool that
+ships with the OCaml compiler.  The <command>corebuild</command>
+script is installed along with Core, and its purpose is to pass in the
+flags required for building a program with Core.
 
 ```frag
 ((typ console)(name guided-tour/build_sum.out))
