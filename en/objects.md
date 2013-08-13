@@ -45,14 +45,15 @@ C++, Java, C#, Ruby, Python or JavaScript.
 
 ## OCaml objects
 
-If you already know about object oriented programming in a language like Java
-or C++, the OCaml object system may come as a surprise.  Foremost is the
-complete separation of objects, and their types, from the class system in
-OCaml.  In a language like Java, a class name is also used as the type of
-objects created by instantiating it, and the relationships between these object
-types correspond to inheritance.  For example, if we implement a class `Deque`
-in Java by inheriting from a class `Stack`, we would be allowed to pass a deque
-anywhere a stack is expected.
+If you already know about object oriented programming in a language
+like Java or C++, the OCaml object system may come as a surprise.
+Foremost is the complete separation of objects, and their types, from
+the class system.  In a language like Java, a class name is also used
+as the type of objects created by instantiating it, and the
+relationships between these object types correspond to inheritance.
+For example, if we implement a class `Deque` in Java by inheriting
+from a class `Stack`, we would be allowed to pass a deque anywhere a
+stack is expected.
 
 OCaml is entirely different.  Classes are used to construct objects and support
 inheritance, but classes are not types.  Instead, objects have _object types_,

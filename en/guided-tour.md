@@ -13,8 +13,8 @@ toplevel (which you can start by typing `ocaml` at the command line).
 These instructions will assume you're using `utop` specifically.
 
 Before getting started, make sure you have a working OCaml
-installation and toplevel so you can try out the examples as you read
-through the chapter.  Look at [xref](#installation) for details.
+installation so you can try out the examples as you read through the
+chapter.  Look at [xref](#installation) for details.
 
 ## OCaml as a calculator
 
@@ -46,7 +46,7 @@ at you.
 - Function arguments are separated by spaces instead of by parentheses
   and commas, which is more like the UNIX shell than it is like
   traditional programming languages like C or Java.
-- OCaml allows you to place underscores in the middle of your integer
+- OCaml allows you to place underscores in the middle of your numeric
   literals, to improve readability.  Note that underscores can be
   placed anywhere within a number, not just every three digits.
 - OCaml carefully distinguishes between `float`, the type for floating
@@ -210,7 +210,7 @@ OCaml program.
 ### Inferring generic types
 
 Sometimes, there isn't enough information to fully determine the
-concrete type of a given value.  Consider this function:
+concrete type of a given value.  Consider this function.
 
 ```frag
 ((typ ocamltop)(name guided-tour/main.topscript)(part 10)) 
@@ -228,7 +228,7 @@ rather than choose a single concrete type, OCaml has introduced a
 _type variable_ `'a` to express that the type is generic.  (You can
 tell it's a type variable by the leading single-quote.)  In
 particular, the type of the `test` argument is `('a -> bool)`, which
-means that test is a one-argument function whose return value is
+means that `test` is a one-argument function whose return value is
 `bool`, and whose argument could be of any type `'a`.  But, whatever
 type `'a` is, it has to be the same as the type of the other two
 arguments, `x` and `y`, and of the return value of `first_if_true`.
@@ -294,7 +294,7 @@ the exception.
 
 </note>
 
-## Tuples, lists, options and pattern matching
+## Tuples, lists, options, and pattern matching
 
 ### Tuples
 
@@ -798,7 +798,7 @@ counted starting at zero, element `.(2)` is the third element.
 
 The `unit` type that we see above is interesting in that it has only
 one possible value, written `()`.  This means that a value of type
-`unit` doesn't convey any information, and thus tends to be used as a
+`unit` doesn't convey any information, and so tends to be used as a
 placeholder.  Thus, we use `unit` for the return value of an operation
 like setting a mutable field that communicates by side effect rather
 than by returning a value.  It's also used as the argument to
@@ -822,7 +822,7 @@ incrementally, and sufficient to compute means and standard
 deviations, as shown below.  Note that there are two let-bindings in a
 row without a double semicolon between them.  That's because the
 double semicolon is required only to tell utop to process the input,
-not to separate two expressions.
+not to separate two declarations.
 
 ```frag
 ((typ ocamltop)(name guided-tour/main.topscript)(part 51)) 
@@ -855,6 +855,13 @@ of the provided list.
 ```frag
 ((typ ocamltop)(name guided-tour/main.topscript)(part 53)) 
 ```
+
+It's worth noting that the above algorithm is numerically naive, and
+has poor precision in the presence of cancellation.  You can look at
+this Wikipedia
+[article](http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance)
+for more details, paying particular attention to the weighted
+incremental and parallel algorithms.
 
 ### Refs
 
@@ -932,8 +939,8 @@ Note that `while` (like `for`) is also a keyword.
 
 As a side note, the above code takes advantage of the fact that `&&`,
 OCaml's and operator, short-circuits.  In particular, in an expression
-of the form `<expr1> && <expr2>`, `<expr2>` will only be evaluated if
-`<expr1>` evaluated to true.  Were it not for that, then the above
+of the form _`expr1`_ `&&` _`expr2`_, _`expr2`_ will only be evaluated
+if _`expr1`_ evaluated to true.  Were it not for that, then the above
 function would result in an out-of-bounds error.  Indeed, we can
 trigger that out-of-bounds error by rewriting the function to avoid
 the short-circuiting.
@@ -976,11 +983,11 @@ so `printf` expects one additional argument of type `float`.
 
 ### Compiling and running
 
-We'll compile our program using `corebuild`, a small wrapper on top of
-`ocamlbuild`, which itself is a build-tool that ships with the OCaml
-compiler.  The `corebuild` script is installed along with Core, and
-its purpose is to pass in the flags required for building a program
-with Core.
+We'll compile our program using <command>corebuild</command>, a small
+wrapper on top of <command>ocamlbuild</command>, a build-tool that
+ships with the OCaml compiler.  The <command>corebuild</command>
+script is installed along with Core, and its purpose is to pass in the
+flags required for building a program with Core.
 
 ```frag
 ((typ console)(name guided-tour/build_sum.out))
