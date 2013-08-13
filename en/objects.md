@@ -274,7 +274,8 @@ type, so they can both be coerced into the object type `< shape : shape >`
 ((typ ocamltop)(name objects/subtyping.topscript)(part 3))
 ```
 
-### Polymorphic variant subtyping
+<note>
+<title>Polymorphic variant subtyping</title>
 
 Subtyping can also be used to coerce a polymorphic variant into a larger
 polymorphic variant type. A polymorphic variant type _A_ is a subtype of _B_,
@@ -283,6 +284,8 @@ if the tags of _A_ are a subset of the tags of _B_.
 ```frag
 ((typ ocamltop)(name objects/subtyping.topscript)(part 4))
 ```
+
+</note>
 
 ### Variance
 
