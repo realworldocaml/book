@@ -48,7 +48,7 @@ dirs= json \
       ctypes \
       ocp-index
 
-# html/md files directory
+# html/xml files directory
 OBJ=         _build
 
 # All the source files
@@ -79,9 +79,9 @@ all_src=      $(ml_src) $(mli_src) $(json_src) $(java_src) $(c_src) \
 all_scripts=  $(scripts:%.sh=%.out) $(errscripts:%.errsh=%.out) \
 	      $(topscripts) $(rawtscripts) $(rawscripts:%.rawsh=%.out)
 
-# The source files all map to %.<part>.html and %.<part>.md
+# The source files all map to %.<part>.html and %.<part>.xml
 all_src_html= $(all_src:%=$(OBJ)/%.0.html) $(all_scripts:%=$(OBJ)/%.0.html)
-all_src_md=   $(all_src:%=$(OBJ)/%.0.md) $(all_scripts:%=$(OBJ)/%.0.md)
+all_src_md=   $(all_src:%=$(OBJ)/%.0.xml) $(all_scripts:%=$(OBJ)/%.0.xml)
 
 # Binaries we run
 runtop=      rwo-run-toplevel
@@ -103,23 +103,23 @@ command-line-parsing/md5_completion.out:: command-line-parsing/build_basic_md5_w
 command-line-parsing/cal_completion.out:: command-line-parsing/build_cal_add_sub_days.out
 parsing-test/run_broken_test.out:: parsing-test/build_test.out
 
-$(OBJ)/%.mli.0.html $(OBJ)/%.mli.0.md: %.mli
+$(OBJ)/%.mli.0.html $(OBJ)/%.mli.0.xml: %.mli
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -cow $< || (cat $@ && rm -f $@)
 
-$(OBJ)/%.ml.0.html $(OBJ)/%.ml.0.md: %.ml
+$(OBJ)/%.ml.0.html $(OBJ)/%.ml.0.xml: %.ml
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -cow $<  || (cat $@ && rm -f $@)
 
-$(OBJ)/%.mll.0.html $(OBJ)/%.mll.0.md: %.mll
+$(OBJ)/%.mll.0.html $(OBJ)/%.mll.0.xml: %.mll
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -cow $<  || (cat $@ && rm -f $@)
 
-$(OBJ)/%.mly.0.html $(OBJ)/%.mly.0.md: %.mly
+$(OBJ)/%.mly.0.html $(OBJ)/%.mly.0.xml: %.mly
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -cow $<  || (cat $@ && rm -f $@)
 
-$(OBJ)/%.json.0.html $(OBJ)/%.json.0.md: %.json
+$(OBJ)/%.json.0.html $(OBJ)/%.json.0.xml: %.json
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -pygments json $< || (cat $@ && rm -f $@)
 
@@ -163,15 +163,15 @@ $(OBJ)/%.scm.0.html: %.scm
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -pygments scheme $< || (cat $@ && rm -f $@)
 
-$(OBJ)/%.topscript.0.md $(OBJ)/%.topscript.0.html: %.topscript
+$(OBJ)/%.topscript.0.xml $(OBJ)/%.topscript.0.html: %.topscript
 	@mkdir -p $(@D)
 	cd $(*D) && $(runtop) $(*F).topscript -fullfile "$<" -builddir "../$(@D)"
 
-$(OBJ)/%.rawscript.0.md $(OBJ)/%.rawscript.0.html: %.rawscript
+$(OBJ)/%.rawscript.0.xml $(OBJ)/%.rawscript.0.html: %.rawscript
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -rawscript $<
 
-$(OBJ)/%.out.0.html $(OBJ)/%.out.0.md: %.out
+$(OBJ)/%.out.0.html $(OBJ)/%.out.0.xml: %.out
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -console $<
 
