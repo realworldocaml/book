@@ -269,81 +269,73 @@ of `ocamlyacc` to handle files with the `.mly` suffix.
 
 ## Defining a lexer
 
-For the next part, we need to define a lexer to tokenize the input
-text, meaning that we break the input into a sequence of words or
-tokens.  For this, we'll define a lexer using `ocamllex`.  In this
-case, the specification is placed in a file with a `.mll` suffix
-(we'll use the name `lexer.mll`).  A lexer file has several parts in
-the following sequence.
+Now we can define a lexer, using `ocamllex`, to convert our input text
+into a stream of tokens.  The specification of the lexer is placed in
+a file with an `.mll` suffix.
 
-```frag
-((typ ocamlsyntax)(name parsing/lex.syntax))
-```
+### OCaml prelude 
 
-### Let-definitions for regular expressions
-
-The OCaml code for the header and trailer is optional.  The
-let-definitions are used to ease the definition of regular expressions
-by defining utility functions.  They are optional, but very useful.
-To get started, let's define a utility function that can track the
-location of tokens across line breaks.
+Let's walk through the definition of a lexer section by section.  The
+first section is on optional chunk of OCaml code that is bounded by a
+pair of curly braces.
 
 ```frag
 ((typ ocaml)(name parsing/lexer.mll)(part 0))
 ```
 
-The `Lexing` module defines a `lexbuf` structure that holds all of the
-lexer state, including the current location within the source file.
-The `next_line` function simply accesses the `lex_curr_p` field that
-holds the current location and updates its line number.  This is
-intended to be called from within the lexing regular expressions that
-we'll define next.
+This code is there to define utility functions used by later snippets
+of OCaml code, and to set up the environment by opening useful
+modules, and define an exception, `SyntaxError`.
 
-To get started with our rules, we know that we'll need to match
-numbers and strings, so let's define names for the regular expressions
-that specify their form.
+We also define a utility function `next_line` for tracking the
+location of tokens across line breaks.  The `Lexing` module defines a
+`lexbuf` structure that holds the state of the lexer, including the
+current location within the source file.  The `next_line` function
+simply accesses the `lex_curr_p` field that holds the current location
+and updates its line number.  
+
+### Regular expressions
+
+The next section of the lexing file is a collection of named regular
+expressions.  These look syntactically like ordinary OCaml `let`
+bindings, but really this is a specialized syntax for declaring
+regular expressions.  Here's an example.
 
 ```frag
 ((typ ocaml)(name parsing/lexer.mll)(part 1))
 ```
 
-An integer is a sequence of digits, optionally preceded by a minus
-sign.  Leading zeroes are not allowed.  The question mark means that
-the preceding symbol `-` is optional.  The square brackets ['1'-'9']
-define a character range, meaning that the first digit of the integer
-should be 1-9.  The final range `['0'-'9']*` includes the star `*`,
-which means zero-or-more occurrences of the characters 0-9.  Read
-formally then, an `int` has an optional minus sign, followed by a
-digit in the range 1-9, followed by zero or more digits in the range
-0-9.
+The syntax here is something of a hybrid between OCaml syntax and
+traditional regular expression syntax.  The `int` regular expression
+specifies an optional leading `-`, followed by a digit from `1` to
+`9`, followed by some number of digits from `0` to `9`.  The question
+mark is used to indicate an optional component of a regular
+expression, the square brackets are used to specify ranges, and the
+`*` operator is used to indicate a (possibly empty) repetition.
 
-Floating-point numbers are similar, but we deal with decimal points
-and exponents.  We can use multiple let-definitions for the different
-parts.
+Floating-point numbers are specified similarly, but we deal with
+decimal points and exponents.  We make the expression easier to read
+by building up a sequence of named regular expressions, rather than
+creating one big and impenetrable expression.
 
 ```frag
 ((typ ocaml)(name parsing/lexer.mll)(part 2))
 ```
 
-The `digits` expression defines a single character regexp in the range
-0-9.  A fractional part `frac` has a compulsary decimal point followed
-by some optional digits; an exponent `exp` begins with an `e` followed
-by some digits; and a `float` has an integer part, and one, both or
-none of a `frac` and `exp` part.
-
-Finally, let's define identifiers and whitespace.  An identifier
-(label), is an alphanumeric sequence not beginning with a digit.
+Finally, we define whitespace, newlines, identifiers, and hex
+constants.
 
 ```frag
 ((typ ocaml)(name parsing/lexer.mll)(part 3))
 ```
 
-
 ### Lexing rules
 
-The lexing rules are specified as a set of `parse` rules.  A `parse`
-rule has a regular expression followed by OCaml code that defines a
-semantic action.  Let's write the rule for JSON next.
+The lexing rules are essentially functions that consume the data,
+producing OCaml expressions that evaluate to tokens.  These OCaml
+expressions can be quite complicated, using side-effects and invoking
+other rules as part ofthe body of the rule.  Let's look at the `read`
+rule for parsing a JSON expression.
 
 ```frag
 ((typ ocaml)(name parsing/lexer.mll)(part 4))
