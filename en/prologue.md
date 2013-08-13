@@ -2,10 +2,10 @@
 
 ## Why OCaml?
 
-The programming languages that you use affect the software you create.
+The programming languages that you use affect the code you write.
 They influence your software's reliability, security and efficiency,
-and how easy it is to read, refactor, and extend.  The languages
-you know can also deeply affect how you think about programming and
+and how easy it is to read, refactor, and extend.  The languages you
+know can also deeply affect how you think about programming and
 software design.
 
 But not all ideas about how to design a programming language are
@@ -28,23 +28,23 @@ design.  These features include:
   found in distributed big data frameworks like Hadoop.
 * _Automatic type inference_ to avoid having to laboriously define the
   type of every single variable in a program and instead have them
-  inferred based on how a value is used.  Available in C# with
-  implicitly typed local variables and in a limited form in C++11
-  with its `auto` keyword.
+  inferred based on how a value is used.  Available in a limited form
+  in C# with implicitly typed local variables and in C++11 with its
+  `auto` keyword.
 * _Algebraic datatypes_ and _pattern matching_ to define and
   manipulate complex data structures.  Available in Scala and F#.
 
-Some of you will know and love these features, and others will be
-completely new to them.  Most of you will have seen _some_ of them in
-other languages that you've used.  As we'll demonstrate over the
-course of this book, there is something transformative about having
-them all together and able to interact in a single language.  Despite
-their importance, these ideas have made only limited inroads into
-mainstream languages and when they do arrive there, like higher-order
-functions in C# or parametric polymorphism in Java, it's typically in
-a limited and awkward form. The only languages that completely embody
-these ideas are _statically-typed functional programming languages_ like
-OCaml, F#, Haskell, Scala and Standard ML.
+Some of you will know and love all of these features, and for others
+they will be largely new, but most of you will have seen _some_ of
+them in other languages that you've used.  As we'll demonstrate over
+the course of this book, there is something transformative about
+having them all together and able to interact in a single language.
+Despite their importance, these ideas have made only limited inroads
+into mainstream languages and when they do arrive there, like
+higher-order functions in C# or parametric polymorphism in Java, it's
+typically in a limited and awkward form. The only languages that
+completely embody these ideas are _statically-typed functional
+programming languages_ like OCaml, F#, Haskell, Scala and Standard ML.
 
 Among this worthy set of languages, OCaml stands apart because it
 manages to provide a great deal of power while remaining highly
@@ -163,48 +163,49 @@ traditional functional-programming techniques like higher-order
 functions and immutable data types, as well as aspects of OCaml's
 powerful type and module systems.
 
-If you've learned some OCaml before, this book may surprise you with some
-differences from your experience.  Core redefines most of the standard modules
-to be much more consistent, so you'll need to adapt older code to work with
-Core.  We believe the Core model is worth learning; it's been successfully used
-on large, multi-million-line codebases and removes a big barrier to building
-sophisticated applications in OCaml.  Code that uses only the traditional
-compiler standard library will always exist, but there are other online
-resources to learn how that works.  Real World OCaml focuses on the techniques
-the authors have used in their personal experience to construct scalable,
-robust software systems.
+If you already know OCaml, this book may surprise you.  Core redefines
+most of the standard modules to be much more consistent, so you'll
+need to adapt older code to work with Core.  We believe the Core model
+is worth learning; it's been successfully used on large,
+multi-million-line codebases and removes a big barrier to building
+sophisticated applications in OCaml.  Code that uses only the
+traditional compiler standard library will always exist, but there are
+other online resources to learn how that works.  Real World OCaml
+focuses on the techniques the authors have used in their personal
+experience to construct scalable, robust software systems.
 
 ### What to expect
 
 Real World OCaml is split into three parts:
 
 *   Part I covers the language itself, opening with a guided tour
-    designed to provide a quick sketch of the language.  Don't expect to
-    understand everything in the tour; it's meant to give you a taste of
-    many different aspects of the language, but the ideas covered there
-    will be explained in more depth in the chapters that follow.
+    designed to provide a quick sketch of the language.  Don't expect
+    to understand everything in the tour; it's meant to give you a
+    taste of many different aspects of the language, but the ideas
+    covered there will be explained in more depth in the chapters that
+    follow.
 
     After covering the core language, Part I then moves onto more
-    advanced features like modules, functors and objects, which may take
-    some time to digest.  Understanding these concepts is important, though.
-    These ideas will put you in good stead even beyond OCaml when
-    switching to other modern languages, many of which have drawn
-    inspiration from ML.
+    advanced features like modules, functors and objects, which may
+    take some time to digest.  Understanding these concepts is
+    important, though.  These ideas will put you in good stead even
+    beyond OCaml when switching to other modern languages, many of
+    which have drawn inspiration from ML.
 
 *   Part II builds on the basics by working through useful tools and
     techniques for addressing common practical applications, from
-    command-line parsing to asynchronous network programming.
-    Along the way, you'll see how some of the concepts from Part I are
-    glued together into real libraries and tools that combine different
+    command-line parsing to asynchronous network programming.  Along
+    the way, you'll see how some of the concepts from Part I are glued
+    together into real libraries and tools that combine different
     features of the language to good effect.
 
-*   Part III discusses OCaml's runtime system and compiler toolchain. It
-    is remarkably simple when compared to some other language implementations
-    (such as Java's or .NET's CLR). 
-    Reading this part will enable you to build very high
-    performance systems, or to interface with C libraries.  This is also
-    where we talk about profiling and debugging techniques using tools
-    such as GNU `gdb`.
+*   Part III discusses OCaml's runtime system and compiler
+    toolchain. It is remarkably simple when compared to some other
+    language implementations (such as Java's or .NET's CLR).  Reading
+    this part will enable you to build very high performance systems,
+    or to interface with C libraries.  This is also where we talk
+    about profiling and debugging techniques using tools such as GNU
+    `gdb`.
 
 Real World OCaml uses some tools that we've developed while writing this book.
 Some of these resulted in improvements to the OCaml compiler, which means that
