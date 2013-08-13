@@ -189,14 +189,14 @@
         and optional arguments.
       </para>
       <para>
-        The last decade has seen OCaml attract a significant user base.
-        Language improvements have been steadily added to support the
-        growing commercial and academic codebases written in OCaml.
-        First-class modules, Generalized Algebraic Data Types (GADTs)
-        and dynamic linking have improved the flexibility of the
-        language and there is fast native code support for x86_64, ARM,
-        PowerPC, and Sparc, making OCaml a good choice for systems where
-        resource usage, predictability, and performance all matter.
+        The last decade has seen OCaml attract a significant user base,
+        and language improvements have been steadily added to support
+        the growing commercial and academic codebases. First-class
+        modules, Generalized Algebraic Data Types (GADTs) and dynamic
+        linking have improved the flexibility of the language and there
+        is fast native code support for x86_64, ARM, PowerPC, and Sparc,
+        making OCaml a good choice for systems where resource usage,
+        predictability, and performance all matter.
       </para>
     </sect2>
     <sect2 id="the-core-standard-library">
@@ -476,11 +476,11 @@ $ utop
       Now let's try a few simple numerical calculations.
     </para>
     <programlisting language="ocaml">
-<lineannotation>Part 1 of guided-tour/main.topscript</lineannotation>
-<prompt># </prompt><userinput>3 + 4;;</userinput>
-<computeroutput>- : int = 7</computeroutput>
-<prompt># </prompt><userinput>8 / 3;;</userinput>
-<computeroutput>- : int = 2</computeroutput>
+...part 1 of guided-tour/main.topscript
+# 3 + 4;; 
+- : int = 7
+# 8 / 3;; 
+- : int = 2
 # 3.5 +. 6.;; 
 - : float = 9.5
 # 30_000_000 / 300_000;; 
@@ -14931,10 +14931,9 @@ boolean IsBarbell(Shape[] s) {
       </para>
       <programlisting language="ocaml">
 (* objects/is_barbell.ml  *)
-let is_barbell =
-  function
-  | [Circle r1; Line _; Circle r2] when r1 = r2 -&gt; true
-  | _ -&gt; false
+let is_barbell = function
+| [Circle r1; Line _; Circle r2] when r1 = r2 -&gt; true
+| _ -&gt; false
 </programlisting>
       <para>
         Regardless, there is a solution if you find yourself in this
@@ -14952,11 +14951,11 @@ and repr =
  | Line of line;;
 
 let is_barbell = function
- | [s1; s2; s3] -&gt;
+| [s1; s2; s3] -&gt;
    (match s1#variant, s2#variant, s3#variant with
-     | Circle c1, Line _, Circle c2 when c1#radius = c2#radius -&gt; true
-     | _ -&gt; false)
- | _ -&gt; false;;
+    | Circle c1, Line _, Circle c2 when c1#radius = c2#radius -&gt; true
+    | _ -&gt; false)
+| _ -&gt; false;;
 </programlisting>
       <para>
         This pattern works, but it has drawbacks. In particular, the
@@ -15043,14 +15042,11 @@ Error: This expression has type &lt; area : float; radius : int &gt;
       <programlisting language="ocaml">
 ...part 6 of objects/row_polymorphism.topscript
 # let hlist: shape list = [(square 10 :&gt; shape); (circle 30 :&gt; shape)];; 
-Characters 11-16:
-Error: Unbound type constructor shape
+val hlist : shape list = [&lt;obj&gt;; &lt;obj&gt;]
 # let shape_ref: shape ref = ref (square 40 :&gt; shape);; 
-Characters 15-20:
-Error: Unbound type constructor shape
+val shape_ref : shape ref = {contents = &lt;obj&gt;}
 # shape_ref := (circle 20 :&gt; shape);; 
-Characters 27-32:
-Error: Unbound type constructor shape
+- : unit = ()
 </programlisting>
       <note>
       <title>
@@ -15200,7 +15196,7 @@ class ['a] stack :
     <para>
       Note that the type parameter <literal>['a]</literal> in the
       definition uses square brackets, but for other uses of the type
-      they are omited (or replaced with parentheses if there is more
+      they are omitted (or replaced with parentheses if there is more
       than one type parameter).
     </para>
     <para>
@@ -15594,8 +15590,7 @@ module VisibleStack : sig
   
   type 'a t = &lt; pop: 'a option; push: 'a -&gt; unit &gt;
 
-  class ['a] stack :
-  object
+  class ['a] stack : object
     val mutable v : 'a list
     method pop : 'a option
     method push : 'a -&gt; unit
@@ -15634,12 +15629,12 @@ end = Stack
     <programlisting language="ocaml">
 (* classes/doc.ml  *)
 type doc =
-    Heading of string
+  | Heading of string
   | Paragraph of text_item list
   | Definition of string list_item list
 
 and text_item =
-    Raw of string
+  | Raw of string
   | Bold of text_item list
   | Enumerate of int list_item list
   | Quote of doc
@@ -15664,22 +15659,20 @@ and 'a list_item =
 open Core.Std
 
 class ['a] folder = object(self)
-  method doc acc =
-    function
-      Heading _ -&gt; acc
-    | Paragraph text -&gt; List.fold ~f:self#text_item ~init:acc text
-    | Definition list -&gt; List.fold ~f:self#list_item ~init:acc list
+  method doc acc = function
+  | Heading _ -&gt; acc
+  | Paragraph text -&gt; List.fold ~f:self#text_item ~init:acc text
+  | Definition list -&gt; List.fold ~f:self#list_item ~init:acc list
 
   method list_item: 'b. 'a -&gt; 'b list_item -&gt; 'a = 
     fun acc {tag; text} -&gt;
       List.fold ~f:self#text_item ~init:acc text
 
-  method text_item acc =
-    function
-      Raw _ -&gt; acc
-    | Bold text -&gt; List.fold ~f:self#text_item ~init:acc text
-    | Enumerate list -&gt; List.fold ~f:self#list_item ~init:acc list
-    | Quote doc -&gt; self#doc acc doc
+  method text_item acc = function
+  | Raw _ -&gt; acc
+  | Bold text -&gt; List.fold ~f:self#text_item ~init:acc text
+  | Enumerate list -&gt; List.fold ~f:self#list_item ~init:acc list
+  | Quote doc -&gt; self#doc acc doc
 end
 </programlisting>
     <para>
@@ -15704,7 +15697,7 @@ class counter = object
   method text_item acc ti =
     let acc = super#text_item acc ti in
     match ti with
-      Bold _ -&gt; acc + 1
+    | Bold _ -&gt; acc + 1
     | _ -&gt; acc
 end
 
@@ -15737,22 +15730,20 @@ let count_doc = (new counter)#doc
     <programlisting language="ocaml">
 (* classes/doc.ml (starting from part 3) *)
 class ['a] folder2 = object(self)
-  method doc acc =
-    function
-      Heading str -&gt; self#heading acc str
-    | Paragraph text -&gt; self#paragraph acc text
-    | Definition list -&gt; self#definition acc list
+  method doc acc = function
+  | Heading str -&gt; self#heading acc str
+  | Paragraph text -&gt; self#paragraph acc text
+  | Definition list -&gt; self#definition acc list
 
   method list_item: 'b. 'a -&gt; 'b list_item -&gt; 'a =
     fun acc {tag; text} -&gt;
       List.fold ~f:self#text_item ~init:acc text
 
-  method text_item acc =
-    function
-      Raw str -&gt; self#raw acc str
-    | Bold text -&gt; self#bold acc text
-    | Enumerate list -&gt; self#enumerate acc list
-    | Quote doc -&gt; self#quote acc doc
+  method text_item acc = function
+  | Raw str -&gt; self#raw acc str
+  | Bold text -&gt; self#bold acc text
+  | Enumerate list -&gt; self#enumerate acc list
+  | Quote doc -&gt; self#quote acc doc
 
   method private heading acc str = acc
   method private paragraph acc text =
@@ -15957,11 +15948,10 @@ class square :
 </programlisting>
     <para>
       The binary method <literal>equals</literal> is now implemented in
-      terms of the concrete type <literal>shape_repr</literal>. In fact,
-      the objects are now isomorphic to the
-      <literal>shape_repr</literal> type. When using this pattern, you
-      will not be able to hide the <literal>repr</literal> method, but
-      you can hide the type definition using the module system.
+      terms of the concrete type <literal>shape_repr</literal>. When
+      using this pattern, you will not be able to hide the
+      <literal>repr</literal> method, but you can hide the type
+      definition using the module system.
     </para>
     <programlisting language="ocaml">
 (* classes/binary_module.ml  *)
@@ -15978,10 +15968,35 @@ module Shapes : sig
       method equals : shape -&gt; bool
     end
 end = struct
-  type shape_repr = Square of int | Circle of int 
+  type shape_repr = 
+  | Square of int 
+  | Circle of int 
   ...
 end
 </programlisting>
+    <para>
+      Note that this solution prevents us from adding new kinds of shape
+      without adding new constructors to the
+      <literal>shape_repr</literal> type, which is quite restrictive.
+      The objects created by these classes are also in one-to-one
+      correspondence with members of the representation type, making the
+      objects seem somewhat redundant.
+    </para>
+    <para>
+      However, equality is quite an extreme instance of a binary method:
+      it needs access to all the information of the other object. Many
+      other binary methods need only partial information about the
+      object. For instance, a method that compares shapes by their
+      sizes:
+    </para>
+    <programlisting language="ocaml">
+(* classes/binary_larger.ml  *)
+</programlisting>
+    <para>
+      In this case, there is no one-to-one correspondence between the
+      objects and their sizes, and we can still easily define new kinds
+      of shape.
+    </para>
   </sect1>
   <sect1 id="virtual-classes-and-methods">
     <title>Virtual classes and methods</title>
@@ -16032,12 +16047,8 @@ type drawable = &lt; draw: unit &gt;
         to the shapes.
       </para>
       <programlisting language="ocaml">
-(* classes-async/verbose_shapes.ml  *)
-open Core.Std
-open Async.Std
-open Async_graphics
-
-class square w x y = object (self)
+(* classes-async/verbose_shapes.ml (starting from part 1) *)
+class square w x y = object(self)
   val mutable x: int = x
   method x = x
 
@@ -16066,8 +16077,8 @@ end
         similar.
       </para>
       <programlisting language="ocaml">
-(* classes-async/verbose_shapes.ml (starting from part 1) *)
-class circle r x y = object (self)
+(* classes-async/verbose_shapes.ml (starting from part 2) *)
+class circle r x y = object(self)
   val mutable x: int = x
   method x = x
 
@@ -16111,7 +16122,7 @@ end
       </para>
       <programlisting language="ocaml">
 (* classes-async/shapes.ml (starting from part 1) *)
-class virtual shape x y = object (self)
+class virtual shape x y = object(self)
   method virtual private contains: int -&gt; int -&gt; bool
 
   val mutable x: int = x
@@ -16216,7 +16227,7 @@ val o : obj = &lt;obj&gt;
     </para>
     <programlisting language="ocaml">
 (* classes-async/shapes.ml (starting from part 3) *)
-class growing_circle r x y = object (self)
+class growing_circle r x y = object(self)
   inherit circle r x y
 
   initializer
@@ -16323,7 +16334,7 @@ end
       </para>
       <programlisting language="ocaml">
 (* classes-async/shapes.ml (starting from part 4) *)
-class virtual draggable = object (self)
+class virtual draggable = object(self)
   method virtual on_mousedown: 
     ?start:unit Deferred.t -&gt; 
     ?stop:unit Deferred.t -&gt; 
@@ -16372,7 +16383,7 @@ end
       </para>
       <programlisting language="ocaml">
 (* classes-async/shapes.ml (starting from part 6) *)
-class virtual animated span = object (self)
+class virtual animated span = object(self)
   method virtual on_click: 
     ?start:unit Deferred.t -&gt; 
     ?stop:unit Deferred.t -&gt; 
@@ -16547,7 +16558,7 @@ $ corebuild -pkg async_graphics shapes.native
         <listitem>
           <para>
             <ulink url="http://ocsigen.org/js_of_ocaml/api/Js">js_of_ocaml</ulink>
-            compiles OCaml code to Javascript, and has bindings to
+            compiles OCaml code to JavaScript, and has bindings to
             WebGL. This is the emerging standard for 3D rendering in web
             browsers.
           </para>
@@ -21043,10 +21054,10 @@ let int = '-'? ['1'-'9'] ['0'-'9']*
       </para>
       <programlisting language="ocaml">
 (* parsing/lexer.mll (starting from part 2) *)
-let digits = ['0'-'9']
-let frac = '.' digits*
-let exp = ['e' 'E'] ['-' '+']? digits+
-let float = digits* frac? exp?
+let digit = ['0'-'9']
+let frac = '.' digit*
+let exp = ['e' 'E'] ['-' '+']? digit+
+let float = digit* frac? exp?
 </programlisting>
       <para>
         The <literal>digits</literal> expression defines a single
@@ -21081,23 +21092,24 @@ let hex = ['0'-'9' 'a'-'f' 'A'-'F']
       </para>
       <programlisting language="ocaml">
 (* parsing/lexer.mll (starting from part 4) *)
-rule read = parse
-| white    { read lexbuf }
-| newline  { next_line lexbuf; read lexbuf }
-| int      { INT (int_of_string (Lexing.lexeme lexbuf)) }
-| float    { FLOAT (float_of_string (Lexing.lexeme lexbuf)) }
-| &quot;true&quot;   { TRUE }
-| &quot;false&quot;  { FALSE }
-| &quot;null&quot;   { NULL }
-| '&quot;'      { read_string (Buffer.create 17) lexbuf }
-| '{'      { LEFT_BRACE }
-| '}'      { RIGHT_BRACE }
-| '['      { LEFT_BRACK }
-| ']'      { RIGHT_BRACK }
-| ':'      { COLON }
-| ','      { COMMA }
-| _ { raise (SyntaxError (&quot;Unexpected char: &quot; ^ Lexing.lexeme lexbuf)) }
-| eof      { EOF }
+rule read =
+  parse
+  | white    { read lexbuf }
+  | newline  { next_line lexbuf; read lexbuf }
+  | int      { INT (int_of_string (Lexing.lexeme lexbuf)) }
+  | float    { FLOAT (float_of_string (Lexing.lexeme lexbuf)) }
+  | &quot;true&quot;   { TRUE }
+  | &quot;false&quot;  { FALSE }
+  | &quot;null&quot;   { NULL }
+  | '&quot;'      { read_string (Buffer.create 17) lexbuf }
+  | '{'      { LEFT_BRACE }
+  | '}'      { RIGHT_BRACE }
+  | '['      { LEFT_BRACK }
+  | ']'      { RIGHT_BRACK }
+  | ':'      { COLON }
+  | ','      { COMMA }
+  | _ { raise (SyntaxError (&quot;Unexpected char: &quot; ^ Lexing.lexeme lexbuf)) }
+  | eof      { EOF }
 </programlisting>
       <para>
         The rules are structured very similarly to pattern matches,
@@ -21178,21 +21190,22 @@ rule read = parse
       </para>
       <programlisting language="ocaml">
 (* parsing/lexer.mll (starting from part 5) *)
-and read_string buf = parse
-| '&quot;' { STRING (Buffer.contents buf) }
-| '\\' '/' { Buffer.add_char buf '/'; read_string buf lexbuf }
-| '\\' '\\' { Buffer.add_char buf '\\'; read_string buf lexbuf }
-| '\\' 'b' { Buffer.add_char buf '\b'; read_string buf lexbuf }
-| '\\' 'f' { Buffer.add_char buf '\012'; read_string buf lexbuf }
-| '\\' 'n' { Buffer.add_char buf '\n'; read_string buf lexbuf }
-| '\\' 'r' { Buffer.add_char buf '\r'; read_string buf lexbuf }
-| '\\' 't' { Buffer.add_char buf '\t'; read_string buf lexbuf }
-| [^ '&quot;' '\\']+
-  { Buffer.add_string buf (Lexing.lexeme lexbuf);
-    read_string buf lexbuf
-  }
-| _ { raise (SyntaxError (&quot;Illegal string character: &quot; ^ Lexing.lexeme lexbuf)) }
-| eof { raise (SyntaxError (&quot;String is not terminated&quot;)) }
+and read_string buf =
+  parse
+  | '&quot;'       { STRING (Buffer.contents buf) }
+  | '\\' '/'  { Buffer.add_char buf '/'; read_string buf lexbuf }
+  | '\\' '\\' { Buffer.add_char buf '\\'; read_string buf lexbuf }
+  | '\\' 'b'  { Buffer.add_char buf '\b'; read_string buf lexbuf }
+  | '\\' 'f'  { Buffer.add_char buf '\012'; read_string buf lexbuf }
+  | '\\' 'n'  { Buffer.add_char buf '\n'; read_string buf lexbuf }
+  | '\\' 'r'  { Buffer.add_char buf '\r'; read_string buf lexbuf }
+  | '\\' 't'  { Buffer.add_char buf '\t'; read_string buf lexbuf }
+  | [^ '&quot;' '\\']+
+    { Buffer.add_string buf (Lexing.lexeme lexbuf);
+      read_string buf lexbuf
+    }
+  | _ { raise (SyntaxError (&quot;Illegal string character: &quot; ^ Lexing.lexeme lexbuf)) }
+  | eof { raise (SyntaxError (&quot;String is not terminated&quot;)) }
 </programlisting>
       <para>
         This rule takes a <literal>buf : Buffer.t</literal> as an
