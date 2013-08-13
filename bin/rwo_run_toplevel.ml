@@ -358,7 +358,7 @@ let parse_file fullfile file =
       let buf = ref x in
       Hashtbl.replace parts ~key ~data:buf;
     | Some buf ->
-      buf := x @ !buf
+      buf := !buf @ x
   in
   let print_html_part key s =
     match Hashtbl.find html_parts key with
