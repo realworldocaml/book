@@ -19,7 +19,7 @@ Obj.is_block (Obj.repr Apple) ;;
 #part 5
 type t = Apple | Orange of int | Pear of string | Kiwi ;;
 Obj.is_block (Obj.repr (Orange 1234)) ;;
-Obj.tag (Obj.repr (Orange 1234)) ;; 
+Obj.tag (Obj.repr (Orange 1234)) ;;
 Obj.tag (Obj.repr (Pear "xyz")) ;;
 (Obj.magic (Obj.field (Obj.repr (Orange 1234)) 0) : int) ;;
 (Obj.magic (Obj.field (Obj.repr (Pear "xyz")) 0) : string) ;;

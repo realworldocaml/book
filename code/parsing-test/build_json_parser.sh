@@ -1,1 +1,1 @@
-corebuild -use-menhir parser.mly
+corebuild -use-menhir parser.mli
