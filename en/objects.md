@@ -256,8 +256,9 @@ subtype of `shape` because it implements all of the methods of `shape`
 
 ### Depth subtyping
 
-We can also use _depth_ subtyping with objects. Depth subtyping, in its most
-general form, says that an object type `< m: t1 >` is a subtype of `< m: t2 >`
+We can also use _depth_ subtyping with objects. Depth subtyping
+allows us coerce an object if its individual methods could safely be
+coerced. So an object type `< m: t1 >` is a subtype of `< m: t2 >`
 iff `t1` is a subtype of `t2`.
 
 For example, we can create two objects with a `shape` method:
