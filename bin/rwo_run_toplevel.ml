@@ -398,7 +398,7 @@ let parse_file fullfile file =
   Hashtbl.iter parts ~f:(
     fun ~key ~data ->
       eprintf "W: %s\n%!" (ofile file key);
-      let data = Cow.Xml.to_string !data in
+      let data = Code_frag.wrap_in_docbook_box ~part:key "OCaml UTop" fullfile !data in
       Out_channel.write_all (ofile file key) ~data);
   Hashtbl.iter html_parts ~f:(
     fun ~key ~data ->
