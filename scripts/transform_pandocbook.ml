@@ -149,14 +149,14 @@ module Transform = struct
     mk_tag "book"
 end
 
-let apply_transform parts_file book public =
+let apply_transform parts_file book public plsubst =
   try
     let parts = Sexp.load_sexps_conv_exn parts_file chapter_of_sexp in
     let o = Xmlm.make_output (`Channel stdout) in
     Xmlm.make_input (`Channel (open_in book))
     |> Xml_tree.in_tree
     |> fun (dtd, t) ->    Transform.rewrite_linkend t
-                       |> Transform.rewrite_programlisting
+                       |> (if plsubst then Transform.rewrite_programlisting else ident)
                        |> Transform.add_parts public parts
                        |> fun t -> Xml_tree.out_tree o (dtd, t)
   with Xmlm.Error ((line,col),e) -> (
@@ -170,6 +170,7 @@ let _ =
   let book = Arg.(required & pos 1 (some non_dir_file) None & info [] ~docv:"DOCBOOK"
                     ~doc:"Docbook source to transform with the $(i,<part>) tags. This file should have been output from $(b,pandoc).") in
   let public = Arg.(value & flag & info ["public"] ~doc:"Filter the chapter list to only output the ones marked as $(i,public) in the $(i,CHAPTERS) file.") in
+  let plsubst = Arg.(value & flag & info ["subst"] ~doc:"Substitute $(i,<programlisting>) tags with their frag values. For OReilly backend only.") in
   let info = Term.info "transform_pandocbook" ~version:"1.0.0" ~doc:"customise the Real World OCaml Docbook" in
-  let cmd_t = Term.(pure apply_transform $ parts $ book $ public) in
+  let cmd_t = Term.(pure apply_transform $ parts $ book $ public $ plsubst) in
   match Term.eval (cmd_t, info) with `Ok x -> x |_ -> exit 1
