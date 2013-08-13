@@ -822,7 +822,7 @@ incrementally, and sufficient to compute means and standard
 deviations, as shown below.  Note that there are two let-bindings in a
 row without a double semicolon between them.  That's because the
 double semicolon is required only to tell utop to process the input,
-not to separate two expressions.
+not to separate two declarations.
 
 ```frag
 ((typ ocamltop)(name guided-tour/main.topscript)(part 51)) 
@@ -939,8 +939,8 @@ Note that `while` (like `for`) is also a keyword.
 
 As a side note, the above code takes advantage of the fact that `&&`,
 OCaml's and operator, short-circuits.  In particular, in an expression
-of the form `<expr1> && <expr2>`, `<expr2>` will only be evaluated if
-`<expr1>` evaluated to true.  Were it not for that, then the above
+of the form _`expr1`_ `&&` _`expr2`_, _`expr2`_ will only be evaluated
+if _`expr1`_ evaluated to true.  Were it not for that, then the above
 function would result in an out-of-bounds error.  Indeed, we can
 trigger that out-of-bounds error by rewriting the function to avoid
 the short-circuiting.
