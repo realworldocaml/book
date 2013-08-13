@@ -22,10 +22,10 @@ type shape_repr =
   | Circle of int ;;
 type shape =
   < repr : shape_repr; equals : shape -> bool; area : float > ;;
-class square w = object(self : 'self) 
+class square w = object(self) 
     method width = w
     method area = Float.of_int (self#width * self#width)
     method repr = Square self#width
-    method equals (other : 'self) = other#repr = self#repr
+    method equals (other : shape) = other#repr = self#repr
   end ;;
 
