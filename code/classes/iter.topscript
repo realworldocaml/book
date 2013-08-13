@@ -1,19 +1,18 @@
 type 'a iterator = < get : 'a; has_value : bool; next : unit > ;;
 #part 1
-class ['a] list_iterator init =
-  object
+class ['a] list_iterator init = object
     val mutable current : 'a list = init
 
     method has_value = current <> []
 
     method get =
       match current with
-        hd :: tl -> hd
+      | hd :: tl -> hd
       | [] -> raise (Invalid_argument "no value")
 
     method next =
       match current with
-        hd :: tl -> current <- tl
+      | hd :: tl -> current <- tl
       | [] -> raise (Invalid_argument "no value")
    end  ;;
 #part 2
@@ -22,9 +21,9 @@ class ['a] stack init = object
 
     method pop =
       match v with
-        hd :: tl ->
-          v <- tl;
-          Some hd
+      | hd :: tl ->
+        v <- tl;
+        Some hd
       | [] -> None
 
     method push hd =
@@ -32,7 +31,7 @@ class ['a] stack init = object
 
     method iterator : 'a iterator =
       new list_iterator v
-end ;;
+  end ;;
 #part 3
 let s = new stack [] ;;
 s#push 5 ;;
@@ -49,25 +48,26 @@ class ['a] stack init = object
 
     method pop =
       match v with
-        hd :: tl ->
-          v <- tl;
-          Some hd
+      | hd :: tl ->
+        v <- tl;
+        Some hd
       | [] -> None
 
     method push hd =
       v <- hd :: v
 
    method iter f = 
-     List.iter ~f v end ;;
+     List.iter ~f v 
+  end ;;
 #part 5
 class ['a] stack init = object
     val mutable v : 'a list = init
 
     method pop =
       match v with
-        hd :: tl ->
-          v <- tl;
-          Some hd
+      | hd :: tl ->
+        v <- tl;
+        Some hd
       | [] -> None
 
     method push hd =

@@ -3,23 +3,23 @@ class ['a] stack init = object
 
     method pop =
       match v with
-        hd :: tl ->
-          v <- tl;
-          Some hd
+      | hd :: tl ->
+        v <- tl;
+        Some hd
       | [] -> None
 
     method push hd =
       v <- hd :: v
-end ;;
+  end ;;
 #part 1
 class ['a] stack init = object
       val mutable v = init
     
       method pop = 
         match v with
-          hd :: tl -> 
-            v <- tl;
-            Some hd
+        | hd :: tl -> 
+          v <- tl;
+          Some hd
         | [] -> None
 
       method push hd = 

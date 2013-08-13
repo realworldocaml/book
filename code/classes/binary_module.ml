@@ -11,6 +11,8 @@ module Shapes : sig
       method equals : shape -> bool
     end
 end = struct
-  type shape_repr = Square of int | Circle of int 
+  type shape_repr = 
+  | Square of int 
+  | Circle of int 
   ...
 end

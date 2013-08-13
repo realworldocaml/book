@@ -2,7 +2,7 @@ open Core.Std
 open Async.Std
 open Async_graphics
 
-class virtual shape x y = object (self)
+class virtual shape x y = object(self)
   method virtual private contains: int -> int -> bool
 
   val mutable x: int = x
