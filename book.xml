@@ -18238,7 +18238,7 @@ let () = Command.run add</programlisting>
   </sect1>
   <sect1 id="command-line-auto-completion-with-bash">
     <title>Command-line auto-completion with
-    <literal>bash</literal></title>
+    <command>bash</command></title>
     <para>
       Modern UNIX shells usually have a tab-completion feature to
       interactively help you figure out how to build a command-line.
@@ -18251,11 +18251,11 @@ let () = Command.run add</programlisting>
     <para>
       The precise mechanism for autocompletion varies depending on what
       shell you are using, but we'll assume you are using the most
-      common one: <literal>bash</literal>. This is the default
+      common one: <command>bash</command>. This is the default
       interactive shell on most Linux distributions and Mac OS X, but
       you may need to switch to it on *BSD or Windows (when using
       Cygwin). The rest of this section assumes that you're using
-      <literal>bash</literal>.
+      <command>bash</command>.
     </para>
     <para>
       Bash autocompletion isn't always installed by default, so check
@@ -18328,12 +18328,12 @@ let () = Command.run add</programlisting>
     </para>
     <para>
       One last bit of information you'll need to find is the location of
-      the <literal>bash_completion.d</literal> directory. This is where
-      all the shell fragments that contain the completion logic are
-      held. On Linux, this is often in
-      <literal>/etc/bash_completion.d</literal>, and in Homebrew on Mac
-      OS X it would be
-      <literal>/usr/local/etc/bash_completion.d</literal> by default.
+      the <filename>bash_completion.d</filename> directory. This is
+      where all the shell fragments that contain the completion logic
+      are held. On Linux, this is often in
+      <filename>/etc/bash_completion.d</filename>, and in Homebrew on
+      Mac OS X it would be
+      <filename>/usr/local/etc/bash_completion.d</filename> by default.
     </para>
     <sect2 id="generating-completion-fragments-from-command">
       <title>Generating completion fragments from Command</title>
@@ -18342,13 +18342,13 @@ let () = Command.run add</programlisting>
         possible valid options, and it can use this information to
         generate a shell script which provides completion support for
         that command. To generate the fragment, just run the command
-        with the <literal>COMMAND_OUTPUT_INSTALLATION_BASH</literal>
+        with the <envar>COMMAND_OUTPUT_INSTALLATION_BASH</envar>
         environment variable set to any value.
       </para>
       <para>
         For example, let's try it on our MD5 example from earlier,
         assuming that the binary is called
-        <literal>basic_md5_with_flags</literal> in the current
+        <command>basic_md5_with_flags</command> in the current
         directory.
       </para>
       <programlisting language="console"><lineannotation>⌘ Terminal: <filename>command-line-parsing/md5_completion.out</filename></lineannotation>
@@ -18386,15 +18386,15 @@ let () = Command.run add</programlisting>
         Command completion support works for flags and grouped commands,
         and is very useful when building larger command-line interfaces.
         Don't forget to install the shell fragment into your global
-        <literal>bash_completion.d</literal> directory if you want it to
-        be loaded in all of your login shells.
+        <filename>bash_completion.d</filename> directory if you want it
+        to be loaded in all of your login shells.
       </para>
       <note>
       <title>
       Installing a generic completion handler
       </title>
       <para>
-        Sadly, <literal>bash</literal> doesn't support installing a
+        Sadly, <command>bash</command> doesn't support installing a
         generic handler for all Command-based applications. This means
         that you have to install the completion script for every
         application, but you should be able to automate this in the
@@ -25673,12 +25673,12 @@ struct custom_operations {
       <para>
         The default minor heap size in OCaml is normally 2MB on 64-bit
         platforms, but this is increased to 8MB if you use Core (which
-        generally improves performance but at the cost of a bigger
-        memory profile by default). This setting can be overridden
-        unless overridden by the <literal>s=&lt;words&gt;</literal>
-        argument to <literal>OCAMLRUNPARAM</literal>. You can change it
-        after the program has started by calling the
-        <literal>Gc.set</literal> function.
+        generally prefers default settings that improves performance but
+        at the cost of a bigger memory profile). This setting can be
+        overridden via the <literal>s=&lt;words&gt;</literal> argument
+        to <literal>OCAMLRUNPARAM</literal>. You can change it after the
+        program has started by calling the <literal>Gc.set</literal>
+        function.
       </para>
       <programlisting language=""><lineannotation>⌘ OCaml UTop: <filename>gc/tune.topscript</filename></lineannotation>
 <prompt># </prompt><userinput>let c = Gc.get () ;;</userinput>
