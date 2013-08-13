@@ -215,10 +215,9 @@ of other values you're working with.
 
 <note><title> More on locally abstract types </title>
 
-One of the key properties of locally abstract types is that they are
-dealt with as abstract types within the function they're defined
-within, but are polymorphic from the outside.  Consider the following
-example.
+One of the key properties of locally abstract types is that they're dealt with
+as abstract types in the function they're defined within, but are polymorphic
+from the outside.  Consider the following example.
 
 ```frag
 ((typ ocamltop)(name fcm/main.topscript)(part 19))
@@ -537,7 +536,7 @@ Notably, the loader can't be itself loaded (since it's not on the list
 of known handlers), and can't be unloaded.
 
 ```frag
-((typ console)(name fcm/loader_cli3.out))
+((typ console)(name fcm/loader_cli4.out))
 ```
 
 We can push this dynamism yet further using libraries like

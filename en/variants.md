@@ -311,7 +311,7 @@ you could write a general-purpose evaluator for these expressions.
 ((typ ocamltop)(name variants/blang.topscript)(part 3))
 ```
 
-The structure of the code is pretty straightforward --- we're just
+The structure of the code is pretty straightforward&#x2014;we're just
 pattern matching over the structure of the data, doing the appropriate
 calculation based on which tag we see.  To use this evaluator on a
 concrete example, we just need to write the `base_eval` function which

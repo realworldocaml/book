@@ -7,8 +7,8 @@ executable code.
 In this chapter, we'll cover the following topics:
 
 * the untyped intermediate lambda code where pattern matching is optimized.
-* the bytecode `ocamlc` compiler and `ocamlrun` interpreter.
-* the native code `ocamlopt` code generator, and debugging and profiling native code.
+* the bytecode <command>ocamlc</command> compiler and <command>ocamlrun</command> interpreter.
+* the native code <command>ocamlopt</command> code generator, and debugging and profiling native code.
 
 ## The untyped lambda form
 
@@ -31,17 +31,17 @@ The compiler dumps the lambda form in an s-expression syntax if you add the
 how the OCaml pattern matching engine works by building three different pattern
 matches and comparing their lambda forms.
 
-Let's start by creating a straightforward exhaustive pattern match using normal
-variants.
+Let's start by creating a straightforward exhaustive pattern match using 
+four normal variants.
 
 ```frag
-((typ ocaml)(name back-end/pattern_monomorphic_exhaustive.ml))
+((typ ocaml)(name back-end/pattern_monomorphic_large.ml))
 ```
 
 The lambda output for this code looks like this.
 
 ```frag
-((typ console)(name back-end/lambda_for_pattern_monomorphic_exhaustive.out))
+((typ console)(name back-end/lambda_for_pattern_monomorphic_large.out))
 ```
 
 It's not important to understand every detail of this internal form and it is
@@ -62,37 +62,31 @@ these caveats, some interesting points emerge from reading it.
   dynamic checks.  Unwise use of unsafe features such as the
   `Obj.magic` module can still easily induce crashes at this level.
 
-The first pattern match is *exhaustive*, so there are no unknown match cases
-that the compiler needs to check for (_e.g._ a value greater than 3).  What
-happens if we modify the code to use an incomplete pattern match instead?
+The compiler computes a jump table in order to handle all four cases.  If we
+drop the number of variants to just two, then there's no need for the complexity
+of computing this table.
 
 ```frag
-((typ ocaml)(name back-end/pattern_monomorphic_incomplete.ml))
+((typ ocaml)(name back-end/pattern_monomorphic_small.ml))
 ```
 
 The lambda output for this code is now quite different.
 
 ```frag
-((typ ocaml)(name back-end/lambda_for_pattern_monomorphic_incomplete.out))
+((typ ocaml)(name back-end/lambda_for_pattern_monomorphic_small.out))
 ```
 
-The compiler has reverted to testing the value as a set of nested conditionals.
-The lambda code above first checks to see if the value is `Alice`, then if it's
-`Bob` and finally falls back to the default `102` return value for everything
-else.
-
-Exhaustive pattern matching is thus a better coding style at several levels.
-It rewards you with more useful compile-time warnings when you modify type
-definitions *and* generates more efficient runtime code too.
-
-Finally, let's look at the same code, but with polymorphic variants instead of
-normal variants.
+The compiler emits simpler conditional jumps rather than setting up a jump
+table, since it statically determines that the range of possible variants is
+small enough.  Finally, let's look at the same code, but with polymorphic
+variants instead of normal variants.
 
 ```frag
 ((typ ocaml)(name back-end/pattern_polymorphic.ml))
 ```
 
-The lambda form for this reveals the most inefficient result yet.
+The lambda form for this also shows up the runtime representation of
+polymorphic variants.
 
 ```frag
 ((typ ocaml)(name back-end/lambda_for_pattern_polymorphic.out))
@@ -101,38 +95,10 @@ The lambda form for this reveals the most inefficient result yet.
 We mentioned earlier in [xref](#variants) that pattern matching over
 polymorphic variants is slightly less efficient, and it should be clearer why
 this is the case now.  Polymorphic variants have a runtime value that's
-calculated by hashing the variant name, and so the compiler has to test each of
-these possible hash values in sequence.
-
-### Benchmarking pattern matching
-
-Let's benchmark these three pattern matching techniques to quantify their
-runtime costs more accurately.  The `Core_bench` module runs the tests
-thousands of times and also calculates statistical variance of the results.
-You'll need to `opam install core_bench` to get the library.
-
-```frag
-((typ ocaml)(name back-end-bench/bench_patterns.ml))
-```
-
-Building and executing this example will run for around 30 seconds by default,
-and you'll see the results summarized in a neat table.
-
-```frag
-((typ console)(name back-end-bench/run_bench_patterns.out))
-```
-
-These results confirm our earlier performance hypothesis obtained from
-inspecting the lambda code. The shortest running time comes from the exhaustive
-pattern match and polymorphic variant pattern matching is the slowest.  There
-isn't a hugely significant difference in these examples, but you can use the
-same techniques to peer into the innards of your own source code and narrow
-down any performance hotspots.
-
-The lambda form is primarily a stepping stone to the bytecode executable format
-that we'll cover next.  It's often easier to look at the textual output from
-this stage than to wade through the native assembly code from compiled
-executables.
+calculated by hashing the variant name, and so the compiler can't use a jump
+table as it does for normal variants.  Instead, it creates a decision tree that
+compares the hash values against the input variable in as few comparisons as
+possible.
 
 <note>
 <title>Learning more about pattern matching compilation</title>
@@ -154,6 +120,37 @@ lightweight language construct to use in OCaml code.
 
 </note>
 
+
+### Benchmarking pattern matching
+
+Let's benchmark these three pattern matching techniques to quantify their
+runtime costs more accurately.  The `Core_bench` module runs the tests
+thousands of times and also calculates statistical variance of the results.
+You'll need to `opam install core_bench` to get the library.
+
+```frag
+((typ ocaml)(name back-end-bench/bench_patterns.ml))
+```
+
+Building and executing this example will run for around 30 seconds by default,
+and you'll see the results summarized in a neat table.
+
+```frag
+((typ console)(name back-end-bench/run_bench_patterns.out))
+```
+
+These results confirm our earlier performance hypothesis obtained from
+inspecting the lambda code. The shortest running time comes from the small conditional
+pattern match and polymorphic variant pattern matching is the slowest.  There
+isn't a hugely significant difference in these examples, but you can use the
+same techniques to peer into the innards of your own source code and narrow
+down any performance hotspots.
+
+The lambda form is primarily a stepping stone to the bytecode executable format
+that we'll cover next.  It's often easier to look at the textual output from
+this stage than to wade through the native assembly code from compiled
+executables.
+
 ## Generating portable bytecode
 
 After the lambda form has been generated, we are very close to having
@@ -161,8 +158,8 @@ executable code.  The OCaml tool-chain branches into two separate compilers at
 this point.  We'll describe the bytecode compiler first, which
 consists of two pieces:
 
-* `ocamlc` compiles files into a bytecode that is a close mapping to the lambda form.
-* `ocamlrun` is a portable interpreter that executes the bytecode.
+* <command>ocamlc</command> compiles files into a bytecode that is a close mapping to the lambda form.
+* <command>ocamlrun</command> is a portable interpreter that executes the bytecode.
 
 The big advantage of using bytecode is simplicity, portability and compilation
 speed.  The mapping from the lambda form to bytecode is straightforward, and
@@ -183,7 +180,7 @@ textual form via `-dinstr`.  Try this on one of our earlier pattern matching
 examples.
 
 ```frag
-((typ console)(name back-end/instr_for_pattern_monomorphic_exhausive.out))
+((typ console)(name back-end/instr_for_pattern_monomorphic_small.out))
 ```
 
 The bytecode above has been simplified from the lambda form into a set of
@@ -218,7 +215,7 @@ budding language hacker.
 
 ### Compiling and linking bytecode 
 
-The `ocamlc` command compiles individual `ml` files into bytecode files that
+The <command>ocamlc</command> command compiles individual `ml` files into bytecode files that
 have a `cmo` extension.  The compiled bytecode files are matched with the
 associated `cmi` interface which contains the type signature exported to
 other compilation units.
@@ -265,7 +262,7 @@ This in turn lets the interpreter dynamically load the external library symbols
 when it executes the bytecode.
 
 You can also generate a complete standalone executable that bundles the
-`ocamlrun` interpreter with the bytecode in a single binary.  This is known as
+<command>ocamlrun</command> interpreter with the bytecode in a single binary.  This is known as
 a *custom runtime* mode and is built as follows.
 
 ```frag
@@ -286,11 +283,11 @@ runtimes).  Full details can be found in the
 ### Embedding OCaml bytecode in C
 
 A consequence of using the bytecode compiler is that the final link phase must
-be performed by `ocamlc`.  However, you might sometimes want to embed your OCaml
+be performed by <command>ocamlc</command>.  However, you might sometimes want to embed your OCaml
 code inside an existing C application.  OCaml also supports this mode of operation
 via the `-output-obj` directive.
 
-This mode causes `ocamlc` to output a C object file that containing the
+This mode causes <command>ocamlc</command> to output a C object file that containing the
 bytecode for the OCaml part of the program, as well as a `caml_startup`
 function.  All of the OCaml modules are linked into this object file as
 bytecode, just as they would be for an executable.
@@ -331,7 +328,7 @@ an output binary using `gcc` to test this out.
 ((typ console)(name back-end-embed/build_embed_binary.out))
 ```
 
-You can inspect the commands that `ocamlc` is invoking by adding `-verbose` to
+You can inspect the commands that <command>ocamlc</command> is invoking by adding `-verbose` to
 the command line to help figure out the GCC command-line if you get stuck.  You
 can even obtain the C source code to the `-output-obj` result by specifying a
 `.c` output file extension instead of the `.o` we used earlier.
@@ -356,8 +353,8 @@ interpreter doesn't perform.  Care is taken to ensure compatibility with the
 bytecode runtime, so the same code should run identically when compiled with
 either toolchain.
 
-The `ocamlopt` command is the frontend to the native code compiler, and has a
-very similar interface to `ocamlc`.  It also accepts `ml` and `mli` files, but
+The <command>ocamlopt</command> command is the frontend to the native code compiler, and has a
+very similar interface to <command>ocamlc</command>.  It also accepts `ml` and `mli` files, but
 compiles them to:
 
 * A `.o` file containing native object code.
@@ -379,7 +376,7 @@ important optimization and have slower binaries.
 ### Inspecting assembly output
 
 The native code compiler generates assembly language that is then passed to the
-system assembler for compiling into object files.  You can get `ocamlopt` to
+system assembler for compiling into object files.  You can get <command>ocamlopt</command> to
 output the assembly by passing the `-S` flag to the compiler command-line.
 
 The assembly code is highly architecture specific, so the discussion below
@@ -514,7 +511,7 @@ functions:
 * The variable name is also suffixed by a `_` and a number.  This is
   the result of the lambda compilation that replaces each variable name
   with a unique value within the module.  You can determine this number
-  by examining the `-dlambda` output from `ocamlopt`.
+  by examining the `-dlambda` output from <command>ocamlopt</command>.
 
 Anonymous functions are hard to predict without inspecting intermediate
 compiler output.  If you need to debug them it's usually easier to modify the
@@ -737,7 +734,7 @@ OPAM switch.
 We've seen how the compiler uses intermediate files to store various stages of
 the compilation toolchain.  Here's a cheat sheet of all them in one place.
 
-Here are the intermediate files generated by `ocamlc`:
+Here are the intermediate files generated by <command>ocamlc</command>:
 
 Extension  Purpose
 ---------  -------

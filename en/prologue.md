@@ -95,9 +95,9 @@ same idioms required runtime checks in languages such as C++ or Java.  In 2000,
 Jacques Garrigue extended OCaml with several new features such as polymorphic
 methods and variants and labeled and optional arguments.
 
-The last decade has seen OCaml attract a significant user base.  Language
+The last decade has seen OCaml attract a significant user base, and language
 improvements have been steadily added to support the growing commercial and
-academic codebases written in OCaml.  First-class modules, Generalized
+academic codebases.  First-class modules, Generalized
 Algebraic Data Types (GADTs) and dynamic linking have improved the flexibility
 of the language and there is fast native code support for x86_64, ARM, PowerPC,
 and Sparc, making OCaml a good choice for systems where resource usage,
@@ -206,23 +206,17 @@ Real World OCaml is split into three parts:
     where we talk about profiling and debugging techniques using tools
     such as GNU `gdb`.
 
-<note>
-<title>Note to reviewers</title>
-
 Real World OCaml uses some tools that we've developed while writing this book.
 Some of these resulted in improvements to the OCaml compiler, which means that
 you will need to ensure that you have an up-to-date development environment
-(using the 4.01.0 compiler).  We've automated everything you need to do via the
-OPAM package manager, so please do follow the installation instructions in
-[xref](#installation) carefully.
+(using the 4.1 version of the compiler).  We've automated everything you need
+to do via the OPAM package manager, so please do follow the installation
+instructions in [xref](#installation) carefully.
 
-At this stage, the Windows operating system is unsupported, and
-only Mac OS X, Linux, FreeBSD and OpenBSD can be expected to work
-reliably.  We realize this is a concern; there are no fundamental
-barriers to Windows support, but we're focused on getting the main
-content finished before getting stuck into the porting effort.
-
-</note>
+As of publication, the Windows operating system is unsupported by Core, and so
+only Mac OS X, Linux, FreeBSD and OpenBSD can be expected to work reliably.
+Please check the online installaton instructions for updates regarding Windows,
+or install a Linux virtual machine to work through the book as it stands.
 
 ## About the Authors
 

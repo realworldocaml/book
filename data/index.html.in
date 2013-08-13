@@ -24,6 +24,7 @@
 
                 <h2>News</h2>
                 <ul>
+                 <li><i>7th August 2013:</i> The second and final public beta2 milestone released. (<a href="http://anil.recoil.org/2013/08/06/real-world-ocaml-beta2.html">blog and release notes</a>)</li>
                  <li><i>27th June 2013:</i> The first <a href="http://shop.oreilly.com/product/0636920024743.do">Rough Cuts</a> release of the book is available in PDF, ePub and Mobi formats!.</li>
                  <li><i>19th June 2013:</i> Site is now SSL-only. No auth tokens are ever sent in the clear, and are only stored client-side in your browser.</li>
                  <li><i>17th June 2013:</i> Blog (Anil): <a href="http://anil.recoil.org/2013/06/17/real-world-ocaml-beta-available.html">Real World OCaml beta available</a>.</li>

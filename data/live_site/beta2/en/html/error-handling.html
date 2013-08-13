@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+    
+        <meta charset="utf-8"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW"/>
+        
+        <title>Chapter 7. Error Handling / Real World OCaml</title>
+        
+        <link rel="stylesheet" href="../../media/css/main.css"/>
+        
+        <script src="../../media/js/require.js" data-main="../../media/js/main.js"> </script>
+        <script>
+            require.config({
+                config: {
+                    gitHub: {
+                        user: 'ocamllabs',
+                        repo: 'rwo\u002Dcomments',
+                        milestone: 'beta2',
+                        page: 'error\u002Dhandling.html'
+                    }
+                }
+            });
+        </script>
+        
+    
+    </head>
+    
+    <body>
+    
+        <div class="body">
+        
+            <header class="header">
+                <h1><img src="../../media/img/header.png" width="213" height="59" alt="Real World OCaml, by Jason Hickey, Anil Madhavapeddy and Yaron Minsky"/></h1>
+            </header>
+    
+            <nav class="navigation">
+                <ul>
+                    <li>
+                        <a href="index.html">Table of Contents</a>
+                    </li>
+                    
+                        <li>
+                            <a href="prologue.html">Prologue</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt01.html">I. Language Concepts</a>
+                            
+                                 
+                                    <ul>
+                                        
+                                            <li>
+                                                <a href="a-guided-tour.html">1. A Guided Tour</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="variables-and-functions.html">2. Variables and Functions</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="lists-and-patterns.html">3. Lists and Patterns</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="files-modules-and-programs.html">4. Files, Modules and Programs</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="records.html">5. Records</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="variants.html">6. Variants</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="error-handling.html" class="here">7. Error Handling</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="imperative-programming-1.html">8. Imperative Programming</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="functors.html">9. Functors</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="first-class-modules.html">10. First-Class Modules</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="objects.html">11. Objects</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="classes.html">12. Classes</a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt02.html">II. Tools and Techniques</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt03.html">III. The Runtime System</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="installation.html">A. Installation</a>
+                            
+                                
+                            
+                        </li>
+                    
+                </ul>
+            </nav>
+        
+            <article class="page">
+        
+                <h1>Chapter 7. Error Handling</h1>
+                
+                
+
+    <p id="idp8180336">
+    Nobody likes dealing with errors. It's tedious, it's easy to get
+    wrong, and it's usually just not as fun as planning out how your
+    program is going to succeed. But error handling is important, and
+    however much you don't like thinking about it, having your software
+    fail due to poor error handling code is worse.
+  </p><p id="idp8181072">
+    Thankfully, OCaml has powerful tools for handling errors reliably
+    and with a minimum of pain. In this chapter we'll discuss some of
+    the different approaches in OCaml to handling errors, and give some
+    advice on how to design interfaces that make error handling easier.
+  </p><p id="idp8181760">
+    We'll start by describing the two basic approaches for reporting
+    errors in OCaml: error-aware return types and exceptions.
+  </p><section><h1 id="error-aware-return-types">Error-aware return types</h1><p id="idp8183168">
+      The best way in OCaml to signal an error is to include that error
+      in your return value. Consider the type of the
+      <code>find</code> function in the <code>List</code>
+      module.
+    </p><div class="rwocode"><pre><code># <span class="keyword5">List.</span>find<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : 'a list -&gt; f:('a -&gt; bool) -&gt; 'a option = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8185648">
+      The option in the return type indicates that the function may not
+      succeed in finding a suitable element, as you can see below.
+    </p><div class="rwocode"><pre><code># <span class="keyword5">List.</span>find <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">]</span> ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> x -<span class="keyword2">&gt;</span> x <span class="keyword2">&gt;</span><span class="keyword2">=</span> <span class="keyword8">2</span><span class="keyword2">)</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int option = Some 2
+</div># <span class="keyword5">List.</span>find <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">]</span> ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> x -<span class="keyword2">&gt;</span> x <span class="keyword2">&gt;</span><span class="keyword2">=</span> <span class="keyword8">10</span><span class="keyword2">)</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int option = None
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8186896">
+      Having errors be explicit in the return values of your functions
+      tells the caller that there is an error that needs to be handled.
+      The caller can then handle the error explicitly, either recovering
+      from the error or propagating it onward.
+    </p><p id="idp8187568">
+      Consider the <code>compute_bounds</code> function defined
+      below. The function takes a list and a comparison function, and
+      returns upper and lower bounds for the list by finding the
+      smallest and largest element on the list.
+      <code>List.hd</code> and <code>List.last</code>, which
+      return <code>None</code> when they encounter an empty list,
+      are used to extract the largest and smallest element of the list.
+    </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> compute_bounds ~cmp <span class="keyword3">list</span> <span class="keyword2">=</span>
+    <span class="keyword4">let</span> sorted <span class="keyword2">=</span> <span class="keyword5">List.</span>sort ~cmp <span class="keyword3">list</span> <span class="keyword4">in</span>
+    <span class="keyword1">match</span> <span class="keyword5">List.</span>hd sorted, <span class="keyword5">List.</span>last sorted <span class="keyword1">with</span>
+    <span class="keyword2">|</span> None,<span class="keyword8">_</span> <span class="keyword2">|</span> <span class="keyword8">_</span>, <span class="keyword6">None </span>-<span class="keyword2">&gt;</span> <span class="keyword6">None
+</span>    <span class="keyword2">|</span> <span class="keyword6">Some </span>x, <span class="keyword6">Some </span>y -<span class="keyword2">&gt;</span> <span class="keyword6">Some </span><span class="keyword2">(</span>x,y<span class="keyword2">)</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val compute_bounds : cmp:('a -&gt; 'a -&gt; int) -&gt; 'a list -&gt; ('a * 'a) option =
+  &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8191504">
+      The match statement is used to handle the error cases, propagating
+      a None in <code>hd</code> or <code>last</code> into
+      the return value of <code>compute_bounds</code>.
+    </p><p id="idp8193872">
+      On the other hand, in <code>find_mismatches</code> below,
+      errors encountered during the computation do not propagate to the
+      return value of the function. <code>find_mismatches</code>
+      takes two hash tables as arguments, and searches for keys that
+      have different data in one table than in the other. As such, the
+      failure to find a key in one table isn't a failure of any sort.
+    </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> find_mismatches table1 table2 <span class="keyword2">=</span>
+     <span class="keyword5">Hashtbl.</span>fold table1 ~init<span class="keyword2">:</span><span class="keyword2">[</span><span class="keyword2">]</span> ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> ~key ~data mismatches -<span class="keyword2">&gt;</span>
+        <span class="keyword1">match</span> <span class="keyword5">Hashtbl.</span>find table2 key <span class="keyword1">with</span>
+        <span class="keyword2">|</span> <span class="keyword6">Some </span>data' <span class="keyword1">when</span> data' <span class="keyword2">&lt;</span><span class="keyword2">&gt;</span> data -<span class="keyword2">&gt;</span> key <span class="keyword2">:</span><span class="keyword2">:</span> mismatches
+        <span class="keyword2">|</span> <span class="keyword8">_</span> -<span class="keyword2">&gt;</span> mismatches
+     <span class="keyword2">)</span>
+ <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val find_mismatches : ('a, 'b) Hashtbl.t -&gt; ('a, 'b) Hashtbl.t -&gt; 'a list =
+  &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 3) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8196560">
+      The use of options to encode errors underlines the fact that it's
+      not clear whether a particular outcome, like not finding something
+      on a list, is an error or is just another valid outcome. This
+      depends on the larger context of your program, and thus is not
+      something that a general purpose library can know in advance. One
+      of the advantages of error-aware return types is that they work
+      well in both situations.
+    </p><section><h1 id="encoding-errors-with-result">Encoding errors with <code>Result</code></h1><p id="idp8198800">
+        Options aren't always a sufficiently expressive way to report
+        errors. Specifically, when you encode an error as
+        <code>None</code>, there's nowhere to say anything about
+        the nature of the error.
+      </p><p id="idp8200064">
+<code>Result.t</code> is meant to address this deficiency.
+        The type is defined as follows.
+      </p><div class="rwocode"><pre><code><span class="keyword4">module</span> <span class="keyword6">Result </span><span class="keyword2">:</span> <span class="keyword4">sig</span>
+   <span class="keyword4">type</span> <span class="keyword2">(</span>'a,'b<span class="keyword2">)</span> t <span class="keyword2">=</span> <span class="keyword2">|</span> <span class="keyword6">Ok </span><span class="keyword2">of</span> 'a
+                    <span class="keyword2">|</span> <span class="keyword6">Error </span><span class="keyword2">of</span> 'b
+<span class="keyword4">end</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/result.mli">error-handling/result.mli</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8201792">
+        A <code>Result.t</code> is essentially an option augmented
+        with the ability to store other information in the error case.
+        Like <code>Some</code> and <code>None</code> for
+        options, the constructors <code>Ok</code> and
+        <code>Error</code> are promoted to the toplevel by
+        <code>Core.Std</code>. As such, we can write:
+      </p><div class="rwocode"><pre><code># <span class="keyword2">[</span> <span class="keyword6">Ok </span><span class="keyword8">3</span><span class="keyword2">;</span> <span class="keyword6">Error </span><span class="keyword7">&quot;abject failure&quot;</span><span class="keyword2">;</span> <span class="keyword6">Ok </span><span class="keyword8">4</span> <span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : (int, string) Result.t list = [Ok 3; Error &quot;abject failure&quot;; Ok 4]
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8206768">
+        without first opening the <code>Result</code> module.
+      </p></section><section><h1 id="error-and-or_error"><code>Error</code> and
+      <code>Or_error</code></h1><p id="idp8209776">
+<code>Result.t</code> gives you complete freedom to choose
+        the type of value you use to represent errors, but it's often
+        useful to standardize on an error type. Among other things, this
+        makes it easier to write utility functions to automate common
+        error handling patterns.
+      </p><p id="idp8211088">
+        But which type to choose? Is it better to represent errors as
+        strings? Some more structured representation like XML? Or
+        something else entirely?
+      </p><p id="idp8211664">
+        Core's answer to this question is the <code>Error.t</code>
+        type, which tries to forge a good compromise between efficiency,
+        convenience, and control over the presentation of errors.
+      </p><p id="idp8212832">
+        It might not be obvious at first why efficiency is an issue at
+        all. But generating error messages is an expensive business. An
+        ASCII representation of a value can be quite time-consuming to
+        construct, particularly if it includes expensive-to-convert
+        numerical data.
+      </p><p id="idp8213552">
+<code>Error</code> gets around this issue through
+        laziness. In particular, an <code>Error.t</code> allows
+        you to put off generation of the error string until and unless
+        you need it, which means a lot of the time you never have to
+        construct it at all. You can of course construct an error
+        directly from a string:
+      </p><div class="rwocode"><pre><code># <span class="keyword5">Error.</span>of_string <span class="keyword7">&quot;something went wrong&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : Error.t = something went wrong
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 5) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8216240">
+        But you can also construct an <code>Error.t</code> from a
+        <span><em>thunk</em></span>, <span><em>i.e.</em></span>, a
+        function that takes a single argument of type
+        <code>unit</code>.
+      </p><div class="rwocode"><pre><code># <span class="keyword5">Error.</span>of_thunk <span class="keyword2">(</span><span class="keyword1">fun</span> <span class="keyword2">(</span><span class="keyword2">)</span> -<span class="keyword2">&gt;</span>
+    sprintf <span class="keyword7">&quot;something went wrong: %f&quot;</span> <span class="keyword8">32</span>.<span class="keyword8">3343</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : Error.t = something went wrong: 32.334300
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 6) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8219424">
+        In this case, we can benefit from the laziness of
+        <code>Error</code>, since the thunk won't be called unless
+        the <code>Error.t</code> is converted to a string.
+      </p><p id="idp8221136">
+        The most common way to create <code>Error.t</code>s is
+        using <span><em>s-expressions</em></span>. An s-expression is a
+        balanced parenthetical expression where the leaves of the
+        expressions are strings. Thus, the following is a simple
+        s-expression:
+      </p><div class="rwocode"><pre><code><div class="highlight"><span class="p">(</span><span class="nf">This</span> <span class="p">(</span><span class="nf">is</span> <span class="nv">an</span><span class="p">)</span> <span class="p">(</span><span class="nf">s</span> <span class="nv">expression</span><span class="p">))</span>
+</div></code></pre><div class="rwocodeinfo">S-expression ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/sexpr.scm">error-handling/sexpr.scm</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8223344">
+        S-expressions are supported by the <code>sexplib</code>
+        package that is distributed with Core, and is the most common
+        serialization format used in Core. Indeed, most types in Core
+        come with built-in s-expression converters. Here's an example of
+        creating an error using the sexp converter for times,
+        <code>Time.sexp_of_t</code>.
+      </p><div class="rwocode"><pre><code># <span class="keyword5">Error.</span>create <span class="keyword7">&quot;Something failed a long time ago&quot;</span> <span class="keyword5">Time.</span>epoch <span class="keyword5">Time.</span>sexp_of_t<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : Error.t =
+Something failed a long time ago: (1970-01-01 01:00:00.000000+01:00)
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 7) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8225984">
+        Note that the time isn't actually serialized into an
+        s-expression until the error is printed out. We're not
+        restricted to doing this kind of error reporting with built-in
+        types. This will be discussed in more detail in
+        <a href="data-serialization-with-s-expressions.html">Chapter 17, <i>Data Serialization with S-Expressions</i></a>,
+        but Sexplib comes with a language extension that can
+        autogenerate sexp-converters for newly generated types, as shown
+        below.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> custom_to_sexp <span class="keyword2">=</span> <span class="keyword1">&lt;:sexp_of&lt;</span><span class="keyword3">float</span> <span class="keyword2">*</span> <span class="keyword3">string</span> <span class="keyword3">list</span> <span class="keyword2">*</span> <span class="keyword3">int</span><span class="keyword1">&gt;&gt;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val custom_to_sexp : float * string list * int -&gt; Sexp.t = &lt;fun&gt;
+</div># custom_to_sexp <span class="keyword2">(</span><span class="keyword8">3</span>.<span class="keyword8">5</span>, <span class="keyword2">[</span><span class="keyword7">&quot;a&quot;</span><span class="keyword2">;</span><span class="keyword7">&quot;b&quot;</span><span class="keyword2">;</span><span class="keyword7">&quot;c&quot;</span><span class="keyword2">]</span>, <span class="keyword8">6034</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : Sexp.t = (3.5 (a b c) 6034)
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 8) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8228016">
+        We can use this same idiom for generating an error.
+      </p><div class="rwocode"><pre><code># <span class="keyword5">Error.</span>create <span class="keyword7">&quot;Something went terribly wrong&quot;</span>
+    <span class="keyword2">(</span><span class="keyword8">3</span>.<span class="keyword8">5</span>, <span class="keyword2">[</span><span class="keyword7">&quot;a&quot;</span><span class="keyword2">;</span><span class="keyword7">&quot;b&quot;</span><span class="keyword2">;</span><span class="keyword7">&quot;c&quot;</span><span class="keyword2">]</span>, <span class="keyword8">6034</span><span class="keyword2">)</span>
+    <span class="keyword1">&lt;:sexp_of&lt;</span><span class="keyword3">float</span> <span class="keyword2">*</span> <span class="keyword3">string</span> <span class="keyword3">list</span> <span class="keyword2">*</span> <span class="keyword3">int</span><span class="keyword1">&gt;&gt;</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : Error.t = Something went terribly wrong: (3.5(a b c)6034)
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 9) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8229184">
+<code>Error</code> also supports operations for
+        transforming errors. For example, it's often useful to augment
+        an error with some extra information about the context of the
+        error or to combine multiple errors together.
+        <code>Error.tag</code> and
+        <code>Error.of_list</code> fulfill these roles, as you can
+        see below.
+      </p><div class="rwocode"><pre><code># <span class="keyword5">Error.</span>tag
+    <span class="keyword2">(</span><span class="keyword5">Error.</span>of_list <span class="keyword2">[</span> <span class="keyword5">Error.</span>of_string <span class="keyword7">&quot;Your tires were slashed&quot;</span><span class="keyword2">;</span>
+                     <span class="keyword5">Error.</span>of_string <span class="keyword7">&quot;Your windshield was smashed&quot;</span> <span class="keyword2">]</span><span class="keyword2">)</span>
+    <span class="keyword7">&quot;over the weekend&quot;</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : Error.t =
+over the weekend: Your tires were slashed; Your windshield was smashed
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 10) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8232480">
+        The type <code>'a Or_error.t</code> is just a shorthand
+        for <code>('a,Error.t) Result.t</code>, and it is, after
+        <code>option</code>, the most common way of returning
+        errors in Core.
+      </p></section><section><h1 id="bind-and-other-error-handling-idioms"><code>bind</code> and other error-handling
+      idioms</h1><p id="idp8236320">
+        As you write more error handling code in OCaml, you'll discover
+        that certain patterns start to emerge. A number of these common
+        patterns have been codified by functions in modules like
+        <code>Option</code> and <code>Result</code>. One
+        particularly useful pattern is built around the function
+        <code>bind</code>, which is both an ordinary function and
+        an infix operator <code>&gt;&gt;=</code>. Here's the
+        definition of <code>bind</code> for options.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> bind option f <span class="keyword2">=</span>
+    <span class="keyword1">match</span> option <span class="keyword1">with</span>
+    <span class="keyword2">|</span> <span class="keyword6">None </span>-<span class="keyword2">&gt;</span> <span class="keyword6">None
+</span>    <span class="keyword2">|</span> <span class="keyword6">Some </span>x -<span class="keyword2">&gt;</span> f x
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val bind : 'a option -&gt; ('a -&gt; 'b option) -&gt; 'b option = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 11) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8240944">
+        As you can see, <code>bind None f</code> returns
+        <code>None</code> without calling <code>f</code>,
+        and <code>bind (Some x) f</code> returns
+        <code>f x</code>. Perhaps surprisingly,
+        <code>bind</code> can be used as a way of sequencing
+        together error-producing functions so that the first one to
+        produce an error terminates the computation. Here's a rewrite of
+        <code>compute_bounds</code> to use a nested series of
+        <code>bind</code>s.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> compute_bounds ~cmp <span class="keyword3">list</span> <span class="keyword2">=</span>
+    <span class="keyword4">let</span> sorted <span class="keyword2">=</span> <span class="keyword5">List.</span>sort ~cmp <span class="keyword3">list</span> <span class="keyword4">in</span>
+    <span class="keyword5">Option.</span>bind <span class="keyword2">(</span><span class="keyword5">List.</span>hd sorted<span class="keyword2">)</span> <span class="keyword2">(</span><span class="keyword1">fun</span> first -<span class="keyword2">&gt;</span>
+      <span class="keyword5">Option.</span>bind <span class="keyword2">(</span><span class="keyword5">List.</span>last sorted<span class="keyword2">)</span> <span class="keyword2">(</span><span class="keyword1">fun</span> last -<span class="keyword2">&gt;</span>
+        <span class="keyword6">Some </span><span class="keyword2">(</span>first,last<span class="keyword2">)</span><span class="keyword2">)</span><span class="keyword2">)</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val compute_bounds : cmp:('a -&gt; 'a -&gt; int) -&gt; 'a list -&gt; ('a * 'a) option =
+  &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 12) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8247232">
+        The above code is a little bit hard to swallow, however, on a
+        syntactic level. We can make it easier to read, and drop some of
+        the parentheses, by using the infix operator form of bind, which
+        we get access to by locally opening
+        <code>Option.Monad_infix</code>. The module is called
+        <code>Monad_infix</code> because the bind operator is part
+        of a sub-interface called <code>Monad</code>, which we'll
+        talk about more in
+        <a href="concurrent-programming-with-async.html">Chapter 18, <i>Concurrent Programming with Async</i></a>.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> compute_bounds ~cmp <span class="keyword3">list</span> <span class="keyword2">=</span>
+    <span class="keyword4">let</span> <span class="keyword1">open</span> <span class="keyword5">Option.Monad_infix </span><span class="keyword4">in</span>
+    <span class="keyword4">let</span> sorted <span class="keyword2">=</span> <span class="keyword5">List.</span>sort ~cmp <span class="keyword3">list</span> <span class="keyword4">in</span>
+    <span class="keyword5">List.</span>hd sorted   <span class="keyword1">&gt;&gt;</span><span class="keyword2">=</span> <span class="keyword1">fun</span> first -<span class="keyword2">&gt;</span>
+    <span class="keyword5">List.</span>last sorted <span class="keyword1">&gt;&gt;</span><span class="keyword2">=</span> <span class="keyword1">fun</span> last  -<span class="keyword2">&gt;</span>
+    <span class="keyword6">Some </span><span class="keyword2">(</span>first,last<span class="keyword2">)</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val compute_bounds : cmp:('a -&gt; 'a -&gt; int) -&gt; 'a list -&gt; ('a * 'a) option =
+  &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 13) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8251056">
+        This use of <code>bind</code> isn't really materially
+        better than the one we started with, and indeed, for small
+        examples like this, direct matching of options is generally
+        better than using <code>bind</code>. But for large complex
+        examples with many stages of error-handling, the bind idiom
+        becomes clearer and easier to manage.
+      </p><p id="idp8253056">
+        There are other useful idioms encoded in the functions in
+        <code>Option</code>. One example is
+        <code>Option.both</code>, which takes two optional values
+        and produces a new optional pair that is <code>None</code>
+        if either of its arguments are <code>None</code>. Using
+        <code>Option.both</code>, we can make
+        <code>compute_bounds</code> even shorter.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> compute_bounds ~cmp <span class="keyword3">list</span> <span class="keyword2">=</span>
+    <span class="keyword4">let</span> sorted <span class="keyword2">=</span> <span class="keyword5">List.</span>sort ~cmp <span class="keyword3">list</span> <span class="keyword4">in</span>
+    <span class="keyword5">Option.</span>both <span class="keyword2">(</span><span class="keyword5">List.</span>hd sorted<span class="keyword2">)</span> <span class="keyword2">(</span><span class="keyword5">List.</span>last sorted<span class="keyword2">)</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val compute_bounds : cmp:('a -&gt; 'a -&gt; int) -&gt; 'a list -&gt; ('a * 'a) option =
+  &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 14) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8258080">
+        These error-handling functions are valuable because they let you
+        express your error handling both explicitly and concisely. We've
+        only discussed these functions in the context of the
+        <code>Option</code> module, but similar functionality is
+        available in both <code>Result</code> and
+        <code>Or_error</code>.
+      </p></section></section><section><h1 id="exceptions">Exceptions</h1><p id="idp8261792">
+      Exceptions in OCaml are not that different from exceptions in many
+      other languages, like Java, C# and Python. Exceptions are a way to
+      terminate a computation and report an error, while providing a
+      mechanism to catch and handle (and possibly recover from)
+      exceptions that are triggered by sub-computations.
+    </p><p id="idp8262528">
+      You can trigger an exception by, for example, dividing an integer
+      by zero:
+    </p><div class="rwocode"><pre><code># <span class="keyword8">3</span> / <span class="keyword8">0</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Exception: Division_by_zero.
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 15) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8263728">
+      And an exception can terminate a computation even if it happens
+      nested somewhere deep within it.
+    </p><div class="rwocode"><pre><code># <span class="keyword5">List.</span>map ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> x -<span class="keyword2">&gt;</span> <span class="keyword8">100</span> / x<span class="keyword2">)</span> <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword8">0</span><span class="keyword2">;</span><span class="keyword8">4</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Exception: Division_by_zero.
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 16) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8264944">
+      If we put a <code>printf</code> in the middle of the
+      computation, we can see that <code>List.map</code> is
+      interrupted part way through it's execution, never getting to the
+      end of the list.
+    </p><div class="rwocode"><pre><code># <span class="keyword5">List.</span>map ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> x -<span class="keyword2">&gt;</span> printf <span class="keyword7">&quot;%d\n%!&quot;</span> x<span class="keyword2">;</span> <span class="keyword8">100</span> / x<span class="keyword2">)</span> <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword8">0</span><span class="keyword2">;</span><span class="keyword8">4</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"><br/>1
+3
+0
+Exception: Division_by_zero.
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 17) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8267472">
+      In addition to built-in exceptions like
+      <code>Divide_by_zero</code>, OCaml lets you define your own.
+    </p><div class="rwocode"><pre><code># <span class="keyword1">exception</span> <span class="keyword6">Key_not_found </span><span class="keyword2">of</span> <span class="keyword3">string</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">exception Key_not_found of string
+</div># <span class="keyword1">raise</span> <span class="keyword2">(</span><span class="keyword6">Key_not_found </span><span class="keyword7">&quot;a&quot;</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Exception: Key_not_found(&quot;a&quot;).
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 18) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8269184">
+      Exceptions are ordinary values, and can be manipulated just like
+      other OCaml values, as you can see below.
+    </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> exceptions <span class="keyword2">=</span> <span class="keyword2">[</span> Not_found<span class="keyword2">;</span> Division_by_zero<span class="keyword2">;</span> <span class="keyword6">Key_not_found </span><span class="keyword7">&quot;b&quot;</span> <span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val exceptions : exn list = [Not_found; Division_by_zero; Key_not_found(&quot;b&quot;)]
+</div># <span class="keyword5">List.</span>filter exceptions  ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">function</span>
+    <span class="keyword2">|</span> <span class="keyword6">Key_not_found </span><span class="keyword8">_</span> <span class="keyword2">|</span> <span class="keyword6">Not_found </span>-<span class="keyword2">&gt;</span> true
+    <span class="keyword2">|</span> <span class="keyword8">_</span> -<span class="keyword2">&gt;</span> false<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : exn list = [Not_found; Key_not_found(&quot;b&quot;)]
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 19) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8270416">
+      All exceptions are of type <code>exn</code>, and that type
+      is a similar to a variant type of the kind we encountered in
+      <a href="variants.html">Chapter 6, <i>Variants</i></a>. The biggest difference is
+      that it is an open type, meaning that new tags can be added at any
+      time, by any part of the program. As such, you can never have a
+      match on an exception that is guaranteed to exhaustively list all
+      values.
+    </p><p id="idp8272304">
+      Here's an example of a function for looking up a key in an
+      <span><em>association list</em></span>, <span><em>i.e.</em></span> a
+      list of key/value pairs which uses this newly-defined exception:
+    </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword4">rec</span> find_exn alist key <span class="keyword2">=</span> <span class="keyword1">match</span> alist <span class="keyword1">with</span>
+    <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span> -<span class="keyword2">&gt;</span> <span class="keyword1">raise</span> <span class="keyword2">(</span><span class="keyword6">Key_not_found </span>key<span class="keyword2">)</span>
+    <span class="keyword2">|</span> <span class="keyword2">(</span>key',data<span class="keyword2">)</span> <span class="keyword2">:</span><span class="keyword2">:</span> tl -<span class="keyword2">&gt;</span> <span class="keyword1">if</span> key <span class="keyword2">=</span> key' <span class="keyword1">then</span> data <span class="keyword1">else</span> find_exn tl key
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val find_exn : (string * 'a) list -&gt; string -&gt; 'a = &lt;fun&gt;
+</div># <span class="keyword4">let</span> alist <span class="keyword2">=</span> <span class="keyword2">[</span><span class="keyword2">(</span><span class="keyword7">&quot;a&quot;</span>,<span class="keyword8">1</span><span class="keyword2">)</span><span class="keyword2">;</span> <span class="keyword2">(</span><span class="keyword7">&quot;b&quot;</span>,<span class="keyword8">2</span><span class="keyword2">)</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val alist : (string * int) list = [(&quot;a&quot;, 1); (&quot;b&quot;, 2)]
+</div># find_exn alist <span class="keyword7">&quot;a&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 1
+</div># find_exn alist <span class="keyword7">&quot;c&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Exception: Key_not_found(&quot;c&quot;).
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 20) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8274352">
+      Note that we named the function <code>find_exn</code> to
+      warn the user that the function routinely throws exceptions, a
+      convention that is used heavily in Core.
+    </p><p id="idp8275504">
+      In the above example, <code>raise</code> throws the
+      exception, thus terminating the computation. The type of raise is
+      a bit surprising when you first see it:
+    </p><div class="rwocode"><pre><code># <span class="keyword1">raise</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : exn -&gt; 'a = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 21) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8277360">
+      The return type of <code>'a</code> suggests that
+      <code>raise</code> could return a value of any type. That
+      seems impossible, and it is. Really, <code>raise</code> has
+      this type because it never returns at all. This behavior isn't
+      restricted to functions like <code>raise</code> that
+      terminate by throwing exceptions. Here's another example of a
+      function that doesn't return a value.
+    </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword4">rec</span> forever <span class="keyword2">(</span><span class="keyword2">)</span> <span class="keyword2">=</span> forever <span class="keyword2">(</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val forever : unit -&gt; 'a = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 22) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8281312">
+<code>forever</code> doesn't return a value for a different
+      reason: it is an infinite loop.
+    </p><p id="idp8282416">
+      This all matters because it means that the return type of
+      <code>raise</code> can be whatever it needs to be to fit in
+      to the context it is called in. Thus, the type system will let us
+      throw an exception anywhere in a program.
+    </p><aside class="note"><h1>
+    Declaring exceptions using with sexp
+</h1><p id="idp8284944">
+      OCaml can't always generate a useful textual representation of an
+      exception. For example:
+    </p><div class="rwocode"><pre><code># <span class="keyword1">exception</span> <span class="keyword6">Wrong_date </span><span class="keyword2">of</span> <span class="keyword5">Date.</span>t<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">exception Wrong_date of Date.t
+</div># <span class="keyword6">Wrong_date </span><span class="keyword2">(</span><span class="keyword5">Date.</span>of_string <span class="keyword7">&quot;2011-02-23&quot;</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : exn = Wrong_date(_)
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 23) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8286160">
+      But if we declare the exception using <code>with sexp</code>
+      (and the constituent types have sexp converters), we'll get
+      something with more information.
+    </p><div class="rwocode"><pre><code># <span class="keyword1">exception</span> <span class="keyword6">Wrong_date </span><span class="keyword2">of</span> <span class="keyword5">Date.</span>t <span class="keyword1">with</span> sexp<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">exception Wrong_date of Date.t
+</div># <span class="keyword6">Wrong_date </span><span class="keyword2">(</span><span class="keyword5">Date.</span>of_string <span class="keyword7">&quot;2011-02-23&quot;</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : exn = (//toplevel//.Wrong_date 2011-02-23)
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 24) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8288000">
+      The period in front of <code>Wrong_date</code> is there
+      because the representation generated by
+      <code>with sexp</code> includes the full module path of the
+      module where the exception in question is defined. In this case,
+      since we've declared the exception at the toplevel, that module
+      path is trivial.
+    </p><p id="idp8289936">
+      This is all part of the support for s-expressions provided by the
+      Sexplib library and syntax-extension, which is described in more
+      detail in
+      <a href="data-serialization-with-s-expressions.html">Chapter 17, <i>Data Serialization with S-Expressions</i></a>.
+    </p></aside><section><h1 id="helper-functions-for-throwing-exceptions">Helper functions for throwing exceptions</h1><p id="idp8292000">
+        OCaml and Core provide a number of helper functions to simplify
+        the task of throwing exceptions. The simplest one is
+        <code>failwith</code>, which could be defined as follows:
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> failwith msg <span class="keyword2">=</span> <span class="keyword1">raise</span> <span class="keyword2">(</span><span class="keyword6">Failure </span>msg<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val failwith : string -&gt; 'a = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 25) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8293872">
+        There are several other useful functions for raising exceptions,
+        which can be found in the API documentation for the
+        <code>Common</code> and <code>Exn</code> modules in
+        Core.
+      </p><p id="idp8295664">
+        Another important way of throwing an exception is the
+        <code>assert</code> directive. <code>assert</code>
+        is used for situations where a violation of the condition in
+        question indicates a bug. Consider the following piece of code
+        for zipping together two lists.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> merge_lists xs ys ~f <span class="keyword2">=</span>
+    <span class="keyword1">if</span> <span class="keyword5">List.</span>length xs <span class="keyword2">&lt;</span><span class="keyword2">&gt;</span> <span class="keyword5">List.</span>length ys <span class="keyword1">then</span> <span class="keyword6">None
+</span>    <span class="keyword1">else</span>
+      <span class="keyword4">let</span> <span class="keyword4">rec</span> loop xs ys <span class="keyword2">=</span>
+        <span class="keyword1">match</span> xs,ys <span class="keyword1">with</span>
+        <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span>,<span class="keyword2">[</span><span class="keyword2">]</span> -<span class="keyword2">&gt;</span> <span class="keyword2">[</span><span class="keyword2">]</span>
+        <span class="keyword2">|</span> x<span class="keyword2">:</span><span class="keyword2">:</span>xs, y<span class="keyword2">:</span><span class="keyword2">:</span>ys -<span class="keyword2">&gt;</span> f x y <span class="keyword2">:</span><span class="keyword2">:</span> loop xs ys
+        <span class="keyword2">|</span> <span class="keyword8">_</span> -<span class="keyword2">&gt;</span> <span class="keyword1">assert</span> false
+      <span class="keyword4">in</span>
+      <span class="keyword6">Some </span><span class="keyword2">(</span>loop xs ys<span class="keyword2">)</span>
+   <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val merge_lists : 'a list -&gt; 'b list -&gt; f:('a -&gt; 'b -&gt; 'c) -&gt; 'c list option =
+  &lt;fun&gt;
+</div># merge_lists <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">]</span> <span class="keyword2">[</span><span class="keyword8">-1</span><span class="keyword2">;</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">]</span> ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword2">+</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list option = Some [0; 3; 5]
+</div># merge_lists <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">]</span> <span class="keyword2">[</span><span class="keyword8">-1</span><span class="keyword2">;</span><span class="keyword8">1</span><span class="keyword2">]</span> ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword2">+</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list option = None
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 26) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8298288">
+        Here we use <code>assert false</code>, which means that
+        the assert is guaranteed to trigger. In general, one can put an
+        arbitrary condition in the assertion.
+      </p><p id="idp8299456">
+        In this case, the assert can never be triggered because we have
+        a check that makes sure that the lists are of the same length
+        before we call <code>loop</code>. If we change the code so
+        that we drop this test, then we can trigger the assert.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> merge_lists xs ys ~f <span class="keyword2">=</span>
+    <span class="keyword4">let</span> <span class="keyword4">rec</span> loop xs ys <span class="keyword2">=</span>
+      <span class="keyword1">match</span> xs,ys <span class="keyword1">with</span>
+      <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span>,<span class="keyword2">[</span><span class="keyword2">]</span> -<span class="keyword2">&gt;</span> <span class="keyword2">[</span><span class="keyword2">]</span>
+      <span class="keyword2">|</span> x<span class="keyword2">:</span><span class="keyword2">:</span>xs, y<span class="keyword2">:</span><span class="keyword2">:</span>ys -<span class="keyword2">&gt;</span> f x y <span class="keyword2">:</span><span class="keyword2">:</span> loop xs ys
+      <span class="keyword2">|</span> <span class="keyword8">_</span> -<span class="keyword2">&gt;</span> <span class="keyword1">assert</span> false
+    <span class="keyword4">in</span>
+    loop xs ys
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val merge_lists : 'a list -&gt; 'b list -&gt; f:('a -&gt; 'b -&gt; 'c) -&gt; 'c list = &lt;fun&gt;
+</div># merge_lists <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">]</span> <span class="keyword2">[</span><span class="keyword8">-1</span><span class="keyword2">]</span> ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword2">+</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Exception: (Assert_failure //toplevel// 5 13).
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 27) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8301456">
+        This shows what's special about <code>assert</code>, which
+        is that it captures the line number and character offset of the
+        source location from which the assertion was made.
+      </p></section><section><h1 id="exception-handlers">Exception handlers</h1><p id="idp8303632">
+        So far, we've only seen exceptions fully terminate the execution
+        of a computation. But often, we want a program to be able to
+        respond to and recover from an exception. This is achieved
+        through the use of <span><em>exception handlers</em></span>.
+      </p><p id="idp8304656">
+        In OCaml, an exception handler is declared using a
+        <code>try</code>/<code>with</code> statement. Here's
+        the basic syntax.
+      </p><div class="rwocode"><pre><code><div class="highlight">try <span class="nt">&lt;expr&gt;</span> with
+| <span class="nt">&lt;pat1&gt;</span> -&gt; <span class="nt">&lt;expr1&gt;</span>
+| <span class="nt">&lt;pat2&gt;</span> -&gt; <span class="nt">&lt;expr2&gt;</span>
+...
+</div></code></pre><div class="rwocodeinfo">Syntax ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/try_with.syntax">error-handling/try_with.syntax</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8307072">
+        A <code>try/with</code> clause first evaluates its body,
+        <code>&lt;expr&gt;</code>. If no exception is thrown, then
+        the result of evaluating the body is what the entire
+        <code>try/with</code> clause evaluates to.
+      </p><p id="idp8309440">
+        But if the evaluation of the body throws an exception, then the
+        exception will be fed to the pattern match statements following
+        the <code>with</code>. If the exception matches a pattern,
+        then we consider the exception caught, and the
+        <code>try/with</code> clause evaluates to the expression
+        on the right-hand side of the matching pattern.
+      </p><p id="idp8311472">
+        Otherwise, the original exception continues up the stack of
+        function calls, to be handled by the next outer exception
+        handler. If the exception is never caught, it terminates the
+        program.
+      </p></section><section><h1 id="cleaning-up-in-the-presence-of-exceptions">Cleaning up in the presence of exceptions</h1><p id="idp8313104">
+        One headache with exceptions is that they can terminate your
+        execution at unexpected places, leaving your program in an
+        awkward state. Consider the following function for loading a
+        file full of reminders, formatted as s-expressions.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> reminders_of_sexp <span class="keyword2">=</span>
+    <span class="keyword1">&lt;:of_sexp&lt;</span><span class="keyword2">(</span><span class="keyword5">Time.</span>t <span class="keyword2">*</span> <span class="keyword3">string</span><span class="keyword2">)</span> <span class="keyword3">list</span><span class="keyword1">&gt;&gt;</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val reminders_of_sexp : Sexp.t -&gt; (Time.t * string) list = &lt;fun&gt;
+</div># <span class="keyword4">let</span> load_reminders filename <span class="keyword2">=</span>
+    <span class="keyword4">let</span> inc <span class="keyword2">=</span> <span class="keyword5">In_channel.</span>create filename <span class="keyword4">in</span>
+    <span class="keyword4">let</span> reminders <span class="keyword2">=</span> reminders_of_sexp <span class="keyword2">(</span><span class="keyword5">Sexp.</span>input_sexp inc<span class="keyword2">)</span> <span class="keyword4">in</span>
+    <span class="keyword5">In_channel.</span>close inc<span class="keyword2">;</span>
+    reminders
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val load_reminders : string -&gt; (Time.t * string) list = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 28) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8314480">
+        The problem with this code is that the function that loads the
+        s-expression and parses it into a list of
+        <code>Time.t</code>/<code>string</code> pairs might
+        throw an exception if the file in question is malformed.
+        Unfortunately, that means that the
+        <code>In_channel.t</code> that was opened will never be
+        closed, leading to a file-descriptor leak.
+      </p><p id="idp8317136">
+        We can fix this using Core's <code>protect</code>
+        function. The purpose of <code>protect</code> is to ensure
+        that the <code>finally</code> thunk will be called when
+        <code>f</code> exits, whether it exits normally or with an
+        exception. This is similar to the <code>try/finally</code>
+        construct available in many programming languages, but it is
+        implemented in a library, rather than being a built-in
+        primitive. Here's how it could be used to fix
+        <code>load_reminders</code>.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> load_reminders filename <span class="keyword2">=</span>
+    <span class="keyword4">let</span> inc <span class="keyword2">=</span> <span class="keyword5">In_channel.</span>create filename <span class="keyword4">in</span>
+    protect ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> <span class="keyword2">(</span><span class="keyword2">)</span> -<span class="keyword2">&gt;</span> reminders_of_sexp <span class="keyword2">(</span><span class="keyword5">Sexp.</span>input_sexp inc<span class="keyword2">)</span><span class="keyword2">)</span>
+      ~finally<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> <span class="keyword2">(</span><span class="keyword2">)</span> -<span class="keyword2">&gt;</span> <span class="keyword5">In_channel.</span>close inc<span class="keyword2">)</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val load_reminders : string -&gt; (Time.t * string) list = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 29) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8322272">
+        This is a common enough problem that
+        <code>In_channel</code> has a function called
+        <code>with_file</code> that automates this pattern.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> reminders_of_sexp filename <span class="keyword2">=</span>
+    <span class="keyword5">In_channel.</span>with_file filename ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> inc -<span class="keyword2">&gt;</span>
+      reminders_of_sexp <span class="keyword2">(</span><span class="keyword5">Sexp.</span>input_sexp inc<span class="keyword2">)</span><span class="keyword2">)</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val reminders_of_sexp : string -&gt; (Time.t * string) list = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 30) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8324608">
+<code>In_channel.with_file</code> is actually built on top
+        of <code>protect</code> so that it can clean up after
+        itself in the presence of exceptions.
+      </p></section><section><h1 id="catching-specific-exceptions">Catching specific exceptions</h1><p id="idp8327344">
+        OCaml's exception-handling system allows you to tune your
+        error-recovery logic to the particular error that was thrown.
+        For example, <code>List.find_exn</code> throws
+        <code>Not_found</code> when the element in question can't
+        be found. Let's look at an example of how you could take
+        advantage of this. In particular, consider the following
+        function
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> lookup_weight ~compute_weight alist key <span class="keyword2">=</span>
+    <span class="keyword1">try</span>
+      <span class="keyword4">let</span> data <span class="keyword2">=</span> <span class="keyword5">List.</span><span class="keyword5">Assoc.</span>find_exn alist key <span class="keyword4">in</span>
+      compute_weight data
+    <span class="keyword1">with</span>
+      <span class="keyword6">Not_found </span>-<span class="keyword2">&gt;</span> <span class="keyword8">0</span>. <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val lookup_weight :
+  compute_weight:('a -&gt; float) -&gt; ('b, 'a) List.Assoc.t -&gt; 'b -&gt; float =
+  &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 31) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8330096">
+        As you can see from the type, <code>lookup_weight</code>
+        takes an association list, a key for looking up a corresponding
+        value in that list, and a function for computing a
+        floating-point weight from the looked-up value. If no value is
+        found, then a weight of <code>0.</code> should be
+        returned.
+      </p><p id="idp8331984">
+        The use of exceptions in this code, however, presents some
+        problems. In particular, what happens if
+        <code>compute_weight</code> throws an exception? Ideally,
+        <code>lookup_weight</code> should propagate that exception
+        on, but if the exception happens to be
+        <code>Not_found</code>, then that's not what will happen:
+      </p><div class="rwocode"><pre><code># lookup_weight ~compute_weight<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> <span class="keyword8">_</span> -<span class="keyword2">&gt;</span> <span class="keyword1">raise</span> Not_found<span class="keyword2">)</span>
+    <span class="keyword2">[</span><span class="keyword7">&quot;a&quot;</span>,<span class="keyword8">3</span><span class="keyword2">;</span> <span class="keyword7">&quot;b&quot;</span>,<span class="keyword8">4</span><span class="keyword2">]</span> <span class="keyword7">&quot;a&quot;</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : float = 0.
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 32) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8335200">
+        This kind of problem is hard to detect in advance, because the
+        type system doesn't tell you what exceptions a given function
+        might throw. For this reason, it's generally better to avoid
+        relying on the identity of the exception to determine the nature
+        of a failure. A better approach is to narrow the scope of the
+        exception handler, so that when it fires it's very clear what
+        part of the code failed.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> lookup_weight ~compute_weight alist key <span class="keyword2">=</span>
+    <span class="keyword1">match</span>
+      <span class="keyword1">try</span> <span class="keyword6">Some </span><span class="keyword2">(</span><span class="keyword5">List.</span><span class="keyword5">Assoc.</span>find_exn alist key<span class="keyword2">)</span>
+      <span class="keyword1">with</span> <span class="keyword8">_</span> -<span class="keyword2">&gt;</span> <span class="keyword6">None
+</span>    <span class="keyword1">with</span>
+    <span class="keyword2">|</span> <span class="keyword6">None </span>-<span class="keyword2">&gt;</span> <span class="keyword8">0</span>.
+    <span class="keyword2">|</span> <span class="keyword6">Some </span>data -<span class="keyword2">&gt;</span> compute_weight data <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val lookup_weight :
+  compute_weight:('a -&gt; float) -&gt; ('b, 'a) List.Assoc.t -&gt; 'b -&gt; float =
+  &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 33) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8336768">
+        At which point, it makes sense to simply use the non-exception
+        throwing function, <code>List.Assoc.find</code>, instead.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> lookup_weight ~compute_weight alist key <span class="keyword2">=</span>
+    <span class="keyword1">match</span> <span class="keyword5">List.</span><span class="keyword5">Assoc.</span>find alist key <span class="keyword1">with</span>
+    <span class="keyword2">|</span> <span class="keyword6">None </span>-<span class="keyword2">&gt;</span> <span class="keyword8">0</span>.
+    <span class="keyword2">|</span> <span class="keyword6">Some </span>data -<span class="keyword2">&gt;</span> compute_weight data <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val lookup_weight :
+  compute_weight:('a -&gt; float) -&gt; ('b, 'a) List.Assoc.t -&gt; 'b -&gt; float =
+  &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 34) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></section><section><h1 id="backtraces">Backtraces</h1><p id="idp8339600">
+        A big part of the value of exceptions is that they provide
+        useful debugging information in the form of a stack backtrace.
+        Consider the following simple program.
+      </p><div class="rwocode"><pre><code><span class="keyword1">open</span> <span class="keyword5">Core.Std
+</span><span class="keyword1">exception</span> <span class="keyword6">Empty_list
+</span>
+<span class="keyword4">let</span> list_max <span class="keyword2">=</span> <span class="keyword1">function</span>
+  <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span> -<span class="keyword2">&gt;</span> <span class="keyword1">raise</span> <span class="keyword6">Empty_list
+</span>  <span class="keyword2">|</span> hd <span class="keyword2">:</span><span class="keyword2">:</span> tl -<span class="keyword2">&gt;</span> <span class="keyword5">List.</span>fold tl ~init<span class="keyword2">:</span>hd ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword5">Int.</span>max<span class="keyword2">)</span>
+
+<span class="keyword4">let</span> <span class="keyword2">(</span><span class="keyword2">)</span> <span class="keyword2">=</span>
+  printf <span class="keyword7">&quot;%d\n&quot;</span> <span class="keyword2">(</span>list_max <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">]</span><span class="keyword2">)</span><span class="keyword2">;</span>
+  printf <span class="keyword7">&quot;%d\n&quot;</span> <span class="keyword2">(</span>list_max <span class="keyword2">[</span><span class="keyword2">]</span><span class="keyword2">)</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/blow_up.ml">error-handling/blow_up.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8340816">
+        If we build and run this program, we'll get a stack backtrace
+        that will give you some information about where the error
+        occurred, and the stack of function calls that were in place at
+        the time of the error.
+      </p><div class="rwocode"><pre><code><div class="highlight"><span class="gp">$</span> corebuild blow_up.byte
+</div><div class="highlight"><span class="gp">$</span> ./blow_up.byte
+</div><div class="rwocodeout">3</div><div class="rwocodeout">Fatal error: exception Blow_up.Empty_list</div><div class="rwocodeout">Raised at file &quot;blow_up.ml&quot;, line 5, characters 16-26</div><div class="rwocodeout">Called from file &quot;blow_up.ml&quot;, line 10, characters 17-28</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/build_blow_up.out">error-handling/build_blow_up.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8342160">
+        You can also capture a backtrace within your program by calling
+        <code>Exn.backtrace</code>, which returns the backtrace of
+        the most recently thrown exception. This is useful for reporting
+        detailed information on errors that did not cause your program
+        to fail.
+      </p><p id="idp8343488">
+        This works well if you have backtraces enabled, but that isn't
+        always the case. In fact, by default, OCaml has backtraces
+        turned off, and even if you have them turned on at runtime, you
+        can't get backtraces unless you have compiled with debugging
+        symbols. Core reverses the default, so if you're linking in
+        Core, you will have backtraces enabled at runtime.
+      </p><p id="idp8344304">
+        Even using Core and compiling with debugging symbols, you can
+        turn backtraces off by setting the
+        <code>OCAMLRUNPARAM</code> environment variable to be
+        empty.
+      </p><div class="rwocode"><pre><code><div class="highlight"><span class="gp">$</span> corebuild blow_up.byte
+</div><div class="highlight"><span class="gp">$</span> <span class="nv">OCAMLRUNPARAM</span><span class="o">=</span> ./blow_up.byte
+</div><div class="rwocodeout">3</div><div class="rwocodeout">Fatal error: exception Blow_up.Empty_list</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/build_blow_up_notrace.out">error-handling/build_blow_up_notrace.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8346160">
+        The resulting error message is considerably less informative.
+        You can also turn backtraces off in your code by calling
+        <code>Backtrace.Exn.set_recording false</code>.
+      </p><p id="idp8347328">
+        There is a legitimate reasons to run without backtraces: speed.
+        OCaml's exceptions are fairly fast, but they're even faster
+        still if you disable backtraces. Here's a simple benchmark that
+        shows the effect, using the <code>core_bench</code>
+        package.
+      </p><div class="rwocode"><pre><code><span class="keyword1">open</span> <span class="keyword5">Core.Std
+</span><span class="keyword1">open</span> <span class="keyword5">Core_bench.Std
+</span>
+<span class="keyword4">let</span> simple_computation <span class="keyword2">(</span><span class="keyword2">)</span> <span class="keyword2">=</span>
+  <span class="keyword5">List.</span>range <span class="keyword8">0</span> <span class="keyword8">10</span>
+  <span class="keyword2">|</span><span class="keyword2">&gt;</span> <span class="keyword5">List.</span>fold ~init<span class="keyword2">:</span><span class="keyword8">0</span> ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> sum x -<span class="keyword2">&gt;</span> sum <span class="keyword2">+</span> x <span class="keyword2">*</span> x<span class="keyword2">)</span>
+  <span class="keyword2">|</span><span class="keyword2">&gt;</span> ignore
+
+<span class="keyword4">let</span> simple_with_handler <span class="keyword2">(</span><span class="keyword2">)</span> <span class="keyword2">=</span>
+  <span class="keyword1">try</span> simple_computation <span class="keyword2">(</span><span class="keyword2">)</span> <span class="keyword1">with</span> <span class="keyword6">Exit </span>-<span class="keyword2">&gt;</span> <span class="keyword2">(</span><span class="keyword2">)</span>
+
+<span class="keyword4">let</span> end_with_exn <span class="keyword2">(</span><span class="keyword2">)</span> <span class="keyword2">=</span>
+  <span class="keyword1">try</span>
+    simple_computation <span class="keyword2">(</span><span class="keyword2">)</span><span class="keyword2">;</span>
+    <span class="keyword1">raise</span> <span class="keyword6">Exit
+</span>  <span class="keyword1">with</span> <span class="keyword6">Exit </span>-<span class="keyword2">&gt;</span> <span class="keyword2">(</span><span class="keyword2">)</span>
+
+<span class="keyword4">let</span> <span class="keyword2">(</span><span class="keyword2">)</span> <span class="keyword2">=</span>
+  <span class="keyword2">[</span> <span class="keyword5">Bench.</span><span class="keyword5">Test.</span>create ~name<span class="keyword2">:</span><span class="keyword7">&quot;simple computation&quot;</span>
+      <span class="keyword2">(</span><span class="keyword1">fun</span> <span class="keyword2">(</span><span class="keyword2">)</span> -<span class="keyword2">&gt;</span> simple_computation <span class="keyword2">(</span><span class="keyword2">)</span><span class="keyword2">)</span><span class="keyword2">;</span>
+    <span class="keyword5">Bench.</span><span class="keyword5">Test.</span>create ~name<span class="keyword2">:</span><span class="keyword7">&quot;simple computation w/handler&quot;</span>
+      <span class="keyword2">(</span><span class="keyword1">fun</span> <span class="keyword2">(</span><span class="keyword2">)</span> -<span class="keyword2">&gt;</span> simple_with_handler <span class="keyword2">(</span><span class="keyword2">)</span><span class="keyword2">)</span><span class="keyword2">;</span>
+    <span class="keyword5">Bench.</span><span class="keyword5">Test.</span>create ~name<span class="keyword2">:</span><span class="keyword7">&quot;end with exn&quot;</span>
+      <span class="keyword2">(</span><span class="keyword1">fun</span> <span class="keyword2">(</span><span class="keyword2">)</span> -<span class="keyword2">&gt;</span> end_with_exn <span class="keyword2">(</span><span class="keyword2">)</span><span class="keyword2">)</span><span class="keyword2">;</span>
+  <span class="keyword2">]</span>
+  <span class="keyword2">|</span><span class="keyword2">&gt;</span> <span class="keyword5">Bench.</span>make_command
+  <span class="keyword2">|</span><span class="keyword2">&gt;</span> <span class="keyword5">Command.</span>run</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/exn_cost.ml">error-handling/exn_cost.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8349232">
+        We're testing three cases here: a simple computation with no
+        exceptions; the same computation with an exception handler but
+        no thrown exceptions; and finally the same computation where we
+        use the exception to do the control flow back to the caller.
+      </p><p id="idp8349920">
+        If we run this with stacktraces on, the benchmark results look
+        like this.
+      </p><div class="rwocode"><pre><code><div class="highlight"><span class="gp">$</span> corebuild -pkg core_bench exn_cost.native
+</div><div class="highlight"><span class="gp">$</span> ./exn_cost.native cycles
+</div><div class="rwocodeout">Estimated testing time 30s (change using -quota SECS).</div><div class="rwocodeout">┌──────────────────────────────┬────────┬───────────┬──────────┐</div><div class="rwocodeout">│ Name                         │ Cycles │ Time (ns) │ % of max │</div><div class="rwocodeout">├──────────────────────────────┼────────┼───────────┼──────────┤</div><div class="rwocodeout">│ simple computation           │    268 │       112 │    76.04 │</div><div class="rwocodeout">│ simple computation w/handler │    297 │       124 │    84.32 │</div><div class="rwocodeout">│ end with exn                 │    352 │       147 │   100.00 │</div><div class="rwocodeout">└──────────────────────────────┴────────┴───────────┴──────────┘</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/run_exn_cost.out">error-handling/run_exn_cost.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8351040">
+        Here, we see that we lose something like 20 cycles to adding an
+        exception handler, and 30 more to actually throwing and catching
+        an exception. If we turn backtraces off, then the results look
+        like this.
+      </p><div class="rwocode"><pre><code><div class="highlight"><span class="gp">$</span> <span class="nv">OCAMLRUNPARAM</span><span class="o">=</span> ./exn_cost.native cycles
+</div><div class="rwocodeout">Estimated testing time 30s (change using -quota SECS).</div><div class="rwocodeout">┌──────────────────────────────┬────────┬───────────┬──────────┐</div><div class="rwocodeout">│ Name                         │ Cycles │ Time (ns) │ % of max │</div><div class="rwocodeout">├──────────────────────────────┼────────┼───────────┼──────────┤</div><div class="rwocodeout">│ simple computation           │    267 │       111 │    82.21 │</div><div class="rwocodeout">│ simple computation w/handler │    296 │       124 │    91.29 │</div><div class="rwocodeout">│ end with exn                 │    324 │       135 │   100.00 │</div><div class="rwocodeout">└──────────────────────────────┴────────┴───────────┴──────────┘</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/run_exn_cost_notrace.out">error-handling/run_exn_cost_notrace.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8352384">
+        Here, the handler costs about the same, at 20 cycles, but the
+        exception itself costs only 20, as opposed to 30 additional
+        cycles. All told, this should only matter if you're using
+        exceptions routinely as part of your flow control, which is in
+        most cases a stylistic mistake anyway.
+      </p></section><section><h1 id="from-exceptions-to-error-aware-types-and-back-again">From exceptions to error-aware types and back again</h1><p id="idp8354128">
+        Both exceptions and error-aware types are necessary parts of
+        programming in OCaml. As such, you often need to move between
+        these two worlds. Happily, Core comes with some useful helper
+        functions to help you do just that. For example, given a piece
+        of code that can throw an exception, you can capture that
+        exception into an option as follows:
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> find alist key <span class="keyword2">=</span>
+    <span class="keyword5">Option.</span>try_with <span class="keyword2">(</span><span class="keyword1">fun</span> <span class="keyword2">(</span><span class="keyword2">)</span> -<span class="keyword2">&gt;</span> find_exn alist key<span class="keyword2">)</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val find : (string * 'a) list -&gt; string -&gt; 'a option = &lt;fun&gt;
+</div># find <span class="keyword2">[</span><span class="keyword7">&quot;a&quot;</span>,<span class="keyword8">1</span><span class="keyword2">;</span> <span class="keyword7">&quot;b&quot;</span>,<span class="keyword8">2</span><span class="keyword2">]</span> <span class="keyword7">&quot;c&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int option = None
+</div># find <span class="keyword2">[</span><span class="keyword7">&quot;a&quot;</span>,<span class="keyword8">1</span><span class="keyword2">;</span> <span class="keyword7">&quot;b&quot;</span>,<span class="keyword8">2</span><span class="keyword2">]</span> <span class="keyword7">&quot;b&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int option = Some 2
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 35) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8355632">
+        And <code>Result</code> and <code>Or_error</code>
+        have similar <code>try_with</code> functions. So, we could
+        write:
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> find alist key <span class="keyword2">=</span>
+    <span class="keyword5">Result.</span>try_with <span class="keyword2">(</span><span class="keyword1">fun</span> <span class="keyword2">(</span><span class="keyword2">)</span> -<span class="keyword2">&gt;</span> find_exn alist key<span class="keyword2">)</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val find : (string * 'a) list -&gt; string -&gt; ('a, exn) Result.t = &lt;fun&gt;
+</div># find <span class="keyword2">[</span><span class="keyword7">&quot;a&quot;</span>,<span class="keyword8">1</span><span class="keyword2">;</span> <span class="keyword7">&quot;b&quot;</span>,<span class="keyword8">2</span><span class="keyword2">]</span> <span class="keyword7">&quot;c&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : (int, exn) Result.t = Core.Std.Result.Error Key_not_found(&quot;c&quot;)
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 36) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp8358592">
+        And then we can re-raise that exception:
+      </p><div class="rwocode"><pre><code># <span class="keyword5">Result.</span>ok_exn <span class="keyword2">(</span>find <span class="keyword2">[</span><span class="keyword7">&quot;a&quot;</span>,<span class="keyword8">1</span><span class="keyword2">;</span> <span class="keyword7">&quot;b&quot;</span>,<span class="keyword8">2</span><span class="keyword2">]</span> <span class="keyword7">&quot;b&quot;</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 2
+</div></code></pre><div class="rwocodeinfo">OCaml UTop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/error-handling/main.topscript">error-handling/main.topscript</a> , continued (part 37) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></section></section><section><h1 id="choosing-an-error-handling-strategy">Choosing an error handling strategy</h1><p id="idp8360896">
+      Given that OCaml supports both exceptions and error-aware return
+      types, how do you choose between them? The key is to think about
+      the tradeoff between concision and explicitness.
+    </p><p id="idp8361504">
+      Exceptions are more concise because they allow you to defer the
+      job of error handling to some larger scope, and because they don't
+      clutter up your types. But this same concision comes at a cost:
+      exceptions are all too easy to ignore. Error-aware return types,
+      on the other hand, are fully manifest in your type definitions,
+      making the errors that your code might generate explicit and
+      impossible to ignore.
+    </p><p id="idp8362352">
+      The right tradeoff depends on your application. If you're writing
+      a rough and ready program where getting it done quickly is key,
+      and failure is not that expensive, then using exceptions
+      extensively may be the way to go. If, on the other hand, you're
+      writing production software whose failure is costly, then you
+      should probably lean in the direction of using error-aware return
+      types.
+    </p><p id="idp8363184">
+      To be clear, it doesn't make sense to avoid exceptions entirely.
+      The old maxim of &quot;use exceptions for exceptional
+      conditions&quot; applies. If an error occurs sufficiently rarely,
+      then throwing an exception may well be the right behavior.
+    </p><p id="idp8364208">
+      Also, for errors that are omnipresent, error-aware return types
+      may also be overkill. A good example is out-of-memory errors,
+      which can occur anywhere, and so you'd need to use error-aware
+      return types everywhere to capture those. And having every
+      operation marked as one that might fail is no more explicit than
+      having none of them marked.
+    </p><p id="idp8364992">
+      In short, for errors that are a foreseeable and ordinary part of
+      the execution of your production code and that are not
+      omnipresent, error aware return types are typically the right
+      solution.
+    </p></section>
+
+
+                
+            </article>
+            
+            
+    
+                <nav class="pagination">
+                    
+                        <a rel="previous" href="variants.html">
+                            &lt; Previous
+                        </a>
+                    
+                    
+                        <a rel="next" href="imperative-programming-1.html">
+                            Next &gt;
+                        </a>
+                    
+                </nav>
+            
+            
+            
+            <footer class="footer">
+                <p>Copyright 2012-2013, Jason Hickey, Anil Madhavapeddy and Yaron Minsky. Licensed under <a href="http://creativecommons.org/licenses/by-nc-nd/3.0/us/">CC BY-NC-ND 3.0 US</a>.</p>
+            </footer>
+            
+        </div>
+    
+    </body>
+
+</html>

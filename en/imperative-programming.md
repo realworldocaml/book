@@ -12,7 +12,7 @@ modify a program's internal state or interact with the outside world.
 An imperative function has a new effect, and potentially returns
 different results, every time it's called.
 
-Pure code is the default in OCaml, and for good reason --- it's
+Pure code is the default in OCaml, and for good reason&#x2014;it's
 generally easier to reason about, less error prone and more
 composable.  But imperative code is of fundamental importance to any
 practical programming language because real-world tasks require that
@@ -230,8 +230,8 @@ Array literals are written using `[|` and `|]` as delimiters.  Thus,
 Strings are essentially byte-arrays which are often used for textual
 data.  The main advantage of using a `string` in place of a `Char.t
 array` (a `Char.t` is an 8-bit character) is that the former is
-considerably more space efficient; an array uses one word --- 8 bytes
-on a 64-bit machine --- to store a single entry, whereas strings use
+considerably more space efficient; an array uses one word&#x2014;8 bytes
+on a 64-bit machine&#x2014;to store a single entry, whereas strings use
 one byte per character.
 
 Strings also come with their own syntax for getting and setting
@@ -267,7 +267,7 @@ as mutable, and can then be modified in much the same way as record fields.
 
 #### Ref cells
 
-Variables in OCaml are never mutable --- they can refer to mutable
+Variables in OCaml are never mutable&#x2014;they can refer to mutable
 data, but what the variable points to can't be changed.  Sometimes,
 though, you want to do exactly what you would do with a mutable
 variable in another language: define a single, mutable value. In OCaml
@@ -323,7 +323,7 @@ Nonetheless, explicit `for` and `while` loops are both more idiomatic
 for imperative programming and often more concise.
 
 The `for` loop is the simpler of the two.  Indeed, we've already seen
-the `for` loop in action --- the `iter` function in `Dictionary` is
+the `for` loop in action&#x2014;the `iter` function in `Dictionary` is
 built using it.  Here's a simple example of `for`.
 
 ```frag
@@ -350,7 +350,7 @@ Here's a simple example of a function for reversing an array in-place.
 ((typ ocamltop)(name imperative-programming/for.topscript)(part 3))
 ```
 
-In the above, we used `incr` and `decr`, which are build-in functions
+In the above, we used `incr` and `decr`, which are built-in functions
 for incrementing and decrementing an `int ref` by one, respectively.
 
 ## Example: Doubly-linked lists
@@ -733,7 +733,7 @@ not trigger a call to `memoize`.  Only when the final argument to
 `fib` is presented does `memoize` get called, and the result of that
 call falls out of scope when the `fib` call returns.  That means that,
 unlike ordinary memoization, calling `memo_rec` on a function does not
-create a memory leak --- the memoization table is collected after the
+create a memory leak&#x2014;the memoization table is collected after the
 computation completes.
 
 We can use `memo_rec` as part of a single declaration that makes this
@@ -979,7 +979,7 @@ And accordingly, we can pass it to `printf`.
 If this looks different from everything else you've seen so far,
 that's because it is.  This is really a special case in the
 type system.  Most of the time, you don't need to worry about this
-special handling of format strings --- you can just use `printf` and
+special handling of format strings&#x2014;you can just use `printf` and
 not worry about the details.  But it's useful to keep the broad
 outlines of the story in the back of your head.
 

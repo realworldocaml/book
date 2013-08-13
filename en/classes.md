@@ -52,18 +52,18 @@ A class definition serves as the _constructor_ for the class.  In
 general, a class definition may have parameters that must be provided
 as arguments when the object is created with `new`.
 
-Let's implement a class for creating simple stack objects. When defining the
-class, the type parameters are placed in square brackets before the class name
-in the class definition.  We also need a parameter `init` for the initial
-contents of the stack.
+Let's implement a variant of the `istack` class that can hold any values, not
+just integers. When defining the class, the type parameters are placed in
+square brackets before the class name in the class definition.  We also add a
+parameter `init` for the initial contents of the stack.
 
 ```frag
 ((typ ocamltop)(name classes/stack.topscript)(part 0))
 ```
 
 Note that the type parameter `['a]` in the definition uses square brackets, but
-other uses of the type can omit them (or use parentheses if there is more than
-one type parameter).
+for other uses of the type they are omited (or replaced with parentheses if
+there is more than one type parameter).
 
 The type annotation on the declaration of `v` is used to constrain type
 inference.  If we omit this annotation, the type inferred for the class will
@@ -348,12 +348,10 @@ an equality method.
 ((typ ocamltop)(name classes/binary.topscript)(part 2))
 ```
 
-The problem is that a `square` expects to be compared with a `square`,
-not an arbitrary shape; similarly for `circle`.
-
-This problem is fundamental.  Many languages solve it either with
-narrowing (with dynamic type checking), or by method overloading.
-Since OCaml has neither of these, what can we do?
+The problem is that a `square` expects to be compared with a `square`, not an
+arbitrary shape; similarly for `circle`.  This problem is fundamental.  Many
+languages solve it either with narrowing (with dynamic type checking), or by
+method overloading.  Since OCaml has neither of these, what can we do?
 
 Since the problematic method is equality, one proposal we could consider is is
 to just drop it from the base type `shape` and use polymorphic equality
@@ -364,11 +362,10 @@ when applied to objects.
 ((typ ocamltop)(name classes/binary.topscript)(part 3))
 ```
 
-The problem here is that the built-in polymorphic equality compares the method
-implementations, not their return values.  The method implementations (the
-function values that implement the methods) are different, and so the equality
-comparison is false.  There are other reasons not to use the built-in
-polymorphic equality, but these false negatives are a showstopper.
+The problem here is that two objects are considered equal by the built-in
+polymorphic equality if and only if they are physically equal.  There are other
+reasons not to use the built-in polymorphic equality, but these false negatives
+are a showstopper.
 
 If we want to define equality for shapes in general, the remaining solution is
 to use the same approach as we described for narrowing.  That is, introduce a
@@ -393,50 +390,43 @@ module system.
 
 A _virtual_ class is a class where some methods or fields are declared, but not
 implemented.  This should not be confused with the word `virtual` as it is used
-in C++.  In C++, a `virtual` method uses dynamic dispatch, while regular
+in C++.  A `virtual` method in C++ uses dynamic dispatch, while regular
 non-virtual methods are statically dispatched.  In OCaml, _all_ methods use
 dynamic dispatch, but the keyword `virtual` means that the method or field is
 not implemented.  A class containing virtual methods must also be flagged
 `virtual` and cannot be directly instantiated (i.e. no object of this class can
 be created).
 
-To explore this, lets extend our shapes examples to simple interactive
+To explore this, let's extend our shapes examples to simple interactive
 graphics.  We will use the Async concurrency library and the
 [Async_graphics](http://github.com/lpw25/async_graphics/) library, which
 provides an asynchronous interface to OCaml's built in Graphics library.
 Concurrent programming with Async will be explored later in
-[xref](#concurrent-programming-with-async), for now you can safely ignore the
+[xref](#concurrent-programming-with-async); for now you can safely ignore the
 details.  You just need to run `opam install async_graphics` to get the library
 installed on your system.
 
-### Defining a `Drawable` module
+We will give each shape a `draw` method that describes how to draw the shape on
+the `Async_graphics` display:
 
-Let's start with by creating a `Drawable` module to hold the base logic to
-handle the display.
- 
 ```frag
-((typ ocaml)(name classes-async/drawable.ml))
+((typ ocaml)(name classes-async/shapes.ml)(part 0))
 ```
 
-We first define our `shape` object type to include a `draw` method, and a
-reference to a list of shapes to display them.  Any shapes in that list will be
-drawn on the display at regular intervals via the `repaint` function. Finally,
-we also define an `open_display` function to open a graphical display and
-ensure that the Async scheduler is running.
+### Create some simple shapes
 
-Now let's create a new module that contains classes for making squares and
-circles. We include an `on_click` method for adding event handlers to the
-shapes.
+Now let's add classes for making squares and circles. We include an `on_click`
+method for adding event handlers to the shapes.
 
 ```frag
-((typ ocaml)(name classes-async/verbose_shapes.ml)(part 0))
+((typ ocaml)(name classes-async/verbose_shapes.ml)(part 1))
 ```
 
 The `square` class is pretty straightforward, and the `circle` class below also
 looks very similar.
 
 ```frag
-((typ ocaml)(name classes-async/verbose_shapes.ml)(part 1))
+((typ ocaml)(name classes-async/verbose_shapes.ml)(part 2))
 ```
 
 These classes have a lot in common, and it would be useful to factor out this
@@ -450,13 +440,13 @@ Here is the more succinct definition, starting with a virtual `shape` class
 that implements `on_click` and `on_mousedown`.
 
 ```frag
-((typ ocaml)(name classes-async/shapes.ml)(part 0))
+((typ ocaml)(name classes-async/shapes.ml)(part 1))
 ```
 
 Now we can define `square` and `circle` by inheriting from `shape`.
 
 ```frag
-((typ ocaml)(name classes-async/shapes.ml)(part 1))
+((typ ocaml)(name classes-async/shapes.ml)(part 2))
 ```
 
 One way to view a `virtual` class is that it is like a functor, where
@@ -486,7 +476,7 @@ from `circle` and used the inherited `on_click` to add a handler for click
 events.
 
 ```frag
-((typ ocaml)(name classes-async/shapes.ml)(part 2))
+((typ ocaml)(name classes-async/shapes.ml)(part 3))
 ```
 
 ## Multiple inheritance
@@ -500,7 +490,7 @@ tree, so it should be used with care.
 
 ### How names are resolved
 
-The main trickiness of multiple inheritance is due to naming -- what happens
+The main trickiness of multiple inheritance is due to naming&#x2014;what happens
 when a method or field with some name is defined in more than one class?
 
 If there is one thing to remember about inheritance in OCaml, it is this:
@@ -546,7 +536,7 @@ for multiple inheritance that is both useful and reasonably simple, the _mixin_
 pattern.  Generically, a _mixin_ is just a virtual class that implements a
 feature based on another one.  If you have a class that implements methods _A_,
 and you have a mixin _M_ that provides methods _B_ from _A_, then you can
-inherit from _M_ -- "mixing" it in -- to get features _B_.
+inherit from _M_&#x2014;"mixing" it in&#x2014;to get features _B_.
 
 That's too abstract, so let's give some examples based on our interactive
 shapes. We may wish to allow a shape to be dragged by the mouse. We can define
@@ -554,13 +544,13 @@ this functionality for any object which has mutable `x` and `y` fields and an
 `on_mousedown` method for adding event handlers:
 
 ```frag
-((typ ocaml)(name classes-async/shapes.ml)(part 3))
+((typ ocaml)(name classes-async/shapes.ml)(part 4))
 ```
 
 This allows us to create draggable shapes using multiple inheritance.
 
 ```frag
-((typ ocaml)(name classes-async/shapes.ml)(part 4))
+((typ ocaml)(name classes-async/shapes.ml)(part 5))
 ```
 
 We can also use mixins to create animated shapes. Each animated shape has a
@@ -569,7 +559,7 @@ mixin to provide this update list and ensure that the functions in it are
 called regular intervals when the shape is animated.
 
 ```frag
-((typ ocaml)(name classes-async/shapes.ml)(part 5))
+((typ ocaml)(name classes-async/shapes.ml)(part 6))
 ```
 
 We use initializers to add functions to this update list. For
@@ -577,13 +567,13 @@ example, this class will produce circles that move to the right for a
 second when clicked:
 
 ```frag
-((typ ocaml)(name classes-async/shapes.ml)(part 6))
+((typ ocaml)(name classes-async/shapes.ml)(part 7))
 ```
 
-This initializers can also be added using mixins:
+These initializers can also be added using mixins:
 
 ```frag
-((typ ocaml)(name classes-async/shapes.ml)(part 7))
+((typ ocaml)(name classes-async/shapes.ml)(part 8))
 ```
 
 Since the `linear` and `harmonic` mixins are only used for there
@@ -591,15 +581,21 @@ side-effects, they can be inherited multiple times within the same
 object to produce a variety of different animations.
 
 ```frag
-((typ ocaml)(name classes-async/shapes.ml)(part 8))
-```
-
-Now all we have to do is to glue it together by initializing the
-display, creating some shapes, and running the scheduler.
-
-```frag
 ((typ ocaml)(name classes-async/shapes.ml)(part 9))
 ```
+
+### Displaying the animated shapes
+
+We finish our shapes module by creating a `main` function to draw some shapes on
+the graphical display, and running that function using the Async scheduler.
+
+```frag
+((typ ocaml)(name classes-async/shapes.ml)(part 10))
+```
+
+Our `main` function creates a list of shapes to be displayed and defines a
+`repaint` function that actually draws them on the display. We then open a
+graphical display and ask Async to run `repaint` at regular intervals.
 
 Finally, build the binary by linking against the `async_graphics` package,
 which will pull in all the other dependencies.

@@ -628,7 +628,7 @@ Operating System  Package Manager  Package
 ----------------  ---------------  -------
 Debian Linux      `apt`            `bash-completion`
 Mac OS X          Homebrew         `bash-completion`
-FreeBSD           Ports System     `/usr/ports/shells/bash-completion`
+FreeBSD           Ports System     <filename>/usr/ports/shells/bash-completion</filename>
 
 Once bash completion is installed and configured, check that it works
 by typing the `ssh` command, and pressing `<tab>`.  This should show

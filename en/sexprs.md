@@ -83,7 +83,7 @@ variants that they're actually made of.
 
 This is due to OCaml's facility for installing custom *toplevel printers* that
 can rewrite some values into more toplevel-friendly equivalents.  They are
-generally installed as `ocamlfind` packages ending in `top`.
+generally installed as <command>ocamlfind</command> packages ending in `top`.
 
 ```frag
 ((typ console)(name sexpr/list_top_packages.out))

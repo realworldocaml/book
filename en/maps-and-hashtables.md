@@ -607,7 +607,7 @@ memory at the same time multiple different related collections of
 key/value pairs, then a map is typically a much more efficient data
 structure to do it with.
 
-Here's a benchmark to demonstrates this.  In it, we create a list of
+Here's a benchmark that demonstrates this.  In it, we create a list of
 maps (or hash tables) that are built up by iteratively applying
 updates, starting from an empty map.  In the hash table implementation,
 we do this by calling `Hashtbl.copy` to get the list entries.

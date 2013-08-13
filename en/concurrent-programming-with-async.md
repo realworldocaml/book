@@ -714,7 +714,7 @@ some monitor, which, when the job is running, is referred to as the
 current monitor.  When a new Async job is scheduled, say, using `bind`
 or `map`, it inherits the current monitor of the job that spawned it.
 
-Monitors are arranged in a tree -- when a new monitor is created (say,
+Monitors are arranged in a tree&#x2014;when a new monitor is created (say,
 using `Monitor.create`) it is a child of the current monitor.  You can
 explicitly run jobs within a monitor using `within`, which takes a
 thunk that returns a non-deferred value, or `within'`, which takes a

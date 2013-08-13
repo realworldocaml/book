@@ -1,0 +1,75 @@
+.rwocode {
+	border: 1px solid #999999;
+	margin-bottom: 20px;
+}
+
+.rwocodeinfo {
+	text-align: left;
+	font-family: sans-serif;
+	font-size: 80%;
+	background: #D8D7BB;
+	color: #444444;
+        padding-left: 5px;
+}
+.rwocodeinfo a { color: #444444; }
+.rwocodeinfo a:visited { color: #444444; }
+
+.rwocodeout {
+        margin-top: 3px;
+        margin-bottom: 3px;
+        font-style: italic;
+        font-color: #eeeeee;
+        margin-left: 5px;
+        padding-left: 2px;
+}
+
+.rwocode code {
+	font-family: monospace;
+}
+.rwocode .keyword1 {
+	display: inline;
+	color: #15317E;
+        font-weight: bold;
+
+}
+.rwocode .keyword2 {
+	display: inline;
+	color: ##000080;
+
+}
+.rwocode .keyword3 {
+	display: inline;
+	color: #440000;
+
+}
+.rwocode .keyword4 {
+	display: inline;
+	color: #000077;
+	font-weight: bold;
+
+}
+.rwocode .keyword5 {
+	display: inline;
+	color: #882222;
+
+}
+.rwocode .keyword6 {
+	display: inline;
+	color: #117777;
+
+}
+.rwocode .keyword7 {
+	display: inline;
+	color: #BB8844;
+
+}
+.rwocode .keyword8 {
+	display: inline;
+	color: #885533;
+
+}
+.rwocode .comments {
+	display: inline;
+	font-style: italic;
+	color: #007799;
+}
