@@ -605,7 +605,7 @@ with command-line arguments with similar types but different names and
 purposes.  It's good form to use labels when you have a lot of
 otherwise anonymous `int` and `string` arguments.
 
-## Command-line auto-completion with `bash`
+## Command-line auto-completion with <command>bash</command>
 
 Modern UNIX shells usually have a tab-completion feature to
 interactively help you figure out how to build a command-line.  These
@@ -616,10 +616,10 @@ be extended for other parts of the command too.
 
 The precise mechanism for autocompletion varies depending on what
 shell you are using, but we'll assume you are using the most common
-one: `bash`.  This is the default interactive shell on most Linux
+one: <command>bash</command>.  This is the default interactive shell on most Linux
 distributions and Mac OS X, but you may need to switch to it on *BSD
 or Windows (when using Cygwin).  The rest of this section assumes that
-you're using `bash`.
+you're using <command>bash</command>.
 
 Bash autocompletion isn't always installed by default, so check your
 OS package manager to see if you have it available.
@@ -638,22 +638,21 @@ continue on.  If it lists the files in your current directory instead,
 then check your OS documentation to configure completion correctly.
 
 One last bit of information you'll need to find is the location of the
-`bash_completion.d` directory. This is where all the shell fragments
+<filename>bash_completion.d</filename> directory. This is where all the shell fragments
 that contain the completion logic are held.  On Linux, this is often
-in `/etc/bash_completion.d`, and in Homebrew on Mac OS X it would be
-`/usr/local/etc/bash_completion.d` by default.
+in <filename>/etc/bash_completion.d</filename>, and in Homebrew on Mac OS X it would be
+<filename>/usr/local/etc/bash_completion.d</filename> by default.
 
 ### Generating completion fragments from Command
 
 The Command library has a declarative description of all the possible
-valid options, and it can use this information to generate a shell
-script which provides completion support for that command.  To
-generate the fragment, just run the command with the
-`COMMAND_OUTPUT_INSTALLATION_BASH` environment variable set to any
-value.
+valid options, and it can use this information to generate a shell script which
+provides completion support for that command.  To generate the fragment, just
+run the command with the <envar>COMMAND_OUTPUT_INSTALLATION_BASH</envar>
+environment variable set to any value.
 
-For example, let's try it on our MD5 example from earlier, assuming
-that the binary is called `basic_md5_with_flags` in the current
+For example, let's try it on our MD5 example from earlier, assuming that the
+binary is called <command>basic_md5_with_flags</command> in the current
 directory.
 
 ```frag
@@ -678,13 +677,13 @@ current directory and source it into your current shell.
 Command completion support works for flags and grouped commands, and
 is very useful when building larger command-line interfaces.  Don't
 forget to install the shell fragment into your global
-`bash_completion.d` directory if you want it to be loaded in all of
+<filename>bash_completion.d</filename> directory if you want it to be loaded in all of
 your login shells.
 
 <note>
 <title>Installing a generic completion handler</title>
 
-Sadly, `bash` doesn't support installing a generic handler for all
+Sadly, <command>bash</command> doesn't support installing a generic handler for all
 Command-based applications.  This means that you have to install the
 completion script for every application, but you should be able to
 automate this in the build and packaging system for your application.
