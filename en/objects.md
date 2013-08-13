@@ -418,7 +418,7 @@ essentially provide the ability to enumerate the methods in an object.
 To check whether an object `obj` has some method `foo : int`, one
 would attempt a coercion `(obj :> < foo : int >)`.
 
-More commonly, narrowing leads to poor object-oriented style.
+More pragmatically, narrowing leads to poor object-oriented style.
 Consider the following Java code, which returns the name of a shape
 object.
 
