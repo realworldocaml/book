@@ -17423,7 +17423,7 @@ let () =
         compile-time error.
       </para>
       <programlisting language="console"><lineannotation>⌘ Terminal: <filename>command-line-parsing/build_basic_md5_with_optional_file_broken.out</filename></lineannotation>
-<prompt>$ </prompt><userinput>ocamlbuild -use-ocamlfind -pkg cryptokit,core -tag thread basic_md5_with_optional_file_broken.native</userinput>
+<prompt>$ </prompt><userinput>corebuild -pkg cryptokit basic_md5_with_optional_file_broken.native</userinput>
 <computeroutput>File &quot;basic_md5_with_optional_file_broken.ml&quot;, line 18, characters 4-11:</computeroutput>
 <computeroutput>Error: This expression has type string -&gt; unit -&gt; unit</computeroutput>
 <computeroutput>       but an expression was expected of type string option -&gt; unit -&gt; unit</computeroutput>
@@ -18053,8 +18053,8 @@ let () =
         and recompile, we'll get this impressively long type error:
       </para>
       <programlisting language="console"><lineannotation>⌘ Terminal: <filename>command-line-parsing/build_cal_append_broken.out</filename></lineannotation>
-<prompt>$ </prompt><userinput>ocamlbuild -use-ocamlfind -tag thread -pkg core cal_append_broken.native</userinput>
-<computeroutput>File &quot;cal_append_broken.ml&quot;, line 38, characters 46-52:</computeroutput>
+<prompt>$ </prompt><userinput>corebuild cal_append_broken.native</userinput>
+<computeroutput>File &quot;cal_append_broken.ml&quot;, line 38, characters 45-52:</computeroutput>
 <computeroutput>Error: This expression has type</computeroutput>
 <computeroutput>         (bool -&gt; unit -&gt; unit -&gt; unit, unit -&gt; unit -&gt; unit) Command.Spec.t</computeroutput>
 <computeroutput>       but an expression was expected of type</computeroutput>
@@ -20926,7 +20926,7 @@ val contains : t -&gt; int -&gt; bool</programlisting>
       Building this will give us the following error:
     </para>
     <programlisting language="console"><lineannotation>⌘ Terminal: <filename>sexpr/build_test_interval_nosexp.out</filename></lineannotation>
-<prompt>$ </prompt><userinput>ocamlbuild -use-ocamlfind -tag thread -syntax camlp4o -pkgs core,sexplib.syntax test_interval_nosexp.native</userinput>
+<prompt>$ </prompt><userinput>corebuild test_interval_nosexp.native</userinput>
 <computeroutput>File &quot;test_interval_nosexp.ml&quot;, line 14, characters 20-42:</computeroutput>
 <computeroutput>Error: Unbound value Int_interval.sexp_of_t</computeroutput>
 <computeroutput>Command exited with code 2.</computeroutput>
@@ -21060,7 +21060,7 @@ let () =
         you'll get the following error:
       </para>
       <programlisting language="console"><lineannotation>⌘ Terminal: <filename>sexpr/build_read_foo.out</filename></lineannotation>
-<prompt>$ </prompt><userinput>ocamlbuild -use-ocamlfind -tag thread -syntax camlp4o -pkg core,sexplib.syntax read_foo.native</userinput>
+<prompt>$ </prompt><userinput>corebuild read_foo.native</userinput>
 <prompt>$ </prompt><userinput>./read_foo.native foo_example_broken.scm</userinput>
 <computeroutput>Uncaught exception:</computeroutput>
 <computeroutput>  </computeroutput>
@@ -21070,6 +21070,9 @@ let () =
 <computeroutput>Raised at file &quot;lib/conv.ml&quot;, line 281, characters 36-72</computeroutput>
 <computeroutput>Called from file &quot;lib/core_int.ml&quot;, line 6, characters 7-14</computeroutput>
 <computeroutput>Called from file &quot;lib/std_internal.ml&quot;, line 115, characters 7-33</computeroutput>
+<computeroutput>Called from file &quot;read_foo.ml&quot;, line 5, characters 2-8</computeroutput>
+<computeroutput>Called from file &quot;read_foo.ml&quot;, line 4, characters 2-40</computeroutput>
+<computeroutput>Called from file &quot;read_foo.ml&quot;, line 11, characters 4-60</computeroutput>
 <computeroutput>Called from file &quot;lib/exn.ml&quot;, line 87, characters 6-10</computeroutput>
 </programlisting>
       <para>
@@ -21103,7 +21106,7 @@ let () =
         error message:
       </para>
       <programlisting language="console"><lineannotation>⌘ Terminal: <filename>sexpr/build_read_foo_better_errors.out</filename></lineannotation>
-<prompt>$ </prompt><userinput>ocamlbuild -use-ocamlfind -tag thread -syntax camlp4o -pkg core,sexplib.syntax read_foo_better_errors.native</userinput>
+<prompt>$ </prompt><userinput>corebuild read_foo_better_errors.native</userinput>
 <prompt>$ </prompt><userinput>./read_foo_better_errors.native foo_example_broken.scm</userinput>
 <computeroutput>Uncaught exception:</computeroutput>
 <computeroutput>  </computeroutput>
@@ -21113,6 +21116,7 @@ let () =
 <computeroutput>   &quot;&quot;)</computeroutput>
 <computeroutput> </computeroutput>
 <computeroutput>Raised at file &quot;lib/pre_sexp.ml&quot;, line 1145, characters 12-58</computeroutput>
+<computeroutput>Called from file &quot;read_foo_better_errors.ml&quot;, line 10, characters 10-68</computeroutput>
 <computeroutput>Called from file &quot;lib/exn.ml&quot;, line 87, characters 6-10</computeroutput>
 </programlisting>
       <para>
