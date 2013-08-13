@@ -62,7 +62,7 @@ parameter `init` for the initial contents of the stack.
 ```
 
 Note that the type parameter `['a]` in the definition uses square brackets, but
-for other uses of the type they are omited (or replaced with parentheses if
+for other uses of the type they are omitted (or replaced with parentheses if
 there is more than one type parameter).
 
 The type annotation on the declaration of `v` is used to constrain type
@@ -377,14 +377,31 @@ based on the representation type.
 ```
 
 The binary method `equals` is now implemented in terms of the concrete
-type `shape_repr`.  In fact, the objects are now isomorphic to the
-`shape_repr` type.  When using this pattern, you will not be able to
+type `shape_repr`.  When using this pattern, you will not be able to
 hide the `repr` method, but you can hide the type definition using the
 module system.
 
 ```frag
-((typ ocaml)(name classes/binary_module.ml))
+((typ ocaml)(name classes/binary_module.ml)(part 0))
 ```
+
+Note that this solution prevents us from adding new kinds of shape without
+adding new constructors to the `shape_repr` type, which is quite
+restrictive. The objects created by these classes are also in one-to-one
+correspondence with members of the representation type, making the objects seem
+somewhat redundant.
+
+However, equality is quite an extreme instance of a binary method: it needs
+access to all the information of the other object. Many other binary methods
+need only partial information about the object. For instance, a method that
+compares shapes by their sizes:
+
+```frag
+((typ ocaml)(name classes/binary_larger.ml))
+```
+
+In this case, there is no one-to-one correspondence between the objects and
+their sizes, and we can still easily define new kinds of shape.
 
 ## Virtual classes and methods
 
@@ -619,7 +636,7 @@ subsystems.
 *   [LablGL](https://forge.ocamlcore.org/projects/lablgl/) is an interface between
     OCaml and OpenGL, a widely supported standard for 3D rendering.
 *   [js_of_ocaml](http://ocsigen.org/js_of_ocaml/api/Js) compiles OCaml code to
-    Javascript, and has bindings to WebGL.  This is the emerging standard for
+    JavaScript, and has bindings to WebGL.  This is the emerging standard for
     3D rendering in web browsers.
 
 <note>
