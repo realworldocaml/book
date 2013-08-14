@@ -16983,7 +16983,7 @@ let () =
       function to the data, and outputs an ASCII hex representation of
       the result.
     </para>
-    <programlisting language="ocaml"><lineannotation>⌘ OCaml: <filename>command-line-parsing/basic_md5.ml</filename></lineannotation>
+    <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>command-line-parsing/basic_md5.ml</filename></lineannotation>
 open Core.Std
 
 let do_hash file =
@@ -17013,7 +17013,7 @@ let do_hash file =
         passed directly on the command-line. This is known as an
         <emphasis>anonymous</emphasis> argument.
       </para>
-      <programlisting language="ocaml"><lineannotation>⌘ OCaml: <filename>command-line-parsing/basic_md5.ml</filename>, continued (part 1)</lineannotation>
+      <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>command-line-parsing/basic_md5.ml</filename> (part 1)</lineannotation>
 let spec =
   let open Command.Spec in
   empty
@@ -17045,7 +17045,7 @@ let spec =
         command-line interface via the <literal>Command.basic</literal>
         module.
       </para>
-      <programlisting language="ocaml"><lineannotation>⌘ OCaml: <filename>command-line-parsing/basic_md5.ml</filename>, continued (part 2)</lineannotation>
+      <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>command-line-parsing/basic_md5.ml</filename> (part 2)</lineannotation>
 let command =
   Command.basic
     ~summary:&quot;Generate an MD5 hash of the input data&quot;
@@ -17111,7 +17111,7 @@ let command =
         Once we've defined the basic command, running it is just one
         function call away.
       </para>
-      <programlisting language="ocaml"><lineannotation>⌘ OCaml: <filename>command-line-parsing/basic_md5.ml</filename>, continued (part 3)</lineannotation>
+      <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>command-line-parsing/basic_md5.ml</filename> (part 3)</lineannotation>
 let () =
   Command.run ~version:&quot;1.0&quot; ~build_info:&quot;RWO&quot; command</programlisting>
       <para>
@@ -17122,14 +17122,14 @@ let () =
         to run <literal>opam install cryptokit</literal> if you didn't
         do so when reading <xref linkend="classes"/>.
       </para>
-      <programlisting language="ocaml"><lineannotation>⌘ Terminal: <filename>command-line-parsing/build_basic_md5.out</filename></lineannotation>
+      <programlisting language="ocaml"><lineannotation>✎ Terminal: <filename>command-line-parsing/build_basic_md5.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>corebuild -pkg cryptokit basic_md5.native</userinput>
 </programlisting>
       <para>
         You can now query the version information for the binary you
         just compiled.
       </para>
-      <programlisting language="console"><lineannotation>⌘ Terminal: <filename>command-line-parsing/get_basic_md5_version.out</filename></lineannotation>
+      <programlisting language="console"><lineannotation>✎ Terminal: <filename>command-line-parsing/get_basic_md5_version.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>./basic_md5.native -version</userinput>
 <computeroutput>1.0</computeroutput>
 <prompt>$ </prompt><userinput>./basic_md5.native -build-info</userinput>
@@ -17143,7 +17143,7 @@ let () =
         (<emphasis>e.g.</emphasis> by running <literal>hg id</literal>
         to generate a build revision number, in the case of Mercurial).
       </para>
-      <programlisting language="console"><lineannotation>⌘ Terminal: <filename>command-line-parsing/get_basic_md5_help.out</filename></lineannotation>
+      <programlisting language="console"><lineannotation>✎ Terminal: <filename>command-line-parsing/get_basic_md5_help.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>./basic_md5.native</userinput>
 <computeroutput>Generate an MD5 hash of the input data</computeroutput>
 <computeroutput> </computeroutput>
@@ -17171,7 +17171,7 @@ let () =
         <literal>do_hash</literal> is called with the argument and the
         MD5 output is displayed to the standard output.
       </para>
-      <programlisting language="console"><lineannotation>⌘ Terminal: <filename>command-line-parsing/run_basic_md5.out</filename></lineannotation>
+      <programlisting language="console"><lineannotation>✎ Terminal: <filename>command-line-parsing/run_basic_md5.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>./basic_md5.native ./basic_md5.native</userinput>
 <computeroutput>b5ee7de449a2e0c6c01d4f2d898926de</computeroutput>
 </programlisting>
@@ -17180,7 +17180,7 @@ let () =
         complete version of the example we just walked through, but made
         slightly more succinct by removing intermediate variables.
       </para>
-      <programlisting language="ocaml"><lineannotation>⌘ OCaml: <filename>command-line-parsing/basic_md5_succinct.ml</filename></lineannotation>
+      <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>command-line-parsing/basic_md5_succinct.ml</filename></lineannotation>
 open Core.Std
 
 let do_hash file () =
@@ -17318,7 +17318,7 @@ let () =
       <literal>file</literal> to reflect that the argument must be a
       valid filename, and not just any string.
     </para>
-    <programlisting language="ocaml"><lineannotation>⌘ OCaml: <filename>command-line-parsing/basic_md5_as_filename.ml</filename>, continued (part 1)</lineannotation>
+    <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>command-line-parsing/basic_md5_as_filename.ml</filename> (part 1)</lineannotation>
 let command =
   Command.basic
     ~summary:&quot;Generate an MD5 hash of the input data&quot;
@@ -17334,7 +17334,7 @@ let () =
       command-line completion to work on the filename argument
       (explained later in the chapter).
     </para>
-    <programlisting language="console"><lineannotation>⌘ Terminal: <filename>command-line-parsing/run_basic_md5_as_filename.out</filename></lineannotation>
+    <programlisting language="console"><lineannotation>✎ Terminal: <filename>command-line-parsing/run_basic_md5_as_filename.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>./basic_md5_as_filename.native nonexistent</userinput>
 <computeroutput>Uncaught exception:</computeroutput>
 <computeroutput>  </computeroutput>
@@ -17353,7 +17353,7 @@ let () =
         the input file isn't a character device or some other odd UNIX
         file type that can't be fully read.
       </para>
-      <programlisting language="ocaml"><lineannotation>⌘ OCaml: <filename>command-line-parsing/basic_md5_with_custom_arg.ml</filename></lineannotation>
+      <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>command-line-parsing/basic_md5_with_custom_arg.ml</filename></lineannotation>
 open Core.Std
 
 let do_hash file () =
@@ -17391,7 +17391,7 @@ let () =
         new error messages if you try to open a special device such as
         <literal>/dev/null</literal>.
       </para>
-      <programlisting language="console"><lineannotation>⌘ Terminal: <filename>command-line-parsing/run_basic_md5_with_custom_arg.out</filename></lineannotation>
+      <programlisting language="console"><lineannotation>✎ Terminal: <filename>command-line-parsing/run_basic_md5_with_custom_arg.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>./basic_md5_with_custom_arg.native /etc/passwd</userinput>
 <computeroutput>8cfb68a5622dd12932df658a54698aad</computeroutput>
 <prompt>$ </prompt><userinput>./basic_md5_with_custom_arg.native /dev/null</userinput>
@@ -17404,7 +17404,7 @@ let () =
         A more realistic MD5 binary could also read from the standard
         input if a <literal>filename</literal> isn't specified.
       </para>
-      <programlisting language="ocaml"><lineannotation>⌘ OCaml: <filename>command-line-parsing/basic_md5_with_optional_file_broken.ml</filename>, continued (part 1)</lineannotation>
+      <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>command-line-parsing/basic_md5_with_optional_file_broken.ml</filename> (part 1)</lineannotation>
 let command =
   Command.basic
     ~summary:&quot;Generate an MD5 hash of the input data&quot;
@@ -17420,7 +17420,7 @@ let () =
         as an optional argument. However, building this results in a
         compile-time error.
       </para>
-      <programlisting language="console"><lineannotation>⌘ Terminal: <filename>command-line-parsing/build_basic_md5_with_optional_file_broken.out</filename></lineannotation>
+      <programlisting language="console"><lineannotation>✎ Terminal: <filename>command-line-parsing/build_basic_md5_with_optional_file_broken.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>corebuild -pkg cryptokit basic_md5_with_optional_file_broken.native</userinput>
 <computeroutput>File &quot;basic_md5_with_optional_file_broken.ml&quot;, line 18, characters 4-11:</computeroutput>
 <computeroutput>Error: This expression has type string -&gt; unit -&gt; unit</computeroutput>
@@ -17436,7 +17436,7 @@ let () =
         We can adapt our example to use the new information and read
         from standard input if no file is specified.
       </para>
-      <programlisting language="ocaml"><lineannotation>⌘ OCaml: <filename>command-line-parsing/basic_md5_with_optional_file.ml</filename></lineannotation>
+      <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>command-line-parsing/basic_md5_with_optional_file.ml</filename></lineannotation>
 open Core.Std
 
 let get_inchan = function
@@ -17481,7 +17481,7 @@ let () =
         example, but replaces <literal>maybe</literal> with
         <literal>maybe_with_default</literal>.
       </para>
-      <programlisting language="ocaml"><lineannotation>⌘ OCaml: <filename>command-line-parsing/basic_md5_with_default_file.ml</filename></lineannotation>
+      <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>command-line-parsing/basic_md5_with_default_file.ml</filename></lineannotation>
 open Core.Std
 
 let get_inchan = function
@@ -17511,7 +17511,7 @@ let () =
         Building and running both against a system file confirms that
         they have the same behavior.
       </para>
-      <programlisting language="console"><lineannotation>⌘ Terminal: <filename>command-line-parsing/run_basic_and_default_md5.out</filename></lineannotation>
+      <programlisting language="console"><lineannotation>✎ Terminal: <filename>command-line-parsing/run_basic_and_default_md5.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>cat /etc/passwd | ./basic_md5_with_optional_file.native</userinput>
 <computeroutput>8cfb68a5622dd12932df658a54698aad</computeroutput>
 <prompt>$ </prompt><userinput>cat /etc/passwd | ./basic_md5_with_default_file.native</userinput>
@@ -17526,7 +17526,7 @@ let () =
         let's modify our MD5 code to take a collection of files to
         process on the command line.
       </para>
-      <programlisting language="ocaml"><lineannotation>⌘ OCaml: <filename>command-line-parsing/basic_md5_sequence.ml</filename></lineannotation>
+      <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>command-line-parsing/basic_md5_sequence.ml</filename></lineannotation>
 open Core.Std
 
 let do_hash filename ic =
@@ -17579,7 +17579,7 @@ let () =
       <literal>-t</literal> runs a self-test. The complete example is
       below.
     </para>
-    <programlisting language="ocaml"><lineannotation>⌘ OCaml: <filename>command-line-parsing/basic_md5_with_flags.ml</filename></lineannotation>
+    <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>command-line-parsing/basic_md5_with_flags.ml</filename></lineannotation>
 open Core.Std
 open Cryptokit
 
@@ -17627,7 +17627,7 @@ let () = Command.run command</programlisting>
       <literal>doc</literal> text with a blank space. The help text for
       the above code looks like this.
     </para>
-    <programlisting language="console"><lineannotation>⌘ Terminal: <filename>command-line-parsing/run_basic_md5_flags_help.out</filename></lineannotation>
+    <programlisting language="console"><lineannotation>✎ Terminal: <filename>command-line-parsing/run_basic_md5_flags_help.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>./basic_md5_with_flags.native -help</userinput>
 <computeroutput>Generate an MD5 hash of the input data</computeroutput>
 <computeroutput> </computeroutput>
@@ -17736,7 +17736,7 @@ let () = Command.run command</programlisting>
       package manager (or, in the non-OCaml world, the Git or Mercurial
       commands). OPAM exposes commands in this form.
     </para>
-    <programlisting language="console"><lineannotation>⌘ Terminal: <filename>command-line-parsing/opam.out</filename></lineannotation>
+    <programlisting language="console"><lineannotation>✎ Terminal: <filename>command-line-parsing/opam.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>opam config env</userinput>
 <prompt>$ </prompt><userinput>opam remote list -k git</userinput>
 <prompt>$ </prompt><userinput>opam install --help</userinput>
@@ -17758,7 +17758,7 @@ let () = Command.run command</programlisting>
       of specifications and handles the sub-command parsing and help
       output for you.
     </para>
-    <programlisting language=""><lineannotation>⌘ OCaml UTop: <filename>command-line-parsing/group.topscript</filename></lineannotation>
+    <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>command-line-parsing/group.topscript</filename></lineannotation>
 <prompt># </prompt><userinput>Command.basic ;;</userinput>
 <computeroutput>- : summary:string -&gt;</computeroutput>
 <computeroutput>    ?readme:(unit -&gt; string) -&gt;</computeroutput>
@@ -17781,7 +17781,7 @@ let () = Command.run command</programlisting>
       define a command that adds days to an input date and prints the
       resulting date.
     </para>
-    <programlisting language="ocaml"><lineannotation>⌘ OCaml: <filename>command-line-parsing/cal_add_days.ml</filename></lineannotation>
+    <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>command-line-parsing/cal_add_days.ml</filename></lineannotation>
 open Core.Std
 
 let add =
@@ -17806,7 +17806,7 @@ let () = Command.run add</programlisting>
       of creating a new binary, we group both operations as sub-commands
       using <literal>Command.group</literal>.
     </para>
-    <programlisting language="ocaml"><lineannotation>⌘ OCaml: <filename>command-line-parsing/cal_add_sub_days.ml</filename></lineannotation>
+    <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>command-line-parsing/cal_add_sub_days.ml</filename></lineannotation>
 open Core.Std
 
 let add =
@@ -17844,7 +17844,7 @@ let () = Command.run command</programlisting>
       build the example first in the usual way and inspect the help
       output, which now reflects the sub-commands we just added.
     </para>
-    <programlisting language="ocaml"><lineannotation>⌘ Terminal: <filename>command-line-parsing/build_cal_add_sub_days.out</filename></lineannotation>
+    <programlisting language="ocaml"><lineannotation>✎ Terminal: <filename>command-line-parsing/build_cal_add_sub_days.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>corebuild cal_add_sub_days.native</userinput>
 <prompt>$ </prompt><userinput>./cal_add_sub_days.native -help</userinput>
 <computeroutput>Manipulate dates</computeroutput>
@@ -17863,7 +17863,7 @@ let () = Command.run command</programlisting>
       We can invoke the two commands we just defined to verify that they
       work and see the date parsing in action.
     </para>
-    <programlisting language="console"><lineannotation>⌘ Terminal: <filename>command-line-parsing/run_cal_add_sub_days.out</filename></lineannotation>
+    <programlisting language="console"><lineannotation>✎ Terminal: <filename>command-line-parsing/run_cal_add_sub_days.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>./cal_add_sub_days.native add 2012-12-25 40</userinput>
 <computeroutput>2013-02-03</computeroutput>
 <prompt>$ </prompt><userinput>./cal_add_sub_days.native diff 2012-12-25 2012-11-01</userinput>
@@ -17940,7 +17940,7 @@ let () = Command.run command</programlisting>
         returns a value of type <literal>'r</literal>. Let's look at
         some examples of specs, and their types:
       </para>
-      <programlisting language=""><lineannotation>⌘ OCaml UTop: <filename>command-line-parsing/command_types.topscript</filename></lineannotation>
+      <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>command-line-parsing/command_types.topscript</filename></lineannotation>
 <prompt># </prompt><userinput>Command.Spec.empty ;;</userinput>
 <computeroutput>- : ('m, 'm) Command.Spec.t = &lt;abstr&gt;</computeroutput>
 <prompt># </prompt><userinput>Command.Spec.(empty +&gt; anon (&quot;foo&quot; %: int)) ;;</userinput>
@@ -17962,7 +17962,7 @@ let () = Command.run command</programlisting>
         The type of <literal>Command.basic</literal> should make more
         sense now:
       </para>
-      <programlisting language=""><lineannotation>⌘ OCaml UTop: <filename>command-line-parsing/basic.topscript</filename></lineannotation>
+      <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>command-line-parsing/basic.topscript</filename></lineannotation>
 <prompt># </prompt><userinput>Command.basic ;;</userinput>
 <computeroutput>- : summary:string -&gt;</computeroutput>
 <computeroutput>    ?readme:(unit -&gt; string) -&gt;</computeroutput>
@@ -17991,7 +17991,7 @@ let () = Command.run command</programlisting>
         together. Let's add some dummy verbosity and debug flags to our
         calendar application to illustrate this.
       </para>
-      <programlisting language="ocaml"><lineannotation>⌘ OCaml: <filename>command-line-parsing/cal_append.ml</filename></lineannotation>
+      <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>command-line-parsing/cal_append.ml</filename></lineannotation>
 open Core.Std
 
 let add ~common =
@@ -18026,7 +18026,7 @@ let diff ~common =
         <literal>common</literal> parameter after each specification. We
         can supply these flags when defining the groups.
       </para>
-      <programlisting language="ocaml"><lineannotation>⌘ OCaml: <filename>command-line-parsing/cal_append.ml</filename>, continued (part 1)</lineannotation>
+      <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>command-line-parsing/cal_append.ml</filename> (part 1)</lineannotation>
 let () =
   let common =
     Command.Spec.(
@@ -18050,7 +18050,7 @@ let () =
         For example, if we remove the <literal>verbose</literal> flag
         and recompile, we'll get this impressively long type error:
       </para>
-      <programlisting language="console"><lineannotation>⌘ Terminal: <filename>command-line-parsing/build_cal_append_broken.out</filename></lineannotation>
+      <programlisting language="console"><lineannotation>✎ Terminal: <filename>command-line-parsing/build_cal_append_broken.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>corebuild cal_append_broken.native</userinput>
 <computeroutput>File &quot;cal_append_broken.ml&quot;, line 38, characters 45-52:</computeroutput>
 <computeroutput>Error: This expression has type</computeroutput>
@@ -18080,7 +18080,7 @@ let () =
         revisit our first calendar application that added a number of
         days onto a supplied base date.
       </para>
-      <programlisting language="ocaml"><lineannotation>⌘ OCaml: <filename>command-line-parsing/cal_add_days.ml</filename></lineannotation>
+      <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>command-line-parsing/cal_add_days.ml</filename></lineannotation>
 open Core.Std
 
 let add =
@@ -18107,7 +18107,7 @@ let () = Command.run add</programlisting>
         a number of days if only the <literal>base</literal> date is
         supplied.
       </para>
-      <programlisting language="ocaml"><lineannotation>⌘ OCaml: <filename>command-line-parsing/cal_add_interactive.ml</filename></lineannotation>
+      <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>command-line-parsing/cal_add_interactive.ml</filename></lineannotation>
 open Core.Std
 
 let add_days base span () =
@@ -18155,7 +18155,7 @@ let () = Command.run add</programlisting>
         value that is passed onto the next callback now has a
         non-optional <literal>int</literal> type.
       </para>
-      <programlisting language="console"><lineannotation>⌘ Terminal: <filename>command-line-parsing/build_and_run_cal_add_interactive.out</filename></lineannotation>
+      <programlisting language="console"><lineannotation>✎ Terminal: <filename>command-line-parsing/build_and_run_cal_add_interactive.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>ocamlbuild -use-ocamlfind -tag thread -pkg core cal_add_interactive.native</userinput>
 <prompt>$ </prompt><userinput>./cal_add_interactive.native 2013-12-01</userinput>
 <computeroutput>enter days:</computeroutput>
@@ -18172,7 +18172,7 @@ let () = Command.run add</programlisting>
         This transformation is explicitly represented in the type of the
         <literal>step</literal> return value:
       </para>
-      <programlisting language=""><lineannotation>⌘ OCaml UTop: <filename>command-line-parsing/step.topscript</filename></lineannotation>
+      <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>command-line-parsing/step.topscript</filename></lineannotation>
 <prompt># </prompt><userinput>open Command.Spec ;;</userinput>
 <prompt># </prompt><userinput>step (fun m (base:Date.t) days -&gt;</userinput>
 <userinput>  match days with</userinput>
@@ -18197,7 +18197,7 @@ let () = Command.run add</programlisting>
         interfaces or make things more explicit by adding labeled
         arguments.
       </para>
-      <programlisting language="ocaml"><lineannotation>⌘ OCaml: <filename>command-line-parsing/cal_add_labels.ml</filename></lineannotation>
+      <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>command-line-parsing/cal_add_labels.ml</filename></lineannotation>
 open Core.Std
 
 let add_days ~base_date ~num_days () =
@@ -18349,14 +18349,14 @@ let () = Command.run add</programlisting>
         <command>basic_md5_with_flags</command> in the current
         directory.
       </para>
-      <programlisting language="console"><lineannotation>⌘ Terminal: <filename>command-line-parsing/md5_completion.out</filename></lineannotation>
+      <programlisting language="console"><lineannotation>✎ Terminal: <filename>command-line-parsing/md5_completion.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>env COMMAND_OUTPUT_INSTALLATION_BASH=1 ./basic_md5_with_flags.native</userinput>
-<computeroutput>function _jsautocom_18061 {</computeroutput>
+<computeroutput>function _jsautocom_24417 {</computeroutput>
 <computeroutput>  export COMP_CWORD</computeroutput>
 <computeroutput>  COMP_WORDS[0]=./basic_md5_with_flags.native</computeroutput>
 <computeroutput>  COMPREPLY=($(&quot;${COMP_WORDS[@]}&quot;))</computeroutput>
 <computeroutput>}</computeroutput>
-<computeroutput>complete -F _jsautocom_18061 ./basic_md5_with_flags.native</computeroutput>
+<computeroutput>complete -F _jsautocom_24417 ./basic_md5_with_flags.native</computeroutput>
 </programlisting>
       <para>
         Recall that we used the <literal>Arg_type.file</literal> to
@@ -18374,7 +18374,7 @@ let () = Command.run add</programlisting>
         output to a file in your current directory and source it into
         your current shell.
       </para>
-      <programlisting language="console"><lineannotation>⌘ Terminal: <filename>command-line-parsing/cal_completion.out</filename></lineannotation>
+      <programlisting language="console"><lineannotation>✎ Terminal: <filename>command-line-parsing/cal_completion.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>env COMMAND_OUTPUT_INSTALLATION_BASH=1 ./cal_add_sub_days.native &gt; cal.cmd</userinput>
 <prompt>$ </prompt><userinput>. cal.cmd</userinput>
 <prompt>$ </prompt><userinput>./cal_add_sub_days.native &lt;tab&gt;</userinput>
