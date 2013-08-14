@@ -578,7 +578,7 @@ types defined earlier can be allocated as blocks via the `Array` module.
 The array functions are similar to those in the standard library `Array`
 module except that they operate on arrays stored using the flat C
 representation rather than the OCaml representation described in
-[xref](#runtime-memory-layout).
+[xref](#memory-representation-of-values).
 
 As with standard OCaml arrays, the conversion between arrays and lists
 requires copying the values, which can be expensive for large data structures.
