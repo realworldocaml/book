@@ -1,8 +1,7 @@
 Using fo/series/animal.xsl stylesheet... 
 Showing comments and <remark>s: true...
 Showing draft timestamps: true...
-Expanding book to /mnt/work/work/tools/svn_hooks/checkouts/internalbooks9781449323912current/book.xml.dcps.892.xml
-/mnt/work/work/tools/svn_hooks/checkouts/internalbooks9781449323912current/book.xml:24564: element note: validity error : Element note content does not follow the DTD, expecting (title? , (calloutlist | glosslist | bibliolist | itemizedlist | orderedlist | segmentedlist | simplelist | variablelist | literallayout | programlisting | programlistingco | screen | screenco | screenshot | synopsis | cmdsynopsis | funcsynopsis | classsynopsis | fieldsynopsis | constructorsynopsis | destructorsynopsis | methodsynopsis | formalpara | para | simpara | address | blockquote | graphic | graphicco | mediaobject | mediaobjectco | informalequation | informalexample | informalfigure | informaltable | equation | example | figure | table | procedure | sidebar | anchor | bridgehead | remark | indexterm | beginpage)+), got (title para para para para CDATA literal CDATA literal CDATA)
+Expanding book to /mnt/work/work/tools/svn_hooks/checkouts/internalbooks9781449323912current/book.xml.dcps.111.xml
 /mnt/work/work/tools/svn_hooks/checkouts/internalbooks9781449323912current/book.xml:24317: element xref: validity error : IDREF attribute linkend references an unknown ID "runtime-memory-layout"
 Document /mnt/work/work/tools/svn_hooks/checkouts/internalbooks9781449323912current/book.xml does not validate
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
