@@ -373,7 +373,7 @@ S-expressions are a serialization format used commonly in Core, and
 are required here to enable better error messages.  We'll discuss
 s-expressions more in [xref](#data-serialization-with-s-expressions),
 but in the meantime, we can just use the `with sexp` declaration that
-comes from the `sexplib` syntax extension to create s-expression
+comes from the Sexplib syntax extension to create s-expression
 converters for us.
 
 The following example shows how this all fits together, following the

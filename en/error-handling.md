@@ -142,7 +142,7 @@ s-expression:
 ((typ scheme)(name error-handling/sexpr.scm))
 ```
 
-S-expressions are supported by the `sexplib` package that is
+S-expressions are supported by the Sexplib package that is
 distributed with Core, and is the most common serialization format
 used in Core.  Indeed, most types in Core come with built-in
 s-expression converters.  Here's an example of creating an error using
