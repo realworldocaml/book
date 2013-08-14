@@ -18,12 +18,16 @@ An example s-expression might look like this.
 ```
 
 S-expressions are a good choice for a data serialization format that is not
-only human-editable, but also easy to automatically convert to-and-from
-standard OCaml type definitions without writing a lot of boilerplate code by
-hand.  This is useful day-to-day when you need to write code that can
-succinctly parse and generate configuration files or logging messages, or even
-RPC clients and servers that convert OCaml datatypes into messages in a
-distributed system.
+only human-editable, but also easy to automatically convert between standard
+OCaml type definitions without writing a lot of boilerplate code by hand. We
+define the process of converting an OCaml data type to an s-expression as
+_serialization_, and conversely the parsing of an s-expression into an OCaml
+value as _deserialization_.
+
+Both are useful day-to-day when you need to write code that can succinctly
+parse and generate configuration files, emit and collect logging messages, or
+even to build clients and servers that convert OCaml datatypes into messages in
+a distributed system.
 
 To this end, this chapter will show you how to:
 
