@@ -13,9 +13,10 @@ The basic syntax of a variant type declaration is as follows.
 ((typ ocamlsyntax)(name variants/variant.syntax))
 ```
 
-Each row starts with a tag that identifies that case, and in addition,
-there may be a collection of fields, each with its own type, that is
-associated with a given tag.
+Each row essentially represents a case of the variant.  Each case has
+an assocaited tag, and may optionally have a sequence of fields, where
+each field has a specified type.  These fields specify the type of the
+data associated with each case.
 
 Let's consider a concrete example of how variants can be useful.
 Almost all terminals support a set of 8 basic colors, and we can
@@ -40,7 +41,7 @@ Using the above, we can generate escape codes to change the color of a
 given string displayed in a terminal.
 
 ```frag
-((typ ocamltop)(name variants/main.topscript)(part 2))
+((typ ocamlrawtop)(name variants/main-2.rawscript))
 ```
 
 On most terminals, that word "Blue" will be rendered in blue.
@@ -48,8 +49,8 @@ On most terminals, that word "Blue" will be rendered in blue.
 In this example, the cases of the variant are simple tags with no
 associated data.  This is substantively the same as the enumerations
 found in languages like C and Java.  But as we'll see, variants can do
-considerably more than represent a simple enumeration.  Indeed, an
-enumeration isn't enough to effectively describe the full set of
+considerably more than represent a simple enumeration.  As it happens,
+an enumeration isn't enough to effectively describe the full set of
 colors that a modern terminal can display.  Many terminals, including
 the venerable `xterm`, support 256 different colors, broken up into
 the following groups.
@@ -79,12 +80,12 @@ extract the data associated with each tag.
 Now, we can print text using the full set of available colors.
 
 ```frag
-((typ ocamltop)(name variants/main.topscript)(part 5))
+((typ ocamlrawtop)(name variants/main-5.rawscript))
 ```
 
-<note><title>Catch-all cases and refactoring</title>
+## Catch-all cases and refactoring
 
-OCaml's type system can act as a refactoring tool, by warning you of
+OCaml's type system can act as a refactoring tool, warning you of
 places where your code needs to be updated to match an interface
 change.  This is particularly valuable in the context of variants.
 
@@ -144,8 +145,6 @@ system will no longer warn us that we have missed the new `Bold` case
 when we change the type to include it.  We can get this check back by
 avoiding the catch-all case, and instead being explicit about the tags
 that are ignored.
-
-</note>
 
 ## Combining records and variants
 
