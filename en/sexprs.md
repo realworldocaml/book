@@ -261,9 +261,6 @@ Again, loading the file as an s-expression drops the comments.
 ((typ ocamltop)(name sexpr/example_load.topscript)(part 1))
 ```
 
-Note that the comments were dropped from the file upon reading.  This is
-expected, since there's no place in the `Sexp.t` type to store comments.
-
 If we introduce an error into our s-expression, by, say, creating a
 file `broken_example.scm` which is `example.scm` without open-paren in
 front of `bar`, we'll get a parse error:
