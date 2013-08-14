@@ -633,11 +633,11 @@ Since type descriptions are regular values, we can just use `let` in place of
 ```
 
 We only use `compare_t` once (in the `qsort` definition), so you can choose to
-inline it in the OCaml code if you prefer. The resulting `qsort` value is a
-higher-order function, as shown by its type.  As before, let's define a wrapper
-function to make `qsort` easier to use.  The second and third arguments to
-`qsort` specify the length (number of elements) of the array and the element
-size.
+inline it in the OCaml code if you prefer. As the type shows, the resulting
+`qsort` value is a higher-order function, since its the fourth argument is
+itself a function.  As before, let's define a wrapper function to make `qsort`
+easier to use.  The second and third arguments to `qsort` specify the length
+(number of elements) of the array and the element size.
 
 Arrays created using Ctypes have a richer runtime structure than C arrays, so
 we don't need to pass size information around.  Furthermore, we can use OCaml
