@@ -347,9 +347,9 @@ Here is the type signature of the `Ctypes.view` function.
 ((typ ocaml)(name ctypes/ctypes.mli)(part 2))
 ```
 
-Ctypes has some internal low-level functions conversion functions that map
-between an OCaml `string` and a C character buffer by copying the contents
-into the respective data structure.  They have the following type signature.
+Ctypes has some internal low-level conversion functions that map between an
+OCaml `string` and a C character buffer by copying the contents into the
+respective data structure.  They have the following type signature.
 
 ```frag
 ((typ ocaml)(name ctypes/ctypes.mli)(part 3))
