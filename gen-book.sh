@@ -71,7 +71,8 @@ mkdir -p build/${LINGUA}/source build/${LINGUA}/html
 echo Inserting code fragments in Markdown
 mkdir -p build/${LINGUA}/md-ora
 for i in ${SRCS}; do
-  ./scripts/_build/transform_markdown.native < ${LINGUA}/${i} > build/${LINGUA}/md-ora/${i}
+#  ./scripts/_build/transform_markdown.native < ${LINGUA}/${i} > build/${LINGUA}/md-ora/${i}
+  cp ${LINGUA}/${i} build/${LINGUA}/md-ora/${i}
   SRCS_WEB="${SRCS_WEB} en/${i}"
   SRCS_ORA="${SRCS_ORA} build/${LINGUA}/md-ora/${i}"
 done
@@ -82,8 +83,10 @@ pandoc -f markdown -t docbook --chapters --template rwo.docbook -o build/${LINGU
 pandoc -f markdown -t docbook --chapters --template rwo-oreilly.docbook -o build/${LINGUA}/source/rwo-pre-oreilly.xml ${SRCS_ORA}
 TRANSFORM_DOCBOOK=./scripts/_build/transform_pandocbook.native
 ${TRANSFORM_DOCBOOK} ${PUBLIC} ${CHAPTERS} build/${LINGUA}/source/rwo-pre.xml > build/${LINGUA}/source/rwo.xml
-${TRANSFORM_DOCBOOK} ${PUBLIC} ${CHAPTERS} build/${LINGUA}/source/rwo-pre-oreilly.xml > build/${LINGUA}/source/rwo-oreilly.xml
+${TRANSFORM_DOCBOOK} --subst ${PUBLIC} ${CHAPTERS} build/${LINGUA}/source/rwo-pre-oreilly.xml > build/${LINGUA}/source/rwo-oreilly.xml
 xsltproc --nonet --output build/${LINGUA}/html/ stylesheets/${LINGUA}/web.xsl build/${LINGUA}/source/rwo.xml
+mkdir -p build${LINGUA}/html-ora
+xsltproc --nonet --output build/${LINGUA}/html-ora/ stylesheets/${LINGUA}/web.xsl build/${LINGUA}/source/rwo-oreilly.xml
 
 echo The raw HTML is in build/${LINGUA}/html.
 echo "The Docbook is in build/${LINGUA}/source/rwo[-oreilly].xml"

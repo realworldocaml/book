@@ -126,11 +126,11 @@ application code.
 <title>Setting the size of the minor heap</title>
 
 The default minor heap size in OCaml is normally 2MB on 64-bit platforms, but
-this is increased to 8MB if you use Core (which generally improves performance
-but at the cost of a bigger memory profile by default).
-This setting can be overridden unless overridden by
-the `s=<words>` argument to `OCAMLRUNPARAM`.  You can change it after the
-program has started by calling the `Gc.set` function.
+this is increased to 8MB if you use Core (which generally prefers default
+settings that improves performance but at the cost of a bigger memory profile).
+This setting can be overridden via the `s=<words>` argument to `OCAMLRUNPARAM`.
+You can change it after the program has started by calling the `Gc.set`
+function.
 
 ```frag
 ((typ ocamltop)(name gc/tune.topscript)(part 0))

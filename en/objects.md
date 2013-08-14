@@ -225,11 +225,10 @@ We'll introduce you to classes, and examples using open recursion, in
 
 Subtyping is a central concept in object-oriented programming.  It
 governs when an object with one type _A_ can be used in an expression
-that expects an object of another type _B_.  When this is true, we say
-that _A_ is a _subtype_ of _B_.  Actually, more concretely, subtyping
+that expects an object of another type _B_.  When this is true, we
+say that _A_ is a _subtype_ of _B_.  More concretely, subtyping
 restricts when the coercion operator `e :> t` can be applied.  This
-coercion works only if the expression `e` has some type `s` and `s` is
-a subtype of `t`.
+coercion works only if the type of `e` is a subtype of `t`.
 
 ### Width subtyping
 
@@ -257,8 +256,9 @@ subtype of `shape` because it implements all of the methods of `shape`
 
 ### Depth subtyping
 
-We can also use _depth_ subtyping with objects. Depth subtyping, in its most
-general form, says that an object type `< m: t1 >` is a subtype of `< m: t2 >`
+We can also use _depth_ subtyping with objects. Depth subtyping
+allows us coerce an object if its individual methods could safely be
+coerced. So an object type `< m: t1 >` is a subtype of `< m: t2 >`
 iff `t1` is a subtype of `t2`.
 
 For example, we can create two objects with a `shape` method:
@@ -274,7 +274,8 @@ type, so they can both be coerced into the object type `< shape : shape >`
 ((typ ocamltop)(name objects/subtyping.topscript)(part 3))
 ```
 
-### Polymorphic variant subtyping
+<note>
+<title>Polymorphic variant subtyping</title>
 
 Subtyping can also be used to coerce a polymorphic variant into a larger
 polymorphic variant type. A polymorphic variant type _A_ is a subtype of _B_,
@@ -283,6 +284,8 @@ if the tags of _A_ are a subset of the tags of _B_.
 ```frag
 ((typ ocamltop)(name objects/subtyping.topscript)(part 4))
 ```
+
+</note>
 
 ### Variance
 
@@ -419,7 +422,7 @@ essentially provide the ability to enumerate the methods in an object.
 To check whether an object `obj` has some method `foo : int`, one
 would attempt a coercion `(obj :> < foo : int >)`.
 
-More commonly, narrowing leads to poor object-oriented style.
+More pragmatically, narrowing leads to poor object-oriented style.
 Consider the following Java code, which returns the name of a shape
 object.
 

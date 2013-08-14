@@ -5,6 +5,14 @@
 open Core.Std
 open Chapter
 
+let string_of_data d =
+  let b = Buffer.create 100 in
+  List.iter ~f:(function
+    |`Data x -> Buffer.add_string b x
+    |_ -> failwith "unexpected tag in data"
+  ) d;
+  Buffer.contents b
+
 let mk_tag ?(attrs=[]) tag_name contents =                                                                            
   let attrs : Xmlm.attribute list = List.map ~f:(fun (k,v) -> ("",k),v) attrs in                                         
   let tag = ("", tag_name), attrs in                                                                                  
@@ -83,6 +91,22 @@ module Transform = struct
         ) children
     |_ -> failwith "<book> tag not found"
 
+  (* Substitute a <programlisting> tag with the appropriate code block *)
+  let rewrite_programlisting it =
+    let rec aux = function
+      | `El ( (("","programlisting"),_), contents) ->
+        let open Code_frag in
+        let cf = of_string (string_of_data contents) in
+        let contents = 
+          try Cow.Xml.of_string (read ~ext:"xml" cf) 
+          with _ -> [`Data "???"] in (* TODO temporary *)
+        let lang = typ_to_docbook_language (typ_of_string cf.typ) in
+        mk_tag ~attrs:[("language",lang)] "programlisting" contents
+      | `El (tag, children) ->
+        `El (tag, List.map ~f:aux children)
+      | x -> x
+    in aux it
+
   (* Given a list of input chapters and the book XML, output
    * a book with <part> tags and the desired chapters.
    * If [public] is true then only show public chapters and stub out rest *)
@@ -125,13 +149,14 @@ module Transform = struct
     mk_tag "book"
 end
 
-let apply_transform parts_file book public =
+let apply_transform parts_file book public plsubst =
   try
     let parts = Sexp.load_sexps_conv_exn parts_file chapter_of_sexp in
     let o = Xmlm.make_output (`Channel stdout) in
     Xmlm.make_input (`Channel (open_in book))
     |> Xml_tree.in_tree
-    |> fun (dtd, t) -> Transform.rewrite_linkend t
+    |> fun (dtd, t) ->    Transform.rewrite_linkend t
+                       |> (if plsubst then Transform.rewrite_programlisting else ident)
                        |> Transform.add_parts public parts
                        |> fun t -> Xml_tree.out_tree o (dtd, t)
   with Xmlm.Error ((line,col),e) -> (
@@ -145,6 +170,7 @@ let _ =
   let book = Arg.(required & pos 1 (some non_dir_file) None & info [] ~docv:"DOCBOOK"
                     ~doc:"Docbook source to transform with the $(i,<part>) tags. This file should have been output from $(b,pandoc).") in
   let public = Arg.(value & flag & info ["public"] ~doc:"Filter the chapter list to only output the ones marked as $(i,public) in the $(i,CHAPTERS) file.") in
+  let plsubst = Arg.(value & flag & info ["subst"] ~doc:"Substitute $(i,<programlisting>) tags with their frag values. For OReilly backend only.") in
   let info = Term.info "transform_pandocbook" ~version:"1.0.0" ~doc:"customise the Real World OCaml Docbook" in
-  let cmd_t = Term.(pure apply_transform $ parts $ book $ public) in
+  let cmd_t = Term.(pure apply_transform $ parts $ book $ public $ plsubst) in
   match Term.eval (cmd_t, info) with `Ok x -> x |_ -> exit 1
