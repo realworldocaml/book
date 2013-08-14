@@ -581,10 +581,11 @@ module except that they operate on arrays stored using the flat C
 representation rather than the OCaml representation described in
 [xref](#runtime-memory-layout).
 
-The conversion between arrays and lists still requires copying the values, and
-can be expensive for large data structures.  Notice that you can also convert
-an array into a `ptr` pointer to the head of buffer, which can be useful if you
-need to pass the pointer and size arguments separately to a C function.
+As with standard OCaml arrays, the conversion between arrays and lists
+requires copying the values, which can be expensive for large data structures.
+Notice that you can also convert an array into a `ptr` pointer to the head of
+the underlying buffer, which can be useful if you need to pass the pointer and
+size arguments separately to a C function.
 
 Unions in C are named structures that can be mapped onto the same underlying
 memory.  They are also fully supported in Ctypes, but we won't go into more
