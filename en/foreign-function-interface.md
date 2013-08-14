@@ -433,10 +433,7 @@ add those next.
 
 The `field` function appends a field to the structure, as shown with `tv_sec`
 and `tv_usec` above.  Structure fields are typed accessors that are associated
-with a particular structure, and they correspond to the labels in C.  Note
-that there's no explicit requirement that the OCaml variable names for a field
-are the same as the corresponding C struct label names, but it helps avoid
-confusion.
+with a particular structure, and they correspond to the labels in C.
 
 Every field addition mutates the structure variable and records a new size (the
 exact value of which depends on the type of the field that was just added).
