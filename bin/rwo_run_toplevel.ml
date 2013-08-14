@@ -375,7 +375,7 @@ let parse_file fullfile file =
         fun acc line ->
           if String.is_prefix line ~prefix:"#part" then begin
             part := Scanf.sscanf line "#part %d" (fun p -> p);
-            eprintf "C: part %d -> %s\n%!" !part (ofile file !part); 
+            eprintf "C: part %d -> %s\n%!" !part (ofile file !part);
             []
           end else begin
             if String.is_suffix ~suffix:";;" line then begin
@@ -383,7 +383,10 @@ let parse_file fullfile file =
               eprintf "X: %s\n%!" phrase;
               match toploop_eval phrase with
               | `Normal(s, stdout, stderr) |`Error (s,stdout,stderr) ->
-                print_part ~phrase ~sout:stdout ~serr:stderr ~out:s !part; 
+                eprintf "c: %s\n%!" s;
+                eprintf "o: %s\n%!" stdout;
+                eprintf "e: %s\n%!" stderr;
+                print_part ~phrase ~sout:stdout ~serr:stderr ~out:s !part;
                 print_html_part !part (Cow.Html.to_string (Cow.Code.ocaml_fragment ("# " ^ phrase)));
                 let sout = if stdout = "" then <:html<&>> else <:html<<br />$str:stdout$>> in
                 let serr = if stderr = "" then <:html<&>> else <:html<<br />$str:stderr$>> in
