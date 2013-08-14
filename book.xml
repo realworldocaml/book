@@ -20824,28 +20824,29 @@ end</programlisting>
 </programlisting>
     <para>
       All in, the s-expression format actually supports three comment
-      syntaxes:
+      syntaxes.
     </para>
-    <itemizedlist>
-      <listitem>
-        <para>
-          <literal>;</literal>, which comments out everything to the end
-          of a line
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <literal>#|</literal> and <literal>|#</literal>, which are
-          delimiters for commenting out a block
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <literal>#;</literal>, which comments out the first complete
-          s-expression that follows.
-        </para>
-      </listitem>
-    </itemizedlist>
+    <variablelist><title>
+    S-expression comment formats
+    </title>
+      
+    <varlistentry> <term><literal>;</literal></term> <listitem>
+    <para>
+    comments out everything to the end of line
+    </para>
+    </listitem> </varlistentry> <varlistentry>
+    <term><literal>#|</literal></term>
+    <term><literal>|#</literal></term> <listitem>
+    <para>
+    delimiters for commenting out a block
+    </para>
+    </listitem> </varlistentry> <varlistentry>
+    <term><literal>#;</literal></term> <listitem>
+    <para>
+    comments out the first complete s-expression that follows
+    </para>
+    </listitem> </varlistentry>
+    </variablelist>
     <para>
       The following example shows all of these in action.
     </para>
