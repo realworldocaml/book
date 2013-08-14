@@ -81,10 +81,19 @@ how to automatically generate this function in the next section.
 ```
 
 In addition to providing the `Sexp` module, most of the base types in Core
-support conversion to and from s-expressions.  For example, we can write:
+support conversion to and from s-expressions.  For example, we can use the
+conversion functions defined in the respective modules for integers, strings
+and exceptions.
 
 ```frag
-((typ ocamltop)(name sexpr/to_from_sexp.topscript))
+((typ ocamltop)(name sexpr/to_from_sexp.topscript)(part 0))
+```
+
+It's also possible to convert more complex types such as lists or arrays that
+are polymorphic across the types that they an contain.
+
+```frag
+((typ ocamltop)(name sexpr/to_from_sexp.topscript)(part 1))
 ```
 
 Notice that `List.sexp_of_t` is polymorphic, and takes as its first argument
