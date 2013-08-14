@@ -237,7 +237,7 @@ some of them need a bit more explanation.
   size and alignment requirements for `size_t` varies between platforms. Ctypes provides
   an OCaml `size_t` type that is aliased to the appropriate integer type.
 * OCaml only supports double-precision floating-point numbers, and so the C `float` and
-  `double` functions both map onto the OCaml `float` type.
+  `double` types both map onto the OCaml `float` type.
 
 ## Pointers and arrays
 
