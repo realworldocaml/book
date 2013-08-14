@@ -568,8 +568,8 @@ function definitions.
 
 ### Defining arrays
 
-Arrays in C are contiguous blocks of the same value.  Any of the basic types
-defined earlier can be allocated as blocks via the `Array` module.
+Arrays in C are contiguous blocks of the same type of value.  Any of the basic
+types defined earlier can be allocated as blocks via the `Array` module.
 
 ```frag
 ((typ ocaml)(name ctypes/ctypes.mli)(part 5))
