@@ -483,9 +483,9 @@ ideally like.  Consider, for example, the following variant type:
 ((typ ocamltop)(name sexpr/sexp_list.topscript)(part 0))
 ```
 
-You might prefer to make the syntax a bit less parenthesis-laden by
-dropping the parentheses around the list.  `sexp_list` gives us this
-alternate syntax:
+You might prefer to make the syntax a bit less parenthesis-laden by dropping
+the parentheses around the list.  We can replace the `string list` in the type
+declaration with `string sexp_list` to give us this alternate syntax:
 
 ```frag
 ((typ ocamltop)(name sexpr/sexp_list.topscript)(part 1))
