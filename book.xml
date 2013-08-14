@@ -8224,11 +8224,11 @@ end</programlisting>
 (This (is an) (s expression))
 </programlisting>
       <para>
-        S-expressions are supported by the <literal>sexplib</literal>
-        package that is distributed with Core, and is the most common
-        serialization format used in Core. Indeed, most types in Core
-        come with built-in s-expression converters. Here's an example of
-        creating an error using the sexp converter for times,
+        S-expressions are supported by the Sexplib package that is
+        distributed with Core, and is the most common serialization
+        format used in Core. Indeed, most types in Core come with
+        built-in s-expression converters. Here's an example of creating
+        an error using the sexp converter for times,
         <literal>Time.sexp_of_t</literal>.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>error-handling/main.topscript</filename> (part 7)</lineannotation>
@@ -12033,11 +12033,11 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
 <computeroutput>- : Sexp.t = (This is (an s-expression))</computeroutput>
 </programlisting>
       <para>
-        Core comes with a syntax extension called
-        <literal>sexplib</literal> which can autogenerate s-expression
-        conversion functions from a type declaration. Attaching
-        <literal>with sexp</literal> to a type definition signals to the
-        extension to generate the converters. Thus, we can write:
+        Core comes with a syntax extension called Sexplib which can
+        autogenerate s-expression conversion functions from a type
+        declaration. Attaching <literal>with sexp</literal> to a type
+        definition signals to the extension to generate the converters.
+        Thus, we can write:
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>functors/main.topscript</filename> (part 24)</lineannotation>
 <prompt># </prompt><userinput>type some_type = int * string list with sexp;;</userinput>
@@ -12050,8 +12050,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
 <computeroutput>- : int * string list = (44, [&quot;five&quot;; &quot;six&quot;])</computeroutput>
 </programlisting>
       <para>
-        We'll discuss s-expressions and <literal>sexplib</literal> in
-        more detail in
+        We'll discuss s-expressions and Sexplib in more detail in
         <xref linkend="data-serialization-with-s-expressions"/>,
         but for now, let's see what happens if we attach the
         <literal>with sexp</literal> declaration to the definition of
@@ -12853,11 +12852,11 @@ include Foldable.Extend(Fqueue)</programlisting>
       <literal>(this (is an) (s expression))</literal>.
     </para>
     <para>
-      In addition, we use the <literal>sexplib</literal> syntax
-      extension which extends OCaml by adding the
-      <literal>with sexp</literal> declaration. When attached to a type
-      in a signature, <literal>with sexp</literal> adds declarations of
-      s-expression converters, <emphasis>e.g.</emphasis>,
+      In addition, we use the Sexplib syntax extension which extends
+      OCaml by adding the <literal>with sexp</literal> declaration. When
+      attached to a type in a signature, <literal>with sexp</literal>
+      adds declarations of s-expression converters,
+      <emphasis>e.g.</emphasis>,
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>fcm/query_handler.topscript</filename> (part 1)</lineannotation>
 <prompt># </prompt><userinput>module type M = sig type t with sexp end;;</userinput>
@@ -16414,8 +16413,8 @@ end</programlisting>
         <xref linkend="data-serialization-with-s-expressions"/>,
         but in the meantime, we can just use the
         <literal>with sexp</literal> declaration that comes from the
-        <literal>sexplib</literal> syntax extension to create
-        s-expression converters for us.
+        Sexplib syntax extension to create s-expression converters for
+        us.
       </para>
       <para>
         The following example shows how this all fits together,
@@ -20482,11 +20481,18 @@ null
   <para>
     S-expressions are a good choice for a data serialization format that
     is not only human-editable, but also easy to automatically convert
-    to-and-from standard OCaml type definitions without writing a lot of
-    boilerplate code by hand. This is useful day-to-day when you need to
-    write code that can succinctly parse and generate configuration
-    files or logging messages, or even RPC clients and servers that
-    convert OCaml datatypes into messages in a distributed system.
+    between standard OCaml type definitions without writing a lot of
+    boilerplate code by hand. We define the process of converting an
+    OCaml data type to an s-expression as
+    <emphasis>serialization</emphasis>, and conversely the parsing of an
+    s-expression into an OCaml value as
+    <emphasis>deserialization</emphasis>.
+  </para>
+  <para>
+    Both are useful day-to-day when you need to write code that can
+    succinctly parse and generate configuration files, emit and collect
+    logging messages, or even to build clients and servers that convert
+    OCaml datatypes into messages in a distributed system.
   </para>
   <para>
     To this end, this chapter will show you how to:
@@ -20550,15 +20556,12 @@ end</programlisting>
       <literal>Sexp.t</literal> type.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>sexpr/print_sexp.topscript</filename></lineannotation>
-<prompt># </prompt><userinput>let a x = Sexp.Atom x ;;</userinput>
-<computeroutput>val a : string -&gt; Sexp.t = &lt;fun&gt;</computeroutput>
-<prompt># </prompt><userinput>let l x = Sexp.List x ;;</userinput>
-<computeroutput>val l : Sexp.t list -&gt; Sexp.t = &lt;fun&gt;</computeroutput>
-<prompt># </prompt><userinput>let sexp = l [</userinput>
-<userinput>    a &quot;this&quot;;</userinput>
-<userinput>    l [a &quot;is&quot;; a &quot;an&quot;];</userinput>
-<userinput>    l [ a &quot;s&quot;; a &quot;expression&quot;] ] ;;</userinput>
-<computeroutput>val sexp : Sexp.t = (this (is an) (s expression))</computeroutput>
+<prompt># </prompt><userinput>Sexp.List [</userinput>
+<userinput>    Sexp.Atom &quot;this&quot;;</userinput>
+<userinput>    Sexp.List [ Sexp.Atom &quot;is&quot;; Sexp.Atom &quot;a&quot;];</userinput>
+<userinput>    Sexp.List [ Sexp.Atom &quot;s&quot;; Sexp.Atom &quot;expression&quot; ];</userinput>
+<userinput>  ];;</userinput>
+<computeroutput>- : Sexp.t = (this (is a) (s expression))</computeroutput>
 </programlisting>
     <para>
       This prints out nicely because Core registers a pretty printer
@@ -20591,14 +20594,26 @@ end</programlisting>
     <para>
       In addition to providing the <literal>Sexp</literal> module, most
       of the base types in Core support conversion to and from
-      s-expressions. For example, we can write:
+      s-expressions. For example, we can use the conversion functions
+      defined in the respective modules for integers, strings and
+      exceptions.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>sexpr/to_from_sexp.topscript</filename></lineannotation>
-<prompt># </prompt><userinput>Int.sexp_of_t 3 ;;</userinput>
+<prompt># </prompt><userinput>Int.sexp_of_t 3;;</userinput>
 <computeroutput>- : Sexp.t = 3</computeroutput>
-<prompt># </prompt><userinput>List.sexp_of_t ;;</userinput>
+<prompt># </prompt><userinput>String.sexp_of_t &quot;hello&quot;;;</userinput>
+<computeroutput>- : Sexp.t = hello</computeroutput>
+<prompt># </prompt><userinput>Exn.sexp_of_t (Invalid_argument &quot;foo&quot;);;</userinput>
+<computeroutput>- : Sexp.t = (Invalid_argument foo)</computeroutput>
+</programlisting>
+    <para>
+      It's also possible to convert more complex types such as lists or
+      arrays that are polymorphic across the types that they an contain.
+    </para>
+    <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>sexpr/to_from_sexp.topscript</filename> (part 1)</lineannotation>
+<prompt># </prompt><userinput>List.sexp_of_t;;</userinput>
 <computeroutput>- : ('a -&gt; Sexp.t) -&gt; 'a list -&gt; Sexp.t = &lt;fun&gt;</computeroutput>
-<prompt># </prompt><userinput>List.sexp_of_t Int.sexp_of_t [1; 2; 3] ;;</userinput>
+<prompt># </prompt><userinput>List.sexp_of_t Int.sexp_of_t [1; 2; 3];;</userinput>
 <computeroutput>- : Sexp.t = (1 2 3)</computeroutput>
 </programlisting>
     <para>
@@ -20607,6 +20622,20 @@ end</programlisting>
       the elements of the list to be converted. Core uses this scheme
       more generally for defining sexp-converters for polymorphic types.
     </para>
+    <para>
+      The deserialization functions to reconstruct an OCaml value from
+      an s-expression also have a similar signature. They will raise an
+      exception if you pass them a malformed s-expression that doesn't
+      match the structure of the OCaml type, so you should normally only
+      pass them output that was generated by the respective
+      <literal>sexp_of_t</literal> function.
+    </para>
+    <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>sexpr/to_from_sexp.topscript</filename> (part 2)</lineannotation>
+<prompt># </prompt><userinput>Int.t_of_sexp (Sexp.of_string &quot;1&quot;);;</userinput>
+<computeroutput>- : int = 1</computeroutput>
+<prompt># </prompt><userinput>List.t_of_sexp Int.t_of_sexp (Sexp.of_string &quot;(1 2 3)&quot;);;</userinput>
+<computeroutput>- : int list = [1; 2; 3]</computeroutput>
+</programlisting>
     <note>
     <title>
     More on toplevel printing
@@ -20670,13 +20699,13 @@ end</programlisting>
         Given how mechanical the code is, you could imagine writing a
         program that inspected the type definition and autogenerated the
         conversion code for you. As it turns out, we can do just that
-        using <literal>sexplib</literal>. The <literal>sexplib</literal>
-        package, which is included with Core, provides both a library
-        for manipulating s-expressions and a <emphasis>syntax
-        extension</emphasis> for generating such conversion functions.
-        With that syntax extension enabled, any type that has
-        <literal>with sexp</literal> as an annotation will trigger the
-        generation of the functions we want for free.
+        using Sexplib. The <literal>sexplib</literal> package, which is
+        included with Core, provides both a library for manipulating
+        s-expressions and a <emphasis>syntax extension</emphasis> for
+        generating such conversion functions. With that syntax extension
+        enabled, any type that has <literal>with sexp</literal> as an
+        annotation will trigger the generation of the functions we want
+        for free.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>sexpr/auto_making_sexp.topscript</filename></lineannotation>
 <prompt># </prompt><userinput>type t = { foo: int; bar: float } with sexp ;;</userinput>
@@ -20687,7 +20716,7 @@ end</programlisting>
 <computeroutput>- : t = {foo = 3; bar = 35.}</computeroutput>
 </programlisting>
       <para>
-        The <literal>sexplib</literal> syntax extension sees the
+        The Sexplib syntax extension sees the
         <literal>with sexp</literal> annotation replaces it with the
         definition of the conversions functions we see above.
       </para>
@@ -20746,27 +20775,24 @@ end</programlisting>
         OCaml doesn't directly support generating code from type
         definitions. Instead, it supplies a powerful syntax extension
         mechanism known as <literal>camlp4</literal>, which lets you
-        extend the grammar of the language. In the case of
-        <literal>sexplib</literal>, <literal>camlp4</literal> is used to
-        create s-expression conversion functions.
-        <literal>camlp4</literal> is well integrated into the OCaml
-        toolchain, and can be activated within the toplevel and also
-        included in compilation using the <literal>-pp</literal>
-        compiler flag.
+        extend the grammar of the language. In the case of Sexplib,
+        <command>camlp4</command> is used to create s-expression
+        conversion functions. <command>camlp4</command> is well
+        integrated into the OCaml toolchain, and can be activated within
+        the toplevel and also included in compilation using the
+        <literal>-pp</literal> compiler flag.
       </para>
       <para>
-        <literal>sexplib</literal> is part of a family of syntax
-        extensions, including <literal>comparelib</literal>, described
-        in <xref linkend="maps-and-hash-tables"/>, and
-        <literal>fieldslib</literal>, described in
-        <xref linkend="records"/>, that generate code based on
-        type declarations, and are all based on a common library called
-        <literal>type_conv</literal>. This library provides a common
+        Sexplib is part of a family of syntax extensions, including
+        Comparelib, described in
+        <xref linkend="maps-and-hash-tables"/>, and Fieldslib,
+        described in <xref linkend="records"/>, that generate
+        code based on type declarations, and are all based on a common
+        library called Type_conv. This library provides a common
         language for annotating types (<emphasis>e.g.</emphasis>, using
         the <literal>with</literal> notation) and utilities for working
         with type definitions. If you want to build your own type-driven
-        syntax extension, you should consider basing it on
-        <literal>type_conv</literal>.
+        syntax extension, you should consider basing it on Type_conv.
       </para>
       </note>
     </sect2>
@@ -20789,7 +20815,7 @@ end</programlisting>
  (bar &quot;this is () an \&quot; atom&quot;))
 </programlisting>
     <para>
-      can be loaded using sexplib. As you can see, the commented data is
+      can be loaded using Sexplib. As you can see, the commented data is
       not part of the resulting s-expression.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>sexpr/example_load.topscript</filename></lineannotation>
@@ -20950,8 +20976,7 @@ val contains : t -&gt; int -&gt; bool</programlisting>
 </programlisting>
     <para>
       We could export the types by hand in the signature, by writing the
-      signatures for the extra functions generated by
-      <literal>sexplib</literal>.
+      signatures for the extra functions generated by Sexplib.
     </para>
     <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>sexpr/int_interval_manual_sexp.mli</filename></lineannotation>
 open Core.Std
@@ -27067,9 +27092,8 @@ type t = {
 <computeroutput>Error: Syntax error</computeroutput>
 </programlisting>
     <para>
-      Now add in the syntax extension packages for
-      <literal>fieldslib</literal> and <literal>sexplib</literal>, and
-      everything will compile again.
+      Now add in the syntax extension packages for Fieldslib and
+      Sexplib, and everything will compile again.
     </para>
     <programlisting language="console"><lineannotation>✎ Terminal: <filename>front-end/build_type_conv_with_camlp4.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax -package fieldslib.syntax type_conv_example.ml</userinput>
