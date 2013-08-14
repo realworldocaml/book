@@ -31,6 +31,6 @@ let () =
     Xml_tree.read_document In_channel.stdin
     |> fun (dtd, doc) -> Xml_tree.map ~tag:"pre" ~f:subst_with_code_frag doc
     |> fun doc -> Xml_tree.write_document Out_channel.stdout dtd doc
-  with 
+  with
   | Xmlm.Error (_p,e) ->
     print_endline (Xmlm.error_message e)

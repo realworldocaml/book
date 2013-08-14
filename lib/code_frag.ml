@@ -161,12 +161,12 @@ let concat_toplevel_phrases lines =
   |> List.filter ~f:(function |"" -> false |_ -> true)
 
 let wrap_in_docbook_box ~part typ file buf =
-  let part = 
+  let part =
     match part with
     | 0 -> []
-    | part -> <:html<, continued (part $int:part$)>>
+    | part -> <:html< (part $int:part$)>>
   in
-  let icon = <:xml<&#x2318;>> in
+  let icon = <:xml<&#x270e;>> in
   let info = <:xml<<lineannotation>$icon$ $str:typ$: <filename>$str:file$</filename>$part$</lineannotation>
 $buf$>> in
   Cow.Xml.to_string info
