@@ -17,7 +17,10 @@ An example s-expression might look like this.
 ((typ scheme)(name sexpr/basic.scm))
 ```
 
-This chapter will show you how to:
+S-expressions are a good choice for a data serialization format that is not
+only human-editable, but also easy to automatically convert to-and-from
+standard OCaml type definitions without writing a lot of boilerplate code by
+hand. To this end, this chapter will show you how to:
 
 * generate s-expressions from arbitrary OCaml types, thus giving
   you a human-readable format for persisting any values in your code.
@@ -25,6 +28,9 @@ This chapter will show you how to:
 * generate good error messages for debugging malformed inputs.
 * use custom type annotations to control the exact printing behavior for
   s-expression converters.
+
+We will also tie this together at the end of the chapter with a simple
+configuration file for a web server written using s-expressions.
 
 ## Basic Usage
 
