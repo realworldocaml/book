@@ -714,6 +714,7 @@ are straightforward, since the comparison function is only used during the call
 to `qsort` itself.  However, other C libraries may store function pointers in
 global variables or elsewhere, in which case you'll need to take care that the
 OCaml functions you pass to them aren't prematurely garbage collected.
+
 </note>
 
 ## Learning more about C bindings
