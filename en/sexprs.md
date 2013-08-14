@@ -51,17 +51,10 @@ s-expression is quite simple.
 ```
 
 An s-expression can be thought of as a tree where each node contains a list of
-its children, and where the leaves of the tree are strings.  Here's how we can
-use this type to represent the our example s-expression.
-
-```frag
-((typ ocamltop)(name sexpr/manually_making_sexp.topscript))
-```
-
-Core provides good support for `s-expressions` in its `Sexp` module,
-including functions for converting s-expressions to and from strings.
-If we do the same example above with Core's s-expression type, we'll
-see that the output in the top-level is easier to read.
+its children, and where the leaves of the tree are strings.  Core provides good
+support for s-expressions in its `Sexp` module, including functions for
+converting s-expressions to and from strings.  We can start by manually
+building the first example s-expression using the `Sexp.t` type.
 
 ```frag
 ((typ ocamltop)(name sexpr/print_sexp.topscript))
@@ -73,6 +66,14 @@ converting s-expressions to and from strings.
 
 ```frag
 ((typ ocamltop)(name sexpr/sexp_printer.topscript))
+```
+
+We can write a function to manually map an OCaml record type to an
+s-expression, and pretty-print it with Core's functions.  We'll show you
+how to automatically generate this function in the next section.
+
+```frag
+((typ ocamltop)(name sexpr/manually_making_sexp.topscript))
 ```
 
 In addition to providing the `Sexp` module, most of the base types in Core
@@ -111,7 +112,8 @@ don't need to do anything special to use the Sexplib printer.
 ### Generating s-expressions from OCaml types
 
 But what if you want a function to convert some brand new type to an
-s-expression?  You can of course write it yourself manually:
+s-expression?  You can of course write it yourself manually as we did in the
+introduction.
 
 ```frag
 ((typ ocamltop)(name sexpr/manually_making_sexp.topscript))
