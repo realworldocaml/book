@@ -236,8 +236,10 @@ some of them need a bit more explanation.
 * The C `size_t` type is an alias for one of the unsigned integer types.  The actual 
   size and alignment requirements for `size_t` varies between platforms. Ctypes provides
   an OCaml `size_t` type that is aliased to the appropriate integer type.
-* OCaml only supports double-precision floating-point numbers, and so the C `float` and
-  `double` functions both map onto the OCaml `float` type.
+* OCaml only supports double-precision floating-point numbers, and so the C
+  `float` and `double` types both map onto the OCaml `float` type, and the C
+  `float complex` and `double complex` types both map onto the OCaml
+  double-precision `Complex.t` type.
 
 ## Pointers and arrays
 
@@ -347,9 +349,9 @@ Here is the type signature of the `Ctypes.view` function.
 ((typ ocaml)(name ctypes/ctypes.mli)(part 2))
 ```
 
-Ctypes has some internal low-level functions conversion functions that map
-between an OCaml `string` and a C character buffer by copying the contents
-into the respective data structure.  They have the following type signature.
+Ctypes has some internal low-level conversion functions that map between an
+OCaml `string` and a C character buffer by copying the contents into the
+respective data structure.  They have the following type signature.
 
 ```frag
 ((typ ocaml)(name ctypes/ctypes.mli)(part 3))
@@ -431,12 +433,9 @@ add those next.
 ((typ ocamltop)(name ffi/posix.topscript)(part 9))
 ```
 
-The `*:*` operator appends a field to the structure, as shown with `tv_sec` and
-`tv_usec` above.  Structure fields are typed accessors that are associated with
-a particular structure, and they correspond to the labels in C.  Note that
-there's no explicit requirement that the OCaml variable names for a field are
-the same as the corresponding C struct label names, but it helps avoid
-confusion.
+The `field` function appends a field to the structure, as shown with `tv_sec`
+and `tv_usec` above.  Structure fields are typed accessors that are associated
+with a particular structure, and they correspond to the labels in C.
 
 Every field addition mutates the structure variable and records a new size (the
 exact value of which depends on the type of the field that was just added).
@@ -569,8 +568,8 @@ function definitions.
 
 ### Defining arrays
 
-Arrays in C are contiguous blocks of the same value.  Any of the basic types
-defined earlier can be allocated as blocks via the `Array` module.
+Arrays in C are contiguous blocks of the same type of value.  Any of the basic
+types defined earlier can be allocated as blocks via the `Array` module.
 
 ```frag
 ((typ ocaml)(name ctypes/ctypes.mli)(part 5))
@@ -610,8 +609,8 @@ documentation), for example for pointer differencing and comparison.
 ## Passing functions to C
 
 It's also straightforward to pass OCaml function values to C.  The C standard
-library function `qsort` has the following signature that requires a function
-pointer to use.
+library function `qsort` sorts arrays of elements using a comparison function
+passed in as a function pointer.  The signature for `qsort` is as follows:
 
 ```frag
 ((typ c)(name ffi/qsort.h))
@@ -634,11 +633,11 @@ Since type descriptions are regular values, we can just use `let` in place of
 ```
 
 We only use `compare_t` once (in the `qsort` definition), so you can choose to
-inline it in the OCaml code if you prefer. The resulting `qsort` value is a
-higher-order function, as shown by its type.  As before, let's define a wrapper
-function to make `qsort` easier to use.  The second and third arguments to
-`qsort` specify the length (number of elements) of the array and the element
-size.
+inline it in the OCaml code if you prefer. As the type shows, the resulting
+`qsort` value is a higher-order function, since its the fourth argument is
+itself a function.  As before, let's define a wrapper function to make `qsort`
+easier to use.  The second and third arguments to `qsort` specify the length
+(number of elements) of the array and the element size.
 
 Arrays created using Ctypes have a richer runtime structure than C arrays, so
 we don't need to pass size information around.  Furthermore, we can use OCaml
