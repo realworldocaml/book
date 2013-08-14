@@ -3,10 +3,10 @@
 type 'a ref = { mutable contents : 'a };;
 #part 2
 let ref x = { contents = x };;
-let (!) r = r.contents;;
-let (:=) r x = r.contents <- x;;
+  let (!) r = r.contents;;
+  let (:=) r x = r.contents <- x;;
 #part 3
 let x = ref 1;;
-!x;;
-x := !x + 1;;
-!x;;
+  !x;;
+  x := !x + 1;;
+  !x;;
