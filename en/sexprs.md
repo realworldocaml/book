@@ -435,7 +435,8 @@ and then try to use another type with a sexp-converter, we'll error out:
 ((typ ocamltop)(name sexpr/sexp_opaque.topscript)(part 0))
 ```
 
-But with `sexp_opaque`, we won't:
+But with `sexp_opaque`, we can embed our opaque `no_converter` type within
+the other data structure without an error.
 
 ```frag
 ((typ ocamltop)(name sexpr/sexp_opaque.topscript)(part 1))
