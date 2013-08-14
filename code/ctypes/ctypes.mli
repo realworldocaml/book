@@ -29,6 +29,9 @@ val ullong    : ullong typ
 val float     : float typ
 val double    : float typ
 
+val complex32 : Complex.t typ
+val complex64 : Complex.t typ
+
 (* part 2 *)
 val view :
   read:('a -> 'b) ->
