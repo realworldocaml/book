@@ -1,1 +1,1 @@
-ocamlc freq.ml -o freq
+ocamlc freq.ml -o freq.byte
