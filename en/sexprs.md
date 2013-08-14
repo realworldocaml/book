@@ -30,7 +30,9 @@ hand. To this end, this chapter will show you how to:
   s-expression converters.
 
 We will also tie this together at the end of the chapter with a simple
-configuration file for a web server written using s-expressions.
+configuration file for a web server written using s-expressions. You can
+also refer back to the plugin loader described back in [xref](#first-class-modules)
+for another good use of s-expressions.
 
 ## Basic Usage
 
