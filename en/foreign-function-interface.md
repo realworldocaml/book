@@ -609,8 +609,8 @@ documentation), for example for pointer differencing and comparison.
 ## Passing functions to C
 
 It's also straightforward to pass OCaml function values to C.  The C standard
-library function `qsort` has the following signature that requires a function
-pointer to use.
+library function `qsort` sorts arrays of elements using a comparison function
+passed in as a function pointer.  The signature for `qsort` is as follows:
 
 ```frag
 ((typ c)(name ffi/qsort.h))
