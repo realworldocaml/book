@@ -383,12 +383,12 @@ string is terminated by a null (a `\0` byte) character.  The C string functions
 calculate their length by scanning the buffer until the first null character is
 encountered.
 
-This means you need to be careful when passing OCaml strings to C buffers that
-don't contain any null values within the OCaml string, or else the C string
-will be truncated at the first null instance.  Ctypes also defaults to a *copying*
-interface for strings, which means that you shouldn't use them when you want
-the library to mutate the buffer in-place.  In that situation, use the Ctypes
-`Bigarray` support to pass memory by reference instead.
+This means that you need to be careful that OCaml strings that you pass to C
+functions don't contain any null values, since the first occurrence of a null
+character will be treated as the end of the C string.  Ctypes also defaults to a
+*copying* interface for strings, which means that you shouldn't use them when
+you want the library to mutate the buffer in-place.  In that situation, use the
+Ctypes `Bigarray` support to pass memory by reference instead.
 
 </note>
 
