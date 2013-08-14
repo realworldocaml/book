@@ -730,6 +730,20 @@ all.  Ctypes does its best to make function bindings easy, but the rest of this
 part will also fill you in about how interactions with OCaml memory layout and
 the garbage collector work.
 
+Ctypes gives OCaml programs access to the C representation of values, shielding
+you from the details of the OCaml value representation, and introducing an
+abstraction layer that hides the details of foreign calls.  While this covers a
+wide variety of situations, it's sometimes necessary to look behind the
+abstraction to obtain finer control over the details of the interaction between
+the two languages.  The standard OCaml foreign function interface allows you to
+glue OCaml and C together from the other side of the boundary, by writing C
+functions that operate on the OCaml representation of values.  You can find
+details of the standard interface in the [online OCaml
+manual](http://caml.inria.fr/pub/docs/manual-ocaml-4.00/manual033.html) and in
+the book [Developing Applications with Objective
+Caml](http://caml.inria.fr/pub/docs/oreilly-book/ocaml-ora-book.pdf‎) by
+Chailloux, Manoury and Pagano.
+
 <note>
 <title>Production note</title>
 
