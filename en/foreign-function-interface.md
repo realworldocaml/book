@@ -576,8 +576,10 @@ defined earlier can be allocated as blocks via the `Array` module.
 ((typ ocaml)(name ctypes/ctypes.mli)(part 5))
 ```
 
-The array functions are similar to the standard library `Array` module except
-that they represent flat C arrays instead of OCaml ones.
+The array functions are similar to those in the standard library `Array`
+module except that they operate on arrays stored using the flat C
+representation rather than the OCaml representation described in
+[xref](#runtime-memory-layout).
 
 The conversion between arrays and lists still requires copying the values, and
 can be expensive for large data structures.  Notice that you can also convert
