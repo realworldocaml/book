@@ -1418,7 +1418,7 @@ sum [1;2;3]
 <prompt># </prompt><userinput>log_entry (Some Time.epoch) &quot;A long long time ago&quot;;;</userinput>
 <computeroutput>- : string = &quot;1970-01-01 01:00:00 -- A long long time ago&quot;</computeroutput>
 <prompt># </prompt><userinput>log_entry None &quot;Up to the minute&quot;;;</userinput>
-<computeroutput>- : string = &quot;2013-08-13 16:06:46 -- Up to the minute&quot;</computeroutput>
+<computeroutput>- : string = &quot;2013-08-14 13:07:52 -- Up to the minute&quot;</computeroutput>
 </programlisting>
       <para>
         This example uses Core's <literal>Time</literal> module for
@@ -3638,6 +3638,8 @@ val numeric_deriv :
     <programlisting language=""><lineannotation>⌘ OCaml UTop: <filename>lists-and-patterns/main.topscript</filename>, continued (part 1)</lineannotation>
 <prompt># </prompt><userinput>1 :: (2 :: (3 :: [])) ;;</userinput>
 <computeroutput>- : int list = [1; 2; 3]</computeroutput>
+<prompt># </prompt><userinput>1 :: 2 :: 3 :: [] ;;</userinput>
+<computeroutput>- : int list = [1; 2; 3]</computeroutput>
 </programlisting>
     <para>
       As you can see, the <literal>::</literal> operator is
@@ -3699,10 +3701,11 @@ val numeric_deriv :
 <userinput>    | hd :: tl -&gt; hd + sum tl</userinput>
 <userinput>  ;;</userinput>
 <computeroutput>val sum : int list -&gt; int = &lt;fun&gt;</computeroutput>
-<prompt># </prompt><userinput>sum [1;2;3];;  </userinput>
-<userinput>sum []</userinput>
-<userinput>;;</userinput>
+<prompt># </prompt><userinput>sum [1;2;3];;</userinput>
 <computeroutput>- : int = 6</computeroutput>
+<prompt># </prompt><userinput>sum []</userinput>
+<userinput>;;</userinput>
+<computeroutput>- : int = 0</computeroutput>
 </programlisting>
     <para>
       This code follows the convention of using <literal>hd</literal> to
@@ -3876,7 +3879,7 @@ val numeric_deriv :
 <prompt># </prompt><userinput>let run_bench tests =</userinput>
 <userinput>  Bench.bench</userinput>
 <userinput>    ~ascii_table:true</userinput>
-<userinput>    ~display:Textutils.Ascii_table.Display.column_titles </userinput>
+<userinput>    ~display:Textutils.Ascii_table.Display.column_titles</userinput>
 <userinput>    tests</userinput>
 <userinput>;;</userinput>
 <computeroutput>val run_bench : Bench.Test.t list -&gt; unit = &lt;fun&gt;</computeroutput>
@@ -3925,7 +3928,7 @@ val numeric_deriv :
 <computeroutput>                                 </computeroutput>
 <computeroutput>  Name     Time (ns)   % of max  </computeroutput>
 <computeroutput> -------- ----------- ---------- </computeroutput>
-<computeroutput>  sum_if     110_860     100.00  </computeroutput>
+<computeroutput>  sum_if     110_874     100.00  </computeroutput>
 <computeroutput>  sum         22_348      20.16  </computeroutput>
 <computeroutput>                                 </computeroutput>
 <computeroutput>- : unit = ()</computeroutput>
@@ -4382,13 +4385,10 @@ val numeric_deriv :
 <userinput>    then [s]</userinput>
 <userinput>    else</userinput>
 <userinput>      Sys.ls_dir s</userinput>
-<userinput>      |&gt; List.map ~f:(fun sub -&gt; ls_rec (s ^ &quot;/&quot; ^ sub))</userinput>
+<userinput>      |&gt; List.map ~f:(fun sub -&gt; ls_rec (s ^/ sub))</userinput>
 <userinput>      |&gt; List.concat</userinput>
 <userinput>  ;;</userinput>
 <computeroutput>val ls_rec : string -&gt; string list = &lt;fun&gt;</computeroutput>
-<prompt># </prompt><userinput>ls_rec &quot;.&quot;;;</userinput>
-<computeroutput>- : string list =</computeroutput>
-<computeroutput>[&quot;./main.topscript&quot;; &quot;./example.mli&quot;; &quot;./example.ml&quot;; &quot;./lists_layout.ascii&quot;]</computeroutput>
 </programlisting>
         <para>
           The above combination of <literal>List.map</literal> and
@@ -4446,12 +4446,9 @@ val numeric_deriv :
     <programlisting language=""><lineannotation>⌘ OCaml UTop: <filename>lists-and-patterns/main.topscript</filename>, continued (part 38)</lineannotation>
 <prompt># </prompt><userinput>let make_list n = List.init n ~f:(fun x -&gt; x);;</userinput>
 <computeroutput>val make_list : int -&gt; int list = &lt;fun&gt;</computeroutput>
-<prompt># </prompt><userinput>make_list 10;</userinput>
-<userinput>length (make_list 10_000_000);;</userinput>
-<computeroutput>Characters -1-12:</computeroutput>
-<computeroutput>Warning 10: this expression should have type unit.</computeroutput>
-<computeroutput>Characters -1-12:</computeroutput>
-<computeroutput>Warning 10: this expression should have type unit.</computeroutput>
+<prompt># </prompt><userinput>length (make_list 10);;</userinput>
+<computeroutput>- : int = 10</computeroutput>
+<prompt># </prompt><userinput>length (make_list 10_000_000);;</userinput>
 <computeroutput>Stack overflow during evaluation (looping recursion?).</computeroutput>
 </programlisting>
     <para>
@@ -4890,7 +4887,7 @@ let () =
       build the executable like this:
     </para>
     <programlisting language="console"><lineannotation>⌘ Terminal: <filename>files-modules-and-programs-freq/simple_build_fail.out</filename></lineannotation>
-<prompt>$ </prompt><userinput>ocamlc freq.ml -o freq</userinput>
+<prompt>$ </prompt><userinput>ocamlc freq.ml -o freq.byte</userinput>
 <computeroutput>File &quot;freq.ml&quot;, line 1, characters 0-13:</computeroutput>
 <computeroutput>Error: Unbound module Core</computeroutput>
 </programlisting>
@@ -5155,9 +5152,8 @@ val empty : t
 (** Bump the frequency count for the given string. *)
 val touch : t -&gt; string -&gt; t
 
-(** Converts the set of frequency counts to an association list.  Every string
-    in the list will show up at most once, and the integers will be at least
-    1. *)
+(** Converts the set of frequency counts to an association list.  A string shows
+    up at most once, and the counts are &gt;= 1. *)
 val to_list : t -&gt; (string * int) list</programlisting>
     <para>
       Note that we needed to add <literal>empty</literal> and
@@ -5901,7 +5897,7 @@ type &lt;record-name&gt; =
 <userinput>    };;</userinput>
 <computeroutput>val my_host : host_info =</computeroutput>
 <computeroutput>  {hostname = &quot;ocaml-www1&quot;; os_name = &quot;Linux&quot;; cpu_arch = &quot;unknown&quot;;</computeroutput>
-<computeroutput>   timestamp = 2013-08-13 16:09:24.625003+01:00}</computeroutput>
+<computeroutput>   timestamp = 2013-08-14 13:10:30.692652+01:00}</computeroutput>
 </programlisting>
   <para>
     You might wonder how the compiler inferred that
@@ -5953,7 +5949,7 @@ type &lt;record-name&gt; =
 <userinput>       sprintf &quot;%s (%s / %s, on %s)&quot; h os c (Time.to_sec_string ts);;</userinput>
 <computeroutput>val host_info_to_string : host_info -&gt; string = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>host_info_to_string my_host;;</userinput>
-<computeroutput>- : string = &quot;ocaml-www1 (Linux / unknown, on 2013-08-13 16:09:24)&quot;</computeroutput>
+<computeroutput>- : string = &quot;ocaml-www1 (Linux / unknown, on 2013-08-14 13:10:30)&quot;</computeroutput>
 </programlisting>
     <para>
       Note that the pattern that we used had only a single case, rather
@@ -6113,7 +6109,7 @@ type &lt;record-name&gt; =
 <computeroutput>val my_host : host_info =</computeroutput>
 <computeroutput>  {hostname = &quot;ocaml-www1&quot;; os_name = &quot;Linux&quot;; cpu_arch = &quot;unknown&quot;;</computeroutput>
 <computeroutput>   os_release = &quot;3.2.0-1-amd64&quot;;</computeroutput>
-<computeroutput>   timestamp = 2013-08-13 16:09:31.034963+01:00}</computeroutput>
+<computeroutput>   timestamp = 2013-08-14 13:10:36.955276+01:00}</computeroutput>
 </programlisting>
     <para>
       In the above code, we defined variables corresponding to the
@@ -6719,12 +6715,12 @@ type &lt;record-name&gt; =
 <userinput>                credentials = &quot;Xy2d9W&quot;; }</userinput>
 <userinput>  ;;</userinput>
 <computeroutput>val logon : Logon.t =</computeroutput>
-<computeroutput>  {Logon.session_id = &quot;26685&quot;; time = 2013-08-13 16:09:36.212965+01:00;</computeroutput>
+<computeroutput>  {Logon.session_id = &quot;26685&quot;; time = 2013-08-14 13:10:42.116353+01:00;</computeroutput>
 <computeroutput>   user = &quot;yminsky&quot;; credentials = &quot;Xy2d9W&quot;}</computeroutput>
 <prompt># </prompt><userinput>show_field Logon.Fields.user Fn.id logon;;</userinput>
 <computeroutput>- : string = &quot;user: yminsky&quot;</computeroutput>
 <prompt># </prompt><userinput>show_field Logon.Fields.time Time.to_string logon;;</userinput>
-<computeroutput>- : string = &quot;time: 2013-08-13 16:09:36.212965+01:00&quot;</computeroutput>
+<computeroutput>- : string = &quot;time: 2013-08-14 13:10:42.116353+01:00&quot;</computeroutput>
 </programlisting>
     <para>
       As a side note, the above is our first use of the
@@ -6783,7 +6779,7 @@ type &lt;record-name&gt; =
 <computeroutput>val print_logon : Logon.t -&gt; unit = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>print_logon logon;;</userinput>
 <computeroutput>session_id: 26685</computeroutput>
-<computeroutput>time: 2013-08-13 16:09:36.212965+01:00</computeroutput>
+<computeroutput>time: 2013-08-14 13:10:42.116353+01:00</computeroutput>
 <computeroutput>user: yminsky</computeroutput>
 <computeroutput>credentials: Xy2d9W</computeroutput>
 <computeroutput>- : unit = ()</computeroutput>
@@ -8928,7 +8924,7 @@ let () =
 <computeroutput>                                                                </computeroutput>
 <computeroutput>  Name                           Cycles   Time (ns)   % of max  </computeroutput>
 <computeroutput> ------------------------------ -------- ----------- ---------- </computeroutput>
-<computeroutput>  simple computation                279         117      76.85  </computeroutput>
+<computeroutput>  simple computation                278         116      76.48  </computeroutput>
 <computeroutput>  simple computation w/handler      308         129      84.67  </computeroutput>
 <computeroutput>  end with exn                      364         152     100.00  </computeroutput>
 <computeroutput>                                                                </computeroutput>
@@ -8945,9 +8941,9 @@ let () =
 <computeroutput>                                                                </computeroutput>
 <computeroutput>  Name                           Cycles   Time (ns)   % of max  </computeroutput>
 <computeroutput> ------------------------------ -------- ----------- ---------- </computeroutput>
-<computeroutput>  simple computation                279         117      83.58  </computeroutput>
-<computeroutput>  simple computation w/handler      307         128      92.06  </computeroutput>
-<computeroutput>  end with exn                      334         140     100.00  </computeroutput>
+<computeroutput>  simple computation                280         117      83.58  </computeroutput>
+<computeroutput>  simple computation w/handler      308         129      92.03  </computeroutput>
+<computeroutput>  end with exn                      335         140     100.00  </computeroutput>
 <computeroutput>                                                                </computeroutput>
 </programlisting>
       <para>
@@ -8984,17 +8980,19 @@ let () =
       </para>
       <programlisting language=""><lineannotation>⌘ OCaml UTop: <filename>error-handling/main.topscript</filename>, continued (part 36)</lineannotation>
 <prompt># </prompt><userinput>let find alist key =</userinput>
-<userinput>    Result.try_with (fun () -&gt; find_exn alist key) ;;</userinput>
-<computeroutput>val find : (string * 'a) list -&gt; string -&gt; ('a, exn) Result.t = &lt;fun&gt;</computeroutput>
+<userinput>    Or_error.try_with (fun () -&gt; find_exn alist key) ;;</userinput>
+<computeroutput>val find : (string * 'a) list -&gt; string -&gt; 'a Or_error.t = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>find [&quot;a&quot;,1; &quot;b&quot;,2] &quot;c&quot;;;</userinput>
-<computeroutput>- : (int, exn) Result.t = Core.Std.Result.Error Key_not_found(&quot;c&quot;)</computeroutput>
+<computeroutput>- : int Or_error.t = Core_kernel.Result.Error (&quot;Key_not_found(\&quot;c\&quot;)&quot;)</computeroutput>
 </programlisting>
       <para>
         And then we can re-raise that exception:
       </para>
       <programlisting language=""><lineannotation>⌘ OCaml UTop: <filename>error-handling/main.topscript</filename>, continued (part 37)</lineannotation>
-<prompt># </prompt><userinput>Result.ok_exn (find [&quot;a&quot;,1; &quot;b&quot;,2] &quot;b&quot;);;</userinput>
+<prompt># </prompt><userinput>Or_error.ok_exn (find [&quot;a&quot;,1; &quot;b&quot;,2] &quot;b&quot;);;</userinput>
 <computeroutput>- : int = 2</computeroutput>
+<prompt># </prompt><userinput>Or_error.ok_exn (find [&quot;a&quot;,1; &quot;b&quot;,2] &quot;c&quot;);;</userinput>
+<computeroutput>Exception: (&quot;Key_not_found(\&quot;c\&quot;)&quot;).</computeroutput>
 </programlisting>
     </sect2>
   </sect1>
@@ -10130,10 +10128,10 @@ edit_distance &quot;OCam&quot; &quot;ocam&quot;
       </para>
       <programlisting language=""><lineannotation>⌘ OCaml UTop: <filename>imperative-programming/memo.topscript</filename>, continued (part 4)</lineannotation>
 <prompt># </prompt><userinput>time (fun () -&gt; edit_distance &quot;OCaml&quot; &quot;ocaml&quot;);;</userinput>
-<computeroutput>Time: 1.42407ms</computeroutput>
+<computeroutput>Time: 1.40381ms</computeroutput>
 <computeroutput>- : int = 2</computeroutput>
 <prompt># </prompt><userinput>time (fun () -&gt; edit_distance &quot;OCaml 4.01&quot; &quot;ocaml 4.01&quot;);;</userinput>
-<computeroutput>Time: 6.8527s</computeroutput>
+<computeroutput>Time: 6.81361s</computeroutput>
 <computeroutput>- : int = 2</computeroutput>
 </programlisting>
       <para>
@@ -10166,10 +10164,10 @@ edit_distance &quot;OCam&quot; &quot;ocam&quot;
       </para>
       <programlisting language=""><lineannotation>⌘ OCaml UTop: <filename>imperative-programming/fib.topscript</filename>, continued (part 2)</lineannotation>
 <prompt># </prompt><userinput>time (fun () -&gt; fib 20);;</userinput>
-<computeroutput>Time: 0.873804ms</computeroutput>
+<computeroutput>Time: 0.859976ms</computeroutput>
 <computeroutput>- : int = 10946</computeroutput>
 <prompt># </prompt><userinput>time (fun () -&gt; fib 40);;</userinput>
-<computeroutput>Time: 12.774s</computeroutput>
+<computeroutput>Time: 12.7757s</computeroutput>
 <computeroutput>- : int = 165580141</computeroutput>
 </programlisting>
       <para>
@@ -10190,7 +10188,7 @@ edit_distance &quot;OCam&quot; &quot;ocam&quot;
 <prompt># </prompt><userinput>let fib = memoize fib;;</userinput>
 <computeroutput>val fib : int -&gt; int = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>time (fun () -&gt; fib 40);;</userinput>
-<computeroutput>Time: 12.774s</computeroutput>
+<computeroutput>Time: 12.7816s</computeroutput>
 <computeroutput>- : int = 165580141</computeroutput>
 <prompt># </prompt><userinput>time (fun () -&gt; fib 40);;</userinput>
 <computeroutput>Time: 0.00309944ms</computeroutput>
@@ -10428,7 +10426,7 @@ let rec x = x + 1</programlisting>
 <userinput>;;</userinput>
 <computeroutput>val lazy_memo_rec : (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>time (fun () -&gt; lazy_memo_rec fib_norec 40);;</userinput>
-<computeroutput>Time: 0.0638962ms</computeroutput>
+<computeroutput>Time: 0.0629425ms</computeroutput>
 <computeroutput>- : int = 102334155</computeroutput>
 </programlisting>
       <para>
@@ -13717,7 +13715,7 @@ let () =
 <userinput>  end ;;</userinput>
 <computeroutput>val t : &lt; pop : int option &gt; = &lt;obj&gt;</computeroutput>
 <prompt># </prompt><userinput>print_pop t ;;</userinput>
-<computeroutput>Popped: 1376406619</computeroutput>
+<computeroutput>Popped: 1376482285</computeroutput>
 <computeroutput>- : unit = ()</computeroutput>
 </programlisting>
   </sect1>
@@ -16808,8 +16806,8 @@ let () =
 <computeroutput>                                </computeroutput>
 <computeroutput>  Name     Time (ns)   Speedup  </computeroutput>
 <computeroutput> ------- ------------ --------- </computeroutput>
-<computeroutput>  map     31_757_869      1.00  </computeroutput>
-<computeroutput>  table    7_221_696      4.40  </computeroutput>
+<computeroutput>  map     31_554_987      1.00  </computeroutput>
+<computeroutput>  table    7_216_356      4.37  </computeroutput>
 <computeroutput>                                </computeroutput>
 </programlisting>
     <para>
@@ -16889,8 +16887,8 @@ let () =
 <computeroutput>                               </computeroutput>
 <computeroutput>  Name    Time (ns)   Speedup  </computeroutput>
 <computeroutput> ------- ----------- --------- </computeroutput>
-<computeroutput>  map       222_651     11.87  </computeroutput>
-<computeroutput>  table   2_643_119      1.00  </computeroutput>
+<computeroutput>  map       218_968     12.13  </computeroutput>
+<computeroutput>  table   2_655_246      1.00  </computeroutput>
 <computeroutput>                               </computeroutput>
 </programlisting>
     <para>
@@ -18353,12 +18351,12 @@ let () = Command.run add</programlisting>
       </para>
       <programlisting language="console"><lineannotation>⌘ Terminal: <filename>command-line-parsing/md5_completion.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>env COMMAND_OUTPUT_INSTALLATION_BASH=1 ./basic_md5_with_flags.native</userinput>
-<computeroutput>function _jsautocom_9422 {</computeroutput>
+<computeroutput>function _jsautocom_18061 {</computeroutput>
 <computeroutput>  export COMP_CWORD</computeroutput>
 <computeroutput>  COMP_WORDS[0]=./basic_md5_with_flags.native</computeroutput>
 <computeroutput>  COMPREPLY=($(&quot;${COMP_WORDS[@]}&quot;))</computeroutput>
 <computeroutput>}</computeroutput>
-<computeroutput>complete -F _jsautocom_9422 ./basic_md5_with_flags.native</computeroutput>
+<computeroutput>complete -F _jsautocom_18061 ./basic_md5_with_flags.native</computeroutput>
 </programlisting>
       <para>
         Recall that we used the <literal>Arg_type.file</literal> to
@@ -20612,6 +20610,7 @@ end</programlisting>
 <prompt>$ </prompt><userinput>ocamlfind list | grep top</userinput>
 <computeroutput>compiler-libs.toplevel (version: [distributed with Ocaml])</computeroutput>
 <computeroutput>core.top            (version: 109.37.00)</computeroutput>
+<computeroutput>ctypes.top          (version: 0.1)</computeroutput>
 <computeroutput>lwt.simple-top      (version: 2.4.3)</computeroutput>
 <computeroutput>num-top             (version: 1.3.3)</computeroutput>
 <computeroutput>sexplib.top         (version: 109.20.00)</computeroutput>
@@ -22787,7 +22786,7 @@ let query_uri ~server query =
 <computeroutput>    (monitor</computeroutput>
 <computeroutput>     (((name main) (here ()) (id 1) (has_seen_error true)</computeroutput>
 <computeroutput>       (someone_is_listening false) (kill_index 0))))))</computeroutput>
-<computeroutput>  (Pid 12796)))</computeroutput>
+<computeroutput>  (Pid 21433)))</computeroutput>
 </programlisting>
       <para>
         As you can see, we got a &quot;Connection refused&quot; failure
@@ -23042,16 +23041,12 @@ let get_definition_with_timeout ~server ~timeout word =
 <computeroutput>concurrent programming</computeroutput>
 <computeroutput>----------------------</computeroutput>
 <computeroutput> </computeroutput>
-<computeroutput>&quot;Concurrent computing is a form of computing in which programs are</computeroutput>
-<computeroutput>designed as collections of interacting computational processes that</computeroutput>
-<computeroutput>may be executed in parallel.&quot;</computeroutput>
+<computeroutput>DuckDuckGo query failed: Timed out</computeroutput>
 <computeroutput> </computeroutput>
 <computeroutput>ocaml</computeroutput>
 <computeroutput>-----</computeroutput>
 <computeroutput> </computeroutput>
-<computeroutput>&quot;OCaml or Objective Caml, is the main implementation of the Caml</computeroutput>
-<computeroutput>programming language, created by Xavier Leroy, Jérôme Vouillon,</computeroutput>
-<computeroutput>Damien Doligez, Didier Rémy and others in 1996.&quot;</computeroutput>
+<computeroutput>DuckDuckGo query failed: Timed out</computeroutput>
 <computeroutput> </computeroutput>
 </programlisting>
   </sect1>
@@ -23183,8 +23178,8 @@ let get_definition_with_timeout ~server ~timeout word =
     <programlisting language=""><lineannotation>⌘ OCaml UTop: <filename>async/main.topscript</filename>, continued (part 44)</lineannotation>
 <prompt># </prompt><userinput>log_delays (after (sec 1.));;</userinput>
 <computeroutput>- : Core.Span.t list =</computeroutput>
-<computeroutput>[0.000953674ms; 100.215ms; 200.409ms; 300.61ms; 400.819ms; 501.01ms;</computeroutput>
-<computeroutput> 601.208ms; 701.409ms; 801.611ms; 901.807ms; 1.00201s]</computeroutput>
+<computeroutput>[0.000953674ms; 100.278ms; 200.474ms; 300.673ms; 400.867ms; 501.07ms;</computeroutput>
+<computeroutput> 601.274ms; 701.466ms; 801.664ms; 901.876ms; 1.00206s]</computeroutput>
 </programlisting>
     <para>
       Now, if instead of simply waiting a second, what if we have a busy
@@ -23197,7 +23192,7 @@ let get_definition_with_timeout ~server ~timeout word =
 <userinput>  ;;</userinput>
 <computeroutput>val busy_loop : int -&gt; unit = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>log_delays (Deferred.unit &gt;&gt;| fun () -&gt; busy_loop 100);;</userinput>
-<computeroutput>- : Core.Span.t list = [0.00119209ms; 243.051ms]</computeroutput>
+<computeroutput>- : Core.Span.t list = [0.000953674ms; 242.482ms]</computeroutput>
 </programlisting>
     <para>
       As you can see, instead of waking up ten times a second,
@@ -23211,7 +23206,7 @@ let get_definition_with_timeout ~server ~timeout word =
     </para>
     <programlisting language=""><lineannotation>⌘ OCaml UTop: <filename>async/main.topscript</filename>, continued (part 46)</lineannotation>
 <prompt># </prompt><userinput>log_delays (In_thread.run (fun () -&gt; busy_loop 100));;</userinput>
-<computeroutput>- : Core.Span.t list = [0.00214577ms; 244.169ms]</computeroutput>
+<computeroutput>- : Core.Span.t list = [0.000953674ms; 244.02ms]</computeroutput>
 </programlisting>
     <para>
       Now <literal>log_delays</literal> does get a chance to run, but
@@ -23239,7 +23234,7 @@ let get_definition_with_timeout ~server ~timeout word =
 <userinput>  ;;</userinput>
 <computeroutput>val noalloc_busy_loop : int -&gt; unit = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>log_delays (In_thread.run (fun () -&gt; noalloc_busy_loop 500));;</userinput>
-<computeroutput>- : Core.Span.t list = [0.00190735ms; 912.918ms]</computeroutput>
+<computeroutput>- : Core.Span.t list = [0.00119209ms; 899.714ms]</computeroutput>
 </programlisting>
     <para>
       Even though <literal>noalloc_busy_loop</literal> was running in a
@@ -23713,7 +23708,10 @@ val ulong     : ulong typ
 val ullong    : ullong typ
 
 val float     : float typ
-val double    : float typ</programlisting>
+val double    : float typ
+
+val complex32 : Complex.t typ
+val complex64 : Complex.t typ</programlisting>
     <para>
       These values are all of type <literal>'a typ</literal>, where the
       value name (<emphasis>e.g.</emphasis> <literal>void</literal>)
@@ -23746,8 +23744,11 @@ val double    : float typ</programlisting>
         <para>
           OCaml only supports double-precision floating-point numbers,
           and so the C <literal>float</literal> and
-          <literal>double</literal> functions both map onto the OCaml
-          <literal>float</literal> type.
+          <literal>double</literal> types both map onto the OCaml
+          <literal>float</literal> type, and the C
+          <literal>float complex</literal> and
+          <literal>double complex</literal> types both map onto the
+          OCaml double-precision <literal>Complex.t</literal> type.
         </para>
       </listitem>
     </itemizedlist>
@@ -23805,6 +23806,8 @@ char *ctime(const time_t *timep);
 <computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/ctypes: added to search path</computeroutput>
 <computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/ctypes/ctypes.cma: loaded</computeroutput>
 <computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/ctypes/ctypes-foreign.cma: loaded</computeroutput>
+<prompt># </prompt><userinput>#require &quot;ctypes.top&quot; ;;</userinput>
+<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/ctypes/ctypes_top.cma: loaded</computeroutput>
 <prompt># </prompt><userinput>open Ctypes ;;</userinput>
 <prompt># </prompt><userinput>open PosixTypes ;;</userinput>
 <prompt># </prompt><userinput>open Foreign ;;</userinput>
@@ -23827,7 +23830,7 @@ char *ctime(const time_t *timep);
     </para>
     <programlisting language=""><lineannotation>⌘ OCaml UTop: <filename>ffi/posix.topscript</filename>, continued (part 1)</lineannotation>
 <prompt># </prompt><userinput>let cur_time = time (from_voidp time_t null) ;;</userinput>
-<computeroutput>val cur_time : time_t = &lt;abstr&gt;</computeroutput>
+<computeroutput>val cur_time : time_t = 1376482507</computeroutput>
 </programlisting>
     <para>
       Since we're going to call <literal>time</literal> a few times,
@@ -23893,7 +23896,7 @@ char *ctime(const time_t *timep);
       </para>
       <programlisting language=""><lineannotation>⌘ OCaml UTop: <filename>ffi/posix.topscript</filename>, continued (part 6)</lineannotation>
 <prompt># </prompt><userinput>let t_ptr = allocate time_t (time' ()) ;;</userinput>
-<computeroutput>val t_ptr : time_t ptr = &lt;abstr&gt;</computeroutput>
+<computeroutput>val t_ptr : time_t ptr = (int64_t*) 0x1117df0</computeroutput>
 </programlisting>
       <para>
         The <literal>allocate</literal> function takes the type of the
@@ -23903,7 +23906,7 @@ char *ctime(const time_t *timep);
       </para>
       <programlisting language=""><lineannotation>⌘ OCaml UTop: <filename>ffi/posix.topscript</filename>, continued (part 7)</lineannotation>
 <prompt># </prompt><userinput>ctime t_ptr ;;</userinput>
-<computeroutput>- : string = &quot;Tue Aug 13 16:14:02 2013\n&quot;</computeroutput>
+<computeroutput>- : string = &quot;Wed Aug 14 13:15:09 2013\n&quot;</computeroutput>
 </programlisting>
     </sect2>
     <sect2 id="using-views-to-map-complex-values">
@@ -23932,11 +23935,10 @@ val view :
   write:('b -&gt; 'a) -&gt;
   'a typ -&gt; 'b typ</programlisting>
       <para>
-        Ctypes has some internal low-level functions conversion
-        functions that map between an OCaml <literal>string</literal>
-        and a C character buffer by copying the contents into the
-        respective data structure. They have the following type
-        signature.
+        Ctypes has some internal low-level conversion functions that map
+        between an OCaml <literal>string</literal> and a C character
+        buffer by copying the contents into the respective data
+        structure. They have the following type signature.
       </para>
       <programlisting language="ocaml"><lineannotation>⌘ OCaml: <filename>ctypes/ctypes.mli</filename>, continued (part 3)</lineannotation>
 val string_of_char_ptr : char ptr -&gt; string
@@ -23948,10 +23950,9 @@ val char_ptr_of_string : string -&gt; char ptr</programlisting>
       </para>
       <programlisting language="ocaml"><lineannotation>⌘ OCaml: <filename>ctypes/ctypes_impl.ml</filename></lineannotation>
 let string = 
-  view 
+  view (char ptr)
     ~read:string_of_char_ptr 
-    ~write:char_ptr_of_string 
-    (char ptr)</programlisting>
+    ~write:char_ptr_of_string</programlisting>
       <para>
         The type of this <literal>string</literal> function is a normal
         <literal>typ</literal> with no external sign of the use of the
@@ -23977,14 +23978,15 @@ val string    : string.typ</programlisting>
         the first null character is encountered.
       </para>
       <para>
-        This means you need to be careful when passing OCaml strings to
-        C buffers that don't contain any null values within the OCaml
-        string, or else the C string will be truncated at the first null
-        instance. Ctypes also defaults to a <emphasis>copying</emphasis>
-        interface for strings, which means that you shouldn't use them
-        when you want the library to mutate the buffer in-place. In that
-        situation, use the Ctypes <literal>Bigarray</literal> support to
-        pass memory by reference instead.
+        This means that you need to be careful that OCaml strings that
+        you pass to C functions don't contain any null values, since the
+        first occurrence of a null character will be treated as the end
+        of the C string. Ctypes also defaults to a
+        <emphasis>copying</emphasis> interface for strings, which means
+        that you shouldn't use them when you want the library to mutate
+        the buffer in-place. In that situation, use the Ctypes
+        <literal>Bigarray</literal> support to pass memory by reference
+        instead.
       </para>
       </note>
     </sect2>
@@ -24021,7 +24023,7 @@ int gettimeofday(struct timeval *, struct timezone *tv);
 <prompt># </prompt><userinput>type timeval ;;</userinput>
 <computeroutput>type timeval</computeroutput>
 <prompt># </prompt><userinput>let timeval : timeval structure typ = structure &quot;timeval&quot; ;;</userinput>
-<computeroutput>val timeval : timeval structure typ = &lt;abstr&gt;</computeroutput>
+<computeroutput>val timeval : timeval structure typ = struct timeval</computeroutput>
 </programlisting>
       <para>
         The first command defines a new OCaml type
@@ -24046,22 +24048,19 @@ int gettimeofday(struct timeval *, struct timezone *tv);
         doesn't have any fields, so we need to add those next.
       </para>
       <programlisting language=""><lineannotation>⌘ OCaml UTop: <filename>ffi/posix.topscript</filename>, continued (part 9)</lineannotation>
-<prompt># </prompt><userinput>let tv_sec  = timeval *:* long ;;</userinput>
+<prompt># </prompt><userinput>let tv_sec  = field timeval &quot;tv_sec&quot; long ;;</userinput>
 <computeroutput>val tv_sec : (Signed.long, timeval structure) field = &lt;abstr&gt;</computeroutput>
-<prompt># </prompt><userinput>let tv_usec = timeval *:* long ;;</userinput>
+<prompt># </prompt><userinput>let tv_usec = field timeval &quot;tv_usec&quot; long ;;</userinput>
 <computeroutput>val tv_usec : (Signed.long, timeval structure) field = &lt;abstr&gt;</computeroutput>
 <prompt># </prompt><userinput>seal timeval ;;</userinput>
 <computeroutput>- : unit = ()</computeroutput>
 </programlisting>
       <para>
-        The <literal>*:*</literal> operator appends a field to the
+        The <literal>field</literal> function appends a field to the
         structure, as shown with <literal>tv_sec</literal> and
         <literal>tv_usec</literal> above. Structure fields are typed
         accessors that are associated with a particular structure, and
-        they correspond to the labels in C. Note that there's no
-        explicit requirement that the OCaml variable names for a field
-        are the same as the corresponding C struct label names, but it
-        helps avoid confusion.
+        they correspond to the labels in C.
       </para>
       <para>
         Every field addition mutates the structure variable and records
@@ -24082,7 +24081,7 @@ int gettimeofday(struct timeval *, struct timezone *tv);
 <prompt># </prompt><userinput>type timezone ;;</userinput>
 <computeroutput>type timezone</computeroutput>
 <prompt># </prompt><userinput>let timezone : timezone structure typ = structure &quot;timezone&quot; ;;</userinput>
-<computeroutput>val timezone : timezone structure typ = &lt;abstr&gt;</computeroutput>
+<computeroutput>val timezone : timezone structure typ = struct timezone</computeroutput>
 </programlisting>
       <para>
         We don't ever need to create <literal>struct timezone</literal>
@@ -24127,7 +24126,7 @@ int gettimeofday(struct timeval *, struct timezone *tv);
 <userinput>  Pervasives.(float secs +. float usecs /. 1000000.0) ;;</userinput>
 <computeroutput>val gettimeofday' : unit -&gt; float = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>gettimeofday' () ;;</userinput>
-<computeroutput>- : float = 1376406843.01</computeroutput>
+<computeroutput>- : float = 1376482509.7</computeroutput>
 </programlisting>
       <para>
         You need to be a little careful not to get all the open modules
@@ -24159,8 +24158,8 @@ let ctime    = foreign &quot;ctime&quot; (ptr time_t @-&gt; returning string)
 
 type timeval
 let timeval : timeval structure typ = structure &quot;timeval&quot;
-let tv_sec   = timeval *:* long 
-let tv_usec  = timeval *:* long 
+let tv_sec   = field timeval &quot;tv_sec&quot; long
+let tv_usec  = field timeval &quot;tv_usec&quot; long
 let ()       = seal timeval
 
 type timezone
@@ -24196,9 +24195,9 @@ let () =
         <programlisting language="ocaml"><lineannotation>⌘ Terminal: <filename>ffi/build_datetime.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>corebuild -pkg ctypes.foreign datetime.native</userinput>
 <prompt>$ </prompt><userinput>./datetime.native</userinput>
-<computeroutput>1376406281.304190</computeroutput>
+<computeroutput>1376481939.793053</computeroutput>
 <prompt>$ </prompt><userinput>./datetime.native -a</userinput>
-<computeroutput>Tue Aug 13 16:04:41 2013</computeroutput>
+<computeroutput>Wed Aug 14 13:05:39 2013</computeroutput>
 </programlisting>
         <sidebar>
         <title>
@@ -24293,9 +24292,9 @@ function_t *f = curried_C(3); f(4);
     <sect2 id="defining-arrays">
       <title>Defining arrays</title>
       <para>
-        Arrays in C are contiguous blocks of the same value. Any of the
-        basic types defined earlier can be allocated as blocks via the
-        <literal>Array</literal> module.
+        Arrays in C are contiguous blocks of the same type of value. Any
+        of the basic types defined earlier can be allocated as blocks
+        via the <literal>Array</literal> module.
       </para>
       <programlisting language="ocaml"><lineannotation>⌘ OCaml: <filename>ctypes/ctypes.mli</filename>, continued (part 5)</lineannotation>
 module Array : sig
@@ -24311,17 +24310,19 @@ module Array : sig
   val make : 'a typ -&gt; ?initial:'a -&gt; int -&gt; 'a t
 end</programlisting>
       <para>
-        The array functions are similar to the standard library
-        <literal>Array</literal> module except that they represent flat
-        C arrays instead of OCaml ones.
+        The array functions are similar to those in the standard library
+        <literal>Array</literal> module except that they operate on
+        arrays stored using the flat C representation rather than the
+        OCaml representation described in
+        <xref linkend="runtime-memory-layout"/>.
       </para>
       <para>
-        The conversion between arrays and lists still requires copying
-        the values, and can be expensive for large data structures.
-        Notice that you can also convert an array into a
-        <literal>ptr</literal> pointer to the head of buffer, which can
-        be useful if you need to pass the pointer and size arguments
-        separately to a C function.
+        As with standard OCaml arrays, the conversion between arrays and
+        lists requires copying the values, which can be expensive for
+        large data structures. Notice that you can also convert an array
+        into a <literal>ptr</literal> pointer to the head of the
+        underlying buffer, which can be useful if you need to pass the
+        pointer and size arguments separately to a C function.
       </para>
       <para>
         Unions in C are named structures that can be mapped onto the
@@ -24405,8 +24406,9 @@ end</programlisting>
     <title>Passing functions to C</title>
     <para>
       It's also straightforward to pass OCaml function values to C. The
-      C standard library function <literal>qsort</literal> has the
-      following signature that requires a function pointer to use.
+      C standard library function <literal>qsort</literal> sorts arrays
+      of elements using a comparison function passed in as a function
+      pointer. The signature for <literal>qsort</literal> is as follows:
     </para>
     <programlisting language="c"><lineannotation>⌘ C: <filename>ffi/qsort.h</filename></lineannotation>
 void qsort(void *base, size_t nmemb, size_t size,
@@ -24450,10 +24452,11 @@ void qsort(void *base, size_t nmemb, size_t size, compare_t *);
     <para>
       We only use <literal>compare_t</literal> once (in the
       <literal>qsort</literal> definition), so you can choose to inline
-      it in the OCaml code if you prefer. The resulting
-      <literal>qsort</literal> value is a higher-order function, as
-      shown by its type. As before, let's define a wrapper function to
-      make <literal>qsort</literal> easier to use. The second and third
+      it in the OCaml code if you prefer. As the type shows, the
+      resulting <literal>qsort</literal> value is a higher-order
+      function, since its the fourth argument is itself a function. As
+      before, let's define a wrapper function to make
+      <literal>qsort</literal> easier to use. The second and third
       arguments to <literal>qsort</literal> specify the length (number
       of elements) of the array and the element size.
     </para>
@@ -24572,7 +24575,7 @@ val sort_stdin : unit -&gt; unit</programlisting>
       </para>
       <para>
         The definition of reachability for Ctypes values is a little
-        different from conventional OCaml values though. The allocation
+        different from conventional OCaml values, though. The allocation
         functions return an OCaml-managed pointer to the value, and as
         long as some derivative pointer is still reachable by the GC,
         the value won't be collected.
@@ -24587,11 +24590,23 @@ val sort_stdin : unit -&gt; unit</programlisting>
         A corollary of the above rule is that pointers written into the
         C heap don't have any effect on reachability. For example, if
         you have a C-managed array of pointers to structs then you'll
-        need some additional way of keeping the structs around to
-        protect them from collection. You could achieve this via a
-        global array of values on the OCaml side that would keep them
-        live until they're no longer needed.
+        need some additional way of keeping the structs themselves
+        around to protect them from collection. You could achieve this
+        via a global array of values on the OCaml side that would keep
+        them live until they're no longer needed.
       </para>
+      Functions passed to C have similar considerations regarding
+      lifetime. On the OCaml side, functions created at runtime may be
+      collected when they become unreachable. As we've seen, OCaml
+      functions passed to C are converted to function pointers, and
+      function pointers written into the C heap have no effect on the
+      reachability of the OCaml functions they reference. With
+      <literal>qsort</literal> things are straightforward, since the
+      comparison function is only used during the call to
+      <literal>qsort</literal> itself. However, other C libraries may
+      store function pointers in global variables or elsewhere, in which
+      case you'll need to take care that the OCaml functions you pass to
+      them aren't prematurely garbage collected.
       </note>
     </sect2>
   </sect1>
@@ -24628,6 +24643,24 @@ val sort_stdin : unit -&gt; unit</programlisting>
       but the rest of this part will also fill you in about how
       interactions with OCaml memory layout and the garbage collector
       work.
+    </para>
+    <para>
+      Ctypes gives OCaml programs access to the C representation of
+      values, shielding you from the details of the OCaml value
+      representation, and introducing an abstraction layer that hides
+      the details of foreign calls. While this covers a wide variety of
+      situations, it's sometimes necessary to look behind the
+      abstraction to obtain finer control over the details of the
+      interaction between the two languages. The standard OCaml foreign
+      function interface allows you to glue OCaml and C together from
+      the other side of the boundary, by writing C functions that
+      operate on the OCaml representation of values. You can find
+      details of the standard interface in the
+      <ulink url="http://caml.inria.fr/pub/docs/manual-ocaml-4.00/manual033.html">online
+      OCaml manual</ulink> and in the book
+      <ulink url="http://caml.inria.fr/pub/docs/oreilly-book/ocaml-ora-book.pdf‎">Developing
+      Applications with Objective Caml</ulink> by Chailloux, Manoury and
+      Pagano.
     </para>
     <note>
     <title>
@@ -26179,8 +26212,8 @@ let () =
 <computeroutput>                                                                   </computeroutput>
 <computeroutput>  Name        Time (ns)       Minor   Major   Promoted   % of max  </computeroutput>
 <computeroutput> ----------- ----------- ----------- ------- ---------- ---------- </computeroutput>
-<computeroutput>  mutable     6_330_603   2_000_004    9.05       9.05     100.00  </computeroutput>
-<computeroutput>  immutable   4_890_753   5_000_005    0.03       0.03      77.26  </computeroutput>
+<computeroutput>  mutable     6_309_073   2_000_004    9.05       9.05     100.00  </computeroutput>
+<computeroutput>  immutable   4_888_212   5_000_005    0.03       0.03      77.48  </computeroutput>
 <computeroutput>                                                                   </computeroutput>
 </programlisting>
         <para>
@@ -28658,9 +28691,9 @@ let () =
 <computeroutput>                                                     </computeroutput>
 <computeroutput>  Name                         Time (ns)   % of max  </computeroutput>
 <computeroutput> ---------------------------- ----------- ---------- </computeroutput>
-<computeroutput>  Polymorphic pattern              31.53     100.00  </computeroutput>
-<computeroutput>  Monomorphic larger pattern       29.22      92.67  </computeroutput>
-<computeroutput>  Monomorphic small pattern        16.27      51.62  </computeroutput>
+<computeroutput>  Polymorphic pattern              31.59     100.00  </computeroutput>
+<computeroutput>  Monomorphic larger pattern       29.26      92.63  </computeroutput>
+<computeroutput>  Monomorphic small pattern        16.32      51.66  </computeroutput>
 <computeroutput>                                                     </computeroutput>
 </programlisting>
       <para>
@@ -29233,8 +29266,8 @@ let () =
 <computeroutput>                                                 </computeroutput>
 <computeroutput>  Name                     Time (ns)   % of max  </computeroutput>
 <computeroutput> ------------------------ ----------- ---------- </computeroutput>
-<computeroutput>  Polymorphic comparison      13_910     100.00  </computeroutput>
-<computeroutput>  Monomorphic comparison         814       5.85  </computeroutput>
+<computeroutput>  Polymorphic comparison      13_907     100.00  </computeroutput>
+<computeroutput>  Monomorphic comparison         815       5.86  </computeroutput>
 <computeroutput>                                                 </computeroutput>
 </programlisting>
         <para>
