@@ -236,8 +236,10 @@ some of them need a bit more explanation.
 * The C `size_t` type is an alias for one of the unsigned integer types.  The actual 
   size and alignment requirements for `size_t` varies between platforms. Ctypes provides
   an OCaml `size_t` type that is aliased to the appropriate integer type.
-* OCaml only supports double-precision floating-point numbers, and so the C `float` and
-  `double` types both map onto the OCaml `float` type.
+* OCaml only supports double-precision floating-point numbers, and so the C
+  `float` and `double` types both map onto the OCaml `float` type, and the C
+  `float complex` and `double complex` types both map onto the OCaml
+  double-precision `Complex.t` type.
 
 ## Pointers and arrays
 
