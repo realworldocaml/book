@@ -24595,18 +24595,20 @@ val sort_stdin : unit -&gt; unit</programlisting>
         via a global array of values on the OCaml side that would keep
         them live until they're no longer needed.
       </para>
-      Functions passed to C have similar considerations regarding
-      lifetime. On the OCaml side, functions created at runtime may be
-      collected when they become unreachable. As we've seen, OCaml
-      functions passed to C are converted to function pointers, and
-      function pointers written into the C heap have no effect on the
-      reachability of the OCaml functions they reference. With
-      <literal>qsort</literal> things are straightforward, since the
-      comparison function is only used during the call to
-      <literal>qsort</literal> itself. However, other C libraries may
-      store function pointers in global variables or elsewhere, in which
-      case you'll need to take care that the OCaml functions you pass to
-      them aren't prematurely garbage collected.
+      <para>
+        Functions passed to C have similar considerations regarding
+        lifetime. On the OCaml side, functions created at runtime may be
+        collected when they become unreachable. As we've seen, OCaml
+        functions passed to C are converted to function pointers, and
+        function pointers written into the C heap have no effect on the
+        reachability of the OCaml functions they reference. With
+        <literal>qsort</literal> things are straightforward, since the
+        comparison function is only used during the call to
+        <literal>qsort</literal> itself. However, other C libraries may
+        store function pointers in global variables or elsewhere, in
+        which case you'll need to take care that the OCaml functions you
+        pass to them aren't prematurely garbage collected.
+      </para>
       </note>
     </sect2>
   </sect1>
