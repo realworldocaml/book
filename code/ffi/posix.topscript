@@ -27,8 +27,8 @@ ctime t_ptr ;;
 type timeval ;;
 let timeval : timeval structure typ = structure "timeval" ;;
 #part 9
-let tv_sec  = timeval *:* long ;;
-let tv_usec = timeval *:* long ;;
+let tv_sec  = field timeval "tv_sec" long ;;
+let tv_usec = field timeval "tv_usec" long ;;
 seal timeval ;;
 #part 10
 type timezone ;;
