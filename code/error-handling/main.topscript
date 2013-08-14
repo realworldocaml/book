@@ -175,8 +175,8 @@ find ["a",1; "b",2] "c";;
 find ["a",1; "b",2] "b";;
 #part 36
 let find alist key =
-    Result.try_with (fun () -> find_exn alist key) ;;
+    Or_error.try_with (fun () -> find_exn alist key) ;;
 find ["a",1; "b",2] "c";;
 #part 37
-Result.ok_exn (find ["a",1; "b",2] "b");;
-Result.ok_exn (find ["a",1; "b",2] "c");;o
+Or_error.ok_exn (find ["a",1; "b",2] "b");;
+Or_error.ok_exn (find ["a",1; "b",2] "c");;

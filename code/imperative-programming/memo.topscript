@@ -1,70 +1,64 @@
 1;;
 #part 1
 let memoize f =
-  let table = Hashtbl.Poly.create () in
-  (fun x ->
-    match Hashtbl.find table x with
-    | Some y -> y
-    | None ->
-      let y = f x in
-      Hashtbl.add_exn table ~key:x ~data:y;
-      y
-  );;
-
+    let table = Hashtbl.Poly.create () in
+    (fun x ->
+      match Hashtbl.find table x with
+      | Some y -> y
+      | None ->
+        let y = f x in
+        Hashtbl.add_exn table ~key:x ~data:y;
+        y
+    );;
 #part 2
 let rec edit_distance s t =
-  match String.length s, String.length t with
-  | (0,x) | (x,0) -> x
-  | (len_s,len_t) ->
-    let s' = String.drop_suffix s 1 in
-    let t' = String.drop_suffix t 1 in
-    let cost_to_drop_both =
-      if s.[len_s - 1] = t.[len_t - 1] then 0 else 1
-    in
-    List.reduce_exn ~f:Int.min
-      [ edit_distance s' t  + 1
-      ; edit_distance s  t' + 1
-      ; edit_distance s' t' + cost_to_drop_both
-      ]
-;;
+    match String.length s, String.length t with
+    | (0,x) | (x,0) -> x
+    | (len_s,len_t) ->
+      let s' = String.drop_suffix s 1 in
+      let t' = String.drop_suffix t 1 in
+      let cost_to_drop_both =
+        if s.[len_s - 1] = t.[len_t - 1] then 0 else 1
+      in
+      List.reduce_exn ~f:Int.min
+        [ edit_distance s' t  + 1
+        ; edit_distance s  t' + 1
+        ; edit_distance s' t' + cost_to_drop_both
+        ]
+  ;;
 edit_distance "OCaml" "ocaml";;
-
 #part 3
 let time f =
-  let start = Time.now () in
-  let x = f () in
-  let stop = Time.now () in
-  printf "Time: %s\n" (Time.Span.to_string (Time.diff stop start));
-  x ;;
-
+    let start = Time.now () in
+    let x = f () in
+    let stop = Time.now () in
+    printf "Time: %s\n" (Time.Span.to_string (Time.diff stop start));
+    x ;;
 #part 4
 time (fun () -> edit_distance "OCaml" "ocaml");;
 time (fun () -> edit_distance "OCaml 4.01" "ocaml 4.01");;
-
 #part 5
 let memo_rec f_norec x =
-   let fref = ref (fun _ -> assert false) in
-   let f = memoize (fun x -> f_norec !fref x) in
-   fref := f;
-   f x
+    let fref = ref (fun _ -> assert false) in
+    let f = memoize (fun x -> f_norec !fref x) in
+    fref := f;
+    f x
 ;;
-
 #part 6
 let edit_distance = memo_rec (fun edit_distance (s,t) ->
-  match String.length s, String.length t with
-  | (0,x) | (x,0) -> x
-  | (len_s,len_t) ->
-    let s' = String.drop_suffix s 1 in
-    let t' = String.drop_suffix t 1 in
-    let cost_to_drop_both =
-      if s.[len_s - 1] = t.[len_t - 1] then 0 else 1
-    in
-    List.reduce_exn ~f:Int.min
-      [ edit_distance (s',t ) + 1
-      ; edit_distance (s ,t') + 1
-      ; edit_distance (s',t') + cost_to_drop_both
-      ]) ;;
-
+    match String.length s, String.length t with
+    | (0,x) | (x,0) -> x
+    | (len_s,len_t) ->
+      let s' = String.drop_suffix s 1 in
+      let t' = String.drop_suffix t 1 in
+      let cost_to_drop_both =
+        if s.[len_s - 1] = t.[len_t - 1] then 0 else 1
+      in
+      List.reduce_exn ~f:Int.min
+        [ edit_distance (s',t ) + 1
+        ; edit_distance (s ,t') + 1
+        ; edit_distance (s',t') + cost_to_drop_both
+        ]) ;;
 #part 7
 time (fun () -> edit_distance ("OCaml 4.01","ocaml 4.01"));;
 

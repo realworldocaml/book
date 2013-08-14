@@ -1,21 +1,16 @@
 open Printf
 1;;
-
 #part 1
 printf "%i is an integer, %F is a float, \"%s\" is a string\n"
     3 4.5 "five";;
-
 #part 2
 printf "An integer: %i\n" 4.5;;
-
 #part 3
 let fmt = "%i is an integer, %F is a float, \"%s\" is a string\n";;
-printf fmt 3 4.5 "five";;
-
+  printf fmt 3 4.5 "five";;
 #part 4
 let fmt : ('a, 'b, 'c) format =
-  "%i is an integer, %F is a float, \"%s\" is a string\n";;
-
+    "%i is an integer, %F is a float, \"%s\" is a string\n";;
 #part 5
 printf fmt 3 4.5 "five";;
 
