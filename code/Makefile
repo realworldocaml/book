@@ -123,43 +123,43 @@ $(OBJ)/%.json.0.html $(OBJ)/%.json.0.xml: %.json
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -pygments json $< || (cat $@ && rm -f $@)
 
-$(OBJ)/%.syntax.0.html: %.syntax
+$(OBJ)/%.syntax.0.html $(OBJ)/%.syntax.0.xml: %.syntax
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -pygments html $< || (cat $@ && rm -f $@)
 
-$(OBJ)/%.cmd.0.html: %.cmd
+$(OBJ)/%.cmd.0.html $(OBJ)/%.cmd.0.xml: %.cmd
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -pygments bash $< || (cat $@ && rm -f $@)
 
-$(OBJ)/%.atd.0.html: %.atd
+$(OBJ)/%.atd.0.html $(OBJ)/%.atd.0.xml: %.atd
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -cow $< || (cat $@ && rm -f $@)
 
-$(OBJ)/%.ascii.0.html: %.ascii
+$(OBJ)/%.ascii.0.html $(OBJ)/%.ascii.0.xml: %.ascii
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -raw "Ascii Art" $< || (cat $@ && rm -f $@)
 
-$(OBJ)/%.java.0.html: %.java
+$(OBJ)/%.java.0.html $(OBJ)/%.java.0.xml: %.java
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -pygments java $< || (cat $@ && rm -f $@)
 
-$(OBJ)/%.S.0.html: %.S
+$(OBJ)/%.S.0.html $(OBJ)/%.S.0.xml: %.S
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -pygments gas $< || (cat $@ && rm -f $@)
 
-$(OBJ)/%.c.0.html: %.c
+$(OBJ)/%.c.0.html $(OBJ)/%.c.0.xml: %.c
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -pygments c $< || (cat $@ && rm -f $@)
 
-$(OBJ)/%.h.0.html: %.h
+$(OBJ)/%.h.0.html $(OBJ)/%.h.0.xml: %.h
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -pygments c $< || (cat $@ && rm -f $@)
 
-$(OBJ)/%.cpp.0.html: %.cpp
+$(OBJ)/%.cpp.0.html $(OBJ)/%.cpp.0.xml: %.cpp
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -pygments cpp $< || (cat $@ && rm -f $@)
 
-$(OBJ)/%.scm.0.html: %.scm
+$(OBJ)/%.scm.0.html $(OBJ)/%.scm.0.xml: %.scm
 	@mkdir -p $(@D)
 	$(highlight) -builddir $(OBJ) -pygments scheme $< || (cat $@ && rm -f $@)
 
