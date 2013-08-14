@@ -24314,7 +24314,7 @@ end</programlisting>
         <literal>Array</literal> module except that they operate on
         arrays stored using the flat C representation rather than the
         OCaml representation described in
-        <xref linkend="runtime-memory-layout"/>.
+        <xref linkend="memory-representation-of-values"/>.
       </para>
       <para>
         As with standard OCaml arrays, the conversion between arrays and
