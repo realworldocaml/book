@@ -688,7 +688,7 @@ The system memory they occupy is freed when they do become unreachable, via a
 finalizer function registered with the GC.
 
 The definition of reachability for Ctypes values is a little different from
-conventional OCaml values though.  The allocation functions return an
+conventional OCaml values, though.  The allocation functions return an
 OCaml-managed pointer to the value, and as long as some derivative pointer is
 still reachable by the GC, the value won't be collected.
 
@@ -699,10 +699,19 @@ protects the whole object from collection.
 A corollary of the above rule is that pointers written into the C heap don't
 have any effect on reachability.  For example, if you have a C-managed array of
 pointers to structs then you'll need some additional way of keeping the structs
-around to protect them from collection.  You could achieve this via a global
-array of values on the OCaml side that would keep them live until they're no
-longer needed.
+themselves around to protect them from collection.  You could achieve this via a
+global array of values on the OCaml side that would keep them live until they're
+no longer needed.
 
+Functions passed to C have similar considerations regarding lifetime.  On the
+OCaml side, functions created at runtime may be collected when they become
+unreachable.  As we've seen, OCaml functions passed to C are converted to
+function pointers, and function pointers written into the C heap have no effect
+on the reachability of the OCaml functions they reference.  With `qsort` things
+are straightforward, since the comparison function is only used during the call
+to `qsort` itself.  However, other C libraries may store function pointers in
+global variables or elsewhere, in which case you'll need to take care that the
+OCaml functions you pass to them aren't prematurely garbage collected.
 </note>
 
 ## Learning more about C bindings
