@@ -528,7 +528,8 @@ very simple web-server.
 
 One could imagine making some of these parameters optional; in particular, by
 default, we might want the web server to bind to port 80, and to listen as
-localhost.  The sexp-syntax allows this as follows.
+localhost.  The sexp-syntax allows this as follows, by setting the default 
+value of `addr` to `"localhost"`.
 
 ```frag
 ((typ ocamltop)(name sexpr/sexp_default.topscript)(part 1))
