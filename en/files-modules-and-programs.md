@@ -32,7 +32,7 @@ association list, as shown below.
 ```
 
 Note that `List.Assoc.add` doesn't modify the original list, but
-instead allocates a new list with the requisite key/value added.
+instead allocates a new list with the requisite key/value pair added.
 
 Now we can write down `freq.ml`.
 
@@ -52,7 +52,7 @@ With `build_counts` defined, we then call the function to build the
 association list, sort that list by frequency in descending order,
 grab the first 10 elements off the list, and then iterate over those
 ten elements and print them to the screen.  These operations are tied
-together using the `|>` operator, as described in
+together using the `|>` operator described in
 [xref](#variables-and-functions).
 
 
@@ -64,8 +64,8 @@ implementation files are evaluated in the order in which they were
 linked together.  These implementation files can contain arbitrary
 expressions, not just function definitions. In this example, the
 declaration starting with `let () =` plays the role of the `main`
-declaration, kicking off the processing.  But really the entire file
-is evaluated at startup, and so in some sense the full codebase is one
+function, kicking off the processing.  But really the entire file is
+evaluated at startup, and so in some sense the full codebase is one
 big `main` function.
 
 </note>
@@ -84,20 +84,23 @@ somewhat more complex invocation to get Core linked in:
 ((typ console)(name files-modules-and-programs-freq/simple_build.out))
 ```
 
-Here we're using <command>ocamlfind</command>, a tool which itself invokes other parts of the
-OCaml toolchain (in this case, <command>ocamlc</command>) with the appropriate flags to link in
-particular libraries and packages.  Here, `-package core` is asking <command>ocamlfind</command>
-to link in the Core library, `-linkpkg` asks ocamlfind to link in the packages
-as is necessary for building an executable, while `-thread` turns on threading
-support, which is required for Core.
+This uses <command>ocamlfind</command>, a tool which itself invokes
+other parts of the OCaml toolchain (in this case,
+<command>ocamlc</command>) with the appropriate flags to link in
+particular libraries and packages.  Here, `-package core` is asking
+<command>ocamlfind</command> to link in the Core library, `-linkpkg`
+asks ocamlfind to link in the packages as is necessary for building an
+executable, while `-thread` turns on threading support, which is
+required for Core.
 
-While this works well enough for a one-file project, more complicated projects
-require a tool to orchestrate the build.  One good tool for this task is
-`ocamlbuild`, which is shipped with the OCaml compiler.  We'll talk more about
-`ocamlbuild` in [xref](#the-compiler-frontend-parsing-and-type-checking), but
-for now, we'll just use a simple wrapper around `ocamlbuild` called `corebuild`
-that sets build parameters appropriately for building against Core and its
-related libraries.
+While this works well enough for a one-file project, more complicated
+projects require a tool to orchestrate the build.  One good tool for
+this task is `ocamlbuild`, which is shipped with the OCaml compiler.
+We'll talk more about `ocamlbuild` in
+[xref](#the-compiler-frontend-parsing-and-type-checking), but for now,
+we'll just use a simple wrapper around `ocamlbuild` called `corebuild`
+that sets build parameters appropriately for building against Core and
+its related libraries.
 
 ```frag
 ((typ console)(name files-modules-and-programs-freq-obuild/build.out))
@@ -107,10 +110,10 @@ If we'd invoked `ocamlbuild` with a target of `freq.native` instead of
 `freq.byte`, we would have gotten native-code instead.
 
 We can run the resulting executable from the command-line.  The
-following line extracts strings from the <command>ocamlopt</command> binary, reporting
-the most frequently occurring ones.  Note that the specific results
-will vary from platform to platform, since the binary itself will
-differ between platforms.
+following line extracts strings from the <command>ocamlopt</command>
+binary, reporting the most frequently occurring ones.  Note that the
+specific results will vary from platform to platform, since the binary
+itself will differ between platforms.
 
 ```frag
 ((typ console)(name files-modules-and-programs-freq-obuild/test.out))
@@ -118,23 +121,28 @@ differ between platforms.
 
 <note><title>Bytecode vs native code</title>
 
-OCaml ships with two compilers: the <command>ocamlc</command> bytecode compiler and the
-<command>ocamlopt</command> native-code compiler.  Programs compiled with <command>ocamlc</command> are
-interpreted by a virtual machine, while programs compiled with
-<command>ocamlopt</command> are compiled to native machine code to be run on a specific
-operating system and processor architecture.
+OCaml ships with two compilers: the <command>ocamlc</command> bytecode
+compiler and the <command>ocamlopt</command> native-code compiler.
+Programs compiled with <command>ocamlc</command> are interpreted by a
+virtual machine, while programs compiled with
+<command>ocamlopt</command> are compiled to native machine code to be
+run on a specific operating system and processor architecture.  With
+<command>ocamlbuild</command>, targets ending with `.byte` are build
+as bytecode executables, and those ending with `.native` are built as
+native code.
 
 Aside from performance, executables generated by the two compilers
 have nearly identical behavior.  There are a few things to be aware
 of.  First, the bytecode compiler can be used on more architectures,
 and has some tools that are not available for native code.  For
-example, the OCaml debugger only works with bytecode (although <command>gdb</command>,
-the GNU Debugger, works with OCaml native-code applications).  The
-bytecode compiler is also quicker than the native-code compiler.  In
-addition, in order to run a bytecode executable you typically need to
-have OCaml installed on the system in question.  That's not strictly
-required, though, since you can build a bytecode executable with an
-embedded runtime, using the `-custom` compiler flag.
+example, the OCaml debugger only works with bytecode (although
+<command>gdb</command>, the GNU Debugger, works with OCaml native-code
+applications).  The bytecode compiler is also quicker than the
+native-code compiler.  In addition, in order to run a bytecode
+executable you typically need to have OCaml installed on the system in
+question.  That's not strictly required, though, since you can build a
+bytecode executable with an embedded runtime, using the `-custom`
+compiler flag.
 
 As a general matter, production executables should usually be built
 using the native-code compiler, but it sometimes makes sense to use
@@ -168,19 +176,19 @@ can consider alternative (and more efficient) implementations once we
 have a clear interface to program against.
 
 We'll start by creating a file, `counter.ml` that contains the logic
-for maintaining the association list used to describe the counts.  The
-key function, called `touch`, updates the association list with the
-information that a given line should be added to the frequency counts.
+for maintaining the association list used to represent the frequency
+counts.  The key function, called `touch`, bumps the frequency count
+of a given line by one.
 
 
 ```frag
 ((typ ocaml)(name files-modules-and-programs-freq-with-counter/counter.ml))
 ```
 
-The file `counter.ml` will be compiled into a module named `Counter`.
-The name of the module is derived automatically from the filename.
-The module name is capitalized even if the file is not, and more
-generally module names must be capitalized.
+The file `counter.ml` will be compiled into a module named `Counter`,
+where the name of the module is derived automatically from the
+filename.  The module name is capitalized even if the file is not.
+Indeed, module names are always capitalized.
 
 We can now rewrite `freq.ml` to use `Counter`.  Note that the
 resulting code can still be built with `ocamlbuild`, which will
@@ -198,14 +206,14 @@ in `freq.ml` can still depend on the details of the implementation of
 `Counter`.  Indeed, if you look at the definition of `build_counts`,
 you'll see that it depends on the fact that the empty set of frequency
 counts is represented as an empty list.  We'd like to prevent this
-kind of dependency so we can change the implementation of `Counter`
+kind of dependency, so we can change the implementation of `Counter`
 without needing to change client code like that in `freq.ml`.
 
 The implementation details of a module can be hidden by attaching an
-_interface_.  (Note that the terms _interface_, _signature_ and
-_module type_ are all used interchangeably.)  A module defined by a
-file `filename.ml` can be constrained by a signature placed in a file
-called `filename.mli`.
+_interface_.  (Note that in the context of OCaml, the terms
+_interface_, _signature_ and _module type_ are all used
+interchangeably.)  A module defined by a file `filename.ml` can be
+constrained by a signature placed in a file called `filename.mli`.
 
 For `counter.mli`, we'll start by writing down an interface that
 describes what's currently available in `counter.ml`, without hiding
@@ -262,10 +270,10 @@ out of one.
 
 We also used this opportunity to document the module.  The `mli` file
 is the place where you specify your module's interface, and as such is
-a natural place to document the module as well.  We also started our
-comments with a double asterisk to cause them to be picked up by the
-<command>ocamldoc</command> tool when generating API documentation.  We'll discuss
-<command>ocamldoc</command> more in
+a natural place to put documentation.  We also started our comments
+with a double asterisk to cause them to be picked up by the
+<command>ocamldoc</command> tool when generating API documentation.
+We'll discuss <command>ocamldoc</command> more in
 [xref](#the-compiler-frontend-parsing-and-type-checking).
 
 Here's a rewrite of `counter.ml` to match the new `counter.mli`.
@@ -402,6 +410,11 @@ however, the compiler will flag this bug for us.
 ((typ console)(name files-modules-and-programs/build_session_info.out))
 ```
 
+This is a trivial example, but confusing different kinds of
+identifiers is a very real source of bugs, and the approach of minting
+abstract types for different classes of identifiers is an effective
+way of avoiding such issues.
+
 ## Opening modules
 
 Most of the time, you refer to values and types within a module by
@@ -509,26 +522,26 @@ functionality not present in the module as distributed in Core.
 ((typ ocaml)(name files-modules-and-programs/ext_list.ml))
 ```
 
-Now, what about the interface of this new module?  It turns out that
-include works on the signature language as well, so we can pull
-essentially the same trick to write an `mli` for this new module.  The
-only trick is that we need to get our hands on the signature for the
-list module, which can be done using `module type of`.
+Now, how do we write an interface for this new module?  It turns out
+that `include` works on signatures as well, so we can pull essentially
+the same trick to write our `mli`.  The only issues is that we need to
+get our hands on the signature for the `List` module. This can be done
+using `module type of`, which computes a signature from a module.
 
 ```frag
 ((typ ocaml)(name files-modules-and-programs/ext_list.mli))
 ```
 
 Note that the order of declarations in the `mli` does not need to
-match the order of declarations in the `ml`.  Also, the order of
-declarations in the `ml` is quite important in that it determines what
+match the order of declarations in the `ml`.  The order of
+declarations in the `ml` mostly matters insofar as it affects which
 values are shadowed.  If we wanted to replace a function in `List`
 with a new function of the same name, the declaration of that function
 in the `ml` would have to come after the `include List` declaration.
 
-And we can now use `Ext_list` as a replacement for `List`.  If we want
-to use `Ext_list` in preference to `List` in our project, we can
-create a file of common definitions:
+We can now use `Ext_list` as a replacement for `List`.  If we want to
+use `Ext_list` in preference to `List` in our project, we can create a
+file of common definitions:
 
 ```frag
 ((typ ocaml)(name files-modules-and-programs/common.ml))
@@ -560,17 +573,6 @@ and we try to compile, we'll get the following error.
 ```frag
 ((typ console)(name files-modules-and-programs-freq-with-sig-mismatch/build.out))
 ```
-
-This error message is a bit intimidating at first, and it takes a bit
-of thought to see why the first type for touch (which comes from the
-implementation) doesn't match the second one (which comes from the
-interface).  The key thing to remember is that `t` is a
-`Core.Std.Map.t`, at which point you can see that the error is a
-mismatch in the order of arguments to `touch`.
-
-There's no denying that learning to decode such error messages is
-difficult at first, and takes some getting used to.  But in time,
-decoding these errors becomes second nature.
 
 ### Missing definitions
 
@@ -617,10 +619,9 @@ will lead to a compilation error:
 ) 
 ```
 
-Order is similarly important in other parts of the signature,
-including the order in which record fields are declared and the order
-of arguments (including labeled and optional arguments) to a
-function.
+Order is similarly important to other type declarations, including the
+order in which record fields are declared and the order of arguments
+(including labeled and optional arguments) to a function.
 
 ### Cyclic dependencies
 
@@ -633,14 +634,13 @@ the definition of `is_even` and `is_odd` in
 rather than ordinary `let`.
 
 The same is true at the module level.  By default, cyclic dependencies
-between modules are not allowed, and indeed, cyclic dependencies among
-files are never allowed.  Recursive modules are possible, but are a
-rare case and we won't discuss them further here.
+between modules are not allowed, and cyclic dependencies among files
+are never allowed.  Recursive modules are possible, but are a rare
+case and we won't discuss them further here.
 
-The simplest case of this is that a module can not directly refer to
-itself (although definitions within a module can refer to each other
-in the ordinary way).  So, if we tried to add a reference to `Counter`
-from within `counter.ml`
+The simplest example of a forbidden circular reference is a module
+referring to its own module name.  So, if we tried to add a reference
+to `Counter` from within `counter.ml`
 
 ```frag
 ((typ ocaml)

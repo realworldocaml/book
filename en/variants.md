@@ -13,9 +13,10 @@ The basic syntax of a variant type declaration is as follows.
 ((typ ocamlsyntax)(name variants/variant.syntax))
 ```
 
-Each row starts with a tag that identifies that case, and in addition,
-there may be a collection of fields, each with its own type, that is
-associated with a given tag.
+Each row essentially represents a case of the variant.  Each case has
+an assocaited tag, and may optionally have a sequence of fields, where
+each field has a specified type.  These fields specify the type of the
+data associated with each case.
 
 Let's consider a concrete example of how variants can be useful.
 Almost all terminals support a set of 8 basic colors, and we can
@@ -40,7 +41,7 @@ Using the above, we can generate escape codes to change the color of a
 given string displayed in a terminal.
 
 ```frag
-((typ ocamltop)(name variants/main.topscript)(part 2))
+((typ ocamlrawtop)(name variants/main-2.rawscript))
 ```
 
 On most terminals, that word "Blue" will be rendered in blue.
@@ -48,8 +49,8 @@ On most terminals, that word "Blue" will be rendered in blue.
 In this example, the cases of the variant are simple tags with no
 associated data.  This is substantively the same as the enumerations
 found in languages like C and Java.  But as we'll see, variants can do
-considerably more than represent a simple enumeration.  Indeed, an
-enumeration isn't enough to effectively describe the full set of
+considerably more than represent a simple enumeration.  As it happens,
+an enumeration isn't enough to effectively describe the full set of
 colors that a modern terminal can display.  Many terminals, including
 the venerable `xterm`, support 256 different colors, broken up into
 the following groups.
@@ -79,12 +80,12 @@ extract the data associated with each tag.
 Now, we can print text using the full set of available colors.
 
 ```frag
-((typ ocamltop)(name variants/main.topscript)(part 5))
+((typ ocamlrawtop)(name variants/main-5.rawscript))
 ```
 
-<note><title>Catch-all cases and refactoring</title>
+## Catch-all cases and refactoring
 
-OCaml's type system can act as a refactoring tool, by warning you of
+OCaml's type system can act as a refactoring tool, warning you of
 places where your code needs to be updated to match an interface
 change.  This is particularly valuable in the context of variants.
 
@@ -145,8 +146,6 @@ when we change the type to include it.  We can get this check back by
 avoiding the catch-all case, and instead being explicit about the tags
 that are ignored.
 
-</note>
-
 ## Combining records and variants
 
 The term _algebraic data types_ is often used to describe a collection
@@ -204,25 +203,24 @@ Here's the concrete code.
 ((typ ocamltop)(name variants/logger.topscript)(part 3))
 ```
 
-There's one awkward bit about the code above, which is the calculation
-of the session ids.  In particular, we have the repetitive bit of code
-where we compute the `session_id`.  This code effectively computes the
-session id for each underlying message type.  The repetition in this
-case isn't that bad, but would become problematic in larger and more
-complicated examples.  Also, we had to include code for the `Logon`
-case, even though it can't actually come up.
+There's one awkward part of the above code, which is the logic that
+determines the session id.  The code is somewhat repetitive,
+contemplating each of the possible messages types (including the
+`Logon` case which isn't actually possible at that point in the code)
+and extracting the session id in each case.  This per-message-type
+handling seems unnecessary, since the session id works in the same way
+for all of the message types.
 
-We can improve the code by refactoring our types to explicitly
-separate the parts that are shared from those that are common.  The
-first step is to cut down the definitions of the per-message records
-to just contain the unique components of each message.
+We can improve the code by refactoring our types to explicitly reflect
+the information that's shared between the different messages.  The
+first step is to cut down the definitions of each per-message record
+to contain just the information unique to that record.
 
 ```frag
 ((typ ocamltop)(name variants/logger.topscript)(part 4))
 ```
 
-We can then define a variant type that covers the different possible
-unique components.
+We can then define a variant type that combines these types.
 
 ```frag
 ((typ ocamltop)(name variants/logger.topscript)(part 5))
@@ -242,9 +240,8 @@ A full message can then be represented as a pair of a `Common.t` and a
 ((typ ocamltop)(name variants/logger.topscript)(part 7))
 ```
 
-Note that the more complex match statement for computing the session
-id has been replaced with the simple expression
-`common.Common.session_id`.
+As you can see, the code for extracting the session id has been
+replaced with the simple expression `common.Common.session_id`.
 
 In addition, this design allows us to essentially downcast to the
 specific message type once we know what it is, and then dispatch code
@@ -304,8 +301,7 @@ Using the above, we can construct a simple expression with
 ```
 
 Being able to construct such expressions isn't enough; we also need to
-be able to evaluate such an expression.  The following code shows how
-you could write a general-purpose evaluator for these expressions.
+be able to evaluate them.  Here's a function for doing just that.
 
 ```frag
 ((typ ocamltop)(name variants/blang.topscript)(part 3))
@@ -318,23 +314,22 @@ concrete example, we just need to write the `base_eval` function which
 is capable of evaluating a base predicate.
 
 Another useful operation on expressions is simplification.  The
-following simplification code is based on having some simplifying
-constructors that mirror the tags used to construct a tree.  Then
-the simplification function is responsible for rebuilding the tree
-using these constructors.
+following is a set of simplifying construction functions that mirror
+the tags of an `expr`.
 
 ```frag
 ((typ ocamltop)(name variants/blang.topscript)(part 4))
 ```
 
-Now, we can write a simplification routine that brings these together.
+We can now write a simplification routine that is based on the above
+functions.
 
 ```frag
 ((typ ocamltop)(name variants/blang.topscript)(part 5))
 ```
 
-We can now apply this to a boolean expression and see how good of a
-job it does at simplifying it.
+We can apply this to a boolean expression and see how good of a job it
+does at simplifying it.
 
 ```frag
 ((typ ocamltop)(name variants/blang.topscript)(part 6))
@@ -513,7 +508,7 @@ compilation fails.
 As we saw with the definition of `is_positive`, a match statement can
 lead to the inference of an upper bound on a variant type, limiting
 the possible tags to those that can be handled by the match.  If we
-add a catch-all case to our match statement, we end up with a function
+add a catch-all case to our match statement, we end up with a type
 with a lower bound.
 
 ```frag

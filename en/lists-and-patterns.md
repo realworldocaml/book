@@ -24,17 +24,18 @@ And they can also be generated using the equivalent `::` notation.
 As you can see, the `::` operator is right-associative, which means
 that we can build up lists without parentheses.  The empty list `[]`
 is used to terminate a list.  Note that the empty list is polymorphic,
-meaning it can be used with elements of any type.
+meaning it can be used with elements of any type, as you can see
+below.
 
 ```frag
 ((typ ocamltop)(name lists-and-patterns/main.topscript)(part 2)) 
 ```
 
-The `::` operator conveys something important about the nature of
-lists, which is that they are implemented as singly-linked lists.  The
-following is a rough graphical representation of how the list `1 :: 2
-:: 3 :: []` is laid out as a data-structure.  The final arrow (from
-the box containing `3`) points to the empty list.
+The way in which the `::` operator attaches elements to the front of a
+list reflects the fact that OCaml's lists are in fact singly-linked
+lists.  The following is a rough graphical representation of how the
+list `1 :: 2 :: 3 :: []` is laid out as a data-structure.  The final
+arrow (from the box containing `3`) points to the empty list.
 
 
 ```frag
@@ -71,7 +72,7 @@ acting as a case-analysis tool, breaking down the possibilities into a
 pattern-indexed list of cases.  Second, it lets you name
 sub-structures within the data-structure being matched.  In this case,
 the variables `hd` and `tl` are bound by the pattern that defines the
-first case of the match statement.  Variables that are bound in this
+second case of the match statement.  Variables that are bound in this
 way can be used in the expression to the right of the arrow for the
 pattern in question.
 
@@ -184,8 +185,8 @@ Again, we can benchmark these to see the difference.
 ((typ ocamltop)(name lists-and-patterns/main.topscript)(part 12)) 
 ```
 
-In this case, the `match`-based implementation is more than three
-times faster than the one using `if`.  The difference comes because we
+In this case, the `match`-based implementation is many times faster
+than the `if`-based implementation.  The difference comes because we
 need to effectively do the same work multiple times, since each
 function we call has to re-examine the first element of the list to
 determine whether or not it's the empty cell.  With a match statement,
@@ -217,13 +218,13 @@ we've missed a case, along with an example of an unmatched pattern.
 ((typ ocamltop)(name lists-and-patterns/main.topscript)(part 13)) 
 ```
 
-For simple examples like this, exhaustiveness checks are useful
-enough.  But as we'll see in [xref](#variants), as you get to more
-complicated examples, especially those involving user-defined types,
-exhaustiveness checks become a lot more valuable.  In addition to
-catching outright errors, they act as a sort of refactoring tool,
-guiding you to the locations where you need to adapt your code to deal
-with changing types.
+Even for simple examples like this, exhaustiveness checks are pretty
+useful.  But as we'll see in [xref](#variants), they become yet more
+valuable as you get to more complicated examples, especially those
+involving user-defined types.  In addition to catching outright
+errors, they act as a sort of refactoring tool, guiding you to the
+locations where you need to adapt your code to deal with changing
+types.
 
 ## Using the `List` module effectively
 
@@ -379,18 +380,19 @@ the table.
 ### More useful list functions
 
 The example we worked through above only touched on three of the
-function in `List`.  We won't cover the entire interface, but there
-are a few more functions that are useful enough to mention here.
+function in `List`.  We won't cover the entire interface (for that you
+should look at the [online docs](http://realworldocaml.org/doc)), but
+there are a few more functions that are useful enough to mention here.
 
 #### Combining list elements with `List.reduce` 
 
 `List.fold`, which we described earlier, is a very general and
-powerful function.  Sometimes, however, you want something more that's
-simpler and thereby easier to use.  One such function is
-`List.reduce`, which is essentially a specialized version of
-`List.fold` that doesn't require an explicit starting value, and whose
-accumulator has to consume and produce values of the same type as the
-elements of the list it applies to.
+powerful function.  Sometimes, however, you want something simpler and
+easier to use.  One such function is `List.reduce`, which is
+essentially a specialized version of `List.fold` that doesn't require
+an explicit starting value, and whose accumulator has to consume and
+produce values of the same type as the elements of the list it applies
+to.
 
 Here's the type signature:
 
@@ -409,8 +411,9 @@ Now we can see reduce in action.
 
 #### Filtering with `List.filter`  and `List.filter_map` 
 
-Very often when processing lists, one wants to restrict attention to
-just a subset of values.  The `List.filter` function does just that.
+Very often when processing lists, one wants to restrict your attention
+to a subset of the values on your list.  The `List.filter` function is
+one way of doing that.
 
 ```frag
 ((typ ocamltop)(name lists-and-patterns/main.topscript)(part 29)) 
@@ -420,7 +423,7 @@ Note that the `mod` used above is an infix operator, as described in
 [xref](#variables-and-functions).
 
 Sometimes, you want to both transform and filter as part of the same
-computation.  `List.filter_map` allows you to do just that.  The
+computation.  In that case, `List.filter_map` is what you need.  The
 function passed to `List.filter_map` returns an optional value, and
 `List.filter_map` drops all elements for which `None` is returned.
 
@@ -442,17 +445,16 @@ or-patterns can be nested anywhere within larger patterns.
 
 #### Partitioning with `List.partition_tf`
 
-Another function that is similar to `filter` is `partition_tf`, which
-takes a list and partitions it into a pair of lists based on a boolean
-condition.  `tf` is a mnemonic to remind the reader that `true`
-elements go to the first bucket and `false` ones go to the second.
-Thus, one could write:
+Another useful operation that's closely related to filtering is
+partitioning.  The function `List.partition_tf` takes a list and a
+function for computing a boolean condition on the list elements, and
+returns two lists.  The `tf` in the name is a mnemonic to remind the
+user that `true` elements go to the first list and `false` ones go to
+the second.  Here's an example.
 
 ```frag
 ((typ ocamltop)(name lists-and-patterns/main.topscript)(part 31)) 
 ```
-
-Note the use of a nested or-pattern in `is_ocaml_source`.
 
 #### Combining lists
 
@@ -484,6 +486,10 @@ compute a recursive listing of a directory tree.
 ((typ ocamltop)(name lists-and-patterns/main.topscript)(part 35)) 
 ```
 
+Note that `^/` is an infix operator provided by Core for adding a new
+element to a string representing a file path.  It is equivalent to
+Core's `Filename.concat`.
+
 The above combination of `List.map` and `List.concat` is common
 enough that there is a function `List.concat_map` that combines these
 into one, more efficient operation.
@@ -491,10 +497,6 @@ into one, more efficient operation.
 ```frag
 ((typ ocamltop)(name lists-and-patterns/main.topscript)(part 36)) 
 ```
-
-Note that `^/` is an infix operator provided by Core for adding a new
-element to a string representing a file path.  It is equivalent to
-Core's `Filename.concat`.
 
 ## Tail recursion
 
@@ -508,25 +510,26 @@ function for doing so.
 ```
 
 This looks simple enough, but you'll discover that this implementation
-runs into problems on very large lists.  Here are some examples, using
-another useful function from the `List` module, `List.init`, to create
-the lists.  `List.init` takes an integer `n` and a function `f` and
-creates a list of length `n` where the data for each element is
-created by calling `f` on the index of that element.
+runs into problems on very large lists, as we'll show below.  
 
 ```frag
 ((typ ocamltop)(name lists-and-patterns/main.topscript)(part 38)) 
 ```
 
-To understand what went wrong, you need to learn a bit more about how
-function calls work.  Typically, a function call needs some space to
-keep track of information associated with the call, such as the
-arguments passed to the function, or the location of the code that
-needs to start executing when the function call is complete.  To allow
-for nested function calls, this information is typically organized in
-a stack, where a new _stack frame_ is allocated for each nested
-function call, and then deallocated when the function call is
-complete.
+The above example creates lists using `List.init`, which takes an
+integer `n` and a function `f` and creates a list of length `n` where
+the data for each element is created by calling `f` on the index of
+that element.
+
+To understand where the error in the above example comes from, you
+need to learn a bit more about how function calls work.  Typically, a
+function call needs some space to keep track of information associated
+with the call, such as the arguments passed to the function, or the
+location of the code that needs to start executing when the function
+call is complete.  To allow for nested function calls, this
+information is typically organized in a stack, where a new _stack
+frame_ is allocated for each nested function call, and then
+deallocated when the function call is complete.
 
 And that's the problem with our call to `length`: it tried to allocate
 ten million stack frames, which exhausted the available stack space.

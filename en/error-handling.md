@@ -31,10 +31,9 @@ succeed in finding a suitable element, as you can see below.
 ((typ ocamltop)(name error-handling/main.topscript)(part 1))
 ```
 
-Having errors be explicit in the return values of your functions tells
-the caller that there is an error that needs to be handled.  The
-caller can then handle the error explicitly, either recovering from
-the error or propagating it onward.
+Including errors in the return values of your functions requires the
+caller to handle the error explicitly, allowing the caller to make the
+choice of whether to recover from the error or propagate it onward.
 
 Consider the `compute_bounds` function defined below.  The function
 takes a list and a comparison function, and returns upper and lower
@@ -48,7 +47,7 @@ element of the list.
 ```
 
 The match statement is used to handle the error cases, propagating a
-None in `hd` or `last` into the return value of `compute_bounds`.
+`None` in `hd` or `last` into the return value of `compute_bounds`.
 
 On the other hand, in `find_mismatches` below, errors encountered
 during the computation do not propagate to the return value of the
@@ -135,8 +134,7 @@ thunk won't be called unless the `Error.t` is converted to a string.
 
 The most common way to create `Error.t`s is using _s-expressions_.  An
 s-expression is a balanced parenthetical expression where the leaves
-of the expressions are strings.  Thus, the following is a simple
-s-expression:
+of the expressions are strings.  Here's a simple example.
 
 ```frag
 ((typ scheme)(name error-handling/sexpr.scm))
@@ -153,11 +151,13 @@ the sexp converter for times, `Time.sexp_of_t`.
 ```
 
 Note that the time isn't actually serialized into an s-expression
-until the error is printed out.  We're not restricted to doing this
-kind of error reporting with built-in types.  This will be discussed
-in more detail in [xref](#data-serialization-with-s-expressions), but
-Sexplib comes with a language extension that can autogenerate
-sexp-converters for newly generated types, as shown below.
+until the error is printed out.  
+
+We're not restricted to doing this kind of error reporting with
+built-in types.  This will be discussed in more detail in
+[xref](#data-serialization-with-s-expressions), but Sexplib comes with
+a language extension that can autogenerate sexp-converters for newly
+generated types, as shown below.
 
 ```frag
 ((typ ocamltop)(name error-handling/main.topscript)(part 8))
@@ -170,10 +170,10 @@ We can use this same idiom for generating an error.
 ```
 
 `Error` also supports operations for transforming errors.  For
-example, it's often useful to augment an error with some extra
-information about the context of the error or to combine multiple
-errors together.  `Error.tag` and `Error.of_list` fulfill these roles,
-as you can see below.
+example, it's often useful to augment an error with information about
+the context of the error or to combine multiple errors together.
+`Error.tag` and `Error.of_list` fulfill these roles, as you can see
+below.
 
 ```frag
 ((typ ocamltop)(name error-handling/main.topscript)(part 10))
@@ -237,7 +237,8 @@ shorter.
 These error-handling functions are valuable because they let you
 express your error handling both explicitly and concisely.  We've only
 discussed these functions in the context of the `Option` module, but
-similar functionality is available in both `Result` and `Or_error`.
+more functionality of this kind can be found in the `Result` and
+`Or_error` modules.
 
 ## Exceptions
 
@@ -284,16 +285,18 @@ OCaml values, as you can see below.
 ((typ ocamltop)(name error-handling/main.topscript)(part 19))
 ```
 
-All exceptions are of type `exn`, and that type is a similar to a
-variant type of the kind we encountered in [xref](#variants).  The
-biggest difference is that it is an open type, meaning that new tags
-can be added at any time, by any part of the program.  As such, you
-can never have a match on an exception that is guaranteed to
-exhaustively list all values.
+Exceptions are all of the same type, `exn`.  The `exn` type is
+something of a special case in the OCaml type system.  It is similar
+to the variant types we encountered in [xref](#variants), except that
+it is _open_, meaning that it's not fully defined in any one place.
+In particular, new tags (specifically, new exceptions) can be added to
+it by different parts of the program.  This is in contrast to ordinary
+variants, which are defined with a closed universe of available tags.
+One result of this is that you can never have an exhaustive match on
+an `exn`, since the full set of possible exceptions is not known.
 
-Here's an example of a function for looking up a key in an
-_association list_, _i.e._ a list of key/value pairs which uses this
-newly-defined exception:
+The following function uses the `Key_not_found` exception we defined
+above to signal an error.
 
 ```frag
 ((typ ocamltop)(name error-handling/main.topscript)(part 20))
@@ -311,9 +314,10 @@ see it:
 ((typ ocamltop)(name error-handling/main.topscript)(part 21))
 ```
 
-The return type of `'a` suggests that `raise` could return a value of
-any type.  That seems impossible, and it is.  Really, `raise` has this
-type because it never returns at all. This behavior isn't restricted
+The return type of `'a` makes it look like `raise` manufactures a
+value to return that is completely unconstrained in its type.  That
+seems impossible, and it is.  Really, `raise` has a return type of
+`'a` because it never returns at all.  This behavior isn't restricted
 to functions like `raise` that terminate by throwing exceptions.
 Here's another example of a function that doesn't return a value.
 
@@ -321,7 +325,7 @@ Here's another example of a function that doesn't return a value.
 ((typ ocamltop)(name error-handling/main.topscript)(part 22))
 ```
 
-`forever` doesn't return a value for a different reason: it is an
+`forever` doesn't return a value for a different reason: it's an
 infinite loop.
 
 This all matters because it means that the return type of `raise` can
@@ -350,8 +354,8 @@ information.
 The period in front of `Wrong_date` is there because the
 representation generated by `with sexp` includes the full module path
 of the module where the exception in question is defined.  In this
-case, since we've declared the exception at the toplevel, that module
-path is trivial.
+case, the string `//toplevel//` is used to indicate that this was
+declared at the top-level, rather than in a module.
 
 This is all part of the support for s-expressions provided by the
 Sexplib library and syntax-extension, which is described in more
@@ -395,9 +399,9 @@ can trigger the assert.
 ((typ ocamltop)(name error-handling/main.topscript)(part 27))
 ```
 
-This shows what's special about `assert`, which is that it captures
-the line number and character offset of the source location from which
-the assertion was made.
+This shows what's special about `assert`: it captures the line number
+and character offset of the source location from which the assertion
+was made.
 
 ### Exception handlers
 
@@ -444,12 +448,13 @@ might throw an exception if the file in question is malformed.
 Unfortunately, that means that the `In_channel.t` that was opened will
 never be closed, leading to a file-descriptor leak.
 
-We can fix this using Core's `protect` function.  The purpose of
-`protect` is to ensure that the `finally` thunk will be called when
-`f` exits, whether it exits normally or with an exception.  This is
-similar to the `try/finally` construct available in many programming
-languages, but it is implemented in a library, rather than being a
-built-in primitive.  Here's how it could be used to fix `load_reminders`.
+We can fix this using Core's `protect` function, which takes two
+arguments: a thunk `f`, which is the main body of the computation to
+be run, and a thunk `finally`, which is to be called when `f` exits,
+whether it exits normally or with an exception.  This is similar to
+the `try/finally` construct available in many programming languages,
+but it is implemented in a library, rather than being a built-in
+primitive.  Here's how it could be used to fix `load_reminders`.
 
 ```frag
 ((typ ocamltop)(name error-handling/main.topscript)(part 29))
@@ -462,8 +467,8 @@ called `with_file` that automates this pattern.
 ((typ ocamltop)(name error-handling/main.topscript)(part 30))
 ```
 
-`In_channel.with_file` is actually built on top of `protect` so that
-it can clean up after itself in the presence of exceptions.
+`In_channel.with_file` is built on top of `protect` so that it can
+clean up after itself in the presence of exceptions.
 
 
 ### Catching specific exceptions
@@ -540,7 +545,7 @@ the case.  In fact, by default, OCaml has backtraces turned off, and
 even if you have them turned on at runtime, you can't get backtraces
 unless you have compiled with debugging symbols.  Core reverses the
 default, so if you're linking in Core, you will have backtraces
-enabled at runtime.
+enabled by default.
 
 Even using Core and compiling with debugging symbols, you can turn
 backtraces off by setting the `OCAMLRUNPARAM` environment variable to
@@ -637,15 +642,15 @@ software whose failure is costly, then you should probably lean in the
 direction of using error-aware return types.
 
 To be clear, it doesn't make sense to avoid exceptions entirely.  The
-old maxim of "use exceptions for exceptional conditions" applies.  If
-an error occurs sufficiently rarely, then throwing an exception may
-well be the right behavior.  
+maxim of "use exceptions for exceptional conditions" applies.  If an
+error occurs sufficiently rarely, then throwing an exception is often
+the right behavior.
 
-Also, for errors that are omnipresent, error-aware return types may
-also be overkill.  A good example is out-of-memory errors, which can
-occur anywhere, and so you'd need to use error-aware return types
-everywhere to capture those.  And having every operation marked as one
-that might fail is no more explicit than having none of them marked.
+Also, for errors that are omnipresent, error-aware return types may be
+overkill.  A good example is out-of-memory errors, which can occur
+anywhere, and so you'd need to use error-aware return types everywhere
+to capture those.  Having every operation marked as one that might
+fail is no more explicit than having none of them marked.
 
 In short, for errors that are a foreseeable and ordinary part of the
 execution of your production code and that are not omnipresent, error

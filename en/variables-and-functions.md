@@ -1,19 +1,26 @@
 # Variables and Functions
 
-Variables and functions are fundamental ideas that show up in virtually
-all programming languages.  But OCaml has a different take on these
-basic concepts, so we'll spend some time digging into the details so you
-can understand OCaml's variables and functions and see how they differ
-from what you've encountered elsewhere.
+Variables and functions are fundamental ideas that show up in
+virtually all programming languages.  OCaml has a different take on
+these concepts than most languages you're liketly to have encountered,
+so this chapter will cover OCaml's approach to variables and functions
+in some detail, starting with the basics of how to define a variable,
+and ending with the intricacies of functions with labeled and optional
+arguments.  
+
+Don't be discouraged if you find yourself overwhelmed by some of the
+details, especially towards the end of the chapter.  The concepts here
+are important, but if they don't connect for you on your first read,
+you should return to this chapter after you've gotten a better sense
+for the language and fill in your understanding.
 
 ## Variables
 
 At its simplest, a variable is an identifier whose meaning is bound to
 a particular value.  In OCaml these bindings are often introduced
 using the `let` keyword.  We can type a so-called _top-level_ `let`
-binding into `utop` with the following syntax to bind a new variable.
-Note that variable names must start with a lowercase letter or an
-underscore.
+binding into `utop` with the following syntax.  Note that variable
+names must start with a lowercase letter or an underscore.
 
 ```frag
 ((typ ocamlsyntax)(name variables-and-functions/let.syntax))
@@ -169,7 +176,7 @@ to use a match statement to handle such cases explicitly:
 ```
 
 Note that this is our first use of `assert`, which is useful for
-marking cases that should be impossible.  Asserts are discussed in
+marking cases that should be impossible.  We'll discuss `assert` in
 more detail in [xref](#error-handling).
 
 ## Functions
@@ -284,8 +291,8 @@ This rewrite makes it explicit that `abs_diff` is actually a function
 of one argument that returns another function of one argument, which
 itself returns the final result.  Because the functions are nested,
 the inner expression `abs (x - y)` has access to both `x`, which was
-bound by the first function application, and `y`, which was bound by
-the second one.
+bound by the outer function application, and `y`, which was bound by
+the inner one.
 
 This style of function is called a _curried_ function.  (Currying is
 named after Haskell Curry, a logician who had a significant impact on
@@ -337,8 +344,8 @@ different arguments.  So, we could write:
 
 OCaml handles this calling convention efficiently as well.  In
 particular it does not generally have to allocate a tuple just for the
-purpose of sending arguments to a tuple-style function.  (You can't,
-however, use partial application for this style of function.)
+purpose of sending arguments to a tuple-style function.  You can't,
+however, use partial application for this style of function.
 
 There are small tradeoffs between these two approaches, but most of
 the time, one should stick to currying, since it's the default style
@@ -363,8 +370,9 @@ for finding the first sequentially-repeated element in a list.
 ```
 
 Note that in the above, the pattern `| [] | [_]` is what's called on
-_or-pattern_, which is the combination of two patterns.  In this case,
-`[]`, matching the empty list, and `[_]`, matching any single element
+_or-pattern_, which is a disjunction of two patterns, meaning that it
+will be considered a match if either pattern matches.  In this case,
+`[]`, matches the empty list, and `[_]`, matches any single element
 list.  The `_` is there so we don't have to put an explicit name on
 that single element.
 
@@ -385,10 +393,9 @@ explicitly by the programmer.
 
 But this decision has some good effects.  For one thing, recursive
 (and especially mutually recursive) definitions are harder to reason
-about than non-recursive definitions that proceed in order, each
-building on top of what has already been defined.  It's therefore
-useful that, in the absence of an explicit marker, new definitions can
-only build upon ones that were previously defined.
+about than non-recursive ones.  It's therefore useful that, in the
+absence of an explicit `rec`, you can assume that a let binding is
+non-recursive, and so can only build upon previous bindings.
 
 In addition, having a non-recursive form makes it easier to create a
 new definition that extends and supersedes an existing one by
@@ -413,9 +420,8 @@ prefix function.
 ((typ ocamltop)(name variables-and-functions/main.topscript)(part 25)) 
 ```
 
-In the second expression above, we've partially applied `(+)` to gain
-a function that increments its single argument by `3`, and then
-applied that to all the elements of a list.
+In the second expression, we've partially applied `(+)` to create a
+function that increments its single argument by `3`.
 
 A function is treated syntactically as an operator if the name of that
 function is chosen from one of a specialized set of identifiers.  This
@@ -758,8 +764,7 @@ But, it works smoothly with the original `apply_to_tuple`.
 ```
 
 As a result, when passing labeled functions as arguments, you need to
-take care to be consistent in your ordering of labeled arguments in
-higher-order contexts.
+take care to be consistent in your ordering of labeled arguments.
 
 ### Optional arguments ###
 
@@ -769,8 +774,8 @@ using the same syntax as labeled arguments, and, like labeled
 arguments, can be provided in any order.
 
 Here's an example of a string concatenation function with an optional
-separator.  This function uses the `^` operator for simple pairwise
-string concatenation.
+separator.  This function uses the `^` operator for pairwise string
+concatenation.
 
 ```frag
 ((typ ocamltop)(name variables-and-functions/main.topscript)(part 49)) 
@@ -977,3 +982,9 @@ argument is not erased, instead returning a function that expects the
 ((typ ocamltop)(name variables-and-functions/main.topscript)(part 65)) 
 ```
 
+As you can see, OCaml's support for labeled and optional arguments is
+not without its complexities.  But don't let these complexities
+obscure the usefulness of these features.  Labels and optional
+arguments are very effective tools for making your APIs both more
+convenient and safer, and it's worth the effort of learning how to use
+them effectively.

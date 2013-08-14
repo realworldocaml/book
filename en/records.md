@@ -27,7 +27,8 @@ information about a given computer.
 We can construct a `host_info` just as easily.  The following code
 uses the `Shell` module from `Core_extended` to dispatch commands to
 the shell to extract the information we need about the computer we're
-running on, and the `Time.now` call from Core's `Time` module.
+running on. It also uses the `Time.now` call from Core's `Time`
+module.
 
 ```frag
 ((typ ocamltop)(name records/main.topscript)(part 1))
@@ -123,15 +124,15 @@ and to explicitly disable it with an `_` where necessary.
 <note> <title> Compiler warnings </title>
 
 The OCaml compiler is packed full of useful warnings that can be
-enabled and disabled separately.  For example, we could have found out
-about warning 9, which was discussed above, as follows:
+enabled and disabled separately.  These are documented in the compiler
+itself, so we could have found out about warning 9 as follows.
 
 ```frag
 ((typ console)(name records/warn_help.out))
 ```
 
 You should think of OCaml's warnings as a powerful set of optional
-static analysis tools, and eagerly enable them in your build
+static analysis tools, and should eagerly enable them in your build
 environment.  You don't typically enable all warnings, but the
 defaults that ship with the compiler are pretty good.
 
@@ -184,7 +185,7 @@ as shown below.
 ```
 
 This is considerably more concise than what you would get without
-punning at all.
+punning.
 
 ```frag
 ((typ ocamltop)(name records/main.topscript)(part 12))
@@ -338,20 +339,20 @@ Functional updates make your code independent of the identity of the
 fields in the record that are not changing.  This is often what you
 want, but it has downsides as well.  In particular, if you change the
 definition of your record to have more fields, the type system will
-not prompt you to reconsider whether your update code should affect
-those fields.  Consider what happens if we decided to add a field for
-the status message received on the last heartbeat.
+not prompt you to reconsider whether your code needs to change to
+accommodate the new fields.  Consider what happens if we decided to
+add a field for the status message received on the last heartbeat.
 
 ```frag
 ((typ ocamltop)(name records/main.topscript)(part 24))
 ```
 
 The original implementation of `register_heartbeat` would now be
-invalid, and thus the compiler would warn us to think about how to
-handle this new field.  But the version using a functional update
-continues to compile as is, even though it incorrectly ignores the new
-field.  The correct thing to do would be to update the code as
-follows.
+invalid, and thus the compiler would effectively warn us to think
+about how to handle this new field.  But the version using a
+functional update continues to compile as is, even though it
+incorrectly ignores the new field.  The correct thing to do would be
+to update the code as follows.
 
 ```frag
 ((typ ocamltop)(name records/main.topscript)(part 25))
@@ -367,9 +368,8 @@ following, we've made the last two fields of `client_info` mutable.
 ((typ ocamltop)(name records/main.topscript)(part 26))
 ```
 
-We then use the `<-` operator for actually changing the state.  The
-side-effecting version of `register_heartbeat` would be written as
-follows.
+The `<-` operator is used setting a mutable field.  The side-effecting
+version of `register_heartbeat` would be written as follows.
 
 ```frag
 ((typ ocamltop)(name records/main.topscript)(part 27))
@@ -380,9 +380,9 @@ needed for initialization, because all fields of a record, including
 mutable ones, are specified when the record is created.
 
 OCaml's policy of immutable-by-default is a good one, but imperative
-programming does have its place.  We'll discuss more about how (and
-when) to use OCaml's imperative features in
-[xref](#imperative-programming).
+programming is an important part of programming in OCaml.  We'll
+discuss more about how (and when) to use OCaml's imperative features
+in [xref](#imperative-programming).
 
 ## First-class fields
 
@@ -453,10 +453,11 @@ naively expect from the above, as you can see below.
 ((typ ocamltop)(name records/main.topscript)(part 32))
 ```
 
-The type is `Field.t_with_perm` rather than a simple `Field.t` because
-fields have a notion of access control associated with them because
-there are some special cases where we may expose the ability to read a
-field but not the ability to do a functional update.
+The type is `Field.t_with_perm` rather than `Field.t` because fields
+have a notion of access control that comes up in some special cases
+where we expose the ability to read a field from a record, but not the
+ability to create new records, and so we can't expose functional
+updates.
 
 We can use first-class fields to do things like write a generic
 function for displaying a record field.
@@ -480,9 +481,9 @@ for "function") which provides a collection of useful primitives for
 dealing with functions.  `Fn.id` is the identity function.
 
 `fieldslib` also provides higher-level operators, like `Fields.fold`
-and `Fields.iter`, which let you iterate over all the fields of a
-record.  So, for example, in the case of `Logon.t`, the field iterator
-has the following type.
+and `Fields.iter`, which let you walk over the fields of a record.
+So, for example, in the case of `Logon.t`, the field iterator has the
+following type.
 
 ```frag
 ((typ ocamltop)(name records/main.topscript)(part 35))
@@ -509,9 +510,9 @@ to `Logon.t`, the type of `Logon.Fields.iter` would change along with
 it, acquiring a new argument.  Any code using `Logon.Fields.iter`
 won't compile until it's fixed to take this new argument into account.
 
-This exhaustion guarantee is a valuable one.  Field iterators are
-useful for a variety of record-related tasks, from building record
-validation functions to scaffolding the definition of a web-form from
-a record type, and such applications can benefit from the guarantee
-that all fields of the record type in question have been considered.
+Field iterators are useful for a variety of record-related tasks, from
+building record validation functions to scaffolding the definition of
+a web-form from a record type, and such applications can benefit from
+the guarantee that all fields of the record type in question have been
+considered.
 
