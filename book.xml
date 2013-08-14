@@ -2079,10 +2079,19 @@ let () =
   <title>Variables and Functions</title>
   <para>
     Variables and functions are fundamental ideas that show up in
-    virtually all programming languages. But OCaml has a different take
-    on these basic concepts, so we'll spend some time digging into the
-    details so you can understand OCaml's variables and functions and
-    see how they differ from what you've encountered elsewhere.
+    virtually all programming languages. OCaml has a different take on
+    these concepts than most languages you're liketly to have
+    encountered, so this chapter will cover OCaml's approach to
+    variables and functions in some detail, starting with the basics of
+    how to define a variable, and ending with the intricacies of
+    functions with labeled and optional arguments.
+  </para>
+  <para>
+    Don't be discouraged if you find yourself overwhelmed by some of the
+    details, especially towards the end of the chapter. The concepts
+    here are important, but if they don't connect for you on your first
+    read, you should return to this chapter after you've gotten a better
+    sense for the language and fill in your understanding.
   </para>
   <sect1 id="variables">
     <title>Variables</title>
@@ -2091,9 +2100,9 @@ let () =
       bound to a particular value. In OCaml these bindings are often
       introduced using the <literal>let</literal> keyword. We can type a
       so-called <emphasis>top-level</emphasis> <literal>let</literal>
-      binding into <literal>utop</literal> with the following syntax to
-      bind a new variable. Note that variable names must start with a
-      lowercase letter or an underscore.
+      binding into <literal>utop</literal> with the following syntax.
+      Note that variable names must start with a lowercase letter or an
+      underscore.
     </para>
     <programlisting language=""><lineannotation>✎ Syntax: <filename>variables-and-functions/let.syntax</filename></lineannotation>
 let &lt;variable&gt; = &lt;expr&gt;
@@ -2327,7 +2336,7 @@ let &lt;variable&gt; = &lt;expr1&gt; in &lt;expr2&gt;
       <para>
         Note that this is our first use of <literal>assert</literal>,
         which is useful for marking cases that should be impossible.
-        Asserts are discussed in more detail in
+        We'll discuss <literal>assert</literal> in more detail in
         <xref linkend="error-handling"/>.
       </para>
     </sect2>
@@ -2476,9 +2485,9 @@ let &lt;variable&gt; = &lt;expr1&gt; in &lt;expr2&gt;
         function of one argument, which itself returns the final result.
         Because the functions are nested, the inner expression
         <literal>abs (x - y)</literal> has access to both
-        <literal>x</literal>, which was bound by the first function
+        <literal>x</literal>, which was bound by the outer function
         application, and <literal>y</literal>, which was bound by the
-        second one.
+        inner one.
       </para>
       <para>
         This style of function is called a <emphasis>curried</emphasis>
@@ -2547,8 +2556,8 @@ val abs_diff : int -&gt; (int -&gt; int)</programlisting>
         OCaml handles this calling convention efficiently as well. In
         particular it does not generally have to allocate a tuple just
         for the purpose of sending arguments to a tuple-style function.
-        (You can't, however, use partial application for this style of
-        function.)
+        You can't, however, use partial application for this style of
+        function.
       </para>
       <para>
         There are small tradeoffs between these two approaches, but most
@@ -2589,9 +2598,10 @@ val abs_diff : int -&gt; (int -&gt; int)</programlisting>
       <para>
         Note that in the above, the pattern
         <literal>| [] | [_]</literal> is what's called on
-        <emphasis>or-pattern</emphasis>, which is the combination of two
-        patterns. In this case, <literal>[]</literal>, matching the
-        empty list, and <literal>[_]</literal>, matching any single
+        <emphasis>or-pattern</emphasis>, which is a disjunction of two
+        patterns, meaning that it will be considered a match if either
+        pattern matches. In this case, <literal>[]</literal>, matches
+        the empty list, and <literal>[_]</literal>, matches any single
         element list. The <literal>_</literal> is there so we don't have
         to put an explicit name on that single element.
       </para>
@@ -2626,11 +2636,10 @@ val abs_diff : int -&gt; (int -&gt; int)</programlisting>
       <para>
         But this decision has some good effects. For one thing,
         recursive (and especially mutually recursive) definitions are
-        harder to reason about than non-recursive definitions that
-        proceed in order, each building on top of what has already been
-        defined. It's therefore useful that, in the absence of an
-        explicit marker, new definitions can only build upon ones that
-        were previously defined.
+        harder to reason about than non-recursive ones. It's therefore
+        useful that, in the absence of an explicit
+        <literal>rec</literal>, you can assume that a let binding is
+        non-recursive, and so can only build upon previous bindings.
       </para>
       <para>
         In addition, having a non-recursive form makes it easier to
@@ -2664,10 +2673,9 @@ val abs_diff : int -&gt; (int -&gt; int)</programlisting>
 <computeroutput>- : int list = [7; 8; 9]</computeroutput>
 </programlisting>
       <para>
-        In the second expression above, we've partially applied
-        <literal>(+)</literal> to gain a function that increments its
-        single argument by <literal>3</literal>, and then applied that
-        to all the elements of a list.
+        In the second expression, we've partially applied
+        <literal>(+)</literal> to create a function that increments its
+        single argument by <literal>3</literal>.
       </para>
       <para>
         A function is treated syntactically as an operator if the name
@@ -3262,7 +3270,7 @@ val substring: string -&gt; pos:int -&gt; len:int -&gt; string</programlisting>
         <para>
           As a result, when passing labeled functions as arguments, you
           need to take care to be consistent in your ordering of labeled
-          arguments in higher-order contexts.
+          arguments.
         </para>
       </sect3>
     </sect2>
@@ -3277,7 +3285,7 @@ val substring: string -&gt; pos:int -&gt; len:int -&gt; string</programlisting>
       <para>
         Here's an example of a string concatenation function with an
         optional separator. This function uses the <literal>^</literal>
-        operator for simple pairwise string concatenation.
+        operator for pairwise string concatenation.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>variables-and-functions/main.topscript</filename> (part 49)</lineannotation>
 <prompt># </prompt><userinput>let concat ?sep x y =</userinput>
@@ -3608,6 +3616,14 @@ val numeric_deriv :
 <prompt># </prompt><userinput>concat &quot;a&quot; &quot;b&quot;;;</userinput>
 <computeroutput>- : ?sep:string -&gt; string = &lt;fun&gt;</computeroutput>
 </programlisting>
+        <para>
+          As you can see, OCaml's support for labeled and optional
+          arguments is not without its complexities. But don't let these
+          complexities obscure the usefulness of these features. Labels
+          and optional arguments are very effective tools for making
+          your APIs both more convenient and safer, and it's worth the
+          effort of learning how to use them effectively.
+        </para>
       </sect3>
     </sect2>
   </sect1>
@@ -3646,7 +3662,7 @@ val numeric_deriv :
       right-associative, which means that we can build up lists without
       parentheses. The empty list <literal>[]</literal> is used to
       terminate a list. Note that the empty list is polymorphic, meaning
-      it can be used with elements of any type.
+      it can be used with elements of any type, as you can see below.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>lists-and-patterns/main.topscript</filename> (part 2)</lineannotation>
 <prompt># </prompt><userinput>let empty = [];;</userinput>
@@ -3657,10 +3673,10 @@ val numeric_deriv :
 <computeroutput>- : string list = [&quot;three&quot;]</computeroutput>
 </programlisting>
     <para>
-      The <literal>::</literal> operator conveys something important
-      about the nature of lists, which is that they are implemented as
-      singly-linked lists. The following is a rough graphical
-      representation of how the list
+      The way in which the <literal>::</literal> operator attaches
+      elements to the front of a list reflects the fact that OCaml's
+      lists are in fact singly-linked lists. The following is a rough
+      graphical representation of how the list
       <literal>1 :: 2 :: 3 :: []</literal> is laid out as a
       data-structure. The final arrow (from the box containing
       <literal>3</literal>) points to the empty list.
@@ -3719,7 +3735,7 @@ val numeric_deriv :
       lets you name sub-structures within the data-structure being
       matched. In this case, the variables <literal>hd</literal> and
       <literal>tl</literal> are bound by the pattern that defines the
-      first case of the match statement. Variables that are bound in
+      second case of the match statement. Variables that are bound in
       this way can be used in the expression to the right of the arrow
       for the pattern in question.
     </para>
@@ -3935,8 +3951,8 @@ val numeric_deriv :
 </programlisting>
       <para>
         In this case, the <literal>match</literal>-based implementation
-        is more than three times faster than the one using
-        <literal>if</literal>. The difference comes because we need to
+        is many times faster than the <literal>if</literal>-based
+        implementation. The difference comes because we need to
         effectively do the same work multiple times, since each function
         we call has to re-examine the first element of the list to
         determine whether or not it's the empty cell. With a match
@@ -3983,14 +3999,14 @@ val numeric_deriv :
 <computeroutput>val drop_zero : int list -&gt; 'a list = &lt;fun&gt;</computeroutput>
 </programlisting>
       <para>
-        For simple examples like this, exhaustiveness checks are useful
-        enough. But as we'll see in
-        <xref linkend="variants"/>, as you get to more
-        complicated examples, especially those involving user-defined
-        types, exhaustiveness checks become a lot more valuable. In
-        addition to catching outright errors, they act as a sort of
-        refactoring tool, guiding you to the locations where you need to
-        adapt your code to deal with changing types.
+        Even for simple examples like this, exhaustiveness checks are
+        pretty useful. But as we'll see in
+        <xref linkend="variants"/>, they become yet more
+        valuable as you get to more complicated examples, especially
+        those involving user-defined types. In addition to catching
+        outright errors, they act as a sort of refactoring tool, guiding
+        you to the locations where you need to adapt your code to deal
+        with changing types.
       </para>
     </sect2>
   </sect1>
@@ -4225,8 +4241,10 @@ val numeric_deriv :
       <para>
         The example we worked through above only touched on three of the
         function in <literal>List</literal>. We won't cover the entire
-        interface, but there are a few more functions that are useful
-        enough to mention here.
+        interface (for that you should look at the
+        <ulink url="http://realworldocaml.org/doc">online docs</ulink>),
+        but there are a few more functions that are useful enough to
+        mention here.
       </para>
       <sect3 id="combining-list-elements-with-list.reduce">
         <title>Combining list elements with
@@ -4234,13 +4252,12 @@ val numeric_deriv :
         <para>
           <literal>List.fold</literal>, which we described earlier, is a
           very general and powerful function. Sometimes, however, you
-          want something more that's simpler and thereby easier to use.
-          One such function is <literal>List.reduce</literal>, which is
-          essentially a specialized version of
-          <literal>List.fold</literal> that doesn't require an explicit
-          starting value, and whose accumulator has to consume and
-          produce values of the same type as the elements of the list it
-          applies to.
+          want something simpler and easier to use. One such function is
+          <literal>List.reduce</literal>, which is essentially a
+          specialized version of <literal>List.fold</literal> that
+          doesn't require an explicit starting value, and whose
+          accumulator has to consume and produce values of the same type
+          as the elements of the list it applies to.
         </para>
         <para>
           Here's the type signature:
@@ -4268,9 +4285,10 @@ val numeric_deriv :
         <title>Filtering with <literal>List.filter</literal> and
         <literal>List.filter_map</literal></title>
         <para>
-          Very often when processing lists, one wants to restrict
-          attention to just a subset of values. The
-          <literal>List.filter</literal> function does just that.
+          Very often when processing lists, one wants to restrict your
+          attention to a subset of the values on your list. The
+          <literal>List.filter</literal> function is one way of doing
+          that.
         </para>
         <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>lists-and-patterns/main.topscript</filename> (part 29)</lineannotation>
 <prompt># </prompt><userinput>List.filter ~f:(fun x -&gt; x mod 2 = 0) [1;2;3;4;5];;</userinput>
@@ -4283,11 +4301,12 @@ val numeric_deriv :
         </para>
         <para>
           Sometimes, you want to both transform and filter as part of
-          the same computation. <literal>List.filter_map</literal>
-          allows you to do just that. The function passed to
-          <literal>List.filter_map</literal> returns an optional value,
-          and <literal>List.filter_map</literal> drops all elements for
-          which <literal>None</literal> is returned.
+          the same computation. In that case,
+          <literal>List.filter_map</literal> is what you need. The
+          function passed to <literal>List.filter_map</literal> returns
+          an optional value, and <literal>List.filter_map</literal>
+          drops all elements for which <literal>None</literal> is
+          returned.
         </para>
         <para>
           Here's an example. The following expression computes the list
@@ -4321,13 +4340,15 @@ val numeric_deriv :
         <title>Partitioning with
         <literal>List.partition_tf</literal></title>
         <para>
-          Another function that is similar to <literal>filter</literal>
-          is <literal>partition_tf</literal>, which takes a list and
-          partitions it into a pair of lists based on a boolean
-          condition. <literal>tf</literal> is a mnemonic to remind the
-          reader that <literal>true</literal> elements go to the first
-          bucket and <literal>false</literal> ones go to the second.
-          Thus, one could write:
+          Another useful operation that's closely related to filtering
+          is partitioning. The function
+          <literal>List.partition_tf</literal> takes a list and a
+          function for computing a boolean condition on the list
+          elements, and returns two lists. The <literal>tf</literal> in
+          the name is a mnemonic to remind the user that
+          <literal>true</literal> elements go to the first list and
+          <literal>false</literal> ones go to the second. Here's an
+          example.
         </para>
         <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>lists-and-patterns/main.topscript</filename> (part 31)</lineannotation>
 <prompt># </prompt><userinput>let is_ocaml_source s =</userinput>
@@ -4341,10 +4362,6 @@ val numeric_deriv :
 <computeroutput>val ml_files : string list = [&quot;example.mli&quot;; &quot;example.ml&quot;]</computeroutput>
 <computeroutput>val other_files : string list = [&quot;main.topscript&quot;; &quot;lists_layout.ascii&quot;]</computeroutput>
 </programlisting>
-        <para>
-          Note the use of a nested or-pattern in
-          <literal>is_ocaml_source</literal>.
-        </para>
       </sect3>
       <sect3 id="combining-lists">
         <title>Combining lists</title>
@@ -4391,6 +4408,12 @@ val numeric_deriv :
 <computeroutput>val ls_rec : string -&gt; string list = &lt;fun&gt;</computeroutput>
 </programlisting>
         <para>
+          Note that <literal>^/</literal> is an infix operator provided
+          by Core for adding a new element to a string representing a
+          file path. It is equivalent to Core's
+          <literal>Filename.concat</literal>.
+        </para>
+        <para>
           The above combination of <literal>List.map</literal> and
           <literal>List.concat</literal> is common enough that there is
           a function <literal>List.concat_map</literal> that combines
@@ -4406,12 +4429,6 @@ val numeric_deriv :
 <userinput>  ;;</userinput>
 <computeroutput>val ls_rec : string -&gt; string list = &lt;fun&gt;</computeroutput>
 </programlisting>
-        <para>
-          Note that <literal>^/</literal> is an infix operator provided
-          by Core for adding a new element to a string representing a
-          file path. It is equivalent to Core's
-          <literal>Filename.concat</literal>.
-        </para>
       </sect3>
     </sect2>
   </sect1>
@@ -4434,14 +4451,8 @@ val numeric_deriv :
 </programlisting>
     <para>
       This looks simple enough, but you'll discover that this
-      implementation runs into problems on very large lists. Here are
-      some examples, using another useful function from the
-      <literal>List</literal> module, <literal>List.init</literal>, to
-      create the lists. <literal>List.init</literal> takes an integer
-      <literal>n</literal> and a function <literal>f</literal> and
-      creates a list of length <literal>n</literal> where the data for
-      each element is created by calling <literal>f</literal> on the
-      index of that element.
+      implementation runs into problems on very large lists, as we'll
+      show below.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>lists-and-patterns/main.topscript</filename> (part 38)</lineannotation>
 <prompt># </prompt><userinput>let make_list n = List.init n ~f:(fun x -&gt; x);;</userinput>
@@ -4452,15 +4463,24 @@ val numeric_deriv :
 <computeroutput>Stack overflow during evaluation (looping recursion?).</computeroutput>
 </programlisting>
     <para>
-      To understand what went wrong, you need to learn a bit more about
-      how function calls work. Typically, a function call needs some
-      space to keep track of information associated with the call, such
-      as the arguments passed to the function, or the location of the
-      code that needs to start executing when the function call is
-      complete. To allow for nested function calls, this information is
-      typically organized in a stack, where a new <emphasis>stack
-      frame</emphasis> is allocated for each nested function call, and
-      then deallocated when the function call is complete.
+      The above example creates lists using
+      <literal>List.init</literal>, which takes an integer
+      <literal>n</literal> and a function <literal>f</literal> and
+      creates a list of length <literal>n</literal> where the data for
+      each element is created by calling <literal>f</literal> on the
+      index of that element.
+    </para>
+    <para>
+      To understand where the error in the above example comes from, you
+      need to learn a bit more about how function calls work. Typically,
+      a function call needs some space to keep track of information
+      associated with the call, such as the arguments passed to the
+      function, or the location of the code that needs to start
+      executing when the function call is complete. To allow for nested
+      function calls, this information is typically organized in a
+      stack, where a new <emphasis>stack frame</emphasis> is allocated
+      for each nested function call, and then deallocated when the
+      function call is complete.
     </para>
     <para>
       And that's the problem with our call to <literal>length</literal>:
@@ -4822,7 +4842,7 @@ val numeric_deriv :
     <para>
       Note that <literal>List.Assoc.add</literal> doesn't modify the
       original list, but instead allocates a new list with the requisite
-      key/value added.
+      key/value pair added.
     </para>
     <para>
       Now we can write down <literal>freq.ml</literal>.
@@ -4862,7 +4882,7 @@ let () =
       frequency in descending order, grab the first 10 elements off the
       list, and then iterate over those ten elements and print them to
       the screen. These operations are tied together using the
-      <literal>|&gt;</literal> operator, as described in
+      <literal>|&gt;</literal> operator described in
       <xref linkend="variables-and-functions"/>.
     </para>
     <note><title>
@@ -4876,8 +4896,8 @@ let () =
       implementation files can contain arbitrary expressions, not just
       function definitions. In this example, the declaration starting
       with <literal>let () =</literal> plays the role of the
-      <literal>main</literal> declaration, kicking off the processing.
-      But really the entire file is evaluated at startup, and so in some
+      <literal>main</literal> function, kicking off the processing. But
+      really the entire file is evaluated at startup, and so in some
       sense the full codebase is one big <literal>main</literal>
       function.
     </para>
@@ -4899,7 +4919,7 @@ let () =
 <prompt>$ </prompt><userinput>ocamlfind ocamlc -linkpkg -thread -package core freq.ml -o freq.byte</userinput>
 </programlisting>
     <para>
-      Here we're using <command>ocamlfind</command>, a tool which itself
+      This uses <command>ocamlfind</command>, a tool which itself
       invokes other parts of the OCaml toolchain (in this case,
       <command>ocamlc</command>) with the appropriate flags to link in
       particular libraries and packages. Here,
@@ -4926,7 +4946,7 @@ let () =
 <prompt>$ </prompt><userinput>corebuild freq.byte</userinput>
 </programlisting>
     <para>
-      If we'd invoked <literal>ocamlbuild</literal> with a target of
+      If we'd invoked <literal>corebuild</literal> with a target of
       <literal>freq.native</literal> instead of
       <literal>freq.byte</literal>, we would have gotten native-code
       instead.
@@ -4962,6 +4982,10 @@ let () =
       interpreted by a virtual machine, while programs compiled with
       <command>ocamlopt</command> are compiled to native machine code to
       be run on a specific operating system and processor architecture.
+      With <command>ocamlbuild</command>, targets ending with
+      <literal>.byte</literal> are build as bytecode executables, and
+      those ending with <literal>.native</literal> are built as native
+      code.
     </para>
     <para>
       Aside from performance, executables generated by the two compilers
@@ -5018,10 +5042,9 @@ let () =
     <para>
       We'll start by creating a file, <literal>counter.ml</literal> that
       contains the logic for maintaining the association list used to
-      describe the counts. The key function, called
-      <literal>touch</literal>, updates the association list with the
-      information that a given line should be added to the frequency
-      counts.
+      represent the frequency counts. The key function, called
+      <literal>touch</literal>, bumps the frequency count of a given
+      line by one.
     </para>
     <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>files-modules-and-programs-freq-with-counter/counter.ml</filename></lineannotation>
 open Core.Std
@@ -5035,10 +5058,10 @@ let touch t s =
   List.Assoc.add t s (count + 1)</programlisting>
     <para>
       The file <literal>counter.ml</literal> will be compiled into a
-      module named <literal>Counter</literal>. The name of the module is
-      derived automatically from the filename. The module name is
-      capitalized even if the file is not, and more generally module
-      names must be capitalized.
+      module named <literal>Counter</literal>, where the name of the
+      module is derived automatically from the filename. The module name
+      is capitalized even if the file is not. Indeed, module names are
+      always capitalized.
     </para>
     <para>
       We can now rewrite <literal>freq.ml</literal> to use
@@ -5069,18 +5092,18 @@ let () =
       at the definition of <literal>build_counts</literal>, you'll see
       that it depends on the fact that the empty set of frequency counts
       is represented as an empty list. We'd like to prevent this kind of
-      dependency so we can change the implementation of
+      dependency, so we can change the implementation of
       <literal>Counter</literal> without needing to change client code
       like that in <literal>freq.ml</literal>.
     </para>
     <para>
       The implementation details of a module can be hidden by attaching
-      an <emphasis>interface</emphasis>. (Note that the terms
-      <emphasis>interface</emphasis>, <emphasis>signature</emphasis> and
-      <emphasis>module type</emphasis> are all used interchangeably.) A
-      module defined by a file <literal>filename.ml</literal> can be
-      constrained by a signature placed in a file called
-      <literal>filename.mli</literal>.
+      an <emphasis>interface</emphasis>. (Note that in the context of
+      OCaml, the terms <emphasis>interface</emphasis>,
+      <emphasis>signature</emphasis> and <emphasis>module
+      type</emphasis> are all used interchangeably.) A module defined by
+      a file <literal>filename.ml</literal> can be constrained by a
+      signature placed in a file called <literal>filename.mli</literal>.
     </para>
     <para>
       For <literal>counter.mli</literal>, we'll start by writing down an
@@ -5164,11 +5187,11 @@ val to_list : t -&gt; (string * int) list</programlisting>
     <para>
       We also used this opportunity to document the module. The
       <literal>mli</literal> file is the place where you specify your
-      module's interface, and as such is a natural place to document the
-      module as well. We also started our comments with a double
-      asterisk to cause them to be picked up by the
-      <command>ocamldoc</command> tool when generating API
-      documentation. We'll discuss <command>ocamldoc</command> more in
+      module's interface, and as such is a natural place to put
+      documentation. We also started our comments with a double asterisk
+      to cause them to be picked up by the <command>ocamldoc</command>
+      tool when generating API documentation. We'll discuss
+      <command>ocamldoc</command> more in
       <xref linkend="the-compiler-frontend-parsing-and-type-checking"/>.
     </para>
     <para>
@@ -5415,6 +5438,12 @@ let sessions_have_same_user s1 s2 =
 <computeroutput>       but an expression was expected of type Username.t</computeroutput>
 <computeroutput>Command exited with code 2.</computeroutput>
 </programlisting>
+    <para>
+      This is a trivial example, but confusing different kinds of
+      identifiers is a very real source of bugs, and the approach of
+      minting abstract types for different classes of identifiers is an
+      effective way of avoiding such issues.
+    </para>
   </sect1>
   <sect1 id="opening-modules">
     <title>Opening modules</title>
@@ -5610,12 +5639,13 @@ let rec intersperse list el =
 (* The remainder of the list module *)
 include List</programlisting>
     <para>
-      Now, what about the interface of this new module? It turns out
-      that include works on the signature language as well, so we can
-      pull essentially the same trick to write an <literal>mli</literal>
-      for this new module. The only trick is that we need to get our
-      hands on the signature for the list module, which can be done
-      using <literal>module type of</literal>.
+      Now, how do we write an interface for this new module? It turns
+      out that <literal>include</literal> works on signatures as well,
+      so we can pull essentially the same trick to write our
+      <literal>mli</literal>. The only issues is that we need to get our
+      hands on the signature for the <literal>List</literal> module.
+      This can be done using <literal>module type of</literal>, which
+      computes a signature from a module.
     </para>
     <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>files-modules-and-programs/ext_list.mli</filename></lineannotation>
 open Core.Std
@@ -5628,17 +5658,17 @@ val intersperse : 'a list -&gt; 'a -&gt; 'a list</programlisting>
     <para>
       Note that the order of declarations in the <literal>mli</literal>
       does not need to match the order of declarations in the
-      <literal>ml</literal>. Also, the order of declarations in the
-      <literal>ml</literal> is quite important in that it determines
-      what values are shadowed. If we wanted to replace a function in
+      <literal>ml</literal>. The order of declarations in the
+      <literal>ml</literal> mostly matters insofar as it affects which
+      values are shadowed. If we wanted to replace a function in
       <literal>List</literal> with a new function of the same name, the
       declaration of that function in the <literal>ml</literal> would
       have to come after the <literal>include List</literal>
       declaration.
     </para>
     <para>
-      And we can now use <literal>Ext_list</literal> as a replacement
-      for <literal>List</literal>. If we want to use
+      We can now use <literal>Ext_list</literal> as a replacement for
+      <literal>List</literal>. If we want to use
       <literal>Ext_list</literal> in preference to
       <literal>List</literal> in our project, we can create a file of
       common definitions:
@@ -5685,21 +5715,6 @@ val touch : string -&gt; t -&gt; t</programlisting>
 <computeroutput>       Type string is not compatible with type Counter.t </computeroutput>
 <computeroutput>Command exited with code 2.</computeroutput>
 </programlisting>
-      <para>
-        This error message is a bit intimidating at first, and it takes
-        a bit of thought to see why the first type for touch (which
-        comes from the implementation) doesn't match the second one
-        (which comes from the interface). The key thing to remember is
-        that <literal>t</literal> is a
-        <literal>Core.Std.Map.t</literal>, at which point you can see
-        that the error is a mismatch in the order of arguments to
-        <literal>touch</literal>.
-      </para>
-      <para>
-        There's no denying that learning to decode such error messages
-        is difficult at first, and takes some getting used to. But in
-        time, decoding these errors becomes second nature.
-      </para>
     </sect2>
     <sect2 id="missing-definitions">
       <title>Missing definitions</title>
@@ -5761,7 +5776,7 @@ type median = | Before_and_after of string * string
 <computeroutput>Command exited with code 2.</computeroutput>
 </programlisting>
       <para>
-        Order is similarly important in other parts of the signature,
+        Order is similarly important to other type declarations,
         including the order in which record fields are declared and the
         order of arguments (including labeled and optional arguments) to
         a function.
@@ -5782,16 +5797,15 @@ type median = | Before_and_after of string * string
       </para>
       <para>
         The same is true at the module level. By default, cyclic
-        dependencies between modules are not allowed, and indeed, cyclic
+        dependencies between modules are not allowed, and cyclic
         dependencies among files are never allowed. Recursive modules
         are possible, but are a rare case and we won't discuss them
         further here.
       </para>
       <para>
-        The simplest case of this is that a module can not directly
-        refer to itself (although definitions within a module can refer
-        to each other in the ordinary way). So, if we tried to add a
-        reference to <literal>Counter</literal> from within
+        The simplest example of a forbidden circular reference is a
+        module referring to its own module name. So, if we tried to add
+        a reference to <literal>Counter</literal> from within
         <literal>counter.ml</literal>
       </para>
       <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>files-modules-and-programs-freq-cyclic1/counter.ml</filename> (part 1)</lineannotation>
@@ -5875,7 +5889,7 @@ type &lt;record-name&gt; =
     following code uses the <literal>Shell</literal> module from
     <literal>Core_extended</literal> to dispatch commands to the shell
     to extract the information we need about the computer we're running
-    on, and the <literal>Time.now</literal> call from Core's
+    on. It also uses the <literal>Time.now</literal> call from Core's
     <literal>Time</literal> module.
   </para>
   <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>records/main.topscript</filename> (part 1)</lineannotation>
@@ -6040,8 +6054,9 @@ type &lt;record-name&gt; =
     </title>
     <para>
       The OCaml compiler is packed full of useful warnings that can be
-      enabled and disabled separately. For example, we could have found
-      out about warning 9, which was discussed above, as follows:
+      enabled and disabled separately. These are documented in the
+      compiler itself, so we could have found out about warning 9 as
+      follows.
     </para>
     <programlisting language="console"><lineannotation>✎ Terminal: <filename>records/warn_help.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>ocaml -warn-help | egrep '\b9\b'</userinput>
@@ -6050,9 +6065,9 @@ type &lt;record-name&gt; =
 </programlisting>
     <para>
       You should think of OCaml's warnings as a powerful set of optional
-      static analysis tools, and eagerly enable them in your build
-      environment. You don't typically enable all warnings, but the
-      defaults that ship with the compiler are pretty good.
+      static analysis tools, and should eagerly enable them in your
+      build environment. You don't typically enable all warnings, but
+      the defaults that ship with the compiler are pretty good.
     </para>
     <para>
       The warnings used for building the examples in this book are
@@ -6132,7 +6147,7 @@ type &lt;record-name&gt; =
 </programlisting>
     <para>
       This is considerably more concise than what you would get without
-      punning at all.
+      punning.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>records/main.topscript</filename> (part 12)</lineannotation>
 <prompt># </prompt><userinput>let create_host_info</userinput>
@@ -6443,9 +6458,10 @@ type &lt;record-name&gt; =
       the fields in the record that are not changing. This is often what
       you want, but it has downsides as well. In particular, if you
       change the definition of your record to have more fields, the type
-      system will not prompt you to reconsider whether your update code
-      should affect those fields. Consider what happens if we decided to
-      add a field for the status message received on the last heartbeat.
+      system will not prompt you to reconsider whether your code needs
+      to change to accommodate the new fields. Consider what happens if
+      we decided to add a field for the status message received on the
+      last heartbeat.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>records/main.topscript</filename> (part 24)</lineannotation>
 <prompt># </prompt><userinput>type client_info =</userinput>
@@ -6468,10 +6484,11 @@ type &lt;record-name&gt; =
     <para>
       The original implementation of
       <literal>register_heartbeat</literal> would now be invalid, and
-      thus the compiler would warn us to think about how to handle this
-      new field. But the version using a functional update continues to
-      compile as is, even though it incorrectly ignores the new field.
-      The correct thing to do would be to update the code as follows.
+      thus the compiler would effectively warn us to think about how to
+      handle this new field. But the version using a functional update
+      continues to compile as is, even though it incorrectly ignores the
+      new field. The correct thing to do would be to update the code as
+      follows.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>records/main.topscript</filename> (part 25)</lineannotation>
 <prompt># </prompt><userinput>let register_heartbeat t hb =</userinput>
@@ -6508,8 +6525,8 @@ type &lt;record-name&gt; =
 <computeroutput>}</computeroutput>
 </programlisting>
     <para>
-      We then use the <literal>&lt;-</literal> operator for actually
-      changing the state. The side-effecting version of
+      The <literal>&lt;-</literal> operator is used setting a mutable
+      field. The side-effecting version of
       <literal>register_heartbeat</literal> would be written as follows.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>records/main.topscript</filename> (part 27)</lineannotation>
@@ -6527,8 +6544,9 @@ type &lt;record-name&gt; =
     </para>
     <para>
       OCaml's policy of immutable-by-default is a good one, but
-      imperative programming does have its place. We'll discuss more
-      about how (and when) to use OCaml's imperative features in
+      imperative programming is an important part of programming in
+      OCaml. We'll discuss more about how (and when) to use OCaml's
+      imperative features in
       <xref linkend="imperative-programming"/>.
     </para>
   </sect1>
@@ -6680,11 +6698,11 @@ type &lt;record-name&gt; =
 <computeroutput>- : ('b, 'r, 'a) Field.t_with_perm -&gt; 'r -&gt; 'a = &lt;fun&gt;</computeroutput>
 </programlisting>
     <para>
-      The type is <literal>Field.t_with_perm</literal> rather than a
-      simple <literal>Field.t</literal> because fields have a notion of
-      access control associated with them because there are some special
-      cases where we may expose the ability to read a field but not the
-      ability to do a functional update.
+      The type is <literal>Field.t_with_perm</literal> rather than
+      <literal>Field.t</literal> because fields have a notion of access
+      control that comes up in some special cases where we expose the
+      ability to read a field from a record, but not the ability to
+      create new records, and so we can't expose functional updates.
     </para>
     <para>
       We can use first-class fields to do things like write a generic
@@ -6731,8 +6749,8 @@ type &lt;record-name&gt; =
     <para>
       <literal>fieldslib</literal> also provides higher-level operators,
       like <literal>Fields.fold</literal> and
-      <literal>Fields.iter</literal>, which let you iterate over all the
-      fields of a record. So, for example, in the case of
+      <literal>Fields.iter</literal>, which let you walk over the fields
+      of a record. So, for example, in the case of
       <literal>Logon.t</literal>, the field iterator has the following
       type.
     </para>
@@ -6794,12 +6812,11 @@ type &lt;record-name&gt; =
       fixed to take this new argument into account.
     </para>
     <para>
-      This exhaustion guarantee is a valuable one. Field iterators are
-      useful for a variety of record-related tasks, from building record
-      validation functions to scaffolding the definition of a web-form
-      from a record type, and such applications can benefit from the
-      guarantee that all fields of the record type in question have been
-      considered.
+      Field iterators are useful for a variety of record-related tasks,
+      from building record validation functions to scaffolding the
+      definition of a web-form from a record type, and such applications
+      can benefit from the guarantee that all fields of the record type
+      in question have been considered.
     </para>
   </sect1>
 </chapter><chapter id="variants">
@@ -6822,9 +6839,10 @@ type &lt;variant&gt; =
   | ...
 </programlisting>
   <para>
-    Each row starts with a tag that identifies that case, and in
-    addition, there may be a collection of fields, each with its own
-    type, that is associated with a given tag.
+    Each row essentially represents a case of the variant. Each case has
+    an assocaited tag, and may optionally have a sequence of fields,
+    where each field has a specified type. These fields specify the type
+    of the data associated with each case.
   </para>
   <para>
     Let's consider a concrete example of how variants can be useful.
@@ -6868,14 +6886,14 @@ type &lt;variant&gt; =
     Using the above, we can generate escape codes to change the color of
     a given string displayed in a terminal.
   </para>
-  <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>variants/main.topscript</filename> (part 2)</lineannotation>
-<prompt># </prompt><userinput>let color_by_number number text =</userinput>
-<userinput>    sprintf &quot;\027[38;5;%dm%s\027[0m&quot; number text;;</userinput>
+  <programlisting language=""><lineannotation>✎ OCaml Utop: <filename>variants/main-2.rawscript</filename></lineannotation>
+<userinput># let color_by_number number text =
+    sprintf &quot;\027[38;5;%dm%s\027[0m&quot; number text;;</userinput>
 <computeroutput>val color_by_number : int -&gt; string -&gt; string = &lt;fun&gt;</computeroutput>
-<prompt># </prompt><userinput>let blue = color_by_number (basic_color_to_int Blue) &quot;Blue&quot;;;</userinput>
+<userinput># let blue = color_by_number (basic_color_to_int Blue) &quot;Blue&quot;;;</userinput>
 <computeroutput>val blue : string = &quot;\027[38;5;4mBlue\027[0m&quot;</computeroutput>
-<prompt># </prompt><userinput>(* printf &quot;Hello %s World!\n&quot; blue*) ();;</userinput>
-<computeroutput>- : unit = ()</computeroutput>
+<userinput># printf &quot;Hello %s World!\n&quot; blue;;</userinput>
+<computeroutput>Hello Blue World!</computeroutput>
 </programlisting>
   <para>
     On most terminals, that word &quot;Blue&quot; will be rendered in
@@ -6885,11 +6903,11 @@ type &lt;variant&gt; =
     In this example, the cases of the variant are simple tags with no
     associated data. This is substantively the same as the enumerations
     found in languages like C and Java. But as we'll see, variants can
-    do considerably more than represent a simple enumeration. Indeed, an
-    enumeration isn't enough to effectively describe the full set of
-    colors that a modern terminal can display. Many terminals, including
-    the venerable <literal>xterm</literal>, support 256 different
-    colors, broken up into the following groups.
+    do considerably more than represent a simple enumeration. As it
+    happens, an enumeration isn't enough to effectively describe the
+    full set of colors that a modern terminal can display. Many
+    terminals, including the venerable <literal>xterm</literal>, support
+    256 different colors, broken up into the following groups.
   </para>
   <itemizedlist>
     <listitem>
@@ -6947,28 +6965,27 @@ type &lt;variant&gt; =
   <para>
     Now, we can print text using the full set of available colors.
   </para>
-  <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>variants/main.topscript</filename> (part 5)</lineannotation>
-<prompt># </prompt><userinput>let color_print color s =</userinput>
-<userinput>     printf &quot;%s\n&quot; (color_by_number (color_to_int color) s);;</userinput>
+  <programlisting language=""><lineannotation>✎ OCaml Utop: <filename>variants/main-5.rawscript</filename></lineannotation>
+<userinput># let color_print color s =
+     printf &quot;%s\n&quot; (color_by_number (color_to_int color) s);;</userinput>
 <computeroutput>val color_print : color -&gt; string -&gt; unit = &lt;fun&gt;</computeroutput>
-<prompt># </prompt><userinput>(* color_print (Basic (Red,Bold)) &quot;A bold red!&quot;*) ();;</userinput>
-<computeroutput>- : unit = ()</computeroutput>
-<prompt># </prompt><userinput>(* color_print (Gray 4) &quot;A muted gray...&quot; *) ();;</userinput>
-<computeroutput>- : unit = ()</computeroutput>
+<userinput># color_print (Basic (Red,Bold)) &quot;A bold red!&quot;;;</userinput>
+<computeroutput>A bold red!</computeroutput>
+<userinput># color_print (Gray 4) &quot;A muted gray...&quot;;;</userinput>
+<computeroutput>A muted gray...</computeroutput>
 </programlisting>
-  <note><title>
-  Catch-all cases and refactoring
-  </title>
-  <para>
-    OCaml's type system can act as a refactoring tool, by warning you of
-    places where your code needs to be updated to match an interface
-    change. This is particularly valuable in the context of variants.
-  </para>
-  <para>
-    Consider what would happen if we were to change the definition of
-    <literal>color</literal> to the following.
-  </para>
-  <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>variants/catch_all.topscript</filename> (part 1)</lineannotation>
+  <sect1 id="catch-all-cases-and-refactoring">
+    <title>Catch-all cases and refactoring</title>
+    <para>
+      OCaml's type system can act as a refactoring tool, warning you of
+      places where your code needs to be updated to match an interface
+      change. This is particularly valuable in the context of variants.
+    </para>
+    <para>
+      Consider what would happen if we were to change the definition of
+      <literal>color</literal> to the following.
+    </para>
+    <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>variants/catch_all.topscript</filename> (part 1)</lineannotation>
 <prompt># </prompt><userinput>type color =</userinput>
 <userinput>  | Basic of basic_color     (* basic colors *)</userinput>
 <userinput>  | Bold  of basic_color     (* bold basic colors *)</userinput>
@@ -6981,15 +6998,16 @@ type &lt;variant&gt; =
 <computeroutput>  | RGB of int * int * int</computeroutput>
 <computeroutput>  | Gray of int</computeroutput>
 </programlisting>
-  <para>
-    We've essentially broken out the <literal>Basic</literal> case into
-    two cases, <literal>Basic</literal> and <literal>Bold</literal>, and
-    <literal>Basic</literal> has changed from having two arguments to
-    one. <literal>color_to_int</literal> as we wrote it still expects
-    the old structure of the variant, and if we try to compile that same
-    code again, the compiler will notice the discrepancy.
-  </para>
-  <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>variants/catch_all.topscript</filename> (part 2)</lineannotation>
+    <para>
+      We've essentially broken out the <literal>Basic</literal> case
+      into two cases, <literal>Basic</literal> and
+      <literal>Bold</literal>, and <literal>Basic</literal> has changed
+      from having two arguments to one. <literal>color_to_int</literal>
+      as we wrote it still expects the old structure of the variant, and
+      if we try to compile that same code again, the compiler will
+      notice the discrepancy.
+    </para>
+    <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>variants/catch_all.topscript</filename> (part 2)</lineannotation>
 <prompt># </prompt><userinput>let color_to_int = function</userinput>
 <userinput>    | Basic (basic_color,weight) -&gt;</userinput>
 <userinput>      let base = match weight with Bold -&gt; 8 | Regular -&gt; 0 in</userinput>
@@ -7000,13 +7018,14 @@ type &lt;variant&gt; =
 <computeroutput>Error: This pattern matches values of type 'a * 'b</computeroutput>
 <computeroutput>       but a pattern was expected which matches values of type basic_color</computeroutput>
 </programlisting>
-  <para>
-    Here, the compiler is complaining that the <literal>Basic</literal>
-    tag is used with the wrong number of arguments. If we fix that,
-    however, the compiler flag will flag a second problem, which is that
-    we haven't handled the new <literal>Bold</literal> tag.
-  </para>
-  <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>variants/catch_all.topscript</filename> (part 3)</lineannotation>
+    <para>
+      Here, the compiler is complaining that the
+      <literal>Basic</literal> tag is used with the wrong number of
+      arguments. If we fix that, however, the compiler flag will flag a
+      second problem, which is that we haven't handled the new
+      <literal>Bold</literal> tag.
+    </para>
+    <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>variants/catch_all.topscript</filename> (part 3)</lineannotation>
 <prompt># </prompt><userinput>let color_to_int = function</userinput>
 <userinput>    | Basic basic_color -&gt; basic_color_to_int basic_color</userinput>
 <userinput>    | RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36</userinput>
@@ -7017,10 +7036,10 @@ type &lt;variant&gt; =
 <computeroutput>Bold _</computeroutput>
 <computeroutput>val color_to_int : color -&gt; int = &lt;fun&gt;</computeroutput>
 </programlisting>
-  <para>
-    Fixing this now leads us to the correct implementation.
-  </para>
-  <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>variants/catch_all.topscript</filename> (part 4)</lineannotation>
+    <para>
+      Fixing this now leads us to the correct implementation.
+    </para>
+    <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>variants/catch_all.topscript</filename> (part 4)</lineannotation>
 <prompt># </prompt><userinput>let color_to_int = function</userinput>
 <userinput>    | Basic basic_color -&gt; basic_color_to_int basic_color</userinput>
 <userinput>    | Bold  basic_color -&gt; 8 + basic_color_to_int basic_color</userinput>
@@ -7028,23 +7047,24 @@ type &lt;variant&gt; =
 <userinput>    | Gray i -&gt; 232 + i ;;</userinput>
 <computeroutput>val color_to_int : color -&gt; int = &lt;fun&gt;</computeroutput>
 </programlisting>
-  <para>
-    As we've seen, the type errors identified the things that needed to
-    be fixed to complete the refactoring of the code. This is
-    fantastically useful, but for it to work well and reliably, you need
-    to write your code in a way that maximizes the compiler's chances of
-    helping you find the bugs. To this end, a useful rule of thumb is to
-    avoid catch-all cases in pattern matches.
-  </para>
-  <para>
-    Here's an example that illustrates how catch-all cases interact with
-    exhaustion checks. Imagine we wanted a version of
-    <literal>color_to_int</literal> that works on older terminals by
-    rendering the first 16 colors (the 8 <literal>basic_color</literal>s
-    in regular and bold) in the normal way, but rendering everything
-    else as white. We might have written the function as follows.
-  </para>
-  <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>variants/catch_all.topscript</filename> (part 5)</lineannotation>
+    <para>
+      As we've seen, the type errors identified the things that needed
+      to be fixed to complete the refactoring of the code. This is
+      fantastically useful, but for it to work well and reliably, you
+      need to write your code in a way that maximizes the compiler's
+      chances of helping you find the bugs. To this end, a useful rule
+      of thumb is to avoid catch-all cases in pattern matches.
+    </para>
+    <para>
+      Here's an example that illustrates how catch-all cases interact
+      with exhaustion checks. Imagine we wanted a version of
+      <literal>color_to_int</literal> that works on older terminals by
+      rendering the first 16 colors (the 8
+      <literal>basic_color</literal>s in regular and bold) in the normal
+      way, but rendering everything else as white. We might have written
+      the function as follows.
+    </para>
+    <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>variants/catch_all.topscript</filename> (part 5)</lineannotation>
 <prompt># </prompt><userinput>let oldschool_color_to_int = function</userinput>
 <userinput>    | Basic (basic_color,weight) -&gt;</userinput>
 <userinput>      let base = match weight with Bold -&gt; 8 | Regular -&gt; 0 in</userinput>
@@ -7054,14 +7074,14 @@ type &lt;variant&gt; =
 <computeroutput>Error: This pattern matches values of type 'a * 'b</computeroutput>
 <computeroutput>       but a pattern was expected which matches values of type basic_color</computeroutput>
 </programlisting>
-  <para>
-    But because the catch-all case encompasses all possibilities, the
-    type system will no longer warn us that we have missed the new
-    <literal>Bold</literal> case when we change the type to include it.
-    We can get this check back by avoiding the catch-all case, and
-    instead being explicit about the tags that are ignored.
-  </para>
-  </note>
+    <para>
+      But because the catch-all case encompasses all possibilities, the
+      type system will no longer warn us that we have missed the new
+      <literal>Bold</literal> case when we change the type to include
+      it. We can get this check back by avoiding the catch-all case, and
+      instead being explicit about the tags that are ignored.
+    </para>
+  </sect1>
   <sect1 id="combining-records-and-variants">
     <title>Combining records and variants</title>
     <para>
@@ -7189,21 +7209,20 @@ type &lt;variant&gt; =
 <computeroutput>  &lt;fun&gt;</computeroutput>
 </programlisting>
     <para>
-      There's one awkward bit about the code above, which is the
-      calculation of the session ids. In particular, we have the
-      repetitive bit of code where we compute the
-      <literal>session_id</literal>. This code effectively computes the
-      session id for each underlying message type. The repetition in
-      this case isn't that bad, but would become problematic in larger
-      and more complicated examples. Also, we had to include code for
-      the <literal>Logon</literal> case, even though it can't actually
-      come up.
+      There's one awkward part of the above code, which is the logic
+      that determines the session id. The code is somewhat repetitive,
+      contemplating each of the possible messages types (including the
+      <literal>Logon</literal> case which isn't actually possible at
+      that point in the code) and extracting the session id in each
+      case. This per-message-type handling seems unnecessary, since the
+      session id works in the same way for all of the message types.
     </para>
     <para>
       We can improve the code by refactoring our types to explicitly
-      separate the parts that are shared from those that are common. The
-      first step is to cut down the definitions of the per-message
-      records to just contain the unique components of each message.
+      reflect the information that's shared between the different
+      messages. The first step is to cut down the definitions of each
+      per-message record to contain just the information unique to that
+      record.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>variants/logger.topscript</filename> (part 4)</lineannotation>
 <prompt># </prompt><userinput>module Log_entry = struct</userinput>
@@ -7224,8 +7243,7 @@ type &lt;variant&gt; =
 <computeroutput>module Logon : sig type t = { user : string; credentials : string; } end</computeroutput>
 </programlisting>
     <para>
-      We can then define a variant type that covers the different
-      possible unique components.
+      We can then define a variant type that combines these types.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>variants/logger.topscript</filename> (part 5)</lineannotation>
 <prompt># </prompt><userinput>type details =</userinput>
@@ -7278,8 +7296,8 @@ type &lt;variant&gt; =
 <computeroutput>  string -&gt; (Common.t * details) list -&gt; (Common.t * details) list = &lt;fun&gt;</computeroutput>
 </programlisting>
     <para>
-      Note that the more complex match statement for computing the
-      session id has been replaced with the simple expression
+      As you can see, the code for extracting the session id has been
+      replaced with the simple expression
       <literal>common.Common.session_id</literal>.
     </para>
     <para>
@@ -7393,9 +7411,8 @@ type &lt;variant&gt; =
 </programlisting>
     <para>
       Being able to construct such expressions isn't enough; we also
-      need to be able to evaluate such an expression. The following code
-      shows how you could write a general-purpose evaluator for these
-      expressions.
+      need to be able to evaluate them. Here's a function for doing just
+      that.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>variants/blang.topscript</filename> (part 3)</lineannotation>
 <prompt># </prompt><userinput>let rec eval expr base_eval =</userinput>
@@ -7421,10 +7438,8 @@ type &lt;variant&gt; =
     </para>
     <para>
       Another useful operation on expressions is simplification. The
-      following simplification code is based on having some simplifying
-      constructors that mirror the tags used to construct a tree. Then
-      the simplification function is responsible for rebuilding the tree
-      using these constructors.
+      following is a set of simplifying construction functions that
+      mirror the tags of an <literal>expr</literal>.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>variants/blang.topscript</filename> (part 4)</lineannotation>
 <prompt># </prompt><userinput>let and_ l =</userinput>
@@ -7452,8 +7467,8 @@ type &lt;variant&gt; =
 <computeroutput>val not_ : 'a expr -&gt; 'a expr = &lt;fun&gt;</computeroutput>
 </programlisting>
     <para>
-      Now, we can write a simplification routine that brings these
-      together.
+      We can now write a simplification routine that is based on the
+      above functions.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>variants/blang.topscript</filename> (part 5)</lineannotation>
 <prompt># </prompt><userinput>let rec simplify = function</userinput>
@@ -7465,8 +7480,8 @@ type &lt;variant&gt; =
 <computeroutput>val simplify : 'a expr -&gt; 'a expr = &lt;fun&gt;</computeroutput>
 </programlisting>
     <para>
-      We can now apply this to a boolean expression and see how good of
-      a job it does at simplifying it.
+      We can apply this to a boolean expression and see how good of a
+      job it does at simplifying it.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>variants/blang.topscript</filename> (part 6)</lineannotation>
 <prompt># </prompt><userinput>simplify (Not (And [ Or [Base &quot;it's snowing&quot;; Const true];</userinput>
@@ -7803,7 +7818,7 @@ type &lt;variant&gt; =
         a match statement can lead to the inference of an upper bound on
         a variant type, limiting the possible tags to those that can be
         handled by the match. If we add a catch-all case to our match
-        statement, we end up with a function with a lower bound.
+        statement, we end up with a type with a lower bound.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>variants/main.topscript</filename> (part 16)</lineannotation>
 <prompt># </prompt><userinput>let is_positive_permissive = function</userinput>
@@ -8068,10 +8083,10 @@ let extended_color_to_int : extended_color -&gt; int = function
 <computeroutput>- : int option = None</computeroutput>
 </programlisting>
     <para>
-      Having errors be explicit in the return values of your functions
-      tells the caller that there is an error that needs to be handled.
-      The caller can then handle the error explicitly, either recovering
-      from the error or propagating it onward.
+      Including errors in the return values of your functions requires
+      the caller to handle the error explicitly, allowing the caller to
+      make the choice of whether to recover from the error or propagate
+      it onward.
     </para>
     <para>
       Consider the <literal>compute_bounds</literal> function defined
@@ -8094,8 +8109,9 @@ let extended_color_to_int : extended_color -&gt; int = function
 </programlisting>
     <para>
       The match statement is used to handle the error cases, propagating
-      a None in <literal>hd</literal> or <literal>last</literal> into
-      the return value of <literal>compute_bounds</literal>.
+      a <literal>None</literal> in <literal>hd</literal> or
+      <literal>last</literal> into the return value of
+      <literal>compute_bounds</literal>.
     </para>
     <para>
       On the other hand, in <literal>find_mismatches</literal> below,
@@ -8217,8 +8233,7 @@ end</programlisting>
         The most common way to create <literal>Error.t</literal>s is
         using <emphasis>s-expressions</emphasis>. An s-expression is a
         balanced parenthetical expression where the leaves of the
-        expressions are strings. Thus, the following is a simple
-        s-expression:
+        expressions are strings. Here's a simple example.
       </para>
       <programlisting language="scheme"><lineannotation>✎ S-expression: <filename>error-handling/sexpr.scm</filename></lineannotation>
 (This (is an) (s expression))
@@ -8238,9 +8253,11 @@ end</programlisting>
 </programlisting>
       <para>
         Note that the time isn't actually serialized into an
-        s-expression until the error is printed out. We're not
-        restricted to doing this kind of error reporting with built-in
-        types. This will be discussed in more detail in
+        s-expression until the error is printed out.
+      </para>
+      <para>
+        We're not restricted to doing this kind of error reporting with
+        built-in types. This will be discussed in more detail in
         <xref linkend="data-serialization-with-s-expressions"/>,
         but Sexplib comes with a language extension that can
         autogenerate sexp-converters for newly generated types, as shown
@@ -8264,11 +8281,10 @@ end</programlisting>
       <para>
         <literal>Error</literal> also supports operations for
         transforming errors. For example, it's often useful to augment
-        an error with some extra information about the context of the
-        error or to combine multiple errors together.
-        <literal>Error.tag</literal> and
-        <literal>Error.of_list</literal> fulfill these roles, as you can
-        see below.
+        an error with information about the context of the error or to
+        combine multiple errors together. <literal>Error.tag</literal>
+        and <literal>Error.of_list</literal> fulfill these roles, as you
+        can see below.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>error-handling/main.topscript</filename> (part 10)</lineannotation>
 <prompt># </prompt><userinput>Error.tag</userinput>
@@ -8379,9 +8395,9 @@ end</programlisting>
         These error-handling functions are valuable because they let you
         express your error handling both explicitly and concisely. We've
         only discussed these functions in the context of the
-        <literal>Option</literal> module, but similar functionality is
-        available in both <literal>Result</literal> and
-        <literal>Or_error</literal>.
+        <literal>Option</literal> module, but more functionality of this
+        kind can be found in the <literal>Result</literal> and
+        <literal>Or_error</literal> modules.
       </para>
     </sect2>
   </sect1>
@@ -8446,18 +8462,22 @@ end</programlisting>
 <computeroutput>- : exn list = [Not_found; Key_not_found(&quot;b&quot;)]</computeroutput>
 </programlisting>
     <para>
-      All exceptions are of type <literal>exn</literal>, and that type
-      is a similar to a variant type of the kind we encountered in
-      <xref linkend="variants"/>. The biggest difference is
-      that it is an open type, meaning that new tags can be added at any
-      time, by any part of the program. As such, you can never have a
-      match on an exception that is guaranteed to exhaustively list all
-      values.
+      Exceptions are all of the same type, <literal>exn</literal>. The
+      <literal>exn</literal> type is something of a special case in the
+      OCaml type system. It is similar to the variant types we
+      encountered in <xref linkend="variants"/>, except that
+      it is <emphasis>open</emphasis>, meaning that it's not fully
+      defined in any one place. In particular, new tags (specifically,
+      new exceptions) can be added to it by different parts of the
+      program. This is in contrast to ordinary variants, which are
+      defined with a closed universe of available tags. One result of
+      this is that you can never have an exhaustive match on an
+      <literal>exn</literal>, since the full set of possible exceptions
+      is not known.
     </para>
     <para>
-      Here's an example of a function for looking up a key in an
-      <emphasis>association list</emphasis>, <emphasis>i.e.</emphasis> a
-      list of key/value pairs which uses this newly-defined exception:
+      The following function uses the <literal>Key_not_found</literal>
+      exception we defined above to signal an error.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>error-handling/main.topscript</filename> (part 20)</lineannotation>
 <prompt># </prompt><userinput>let rec find_exn alist key = match alist with</userinput>
@@ -8487,13 +8507,14 @@ end</programlisting>
 <computeroutput>- : exn -&gt; 'a = &lt;fun&gt;</computeroutput>
 </programlisting>
     <para>
-      The return type of <literal>'a</literal> suggests that
-      <literal>raise</literal> could return a value of any type. That
-      seems impossible, and it is. Really, <literal>raise</literal> has
-      this type because it never returns at all. This behavior isn't
-      restricted to functions like <literal>raise</literal> that
-      terminate by throwing exceptions. Here's another example of a
-      function that doesn't return a value.
+      The return type of <literal>'a</literal> makes it look like
+      <literal>raise</literal> manufactures a value to return that is
+      completely unconstrained in its type. That seems impossible, and
+      it is. Really, <literal>raise</literal> has a return type of
+      <literal>'a</literal> because it never returns at all. This
+      behavior isn't restricted to functions like
+      <literal>raise</literal> that terminate by throwing exceptions.
+      Here's another example of a function that doesn't return a value.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>error-handling/main.topscript</filename> (part 22)</lineannotation>
 <prompt># </prompt><userinput>let rec forever () = forever ();;</userinput>
@@ -8501,7 +8522,7 @@ end</programlisting>
 </programlisting>
     <para>
       <literal>forever</literal> doesn't return a value for a different
-      reason: it is an infinite loop.
+      reason: it's an infinite loop.
     </para>
     <para>
       This all matters because it means that the return type of
@@ -8539,8 +8560,8 @@ end</programlisting>
       because the representation generated by
       <literal>with sexp</literal> includes the full module path of the
       module where the exception in question is defined. In this case,
-      since we've declared the exception at the toplevel, that module
-      path is trivial.
+      the string <literal>//toplevel//</literal> is used to indicate
+      that this was declared at the top-level, rather than in a module.
     </para>
     <para>
       This is all part of the support for s-expressions provided by the
@@ -8618,9 +8639,9 @@ end</programlisting>
 <computeroutput>Exception: (Assert_failure //toplevel// 5 13).</computeroutput>
 </programlisting>
       <para>
-        This shows what's special about <literal>assert</literal>, which
-        is that it captures the line number and character offset of the
-        source location from which the assertion was made.
+        This shows what's special about <literal>assert</literal>: it
+        captures the line number and character offset of the source
+        location from which the assertion was made.
       </para>
     </sect2>
     <sect2 id="exception-handlers">
@@ -8695,14 +8716,15 @@ try &lt;expr&gt; with
       </para>
       <para>
         We can fix this using Core's <literal>protect</literal>
-        function. The purpose of <literal>protect</literal> is to ensure
-        that the <literal>finally</literal> thunk will be called when
-        <literal>f</literal> exits, whether it exits normally or with an
-        exception. This is similar to the <literal>try/finally</literal>
-        construct available in many programming languages, but it is
-        implemented in a library, rather than being a built-in
-        primitive. Here's how it could be used to fix
-        <literal>load_reminders</literal>.
+        function, which takes two arguments: a thunk
+        <literal>f</literal>, which is the main body of the computation
+        to be run, and a thunk <literal>finally</literal>, which is to
+        be called when <literal>f</literal> exits, whether it exits
+        normally or with an exception. This is similar to the
+        <literal>try/finally</literal> construct available in many
+        programming languages, but it is implemented in a library,
+        rather than being a built-in primitive. Here's how it could be
+        used to fix <literal>load_reminders</literal>.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>error-handling/main.topscript</filename> (part 29)</lineannotation>
 <prompt># </prompt><userinput>let load_reminders filename =</userinput>
@@ -8725,9 +8747,9 @@ try &lt;expr&gt; with
 <computeroutput>val reminders_of_sexp : string -&gt; (Time.t * string) list = &lt;fun&gt;</computeroutput>
 </programlisting>
       <para>
-        <literal>In_channel.with_file</literal> is actually built on top
-        of <literal>protect</literal> so that it can clean up after
-        itself in the presence of exceptions.
+        <literal>In_channel.with_file</literal> is built on top of
+        <literal>protect</literal> so that it can clean up after itself
+        in the presence of exceptions.
       </para>
     </sect2>
     <sect2 id="catching-specific-exceptions">
@@ -8853,7 +8875,7 @@ let () =
         turned off, and even if you have them turned on at runtime, you
         can't get backtraces unless you have compiled with debugging
         symbols. Core reverses the default, so if you're linking in
-        Core, you will have backtraces enabled at runtime.
+        Core, you will have backtraces enabled by default.
       </para>
       <para>
         Even using Core and compiling with debugging symbols, you can
@@ -9023,17 +9045,17 @@ let () =
     </para>
     <para>
       To be clear, it doesn't make sense to avoid exceptions entirely.
-      The old maxim of &quot;use exceptions for exceptional
-      conditions&quot; applies. If an error occurs sufficiently rarely,
-      then throwing an exception may well be the right behavior.
+      The maxim of &quot;use exceptions for exceptional conditions&quot;
+      applies. If an error occurs sufficiently rarely, then throwing an
+      exception is often the right behavior.
     </para>
     <para>
       Also, for errors that are omnipresent, error-aware return types
-      may also be overkill. A good example is out-of-memory errors,
-      which can occur anywhere, and so you'd need to use error-aware
-      return types everywhere to capture those. And having every
-      operation marked as one that might fail is no more explicit than
-      having none of them marked.
+      may be overkill. A good example is out-of-memory errors, which can
+      occur anywhere, and so you'd need to use error-aware return types
+      everywhere to capture those. Having every operation marked as one
+      that might fail is no more explicit than having none of them
+      marked.
     </para>
     <para>
       In short, for errors that are a foreseeable and ordinary part of
@@ -20871,11 +20893,6 @@ end</programlisting>
 <computeroutput>- : Sexp.t = ((this is included) (this stays) (and now we're done))</computeroutput>
 </programlisting>
     <para>
-      Note that the comments were dropped from the file upon reading.
-      This is expected, since there's no place in the
-      <literal>Sexp.t</literal> type to store comments.
-    </para>
-    <para>
       If we introduce an error into our s-expression, by, say, creating
       a file <literal>broken_example.scm</literal> which is
       <literal>example.scm</literal> without open-paren in front of
@@ -21050,11 +21067,11 @@ let t_of_sexp sexp =
   t</programlisting>
       <para>
         This trick of overriding an existing function definition with a
-        new one is perfectly acceptable in OCaml. Function definitions
-        are only recursive if the <literal>rec</literal> keyword is
-        specified, and so in this case the inner
-        <literal>t_of_sexp</literal> call will go to the earlier
-        autogenerated definition that resulted from the
+        new one is perfectly acceptable in OCaml. The inner call to
+        <literal>t_of_sexp</literal> would turn into a recursive call to
+        the function you are defining if you specify the
+        <literal>rec</literal> keyword. In this case though, it goes to
+        the auto-generated definition generated by the
         <literal>type t with sexp</literal> definition.
       </para>
       <para>
@@ -21212,7 +21229,9 @@ let () =
 <computeroutput>Error: Unbound value no_converter_of_sexp</computeroutput>
 </programlisting>
       <para>
-        But with <literal>sexp_opaque</literal>, we won't:
+        But with <literal>sexp_opaque</literal>, we can embed our opaque
+        <literal>no_converter</literal> type within the other data
+        structure without an error.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>sexpr/sexp_opaque.topscript</filename> (part 1)</lineannotation>
 <prompt># </prompt><userinput>type t = { a: no_converter sexp_opaque; b: string } with sexp ;;</userinput>
@@ -21290,8 +21309,10 @@ let () =
 </programlisting>
       <para>
         You might prefer to make the syntax a bit less parenthesis-laden
-        by dropping the parentheses around the list.
-        <literal>sexp_list</literal> gives us this alternate syntax:
+        by dropping the parentheses around the list. We can replace the
+        <literal>string list</literal> in the type declaration with
+        <literal>string sexp_list</literal> to give us this alternate
+        syntax:
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>sexpr/sexp_list.topscript</filename> (part 1)</lineannotation>
 <prompt># </prompt><userinput>type compatible_versions =</userinput>
@@ -21371,7 +21392,9 @@ let () =
         One could imagine making some of these parameters optional; in
         particular, by default, we might want the web server to bind to
         port 80, and to listen as localhost. The sexp-syntax allows this
-        as follows.
+        as follows, by setting the default value of
+        <literal>addr</literal> to
+        <literal>&quot;localhost&quot;</literal>.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>sexpr/sexp_default.topscript</filename> (part 1)</lineannotation>
 <prompt># </prompt><userinput>type http_server_config = {</userinput>
