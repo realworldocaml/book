@@ -1,7 +1,7 @@
 [1;2;3];;
 #part 1
 1 :: (2 :: (3 :: [])) ;;
-1 :: 2 :: 3 :: [] ;; 
+1 :: 2 :: 3 :: [] ;;
 #part 2
 let empty = [];;
 3 :: empty;;
@@ -16,7 +16,7 @@ let rec sum l =
     | [] -> 0
     | hd :: tl -> hd + sum tl
   ;;
-sum [1;2;3];;  
+sum [1;2;3];;
 sum []
 ;;
 #part 5
@@ -65,7 +65,7 @@ open Core_bench.Std;;
 let run_bench tests =
   Bench.bench
     ~ascii_table:true
-    ~display:Textutils.Ascii_table.Display.column_titles 
+    ~display:Textutils.Ascii_table.Display.column_titles
     tests
 ;;
 [ Bench.Test.create ~name:"plus_one_match" (fun () ->
@@ -178,10 +178,9 @@ let rec ls_rec s =
     then [s]
     else
       Sys.ls_dir s
-      |> List.map ~f:(fun sub -> ls_rec (s ^ "/" ^ sub))
+      |> List.map ~f:(fun sub -> ls_rec (s ^/ sub))
       |> List.concat
   ;;
-ls_rec ".";;
 #part 36
 let rec ls_rec s =
     if Sys.is_file_exn ~follow_symlinks:true s
@@ -198,7 +197,7 @@ let rec length = function
 length [1;2;3];;
 #part 38
 let make_list n = List.init n ~f:(fun x -> x);;
-make_list 10;
+length (make_list 10);;
 length (make_list 10_000_000);;
 #part 39
 let rec length_plus_n l n =
