@@ -231,11 +231,23 @@ not part of the resulting s-expression.
 ```
 
 All in, the s-expression format actually supports three comment
-syntaxes:
+syntaxes.
 
-- `;`, which comments out everything to the end of a line
-- `#|` and `|#`, which are delimiters for commenting out a block
-- `#;`, which comments out the first complete s-expression that follows.
+<variablelist><title>S-expression comment formats</title>
+  <varlistentry>
+    <term>`;`</term>
+    <listitem><para>comments out everything to the end of line</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>`#|`</term>
+    <term>`|#`</term>
+    <listitem><para>delimiters for commenting out a block</para></listitem>
+  </varlistentry>
+  <varlistentry>
+    <term>`#;`</term>
+    <listitem><para>comments out the first complete s-expression that follows</para></listitem>
+  </varlistentry>
+</variablelist>
 
 The following example shows all of these in action.
 
