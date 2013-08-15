@@ -663,7 +663,7 @@ This is, however, exponentially slow, for the same reason that
 ```
 
 As you can see, `fib 40` takes thousands of times longer to compute
-then `fib 20`.
+than `fib 20`.
 
 So, how can we use memoization to make this faster?  The tricky bit is
 that we need to insert the memoization before the recursive calls
@@ -1190,9 +1190,9 @@ As you can see, the polymorphic type of `identity` lets it operate on
 values with different types.
 
 This is not what happens with `remember`, though.  As you can see from
-the `utop` output above, the type that OCaml infers for `remember`
-looks almost, but not quite, like the type of the identity function.
-Here it is again:
+the <command>utop</command> output above, the type that OCaml infers
+for `remember` looks almost, but not quite, like the type of the
+identity function.  Here it is again:
 
 ```frag
 ((typ ocaml)(name imperative-programming/remember_type.ml))
