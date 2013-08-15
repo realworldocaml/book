@@ -13,12 +13,12 @@ other serialization formats later in the book.  This chapter introduces you to
 a couple of new techniques that glue together the basic ideas from Part I of
 the book by using:
 
-* _polymorphic variants_ to write more extensible libraries and protocols (but
-  still retain the ability to extend them if needed)
-* _functional combinators_ to compose common operations over data
+* _Polymorphic variants_ to write more extensible libraries and
+  protocols (but still retain the ability to extend them if needed).
+* _Functional combinators_ to compose common operations over data
   structures in a type-safe way.
-* external tools to generate boilerplate OCaml modules and
-  signatures from external specification files.
+* External tools to generate boilerplate OCaml modules and signatures
+  from external specification files.
 
 ## JSON Basics
 
@@ -87,14 +87,14 @@ valid JSON structure.
 Some interesting properties should leap out at you after reading this
 definition:
 
-* Some of the type definitions are _recursive_ (that is, one of the
-  algebraic data types includes a reference to the name of the type
-  being defined). `Assoc` types can contain references to
-  further JSON values and the `List` type can contain JSON values of different
-  types, unlike the OCaml `list` whose contents must be of a uniform type.
+* The `json` type is _recursive_, which is to say that some of the
+  tags refer back to the overall `json` type.  In particular, `Assoc`
+  and `List` types can contain references to further JSON values of
+  different types.  This is unlike the OCaml lists, whose contents
+  must be of a uniform type.
 * The definition specifically includes a `Null` variant for empty
   fields.  OCaml doesn't allow null values by default, so this must be
-  encoded like any other value.
+  encoded explicitly.
 * The type definition uses polymorphic variants and not normal
   variants. This will become significant later when we extend it with
   custom extensions to the JSON format.
@@ -107,11 +107,11 @@ functions:
 ((typ ocaml)(name json/yojson_basic.mli)(part 1))
 ```
 
-When first reading these interfaces, you can generally ignore the optional
-arguments (which have the question marks in the type signature), as they will
-be filled in with sensible values. In the above signature, the optional
-arguments offer finer control over the memory buffer allocation and error
-messages from parsing incorrect JSON.
+When first reading these interfaces, you can generally ignore the
+optional arguments (which have the question marks in the type
+signature), since they should have sensible defaults. In the above
+signature, the optional arguments offer finer control over the memory
+buffer allocation and error messages from parsing incorrect JSON.
 
 The type signature for these functions with the optional elements removed makes
 their purpose much clearer.  The three ways of parsing JSON are either directly
@@ -187,14 +187,16 @@ that accumulates a single result, and returns that instead.
 ((typ ocaml)(name json/list_excerpt.mli)(part 1))
 ```
 
-`iter` is a more specialized combinator that is only useful in OCaml due to
-side-effects being allowed.  The input function is applied to every value, but
-no result is supplied. The function must instead apply some side-effect such
-as changing a mutable record field or printing to the standard output.
+`iter` is a more specialized combinator that is only useful when
+writing imperative code.  The input function is applied to every
+value, but no result is supplied. The function must instead apply some
+side-effect such as changing a mutable record field or printing to the
+standard output.
 
 </sidebar>
 
-`Yojson` provides several combinators in the `Yojson.Basic.Util` module.
+`Yojson` provides several combinators in the `Yojson.Basic.Util`
+module, some of which are listed below.
 
 Function         Type                         Purpose
 --------         ----                         -------
@@ -203,11 +205,12 @@ to_string        `json -> string`             Convert a JSON value into an OCaml
 to_int           `json -> int`                Convert a JSON value into an OCaml `int`. Raises an exception if this is impossible.
 filter_string    `json list -> string list`   Filter valid strings from a list of JSON fields, and return them as an OCaml list of strings.
 
-We'll go through each of these uses one-by-one now.  The examples below also
-use the `|>` pipe-forward operator that we explained earlier in
-[xref](#variables-and-functions).  This lets us chain together multiple JSON
-selection functions and feed the output from one into the next one, without
-having to create separate `let` bindings for each one.
+We'll go through each of these uses one-by-one now.  The examples
+below also use the `|>` pipe-forward operator that we explained in
+[xref](#variables-and-functions).  This lets us chain together
+multiple JSON selection functions and feed the output from one into
+the next one, without having to create separate `let` bindings for
+each one.
 
 Let's start with selecting a single `title` field from the record.
 
@@ -325,9 +328,9 @@ compile-time.
 <title>Polymorphic variants and easier type checking</title>
 
 One difficulty you will encounter is that type errors involving
-polymorphic variants can be quite verbose if you make a mistake in
-your code.  For example, suppose you build an `Assoc` and mistakenly
-include a single value instead of a list of keys:
+polymorphic variants can be quite verbose.  For example, suppose you
+build an `Assoc` and mistakenly include a single value instead of a
+list of keys:
 
 ```frag
 ((typ ocamltop)(name json/build_json.topscript)(part 4))
@@ -342,12 +345,12 @@ a hint about your intentions.
 ((typ ocamltop)(name json/build_json.topscript)(part 5))
 ```
 
-We've annotated `person` as being of type `Yojson.Basic.json`, and as a result
-the compiler spots that the argument to the `Assoc` variant has the incorrect
-type.  This illustrates the strengths and weaknesses of polymorphic variants:
-they make it possible to easily subtype across module boundaries, but the error
-messages can be more confusing.  However, a bit of careful manual type
-annotation is all it takes to make tracking down such issues much easier.
+We've annotated `person` as being of type `Yojson.Basic.json`, and as
+a result the compiler spots that the argument to the `Assoc` variant
+has the incorrect type.  This illustrates the strengths and weaknesses
+of polymorphic variants: they're lightweight and flexible, but the
+error messages can be quite confusing.  However, a bit of careful
+manual type annotation makes tracking down such issues much easier.
 
 We'll discuss more techniques like this that help you interpret type errors
 more easily in [xref](#the-compiler-frontend-parsing-and-type-checking).
