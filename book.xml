@@ -254,11 +254,11 @@
         applications quickly and effectively.
       </para>
       <para>
-        We'll also use OPAM for installing the <literal>utop</literal>
+        We'll also use OPAM for installing the <command>utop</command>
         command-line interface. This is a modern interactive tool that
         supports command history, macro expansion, module completion,
         and other niceties that make it much more pleasant to work with
-        the language. We'll be using <literal>utop</literal> throughout
+        the language. We'll be using <command>utop</command> throughout
         the book to let you step through worked examples interactively.
       </para>
     </sect2>
@@ -480,11 +480,11 @@
   <para>
     Throughout the book we're going to use Core, a more full-featured
     and capable replacement for OCaml's standard library. We'll also use
-    <literal>utop</literal>, a shell that lets you type in expressions
-    and evaluate them interactively. <literal>utop</literal> is an
+    <command>utop</command>, a shell that lets you type in expressions
+    and evaluate them interactively. <command>utop</command> is an
     easier-to-use version of OCaml's standard toplevel (which you can
     start by typing <literal>ocaml</literal> at the command line). These
-    instructions will assume you're using <literal>utop</literal>
+    instructions will assume you're using <command>utop</command>
     specifically.
   </para>
   <para>
@@ -613,7 +613,7 @@
 <computeroutput>- : int = 16</computeroutput>
 </programlisting>
     <para>
-      Note that by default, <literal>utop</literal> doesn't bother to
+      Note that by default, <command>utop</command> doesn't bother to
       print out variables starting with an underscore.
     </para>
     <para>
@@ -1997,7 +1997,7 @@ sum [1;2;3]
     <title>A complete program</title>
     <para>
       So far, we've played with the basic features of the language via
-      <literal>utop</literal>. Now we'll show how to create a simple
+      <command>utop</command>. Now we'll show how to create a simple
       standalone program. In particular, we'll create a program that
       sums up a list of numbers read in from the standard input.
     </para>
@@ -2111,7 +2111,7 @@ let () =
       bound to a particular value. In OCaml these bindings are often
       introduced using the <literal>let</literal> keyword. We can type a
       so-called <emphasis>top-level</emphasis> <literal>let</literal>
-      binding into <literal>utop</literal> with the following syntax.
+      binding into <command>utop</command> with the following syntax.
       Note that variable names must start with a lowercase letter or an
       underscore.
     </para>
@@ -2126,7 +2126,7 @@ let &lt;variable&gt; = &lt;expr&gt;
     <para>
       Every variable binding has a <emphasis>scope</emphasis>, which is
       the portion of the code that can refer to that binding. When using
-      <literal>utop</literal>, the scope of a top-level let binding is
+      <command>utop</command>, the scope of a top-level let binding is
       everything that follows it in the session. When it shows up in a
       module, the scope is the remainder of that module.
     </para>
@@ -18646,7 +18646,7 @@ let () = Command.run add</programlisting>
       running <literal>opam install yojson</literal>. See
       <xref linkend="installation"/> for installation
       instructions if you haven't already got OPAM. Once installed, you
-      can open it in the <literal>utop</literal> toplevel by:
+      can open it in the <command>utop</command> toplevel by:
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>json/install.topscript</filename></lineannotation>
 <prompt># </prompt><userinput>#require &quot;yojson&quot; ;;</userinput>
@@ -20850,18 +20850,16 @@ end</programlisting>
         have implemented by hand, but with far less programmer effort.
       </para>
       <note> <title>
-      Syntax extensions, <literal>camlp4</literal> and
-      <literal>type_conv</literal>
+      Syntax extensions, Camlp4 and Type_conv
       </title>
       <para>
         OCaml doesn't directly support generating code from type
         definitions. Instead, it supplies a powerful syntax extension
-        mechanism known as <literal>camlp4</literal>, which lets you
-        extend the grammar of the language. In the case of Sexplib,
-        <command>camlp4</command> is used to create s-expression
-        conversion functions. <command>camlp4</command> is well
-        integrated into the OCaml toolchain, and can be activated within
-        the toplevel and also included in compilation using the
+        mechanism known as Camlp4, which lets you extend the grammar of
+        the language. In the case of Sexplib, Camlp4 is used to create
+        s-expression conversion functions. Camlp4 is well integrated
+        into the OCaml toolchain, and can be activated within the
+        toplevel and also included in compilation using the
         <literal>-pp</literal> compiler flag.
       </para>
       <para>
@@ -20888,7 +20886,7 @@ end</programlisting>
       atoms. Quotes are used for atoms that contain parentheses or
       spaces themselves; backslash is the escape character; and
       semicolons are used to introduce single-line comments. Thus, the
-      following file, <literal>example.scm</literal>:
+      following file, <filename>example.scm</filename>:
     </para>
     <programlisting language="scheme"><lineannotation>✎ S-expression: <filename>sexpr/example.scm</filename></lineannotation>
 ;; example.scm
@@ -21809,7 +21807,7 @@ let () =
 </programlisting>
     <para>
       Note that <literal>count_lines</literal> returns a deferred, but
-      <literal>utop</literal> waits for that deferred to become
+      <command>utop</command> waits for that deferred to become
       determined, and shows us the contents of the deferred instead.
     </para>
     <sect2 id="ivars-and-upon">
@@ -27307,8 +27305,8 @@ type t = {
     <sect2 id="using-camlp4-interactively">
       <title>Using Camlp4 interactively</title>
       <para>
-        The <literal>utop</literal> top-level can run the phrases that
-        you type through <literal>camlp4</literal> automatically. You
+        The <command>utop</command> top-level can run the phrases that
+        you type through <command>camlp4</command> automatically. You
         should have at least these lines in your
         <literal>~/.ocamlinit</literal> file in your home directory (see
         <xref linkend="installation"/> for more information).
@@ -27334,7 +27332,7 @@ type t = {
         <command>ocamlfind</command> packages (including all their
         dependent packages). The second directive instructs the
         top-level to filter all phrases via Camlp4. You can now run
-        <literal>utop</literal> and load the syntax extensions in. We'll
+        <command>utop</command> and load the syntax extensions in. We'll
         use the <literal>comparelib</literal> syntax extension for our
         experiments.
       </para>
@@ -27350,7 +27348,7 @@ type t = {
       </para>
       <para>
         Let's see how <literal>comparelib</literal> solves this problem
-        by running it in <literal>utop</literal>.
+        by running it in <command>utop</command>.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>front-end/camlp4_toplevel.topscript</filename> (part 1)</lineannotation>
 <prompt># </prompt><userinput>#require &quot;comparelib.syntax&quot; ;;</userinput>
@@ -27375,7 +27373,7 @@ type t = {
       <para>
         The top-level is a quick way to examine the signatures generated
         from the extensions, but how can we see what these new functions
-        actually do? You can't do this from <literal>utop</literal>
+        actually do? You can't do this from <command>utop</command>
         directly since it embeds the Camlp4 invocation as an automated
         part of its operation.
       </para>
@@ -28356,7 +28354,7 @@ let w = X.B.w</programlisting>
       <para>
         There's one downside to this approach: type errors suddenly get
         much more verbose. We can see this if you run the vanilla OCaml
-        top-level (not <literal>utop</literal>).
+        top-level (not <command>utop</command>).
       </para>
       <programlisting language="console"><lineannotation>✎ Terminal: <filename>front-end/short_paths_1.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>ocaml</userinput>
@@ -28398,7 +28396,7 @@ let w = X.B.w</programlisting>
 <computeroutput>         'a list</computeroutput>
 </programlisting>
       <para>
-        The <literal>utop</literal> enhanced top-level activates short
+        The <command>utop</command> enhanced top-level activates short
         paths by default, which is why you've not had to do this before
         in our interactive examples. However, the compiler doesn't
         default to the short path heuristic since there are some
