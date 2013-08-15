@@ -578,7 +578,7 @@ situations where the depth of the sequence of nested calls is on the
 order of the size of your data, tail recursion is usually the right
 approach.
 
-## More concise and faster patterns
+## Terser and faster patterns
 
 Now that we know more about how lists and patterns work, let's
 consider how we can improve on an example from
