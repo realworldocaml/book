@@ -83,8 +83,10 @@ let rev_interval = Rev_int_interval.create 4 3;;
 #part 12
 Int_interval.contains rev_interval 3;;
 #part 13
-Int_interval.create 4 3       (* going through create *);;
-Int_interval.Interval (4,3)   (* bypassing create *);;
+Int_interval.is_empty (* going through create *)
+    (Int_interval.create 4 3) ;;
+Int_interval.is_empty (* bypassing create *)
+    (Int_interval.Interval (4,3)) ;;
 #part 14
 module type Interval_intf = sig
    type t
@@ -174,10 +176,9 @@ module Make_interval(Endpoint : Comparable)
       | Empty, _ | _, Empty -> Empty
       | Interval (l1,h1), Interval (l2,h2) ->
         create (max l1 l2) (min h1 h2)
-
-
   end ;;
 #part 19
+module Int_interval = Make_interval(Int);;
 let i = Int_interval.create 3 4;;
 Int_interval.contains i 5;;
 #part 20
@@ -224,8 +225,10 @@ module Make_interval(Endpoint : Comparable)
   end ;;
 #part 22
 module Int_interval = Make_interval(Int);;
-Int_interval.create 3 4;;
-Int_interval.Interval (4,3);;
+Int_interval.is_empty
+    (Int_interval.create 3 4);;
+Int_interval.is_empty
+    (Int_interval.Interval (4,3));;
 #part 23
 Sexp.of_string "(This is (an s-expression))";;
 #part 24
