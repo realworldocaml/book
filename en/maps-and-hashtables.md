@@ -116,8 +116,8 @@ comparator uniquely.
 ```
 
 This constraint is important because the algorithm that
-`Map.symmetric_diff` uses depends on the fact that both maps have the
-same comparator.
+`Map.symmetric_diff` uses depends for its correctness on the fact that
+both maps have the same comparator.
 
 We can create a new comparator using the `Comparator.Make` functor,
 which takes as its input a module containing the type of the object to
@@ -146,8 +146,8 @@ comparison functions.
 ((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 9))
 ```
 
-And accordingly, if we try to use `Map.symmetric_diff` on these two
-maps, we'll get a compile-timer error.
+Accordingly, if we try to use `Map.symmetric_diff` on these two maps,
+we'll get a compile-timer error.
 
 ```frag
 ((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 10))
@@ -159,8 +159,8 @@ As we've discussed, maps carry within them the comparator that they
 were created with.  Sometimes, often for space efficiency reasons, you
 want a version of the map data structure that doesn't include the
 comparator.  You can get such a representation with `Map.to_tree`,
-which returns just the tree that the map is built out of, and not
-including the comparator.
+which returns just the tree underlying the map, without the
+comparator.
 
 ```frag
 ((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 11))
@@ -168,10 +168,10 @@ including the comparator.
 
 Even though a `Map.Tree.t` doesn't physically include a comparator, it
 does include the comparator in its type.  This is what is known as a
-_phantom type parameter_, because it reflects something about the
-logic of the value in question, even though it doesn't correspond to
-any values directly represented in the underlying physical structure
-of the value.
+_phantom type_, because it reflects something about the logic of the
+value in question, even though it doesn't correspond to any values
+directly represented in the underlying physical structure of the
+value.
 
 Since the comparator isn't included in the tree, we need to provide
 the comparator explicitly when we, say, search for a key, as shown
@@ -240,7 +240,7 @@ Crucially, if your data structure is cyclical (that is, a value
 recursively points back to another field within the same structure),
 the `=` operator will never terminate, and your program will hang!
 You therefore must use the physical equality operator or write a
-custom comparison function when comparing recursive values.
+custom comparison function when comparing cyclic values.
 
 It's quite easy to mix up the use of `=` and `==`, so Core disables
 the `==` operator and provides the more explicit `phys_equal` function
@@ -342,9 +342,6 @@ others, since if the sets are built in a consistent order, then they
 will work as expected, but once the order changes, the behavior will
 change.
 
-For this reason, it's preferable to avoid polymorphic compare for
-serious applications.
-
 </warning>
 
 ### Satisfying the `Comparable.S` interface
@@ -359,9 +356,10 @@ question arises of how to satisfy the comparable interface for a new
 type that you design.  Certainly implementing all of the required
 functionality from scratch would be an absurd amount of work.
 
-The module `Comparable` contains a number of functors to help you do
-just this.  The simplest one of these is `Comparable.Make`, which
-takes as an input any module that satisfies the following interface:
+The module `Comparable` contains a number of functors to help you
+automate this task.  The simplest one of these is `Comparable.Make`,
+which takes as an input any module that satisfies the following
+interface:
 
 ```frag
 ((typ ocaml)(name maps-and-hash-tables/comparable.ml))
@@ -537,11 +535,11 @@ function, _e.g._,
 
 Most types in Core satisfy the `Hashable.S` interface, but as with the
 `Comparable.S` interface, the question remains of how one should
-satisfy this interface with a new type.  Again, the answer is to use a
-functor to build the necessary functionality; in this case,
-`Hashable.Make`.  Note that we use OCaml's `lxor` operator for doing
-the "logical" (_i.e._, bit-wise) exclusive-or of the hashes from the
-component values.
+satisfy this interface when writing a new module.  Again, the answer
+is to use a functor to build the necessary functionality; in this
+case, `Hashable.Make`.  Note that we use OCaml's `lxor` operator for
+doing the "logical" (_i.e._, bit-wise) exclusive-or of the hashes from
+the component values.
 
 ```frag
 ((typ ocamlrawtop)(name maps-and-hash-tables/main-30.rawscript))
@@ -599,18 +597,19 @@ outperform maps.
 
 Hash tables are not always the faster choice, though.  In particular,
 maps are often more performant in situations where you need to keep
-multiple related versions of the data structure in memory at once.  In
-particular, if you create map `m'` by calling `Map.add` on some other
-map `m`, then `m` and `m'` can be used independently, and in fact
-share most of their underlying storage.  Thus, if you need to keep in
-memory at the same time multiple different related collections of
-key/value pairs, then a map is typically a much more efficient data
-structure to do it with.
+multiple related versions of the data structure in memory at once.
+That's because maps are immutable, and so operations like `Map.add`
+that modify a map do so by creating a new map, leaving the original
+undisturbed.  Moreover, the new and old map share most of their
+physical structure, so multiple versions can be kept around
+efficiently.
 
 Here's a benchmark that demonstrates this.  In it, we create a list of
-maps (or hash tables) that are built up by iteratively applying
-updates, starting from an empty map.  In the hash table implementation,
-we do this by calling `Hashtbl.copy` to get the list entries.
+maps (or hash tables) that are built up by iteratively applying small
+updates, keeping these copies around.  In the map case, this is done
+by using `Map.change` to update the map.  In the hash table
+implementation, the updates are done using `Hashtbl.change`, but we
+also need to call `Hashtbl.copy` to take snapshots of the table.
 
 ```frag
 ((typ ocaml)(name maps-and-hash-tables/map_vs_hash2.ml))
