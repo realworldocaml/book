@@ -1404,7 +1404,7 @@ This chapter has covered quite a lot of ground, including:
 
 - Discussing the building blocks of mutable data-structures as well as
   the basic imperative constructs like `for` loops, `while` loops, and
-  the sequening operator `;`.
+  the sequencing operator `;`.
 - Walking through the implementation of a couple of classic imperative
   data structures.
 - Discussing so-called benign effects like memoization and laziness.
