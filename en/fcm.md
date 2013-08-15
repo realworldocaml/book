@@ -264,10 +264,9 @@ signature for a module that implements a query handler.
 In the above we use s-expressions as the format for queries and
 responses, as well for the config.  S-expressions are a simple,
 flexible, and human-readable serialization format commonly used in
-Core.  We'll cover s-expressions in more detail in
-[xref](#data-serialization-with-s-expressions), but for now, it's
-enough to think of them as balanced parenthetical expressions whose
-atomic values are strings, _e.g._, `(this (is an) (s expression))`.
+Core.  For now, it's enough to think of them as balanced parenthetical
+expressions whose atomic values are strings, _e.g._, `(this (is an) (s
+expression))`.
 
 In addition, we use the Sexplib syntax extension which extends OCaml
 by adding the `with sexp` declaration.  When attached to a type in a
@@ -290,18 +289,19 @@ This is all described in more detail in
 
 ### Implementing a query handler
 
-Let's look at some examples of query handlers that satisfy this
-interface.  The following handler produces unique integer ids by
-keeping an internal counter which it bumps every time it produces a
-new value.  The input to the query in this case is just the trivial
-s-expression `()`, otherwise known as `Sexp.unit`.
+Let's look at some examples of query handlers that satisfy the
+`Query_handler` interface.  The first example is a handler that
+produces unique integer ids.  It works by keeping an internal counter
+which it bumps every time it produces a new value.  The input to the
+query in this case is just the trivial s-expression `()`, otherwise
+known as `Sexp.unit`.
 
 ```frag
 ((typ ocamltop)(name fcm/query_handler.topscript)(part 3))
 ```
 
 We can use this module to create an instance of the `Unique` query
-handler and interact with it.
+handler and interact with it directly.
 
 ```frag
 ((typ ocamltop)(name fcm/query_handler.topscript)(part 4))
@@ -361,16 +361,16 @@ one-liner:
 ((typ ocamltop)(name fcm/query_handler.topscript)(part 10))
 ```
 
-The following code lets you dispatch queries to one of a list of query
-handler instances.  We assume that the shape of the query is as
-follows:
+We can now write code that lets you dispatch queries to one of a list
+of query handler instances.  We assume that the shape of the query is
+as follows:
 
 ```frag
 ((typ scheme)(name fcm/query-syntax.scm))
 ```
 
-where `query-name` is the name used to determine which query handler
-to dispatch the query to, and `query` is the body of the query.
+where _`query-name`_ is the name used to determine which query handler
+to dispatch the query to, and _`query`_ is the body of the query.
 
 The first thing we'll need is a function that takes a list of query
 handler instances and constructs a dispatch table from it.
@@ -391,15 +391,15 @@ This function interacts with an instance by unpacking it into a module
 with the associated module (`I.Query_handler`).
 
 The bundling together of the module and the value is in many ways
-reminiscent of object-oriented languages.  One key difference, is
-that first-class modules allow you to package up more than just a
-functions or methods.  As we've seen, you can also include types and
-even modules.  We've only used it in a small way here, but this extra
-power allows you to build more sophisticated components that involve
+reminiscent of object-oriented languages.  One key difference, is that
+first-class modules allow you to package up more than just functions
+or methods.  As we've seen, you can also include types and even
+modules.  We've only used it in a small way here, but this extra power
+allows you to build more sophisticated components that involve
 multiple interdependent types and values.
 
-Now let's turn this into a complete, running example, by adding a
-command-line interface, as shown below.
+Now let's turn this into a complete, running example by adding a
+command-line interface.
 
 ```frag
 ((typ ocaml)(name fcm/query_handler.topscript)(part 13))
@@ -435,8 +435,8 @@ modules.  Here are the basic types.
 ((typ ocaml)(name fcm/query_handler_core.ml)(part 1))
 ```
 
-Note that a `Loader.t` has two hash tables: one containing the known
-query handler modules, and one containing the active query handler
+Note that a `Loader.t` has two tables: one containing the known query
+handler modules, and one containing the active query handler
 instances.  The `Loader.t` will be responsible for creating new
 instances and adding them to the table, as well as for removing
 instances, all in response to user queries.
@@ -517,7 +517,7 @@ handler.
 ((typ console)(name fcm/loader_cli1.out))
 ```
 
-If we try to use one of the inactive queries, it will fail. 
+Any attempt to use an inactive query handler will fail.
 
 ```frag
 ((typ console)(name fcm/loader_cli2.out))
@@ -532,8 +532,8 @@ config.
 ((typ console)(name fcm/loader_cli3.out))
 ```
 
-Notably, the loader can't be itself loaded (since it's not on the list
-of known handlers), and can't be unloaded.
+Notably, the loader can't be loaded (since it's not on the list of
+known handlers), and can't be unloaded either.
 
 ```frag
 ((typ console)(name fcm/loader_cli4.out))
