@@ -503,7 +503,7 @@ need.
 
 - `textwrap`, a library for wrapping long lines.  We'll use this for
   printing out our results.
-- `uri`, a library for handling URI's, or "Uniform Resource
+- `uri`, a library for handling URIs, or "Uniform Resource
   Identifiers", of which HTTP URL's are an example.
 - `yojson`, a JSON parsing library that was described in
   [xref](#handling-json-data)
@@ -521,7 +521,7 @@ of a more general family known as Uniform Resource Identifiers
 complicated.  Luckily, the `uri` library provides a strongly-typed
 interface which takes care of much of the hassle.
 
-We'll need a function for generating the URI's that we're going to use
+We'll need a function for generating the URIs that we're going to use
 to query the DuckDuckGo servers.
 
 ```frag
