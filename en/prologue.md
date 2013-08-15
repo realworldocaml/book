@@ -163,15 +163,18 @@ traditional functional-programming techniques like higher-order
 functions and immutable data types, as well as aspects of OCaml's
 powerful type and module systems.
 
-If you already know OCaml, this book may surprise you.  Core redefines
-most of the standard modules to be much more consistent, so you'll
-need to adapt older code to work with Core.  We believe the Core model
-is worth learning; it's been successfully used on large,
+If you already know OCaml, this book may surprise you.  Core redefines most of
+the standard namespace to make better use of the OCaml module system and expose
+a number of powerful, reusable datastructures by default.  Older OCaml code
+will still interoperate with Core, but you may need to adapt it for maximal
+benefit.  All the _new_ code that we write uses Core, and we believe the Core
+model is worth learning; it's been successfully used on large,
 multi-million-line codebases and removes a big barrier to building
-sophisticated applications in OCaml.  Code that uses only the
-traditional compiler standard library will always exist, but there are
-other online resources to learn how that works.  Real World OCaml
-focuses on the techniques the authors have used in their personal
+sophisticated applications in OCaml.
+
+Code that uses only the traditional compiler standard library will always
+exist, but there are other online resources to learn how that works.  Real
+World OCaml focuses on the techniques the authors have used in their personal
 experience to construct scalable, robust software systems.
 
 ### What to expect
@@ -218,13 +221,14 @@ instructions in [xref](#installation) carefully.
 As of publication, the Windows operating system is unsupported by Core, and so
 only Mac OS X, Linux, FreeBSD and OpenBSD can be expected to work reliably.
 Please check the online installaton instructions for updates regarding Windows,
-or install a Linux virtual machine to work through the book as it stands.  This
-book is not intended as a reference manual.  We aim to teach you about the
+or install a Linux virtual machine to work through the book as it stands.
+
+This book is not intended as a reference manual.  We aim to teach you about the
 language, and about libraries tools and techniques that will help you be a more
 effective OCaml programmer.  But it's no replacement for API documentation or
 the OCaml manual and man pages.  You can find documentation for all of the
 libraries and tools referenced in the book
-[online](http://realworldocaml.org/doc).
+[online](https://realworldocaml.org/doc).
 
 ### Code Examples
 
