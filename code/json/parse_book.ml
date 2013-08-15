@@ -20,7 +20,7 @@ let () =
   printf "Tags: %s\n" (String.concat ~sep:", " tags);
   let string_of_bool_option =
     function
-    | None -> "<none>"
+    | None -> "<unknown>"
     | Some true -> "yes"
     | Some false -> "no" in
   printf "Online: %s\n" (string_of_bool_option is_online);
