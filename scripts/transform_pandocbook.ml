@@ -13,10 +13,10 @@ let string_of_data d =
   ) d;
   Buffer.contents b
 
-let mk_tag ?(attrs=[]) tag_name contents =                                                                            
-  let attrs : Xmlm.attribute list = List.map ~f:(fun (k,v) -> ("",k),v) attrs in                                         
-  let tag = ("", tag_name), attrs in                                                                                  
-  `El (tag, contents)                                                                                                 
+let mk_tag ?(attrs=[]) tag_name contents =
+  let attrs : Xmlm.attribute list = List.map ~f:(fun (k,v) -> ("",k),v) attrs in
+  let tag = ("", tag_name), attrs in
+  `El (tag, contents)
 
 let part_to_string = function
   | Basic     -> "I"   , "Language Concepts"
@@ -28,32 +28,39 @@ let part_to_intro =
   let map_paras = List.map ~f:(fun p -> mk_tag "para" [`Data p]) in
   function
   | Basic     -> map_paras [
-      "Part I covers the basic language concepts you'll need to know when building OCaml programs.
-      You won't need to memorise all of this (objects, for example, are used rarely in practice)
-      but understanding the concepts and examples is important.";
-      "This part opens up with a guided tour to give you a quick overview of the language using
-      an interactive command-line interface. It then moves onto covering language features such 
-      as records, algebraic data types and the module system.";
-      "The final portion covers more advanced features such as functors, objects and first-class 
-      modules, which may all take some time to digest. Persevere though; even though these concepts 
-      may be difficult at first, they will put you in good stead even when switching to other 
-      languages, many of which have drawn inspiration from ML."
-    ]
+    "Part I covers the basic language concepts you'll need to know when building
+     OCaml programs.  You won't need to memorise all of this (objects, for
+     example, are used rarely in practice) but understanding the concepts and
+     examples is important.";
+    "This part opens up with a guided tour to give you a quick overview of the
+     language using an interactive command-line interface. It then moves onto
+     covering language features such as records, algebraic data types and the
+     module system.";
+    "The final portion covers more advanced features such as functors, objects
+     and first-class modules, which may all take some time to digest. Persevere
+     though; even though these concepts may be difficult at first, they will put
+     you in good stead even when switching to other languages, many of which
+     have drawn inspiration from ML."
+  ]
   | Practical  -> map_paras [
-      "Part II builds on the basics by working through useful tools and techniques for using OCaml. 
-     Here you'll pick up useful techniques for building networked systems, as well as functional 
-     design patterns that help combine different features of the language to good effect.";
-      "The focus throughout this section is on networked systems, and among other examples we'll 
-      build a running example that will perform Internet queries using the DuckDuckGo search engine."
-    ]
+    "Part II builds on the basics by working through higher-level tools and
+     techniques for using OCaml effectively.  Here you'll learn about useful
+     libraries for building command-line interfaces and networked applications,
+     as well as functional design patterns that help combine different features
+     of the language to good effect.";
+    "The focus throughout this section is on networked systems, and among other
+     examples we'll build a simple tool that will perform Internet queries using
+     the DuckDuckGo search engine."
+  ]
   | Advanced -> map_paras [
-      "Part III is all about understanding the compiler toolchain and runtime system in OCaml.  
-     It's a remarkably simple system in comparison to other language runtimes (such as Java or 
-     the .NET CLR).";
-      "You'll need to read this to build very high performance systems that have to minimise 
-      resource usage or interface to C libraries. This is also where we talk about profiling and 
-      debugging techniques using tools such as GNU gdb.";
-    ]
+    "Part III is all about understanding the compiler toolchain and runtime
+     system in OCaml.  It's a remarkably simple system in comparison to other
+     language runtimes (such as Java or the .NET CLR).";
+    "You'll need to read this to build very high performance systems that have
+     to minimise resource usage or interface to C libraries. This is also where
+     we talk about profiling and debugging techniques using tools such as GNU
+     gdb.";
+  ]
   | Appendix | Preface -> assert false
 
 let all_parts = [ Basic; Practical; Advanced ]
@@ -97,8 +104,8 @@ module Transform = struct
       | `El ( (("","programlisting"),_), contents) ->
         let open Code_frag in
         let cf = of_string (string_of_data contents) in
-        let contents = 
-          try Cow.Xml.of_string (read ~ext:"xml" cf) 
+        let contents =
+          try Cow.Xml.of_string (read ~ext:"xml" cf)
           with _ -> [`Data "???"] in (* TODO temporary *)
         let lang = typ_to_docbook_language (typ_of_string cf.typ) in
         mk_tag ~attrs:[("language",lang)] "programlisting" contents
