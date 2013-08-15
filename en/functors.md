@@ -27,12 +27,19 @@ including:
   and independent mutable state.  Functors let you automate the
   construction of such modules.
 
+These are really just some of the uses that you can put functors to.
+We'll make no attempt to provide examples of all of the uses of
+functors here.  Instead, this chapter will try to provide examples
+that illuminate the language features and design patterns that you
+need to master in order to use functors effectively.
+
 ## A trivial example
 
 Let's create a functor that takes a module containing a single integer
 variable `x`, and returns a new module with `x` incremented by one.
-This is not actually a useful example, but it's a good way to walk
-through the basic mechanics of functors.
+This is intended to serve as a way to walk through the basic mechanics
+of functors, even though it's not something you'd want to do in
+practice.
 
 First, let's define a signature for a module that contains a single
 value of type `int`.
@@ -68,7 +75,7 @@ We can see that the inferred module type of the output is now written
 out explicitly, rather than being a reference to the named signature
 `X_int`.
 
-We can now use `Increment` to define new modules.
+We can use `Increment` to define new modules.
 
 ```frag
 ((typ ocamltop)(name functors/main.topscript)(part 3))
@@ -131,8 +138,8 @@ shown below.
 
 (This idiom is a bit of a historical error.  It would be better if
 compare returned a variant with three cases for less than, greater
-than and equal.  But it's a well-established idiom at this point, and
-unlikely to change.)
+than and equal.  But it's well-established at this point, and unlikely
+to change.)
 
 The functor for creating the interval module is shown below.  We
 represent an interval with a variant type, which is either `Empty` or
@@ -166,8 +173,8 @@ module to feed to the functor.  In this case, we can directly use the
 This works because many modules in Core, including `Int` and `String`,
 satisfy an extended version of the `Comparable` signature described
 above.  Such standardized signatures are good practice, both because
-they makes functors easier to use, and because they make your codebase
-generally easier to navigate.
+they makes functors easier to use, and because they encourage
+standardization that makes your codebase easier to navigate.
 
 Now we can use the newly defined `Int_interval` module like any
 ordinary module.
@@ -449,12 +456,11 @@ accumulator value as it walks over the queue, returning the final
 value of the accumulator at the end of the computation.  Fold is a
 quite powerful operation, as we'll see.
 
-Now let's implement `Fqueue`.  A standard trick is for the `Fqueue` to
-maintain an input and an output list, so that one can efficiently
-`enqueue` on the input list and efficiently dequeue from the output
-list.  If you attempt to dequeue when the output list is empty, the
-input list is reversed and becomes the new output list.  Here's an
-implementation that uses that trick.
+We'll implement `Fqueue` using a standard trick which is to maintain
+an input and an output list, so that one can efficiently `enqueue` on
+the input list and efficiently dequeue from the output list.  If you
+attempt to dequeue when the output list is empty, the input list is
+reversed and becomes the new output list.  Here's the implementation.
 
 ```frag
 ((typ ocaml)(name functors/fqueue.ml))
@@ -462,8 +468,8 @@ implementation that uses that trick.
 
 One problem with `Fqueue` is that the interface is quite skeletal.
 There are lots of useful helper functions that one might want that
-aren't there.  The list module, by way of contrast, has functions like
-`List.iter`, which runs a function on each element; and
+aren't there.  The `List` module, by way of contrast, has functions
+like `List.iter`, which runs a function on each element; and
 `List.for_all`, which returns true if and only if the given predicate
 evaluates to `true` on every element of the list.  Such helper
 functions come up for pretty much every container type, and
@@ -502,11 +508,12 @@ a sub-module called `T`, and then call `Foldable.Extend` on `T`.
 Core comes with a number of functors for extending modules that follow
 this same basic pattern, including:
 
-- `Container.Make`,  which is very similar to `Foldable.Extend`.
-- `Comparable.Make`, which adds a variety of helper functions and
-  types for types that have a comparison function.
-- `Hashable.Make` for adding hash-based data structures like hash sets
-  and hash heaps for types that have hash functions.
+- `Container.Make`, which is very similar to `Foldable.Extend`.
+- `Comparable.Make`, which adds support for functionality that depends
+  on the presence of a comparison function, including support for
+  containers like maps and sets.
+- `Hashable.Make`, which adds support for hashing-based data
+  structures including hash tables, hash sets and hash heaps.
 - `Monad.Make` for so-called monadic libraries, like the ones discussed in
   [xref](#error-handling) and
   [xref](#concurrent-programming-with-async).  Here, the functor is
