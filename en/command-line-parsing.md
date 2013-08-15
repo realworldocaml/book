@@ -7,13 +7,13 @@ command-line should support a collection of basic features:
 * Parsing of command line arguments.
 * Generation of error messages in response to incorrect inputs.
 * Help for all the available options.
-* Interactive auto-completion of commands to assist the user.
+* Interactive auto-completion.
 
 It's tedious and error-prone to code all this manually for every
 program you write. Core provides the Command library that simplifies
 all of this by letting you declare all your command-line options in
-one place, and deriving all of the above functionality from that
-declaration.
+one place, and deriving all of the above functionality from these
+declarations.
 
 Command is simple to use for simple applications, but also also scales
 well as your needs grow more complex.  In particular, Command provides
