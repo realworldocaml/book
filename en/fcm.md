@@ -269,7 +269,7 @@ Core.  We'll cover s-expressions in more detail in
 enough to think of them as balanced parenthetical expressions whose
 atomic values are strings, _e.g._, `(this (is an) (s expression))`.
 
-In addition, we use the `sexplib` syntax extension which extends OCaml
+In addition, we use the Sexplib syntax extension which extends OCaml
 by adding the `with sexp` declaration.  When attached to a type in a
 signature, `with sexp` adds declarations of s-expression converters,
 _e.g._,

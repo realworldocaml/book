@@ -276,7 +276,7 @@ definition.
 ((typ console)(name front-end/build_type_conv_without_camlp4.out))
 ```
 
-Now add in the syntax extension packages for `fieldslib` and `sexplib`, and
+Now add in the syntax extension packages for Fieldslib and Sexplib, and
 everything will compile again.
 
 ```frag

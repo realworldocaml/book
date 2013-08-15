@@ -236,8 +236,10 @@ some of them need a bit more explanation.
 * The C `size_t` type is an alias for one of the unsigned integer types.  The actual 
   size and alignment requirements for `size_t` varies between platforms. Ctypes provides
   an OCaml `size_t` type that is aliased to the appropriate integer type.
-* OCaml only supports double-precision floating-point numbers, and so the C `float` and
-  `double` functions both map onto the OCaml `float` type.
+* OCaml only supports double-precision floating-point numbers, and so the C
+  `float` and `double` types both map onto the OCaml `float` type, and the C
+  `float complex` and `double complex` types both map onto the OCaml
+  double-precision `Complex.t` type.
 
 ## Pointers and arrays
 
@@ -347,9 +349,9 @@ Here is the type signature of the `Ctypes.view` function.
 ((typ ocaml)(name ctypes/ctypes.mli)(part 2))
 ```
 
-Ctypes has some internal low-level functions conversion functions that map
-between an OCaml `string` and a C character buffer by copying the contents
-into the respective data structure.  They have the following type signature.
+Ctypes has some internal low-level conversion functions that map between an
+OCaml `string` and a C character buffer by copying the contents into the
+respective data structure.  They have the following type signature.
 
 ```frag
 ((typ ocaml)(name ctypes/ctypes.mli)(part 3))
@@ -381,12 +383,12 @@ string is terminated by a null (a `\0` byte) character.  The C string functions
 calculate their length by scanning the buffer until the first null character is
 encountered.
 
-This means you need to be careful when passing OCaml strings to C buffers that
-don't contain any null values within the OCaml string, or else the C string
-will be truncated at the first null instance.  Ctypes also defaults to a *copying*
-interface for strings, which means that you shouldn't use them when you want
-the library to mutate the buffer in-place.  In that situation, use the Ctypes
-`Bigarray` support to pass memory by reference instead.
+This means that you need to be careful that OCaml strings that you pass to C
+functions don't contain any null values, since the first occurrence of a null
+character will be treated as the end of the C string.  Ctypes also defaults to a
+*copying* interface for strings, which means that you shouldn't use them when
+you want the library to mutate the buffer in-place.  In that situation, use the
+Ctypes `Bigarray` support to pass memory by reference instead.
 
 </note>
 
@@ -431,12 +433,9 @@ add those next.
 ((typ ocamltop)(name ffi/posix.topscript)(part 9))
 ```
 
-The `*:*` operator appends a field to the structure, as shown with `tv_sec` and
-`tv_usec` above.  Structure fields are typed accessors that are associated with
-a particular structure, and they correspond to the labels in C.  Note that
-there's no explicit requirement that the OCaml variable names for a field are
-the same as the corresponding C struct label names, but it helps avoid
-confusion.
+The `field` function appends a field to the structure, as shown with `tv_sec`
+and `tv_usec` above.  Structure fields are typed accessors that are associated
+with a particular structure, and they correspond to the labels in C.
 
 Every field addition mutates the structure variable and records a new size (the
 exact value of which depends on the type of the field that was just added).
@@ -569,20 +568,23 @@ function definitions.
 
 ### Defining arrays
 
-Arrays in C are contiguous blocks of the same value.  Any of the basic types
-defined earlier can be allocated as blocks via the `Array` module.
+Arrays in C are contiguous blocks of the same type of value.  Any of the basic
+types defined earlier can be allocated as blocks via the `Array` module.
 
 ```frag
 ((typ ocaml)(name ctypes/ctypes.mli)(part 5))
 ```
 
-The array functions are similar to the standard library `Array` module except
-that they represent flat C arrays instead of OCaml ones.
+The array functions are similar to those in the standard library `Array`
+module except that they operate on arrays stored using the flat C
+representation rather than the OCaml representation described in
+[xref](#memory-representation-of-values).
 
-The conversion between arrays and lists still requires copying the values, and
-can be expensive for large data structures.  Notice that you can also convert
-an array into a `ptr` pointer to the head of buffer, which can be useful if you
-need to pass the pointer and size arguments separately to a C function.
+As with standard OCaml arrays, the conversion between arrays and lists
+requires copying the values, which can be expensive for large data structures.
+Notice that you can also convert an array into a `ptr` pointer to the head of
+the underlying buffer, which can be useful if you need to pass the pointer and
+size arguments separately to a C function.
 
 Unions in C are named structures that can be mapped onto the same underlying
 memory.  They are also fully supported in Ctypes, but we won't go into more
@@ -610,8 +612,8 @@ documentation), for example for pointer differencing and comparison.
 ## Passing functions to C
 
 It's also straightforward to pass OCaml function values to C.  The C standard
-library function `qsort` has the following signature that requires a function
-pointer to use.
+library function `qsort` sorts arrays of elements using a comparison function
+passed in as a function pointer.  The signature for `qsort` is as follows:
 
 ```frag
 ((typ c)(name ffi/qsort.h))
@@ -634,11 +636,11 @@ Since type descriptions are regular values, we can just use `let` in place of
 ```
 
 We only use `compare_t` once (in the `qsort` definition), so you can choose to
-inline it in the OCaml code if you prefer. The resulting `qsort` value is a
-higher-order function, as shown by its type.  As before, let's define a wrapper
-function to make `qsort` easier to use.  The second and third arguments to
-`qsort` specify the length (number of elements) of the array and the element
-size.
+inline it in the OCaml code if you prefer. As the type shows, the resulting
+`qsort` value is a higher-order function, since its the fourth argument is
+itself a function.  As before, let's define a wrapper function to make `qsort`
+easier to use.  The second and third arguments to `qsort` specify the length
+(number of elements) of the array and the element size.
 
 Arrays created using Ctypes have a richer runtime structure than C arrays, so
 we don't need to pass size information around.  Furthermore, we can use OCaml
@@ -688,7 +690,7 @@ The system memory they occupy is freed when they do become unreachable, via a
 finalizer function registered with the GC.
 
 The definition of reachability for Ctypes values is a little different from
-conventional OCaml values though.  The allocation functions return an
+conventional OCaml values, though.  The allocation functions return an
 OCaml-managed pointer to the value, and as long as some derivative pointer is
 still reachable by the GC, the value won't be collected.
 
@@ -699,9 +701,19 @@ protects the whole object from collection.
 A corollary of the above rule is that pointers written into the C heap don't
 have any effect on reachability.  For example, if you have a C-managed array of
 pointers to structs then you'll need some additional way of keeping the structs
-around to protect them from collection.  You could achieve this via a global
-array of values on the OCaml side that would keep them live until they're no
-longer needed.
+themselves around to protect them from collection.  You could achieve this via a
+global array of values on the OCaml side that would keep them live until they're
+no longer needed.
+
+Functions passed to C have similar considerations regarding lifetime.  On the
+OCaml side, functions created at runtime may be collected when they become
+unreachable.  As we've seen, OCaml functions passed to C are converted to
+function pointers, and function pointers written into the C heap have no effect
+on the reachability of the OCaml functions they reference.  With `qsort` things
+are straightforward, since the comparison function is only used during the call
+to `qsort` itself.  However, other C libraries may store function pointers in
+global variables or elsewhere, in which case you'll need to take care that the
+OCaml functions you pass to them aren't prematurely garbage collected.
 
 </note>
 
@@ -718,6 +730,20 @@ This chapter hasn't really needed you to understand the innards of OCaml at
 all.  Ctypes does its best to make function bindings easy, but the rest of this
 part will also fill you in about how interactions with OCaml memory layout and
 the garbage collector work.
+
+Ctypes gives OCaml programs access to the C representation of values, shielding
+you from the details of the OCaml value representation, and introducing an
+abstraction layer that hides the details of foreign calls.  While this covers a
+wide variety of situations, it's sometimes necessary to look behind the
+abstraction to obtain finer control over the details of the interaction between
+the two languages.  The standard OCaml foreign function interface allows you to
+glue OCaml and C together from the other side of the boundary, by writing C
+functions that operate on the OCaml representation of values.  You can find
+details of the standard interface in the [online OCaml
+manual](http://caml.inria.fr/pub/docs/manual-ocaml-4.00/manual033.html) and in
+the book [Developing Applications with Objective
+Caml](http://caml.inria.fr/pub/docs/oreilly-book/ocaml-ora-book.pdf‎) by
+Chailloux, Manoury and Pagano.
 
 <note>
 <title>Production note</title>

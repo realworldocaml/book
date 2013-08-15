@@ -106,7 +106,7 @@ its related libraries.
 ((typ console)(name files-modules-and-programs-freq-obuild/build.out))
 ```
 
-If we'd invoked `ocamlbuild` with a target of `freq.native` instead of
+If we'd invoked `corebuild` with a target of `freq.native` instead of
 `freq.byte`, we would have gotten native-code instead.
 
 We can run the resulting executable from the command-line.  The

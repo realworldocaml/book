@@ -357,7 +357,7 @@ example.
 ((typ ocamltop)(name functors/main.topscript)(part 23))
 ```
 
-Core comes with a syntax extension called `sexplib` which can
+Core comes with a syntax extension called Sexplib which can
 autogenerate s-expression conversion functions from a type
 declaration.  Attaching `with sexp` to a type definition signals to
 the extension to generate the converters.  Thus, we can write:
@@ -366,7 +366,7 @@ the extension to generate the converters.  Thus, we can write:
 ((typ ocamltop)(name functors/main.topscript)(part 24))
 ```
 
-We'll discuss s-expressions and `sexplib` in more detail in
+We'll discuss s-expressions and Sexplib in more detail in
 [xref](#data-serialization-with-s-expressions), but for now, let's see
 what happens if we attach the `with sexp` declaration to the
 definition of `t` within the functor.
