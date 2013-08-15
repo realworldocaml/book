@@ -4549,8 +4549,8 @@ val numeric_deriv :
       right approach.
     </para>
   </sect1>
-  <sect1 id="more-concise-and-faster-patterns">
-    <title>More concise and faster patterns</title>
+  <sect1 id="terser-and-faster-patterns">
+    <title>Terser and faster patterns</title>
     <para>
       Now that we know more about how lists and patterns work, let's
       consider how we can improve on an example from
@@ -9094,9 +9094,8 @@ let () =
   <para>
     OCaml offers a happy compromise here, making it easy and natural to
     program in a pure style, but also providing great support for
-    imperative programming where you need it. This chapter will walk you
-    through OCaml's imperative features, and help you use them to their
-    fullest.
+    imperative programming. This chapter will walk you through OCaml's
+    imperative features, and help you use them to their fullest.
   </para>
   <sect1 id="example-imperative-dictionaries">
     <title>Example: Imperative dictionaries</title>
@@ -9110,18 +9109,18 @@ let () =
       in <xref linkend="maps-and-hash-tables"/>.
     </para>
     <para>
-      Our dictionary, like those in Core and the standard library, will
-      be implemented as a hash table. In particular, we'll use an
-      <emphasis>open hashing</emphasis> scheme, which is to say the hash
-      table will be an array of buckets, each bucket containing a list
-      of key/value pairs that have been hashed into that bucket.
+      The dictionary we'll describe now, like those in Core and the
+      standard library, will be implemented as a hash table. In
+      particular, we'll use an <emphasis>open hashing</emphasis> scheme,
+      where the hash table will be an array of buckets, each bucket
+      containing a list of key/value pairs that have been hashed into
+      that bucket.
     </para>
     <para>
       Here's the interface we'll match, provided as an
-      <literal>mli</literal>. Here, the type
-      <literal>('a, 'b) t</literal> is used for a dictionary with keys
-      of type <literal>'a</literal> and data of type
-      <literal>'b</literal>.
+      <literal>mli</literal>. The type <literal>('a, 'b) t</literal>
+      represents a dictionary with keys of type <literal>'a</literal>
+      and data of type <literal>'b</literal>.
     </para>
     <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>imperative-programming/dictionary.mli</filename> (part 1)</lineannotation>
 (* file: dictionary.mli *)
@@ -9164,7 +9163,7 @@ type ('a, 'b) t = { mutable length: int;
       In OCaml, records are immutable by default, but individual fields
       are mutable when marked as such. The second field,
       <literal>buckets</literal>, is immutable, but contains an array,
-      which is itself a mutable data structure, as we'll see.
+      which is itself a mutable data structure.
     </para>
     <para>
       Now we'll start putting together the basic functions for
@@ -9186,11 +9185,11 @@ let find t key =
   List.find_map t.buckets.(hash_bucket key)
     ~f:(fun (key',data) -&gt; if key' = key then Some data else None)</programlisting>
     <para>
-      Note that <literal>num_buckets</literal> is a constant. That's
-      because, for simplicity's sake, we're using a fixed-length bucket
-      array. For a practical implementation, the length of the array
-      would have to be able to grow as the number of elements in the
-      dictionary increases.
+      Note that <literal>num_buckets</literal> is a constant, which
+      means our bucket array is of fixed length. A practical
+      implementation would need to be able to grow the array as the
+      number of elements in the dictionary increases, but we'll omit
+      this to simplify the presentation.
     </para>
     <para>
       The function <literal>hash_bucket</literal> is used throughout the
@@ -9225,11 +9224,11 @@ let find t key =
       </listitem>
     </itemizedlist>
     <para>
-      Another bit of syntax has popped up in <literal>find</literal>: we
-      write <literal>array.(index)</literal> to grab a value from an
-      array. Also, <literal>find</literal> uses
+      Another important piece of imperative syntax shows up in
+      <literal>find</literal>: we write <literal>array.(index)</literal>
+      to grab a value from an array. <literal>find</literal> also uses
       <literal>List.find_map</literal>, which you can see the type of by
-      typing it into the toplevel:
+      typing it into the toplevel.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>imperative-programming/examples.topscript</filename> (part 1)</lineannotation>
 <prompt># </prompt><userinput>List.find_map;;</userinput>
@@ -9239,11 +9238,9 @@ let find t key =
       <literal>List.find_map</literal> iterates over the elements of the
       list, calling <literal>f</literal> on each one until a
       <literal>Some</literal> is returned by <literal>f</literal>, at
-      which point the value returned by <literal>f</literal> is returned
-      by <literal>find_map</literal>. If <literal>f</literal> returns
-      <literal>None</literal> on all values, then
-      <literal>None</literal> is returned by
-      <literal>find_map</literal>.
+      which point that value is returned. If <literal>f</literal>
+      returns <literal>None</literal> on all values, then
+      <literal>None</literal> is returned.
     </para>
     <para>
       Now let's look at the implementation of <literal>iter</literal>:
@@ -9317,10 +9314,9 @@ let remove t key =
       record field (<literal>record.field &lt;- expression</literal>).
     </para>
     <para>
-      We also use a single semicolon, <literal>;</literal>, as a
-      sequencing operator, to allow us to do a sequence of
-      side-effecting operations in a row: first, update the bucket, then
-      update the count. We could have done this using let bindings:
+      We also use <literal>;</literal>, the sequencing operator, to
+      express a sequence of imperative actions. We could have done the
+      same using let bindings:
     </para>
     <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>imperative-programming/dictionary2.ml</filename> (part 1)</lineannotation>
 let () = t.buckets.(i) &lt;- (key, data) :: filtered_bucket in
@@ -9349,8 +9345,10 @@ let () = &lt;expr2&gt; in
       evaluated, <literal>expr1</literal> is evaluated first, and then
       <literal>expr2</literal>. The expression <literal>expr1</literal>
       should have type <literal>unit</literal> (though this is a warning
-      rather than a hard restriction), and the value of
-      <literal>expr2</literal> is returned as the value of the entire
+      rather than a hard restriction. The
+      <literal>-strict-sequence</literal> compiler flag makes this a
+      hard restriction, which is generally a good idea), and the value
+      of <literal>expr2</literal> is returned as the value of the entire
       sequence. For example, the sequence
       <literal>print_string &quot;hello world&quot;; 1 + 2</literal>
       first prints the string
@@ -9563,16 +9561,11 @@ let () = &lt;expr2&gt; in
     <para>
       OCaml provides support for traditional imperative looping
       constructs, in particular, <literal>for</literal> and
-      <literal>while</literal> loops, even though neither of them is
-      strictly necessary. Anything you can do with such a loop you can
-      also do with a recursive function, and you can also write
-      higher-order functions like <literal>Array.iter</literal> that
-      cover much of the same ground.
-    </para>
-    <para>
-      Nonetheless, explicit <literal>for</literal> and
-      <literal>while</literal> loops are both more idiomatic for
-      imperative programming and often more concise.
+      <literal>while</literal> loops. Neither of these constructs is
+      strictly necessary, since they can be simulated with recursive
+      functions. Nonetheless, explicit <literal>for</literal> and
+      <literal>while</literal> loops are both more concise and more
+      idiomatic when programming imperatively.
     </para>
     <para>
       The <literal>for</literal> loop is the simpler of the two. Indeed,
@@ -9605,8 +9598,9 @@ let () = &lt;expr2&gt; in
     <para>
       Note that the loop variable of a <literal>for</literal> loop,
       <literal>i</literal> in this case, is immutable in the scope of
-      the loop, and is also local to the loop, <literal>i.e.</literal>,
-      it can't be referenced outside of the loop.
+      the loop, and is also local to the loop,
+      <emphasis>i.e.</emphasis>, it can't be referenced outside of the
+      loop.
     </para>
     <para>
       OCaml also supports <literal>while</literal> loops, which include
@@ -9802,7 +9796,7 @@ let insert_first t value =
         with <literal>begin ... end</literal>. We could have used
         parenthesis for the same purpose. Without some kind of
         bracketing, the final assignment would incorrectly become part
-        of the <literal>None -&gt; ...</literal> case.
+        of the <literal>None</literal> case.
       </para>
       <para>
         We can use <literal>insert_after</literal> to insert elements
@@ -9860,8 +9854,8 @@ let remove t elt =
         taken care of in modules like Core's
         <literal>Doubly_linked</literal>. You should use imperative data
         structures from a well-designed library when you can. And when
-        you can't, you should make sure that the code you write is
-        careful about error detection.
+        you can't, you should make sure to put great care into your
+        error handling.
       </para>
     </sect2>
     <sect2 id="iteration-functions">
@@ -9902,6 +9896,17 @@ let find_el t ~f =
       else loop (next elt)
   in
   loop !t</programlisting>
+      <para>
+        This completes our implementation, but there's still
+        considerably more work to be done to make a really usable
+        doubly-linked list. As mentioned earlier, you're probably better
+        off using something like Core's <literal>Doubly_linked</literal>
+        module that has a more complete interface and has more of the
+        tricky corner cases worked out. Nonetheless, this example should
+        serve to demonstrate some of the techniques you can use to build
+        non-trivial imperative data structure in OCaml, as well as some
+        of the pitfalls.
+      </para>
     </sect2>
   </sect1>
   <sect1 id="laziness-and-other-benign-effects">
@@ -9909,21 +9914,20 @@ let find_el t ~f =
     <para>
       There are many instances where you basically want to program in a
       pure style, but you want to make limited use of side-effects to
-      improve the performance of your code, without really changing
-      anything else. Such side effects are sometimes called
-      <emphasis>benign effects</emphasis>, and they are a useful way of
-      leveraging OCaml's imperative features while still maintaining
-      most of the benefits of pure programming.
+      improve the performance of your code. Such side effects are
+      sometimes called <emphasis>benign effects</emphasis>, and they are
+      a useful way of leveraging OCaml's imperative features while still
+      maintaining most of the benefits of pure programming.
     </para>
     <para>
-      One of the simplest benign effect is
+      One of the simplest benign effects is
       <emphasis>laziness</emphasis>. A lazy value is one that is not
       computed until it is actually needed. In OCaml, lazy values are
       created using the <literal>lazy</literal> keyword, which can be
-      used to prefix any expression, returning a value of type
-      <literal>'a Lazy.t</literal>. The evaluation of that expression is
-      delayed until forced with the <literal>Lazy.force</literal>
-      function.
+      used to convert any expression of type <literal>s</literal> into a
+      lazy value of type <literal>s Lazy.t</literal>. The evaluation of
+      that expression is delayed until forced with
+      <literal>Lazy.force</literal>.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>imperative-programming/lazy.topscript</filename> (part 1)</lineannotation>
 <prompt># </prompt><userinput>let v = lazy (print_string &quot;performing lazy computation\n&quot;; sqrt 16.);;</userinput>
@@ -9967,7 +9971,7 @@ let find_el t ~f =
       <literal>Value</literal> or <literal>Exn</literal> states.
     </para>
     <para>
-      We can create a lazy value based on a thunk,
+      We can create a lazy value from a thunk,
       <emphasis>i.e.</emphasis>, a function that takes a unit argument.
       Wrapping an expression in a thunk is another way to suspend the
       computation of an expression.
@@ -10059,10 +10063,9 @@ let find_el t ~f =
       <para>
         Memoization can be useful whenever you have a function that is
         expensive to recompute, and you don't mind caching old values
-        indefinitely. One important caution: every time you create a
-        memoized function, there's something of a built-in memory leak.
-        As long as you hold on to the memoized function, you're holding
-        every result it has returned thus far.
+        indefinitely. One important caution: a memoized function by its
+        nature leaks memory. As long as you hold on to the memoized
+        function, you're holding every result it has returned thus far.
       </para>
       <para>
         Memoization is also useful for efficiently implementing some
@@ -10157,8 +10160,8 @@ edit_distance &quot;OCam&quot; &quot;ocam&quot;
 <computeroutput>- : int = 2</computeroutput>
 </programlisting>
       <para>
-        Just those few extra characters made it almost four thousand
-        times slower!
+        Just those few extra characters made it thousands of times
+        slower!
       </para>
       <para>
         Memoization would be a huge help here, but to fix the problem,
@@ -10186,16 +10189,15 @@ edit_distance &quot;OCam&quot; &quot;ocam&quot;
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>imperative-programming/fib.topscript</filename> (part 2)</lineannotation>
 <prompt># </prompt><userinput>time (fun () -&gt; fib 20);;</userinput>
-<computeroutput>Time: 0.844955ms</computeroutput>
+<computeroutput>Time: 0.858068ms</computeroutput>
 <computeroutput>- : int = 10946</computeroutput>
 <prompt># </prompt><userinput>time (fun () -&gt; fib 40);;</userinput>
-<computeroutput>Time: 12.7743s</computeroutput>
+<computeroutput>Time: 12.7762s</computeroutput>
 <computeroutput>- : int = 165580141</computeroutput>
 </programlisting>
       <para>
-        Here, <literal>fib 40</literal> takes almost a minute to
-        compute, as opposed to five <emphasis>milliseconds</emphasis>
-        for <literal>fib 20</literal>.
+        As you can see, <literal>fib 40</literal> takes far longer to
+        compute then <literal>fib 20</literal>.
       </para>
       <para>
         So, how can we use memoization to make this faster? The tricky
@@ -10203,17 +10205,16 @@ edit_distance &quot;OCam&quot; &quot;ocam&quot;
         recursive calls within <literal>fib</literal>. We can't just
         define <literal>fib</literal> in the ordinary way and memoize it
         after the fact and expect the first call to
-        <literal>fib</literal> to be improved (though of course repeated
-        calls will be improved).
+        <literal>fib</literal> to be improved.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>imperative-programming/fib.topscript</filename> (part 3)</lineannotation>
 <prompt># </prompt><userinput>let fib = memoize fib;;</userinput>
 <computeroutput>val fib : int -&gt; int = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>time (fun () -&gt; fib 40);;</userinput>
-<computeroutput>Time: 12.7802s</computeroutput>
+<computeroutput>Time: 12.7765s</computeroutput>
 <computeroutput>- : int = 165580141</computeroutput>
 <prompt># </prompt><userinput>time (fun () -&gt; fib 40);;</userinput>
-<computeroutput>Time: 0.00309944ms</computeroutput>
+<computeroutput>Time: 0.00286102ms</computeroutput>
 <computeroutput>- : int = 165580141</computeroutput>
 </programlisting>
       <para>
@@ -10236,8 +10237,8 @@ edit_distance &quot;OCam&quot; &quot;ocam&quot;
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>imperative-programming/fib.topscript</filename> (part 5)</lineannotation>
 <prompt># </prompt><userinput>let rec fib i = fib_norec fib i;;</userinput>
 <computeroutput>val fib : int -&gt; int = &lt;fun&gt;</computeroutput>
-<prompt># </prompt><userinput>fib 5;;</userinput>
-<computeroutput>- : int = 5</computeroutput>
+<prompt># </prompt><userinput>fib 20;;</userinput>
+<computeroutput>- : int = 6765</computeroutput>
 </programlisting>
       <para>
         We can even write a polymorphic function that we'll call
@@ -10252,8 +10253,8 @@ edit_distance &quot;OCam&quot; &quot;ocam&quot;
 <computeroutput>val make_rec : (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>let fib = make_rec fib_norec;;</userinput>
 <computeroutput>val fib : int -&gt; int = &lt;fun&gt;</computeroutput>
-<prompt># </prompt><userinput>fib 5;;</userinput>
-<computeroutput>- : int = 5</computeroutput>
+<prompt># </prompt><userinput>fib 20;;</userinput>
+<computeroutput>- : int = 6765</computeroutput>
 </programlisting>
       <para>
         This is a pretty strange piece of code, and it may take a few
@@ -10269,7 +10270,7 @@ edit_distance &quot;OCam&quot; &quot;ocam&quot;
       <para>
         This is clever enough, but all we've really done is find a new
         way to implement the same old slow Fibonacci function. To make
-        it faster, we need variant on <literal>make_rec</literal> that
+        it faster, we need a variant on <literal>make_rec</literal> that
         inserts memoization when it ties the recursive knot. We'll call
         that function <literal>memo_rec</literal>.
       </para>
@@ -10308,15 +10309,15 @@ edit_distance &quot;OCam&quot; &quot;ocam&quot;
       <para>
         The memory behavior here is important. If you look back at the
         definition of <literal>memo_rec</literal>, you'll see that the
-        call to memo_rec does not trigger a call to
-        <literal>memoize</literal>. Only when the final argument to
-        <literal>fib</literal> is presented does
-        <literal>memoize</literal> get called, and the result of that
-        call falls out of scope when the <literal>fib</literal> call
-        returns. That means that, unlike ordinary memoization, calling
-        <literal>memo_rec</literal> on a function does not create a
-        memory leak—the memoization table is collected after the
-        computation completes.
+        call <literal>memo_rec fib_norec</literal> does not trigger a
+        call to <literal>memoize</literal>. Only when
+        <literal>fib</literal> is called and thereby the final argument
+        to <literal>memo_rec</literal> is presented does
+        <literal>memoize</literal> get called. The result of that call
+        falls out of scope when the <literal>fib</literal> call returns,
+        and so calling <literal>memo_rec</literal> on a function does
+        not create a memory leak—the memoization table is collected
+        after the computation completes.
       </para>
       <para>
         We can use <literal>memo_rec</literal> as part of a single
@@ -10367,7 +10368,7 @@ edit_distance &quot;OCam&quot; &quot;ocam&quot;
       <para>
         This new version of <literal>edit_distance</literal> is much
         more efficient than the one we started with; the following call
-        is about ten thousand times faster than it was without
+        is many thousands of times faster than it was without
         memoization.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>imperative-programming/memo.topscript</filename> (part 7)</lineannotation>
@@ -10402,14 +10403,16 @@ edit_distance &quot;OCam&quot; &quot;ocam&quot;
 let rec x = x + 1</programlisting>
       <para>
         Note that <literal>x</literal> is an ordinary value, not a
-        function. As such, it's not clear how to execute this code. In
-        some sense, you could imagine it compiling down to an infinite
-        loop, but there's no looping control structure to make that
-        happen.
+        function. As such, it's not clear how this definition should be
+        handled by the compiler. You could imagine it compiling down to
+        an infinite loop, but <literal>x</literal> is of type
+        <literal>int</literal>, and there's no <literal>int</literal>
+        that corresponds to an infinite loop. As such, this construct is
+        effectively impossible to compile.
       </para>
       <para>
-        To avoid such cases, the compiler only allows three possible
-        constructs to show up on the right-hand side of a
+        To avoid such impossible cases, the compiler only allows three
+        possible constructs to show up on the right-hand side of a
         <literal>let rec</literal>: a function definition, a
         constructor, or the lazy keyword. This excludes some reasonable
         things, like our definition of <literal>memo_rec</literal>, but
@@ -10491,7 +10494,7 @@ let rec x = x + 1</programlisting>
       <para>
         OCaml's buffered I/O library is organized around two types:
         <literal>in_channel</literal>, for channels you read from, and
-        <literal>out_channel</literal>, for channels you write to.
+        <literal>out_channel</literal>, for channels you write to. The
         <literal>In_channel</literal> and <literal>Out_channel</literal>
         modules only have direct support for channels corresponding to
         files and terminals; other kinds of channels can be created
@@ -10554,10 +10557,10 @@ let () =
   | None -&gt; failwith &quot;No timezone provided&quot;
   | Some zone_string -&gt;
     let zone = Zone.find_exn zone_string in
-    let time_string = Time.to_localized_string (Time.now ()) zone in
+    let time_string = Time.to_string_abs (Time.now ()) ~zone in
     Out_channel.output_string stdout
       (String.concat
-         [&quot;The time in &quot;;Zone.to_string zone;&quot; is &quot;; time_string;&quot;\n&quot;]);
+         [&quot;The time in &quot;;Zone.to_string zone;&quot; is &quot;;time_string;&quot;.\n&quot;]);
     Out_channel.flush stdout</programlisting>
       <para>
         We can build this program (using <literal>ocamlbuild</literal>
@@ -10566,6 +10569,7 @@ let () =
         you'll see that it prompts you for input, as follows:
       </para>
       <programlisting language="console"><lineannotation>✎ Terminal: <filename>imperative-programming/time_converter.out</filename></lineannotation>
+<prompt>$ </prompt><userinput>corebuild time_converter.byte</userinput>
 <prompt>$ </prompt><userinput>./time_converter.byte</userinput>
 <computeroutput>Pick a timezone:</computeroutput>
 </programlisting>
@@ -10575,7 +10579,7 @@ let () =
       </para>
       <programlisting language="console"><lineannotation>✎ Terminal: <filename>imperative-programming/time_converter2.out</filename></lineannotation>
 <computeroutput>Pick a timezone: Europe/London</computeroutput>
-<computeroutput>The time in Europe/London is 2013-03-06 02:15:13.602033</computeroutput>
+<computeroutput>The time in Europe/London is 2013-08-15 00:03:10.666220+01:00.</computeroutput>
 </programlisting>
       <para>
         We called <literal>Out_channel.flush</literal> on
@@ -10598,7 +10602,7 @@ let () =
         called to flush that output to the screen. The final flush is
         not technically required, since the program ends after that
         instruction, at which point all remaining output will be flushed
-        anyway, but the flush is nonetheless good practice.
+        anyway, but the explicit flush is nonetheless good practice.
       </para>
     </sect2>
     <sect2 id="formatted-output-with-printf">
@@ -10622,7 +10626,7 @@ let () =
 <computeroutput>- : unit = ()</computeroutput>
 </programlisting>
       <para>
-        Importantly, and unlike C's <literal>printf</literal>, the
+        Unlike C's <literal>printf</literal>, the
         <literal>printf</literal> in OCaml is type-safe. In particular,
         if we provide an argument whose type doesn't match what's
         presented in the format string, we'll get a type error.
@@ -10705,7 +10709,7 @@ let () =
   | None -&gt; failwith &quot;No timezone provided&quot;
   | Some zone_string -&gt;
     let zone = Zone.find_exn zone_string in
-    let time_string = Time.to_localized_string (Time.now ()) zone in
+    let time_string = Time.to_string_abs (Time.now ()) ~zone in
     printf &quot;The time in %s is %s.\n%!&quot; (Zone.to_string zone) time_string</programlisting>
       <para>
         In the above example, we've used only two formatting directives:
@@ -10856,17 +10860,19 @@ let () =
 <computeroutput>- : int = 15</computeroutput>
 </programlisting>
       <para>
-        This is really an example of a more general complexity of
+        This is really an example of a more general issue with
         imperative programming. When programming imperatively, you need
         to be quite careful to make sure that exceptions don't leave you
         in an awkward state.
       </para>
       <para>
-        <literal>In_channel</literal> also supports some idioms that
-        handle some of the details of this for you. For example, the
-        <literal>with_file</literal> function takes a filename and a
-        function for processing that file, and takes care of the opening
-        and closing of the file transparently.
+        <literal>In_channel</literal> has functions that automate the
+        handling of some of these details. For example,
+        <literal>In_channel.with_file</literal> takes a filename and a
+        function for processing data from an
+        <literal>in_channel</literal>, and takes care of the bookkeeping
+        associated with opening and closing the file. We can rewrite
+        <literal>sum_file</literal> using this function, as shown here.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>imperative-programming/file2.topscript</filename> (part 3)</lineannotation>
 <prompt># </prompt><userinput>let sum_file filename =</userinput>
