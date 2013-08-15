@@ -26,4 +26,6 @@ Please visit:
 
 * <https://realworldocaml.org/install> and follow the instructions for your operating system.
 
-* <https://github.com/realworldocaml> has all of the example code freely available under a public-domain-like license, so that you can copy them for use in your own projects.
+* <https://realworldocaml.org/code> has all of the example code freely available under a public-domain-like license, so that you can copy them for use in your own projects.
+
+* <https://realworldocaml.org/doc> contains the HTML documentation for all the libraries used within the book.  This is a convenient reference for the Core interfaces, and also the other third-party software we use such as Yojson or Menhir.
