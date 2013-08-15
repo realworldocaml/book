@@ -662,7 +662,8 @@ This is, however, exponentially slow, for the same reason that
 ((typ ocamltop)(name imperative-programming/fib.topscript)(part 2))
 ```
 
-As you can see, `fib 40` takes far longer to compute then `fib 20`.
+As you can see, `fib 40` takes thousands of times longer to compute
+then `fib 20`.
 
 So, how can we use memoization to make this faster?  The tricky bit is
 that we need to insert the memoization before the recursive calls
@@ -1166,16 +1167,15 @@ Consider the following simple imperative function.
 ```
 
 `remember` simply caches the first value that's passed to it,
-returning that value on every call.  Note that we've carefully written
-`remember` so that `cache` is created and initialized once, and is
-shared across invocations of `remember`.
+returning that value on every call.  That's because `cache` is created
+and initialized once, and is shared across invocations of `remember`.
 
 `remember` is not a terribly useful function, but it raises an
-interesting question: what type should it have?
+interesting question: what is its type?
 
 On its first call, `remember` returns the same value its passed, which
 means its input type and return type should match.  Accordingly,
-`remember` should have the type `t -> t` for some type `t`.  There's
+`remember` should have type `t -> t` for some type `t`.  There's
 nothing about `remember` that ties the choice of `t` to any particular
 type, so you might expect OCaml to generalize, replacing `t` with a
 polymorphic type variable.  It's this kind of generalization that
@@ -1190,9 +1190,9 @@ As you can see, the polymorphic type of `identity` lets it operate on
 values with different types.
 
 This is not what happens with `remember`, though.  As you can see from
-the `utop` output above, the type that OCaml infers for `remember`,
-which looks almost, but not quite, like the type of the identity
-function.  Here it is again:
+the `utop` output above, the type that OCaml infers for `remember`
+looks almost, but not quite, like the type of the identity function.
+Here it is again:
 
 ```frag
 ((typ ocaml)(name imperative-programming/remember_type.ml))
@@ -1202,7 +1202,8 @@ The underscore in the type variable `'_a` tells us that the variable
 is only _weakly polymorphic_, which is to say that it can be used with
 any _single_ type.  That makes sense, because, unlike `identity`,
 `remember` always returns the value it was passed on its first
-invocation, which means it can only be used with one type.
+invocation, which means its return value must always have the same
+type.
 
 OCaml will convert a weakly polymorphic variable to a concrete type as
 soon as it gets a clue as to what concrete type it is to be used as,
@@ -1221,19 +1222,20 @@ So, when does the compiler infer weakly polymorphic types?  As we've
 seen, we need weakly polymorphic types when a value of unknown type is
 stored in a persistent mutable cell.  Because the type system isn't
 precise enough to determine all cases where this might happen, OCaml
-uses a rough rule to flag cases where it's sure there are no
-persistent refs, and to only infer polymorphic types in those cases.
+uses a rough rule to flag cases that don't introduce any persistent
+mutable cells, and to only infer polymorphic types in those cases.
 This rule is called _the value restriction_.
 
 The core of the value restriction is the observation that some kinds
-of simple values by their nature can't contain refs, including:
+of expressions, which we'll refer to as _simple values_, by their
+nature can't introduce persistent mutable cells, including:
 
 - Constants (_i.e._, things like integer and floating-point literals)
-- Constructors that contain only other simple values
+- Constructors that only contain other simple values
 - Function declarations, _i.e._, expressions that begin with `fun` or
   `function`, or, the equivalent let binding, `let f x = ...`.
-- `let` bindings of the form `let var = <expr1> in <expr2>`, where
-  both `<expr1>` and `<expr2>` are simple values.
+- `let` bindings of the form `let` _`var`_ `=` _`expr1`_ `in`
+  _`expr2`_, where both _`expr1`_ and _`expr2`_ are simple values.
 
 Thus, the following expression is a simple value, and as a result, the
 types of values contained within it are allowed to be polymorphic.
@@ -1305,12 +1307,11 @@ application, as follows.
 ```
 
 As you can see, we now infer a weakly polymorphic type for the
-resulting function, and for good reason.  There's nothing that tells
-us that `List.init` isn't creating a persistent `ref` somewhere inside
-of it that would be shared across multiple calls to `list_init_10`.
-We can eliminate this possibility, and at the same time get the
-compiler to infer a polymorphic type, by using explicit variables
-rather than partial application.
+resulting function.  That's because there's nothing that guarantees
+that `List.init` isn't creating a persistent `ref` somewhere inside of
+it that would be shared across multiple calls to `list_init_10`.  We
+can eliminate this possibility, and at the same time get the compiler
+to infer a polymorphic type, by avoiding partial application.
 
 ```frag
 ((typ ocamltop)(name imperative-programming/value_restriction.topscript)(part 7))
@@ -1322,7 +1323,7 @@ useful to resolve problems that arise from the value restriction.
 ### Relaxing the value restriction
 
 OCaml is actually a little better at inferring polymorphic types than
-is implied above.  The value restriction as we described it above is
+is suggested above.  The value restriction as we described it above is
 basically a syntactic check: there are a few operations that you can
 do that count as simple values, and anything that's a simple value can
 be generalized.
@@ -1375,16 +1376,45 @@ obscured the fact that `Concat_list.t` is in fact an immutable
 data-type.  We can resolve this in one of two ways: either by making
 the type concrete (_i.e._, exposing the implementation in the `mli`),
 which is often not desirable; or by marking the type variable in
-question as _covariant_.  We'll learn more about variance and
-covariance in [xref](#objects), but for now, you can think of it as an
-annotation which can be put in the interface of a pure data structure.
+question as _covariant_.  We'll learn more about covariance and
+contravariance in [xref](#objects), but for now, you can think of it
+as an annotation which can be put in the interface of a pure data
+structure.
 
-Thus, if we replace `type 'a t` in the interface with `type +'a t`,
-that will make it explicit in the interface that the data-structure
-doesn't contain any persistent references to values of type `'a`, at
-which point, OCaml can infer polymorphic types for expressions of this
-type that are not simple values.
+In particular, if we replace `type 'a t` in the interface with `type
++'a t`, that will make it explicit in the interface that the
+data-structure doesn't contain any persistent references to values of
+type `'a`, at which point, OCaml can infer polymorphic types for
+expressions of this type that are not simple values.
 
 ```frag
-((typ ocamltop)(name imperative-programming/value_restriction.topscript)(part 13))
+((typ ocamlrawtop)(name imperative-programming/value_restriction-13.rawscript))
 ```
+
+Now, we can apply the identity function to `Concat_list.empty` without
+without losing any polymorphism.
+
+```frag
+((typ ocamltop)(name imperative-programming/value_restriction.topscript)(part 14))
+```
+
+## Summary
+
+This chapter has covered quite a lot of ground, including:
+
+- Discussing the building blocks of mutable data-structures as well as
+  the basic imperative constructs like for loops, while loops, and the
+  sequening operator `;`.
+- Walking through the implementation of a couple of classic imperative
+  data structures.
+- Discussing so-called benign effects like memoization and laziness.
+- Covering OCaml's API for blocking I/O.
+- Discussing how language-level issues like order of evaluation and
+  weak polymorphism interact with OCaml's imperative features.
+
+Despite the fact that OCaml is a functional language, we can see from
+the scope and sophistication of the material here that that imperative
+programming is a rich and important part of the language.  Despite the
+fact that OCaml is functional by default, imperative programming is a
+first-class part of the language, and something that you need to
+understand well to build any serious application.
