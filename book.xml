@@ -451,14 +451,17 @@
       </para>
     </sect2>
   </sect1>
-</preface><part label="I"><title>Language Concepts</title><partintro><para>Part I covers the basic language concepts you'll need to know when building OCaml programs.
-      You won't need to memorise all of this (objects, for example, are used rarely in practice)
-      but understanding the concepts and examples is important.</para><para>This part opens up with a guided tour to give you a quick overview of the language using
-      an interactive command-line interface. It then moves onto covering language features such 
-      as records, algebraic data types and the module system.</para><para>The final portion covers more advanced features such as functors, objects and first-class 
-      modules, which may all take some time to digest. Persevere though; even though these concepts 
-      may be difficult at first, they will put you in good stead even when switching to other 
-      languages, many of which have drawn inspiration from ML.</para></partintro><chapter id="a-guided-tour">
+</preface><part label="I"><title>Language Concepts</title><partintro><para>Part I covers the basic language concepts you'll need to know when building
+     OCaml programs.  You won't need to memorise all of this (objects, for
+     example, are used rarely in practice) but understanding the concepts and
+     examples is important.</para><para>This part opens up with a guided tour to give you a quick overview of the
+     language using an interactive command-line interface. It then moves onto
+     covering language features such as records, algebraic data types and the
+     module system.</para><para>The final portion covers more advanced features such as functors, objects
+     and first-class modules, which may all take some time to digest. Persevere
+     though; even though these concepts may be difficult at first, they will put
+     you in good stead even when switching to other languages, many of which
+     have drawn inspiration from ML.</para></partintro><chapter id="a-guided-tour">
   <title>A Guided Tour</title>
   <para>
     This chapter gives an overview of OCaml by walking through a series
@@ -10196,8 +10199,8 @@ edit_distance &quot;OCam&quot; &quot;ocam&quot;
 <computeroutput>- : int = 165580141</computeroutput>
 </programlisting>
       <para>
-        As you can see, <literal>fib 40</literal> takes far longer to
-        compute then <literal>fib 20</literal>.
+        As you can see, <literal>fib 40</literal> takes thousands of
+        times longer to compute than <literal>fib 20</literal>.
       </para>
       <para>
         So, how can we use memoization to make this faster? The tricky
@@ -11023,20 +11026,19 @@ let () =
 </programlisting>
     <para>
       <literal>remember</literal> simply caches the first value that's
-      passed to it, returning that value on every call. Note that we've
-      carefully written <literal>remember</literal> so that
+      passed to it, returning that value on every call. That's because
       <literal>cache</literal> is created and initialized once, and is
       shared across invocations of <literal>remember</literal>.
     </para>
     <para>
       <literal>remember</literal> is not a terribly useful function, but
-      it raises an interesting question: what type should it have?
+      it raises an interesting question: what is its type?
     </para>
     <para>
       On its first call, <literal>remember</literal> returns the same
       value its passed, which means its input type and return type
       should match. Accordingly, <literal>remember</literal> should have
-      the type <literal>t -&gt; t</literal> for some type
+      type <literal>t -&gt; t</literal> for some type
       <literal>t</literal>. There's nothing about
       <literal>remember</literal> that ties the choice of
       <literal>t</literal> to any particular type, so you might expect
@@ -11060,10 +11062,10 @@ let () =
     </para>
     <para>
       This is not what happens with <literal>remember</literal>, though.
-      As you can see from the <literal>utop</literal> output above, the
-      type that OCaml infers for <literal>remember</literal>, which
-      looks almost, but not quite, like the type of the identity
-      function. Here it is again:
+      As you can see from the <command>utop</command> output above, the
+      type that OCaml infers for <literal>remember</literal> looks
+      almost, but not quite, like the type of the identity function.
+      Here it is again:
     </para>
     <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>imperative-programming/remember_type.ml</filename></lineannotation>
 val remember : '_a -&gt; '_a = &lt;fun&gt;</programlisting>
@@ -11074,7 +11076,7 @@ val remember : '_a -&gt; '_a = &lt;fun&gt;</programlisting>
       any <emphasis>single</emphasis> type. That makes sense, because,
       unlike <literal>identity</literal>, <literal>remember</literal>
       always returns the value it was passed on its first invocation,
-      which means it can only be used with one type.
+      which means its return value must always have the same type.
     </para>
     <para>
       OCaml will convert a weakly polymorphic variable to a concrete
@@ -11103,15 +11105,16 @@ val remember : '_a -&gt; '_a = &lt;fun&gt;</programlisting>
         we've seen, we need weakly polymorphic types when a value of
         unknown type is stored in a persistent mutable cell. Because the
         type system isn't precise enough to determine all cases where
-        this might happen, OCaml uses a rough rule to flag cases where
-        it's sure there are no persistent refs, and to only infer
+        this might happen, OCaml uses a rough rule to flag cases that
+        don't introduce any persistent mutable cells, and to only infer
         polymorphic types in those cases. This rule is called
         <emphasis>the value restriction</emphasis>.
       </para>
       <para>
         The core of the value restriction is the observation that some
-        kinds of simple values by their nature can't contain refs,
-        including:
+        kinds of expressions, which we'll refer to as <emphasis>simple
+        values</emphasis>, by their nature can't introduce persistent
+        mutable cells, including:
       </para>
       <itemizedlist>
         <listitem>
@@ -11122,7 +11125,7 @@ val remember : '_a -&gt; '_a = &lt;fun&gt;</programlisting>
         </listitem>
         <listitem>
           <para>
-            Constructors that contain only other simple values
+            Constructors that only contain other simple values
           </para>
         </listitem>
         <listitem>
@@ -11136,9 +11139,15 @@ val remember : '_a -&gt; '_a = &lt;fun&gt;</programlisting>
         <listitem>
           <para>
             <literal>let</literal> bindings of the form
-            <literal>let var = &lt;expr1&gt; in &lt;expr2&gt;</literal>,
-            where both <literal>&lt;expr1&gt;</literal> and
-            <literal>&lt;expr2&gt;</literal> are simple values.
+            <literal>let</literal>
+            <emphasis><literal>var</literal></emphasis>
+            <literal>=</literal>
+            <emphasis><literal>expr1</literal></emphasis>
+            <literal>in</literal>
+            <emphasis><literal>expr2</literal></emphasis>, where both
+            <emphasis><literal>expr1</literal></emphasis> and
+            <emphasis><literal>expr2</literal></emphasis> are simple
+            values.
           </para>
         </listitem>
       </itemizedlist>
@@ -11229,14 +11238,13 @@ val remember : '_a -&gt; '_a = &lt;fun&gt;</programlisting>
 </programlisting>
       <para>
         As you can see, we now infer a weakly polymorphic type for the
-        resulting function, and for good reason. There's nothing that
-        tells us that <literal>List.init</literal> isn't creating a
+        resulting function. That's because there's nothing that
+        guarantees that <literal>List.init</literal> isn't creating a
         persistent <literal>ref</literal> somewhere inside of it that
         would be shared across multiple calls to
         <literal>list_init_10</literal>. We can eliminate this
         possibility, and at the same time get the compiler to infer a
-        polymorphic type, by using explicit variables rather than
-        partial application.
+        polymorphic type, by avoiding partial application.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>imperative-programming/value_restriction.topscript</filename> (part 7)</lineannotation>
 <prompt># </prompt><userinput>let list_init_10 ~f = List.init 10 ~f;;</userinput>
@@ -11252,10 +11260,10 @@ val remember : '_a -&gt; '_a = &lt;fun&gt;</programlisting>
       <title>Relaxing the value restriction</title>
       <para>
         OCaml is actually a little better at inferring polymorphic types
-        than is implied above. The value restriction as we described it
-        above is basically a syntactic check: there are a few operations
-        that you can do that count as simple values, and anything that's
-        a simple value can be generalized.
+        than is suggested above. The value restriction as we described
+        it above is basically a syntactic check: there are a few
+        operations that you can do that count as simple values, and
+        anything that's a simple value can be generalized.
       </para>
       <para>
         But OCaml actually has a relaxed version of the value
@@ -11351,12 +11359,13 @@ val remember : '_a -&gt; '_a = &lt;fun&gt;</programlisting>
         the implementation in the <literal>mli</literal>), which is
         often not desirable; or by marking the type variable in question
         as <emphasis>covariant</emphasis>. We'll learn more about
-        variance and covariance in <xref linkend="objects"/>,
-        but for now, you can think of it as an annotation which can be
-        put in the interface of a pure data structure.
+        covariance and contravariance in
+        <xref linkend="objects"/>, but for now, you can think
+        of it as an annotation which can be put in the interface of a
+        pure data structure.
       </para>
       <para>
-        Thus, if we replace <literal>type 'a t</literal> in the
+        In particular, if we replace <literal>type 'a t</literal> in the
         interface with <literal>type +'a t</literal>, that will make it
         explicit in the interface that the data-structure doesn't
         contain any persistent references to values of type
@@ -11364,44 +11373,66 @@ val remember : '_a -&gt; '_a = &lt;fun&gt;</programlisting>
         polymorphic types for expressions of this type that are not
         simple values.
       </para>
-      <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>imperative-programming/value_restriction.topscript</filename> (part 13)</lineannotation>
-<prompt># </prompt><userinput>module Concat_list : sig</userinput>
-<userinput>    type +'a t</userinput>
-<userinput>    val empty : 'a t</userinput>
-<userinput>    val singleton : 'a -&gt; 'a t</userinput>
-<userinput>    val concat  : 'a t -&gt; 'a t -&gt; 'a t (* constant time *)</userinput>
-<userinput>    val to_list : 'a t -&gt; 'a list       (* linear time   *)</userinput>
-<userinput>  end = struct</userinput>
-<userinput/>
-<userinput>    type 'a t = Empty | Singleton of 'a | Concat of 'a t * 'a t</userinput>
-<userinput/>
-<userinput>    let empty = Empty</userinput>
-<userinput>    let singleton x = Singleton x</userinput>
-<userinput>    let concat x y = Concat (x,y)</userinput>
-<userinput/>
-<userinput>    let rec to_list_with_tail t tail =</userinput>
-<userinput>      match t with</userinput>
-<userinput>      | Empty -&gt; tail</userinput>
-<userinput>      | Singleton x -&gt; x :: tail</userinput>
-<userinput>      | Concat (x,y) -&gt; to_list_with_tail x (to_list_with_tail y tail)</userinput>
-<userinput/>
-<userinput>    let to_list t =</userinput>
-<userinput>      to_list_with_tail t []</userinput>
-<userinput/>
-<userinput>  end;;</userinput>
-<computeroutput>module Concat_list :</computeroutput>
-<computeroutput>  sig</computeroutput>
-<computeroutput>    type +'a t</computeroutput>
-<computeroutput>    val empty : 'a t</computeroutput>
-<computeroutput>    val singleton : 'a -&gt; 'a t</computeroutput>
-<computeroutput>    val concat : 'a t -&gt; 'a t -&gt; 'a t</computeroutput>
-<computeroutput>    val to_list : 'a t -&gt; 'a list</computeroutput>
-<computeroutput>  end</computeroutput>
-<prompt># </prompt><userinput/>
-<userinput>identity Concat_list.empty;;</userinput>
+      <programlisting language="">???</programlisting>
+      <para>
+        Now, we can apply the identity function to
+        <literal>Concat_list.empty</literal> without without losing any
+        polymorphism.
+      </para>
+      <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>imperative-programming/value_restriction.topscript</filename> (part 14)</lineannotation>
+<prompt># </prompt><userinput>identity Concat_list.empty;;</userinput>
 <computeroutput>- : 'a Concat_list.t = &lt;abstr&gt;</computeroutput>
 </programlisting>
     </sect2>
+  </sect1>
+  <sect1 id="summary">
+    <title>Summary</title>
+    <para>
+      This chapter has covered quite a lot of ground, including:
+    </para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          Discussing the building blocks of mutable data-structures as
+          well as the basic imperative constructs like
+          <literal>for</literal> loops, <literal>while</literal> loops,
+          and the sequencing operator <literal>;</literal>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Walking through the implementation of a couple of classic
+          imperative data structures.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Discussing so-called benign effects like memoization and
+          laziness.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Covering OCaml's API for blocking I/O.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Discussing how language-level issues like order of evaluation
+          and weak polymorphism interact with OCaml's imperative
+          features.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <para>
+      The scope and sophistication of the material here is an indication
+      of the importance of OCaml's imperative features. The fact that
+      OCaml defaults to immutability shouldn't obscure the fact that
+      imperative programming is a fundamental part of building any
+      serious application, and that if you want to be an effective OCaml
+      programmer, you need to understand OCaml's approach to imperative
+      programming.
+    </para>
   </sect1>
 </chapter><chapter id="functors">
   <title>Functors</title>
@@ -11449,14 +11480,21 @@ val remember : '_a -&gt; '_a = &lt;fun&gt;</programlisting>
       </para>
     </listitem>
   </itemizedlist>
+  <para>
+    These are really just some of the uses that you can put functors to.
+    We'll make no attempt to provide examples of all of the uses of
+    functors here. Instead, this chapter will try to provide examples
+    that illuminate the language features and design patterns that you
+    need to master in order to use functors effectively.
+  </para>
   <sect1 id="a-trivial-example">
     <title>A trivial example</title>
     <para>
       Let's create a functor that takes a module containing a single
       integer variable <literal>x</literal>, and returns a new module
-      with <literal>x</literal> incremented by one. This is not actually
-      a useful example, but it's a good way to walk through the basic
-      mechanics of functors.
+      with <literal>x</literal> incremented by one. This is intended to
+      serve as a way to walk through the basic mechanics of functors,
+      even though it's not something you'd want to do in practice.
     </para>
     <para>
       First, let's define a signature for a module that contains a
@@ -11502,7 +11540,7 @@ val remember : '_a -&gt; '_a = &lt;fun&gt;</programlisting>
       signature <literal>X_int</literal>.
     </para>
     <para>
-      We can now use <literal>Increment</literal> to define new modules.
+      We can use <literal>Increment</literal> to define new modules.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>functors/main.topscript</filename> (part 3)</lineannotation>
 <prompt># </prompt><userinput>module Three = struct let x = 3 end;;</userinput>
@@ -11586,8 +11624,8 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
     <para>
       (This idiom is a bit of a historical error. It would be better if
       compare returned a variant with three cases for less than, greater
-      than and equal. But it's a well-established idiom at this point,
-      and unlikely to change.)
+      than and equal. But it's well-established at this point, and
+      unlikely to change.)
     </para>
     <para>
       The functor for creating the interval module is shown below. We
@@ -11701,7 +11739,8 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
       extended version of the <literal>Comparable</literal> signature
       described above. Such standardized signatures are good practice,
       both because they makes functors easier to use, and because they
-      make your codebase generally easier to navigate.
+      encourage standardization that makes your codebase easier to
+      navigate.
     </para>
     <para>
       Now we can use the newly defined <literal>Int_interval</literal>
@@ -11776,10 +11815,12 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
         abstract, we can bypass the <literal>create</literal> function.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>functors/main.topscript</filename> (part 13)</lineannotation>
-<prompt># </prompt><userinput>Int_interval.create 4 3       (* going through create *);;</userinput>
-<computeroutput>- : Int_interval.t = Int_interval.Empty</computeroutput>
-<prompt># </prompt><userinput>Int_interval.Interval (4,3)   (* bypassing create *);;</userinput>
-<computeroutput>- : Int_interval.t = Int_interval.Interval (4, 3)</computeroutput>
+<prompt># </prompt><userinput>Int_interval.is_empty (* going through create *)</userinput>
+<userinput>    (Int_interval.create 4 3) ;;</userinput>
+<computeroutput>- : bool = true</computeroutput>
+<prompt># </prompt><userinput>Int_interval.is_empty (* bypassing create *)</userinput>
+<userinput>    (Int_interval.Interval (4,3)) ;;</userinput>
+<computeroutput>- : bool = false</computeroutput>
 </programlisting>
       <para>
         To make <literal>Int_interval.t</literal> abstract, we need to
@@ -11936,13 +11977,20 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
         intervals.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>functors/main.topscript</filename> (part 19)</lineannotation>
+<prompt># </prompt><userinput>module Int_interval = Make_interval(Int);;</userinput>
+<computeroutput>module Int_interval :</computeroutput>
+<computeroutput>  sig</computeroutput>
+<computeroutput>    type t = Make_interval(Core.Std.Int).t</computeroutput>
+<computeroutput>    type endpoint = int</computeroutput>
+<computeroutput>    val create : endpoint -&gt; endpoint -&gt; t</computeroutput>
+<computeroutput>    val is_empty : t -&gt; bool</computeroutput>
+<computeroutput>    val contains : t -&gt; endpoint -&gt; bool</computeroutput>
+<computeroutput>    val intersect : t -&gt; t -&gt; t</computeroutput>
+<computeroutput>  end</computeroutput>
 <prompt># </prompt><userinput>let i = Int_interval.create 3 4;;</userinput>
-<computeroutput>Characters 28-29:</computeroutput>
-<computeroutput>Error: This expression has type int but an expression was expected of type</computeroutput>
-<computeroutput>         Int_interval.endpoint</computeroutput>
+<computeroutput>val i : Int_interval.t = &lt;abstr&gt;</computeroutput>
 <prompt># </prompt><userinput>Int_interval.contains i 5;;</userinput>
-<computeroutput>Characters 22-23:</computeroutput>
-<computeroutput>Error: Unbound value i</computeroutput>
+<computeroutput>- : bool = false</computeroutput>
 </programlisting>
     </sect2>
     <sect2 id="destructive-substitution">
@@ -12024,10 +12072,12 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
 <computeroutput>    val contains : t -&gt; int -&gt; bool</computeroutput>
 <computeroutput>    val intersect : t -&gt; t -&gt; t</computeroutput>
 <computeroutput>  end</computeroutput>
-<prompt># </prompt><userinput>Int_interval.create 3 4;;</userinput>
-<computeroutput>- : Int_interval.t = &lt;abstr&gt;</computeroutput>
-<prompt># </prompt><userinput>Int_interval.Interval (4,3);;</userinput>
-<computeroutput>Characters 13-21:</computeroutput>
+<prompt># </prompt><userinput>Int_interval.is_empty</userinput>
+<userinput>    (Int_interval.create 3 4);;</userinput>
+<computeroutput>- : bool = false</computeroutput>
+<prompt># </prompt><userinput>Int_interval.is_empty</userinput>
+<userinput>    (Int_interval.Interval (4,3));;</userinput>
+<computeroutput>Characters 40-48:</computeroutput>
 <computeroutput>Error: Unbound constructor Int_interval.Interval</computeroutput>
 </programlisting>
       <para>
@@ -12307,13 +12357,12 @@ val fold : 'a t -&gt; init:'acc -&gt; f:('acc -&gt; 'a -&gt; 'acc) -&gt; 'acc</p
       we'll see.
     </para>
     <para>
-      Now let's implement <literal>Fqueue</literal>. A standard trick is
-      for the <literal>Fqueue</literal> to maintain an input and an
-      output list, so that one can efficiently
-      <literal>enqueue</literal> on the input list and efficiently
-      dequeue from the output list. If you attempt to dequeue when the
-      output list is empty, the input list is reversed and becomes the
-      new output list. Here's an implementation that uses that trick.
+      We'll implement <literal>Fqueue</literal> using a standard trick
+      which is to maintain an input and an output list, so that one can
+      efficiently <literal>enqueue</literal> on the input list and
+      efficiently dequeue from the output list. If you attempt to
+      dequeue when the output list is empty, the input list is reversed
+      and becomes the new output list. Here's the implementation.
     </para>
     <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>functors/fqueue.ml</filename></lineannotation>
 open Core.Std
@@ -12339,14 +12388,14 @@ let fold (in_list, out_list) ~init ~f =
     <para>
       One problem with <literal>Fqueue</literal> is that the interface
       is quite skeletal. There are lots of useful helper functions that
-      one might want that aren't there. The list module, by way of
-      contrast, has functions like <literal>List.iter</literal>, which
-      runs a function on each element; and
-      <literal>List.for_all</literal>, which returns true if and only if
-      the given predicate evaluates to <literal>true</literal> on every
-      element of the list. Such helper functions come up for pretty much
-      every container type, and implementing them over and over is a
-      dull and repetitive affair.
+      one might want that aren't there. The <literal>List</literal>
+      module, by way of contrast, has functions like
+      <literal>List.iter</literal>, which runs a function on each
+      element; and <literal>List.for_all</literal>, which returns true
+      if and only if the given predicate evaluates to
+      <literal>true</literal> on every element of the list. Such helper
+      functions come up for pretty much every container type, and
+      implementing them over and over is a dull and repetitive affair.
     </para>
     <para>
       As it happens, many of these helper functions can be derived
@@ -12438,16 +12487,16 @@ include Foldable.Extend(Fqueue)</programlisting>
       </listitem>
       <listitem>
         <para>
-          <literal>Comparable.Make</literal>, which adds a variety of
-          helper functions and types for types that have a comparison
-          function.
+          <literal>Comparable.Make</literal>, which adds support for
+          functionality that depends on the presence of a comparison
+          function, including support for containers like maps and sets.
         </para>
       </listitem>
       <listitem>
         <para>
-          <literal>Hashable.Make</literal> for adding hash-based data
-          structures like hash sets and hash heaps for types that have
-          hash functions.
+          <literal>Hashable.Make</literal>, which adds support for
+          hashing-based data structures including hash tables, hash sets
+          and hash heaps.
         </para>
       </listitem>
       <listitem>
@@ -12847,10 +12896,10 @@ include Foldable.Extend(Fqueue)</programlisting>
 <userinput>    (** The name of the query-handling service *)</userinput>
 <userinput>    val name : string</userinput>
 <userinput/>
-<userinput>    (** The state o fthe query handler *)</userinput>
+<userinput>    (** The state of the query handler *)</userinput>
 <userinput>    type t</userinput>
 <userinput/>
-<userinput>    (** Create a new query handler from a config *)</userinput>
+<userinput>    (** Creates a new query handler from a config *)</userinput>
 <userinput>    val create : config -&gt; t</userinput>
 <userinput/>
 <userinput>    (** Evaluate a given query, where both input and output are</userinput>
@@ -12872,9 +12921,7 @@ include Foldable.Extend(Fqueue)</programlisting>
       In the above we use s-expressions as the format for queries and
       responses, as well for the config. S-expressions are a simple,
       flexible, and human-readable serialization format commonly used in
-      Core. We'll cover s-expressions in more detail in
-      <xref linkend="data-serialization-with-s-expressions"/>,
-      but for now, it's enough to think of them as balanced
+      Core. For now, it's enough to think of them as balanced
       parenthetical expressions whose atomic values are strings,
       <emphasis>e.g.</emphasis>,
       <literal>(this (is an) (s expression))</literal>.
@@ -12912,12 +12959,13 @@ include Foldable.Extend(Fqueue)</programlisting>
     <sect2 id="implementing-a-query-handler">
       <title>Implementing a query handler</title>
       <para>
-        Let's look at some examples of query handlers that satisfy this
-        interface. The following handler produces unique integer ids by
-        keeping an internal counter which it bumps every time it
-        produces a new value. The input to the query in this case is
-        just the trivial s-expression <literal>()</literal>, otherwise
-        known as <literal>Sexp.unit</literal>.
+        Let's look at some examples of query handlers that satisfy the
+        <literal>Query_handler</literal> interface. The first example is
+        a handler that produces unique integer ids. It works by keeping
+        an internal counter which it bumps every time it produces a new
+        value. The input to the query in this case is just the trivial
+        s-expression <literal>()</literal>, otherwise known as
+        <literal>Sexp.unit</literal>.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>fcm/query_handler.topscript</filename> (part 3)</lineannotation>
 <prompt># </prompt><userinput>module Unique = struct</userinput>
@@ -12948,7 +12996,8 @@ include Foldable.Extend(Fqueue)</programlisting>
 </programlisting>
       <para>
         We can use this module to create an instance of the
-        <literal>Unique</literal> query handler and interact with it.
+        <literal>Unique</literal> query handler and interact with it
+        directly.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>fcm/query_handler.topscript</filename> (part 4)</lineannotation>
 <prompt># </prompt><userinput>let unique = Unique.create 0;;</userinput>
@@ -13078,17 +13127,18 @@ include Foldable.Extend(Fqueue)</programlisting>
 <computeroutput>val list_dir_instance : (module Query_handler_instance) = &lt;module&gt;</computeroutput>
 </programlisting>
       <para>
-        The following code lets you dispatch queries to one of a list of
-        query handler instances. We assume that the shape of the query
-        is as follows:
+        We can now write code that lets you dispatch queries to one of a
+        list of query handler instances. We assume that the shape of the
+        query is as follows:
       </para>
       <programlisting language="scheme"><lineannotation>✎ S-expression: <filename>fcm/query-syntax.scm</filename></lineannotation>
 (query-name query)
 </programlisting>
       <para>
-        where <literal>query-name</literal> is the name used to
-        determine which query handler to dispatch the query to, and
-        <literal>query</literal> is the body of the query.
+        where <emphasis><literal>query-name</literal></emphasis> is the
+        name used to determine which query handler to dispatch the query
+        to, and <emphasis><literal>query</literal></emphasis> is the
+        body of the query.
       </para>
       <para>
         The first thing we'll need is a function that takes a list of
@@ -13138,15 +13188,15 @@ include Foldable.Extend(Fqueue)</programlisting>
         The bundling together of the module and the value is in many
         ways reminiscent of object-oriented languages. One key
         difference, is that first-class modules allow you to package up
-        more than just a functions or methods. As we've seen, you can
-        also include types and even modules. We've only used it in a
-        small way here, but this extra power allows you to build more
+        more than just functions or methods. As we've seen, you can also
+        include types and even modules. We've only used it in a small
+        way here, but this extra power allows you to build more
         sophisticated components that involve multiple interdependent
         types and values.
       </para>
       <para>
-        Now let's turn this into a complete, running example, by adding
-        a command-line interface, as shown below.
+        Now let's turn this into a complete, running example by adding a
+        command-line interface.
       </para>
       <programlisting language="ocaml"><lineannotation>✎ OCaml UTop: <filename>fcm/query_handler.topscript</filename> (part 13)</lineannotation>
 <prompt># </prompt><userinput>let rec cli dispatch_table =</userinput>
@@ -13223,7 +13273,7 @@ module Loader = struct
 
   let name = &quot;loader&quot;</programlisting>
       <para>
-        Note that a <literal>Loader.t</literal> has two hash tables: one
+        Note that a <literal>Loader.t</literal> has two tables: one
         containing the known query handler modules, and one containing
         the active query handler instances. The
         <literal>Loader.t</literal> will be responsible for creating new
@@ -13369,7 +13419,7 @@ let () =
 <computeroutput>(loader)</computeroutput>
 </programlisting>
       <para>
-        If we try to use one of the inactive queries, it will fail.
+        Any attempt to use an inactive query handler will fail.
       </para>
       <programlisting language="console"><lineannotation>✎ Terminal: <filename>fcm/loader_cli2.out</filename></lineannotation>
 <computeroutput>&gt;&gt;&gt; (ls .)</computeroutput>
@@ -13393,8 +13443,8 @@ let () =
 <computeroutput>Could not find matching handler: ls</computeroutput>
 </programlisting>
       <para>
-        Notably, the loader can't be itself loaded (since it's not on
-        the list of known handlers), and can't be unloaded.
+        Notably, the loader can't be loaded (since it's not on the list
+        of known handlers), and can't be unloaded either.
       </para>
       <programlisting language="console"><lineannotation>✎ Terminal: <filename>fcm/loader_cli4.out</filename></lineannotation>
 <computeroutput>&gt;&gt;&gt; (loader (unload loader))</computeroutput>
@@ -15861,10 +15911,13 @@ let () = never_returns (Scheduler.go_main ~main ())</programlisting>
 
     </sect2>
   </sect1>
-</chapter></part><part label="II"><title>Tools and Techniques</title><partintro><para>Part II builds on the basics by working through useful tools and techniques for using OCaml. 
-     Here you'll pick up useful techniques for building networked systems, as well as functional 
-     design patterns that help combine different features of the language to good effect.</para><para>The focus throughout this section is on networked systems, and among other examples we'll 
-      build a running example that will perform Internet queries using the DuckDuckGo search engine.</para></partintro><chapter id="maps-and-hash-tables">
+</chapter></part><part label="II"><title>Tools and Techniques</title><partintro><para>Part II builds on the basics by working through higher-level tools and
+     techniques for using OCaml effectively.  Here you'll learn about useful
+     libraries for building command-line interfaces and networked applications,
+     as well as functional design patterns that help combine different features
+     of the language to good effect.</para><para>The focus throughout this section is on networked systems, and among other
+     examples we'll build a simple tool that will perform Internet queries using
+     the DuckDuckGo search engine.</para></partintro><chapter id="maps-and-hash-tables">
   <title>Maps and Hash Tables</title>
   <para>
     Lots of programming problems require dealing with data organized as
@@ -16061,8 +16114,8 @@ let touch t s =
 </programlisting>
       <para>
         This constraint is important because the algorithm that
-        <literal>Map.symmetric_diff</literal> uses depends on the fact
-        that both maps have the same comparator.
+        <literal>Map.symmetric_diff</literal> uses depends for its
+        correctness on the fact that both maps have the same comparator.
       </para>
       <para>
         We can create a new comparator using the
@@ -16115,7 +16168,7 @@ let touch t s =
 <computeroutput>- : (string * int) option = Some (&quot;snoo&quot;, 3)</computeroutput>
 </programlisting>
       <para>
-        And accordingly, if we try to use
+        Accordingly, if we try to use
         <literal>Map.symmetric_diff</literal> on these two maps, we'll
         get a compile-timer error.
       </para>
@@ -16136,8 +16189,8 @@ let touch t s =
         reasons, you want a version of the map data structure that
         doesn't include the comparator. You can get such a
         representation with <literal>Map.to_tree</literal>, which
-        returns just the tree that the map is built out of, and not
-        including the comparator.
+        returns just the tree underlying the map, without the
+        comparator.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>maps-and-hash-tables/main.topscript</filename> (part 11)</lineannotation>
 <prompt># </prompt><userinput>let ord_tree = Map.to_tree ord_map;;</userinput>
@@ -16146,11 +16199,11 @@ let touch t s =
       <para>
         Even though a <literal>Map.Tree.t</literal> doesn't physically
         include a comparator, it does include the comparator in its
-        type. This is what is known as a <emphasis>phantom type
-        parameter</emphasis>, because it reflects something about the
-        logic of the value in question, even though it doesn't
-        correspond to any values directly represented in the underlying
-        physical structure of the value.
+        type. This is what is known as a <emphasis>phantom
+        type</emphasis>, because it reflects something about the logic
+        of the value in question, even though it doesn't correspond to
+        any values directly represented in the underlying physical
+        structure of the value.
       </para>
       <para>
         Since the comparator isn't included in the tree, we need to
@@ -16247,7 +16300,7 @@ let touch t s =
         field within the same structure), the <literal>=</literal>
         operator will never terminate, and your program will hang! You
         therefore must use the physical equality operator or write a
-        custom comparison function when comparing recursive values.
+        custom comparison function when comparing cyclic values.
       </para>
       <para>
         It's quite easy to mix up the use of <literal>=</literal> and
@@ -16395,10 +16448,6 @@ and t2 = { foo2 : int; bar2 : t1; }</computeroutput>
         consistent order, then they will work as expected, but once the
         order changes, the behavior will change.
       </para>
-      <para>
-        For this reason, it's preferable to avoid polymorphic compare
-        for serious applications.
-      </para>
       </warning>
     </sect2>
     <sect2 id="satisfying-the-comparable.s-interface">
@@ -16420,9 +16469,9 @@ and t2 = { foo2 : int; bar2 : t1; }</computeroutput>
       </para>
       <para>
         The module <literal>Comparable</literal> contains a number of
-        functors to help you do just this. The simplest one of these is
-        <literal>Comparable.Make</literal>, which takes as an input any
-        module that satisfies the following interface:
+        functors to help you automate this task. The simplest one of
+        these is <literal>Comparable.Make</literal>, which takes as an
+        input any module that satisfies the following interface:
       </para>
       <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>maps-and-hash-tables/comparable.ml</filename></lineannotation>
 module type Comparable = sig
@@ -16712,8 +16761,8 @@ end
         Most types in Core satisfy the <literal>Hashable.S</literal>
         interface, but as with the <literal>Comparable.S</literal>
         interface, the question remains of how one should satisfy this
-        interface with a new type. Again, the answer is to use a functor
-        to build the necessary functionality; in this case,
+        interface when writing a new module. Again, the answer is to use
+        a functor to build the necessary functionality; in this case,
         <literal>Hashable.Make</literal>. Note that we use OCaml's
         <literal>lxor</literal> operator for doing the
         &quot;logical&quot; (<emphasis>i.e.</emphasis>, bit-wise)
@@ -16848,21 +16897,20 @@ let () =
       Hash tables are not always the faster choice, though. In
       particular, maps are often more performant in situations where you
       need to keep multiple related versions of the data structure in
-      memory at once. In particular, if you create map
-      <literal>m'</literal> by calling <literal>Map.add</literal> on
-      some other map <literal>m</literal>, then <literal>m</literal> and
-      <literal>m'</literal> can be used independently, and in fact share
-      most of their underlying storage. Thus, if you need to keep in
-      memory at the same time multiple different related collections of
-      key/value pairs, then a map is typically a much more efficient
-      data structure to do it with.
+      memory at once. That's because maps are immutable, and so
+      operations like <literal>Map.add</literal> that modify a map do so
+      by creating a new map, leaving the original undisturbed. Moreover,
+      the new and old map share most of their physical structure, so
+      multiple versions can be kept around efficiently.
     </para>
     <para>
       Here's a benchmark that demonstrates this. In it, we create a list
       of maps (or hash tables) that are built up by iteratively applying
-      updates, starting from an empty map. In the hash table
-      implementation, we do this by calling
-      <literal>Hashtbl.copy</literal> to get the list entries.
+      small updates, keeping these copies around. In the map case, this
+      is done by using <literal>Map.change</literal> to update the map.
+      In the hash table implementation, the updates are done using
+      <literal>Hashtbl.change</literal>, but we also need to call
+      <literal>Hashtbl.copy</literal> to take snapshots of the table.
     </para>
     <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>maps-and-hash-tables/map_vs_hash2.ml</filename></lineannotation>
 open Core.Std
@@ -16954,7 +17002,7 @@ let () =
     </listitem>
     <listitem>
       <para>
-        Interactive auto-completion of commands to assist the user.
+        Interactive auto-completion.
       </para>
     </listitem>
   </itemizedlist>
@@ -16962,8 +17010,8 @@ let () =
     It's tedious and error-prone to code all this manually for every
     program you write. Core provides the Command library that simplifies
     all of this by letting you declare all your command-line options in
-    one place, and deriving all of the above functionality from that
-    declaration.
+    one place, and deriving all of the above functionality from these
+    declarations.
   </para>
   <para>
     Command is simple to use for simple applications, but also also
@@ -18503,20 +18551,20 @@ let () = Command.run add</programlisting>
   <itemizedlist>
     <listitem>
       <para>
-        <emphasis>polymorphic variants</emphasis> to write more
+        <emphasis>Polymorphic variants</emphasis> to write more
         extensible libraries and protocols (but still retain the ability
-        to extend them if needed)
+        to extend them if needed).
       </para>
     </listitem>
     <listitem>
       <para>
-        <emphasis>functional combinators</emphasis> to compose common
+        <emphasis>Functional combinators</emphasis> to compose common
         operations over data structures in a type-safe way.
       </para>
     </listitem>
     <listitem>
       <para>
-        external tools to generate boilerplate OCaml modules and
+        External tools to generate boilerplate OCaml modules and
         signatures from external specification files.
       </para>
     </listitem>
@@ -18628,21 +18676,20 @@ type json = [
     <itemizedlist>
       <listitem>
         <para>
-          Some of the type definitions are
-          <emphasis>recursive</emphasis> (that is, one of the algebraic
-          data types includes a reference to the name of the type being
-          defined). <literal>Assoc</literal> types can contain
-          references to further JSON values and the
-          <literal>List</literal> type can contain JSON values of
-          different types, unlike the OCaml <literal>list</literal>
-          whose contents must be of a uniform type.
+          The <literal>json</literal> type is
+          <emphasis>recursive</emphasis>, which is to say that some of
+          the tags refer back to the overall <literal>json</literal>
+          type. In particular, <literal>Assoc</literal> and
+          <literal>List</literal> types can contain references to
+          further JSON values of different types. This is unlike the
+          OCaml lists, whose contents must be of a uniform type.
         </para>
       </listitem>
       <listitem>
         <para>
           The definition specifically includes a <literal>Null</literal>
           variant for empty fields. OCaml doesn't allow null values by
-          default, so this must be encoded like any other value.
+          default, so this must be encoded explicitly.
         </para>
       </listitem>
       <listitem>
@@ -18680,10 +18727,10 @@ val from_channel : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt;
     <para>
       When first reading these interfaces, you can generally ignore the
       optional arguments (which have the question marks in the type
-      signature), as they will be filled in with sensible values. In the
-      above signature, the optional arguments offer finer control over
-      the memory buffer allocation and error messages from parsing
-      incorrect JSON.
+      signature), since they should have sensible defaults. In the above
+      signature, the optional arguments offer finer control over the
+      memory buffer allocation and error messages from parsing incorrect
+      JSON.
     </para>
     <para>
       The type signature for these functions with the optional elements
@@ -18761,7 +18808,7 @@ let () =
   printf &quot;Tags: %s\n&quot; (String.concat ~sep:&quot;, &quot; tags);
   let string_of_bool_option =
     function
-    | None -&gt; &quot;&lt;none&gt;&quot;
+    | None -&gt; &quot;&lt;unknown&gt;&quot;
     | Some true -&gt; &quot;yes&quot;
     | Some false -&gt; &quot;no&quot; in
   printf &quot;Online: %s\n&quot; (string_of_bool_option is_online);
@@ -18818,15 +18865,16 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
 val iter : 'a list -&gt; f:('a -&gt; unit) -&gt; unit</programlisting>
     <para>
       <literal>iter</literal> is a more specialized combinator that is
-      only useful in OCaml due to side-effects being allowed. The input
-      function is applied to every value, but no result is supplied. The
-      function must instead apply some side-effect such as changing a
-      mutable record field or printing to the standard output.
+      only useful when writing imperative code. The input function is
+      applied to every value, but no result is supplied. The function
+      must instead apply some side-effect such as changing a mutable
+      record field or printing to the standard output.
     </para>
     </sidebar>
     <para>
       <literal>Yojson</literal> provides several combinators in the
-      <literal>Yojson.Basic.Util</literal> module.
+      <literal>Yojson.Basic.Util</literal> module, some of which are
+      listed below.
     </para>
     <informaltable>
       <tgroup cols="3">
@@ -18901,7 +18949,7 @@ val iter : 'a list -&gt; f:('a -&gt; unit) -&gt; unit</programlisting>
     <para>
       We'll go through each of these uses one-by-one now. The examples
       below also use the <literal>|&gt;</literal> pipe-forward operator
-      that we explained earlier in
+      that we explained in
       <xref linkend="variables-and-functions"/>. This lets us
       chain together multiple JSON selection functions and feed the
       output from one into the next one, without having to create
@@ -19085,10 +19133,9 @@ type json = [
     </title>
     <para>
       One difficulty you will encounter is that type errors involving
-      polymorphic variants can be quite verbose if you make a mistake in
-      your code. For example, suppose you build an
-      <literal>Assoc</literal> and mistakenly include a single value
-      instead of a list of keys:
+      polymorphic variants can be quite verbose. For example, suppose
+      you build an <literal>Assoc</literal> and mistakenly include a
+      single value instead of a list of keys:
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>json/build_json.topscript</filename> (part 4)</lineannotation>
 <prompt># </prompt><userinput>let person = `Assoc (&quot;name&quot;, `String &quot;Anil&quot;);;</userinput>
@@ -19120,11 +19167,10 @@ type json = [
       <literal>Yojson.Basic.json</literal>, and as a result the compiler
       spots that the argument to the <literal>Assoc</literal> variant
       has the incorrect type. This illustrates the strengths and
-      weaknesses of polymorphic variants: they make it possible to
-      easily subtype across module boundaries, but the error messages
-      can be more confusing. However, a bit of careful manual type
-      annotation is all it takes to make tracking down such issues much
-      easier.
+      weaknesses of polymorphic variants: they're lightweight and
+      flexible, but the error messages can be quite confusing. However,
+      a bit of careful manual type annotation makes tracking down such
+      issues much easier.
     </para>
     <para>
       We'll discuss more techniques like this that help you interpret
@@ -23352,11 +23398,12 @@ let get_definition_with_timeout ~server ~timeout word =
       complex use-case that is beyond the scope of this chapter.
     </para>
   </sect1>
-</chapter></part><part label="III"><title>The Runtime System</title><partintro><para>Part III is all about understanding the compiler toolchain and runtime system in OCaml.  
-     It's a remarkably simple system in comparison to other language runtimes (such as Java or 
-     the .NET CLR).</para><para>You'll need to read this to build very high performance systems that have to minimise 
-      resource usage or interface to C libraries. This is also where we talk about profiling and 
-      debugging techniques using tools such as GNU gdb.</para></partintro><chapter id="foreign-function-interface">
+</chapter></part><part label="III"><title>The Runtime System</title><partintro><para>Part III is all about understanding the compiler toolchain and runtime
+     system in OCaml.  It's a remarkably simple system in comparison to other
+     language runtimes (such as Java or the .NET CLR).</para><para>You'll need to read this to build very high performance systems that have
+     to minimise resource usage or interface to C libraries. This is also where
+     we talk about profiling and debugging techniques using tools such as GNU
+     gdb.</para></partintro><chapter id="foreign-function-interface">
   <title>Foreign Function Interface</title>
   <para>
     OCaml has several options available to interact with non-OCaml code.
