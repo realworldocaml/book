@@ -1403,8 +1403,8 @@ without losing any polymorphism.
 This chapter has covered quite a lot of ground, including:
 
 - Discussing the building blocks of mutable data-structures as well as
-  the basic imperative constructs like for loops, while loops, and the
-  sequening operator `;`.
+  the basic imperative constructs like `for` loops, `while` loops, and
+  the sequening operator `;`.
 - Walking through the implementation of a couple of classic imperative
   data structures.
 - Discussing so-called benign effects like memoization and laziness.
@@ -1412,9 +1412,9 @@ This chapter has covered quite a lot of ground, including:
 - Discussing how language-level issues like order of evaluation and
   weak polymorphism interact with OCaml's imperative features.
 
-Despite the fact that OCaml is a functional language, we can see from
-the scope and sophistication of the material here that that imperative
-programming is a rich and important part of the language.  Despite the
-fact that OCaml is functional by default, imperative programming is a
-first-class part of the language, and something that you need to
-understand well to build any serious application.
+The scope and sophistication of the material here is an indication of
+the importance of OCaml's imperative features.  The fact that OCaml
+defaults to immutability shouldn't obscure the fact that imperative
+programming is a fundamental part of building any serious application,
+and that if you want to be an effective OCaml programmer, you need to
+understand OCaml's approach to imperative programming.
