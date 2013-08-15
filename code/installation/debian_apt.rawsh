@@ -1,0 +1,3 @@
+# apt-get install \
+  ocaml ocaml-native-compilers camlp4-extra \
+  git libpcre3-dev curl build-essential m4

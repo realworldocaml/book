@@ -1,0 +1,2 @@
+$ sudo port install ocaml
+$ sudo port install ocaml-pcre
