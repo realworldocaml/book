@@ -1,2 +1,3 @@
+$ corebuild time_converter.byte
 $ ./time_converter.byte
 Pick a timezone:

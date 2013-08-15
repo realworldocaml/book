@@ -8,9 +8,9 @@ let () =
   | None -> failwith "No timezone provided"
   | Some zone_string ->
     let zone = Zone.find_exn zone_string in
-    let time_string = Time.to_localized_string (Time.now ()) zone in
+    let time_string = Time.to_string_abs (Time.now ()) ~zone in
     Out_channel.output_string stdout
       (String.concat
-         ["The time in ";Zone.to_string zone;" is "; time_string;"\n"]);
+         ["The time in ";Zone.to_string zone;" is ";time_string;".\n"]);
     Out_channel.flush stdout
 

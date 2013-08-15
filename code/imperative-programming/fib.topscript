@@ -30,14 +30,14 @@ let fib_norec fib i =
     else fib (i - 1) + fib (i - 2) ;;
 #part 5
 let rec fib i = fib_norec fib i;;
-fib 5;;
+fib 20;;
 #part 6
 let make_rec f_norec =
     let rec f x = f_norec f x in
     f
   ;;
 let fib = make_rec fib_norec;;
-fib 5;;
+fib 20;;
 #part 7
 let memo_rec f_norec x =
     let fref = ref (fun _ -> assert false) in
