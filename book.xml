@@ -22337,7 +22337,7 @@ let () =
       </listitem>
       <listitem>
         <para>
-          <literal>uri</literal>, a library for handling URI's, or
+          <literal>uri</literal>, a library for handling URIs, or
           &quot;Uniform Resource Identifiers&quot;, of which HTTP URL's
           are an example.
         </para>
@@ -22371,7 +22371,7 @@ let () =
         much of the hassle.
       </para>
       <para>
-        We'll need a function for generating the URI's that we're going
+        We'll need a function for generating the URIs that we're going
         to use to query the DuckDuckGo servers.
       </para>
       <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>async/search.ml</filename></lineannotation>
@@ -24774,36 +24774,112 @@ val sort_stdin : unit -&gt; unit</programlisting>
       This chapter hasn't really needed you to understand the innards of
       OCaml at all. Ctypes does its best to make function bindings easy,
       but the rest of this part will also fill you in about how
-      interactions with OCaml memory layout and the garbage collector
-      work.
+      interactions with OCaml memory layout in
+      <xref linkend="memory-representation-of-values"/> and
+      automatic memory management in
+      <xref linkend="understanding-the-garbage-collector"/>.
     </para>
     <para>
       Ctypes gives OCaml programs access to the C representation of
       values, shielding you from the details of the OCaml value
-      representation, and introducing an abstraction layer that hides
-      the details of foreign calls. While this covers a wide variety of
+      representation, and introduces an abstraction layer that hides the
+      details of foreign calls. While this covers a wide variety of
       situations, it's sometimes necessary to look behind the
       abstraction to obtain finer control over the details of the
-      interaction between the two languages. The standard OCaml foreign
-      function interface allows you to glue OCaml and C together from
-      the other side of the boundary, by writing C functions that
-      operate on the OCaml representation of values. You can find
-      details of the standard interface in the
-      <ulink url="http://caml.inria.fr/pub/docs/manual-ocaml-4.00/manual033.html">online
-      OCaml manual</ulink> and in the book
-      <ulink url="http://caml.inria.fr/pub/docs/oreilly-book/ocaml-ora-book.pdf‎">Developing
-      Applications with Objective Caml</ulink> by Chailloux, Manoury and
-      Pagano.
+      interaction between the two languages.
     </para>
-    <note>
-    <title>
-    Production note
-    </title>
     <para>
-      This chapter contains significant contributions from Jeremy
-      Yallop.
+      You can find more information about the C interface in several
+      places.
     </para>
-    </note>
+    <itemizedlist>
+      <listitem>
+        <para>
+          The standard OCaml foreign function interface allows you to
+          glue OCaml and C together from the other side of the boundary,
+          by writing C functions that operate on the OCaml
+          representation of values. You can find details of the standard
+          interface in the
+          <ulink url="http://caml.inria.fr/pub/docs/manual-ocaml-4.00/manual033.html">OCaml
+          manual</ulink> and in the book
+          <ulink url="http://caml.inria.fr/pub/docs/oreilly-book/ocaml-ora-book.pdf">Developing
+          Applications with Objective Caml</ulink>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Florent Monnier maintains an excellent online
+          <ulink url="http://www.linux-nantes.org/~fmonnier/ocaml/ocaml-wrapping-c.php">reference</ulink>
+          that provides examples of how to call OCaml functions from C.
+          This covers a wide variety of OCaml data types and also more
+          complex callbacks between C and OCaml.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <ulink url="http://www.swig.org">SWIG</ulink> is a tool that
+          connects programs written in C/C++ to a variety of
+          higher-level programming languages, including OCaml. The SWIG
+          manual has examples of converting library specifications into
+          OCaml bindings.
+        </para>
+      </listitem>
+    </itemizedlist>
+    <sect2 id="struct-memory-layout">
+      <title>Struct memory layout</title>
+      <para>
+        The C language gives implementations a certain amount of freedom
+        in choosing how to lay out structs in memory. There may be
+        padding between members and at the end of the struct, in order
+        to satisfy the memory alignment requirements of the host
+        platform. Ctypes uses platform-appropriate size and alignment
+        information to replicate the struct layout process. OCaml and C
+        will have consistent views abotu the layout of the struct as
+        long as you declare the fields of a struct in the same order and
+        with the same types as the C library you're binding to.
+      </para>
+      <para>
+        However, this approach can lead to difficulties when the fields
+        of a struct aren't fully specified in the interface of a
+        library. The interface may list the fields of a structure
+        without specifying their order, or make certain fields available
+        only on certain platforms, or insert undocumented fields into
+        struct definitions for performance reasons. For example, the
+        <literal>struct timeval</literal> definition used in this
+        chapter accurately describes the layout of the struct on common
+        platforms but implementations on some more unusual architectures
+        include additional padding members that will lead to strange
+        behaviour in the examples.
+      </para>
+      <para>
+        The Cstubs subpackage of Ctypes addresses this issue. Rather
+        than simply assuming that struct definitions given by the user
+        accurately reflect the actual definitions of structs used in C
+        libraries, Cstubs generates code that uses the C library headers
+        to discover the layout of the struct. The good news is that the
+        code that you write doesn't need to change much. Cstubs provides
+        alternative implementations of the <literal>field</literal> and
+        <literal>seal</literal> functions that you've already used to
+        describe <literal>struct timeval</literal>; instead of computing
+        member offsets and sizes appropriate for the platform, these
+        implementations obtain them directly from C.
+      </para>
+      <para>
+        The details of using Cstubs are available in the online
+        <ulink url="https://ocamllabs.github.io/ocaml-ctypes">documentation</ulink>,
+        along with instructions on integration with
+        <command>autoconf</command> platform portability instructions.
+      </para>
+      <note>
+      <title>
+      Production note
+      </title>
+      <para>
+        This chapter contains significant contributions from Jeremy
+        Yallop.
+      </para>
+      </note>
+    </sect2>
   </sect1>
 </chapter><chapter id="memory-representation-of-values">
   <title>Memory Representation of Values</title>
