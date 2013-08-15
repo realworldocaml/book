@@ -186,7 +186,7 @@ rewrite `count_lines` again a bit more succinctly:
 ((typ ocamltop)(name async/main.topscript)(part 14))
 ```
 
-Note that `count_lines` returns a deferred, but `utop` waits for that
+Note that `count_lines` returns a deferred, but <command>utop</command> waits for that
 deferred to become determined, and shows us the contents of the
 deferred instead.
 

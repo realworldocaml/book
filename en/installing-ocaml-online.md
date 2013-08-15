@@ -328,31 +328,31 @@ spartan experience and so we use a more modern alternative.
 ((typ console)(name installation/opam_install_utop.out))
 ```
 
-The `utop` package is an interactive command-line interface to OCaml
+The <command>utop</command> package is an interactive command-line interface to OCaml
 that has tab-completion, persistent history and integration with Emacs
 so that you can run it within your editing environment.
 
 Remember from earlier that OPAM never installs files directly into your system
-directories, and this applies to `utop` too.  You'll find the binary in
-`~/.opam/4.01.0dev+trunk/bin`.  However, typing in `utop` from your shell
+directories, and this applies to <command>utop</command> too.  You'll find the binary in
+`~/.opam/4.01.0dev+trunk/bin`.  However, typing in <command>utop</command> from your shell
 should just work, due to the `opam config env` step that configures your shell.
 Don't forget to automate this as described earlier as it makes life much
 easier when developing OCaml code!
 
 ### Command Line
 
-The `utop` tool provides a convenient interactive toplevel, with full
+The <command>utop</command> tool provides a convenient interactive toplevel, with full
 command history, command macros and module name completion.  When you
-first run `utop`, you'll find yourself at an interactive prompt with
+first run <command>utop</command>, you'll find yourself at an interactive prompt with
 a bar at the bottom of the screen.  The bottom bar dynamically updates as you
 write text, and contains the possible names of modules or variables
 that are valid at that point in the phrase you are entering.  You can
 press the `<tab>` key to complete the phrase with the first choice. 
 
-The `~/.ocamlinit` file in your home directory initialises `utop` with
+The `~/.ocamlinit` file in your home directory initialises <command>utop</command> with
 common libraries and syntax extensions so you don't need to type them
 in every time.  Now that you have Core installed, you should update it
-to load it every time you start `utop`, by adding this to it:
+to load it every time you start <command>utop</command>, by adding this to it:
 
 ```frag
 ((typ console)(name installation/show_ocamlinit.out))
@@ -367,7 +367,7 @@ line to the `.ocamlinit` file.
 ((typ ocaml)(name installation/open_core.ml))
 ```
 
-When you run `utop` with these initialization rules, it should start up with
+When you run <command>utop</command> with these initialization rules, it should start up with
 Core opened and ready to use.  If you don't open `Core.Std` by default, then
 you must remember to open it before running any of the interactive examples in
 the book.
@@ -387,19 +387,19 @@ with a pointer or direct instructions.
 
 Emacs users have tuareg and [Typerex](http://www.typerex.org/).
 
-To use `utop` directly in Emacs, add the following line to your `~/.emacs` file:
+To use <command>utop</command> directly in Emacs, add the following line to your `~/.emacs` file:
 
 ```frag
 ((typ scheme)(name installation/emacsrc.scm))
 ```
 
 You also need to make the `utop.el` file available to your Emacs installation.
-The OPAM version of `utop` installs it into the `~/.opam` hierarchy, for
+The OPAM version of <command>utop</command> installs it into the `~/.opam` hierarchy, for
 example in `~/.opam/system/share/emacs/site-lisp/utop.el`. You may need to
 replace `system` with your current compiler switch, such as `4.01.0dev+trunk`.
 
 Once this successfully loads in Emacs, you can run utop by executing the
-command `utop` in Emacs.  There are more details instructions at the 
+command <command>utop</command> in Emacs.  There are more details instructions at the 
 [utop homepage](https://github.com/diml/utop#integration-with-emacs).
 
 #### Vim

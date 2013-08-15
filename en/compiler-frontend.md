@@ -317,7 +317,7 @@ transformation in action.  We'll show you how to do both of these now.
 
 ### Using Camlp4 interactively
 
-The `utop` top-level can run the phrases that you type through `camlp4`
+The <command>utop</command> top-level can run the phrases that you type through `camlp4`
 automatically. You should have at least these lines in your `~/.ocamlinit` file
 in your home directory (see [xref](#installation) for more information).
 
@@ -328,7 +328,7 @@ in your home directory (see [xref](#installation) for more information).
 The first directive loads the <command>ocamlfind</command> top-level interface that lets you
 require <command>ocamlfind</command> packages (including all their dependent packages).  The
 second directive instructs the top-level to filter all phrases via Camlp4.  You
-can now run `utop` and load the syntax extensions in.  We'll use the
+can now run <command>utop</command> and load the syntax extensions in.  We'll use the
 `comparelib` syntax extension for our experiments.
 
 OCaml provides a built-in polymorphic comparison operator that inspects the
@@ -338,7 +338,7 @@ than defining explicit comparison functions between values. However, it quickly
 become tedious to manually define comparison functions for complex type
 definitions.
 
-Let's see how `comparelib` solves this problem by running it in `utop`.
+Let's see how `comparelib` solves this problem by running it in <command>utop</command>.
 
 ```frag
 ((typ ocamltop)(name front-end/camlp4_toplevel.topscript)(part 1))
@@ -353,7 +353,7 @@ definition with two new functions also included.
 
 The top-level is a quick way to examine the signatures generated from the
 extensions, but how can we see what these new functions actually do?  You can't
-do this from `utop` directly since it embeds the Camlp4 invocation as an
+do this from <command>utop</command> directly since it embeds the Camlp4 invocation as an
 automated part of its operation.
 
 Let's turn to the command-line to obtain the result of the `comparelib`
@@ -935,7 +935,7 @@ module which provides a single module that needs to be opened to import
 the replacement modules and functions.
 
 There's one downside to this approach: type errors suddenly get much more
-verbose.  We can see this if you run the vanilla OCaml top-level (not `utop`).
+verbose.  We can see this if you run the vanilla OCaml top-level (not <command>utop</command>).
 
 ```frag
 ((typ console)(name front-end/short_paths_1.out))
@@ -961,7 +961,7 @@ by passing `-short-paths` to the compiler, and works on the top-level too.
 ((typ console)(name front-end/short_paths_3.out))
 ```
 
-The `utop` enhanced top-level activates short paths by default, which is why
+The <command>utop</command> enhanced top-level activates short paths by default, which is why
 you've not had to do this before in our interactive examples.  However, the
 compiler doesn't default to the short path heuristic since there are some
 situations where the type aliasing information is useful to know, and would be
