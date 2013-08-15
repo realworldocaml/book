@@ -317,7 +317,7 @@ transformation in action.  We'll show you how to do both of these now.
 
 ### Using Camlp4 interactively
 
-The <command>utop</command> top-level can run the phrases that you type through `camlp4`
+The <command>utop</command> top-level can run the phrases that you type through <command>camlp4</command>
 automatically. You should have at least these lines in your `~/.ocamlinit` file
 in your home directory (see [xref](#installation) for more information).
 

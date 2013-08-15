@@ -188,13 +188,13 @@ structure: they autogenerate code based on type definitions,
 implementing functionality that you could in theory have implemented
 by hand, but with far less programmer effort.
 
-<note> <title>Syntax extensions, `camlp4` and `type_conv`</title>
+<note> <title>Syntax extensions, Camlp4 and Type_conv</title>
 
 OCaml doesn't directly support generating code from type definitions.
 Instead, it supplies a powerful syntax extension mechanism known as
-`camlp4`, which lets you extend the grammar of the language.  In the
-case of Sexplib, <command>camlp4</command> is used to create s-expression conversion
-functions.  <command>camlp4</command> is well integrated into the OCaml toolchain, and
+Camlp4, which lets you extend the grammar of the language.  In the
+case of Sexplib, Camlp4 is used to create s-expression conversion
+functions. Camlp4 is well integrated into the OCaml toolchain, and
 can be activated within the toplevel and also included in compilation
 using the `-pp` compiler flag.
 
@@ -217,7 +217,7 @@ parenthetical expression, with whitespace-separated strings as the
 atoms.  Quotes are used for atoms that contain parentheses or spaces
 themselves; backslash is the escape character; and semicolons are used
 to introduce single-line comments.  Thus, the following file,
-`example.scm`:
+<filename>example.scm</filename>:
 
 ```frag
 ((typ scheme)(name sexpr/example.scm))
