@@ -147,11 +147,11 @@ the Platform, which is a set of tools and libraries that, along with
 the OCaml compiler, let you build real-world applications quickly and
 effectively.
 
-We'll also use OPAM for installing the `utop` command-line interface.
-This is a modern interactive tool that supports command history, macro
-expansion, module completion, and other niceties that make it much
-more pleasant to work with the language.  We'll be using `utop`
-throughout the book instead of the normal OCaml toplevel.
+We'll also use OPAM for installing the `utop` command-line interface.  This is
+a modern interactive tool that supports command history, macro expansion,
+module completion, and other niceties that make it much more pleasant to work
+with the language.  We'll be using `utop` throughout the book to let you step
+through worked examples interactively.
 
 ## About this book
 
