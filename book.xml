@@ -223,7 +223,7 @@
         decade, developed Core for its own internal use, but designed it
         from the start with an eye towards being a general-purpose
         standard library. Like the OCaml language itself, Core is
-        engineered with correctness, reliability and performance in
+        engineered with correctness, reliability, and performance in
         mind.
       </para>
       <para>
@@ -232,7 +232,7 @@
         such as the Async network communications library that extend the
         reach of Core into building complex distributed systems. All of
         these libraries are distributed under a liberal Apache 2 license
-        to permit free use in hobby, academic and commercial settings.
+        to permit free use in hobby, academic, and commercial settings.
       </para>
     </sect2>
     <sect2 id="the-ocaml-platform">
@@ -259,7 +259,7 @@
         supports command history, macro expansion, module completion,
         and other niceties that make it much more pleasant to work with
         the language. We'll be using <literal>utop</literal> throughout
-        the book instead of the normal OCaml toplevel.
+        the book to let you step through worked examples interactively.
       </para>
     </sect2>
   </sect1>
@@ -276,16 +276,22 @@
     </para>
     <para>
       If you already know OCaml, this book may surprise you. Core
-      redefines most of the standard modules to be much more consistent,
-      so you'll need to adapt older code to work with Core. We believe
-      the Core model is worth learning; it's been successfully used on
-      large, multi-million-line codebases and removes a big barrier to
-      building sophisticated applications in OCaml. Code that uses only
-      the traditional compiler standard library will always exist, but
-      there are other online resources to learn how that works. Real
-      World OCaml focuses on the techniques the authors have used in
-      their personal experience to construct scalable, robust software
-      systems.
+      redefines most of the standard namespace to make better use of the
+      OCaml module system and expose a number of powerful, reusable
+      datastructures by default. Older OCaml code will still
+      interoperate with Core, but you may need to adapt it for maximal
+      benefit. All the <emphasis>new</emphasis> code that we write uses
+      Core, and we believe the Core model is worth learning; it's been
+      successfully used on large, multi-million-line codebases and
+      removes a big barrier to building sophisticated applications in
+      OCaml.
+    </para>
+    <para>
+      Code that uses only the traditional compiler standard library will
+      always exist, but there are other online resources to learn how
+      that works. Real World OCaml focuses on the techniques the authors
+      have used in their personal experience to construct scalable,
+      robust software systems.
     </para>
     <sect2 id="what-to-expect">
       <title>What to expect</title>
@@ -352,14 +358,16 @@
         by Core, and so only Mac OS X, Linux, FreeBSD and OpenBSD can be
         expected to work reliably. Please check the online installaton
         instructions for updates regarding Windows, or install a Linux
-        virtual machine to work through the book as it stands. This book
-        is not intended as a reference manual. We aim to teach you about
-        the language, and about libraries tools and techniques that will
-        help you be a more effective OCaml programmer. But it's no
-        replacement for API documentation or the OCaml manual and man
-        pages. You can find documentation for all of the libraries and
-        tools referenced in the book
-        <ulink url="http://realworldocaml.org/doc">online</ulink>.
+        virtual machine to work through the book as it stands.
+      </para>
+      <para>
+        This book is not intended as a reference manual. We aim to teach
+        you about the language, and about libraries tools and techniques
+        that will help you be a more effective OCaml programmer. But
+        it's no replacement for API documentation or the OCaml manual
+        and man pages. You can find documentation for all of the
+        libraries and tools referenced in the book
+        <ulink url="https://realworldocaml.org/doc">online</ulink>.
       </para>
     </sect2>
     <sect2 id="code-examples">
