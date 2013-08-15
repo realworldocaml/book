@@ -32,38 +32,33 @@ OCaml installer, which is usually updated pretty quickly to the latest stable
 release.  Make sure that you have the latest XCode (and Command Line Tools for
 XCode) installed from the App Store before starting the OCaml installation.
 
-```
-$ brew update
-$ brew install ocaml
-$ brew install pcre
+```frag
+((typ console)(name installation/brew_install.out))
 ```
 
 The Perl-compatible Regular Expression library (PCRE) is used by the
 Core suite.  It's not strictly needed to use OCaml, but is a commonly
 used library that we're installing now to save time later.
 
-Another popular package manager on Mac OS X is
-[MacPorts](http://macports.org), which also has an OCaml port.  As
-with Homebrew, make sure you have XCode installed and have followed
-the rest of the MacPorts installation instructions, and then type in:
+Another popular package manager on Mac OS X is [MacPorts](http://macports.org),
+which also has an OCaml port.  As with Homebrew, make sure you have XCode
+installed and have followed the rest of the MacPorts installation instructions,
+and then type in:
 
-```
-$ sudo port install ocaml
-$ sudo port install ocaml-pcre
+```frag
+((typ console)(name installation/macports_install.out))
 ```
 
 ### Debian Linux
 
-On Debian Linux, you should install OCaml via binary packages.  You'll
-need at least OCaml version 3.12.1 to bootstrap OPAM, which means
-using Debian Wheezy or greater.  Don't worry about getting the
-absolute latest version of the compiler, as you just need one new
-enough to compile the OPAM package manager, after which you'll use OPAM
-to manage your compiler installation.
+On Debian Linux, you should install OCaml via binary packages.  You'll need at
+least OCaml version 3.12.1 to bootstrap OPAM, which means using Debian Wheezy
+or greater.  Don't worry about getting the absolute latest version of the
+compiler, as you just need one new enough to compile the OPAM package manager,
+after which you'll use OPAM to manage your compiler installation.
 
-```
-$ sudo apt-get install ocaml ocaml-native-compilers camlp4-extra
-$ sudo apt-get install git libpcre3-dev curl build-essential m4
+```frag
+((typ console)(name installation/debian_apt.out))
 ```
 
 Notice that we've installed a few more packages than just the OCaml
@@ -78,10 +73,8 @@ the library.
 OCaml has been included in the basic distribution since Fedora 8.  To install
 the latest compiler, just run:
 
-```
-# yum install ocaml
-# yum install ocaml-camlp4-devel
-# yum install pcre-devel
+```frag
+((typ console)(name installation/fedora_install.out))
 ```
 
 The PCRE package is used by Core and is just included here for convenience
@@ -92,8 +85,8 @@ later.
 Arch Linux provides OCaml 4.00.1 (or later) in the standard repositories, so
 the easiest method of installation is using `pacman`:
 
-```
-$ pacman -Sy ocaml
+```frag
+((typ console)(name installation/arch_install.out))
 ```
 
 ### Windows
@@ -108,21 +101,16 @@ machine.
 To install OCaml from source code, first make sure that you have a C
 compilation environment (usually either `gcc` or `llvm` installed).
 
-```
-$ curl -OL https://github.com/ocaml/ocaml/archive/4.01.tar.gz
-$ tar -zxvf 4.01.tar.gz
-$ cd ocaml-4.01
-$ ./configure
-$ make world world.opt
-$ sudo make install
+```frag
+((typ console)(name installation/ocaml_src_install.out))
 ```
 
 The final step requires administrator privilege to install in your
 system directory.  You can also install it in your home directory by
 passing the `prefix` option to the configuration script:
 
-```
-$ ./configure -prefix $HOME/my-ocaml
+```frag
+((typ console)(name installation/ocaml_user_conf.out))
 ```
 
 Once the installation is completed into this custom location, you will
@@ -164,15 +152,14 @@ proceeding.
 Source installation of OPAM will take a minute or so on a modern
 machine.  There is a Homebrew package for the latest OPAM:
 
-```
-$ brew update
-$ brew install opam
+```frag
+((typ console)(name installation/brew_opam_install.out))
 ```
 
 And on MacPorts, install it like this:
 
-```
-$ sudo port install opam
+```frag
+((typ console)(name installation/macports_opam_install.out))
 ```
 
 ### Debian Linux
@@ -182,29 +169,17 @@ distribution.  If you're on an earlier stable distribution such as `wheezy`, you
 can either compile from source, or cherry-pick just the OPAM binary package from
 `unstable` by:
 
-```console
-# apt-get update
-# apt-get -t unstable install opam
+```frag
+((typ console)(name installation/debian_apt_opam.out))
 ```
-
-<note>
-<title>Note to reviewers</title>
-
-The binary packages for OPAM are not yet available as of the 5th August 2013,
-but the package is in the `NEW` queue.  It should be available by the the time
-the book is released, and these instructions will be updated accordingly.
-
-</note>
 
 ### Ubuntu Raring
 
 OPAM is available as a Personal Package Archive on Ubuntu Raring for both i386
 and x86_64.  To install it, just run:
 
-```console
-$ add-apt-repository ppa:avsm/ppa
-$ apt-get update
-$ apt-get install ocaml opam
+```frag
+((typ console)(name installation/ubuntu_opam_ppa.out))
 ```
 
 ### Fedora and Red Hat
@@ -222,42 +197,15 @@ You'll need both `ocaml` and the `base-devel` packages installed first:
 
 Run these commands to install the stable OPAM package:
 
-```
-$ sudo pacman -Sy base-devel
-$ wget https://aur.archlinux.org/packages/op/opam/opam.tar.gz
-$ tar -xvf opam.tar.gz && cd opam
-$ makepkg
-$ sudo pacman -U opam-_version_.pkg.tar.gz
+```frag
+((typ console)(name installation/arch_opam.out))
 ```
 
 ### Source Installation
 
 If the binary packages aren't available for your system, you'll need to install
 the latest OPAM release from source.  You can follow the online [quick install
-guide](http://opam.ocamlpro.com/doc/Quick_Install.html) or read the summary
-below.
-
- The distribution only requires the OCaml compiler to be installed, so this
-should be straightforward.  Download the latest version from the
-[homepage](https://github.com/OCamlPro/opam/tags).
-
-```console
-$ curl -OL https://github.com/OCamlPro/opam/archive/latest.tar.gz
-$ tar -zxvf latest.tar.gz
-$ cd opam-latest
-$ ./configure && make
-$ sudo make install
-```
-
-<note>
-<title>Note to reviewers</title>
-
-The OPAM instructions will be simplified when integrated upstream into
-Debian and Fedora, which is ongoing.  Until then, we're leaving
-source-code installation instructions here. Please leave a comment
-with any amended instructions you encounter.
-
-</note>
+guide](http://opam.ocamlpro.com/doc/Quick_Install.html).
 
 ## Configuring OPAM
 
@@ -275,28 +223,8 @@ questions at the end.  It's safe to answer yes to these unless you
 want to manually control the configuration steps yourself as an
 advanced user.
 
-```
-$ opam init
-<...>
-=-=-=-= Configuring OPAM =-=-=-=
-Do you want to update your configuration to use OPAM ? [Y/n] y
-[1/4] Do you want to update your shell configuration file ? [default: ~/.profile] y
-[2/4] Do you want to update your ~/.ocamlinit ? [Y/n] y
-[3/4] Do you want to install the auto-complete scripts ? [Y/n] y
-[4/4] Do you want to install the `opam-switch-eval` script ? [Y/n] y
-User configuration:
-  ~/.ocamlinit is already up-to-date.
-  ~/.profile is already up-to-date.
-Gloabal configuration:
-  Updating <root>/opam-init/init.sh
-    auto-completion : [true]
-    opam-switch-eval: [true]
-  Updating <root>/opam-init/init.zsh
-    auto-completion : [true]
-    opam-switch-eval: [true]
-  Updating <root>/opam-init/init.csh
-    auto-completion : [true]
-    opam-switch-eval: [true]
+```frag
+((typ console)(name installation/opam_init.out))
 ```
 
 You only need to run this command once, and it will create the
@@ -314,8 +242,8 @@ If you choose not to follow the OPAM instructions to add itself
 to your shell profile, you can still configure it on-the-fly in your
 current shell with just one command.
 
-```
-$ eval `opam config env`
+```frag
+((typ console)(name installation/opam_eval.out))
 ```
 
 This evaluates the results of running `opam config env` in your current shell
@@ -332,8 +260,8 @@ If you answered `yes` to the auto-complete scripts question during
 `opam init`, this should have all been set up for you. 
 You can verify this worked by listing the available packages:
 
-```
-$ opam list
+```frag
+((typ console)(name installation/opam_list.out))
 ```
 
 <note>
@@ -342,25 +270,17 @@ $ opam list
 OPAM 1.0.0 places the login commands into your `~/.profile`
 directory, which isn't always executed if your shell is `bash`.
 This has been fixed in subsequent versions, but for now you'll need to manually
-copy the contents of `~/.profile` over to `~/.bash_profile` via:
-
-```
-$ cat ~/.profile >> ~/.bash_profile
-```
+copy the contents of `~/.profile` over to `~/.bash_profile`.
 
 </note>
 
 The most important package we need to install is Core, which is the
 replacement standard library that all of the examples in this book
 use.  Before doing this, let's make sure you have exactly the right
-compiler version you need.  We've made some minor modifications to the
-way the OCaml compiler displays type signatures, and the next command
-will install a patched `4.01.0` compiler with this functionality
-enabled.
+compiler version you need.
 
-```
-$ opam switch 4.01.0dev+trunk
-$ eval `opam config env`
+```frag
+((typ console)(name installation/opam_switch.out))
 ```
 
 This step will take around ten or fifteen minutes on a modern machine, and will
@@ -379,8 +299,8 @@ Browse through the available compilers by running `opam switch list`.
 
 Finally, we're ready to install the Core libraries.  Run this:
 
-```
-$ opam install core core_extended core_bench async
+```frag
+((typ console)(name installation/opam_install.out))
 ```
 
 This will take about five or ten minutes to build, and will install a series of
@@ -404,8 +324,8 @@ The default `ocaml` command gives us an interactive command-line to
 experiment with code without compiling it.  However, it's quite a
 spartan experience and so we use a more modern alternative.
 
-```
-$ opam install utop
+```frag
+((typ console)(name installation/opam_install_utop.out))
 ```
 
 The `utop` package is an interactive command-line interface to OCaml
@@ -434,12 +354,8 @@ common libraries and syntax extensions so you don't need to type them
 in every time.  Now that you have Core installed, you should update it
 to load it every time you start `utop`, by adding this to it:
 
-```ocaml
-#use "topfind"
-#thread
-#camlp4o
-#require "core.top"
-#require "core.syntax"
+```frag
+((typ console)(name installation/show_ocamlinit.out))
 ```
 
 If you only use Core libraries (and this will be the case for beginners who are
@@ -447,9 +363,9 @@ working their way through Real World OCaml as their first taste of the
 language), then you can also open the Core module by default.  Just append this
 line to the `.ocamlinit` file.
 
-```ocaml
-open Core.Std
-```ocaml
+```frag
+((typ ocaml)(name installation/open_core.ml))
+```
 
 When you run `utop` with these initialization rules, it should start up with
 Core opened and ready to use.  If you don't open `Core.Std` by default, then
@@ -469,12 +385,12 @@ with a pointer or direct instructions.
 
 #### Emacs
 
-TODO: Emacs users have tuareg and [Typerex](http://www.typerex.org/).
+Emacs users have tuareg and [Typerex](http://www.typerex.org/).
 
 To use `utop` directly in Emacs, add the following line to your `~/.emacs` file:
 
-```scheme
-(autoload 'utop "utop" "Toplevel for OCaml" t)
+```frag
+((typ scheme)(name installation/emacsrc.scm))
 ```
 
 You also need to make the `utop.el` file available to your Emacs installation.
@@ -488,7 +404,7 @@ command `utop` in Emacs.  There are more details instructions at the
 
 #### Vim
 
-TODO: Vim users can use the built-in style, and
+Vim users can use the built-in style, and
 [ocaml-annot](http://github.com/avsm/ocaml-annot) may also be useful.
 
 #### Eclipse
