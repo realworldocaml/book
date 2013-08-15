@@ -3,7 +3,7 @@
 OCaml has several options available to interact with non-OCaml code.  The
 compiler can link with external system libraries via C code and also produce
 standalone native object files that can be embedded within other non-OCaml
-applications. 
+applications.
 
 The mechanism by which code in one programming language can invoke routines in
 another different programming language is called a *foreign function
@@ -206,7 +206,7 @@ represented by an OCaml equivalent via the single type definition below.
 ```
 
 `Ctypes.typ` is the type of values that represents C types to OCaml.  There are
-two types associated with each instance of `typ`: 
+two types associated with each instance of `typ`:
 
 * the C type used to store and pass values to the foreign library.
 * the corresponding OCaml type.  The `'a` type parameter contains the OCaml type
@@ -246,7 +246,7 @@ some of them need a bit more explanation.
 Pointers are at the heart of C, so they are necessarily part of Ctypes, which
 provides support for pointer arithmetic, pointer conversions, reading and
 writing through pointers, and passing and returning pointers to and from
-functions. 
+functions.
 
 We've already seen a simple use of pointers in the Ncurses example.  Let's
 start a new example by binding the following POSIX functions.
@@ -365,7 +365,7 @@ views is quite simple.
 ```
 
 The type of this `string` function is a normal `typ` with no external sign of
-the use of the view function. 
+the use of the view function.
 
 ```frag
 ((typ ocaml)(name ctypes/ctypes.mli)(part 4))
@@ -472,7 +472,7 @@ As before we can create a wrapper to make `gettimeofday` easier to use.  The
 functions `make`, `addr` and `getf` create a structure value, retrieve the
 address of a structure value, and retrieve the value of a field from a
 structure.
- 
+
 ```frag
 ((typ ocamltop)(name ffi/posix.topscript)(part 12))
 ```
@@ -521,7 +521,7 @@ Functions are first-class values in OCaml, but not in C. For example, in C,
 it is possible to return a function pointer from a function, but not to return
 an actual function.
 
-Secondly, OCaml functions are typically defined in a curried style. The signature of 
+Secondly, OCaml functions are typically defined in a curried style. The signature of
 a two-argument function is written as follows:
 
 ```frag
@@ -597,7 +597,7 @@ Ctypes defines a number of operators that let you manipulate pointers and arrays
 just as you would in C.  The Ctypes equivalents do have the benefit of being
 more strongly typed, of course.
 
-Operator    Purpose      
+Operator    Purpose
 --------    -------
 `!@ p`      Dereference the pointer `p`.
 `p <-@ v`   Write the value `v` to the address `p`.
@@ -728,22 +728,68 @@ number of larger-scale examples, including:
 
 This chapter hasn't really needed you to understand the innards of OCaml at
 all.  Ctypes does its best to make function bindings easy, but the rest of this
-part will also fill you in about how interactions with OCaml memory layout and
-the garbage collector work.
+part will also fill you in about how interactions with OCaml memory layout in
+[xref](#memory-representation-of-values) and automatic memory management in
+[xref](#understanding-the-garbage-collector).
 
 Ctypes gives OCaml programs access to the C representation of values, shielding
-you from the details of the OCaml value representation, and introducing an
+you from the details of the OCaml value representation, and introduces an
 abstraction layer that hides the details of foreign calls.  While this covers a
 wide variety of situations, it's sometimes necessary to look behind the
 abstraction to obtain finer control over the details of the interaction between
-the two languages.  The standard OCaml foreign function interface allows you to
-glue OCaml and C together from the other side of the boundary, by writing C
-functions that operate on the OCaml representation of values.  You can find
-details of the standard interface in the [online OCaml
-manual](http://caml.inria.fr/pub/docs/manual-ocaml-4.00/manual033.html) and in
-the book [Developing Applications with Objective
-Caml](http://caml.inria.fr/pub/docs/oreilly-book/ocaml-ora-book.pdf‎) by
-Chailloux, Manoury and Pagano.
+the two languages.
+
+You can find more information about the C interface in several places.
+
+*   The standard OCaml foreign function interface allows you to
+    glue OCaml and C together from the other side of the boundary, by writing C
+    functions that operate on the OCaml representation of values.
+    You can find details of the standard interface in the [OCaml manual](http://caml.inria.fr/pub/docs/manual-ocaml-4.00/manual033.html) and in
+    the book [Developing Applications with Objective Caml](http://caml.inria.fr/pub/docs/oreilly-book/ocaml-ora-book.pdf).
+
+*   Florent Monnier maintains an excellent online [reference](http://www.linux-nantes.org/~fmonnier/ocaml/ocaml-wrapping-c.php) that
+    provides examples of how to call OCaml functions from C.  This covers a wide variety of OCaml data types and also
+    more complex callbacks between C and OCaml.
+
+*   [SWIG](http://www.swig.org) is a tool that connects programs written in
+    C/C++ to a variety of higher-level programming languages, including OCaml.
+    The SWIG manual has examples of converting library specifications into
+    OCaml bindings.
+
+### Struct memory layout
+
+The C language gives implementations a certain amount of freedom in choosing
+how to lay out structs in memory.  There may be padding between members and at
+the end of the struct, in order to satisfy the memory alignment requirements of
+the host platform.  Ctypes uses platform-appropriate size and alignment
+information to replicate the struct layout process.  OCaml and C will have
+consistent views abotu the layout of the struct as long as you declare the
+fields of a struct in the same order and with the same types as the C library
+you're binding to.
+
+However, this approach can lead to difficulties when the fields of a struct
+aren't fully specified in the interface of a library.  The interface may list
+the fields of a structure without specifying their order, or make certain
+fields available only on certain platforms, or insert undocumented fields into
+struct definitions for performance reasons.  For example, the `struct timeval`
+definition used in this chapter accurately describes the layout of the struct
+on common platforms but implementations on some more unusual architectures
+include additional padding members that will lead to strange behaviour in the
+examples.
+
+The Cstubs subpackage of Ctypes addresses this issue. Rather than simply
+assuming that struct definitions given by the user accurately reflect the actual
+definitions of structs used in C libraries, Cstubs generates code that uses the
+C library headers to discover the layout of the struct.  The good news is that the
+code that you write doesn't need to change much.  Cstubs provides alternative
+implementations of the `field` and `seal` functions that you've already used to
+describe `struct timeval`; instead of computing member offsets and sizes
+appropriate for the platform, these implementations obtain them directly from C.
+
+The details of using Cstubs are available in the online
+[documentation](https://ocamllabs.github.io/ocaml-ctypes), along with
+instructions on integration with <command>autoconf</command> platform
+portability instructions.
 
 <note>
 <title>Production note</title>
