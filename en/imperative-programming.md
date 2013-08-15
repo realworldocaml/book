@@ -24,9 +24,8 @@ imperative techniques.
 
 OCaml offers a happy compromise here, making it easy and natural to
 program in a pure style, but also providing great support for
-imperative programming where you need it.  This chapter will walk you
-through OCaml's imperative features, and help you use them to their
-fullest.
+imperative programming.  This chapter will walk you through OCaml's
+imperative features, and help you use them to their fullest.
 
 ## Example: Imperative dictionaries
 
@@ -37,15 +36,15 @@ imperative dictionaries, and for most real world tasks, you should use
 one of those implementations.  There's more advice on using Core's
 implementation in particular in [xref](#maps-and-hash-tables).
 
-Our dictionary, like those in Core and the standard library, will be
-implemented as a hash table.  In particular, we'll use an _open
-hashing_ scheme, which is to say the hash table will be an array of
+The dictionary we'll describe now, like those in Core and the standard
+library, will be implemented as a hash table.  In particular, we'll
+use an _open hashing_ scheme, where the hash table will be an array of
 buckets, each bucket containing a list of key/value pairs that have
 been hashed into that bucket.
 
-Here's the interface we'll match, provided as an `mli`.  Here, the
-type `('a, 'b) t` is used for a dictionary with keys of type `'a` and
-data of type `'b`.
+Here's the interface we'll match, provided as an `mli`.  The type
+`('a, 'b) t` represents a dictionary with keys of type `'a` and data
+of type `'b`.
 
 ```frag
 ((typ ocaml)(name imperative-programming/dictionary.mli)(part 1))
@@ -71,8 +70,7 @@ two fields.
 The first field, `length` is declared as mutable.  In OCaml, records
 are immutable by default, but individual fields are mutable when
 marked as such.  The second field, `buckets`, is immutable, but
-contains an array, which is itself a mutable data structure, as we'll
-see.
+contains an array, which is itself a mutable data structure.
 
 Now we'll start putting together the basic functions for manipulating
 a dictionary.
@@ -81,10 +79,10 @@ a dictionary.
 ((typ ocaml)(name imperative-programming/dictionary.ml)(part 2))
 ```
 
-Note that `num_buckets` is a constant.  That's because, for
-simplicity's sake, we're using a fixed-length bucket array.  For a
-practical implementation, the length of the array would have to be
-able to grow as the number of elements in the dictionary increases.
+Note that `num_buckets` is a constant, which means our bucket array is
+of fixed length.  A practical implementation would need to be able to
+grow the array as the number of elements in the dictionary increases,
+but we'll omit this to simplify the presentation.
 
 The function `hash_bucket` is used throughout the rest of the module
 to choose the position in the array that a given key should be stored
@@ -100,19 +98,19 @@ The other functions defined above are fairly straightforward:
 - `find` looks for a matching key in the table and returns the
   corresponding value if found as an option.
 
-Another bit of syntax has popped up in `find`: we write
-`array.(index)` to grab a value from an array.  Also, `find` uses
+Another important piece of imperative syntax shows up in `find`: we
+write `array.(index)` to grab a value from an array.  `find` also uses
 `List.find_map`, which you can see the type of by typing it into the
-toplevel:
+toplevel.
 
 ```frag
 ((typ ocamltop)(name imperative-programming/examples.topscript)(part 1))
 ```
 
 `List.find_map` iterates over the elements of the list, calling `f` on
-each one until a `Some` is returned by `f`, at which point the value
-returned by `f` is returned by `find_map`.  If `f` returns `None` on
-all values, then `None` is returned by `find_map`.
+each one until a `Some` is returned by `f`, at which point that value
+is returned.  If `f` returns `None` on all values, then `None` is
+returned.
 
 Now let's look at the implementation of `iter`:
 
@@ -149,10 +147,8 @@ Another piece of syntax shows up in both `add` and `remove`: the use
 of the `<-` operator to update elements of an array (`array.(i) <-
 expr`) and for updating a record field (`record.field <- expression`).
 
-We also use a single semicolon, `;`, as a sequencing operator, to
-allow us to do a sequence of side-effecting operations in a row:
-first, update the bucket, then update the count.  We could have done
-this using let bindings:
+We also use `;`, the sequencing operator, to express a sequence of
+imperative actions.  We could have done the same using let bindings:
 
 ```frag
 ((typ ocaml)(name imperative-programming/dictionary2.ml)(part 1))
@@ -172,11 +168,12 @@ is equivalent to
 
 When a sequence expression `expr1; expr2` is evaluated, `expr1` is
 evaluated first, and then `expr2`.  The expression `expr1` should have
-type `unit` (though this is a warning rather than a hard restriction),
-and the value of `expr2` is returned as the value of the entire
-sequence.  For example, the sequence `print_string "hello world"; 1 +
-2` first prints the string `"hello world"`, then returns the integer
-`3`.
+type `unit` (though this is a warning rather than a hard restriction.
+The `-strict-sequence` compiler flag makes this a hard restriction,
+which is generally a good idea), and the value of `expr2` is returned
+as the value of the entire sequence.  For example, the sequence
+`print_string "hello world"; 1 + 2` first prints the string `"hello
+world"`, then returns the integer `3`.
 
 Note also that we do all of the side-effecting operations at the very
 end of each function.  This is good practice because it minimizes the
@@ -314,13 +311,10 @@ like LAPACK bindings.
 ## `for` and `while` loops
 
 OCaml provides support for traditional imperative looping constructs,
-in particular, `for` and `while` loops, even though neither of them is
-strictly necessary.  Anything you can do with such a loop you can also
-do with a recursive function, and you can also write higher-order
-functions like `Array.iter` that cover much of the same ground.
-
-Nonetheless, explicit `for` and `while` loops are both more idiomatic
-for imperative programming and often more concise.
+in particular, `for` and `while` loops.  Neither of these constructs
+is strictly necessary, since they can be simulated with recursive
+functions.  Nonetheless, explicit `for` and `while` loops are both
+more concise and more idiomatic when programming imperatively.
 
 The `for` loop is the simpler of the two.  Indeed, we've already seen
 the `for` loop in action&#x2014;the `iter` function in `Dictionary` is
@@ -339,7 +333,7 @@ use `downto` to iterate in the other direction.
 
 Note that the loop variable of a `for` loop, `i` in this case, is
 immutable in the scope of the loop, and is also local to the loop,
-`i.e.`, it can't be referenced outside of the loop.
+_i.e._, it can't be referenced outside of the loop.
 
 OCaml also supports `while` loops, which include a condition and a
 body.  The loop first evaluates the condition, and then, if it
@@ -436,7 +430,7 @@ low, so to separate it from the following assignment (`t := Some
 new_elt`) we surround the match with `begin ... end`. We could have
 used parenthesis for the same purpose.  Without some kind of
 bracketing, the final assignment would incorrectly become part of the
-`None -> ...` case.
+`None` case.
 
 We can use `insert_after` to insert elements later in the list.
 `insert_after` takes as arguments both an `element` after which to
@@ -470,8 +464,8 @@ equivalents.  The issues described above can be dealt with by more
 careful error detection, and such error correction is taken care of in
 modules like Core's `Doubly_linked`.  You should use imperative data
 structures from a well-designed library when you can.  And when you
-can't, you should make sure that the code you write is careful about
-error detection.
+can't, you should make sure to put great care into your error
+handling.
 
 ### Iteration functions
 
@@ -492,21 +486,30 @@ element from a given node.
 ((typ ocaml)(name imperative-programming/dlist.ml)(part 6))
 ```
 
+This completes our implementation, but there's still considerably more
+work to be done to make a really usable doubly-linked list. As
+mentioned earlier, you're probably better off using something like
+Core's `Doubly_linked` module that has a more complete interface and
+has more of the tricky corner cases worked out.  Nonetheless, this
+example should serve to demonstrate some of the techniques you can use
+to build non-trivial imperative data structure in OCaml, as well as
+some of the pitfalls.
+
 ## Laziness and other benign effects
 
 There are many instances where you basically want to program in a pure
 style, but you want to make limited use of side-effects to improve the
-performance of your code, without really changing anything else.  Such
-side effects are sometimes called _benign effects_, and they are a
-useful way of leveraging OCaml's imperative features while still
-maintaining most of the benefits of pure programming.
+performance of your code.  Such side effects are sometimes called
+_benign effects_, and they are a useful way of leveraging OCaml's
+imperative features while still maintaining most of the benefits of
+pure programming.
 
-One of the simplest benign effect is _laziness_.  A lazy value
-is one that is not computed until it is actually needed.  In OCaml,
-lazy values are created using the `lazy` keyword, which can be used to
-prefix any expression, returning a value of type `'a Lazy.t`.  The
-evaluation of that expression is delayed until forced with the
-`Lazy.force` function.
+One of the simplest benign effects is _laziness_.  A lazy value is one
+that is not computed until it is actually needed.  In OCaml, lazy
+values are created using the `lazy` keyword, which can be used to
+convert any expression of type `s` into a lazy value of type `s
+Lazy.t`.  The evaluation of that expression is delayed until forced
+with `Lazy.force`.
 
 ```frag
 ((typ ocamltop)(name imperative-programming/lazy.topscript)(part 1))
@@ -533,9 +536,9 @@ but the computation ended with an exception.  A lazy value is simply a
 change from being in the `Delayed` state to being in the `Value` or
 `Exn` states.
 
-We can create a lazy value based on a thunk, _i.e._, a function that
-takes a unit argument.  Wrapping an expression in a thunk is another
-way to suspend the computation of an expression.
+We can create a lazy value from a thunk, _i.e._, a function that takes
+a unit argument.  Wrapping an expression in a thunk is another way to
+suspend the computation of an expression.
 
 ```frag
 ((typ ocamltop)(name imperative-programming/lazy.topscript)(part 3))
@@ -585,10 +588,9 @@ is in scope.
 
 Memoization can be useful whenever you have a function that is
 expensive to recompute, and you don't mind caching old values
-indefinitely.  One important caution: every time you create a memoized
-function, there's something of a built-in memory leak.  As long as you
-hold on to the memoized function, you're holding every result it has
-returned thus far.
+indefinitely.  One important caution: a memoized function by its
+nature leaks memory.  As long as you hold on to the memoized function,
+you're holding every result it has returned thus far.
 
 Memoization is also useful for efficiently implementing some recursive
 algorithms.  One good example is the algorithm for computing the _edit
@@ -636,8 +638,7 @@ And now we can use this to try out some examples.
 ((typ ocamltop)(name imperative-programming/memo.topscript)(part 4))
 ```
 
-Just those few extra characters made it almost four thousand times
-slower!
+Just those few extra characters made it thousands of times slower!
 
 Memoization would be a huge help here, but to fix the problem, we need
 to memoize the calls that `edit_distance` makes to itself.  This
@@ -661,14 +662,13 @@ This is, however, exponentially slow, for the same reason that
 ((typ ocamltop)(name imperative-programming/fib.topscript)(part 2))
 ```
 
-Here, `fib 40` takes almost a minute to compute, as opposed to five
-_milliseconds_ for `fib 20`.
+As you can see, `fib 40` takes far longer to compute then `fib 20`.
 
 So, how can we use memoization to make this faster?  The tricky bit is
 that we need to insert the memoization before the recursive calls
 within `fib`.  We can't just define `fib` in the ordinary way and
 memoize it after the fact and expect the first call to `fib` to be
-improved (though of course repeated calls will be improved).
+improved.
 
 ```frag
 ((typ ocamltop)(name imperative-programming/fib.topscript)(part 3))
@@ -705,9 +705,9 @@ What `make_rec` does is to essentially feed `f_norec` to itself, thus
 making it a true recursive function.
 
 This is clever enough, but all we've really done is find a new way to
-implement the same old slow Fibonacci function.  To make it
-faster, we need variant on `make_rec` that inserts memoization when it
-ties the recursive knot.  We'll call that function `memo_rec`.
+implement the same old slow Fibonacci function.  To make it faster, we
+need a variant on `make_rec` that inserts memoization when it ties the
+recursive knot.  We'll call that function `memo_rec`.
 
 ```frag
 ((typ ocamltop)(name imperative-programming/fib.topscript)(part 7))
@@ -728,13 +728,13 @@ Using `memo_rec`, we can now build an efficient version of `fib`.
 And as you can see, the exponential time complexity is now gone.
 
 The memory behavior here is important.  If you look back at the
-definition of `memo_rec`, you'll see that the call to memo_rec does
-not trigger a call to `memoize`.  Only when the final argument to
-`fib` is presented does `memoize` get called, and the result of that
-call falls out of scope when the `fib` call returns.  That means that,
-unlike ordinary memoization, calling `memo_rec` on a function does not
-create a memory leak&#x2014;the memoization table is collected after the
-computation completes.
+definition of `memo_rec`, you'll see that the call `memo_rec
+fib_norec` does not trigger a call to `memoize`.  Only when `fib` is
+called and thereby the final argument to `memo_rec` is presented does
+`memoize` get called.  The result of that call falls out of scope when
+the `fib` call returns, and so calling `memo_rec` on a function does
+not create a memory leak&#x2014;the memoization table is collected
+after the computation completes.
 
 We can use `memo_rec` as part of a single declaration that makes this
 look like it's little more than a special form of `let rec`.
@@ -761,7 +761,7 @@ memoized version of `edit_distance`:
 ```
 
 This new version of `edit_distance` is much more efficient than the
-one we started with; the following call is about ten thousand times
+one we started with; the following call is many thousands of times
 faster than it was without memoization.
 
 ```frag
@@ -787,13 +787,14 @@ particular, imagine how the following code snippet would be compiled.
 ```
 
 Note that `x` is an ordinary value, not a function.  As such, it's not
-clear how to execute this code.  In some sense, you could imagine it
-compiling down to an infinite loop, but there's no looping control
-structure to make that happen.
+clear how this definition should be handled by the compiler.  You
+could imagine it compiling down to an infinite loop, but `x` is of
+type `int`, and there's no `int` that corresponds to an infinite loop.
+As such, this construct is effectively impossible to compile.
 
-To avoid such cases, the compiler only allows three possible
-constructs to show up on the right-hand side of a `let rec`: a
-function definition, a constructor, or the lazy keyword.  This
+To avoid such impossible cases, the compiler only allows three
+possible constructs to show up on the right-hand side of a `let rec`:
+a function definition, a constructor, or the lazy keyword.  This
 excludes some reasonable things, like our definition of `memo_rec`,
 but it also blocks things that don't make sense, like our definition
 of `x`.
@@ -852,9 +853,10 @@ here.
 
 OCaml's buffered I/O library is organized around two types:
 `in_channel`, for channels you read from, and `out_channel`, for
-channels you write to.  `In_channel` and `Out_channel` modules only
-have direct support for channels corresponding to files and terminals;
-other kinds of channels can be created through the `Unix` module.
+channels you write to.  The `In_channel` and `Out_channel` modules
+only have direct support for channels corresponding to files and
+terminals; other kinds of channels can be created through the `Unix`
+module.
 
 We'll start our discussion of I/O by focusing on the terminal.
 Following the UNIX model, communication with the terminal is organized
@@ -914,8 +916,8 @@ end-of-file condition).  `Out_channel.output_string` is used to print
 the final output, and `Out_channel.flush` is called to flush that
 output to the screen.  The final flush is not technically required,
 since the program ends after that instruction, at which point all
-remaining output will be flushed anyway, but the flush is nonetheless
-good practice.
+remaining output will be flushed anyway, but the explicit flush is
+nonetheless good practice.
 
 ### Formatted output with `printf`
 
@@ -933,10 +935,9 @@ write:
 ((typ ocamltop)(name imperative-programming/printf.topscript)(part 1))
 ```
 
-Importantly, and unlike C's `printf`, the `printf` in OCaml is
-type-safe.  In particular, if we provide an argument whose type
-doesn't match what's presented in the format string, we'll get a type
-error.
+Unlike C's `printf`, the `printf` in OCaml is type-safe.  In
+particular, if we provide an argument whose type doesn't match what's
+presented in the format string, we'll get a type error.
 
 ```frag
 ((typ ocamltop)(name imperative-programming/printf.topscript)(part 2))
@@ -1064,15 +1065,16 @@ And now, the file descriptor leak is gone:
 ((typ ocamltop)(name imperative-programming/file2.topscript)(part 2))
 ```
 
-This is really an example of a more general complexity of imperative
+This is really an example of a more general issue with imperative
 programming.  When programming imperatively, you need to be quite
 careful to make sure that exceptions don't leave you in an awkward
 state.
 
-`In_channel` also supports some idioms that handle some of the details
-of this for you.  For example, the `with_file` function takes a
-filename and a function for processing that file, and takes care of
-the opening and closing of the file transparently.
+`In_channel` has functions that automate the handling of some of these
+details.  For example, `In_channel.with_file` takes a filename and a
+function for processing data from an `in_channel`, and takes care of
+the bookkeeping associated with opening and closing the file.  We can
+rewrite `sum_file` using this function, as shown here.
 
 ```frag
 ((typ ocamltop)(name imperative-programming/file2.topscript)(part 3))
