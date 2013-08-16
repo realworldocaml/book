@@ -15276,7 +15276,7 @@ end</programlisting>
     </para>
     <para>
       Since the problematic method is equality, one proposal we could
-      consider is is to just drop it from the base type
+      consider is to just drop it from the base type
       <literal>shape</literal> and use polymorphic equality instead.
       However, the built-in polymorphic equality has very poor behavior
       when applied to objects.
@@ -19919,16 +19919,15 @@ type value = [
       <title>Describing the grammar</title>
       <para>
         The next thing we need to do is to specify the grammar of a JSON
-        expression. <command>menhir</command>, like many parsers,
-        expresses grammars as <emphasis>context free
+        expression. <command>menhir</command>, like many parser
+        generators, expresses grammars as <emphasis>context free
         grammars</emphasis>. (More precisely, <command>menhir</command>
         supports LR(1) grammars, but we will ignore that technical
         distinction here.) You can think of a context-free grammar as a
         set of abstract names, called <emphasis>non-terminal
         symbols</emphasis>, along with a collection of rules for
-        transforming a non-terminal symbol into a sequence, where each
-        element of the sequence is either a token or another
-        non-terminal symbol. A sequence of tokens is parsable by a
+        transforming a non-terminal symbol into a sequence of tokens and
+        non-terminal symbols. A sequence of tokens is parsable by a
         grammar if you can apply the grammar's rules to produce a series
         of transformations, starting at a distinguished <emphasis>start
         symbol</emphasis>, that produces the token sequence in question.
@@ -19958,17 +19957,23 @@ prog:
   ;</programlisting>
       <para>
         The syntax for this is reminiscent of an OCaml match statement.
-        The pipes separate the individual productions, and the code in
-        curly-braces is OCaml code that generates the OCaml value
-        corresponding to the production in question. In the case of
-        <literal>prog</literal>, we have two cases: either there's an
-        <literal>EOF</literal>, which means the text is empty, and so
-        there's no JSON value to read, and so we return the OCaml value
-        <literal>None</literal>; or we have an instance of the
-        <literal>value</literal> non-terminal, which corresponds to a
-        well-formed JSON value, in which case we wrap the corresponding
-        <literal>Json.value</literal> in a <literal>Some</literal> tag.
-        Note that in the <literal>value</literal> case, we wrote
+        The pipes separate the individual productions, and the curly
+        braces contain a <emphasis>semantic action</emphasis>: OCaml
+        code that generates the OCaml value corresponding to the
+        production in question. Semantic actions are arbitrary OCaml
+        expressions that are evaluated during parsing to produce a value
+        that is attached to the non-terminal in the rule.
+      </para>
+      <para>
+        In the case of <literal>prog</literal>, we have two cases:
+        either there's an <literal>EOF</literal>, which means the text
+        is empty, and so there's no JSON value to read, and so we return
+        the OCaml value <literal>None</literal>; or we have an instance
+        of the <literal>value</literal> non-terminal, which corresponds
+        to a well-formed JSON value, in which case we wrap the
+        corresponding <literal>Json.value</literal> in a
+        <literal>Some</literal> tag. Note that in the
+        <literal>value</literal> case, we wrote
         <literal>v = value</literal> to bind the OCaml value that
         corresponds to to the variable <literal>v</literal>, which we
         can then use within the curly-braces for that production.
@@ -20034,16 +20039,15 @@ value:
         returned by the following rule for
         <literal>rev_object_fields</literal>. Note that the first
         production in <literal>rev_object_fields</literal> has an empty
-        left-hand side. That's because what we're matching on in this
-        case is an empty sequence of tokens. The comment
-        <literal>/* empty */</literal> is used to make this clear.
-        C-style comment syntax is used within the body of a rule.
+        left-hand side, because what we're matching on in this case is
+        an empty sequence of tokens. The comment
+        <literal>(* empty *)</literal> is used to make this clear.
       </para>
       <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>parsing/parser.mly</filename> (part 4)</lineannotation>
 object_fields: obj = rev_object_fields { List.rev obj };
 
 rev_object_fields:
-  | /* empty */ { [] }
+  | (* empty *) { [] }
   | obj = rev_object_fields; COMMA; k = ID; COLON; v = value
     { (k, v) :: obj }
   ;</programlisting>
@@ -20056,22 +20060,22 @@ rev_object_fields:
         it requires linear stack space to read object field definitions.
       </para>
       <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>parsing/right_rec_rule.mly</filename> (part 4)</lineannotation>
-/* Inefficient right-recursive rule */
+(* Inefficient right-recursive rule *)
 object_fields:
-  | /* empty */ { [] }
+  | (* empty *) { [] }
   | k = ID; COLON; v = value; COMMA; obj = object_fields
     { (k, v) :: obj }</programlisting>
       <para>
         Alternatively, we could keep the left-recursive definition and
         simply construct the returned value in left-to-right order. This
-        is is even less efficient, since the complexity of building thes
+        is even less efficient, since the complexity of building the
         list incrementally in this way is quadratic in the length of the
         list.
       </para>
       <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>parsing/quadratic_rule.mly</filename> (part 4)</lineannotation>
-/* Quadratic left-recursive rule */
+(* Quadratic left-recursive rule *)
 object_fields:
-  | /* empty */ { [] }
+  | (* empty *) { [] }
   | obj = object_fields; COMMA; k = ID; COLON; v = value
     { obj @ [k, v] }
   ;</programlisting>
@@ -20185,13 +20189,13 @@ let next_line lexbuf =
         example.
       </para>
       <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>parsing/lexer.mll</filename> (part 1)</lineannotation>
-let int = '-'? ['1'-'9'] ['0'-'9']*</programlisting>
+let int = '-'? ['0'-'9'] ['0'-'9']*</programlisting>
       <para>
         The syntax here is something of a hybrid between OCaml syntax
         and traditional regular expression syntax. The
         <literal>int</literal> regular expression specifies an optional
         leading <literal>-</literal>, followed by a digit from
-        <literal>1</literal> to <literal>9</literal>, followed by some
+        <literal>0</literal> to <literal>9</literal>, followed by some
         number of digits from <literal>0</literal> to
         <literal>9</literal>. The question mark is used to indicate an
         optional component of a regular expression, the square brackets
@@ -20216,9 +20220,7 @@ let float = digit* frac? exp?</programlisting>
       <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>parsing/lexer.mll</filename> (part 3)</lineannotation>
 let white = [' ' '\t']+
 let newline = '\r' | '\n' | &quot;\r\n&quot;
-
-let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
-let hex = ['0'-'9' 'a'-'f' 'A'-'F']</programlisting>
+let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*</programlisting>
     </sect2>
     <sect2 id="lexing-rules">
       <title>Lexing rules</title>
@@ -20502,16 +20504,18 @@ null
       the full parser in action.
     </para>
     <programlisting language="console"><lineannotation>✎ Terminal: <filename>parsing-test/build_test.out</filename></lineannotation>
-<prompt>$ </prompt><userinput>ocamlbuild -use-menhir -tag thread -use-ocamlfind -pkg core test.native</userinput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/bin/ocamllex.opt -q lexer.mll</computeroutput>
-<computeroutput>menhir --ocamlc 'ocamlfind ocamlc -thread -package core' --infer parser.mly</computeroutput>
+<prompt>$ </prompt><userinput>ocamlbuild -use-menhir -tag thread -use-ocamlfind -quiet -pkg core test.native</userinput>
 <prompt>$ </prompt><userinput>./test.native test1.json</userinput>
 <computeroutput>true</computeroutput>
 <computeroutput>false</computeroutput>
 <computeroutput>null</computeroutput>
 <computeroutput>[1, 2, 3.000000, 4.000000, 0.500000, 550000.000000, 6.300000]</computeroutput>
 <computeroutput>&quot;Hello World&quot;</computeroutput>
-<computeroutput>{ &quot;field1&quot;: &quot;Hello&quot;, &quot;field2&quot;: 170000000000000.000000, &quot;field3&quot;: [1, 2, 3], &quot;field4&quot;: { &quot;fieldA&quot;: 1, &quot;fieldB&quot;: &quot;Hello&quot; } }</computeroutput>
+<computeroutput>{ &quot;field1&quot;: &quot;Hello&quot;,</computeroutput>
+<computeroutput>  &quot;field2&quot;: 170000000000000.000000,</computeroutput>
+<computeroutput>  &quot;field3&quot;: [1, 2, 3],</computeroutput>
+<computeroutput>  &quot;field4&quot;: { &quot;fieldA&quot;: 1,</computeroutput>
+<computeroutput>  &quot;fieldB&quot;: &quot;Hello&quot; } }</computeroutput>
 </programlisting>
     <para>
       With our simple error handling scheme, errors are fatal and cause
