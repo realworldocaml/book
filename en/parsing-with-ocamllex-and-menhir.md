@@ -145,18 +145,16 @@ specification.
 
 ### Describing the grammar
 
-The next thing we need to do is to specify the grammar of a JSON
-expression.  <command>menhir</command>, like many parser generators, expresses grammars as
-_context free grammars_.  (More precisely, <command>menhir</command> supports LR(1)
-grammars, but we will ignore that technical distinction here.) You can
+The next thing we need to do is to specify the grammar of a JSON expression.
+<command>menhir</command>, like many parser generators, expresses grammars as
+_context free grammars_.  (More precisely, <command>menhir</command> supports
+LR(1) grammars, but we will ignore that technical distinction here.) You can
 think of a context-free grammar as a set of abstract names, called
-_non-terminal symbols_, along with a collection of rules for
-transforming a non-terminal symbol into a sequence, where each element
-of the sequence is either a token or another non-terminal symbol.  A
-sequence of tokens is parsable by a grammar if you can apply the
-grammar's rules to produce a series of transformations, starting at a
-distinguished _start symbol_, that produces the token sequence in
-question.
+_non-terminal symbols_, along with a collection of rules for transforming a
+non-terminal symbol into a sequence of tokens and non-terminal symbols. A
+sequence of tokens is parsable by a grammar if you can apply the grammar's
+rules to produce a series of transformations, starting at a distinguished
+_start symbol_, that produces the token sequence in question.
 
 We'll start describing the JSON grammar by declaring the start symbol
 to be the non-terminal symbol `prog`, and by declaring that when
