@@ -1,16 +1,15 @@
 type token =
-  | TRUE
-  | STRING of string
-  | RIGHT_BRACK
-  | RIGHT_BRACE
   | NULL
-  | LEFT_BRACK
-  | LEFT_BRACE
-  | INT of int
-  | ID of string
-  | FLOAT of float
+  | TRUE
   | FALSE
-  | EOF
+  | STRING of string
+  | INT of int
+  | FLOAT of float
+  | ID of string
+  | LEFT_BRACK
+  | RIGHT_BRACK
+  | LEFT_BRACE
+  | RIGHT_BRACE
   | COMMA
   | COLON
-
+  | EOF
