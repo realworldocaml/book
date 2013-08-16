@@ -20,9 +20,9 @@ parser generator creates a parser from a specification of the data
 format that you want to parse, and uses that to generate a parser.
 
 Parser generators have a long history, including tools like <command>lex</command> and
-`yacc` that date back to the early 1970's.  OCaml has its own
+<command>yacc</command> that date back to the early 1970's.  OCaml has its own
 alternatives, including <command>ocamllex</command>, which replaces <command>lex</command>, and
-<command>ocamlyacc</command> and <command>menhir</command>, which are replacements for `yacc`.  We'll
+<command>ocamlyacc</command> and <command>menhir</command>, which are replacements for <command>yacc</command>  We'll
 explore these tools in the course of walking through the
 implementation of a parser for the JSON serialization format that we
 discussed in [xref](#handling-json-data).
