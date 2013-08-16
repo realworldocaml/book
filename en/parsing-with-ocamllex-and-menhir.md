@@ -305,7 +305,7 @@ regular expressions.  Here's an example.
 
 The syntax here is something of a hybrid between OCaml syntax and
 traditional regular expression syntax.  The `int` regular expression
-specifies an optional leading `-`, followed by a digit from `1` to
+specifies an optional leading `-`, followed by a digit from `0` to
 `9`, followed by some number of digits from `0` to `9`.  The question
 mark is used to indicate an optional component of a regular
 expression, the square brackets are used to specify ranges, and the
