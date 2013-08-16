@@ -13,7 +13,7 @@ let next_line lexbuf =
 }
 
 (* part 1 *)
-let int = '-'? ['1'-'9'] ['0'-'9']*
+let int = '-'? ['0'-'9'] ['0'-'9']*
 
 (* part 2 *)
 let digit = ['0'-'9']
