@@ -21546,24 +21546,23 @@ let () =
   <sect1 id="async-basics">
     <title>Async basics</title>
     <para>
-      Consider a typical function for doing I/O in Core.
+      Recall how I/O is typically done in Core. Here's a simple example.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>async/main.topscript</filename> (part 1)</lineannotation>
 <prompt># </prompt><userinput>In_channel.read_all;;</userinput>
 <computeroutput>- : string -&gt; string = &lt;fun&gt;</computeroutput>
-</programlisting>
-    <para>
-      Since the function returns a concrete string, it has to block
-      until the read completes. The blocking nature of the call means
-      that no progress can be made on anything else until the read is
-      completed. Here's an example.
-    </para>
-    <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>async/main.topscript</filename> (part 2)</lineannotation>
 <prompt># </prompt><userinput>Out_channel.write_all &quot;test.txt&quot; ~data:&quot;This is only a test.&quot;;;</userinput>
 <computeroutput>- : unit = ()</computeroutput>
 <prompt># </prompt><userinput>In_channel.read_all &quot;test.txt&quot;;;</userinput>
 <computeroutput>- : string = &quot;This is only a test.&quot;</computeroutput>
 </programlisting>
+    <para>
+      From the type of <literal>In_channel.read_all</literal>, you can
+      see that it must be a blocking operation. In particular, the fact
+      that it returns a concrete string means it can't return until the
+      read has completed. The blocking nature of the call means that no
+      progress can be made on anything else until the read is completed.
+    </para>
     <para>
       In Async, well-behaved functions never block. Instead, they return
       a value of type <literal>Deferred.t</literal> that acts as a
@@ -21634,8 +21633,8 @@ let () =
 <computeroutput>- : string option = Some &quot;This is only a test.&quot;</computeroutput>
 </programlisting>
     <para>
-      In order to do real work with deferreds, we need a way of
-      sequencing deferred computations, which we do using
+      In order to do real work with deferreds, we need a way of waiting
+      for a deferred computation to finish, which we do using
       <literal>Deferred.bind</literal>. First, let's consider the
       type-signature of bind.
     </para>
@@ -21675,6 +21674,8 @@ let () =
 <computeroutput>val uppercase_file : string -&gt; unit Deferred.t = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>uppercase_file &quot;test.txt&quot;;;</userinput>
 <computeroutput>- : unit = ()</computeroutput>
+<prompt># </prompt><userinput>Reader.file_contents &quot;test.txt&quot;;;</userinput>
+<computeroutput>- : string = &quot;THIS IS ONLY A TEST.&quot;</computeroutput>
 </programlisting>
     <para>
       Writing out <literal>Deferred.bind</literal> explicitly can be
@@ -21713,12 +21714,12 @@ let () =
 </programlisting>
     <para>
       This looks reasonable enough, but as you can see, the compiler is
-      unhappy with the code. The issue here is that bind expects a
-      function that returns a deferred, but we've provided it a function
-      that simply returns the result. To make these signatures match, we
-      need a function for taking an ordinary value and wrapping it in a
-      deferred. This function is a standard part of Async, and is called
-      <literal>return</literal>:
+      unhappy. The issue here is that bind expects a function that
+      returns a deferred, but we've provided it a function that returns
+      the non-deferred result directly. To make these signatures match,
+      we need a function for taking an ordinary value and wrapping it in
+      a deferred. This function is a standard part of Async, and is
+      called <literal>return</literal>:
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>async/main.topscript</filename> (part 11)</lineannotation>
 <prompt># </prompt><userinput>return;;</userinput>
@@ -21785,18 +21786,16 @@ let () =
         <literal>bind</literal>, <literal>map</literal> and
         <literal>return</literal>, but sometimes you want to construct a
         deferred that you can determine explicitly with user-code. This
-        is done using an <emphasis>ivar</emphasis>, which is a handle
-        that lets you control precisely when a deferred becomes
-        determined.
+        is done using an <emphasis>ivar</emphasis>.
       </para>
       <para>
         There are three fundamental operations for working with an ivar;
         you can create one, using <literal>Ivar.create</literal>, you
         can read off the deferred that corresponds to the ivar in
         question, using <literal>Ivar.read</literal>, and you can fill
-        an ivar, thus causing that deferred to become determined, using
-        <literal>Ivar.fill</literal>. These operations are illustrated
-        below.
+        an ivar, thus causing the corresponding deferred to become
+        determined, using <literal>Ivar.fill</literal>. These operations
+        are illustrated below.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>async/main.topscript</filename> (part 15)</lineannotation>
 <prompt># </prompt><userinput>let ivar = Ivar.create ();;</userinput>
@@ -21813,9 +21812,8 @@ let () =
       <para>
         Ivars are something of a low-level feature; operators like map,
         bind and return are typically easier to use and think about. But
-        ivars can be useful when you want to build complicated
-        synchronization patterns that can't be constructed naturally
-        otherwise.
+        ivars can be useful when you want to build a synchronization
+        patterns that isn't already well supported.
       </para>
       <para>
         As an example, imagine we wanted a way of scheduling a sequence
@@ -21843,9 +21841,9 @@ let () =
         argument is of type <literal>unit</literal>). A deferred is
         handed back to the caller of <literal>schedule</literal> that
         will eventually be filled with the contents of the deferred
-        value returned by the thunk to be scheduled. To implement this,
-        we'll use a new operator called <literal>upon</literal>, which
-        has the following signature.
+        value returned by the thunk. To implement this, we'll use an
+        operator called <literal>upon</literal>, which has the following
+        signature.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>async/main.topscript</filename> (part 17)</lineannotation>
 <prompt># </prompt><userinput>upon;;</userinput>
@@ -21887,11 +21885,11 @@ let () =
 <computeroutput>module Delayer : Delayer_intf</computeroutput>
 </programlisting>
       <para>
-        This code isn't particularly long, but it is a bit subtle. In
+        This code isn't particularly long, but it is subtle. In
         particular, note how the queue of thunks is used to ensure that
         the enqueued actions are run in order, even if the thunks
         scheduled by <literal>upon</literal> are run out-of-order. This
-        is kind of subtlety typical of code that involves ivars and
+        kind of subtlety is typical of code that involves ivars and
         <literal>upon</literal>, and because of this, you should stick
         to the simpler map/bind/return style of working with deferreds
         when you can.
@@ -21934,8 +21932,8 @@ let rec copy_blocks buffer r w =
       Then, when that's complete and if a new block was returned, we
       write that block to the writer. Finally, we wait until the
       writer's buffers are flushed, waiting on the deferred returned by
-      <literal>Writer.flushed</literal>, at which point we recur. If we
-      hit an end-of-file condition, the loop is ended. The deferred
+      <literal>Writer.flushed</literal>, at which point we recurse. If
+      we hit an end-of-file condition, the loop is ended. The deferred
       returned by a call to <literal>copy_blocks</literal> becomes
       determined only once the end-of-file condition is hit.
     </para>
@@ -21986,10 +21984,10 @@ let run () =
       The result of calling <literal>Tcp.Server.create</literal> is a
       <literal>Tcp.Server.t</literal>, which is a handle to the server
       that lets you shut the server down. We don't use that
-      functionality here, so we explicitly ignore [server] to suppress
-      the unused-variables error. We put in a type annotation around the
-      ignored value to make the nature of the value we're ignoring
-      explicit.
+      functionality here, so we explicitly ignore
+      <literal>server</literal> to suppress the unused-variables error.
+      We put in a type annotation around the ignored value to make the
+      nature of the value we're ignoring explicit.
     </para>
     <para>
       The most important argument to
@@ -22013,8 +22011,7 @@ let () =
       One of the most common newbie errors with Async is to forget to
       run the scheduler. It can be a bewildering mistake, because
       without the scheduler, your program won't do anything at all; even
-      calls to <literal>printf</literal> won't actually reach the
-      terminal.
+      calls to <literal>printf</literal> won't reach the terminal.
     </para>
     <para>
       It's worth noting that even though we didn't spend much explicit
@@ -22054,8 +22051,8 @@ let () =
 </programlisting>
     <para>
       This can be surprising when you call a function like this
-      expecting it to return unit, and really it never returns. The
-      type-checker won't necessarily complain in such a case.
+      expecting it to return unit. The type-checker won't necessarily
+      complain in such a case.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>async/main.topscript</filename> (part 20)</lineannotation>
 <prompt># </prompt><userinput>let do_stuff n =</userinput>
@@ -22067,12 +22064,11 @@ let () =
 </programlisting>
     <para>
       With a name like <literal>loop_forever</literal>, the meaning is
-      clear enough in this case. But with something like
+      clear enough. But with something like
       <literal>Scheduler.go</literal>, the fact that it never returns is
       less clear, and so we use the type system to make it more explicit
-      by giving it a return type of <literal>never_returns</literal>. To
-      make it clearer how this works, let's do the same trick with
-      <literal>loop_forever</literal>.
+      by giving it a return type of <literal>never_returns</literal>.
+      Let's do the same trick with <literal>loop_forever</literal>.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>async/main.topscript</filename> (part 21)</lineannotation>
 <prompt># </prompt><userinput>let rec loop_forever () : never_returns = loop_forever ();;</userinput>
@@ -22081,10 +22077,10 @@ let () =
     <para>
       The type <literal>never_returns</literal> is uninhabited, so a
       function can't return a value of type
-      <literal>never_returns</literal>, which means only functions that
-      never return can have it as their return type! Now, if we rewrite
-      our <literal>do_stuff</literal> function, we'll get a helpful type
-      error.
+      <literal>never_returns</literal>, which means only a function that
+      never return can have <literal>never_returns</literal> as its
+      return type! Now, if we rewrite our <literal>do_stuff</literal>
+      function, we'll get a helpful type error.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>async/main.topscript</filename> (part 22)</lineannotation>
 <prompt># </prompt><userinput>let do_stuff n =</userinput>
@@ -22119,39 +22115,32 @@ let () =
     <sect2 id="improving-the-echo-server">
       <title>Improving the echo server</title>
       <para>
-        Let's try to go a little bit farther with our echo server. Let's
-        walk through a few small improvements:
+        Let's try to go a little bit farther with our echo server by
+        walking through a few improvements. In particular, we will
       </para>
       <itemizedlist>
         <listitem>
           <para>
-            Add a proper command-line interface with
-            <literal>Command</literal>
+            add a proper command-line interface with
+            <literal>Command</literal>,
           </para>
         </listitem>
         <listitem>
           <para>
-            Add a flag to specify the port to listen on, and a flag to
+            add a flag to specify the port to listen on, and a flag to
             make the server echo back the capitalized version of
-            whatever was sent to it.
+            whatever was sent to it,
           </para>
         </listitem>
         <listitem>
           <para>
-            Simplify the code using Async's <literal>Pipe</literal>
+            simplify the code using Async's <literal>Pipe</literal>
             interface.
           </para>
         </listitem>
       </itemizedlist>
       <para>
-        Here's the improved code below. There's both the
-        <literal>run</literal> function, which which actually starts the
-        server, and the command-line interface, which is the entry-point
-        of the program. Note the use of
-        <literal>Deferred.never</literal> in <literal>run</literal>,
-        which returns a deferred that never becomes determined. In this
-        case, we use <literal>Deferred.never</literal> because the
-        server in question doesn't shut down.
+        The code below does all of this.
       </para>
       <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>async/better_echo.ml</filename></lineannotation>
 open Core.Std
@@ -22182,14 +22171,21 @@ let () =
     (fun uppercase port () -&gt; run ~uppercase ~port)
   |&gt; Command.run</programlisting>
       <para>
-        The most notable change in the above code is the use of Async's
-        <literal>Pipe</literal>. A <literal>Pipe</literal> is a
-        communication channel that's used for connecting different parts
-        of your program. You can think of it as a consumer/producer
-        queue that uses deferreds for communicating when the pipe is
-        ready to be read from or written to. Our use of pipes is fairly
-        minimal here, but they are an important part of Async, so it's
-        worth discussing them in some detail.
+        Note the use of <literal>Deferred.never</literal> in the
+        <literal>run</literal> function. As you might guess from the
+        name <literal>Deferred.never</literal> returns a deferred that
+        is never determined. In this case, that indicates that the echo
+        server doesn't ever shut down.
+      </para>
+      <para>
+        The biggest change in the above code is the use of Async's
+        <literal>Pipe</literal>. A <literal>Pipe</literal> is an
+        asynchronous communication channel that's used for connecting
+        different parts of your program. You can think of it as a
+        consumer/producer queue that uses deferreds for communicating
+        when the pipe is ready to be read from or written to. Our use of
+        pipes is fairly minimal here, but they are an important part of
+        Async, so it's worth discussing them in some detail.
       </para>
       <para>
         Pipes are created in connected read/write pairs, as you can see
@@ -22204,9 +22200,9 @@ let () =
         <literal>r</literal> and <literal>w</literal> are really just
         read and write handles to the same underlying object. Note that
         <literal>r</literal> and <literal>w</literal> have weakly
-        polymorphic types. That's because a pipe is mutable and so can
-        contain elements of only one type, which will be settled by the
-        compiler once we try to use the pipe for anything.
+        polymorphic types, as discussed in
+        <xref linkend="imperative-programming"/>, and so can
+        only contain values of a single yet to be determined type.
       </para>
       <para>
         If we just try and write to the writer, we'll see that we block
@@ -22267,9 +22263,10 @@ let () =
       <para>
         The command-line parsing for this program is based on the
         <literal>Command</literal> library that we introduced in
-        <xref linkend="command-line-parsing"/>. When you open
-        <literal>Async.Std</literal>, the <literal>Command</literal>
-        module has added to it the <literal>async_basic</literal> call:
+        <xref linkend="command-line-parsing"/>. Opening
+        <literal>Async.Std</literal>, shadows the
+        <literal>Command</literal> module with an extended version that
+        contains the <literal>async_basic</literal> call.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>async/main.topscript</filename> (part 27)</lineannotation>
 <prompt># </prompt><userinput>Command.async_basic;;</userinput>
@@ -22370,9 +22367,8 @@ let query_uri query =
         The HTTP response from DuckDuckGo is in JSON, a common (and
         thankfully simple) format that is specified in
         <ulink url="http://www.ietf.org/rfc/rfc4627.txt">RFC4627</ulink>.
-        We'll parse the JSON data using the Yojson library, which we
-        already introduced in
-        <xref linkend="handling-json-data"/>.
+        We'll parse the JSON data using the Yojson library, which was
+        introduced in <xref linkend="handling-json-data"/>.
       </para>
       <para>
         We expect the response from DuckDuckGo to come across as a JSON
@@ -22442,8 +22438,7 @@ let get_definition word =
         The <literal>get</literal> call takes as a required argument a
         URI, and returns a deferred value containing a
         <literal>Cohttp.Response.t</literal> (which we ignore) and a
-        pipe reader to which the body of the request will be written to
-        as it is received.
+        pipe reader to which the body of the request will be written.
       </para>
       <para>
         In this case, the HTTP body probably isn't very large, so we
@@ -22548,7 +22543,7 @@ let () =
     (fun words () -&gt; search_and_print words)
   |&gt; Command.run</programlisting>
       <para>
-        And that's all we need to create a simple but usable definition
+        And that's all we need for a simple but usable definition
         searcher.
       </para>
       <programlisting language="console"><lineannotation>✎ Terminal: <filename>async/run_search.out</filename></lineannotation>
@@ -22610,7 +22605,7 @@ let () =
 <computeroutput>(lib/monitor.ml.Error_</computeroutput>
 <computeroutput> ((exn Exit) (backtrace (&quot;&quot;))</computeroutput>
 <computeroutput>  (monitor</computeroutput>
-<computeroutput>   (((name block_on_async) (here ()) (id 46) (has_seen_error true)</computeroutput>
+<computeroutput>   (((name block_on_async) (here ()) (id 55) (has_seen_error true)</computeroutput>
 <computeroutput>     (someone_is_listening true) (kill_index 0))</computeroutput>
 <computeroutput>    ((name main) (here ()) (id 1) (has_seen_error false)</computeroutput>
 <computeroutput>     (someone_is_listening false) (kill_index 0)))))).</computeroutput>
@@ -22642,7 +22637,7 @@ let () =
 <computeroutput>(lib/monitor.ml.Error_</computeroutput>
 <computeroutput> ((exn Exit) (backtrace (&quot;&quot;))</computeroutput>
 <computeroutput>  (monitor</computeroutput>
-<computeroutput>   (((name block_on_async) (here ()) (id 50) (has_seen_error true)</computeroutput>
+<computeroutput>   (((name block_on_async) (here ()) (id 59) (has_seen_error true)</computeroutput>
 <computeroutput>     (someone_is_listening true) (kill_index 0))</computeroutput>
 <computeroutput>    ((name main) (here ()) (id 1) (has_seen_error false)</computeroutput>
 <computeroutput>     (someone_is_listening false) (kill_index 0)))))).</computeroutput>
@@ -22722,9 +22717,9 @@ let () =
 <computeroutput>(lib/monitor.ml.Error_</computeroutput>
 <computeroutput> ((exn Exit) (backtrace (&quot;&quot;))</computeroutput>
 <computeroutput>  (monitor</computeroutput>
-<computeroutput>   (((name &quot;blow up monitor&quot;) (here ()) (id 62) (has_seen_error true)</computeroutput>
+<computeroutput>   (((name &quot;blow up monitor&quot;) (here ()) (id 71) (has_seen_error true)</computeroutput>
 <computeroutput>     (someone_is_listening false) (kill_index 0))</computeroutput>
-<computeroutput>    ((name block_on_async) (here ()) (id 61) (has_seen_error false)</computeroutput>
+<computeroutput>    ((name block_on_async) (here ()) (id 70) (has_seen_error false)</computeroutput>
 <computeroutput>     (someone_is_listening true) (kill_index 0))</computeroutput>
 <computeroutput>    ((name main) (here ()) (id 1) (has_seen_error false)</computeroutput>
 <computeroutput>     (someone_is_listening false) (kill_index 0)))))).</computeroutput>
@@ -22811,9 +22806,9 @@ let () =
 <computeroutput>(lib/monitor.ml.Error_</computeroutput>
 <computeroutput> ((exn Not_found) (backtrace (&quot;&quot;))</computeroutput>
 <computeroutput>  (monitor</computeroutput>
-<computeroutput>   (((name (id 66)) (here ()) (id 66) (has_seen_error true)</computeroutput>
+<computeroutput>   (((name (id 75)) (here ()) (id 75) (has_seen_error true)</computeroutput>
 <computeroutput>     (someone_is_listening true) (kill_index 0))</computeroutput>
-<computeroutput>    ((name block_on_async) (here ()) (id 65) (has_seen_error true)</computeroutput>
+<computeroutput>    ((name block_on_async) (here ()) (id 74) (has_seen_error true)</computeroutput>
 <computeroutput>     (someone_is_listening true) (kill_index 0))</computeroutput>
 <computeroutput>    ((name main) (here ()) (id 1) (has_seen_error false)</computeroutput>
 <computeroutput>     (someone_is_listening false) (kill_index 0)))))).</computeroutput>
@@ -22997,7 +22992,7 @@ let print_result (word,definition) =
 </programlisting>
     <para>
       Sometimes, however, we want to wait only for the first of multiple
-      events to occur. This happens particularly often when dealing with
+      events to occur. This happens particularly when dealing with
       timeouts. In that case, we can use the call
       <literal>Deferred.any</literal>, which, given a list of deferreds,
       returns a single deferred that will become determined once any of
@@ -23009,11 +23004,11 @@ let print_result (word,definition) =
 <computeroutput>- : string = &quot;half a second&quot;</computeroutput>
 </programlisting>
     <para>
-      Let's use this to add timeouts to our DuckDuckGo searches. We'll
-      do this by writing a wrapper for <literal>get_definition</literal>
-      that takes a timeout (in the form of a
-      <literal>Time.Span.t</literal>) as an argument, and returns either
-      the definition, or, if that takes too long, the timeout.
+      Let's use this to add timeouts to our DuckDuckGo searches. The
+      code below is a wrapper for <literal>get_definition</literal> that
+      takes a timeout (in the form of a <literal>Time.Span.t</literal>),
+      and returns either the definition, or, if that takes too long, an
+      error.
     </para>
     <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>async/search_with_timeout.ml</filename> (part 1)</lineannotation>
 let get_definition_with_timeout ~server ~timeout word =
@@ -23083,19 +23078,18 @@ let get_definition_with_timeout ~server ~timeout word =
       This will work, and will cause the connection to shutdown cleanly
       when we time out; but our code no longer explicitly knows whether
       or not the timeout has kicked in. In particular, the error message
-      on a timeout will now be <literal>Unexpected failure</literal>
-      rather than <literal>Timed out</literal>, which it was in our
-      previous implementation. This is a minor issue in this case, but
-      if we wanted to have special behavior in the case of a timeout, it
-      would be a more serious issue.
+      on a timeout will now be
+      <literal>&quot;Unexpected failure&quot;</literal> rather than
+      <literal>&quot;Timed out&quot;</literal>, which it was in our
+      previous implementation.
     </para>
     <para>
       We can get more precise handling of timeouts using Async's
-      <literal>choose</literal> operator, which lets you pick between a
-      collection of different deferreds, reacting to exactly one of
-      them. Each deferred is combined, using the function
+      <literal>choose</literal> function. <literal>choose</literal> lets
+      you pick between a collection of different deferreds, reacting to
+      exactly one of them. Each deferred is paired, using the function
       <literal>choice</literal>, with a function that is called if and
-      only if that is the chosen deferred. Here's the type signature of
+      only if that is deferred is chosen. Here's the type signature of
       <literal>choice</literal> and <literal>choose</literal>:
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>async/main.topscript</filename> (part 41)</lineannotation>
@@ -23105,12 +23099,11 @@ let get_definition_with_timeout ~server ~timeout word =
 <computeroutput>- : 'a Deferred.choice list -&gt; 'a Deferred.t = &lt;fun&gt;</computeroutput>
 </programlisting>
     <para>
-      <literal>choose</literal> provides no guarantee that the
-      <literal>choice</literal> built around the first deferred to
-      become determined will in fact be chosen. But
+      Note that there's no guarantee that the winning deferred will be
+      the one that becomes determined first. But
       <literal>choose</literal> does guarantee that only one
       <literal>choice</literal> will be chosen, and only the chosen
-      <literal>choice</literal> will execute the attached closure.
+      <literal>choice</literal> will execute the attached function.
     </para>
     <para>
       In the following, we use <literal>choose</literal> to ensure that
@@ -23158,18 +23151,19 @@ let get_definition_with_timeout ~server ~timeout word =
   <sect1 id="working-with-system-threads">
     <title>Working with system threads</title>
     <para>
-      OCaml does have built-in support for true system threads,
-      <emphasis>i.e.</emphasis>, kernel-level threads whose interleaving
-      is controlled by the kernel. We discussed in the beginning of the
-      chapter why Async is generally a better choice than system
-      threads, but even if you mostly use Async, OCaml's system threads
-      are sometimes necessary, and it's worth understanding them.
+      Although we haven't worked with them yet, OCaml does have built-in
+      support for true system threads, <emphasis>i.e.</emphasis>,
+      kernel-level threads whose interleaving is controlled by the
+      operating system. We discussed in the beginning of the chapter why
+      Async is generally a better choice than system threads, but even
+      if you mostly use Async, OCaml's system threads are sometimes
+      necessary, and it's worth understanding them.
     </para>
     <para>
       The most surprising aspect of OCaml's system threads is that they
-      don't afford you any access to physical parallelism on the
-      machine. That's because OCaml's runtime has a single runtime lock
-      which at most one thread can be holding at a time.
+      don't afford you any access to physical parallelism. That's
+      because OCaml's runtime has a single runtime lock which at most
+      one thread can be holding at a time.
     </para>
     <para>
       Given that threads don't provide physical parallelism, why are
@@ -23179,19 +23173,19 @@ let get_definition_with_timeout ~server ~timeout word =
       The most common reason for using system threads is that there are
       some operating system calls that have no non-blocking alternative,
       which means that you can't run them directly in a system like
-      Async without blocking out the entire system. For this reason,
-      Async maintains a thread pool for running such calls. Most of the
-      time, as a user of Async you don't need to think about this, but
-      it is happening under the covers.
+      Async without blocking your entire program. For this reason, Async
+      maintains a thread pool for running such calls. Most of the time,
+      as a user of Async you don't need to think about this, but it is
+      happening under the covers.n
     </para>
     <para>
-      Another reasonably common reason to have multiple threads is to
-      deal with non-OCaml libraries that have their own event loop or
-      for whatever reason need their own threads. In that case, it's
-      sometimes useful to run some OCaml code on the foreign thread as
-      part of the communication to your main program. OCaml's foreign
-      function interface is discussed in more detail in
-      <xref linkend="foreign-function-interface"/>.
+      Another reason to have multiple threads is to deal with non-OCaml
+      libraries that have their own event loop or for another reason
+      need their own threads. In that case, it's sometimes useful to run
+      some OCaml code on the foreign thread as part of the communication
+      to your main program. (OCaml's foreign function interface is
+      discussed in more detail in
+      <xref linkend="foreign-function-interface"/>.)
     </para>
     <para>
       Another occasional motivation for using true system threads is to
@@ -23283,8 +23277,8 @@ let get_definition_with_timeout ~server ~timeout word =
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>async/main.topscript</filename> (part 44)</lineannotation>
 <prompt># </prompt><userinput>log_delays (after (sec 1.));;</userinput>
 <computeroutput>- : Core.Span.t list =</computeroutput>
-<computeroutput>[0.000953674ms; 100.226ms; 200.436ms; 300.621ms; 400.82ms; 501.025ms;</computeroutput>
-<computeroutput> 601.222ms; 701.439ms; 801.622ms; 901.819ms; 1.00202s]</computeroutput>
+<computeroutput>[0.000953674ms; 100.245ms; 200.441ms; 300.638ms; 400.838ms; 501.039ms;</computeroutput>
+<computeroutput> 601.247ms; 701.441ms; 801.644ms; 901.839ms; 1.00204s]</computeroutput>
 </programlisting>
     <para>
       Now, if instead of simply waiting a second, what if we have a busy
@@ -23297,7 +23291,7 @@ let get_definition_with_timeout ~server ~timeout word =
 <userinput>  ;;</userinput>
 <computeroutput>val busy_loop : int -&gt; unit = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>log_delays (Deferred.unit &gt;&gt;| fun () -&gt; busy_loop 100);;</userinput>
-<computeroutput>- : Core.Span.t list = [0.000953674ms; 242.599ms]</computeroutput>
+<computeroutput>- : Core.Span.t list = [0.000953674ms; 242.559ms]</computeroutput>
 </programlisting>
     <para>
       As you can see, instead of waking up ten times a second,
@@ -23311,15 +23305,15 @@ let get_definition_with_timeout ~server ~timeout word =
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>async/main.topscript</filename> (part 46)</lineannotation>
 <prompt># </prompt><userinput>log_delays (In_thread.run (fun () -&gt; busy_loop 100));;</userinput>
-<computeroutput>- : Core.Span.t list = [0.00214577ms; 244.007ms]</computeroutput>
+<computeroutput>- : Core.Span.t list = [0.000953674ms; 243.627ms]</computeroutput>
 </programlisting>
     <para>
       Now <literal>log_delays</literal> does get a chance to run, but
       not nearly as often as it would like to. The reason for this is
       that that now that we're using system threads, we are at the mercy
-      of the operating system in terms of when each thread gets
-      scheduled. The behavior becomes very dependent on the OS and how
-      you configure the priority of your processes within the OS itself.
+      of the operating system to decide when each thread gets scheduled.
+      The behavior of threads is very much dependent on the operating
+      system and how your system is configured.
     </para>
     <para>
       Another tricky aspect of dealing with OCaml threads has to do with
@@ -23339,7 +23333,7 @@ let get_definition_with_timeout ~server ~timeout word =
 <userinput>  ;;</userinput>
 <computeroutput>val noalloc_busy_loop : int -&gt; unit = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>log_delays (In_thread.run (fun () -&gt; noalloc_busy_loop 500));;</userinput>
-<computeroutput>- : Core.Span.t list = [0.00190735ms; 847.398ms]</computeroutput>
+<computeroutput>- : Core.Span.t list = [0.000953674ms; 917.106ms]</computeroutput>
 </programlisting>
     <para>
       Even though <literal>noalloc_busy_loop</literal> was running in a
