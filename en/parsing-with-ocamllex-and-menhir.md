@@ -211,13 +211,11 @@ these are parsed next.
 
 ### Parsing sequences
 
-The rule for `object_fields` is shown below, and is really just a thin
-wrapper that reverses the list returned by the following rule for
-`rev_object_fields`.  Note that the first production in
-`rev_object_fields` has an empty left-hand side.  That's because what
-we're matching on in this case is an empty sequence of tokens.  The
-comment `/* empty */` is used to make this clear.  C-style comment
-syntax is used within the body of a rule.
+The rule for `object_fields` is shown below, and is really just a thin wrapper
+that reverses the list returned by the following rule for `rev_object_fields`.
+Note that the first production in `rev_object_fields` has an empty left-hand
+side, because what we're matching on in this case is an empty sequence of
+tokens.  The comment `(* empty *)` is used to make this clear.
 
 ```frag
 ((typ ocaml)(name parsing/parser.mly)(part 4))
