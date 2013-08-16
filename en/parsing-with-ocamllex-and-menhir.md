@@ -110,9 +110,9 @@ simple AST we used for representing JSON data in
 This representation is much richer than our token stream, capturing
 the fact that JSON values can be nested inside each other, and that
 JSON has a variety of value types, including numbers, strings, arrays,
-and objects.  The above type is effectively an AST, and the job of the
-parser we'll write will be to convert a token stream into a value of
-this type, as shown below.
+and objects.  The job of the parser we'll write will be to convert a
+token stream into a value of this AST type, as shown below for our
+earlier JSON example.
 
 ```frag
 ((typ ocaml)(name parsing/parsed_example.ml))
