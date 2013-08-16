@@ -20621,10 +20621,8 @@ null
       memory buffers. The OCaml type of an s-expression is quite simple.
     </para>
     <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>sexpr/sexp.mli</filename></lineannotation>
-open Core.Std
-
 module Sexp : sig
-  type t = 
+  type t =
   | Atom of string
   | List of t list
 end</programlisting>
@@ -20640,10 +20638,10 @@ end</programlisting>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>sexpr/print_sexp.topscript</filename></lineannotation>
 <prompt># </prompt><userinput>Sexp.List [</userinput>
 <userinput>    Sexp.Atom &quot;this&quot;;</userinput>
-<userinput>    Sexp.List [ Sexp.Atom &quot;is&quot;; Sexp.Atom &quot;a&quot;];</userinput>
+<userinput>    Sexp.List [ Sexp.Atom &quot;is&quot;; Sexp.Atom &quot;an&quot;];</userinput>
 <userinput>    Sexp.List [ Sexp.Atom &quot;s&quot;; Sexp.Atom &quot;expression&quot; ];</userinput>
 <userinput>  ];;</userinput>
-<computeroutput>- : Sexp.t = (this (is a) (s expression))</computeroutput>
+<computeroutput>- : Sexp.t = (this (is an) (s expression))</computeroutput>
 </programlisting>
     <para>
       This prints out nicely because Core registers a pretty printer
@@ -20651,10 +20649,10 @@ end</programlisting>
       converting s-expressions to and from strings.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>sexpr/sexp_printer.topscript</filename></lineannotation>
-<prompt># </prompt><userinput>Sexp.of_string (&quot;(1 2 (3 4))&quot;) ;;</userinput>
-<computeroutput>- : Sexp.t = (1 2 (3 4))</computeroutput>
 <prompt># </prompt><userinput>Sexp.to_string (Sexp.List [Sexp.Atom &quot;1&quot;; Sexp.Atom &quot;2&quot;]) ;;</userinput>
 <computeroutput>- : string = &quot;(1 2)&quot;</computeroutput>
+<prompt># </prompt><userinput>Sexp.of_string (&quot;(1 2 (3 4))&quot;) ;;</userinput>
+<computeroutput>- : Sexp.t = (1 2 (3 4))</computeroutput>
 </programlisting>
     <para>
       We can write a function to manually map an OCaml record type to an
@@ -20717,6 +20715,10 @@ end</programlisting>
 <computeroutput>- : int = 1</computeroutput>
 <prompt># </prompt><userinput>List.t_of_sexp Int.t_of_sexp (Sexp.of_string &quot;(1 2 3)&quot;);;</userinput>
 <computeroutput>- : int list = [1; 2; 3]</computeroutput>
+<prompt># </prompt><userinput>List.t_of_sexp Int.t_of_sexp (Sexp.of_string &quot;(1 2 three)&quot;);;</userinput>
+<computeroutput>Exception:</computeroutput>
+<computeroutput>(Sexplib.Conv.Of_sexp_error (Failure &quot;int_of_sexp: (Failure int_of_string)&quot;)</computeroutput>
+<computeroutput> three).</computeroutput>
 </programlisting>
     <note>
     <title>
@@ -21170,8 +21172,8 @@ let () =
         If you were to run this on a malformatted file, say, this one:
       </para>
       <programlisting language="scheme"><lineannotation>✎ S-expression: <filename>sexpr/foo_broken_example.scm</filename></lineannotation>
-((a &quot;&quot;)
- (b &quot;&quot;)
+((a &quot;not-an-integer&quot;)
+ (b &quot;not-an-integer&quot;)
  (c 1.0))
 </programlisting>
       <para>
@@ -21183,7 +21185,7 @@ let () =
 <computeroutput>Uncaught exception:</computeroutput>
 <computeroutput>  </computeroutput>
 <computeroutput>  (Sexplib.Conv.Of_sexp_error</computeroutput>
-<computeroutput>   (Failure &quot;int_of_sexp: (Failure int_of_string)&quot;) &quot;&quot;)</computeroutput>
+<computeroutput>   (Failure &quot;int_of_sexp: (Failure int_of_string)&quot;) not-an-integer)</computeroutput>
 <computeroutput> </computeroutput>
 <computeroutput>Raised at file &quot;lib/conv.ml&quot;, line 281, characters 36-72</computeroutput>
 <computeroutput>Called from file &quot;lib/core_int.ml&quot;, line 6, characters 7-14</computeroutput>
@@ -21231,7 +21233,7 @@ let () =
 <computeroutput>  (Sexplib.Conv.Of_sexp_error</computeroutput>
 <computeroutput>   (Sexplib.Sexp.Annotated.Conv_exn foo_broken_example.scm:2:5</computeroutput>
 <computeroutput>    (Failure &quot;int_of_sexp: (Failure int_of_string)&quot;))</computeroutput>
-<computeroutput>   &quot;&quot;)</computeroutput>
+<computeroutput>   not-an-integer)</computeroutput>
 <computeroutput> </computeroutput>
 <computeroutput>Raised at file &quot;lib/pre_sexp.ml&quot;, line 1145, characters 12-58</computeroutput>
 <computeroutput>Called from file &quot;read_foo_better_errors.ml&quot;, line 10, characters 10-68</computeroutput>
@@ -27019,14 +27021,14 @@ let () =
       <para>
         This class of bug (due to a single errant character) can be hard
         to spot in a large body of code. Luckily, there's a great tool
-        available via OPAM called <literal>ocp-indent</literal> that
+        available via OPAM called <command>ocp-indent</command> that
         applies structured indenting rules to your source code on a
         line-by-line basis. This not only beautifies your code layout,
         but it also makes this syntax error much easier to locate.
       </para>
       <para>
         Let's run our erroneous file through
-        <literal>ocp-indent</literal> and see how it processes it.
+        <command>ocp-indent</command> and see how it processes it.
       </para>
       <programlisting language="console"><lineannotation>✎ Terminal: <filename>front-end/indent_follow_on_function.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>ocp-indent follow_on_function.ml</userinput>
@@ -27050,7 +27052,7 @@ let () =
         indented as if it were part of the first
         <literal>concat_and_print</literal> definition, and the errant
         semicolon is now much easier to spot. We just need to remove
-        that semicolon and re-run <literal>ocp-indent</literal> to
+        that semicolon and re-run <command>ocp-indent</command> to
         verify that the syntax is correct.
       </para>
       <programlisting language="console"><lineannotation>✎ Terminal: <filename>front-end/indent_follow_on_function_fixed.out</filename></lineannotation>
@@ -27071,7 +27073,7 @@ let () =
 <computeroutput>  ()</computeroutput>
 </programlisting>
       <para>
-        The <literal>ocp-indent</literal>
+        The <command>ocp-indent</command>
         <ulink url="https://github.com/OCamlPro/ocp-indent">homepage</ulink>
         documents how to integrate it with your favorite editor. All the
         Core libraries are formatted using it to ensure consistency, and
@@ -28437,7 +28439,7 @@ let w = X.B.w</programlisting>
       <title>Using ocp-index for auto-completion</title>
       <para>
         One such command-line tool to display auto-completion
-        information in your editor is <literal>ocp-index</literal>.
+        information in your editor is <command>ocp-index</command>.
         Install it via OPAM as follows.
       </para>
       <programlisting language="console"><lineannotation>✎ Terminal: <filename>front-end/install_ocp_index.out</filename></lineannotation>
@@ -28451,7 +28453,7 @@ let w = X.B.w</programlisting>
         module defined bindings for the Ncurses library. First, compile
         the interfaces with <literal>-bin-annot</literal> so that we can
         obtain the <literal>cmt</literal> and <literal>cmti</literal>
-        files, and then run <literal>ocp-index</literal> in completion
+        files, and then run <command>ocp-index</command> in completion
         mode.
       </para>
       <programlisting language="ocaml"><lineannotation>✎ Terminal: <filename>ocp-index/index_ncurses.out</filename></lineannotation>
@@ -28474,11 +28476,10 @@ let w = X.B.w</programlisting>
 <computeroutput>Ncurses.cbreak val unit -&gt; int</computeroutput>
 </programlisting>
       <para>
-        You need to pass
-        <literal>ocp-indexz a set of directories to search for</literal>cmt`
-        files in, and a fragment of text to autocomplete. As you can
-        imagine, autocompletion is invaluable on larger codebases. See
-        the
+        You need to pass <command>ocp-index</command> a set of
+        directories to search for <literal>cmt</literal> files in, and a
+        fragment of text to autocomplete. As you can imagine,
+        autocompletion is invaluable on larger codebases. See the
         <ulink url="https://github.com/ocamlpro/ocp-index">ocp-index</ulink>
         homepage for more information on how to integrate it with your
         favorite editor.
@@ -28608,7 +28609,7 @@ let v = Foo</programlisting>
       <para>
         You'll rarely need to look at this raw output from the compiler
         unless you're building IDE tools such as
-        <literal>ocp-index</literal>, or are hacking on extensions to
+        <command>ocp-index</command>, or are hacking on extensions to
         the core compiler itself. However, it's useful to know that this
         intermediate form exists before we delve further into the code
         generation process next in
