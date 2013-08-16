@@ -320,12 +320,15 @@ creating one big and impenetrable expression.
 ((typ ocaml)(name parsing/lexer.mll)(part 2))
 ```
 
-Finally, we define whitespace, newlines, identifiers, and hex
-constants.
+Finally, we define whitespace, newlines and identifiers.
 
 ```frag
 ((typ ocaml)(name parsing/lexer.mll)(part 3))
 ```
+
+The `newline` introduces the `|` operator which lets one of several alternative
+regular expressions match (in this case, the various carriage return
+combinations of CR, LF, or CRLF).
 
 ### Lexing rules
 
