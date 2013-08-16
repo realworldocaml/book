@@ -1429,7 +1429,7 @@ sum [1;2;3]
 <prompt># </prompt><userinput>log_entry (Some Time.epoch) &quot;A long long time ago&quot;;;</userinput>
 <computeroutput>- : string = &quot;1970-01-01 01:00:00 -- A long long time ago&quot;</computeroutput>
 <prompt># </prompt><userinput>log_entry None &quot;Up to the minute&quot;;;</userinput>
-<computeroutput>- : string = &quot;2013-08-14 17:20:37 -- Up to the minute&quot;</computeroutput>
+<computeroutput>- : string = &quot;2013-08-16 16:45:59 -- Up to the minute&quot;</computeroutput>
 </programlisting>
       <para>
         This example uses Core's <literal>Time</literal> module for
@@ -3897,10 +3897,6 @@ val numeric_deriv :
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>lists-and-patterns/main.topscript</filename> (part 10)</lineannotation>
 <prompt># </prompt><userinput>#require &quot;core_bench&quot;;;</userinput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/textutils: added to search path</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/textutils/textutils.cma: loaded</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/core_bench: added to search path</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/core_bench/core_bench.cma: loaded</computeroutput>
 <prompt># </prompt><userinput>open Core_bench.Std;;</userinput>
 <prompt># </prompt><userinput>let run_bench tests =</userinput>
 <userinput>  Bench.bench</userinput>
@@ -3919,7 +3915,7 @@ val numeric_deriv :
 <computeroutput>                                         </computeroutput>
 <computeroutput>  Name             Time (ns)   % of max  </computeroutput>
 <computeroutput> ---------------- ----------- ---------- </computeroutput>
-<computeroutput>  plus_one_match       46.81      68.21  </computeroutput>
+<computeroutput>  plus_one_match       46.82      68.22  </computeroutput>
 <computeroutput>  plus_one_if          68.63     100.00  </computeroutput>
 <computeroutput>                                         </computeroutput>
 <computeroutput>- : unit = ()</computeroutput>
@@ -3954,8 +3950,8 @@ val numeric_deriv :
 <computeroutput>                                 </computeroutput>
 <computeroutput>  Name     Time (ns)   % of max  </computeroutput>
 <computeroutput> -------- ----------- ---------- </computeroutput>
-<computeroutput>  sum_if     110_808     100.00  </computeroutput>
-<computeroutput>  sum         22_374      20.19  </computeroutput>
+<computeroutput>  sum_if     110_487     100.00  </computeroutput>
+<computeroutput>  sum         22_354      20.23  </computeroutput>
 <computeroutput>                                 </computeroutput>
 <computeroutput>- : unit = ()</computeroutput>
 </programlisting>
@@ -5904,13 +5900,6 @@ type &lt;record-name&gt; =
   </para>
   <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>records/main.topscript</filename> (part 1)</lineannotation>
 <prompt># </prompt><userinput>#require &quot;core_extended&quot;;;</userinput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/pcre: added to search path</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/pcre/pcre.cma: loaded</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/textutils: added to search path</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/textutils/textutils.cma: loaded</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/custom_printf/custom_printf.cma: loaded</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/core_extended: added to search path</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/core_extended/core_extended.cma: loaded</computeroutput>
 <prompt># </prompt><userinput>open Core_extended.Std;;</userinput>
 <prompt># </prompt><userinput>let my_host =</userinput>
 <userinput>    let sh = Shell.sh_one_exn in</userinput>
@@ -5921,7 +5910,7 @@ type &lt;record-name&gt; =
 <userinput>    };;</userinput>
 <computeroutput>val my_host : host_info =</computeroutput>
 <computeroutput>  {hostname = &quot;ocaml-www1&quot;; os_name = &quot;Linux&quot;; cpu_arch = &quot;unknown&quot;;</computeroutput>
-<computeroutput>   timestamp = 2013-08-14 17:23:15.479568+01:00}</computeroutput>
+<computeroutput>   timestamp = 2013-08-16 16:48:37.909734+01:00}</computeroutput>
 </programlisting>
   <para>
     You might wonder how the compiler inferred that
@@ -5973,7 +5962,7 @@ type &lt;record-name&gt; =
 <userinput>       sprintf &quot;%s (%s / %s, on %s)&quot; h os c (Time.to_sec_string ts);;</userinput>
 <computeroutput>val host_info_to_string : host_info -&gt; string = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>host_info_to_string my_host;;</userinput>
-<computeroutput>- : string = &quot;ocaml-www1 (Linux / unknown, on 2013-08-14 17:23:15)&quot;</computeroutput>
+<computeroutput>- : string = &quot;ocaml-www1 (Linux / unknown, on 2013-08-16 16:48:37)&quot;</computeroutput>
 </programlisting>
     <para>
       Note that the pattern that we used had only a single case, rather
@@ -6134,7 +6123,7 @@ type &lt;record-name&gt; =
 <computeroutput>val my_host : host_info =</computeroutput>
 <computeroutput>  {hostname = &quot;ocaml-www1&quot;; os_name = &quot;Linux&quot;; cpu_arch = &quot;unknown&quot;;</computeroutput>
 <computeroutput>   os_release = &quot;3.2.0-1-amd64&quot;;</computeroutput>
-<computeroutput>   timestamp = 2013-08-14 17:23:21.776830+01:00}</computeroutput>
+<computeroutput>   timestamp = 2013-08-16 16:48:44.201609+01:00}</computeroutput>
 </programlisting>
     <para>
       In the above code, we defined variables corresponding to the
@@ -6743,12 +6732,12 @@ type &lt;record-name&gt; =
 <userinput>                credentials = &quot;Xy2d9W&quot;; }</userinput>
 <userinput>  ;;</userinput>
 <computeroutput>val logon : Logon.t =</computeroutput>
-<computeroutput>  {Logon.session_id = &quot;26685&quot;; time = 2013-08-14 17:23:26.952844+01:00;</computeroutput>
+<computeroutput>  {Logon.session_id = &quot;26685&quot;; time = 2013-08-16 16:48:49.400690+01:00;</computeroutput>
 <computeroutput>   user = &quot;yminsky&quot;; credentials = &quot;Xy2d9W&quot;}</computeroutput>
 <prompt># </prompt><userinput>show_field Logon.Fields.user Fn.id logon;;</userinput>
 <computeroutput>- : string = &quot;user: yminsky&quot;</computeroutput>
 <prompt># </prompt><userinput>show_field Logon.Fields.time Time.to_string logon;;</userinput>
-<computeroutput>- : string = &quot;time: 2013-08-14 17:23:26.952844+01:00&quot;</computeroutput>
+<computeroutput>- : string = &quot;time: 2013-08-16 16:48:49.400690+01:00&quot;</computeroutput>
 </programlisting>
     <para>
       As a side note, the above is our first use of the
@@ -6807,7 +6796,7 @@ type &lt;record-name&gt; =
 <computeroutput>val print_logon : Logon.t -&gt; unit = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>print_logon logon;;</userinput>
 <computeroutput>session_id: 26685</computeroutput>
-<computeroutput>time: 2013-08-14 17:23:26.952844+01:00</computeroutput>
+<computeroutput>time: 2013-08-16 16:48:49.400690+01:00</computeroutput>
 <computeroutput>user: yminsky</computeroutput>
 <computeroutput>credentials: Xy2d9W</computeroutput>
 <computeroutput>- : unit = ()</computeroutput>
@@ -8956,9 +8945,9 @@ let () =
 <computeroutput>                                                                </computeroutput>
 <computeroutput>  Name                           Cycles   Time (ns)   % of max  </computeroutput>
 <computeroutput> ------------------------------ -------- ----------- ---------- </computeroutput>
-<computeroutput>  simple computation                280         117      76.98  </computeroutput>
-<computeroutput>  simple computation w/handler      308         129      84.78  </computeroutput>
-<computeroutput>  end with exn                      363         152     100.00  </computeroutput>
+<computeroutput>  simple computation                279         117      76.72  </computeroutput>
+<computeroutput>  simple computation w/handler      307         128      84.29  </computeroutput>
+<computeroutput>  end with exn                      364         152     100.00  </computeroutput>
 <computeroutput>                                                                </computeroutput>
 </programlisting>
       <para>
@@ -8973,9 +8962,9 @@ let () =
 <computeroutput>                                                                </computeroutput>
 <computeroutput>  Name                           Cycles   Time (ns)   % of max  </computeroutput>
 <computeroutput> ------------------------------ -------- ----------- ---------- </computeroutput>
-<computeroutput>  simple computation                278         116      83.46  </computeroutput>
-<computeroutput>  simple computation w/handler      307         128      92.14  </computeroutput>
-<computeroutput>  end with exn                      334         139     100.00  </computeroutput>
+<computeroutput>  simple computation                279         117      83.11  </computeroutput>
+<computeroutput>  simple computation w/handler      309         129      91.95  </computeroutput>
+<computeroutput>  end with exn                      336         140     100.00  </computeroutput>
 <computeroutput>                                                                </computeroutput>
 </programlisting>
       <para>
@@ -10163,10 +10152,10 @@ edit_distance &quot;OCam&quot; &quot;ocam&quot;
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>imperative-programming/memo.topscript</filename> (part 4)</lineannotation>
 <prompt># </prompt><userinput>time (fun () -&gt; edit_distance &quot;OCaml&quot; &quot;ocaml&quot;);;</userinput>
-<computeroutput>Time: 1.42694ms</computeroutput>
+<computeroutput>Time: 1.42002ms</computeroutput>
 <computeroutput>- : int = 2</computeroutput>
 <prompt># </prompt><userinput>time (fun () -&gt; edit_distance &quot;OCaml 4.01&quot; &quot;ocaml 4.01&quot;);;</userinput>
-<computeroutput>Time: 6.86136s</computeroutput>
+<computeroutput>Time: 6.80744s</computeroutput>
 <computeroutput>- : int = 2</computeroutput>
 </programlisting>
       <para>
@@ -10199,10 +10188,10 @@ edit_distance &quot;OCam&quot; &quot;ocam&quot;
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>imperative-programming/fib.topscript</filename> (part 2)</lineannotation>
 <prompt># </prompt><userinput>time (fun () -&gt; fib 20);;</userinput>
-<computeroutput>Time: 0.858068ms</computeroutput>
+<computeroutput>Time: 0.844002ms</computeroutput>
 <computeroutput>- : int = 10946</computeroutput>
 <prompt># </prompt><userinput>time (fun () -&gt; fib 40);;</userinput>
-<computeroutput>Time: 12.7762s</computeroutput>
+<computeroutput>Time: 12.7752s</computeroutput>
 <computeroutput>- : int = 165580141</computeroutput>
 </programlisting>
       <para>
@@ -10221,10 +10210,10 @@ edit_distance &quot;OCam&quot; &quot;ocam&quot;
 <prompt># </prompt><userinput>let fib = memoize fib;;</userinput>
 <computeroutput>val fib : int -&gt; int = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>time (fun () -&gt; fib 40);;</userinput>
-<computeroutput>Time: 12.7765s</computeroutput>
+<computeroutput>Time: 12.7741s</computeroutput>
 <computeroutput>- : int = 165580141</computeroutput>
 <prompt># </prompt><userinput>time (fun () -&gt; fib 40);;</userinput>
-<computeroutput>Time: 0.00286102ms</computeroutput>
+<computeroutput>Time: 0.00405312ms</computeroutput>
 <computeroutput>- : int = 165580141</computeroutput>
 </programlisting>
       <para>
@@ -10310,7 +10299,7 @@ edit_distance &quot;OCam&quot; &quot;ocam&quot;
 <prompt># </prompt><userinput>let fib = memo_rec fib_norec;;</userinput>
 <computeroutput>val fib : int -&gt; int = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>time (fun () -&gt; fib 40);;</userinput>
-<computeroutput>Time: 0.0579357ms</computeroutput>
+<computeroutput>Time: 0.0591278ms</computeroutput>
 <computeroutput>- : int = 102334155</computeroutput>
 </programlisting>
       <para>
@@ -10383,7 +10372,7 @@ edit_distance &quot;OCam&quot; &quot;ocam&quot;
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>imperative-programming/memo.topscript</filename> (part 7)</lineannotation>
 <prompt># </prompt><userinput>time (fun () -&gt; edit_distance (&quot;OCaml 4.01&quot;,&quot;ocaml 4.01&quot;));;</userinput>
-<computeroutput>Time: 0.497103ms</computeroutput>
+<computeroutput>Time: 0.494957ms</computeroutput>
 <computeroutput>- : int = 2</computeroutput>
 </programlisting>
       <note> <title> 
@@ -10461,7 +10450,7 @@ let rec x = x + 1</programlisting>
 <userinput>  ;;</userinput>
 <computeroutput>val lazy_memo_rec : (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>time (fun () -&gt; lazy_memo_rec fib_norec 40);;</userinput>
-<computeroutput>Time: 0.0638962ms</computeroutput>
+<computeroutput>Time: 0.0629425ms</computeroutput>
 <computeroutput>- : int = 102334155</computeroutput>
 </programlisting>
       <para>
@@ -13799,7 +13788,7 @@ let () =
 <userinput>  end ;;</userinput>
 <computeroutput>val t : &lt; pop : int option &gt; = &lt;obj&gt;</computeroutput>
 <prompt># </prompt><userinput>print_pop t ;;</userinput>
-<computeroutput>Popped: 1376497450</computeroutput>
+<computeroutput>Popped: 1376668172</computeroutput>
 <computeroutput>- : unit = ()</computeroutput>
 </programlisting>
   </sect1>
@@ -16889,8 +16878,8 @@ let () =
 <computeroutput>                                </computeroutput>
 <computeroutput>  Name     Time (ns)   Speedup  </computeroutput>
 <computeroutput> ------- ------------ --------- </computeroutput>
-<computeroutput>  map     31_684_642      1.00  </computeroutput>
-<computeroutput>  table    7_219_176      4.39  </computeroutput>
+<computeroutput>  map     31_597_950      1.00  </computeroutput>
+<computeroutput>  table    7_197_865      4.39  </computeroutput>
 <computeroutput>                                </computeroutput>
 </programlisting>
     <para>
@@ -16969,8 +16958,8 @@ let () =
 <computeroutput>                               </computeroutput>
 <computeroutput>  Name    Time (ns)   Speedup  </computeroutput>
 <computeroutput> ------- ----------- --------- </computeroutput>
-<computeroutput>  map       218_932     12.02  </computeroutput>
-<computeroutput>  table   2_632_499      1.00  </computeroutput>
+<computeroutput>  map       219_223     12.25  </computeroutput>
+<computeroutput>  table   2_684_905      1.00  </computeroutput>
 <computeroutput>                               </computeroutput>
 </programlisting>
     <para>
@@ -18433,12 +18422,12 @@ let () = Command.run add</programlisting>
       </para>
       <programlisting language="console"><lineannotation>✎ Terminal: <filename>command-line-parsing/md5_completion.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>env COMMAND_OUTPUT_INSTALLATION_BASH=1 ./basic_md5_with_flags.native</userinput>
-<computeroutput>function _jsautocom_27099 {</computeroutput>
+<computeroutput>function _jsautocom_7367 {</computeroutput>
 <computeroutput>  export COMP_CWORD</computeroutput>
 <computeroutput>  COMP_WORDS[0]=./basic_md5_with_flags.native</computeroutput>
 <computeroutput>  COMPREPLY=($(&quot;${COMP_WORDS[@]}&quot;))</computeroutput>
 <computeroutput>}</computeroutput>
-<computeroutput>complete -F _jsautocom_27099 ./basic_md5_with_flags.native</computeroutput>
+<computeroutput>complete -F _jsautocom_7367 ./basic_md5_with_flags.native</computeroutput>
 </programlisting>
       <para>
         Recall that we used the <literal>Arg_type.file</literal> to
@@ -18649,12 +18638,6 @@ let () = Command.run add</programlisting>
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>json/install.topscript</filename></lineannotation>
 <prompt># </prompt><userinput>#require &quot;yojson&quot; ;;</userinput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/easy-format: added to search path</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/easy-format/easy_format.cmo: loaded</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/biniou: added to search path</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/biniou/biniou.cma: loaded</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/yojson: added to search path</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/yojson/yojson.cmo: loaded</computeroutput>
 <prompt># </prompt><userinput>open Yojson ;;</userinput>
 </programlisting>
     </note>
@@ -18832,7 +18815,7 @@ let () =
 <computeroutput>Authors: Jason Hickey, Anil Madhavapeddy, Yaron Minsky</computeroutput>
 <computeroutput>Tags: functional programming, ocaml, algorithms</computeroutput>
 <computeroutput>Online: yes</computeroutput>
-<computeroutput>Translated: &lt;none&gt;</computeroutput>
+<computeroutput>Translated: &lt;unknown&gt;</computeroutput>
 </programlisting>
     <para>
       This code introduces the <literal>Yojson.Basic.Util</literal>
@@ -20127,8 +20110,6 @@ list_fields:
       </para>
       <programlisting language="console"><lineannotation>✎ Terminal: <filename>parsing/build_short_parser.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>corebuild -use-menhir short_parser.mli</userinput>
-<computeroutput>menhir --raw-depend --ocamldep 'ocamlfind ocamldep -modules' short_parser.mly &gt; short_parser.mly.depends</computeroutput>
-<computeroutput>menhir --ocamlc 'ocamlfind ocamlc -w A-4-33-41-42-43-34-44 -strict-sequence -principal -g -annot -bin-annot -short-paths -thread -syntax camlp4o -package bin_prot.syntax -package sexplib.syntax,comparelib.syntax,fieldslib.syntax,variantslib.syntax -package core' --infer short_parser.mly</computeroutput>
 </programlisting>
     </sect2>
   </sect1>
@@ -20930,7 +20911,6 @@ end</programlisting>
 <computeroutput>  (Sexplib.Sexp.Parse_error</computeroutput>
 <computeroutput>   ((location parse) (err_msg &quot;unexpected character: ')'&quot;) (text_line 4)</computeroutput>
 <computeroutput>    (text_char 29) (global_offset 78) (buf_pos 78)))</computeroutput>
-<computeroutput/>
 <computeroutput>- : unit = ()</computeroutput>
 </programlisting>
     <para>
@@ -21572,15 +21552,6 @@ let () =
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>async/main.topscript</filename> (part 3)</lineannotation>
 <prompt># </prompt><userinput>#require &quot;async&quot;;;</userinput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/herelib/herelib.cma: loaded</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/async_core: added to search path</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/async_core/async_core.cma: loaded</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/async_unix: added to search path</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/async_unix/async_unix.cma: loaded</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/async_extra: added to search path</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/async_extra/async_extra.cma: loaded</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/async: added to search path</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/async/async.cma: loaded</computeroutput>
 <prompt># </prompt><userinput>open Async.Std;;</userinput>
 <prompt># </prompt><userinput>Reader.file_contents;;</userinput>
 <computeroutput>- : string -&gt; string Deferred.t = &lt;fun&gt;</computeroutput>
@@ -22417,17 +22388,6 @@ let get_definition word =
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>async/main.topscript</filename> (part 28)</lineannotation>
 <prompt># </prompt><userinput>#require &quot;cohttp.async&quot;;;</userinput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/re: added to search path</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/re/re.cma: loaded</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/re/re_posix.cma: loaded</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/re/re_emacs.cma: loaded</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/re/re_str.cma: loaded</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/uri: added to search path</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/uri/uri.cma: loaded</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/uri/services.cma: loaded</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/cohttp: added to search path</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/cohttp/cohttp.cma: loaded</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/cohttp/cohttp_async.cma: loaded</computeroutput>
 <prompt># </prompt><userinput>Cohttp_async.Client.get;;</userinput>
 <computeroutput>- : ?interrupt:unit Deferred.t -&gt;</computeroutput>
 <computeroutput>    ?headers:Cohttp.Header.t -&gt;</computeroutput>
@@ -22884,7 +22844,7 @@ let query_uri ~server query =
 <computeroutput>    (monitor</computeroutput>
 <computeroutput>     (((name main) (here ()) (id 1) (has_seen_error true)</computeroutput>
 <computeroutput>       (someone_is_listening false) (kill_index 0))))))</computeroutput>
-<computeroutput>  (Pid 3095)))</computeroutput>
+<computeroutput>  (Pid 10779)))</computeroutput>
 </programlisting>
       <para>
         As you can see, we got a &quot;Connection refused&quot; failure
@@ -23137,7 +23097,9 @@ let get_definition_with_timeout ~server ~timeout word =
 <computeroutput>concurrent programming</computeroutput>
 <computeroutput>----------------------</computeroutput>
 <computeroutput> </computeroutput>
-<computeroutput>DuckDuckGo query failed: Timed out</computeroutput>
+<computeroutput>&quot;Concurrent computing is a form of computing in which programs are</computeroutput>
+<computeroutput>designed as collections of interacting computational processes that</computeroutput>
+<computeroutput>may be executed in parallel.&quot;</computeroutput>
 <computeroutput> </computeroutput>
 <computeroutput>ocaml</computeroutput>
 <computeroutput>-----</computeroutput>
@@ -23275,8 +23237,8 @@ let get_definition_with_timeout ~server ~timeout word =
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>async/main.topscript</filename> (part 44)</lineannotation>
 <prompt># </prompt><userinput>log_delays (after (sec 1.));;</userinput>
 <computeroutput>- : Core.Span.t list =</computeroutput>
-<computeroutput>[0.000953674ms; 100.243ms; 200.442ms; 300.651ms; 400.835ms; 501.04ms;</computeroutput>
-<computeroutput> 601.242ms; 701.442ms; 801.645ms; 901.842ms; 1.00204s]</computeroutput>
+<computeroutput>[0.000953674ms; 100.262ms; 200.452ms; 300.646ms; 400.846ms; 501.061ms;</computeroutput>
+<computeroutput> 601.252ms; 701.444ms; 801.66ms; 901.857ms; 1.00204s]</computeroutput>
 </programlisting>
     <para>
       Now, if instead of simply waiting a second, what if we have a busy
@@ -23289,7 +23251,7 @@ let get_definition_with_timeout ~server ~timeout word =
 <userinput>  ;;</userinput>
 <computeroutput>val busy_loop : int -&gt; unit = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>log_delays (Deferred.unit &gt;&gt;| fun () -&gt; busy_loop 100);;</userinput>
-<computeroutput>- : Core.Span.t list = [0.000953674ms; 242.669ms]</computeroutput>
+<computeroutput>- : Core.Span.t list = [0.00190735ms; 242.553ms]</computeroutput>
 </programlisting>
     <para>
       As you can see, instead of waking up ten times a second,
@@ -23303,7 +23265,7 @@ let get_definition_with_timeout ~server ~timeout word =
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>async/main.topscript</filename> (part 46)</lineannotation>
 <prompt># </prompt><userinput>log_delays (In_thread.run (fun () -&gt; busy_loop 100));;</userinput>
-<computeroutput>- : Core.Span.t list = [0.00190735ms; 244.023ms]</computeroutput>
+<computeroutput>- : Core.Span.t list = [0.000953674ms; 243.66ms]</computeroutput>
 </programlisting>
     <para>
       Now <literal>log_delays</literal> does get a chance to run, but
@@ -23331,7 +23293,7 @@ let get_definition_with_timeout ~server ~timeout word =
 <userinput>  ;;</userinput>
 <computeroutput>val noalloc_busy_loop : int -&gt; unit = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>log_delays (In_thread.run (fun () -&gt; noalloc_busy_loop 500));;</userinput>
-<computeroutput>- : Core.Span.t list = [0.00190735ms; 869.344ms]</computeroutput>
+<computeroutput>- : Core.Span.t list = [0.000953674ms; 891.639ms]</computeroutput>
 </programlisting>
     <para>
       Even though <literal>noalloc_busy_loop</literal> was running in a
@@ -23901,11 +23863,7 @@ char *ctime(const time_t *timep);
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>ffi/posix.topscript</filename></lineannotation>
 <prompt># </prompt><userinput>#require &quot;ctypes.foreign&quot; ;;</userinput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/ctypes: added to search path</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/ctypes/ctypes.cma: loaded</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/ctypes/ctypes-foreign.cma: loaded</computeroutput>
 <prompt># </prompt><userinput>#require &quot;ctypes.top&quot; ;;</userinput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/ctypes/ctypes_top.cma: loaded</computeroutput>
 <prompt># </prompt><userinput>open Ctypes ;;</userinput>
 <prompt># </prompt><userinput>open PosixTypes ;;</userinput>
 <prompt># </prompt><userinput>open Foreign ;;</userinput>
@@ -23928,7 +23886,7 @@ char *ctime(const time_t *timep);
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>ffi/posix.topscript</filename> (part 1)</lineannotation>
 <prompt># </prompt><userinput>let cur_time = time (from_voidp time_t null) ;;</userinput>
-<computeroutput>val cur_time : time_t = 1376497672</computeroutput>
+<computeroutput>val cur_time : time_t = 1376668394</computeroutput>
 </programlisting>
     <para>
       Since we're going to call <literal>time</literal> a few times,
@@ -23994,7 +23952,7 @@ char *ctime(const time_t *timep);
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>ffi/posix.topscript</filename> (part 6)</lineannotation>
 <prompt># </prompt><userinput>let t_ptr = allocate time_t (time' ()) ;;</userinput>
-<computeroutput>val t_ptr : time_t ptr = (int64_t*) 0x15a1df0</computeroutput>
+<computeroutput>val t_ptr : time_t ptr = (int64_t*) 0x11eec30</computeroutput>
 </programlisting>
       <para>
         The <literal>allocate</literal> function takes the type of the
@@ -24004,7 +23962,7 @@ char *ctime(const time_t *timep);
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>ffi/posix.topscript</filename> (part 7)</lineannotation>
 <prompt># </prompt><userinput>ctime t_ptr ;;</userinput>
-<computeroutput>- : string = &quot;Wed Aug 14 17:27:54 2013\n&quot;</computeroutput>
+<computeroutput>- : string = &quot;Fri Aug 16 16:53:16 2013\n&quot;</computeroutput>
 </programlisting>
     </sect2>
     <sect2 id="using-views-to-map-complex-values">
@@ -24147,9 +24105,10 @@ int gettimeofday(struct timeval *, struct timezone *tv);
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>ffi/posix.topscript</filename> (part 9)</lineannotation>
 <prompt># </prompt><userinput>let tv_sec  = field timeval &quot;tv_sec&quot; long ;;</userinput>
-<computeroutput>val tv_sec : (Signed.long, timeval structure) field = &lt;abstr&gt;</computeroutput>
+<computeroutput>val tv_sec : (Signed.long, (timeval, [ `Struct ]) structured) field = &lt;abstr&gt;</computeroutput>
 <prompt># </prompt><userinput>let tv_usec = field timeval &quot;tv_usec&quot; long ;;</userinput>
-<computeroutput>val tv_usec : (Signed.long, timeval structure) field = &lt;abstr&gt;</computeroutput>
+<computeroutput>val tv_usec : (Signed.long, (timeval, [ `Struct ]) structured) field =</computeroutput>
+<computeroutput>  &lt;abstr&gt;</computeroutput>
 <prompt># </prompt><userinput>seal timeval ;;</userinput>
 <computeroutput>- : unit = ()</computeroutput>
 </programlisting>
@@ -24224,7 +24183,7 @@ int gettimeofday(struct timeval *, struct timezone *tv);
 <userinput>  Pervasives.(float secs +. float usecs /. 1000000.0) ;;</userinput>
 <computeroutput>val gettimeofday' : unit -&gt; float = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>gettimeofday' () ;;</userinput>
-<computeroutput>- : float = 1376497674.94</computeroutput>
+<computeroutput>- : float = 1376668397.08</computeroutput>
 </programlisting>
       <para>
         You need to be a little careful not to get all the open modules
@@ -24293,9 +24252,9 @@ let () =
         <programlisting language="ocaml"><lineannotation>✎ Terminal: <filename>ffi/build_datetime.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>corebuild -pkg ctypes.foreign datetime.native</userinput>
 <prompt>$ </prompt><userinput>./datetime.native</userinput>
-<computeroutput>1376497104.894810</computeroutput>
+<computeroutput>1376667828.387130</computeroutput>
 <prompt>$ </prompt><userinput>./datetime.native -a</userinput>
-<computeroutput>Wed Aug 14 17:18:24 2013</computeroutput>
+<computeroutput>Fri Aug 16 16:43:48 2013</computeroutput>
 </programlisting>
         <sidebar>
         <title>
@@ -24532,9 +24491,6 @@ void qsort(void *base, size_t nmemb, size_t size, compare_t *);
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>ffi/qsort.topscript</filename></lineannotation>
 <prompt># </prompt><userinput>#require &quot;ctypes.foreign&quot; ;;</userinput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/ctypes: added to search path</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/ctypes/ctypes.cma: loaded</computeroutput>
-<computeroutput>/home/rwo/.opam/4.01.0dev+trunk/lib/ctypes/ctypes-foreign.cma: loaded</computeroutput>
 <prompt># </prompt><userinput>open Ctypes ;;</userinput>
 <prompt># </prompt><userinput>open PosixTypes ;;</userinput>
 <prompt># </prompt><userinput>open Foreign ;;</userinput>
@@ -26388,8 +26344,8 @@ let () =
 <computeroutput>                                                                   </computeroutput>
 <computeroutput>  Name        Time (ns)       Minor   Major   Promoted   % of max  </computeroutput>
 <computeroutput> ----------- ----------- ----------- ------- ---------- ---------- </computeroutput>
-<computeroutput>  mutable     6_328_690   2_000_004    9.05       9.05     100.00  </computeroutput>
-<computeroutput>  immutable   4_598_742   5_000_005    0.03       0.03      72.66  </computeroutput>
+<computeroutput>  mutable     6_322_326   2_000_004    9.05       9.05     100.00  </computeroutput>
+<computeroutput>  immutable   4_612_378   5_000_005    0.03       0.03      72.95  </computeroutput>
 <computeroutput>                                                                   </computeroutput>
 </programlisting>
         <para>
@@ -28866,9 +28822,9 @@ let () =
 <computeroutput>                                                     </computeroutput>
 <computeroutput>  Name                         Time (ns)   % of max  </computeroutput>
 <computeroutput> ---------------------------- ----------- ---------- </computeroutput>
-<computeroutput>  Polymorphic pattern              31.52     100.00  </computeroutput>
-<computeroutput>  Monomorphic larger pattern       29.20      92.65  </computeroutput>
-<computeroutput>  Monomorphic small pattern        16.11      51.11  </computeroutput>
+<computeroutput>  Polymorphic pattern              31.56     100.00  </computeroutput>
+<computeroutput>  Monomorphic larger pattern       29.24      92.63  </computeroutput>
+<computeroutput>  Monomorphic small pattern        16.27      51.56  </computeroutput>
 <computeroutput>                                                     </computeroutput>
 </programlisting>
       <para>
@@ -29441,7 +29397,7 @@ let () =
 <computeroutput>                                                 </computeroutput>
 <computeroutput>  Name                     Time (ns)   % of max  </computeroutput>
 <computeroutput> ------------------------ ----------- ---------- </computeroutput>
-<computeroutput>  Polymorphic comparison      13_919     100.00  </computeroutput>
+<computeroutput>  Polymorphic comparison      13_910     100.00  </computeroutput>
 <computeroutput>  Monomorphic comparison         815       5.86  </computeroutput>
 <computeroutput>                                                 </computeroutput>
 </programlisting>
