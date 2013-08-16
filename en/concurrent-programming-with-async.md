@@ -43,20 +43,17 @@ systems.
 
 ## Async basics
 
-Consider a typical function for doing I/O in Core.
+Recall how I/O is typically done in Core.  Here's a simple example.
 
 ```frag
 ((typ ocamltop)(name async/main.topscript)(part 1))
 ```
 
-Since the function returns a concrete string, it has to block until
-the read completes.  The blocking nature of the call means that no
-progress can be made on anything else until the read is completed.
-Here's an example.
-
-```frag
-((typ ocamltop)(name async/main.topscript)(part 2))
-```
+From the type of `In_channel.read_all`, you can see that it must be a
+blocking operation.  In particular, the fact that it returns a
+concrete string means it can't return until the read has completed.
+The blocking nature of the call means that no progress can be made on
+anything else until the read is completed.
 
 In Async, well-behaved functions never block.  Instead, they return a
 value of type `Deferred.t` that acts as a placeholder that will
@@ -86,11 +83,12 @@ The value in `contents` isn't yet determined in part because there's
 nothing running that could do the necessary I/O.  When using Async,
 processing of I/O and other events is handled by the Async scheduler.
 When writing a standalone program, you need to start the scheduler
-explicitly, but <command>utop</command> knows about Async, and can start the scheduler
-automatically.  More than that, <command>utop</command> knows about deferred values, and
-when you type in an expression of type `Deferred.t`, it will make sure
-the scheduler is running and block until the deferred is determined.
-Thus, we can write:
+explicitly, but <command>utop</command> knows about Async, and can
+start the scheduler automatically.  More than that,
+<command>utop</command> knows about deferred values, and when you type
+in an expression of type `Deferred.t`, it will make sure the scheduler
+is running and block until the deferred is determined.  Thus, we can
+write:
 
 ```frag
 ((typ ocamltop)(name async/main.topscript)(part 5))
@@ -103,9 +101,9 @@ determined.
 ((typ ocamltop)(name async/main.topscript)(part 6))
 ```
 
-In order to do real work with deferreds, we need a way of sequencing
-deferred computations, which we do using `Deferred.bind`.  First,
-let's consider the type-signature of bind.
+In order to do real work with deferreds, we need a way of waiting for
+a deferred computation to finish, which we do using `Deferred.bind`.
+First, let's consider the type-signature of bind.
 
 ```frag
 ((typ ocamltop)(name async/main.topscript)(part 7))
@@ -150,10 +148,10 @@ write a function that counts the number of lines in a file.
 ```
 
 This looks reasonable enough, but as you can see, the compiler is
-unhappy with the code.  The issue here is that bind expects a function
-that returns a deferred, but we've provided it a function that simply
-returns the result.  To make these signatures match, we need a
-function for taking an ordinary value and wrapping it in a deferred.
+unhappy.  The issue here is that bind expects a function that returns
+a deferred, but we've provided it a function that returns the
+non-deferred result directly.  To make these signatures match, we need
+a function for taking an ordinary value and wrapping it in a deferred.
 This function is a standard part of Async, and is called `return`:
 
 ```frag
@@ -186,23 +184,22 @@ rewrite `count_lines` again a bit more succinctly:
 ((typ ocamltop)(name async/main.topscript)(part 14))
 ```
 
-Note that `count_lines` returns a deferred, but <command>utop</command> waits for that
-deferred to become determined, and shows us the contents of the
-deferred instead.
+Note that `count_lines` returns a deferred, but
+<command>utop</command> waits for that deferred to become determined,
+and shows us the contents of the deferred instead.
 
 ### Ivars and upon
 
 Deferreds are usually built using combinations of `bind`, `map` and
 `return`, but sometimes you want to construct a deferred that you can
-determine explicitly with user-code.  This is done using an _ivar_,
-which is a handle that lets you control precisely when a deferred
-becomes determined.
+determine explicitly with user-code.  This is done using an _ivar_.
 
 There are three fundamental operations for working with an ivar; you
 can create one, using `Ivar.create`, you can read off the deferred
 that corresponds to the ivar in question, using `Ivar.read`, and you
-can fill an ivar, thus causing that deferred to become determined,
-using `Ivar.fill`.  These operations are illustrated below.
+can fill an ivar, thus causing the corresponding deferred to become
+determined, using `Ivar.fill`.  These operations are illustrated
+below.
 
 ```frag
 ((typ ocamltop)(name async/main.topscript)(part 15))
@@ -210,8 +207,8 @@ using `Ivar.fill`.  These operations are illustrated below.
 
 Ivars are something of a low-level feature; operators like map, bind
 and return are typically easier to use and think about.  But ivars can
-be useful when you want to build complicated synchronization patterns
-that can't be constructed naturally otherwise.
+be useful when you want to build a synchronization patterns that isn't
+alrady well supported.
 
 As an example, imagine we wanted a way of scheduling a sequence of
 actions that would run after a fixed delay.  In addition, we'd like to
@@ -227,8 +224,8 @@ An action is handed to `schedule` in the form of a deferred-returning
 thunk (a thunk is a function whose argument is of type `unit`).  A
 deferred is handed back to the caller of `schedule` that will
 eventually be filled with the contents of the deferred value returned
-by the thunk to be scheduled.  To implement this, we'll use a new
-operator called `upon`, which has the following signature.
+by the thunk.  To implement this, we'll use an operator called `upon`,
+which has the following signature.
 
 ```frag
 ((typ ocamltop)(name async/main.topscript)(part 17))
@@ -249,13 +246,13 @@ time span elapses.
 ((typ ocamltop)(name async/main.topscript)(part 18))
 ```
 
-This code isn't particularly long, but it is a bit subtle.  In
-particular, note how the queue of thunks is used to ensure that the
-enqueued actions are run in order, even if the thunks scheduled by
-`upon` are run out-of-order.  This is kind of subtlety typical of code
-that involves ivars and `upon`, and because of this, you should stick
-to the simpler map/bind/return style of working with deferreds when
-you can.
+This code isn't particularly long, but it is subtle.  In particular,
+note how the queue of thunks is used to ensure that the enqueued
+actions are run in order, even if the thunks scheduled by `upon` are
+run out-of-order.  This kind of subtlety is typical of code that
+involves ivars and `upon`, and because of this, you should stick to
+the simpler map/bind/return style of working with deferreds when you
+can.
 
 ## Examples: an echo server
 
@@ -278,9 +275,9 @@ call `Reader.read` to get a block of input.  Then, when that's
 complete and if a new block was returned, we write that block to the
 writer.  Finally, we wait until the writer's buffers are flushed,
 waiting on the deferred returned by `Writer.flushed`, at which point
-we recur.  If we hit an end-of-file condition, the loop is ended.  The
-deferred returned by a call to `copy_blocks` becomes determined only
-once the end-of-file condition is hit.
+we recurse.  If we hit an end-of-file condition, the loop is ended.
+The deferred returned by a call to `copy_blocks` becomes determined
+only once the end-of-file condition is hit.
 
 One important aspect of how this is written is that it uses
 _pushback_, which is to say that if the writer can't make progress
@@ -312,7 +309,7 @@ servers.
 
 The result of calling `Tcp.Server.create` is a `Tcp.Server.t`, which
 is a handle to the server that lets you shut the server down.  We
-don't use that functionality here, so we explicitly ignore [server] to
+don't use that functionality here, so we explicitly ignore `server` to
 suppress the unused-variables error.  We put in a type annotation
 around the ignored value to make the nature of the value we're
 ignoring explicit.
@@ -333,7 +330,7 @@ Finally, we need to initiate the server and start the Async scheduler.
 One of the most common newbie errors with Async is to forget to run
 the scheduler.  It can be a bewildering mistake, because without the
 scheduler, your program won't do anything at all; even calls to
-`printf` won't actually reach the terminal.
+`printf` won't reach the terminal.
 
 It's worth noting that even though we didn't spend much explicit
 effort on thinking about multiple clients, this server is able to
@@ -359,27 +356,27 @@ doesn't return is inferred as having return type `'a`.
 ```
 
 This can be surprising when you call a function like this expecting it
-to return unit, and really it never returns.  The type-checker won't
-necessarily complain in such a case.
+to return unit.  The type-checker won't necessarily complain in such a
+case.
 
 ```frag
 ((typ ocamltop)(name async/main.topscript)(part 20))
 ```
 
-With a name like `loop_forever`, the meaning is clear enough in this
-case.  But with something like `Scheduler.go`, the fact that it never
-returns is less clear, and so we use the type system to make it more
-explicit by giving it a return type of `never_returns`.  To make it
-clearer how this works, let's do the same trick with `loop_forever`.
+With a name like `loop_forever`, the meaning is clear enough.  But
+with something like `Scheduler.go`, the fact that it never returns is
+less clear, and so we use the type system to make it more explicit by
+giving it a return type of `never_returns`.  Let's do the same trick
+with `loop_forever`.
 
 ```frag
 ((typ ocamltop)(name async/main.topscript)(part 21))
 ```
 
 The type `never_returns` is uninhabited, so a function can't return a
-value of type `never_returns`, which means only functions that never
-return can have it as their return type!  Now, if we rewrite our
-`do_stuff` function, we'll get a helpful type error.
+value of type `never_returns`, which means only a function that never
+return can have `never_returns` as its return type!  Now, if we
+rewrite our `do_stuff` function, we'll get a helpful type error.
 
 ```frag
 ((typ ocamltop)(name async/main.topscript)(part 22))
@@ -398,27 +395,27 @@ the source that the call to `loop_forever` never returns.
 
 ### Improving the echo server
 
-Let's try to go a little bit farther with our echo server.  Let's walk
-through a few small improvements:
+Let's try to go a little bit farther with our echo server by walking
+through a few improvements.  In particular, we will
 
-- Add a proper command-line interface with `Command`
-- Add a flag to specify the port to listen on, and a flag to make the
-  server echo back the capitalized version of whatever was sent to it.
-- Simplify the code using Async's `Pipe` interface.
+- add a proper command-line interface with `Command`,
+- add a flag to specify the port to listen on, and a flag to make the
+  server echo back the capitalized version of whatever was sent to it,
+- simplify the code using Async's `Pipe` interface.
 
-Here's the improved code below.  There's both the `run` function,
-which which actually starts the server, and the command-line
-interface, which is the entry-point of the program.  Note the use of
-`Deferred.never` in `run`, which returns a deferred that never becomes
-determined.  In this case, we use `Deferred.never` because the server
-in question doesn't shut down.
+The code below does all of this.  
 
 ```frag
 ((typ ocaml)(name async/better_echo.ml))
 ```
 
-The most notable change in the above code is the use of Async's
-`Pipe`.  A `Pipe` is a communication channel that's used for
+Note the use of `Deferred.never` in the `run` function.  As you might
+guess from the name `Deferred.never` returns a deferred that is never
+determined.  In this case, that indicates that the echo server doesn't
+ever shut down.
+
+The biggest change in the above code is the use of Async's `Pipe`.  A
+`Pipe` is an asynchronous communication channel that's used for
 connecting different parts of your program.  You can think of it as a
 consumer/producer queue that uses deferreds for communicating when the
 pipe is ready to be read from or written to.  Our use of pipes is
@@ -433,13 +430,12 @@ Pipes are created in connected read/write pairs, as you can see below.
 
 `r` and `w` are really just read and write handles to the same
 underlying object.  Note that `r` and `w` have weakly polymorphic
-types.  That's because a pipe is mutable and so can contain elements
-of only one type, which will be settled by the compiler once we try to
-use the pipe for anything.
+types, as discussed in [xref](#imperative-programming), and so can
+only contain values of a single yet to be determined type.
 
 If we just try and write to the writer, we'll see that we block
-indefinitely in <command>utop</command>.  You can break out of the wait by hitting
-`Control-C`.
+indefinitely in <command>utop</command>.  You can break out of the
+wait by hitting `Control-C`.
 
 ```frag
 ((typ ocamlrawtop)(name async/pipe_write_break.rawscript))
@@ -476,9 +472,9 @@ when a client disconnects, the rest of the shutdown happens
 transparently.
 
 The command-line parsing for this program is based on the `Command`
-library that we introduced in [xref](#command-line-parsing).  When you
-open `Async.Std`, the `Command` module has added to it the `async_basic`
-call:
+library that we introduced in [xref](#command-line-parsing).  Opening
+`Async.Std`, shadows the `Command` module with an extended version
+that contains the `async_basic` call.
 
 ```frag
 ((typ ocamltop)(name async/main.topscript)(part 27))
@@ -538,7 +534,7 @@ the network protocol.
 The HTTP response from DuckDuckGo is in JSON, a common (and thankfully
 simple) format that is specified in
 [RFC4627](http://www.ietf.org/rfc/rfc4627.txt).  We'll parse the JSON
-data using the Yojson library, which we already introduced in
+data using the Yojson library, which was introduced in
 [xref](#handling-json-data).
 
 We expect the response from DuckDuckGo to come across as a JSON
@@ -562,7 +558,8 @@ HTTP, using the Cohttp library.
 ```
 
 To better understand what's going on, it's useful to look at the type
-for `Cohttp_async.Client.get`, which we can do in <command>utop</command>.
+for `Cohttp_async.Client.get`, which we can do in
+<command>utop</command>.
 
 ```frag
 ((typ ocamltop)(name async/main.topscript)(part 28))
@@ -570,8 +567,7 @@ for `Cohttp_async.Client.get`, which we can do in <command>utop</command>.
 
 The `get` call takes as a required argument a URI, and returns a
 deferred value containing a `Cohttp.Response.t` (which we ignore) and
-a pipe reader to which the body of the request will be written to as
-it is received.
+a pipe reader to which the body of the request will be written.
 
 In this case, the HTTP body probably isn't very large, so we call
 `Pipe.to_list` to collect the strings from the pipe as a single
@@ -642,8 +638,7 @@ Finally, we create a command line interface using
 ((typ ocaml)(name async/search.ml)(part 5))
 ```
 
-And that's all we need to create a simple but usable definition
-searcher.
+And that's all we need for a simple but usable definition searcher.
 
 ```frag
 ((typ console)(name async/run_search.out))
@@ -670,9 +665,9 @@ two behaviors on subsequent calls.
 ((typ ocamltop)(name async/main.topscript)(part 31))
 ```
 
-In <command>utop</command>, the exception thrown by `maybe_raise ()` terminates the
-evaluation of just that expression, but in a standalone program, an
-uncaught exception would bring down the entire process.
+In <command>utop</command>, the exception thrown by `maybe_raise ()`
+terminates the evaluation of just that expression, but in a standalone
+program, an uncaught exception would bring down the entire process.
 
 So, how could we capture and handle such an exception?  You might try
 to do this using OCaml's built-in `try/with` statement, but as you can
@@ -746,7 +741,8 @@ errors in the processes it spawns.
 The message "an error happened" is printed out, but the deferred
 returned by `swallow_error` is never determined.  This makes sense,
 since the calculation never actually completes, so there's no value to
-return.  You can break out of this in <command>utop</command> by hitting
+return.  You can break out of this in <command>utop</command> by
+hitting
 <keycombo><keycap>Control</keycap><keycap>C</keycap></keycombo>.
 
 Here's an example of a monitor which passes some exceptions through to
@@ -873,7 +869,7 @@ number of seconds.
 ```
 
 Sometimes, however, we want to wait only for the first of multiple
-events to occur.  This happens particularly often when dealing with
+events to occur.  This happens particularly when dealing with
 timeouts.  In that case, we can use the call `Deferred.any`, which,
 given a list of deferreds, returns a single deferred that will become
 determined once any of the values on the list is determined.
@@ -882,10 +878,10 @@ determined once any of the values on the list is determined.
 ((typ ocamltop)(name async/main.topscript)(part 40))
 ```
 
-Let's use this to add timeouts to our DuckDuckGo searches.  We'll do
-this by writing a wrapper for `get_definition` that takes a timeout
-(in the form of a `Time.Span.t`) as an argument, and returns either
-the definition, or, if that takes too long, the timeout.
+Let's use this to add timeouts to our DuckDuckGo searches.  The code
+below is a wrapper for `get_definition` that takes a timeout (in the
+form of a `Time.Span.t`), and returns either the definition, or, if
+that takes too long, an error.
 
 
 ```frag
@@ -919,29 +915,27 @@ timeout expires.
 ((typ ocaml)(name async/search_with_timeout_no_leak_simple.ml)(part 2))
 ```
 
-This will work, and will cause the connection to shutdown cleanly
-when we time out; but our code no longer explicitly knows whether or
-not the timeout has kicked in.  In particular, the error message on a
-timeout will now be `Unexpected failure` rather than `Timed out`,
-which it was in our previous implementation.  This is a minor issue in
-this case, but if we wanted to have special behavior in the case of a
-timeout, it would be a more serious issue.
+This will work, and will cause the connection to shutdown cleanly when
+we time out; but our code no longer explicitly knows whether or not
+the timeout has kicked in.  In particular, the error message on a
+timeout will now be `"Unexpected failure"` rather than `"Timed out"`,
+which it was in our previous implementation.
 
 We can get more precise handling of timeouts using Async's `choose`
-operator, which lets you pick between a collection of different
-deferreds, reacting to exactly one of them.  Each deferred is
-combined, using the function `choice`, with a function that is called
-if and only if that is the chosen deferred.   Here's the type
-signature of `choice` and `choose`:
+function.  `choose` lets you pick between a collection of different
+deferreds, reacting to exactly one of them.  Each deferred is paired,
+using the function `choice`, with a function that is called if and
+only if that is deferred is chosen.  Here's the type signature of
+`choice` and `choose`:
 
 ```frag
 ((typ ocamltop)(name async/main.topscript)(part 41))
 ```
 
-`choose` provides no guarantee that the `choice` built around the
-first deferred to become determined will in fact be chosen.  But
-`choose` does guarantee that only one `choice` will be chosen, and
-only the chosen `choice` will execute the attached closure.
+Note that there's no guarantee that the winning deferred will be the
+one that becomes determined first.  But `choose` does guarantee that
+only one `choice` will be chosen, and only the chosen `choice` will
+execute the attached function.
 
 In the following, we use `choose` to ensure that the `interrupt`
 deferred becomes determined if and only if the timeout-deferred is
@@ -960,17 +954,17 @@ queries succeed and some fail, and the timeouts are reported as such.
 
 ## Working with system threads
 
-OCaml does have built-in support for true system threads, _i.e._,
-kernel-level threads whose interleaving is controlled by the kernel.
-We discussed in the beginning of the chapter why Async is generally a
-better choice than system threads, but even if you mostly use Async,
-OCaml's system threads are sometimes necessary, and it's worth
-understanding them.
+Although we haven't worked with them yet, OCaml does have built-in
+support for true system threads, _i.e._, kernel-level threads whose
+interleaving is controlled by the operating system.  We discussed in
+the beginning of the chapter why Async is generally a better choice
+than system threads, but even if you mostly use Async, OCaml's system
+threads are sometimes necessary, and it's worth understanding them.
 
 The most surprising aspect of OCaml's system threads is that they
-don't afford you any access to physical parallelism on the machine.
-That's because OCaml's runtime has a single runtime lock which at most
-one thread can be holding at a time.
+don't afford you any access to physical parallelism.  That's because
+OCaml's runtime has a single runtime lock which at most one thread can
+be holding at a time.
 
 Given that threads don't provide physical parallelism, why are they
 useful at all?  
@@ -978,18 +972,17 @@ useful at all?
 The most common reason for using system threads is that there are some
 operating system calls that have no non-blocking alternative, which
 means that you can't run them directly in a system like Async without
-blocking out the entire system.  For this reason, Async maintains a
+blocking your entire program.  For this reason, Async maintains a
 thread pool for running such calls.  Most of the time, as a user of
 Async you don't need to think about this, but it is happening under
-the covers.
+the covers.n
 
-Another reasonably common reason to have multiple threads is to deal
-with non-OCaml libraries that have their own event loop or for
-whatever reason need their own threads.  In that case, it's sometimes
-useful to run some OCaml code on the foreign thread as part of the
-communication to your main program.  OCaml's foreign function
-interface is discussed in more detail in
-[xref](#foreign-function-interface).
+Another reason to have multiple threads is to deal with non-OCaml
+libraries that have their own event loop or for another reason need
+their own threads.  In that case, it's sometimes useful to run some
+OCaml code on the foreign thread as part of the communication to your
+main program.  (OCaml's foreign function interface is discussed in
+more detail in [xref](#foreign-function-interface).)
 
 Another occasional motivation for using true system threads is to
 interoperate with compute-intensive OCaml code that otherwise would
@@ -1075,10 +1068,10 @@ different system thread, the behavior will be different.
 
 Now `log_delays` does get a chance to run, but not nearly as often as
 it would like to.  The reason for this is that that now that we're
-using system threads, we are at the mercy of the operating system in
-terms of when each thread gets scheduled.  The behavior becomes very
-dependent on the OS and how you configure the priority of your
-processes within the OS itself.
+using system threads, we are at the mercy of the operating system to
+decide when each thread gets scheduled.  The behavior of threads is
+very much dependent on the operating system and how your system is
+configured.
 
 Another tricky aspect of dealing with OCaml threads has to do with
 allocation.  OCaml's threads only get a chance to give up the runtime
