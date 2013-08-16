@@ -1067,7 +1067,7 @@ different system thread, the behavior will be different.
 ```
 
 Now `log_delays` does get a chance to run, but not nearly as often as
-it would like to.  The reason for this is that that now that we're
+it would like to.  The reason for this is that now that we're
 using system threads, we are at the mercy of the operating system to
 decide when each thread gets scheduled.  The behavior of threads is
 very much dependent on the operating system and how your system is
