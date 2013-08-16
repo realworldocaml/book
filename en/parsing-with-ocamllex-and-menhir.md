@@ -175,18 +175,20 @@ for example, is the rule for `prog`.
 ((typ ocaml)(name parsing/parser.mly)(part 2))
 ```
 
-The syntax for this is reminiscent of an OCaml match statement.  The
-pipes separate the individual productions, and the code in
-curly-braces is OCaml code that generates the OCaml value
-corresponding to the production in question.  In the case of `prog`,
-we have two cases: either there's an `EOF`, which means the text is
-empty, and so there's no JSON value to read, and so we return the
-OCaml value `None`; or we have an instance of the `value`
-non-terminal, which corresponds to a well-formed JSON value, in which
-case we wrap the corresponding `Json.value` in a `Some` tag.  Note
-that in the `value` case, we wrote `v = value` to bind the OCaml value
-that corresponds to to the variable `v`, which we can then use within
-the curly-braces for that production.
+The syntax for this is reminiscent of an OCaml match statement.  The pipes
+separate the individual productions, and the curly braces contain a _semantic
+action_: OCaml code that generates the OCaml value corresponding to the
+production in question.
+Semantic actions are arbitrary OCaml expressions that are evaluated during
+parsing to produce a value that is attached to the non-terminal in the rule.
+
+In the case of `prog`, we have two cases: either there's an `EOF`, which means
+the text is empty, and so there's no JSON value to read, and so we return the
+OCaml value `None`; or we have an instance of the `value` non-terminal, which
+corresponds to a well-formed JSON value, in which case we wrap the
+corresponding `Json.value` in a `Some` tag.  Note that in the `value` case, we
+wrote `v = value` to bind the OCaml value that corresponds to to the variable
+`v`, which we can then use within the curly-braces for that production.
 
 Now let's consider a more complicated example, the rule for the
 `value` symbol.
