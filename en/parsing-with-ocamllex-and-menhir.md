@@ -233,8 +233,8 @@ definitions.
 ```
 
 Alternatively, we could keep the left-recursive definition and simply
-construct the returned value in left-to-right order.  This is is even
-less efficient, since the complexity of building thes list
+construct the returned value in left-to-right order.  This is even
+less efficient, since the complexity of building the list
 incrementally in this way is quadratic in the length of the list.
 
 ```frag
