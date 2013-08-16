@@ -19808,20 +19808,20 @@ let () =
     </para>
     <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>parsing/manual_token_type.ml</filename></lineannotation>
 type token =
-  | TRUE
-  | STRING of string
-  | RIGHT_BRACK
-  | RIGHT_BRACE
   | NULL
-  | LEFT_BRACK
-  | LEFT_BRACE
-  | INT of int
-  | ID of string
-  | FLOAT of float
+  | TRUE
   | FALSE
-  | EOF
+  | STRING of string
+  | INT of int
+  | FLOAT of float
+  | ID of string
+  | LEFT_BRACK
+  | RIGHT_BRACK
+  | LEFT_BRACE
+  | RIGHT_BRACE
   | COMMA
-  | COLON</programlisting>
+  | COLON
+  | EOF</programlisting>
     <para>
       Note that this representation loses some information about the
       original text. For example, white space is not represented. It's
@@ -19856,10 +19856,9 @@ type value = [
       This representation is much richer than our token stream,
       capturing the fact that JSON values can be nested inside each
       other, and that JSON has a variety of value types, including
-      numbers, strings, arrays, and objects. The above type is
-      effectively an AST, and the job of the parser we'll write will be
-      to convert a token stream into a value of this type, as shown
-      below.
+      numbers, strings, arrays, and objects. The job of the parser we'll
+      write will be to convert a token stream into a value of this AST
+      type, as shown below for our earlier JSON example.
     </para>
     <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>parsing/parsed_example.ml</filename></lineannotation>
 `Assoc
