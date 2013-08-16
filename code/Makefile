@@ -46,7 +46,8 @@ dirs= json \
       async \
       ffi \
       ctypes \
-      ocp-index
+      ocp-index \
+      installation
 
 # html/xml files directory
 OBJ=         _build

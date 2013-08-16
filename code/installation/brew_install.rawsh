@@ -1,0 +1,3 @@
+$ brew update
+$ brew install ocaml
+$ brew install pcre

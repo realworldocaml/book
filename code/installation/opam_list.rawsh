@@ -1,0 +1,6 @@
+$ opam list
+Installed packages for 4.01.0:
+async                  109.38.00  Monadic concurrency library
+async_core             109.38.00  Monadic concurrency library
+async_extra            109.38.00  Monadic concurrency library
+<...>
