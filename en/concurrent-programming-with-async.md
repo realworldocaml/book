@@ -208,7 +208,7 @@ below.
 Ivars are something of a low-level feature; operators like map, bind
 and return are typically easier to use and think about.  But ivars can
 be useful when you want to build a synchronization patterns that isn't
-alrady well supported.
+already well supported.
 
 As an example, imagine we wanted a way of scheduling a sequence of
 actions that would run after a fixed delay.  In addition, we'd like to
