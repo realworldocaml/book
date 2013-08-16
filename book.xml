@@ -20549,18 +20549,14 @@ null
 </chapter><chapter id="data-serialization-with-s-expressions">
   <title>Data Serialization with S-Expressions</title>
   <para>
-    We've already discussed the parsing of third-party data formats like
-    JSON. Sometimes, though, you're less concerned with interoperating
-    with specific file formats, and you instead want an easy to use,
-    human-readable format that integrates well with OCaml and its
-    libraries. Core's solution to this problem is to use s-expressions.
-  </para>
-  <para>
     S-expressions are nested parenthetical expressions whose atomic
     values are strings. They were first popularized by the Lisp
     programming language in the 1960s, and have remained one of the
-    simplest and most effective ways to encode structured data. There's
-    a full definition of them available
+    simplest and most effective ways to encode structured data in a
+    human-readable and editable form.
+  </para>
+  <para>
+    There's a full definition of s-expressions available
     <ulink url="http://people.csail.mit.edu/rivest/Sexp.txt">online</ulink>.
     An example s-expression might look like this.
   </para>
@@ -20568,64 +20564,51 @@ null
 (this (is an) (s expression))
 </programlisting>
   <para>
-    S-expressions are a good choice for a data serialization format that
-    is not only human-editable, but also easy to automatically convert
-    between standard OCaml type definitions without writing a lot of
-    boilerplate code by hand. We define the process of converting an
-    OCaml data type to an s-expression as
-    <emphasis>serialization</emphasis>, and conversely the parsing of an
-    s-expression into an OCaml value as
-    <emphasis>deserialization</emphasis>.
+    S-expressions play a major role in Core, effectively acting as the
+    default serialization format. Indeed, we've encountered
+    s-expressions multiple times already, including in
+    <xref linkend="error-handling"/>,
+    <xref linkend="functors"/> and
+    <xref linkend="first-class-modules"/>.
   </para>
   <para>
-    Both are useful day-to-day when you need to write code that can
-    succinctly parse and generate configuration files, emit and collect
-    logging messages, or even to build clients and servers that convert
-    OCaml datatypes into messages in a distributed system.
-  </para>
-  <para>
-    To this end, this chapter will show you how to:
+    This chapter will go into s-expressions in more depth. In
+    particular, we'll discuss:
   </para>
   <itemizedlist>
     <listitem>
       <para>
-        generate s-expressions from arbitrary OCaml types, thus giving
-        you a human-readable format for persisting any values in your
-        code.
+        the details of the s-expression format, and show how to generate
+        good error messages for debugging malformed inputs,
       </para>
     </listitem>
     <listitem>
       <para>
-        expose s-expressions across module interfaces, including with
-        abstract types.
+        how to generate s-expressions from arbitrary OCaml types,
       </para>
     </listitem>
     <listitem>
       <para>
-        generate good error messages for debugging malformed inputs.
+        how to use custom type annotations to control the exact printing
+        behavior for s-expression converters,
       </para>
     </listitem>
     <listitem>
       <para>
-        use custom type annotations to control the exact printing
-        behavior for s-expression converters.
+        how to integrate s-expressions into your interfaces, in
+        particular explaining how to add s-expression converters to a
+        module without breaking your abstraction boundaries.
       </para>
     </listitem>
   </itemizedlist>
   <para>
     We will also tie this together at the end of the chapter with a
-    simple configuration file for a web server written using
-    s-expressions. You can also refer back to the plugin loader
-    described back in <xref linkend="first-class-modules"/>
-    for another good use of s-expressions.
+    simple s-expression formatted configuration file for a web server.
   </para>
   <sect1 id="basic-usage">
     <title>Basic Usage</title>
     <para>
-      OCaml values aren't directly converted to-and-from strings of
-      s-expressions when you use Core. The s-expression is instead built
-      up as an OCaml value which is later serialized into strings or
-      memory buffers. The OCaml type of an s-expression is quite simple.
+      The type used to represent an s-expression is quite simple.
     </para>
     <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>sexpr/sexp.mli</filename></lineannotation>
 module Sexp : sig
@@ -20638,9 +20621,8 @@ end</programlisting>
       contains a list of its children, and where the leaves of the tree
       are strings. Core provides good support for s-expressions in its
       <literal>Sexp</literal> module, including functions for converting
-      s-expressions to and from strings. We can start by manually
-      building the first example s-expression using the
-      <literal>Sexp.t</literal> type.
+      s-expressions to and from strings. Let's rewrite our example
+      s-expression in terms of this type.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>sexpr/print_sexp.topscript</filename></lineannotation>
 <prompt># </prompt><userinput>Sexp.List [</userinput>
@@ -20652,31 +20634,15 @@ end</programlisting>
 </programlisting>
     <para>
       This prints out nicely because Core registers a pretty printer
-      with the toplevel. This pretty-printer uses Core's functions for
-      converting s-expressions to and from strings.
+      with the toplevel. This pretty-printer is based on the functions
+      in <literal>Sexp</literal> for converting s-expressions to and
+      from strings.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>sexpr/sexp_printer.topscript</filename></lineannotation>
 <prompt># </prompt><userinput>Sexp.to_string (Sexp.List [Sexp.Atom &quot;1&quot;; Sexp.Atom &quot;2&quot;]) ;;</userinput>
 <computeroutput>- : string = &quot;(1 2)&quot;</computeroutput>
 <prompt># </prompt><userinput>Sexp.of_string (&quot;(1 2 (3 4))&quot;) ;;</userinput>
 <computeroutput>- : Sexp.t = (1 2 (3 4))</computeroutput>
-</programlisting>
-    <para>
-      We can write a function to manually map an OCaml record type to an
-      s-expression, and pretty-print it with Core's functions. We'll
-      show you how to automatically generate this function in the next
-      section.
-    </para>
-    <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>sexpr/manually_making_sexp.topscript</filename></lineannotation>
-<prompt># </prompt><userinput>type t = { foo: int; bar: float } ;;</userinput>
-<computeroutput>type t = { foo : int; bar : float; }</computeroutput>
-<prompt># </prompt><userinput>let sexp_of_t t =</userinput>
-<userinput>    let a x = Sexp.Atom x and l x = Sexp.List x in</userinput>
-<userinput>    l [ l [a &quot;foo&quot;; Int.sexp_of_t t.foo  ];</userinput>
-<userinput>        l [a &quot;bar&quot;; Float.sexp_of_t t.bar]; ] ;;</userinput>
-<computeroutput>val sexp_of_t : t -&gt; Sexp.t = &lt;fun&gt;</computeroutput>
-<prompt># </prompt><userinput>sexp_of_t { foo = 3; bar = -5.5 } ;;</userinput>
-<computeroutput>- : Sexp.t = ((foo 3) (bar -5.5))</computeroutput>
 </programlisting>
     <para>
       In addition to providing the <literal>Sexp</literal> module, most
@@ -20710,16 +20676,15 @@ end</programlisting>
       more generally for defining sexp-converters for polymorphic types.
     </para>
     <para>
-      The deserialization functions to reconstruct an OCaml value from
-      an s-expression also have a similar signature. They will raise an
-      exception if you pass them a malformed s-expression that doesn't
-      match the structure of the OCaml type, so you should normally only
-      pass them output that was generated by the respective
-      <literal>sexp_of_t</literal> function.
+      The functions that reconstruct an OCaml value from an s-expression
+      use essentially the same trick for handling polymorphic types, as
+      shown below. Note that these functions will fail with an exception
+      when presented with an s-expression that doesn't match the
+      structure of the OCaml type in question.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>sexpr/to_from_sexp.topscript</filename> (part 2)</lineannotation>
-<prompt># </prompt><userinput>Int.t_of_sexp (Sexp.of_string &quot;1&quot;);;</userinput>
-<computeroutput>- : int = 1</computeroutput>
+<prompt># </prompt><userinput>List.t_of_sexp;;</userinput>
+<computeroutput>- : (Sexp.t -&gt; 'a) -&gt; Sexp.t -&gt; 'a list = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>List.t_of_sexp Int.t_of_sexp (Sexp.of_string &quot;(1 2 3)&quot;);;</userinput>
 <computeroutput>- : int list = [1; 2; 3]</computeroutput>
 <prompt># </prompt><userinput>List.t_of_sexp Int.t_of_sexp (Sexp.of_string &quot;(1 2 three)&quot;);;</userinput>
@@ -20758,15 +20723,15 @@ end</programlisting>
       The <literal>core.top</literal> package (which you should have
       loaded by default in your <literal>.ocamlinit</literal> file)
       loads in printers for the Core extensions already, so you don't
-      need to do anything special to use the Sexplib printer.
+      need to do anything special to use the s-expression printer.
     </para>
     </note>
     <sect2 id="generating-s-expressions-from-ocaml-types">
       <title>Generating s-expressions from OCaml types</title>
       <para>
-        But what if you want a function to convert some brand new type
-        to an s-expression? You can of course write it yourself manually
-        as we did in the introduction.
+        But what if you want a function to convert a brand new type to
+        an s-expression? You can of course write it yourself manually.
+        Here's an example.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>sexpr/manually_making_sexp.topscript</filename></lineannotation>
 <prompt># </prompt><userinput>type t = { foo: int; bar: float } ;;</userinput>
@@ -20795,8 +20760,7 @@ end</programlisting>
         s-expressions and a <emphasis>syntax extension</emphasis> for
         generating such conversion functions. With that syntax extension
         enabled, any type that has <literal>with sexp</literal> as an
-        annotation will trigger the generation of the functions we want
-        for free.
+        annotation will trigger the generation of the functions we want.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>sexpr/auto_making_sexp.topscript</filename></lineannotation>
 <prompt># </prompt><userinput>type t = { foo: int; bar: float } with sexp ;;</userinput>
@@ -20807,17 +20771,12 @@ end</programlisting>
 <computeroutput>- : t = {foo = 3; bar = 35.}</computeroutput>
 </programlisting>
       <para>
-        The Sexplib syntax extension sees the
-        <literal>with sexp</literal> annotation replaces it with the
-        definition of the conversions functions we see above.
-      </para>
-      <para>
         The syntax extension can be used outside of type declarations as
         well. As discussed in
         <xref linkend="error-handling"/>,
         <literal>with sexp</literal> can be attached to the declaration
         of an exception, which will improve the ability of Core to
-        generate a useful string representation of an exception.
+        generate a useful string representation.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>sexpr/auto_making_sexp.topscript</filename> (part 1)</lineannotation>
 <prompt># </prompt><userinput>exception Bad_message of string list ;;</userinput>
@@ -20865,11 +20824,10 @@ end</programlisting>
         OCaml doesn't directly support generating code from type
         definitions. Instead, it supplies a powerful syntax extension
         mechanism known as Camlp4, which lets you extend the grammar of
-        the language. In the case of Sexplib, Camlp4 is used to create
-        s-expression conversion functions. Camlp4 is well integrated
-        into the OCaml toolchain, and can be activated within the
-        toplevel and also included in compilation using the
-        <literal>-pp</literal> compiler flag.
+        the language. Camlp4 is well integrated into the OCaml
+        toolchain, and can be activated within the toplevel and also
+        included in compilation using the <literal>-pp</literal>
+        compiler flag.
       </para>
       <para>
         Sexplib is part of a family of syntax extensions, including
@@ -20912,8 +20870,7 @@ end</programlisting>
 <computeroutput>- : Sexp.t = ((foo 3.3) (bar &quot;this is () an \&quot; atom&quot;))</computeroutput>
 </programlisting>
     <para>
-      All in, the s-expression format actually supports three comment
-      syntaxes.
+      All in, the s-expression format supports three comment syntaxes.
     </para>
     <variablelist><title>
     S-expression comment formats
@@ -20983,14 +20940,15 @@ end</programlisting>
       good error messages for any unexpected exceptions.
     </para>
   </sect1>
-  <sect1 id="sexp-converters">
-    <title>Sexp converters</title>
+  <sect1 id="preserving-invariants">
+    <title>Preserving invariants</title>
     <para>
       The most important functionality provided by Sexplib is the
       auto-generation of converters for new types. We've seen a bit of
       how this works already, but let's walk through a complete example.
-      Here's the source for the beginning of a library for representing
-      integer intervals.
+      Here's the source for a simple library for representing integer
+      intervals, very similar to the one described in
+      <xref linkend="functors"/>.
     </para>
     <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>sexpr/int_interval.ml</filename></lineannotation>
 (* Module for representing closed integer intervals *)
@@ -21097,25 +21055,23 @@ val contains : t -&gt; int -&gt; bool</programlisting>
 <prompt>$ </prompt><userinput>./test_interval.native</userinput>
 <computeroutput>((Range 3 4) Empty (Range 2 3) (Range 1 6))</computeroutput>
 </programlisting>
-    <sect2 id="preserving-invariants">
-      <title>Preserving invariants</title>
-      <para>
-        One easy mistake to make when dealing with sexp converters is to
-        ignore the fact that those converters can violate the invariants
-        of your code. For example, the <literal>Int_interval</literal>
-        module depends for the correctness of the
-        <literal>is_empty</literal> check on the fact that for any value
-        <literal>Range (x,y)</literal>, <literal>y</literal> is greater
-        than or equal to <literal>x</literal>. The
-        <literal>create</literal> function preserves this invariant, but
-        the <literal>t_of_sexp</literal> function does not.
-      </para>
-      <para>
-        We can fix this problem by overriding the autogenerated function
-        and writing a custom sexp-converter that is based on the
-        autogenerated converter.
-      </para>
-      <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>sexpr/sexp_override.ml</filename></lineannotation>
+    <para>
+      One easy mistake to make when dealing with sexp converters is to
+      ignore the fact that those converters can violate the invariants
+      of your code. For example, the <literal>Int_interval</literal>
+      module depends for the correctness of the
+      <literal>is_empty</literal> check on the fact that for any value
+      <literal>Range (x,y)</literal>, <literal>y</literal> is greater
+      than or equal to <literal>x</literal>. The
+      <literal>create</literal> function preserves this invariant, but
+      the <literal>t_of_sexp</literal> function does not.
+    </para>
+    <para>
+      We can fix this problem by overriding the autogenerated function
+      and writing a custom sexp-converter that wraps the autogenerated
+      converter with whatever invariant checks are necessary.
+    </para>
+    <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>sexpr/sexp_override.ml</filename></lineannotation>
 type t =
   | Range of int * int
   | Empty
@@ -21132,32 +21088,33 @@ let t_of_sexp sexp =
       if y &lt; x then of_sexp_error &quot;Upper and lower bound of Range swapped&quot; sexp
   end;
   t</programlisting>
-      <para>
-        This trick of overriding an existing function definition with a
-        new one is perfectly acceptable in OCaml. The inner call to
-        <literal>t_of_sexp</literal> would turn into a recursive call to
-        the function you are defining if you specify the
-        <literal>rec</literal> keyword. In this case though, it goes to
-        the auto-generated definition generated by the
-        <literal>type t with sexp</literal> definition.
-      </para>
-      <para>
-        We call the function <literal>of_sexp_error</literal> to raise
-        an exception because that improves the error reporting that
-        Sexplib can provide when a conversion fails.
-      </para>
-    </sect2>
-    <sect2 id="getting-good-error-messages">
-      <title>Getting good error messages</title>
-      <para>
-        There are two steps to deserializing a type from an
-        s-expression: first, converting the bytes in a file to an
-        s-expression, and the second, converting that s-expression into
-        the type in question. One problem with this is that it can be
-        hard to localize errors to the right place using this scheme.
-        Consider the following example:
-      </para>
-      <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>sexpr/read_foo.ml</filename></lineannotation>
+    <para>
+      This trick of overriding an existing function definition with a
+      new one is perfectly acceptable in OCaml. Since
+      <literal>t_of_sexp</literal> is defined with an ordinary
+      <literal>let</literal> rather than a <literal>let rec</literal>,
+      the call to the <literal>t_of_sexp</literal> goes to the
+      Sexplib-generated version of the function, rather than being a
+      recursive call.
+    </para>
+    <para>
+      Another important aspect of our definition above is that we call
+      the function <literal>of_sexp_error</literal> to raise an
+      exception when the parsing process fails. This improves the error
+      reporting that Sexplib can provide when a conversion fails, as
+      we'll see in the next section.
+    </para>
+  </sect1>
+  <sect1 id="getting-good-error-messages">
+    <title>Getting good error messages</title>
+    <para>
+      There are two steps to deserializing a type from an s-expression:
+      first, converting the bytes in a file to an s-expression, and the
+      second, converting that s-expression into the type in question.
+      One problem with this is that it can be hard to localize errors to
+      the right place using this scheme. Consider the following example:
+    </para>
+    <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>sexpr/read_foo.ml</filename></lineannotation>
 open Core.Std
 
 type t = { 
@@ -21175,18 +21132,18 @@ let run () =
 
 let () =
   Exn.handle_uncaught ~exit:true run</programlisting>
-      <para>
-        If you were to run this on a malformatted file, say, this one:
-      </para>
-      <programlisting language="scheme"><lineannotation>✎ S-expression: <filename>sexpr/foo_broken_example.scm</filename></lineannotation>
+    <para>
+      If you were to run this on a malformatted file, say, this one:
+    </para>
+    <programlisting language="scheme"><lineannotation>✎ S-expression: <filename>sexpr/foo_broken_example.scm</filename></lineannotation>
 ((a &quot;not-an-integer&quot;)
  (b &quot;not-an-integer&quot;)
  (c 1.0))
 </programlisting>
-      <para>
-        you'll get the following error:
-      </para>
-      <programlisting language="console"><lineannotation>✎ Terminal: <filename>sexpr/build_read_foo.out</filename></lineannotation>
+    <para>
+      you'll get the following error:
+    </para>
+    <programlisting language="console"><lineannotation>✎ Terminal: <filename>sexpr/build_read_foo.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>corebuild read_foo.native</userinput>
 <prompt>$ </prompt><userinput>./read_foo.native foo_example_broken.scm</userinput>
 <computeroutput>Uncaught exception:</computeroutput>
@@ -21202,18 +21159,18 @@ let () =
 <computeroutput>Called from file &quot;read_foo.ml&quot;, line 11, characters 4-60</computeroutput>
 <computeroutput>Called from file &quot;lib/exn.ml&quot;, line 87, characters 6-10</computeroutput>
 </programlisting>
-      <para>
-        If all you have is the error message and the string, it's not
-        terribly informative. In particular, you know that the parsing
-        error-ed out on the atom &quot;not-an-integer&quot;, but you
-        don't know which one! In a large file, this kind of bad error
-        message can be pure misery.
-      </para>
-      <para>
-        But there's hope! If we make small change to the
-        <literal>run</literal> function as follows:
-      </para>
-      <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>sexpr/read_foo_better_errors.ml</filename></lineannotation>
+    <para>
+      If all you have is the error message and the string, it's not
+      terribly informative. In particular, you know that the parsing
+      errored out on the atom &quot;not-an-integer&quot;, but you don't
+      know which one! In a large file, this kind of bad error message
+      can be pure misery.
+    </para>
+    <para>
+      But there's hope! We can make a small change to the code to
+      improve the error message greatly.
+    </para>
+    <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>sexpr/read_foo_better_errors.ml</filename></lineannotation>
 open Core.Std
 
 type t = { 
@@ -21228,11 +21185,10 @@ let run () =
 
 let () =
   Exn.handle_uncaught ~exit:true run</programlisting>
-      <para>
-        and run it again, we'll get the following much more helpful
-        error message:
-      </para>
-      <programlisting language="console"><lineannotation>✎ Terminal: <filename>sexpr/build_read_foo_better_errors.out</filename></lineannotation>
+    <para>
+      If we run it again, we'll see a much more specific errro.
+    </para>
+    <programlisting language="console"><lineannotation>✎ Terminal: <filename>sexpr/build_read_foo_better_errors.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>corebuild read_foo_better_errors.native</userinput>
 <prompt>$ </prompt><userinput>./read_foo_better_errors.native foo_example_broken.scm</userinput>
 <computeroutput>Uncaught exception:</computeroutput>
@@ -21246,15 +21202,18 @@ let () =
 <computeroutput>Called from file &quot;read_foo_better_errors.ml&quot;, line 10, characters 10-68</computeroutput>
 <computeroutput>Called from file &quot;lib/exn.ml&quot;, line 87, characters 6-10</computeroutput>
 </programlisting>
-      <para>
-        In the above error,
-        <computeroutput>&quot;foo_broken_example.scm&quot;:2:5</computeroutput>
-        tells us that the error occurred on
-        <computeroutput>&quot;foo_broken_example.scm&quot;, line 2,
-        character 5</computeroutput>, which is a much better start for
-        figuring out what has gone wrong.
-      </para>
-    </sect2>
+    <para>
+      In the above error,
+      <computeroutput>foo_broken_example.scm:2:5</computeroutput> tells
+      us that the error occurred in the file
+      <computeroutput>&quot;foo_broken_example.scm&quot;</computeroutput>
+      on line 2, character 5. This is a much better start for figuring
+      out what went wrong. The ability to find the precise location of
+      the error depends on the sexp converter reporting errors using the
+      function <literal>of_sexp_error</literal>. This is already done by
+      converters generated by Sexplib, but you should make sure to do
+      the same when you write custom converters.
+    </para>
   </sect1>
   <sect1 id="sexp-conversion-directives">
     <title>Sexp-conversion directives</title>
@@ -21263,7 +21222,7 @@ let () =
       default behavior of the autogenerated sexp-converters. These
       directives allow you to customize the way in which types are
       represented as s-expressions without having to write a custom
-      parser.
+      converter.
     </para>
     <para>
       Note that the extra directives aren't part of the standard OCaml
@@ -21328,11 +21287,12 @@ let () =
 </programlisting>
       <para>
         This is there to allow for s-expression converters to be created
-        for types containing <literal>sexp_opaque</literal> values, and
-        the resulting converters won't necessarily fail. For example, if
-        we made the field containing a <literal>no_converter</literal> a
-        list, the <literal>t_of_sexp</literal> function could still
-        succeed when that list was empty, as shown below.
+        for types containing <literal>sexp_opaque</literal> values. This
+        is useful because the resulting converters won't necessarily
+        fail on all inputs. For example, if you have a record containing
+        a <literal>no_converter list</literal>, the
+        <literal>t_of_sexp</literal> function would still succeed when
+        the list is empty.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>sexpr/sexp_opaque.topscript</filename> (part 4)</lineannotation>
 <prompt># </prompt><userinput>type t = { a: no_converter sexp_opaque list; b: string } with sexp ;;</userinput>
@@ -21346,7 +21306,8 @@ let () =
         If you really only want to generate one direction of converter,
         one can do this by annotating the type with
         <literal>with sexp_of</literal> or
-        <literal>with of_sexp</literal>, as shown below.
+        <literal>with of_sexp</literal> instead of
+        <literal>with sexp</literal>.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>sexpr/sexp_opaque.topscript</filename> (part 5)</lineannotation>
 <prompt># </prompt><userinput>type t = { a: no_converter sexp_opaque; b: string } with sexp_of ;;</userinput>
@@ -21435,11 +21396,10 @@ let () =
       <title>Specifying defaults</title>
       <para>
         The <literal>sexp_option</literal> declaration is really just an
-        example of how one might want to deal with default values. With
-        <literal>sexp_option</literal>, your type on the OCaml side is
-        an option, with <literal>None</literal> representing the case
-        where no value is provided. But you might want to allow other
-        ways of filling in default values.
+        example of specifying a default behavior for dealing with an
+        unspecified field. In particular, <literal>sexp_option</literal>
+        fills in absent fields with <literal>None</literal>. But you
+        might want to allow other ways of filling in default values.
       </para>
       <para>
         Consider the following type which represents the configuration
@@ -21458,10 +21418,7 @@ let () =
       <para>
         One could imagine making some of these parameters optional; in
         particular, by default, we might want the web server to bind to
-        port 80, and to listen as localhost. The sexp-syntax allows this
-        as follows, by setting the default value of
-        <literal>addr</literal> to
-        <literal>&quot;localhost&quot;</literal>.
+        port 80, and to listen as localhost. We can do this as follows.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>sexpr/sexp_default.topscript</filename> (part 1)</lineannotation>
 <prompt># </prompt><userinput>type http_server_config = {</userinput>
@@ -21474,9 +21431,9 @@ let () =
 <computeroutput>val sexp_of_http_server_config : http_server_config -&gt; Sexp.t = &lt;fun&gt;</computeroutput>
 </programlisting>
       <para>
-        The top-level will echo back the type you just defined as usual,
-        but also generate the additional conversion functions that let
-        you convert to and from s-expressions.
+        Now, if we try to convert an s-expression that specifies only
+        the <literal>web_root</literal>, we'll see that the other values
+        are filled in with the desired defaults.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>sexpr/sexp_default.topscript</filename> (part 2)</lineannotation>
 <prompt># </prompt><userinput>let cfg = http_server_config_of_sexp</userinput>
@@ -21485,8 +21442,9 @@ let () =
 <computeroutput>  {web_root = &quot;/var/www/html&quot;; port = 80; addr = &quot;localhost&quot;}</computeroutput>
 </programlisting>
       <para>
-        When we convert the configuration back out to an s-expression,
-        you'll notice that no data is dropped.
+        If we convert the configuration back out to an s-expression,
+        you'll notice that all of the fields are present, even though
+        they're not strictly necessary.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>sexpr/sexp_default.topscript</filename> (part 3)</lineannotation>
 <prompt># </prompt><userinput>sexp_of_http_server_config cfg ;;</userinput>
