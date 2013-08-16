@@ -1,83 +1,63 @@
 # Data Serialization with S-Expressions
 
-We've already discussed the parsing of third-party data formats like
-JSON.  Sometimes, though, you're less concerned with interoperating
-with specific file formats, and you instead want an easy to use,
-human-readable format that integrates well with OCaml and its
-libraries.  Core's solution to this problem is to use s-expressions.
-
 S-expressions are nested parenthetical expressions whose atomic values
 are strings.  They were first popularized by the Lisp programming
 language in the 1960s, and have remained one of the simplest and most
-effective ways to encode structured data.  There's a full definition
-of them available [online](http://people.csail.mit.edu/rivest/Sexp.txt).
-An example s-expression might look like this.
+effective ways to encode structured data in a human-readable and
+editable form.  
+
+There's a full definition of s-expressions available
+[online](http://people.csail.mit.edu/rivest/Sexp.txt).  An example
+s-expression might look like this.
 
 ```frag
 ((typ scheme)(name sexpr/basic.scm))
 ```
 
-S-expressions are a good choice for a data serialization format that is not
-only human-editable, but also easy to automatically convert between standard
-OCaml type definitions without writing a lot of boilerplate code by hand. We
-define the process of converting an OCaml data type to an s-expression as
-_serialization_, and conversely the parsing of an s-expression into an OCaml
-value as _deserialization_.
+S-expressions play a major role in Core, effectively acting as the
+default serialization format.  Indeed, we've encountered s-expressions
+multiple times already, including in [xref](#error-handling),
+[xref](#functors) and [xref](#first-class-modules).
 
-Both are useful day-to-day when you need to write code that can succinctly
-parse and generate configuration files, emit and collect logging messages, or
-even to build clients and servers that convert OCaml datatypes into messages in
-a distributed system.
+This chapter will go into s-expressions in more depth.  In particular,
+we'll discuss:
 
-To this end, this chapter will show you how to:
-
-* generate s-expressions from arbitrary OCaml types, thus giving
-  you a human-readable format for persisting any values in your code.
-* expose s-expressions across module interfaces, including with abstract types.
-* generate good error messages for debugging malformed inputs.
-* use custom type annotations to control the exact printing behavior for
-  s-expression converters.
+* the details of the s-expression format, and show how to generate
+  good error messages for debugging malformed inputs,
+* how to generate s-expressions from arbitrary OCaml types,
+* how to use custom type annotations to control the exact printing
+  behavior for s-expression converters,
+* how to integrate s-expressions into your interfaces, in particular
+  explaining how to add s-expression converters to a module without
+  breaking your abstraction boundaries.
 
 We will also tie this together at the end of the chapter with a simple
-configuration file for a web server written using s-expressions. You can
-also refer back to the plugin loader described back in [xref](#first-class-modules)
-for another good use of s-expressions.
+s-expression formatted configuration file for a web server.
 
 ## Basic Usage
 
-OCaml values aren't directly converted to-and-from strings of s-expressions
-when you use Core.  The s-expression is instead built up as an OCaml value
-which is later serialized into strings or memory buffers.  The OCaml type of an
-s-expression is quite simple.
+The type used to represent an s-expression is quite simple.
 
 ```frag
 ((typ ocaml)(name sexpr/sexp.mli))
 ```
 
-An s-expression can be thought of as a tree where each node contains a list of
-its children, and where the leaves of the tree are strings.  Core provides good
-support for s-expressions in its `Sexp` module, including functions for
-converting s-expressions to and from strings.  We can start by manually
-building the first example s-expression using the `Sexp.t` type.
+An s-expression can be thought of as a tree where each node contains a
+list of its children, and where the leaves of the tree are strings.
+Core provides good support for s-expressions in its `Sexp` module,
+including functions for converting s-expressions to and from strings.
+Let's rewrite our example s-expression in terms of this type.
 
 ```frag
 ((typ ocamltop)(name sexpr/print_sexp.topscript))
 ```
 
 This prints out nicely because Core registers a pretty printer with
-the toplevel.  This pretty-printer uses Core's functions for
-converting s-expressions to and from strings.
+the toplevel.  This pretty-printer is based on the functions in `Sexp`
+for converting s-expressions to and from strings.
 
 ```frag
 ((typ ocamltop)(name sexpr/sexp_printer.topscript))
-```
-
-We can write a function to manually map an OCaml record type to an
-s-expression, and pretty-print it with Core's functions.  We'll show you
-how to automatically generate this function in the next section.
-
-```frag
-((typ ocamltop)(name sexpr/manually_making_sexp.topscript))
 ```
 
 In addition to providing the `Sexp` module, most of the base types in Core
@@ -101,71 +81,72 @@ another conversion function to handle the elements of the list to be converted.
 Core uses this scheme more generally for defining sexp-converters for
 polymorphic types.
 
-The deserialization functions to reconstruct an OCaml value from an
-s-expression also have a similar signature.  They will raise an exception
-if you pass them a malformed s-expression that doesn't match the structure
-of the OCaml type, so you should normally only pass them output that was
-generated by the respective `sexp_of_t` function.
+The functions that reconstruct an OCaml value from an s-expression use
+essentially the same trick for handling polymorphic types, as shown
+below.  Note that these functions will fail with an exception when
+presented with an s-expression that doesn't match the structure of the
+OCaml type in question.
 
 ```frag
 ((typ ocamltop)(name sexpr/to_from_sexp.topscript)(part 2))
 ```
 
+
 <note>
 <title>More on toplevel printing</title>
 
-The values of the s-expressions that we created above were printed properly as
-s-expressions in the toplevel, instead of as the tree of `Atom` and `List`
-variants that they're actually made of.
+The values of the s-expressions that we created above were printed
+properly as s-expressions in the toplevel, instead of as the tree of
+`Atom` and `List` variants that they're actually made of.
 
-This is due to OCaml's facility for installing custom *toplevel printers* that
-can rewrite some values into more toplevel-friendly equivalents.  They are
-generally installed as <command>ocamlfind</command> packages ending in `top`.
+This is due to OCaml's facility for installing custom *toplevel
+printers* that can rewrite some values into more toplevel-friendly
+equivalents.  They are generally installed as
+<command>ocamlfind</command> packages ending in `top`.
 
 ```frag
 ((typ console)(name sexpr/list_top_packages.out))
 ```
 
-The `core.top` package (which you should have loaded by default in your
-`.ocamlinit` file) loads in printers for the Core extensions already, so you
-don't need to do anything special to use the Sexplib printer.
+The `core.top` package (which you should have loaded by default in
+your `.ocamlinit` file) loads in printers for the Core extensions
+already, so you don't need to do anything special to use the
+s-expression printer.
 
 </note>
 
 ### Generating s-expressions from OCaml types
 
-But what if you want a function to convert some brand new type to an
-s-expression?  You can of course write it yourself manually as we did in the
-introduction.
+But what if you want a function to convert a brand new type to an
+s-expression?  You can of course write it yourself manually.  Here's
+an example.
 
 ```frag
 ((typ ocamltop)(name sexpr/manually_making_sexp.topscript))
 ```
 
-This is somewhat tiresome to write, and it gets more so when you consider the
-parser, _i.e._, `t_of_sexp`, which is considerably more complex.  Writing this
-kind of parsing and printing code by hand is mechanical and error prone, not to
-mention a drag.
+This is somewhat tiresome to write, and it gets more so when you
+consider the parser, _i.e._, `t_of_sexp`, which is considerably more
+complex.  Writing this kind of parsing and printing code by hand is
+mechanical and error prone, not to mention a drag.
 
-Given how mechanical the code is, you could imagine writing a program that
-inspected the type definition and autogenerated the conversion code for you.
-As it turns out, we can do just that using Sexplib.  The `sexplib` package,
-which is included with Core, provides both a library for manipulating
-s-expressions and a _syntax extension_ for generating such conversion
-functions.  With that syntax extension enabled, any type that has `with sexp`
-as an annotation will trigger the generation of the functions we want for free.
+Given how mechanical the code is, you could imagine writing a program
+that inspected the type definition and autogenerated the conversion
+code for you.  As it turns out, we can do just that using Sexplib.
+The `sexplib` package, which is included with Core, provides both a
+library for manipulating s-expressions and a _syntax extension_ for
+generating such conversion functions.  With that syntax extension
+enabled, any type that has `with sexp` as an annotation will trigger
+the generation of the functions we want.
 
 ```frag
 ((typ ocamltop)(name sexpr/auto_making_sexp.topscript)(part 0))
 ```
 
-The Sexplib syntax extension sees the `with sexp` annotation replaces it with
-the definition of the conversions functions we see above.
-
-The syntax extension can be used outside of type declarations as well.  As
-discussed in [xref](#error-handling), `with sexp` can be attached to the
-declaration of an exception, which will improve the ability of Core to generate
-a useful string representation of an exception.
+The syntax extension can be used outside of type declarations as well.
+As discussed in [xref](#error-handling), `with sexp` can be attached
+to the declaration of an exception, which will improve the ability of
+Core to generate a useful string representation.
 
 ```frag
 ((typ ocamltop)(name sexpr/auto_making_sexp.topscript)(part 1))
@@ -193,10 +174,11 @@ by hand, but with far less programmer effort.
 OCaml doesn't directly support generating code from type definitions.
 Instead, it supplies a powerful syntax extension mechanism known as
 `camlp4`, which lets you extend the grammar of the language.  In the
-case of Sexplib, <command>camlp4</command> is used to create s-expression conversion
-functions.  <command>camlp4</command> is well integrated into the OCaml toolchain, and
-can be activated within the toplevel and also included in compilation
-using the `-pp` compiler flag.
+case of Sexplib, <command>camlp4</command> is used to create
+s-expression conversion functions.  <command>camlp4</command> is well
+integrated into the OCaml toolchain, and can be activated within the
+toplevel and also included in compilation using the `-pp` compiler
+flag.
 
 Sexplib is part of a family of syntax extensions, including
 Comparelib, described in [xref](#maps-and-hash-tables), and
@@ -230,8 +212,7 @@ not part of the resulting s-expression.
 ((typ ocamltop)(name sexpr/example_load.topscript)(part 0))
 ```
 
-All in, the s-expression format actually supports three comment
-syntaxes.
+All in, the s-expression format supports three comment syntaxes.
 
 <variablelist><title>S-expression comment formats</title>
   <varlistentry>
@@ -273,12 +254,13 @@ In the above, we use `Exn.handle_uncaught` to make sure that the exception gets
 printed out in full detail.  You should generally wrap every Core program in
 this handler to get good error messages for any unexpected exceptions.
 
-## Sexp converters
+## Preserving invariants
 
-The most important functionality provided by Sexplib is the auto-generation of
-converters for new types.  We've seen a bit of how this works already, but
-let's walk through a complete example.  Here's the source for the beginning of
-a library for representing integer intervals.
+The most important functionality provided by Sexplib is the
+auto-generation of converters for new types.  We've seen a bit of how
+this works already, but let's walk through a complete example.  Here's
+the source for a simple library for representing integer intervals,
+very similar to the one described in [xref](#functors).
 
 ```frag
 ((typ ocaml)(name sexpr/int_interval.ml))
@@ -329,8 +311,6 @@ it, we'll get the following output.
 ((typ ocaml)(name sexpr/build_test_interval.out))
 ```
 
-### Preserving invariants
-
 One easy mistake to make when dealing with sexp converters is to
 ignore the fact that those converters can violate the invariants of
 your code.  For example, the `Int_interval` module depends for the
@@ -340,24 +320,25 @@ function preserves this invariant, but the `t_of_sexp` function does
 not.
 
 We can fix this problem by overriding the autogenerated function and
-writing a custom sexp-converter that is based on the autogenerated
-converter.
+writing a custom sexp-converter that wraps the autogenerated converter
+with whatever invariant checks are necessary.
 
 ```frag
 ((typ ocaml)(name sexpr/sexp_override.ml))
 ```
 
-This trick of overriding an existing function definition with a new one is
-perfectly acceptable in OCaml.  The inner call to `t_of_sexp` would turn into a
-recursive call to the function you are defining if you specify the `rec`
-keyword. In this case though, it goes to the auto-generated definition
-generated by the `type t with sexp` definition.
+This trick of overriding an existing function definition with a new
+one is perfectly acceptable in OCaml.  Since `t_of_sexp` is defined
+with an ordinary `let` rather than a `let rec`, the call to the
+`t_of_sexp` goes to the Sexplib-generated version of the function,
+rather than being a recursive call.
 
-We call the function `of_sexp_error` to raise an exception because
-that improves the error reporting that Sexplib can provide when a
-conversion fails.
+Another important aspect of our definition above is that we call the
+function `of_sexp_error` to raise an exception when the parsing
+process fails.  This improves the error reporting that Sexplib can
+provide when a conversion fails, as we'll see in the next section.
 
-### Getting good error messages
+## Getting good error messages
 
 There are two steps to deserializing a type from an s-expression:
 first, converting the bytes in a file to an s-expression, and the
@@ -382,42 +363,46 @@ you'll get the following error:
 ```
 
 If all you have is the error message and the string, it's not terribly
-informative.  In particular, you know that the parsing error-ed out on
+informative.  In particular, you know that the parsing errored out on
 the atom "not-an-integer", but you don't know which one!  In a large
 file, this kind of bad error message can be pure misery.
 
-But there's hope!  If we make small change to the `run` function as
-follows:
+But there's hope!  We can make a small change to the code to improve
+the error message greatly.
 
 ```frag
 ((typ ocaml)(name sexpr/read_foo_better_errors.ml))
 ```
 
-and run it again, we'll get the following much more helpful error
-message:
+If we run it again, we'll see a much more specific errro.
 
 ```frag
 ((typ console)(name sexpr/build_read_foo_better_errors.out))
 ```
 
 In the above error,
-<computeroutput>"foo_broken_example.scm":2:5</computeroutput> tells us that the
-error occurred on <computeroutput>"foo_broken_example.scm", line 2, character
-5</computeroutput>, which is a much better start for figuring out what has gone
-wrong.
+<computeroutput>foo_broken_example.scm:2:5</computeroutput> tells us
+that the error occurred in the file
+<computeroutput>"foo_broken_example.scm"</computeroutput> on line 2,
+character 5.  This is a much better start for figuring out what went
+wrong.  The ability to find the precise location of the error depends
+on the sexp converter reporting errors using the function
+`of_sexp_error`.  This is already done by converters generated by
+Sexplib, but you should make sure to do the same when you write custom
+converters.
 
 ## Sexp-conversion directives
 
-Sexplib supports a collection of directives for modifying the default behavior
-of the autogenerated sexp-converters.  These directives allow you to customize
-the way in which types are represented as s-expressions without having to write
-a custom parser.
+Sexplib supports a collection of directives for modifying the default
+behavior of the autogenerated sexp-converters.  These directives allow
+you to customize the way in which types are represented as
+s-expressions without having to write a custom converter.
 
-Note that the extra directives aren't part of the standard OCaml syntax, but
-are added via the Sexplib syntax extension.  However, since Sexplib is used
-throughout Core and is part of the standard bundle activated by
-<command>corebuild</command>, you can use these in your own Core code without
-any special effort.
+Note that the extra directives aren't part of the standard OCaml
+syntax, but are added via the Sexplib syntax extension.  However,
+since Sexplib is used throughout Core and is part of the standard
+bundle activated by <command>corebuild</command>, you can use these in
+your own Core code without any special effort.
 
 ### `sexp_opaque`
 
@@ -457,10 +442,10 @@ but will fail at runtime if it is used.
 ```
 
 This is there to allow for s-expression converters to be created for
-types containing `sexp_opaque` values, and the resulting converters
-won't necessarily fail.  For example, if we made the field containing
-a `no_converter` a list, the `t_of_sexp` function could still succeed
-when that list was empty, as shown below.
+types containing `sexp_opaque` values.  This is useful because the
+resulting converters won't necessarily fail on all inputs.  For
+example, if you have a record containing a `no_converter list`, the
+`t_of_sexp` function would still succeed when the list is empty.
 
 ```frag
 ((typ ocamltop)(name sexpr/sexp_opaque.topscript)(part 4))
@@ -468,7 +453,7 @@ when that list was empty, as shown below.
 
 If you really only want to generate one direction of converter, one
 can do this by annotating the type with `with sexp_of` or `with
-of_sexp`, as shown below.
+of_sexp` instead of `with sexp`.
 
 ```frag
 ((typ ocamltop)(name sexpr/sexp_opaque.topscript)(part 5))
@@ -513,11 +498,10 @@ it with `sexp_option`:
 
 ### Specifying defaults
 
-The `sexp_option` declaration is really just an example of how one
-might want to deal with default values.  With `sexp_option`, your type
-on the OCaml side is an option, with `None` representing the case
-where no value is provided.  But you might want to allow other ways of
-filling in default values.
+The `sexp_option` declaration is really just an example of specifying
+a default behavior for dealing with an unspecified field.  In
+particular, `sexp_option` fills in absent fields with `None`.  But you
+might want to allow other ways of filling in default values.
 
 Consider the following type which represents the configuration of a
 very simple web-server.
@@ -528,23 +512,23 @@ very simple web-server.
 
 One could imagine making some of these parameters optional; in particular, by
 default, we might want the web server to bind to port 80, and to listen as
-localhost.  The sexp-syntax allows this as follows, by setting the default 
-value of `addr` to `"localhost"`.
+localhost.  We can do this as follows.
 
 ```frag
 ((typ ocamltop)(name sexpr/sexp_default.topscript)(part 1))
 ```
 
-The top-level will echo back the type you just defined as usual, but also
-generate the additional conversion functions that let you convert to and from
-s-expressions.
+Now, if we try to convert an s-expression that specifies only the
+`web_root`, we'll see that the other values are filled in with the
+desired defaults.
 
 ```frag
 ((typ ocamltop)(name sexpr/sexp_default.topscript)(part 2))
 ```
 
-When we convert the configuration back out to an s-expression, you'll notice
-that no data is dropped.
+If we convert the configuration back out to an s-expression, you'll
+notice that all of the fields are present, even though they're not
+strictly necessary.
 
 ```frag
 ((typ ocamltop)(name sexpr/sexp_default.topscript)(part 3))
