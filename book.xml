@@ -19726,11 +19726,11 @@ let () =
   </para>
   <para>
     Parser generators have a long history, including tools like
-    <command>lex</command> and <literal>yacc</literal> that date back to
+    <command>lex</command> and <command>yacc</command> that date back to
     the early 1970's. OCaml has its own alternatives, including
     <command>ocamllex</command>, which replaces <command>lex</command>,
     and <command>ocamlyacc</command> and <command>menhir</command>,
-    which are replacements for <literal>yacc</literal>. We'll explore
+    which are replacements for <command>yacc</command> We'll explore
     these tools in the course of walking through the implementation of a
     parser for the JSON serialization format that we discussed in
     <xref linkend="handling-json-data"/>.
@@ -21655,12 +21655,13 @@ let () =
       part because there's nothing running that could do the necessary
       I/O. When using Async, processing of I/O and other events is
       handled by the Async scheduler. When writing a standalone program,
-      you need to start the scheduler explicitly, but utop knows about
-      Async, and can start the scheduler automatically. More than that,
-      utop knows about deferred values, and when you type in an
-      expression of type <literal>Deferred.t</literal>, it will make
-      sure the scheduler is running and block until the deferred is
-      determined. Thus, we can write:
+      you need to start the scheduler explicitly, but
+      <command>utop</command> knows about Async, and can start the
+      scheduler automatically. More than that, <command>utop</command>
+      knows about deferred values, and when you type in an expression of
+      type <literal>Deferred.t</literal>, it will make sure the
+      scheduler is running and block until the deferred is determined.
+      Thus, we can write:
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>async/main.topscript</filename> (part 5)</lineannotation>
 <prompt># </prompt><userinput>contents;;</userinput>
@@ -22251,8 +22252,8 @@ let () =
       </para>
       <para>
         If we just try and write to the writer, we'll see that we block
-        indefinitely in utop. You can break out of the wait by hitting
-        <literal>Control-C</literal>.
+        indefinitely in <command>utop</command>. You can break out of
+        the wait by hitting <literal>Control-C</literal>.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml Utop: <filename>async/pipe_write_break.rawscript</filename></lineannotation>
 <userinput># Pipe.write w &quot;Hello World!&quot;;;</userinput>
@@ -22458,7 +22459,7 @@ let get_definition word =
       <para>
         To better understand what's going on, it's useful to look at the
         type for <literal>Cohttp_async.Client.get</literal>, which we
-        can do in utop.
+        can do in <command>utop</command>.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>async/main.topscript</filename> (part 28)</lineannotation>
 <prompt># </prompt><userinput>#require &quot;cohttp.async&quot;;;</userinput>
@@ -22568,7 +22569,7 @@ let search_and_print words =
         <literal>unit</literal> deferreds and returns a single
         <literal>unit</literal> deferred that becomes determined when
         every deferred on the input list is determined. We can see the
-        type of this function in utop.
+        type of this function in <command>utop</command>.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>async/main.topscript</filename> (part 30)</lineannotation>
 <prompt># </prompt><userinput>Deferred.all_unit;;</userinput>
@@ -22657,10 +22658,10 @@ let () =
 <computeroutput>     (someone_is_listening false) (kill_index 0)))))).</computeroutput>
 </programlisting>
     <para>
-      In utop, the exception thrown by <literal>maybe_raise ()</literal>
-      terminates the evaluation of just that expression, but in a
-      standalone program, an uncaught exception would bring down the
-      entire process.
+      In <command>utop</command>, the exception thrown by
+      <literal>maybe_raise ()</literal> terminates the evaluation of
+      just that expression, but in a standalone program, an uncaught
+      exception would bring down the entire process.
     </para>
     <para>
       So, how could we capture and handle such an exception? You might
@@ -22774,8 +22775,8 @@ let () =
         In addition to the ordinary stack-trace, the exception displays
         the trace of monitors through which the exception traveled,
         starting at the one we created, called &quot;blow up
-        monitor&quot;. The other monitors you see come from utop's
-        special handling of deferreds.
+        monitor&quot;. The other monitors you see come from
+        <command>utop</command>'s special handling of deferreds.
       </para>
       <para>
         Monitors can do more than just augment the error-trace of an
@@ -22807,7 +22808,8 @@ let () =
         the deferred returned by <literal>swallow_error</literal> is
         never determined. This makes sense, since the calculation never
         actually completes, so there's no value to return. You can break
-        out of this in utop by hitting <literal>Control-C</literal>.
+        out of this in <command>utop</command> by hitting
+        <keycombo><keycap>Control</keycap><keycap>C</keycap></keycombo>.
       </para>
       <para>
         Here's an example of a monitor which passes some exceptions
