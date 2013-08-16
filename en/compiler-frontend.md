@@ -739,10 +739,11 @@ become larger.  This is generally only a problem if you use objects
 extensively, which usually have larger type signature to cover all their
 methods.
 
-As a result, the suggested approach is to only compile with `-principal`
-occasionally to check if your code is compliant.  If compiling in principal
-mode works, it is guaranteed that the program will pass type checking in
-non-principal mode too.
+If compiling in principal mode works, it is guaranteed that the program will
+pass type checking in non-principal mode too.  For this reason, the
+<command>corebuild</command> wrapper script activates principal mode by
+default, preferring stricter type inference over a small loss in compilation
+speed and extra disk space usage.
 
 Bear in mind that the `cmi` files generated in principal mode differ from the
 default mode. Try to ensure that you compile your whole project with it
