@@ -159,11 +159,11 @@ in a parsing error at the very end of the second function.
 
 This class of bug (due to a single errant character) can be hard to spot in a
 large body of code. Luckily, there's a great tool available via OPAM called
-`ocp-indent` that applies structured indenting rules to your source code on a
+<command>ocp-indent</command> that applies structured indenting rules to your source code on a
 line-by-line basis. This not only beautifies your code layout, but it also
 makes this syntax error much easier to locate.
 
-Let's run our erroneous file through `ocp-indent` and see how it processes it.
+Let's run our erroneous file through <command>ocp-indent</command> and see how it processes it.
 
 ```frag
 ((typ console)(name front-end/indent_follow_on_function.out))
@@ -171,14 +171,14 @@ Let's run our erroneous file through `ocp-indent` and see how it processes it.
 
 The `add_and_print` definition has been indented as if it were part of the
 first `concat_and_print` definition, and the errant semicolon is now much
-easier to spot.  We just need to remove that semicolon and re-run `ocp-indent`
+easier to spot.  We just need to remove that semicolon and re-run <command>ocp-indent</command>
 to verify that the syntax is correct.
 
 ```frag
 ((typ console)(name front-end/indent_follow_on_function_fixed.out))
 ```
 
-The `ocp-indent` [homepage](https://github.com/OCamlPro/ocp-indent) documents
+The <command>ocp-indent</command> [homepage](https://github.com/OCamlPro/ocp-indent) documents
 how to integrate it with your favorite editor.  All the Core libraries are
 formatted using it to ensure consistency, and it's a good idea to do this
 before publishing your own source code online.
@@ -988,7 +988,7 @@ code at a specific location to the inferred or external types.
 ### Using ocp-index for auto-completion
 
 One such command-line tool to display auto-completion information in your
-editor is `ocp-index`.  Install it via OPAM as follows.
+editor is <command>ocp-index</command>.  Install it via OPAM as follows.
 
 ```frag
 ((typ console)(name front-end/install_ocp_index.out))
@@ -997,14 +997,14 @@ editor is `ocp-index`.  Install it via OPAM as follows.
 Let's refer back to our Ncurses binding example from the beginning of
 [xref](#foreign-function-interface).  This module defined bindings for the
 Ncurses library.  First, compile the interfaces with `-bin-annot` so that we
-can obtain the `cmt` and `cmti` files, and then run `ocp-index` in completion
+can obtain the `cmt` and `cmti` files, and then run <command>ocp-index</command> in completion
 mode.
 
 ```frag
 ((typ ocaml)(name ocp-index/index_ncurses.out))
 ```
 
-You need to pass `ocp-indexz a set of directories to search for `cmt` files in,
+You need to pass <command>ocp-index</command> a set of directories to search for `cmt` files in,
 and a fragment of text to autocomplete.  As you can imagine, autocompletion is
 invaluable on larger codebases.  See the
 [ocp-index](https://github.com/ocamlpro/ocp-index) homepage for more
@@ -1047,7 +1047,7 @@ type declaration has been given a unique name (`t/1008`), as has the `v` value
 (`v/1011`).
 
 You'll rarely need to look at this raw output from the compiler unless you're
-building IDE tools such as `ocp-index`, or are hacking on extensions to the
+building IDE tools such as <command>ocp-index</command>, or are hacking on extensions to the
 core compiler itself.  However, it's useful to know that this intermediate form
 exists before we delve further into the code generation process next in
 [xref](#the-compiler-backend-byte-code-and-native-code).
