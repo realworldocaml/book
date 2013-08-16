@@ -3730,8 +3730,7 @@ val numeric_deriv :
 <computeroutput>val sum : int list -&gt; int = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>sum [1;2;3];;</userinput>
 <computeroutput>- : int = 6</computeroutput>
-<prompt># </prompt><userinput>sum []</userinput>
-<userinput>;;</userinput>
+<prompt># </prompt><userinput>sum [];;</userinput>
 <computeroutput>- : int = 0</computeroutput>
 </programlisting>
     <para>
@@ -3955,8 +3954,8 @@ val numeric_deriv :
 <computeroutput>                                 </computeroutput>
 <computeroutput>  Name     Time (ns)   % of max  </computeroutput>
 <computeroutput> -------- ----------- ---------- </computeroutput>
-<computeroutput>  sum_if     110_799     100.00  </computeroutput>
-<computeroutput>  sum         22_348      20.17  </computeroutput>
+<computeroutput>  sum_if     110_808     100.00  </computeroutput>
+<computeroutput>  sum         22_374      20.19  </computeroutput>
 <computeroutput>                                 </computeroutput>
 <computeroutput>- : unit = ()</computeroutput>
 </programlisting>
@@ -20214,13 +20213,18 @@ let frac = '.' digit*
 let exp = ['e' 'E'] ['-' '+']? digit+
 let float = digit* frac? exp?</programlisting>
       <para>
-        Finally, we define whitespace, newlines, identifiers, and hex
-        constants.
+        Finally, we define whitespace, newlines and identifiers.
       </para>
       <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>parsing/lexer.mll</filename> (part 3)</lineannotation>
 let white = [' ' '\t']+
 let newline = '\r' | '\n' | &quot;\r\n&quot;
 let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*</programlisting>
+      <para>
+        The <literal>newline</literal> introduces the
+        <literal>|</literal> operator which lets one of several
+        alternative regular expressions match (in this case, the various
+        carriage return combinations of CR, LF, or CRLF).
+      </para>
     </sect2>
     <sect2 id="lexing-rules">
       <title>Lexing rules</title>
