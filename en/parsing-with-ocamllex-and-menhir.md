@@ -146,7 +146,7 @@ specification.
 ### Describing the grammar
 
 The next thing we need to do is to specify the grammar of a JSON
-expression.  <command>menhir</command>, like many parsers, expresses grammars as
+expression.  <command>menhir</command>, like many parser generators, expresses grammars as
 _context free grammars_.  (More precisely, <command>menhir</command> supports LR(1)
 grammars, but we will ignore that technical distinction here.) You can
 think of a context-free grammar as a set of abstract names, called
