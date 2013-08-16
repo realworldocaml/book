@@ -5,6 +5,6 @@ Exn.sexp_of_t (Invalid_argument "foo");;
 List.sexp_of_t;;
 List.sexp_of_t Int.sexp_of_t [1; 2; 3];;
 #part 2
-Int.t_of_sexp (Sexp.of_string "1");;
+List.t_of_sexp;;
 List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 3)");;
 List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 three)");;
