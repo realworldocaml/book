@@ -356,7 +356,7 @@
       <para>
         As of publication, the Windows operating system is unsupported
         by Core, and so only Mac OS X, Linux, FreeBSD and OpenBSD can be
-        expected to work reliably. Please check the online installaton
+        expected to work reliably. Please check the online installation
         instructions for updates regarding Windows, or install a Linux
         virtual machine to work through the book as it stands.
       </para>
@@ -2608,7 +2608,7 @@ val abs_diff : int -&gt; (int -&gt; int)</programlisting>
 </programlisting>
       <para>
         Note that in the above, the pattern
-        <literal>| [] | [_]</literal> is what's called on
+        <literal>| [] | [_]</literal> is what's called an
         <emphasis>or-pattern</emphasis>, which is a disjunction of two
         patterns, meaning that it will be considered a match if either
         pattern matches. In this case, <literal>[]</literal>, matches
@@ -25923,7 +25923,7 @@ struct custom_operations {
         enough space after this is done and will always trigger a
         garbage collection. There are various internal reasons for such
         early collections, such as handling pending UNIX signals, and
-        they don't ordinally matter for application code.
+        they don't ordinarily matter for application code.
       </para>
       <note>
       <title>
@@ -29213,7 +29213,7 @@ main (int argc, char **argv)
         After this point, you no longer need the OCaml compiler, as
         <literal>embed_out.o</literal> has all of the OCaml code
         compiled and linked into a single object file. Compile an output
-        binary using <literal>gcc</literal> to test this out.
+        binary using <command>gcc</command> to test this out.
       </para>
       <programlisting language="console"><lineannotation>✎ Terminal: <filename>back-end-embed/build_embed_binary.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>gcc -fPIC -Wall -I`ocamlc -where` -L`ocamlc -where` -ltermcap -lm -ldl -o finalbc.native main.c embed_out.o -lcamlrun</userinput>
@@ -29511,7 +29511,7 @@ let () =
       <para>
         The native code compiler builds executables that can be debugged
         using conventional system debuggers such as GNU
-        <literal>gdb</literal>. You need to compile your libraries with
+        <command>gdb</command> You need to compile your libraries with
         the <literal>-g</literal> option to add the debug information to
         the output, just as you need to with C compilers.
       </para>
@@ -29527,7 +29527,7 @@ let () =
         <title>Understanding name mangling</title>
         <para>
           So how do you refer to OCaml functions in an interactive
-          debugger like <literal>gdb</literal>? The first thing you need
+          debugger like <command>gdb</command>? The first thing you need
           to know is how function names compile down to C symbols; a
           procedure generally called <emphasis>name mangling</emphasis>.
         </para>
@@ -29579,17 +29579,17 @@ let () =
         <title>Interactive breakpoints with the GNU debugger</title>
         <para>
           Let's see name mangling in action with some interactive
-          debugging in the GNU <literal>gdb</literal> debugger.
+          debugging using GNU <command>gdb</command>.
         </para>
         <caution>
         <title>
-        Beware <literal>gdb</literal> on MacOS X
+        Beware gdb on MacOS X
         </title>
         <para>
           The examples here assume that you are running
-          <literal>gdb</literal> on either Linux or FreeBSD. MacOS X
-          does have <literal>gdb</literal> installed, but it's a rather
-          quirky experience that doesn't reliably interpret the
+          <command>gdb</command> on either Linux or FreeBSD. MacOS X
+          10.8 does have <command>gdb</command> installed, but it's a
+          rather quirky experience that doesn't reliably interpret the
           debugging information contained in the native binaries. This
           can result in function names showing up as raw symbols such as
           <literal>.L101</literal> instead of their more human-readable
@@ -29636,7 +29636,7 @@ let () =
 </programlisting>
         <para>
           Now we can run this interactively within
-          <literal>gdb</literal>.
+          <command>gdb</command>.
         </para>
         <programlisting language="console"><lineannotation>✎ Terminal: <filename>back-end/gdb_alternate0.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>gdb ./alternate_list.native</userinput>
@@ -29653,7 +29653,7 @@ let () =
 <computeroutput>(gdb)</computeroutput>
 </programlisting>
         <para>
-          The <literal>gdb</literal> prompt lets you enter debug
+          The <command>gdb</command> prompt lets you enter debug
           directives. Let's set the program to break just before the
           first call to <literal>take</literal>.
         </para>
@@ -29751,7 +29751,8 @@ let () =
       <itemizedlist>
         <listitem>
           <para>
-            GNU Gprof to measure execution time and call graphs.
+            GNU <command>gprof</command> to measure execution time and
+            call graphs.
           </para>
         </listitem>
         <listitem>
@@ -29770,28 +29771,28 @@ let () =
       <sect3 id="gprof">
         <title>Gprof</title>
         <para>
-          Gprof produces an execution profile of an OCaml program by
-          recording a call graph of which functions call each other, and
-          recording the time these calls take during the program
-          execution.
+          <command>gprof</command> produces an execution profile of an
+          OCaml program by recording a call graph of which functions
+          call each other, and recording the time these calls take
+          during the program execution.
         </para>
         <para>
-          Getting precise information out of Gprof requires passing the
-          <literal>-p</literal> flag to the native code compiler when
-          compiling <emphasis>and</emphasis> linking the binary. This
-          generates extra code that records profile information to a
-          file called <literal>gmon.out</literal> when the program is
-          executed. This profile information can then be examined using
-          Gprof.
+          Getting precise information out of <command>gprof</command>
+          requires passing the <literal>-p</literal> flag to the native
+          code compiler when compiling <emphasis>and</emphasis> linking
+          the binary. This generates extra code that records profile
+          information to a file called <literal>gmon.out</literal> when
+          the program is executed. This profile information can then be
+          examined using <command>gprof</command>.
         </para>
       </sect3>
       <sect3 id="perf">
         <title>Perf</title>
         <para>
-          Perf is a more modern alternative to Gprof that doesn't
-          require you to instrument the binary. Instead, it uses
-          hardware counters and debug information within the binary to
-          record information accurately.
+          Perf is a more modern alternative to <command>gprof</command>
+          that doesn't require you to instrument the binary. Instead, it
+          uses hardware counters and debug information within the binary
+          to record information accurately.
         </para>
         <para>
           Run Perf on a compiled binary to record information first.
