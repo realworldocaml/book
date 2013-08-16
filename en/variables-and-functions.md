@@ -369,7 +369,7 @@ for finding the first sequentially-repeated element in a list.
 ((typ ocamltop)(name variables-and-functions/main.topscript)(part 22)) 
 ```
 
-Note that in the above, the pattern `| [] | [_]` is what's called on
+Note that in the above, the pattern `| [] | [_]` is what's called an
 _or-pattern_, which is a disjunction of two patterns, meaning that it
 will be considered a match if either pattern matches.  In this case,
 `[]`, matches the empty list, and `[_]`, matches any single element
