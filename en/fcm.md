@@ -148,7 +148,7 @@ and produces a new one.
 ```
 
 We can create multiple instances of this module with different
-undelrying types.
+underlying types.
 
 ```frag
 ((typ ocamltop)(name fcm/main.topscript)(part 12))
@@ -169,7 +169,7 @@ you can see below.
 ((typ ocamltop)(name fcm/main.topscript)(part 14))
 ```
 
-To make `int_bumber` usable, we need to expose the type, which we can
+To make `int_bumper` usable, we need to expose the type, which we can
 do as follows.
 
 ```frag
@@ -483,8 +483,8 @@ The eval function itself is fairly straight-forward, dispatching to
 the appropriate functions to respond to each type of query.  Note that
 we use write `<sexp_of<string list>>` to autogenerate a function for
 converting a list of strings to an s-expression.  This is part of the
-sexplib package described in
-[xref](#data-serialization-with-s-expressions).  
+Sexplib package described in
+[xref](#data-serialization-with-s-expressions).
 
 This function ends the definition of the `Loader` module.
 
