@@ -8,10 +8,9 @@ and how easy it is to read, refactor, and extend.  The languages you
 know can also deeply affect how you think about programming and
 software design.
 
-But not all ideas about how to design a programming language are
-created equal.  Over the last 40 years, a few key language features
-have emerged that together form a kind of sweet-spot in language
-design.  These features include:
+But not all programming languages are created equal.  Over the last 40
+years, a few key language features have emerged that together form a
+kind of sweet-spot in language design.  These features include:
 
 * _Garbage collection_ for automatic memory management, now a feature
   of almost every modern high-level language.
