@@ -220,7 +220,7 @@ instructions in [xref](#installation) carefully.
 
 As of publication, the Windows operating system is unsupported by Core, and so
 only Mac OS X, Linux, FreeBSD and OpenBSD can be expected to work reliably.
-Please check the online installaton instructions for updates regarding Windows,
+Please check the online installation instructions for updates regarding Windows,
 or install a Linux virtual machine to work through the book as it stands.
 
 This book is not intended as a reference manual.  We aim to teach you about the
