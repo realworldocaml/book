@@ -368,7 +368,13 @@ let parse_file fullfile file =
       Buffer.add_string buf s
     | Some buf -> Buffer.add_string buf s
   in
-
+  (* Utop does this directly in findlib, but we dont link to it *)
+  let strip_findlib_stuff b =
+    String.split_lines b
+    |> List.filter ~f:(fun l -> not (String.is_suffix ~suffix:"added to search path" l))
+    |> List.filter ~f:(fun l -> not (String.is_suffix ~suffix:": loaded" l))
+    |> String.concat ~sep:"\n"
+  in
   let _ =
     In_channel.with_file file ~f:(
       In_channel.fold_lines ~init:[] ~f:(
@@ -386,6 +392,7 @@ let parse_file fullfile file =
                 eprintf "c: %s\n%!" s;
                 eprintf "o: %s\n%!" stdout;
                 eprintf "e: %s\n%!" stderr;
+                let stderr = strip_findlib_stuff stderr in
                 print_part ~phrase ~sout:stdout ~serr:stderr ~out:s !part;
                 print_html_part !part (Cow.Html.to_string (Cow.Code.ocaml_fragment ("# " ^ phrase)));
                 let sout = if stdout = "" then <:html<&>> else <:html<<br />$str:stdout$>> in
