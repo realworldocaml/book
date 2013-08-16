@@ -169,25 +169,23 @@ structure: they autogenerate code based on type definitions,
 implementing functionality that you could in theory have implemented
 by hand, but with far less programmer effort.
 
-<note> <title>Syntax extensions, `camlp4` and `type_conv`</title>
+<note> <title>Syntax extensions, Camlp4 and Type_conv</title>
 
 OCaml doesn't directly support generating code from type definitions.
 Instead, it supplies a powerful syntax extension mechanism known as
-`camlp4`, which lets you extend the grammar of the language.  In the
-case of Sexplib, <command>camlp4</command> is used to create
-s-expression conversion functions.  <command>camlp4</command> is well
-integrated into the OCaml toolchain, and can be activated within the
-toplevel and also included in compilation using the `-pp` compiler
+Camlp4, which lets you extend the grammar of the language.  Camlp4 is
+well integrated into the OCaml toolchain, and can be activated within
+the toplevel and also included in compilation using the `-pp` compiler
 flag.
 
 Sexplib is part of a family of syntax extensions, including
-Comparelib, described in [xref](#maps-and-hash-tables), and
-Fieldslib, described in [xref](#records), that generate code based
-on type declarations, and are all based on a common library called
-Type_conv.  This library provides a common language for annotating
-types (_e.g._, using the `with` notation) and utilities for working
-with type definitions.  If you want to build your own type-driven
-syntax extension, you should consider basing it on Type_conv.
+Comparelib, described in [xref](#maps-and-hash-tables), and Fieldslib,
+described in [xref](#records), that generate code based on type
+declarations, and are all based on a common library called Type_conv.
+This library provides a common language for annotating types (_e.g._,
+using the `with` notation) and utilities for working with type
+definitions.  If you want to build your own type-driven syntax
+extension, you should consider basing it on Type_conv.
 
 </note>
 
@@ -199,7 +197,7 @@ parenthetical expression, with whitespace-separated strings as the
 atoms.  Quotes are used for atoms that contain parentheses or spaces
 themselves; backslash is the escape character; and semicolons are used
 to introduce single-line comments.  Thus, the following file,
-`example.scm`:
+<filename>example.scm</filename>:
 
 ```frag
 ((typ scheme)(name sexpr/example.scm))

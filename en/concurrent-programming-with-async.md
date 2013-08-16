@@ -86,8 +86,8 @@ The value in `contents` isn't yet determined in part because there's
 nothing running that could do the necessary I/O.  When using Async,
 processing of I/O and other events is handled by the Async scheduler.
 When writing a standalone program, you need to start the scheduler
-explicitly, but utop knows about Async, and can start the scheduler
-automatically.  More than that, utop knows about deferred values, and
+explicitly, but <command>utop</command> knows about Async, and can start the scheduler
+automatically.  More than that, <command>utop</command> knows about deferred values, and
 when you type in an expression of type `Deferred.t`, it will make sure
 the scheduler is running and block until the deferred is determined.
 Thus, we can write:
@@ -186,7 +186,7 @@ rewrite `count_lines` again a bit more succinctly:
 ((typ ocamltop)(name async/main.topscript)(part 14))
 ```
 
-Note that `count_lines` returns a deferred, but `utop` waits for that
+Note that `count_lines` returns a deferred, but <command>utop</command> waits for that
 deferred to become determined, and shows us the contents of the
 deferred instead.
 
@@ -438,7 +438,7 @@ of only one type, which will be settled by the compiler once we try to
 use the pipe for anything.
 
 If we just try and write to the writer, we'll see that we block
-indefinitely in utop.  You can break out of the wait by hitting
+indefinitely in <command>utop</command>.  You can break out of the wait by hitting
 `Control-C`.
 
 ```frag
@@ -562,7 +562,7 @@ HTTP, using the Cohttp library.
 ```
 
 To better understand what's going on, it's useful to look at the type
-for `Cohttp_async.Client.get`, which we can do in utop.
+for `Cohttp_async.Client.get`, which we can do in <command>utop</command>.
 
 ```frag
 ((typ ocamltop)(name async/main.topscript)(part 28))
@@ -629,7 +629,7 @@ the results to get back and then printing them out together.  We use
 `Deferred.all_unit`, which takes a list of `unit` deferreds and
 returns a single `unit` deferred that becomes determined when every
 deferred on the input list is determined.  We can see the type of this
-function in utop.
+function in <command>utop</command>.
 
 ```frag
 ((typ ocamltop)(name async/main.topscript)(part 30))
@@ -670,7 +670,7 @@ two behaviors on subsequent calls.
 ((typ ocamltop)(name async/main.topscript)(part 31))
 ```
 
-In utop, the exception thrown by `maybe_raise ()` terminates the
+In <command>utop</command>, the exception thrown by `maybe_raise ()` terminates the
 evaluation of just that expression, but in a standalone program, an
 uncaught exception would bring down the entire process.
 
@@ -727,7 +727,7 @@ thunk that returns a deferred.  Here's an example.
 In addition to the ordinary stack-trace, the exception displays the
 trace of monitors through which the exception traveled, starting at
 the one we created, called "blow up monitor".  The other monitors you
-see come from utop's special handling of deferreds.
+see come from <command>utop</command>'s special handling of deferreds.
 
 Monitors can do more than just augment the error-trace of an
 exception.  You can also use a monitor to explicitly handle errors
@@ -746,7 +746,8 @@ errors in the processes it spawns.
 The message "an error happened" is printed out, but the deferred
 returned by `swallow_error` is never determined.  This makes sense,
 since the calculation never actually completes, so there's no value to
-return.  You can break out of this in utop by hitting `Control-C`.
+return.  You can break out of this in <command>utop</command> by hitting
+<keycombo><keycap>Control</keycap><keycap>C</keycap></keycombo>.
 
 Here's an example of a monitor which passes some exceptions through to
 the parent, and handles others.  Exceptions are sent to the parent

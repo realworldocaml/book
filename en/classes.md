@@ -353,7 +353,7 @@ arbitrary shape; similarly for `circle`.  This problem is fundamental.  Many
 languages solve it either with narrowing (with dynamic type checking), or by
 method overloading.  Since OCaml has neither of these, what can we do?
 
-Since the problematic method is equality, one proposal we could consider is is
+Since the problematic method is equality, one proposal we could consider is
 to just drop it from the base type `shape` and use polymorphic equality
 instead.  However, the built-in polymorphic equality has very poor behavior
 when applied to objects.

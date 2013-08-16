@@ -19,7 +19,7 @@ for the language and fill in your understanding.
 At its simplest, a variable is an identifier whose meaning is bound to
 a particular value.  In OCaml these bindings are often introduced
 using the `let` keyword.  We can type a so-called _top-level_ `let`
-binding into `utop` with the following syntax.  Note that variable
+binding into <command>utop</command> with the following syntax.  Note that variable
 names must start with a lowercase letter or an underscore.
 
 ```frag
@@ -31,7 +31,7 @@ As we'll see when we get to the module system in
 bindings at the top-level of a module.
 
 Every variable binding has a _scope_, which is the portion of the code
-that can refer to that binding.  When using `utop`, the scope of a
+that can refer to that binding.  When using <command>utop</command>, the scope of a
 top-level let binding is everything that follows it in the session.
 When it shows up in a module, the scope is the remainder of that
 module.
@@ -369,7 +369,7 @@ for finding the first sequentially-repeated element in a list.
 ((typ ocamltop)(name variables-and-functions/main.topscript)(part 22)) 
 ```
 
-Note that in the above, the pattern `| [] | [_]` is what's called on
+Note that in the above, the pattern `| [] | [_]` is what's called an
 _or-pattern_, which is a disjunction of two patterns, meaning that it
 will be considered a match if either pattern matches.  In this case,
 `[]`, matches the empty list, and `[_]`, matches any single element

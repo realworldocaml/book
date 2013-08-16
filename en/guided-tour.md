@@ -7,10 +7,10 @@ deep into any one topic.
 
 Throughout the book we're going to use Core, a more full-featured and
 capable replacement for OCaml's standard library.  We'll also use
-`utop`, a shell that lets you type in expressions and evaluate them
-interactively.  `utop` is an easier-to-use version of OCaml's standard
+<command>utop</command>, a shell that lets you type in expressions and evaluate them
+interactively.  <command>utop</command> is an easier-to-use version of OCaml's standard
 toplevel (which you can start by typing `ocaml` at the command line).
-These instructions will assume you're using `utop` specifically.
+These instructions will assume you're using <command>utop</command> specifically.
 
 Before getting started, make sure you have a working OCaml
 installation so you can try out the examples as you read through the
@@ -80,7 +80,7 @@ Thus, these are legal:
 ((typ ocamltop)(name guided-tour/main.topscript)(part 3)) 
 ```
 
-Note that by default, `utop` doesn't bother to print out variables
+Note that by default, <command>utop</command> doesn't bother to print out variables
 starting with an underscore.
 
 The following examples, however, are not legal.
@@ -954,7 +954,7 @@ The or operator, `||` short-circuits in a similar way to `&&`.
 ## A complete program
 
 So far, we've played with the basic features of the language via
-`utop`.  Now we'll show how to create a simple standalone program.  In
+<command>utop</command>.  Now we'll show how to create a simple standalone program.  In
 particular, we'll create a program that sums up a list of numbers read
 in from the standard input.
 

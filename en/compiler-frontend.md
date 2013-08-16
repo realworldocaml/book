@@ -159,11 +159,11 @@ in a parsing error at the very end of the second function.
 
 This class of bug (due to a single errant character) can be hard to spot in a
 large body of code. Luckily, there's a great tool available via OPAM called
-`ocp-indent` that applies structured indenting rules to your source code on a
+<command>ocp-indent</command> that applies structured indenting rules to your source code on a
 line-by-line basis. This not only beautifies your code layout, but it also
 makes this syntax error much easier to locate.
 
-Let's run our erroneous file through `ocp-indent` and see how it processes it.
+Let's run our erroneous file through <command>ocp-indent</command> and see how it processes it.
 
 ```frag
 ((typ console)(name front-end/indent_follow_on_function.out))
@@ -171,14 +171,14 @@ Let's run our erroneous file through `ocp-indent` and see how it processes it.
 
 The `add_and_print` definition has been indented as if it were part of the
 first `concat_and_print` definition, and the errant semicolon is now much
-easier to spot.  We just need to remove that semicolon and re-run `ocp-indent`
+easier to spot.  We just need to remove that semicolon and re-run <command>ocp-indent</command>
 to verify that the syntax is correct.
 
 ```frag
 ((typ console)(name front-end/indent_follow_on_function_fixed.out))
 ```
 
-The `ocp-indent` [homepage](https://github.com/OCamlPro/ocp-indent) documents
+The <command>ocp-indent</command> [homepage](https://github.com/OCamlPro/ocp-indent) documents
 how to integrate it with your favorite editor.  All the Core libraries are
 formatted using it to ensure consistency, and it's a good idea to do this
 before publishing your own source code online.
@@ -317,7 +317,7 @@ transformation in action.  We'll show you how to do both of these now.
 
 ### Using Camlp4 interactively
 
-The `utop` top-level can run the phrases that you type through `camlp4`
+The <command>utop</command> top-level can run the phrases that you type through <command>camlp4</command>
 automatically. You should have at least these lines in your `~/.ocamlinit` file
 in your home directory (see [xref](#installation) for more information).
 
@@ -328,7 +328,7 @@ in your home directory (see [xref](#installation) for more information).
 The first directive loads the <command>ocamlfind</command> top-level interface that lets you
 require <command>ocamlfind</command> packages (including all their dependent packages).  The
 second directive instructs the top-level to filter all phrases via Camlp4.  You
-can now run `utop` and load the syntax extensions in.  We'll use the
+can now run <command>utop</command> and load the syntax extensions in.  We'll use the
 `comparelib` syntax extension for our experiments.
 
 OCaml provides a built-in polymorphic comparison operator that inspects the
@@ -338,7 +338,7 @@ than defining explicit comparison functions between values. However, it quickly
 become tedious to manually define comparison functions for complex type
 definitions.
 
-Let's see how `comparelib` solves this problem by running it in `utop`.
+Let's see how `comparelib` solves this problem by running it in <command>utop</command>.
 
 ```frag
 ((typ ocamltop)(name front-end/camlp4_toplevel.topscript)(part 1))
@@ -353,7 +353,7 @@ definition with two new functions also included.
 
 The top-level is a quick way to examine the signatures generated from the
 extensions, but how can we see what these new functions actually do?  You can't
-do this from `utop` directly since it embeds the Camlp4 invocation as an
+do this from <command>utop</command> directly since it embeds the Camlp4 invocation as an
 automated part of its operation.
 
 Let's turn to the command-line to obtain the result of the `comparelib`
@@ -739,10 +739,11 @@ become larger.  This is generally only a problem if you use objects
 extensively, which usually have larger type signature to cover all their
 methods.
 
-As a result, the suggested approach is to only compile with `-principal`
-occasionally to check if your code is compliant.  If compiling in principal
-mode works, it is guaranteed that the program will pass type checking in
-non-principal mode too.
+If compiling in principal mode works, it is guaranteed that the program will
+pass type checking in non-principal mode too.  For this reason, the
+<command>corebuild</command> wrapper script activates principal mode by
+default, preferring stricter type inference over a small loss in compilation
+speed and extra disk space usage.
 
 Bear in mind that the `cmi` files generated in principal mode differ from the
 default mode. Try to ensure that you compile your whole project with it
@@ -935,7 +936,7 @@ module which provides a single module that needs to be opened to import
 the replacement modules and functions.
 
 There's one downside to this approach: type errors suddenly get much more
-verbose.  We can see this if you run the vanilla OCaml top-level (not `utop`).
+verbose.  We can see this if you run the vanilla OCaml top-level (not <command>utop</command>).
 
 ```frag
 ((typ console)(name front-end/short_paths_1.out))
@@ -961,7 +962,7 @@ by passing `-short-paths` to the compiler, and works on the top-level too.
 ((typ console)(name front-end/short_paths_3.out))
 ```
 
-The `utop` enhanced top-level activates short paths by default, which is why
+The <command>utop</command> enhanced top-level activates short paths by default, which is why
 you've not had to do this before in our interactive examples.  However, the
 compiler doesn't default to the short path heuristic since there are some
 situations where the type aliasing information is useful to know, and would be
@@ -988,7 +989,7 @@ code at a specific location to the inferred or external types.
 ### Using ocp-index for auto-completion
 
 One such command-line tool to display auto-completion information in your
-editor is `ocp-index`.  Install it via OPAM as follows.
+editor is <command>ocp-index</command>.  Install it via OPAM as follows.
 
 ```frag
 ((typ console)(name front-end/install_ocp_index.out))
@@ -997,14 +998,14 @@ editor is `ocp-index`.  Install it via OPAM as follows.
 Let's refer back to our Ncurses binding example from the beginning of
 [xref](#foreign-function-interface).  This module defined bindings for the
 Ncurses library.  First, compile the interfaces with `-bin-annot` so that we
-can obtain the `cmt` and `cmti` files, and then run `ocp-index` in completion
+can obtain the `cmt` and `cmti` files, and then run <command>ocp-index</command> in completion
 mode.
 
 ```frag
 ((typ ocaml)(name ocp-index/index_ncurses.out))
 ```
 
-You need to pass `ocp-indexz a set of directories to search for `cmt` files in,
+You need to pass <command>ocp-index</command> a set of directories to search for `cmt` files in,
 and a fragment of text to autocomplete.  As you can imagine, autocompletion is
 invaluable on larger codebases.  See the
 [ocp-index](https://github.com/ocamlpro/ocp-index) homepage for more
@@ -1047,7 +1048,7 @@ type declaration has been given a unique name (`t/1008`), as has the `v` value
 (`v/1011`).
 
 You'll rarely need to look at this raw output from the compiler unless you're
-building IDE tools such as `ocp-index`, or are hacking on extensions to the
+building IDE tools such as <command>ocp-index</command>, or are hacking on extensions to the
 core compiler itself.  However, it's useful to know that this intermediate form
 exists before we delve further into the code generation process next in
 [xref](#the-compiler-backend-byte-code-and-native-code).

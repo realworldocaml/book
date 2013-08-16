@@ -20,9 +20,9 @@ parser generator creates a parser from a specification of the data
 format that you want to parse, and uses that to generate a parser.
 
 Parser generators have a long history, including tools like <command>lex</command> and
-`yacc` that date back to the early 1970's.  OCaml has its own
+<command>yacc</command> that date back to the early 1970's.  OCaml has its own
 alternatives, including <command>ocamllex</command>, which replaces <command>lex</command>, and
-<command>ocamlyacc</command> and <command>menhir</command>, which are replacements for `yacc`.  We'll
+<command>ocamlyacc</command> and <command>menhir</command>, which are replacements for <command>yacc</command>  We'll
 explore these tools in the course of walking through the
 implementation of a parser for the JSON serialization format that we
 discussed in [xref](#handling-json-data).
@@ -110,9 +110,9 @@ simple AST we used for representing JSON data in
 This representation is much richer than our token stream, capturing
 the fact that JSON values can be nested inside each other, and that
 JSON has a variety of value types, including numbers, strings, arrays,
-and objects.  The above type is effectively an AST, and the job of the
-parser we'll write will be to convert a token stream into a value of
-this type, as shown below.
+and objects.  The job of the parser we'll write will be to convert a
+token stream into a value of this AST type, as shown below for our
+earlier JSON example.
 
 ```frag
 ((typ ocaml)(name parsing/parsed_example.ml))
@@ -145,18 +145,16 @@ specification.
 
 ### Describing the grammar
 
-The next thing we need to do is to specify the grammar of a JSON
-expression.  <command>menhir</command>, like many parsers, expresses grammars as
-_context free grammars_.  (More precisely, <command>menhir</command> supports LR(1)
-grammars, but we will ignore that technical distinction here.) You can
+The next thing we need to do is to specify the grammar of a JSON expression.
+<command>menhir</command>, like many parser generators, expresses grammars as
+_context free grammars_.  (More precisely, <command>menhir</command> supports
+LR(1) grammars, but we will ignore that technical distinction here.) You can
 think of a context-free grammar as a set of abstract names, called
-_non-terminal symbols_, along with a collection of rules for
-transforming a non-terminal symbol into a sequence, where each element
-of the sequence is either a token or another non-terminal symbol.  A
-sequence of tokens is parsable by a grammar if you can apply the
-grammar's rules to produce a series of transformations, starting at a
-distinguished _start symbol_, that produces the token sequence in
-question.
+_non-terminal symbols_, along with a collection of rules for transforming a
+non-terminal symbol into a sequence of tokens and non-terminal symbols. A
+sequence of tokens is parsable by a grammar if you can apply the grammar's
+rules to produce a series of transformations, starting at a distinguished
+_start symbol_, that produces the token sequence in question.
 
 We'll start describing the JSON grammar by declaring the start symbol
 to be the non-terminal symbol `prog`, and by declaring that when
@@ -177,18 +175,20 @@ for example, is the rule for `prog`.
 ((typ ocaml)(name parsing/parser.mly)(part 2))
 ```
 
-The syntax for this is reminiscent of an OCaml match statement.  The
-pipes separate the individual productions, and the code in
-curly-braces is OCaml code that generates the OCaml value
-corresponding to the production in question.  In the case of `prog`,
-we have two cases: either there's an `EOF`, which means the text is
-empty, and so there's no JSON value to read, and so we return the
-OCaml value `None`; or we have an instance of the `value`
-non-terminal, which corresponds to a well-formed JSON value, in which
-case we wrap the corresponding `Json.value` in a `Some` tag.  Note
-that in the `value` case, we wrote `v = value` to bind the OCaml value
-that corresponds to to the variable `v`, which we can then use within
-the curly-braces for that production.
+The syntax for this is reminiscent of an OCaml match statement.  The pipes
+separate the individual productions, and the curly braces contain a _semantic
+action_: OCaml code that generates the OCaml value corresponding to the
+production in question.
+Semantic actions are arbitrary OCaml expressions that are evaluated during
+parsing to produce a value that is attached to the non-terminal in the rule.
+
+In the case of `prog`, we have two cases: either there's an `EOF`, which means
+the text is empty, and so there's no JSON value to read, and so we return the
+OCaml value `None`; or we have an instance of the `value` non-terminal, which
+corresponds to a well-formed JSON value, in which case we wrap the
+corresponding `Json.value` in a `Some` tag.  Note that in the `value` case, we
+wrote `v = value` to bind the OCaml value that corresponds to to the variable
+`v`, which we can then use within the curly-braces for that production.
 
 Now let's consider a more complicated example, the rule for the
 `value` symbol.
@@ -211,13 +211,11 @@ these are parsed next.
 
 ### Parsing sequences
 
-The rule for `object_fields` is shown below, and is really just a thin
-wrapper that reverses the list returned by the following rule for
-`rev_object_fields`.  Note that the first production in
-`rev_object_fields` has an empty left-hand side.  That's because what
-we're matching on in this case is an empty sequence of tokens.  The
-comment `/* empty */` is used to make this clear.  C-style comment
-syntax is used within the body of a rule.
+The rule for `object_fields` is shown below, and is really just a thin wrapper
+that reverses the list returned by the following rule for `rev_object_fields`.
+Note that the first production in `rev_object_fields` has an empty left-hand
+side, because what we're matching on in this case is an empty sequence of
+tokens.  The comment `(* empty *)` is used to make this clear.
 
 ```frag
 ((typ ocaml)(name parsing/parser.mly)(part 4))
@@ -235,8 +233,8 @@ definitions.
 ```
 
 Alternatively, we could keep the left-recursive definition and simply
-construct the returned value in left-to-right order.  This is is even
-less efficient, since the complexity of building thes list
+construct the returned value in left-to-right order.  This is even
+less efficient, since the complexity of building the list
 incrementally in this way is quadratic in the length of the list.
 
 ```frag
@@ -307,7 +305,7 @@ regular expressions.  Here's an example.
 
 The syntax here is something of a hybrid between OCaml syntax and
 traditional regular expression syntax.  The `int` regular expression
-specifies an optional leading `-`, followed by a digit from `1` to
+specifies an optional leading `-`, followed by a digit from `0` to
 `9`, followed by some number of digits from `0` to `9`.  The question
 mark is used to indicate an optional component of a regular
 expression, the square brackets are used to specify ranges, and the
@@ -322,12 +320,15 @@ creating one big and impenetrable expression.
 ((typ ocaml)(name parsing/lexer.mll)(part 2))
 ```
 
-Finally, we define whitespace, newlines, identifiers, and hex
-constants.
+Finally, we define whitespace, newlines and identifiers.
 
 ```frag
 ((typ ocaml)(name parsing/lexer.mll)(part 3))
 ```
+
+The `newline` introduces the `|` operator which lets one of several alternative
+regular expressions match (in this case, the various carriage return
+combinations of CR, LF, or CRLF).
 
 ### Lexing rules
 

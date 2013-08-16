@@ -322,7 +322,7 @@ Now compile the OCaml files into a standalone object file.
 
 After this point, you no longer need the OCaml compiler, as `embed_out.o` has
 all of the OCaml code compiled and linked into a single object file.  Compile
-an output binary using `gcc` to test this out.
+an output binary using <command>gcc</command> to test this out.
 
 ```frag
 ((typ console)(name back-end-embed/build_embed_binary.out))
@@ -480,7 +480,7 @@ you can hand-optimize it.
 ### Debugging native code binaries
 
 The native code compiler builds executables that can be debugged using
-conventional system debuggers such as GNU `gdb`.  You need to compile your
+conventional system debuggers such as GNU <command>gdb</command>  You need to compile your
 libraries with the `-g` option to add the debug information to the output, just
 as you need to with C compilers.
 
@@ -491,7 +491,7 @@ to delimit an OCaml function call, for example).
 
 #### Understanding name mangling
 
-So how do you refer to OCaml functions in an interactive debugger like `gdb`?
+So how do you refer to OCaml functions in an interactive debugger like <command>gdb</command>?
 The first thing you need to know is how function names compile down to C
 symbols; a procedure generally called *name mangling*.
 
@@ -519,17 +519,18 @@ source code to let-bind the anonymous function to a variable name.
 
 #### Interactive breakpoints with the GNU debugger
 
-Let's see name mangling in action with some interactive debugging in the
-GNU `gdb` debugger.
+Let's see name mangling in action with some interactive debugging using
+GNU <command>gdb</command>.
 
 <caution>
-<title>Beware `gdb` on MacOS X</title>
+<title>Beware gdb on MacOS X</title>
 
-The examples here assume that you are running `gdb` on either Linux or FreeBSD.
-MacOS X does have `gdb` installed, but it's a rather quirky experience that
-doesn't reliably interpret the debugging information contained in the native
-binaries. This can result in function names showing up as raw symbols such as
-`.L101` instead of their more human-readable form.
+The examples here assume that you are running <command>gdb</command> on either
+Linux or FreeBSD.  MacOS X 10.8 does have <command>gdb</command> installed, but
+it's a rather quirky experience that doesn't reliably interpret the debugging
+information contained in the native binaries. This can result in function names
+showing up as raw symbols such as `.L101` instead of their more human-readable
+form.
 
 For OCaml 4.1, we'd recommend you do native code debugging on an alternate
 platform such as Linux, or manually look at the assembly code output to map the
@@ -552,14 +553,14 @@ output:
 ((typ ocaml)(name back-end-bench/run_alternate_list.out))
 ```
 
-Now we can run this interactively within `gdb`.
+Now we can run this interactively within <command>gdb</command>.
 
 ```frag
 ((typ console)(name back-end/gdb_alternate0.out))
 ```
 
-The `gdb` prompt lets you enter debug directives.  Let's set the program
-to break just before the first call to `take`.
+The <command>gdb</command> prompt lets you enter debug directives.  Let's set
+the program to break just before the first call to `take`.
 
 ```frag
 ((typ console)(name back-end/gdb_alternate1.out))
@@ -596,7 +597,7 @@ what's going on in your program *and* runtime library.  This includes any calls
 to C libraries or even callbacks into OCaml from the C layer if you're in an
 embedded environment.
 
-### Profiling native code 
+### Profiling native code
 
 The recording and analysis of where your application spends its execution time
 is known as *performance profiling*.  OCaml native code binaries can be
@@ -606,28 +607,28 @@ earlier to map between OCaml variable names and the profiler output.
 Most profiling tools benefit from having some instrumentation included in the
 binary.  OCaml supports two such tools:
 
-* GNU Gprof to measure execution time and call graphs.
+* GNU <command>gprof</command> to measure execution time and call graphs.
 * The [Perf](https://perf.wiki.kernel.org/) profiling framework in modern versions of Linux.
 
 Note that many other tools that operate on native binaries such as Valgrind
 will work just fine with OCaml as long as the program is linked with the `-g`
-flag to embed debugging symbols. 
+flag to embed debugging symbols.
 
 #### Gprof
 
-Gprof produces an execution profile of an OCaml program by recording a call
-graph of which functions call each other, and recording the time these calls
-take during the program execution.
+<command>gprof</command> produces an execution profile of an OCaml program by
+recording a call graph of which functions call each other, and recording the
+time these calls take during the program execution.
 
-Getting precise information out of Gprof requires passing the `-p` flag to the
-native code compiler when compiling *and* linking the binary.  This generates
-extra code that records profile information to a file called `gmon.out` when
-the program is executed.  This profile information can then be examined using
-Gprof.
+Getting precise information out of <command>gprof</command> requires passing
+the `-p` flag to the native code compiler when compiling *and* linking the
+binary.  This generates extra code that records profile information to a file
+called `gmon.out` when the program is executed.  This profile information can
+then be examined using <command>gprof</command>.
 
 #### Perf
 
-Perf is a more modern alternative to Gprof that doesn't require you to
+Perf is a more modern alternative to <command>gprof</command> that doesn't require you to
 instrument the binary.  Instead, it uses hardware counters and debug
 information within the binary to record information accurately.
 

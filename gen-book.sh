@@ -40,7 +40,7 @@ while getopts ":l:c:m:ph" opt; do
     m)
       MILESTONE=$OPTARG
       ;;
-    p) 
+    p)
       PUBLIC=--public
       ;;
     h)
@@ -70,12 +70,17 @@ rm -rf build/${LINGUA}
 mkdir -p build/${LINGUA}/source build/${LINGUA}/html
 echo Inserting code fragments in Markdown
 mkdir -p build/${LINGUA}/md-ora
+mkdir -p build/${LINGUA}/md-web
 for i in ${SRCS}; do
 #  ./scripts/_build/transform_markdown.native < ${LINGUA}/${i} > build/${LINGUA}/md-ora/${i}
   cp ${LINGUA}/${i} build/${LINGUA}/md-ora/${i}
-  SRCS_WEB="${SRCS_WEB} en/${i}"
+  cp ${LINGUA}/${i} build/${LINGUA}/md-web/${i}
+  SRCS_WEB="${SRCS_WEB} build/${LINGUA}/md-web/${i}"
   SRCS_ORA="${SRCS_ORA} build/${LINGUA}/md-ora/${i}"
 done
+
+# special case override for online installation instructions
+cp ${LINGUA}/installing-ocaml-online.md build/${LINGUA}/md-web/installing-ocaml.md
 
 ln -nfs ${DOCBOOK_XSL_PATH} stylesheets/system-xsl
 set -x
