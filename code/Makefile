@@ -181,7 +181,7 @@ $(OBJ)/%.out.0.html $(OBJ)/%.out.0.xml: %.out
 	./exec_script.sh $< > $@ 2>&1 || (cat $@ && rm -f $@)
 
 %.out: %.out.full
-	egrep -v "(^ocamlfind |^\+|^menhir --)" < $< > $@
+	egrep -v '(^ocamlfind |^\+|^menhir --|added to search path$$)' < $< > $@
 
 %.out.full: %.errsh
 	! ./exec_script.sh $< > $@ 2>&1 || (cat $@ && rm -f $@)
