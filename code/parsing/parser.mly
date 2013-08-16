@@ -45,14 +45,14 @@ value:
 object_fields: obj = rev_object_fields { List.rev obj };
 
 rev_object_fields:
-  | /* empty */ { [] }
+  | (* empty *) { [] }
   | obj = rev_object_fields; COMMA; k = ID; COLON; v = value
     { (k, v) :: obj }
   ;
 
 (* part 5 *)
 array_values:
-  | /* empty */ { [] }
+  | (* empty *) { [] }
   | vl = rev_values { List.rev vl }
   ;
 

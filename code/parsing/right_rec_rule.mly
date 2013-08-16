@@ -42,9 +42,9 @@ value:
   ;
 
 (* part 4 *)
-/* Inefficient right-recursive rule */
+(* Inefficient right-recursive rule *)
 object_fields:
-  | /* empty */ { [] }
+  | (* empty *) { [] }
   | k = ID; COLON; v = value; COMMA; obj = object_fields
     { (k, v) :: obj }
 
@@ -60,5 +60,3 @@ rev_values: v = value
   | vl = rev_values; COMMA; v = value
     { v :: vl }
   ;
-
-

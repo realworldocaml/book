@@ -42,16 +42,16 @@ value:
   ;
 
 (* part 4 *)
-/* Quadratic left-recursive rule */
+(* Quadratic left-recursive rule *)
 object_fields:
-  | /* empty */ { [] }
+  | (* empty *) { [] }
   | obj = object_fields; COMMA; k = ID; COLON; v = value
     { obj @ [k, v] }
   ;
 
 (* part 5 *)
 array_values:
-  | /* empty */ { [] }
+  | (* empty *) { [] }
   | vl = rev_values
     { List.rev vl }
   ;
