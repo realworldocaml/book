@@ -22884,7 +22884,7 @@ let query_uri ~server query =
 <computeroutput>    (monitor</computeroutput>
 <computeroutput>     (((name main) (here ()) (id 1) (has_seen_error true)</computeroutput>
 <computeroutput>       (someone_is_listening false) (kill_index 0))))))</computeroutput>
-<computeroutput>  (Pid 30470)))</computeroutput>
+<computeroutput>  (Pid 3095)))</computeroutput>
 </programlisting>
       <para>
         As you can see, we got a &quot;Connection refused&quot; failure
@@ -23142,9 +23142,7 @@ let get_definition_with_timeout ~server ~timeout word =
 <computeroutput>ocaml</computeroutput>
 <computeroutput>-----</computeroutput>
 <computeroutput> </computeroutput>
-<computeroutput>&quot;OCaml or Objective Caml, is the main implementation of the Caml</computeroutput>
-<computeroutput>programming language, created by Xavier Leroy, Jérôme Vouillon,</computeroutput>
-<computeroutput>Damien Doligez, Didier Rémy and others in 1996.&quot;</computeroutput>
+<computeroutput>DuckDuckGo query failed: Timed out</computeroutput>
 <computeroutput> </computeroutput>
 </programlisting>
   </sect1>
@@ -23277,8 +23275,8 @@ let get_definition_with_timeout ~server ~timeout word =
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>async/main.topscript</filename> (part 44)</lineannotation>
 <prompt># </prompt><userinput>log_delays (after (sec 1.));;</userinput>
 <computeroutput>- : Core.Span.t list =</computeroutput>
-<computeroutput>[0.000953674ms; 100.245ms; 200.441ms; 300.638ms; 400.838ms; 501.039ms;</computeroutput>
-<computeroutput> 601.247ms; 701.441ms; 801.644ms; 901.839ms; 1.00204s]</computeroutput>
+<computeroutput>[0.000953674ms; 100.243ms; 200.442ms; 300.651ms; 400.835ms; 501.04ms;</computeroutput>
+<computeroutput> 601.242ms; 701.442ms; 801.645ms; 901.842ms; 1.00204s]</computeroutput>
 </programlisting>
     <para>
       Now, if instead of simply waiting a second, what if we have a busy
@@ -23291,7 +23289,7 @@ let get_definition_with_timeout ~server ~timeout word =
 <userinput>  ;;</userinput>
 <computeroutput>val busy_loop : int -&gt; unit = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>log_delays (Deferred.unit &gt;&gt;| fun () -&gt; busy_loop 100);;</userinput>
-<computeroutput>- : Core.Span.t list = [0.000953674ms; 242.559ms]</computeroutput>
+<computeroutput>- : Core.Span.t list = [0.000953674ms; 242.669ms]</computeroutput>
 </programlisting>
     <para>
       As you can see, instead of waking up ten times a second,
@@ -23305,7 +23303,7 @@ let get_definition_with_timeout ~server ~timeout word =
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>async/main.topscript</filename> (part 46)</lineannotation>
 <prompt># </prompt><userinput>log_delays (In_thread.run (fun () -&gt; busy_loop 100));;</userinput>
-<computeroutput>- : Core.Span.t list = [0.000953674ms; 243.627ms]</computeroutput>
+<computeroutput>- : Core.Span.t list = [0.00190735ms; 244.023ms]</computeroutput>
 </programlisting>
     <para>
       Now <literal>log_delays</literal> does get a chance to run, but
@@ -23333,7 +23331,7 @@ let get_definition_with_timeout ~server ~timeout word =
 <userinput>  ;;</userinput>
 <computeroutput>val noalloc_busy_loop : int -&gt; unit = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>log_delays (In_thread.run (fun () -&gt; noalloc_busy_loop 500));;</userinput>
-<computeroutput>- : Core.Span.t list = [0.000953674ms; 917.106ms]</computeroutput>
+<computeroutput>- : Core.Span.t list = [0.00190735ms; 869.344ms]</computeroutput>
 </programlisting>
     <para>
       Even though <literal>noalloc_busy_loop</literal> was running in a
