@@ -28051,11 +28051,12 @@ let f (x:s) =
           all their methods.
         </para>
         <para>
-          As a result, the suggested approach is to only compile with
-          <literal>-principal</literal> occasionally to check if your
-          code is compliant. If compiling in principal mode works, it is
-          guaranteed that the program will pass type checking in
-          non-principal mode too.
+          If compiling in principal mode works, it is guaranteed that
+          the program will pass type checking in non-principal mode too.
+          For this reason, the <command>corebuild</command> wrapper
+          script activates principal mode by default, preferring
+          stricter type inference over a small loss in compilation speed
+          and extra disk space usage.
         </para>
         <para>
           Bear in mind that the <literal>cmi</literal> files generated
