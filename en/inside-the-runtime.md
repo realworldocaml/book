@@ -119,7 +119,7 @@ You may wonder why `limit` is required at all, since it always seems to equal
 collection is by setting `limit` to equal `end`.  The next allocation will
 never have enough space after this is done and will always trigger a garbage
 collection. There are various internal reasons for such early collections, such
-as handling pending UNIX signals, and they don't ordinally matter for
+as handling pending UNIX signals, and they don't ordinarily matter for
 application code.
 
 <note>
