@@ -24,7 +24,7 @@ This implementation will use two functions from the `List.Assoc`
 module, which provides utility functions for interacting with
 association lists, _i.e._, lists of key/value pairs.  In particular,
 we use the function `List.Assoc.find`, which looks up a key in an
-association list, and `List.add`, which adds a new binding to an
+association list, and `List.Assoc.add`, which adds a new binding to an
 association list, as shown below.
 
 ```frag
