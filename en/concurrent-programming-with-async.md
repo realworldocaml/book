@@ -193,7 +193,7 @@ and shows us the contents of the deferred instead.
 Deferreds are usually built using combinations of `bind`, `map` and
 `return`, but sometimes you want to construct a deferred that you can
 determine explicitly with user-code.  This is done using an _ivar_.
-(The term ivar dates back to a languaage called Concurrent ML that was
+(The term ivar dates back to a language called Concurrent ML that was
 developed by John Reppy in the early 90's.  The "i" in ivar stands for
 incremental.)
 
