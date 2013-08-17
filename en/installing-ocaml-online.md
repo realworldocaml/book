@@ -291,7 +291,7 @@ with the latest release without sacrificing your current installation.  You
 only need to install this compiler once, and future updates will be much faster
 as they only recompile libraries within the compiler installation.
 
-The new compiler will be installed into `~/.opam/4.01.0dev+trunk`
+The new compiler will be installed into `~/.opam/4.01.0beta1`
 and any libraries you install for it will be tracked separately from
 your system installation.  You can have any number of compilers
 installed simultaneously, but only one can be active at any time.
@@ -334,7 +334,7 @@ so that you can run it within your editing environment.
 
 Remember from earlier that OPAM never installs files directly into your system
 directories, and this applies to <command>utop</command> too.  You'll find the binary in
-`~/.opam/4.01.0dev+trunk/bin`.  However, typing in <command>utop</command> from your shell
+`~/.opam/4.01.0beta1/bin`.  However, typing in <command>utop</command> from your shell
 should just work, due to the `opam config env` step that configures your shell.
 Don't forget to automate this as described earlier as it makes life much
 easier when developing OCaml code!
@@ -396,10 +396,10 @@ To use <command>utop</command> directly in Emacs, add the following line to your
 You also need to make the `utop.el` file available to your Emacs installation.
 The OPAM version of <command>utop</command> installs it into the `~/.opam` hierarchy, for
 example in `~/.opam/system/share/emacs/site-lisp/utop.el`. You may need to
-replace `system` with your current compiler switch, such as `4.01.0dev+trunk`.
+replace `system` with your current compiler switch, such as `4.01.0beta1`.
 
 Once this successfully loads in Emacs, you can run utop by executing the
-command <command>utop</command> in Emacs.  There are more details instructions at the 
+command <command>utop</command> in Emacs.  There are more details instructions at the
 [utop homepage](https://github.com/diml/utop#integration-with-emacs).
 
 #### Vim
