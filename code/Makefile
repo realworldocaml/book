@@ -126,7 +126,7 @@ $(OBJ)/%.json.0.html $(OBJ)/%.json.0.xml: %.json
 
 $(OBJ)/%.syntax.0.html $(OBJ)/%.syntax.0.xml: %.syntax
 	@mkdir -p $(@D)
-	$(highlight) -builddir $(OBJ) -pygments html $< || (cat $@ && rm -f $@)
+	$(highlight) -builddir $(OBJ) -raw ocamlsyntax $< || (cat $@ && rm -f $@)
 
 $(OBJ)/%.cmd.0.html $(OBJ)/%.cmd.0.xml: %.cmd
 	@mkdir -p $(@D)
@@ -138,7 +138,7 @@ $(OBJ)/%.atd.0.html $(OBJ)/%.atd.0.xml: %.atd
 
 $(OBJ)/%.ascii.0.html $(OBJ)/%.ascii.0.xml: %.ascii
 	@mkdir -p $(@D)
-	$(highlight) -builddir $(OBJ) -raw "Ascii Art" $< || (cat $@ && rm -f $@)
+	$(highlight) -builddir $(OBJ) -raw ascii $< || (cat $@ && rm -f $@)
 
 $(OBJ)/%.java.0.html $(OBJ)/%.java.0.xml: %.java
 	@mkdir -p $(@D)
