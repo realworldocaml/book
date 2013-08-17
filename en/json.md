@@ -152,8 +152,7 @@ fields.
 ((typ ocaml)(name json/parse_book.ml))
 ```
 
-Build this with the same `_tags` file as the earlier example, and run
-`ocamlbuild` on the new file.
+Now build and run this in the same way as the previous example.
 
 ```frag
 ((typ console)(name json/run_parse_book.out))
