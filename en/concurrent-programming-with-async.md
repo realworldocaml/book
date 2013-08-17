@@ -208,7 +208,7 @@ below.
 Ivars are something of a low-level feature; operators like map, bind
 and return are typically easier to use and think about.  But ivars can
 be useful when you want to build a synchronization patterns that isn't
-alrady well supported.
+already well supported.
 
 As an example, imagine we wanted a way of scheduling a sequence of
 actions that would run after a fixed delay.  In addition, we'd like to
@@ -1041,11 +1041,10 @@ different system thread, the behavior will be different.
 ```
 
 Now `log_delays` does get a chance to run, but not nearly as often as
-every 100 milliseconds.  The reason for this is that that now that
-we're using system threads, we are at the mercy of the operating
-system to decide when each thread gets scheduled.  The behavior of
-threads is very much dependent on the operating system and how it is
-configured.
+every 100 milliseconds.  The reason for this is that now that we're
+using system threads, we are at the mercy of the operating system to
+decide when each thread gets scheduled.  The behavior of threads is
+very much dependent on the operating system and how it is configured.
 
 Another tricky aspect of dealing with OCaml threads has to do with
 allocation.  When compiling to native-code, OCaml's threads only get a

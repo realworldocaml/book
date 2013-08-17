@@ -461,7 +461,7 @@ interest to us).
 
 For example, the GitHub `scope` field above is defined as a variant type with
 each option starting with an uppercase letter as is conventional for OCaml
-variants. However, the the JSON values that come back from GitHub are actually
+variants. However, the JSON values that come back from GitHub are actually
 lowercase, and so aren't exactly the same as the option name.
 
 The annotation `<json name="user">` signals that the JSON value of the field is
