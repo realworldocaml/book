@@ -1,0 +1,16 @@
+$ corebuild -pkg cohttp.async,yojson,textwrap search.native
+$ ./search.native "Concurrent Programming" "OCaml"
+Concurrent Programming
+----------------------
+
+"Concurrent computing is a form of computing in which programs are
+designed as collections of interacting computational processes that
+may be executed in parallel."
+
+OCaml
+-----
+
+"OCaml, originally known as Objective Caml, is the main implementation
+of the Caml programming language, created by Xavier Leroy, Jérôme
+Vouillon, Damien Doligez, Didier Rémy and others in 1996."
+

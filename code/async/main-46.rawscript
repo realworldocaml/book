@@ -1,0 +1,3 @@
+# log_delays (fun () -> In_thread.run busy_loop);;
+0.332117ms, 16.6319s, 18.8722s,
+- : unit = ()

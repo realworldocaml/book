@@ -12,7 +12,9 @@ opam install --yes \
   cohttp \
   async_graphics \
   menhir \
-  utop
+  utop \
+  cmdliner \
+  cow 
 
 echo You also need Pygments installed.
 echo This is python-pygments in Debian

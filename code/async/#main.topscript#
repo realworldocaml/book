@@ -220,17 +220,21 @@ let log_delays thunk =
     d >>| fun () -> print_time (); printf "\n"
   ;;
 #part 44
-log_delays (fun () -> after (sec 0.5));;
+log_delays (fun () -> after (sec 1.));;
 #part 45
-let busy_loop n =
+let busy_loop () =
     let x = ref None in
     for i = 1 to 100_000_000 do x := Some i done
   ;;
-log_delays (fun () -> return (busy_loop ()));;
+log_delays ( >>| fun () -> busy_loop 100);;
 #part 46
-log_delays (fun () -> In_thread.run busy_loop);;
+log_delays (In_thread.run (fun () -> busy_loop 100));;
 #part 47
-let noalloc_busy_loop () =
-    for i = 0 to 100_000_000 do () done
+let noalloc_busy_loop n =
+    let rec loop n =
+      if n <= 0 then ()
+      else loop (n-1)
+    in
+    loop (n * 100_000)
   ;;
-log_delays (fun () -> In_thread.run noalloc_busy_loop);;
+log_delays (In_thread.run (fun () -> noalloc_busy_loop 500));;
