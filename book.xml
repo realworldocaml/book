@@ -47,10 +47,10 @@
       programming and software design.
     </para>
     <para>
-      But not all ideas about how to design a programming language are
-      created equal. Over the last 40 years, a few key language features
-      have emerged that together form a kind of sweet-spot in language
-      design. These features include:
+      But not all programming languages are created equal. Over the last
+      40 years, a few key language features have emerged that together
+      form a kind of sweet-spot in language design. These features
+      include:
     </para>
     <itemizedlist>
       <listitem>
@@ -533,7 +533,9 @@
           toplevel that it should evaluate an expression. This is a
           peculiarity of the toplevel that is not required in standalone
           programs (though it is sometimes helpful to include
-          <literal>;;</literal> to improve OCaml's error reporting).
+          <literal>;;</literal> to improve OCaml's error reporting, by
+          making it more explicit where a given top-level declaration
+          was intended to end).
         </para>
       </listitem>
       <listitem>
@@ -2111,9 +2113,8 @@ let () =
       bound to a particular value. In OCaml these bindings are often
       introduced using the <literal>let</literal> keyword. We can type a
       so-called <emphasis>top-level</emphasis> <literal>let</literal>
-      binding into <command>utop</command> with the following syntax.
-      Note that variable names must start with a lowercase letter or an
-      underscore.
+      binding with the following syntax. Note that variable names must
+      start with a lowercase letter or an underscore.
     </para>
     <programlisting language=""><lineannotation>✎ Syntax: <filename>variables-and-functions/let.syntax</filename></lineannotation>
 let &lt;variable&gt; = &lt;expr&gt;
@@ -2255,9 +2256,10 @@ let &lt;variable&gt; = &lt;expr1&gt; in &lt;expr2&gt;
       unused definition of <literal>pi</literal>.
     </para>
     <para>
-      In OCaml, let bindings are immutable. As we'll see in
-      <xref linkend="imperative-programming-1"/>, there are
-      mutable values in OCaml, but no mutable variables.
+      In OCaml, let bindings are immutable. There are many kinds of
+      mutable values in OCaml, which we'll discuss in
+      <xref linkend="imperative-programming-1"/>, but there
+      are no mutable variables.
     </para>
     <note> <title> 
     Why don't variables vary?
@@ -2376,9 +2378,9 @@ let &lt;variable&gt; = &lt;expr1&gt; in &lt;expr2&gt;
 <computeroutput>- : int -&gt; int = &lt;fun&gt;</computeroutput>
 </programlisting>
       <para>
-        Anonymous functions aren't named, but they can be used for many
-        different purposes nonetheless. You can, for example, apply an
-        anonymous function to an argument.
+        Anonymous functions operate in much the same way as named
+        functions. For example, we can apply an anonymous function to an
+        argument.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>variables-and-functions/main.topscript</filename> (part 11)</lineannotation>
 <prompt># </prompt><userinput>(fun x -&gt; x + 1) 7;;</userinput>
@@ -2582,10 +2584,10 @@ val abs_diff : int -&gt; (int -&gt; int)</programlisting>
         A function is <emphasis>recursive</emphasis> if it refers to
         itself in its definition. Recursion is important in any
         programming language, but is particularly important in
-        functional languages, because it is the fundamental building
-        block that is used for building looping constructs. (As we'll
-        see in <xref linkend="imperative-programming-1"/>,
-        OCaml also supports imperative looping constructs like
+        functional languages, because it is the way in which you build
+        looping constructs. (As will be discussed in more detail in
+        <xref linkend="imperative-programming-1"/>, OCaml also
+        supports imperative looping constructs like
         <literal>for</literal> and <literal>while</literal>, but these
         are only useful when using OCaml's imperative features.)
       </para>
@@ -3124,7 +3126,7 @@ val abs_diff : int -&gt; (int -&gt; int)</programlisting>
         that you get to drop the text after the <literal>:</literal> if
         the name of the label and the name of the variable being used
         are the same. We were actually already using label punning when
-        defining our labeled function above. The following shows how
+        defining <literal>ratio</literal> above. The following shows how
         punning can be used when invoking a function.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>variables-and-functions/main.topscript</filename> (part 42)</lineannotation>
@@ -3438,7 +3440,7 @@ val substring: string -&gt; pos:int -&gt; len:int -&gt; string</programlisting>
           One subtle aspect of labeled and optional arguments is how
           they are inferred by the type system. Consider the following
           example for computing numerical derivatives of a function of
-          two dimensions. The function takes an argument
+          two real variables. The function takes an argument
           <literal>delta</literal> which determines the scale at which
           to compute the derivative, values <literal>x</literal> and
           <literal>y</literal> which determine which point to compute
@@ -4831,8 +4833,8 @@ val numeric_deriv :
       <emphasis>i.e.</emphasis>, lists of key/value pairs. In
       particular, we use the function
       <literal>List.Assoc.find</literal>, which looks up a key in an
-      association list, and <literal>List.add</literal>, which adds a
-      new binding to an association list, as shown below.
+      association list, and <literal>List.Assoc.add</literal>, which
+      adds a new binding to an association list, as shown below.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>files-modules-and-programs/intro.topscript</filename></lineannotation>
 <prompt># </prompt><userinput>let assoc = [(&quot;one&quot;, 1); (&quot;two&quot;,2); (&quot;three&quot;,3)] ;;</userinput>
@@ -4907,6 +4909,14 @@ let () =
       sense the full codebase is one big <literal>main</literal>
       function.
     </para>
+    <para>
+      The idiom of writing <literal>let () =</literal> may seem a bit
+      odd, but it has a purpose. The let binding here is a pattern-match
+      to a value of type <literal>unit</literal>, which is there to
+      ensure that the expression on the right-hand side returns
+      <literal>unit</literal>, as is common for functions that operate
+      primarily by side-effect.
+    </para>
     </note>
     <para>
       If we weren't using Core or any other external libraries, we could
@@ -4939,12 +4949,12 @@ let () =
     <para>
       While this works well enough for a one-file project, more
       complicated projects require a tool to orchestrate the build. One
-      good tool for this task is <literal>ocamlbuild</literal>, which is
+      good tool for this task is <command>ocamlbuild</command>, which is
       shipped with the OCaml compiler. We'll talk more about
-      <literal>ocamlbuild</literal> in
+      <command>ocamlbuild</command> in
       <xref linkend="the-compiler-frontend-parsing-and-type-checking"/>,
       but for now, we'll just use a simple wrapper around
-      <literal>ocamlbuild</literal> called <literal>corebuild</literal>
+      <command>ocamlbuild</command> called <command>corebuild</command>
       that sets build parameters appropriately for building against Core
       and its related libraries.
     </para>
@@ -4952,7 +4962,7 @@ let () =
 <prompt>$ </prompt><userinput>corebuild freq.byte</userinput>
 </programlisting>
     <para>
-      If we'd invoked <literal>corebuild</literal> with a target of
+      If we'd invoked <command>corebuild</command> with a target of
       <literal>freq.native</literal> instead of
       <literal>freq.byte</literal>, we would have gotten native-code
       instead.
@@ -5046,9 +5056,9 @@ let () =
       implementations once we have a clear interface to program against.
     </para>
     <para>
-      We'll start by creating a file, <literal>counter.ml</literal> that
-      contains the logic for maintaining the association list used to
-      represent the frequency counts. The key function, called
+      We'll start by creating a file, <literal>counter.ml</literal>,
+      that contains the logic for maintaining the association list used
+      to represent the frequency counts. The key function, called
       <literal>touch</literal>, bumps the frequency count of a given
       line by one.
     </para>
@@ -5072,7 +5082,7 @@ let touch t s =
     <para>
       We can now rewrite <literal>freq.ml</literal> to use
       <literal>Counter</literal>. Note that the resulting code can still
-      be built with <literal>ocamlbuild</literal>, which will discover
+      be built with <command>ocamlbuild</command>, which will discover
       dependencies and realize that <literal>counter.ml</literal> needs
       to be compiled.
     </para>
@@ -5132,7 +5142,7 @@ open Core.Std
 (** Bump the frequency count for the given string. *)
 val touch : (string * int) list -&gt; string -&gt; (string * int) list</programlisting>
     <para>
-      Note that <literal>ocamlbuild</literal> will detect the presence
+      Note that <command>ocamlbuild</command> will detect the presence
       of the <literal>mli</literal> file automatically and include it in
       the build.
     </para>
@@ -5835,8 +5845,8 @@ let singleton l = Counter.touch Counter.empty</programlisting>
       <programlisting language="ocaml"><lineannotation>✎ OCaml: <filename>files-modules-and-programs-freq-cyclic2/counter.ml</filename> (part 1)</lineannotation>
 let _build_counts = Freq.build_counts</programlisting>
       <para>
-        In this case, <literal>ocamlbuild</literal> (which is invoked by
-        the <literal>corebuild</literal> script) will notice the error
+        In this case, <command>ocamlbuild</command> (which is invoked by
+        the <command>corebuild</command> script) will notice the error
         and complain explicitly about the cycle.
       </para>
       <programlisting language="console"><lineannotation>✎ Terminal: <filename>files-modules-and-programs-freq-cyclic2/build.out</filename></lineannotation>
@@ -8351,7 +8361,7 @@ end</programlisting>
         <literal>Option.Monad_infix</literal>. The module is called
         <literal>Monad_infix</literal> because the bind operator is part
         of a sub-interface called <literal>Monad</literal>, which we'll
-        talk about more in
+        see again in
         <xref linkend="concurrent-programming-with-async"/>.
       </para>
       <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>error-handling/main.topscript</filename> (part 13)</lineannotation>
@@ -10562,10 +10572,8 @@ let () =
          [&quot;The time in &quot;;Zone.to_string zone;&quot; is &quot;;time_string;&quot;.\n&quot;]);
     Out_channel.flush stdout</programlisting>
       <para>
-        We can build this program (using <literal>ocamlbuild</literal>
-        with the <literal>_tags</literal> file described in
-        <xref linkend="single-file-programs"/>) and run it,
-        you'll see that it prompts you for input, as follows:
+        We can build this program using <command>corebuild</command> and
+        run it. You'll see that it prompts you for input, as follows:
       </para>
       <programlisting language="console"><lineannotation>✎ Terminal: <filename>imperative-programming/time_converter.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>corebuild time_converter.byte</userinput>
@@ -11179,9 +11187,9 @@ val remember : '_a -&gt; '_a = &lt;fun&gt;</programlisting>
 <computeroutput>- : '_a -&gt; '_a list = &lt;fun&gt;</computeroutput>
 </programlisting>
       <para>
-        It would be safe to infer a weakly polymorphic variable here,
-        but because OCaml's type system doesn't distinguish between pure
-        and impure functions, it can't separate those two cases.
+        It would be safe to infer a fully polymorphic variable here, but
+        because OCaml's type system doesn't distinguish between pure and
+        impure functions, it can't separate those two cases.
       </para>
       <para>
         The value restriction doesn't require that there is no mutable
@@ -11369,7 +11377,29 @@ val remember : '_a -&gt; '_a = &lt;fun&gt;</programlisting>
         polymorphic types for expressions of this type that are not
         simple values.
       </para>
-      <programlisting language="">???</programlisting>
+      <programlisting language=""><lineannotation>✎ OCaml Utop: <filename>imperative-programming/value_restriction-13.rawscript</filename></lineannotation>
+<userinput># module Concat_list : sig
+    type 'a t
+    val empty : 'a t
+    val singleton : 'a -&gt; 'a t
+    val concat  : 'a t -&gt; 'a t -&gt; 'a t  (* constant time *)
+    val to_list : 'a t -&gt; 'a list       (* linear time   *)
+  end = struct
+
+    type 'a t = Empty | Singleton of 'a | Concat of 'a t * 'a t
+
+    ...
+
+  end;;</userinput>
+<computeroutput> module Concat_list :
+  sig
+    type 'a t
+    val empty : 'a t
+    val singleton : 'a -&gt; 'a t
+    val concat : 'a t -&gt; 'a t -&gt; 'a t
+    val to_list : 'a t -&gt; 'a list
+  end</computeroutput>
+</programlisting>
       <para>
         Now, we can apply the identity function to
         <literal>Concat_list.empty</literal> without without losing any
@@ -12712,7 +12742,7 @@ include Foldable.Extend(Fqueue)</programlisting>
 </programlisting>
     <para>
       We can create multiple instances of this module with different
-      undelrying types.
+      underlying types.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>fcm/main.topscript</filename> (part 12)</lineannotation>
 <prompt># </prompt><userinput>module Int_bumper = struct</userinput>
@@ -12747,7 +12777,7 @@ include Foldable.Extend(Fqueue)</programlisting>
 <computeroutput>         Bumpable.t</computeroutput>
 </programlisting>
     <para>
-      To make <literal>int_bumber</literal> usable, we need to expose
+      To make <literal>int_bumper</literal> usable, we need to expose
       the type, which we can do as follows.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>fcm/main.topscript</filename> (part 15)</lineannotation>
@@ -13354,7 +13384,7 @@ type request =
         Note that we use write
         <literal>&lt;sexp_of&lt;string list&gt;&gt;</literal> to
         autogenerate a function for converting a list of strings to an
-        s-expression. This is part of the sexplib package described in
+        s-expression. This is part of the Sexplib package described in
         <xref linkend="data-serialization-with-s-expressions"/>.
       </para>
       <para>
@@ -16484,10 +16514,10 @@ end</programlisting>
         here to enable better error messages. We'll discuss
         s-expressions more in
         <xref linkend="data-serialization-with-s-expressions"/>,
-        but in the meantime, we can just use the
-        <literal>with sexp</literal> declaration that comes from the
-        Sexplib syntax extension to create s-expression converters for
-        us.
+        but in the meantime, we'll use the <literal>with sexp</literal>
+        declaration that comes from the Sexplib syntax extension. This
+        declaration kicks off the automatic generation of s-expression
+        conversion functions for the marked type.
       </para>
       <para>
         The following example shows how this all fits together,
@@ -16654,7 +16684,7 @@ end
       hash collisions also helps protect against some denial-of-service
       attacks. One well-known type of attack is to send queries to a
       service with carefully chosen keys to cause many collisions. This,
-      in combination with the the quadratic behavior of hash tables, can
+      in combination with the quadratic behavior of hash tables, can
       cause the service to become unresponsive due to high CPU load.
       Core's hash tables would be much less susceptible to such an
       attack, because the amount of degradation would be far less.
@@ -18804,9 +18834,7 @@ let () =
   printf &quot;Online: %s\n&quot; (string_of_bool_option is_online);
   printf &quot;Translated: %s\n&quot; (string_of_bool_option is_translated)</programlisting>
     <para>
-      Build this with the same <literal>_tags</literal> file as the
-      earlier example, and run <literal>ocamlbuild</literal> on the new
-      file.
+      Now build and run this in the same way as the previous example.
     </para>
     <programlisting language="console"><lineannotation>✎ Terminal: <filename>json/run_parse_book.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>corebuild -pkg yojson parse_book.native</userinput>
@@ -19367,7 +19395,7 @@ type authorization_response = {
         For example, the GitHub <literal>scope</literal> field above is
         defined as a variant type with each option starting with an
         uppercase letter as is conventional for OCaml variants. However,
-        the the JSON values that come back from GitHub are actually
+        the JSON values that come back from GitHub are actually
         lowercase, and so aren't exactly the same as the option name.
       </para>
       <para>
@@ -19957,8 +19985,8 @@ prog:
         <literal>Some</literal> tag. Note that in the
         <literal>value</literal> case, we wrote
         <literal>v = value</literal> to bind the OCaml value that
-        corresponds to to the variable <literal>v</literal>, which we
-        can then use within the curly-braces for that production.
+        corresponds to the variable <literal>v</literal>, which we can
+        then use within the curly-braces for that production.
       </para>
       <para>
         Now let's consider a more complicated example, the rule for the
@@ -20485,8 +20513,8 @@ null
 }
 </programlisting>
     <para>
-      Now build and run the example using this file, and you you can see
-      the full parser in action.
+      Now build and run the example using this file, and you can see the
+      full parser in action.
     </para>
     <programlisting language="console"><lineannotation>✎ Terminal: <filename>parsing-test/build_test.out</filename></lineannotation>
 <prompt>$ </prompt><userinput>ocamlbuild -use-menhir -tag thread -use-ocamlfind -quiet -pkg core test.native</userinput>
@@ -21338,7 +21366,7 @@ let () =
       <title><literal>sexp_option</literal></title>
       <para>
         Another common directive is <literal>sexp_option</literal>,
-        which is used to to make a record field optional in the
+        which is used to make a record field optional in the
         s-expression. Normally, optional values are represented either
         as <literal>()</literal> for <literal>None</literal>, or as
         <literal>(x)</literal> for <literal>Some x</literal>, and a
@@ -21615,12 +21643,12 @@ let () =
 </programlisting>
     <para>
       <literal>Deferred.bind d f</literal> takes a deferred value
-      <literal>d</literal> and a function f that is to be run with the
-      value of <literal>d</literal> once it's determined. You can think
-      of <literal>Deferred.bind</literal> as a kind of sequencing
-      operator, and what we're doing is essentially taking an
-      asynchronous computation <literal>d</literal> and tacking on
-      another stage comprised by the actions of the function
+      <literal>d</literal> and a function <literal>f</literal> that is
+      to be run with the value of <literal>d</literal> once it's
+      determined. You can think of <literal>Deferred.bind</literal> as a
+      kind of sequencing operator, and what we're doing is essentially
+      taking an asynchronous computation <literal>d</literal> and
+      tacking on another stage comprised by the actions of the function
       <literal>f</literal>.
     </para>
     <para>
@@ -21757,7 +21785,10 @@ let () =
         <literal>bind</literal>, <literal>map</literal> and
         <literal>return</literal>, but sometimes you want to construct a
         deferred that you can determine explicitly with user-code. This
-        is done using an <emphasis>ivar</emphasis>.
+        is done using an <emphasis>ivar</emphasis>. (The term ivar dates
+        back to a language called Concurrent ML that was developed by
+        John Reppy in the early 90's. The &quot;i&quot; in ivar stands
+        for incremental.)
       </para>
       <para>
         There are three fundamental operations for working with an ivar;
@@ -22829,22 +22860,25 @@ let query_uri ~server query =
         a list of servers, some of which won't respond to the query.
       </para>
       <programlisting language="console"><lineannotation>✎ Terminal: <filename>async/run_search_with_configurable_server.out</filename></lineannotation>
-<prompt>$ </prompt><userinput>corebuild -pkg cohttp.async,yojson,textwrap search_with_configurable_server.native</userinput>
-<prompt>$ </prompt><userinput>./search_with_configurable_server.native -servers localhost,api.duckduckgo.com &quot;Concurrent Programming&quot; OCaml</userinput>
+<prompt>$ </prompt><userinput>corebuild -pkg cohttp.async,yojson,textwrap \</userinput>
+<computeroutput>    search_with_configurable_server.native</computeroutput>
+<prompt>$ </prompt><userinput>./search_with_configurable_server.native \</userinput>
+<computeroutput>    -servers localhost,api.duckduckgo.com \</computeroutput>
+<computeroutput>    &quot;Concurrent Programming&quot; OCaml</computeroutput>
 <computeroutput>(&quot;unhandled exception&quot;</computeroutput>
 <computeroutput> ((lib/monitor.ml.Error_</computeroutput>
-<computeroutput>   ((exn (&quot;Yojson.Json_error(\&quot;Blank input data\&quot;)&quot;))</computeroutput>
+<computeroutput>   ((exn (Unix.Unix_error &quot;Connection refused&quot; connect 127.0.0.1:80))</computeroutput>
 <computeroutput>    (backtrace</computeroutput>
-<computeroutput>     (&quot;Raised at file \&quot;common.ml\&quot;, line 5, characters 25-39&quot;</computeroutput>
-<computeroutput>      &quot;Called from file \&quot;search_with_configurable_server.ml\&quot;, line 14, characters 8-36&quot;</computeroutput>
-<computeroutput>      &quot;Called from file \&quot;search_with_configurable_server.ml\&quot;, line 34, characters 9-57&quot;</computeroutput>
+<computeroutput>     (&quot;Raised by primitive operation at file \&quot;lib/unix_syscalls.ml\&quot;, line 797, characters 12-69&quot;</computeroutput>
 <computeroutput>      &quot;Called from file \&quot;lib/deferred.ml\&quot;, line 20, characters 62-65&quot;</computeroutput>
 <computeroutput>      &quot;Called from file \&quot;lib/scheduler.ml\&quot;, line 125, characters 6-17&quot;</computeroutput>
 <computeroutput>      &quot;Called from file \&quot;lib/jobs.ml\&quot;, line 65, characters 8-13&quot; &quot;&quot;))</computeroutput>
 <computeroutput>    (monitor</computeroutput>
-<computeroutput>     (((name main) (here ()) (id 1) (has_seen_error true)</computeroutput>
+<computeroutput>     (((name Tcp.close_sock_on_error) (here ()) (id 5) (has_seen_error true)</computeroutput>
+<computeroutput>       (someone_is_listening true) (kill_index 0))</computeroutput>
+<computeroutput>      ((name main) (here ()) (id 1) (has_seen_error true)</computeroutput>
 <computeroutput>       (someone_is_listening false) (kill_index 0))))))</computeroutput>
-<computeroutput>  (Pid 10779)))</computeroutput>
+<computeroutput>  (Pid 15971)))</computeroutput>
 </programlisting>
       <para>
         As you can see, we got a &quot;Connection refused&quot; failure
@@ -22867,12 +22901,11 @@ let get_definition ~server word =
   | Ok (word,result) -&gt; (word, Ok result)
   | Error _          -&gt; (word, Error &quot;Unexpected failure&quot;)</programlisting>
       <para>
-        Here, we use <literal>try_with</literal> to capture the
-        exception, which we then use map (the
-        <literal>&gt;&gt;|</literal> operator) to convert the error into
-        the form we want: a pair whose first element is the word being
-        searched for, and the second element is the (possibly erroneous)
-        result.
+        Here, we first use <literal>try_with</literal> to capture the
+        exception, and then use map (the <literal>&gt;&gt;|</literal>
+        operator) to convert the error into the form we want: a pair
+        whose first element is the word being searched for, and the
+        second element is the (possibly erroneous) result.
       </para>
       <para>
         Now we just need to change the code for
@@ -22896,8 +22929,11 @@ let print_result (word,definition) =
         handling of the connection failures:
       </para>
       <programlisting language="console"><lineannotation>✎ Terminal: <filename>async/run_search_with_error_handling.out</filename></lineannotation>
-<prompt>$ </prompt><userinput>corebuild -pkg cohttp.async,yojson,textwrap search_with_error_handling.native</userinput>
-<prompt>$ </prompt><userinput>./search_with_error_handling.native -servers localhost,api.duckduckgo.com &quot;Concurrent Programming&quot; OCaml</userinput>
+<prompt>$ </prompt><userinput>corebuild -pkg cohttp.async,yojson,textwrap \</userinput>
+<computeroutput>    search_with_error_handling.native</computeroutput>
+<prompt>$ </prompt><userinput>./search_with_error_handling.native \</userinput>
+<computeroutput>    -servers localhost,api.duckduckgo.com \</computeroutput>
+<computeroutput>    &quot;Concurrent Programming&quot; OCaml</computeroutput>
 <computeroutput>Concurrent Programming</computeroutput>
 <computeroutput>----------------------</computeroutput>
 <computeroutput> </computeroutput>
@@ -23088,24 +23124,24 @@ let get_definition_with_timeout ~server ~timeout word =
     ]</programlisting>
     <para>
       Now, if we run this with a suitably small timeout, we'll see that
-      some queries succeed and some fail, and the timeouts are reported
-      as such.
+      one query succeeds and the other fails reporting a timeout.
     </para>
     <programlisting language="console"><lineannotation>✎ Terminal: <filename>async/run_search_with_timeout_no_leak.out</filename></lineannotation>
-<prompt>$ </prompt><userinput>corebuild -pkg cohttp.async,yojson,textwrap search_with_timeout_no_leak.native</userinput>
-<prompt>$ </prompt><userinput>./search_with_timeout_no_leak.native &quot;concurrent programming&quot; ocaml -timeout 0.1s</userinput>
+<prompt>$ </prompt><userinput>corebuild -pkg cohttp.async,yojson,textwrap \</userinput>
+<computeroutput>     search_with_timeout_no_leak.native</computeroutput>
+<prompt>$ </prompt><userinput>./search_with_timeout_no_leak.native \</userinput>
+<computeroutput>     &quot;concurrent programming&quot; ocaml -timeout 0.2s</computeroutput>
 <computeroutput>concurrent programming</computeroutput>
 <computeroutput>----------------------</computeroutput>
 <computeroutput> </computeroutput>
-<computeroutput>&quot;Concurrent computing is a form of computing in which programs are</computeroutput>
-<computeroutput>designed as collections of interacting computational processes that</computeroutput>
-<computeroutput>may be executed in parallel.&quot;</computeroutput>
+<computeroutput>DuckDuckGo query failed: Timed out</computeroutput>
 <computeroutput> </computeroutput>
 <computeroutput>ocaml</computeroutput>
 <computeroutput>-----</computeroutput>
 <computeroutput> </computeroutput>
-<computeroutput>DuckDuckGo query failed: Timed out</computeroutput>
-<computeroutput> </computeroutput>
+<computeroutput>&quot;OCaml or Objective Caml, is the main implementation of the Caml</computeroutput>
+<computeroutput>programming language, created by Xavier Leroy, Jérôme Vouillon,</computeroutput>
+<computeroutput>Damien Doligez, Didier Rémy and others in 1996.&quot;</computeroutput>
 </programlisting>
   </sect1>
   <sect1 id="working-with-system-threads">
@@ -23136,24 +23172,23 @@ let get_definition_with_timeout ~server ~timeout word =
       Async without blocking your entire program. For this reason, Async
       maintains a thread pool for running such calls. Most of the time,
       as a user of Async you don't need to think about this, but it is
-      happening under the covers.n
+      happening under the covers.
     </para>
     <para>
       Another reason to have multiple threads is to deal with non-OCaml
       libraries that have their own event loop or for another reason
       need their own threads. In that case, it's sometimes useful to run
       some OCaml code on the foreign thread as part of the communication
-      to your main program. (OCaml's foreign function interface is
+      to your main program. OCaml's foreign function interface is
       discussed in more detail in
-      <xref linkend="foreign-function-interface"/>.)
+      <xref linkend="foreign-function-interface"/>.
     </para>
     <para>
-      Another occasional motivation for using true system threads is to
-      interoperate with compute-intensive OCaml code that otherwise
-      would block the Async runtime. In Async, if you have a
-      long-running computation that never calls <literal>bind</literal>
-      or <literal>map</literal>, then that computation will block out
-      the entire system until it completes.
+      Another occasional use for system threads is to better
+      interoperate with compute-intensive OCaml code. In Async, if you
+      have a long-running computation that never calls
+      <literal>bind</literal> or <literal>map</literal>, then that
+      computation will block out the async runtime until it completes.
     </para>
     <para>
       One way of dealing with this is to explicitly break up the
@@ -23177,155 +23212,163 @@ let get_definition_with_timeout ~server ~timeout word =
       result is placed in the deferred, where it can be used in the
       ordinary way from Async.
     </para>
-    <warning> 
-    <title>
-    Thread-safety and locking
-    </title>
-    <para>
-      Once you start working with system threads, you'll need to be
-      careful about locking your data-structures. Most mutable OCaml
-      data-structures do not have well-defined semantics when accessed
-      concurrently by multiple threads. The issues you can run into
-      range from runtime exceptions to corrupted data-structures to, in
-      some rare cases, segfaults. That means you should always use
-      mutexes when sharing mutable data between different systems
-      threads. Even data-structures that seem like they should be safe
-      but are mutable under the covers, like lazy values, can have
-      undefined behavior when accessed from multiple threads.
-    </para>
-    <para>
-      There are two commonly available mutex packages for OCaml: the
-      <literal>Mutex</literal> module that's part of the standard
-      library, which is just a wrapper over OS-level mutexes, and
-      <literal>Nano_mutex</literal>, a more efficient alternative that
-      takes advantage of some of the locking done by the OCaml runtime
-      to avoid needing to create an OS-level mutex much of the time. As
-      a result, creating a <literal>Nano_mutex.t</literal> is 20x faster
-      than creating a <literal>Mutex.t</literal>, and acquiring the
-      mutex is about 40% faster.
-    </para>
-    </warning>
     <para>
       Interoperability between Async and system threads can be quite
-      tricky, so let's work through some of the issues. Consider the
-      following function which schedules itself to wake up every
-      <literal>100ms</literal>, and keeps a list of the delays after
-      which it actually woke up, until the deferred it was passed
-      becomes determined. We can use this to see how responsive Async
-      is.
+      tricky. Consider the following function for testing how responsive
+      Async is. The function takes a deferred-returning thunk, and it
+      first runs that thunk, and then uses
+      <literal>Clock.every</literal> to wake up every 100 milliseconds
+      and print out a timestamp, until the returned deferred becomes
+      determined, at which point it prints out one last timestamp.
     </para>
     <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>async/main.topscript</filename> (part 43)</lineannotation>
-<prompt># </prompt><userinput>let log_delays d =</userinput>
+<prompt># </prompt><userinput>let log_delays thunk =</userinput>
 <userinput>    let start = Time.now () in</userinput>
-<userinput>    let rec loop stamps =</userinput>
-<userinput>      let delay = Time.diff (Time.now ()) start in</userinput>
-<userinput>      match Deferred.peek d with</userinput>
-<userinput>      | Some () -&gt; return (delay :: stamps)</userinput>
-<userinput>      | None -&gt;</userinput>
-<userinput>        after (sec 0.1)</userinput>
-<userinput>        &gt;&gt;= fun () -&gt;</userinput>
-<userinput>        loop (delay :: stamps)</userinput>
+<userinput>    let print_time () =</userinput>
+<userinput>      let diff = Time.diff (Time.now ()) start in</userinput>
+<userinput>      printf &quot;%s, &quot; (Time.Span.to_string diff)</userinput>
 <userinput>    in</userinput>
-<userinput>    loop [] &gt;&gt;| List.rev</userinput>
+<userinput>    let d = thunk () in</userinput>
+<userinput>    Clock.every (sec 0.1) ~stop:d print_time;</userinput>
+<userinput>    d &gt;&gt;| fun () -&gt; print_time (); printf &quot;\n&quot;</userinput>
 <userinput>  ;;</userinput>
-<computeroutput>val log_delays : unit Deferred.t -&gt; Core.Span.t list Deferred.t = &lt;fun&gt;</computeroutput>
+<computeroutput>val log_delays : (unit -&gt; unit Deferred.t) -&gt; unit Deferred.t = &lt;fun&gt;</computeroutput>
 </programlisting>
     <para>
-      If we feed this function a simple timeout, it works as you might
-      expect.
+      If we feed this function a simple timeout deferred, it works as
+      you might expect, waking up roughly every 100 milliseconds.
     </para>
-    <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>async/main.topscript</filename> (part 44)</lineannotation>
-<prompt># </prompt><userinput>log_delays (after (sec 1.));;</userinput>
-<computeroutput>- : Core.Span.t list =</computeroutput>
-<computeroutput>[0.000953674ms; 100.262ms; 200.452ms; 300.646ms; 400.846ms; 501.061ms;</computeroutput>
-<computeroutput> 601.252ms; 701.444ms; 801.66ms; 901.857ms; 1.00204s]</computeroutput>
+    <programlisting language=""><lineannotation>✎ OCaml Utop: <filename>async/main-44.rawscript</filename></lineannotation>
+<userinput># log_delays (fun () -&gt; after (sec 0.5));;</userinput>
+<computeroutput>0.154972ms, 102.126ms, 203.658ms, 305.73ms, 407.903ms, 501.563ms,
+- : unit = ()</computeroutput>
 </programlisting>
     <para>
-      Now, if instead of simply waiting a second, what if we have a busy
-      loop running instead?
+      Now see what happens if, instead of waiting on a clock event, we
+      wait for a busy-loop to finish running.
     </para>
-    <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>async/main.topscript</filename> (part 45)</lineannotation>
-<prompt># </prompt><userinput>let busy_loop n =</userinput>
-<userinput>    let x = ref None in</userinput>
-<userinput>    for i = 1 to n * 100_000 do x := Some i done</userinput>
-<userinput>  ;;</userinput>
-<computeroutput>val busy_loop : int -&gt; unit = &lt;fun&gt;</computeroutput>
-<prompt># </prompt><userinput>log_delays (Deferred.unit &gt;&gt;| fun () -&gt; busy_loop 100);;</userinput>
-<computeroutput>- : Core.Span.t list = [0.00190735ms; 242.553ms]</computeroutput>
+    <programlisting language=""><lineannotation>✎ OCaml Utop: <filename>async/main-45.rawscript</filename></lineannotation>
+<userinput># let busy_loop n =
+    let x = ref None in
+    for i = 1 to 100_000_000 do x := Some i done
+  ;;</userinput>
+<computeroutput>val busy_loop : 'a -&gt; unit = &lt;fun&gt;</computeroutput>
+<userinput># log_delays (fun () -&gt; return (busy_loop ()));;</userinput>
+<computeroutput>19.2185s,
+- : unit = ()</computeroutput>
 </programlisting>
     <para>
       As you can see, instead of waking up ten times a second,
-      <literal>log_delays</literal> is blocked out for much longer than
-      that while <literal>busy_loop</literal> churns away.
+      <literal>log_delays</literal> is blocked out entirely while
+      <literal>busy_loop</literal> churns away.
     </para>
     <para>
       If, on the other hand, we use <literal>In_thread.run</literal> to
       offload this to a different system thread, the behavior will be
       different.
     </para>
-    <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>async/main.topscript</filename> (part 46)</lineannotation>
-<prompt># </prompt><userinput>log_delays (In_thread.run (fun () -&gt; busy_loop 100));;</userinput>
-<computeroutput>- : Core.Span.t list = [0.000953674ms; 243.66ms]</computeroutput>
+    <programlisting language=""><lineannotation>✎ OCaml Utop: <filename>async/main-46.rawscript</filename></lineannotation>
+<userinput># log_delays (fun () -&gt; In_thread.run busy_loop);;</userinput>
+<computeroutput>0.332117ms, 16.6319s, 18.8722s,
+- : unit = ()</computeroutput>
 </programlisting>
     <para>
       Now <literal>log_delays</literal> does get a chance to run, but
-      not nearly as often as it would like to. The reason for this is
-      that that now that we're using system threads, we are at the mercy
+      not nearly as often as every 100 milliseconds. The reason for this
+      is that now that we're using system threads, we are at the mercy
       of the operating system to decide when each thread gets scheduled.
       The behavior of threads is very much dependent on the operating
-      system and how your system is configured.
+      system and how it is configured.
     </para>
     <para>
       Another tricky aspect of dealing with OCaml threads has to do with
-      allocation. OCaml's threads only get a chance to give up the
-      runtime lock when they interact with the allocator, so if there's
-      a piece of code that doesn't allocate at all, then it will never
-      allow any other OCaml thread to run. We can see this if we rewrite
-      our busy-loop slightly so it doesn't allocate.
+      allocation. When compiling to native-code, OCaml's threads only
+      get a chance to give up the runtime lock when they interact with
+      the allocator, so if there's a piece of code that doesn't allocate
+      at all, then it will never allow another OCaml thread to run.
+      Byte-code doesn't have this behavior, so if we run a
+      non-allocating loop in byte-code, our timer process will get to
+      run.
     </para>
-    <programlisting language=""><lineannotation>✎ OCaml UTop: <filename>async/main.topscript</filename> (part 47)</lineannotation>
-<prompt># </prompt><userinput>let noalloc_busy_loop n =</userinput>
-<userinput>    let rec loop n =</userinput>
-<userinput>      if n &lt;= 0 then ()</userinput>
-<userinput>      else loop (n-1)</userinput>
-<userinput>    in</userinput>
-<userinput>    loop (n * 100_000)</userinput>
-<userinput>  ;;</userinput>
-<computeroutput>val noalloc_busy_loop : int -&gt; unit = &lt;fun&gt;</computeroutput>
-<prompt># </prompt><userinput>log_delays (In_thread.run (fun () -&gt; noalloc_busy_loop 500));;</userinput>
-<computeroutput>- : Core.Span.t list = [0.000953674ms; 891.639ms]</computeroutput>
+    <programlisting language=""><lineannotation>✎ OCaml Utop: <filename>async/main-47.rawscript</filename></lineannotation>
+<userinput># let noalloc_busy_loop () =
+    for i = 0 to 100_000_000 do () done
+;;</userinput>
+<computeroutput>val noalloc_busy_loop : unit -&gt; unit = &lt;fun&gt;</computeroutput>
+<userinput># log_delays (fun () -&gt; In_thread.run noalloc_busy_loop);;</userinput>
+<computeroutput>0.169039ms, 4.58345s, 4.77866s, 4.87957s, 12.4723s, 15.0134s,
+- : unit = ()</computeroutput>
 </programlisting>
     <para>
-      Even though <literal>noalloc_busy_loop</literal> was running in a
-      different thread, it didn't let <literal>log_delays</literal> run
-      at all.
+      But if we compile this to a native-code executable, then the
+      non-allocating busy-loop will block anything else from running.
     </para>
+    <programlisting language="console"><lineannotation>✎ Terminal: <filename>async/run_native_code_log_delays.out</filename></lineannotation>
+<prompt>$ </prompt><userinput>corebuild -pkg async native_code_log_delays.native</userinput>
+<prompt>$ </prompt><userinput>./native_code_log_delays.native</userinput>
+<computeroutput>15.5686s, </computeroutput>
+<prompt>$ </prompt><userinput/>
+</programlisting>
     <para>
-      Overall, combining Async and threads is quite tricky, but it can
-      be done safely and easily if you follow the following hold:
+      The takeaway from these examples is that predicting thread
+      interleavings is a subtle business. Staying within the bounds of
+      Async has its limitations, but it leads to more predictable
+      behavior.
     </para>
-    <itemizedlist>
-      <listitem>
-        <para>
-          There is no shared mutable state between the various threads
-          involved.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          The computations executed by <literal>In_thread.run</literal>
-          do not make any calls to the async library.
-        </para>
-      </listitem>
-    </itemizedlist>
-    <para>
-      It is possible to safely use threads in ways that violate these
-      constraints. In particular, foreign threads can acquire the Async
-      lock using calls from the <literal>Thread_safe</literal> module in
-      Async, and thereby run Async computations safely. This is a very
-      flexible way of connecting threads to the Async world, but it's a
-      complex use-case that is beyond the scope of this chapter.
-    </para>
+    <sect2 id="thread-safety-and-locking">
+      <title>Thread-safety and locking</title>
+      <para>
+        Once you start working with system threads, you'll need to be
+        careful about mutable data structures. Most mutable OCaml data
+        structures do not have well-defined semantics when accessed
+        concurrently by multiple threads. The issues you can run into
+        range from runtime exceptions to corrupted data structures to,
+        in some rare cases, segfaults. That means you should always use
+        mutexes when sharing mutable data between different systems
+        threads. Even data structures that seem like they should be safe
+        but are mutable under the covers, like lazy values, can have
+        undefined behavior when accessed from multiple threads.
+      </para>
+      <para>
+        There are two commonly available mutex packages for OCaml: the
+        <literal>Mutex</literal> module that's part of the standard
+        library, which is just a wrapper over OS-level mutexes, and
+        <literal>Nano_mutex</literal>, a more efficient alternative that
+        takes advantage of some of the locking done by the OCaml runtime
+        to avoid needing to create an OS-level mutex much of the time.
+        As a result, creating a <literal>Nano_mutex.t</literal> is 20x
+        faster than creating a <literal>Mutex.t</literal>, and acquiring
+        the mutex is about 40% faster.
+      </para>
+      <para>
+        Overall, combining Async and threads is quite tricky, but it can
+        be done safely if you follow the following hold:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            There is no shared mutable state between the various threads
+            involved.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The computations executed by
+            <literal>In_thread.run</literal> do not make any calls to
+            the async library.
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        It is possible to safely use threads in ways that violate these
+        constraints. In particular, foreign threads can acquire the
+        Async lock using calls from the <literal>Thread_safe</literal>
+        module in Async, and thereby run Async computations safely. This
+        is a very flexible way of connecting threads to the Async world,
+        but it's a complex use-case that is beyond the scope of this
+        chapter.
+      </para>
+    </sect2>
   </sect1>
 </chapter></part><part label="III"><title>The Runtime System</title><partintro><para>Part III is all about understanding the compiler toolchain and runtime
      system in OCaml.  It's a remarkably simple system in comparison to other
@@ -23642,8 +23685,8 @@ let () =
     <para>
       The command-line above include some important extra link
       directives. The <literal>-lflags</literal> instructs
-      <literal>ocamlbuild</literal> to pass the next comma-separated set
-      of arguments through to the <literal>ocaml</literal> command when
+      <command>ocamlbuild</command> to pass the next comma-separated set
+      of arguments through to the <command>ocaml</command> command when
       linking a binary. OCaml in turn uses <literal>-cclib</literal> to
       pass directives through to the system compiler (normally
       <literal>gcc</literal> or <literal>clang</literal>). We first need
@@ -23652,7 +23695,8 @@ let () =
       <literal>-cclib,-lncurses</literal> does that.
     </para>
     <para>
-      On some distributions such as Ubuntu, you'll also need to add
+      On some distributions such as Ubuntu 11.10 upwards, you'll also
+      need to add
       <literal>-cclib,-Xlinker,-cclib,--no-as-needed</literal> to the
       <literal>-lflags</literal> directive. <literal>-Xlinker</literal>
       is interpreted by the compiler as a directive for the system
