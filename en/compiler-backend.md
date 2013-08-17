@@ -725,7 +725,7 @@ To use the debug library, just link your program with the `-runtime-variant d` f
 
 If you get an error that `libasmrund.a` is not found, then this is probably
 because you're using OCaml 4.00 and not 4.01.  It's only installed by default
-in the very latest version, which you should be using via the `4.01.0dev+trunk`
+in the very latest version, which you should be using via the `4.01.0`
 OPAM switch.
 
 </tip>
