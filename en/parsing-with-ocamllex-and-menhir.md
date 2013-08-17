@@ -483,7 +483,7 @@ Here's a test input file we can use to test the code we just wrote.
 ((typ json)(name parsing-test/test1.json))
 ```
 
-Now build and run the example using this file, and you you can see the
+Now build and run the example using this file, and you can see the
 full parser in action.
 
 ```frag
