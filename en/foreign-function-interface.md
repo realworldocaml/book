@@ -170,13 +170,13 @@ The command-line above include some important extra link directives.  The
 `-lflags` instructs <command>ocamlbuild</command> to pass the next
 comma-separated set of arguments through to the <command>ocaml</command>
 command when linking a binary.  OCaml in turn uses `-cclib` to pass directives
-through to the system compiler (normally `gcc` or `clang`).  We first need to
+through to the system compiler (normally <command>gcc</command> or <command>clang</command).  We first need to
 link to the `ncurses` C library to make the symbols available to Ctypes, and
 `-cclib,-lncurses` does that.
 
 On some distributions such as Ubuntu 11.10 upwards, you'll also need to add
 `-cclib,-Xlinker,-cclib,--no-as-needed` to the `-lflags` directive.  `-Xlinker`
-is interpreted by the compiler as a directive for the system linker `ld`, to
+is interpreted by the compiler as a directive for the system linker <command>ld</command>, to
 which it passes `--no-as-needed`.  Several modern OS distributions (such as
 Ubuntu 11.10 onwards) configure the system linker to only link in libraries
 that directly contain symbols used by the program.  However, when we use
