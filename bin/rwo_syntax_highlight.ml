@@ -31,44 +31,32 @@ let pygmentize lang file contents =
   (* The contents of <pre> are just Data tags, so filter them through
      Pygments *)
   let data = run_through_pygmentize lang contents in
-  let typ =
-    match lang with
-    | "ocaml" -> "OCaml Source Code"
-    | "json" -> "JSON"
-    | "console" -> "Terminal"
-    | "scheme" -> "S-expression"
-    | "html" -> "Syntax"
-    | "java" -> "Java"
-    | "c" -> "C"
-    | "cmd" -> "Shell script"
-    | "cpp" -> "C++"
-    | "gas" -> "Assembly Language"
-    | unknown -> unknown
-  in
-  let data_html = wrap_in_pretty_box ~part:0 typ file data |> Cow.Html.to_string in
+  let lang = typ_of_string lang in
+  let data_html = wrap_in_pretty_box ~part:0 ~lang file data |> Cow.Html.to_string in
   Out_channel.write_all (ofile_html file 0) ~data:data_html;
   Out_channel.write_all (ofile_md file 0) ~data:contents;
-  let data = wrap_in_docbook_box ~part:0 typ file <:xml<$str:contents$>> in
+  let data = wrap_in_docbook_box ~part:0 ~lang file <:xml<$str:contents$>> in
   Out_channel.write_all (ofile_xml file 0) ~data
 
 let raw lang file contents =
   let data = <:html<<pre>$str:contents$</pre>&>> in
-  let data = wrap_in_pretty_box ~part:0 lang file data |> Cow.Html.to_string in
+  let lang = typ_of_string lang in
+  let data = wrap_in_pretty_box ~part:0 ~lang file data |> Cow.Html.to_string in
   Out_channel.write_all (ofile_html file 0) ~data;
   Out_channel.write_all (ofile_md file 0) ~data:contents;
-  let data = wrap_in_docbook_box ~part:0 lang file <:html<$str:contents$>> in
+  let data = wrap_in_docbook_box ~part:0 ~lang file <:html<$str:contents$>> in
   Out_channel.write_all (ofile_xml file 0) ~data
-  
+
 let cow file contents =
   (* Break the OCaml code into parts *)
   Code_frag.extract_all_ocaml_parts file contents
   |> List.iter ~f:(fun (part,buf) ->
       let code = Cow.Code.ocaml_fragment buf in
-      let html = wrap_in_pretty_box ~part "OCaml" file code in
+      let html = wrap_in_pretty_box ~part ~lang:`OCaml file code in
       let data = Cow.Html.to_string html in
       Out_channel.write_all (ofile_html file part) ~data;
       Out_channel.write_all (ofile_md file part) ~data:buf;
-      let data = wrap_in_docbook_box ~part "OCaml" file <:xml<$str:buf$>> in
+      let data = wrap_in_docbook_box ~part ~lang:`OCaml file <:xml<$str:buf$>> in
       Out_channel.write_all (ofile_xml file part) ~data
     )
 
@@ -93,14 +81,14 @@ let rawscript file =
 >>)
   |> fun olines_xml ->
   let buf =
-    wrap_in_pretty_box ~part:0 "OCaml toplevel" file (List.concat olines_html)
+    wrap_in_pretty_box ~part:0 ~lang:`OCaml_toplevel file (List.concat olines_html)
     |> Cow.Html.to_string in
   Out_channel.write_all (ofile_html file 0) ~data:buf;
   Out_channel.write_all (ofile_md file 0) ~data:(In_channel.read_all file);
-  let data = wrap_in_docbook_box ~part:0 "OCaml Utop" file (List.concat olines_xml) in
+  let data = wrap_in_docbook_box ~part:0 ~lang:`OCaml_toplevel file (List.concat olines_xml) in
   Out_channel.write_all (ofile_xml file 0) ~data
 
-let console file = 
+let console file =
   (* Run lines starting with $ through pygments, pass rest through *)
   let olines = List.rev (In_channel.with_file file ~f:(
     In_channel.fold_lines ~init:[] ~f:(fun acc line ->
@@ -121,11 +109,11 @@ let console file =
 >>) :: acc
     ))) in
   let buf =
-    wrap_in_pretty_box ~part:0 "Terminal" file (List.concat olines)
+    wrap_in_pretty_box ~part:0 ~lang:`Console file (List.concat olines)
     |> Cow.Html.to_string in
   Out_channel.write_all (ofile_html file 0) ~data:buf;
   Out_channel.write_all (ofile_md file 0) ~data:(In_channel.read_all file);
-  let data = wrap_in_docbook_box ~part:0 "Terminal" file (List.concat olines_xml) in
+  let data = wrap_in_docbook_box ~part:0 ~lang:`Console file (List.concat olines_xml) in
   Out_channel.write_all (ofile_xml file 0) ~data
 
 let do_highlight build_dir' use_cow use_rawscript use_pygments use_raw use_console file () =
@@ -134,7 +122,7 @@ let do_highlight build_dir' use_cow use_rawscript use_pygments use_raw use_conso
   if use_cow then
     cow file buf
   else if use_console then
-    console file 
+    console file
   else if use_rawscript then
     rawscript file
   else match use_pygments with
@@ -151,9 +139,9 @@ let () =
     Command.Spec.(empty
                   +> flag "-builddir" (optional_with_default "." string)
                       ~doc:"dir Prepend directory to output files"
-                  +> flag "-cow" no_arg 
+                  +> flag "-cow" no_arg
                       ~doc:" Filter OCaml through COW, extracting only part %d "
-                  +> flag "-rawscript" no_arg 
+                  +> flag "-rawscript" no_arg
                       ~doc:" Filter OCaml toplevel through COW"
                   +> flag "-pygments" (optional string)
                       ~doc:"lang Filter through Pygments with given [lang]"

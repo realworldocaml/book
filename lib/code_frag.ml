@@ -65,6 +65,7 @@ let typ_of_string s : typ =
   | "java"     -> `Java
   | "c"        -> `C
   | "sh"       -> `Bash
+  | "bash"     -> `Bash
   | "cpp"      -> `CPP
   | "ascii"    -> `Ascii
   | "gas"      -> `Gas
@@ -73,8 +74,8 @@ let typ_of_string s : typ =
 let typ_to_docbook_language (t:typ) =
   match t with
   | `OCaml             -> "ocaml"
-  | `OCaml_toplevel    -> ""
-  | `OCaml_rawtoplevel -> ""
+  | `OCaml_toplevel    -> "ocaml"
+  | `OCaml_rawtoplevel -> "ocaml"
   | `Console           -> "console"
   | `JSON              -> "json"
   | `ATD               -> "ocaml"
@@ -86,6 +87,23 @@ let typ_to_docbook_language (t:typ) =
   | `CPP               -> "c"
   | `Ascii             -> ""
   | `Gas               -> "gas"
+
+let typ_to_descr (lang:typ) =
+  match lang with
+  | `OCaml             -> "OCaml"
+  | `OCaml_toplevel    -> "OCaml Utop"
+  | `OCaml_rawtoplevel -> "OCaml Utop"
+  | `Console           -> "Terminal"
+  | `JSON              -> "JSON"
+  | `ATD               -> "ATD"
+  | `Scheme            -> "Scheme"
+  | `OCaml_syntax      -> "Syntax"
+  | `Java              -> "Java"
+  | `C                 -> "C"
+  | `Bash              -> "Shell script"
+  | `CPP               -> "C"
+  | `Ascii             -> "Diagram"
+  | `Gas               -> "Assembly"
 
 let of_string s =
   try
@@ -160,20 +178,23 @@ let concat_toplevel_phrases lines =
       |`output (res,acc) -> List.rev (combine acc :: res))
   |> List.filter ~f:(function |"" -> false |_ -> true)
 
-let wrap_in_docbook_box ~part typ file buf =
+let wrap_in_docbook_box ~part ~lang file buf =
   let part =
     match part with
     | 0 -> []
     | part -> <:html< (part $int:part$)>>
   in
-  let icon = <:xml<&#x270e;>> in
-  let info = <:xml<<lineannotation>$icon$ $str:typ$: <filename>$str:file$</filename>$part$</lineannotation>
-$buf$>> in
+  let dlang = typ_to_docbook_language lang in
+  let hlang = typ_to_descr lang in
+  let info = <:xml<<para role="sourcecode">$str:hlang$: <filename>$str:file$</filename>$part$</para>
+<programlisting language=$str:dlang$>$buf$</programlisting>
+>> in
   Cow.Xml.to_string info
 
-let wrap_in_pretty_box ~part typ file (buf:Cow.Xml.t) =
+let wrap_in_pretty_box ~part ~lang file (buf:Cow.Xml.t) =
   let repourl = sprintf "http://github.com/realworldocaml/examples/" in
   let fileurl = sprintf "http://github.com/realworldocaml/examples/blob/master/code/%s" file in
+  let typ = typ_to_descr lang in
   let part =
     match part with
     | 0 -> []

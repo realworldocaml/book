@@ -24,7 +24,7 @@ let subst_with_code_frag _attr (c:Cow.Xml.t) : Cow.Xml.t =
     |> Cow.Html.of_string
   with exn ->
     eprintf "WARNING bare <pre> found. This should be turned into a ```frag:\n %s\n%!" (Exn.to_string exn);
-    Code_frag.wrap_in_pretty_box ~part:0 "Unknown" "" c
+    exit 1
 
 let () =
   try

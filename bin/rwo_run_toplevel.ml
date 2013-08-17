@@ -408,13 +408,13 @@ let parse_file fullfile file =
   Hashtbl.iter parts ~f:(
     fun ~key ~data ->
       eprintf "W: %s\n%!" (ofile file key);
-      let data = Code_frag.wrap_in_docbook_box ~part:key "OCaml UTop" fullfile !data in
+      let data = Code_frag.wrap_in_docbook_box ~part:key ~lang:`OCaml_toplevel fullfile !data in
       Out_channel.write_all (ofile file key) ~data);
   Hashtbl.iter html_parts ~f:(
     fun ~key ~data ->
       let code = Cow.Html.of_string (String.strip (Buffer.contents data)) in
       let data =
-        Code_frag.wrap_in_pretty_box ~part:key "OCaml UTop" fullfile code
+        Code_frag.wrap_in_pretty_box ~part:key ~lang:`OCaml_toplevel fullfile code
         |> Cow.Html.to_string in
       eprintf "W: %s\n%!" (ofile_html file key);
       Out_channel.write_all (ofile_html file key) ~data)
