@@ -294,4 +294,11 @@ large software systems; and OMake, an advanced build system for large software
 projects.  He is the author of the textbook, _An Introduction to Objective
 Caml_ (unpublished).
 
+### Contributors
 
+We would especially like to thank the following individuals for improving Real World OCaml:
+
+* Leo White contributed greatly to the content and examples in [xref](#objects) and [xref](#classes).
+* Jeremy Yallop authored and documented the Ctypes library described in [xref](#foreign-function-interface).
+* Stephen Weeks is responsible for much of the modular architecture behind Core, and his extensive notes formed the basis of [xref](#memory-representation-of-values) and [xref](#understanding-the-garbage-collector).
+* Jeremie Diminio authored the Utop interactive toplevel that is used throughout the book's code snippets.
