@@ -13,8 +13,6 @@ interface*.  This chapter will:
 * teach you how to build higher-level abstractions in OCaml from the low-level C bindings.
 * work through some full examples for binding a terminal interface and UNIX date/time functions.
 
-## The Ctypes library
-
 The simplest foreign function interface in OCaml doesn't even require you to
 write any C code at all!  The Ctypes library lets you define the C interface in
 pure OCaml, and the library then takes care of loading the C symbols and
