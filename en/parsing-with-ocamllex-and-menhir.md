@@ -187,7 +187,7 @@ the text is empty, and so there's no JSON value to read, and so we return the
 OCaml value `None`; or we have an instance of the `value` non-terminal, which
 corresponds to a well-formed JSON value, in which case we wrap the
 corresponding `Json.value` in a `Some` tag.  Note that in the `value` case, we
-wrote `v = value` to bind the OCaml value that corresponds to to the variable
+wrote `v = value` to bind the OCaml value that corresponds to the variable
 `v`, which we can then use within the curly-braces for that production.
 
 Now let's consider a more complicated example, the rule for the
