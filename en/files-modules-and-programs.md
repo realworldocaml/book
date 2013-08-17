@@ -101,10 +101,11 @@ required for Core.
 
 While this works well enough for a one-file project, more complicated
 projects require a tool to orchestrate the build.  One good tool for
-this task is `ocamlbuild`, which is shipped with the OCaml compiler.
-We'll talk more about `ocamlbuild` in
+this task is <command>ocamlbuild</command>, which is shipped with the OCaml compiler.
+We'll talk more about <command>ocamlbuild</command> in
 [xref](#the-compiler-frontend-parsing-and-type-checking), but for now,
-we'll just use a simple wrapper around `ocamlbuild` called `corebuild`
+we'll just use a simple wrapper around <command>ocamlbuild</command>
+called <command>corebuild</command>
 that sets build parameters appropriately for building against Core and
 its related libraries.
 
@@ -112,7 +113,7 @@ its related libraries.
 ((typ console)(name files-modules-and-programs-freq-obuild/build.out))
 ```
 
-If we'd invoked `corebuild` with a target of `freq.native` instead of
+If we'd invoked <command>corebuild</command> with a target of `freq.native` instead of
 `freq.byte`, we would have gotten native-code instead.
 
 We can run the resulting executable from the command-line.  The
@@ -197,7 +198,7 @@ filename.  The module name is capitalized even if the file is not.
 Indeed, module names are always capitalized.
 
 We can now rewrite `freq.ml` to use `Counter`.  Note that the
-resulting code can still be built with `ocamlbuild`, which will
+resulting code can still be built with <command>ocamlbuild</command>, which will
 discover dependencies and realize that `counter.ml` needs to be
 compiled.
 
@@ -237,7 +238,7 @@ follows.
 ((typ ocaml)(name files-modules-and-programs-freq-with-sig/counter.mli))
 ```
 
-Note that `ocamlbuild` will detect the presence of the `mli` file
+Note that <command>ocamlbuild</command> will detect the presence of the `mli` file
 automatically and include it in the build.
 
 <note><title>Auto-generating `mli` files</title>
@@ -672,7 +673,7 @@ following line.
  (part 1))
 ```
 
-In this case, `ocamlbuild` (which is invoked by the `corebuild`
+In this case, <command>ocamlbuild</command> (which is invoked by the <command>corebuild</command>
 script) will notice the error and complain explicitly about the cycle.
 
 ```frag
