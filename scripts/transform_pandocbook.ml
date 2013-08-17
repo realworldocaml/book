@@ -99,20 +99,17 @@ module Transform = struct
     |_ -> failwith "<book> tag not found"
 
   (* Substitute a <programlisting> tag with the appropriate code block *)
-  let rewrite_programlisting it =
+  let rewrite_programlisting (it:Cow.Xml.t) =
     let rec aux = function
       | `El ( (("","programlisting"),_), contents) ->
         let open Code_frag in
         let cf = of_string (string_of_data contents) in
-        let contents =
-          try Cow.Xml.of_string (read ~ext:"xml" cf)
-          with _ -> [`Data "???"] in (* TODO temporary *)
-        let lang = typ_to_docbook_language (typ_of_string cf.typ) in
-        mk_tag ~attrs:[("language",lang)] "programlisting" contents
+        Cow.Xml.of_string (read ~ext:"xml" cf)
       | `El (tag, children) ->
-        `El (tag, List.map ~f:aux children)
-      | x -> x
-    in aux it
+        let cs = List.concat (List.map ~f:aux children) in
+        [`El (tag, cs)]
+      | `Data x-> [`Data x]
+    in List.concat (List.map ~f:aux it)
 
   (* Given a list of input chapters and the book XML, output
    * a book with <part> tags and the desired chapters.
@@ -159,13 +156,14 @@ end
 let apply_transform parts_file book public plsubst =
   try
     let parts = Sexp.load_sexps_conv_exn parts_file chapter_of_sexp in
-    let o = Xmlm.make_output (`Channel stdout) in
     Xmlm.make_input (`Channel (open_in book))
     |> Xml_tree.in_tree
-    |> fun (dtd, t) ->    Transform.rewrite_linkend t
-                       |> (if plsubst then Transform.rewrite_programlisting else ident)
+    |> fun (_dtd, t) ->    Transform.rewrite_linkend t
                        |> Transform.add_parts public parts
-                       |> fun t -> Xml_tree.out_tree o (dtd, t)
+                       |> fun d ->
+                          (if plsubst then Transform.rewrite_programlisting [d]
+                           else [d])
+                       |> fun t -> print_endline (Cow.Xml.to_string t)
   with Xmlm.Error ((line,col),e) -> (
       Printf.eprintf "ERROR: [%d,%d] %s\n%!" line col (Xmlm.error_message e);
       exit 1)
