@@ -109,7 +109,7 @@ First, let's consider the type-signature of bind.
 ((typ ocamltop)(name async/main.topscript)(part 7))
 ```
 
-`Deferred.bind d f` takes a deferred value `d` and a function f that
+`Deferred.bind d f` takes a deferred value `d` and a function `f` that
 is to be run with the value of `d` once it's determined.  You can
 think of `Deferred.bind` as a kind of sequencing operator, and what
 we're doing is essentially taking an asynchronous computation `d` and
@@ -193,6 +193,9 @@ and shows us the contents of the deferred instead.
 Deferreds are usually built using combinations of `bind`, `map` and
 `return`, but sometimes you want to construct a deferred that you can
 determine explicitly with user-code.  This is done using an _ivar_.
+(The term ivar dates back to a languaage called Concurrent ML that was
+developed by John Reppy in the early 90's.  The "i" in ivar stands for
+incremental.)
 
 There are three fundamental operations for working with an ivar; you
 can create one, using `Ivar.create`, you can read off the deferred
