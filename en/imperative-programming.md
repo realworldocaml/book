@@ -888,9 +888,8 @@ question.
 ((typ ocaml)(name imperative-programming/time_converter.ml))
 ```
 
-We can build this program (using `ocamlbuild` with the `_tags` file
-described in [xref](#single-file-programs)) and run it, you'll see
-that it prompts you for input, as follows:
+We can build this program using <command>corebuild</command> and run it. You'll
+see that it prompts you for input, as follows:
 
 ```frag
 ((typ console)(name imperative-programming/time_converter.out))
