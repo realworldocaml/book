@@ -40,7 +40,9 @@ at you.
 - We needed to type `;;` in order to tell the toplevel that it should
   evaluate an expression.  This is a peculiarity of the toplevel that
   is not required in standalone programs (though it is sometimes
-  helpful to include `;;` to improve OCaml's error reporting).
+  helpful to include `;;` to improve OCaml's error reporting, by
+  making it more explicit where a given top-level declaration was
+  intended to end).
 - After evaluating an expression, the toplevel prints first the result
   and then the type of the result.
 - Function arguments are separated by spaces instead of by parentheses

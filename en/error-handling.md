@@ -211,7 +211,7 @@ syntactic level.  We can make it easier to read, and drop some of the
 parentheses, by using the infix operator form of bind, which we get
 access to by locally opening `Option.Monad_infix`.  The module is
 called `Monad_infix` because the bind operator is part of a
-sub-interface called `Monad`, which we'll talk about more in
+sub-interface called `Monad`, which we'll see again in
 [xref](#concurrent-programming-with-async).
 
 ```frag

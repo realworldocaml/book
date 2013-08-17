@@ -19,8 +19,8 @@ for the language and fill in your understanding.
 At its simplest, a variable is an identifier whose meaning is bound to
 a particular value.  In OCaml these bindings are often introduced
 using the `let` keyword.  We can type a so-called _top-level_ `let`
-binding into <command>utop</command> with the following syntax.  Note that variable
-names must start with a lowercase letter or an underscore.
+binding with the following syntax.  Note that variable names must
+start with a lowercase letter or an underscore.
 
 ```frag
 ((typ ocamlsyntax)(name variables-and-functions/let.syntax))
@@ -31,10 +31,10 @@ As we'll see when we get to the module system in
 bindings at the top-level of a module.
 
 Every variable binding has a _scope_, which is the portion of the code
-that can refer to that binding.  When using <command>utop</command>, the scope of a
-top-level let binding is everything that follows it in the session.
-When it shows up in a module, the scope is the remainder of that
-module.
+that can refer to that binding.  When using <command>utop</command>,
+the scope of a top-level let binding is everything that follows it in
+the session.  When it shows up in a module, the scope is the remainder
+of that module.
 
 Here's a simple example.
 
@@ -111,9 +111,9 @@ later use of `pi`, so the binding of `0.` to `pi` made no difference.
 This explains the warning produced by the toplevel telling us that
 there is an unused definition of `pi`.
 
-In OCaml, let bindings are immutable.  As we'll see in
-[xref](#imperative-programming-1), there are mutable values in OCaml,
-but no mutable variables.
+In OCaml, let bindings are immutable.  There are many kinds of mutable
+values in OCaml, which we'll discuss in
+[xref](#imperative-programming-1), but there are no mutable variables.
 
 <note> <title> Why don't variables vary?  </title>
 
@@ -199,9 +199,8 @@ declared using the `fun` keyword, as shown here.
 ((typ ocamltop)(name variables-and-functions/main.topscript)(part 10)) 
 ```
 
-Anonymous functions aren't named, but they can be used for many
-different purposes nonetheless.  You can, for example, apply an
-anonymous function to an argument.
+Anonymous functions operate in much the same way as named functions.
+For example, we can apply an anonymous function to an argument.
 
 ```frag
 ((typ ocamltop)(name variables-and-functions/main.topscript)(part 11)) 
@@ -355,11 +354,11 @@ in the OCaml world.
 
 A function is _recursive_ if it refers to itself in its definition.
 Recursion is important in any programming language, but is
-particularly important in functional languages, because it is the
-fundamental building block that is used for building looping
-constructs.  (As we'll see in [xref](#imperative-programming-1), OCaml
-also supports imperative looping constructs like `for` and `while`,
-but these are only useful when using OCaml's imperative features.)
+particularly important in functional languages, because it is the way
+in which you build looping constructs.  (As will be discussed in more
+detail in [xref](#imperative-programming-1), OCaml also supports
+imperative looping constructs like `for` and `while`, but these are
+only useful when using OCaml's imperative features.)
 
 In order to define a recursive function, you need to mark the let
 binding as recursive with the `rec` keyword, as shown in this function
@@ -650,8 +649,8 @@ you can see, the arguments can be provided in any order.
 OCaml also supports _label punning_, meaning that you get to drop the
 text after the `:` if the name of the label and the name of the
 variable being used are the same.  We were actually already using
-label punning when defining our labeled function above.  The following
-shows how punning can be used when invoking a function.
+label punning when defining `ratio` above.  The following shows how
+punning can be used when invoking a function.
 
 ```frag
 ((typ ocamltop)(name variables-and-functions/main.topscript)(part 42)) 
@@ -868,10 +867,10 @@ what the default behavior should be.
 
 One subtle aspect of labeled and optional arguments is how they are
 inferred by the type system.  Consider the following example for
-computing numerical derivatives of a function of two dimensions.  The
-function takes an argument `delta` which determines the scale at which
-to compute the derivative, values `x` and `y` which determine which
-point to compute the derivative at, and the function `f` whose
+computing numerical derivatives of a function of two real variables.
+The function takes an argument `delta` which determines the scale at
+which to compute the derivative, values `x` and `y` which determine
+which point to compute the derivative at, and the function `f` whose
 derivative is being computed.  The function `f` itself takes two
 labeled arguments `x` and `y`.  Note that you can use an apostrophe as
 part of a variable name, so `x'` and `y'` are just ordinary variables.

@@ -827,7 +827,7 @@ call to `get_definition`, as follows.
 ((typ ocaml)(name async/search_with_error_handling.ml)(part 1))
 ```
 
-Here, we use `try_with` to capture the exception, which we then use
+Here, we first use `try_with` to capture the exception, and then use
 map (the `>>|` operator) to convert the error into the form we want: a
 pair whose first element is the word being searched for, and the
 second element is the (possibly erroneous) result.
