@@ -1,4 +1,3 @@
-(* file: dictionary.ml *)
 open Core.Std
 
 type ('a, 'b) t = { mutable length: int;
