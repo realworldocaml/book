@@ -181,7 +181,7 @@ functionality into a separate module with an explicit interface.  We
 can consider alternative (and more efficient) implementations once we
 have a clear interface to program against.
 
-We'll start by creating a file, `counter.ml` that contains the logic
+We'll start by creating a file, `counter.ml`, that contains the logic
 for maintaining the association list used to represent the frequency
 counts.  The key function, called `touch`, bumps the frequency count
 of a given line by one.
