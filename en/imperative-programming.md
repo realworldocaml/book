@@ -1262,7 +1262,7 @@ function in question did no such thing.  Consider this example:
 ((typ ocamltop)(name imperative-programming/value_restriction.topscript)(part 3))
 ```
 
-It would be safe to infer a weakly polymorphic variable here, but
+It would be safe to infer a fully polymorphic variable here, but
 because OCaml's type system doesn't distinguish between pure and
 impure functions, it can't separate those two cases.
 

@@ -68,6 +68,12 @@ function, kicking off the processing.  But really the entire file is
 evaluated at startup, and so in some sense the full codebase is one
 big `main` function.
 
+The idiom of writing `let () =` may seem a bit odd, but it has a
+purpose.  The let binding here is a pattern-match to a value of type
+`unit`, which is there to ensure that the expression on the right-hand
+side returns `unit`, as is common for functions that operate primarily
+by side-effect.
+
 </note>
 
 If we weren't using Core or any other external libraries, we could

@@ -370,9 +370,10 @@ as functions for converting to and from _s-expressions_.
 S-expressions are a serialization format used commonly in Core, and
 are required here to enable better error messages.  We'll discuss
 s-expressions more in [xref](#data-serialization-with-s-expressions),
-but in the meantime, we can just use the `with sexp` declaration that
-comes from the Sexplib syntax extension to create s-expression
-converters for us.
+but in the meantime, we'll use the `with sexp` declaration that comes
+from the Sexplib syntax extension.  This declaration kicks off the
+automatic generation of s-expression conversion functions for the
+marked type.
 
 The following example shows how this all fits together, following the
 same basic pattern for using functors described in
