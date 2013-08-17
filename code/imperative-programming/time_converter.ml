@@ -1,4 +1,3 @@
-(* file: time_converter.ml *)
 open Core.Std
 
 let () =
