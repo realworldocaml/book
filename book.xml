@@ -457,6 +457,45 @@
         Caml</emphasis> (unpublished).
       </para>
     </sect2>
+    <sect2 id="contributors">
+      <title>Contributors</title>
+      <para>
+        We would especially like to thank the following individuals for
+        improving Real World OCaml:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            Leo White contributed greatly to the content and examples in
+            <xref linkend="objects"/> and
+            <xref linkend="classes"/>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Jeremy Yallop authored and documented the Ctypes library
+            described in
+            <xref linkend="foreign-function-interface"/>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Stephen Weeks is responsible for much of the modular
+            architecture behind Core, and his extensive notes formed the
+            basis of
+            <xref linkend="memory-representation-of-values"/>
+            and
+            <xref linkend="understanding-the-garbage-collector"/>.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Jeremie Diminio authored the Utop interactive toplevel that
+            is used throughout the book's code snippets.
+          </para>
+        </listitem>
+      </itemizedlist>
+    </sect2>
   </sect1>
 </preface><part label="I"><title>Language Concepts</title><partintro><para>Part I covers the basic language concepts you'll need to know when building
      OCaml programs.  You won't need to memorise all of this (objects, for
@@ -1469,7 +1508,7 @@
 <prompt># </prompt><userinput>log_entry (Some Time.epoch) &quot;A long long time ago&quot;;;</userinput>
 <computeroutput>- : string = &quot;1970-01-01 01:00:00 -- A long long time ago&quot;</computeroutput>
 <prompt># </prompt><userinput>log_entry None &quot;Up to the minute&quot;;;</userinput>
-<computeroutput>- : string = &quot;2013-08-17 20:44:43 -- Up to the minute&quot;</computeroutput>
+<computeroutput>- : string = &quot;2013-08-18 14:48:08 -- Up to the minute&quot;</computeroutput>
 </programlisting>
 
       <para>
@@ -4106,8 +4145,8 @@ let () =
 <computeroutput>                                 </computeroutput>
 <computeroutput>  Name     Time (ns)   % of max  </computeroutput>
 <computeroutput> -------- ----------- ---------- </computeroutput>
-<computeroutput>  sum_if     110_527     100.00  </computeroutput>
-<computeroutput>  sum         22_358      20.23  </computeroutput>
+<computeroutput>  sum_if     110_535     100.00  </computeroutput>
+<computeroutput>  sum         22_361      20.23  </computeroutput>
 <computeroutput>                                 </computeroutput>
 <computeroutput>- : unit = ()</computeroutput>
 </programlisting>
@@ -6162,7 +6201,7 @@ type median = | Before_and_after of string * string
 <userinput>    };;</userinput>
 <computeroutput>val my_host : host_info =</computeroutput>
 <computeroutput>  {hostname = &quot;ocaml-www1&quot;; os_name = &quot;Linux&quot;; cpu_arch = &quot;unknown&quot;;</computeroutput>
-<computeroutput>   timestamp = 2013-08-17 20:47:21.892488+01:00}</computeroutput>
+<computeroutput>   timestamp = 2013-08-18 14:50:48.986085+01:00}</computeroutput>
 </programlisting>
 
   <para>
@@ -6218,7 +6257,7 @@ type median = | Before_and_after of string * string
 <userinput>       sprintf &quot;%s (%s / %s, on %s)&quot; h os c (Time.to_sec_string ts);;</userinput>
 <computeroutput>val host_info_to_string : host_info -&gt; string = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>host_info_to_string my_host;;</userinput>
-<computeroutput>- : string = &quot;ocaml-www1 (Linux / unknown, on 2013-08-17 20:47:21)&quot;</computeroutput>
+<computeroutput>- : string = &quot;ocaml-www1 (Linux / unknown, on 2013-08-18 14:50:48)&quot;</computeroutput>
 </programlisting>
 
     <para>
@@ -6385,7 +6424,7 @@ type median = | Before_and_after of string * string
 <computeroutput>val my_host : host_info =</computeroutput>
 <computeroutput>  {hostname = &quot;ocaml-www1&quot;; os_name = &quot;Linux&quot;; cpu_arch = &quot;unknown&quot;;</computeroutput>
 <computeroutput>   os_release = &quot;3.2.0-1-amd64&quot;;</computeroutput>
-<computeroutput>   timestamp = 2013-08-17 20:47:28.343527+01:00}</computeroutput>
+<computeroutput>   timestamp = 2013-08-18 14:50:55.287342+01:00}</computeroutput>
 </programlisting>
 
     <para>
@@ -7019,12 +7058,12 @@ type median = | Before_and_after of string * string
 <userinput>                credentials = &quot;Xy2d9W&quot;; }</userinput>
 <userinput>  ;;</userinput>
 <computeroutput>val logon : Logon.t =</computeroutput>
-<computeroutput>  {Logon.session_id = &quot;26685&quot;; time = 2013-08-17 20:47:33.554357+01:00;</computeroutput>
+<computeroutput>  {Logon.session_id = &quot;26685&quot;; time = 2013-08-18 14:51:00.509463+01:00;</computeroutput>
 <computeroutput>   user = &quot;yminsky&quot;; credentials = &quot;Xy2d9W&quot;}</computeroutput>
 <prompt># </prompt><userinput>show_field Logon.Fields.user Fn.id logon;;</userinput>
 <computeroutput>- : string = &quot;user: yminsky&quot;</computeroutput>
 <prompt># </prompt><userinput>show_field Logon.Fields.time Time.to_string logon;;</userinput>
-<computeroutput>- : string = &quot;time: 2013-08-17 20:47:33.554357+01:00&quot;</computeroutput>
+<computeroutput>- : string = &quot;time: 2013-08-18 14:51:00.509463+01:00&quot;</computeroutput>
 </programlisting>
 
     <para>
@@ -7085,7 +7124,7 @@ type median = | Before_and_after of string * string
 <computeroutput>val print_logon : Logon.t -&gt; unit = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>print_logon logon;;</userinput>
 <computeroutput>session_id: 26685</computeroutput>
-<computeroutput>time: 2013-08-17 20:47:33.554357+01:00</computeroutput>
+<computeroutput>time: 2013-08-18 14:51:00.509463+01:00</computeroutput>
 <computeroutput>user: yminsky</computeroutput>
 <computeroutput>credentials: Xy2d9W</computeroutput>
 <computeroutput>- : unit = ()</computeroutput>
@@ -8784,7 +8823,7 @@ end</programlisting>
     <para>
       If we put a <literal>printf</literal> in the middle of the
       computation, we can see that <literal>List.map</literal> is
-      interrupted part way through it's execution, never getting to the
+      interrupted part way through its execution, never getting to the
       end of the list.
     </para>
     <para role="sourcecode">OCaml Utop: <filename>error-handling/main.topscript</filename> (part 17)</para>
@@ -9324,9 +9363,9 @@ let () =
 <computeroutput>                                                                </computeroutput>
 <computeroutput>  Name                           Cycles   Time (ns)   % of max  </computeroutput>
 <computeroutput> ------------------------------ -------- ----------- ---------- </computeroutput>
-<computeroutput>  simple computation                278         116      76.54  </computeroutput>
-<computeroutput>  simple computation w/handler      308         128      84.61  </computeroutput>
-<computeroutput>  end with exn                      364         152     100.00  </computeroutput>
+<computeroutput>  simple computation                279         117      76.40  </computeroutput>
+<computeroutput>  simple computation w/handler      308         129      84.36  </computeroutput>
+<computeroutput>  end with exn                      366         153     100.00  </computeroutput>
 <computeroutput>                                                                </computeroutput>
 </programlisting>
 
@@ -9342,8 +9381,8 @@ let () =
 <computeroutput>                                                                </computeroutput>
 <computeroutput>  Name                           Cycles   Time (ns)   % of max  </computeroutput>
 <computeroutput> ------------------------------ -------- ----------- ---------- </computeroutput>
-<computeroutput>  simple computation                279         116      83.33  </computeroutput>
-<computeroutput>  simple computation w/handler      308         128      91.99  </computeroutput>
+<computeroutput>  simple computation                279         116      83.50  </computeroutput>
+<computeroutput>  simple computation w/handler      308         128      92.09  </computeroutput>
 <computeroutput>  end with exn                      334         140     100.00  </computeroutput>
 <computeroutput>                                                                </computeroutput>
 </programlisting>
@@ -10573,10 +10612,10 @@ edit_distance &quot;OCam&quot; &quot;ocam&quot;
       </para>
       <para role="sourcecode">OCaml Utop: <filename>imperative-programming/memo.topscript</filename> (part 4)</para>
 <programlisting language="ocaml"><prompt># </prompt><userinput>time (fun () -&gt; edit_distance &quot;OCaml&quot; &quot;ocaml&quot;);;</userinput>
-<computeroutput>Time: 1.42288ms</computeroutput>
+<computeroutput>Time: 1.40405ms</computeroutput>
 <computeroutput>- : int = 2</computeroutput>
 <prompt># </prompt><userinput>time (fun () -&gt; edit_distance &quot;OCaml 4.01&quot; &quot;ocaml 4.01&quot;);;</userinput>
-<computeroutput>Time: 6.80233s</computeroutput>
+<computeroutput>Time: 6.79065s</computeroutput>
 <computeroutput>- : int = 2</computeroutput>
 </programlisting>
 
@@ -10614,7 +10653,7 @@ edit_distance &quot;OCam&quot; &quot;ocam&quot;
 <computeroutput>Time: 0.844955ms</computeroutput>
 <computeroutput>- : int = 10946</computeroutput>
 <prompt># </prompt><userinput>time (fun () -&gt; fib 40);;</userinput>
-<computeroutput>Time: 12.7787s</computeroutput>
+<computeroutput>Time: 12.7751s</computeroutput>
 <computeroutput>- : int = 165580141</computeroutput>
 </programlisting>
 
@@ -10634,10 +10673,10 @@ edit_distance &quot;OCam&quot; &quot;ocam&quot;
 <programlisting language="ocaml"><prompt># </prompt><userinput>let fib = memoize fib;;</userinput>
 <computeroutput>val fib : int -&gt; int = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>time (fun () -&gt; fib 40);;</userinput>
-<computeroutput>Time: 12.7753s</computeroutput>
+<computeroutput>Time: 12.774s</computeroutput>
 <computeroutput>- : int = 165580141</computeroutput>
 <prompt># </prompt><userinput>time (fun () -&gt; fib 40);;</userinput>
-<computeroutput>Time: 0.00405312ms</computeroutput>
+<computeroutput>Time: 0.00309944ms</computeroutput>
 <computeroutput>- : int = 165580141</computeroutput>
 </programlisting>
 
@@ -10728,7 +10767,7 @@ edit_distance &quot;OCam&quot; &quot;ocam&quot;
 <programlisting language="ocaml"><prompt># </prompt><userinput>let fib = memo_rec fib_norec;;</userinput>
 <computeroutput>val fib : int -&gt; int = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>time (fun () -&gt; fib 40);;</userinput>
-<computeroutput>Time: 0.0579357ms</computeroutput>
+<computeroutput>Time: 0.0591278ms</computeroutput>
 <computeroutput>- : int = 102334155</computeroutput>
 </programlisting>
 
@@ -10804,7 +10843,7 @@ edit_distance &quot;OCam&quot; &quot;ocam&quot;
       </para>
       <para role="sourcecode">OCaml Utop: <filename>imperative-programming/memo.topscript</filename> (part 7)</para>
 <programlisting language="ocaml"><prompt># </prompt><userinput>time (fun () -&gt; edit_distance (&quot;OCaml 4.01&quot;,&quot;ocaml 4.01&quot;));;</userinput>
-<computeroutput>Time: 0.495195ms</computeroutput>
+<computeroutput>Time: 0.500917ms</computeroutput>
 <computeroutput>- : int = 2</computeroutput>
 </programlisting>
 
@@ -10887,7 +10926,7 @@ edit_distance &quot;OCam&quot; &quot;ocam&quot;
 <userinput>  ;;</userinput>
 <computeroutput>val lazy_memo_rec : (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>time (fun () -&gt; lazy_memo_rec fib_norec 40);;</userinput>
-<computeroutput>Time: 0.0638962ms</computeroutput>
+<computeroutput>Time: 0.0650883ms</computeroutput>
 <computeroutput>- : int = 102334155</computeroutput>
 </programlisting>
 
@@ -14384,7 +14423,7 @@ end</programlisting>
 <userinput>  end ;;</userinput>
 <computeroutput>val t : &lt; pop : int option &gt; = &lt;obj&gt;</computeroutput>
 <prompt># </prompt><userinput>print_pop t ;;</userinput>
-<computeroutput>Popped: 1376768897</computeroutput>
+<computeroutput>Popped: 1376833904</computeroutput>
 <computeroutput>- : unit = ()</computeroutput>
 </programlisting>
 
@@ -17586,8 +17625,8 @@ let () =
 <computeroutput>                                </computeroutput>
 <computeroutput>  Name     Time (ns)   Speedup  </computeroutput>
 <computeroutput> ------- ------------ --------- </computeroutput>
-<computeroutput>  map     31_655_015      1.00  </computeroutput>
-<computeroutput>  table    7_207_386      4.39  </computeroutput>
+<computeroutput>  map     31_698_313      1.00  </computeroutput>
+<computeroutput>  table    7_202_631      4.40  </computeroutput>
 <computeroutput>                                </computeroutput>
 </programlisting>
 
@@ -17668,8 +17707,8 @@ let () =
 <computeroutput>                               </computeroutput>
 <computeroutput>  Name    Time (ns)   Speedup  </computeroutput>
 <computeroutput> ------- ----------- --------- </computeroutput>
-<computeroutput>  map       219_915     12.12  </computeroutput>
-<computeroutput>  table   2_666_160      1.00  </computeroutput>
+<computeroutput>  map       218_581     12.03  </computeroutput>
+<computeroutput>  table   2_628_423      1.00  </computeroutput>
 <computeroutput>                               </computeroutput>
 </programlisting>
 
@@ -19170,12 +19209,12 @@ let () = Command.run add</programlisting>
       </para>
       <para role="sourcecode">Terminal: <filename>command-line-parsing/md5_completion.out</filename></para>
 <programlisting language="console"><prompt>$ </prompt><userinput>env COMMAND_OUTPUT_INSTALLATION_BASH=1 ./basic_md5_with_flags.native</userinput>
-<computeroutput>function _jsautocom_15714 {</computeroutput>
+<computeroutput>function _jsautocom_23343 {</computeroutput>
 <computeroutput>  export COMP_CWORD</computeroutput>
 <computeroutput>  COMP_WORDS[0]=./basic_md5_with_flags.native</computeroutput>
 <computeroutput>  COMPREPLY=($(&quot;${COMP_WORDS[@]}&quot;))</computeroutput>
 <computeroutput>}</computeroutput>
-<computeroutput>complete -F _jsautocom_15714 ./basic_md5_with_flags.native</computeroutput>
+<computeroutput>complete -F _jsautocom_23343 ./basic_md5_with_flags.native</computeroutput>
 </programlisting>
 
       <para>
@@ -24306,56 +24345,53 @@ let get_definition ~server ~interrupt word =
       </para>
     </listitem>
   </itemizedlist>
-  <sect1 id="the-ctypes-library">
-    <title>The Ctypes library</title>
-    <para>
-      The simplest foreign function interface in OCaml doesn't even
-      require you to write any C code at all! The Ctypes library lets
-      you define the C interface in pure OCaml, and the library then
-      takes care of loading the C symbols and invoking the foreign
-      function call.
-    </para>
-    <para>
-      Let's dive straight into a realistic example to show you how the
-      library looks. We'll create a binding to the Ncurses terminal
-      toolkit, as it's widely available on most systems and doesn't have
-      any complex dependencies.
-    </para>
-    <note>
-    <title>
-    Installing the Ctypes library
-    </title>
-    <para>
-      You'll need to install the
-      <ulink url="https://github.com/atgreen/libffi"><literal>libffi</literal></ulink>
-      library as a prerequisite to using Ctypes. It's a fairly popular
-      library and should be available in your OS package manager.
-    </para>
-    <para>
-      A special note for Mac users: the version of
-      <literal>libffi</literal> installed by default in MacOS X 10.8 is
-      too old for some of the features that Ctypes needs. Use Homebrew
-      to <literal>brew install libffi</literal> to get the latest
-      version before installing the OCaml library.
-    </para>
-    <para>
-      Once that's done, Ctypes is available via OPAM as usual.
-    </para>
-    <para role="sourcecode">Terminal: <filename>ffi/install.out</filename></para>
+  <para>
+    The simplest foreign function interface in OCaml doesn't even
+    require you to write any C code at all! The Ctypes library lets you
+    define the C interface in pure OCaml, and the library then takes
+    care of loading the C symbols and invoking the foreign function
+    call.
+  </para>
+  <para>
+    Let's dive straight into a realistic example to show you how the
+    library looks. We'll create a binding to the Ncurses terminal
+    toolkit, as it's widely available on most systems and doesn't have
+    any complex dependencies.
+  </para>
+  <note>
+  <title>
+  Installing the Ctypes library
+  </title>
+  <para>
+    You'll need to install the
+    <ulink url="https://github.com/atgreen/libffi"><literal>libffi</literal></ulink>
+    library as a prerequisite to using Ctypes. It's a fairly popular
+    library and should be available in your OS package manager.
+  </para>
+  <para>
+    A special note for Mac users: the version of
+    <literal>libffi</literal> installed by default in MacOS X 10.8 is
+    too old for some of the features that Ctypes needs. Use Homebrew to
+    <literal>brew install libffi</literal> to get the latest version
+    before installing the OCaml library.
+  </para>
+  <para>
+    Once that's done, Ctypes is available via OPAM as usual.
+  </para>
+  <para role="sourcecode">Terminal: <filename>ffi/install.out</filename></para>
 <programlisting language="console"><prompt>$ </prompt><userinput>brew install libffi     # for MacOS X users</userinput>
 <prompt>$ </prompt><userinput>opam install ctypes</userinput>
 <prompt>$ </prompt><userinput>utop</userinput>
 <computeroutput># require &quot;ctypes.foreign&quot; ;;</computeroutput>
 </programlisting>
 
-    <para>
-      You'll also need the Ncurses library for the first example. This
-      comes pre-installed on many operating systems such as MacOS X and
-      Debian Linux provides it as the <literal>ncurses-dev</literal>
-      package.
-    </para>
-    </note>
-  </sect1>
+  <para>
+    You'll also need the Ncurses library for the first example. This
+    comes pre-installed on many operating systems such as MacOS X and
+    Debian Linux provides it as the <literal>ncurses-dev</literal>
+    package.
+  </para>
+  </note>
   <sect1 id="example-a-terminal-interface">
     <title>Example: a terminal interface</title>
     <para>
@@ -24596,7 +24632,7 @@ let () =
       of arguments through to the <command>ocaml</command> command when
       linking a binary. OCaml in turn uses <literal>-cclib</literal> to
       pass directives through to the system compiler (normally
-      <literal>gcc</literal> or <literal>clang</literal>). We first need
+      <command>gcc</command> or <command>clang</command>. We first need
       to link to the <literal>ncurses</literal> C library to make the
       symbols available to Ctypes, and
       <literal>-cclib,-lncurses</literal> does that.
@@ -24607,7 +24643,7 @@ let () =
       <literal>-cclib,-Xlinker,-cclib,--no-as-needed</literal> to the
       <literal>-lflags</literal> directive. <literal>-Xlinker</literal>
       is interpreted by the compiler as a directive for the system
-      linker <literal>ld</literal>, to which it passes
+      linker <command>ld</command>, to which it passes
       <literal>--no-as-needed</literal>. Several modern OS distributions
       (such as Ubuntu 11.10 onwards) configure the system linker to only
       link in libraries that directly contain symbols used by the
@@ -24841,7 +24877,7 @@ char *ctime(const time_t *timep);
     </para>
     <para role="sourcecode">OCaml Utop: <filename>ffi/posix.topscript</filename> (part 1)</para>
 <programlisting language="ocaml"><prompt># </prompt><userinput>let cur_time = time (from_voidp time_t null) ;;</userinput>
-<computeroutput>val cur_time : time_t = 1376769123</computeroutput>
+<computeroutput>val cur_time : time_t = 1376834134</computeroutput>
 </programlisting>
 
     <para>
@@ -24912,7 +24948,7 @@ char *ctime(const time_t *timep);
       </para>
       <para role="sourcecode">OCaml Utop: <filename>ffi/posix.topscript</filename> (part 6)</para>
 <programlisting language="ocaml"><prompt># </prompt><userinput>let t_ptr = allocate time_t (time' ()) ;;</userinput>
-<computeroutput>val t_ptr : time_t ptr = (int64_t*) 0x204fc30</computeroutput>
+<computeroutput>val t_ptr : time_t ptr = (int64_t*) 0x238ac30</computeroutput>
 </programlisting>
 
       <para>
@@ -24923,7 +24959,7 @@ char *ctime(const time_t *timep);
       </para>
       <para role="sourcecode">OCaml Utop: <filename>ffi/posix.topscript</filename> (part 7)</para>
 <programlisting language="ocaml"><prompt># </prompt><userinput>ctime t_ptr ;;</userinput>
-<computeroutput>- : string = &quot;Sat Aug 17 20:52:05 2013\n&quot;</computeroutput>
+<computeroutput>- : string = &quot;Sun Aug 18 14:55:36 2013\n&quot;</computeroutput>
 </programlisting>
 
     </sect2>
@@ -25154,7 +25190,7 @@ int gettimeofday(struct timeval *, struct timezone *tv);
 <userinput>  Pervasives.(float secs +. float usecs /. 1000000.0) ;;</userinput>
 <computeroutput>val gettimeofday' : unit -&gt; float = &lt;fun&gt;</computeroutput>
 <prompt># </prompt><userinput>gettimeofday' () ;;</userinput>
-<computeroutput>- : float = 1376769125.8</computeroutput>
+<computeroutput>- : float = 1376834137.14</computeroutput>
 </programlisting>
 
       <para>
@@ -25225,9 +25261,9 @@ let () =
         <para role="sourcecode">Terminal: <filename>ffi/build_datetime.out</filename></para>
 <programlisting language="console"><prompt>$ </prompt><userinput>corebuild -pkg ctypes.foreign datetime.native</userinput>
 <prompt>$ </prompt><userinput>./datetime.native</userinput>
-<computeroutput>1376768551.419366</computeroutput>
+<computeroutput>1376833554.984496</computeroutput>
 <prompt>$ </prompt><userinput>./datetime.native -a</userinput>
-<computeroutput>Sat Aug 17 20:42:31 2013</computeroutput>
+<computeroutput>Sun Aug 18 14:45:55 2013</computeroutput>
 </programlisting>
 
         <sidebar>
@@ -27352,8 +27388,8 @@ let () =
 <computeroutput>                                                                   </computeroutput>
 <computeroutput>  Name        Time (ns)       Minor   Major   Promoted   % of max  </computeroutput>
 <computeroutput> ----------- ----------- ----------- ------- ---------- ---------- </computeroutput>
-<computeroutput>  mutable     6_333_543   2_000_004    9.05       9.05     100.00  </computeroutput>
-<computeroutput>  immutable   4_842_223   5_000_005    0.03       0.03      76.45  </computeroutput>
+<computeroutput>  mutable     6_304_612   2_000_004    9.05       9.05     100.00  </computeroutput>
+<computeroutput>  immutable   4_775_718   5_000_005    0.03       0.03      75.75  </computeroutput>
 <computeroutput>                                                                   </computeroutput>
 </programlisting>
 
@@ -29892,9 +29928,9 @@ let () =
 <computeroutput>                                                     </computeroutput>
 <computeroutput>  Name                         Time (ns)   % of max  </computeroutput>
 <computeroutput> ---------------------------- ----------- ---------- </computeroutput>
-<computeroutput>  Polymorphic pattern              31.54     100.00  </computeroutput>
-<computeroutput>  Monomorphic larger pattern       29.22      92.64  </computeroutput>
-<computeroutput>  Monomorphic small pattern        16.02      50.78  </computeroutput>
+<computeroutput>  Polymorphic pattern              31.51     100.00  </computeroutput>
+<computeroutput>  Monomorphic larger pattern       29.19      92.62  </computeroutput>
+<computeroutput>  Monomorphic small pattern        16.25      51.57  </computeroutput>
 <computeroutput>                                                     </computeroutput>
 </programlisting>
 
@@ -30483,7 +30519,7 @@ let () =
 <computeroutput>                                                 </computeroutput>
 <computeroutput>  Name                     Time (ns)   % of max  </computeroutput>
 <computeroutput> ------------------------ ----------- ---------- </computeroutput>
-<computeroutput>  Polymorphic comparison      13_911     100.00  </computeroutput>
+<computeroutput>  Polymorphic comparison      13_919     100.00  </computeroutput>
 <computeroutput>  Monomorphic comparison         815       5.86  </computeroutput>
 <computeroutput>                                                 </computeroutput>
 </programlisting>
