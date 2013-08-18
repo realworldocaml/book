@@ -623,7 +623,8 @@ it to include the check on whether the first two elements are equal.
 ((typ ocamltop)(name lists-and-patterns/main.topscript)(part 44)) 
 ```
 
-<note> <title> Polymorphic compare </title>
+<sidebar>
+<title>Polymorphic compare</title>
 
 In the `destutter` example above, we made use of the fact that OCaml
 lets us test equality between values of any type, using the `=`
@@ -677,8 +678,7 @@ ordering that you want to impose.  We'll discuss this issue more, as
 well as some of the other downsides of polymorphic compare, in
 [xref](#maps-and-hash-tables).
 
-</note>
-
+</sidebar>
 
 Note that `when` clauses have some downsides.  As we noted earlier,
 the static checks associated with pattern matches rely on the fact
