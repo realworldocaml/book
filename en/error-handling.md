@@ -263,7 +263,7 @@ somewhere deep within it.
 ```
 
 If we put a `printf` in the middle of the computation, we can see that
-`List.map` is interrupted part way through it's execution, never
+`List.map` is interrupted part way through its execution, never
 getting to the end of the list.
 
 
