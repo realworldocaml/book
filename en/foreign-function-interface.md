@@ -680,7 +680,7 @@ and outputs the result to the standard output.  Again, remember to not confuse
 the `Ctypes.Array` module with the `Core.Std.Array` module: the former is in
 scope since we opened `Ctypes` at the start of the file.
 
-<note>
+<sidebar>
 <title>Lifetime of allocated Ctypes</title>
 
 Values allocated via Ctypes (_i.e._ using `allocate`, `Array.make` and so on)
@@ -714,7 +714,7 @@ to `qsort` itself.  However, other C libraries may store function pointers in
 global variables or elsewhere, in which case you'll need to take care that the
 OCaml functions you pass to them aren't prematurely garbage collected.
 
-</note>
+</sidebar>
 
 ## Learning more about C bindings
 
