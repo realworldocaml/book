@@ -6,7 +6,7 @@ programming.  There are objects, classes, and their associated types. In this
 chapter, we'll introduce you to OCaml objects and subtyping.  In the next
 chapter [xref](#classes), we'll introduce you to classes and inheritance.
 
-<note>
+<sidebar>
 <title>What is Object-Oriented Programming?</title>
 
 Object-oriented programming (often shorted to OOP) is a programming style that
@@ -41,7 +41,7 @@ Almost every notable modern programming language has been influenced
 by OOP, and you'll have run across these terms if you've ever used
 C++, Java, C#, Ruby, Python or JavaScript.
 
-</note>
+</sidebar>
 
 ## OCaml objects
 
