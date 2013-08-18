@@ -131,9 +131,9 @@ call away.
 
 `Command.run` takes a couple of optional arguments that are useful to
 identify which version of the binary you are running in production.
-Let's build the complete MD5 example first so that we can see this in
-action.  Makes sure to run `opam install cryptokit` if you didn't do
-so when reading [xref](#classes).
+You'll need to install Cryptokit via `opam install cryptokit`
+before building this example.  Once that's completed, run the following
+to compile the binary.
 
 ```frag
 ((typ ocaml)(name command-line-parsing/build_basic_md5.out))
