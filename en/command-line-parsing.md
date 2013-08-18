@@ -261,7 +261,7 @@ file is specified.
 ```
 
 The `filename` parameter to `do_hash` is now a `string option` type.
-This is resolved into an input channel via `get_file_data` to
+This is resolved into an input channel via `get_inchan` to
 determine whether to open the standard input or a file, and then the
 rest of the command is similar to our previous examples.
 
