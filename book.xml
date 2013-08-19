@@ -22922,7 +22922,7 @@ let () =
 <computeroutput>It repeats whatever I write.</computeroutput>
 </programlisting>
 
-    <note>
+    <sidebar>
     <title>
     Functions that never return
     </title>
@@ -23007,7 +23007,7 @@ let () =
       in the source that the call to <literal>loop_forever</literal>
       never returns.
     </para>
-    </note>
+    </sidebar>
     <sect2 id="improving-the-echo-server">
       <title>Improving the echo server</title>
       <para>
