@@ -14735,7 +14735,7 @@ end</programlisting>
         general, function types are contravariant in their arguments and
         covariant in their results.
       </para>
-      <note>
+      <sidebar>
       <title>
       Variance annotations
       </title>
@@ -14810,7 +14810,7 @@ end</programlisting>
 <computeroutput>- : (shape, shape) VarEither.t = &lt;abstr&gt;</computeroutput>
 </programlisting>
 
-      </note>
+      </sidebar>
       <para>
         For a more concrete example of variance, let's create some
         stacks containing shapes by applying our
@@ -16998,7 +16998,7 @@ let touch t s =
         comparator associated with a given type will order things in the
         same way that polymorphic compare does.
       </para>
-      <note>
+      <sidebar>
       <title> 
       <literal>=</literal>, <literal>==</literal>, and
       <literal>phys_equal</literal>
@@ -17064,7 +17064,7 @@ and t2 = { foo2 : int; bar2 : t1; }</computeroutput>
 <computeroutput>&lt;press ^Z and kill the process now&gt;</computeroutput>
 </programlisting>
 
-      </note>
+      </sidebar>
     </sect2>
     <sect2 id="sets">
       <title>Sets</title>
