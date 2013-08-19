@@ -4859,7 +4859,8 @@ let () =
 <computeroutput>val destutter : 'a list -&gt; 'a list = &lt;fun&gt;</computeroutput>
 </programlisting>
 
-    <note> <title> 
+    <sidebar>
+    <title>
     Polymorphic compare
     </title>
     <para>
@@ -4933,8 +4934,7 @@ let () =
       polymorphic compare, in
       <xref linkend="maps-and-hash-tables"/>.
     </para>
-    </note>
-
+    </sidebar>
     <para>
       Note that <literal>when</literal> clauses have some downsides. As
       we noted earlier, the static checks associated with pattern
@@ -14140,7 +14140,7 @@ end</programlisting>
     <xref linkend="classes"/>, we'll introduce you to classes
     and inheritance.
   </para>
-  <note>
+  <sidebar>
   <title>
   What is Object-Oriented Programming?
   </title>
@@ -14209,7 +14209,7 @@ end</programlisting>
     by OOP, and you'll have run across these terms if you've ever used
     C++, Java, C#, Ruby, Python or JavaScript.
   </para>
-  </note>
+  </sidebar>
   <sect1 id="ocaml-objects">
     <title>OCaml objects</title>
     <para>
@@ -17942,10 +17942,10 @@ let do_hash file =
       <para>
         <literal>Command.run</literal> takes a couple of optional
         arguments that are useful to identify which version of the
-        binary you are running in production. Let's build the complete
-        MD5 example first so that we can see this in action. Makes sure
-        to run <literal>opam install cryptokit</literal> if you didn't
-        do so when reading <xref linkend="classes"/>.
+        binary you are running in production. You'll need to install
+        Cryptokit via <literal>opam install cryptokit</literal> before
+        building this example. Once that's completed, run the following
+        to compile the binary.
       </para>
       <para role="sourcecode">Terminal: <filename>command-line-parsing/build_basic_md5.out</filename></para>
 <programlisting language="console"><prompt>$ </prompt><userinput>corebuild -pkg cryptokit basic_md5.native</userinput>
@@ -18302,7 +18302,7 @@ let () =
         The <literal>filename</literal> parameter to
         <literal>do_hash</literal> is now a
         <literal>string option</literal> type. This is resolved into an
-        input channel via <literal>get_file_data</literal> to determine
+        input channel via <literal>get_inchan</literal> to determine
         whether to open the standard input or a file, and then the rest
         of the command is similar to our previous examples.
       </para>
@@ -25639,7 +25639,7 @@ val sort_stdin : unit -&gt; unit</programlisting>
         since we opened <literal>Ctypes</literal> at the start of the
         file.
       </para>
-      <note>
+      <sidebar>
       <title>
       Lifetime of allocated Ctypes
       </title>
@@ -25687,7 +25687,7 @@ val sort_stdin : unit -&gt; unit</programlisting>
         which case you'll need to take care that the OCaml functions you
         pass to them aren't prematurely garbage collected.
       </para>
-      </note>
+      </sidebar>
     </sect2>
   </sect1>
   <sect1 id="learning-more-about-c-bindings">
@@ -30837,22 +30837,22 @@ let () =
         <para role="sourcecode">Terminal: <filename>back-end/perf_record.out</filename></para>
 <programlisting language="console"><prompt>$ </prompt><userinput>perf record -g ./barrier_bench.native</userinput>
 <computeroutput>Estimated testing time 20s (change using -quota SECS).</computeroutput>
-<computeroutput>┌───────────┬───────────┬─────────────────────┬────────────┐</computeroutput>
-<computeroutput>│ Name      │ Time (ns) │           Time 95ci │ Percentage │</computeroutput>
-<computeroutput>├───────────┼───────────┼─────────────────────┼────────────┤</computeroutput>
-<computeroutput>│ mutable   │ 7_306_219 │ 7_250_234-7_372_469 │      96.83 │</computeroutput>
-<computeroutput>│ immutable │ 7_545_126 │ 7_537_837-7_551_193 │     100.00 │</computeroutput>
-<computeroutput>└───────────┴───────────┴─────────────────────┴────────────┘</computeroutput>
+<computeroutput> </computeroutput>
+<computeroutput>  Name        Time (ns)             Time 95ci   Percentage</computeroutput>
+<computeroutput>  ----        ---------             ---------   ----------</computeroutput>
+<computeroutput>  mutable     7_306_219   7_250_234-7_372_469        96.83</computeroutput>
+<computeroutput>  immutable   7_545_126   7_537_837-7_551_193       100.00</computeroutput>
+<computeroutput> </computeroutput>
 <computeroutput>[ perf record: Woken up 11 times to write data ]</computeroutput>
 <computeroutput>[ perf record: Captured and wrote 2.722 MB perf.data (~118926 samples) ]</computeroutput>
 <computeroutput>perf record -g ./barrier.native</computeroutput>
 <computeroutput>Estimated testing time 20s (change using -quota SECS).</computeroutput>
-<computeroutput>┌───────────┬───────────┬─────────────────────┬────────────┐</computeroutput>
-<computeroutput>│ Name      │ Time (ns) │           Time 95ci │ Percentage │</computeroutput>
-<computeroutput>├───────────┼───────────┼─────────────────────┼────────────┤</computeroutput>
-<computeroutput>│ mutable   │ 7_306_219 │ 7_250_234-7_372_469 │      96.83 │</computeroutput>
-<computeroutput>│ immutable │ 7_545_126 │ 7_537_837-7_551_193 │     100.00 │</computeroutput>
-<computeroutput>└───────────┴───────────┴─────────────────────┴────────────┘</computeroutput>
+<computeroutput> </computeroutput>
+<computeroutput>  Name        Time (ns)             Time 95ci   Percentage</computeroutput>
+<computeroutput>  ----        ---------             ---------   ----------</computeroutput>
+<computeroutput>  mutable     7_306_219   7_250_234-7_372_469        96.83</computeroutput>
+<computeroutput>  immutable   7_545_126   7_537_837-7_551_193       100.00</computeroutput>
+<computeroutput> </computeroutput>
 <computeroutput>[ perf record: Woken up 11 times to write data ]</computeroutput>
 <computeroutput>[ perf record: Captured and wrote 2.722 MB perf.data (~118926 samples) ]</computeroutput>
 </programlisting>
@@ -30863,9 +30863,9 @@ let () =
         </para>
         <para role="sourcecode">Terminal: <filename>back-end/perf_report.out</filename></para>
 <programlisting language="console"><prompt>$ </prompt><userinput>perf report -g</userinput>
-<computeroutput>+  48.86%  barrier.native  barrier.native     [.] camlBarrier__test_immutable_69282</computeroutput>
-<computeroutput>+  30.22%  barrier.native  barrier.native     [.] camlBarrier__test_mutable_69279</computeroutput>
-<computeroutput>+  20.22%  barrier.native  barrier.native     [.] caml_modify</computeroutput>
+<computeroutput>+  48.86%  barrier.native  barrier.native  [.] camlBarrier__test_immutable_69282</computeroutput>
+<computeroutput>+  30.22%  barrier.native  barrier.native  [.] camlBarrier__test_mutable_69279</computeroutput>
+<computeroutput>+  20.22%  barrier.native  barrier.native  [.] caml_modify</computeroutput>
 </programlisting>
 
         <para>
