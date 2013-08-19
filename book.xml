@@ -11115,7 +11115,7 @@ let () =
 <computeroutput>         int</computeroutput>
 </programlisting>
 
-      <note> <title> 
+      <sidebar> <title> 
       Understanding format strings
       </title>
       <para>
@@ -11175,7 +11175,7 @@ let () =
         it's useful to keep the broad outlines of the story in the back
         of your head.
       </para>
-      </note>
+      </sidebar>
       <para>
         Now let's see how we can rewrite our time conversion program to
         be a little more concise using <literal>printf</literal>.
@@ -13193,7 +13193,7 @@ include Foldable.Extend(Fqueue)</programlisting>
 <computeroutput>- : int = 3</computeroutput>
 </programlisting>
 
-    <note> <title> 
+    <sidebar> <title> 
     Equality of first-class module types
     </title>
     <para>
@@ -13237,7 +13237,7 @@ include Foldable.Extend(Fqueue)</programlisting>
       module type. To deal with this, one should be disciplined in how
       one refers to signatures when constructing first-class modules.
     </para>
-    </note>
+    </sidebar>
     <para>
       We can also write ordinary functions which consume and create
       first class modules. The following shows the definition of two
@@ -26198,8 +26198,8 @@ val sort_stdin : unit -&gt; unit</programlisting>
         obvious, although it drops a single bit of precision due to the
         tag bit. Other atomic types such as <literal>unit</literal> and
         empty list <literal>[]</literal> value are stored as constant
-        integers. Boolean values have a value of <literal>0</literal>
-        and <literal>1</literal> for <literal>true</literal> and
+        integers. Boolean values have a value of <literal>1</literal>
+        and <literal>0</literal> for <literal>true</literal> and
         <literal>false</literal> respectively.
       </para>
       <para>
@@ -27009,12 +27009,14 @@ val sort_stdin : unit -&gt; unit</programlisting>
         size).
       </para>
       <para>
-        If you anticipate allocating some large OCaml values, then
-        setting the heap increment to a larger value will let the
-        operating system return a contiguous block of memory. This is
-        preferable to lots of smaller heap chunks that may be spread
-        across different regions of virtual memory, and require more
-        housekeeping in the OCaml runtime to keep track of them.
+        If you anticipate allocating some large OCaml values or many
+        small values in one go, then setting the heap increment to a
+        larger value will improve performance by reducing the amount of
+        heap resizing required in order to satisfy the allocation
+        requiests. A small increment may result in lots of smaller heap
+        chunks spread across different regions of virtual memory that
+        require more housekeeping in the OCaml runtime to keep track of
+        them.
       </para>
       <para role="sourcecode">OCaml Utop: <filename>gc/tune.topscript</filename> (part 1)</para>
 <programlisting language="ocaml"><prompt># </prompt><userinput>Gc.tune ~major_heap_increment:(1000448 * 4) () ;;</userinput>
