@@ -28236,7 +28236,8 @@ type t = {
       Sexplib, and everything will compile again.
     </para>
     <para role="sourcecode">Terminal: <filename>front-end/build_type_conv_with_camlp4.out</filename></para>
-<programlisting language="console"><prompt>$ </prompt><userinput>ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax -package fieldslib.syntax type_conv_example.ml</userinput>
+<programlisting language="console"><prompt>$ </prompt><userinput>ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \</userinput>
+<computeroutput>    -package fieldslib.syntax type_conv_example.ml</computeroutput>
 </programlisting>
 
     <para>
@@ -30240,7 +30241,8 @@ main (int argc, char **argv)
         binary using <command>gcc</command> to test this out.
       </para>
       <para role="sourcecode">Terminal: <filename>back-end-embed/build_embed_binary.out</filename></para>
-<programlisting language="console"><prompt>$ </prompt><userinput>gcc -fPIC -Wall -I`ocamlc -where` -L`ocamlc -where` -ltermcap -lm -ldl -o finalbc.native main.c embed_out.o -lcamlrun</userinput>
+<programlisting language="console"><prompt>$ </prompt><userinput>gcc -fPIC -Wall -I`ocamlc -where` -L`ocamlc -where` -ltermcap -lm -ldl \</userinput>
+<computeroutput>  -o finalbc.native main.c embed_out.o -lcamlrun</computeroutput>
 <prompt>$ </prompt><userinput>./finalbc.native</userinput>
 <computeroutput>Before calling OCaml</computeroutput>
 <computeroutput>hello embedded world 1</computeroutput>
@@ -30947,7 +30949,8 @@ let () =
       </para>
       <para role="sourcecode">Terminal: <filename>back-end-embed/build_embed_native.out</filename></para>
 <programlisting language="console"><prompt>$ </prompt><userinput>ocamlopt -output-obj -o embed_native.o embed_me1.ml embed_me2.ml</userinput>
-<prompt>$ </prompt><userinput>gcc -Wall -I `ocamlc -where` -o final.native embed_native.o main.c -L `ocamlc -where` -lasmrun -ltermcap -lm -ldl</userinput>
+<prompt>$ </prompt><userinput>gcc -Wall -I `ocamlc -where` -o final.native embed_native.o main.c \</userinput>
+<computeroutput>   -L `ocamlc -where` -lasmrun -ltermcap -lm -ldl</computeroutput>
 <prompt>$ </prompt><userinput>./final.native</userinput>
 <computeroutput>Before calling OCaml</computeroutput>
 <computeroutput>hello embedded world 1</computeroutput>
