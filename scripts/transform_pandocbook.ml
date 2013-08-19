@@ -158,12 +158,12 @@ let apply_transform parts_file book public plsubst =
     let parts = Sexp.load_sexps_conv_exn parts_file chapter_of_sexp in
     Xmlm.make_input (`Channel (open_in book))
     |> Xml_tree.in_tree
-    |> fun (_dtd, t) ->    Transform.rewrite_linkend t
+    |> fun (dtd, t) ->    Transform.rewrite_linkend t
                        |> Transform.add_parts public parts
                        |> fun d ->
                           (if plsubst then Transform.rewrite_programlisting [d]
                            else [d])
-                       |> fun t -> print_endline (Cow.Xml.to_string t)
+                       |> fun t -> print_endline (Option.value_exn dtd); print_endline (Cow.Xml.to_string t)
   with Xmlm.Error ((line,col),e) -> (
       Printf.eprintf "ERROR: [%d,%d] %s\n%!" line col (Xmlm.error_message e);
       exit 1)
