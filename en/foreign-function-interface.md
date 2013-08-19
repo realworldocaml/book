@@ -414,10 +414,10 @@ on from the previous definitions.
 ```
 
 The first command defines a new OCaml type `timeval` that we'll use to
-instantiate the OCaml version of the `struct`. Creating a new OCaml type to
-reflect the underlying C type in this way means that the structure we define
-will be distinct from other structures we define elsewhere, which helps to
-avoid getting them mixed up.
+instantiate the OCaml version of the struct. This is a _phantom type_ that
+exists only to distinguish the underlying C type from other pointer types.  The
+particular `timeval` structure now has a distinct type from other structures we
+define elsewhere, which helps to avoid getting them mixed up.
 
 The second command calls `structure` to create a fresh structure type.  At this
 point the structure type is incomplete: we can add fields but cannot yet use it
