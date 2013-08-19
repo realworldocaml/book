@@ -105,9 +105,6 @@ let console file =
         let dollar = "$" in
         (<:xml<<prompt>$str:dollar$ </prompt><userinput>$str:rest$</userinput>
 >>) :: acc
-      ) else if String.is_suffix ~suffix:" \\" line then (
-        (<:xml<<userinput>$str:line$</userinput>
->>) :: acc
       ) else (<:xml<<computeroutput>$str:line$</computeroutput>
 >>) :: acc
     ))) in
