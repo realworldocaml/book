@@ -221,7 +221,7 @@ This is rejected for good reason: there's no guarantee that the
 comparator associated with a given type will order things in the same
 way that polymorphic compare does.
 
-<note>
+<sidebar>
 <title> `=`, `==`, and `phys_equal` </title>
 
 If you come from a C/C++ background, you'll probably reflexively use
@@ -258,7 +258,7 @@ happens with recursive values and structural equality for yourself:
 ((typ ocamlrawtop)(name maps-and-hash-tables/phys_equal.rawscript))
 ```
 
-</note>
+</sidebar>
 
 ### Sets
 
