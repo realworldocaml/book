@@ -196,8 +196,8 @@ records or arrays, all float       special tag for unboxed arrays of floats, or 
 Many basic types are efficiently stored as unboxed integers at runtime.  The
 native `int` type is the most obvious, although it drops a single bit of
 precision due to the tag bit. Other atomic types such as `unit` and empty list
-`[]` value are stored as constant integers.  Boolean values have a value of `0`
-and `1` for `true` and `false` respectively.
+`[]` value are stored as constant integers.  Boolean values have a value of `1`
+and `0` for `true` and `false` respectively.
 
 These basic types such as empty lists and `unit` are very efficient to use
 since integers are never allocated on the heap.  They can be passed directly in
