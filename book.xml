@@ -25090,11 +25090,12 @@ int gettimeofday(struct timeval *, struct timezone *tv);
       <para>
         The first command defines a new OCaml type
         <literal>timeval</literal> that we'll use to instantiate the
-        OCaml version of the <literal>struct</literal>. Creating a new
-        OCaml type to reflect the underlying C type in this way means
-        that the structure we define will be distinct from other
-        structures we define elsewhere, which helps to avoid getting
-        them mixed up.
+        OCaml version of the struct. This is a <emphasis>phantom
+        type</emphasis> that exists only to distinguish the underlying C
+        type from other pointer types. The particular
+        <literal>timeval</literal> structure now has a distinct type
+        from other structures we define elsewhere, which helps to avoid
+        getting them mixed up.
       </para>
       <para>
         The second command calls <literal>structure</literal> to create
