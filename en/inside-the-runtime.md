@@ -196,13 +196,14 @@ The `Gc` module uses the `major_heap_increment` value to control the major heap
 growth.  This defines the number of words to add to the major heap per
 expansion, and is the only memory allocation operation that the operating
 system observes from the OCaml runtime after initial startup (since the minor
-is fixed in size).  
+is fixed in size).
 
-If you anticipate allocating some large OCaml values, then setting the heap
-increment to a larger value will let the operating system return a contiguous
-block of memory.  This is preferable to lots of smaller heap chunks that may be
-spread across different regions of virtual memory, and require more
-housekeeping in the OCaml runtime to keep track of them.
+If you anticipate allocating some large OCaml values or many small values in
+one go, then setting the heap increment to a larger value will improve
+performance by reducing the amount of heap resizing required in order to
+satisfy the allocation requiests.  A small increment may result in lots of
+smaller heap chunks spread across different regions of virtual memory that
+require more housekeeping in the OCaml runtime to keep track of them.
 
 ```frag
 ((typ ocamltop)(name gc/tune.topscript)(part 1))
