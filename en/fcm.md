@@ -79,7 +79,7 @@ And here's an example.
 ((typ ocamltop)(name fcm/main.topscript)(part 5))
 ```
 
-<note> <title> Equality of first-class module types </title>
+<sidebar> <title> Equality of first-class module types </title>
 
 The type of the first-class module, _e.g._, `(module X_int)`, is based
 on the fully-qualified name of the signature that was used to
@@ -110,7 +110,7 @@ those built off of the original module type.  To deal with this, one
 should be disciplined in how one refers to signatures when
 constructing first-class modules.
 
-</note>
+</sidebar>
 
 We can also write ordinary functions which consume and create first
 class modules.  The following shows the definition of two functions:
