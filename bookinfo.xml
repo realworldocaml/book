@@ -1,24 +1,26 @@
-<!DOCTYPE bookinfo PUBLIC '-//OASIS//DTD DocBook XML V4.5//EN' 'http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd'><bookinfo>
+<?xml version="1.0"?>
+<!DOCTYPE bookinfo PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<bookinfo>
 
   <subtitle>Functional Programming for the Masses</subtitle>
 
-  <othercredit role='contributor'>
+  <othercredit role="contributor">
     <firstname>Leo</firstname>
     <surname>White</surname>
   </othercredit>
-  <othercredit role='interiordesigner'>
+  <othercredit role="interiordesigner">
     <firstname>FIX</firstname>
     <surname>ME!</surname>
   </othercredit>
-  <othercredit role='illustrator'>
+  <othercredit role="illustrator">
     <firstname>Robert</firstname>
     <surname>Romano</surname>
   </othercredit>
 
   <!-- All rights reserved. -->
   <publisher>
-    <publishername>O&#x2019;Reilly Media, Inc.    </publishername>
-    <address format='linespecific'>
+    <publishername>O’Reilly Media, Inc.    </publishername>
+    <address format="linespecific">
       <street>1005 Gravenstein Highway North</street>
       <city>Sebastopol</city>
       <state>CA</state>
@@ -26,37 +28,37 @@
     </address>
   </publisher>
 
-  <legalnotice role='printlocation'>
+  <legalnotice role="printlocation">
     <para>Printed in the United States of America.</para>
   </legalnotice>
 
-  <legalnotice role='printer'>
+  <legalnotice role="printer">
     <para>[?]</para>
   </legalnotice>
 
-  <legalnotice role='use'>
-    <para>O&#x2019;Reilly books may be purchased for educational, business, or sales promotional use. Online editions are also available for most 
-          titles (<ulink role='orm:hideurl:ital' url='http://my.safaribooksonline.com/?portal=oreilly'>http://my.safaribooksonline.com</ulink>). For more information, contact our corporate/institutional sales department:
+  <legalnotice role="use">
+    <para>O’Reilly books may be purchased for educational, business, or sales promotional use. Online editions are also available for most 
+          titles (<ulink role="orm:hideurl:ital" url="http://my.safaribooksonline.com/?portal=oreilly">http://my.safaribooksonline.com</ulink>). For more information, contact our corporate/institutional sales department:
           (800) 998-9938 or <email>corporate@oreilly.com</email>.  </para>
   </legalnotice>
 
-  <legalnotice role='trademarks'>
-    <para>Nutshell Handbook, the Nutshell Handbook logo, and the O&#x2019;Reilly logo
-          are registered trademarks of O&#x2019;Reilly Media, Inc. !!FILL THIS IN!!
-          and related trade dress are trademarks of O&#x2019;Reilly Media, Inc.    </para>
+  <legalnotice role="trademarks">
+    <para>Nutshell Handbook, the Nutshell Handbook logo, and the O’Reilly logo
+          are registered trademarks of O’Reilly Media, Inc. !!FILL THIS IN!!
+          and related trade dress are trademarks of O’Reilly Media, Inc.    </para>
     <para>Many of the designations used by manufacturers and sellers to distinguish
           their products are claimed as trademarks. Where those designations appear
-          in this book, and O&#x2019;Reilly Media, Inc. was aware of a trademark claim,
+          in this book, and O’Reilly Media, Inc. was aware of a trademark claim,
           the designations have been printed in caps or initial caps.    </para>
   </legalnotice>
 
-  <legalnotice role='damages'>
+  <legalnotice role="damages">
     <para>While every precaution has been taken in the preparation of this book,
         the publisher and authors assume no responsibility for errors or omissions, 
         or for damages resulting from the use of the information contained herein.</para>
   </legalnotice>
 <isbn>9781449323912</isbn><edition>1</edition>
-<author><firstname>Yaron</firstname><surname>Minsky</surname><authorblurb><para>Yaron Minsky heads the Technology group at Jane Street, a proprietary trading firm that is the largest industrial user of OCaml. He was responsible for introducing OCaml to the company and for managing the company&apos;s transition to using OCaml for all of its core infrastructure. Today, billions of dollars worth of securities transactions  ow each day through those systems.  Yaron obtained his PhD in Computer Science from Cornell University, where he studied distributed systems. Yaron has lectured, blogged and written about OCaml for years, with articles published in Communications of the ACM and the Journal of Functional Programming. He chairs the steering committee of the Commercial Users of Functional Programming, and is a member of the steering committee for the International Conference on Functional Programming.</para></authorblurb></author>
+<author><firstname>Yaron</firstname><surname>Minsky</surname><authorblurb><para>Yaron Minsky heads the Technology group at Jane Street, a proprietary trading firm that is the largest industrial user of OCaml. He was responsible for introducing OCaml to the company and for managing the company's transition to using OCaml for all of its core infrastructure. Today, billions of dollars worth of securities transactions  ow each day through those systems.  Yaron obtained his PhD in Computer Science from Cornell University, where he studied distributed systems. Yaron has lectured, blogged and written about OCaml for years, with articles published in Communications of the ACM and the Journal of Functional Programming. He chairs the steering committee of the Commercial Users of Functional Programming, and is a member of the steering committee for the International Conference on Functional Programming.</para></authorblurb></author>
 <author><firstname>Anil</firstname><surname>Madhavapeddy</surname><authorblurb><para>
 Anil Madhavapeddy is a Senior Research Fellow at the University of Cambridge,
 based in the Systems Research Group. He was on the original team that developed
@@ -88,4 +90,4 @@ large software systems; and OMake, an advanced build system for large software
 projects.  He is the author of the textbook, _An Introduction to Objective
 Caml_ (unpublished).
 </para></authorblurb></author>
-<editor><firstname>Andy</firstname><surname>Oram</surname></editor><copyright><year>2013</year><holder>O&#x2019;Reilly Media    </holder></copyright><editor role='production'><firstname/><surname/></editor><editor role='copy'><firstname/><surname/></editor><othercredit role='indexer'><firstname/><surname/></othercredit><othercredit role='coverdesigner'><firstname/><surname/></othercredit><printhistory><formalpara><title>First Edition</title><para>September, 2013</para></formalpara></printhistory><revhistory><revision><date>YYYY-MM-DD</date><revremark>First release</revremark></revision></revhistory></bookinfo>
+<editor><firstname>Andy</firstname><surname>Oram</surname></editor><copyright><year>2013</year><holder>O’Reilly Media    </holder></copyright><editor role="production"><firstname/><surname/></editor><editor role="copy"><firstname/><surname/></editor><othercredit role="indexer"><firstname/><surname/></othercredit><othercredit role="coverdesigner"><firstname/><surname/></othercredit><printhistory><formalpara><title>First Edition</title><para>September, 2013</para></formalpara></printhistory><revhistory><revision><date>YYYY-MM-DD</date><revremark>First release</revremark></revision></revhistory></bookinfo>

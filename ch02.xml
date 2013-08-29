@@ -1,0 +1,1684 @@
+<?xml version="1.0"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<chapter id="variables-and-functions">
+      <title>Variables and Functions</title>
+
+      <para>Variables and functions are fundamental ideas that show up in
+      virtually all programming languages. OCaml has a different take on these
+      concepts than most languages you're liketly to have encountered, so this
+      chapter will cover OCaml's approach to variables and functions in some
+      detail, starting with the basics of how to define a variable, and ending
+      with the intricacies of functions with labeled and optional
+      arguments.</para>
+
+      <para>Don't be discouraged if you find yourself overwhelmed by some of
+      the details, especially towards the end of the chapter. The concepts
+      here are important, but if they don't connect for you on your first
+      read, you should return to this chapter after you've gotten a better
+      sense for the language and fill in your understanding.</para>
+
+      <sect1 id="variables">
+        <title>Variables</title>
+
+        <para>At its simplest, a variable is an identifier whose meaning is
+        bound to a particular value. In OCaml these bindings are often
+        introduced using the <literal moreinfo="none">let</literal> keyword. We can type a
+        so-called <emphasis>top-level</emphasis> <literal moreinfo="none">let</literal>
+        binding with the following syntax. Note that variable names must start
+        with a lowercase letter or an underscore.</para>
+
+        <para role="sourcecode">Syntax:
+        <filename moreinfo="none">variables-and-functions/let.syntax</filename></para>
+
+        <programlisting language="" format="linespecific">let &lt;variable&gt; = &lt;expr&gt;
+</programlisting>
+
+        <para>As we'll see when we get to the module system in <xref linkend="files-modules-and-programs"/>, this same syntax is used for
+        let bindings at the top-level of a module.</para>
+
+        <para>Every variable binding has a <emphasis>scope</emphasis>, which
+        is the portion of the code that can refer to that binding. When using
+        <command moreinfo="none">utop</command>, the scope of a top-level let binding is
+        everything that follows it in the session. When it shows up in a
+        module, the scope is the remainder of that module.</para>
+
+        <para>Here's a simple example.</para>
+
+        <para role="sourcecode">OCaml Utop:
+        <filename moreinfo="none">variables-and-functions/main.topscript</filename></para>
+
+        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let x = 3;;</userinput>
+<computeroutput moreinfo="none">val x : int = 3</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">let y = 4;;</userinput>
+<computeroutput moreinfo="none">val y : int = 4</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">let z = x + y;;</userinput>
+<computeroutput moreinfo="none">val z : int = 7</computeroutput>
+</programlisting>
+
+        <para><literal moreinfo="none">let</literal> can also be used to create a variable
+        binding whose scope is limited to a particular expression, using the
+        following syntax.</para>
+
+        <para role="sourcecode">Syntax:
+        <filename moreinfo="none">variables-and-functions/let_in.syntax</filename></para>
+
+        <programlisting language="" format="linespecific">let &lt;variable&gt; = &lt;expr1&gt; in &lt;expr2&gt;
+</programlisting>
+
+        <para>This first evaluates
+        <emphasis><literal moreinfo="none">&lt;expr1&gt;</literal></emphasis> and then
+        evaluates <emphasis><literal moreinfo="none">&lt;expr2&gt;</literal></emphasis> with
+        <emphasis><literal moreinfo="none">&lt;variable&gt;</literal></emphasis> bound to
+        whatever value was produced by the evaluation of
+        <emphasis><literal moreinfo="none">&lt;expr1&gt;</literal></emphasis>. Here's how it
+        looks in practice.</para>
+
+        <para role="sourcecode">OCaml Utop:
+        <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+        1)</para>
+
+        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let languages = "OCaml,Perl,C++,C";;</userinput>
+<computeroutput moreinfo="none">val languages : string = "OCaml,Perl,C++,C"</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">let dashed_languages =</userinput>
+<userinput moreinfo="none">    let language_list = String.split languages ~on:',' in</userinput>
+<userinput moreinfo="none">    String.concat ~sep:"-" language_list</userinput>
+<userinput moreinfo="none">  ;;</userinput>
+<computeroutput moreinfo="none">val dashed_languages : string = "OCaml-Perl-C++-C"</computeroutput>
+</programlisting>
+
+        <para>Note that the scope of <literal moreinfo="none">language_list</literal> is just
+        the expression <literal moreinfo="none">String.concat ~sep:"-"
+        language_list</literal>, and is not available at the top level, as we
+        can see if we try to access it now.</para>
+
+        <para role="sourcecode">OCaml Utop:
+        <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+        2)</para>
+
+        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">language_list;;</userinput>
+<computeroutput moreinfo="none">Characters -1-13:</computeroutput>
+<computeroutput moreinfo="none">Error: Unbound value language_list</computeroutput>
+</programlisting>
+
+        <para>A let binding in an inner scope can <emphasis>shadow</emphasis>,
+        or hide, the definition from an outer scope. So, for example, we could
+        have written the <literal moreinfo="none">dashed_languages</literal> example as
+        follows:</para>
+
+        <para role="sourcecode">OCaml Utop:
+        <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+        3)</para>
+
+        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let languages = "OCaml,Perl,C++,C";;</userinput>
+<computeroutput moreinfo="none">val languages : string = "OCaml,Perl,C++,C"</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">let dashed_languages =</userinput>
+<userinput moreinfo="none">     let languages = String.split languages ~on:',' in</userinput>
+<userinput moreinfo="none">     String.concat ~sep:"-" languages</userinput>
+<userinput moreinfo="none">  ;;</userinput>
+<computeroutput moreinfo="none">val dashed_languages : string = "OCaml-Perl-C++-C"</computeroutput>
+</programlisting>
+
+        <para>This time, in the inner scope we called the list of strings
+        <literal moreinfo="none">languages</literal> instead of
+        <literal moreinfo="none">language_list</literal>, thus hiding the original definition
+        of <literal moreinfo="none">languages</literal>. But once the definition of
+        <literal moreinfo="none">dashed_languages</literal> is complete, the inner scope has
+        closed and the original definition of languages reappears.</para>
+
+        <para role="sourcecode">OCaml Utop:
+        <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+        4)</para>
+
+        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">languages;;</userinput>
+<computeroutput moreinfo="none">- : string = "OCaml,Perl,C++,C"</computeroutput>
+</programlisting>
+
+        <para>One common idiom is to use a series of nested
+        <literal moreinfo="none">let</literal>/<literal moreinfo="none">in</literal> expressions to build up
+        the components of a larger computation. Thus, we might write:</para>
+
+        <para role="sourcecode">OCaml Utop:
+        <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+        5)</para>
+
+        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let area_of_ring inner_radius outer_radius =</userinput>
+<userinput moreinfo="none">     let pi = acos (-1.) in</userinput>
+<userinput moreinfo="none">     let area_of_circle r = pi *. r *. r in</userinput>
+<userinput moreinfo="none">     area_of_circle outer_radius -. area_of_circle inner_radius</userinput>
+<userinput moreinfo="none">  ;;</userinput>
+<computeroutput moreinfo="none">val area_of_ring : float -&gt; float -&gt; float = &lt;fun&gt;</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">area_of_ring 1. 3.;;</userinput>
+<computeroutput moreinfo="none">- : float = 25.1327412287</computeroutput>
+</programlisting>
+
+        <para>It's important not to confuse a sequence of let bindings with
+        the modification of a mutable variable. For example, consider how
+        <literal moreinfo="none">area_of_ring</literal> would work if we had instead written
+        this purposefully confusing bit of code.</para>
+
+        <para role="sourcecode">OCaml Utop:
+        <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+        6)</para>
+
+        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let area_of_ring inner_radius outer_radius =</userinput>
+<userinput moreinfo="none">     let pi = acos (-1.) in</userinput>
+<userinput moreinfo="none">     let area_of_circle r = pi *. r *. r in</userinput>
+<userinput moreinfo="none">     let pi = 0. in</userinput>
+<userinput moreinfo="none">     area_of_circle outer_radius -. area_of_circle inner_radius</userinput>
+<userinput moreinfo="none">  ;;</userinput>
+<computeroutput moreinfo="none">Characters 126-128:</computeroutput>
+<computeroutput moreinfo="none">Warning 26: unused variable pi.</computeroutput>
+<computeroutput moreinfo="none">val area_of_ring : float -&gt; float -&gt; float = &lt;fun&gt;</computeroutput>
+</programlisting>
+
+        <para>Here, we redefined <literal moreinfo="none">pi</literal> to be zero after the
+        definition of <literal moreinfo="none">area_of_circle</literal>. You might think that
+        this would mean that the result of the computation would now be zero,
+        but in fact, the behavior of the function is unchanged. That's because
+        the original definition of <literal moreinfo="none">pi</literal> wasn't changed, it
+        was just shadowed, which means that any subsequent reference to
+        <literal moreinfo="none">pi</literal> would see the new definition of
+        <literal moreinfo="none">pi</literal> as zero, but earlier references would be
+        unchanged. But there is no later use of <literal moreinfo="none">pi</literal>, so the
+        binding of <literal moreinfo="none">0.</literal> to <literal moreinfo="none">pi</literal> made no
+        difference. This explains the warning produced by the toplevel telling
+        us that there is an unused definition of <literal moreinfo="none">pi</literal>.</para>
+
+        <para>In OCaml, let bindings are immutable. There are many kinds of
+        mutable values in OCaml, which we'll discuss in <xref linkend="imperative-programming-1"/>, but there are no mutable
+        variables.</para>
+
+        <note>
+          <title>Why don't variables vary?</title>
+
+          <para>One source of confusion for people new to OCaml is the fact
+          that variables are immutable. This seems pretty surprising even on
+          linguistic terms. Isn't the whole point of a variable that it can
+          vary?</para>
+
+          <para>The answer to this is that variables in OCaml (and generally
+          in functional languages) are really more like variables in an
+          equation than a variable in an imperative language. If you think
+          about the mathematical equation <literal moreinfo="none">x(y + z) = xy +
+          xz</literal>, there's no notion of mutating the variables
+          <literal moreinfo="none">x</literal>, <literal moreinfo="none">y</literal> and <literal moreinfo="none">z</literal>.
+          They vary in the sense that you can instantiate this equation with
+          different numbers for those variables, and it still holds.</para>
+
+          <para>The same is true in a functional language. A function can be
+          applied to different inputs, and thus its variables will take on
+          different values, even without mutation.</para>
+        </note>
+
+        <sect2 id="pattern-matching-and-let">
+          <title>Pattern matching and <literal moreinfo="none">let</literal></title>
+
+          <para>Another useful feature of let bindings is that they support
+          the use of <emphasis>patterns</emphasis> on the left-hand side.
+          Consider the following code, which uses
+          <literal moreinfo="none">List.unzip</literal>, a function for converting a list of
+          pairs into a pair of lists.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          7)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let (ints,strings) = List.unzip [(1,"one"); (2,"two"); (3,"three")];;</userinput>
+<computeroutput moreinfo="none">val ints : int list = [1; 2; 3]</computeroutput>
+<computeroutput moreinfo="none">val strings : string list = ["one"; "two"; "three"]</computeroutput>
+</programlisting>
+
+          <para>Here, <literal moreinfo="none">(ints,strings)</literal> is a pattern, and the
+          <literal moreinfo="none">let</literal> binding assigns values to both of the
+          identifiers that show up in that pattern. A pattern is essentially a
+          description of the shape of a data-structure, where some components
+          are identifiers to be bound. As we saw in <xref linkend="tuples-lists-options-and-pattern-matching"/>, OCaml has
+          patterns for a variety of different data-types.</para>
+
+          <para>Using a pattern in a let-binding makes the most sense for a
+          pattern that is <emphasis>irrefutable</emphasis>,
+          <emphasis>i.e.</emphasis>, where any value of the type in question
+          is guaranteed to match the pattern. Tuple and record patterns are
+          irrefutable, but list patterns are not. Consider the following code
+          that implements a function for up-casing the first element of a
+          comma-separated list.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          8)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let upcase_first_entry line =</userinput>
+<userinput moreinfo="none">     let (first :: rest) = String.split ~on:',' line in</userinput>
+<userinput moreinfo="none">     String.concat ~sep:"," (String.uppercase first :: rest)</userinput>
+<userinput moreinfo="none">  ;;</userinput>
+<computeroutput moreinfo="none">Characters 40-53:</computeroutput>
+<computeroutput moreinfo="none">Warning 8: this pattern-matching is not exhaustive.</computeroutput>
+<computeroutput moreinfo="none">Here is an example of a value that is not matched:</computeroutput>
+<computeroutput moreinfo="none">[]</computeroutput>
+<computeroutput moreinfo="none">val upcase_first_entry : string -&gt; string = &lt;fun&gt;</computeroutput>
+</programlisting>
+
+          <para>This case can't really come up in practice, because
+          <literal moreinfo="none">String.split</literal> always returns a list with at least
+          one element. But the compiler doesn't know this, and so it emits the
+          warning. It's generally better to use a match statement to handle
+          such cases explicitly:</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          9)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let upcase_first_entry line =</userinput>
+<userinput moreinfo="none">     match String.split ~on:',' line with</userinput>
+<userinput moreinfo="none">     | [] -&gt; assert false (* String.split returns at least one element *)</userinput>
+<userinput moreinfo="none">     | first :: rest -&gt; String.concat ~sep:"," (String.uppercase first :: rest)</userinput>
+<userinput moreinfo="none">  ;;</userinput>
+<computeroutput moreinfo="none">val upcase_first_entry : string -&gt; string = &lt;fun&gt;</computeroutput>
+</programlisting>
+
+          <para>Note that this is our first use of <literal moreinfo="none">assert</literal>,
+          which is useful for marking cases that should be impossible. We'll
+          discuss <literal moreinfo="none">assert</literal> in more detail in <xref linkend="error-handling"/>.</para>
+        </sect2>
+      </sect1>
+
+      <sect1 id="functions">
+        <title>Functions</title>
+
+        <para>Given that OCaml is a functional language, it's no surprise that
+        functions are important and pervasive. Indeed, functions have come up
+        in almost every example we've done so far. This section will go into
+        more depth, explaining the details of how OCaml's functions work. As
+        you'll see, functions in OCaml differ in a variety of ways from what
+        you'll find in most mainstream languages.</para>
+
+        <sect2 id="anonymous-functions">
+          <title>Anonymous Functions</title>
+
+          <para>We'll start by looking at the most basic style of function
+          declaration in OCaml: the <emphasis>anonymous function</emphasis>.
+          An anonymous function is a function value that is declared without
+          being named. They can be declared using the <literal moreinfo="none">fun</literal>
+          keyword, as shown here.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          10)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">(fun x -&gt; x + 1);;</userinput>
+<computeroutput moreinfo="none">- : int -&gt; int = &lt;fun&gt;</computeroutput>
+</programlisting>
+
+          <para>Anonymous functions operate in much the same way as named
+          functions. For example, we can apply an anonymous function to an
+          argument.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          11)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">(fun x -&gt; x + 1) 7;;</userinput>
+<computeroutput moreinfo="none">- : int = 8</computeroutput>
+</programlisting>
+
+          <para>Or pass it to another function. Passing functions to iteration
+          functions like <literal moreinfo="none">List.map</literal> is probably the most
+          common use-case for anonymous functions.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          12)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.map ~f:(fun x -&gt; x + 1) [1;2;3];;</userinput>
+<computeroutput moreinfo="none">- : int list = [2; 3; 4]</computeroutput>
+</programlisting>
+
+          <para>You can even stuff them into a data structure.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          13)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let increments = [ (fun x -&gt; x + 1); (fun x -&gt; x + 2) ] ;;</userinput>
+<computeroutput moreinfo="none">val increments : (int -&gt; int) list = [&lt;fun&gt;; &lt;fun&gt;]</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.map ~f:(fun g -&gt; g 5) increments;;</userinput>
+<computeroutput moreinfo="none">- : int list = [6; 7]</computeroutput>
+</programlisting>
+
+          <para>It's worth stopping for a moment to puzzle this example out,
+          since this kind of higher-order use of functions can be a bit
+          obscure at first. The first thing to understand is the function
+          <literal moreinfo="none">(fun g -&gt; g 5)</literal>, which takes a function as its
+          argument and applies that function to the number
+          <literal moreinfo="none">5</literal>. The invocation of <literal moreinfo="none">List.map</literal>
+          applies <literal moreinfo="none">(fun g -&gt; g 5)</literal> to the elements of the
+          <literal moreinfo="none">increments</literal> list (which are themselves functions)
+          and returns the list containing the results of these function
+          applications.</para>
+
+          <para>The key thing to understand is that functions are ordinary
+          values in OCaml, and you can do everything with them that you'd do
+          with an ordinary value, including passing them to and returning them
+          from other functions and storing them in data structures. We even
+          name functions in the same way that we name other values, by using a
+          let binding.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          14)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let plusone = (fun x -&gt; x + 1);;</userinput>
+<computeroutput moreinfo="none">val plusone : int -&gt; int = &lt;fun&gt;</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">plusone 3;;</userinput>
+<computeroutput moreinfo="none">- : int = 4</computeroutput>
+</programlisting>
+
+          <para>Defining named functions is so common that there is some
+          syntactic sugar for it. Thus, the following definition of
+          <literal moreinfo="none">plusone</literal> is equivalent to the definition
+          above.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          15)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let plusone x = x + 1;;</userinput>
+<computeroutput moreinfo="none">val plusone : int -&gt; int = &lt;fun&gt;</computeroutput>
+</programlisting>
+
+          <para>This is the most common and convenient way to declare a
+          function, but syntactic niceties aside, the two styles of function
+          definition are entirely equivalent.</para>
+
+          <note>
+            <title><literal moreinfo="none">let</literal> and <literal moreinfo="none">fun</literal></title>
+
+            <para>Functions and let bindings have a lot to do with each other.
+            In some sense, you can think of the parameter of a function as a
+            variable being bound to the value passed by the caller. Indeed,
+            the following two expressions are nearly equivalent:</para>
+
+            <para role="sourcecode">OCaml Utop:
+            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            16)</para>
+
+            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">(fun x -&gt; x + 1) 7;;</userinput>
+<computeroutput moreinfo="none">- : int = 8</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">let x = 7 in x + 1;;</userinput>
+<computeroutput moreinfo="none">- : int = 8</computeroutput>
+</programlisting>
+
+            <para>This connection is important, and will come up more when
+            programming in a monadic style, as we'll see in <xref linkend="concurrent-programming-with-async"/>.</para>
+          </note>
+        </sect2>
+
+        <sect2 id="multi-argument-functions">
+          <title>Multi-argument functions</title>
+
+          <para>OCaml of course also supports multi-argument functions, for
+          example:</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          17)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let abs_diff x y = abs (x - y);;</userinput>
+<computeroutput moreinfo="none">val abs_diff : int -&gt; int -&gt; int = &lt;fun&gt;</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">abs_diff 3 4;;</userinput>
+<computeroutput moreinfo="none">- : int = 1</computeroutput>
+</programlisting>
+
+          <para>You may find the type signature of <literal moreinfo="none">abs_diff</literal>
+          with all of its arrows a little hard to parse. To understand what's
+          going on, let's rewrite <literal moreinfo="none">abs_diff</literal> in an equivalent
+          form, using the <literal moreinfo="none">fun</literal> keyword:</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          18)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let abs_diff =</userinput>
+<userinput moreinfo="none">    (fun x -&gt; (fun y -&gt; abs (x - y)));;</userinput>
+<computeroutput moreinfo="none">val abs_diff : int -&gt; int -&gt; int = &lt;fun&gt;</computeroutput>
+</programlisting>
+
+          <para>This rewrite makes it explicit that
+          <literal moreinfo="none">abs_diff</literal> is actually a function of one argument
+          that returns another function of one argument, which itself returns
+          the final result. Because the functions are nested, the inner
+          expression <literal moreinfo="none">abs (x - y)</literal> has access to both
+          <literal moreinfo="none">x</literal>, which was bound by the outer function
+          application, and <literal moreinfo="none">y</literal>, which was bound by the inner
+          one.</para>
+
+          <para>This style of function is called a
+          <emphasis>curried</emphasis> function. (Currying is named after
+          Haskell Curry, a logician who had a significant impact on the design
+          and theory of programming languages.) The key to interpreting the
+          type signature of a curried function is the observation that
+          <literal moreinfo="none">-&gt;</literal> is right-associative. The type signature of
+          <literal moreinfo="none">abs_diff</literal> can therefore be parenthesized as
+          follows.</para>
+
+          <para role="sourcecode">OCaml:
+          <filename moreinfo="none">variables-and-functions/abs_diff.mli</filename></para>
+
+          <programlisting language="ocaml" format="linespecific">val abs_diff : int -&gt; (int -&gt; int)</programlisting>
+
+          <para>The parentheses above don't change the meaning of the
+          signature, but it makes it easier to see the currying.</para>
+
+          <para>Currying is more than just a theoretical curiosity. You can
+          make use of currying to specialize a function by feeding in some of
+          the arguments. Here's an example where we create a specialized
+          version of <literal moreinfo="none">abs_diff</literal> that measures the distance of
+          a given number from <literal moreinfo="none">3</literal>.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          19)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let dist_from_3 = abs_diff 3;;</userinput>
+<computeroutput moreinfo="none">val dist_from_3 : int -&gt; int = &lt;fun&gt;</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">dist_from_3 8;;</userinput>
+<computeroutput moreinfo="none">- : int = 5</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">dist_from_3 (-1);;</userinput>
+<computeroutput moreinfo="none">- : int = 4</computeroutput>
+</programlisting>
+
+          <para>The practice of applying some of the arguments of a curried
+          function to get a new function is called <emphasis>partial
+          application</emphasis>.</para>
+
+          <para>Note that the <literal moreinfo="none">fun</literal> keyword supports its own
+          syntax for currying, so the following definition of
+          <literal moreinfo="none">abs_diff</literal> is equivalent to the definition
+          above.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          20)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let abs_diff = (fun x y -&gt; abs (x - y));;</userinput>
+<computeroutput moreinfo="none">val abs_diff : int -&gt; int -&gt; int = &lt;fun&gt;</computeroutput>
+</programlisting>
+
+          <para>You might worry that curried functions are terribly expensive,
+          but this is not the case. In OCaml, there is no penalty for calling
+          a curried function with all of its arguments. (Partial application,
+          unsurprisingly, does have a small extra cost.)</para>
+
+          <para>Currying is not the only way of writing a multi-argument
+          function in OCaml. It's also possible to use the different parts of
+          a tuple as different arguments. So, we could write:</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          21)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let abs_diff (x,y) = abs (x - y);;</userinput>
+<computeroutput moreinfo="none">val abs_diff : int * int -&gt; int = &lt;fun&gt;</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">abs_diff (3,4);;</userinput>
+<computeroutput moreinfo="none">- : int = 1</computeroutput>
+</programlisting>
+
+          <para>OCaml handles this calling convention efficiently as well. In
+          particular it does not generally have to allocate a tuple just for
+          the purpose of sending arguments to a tuple-style function. You
+          can't, however, use partial application for this style of
+          function.</para>
+
+          <para>There are small tradeoffs between these two approaches, but
+          most of the time, one should stick to currying, since it's the
+          default style in the OCaml world.</para>
+        </sect2>
+
+        <sect2 id="recursive-functions">
+          <title>Recursive functions</title>
+
+          <para>A function is <emphasis>recursive</emphasis> if it refers to
+          itself in its definition. Recursion is important in any programming
+          language, but is particularly important in functional languages,
+          because it is the way in which you build looping constructs. (As
+          will be discussed in more detail in <xref linkend="imperative-programming-1"/>, OCaml also supports
+          imperative looping constructs like <literal moreinfo="none">for</literal> and
+          <literal moreinfo="none">while</literal>, but these are only useful when using
+          OCaml's imperative features.)</para>
+
+          <para>In order to define a recursive function, you need to mark the
+          let binding as recursive with the <literal moreinfo="none">rec</literal> keyword, as
+          shown in this function for finding the first sequentially-repeated
+          element in a list.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          22)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec find_first_stutter list =</userinput>
+<userinput moreinfo="none">    match list with</userinput>
+<userinput moreinfo="none">    | [] | [_] -&gt;</userinput>
+<userinput moreinfo="none">      (* only zero or one elements, so no repeats *)</userinput>
+<userinput moreinfo="none">      None</userinput>
+<userinput moreinfo="none">    | x :: y :: tl -&gt;</userinput>
+<userinput moreinfo="none">      if x = y then Some x else find_first_stutter (y::tl)</userinput>
+<userinput moreinfo="none">   ;;</userinput>
+<computeroutput moreinfo="none">val find_first_stutter : 'a list -&gt; 'a option = &lt;fun&gt;</computeroutput>
+</programlisting>
+
+          <para>Note that in the above, the pattern <literal moreinfo="none">| [] |
+          [_]</literal> is what's called an <emphasis>or-pattern</emphasis>,
+          which is a disjunction of two patterns, meaning that it will be
+          considered a match if either pattern matches. In this case,
+          <literal moreinfo="none">[]</literal>, matches the empty list, and
+          <literal moreinfo="none">[_]</literal>, matches any single element list. The
+          <literal moreinfo="none">_</literal> is there so we don't have to put an explicit
+          name on that single element.</para>
+
+          <para>We can also define multiple mutually recursive values by using
+          <literal moreinfo="none">let rec</literal> combined with the <literal moreinfo="none">and</literal>
+          keyword. Here's a (gratuitously inefficient) example.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          23)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec is_even x =</userinput>
+<userinput moreinfo="none">    if x = 0 then true else is_odd (x - 1)</userinput>
+<userinput moreinfo="none">  and is_odd x =</userinput>
+<userinput moreinfo="none">    if x = 0 then false else is_even (x - 1)</userinput>
+<userinput moreinfo="none"> ;;</userinput>
+<computeroutput moreinfo="none">val is_even : int -&gt; bool = &lt;fun&gt;</computeroutput>
+<computeroutput moreinfo="none">val is_odd : int -&gt; bool = &lt;fun&gt;</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.map ~f:is_even [0;1;2;3;4;5];;</userinput>
+<computeroutput moreinfo="none">- : bool list = [true; false; true; false; true; false]</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.map ~f:is_odd [0;1;2;3;4;5];;</userinput>
+<computeroutput moreinfo="none">- : bool list = [false; true; false; true; false; true]</computeroutput>
+</programlisting>
+
+          <para>OCaml distinguishes between non-recursive definitions (using
+          <literal moreinfo="none">let</literal>) and recursive definitions (using
+          <literal moreinfo="none">let rec</literal>) largely for technical reasons: the
+          type-inference algorithm needs to know when a set of function
+          definitions are mutually recursive, and for reasons that don't apply
+          to a pure language like Haskell, these have to be marked explicitly
+          by the programmer.</para>
+
+          <para>But this decision has some good effects. For one thing,
+          recursive (and especially mutually recursive) definitions are harder
+          to reason about than non-recursive ones. It's therefore useful that,
+          in the absence of an explicit <literal moreinfo="none">rec</literal>, you can assume
+          that a let binding is non-recursive, and so can only build upon
+          previous bindings.</para>
+
+          <para>In addition, having a non-recursive form makes it easier to
+          create a new definition that extends and supersedes an existing one
+          by shadowing it.</para>
+        </sect2>
+
+        <sect2 id="prefix-and-infix-operators">
+          <title>Prefix and infix operators</title>
+
+          <para>So far, we've seen examples of functions used in both prefix
+          and infix style:</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          24)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Int.max 3 4  (* prefix *);;</userinput>
+<computeroutput moreinfo="none">- : int = 4</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">3 + 4        (* infix  *);;</userinput>
+<computeroutput moreinfo="none">- : int = 7</computeroutput>
+</programlisting>
+
+          <para>You might not have thought of the second example as an
+          ordinary function, but it very much is. Infix operators like
+          <literal moreinfo="none">+</literal> really only differ syntactically from other
+          functions. In fact, if we put parentheses around an infix operator,
+          you can use it as an ordinary prefix function.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          25)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">(+) 3 4;;</userinput>
+<computeroutput moreinfo="none">- : int = 7</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.map ~f:((+) 3) [4;5;6];;</userinput>
+<computeroutput moreinfo="none">- : int list = [7; 8; 9]</computeroutput>
+</programlisting>
+
+          <para>In the second expression, we've partially applied
+          <literal moreinfo="none">(+)</literal> to create a function that increments its
+          single argument by <literal moreinfo="none">3</literal>.</para>
+
+          <para>A function is treated syntactically as an operator if the name
+          of that function is chosen from one of a specialized set of
+          identifiers. This set includes identifiers that are sequences of
+          characters from the following set:</para>
+
+          <para role="sourcecode">Syntax:
+          <filename moreinfo="none">variables-and-functions/operators.syntax</filename></para>
+
+          <programlisting language="" format="linespecific">! $ % &amp; * + - . / : &lt; = &gt; ? @ ^ | ~
+</programlisting>
+
+          <para>or is one of a handful of pre-determined strings, including
+          <literal moreinfo="none">mod</literal>, the modulus operator, and
+          <literal moreinfo="none">lsl</literal>, for "logical shift left", a bit-shifting
+          operation.</para>
+
+          <para>We can define (or redefine) the meaning of an operator. Here's
+          an example of a simple vector-addition operator on int pairs.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          26)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2);;</userinput>
+<computeroutput moreinfo="none">val ( +! ) : int * int -&gt; int * int -&gt; int * int = &lt;fun&gt;</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">(3,2) +! (-2,4);;</userinput>
+<computeroutput moreinfo="none">- : int * int = (1, 6)</computeroutput>
+</programlisting>
+
+          <para>Note that you have to be careful when dealing with operators
+          containing <literal moreinfo="none">*</literal>. Consider the following
+          example.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          27)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let (***) x y = (x ** y) ** y;;</userinput>
+<computeroutput moreinfo="none">Characters 17-18:</computeroutput>
+<computeroutput moreinfo="none">Error: This expression has type int but an expression was expected of type</computeroutput>
+<computeroutput moreinfo="none">         float</computeroutput>
+</programlisting>
+
+          <para>What's going on is that <literal moreinfo="none">(***)</literal> isn't
+          interpreted as an operator at all; it's read as a comment! To get
+          this to work properly, we need to put spaces around any operator
+          that begins or ends with <literal moreinfo="none">*</literal>.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          28)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let ( *** ) x y = (x ** y) ** y;;</userinput>
+<computeroutput moreinfo="none">val ( *** ) : float -&gt; float -&gt; float = &lt;fun&gt;</computeroutput>
+</programlisting>
+
+          <para>The syntactic role of an operator is typically determined by
+          its first character or two, though there are a few exceptions. This
+          table breaks the different operators and other syntactic forms into
+          groups from highest to lowest precedence, explaining how each
+          behaves syntactically. We write <literal moreinfo="none">!</literal>... to indicate
+          the class of operators beginning with <literal moreinfo="none">!</literal>.</para>
+
+          <informaltable>
+            <tgroup cols="2">
+              <colspec align="left" colwidth="37*"/>
+
+              <colspec align="left" colwidth="23*"/>
+
+              <thead>
+                <row>
+                  <entry>Prefix</entry>
+
+                  <entry>Usage</entry>
+                </row>
+              </thead>
+
+              <tbody>
+                <row>
+                  <entry><literal moreinfo="none">!</literal>..., <literal moreinfo="none">?</literal>...,
+                  <literal moreinfo="none">~</literal>...</entry>
+
+                  <entry>Prefix</entry>
+                </row>
+
+                <row>
+                  <entry><literal moreinfo="none">.</literal>, <literal moreinfo="none">.(</literal>,
+                  <literal moreinfo="none">.[</literal></entry>
+
+                  <entry/>
+                </row>
+
+                <row>
+                  <entry>function application, constructor,
+                  <literal moreinfo="none">assert</literal>, <literal moreinfo="none">lazy</literal></entry>
+
+                  <entry>Left associative</entry>
+                </row>
+
+                <row>
+                  <entry><literal moreinfo="none">-</literal>, <literal moreinfo="none">-.</literal></entry>
+
+                  <entry>Prefix</entry>
+                </row>
+
+                <row>
+                  <entry><literal moreinfo="none">**</literal>..., <literal moreinfo="none">lsl</literal>,
+                  <literal moreinfo="none">lsr</literal>, <literal moreinfo="none">asr</literal></entry>
+
+                  <entry>Right associative</entry>
+                </row>
+
+                <row>
+                  <entry><literal moreinfo="none">*</literal>..., <literal moreinfo="none">/</literal>...,
+                  <literal moreinfo="none">%</literal>..., <literal moreinfo="none">mod</literal>,
+                  <literal moreinfo="none">land</literal>, <literal moreinfo="none">lor</literal>,
+                  <literal moreinfo="none">lxor</literal></entry>
+
+                  <entry>Left associative</entry>
+                </row>
+
+                <row>
+                  <entry><literal moreinfo="none">+</literal>, <literal moreinfo="none">-</literal></entry>
+
+                  <entry>Left associative</entry>
+                </row>
+
+                <row>
+                  <entry><literal moreinfo="none">::</literal></entry>
+
+                  <entry>Right associative</entry>
+                </row>
+
+                <row>
+                  <entry><literal moreinfo="none">@</literal>...,
+                  <literal moreinfo="none">^</literal>...</entry>
+
+                  <entry>Right associative</entry>
+                </row>
+
+                <row>
+                  <entry><literal moreinfo="none">=</literal>..., <literal moreinfo="none">&lt;</literal>...,
+                  <literal moreinfo="none">&gt;</literal>..., <literal moreinfo="none">|</literal>...,
+                  <literal moreinfo="none">&amp;</literal>..., <literal moreinfo="none">$</literal>...</entry>
+
+                  <entry>Left associative</entry>
+                </row>
+
+                <row>
+                  <entry><literal moreinfo="none">&amp;</literal>,
+                  <literal moreinfo="none">&amp;&amp;</literal></entry>
+
+                  <entry>Right associative</entry>
+                </row>
+
+                <row>
+                  <entry><literal moreinfo="none">or</literal>, <literal moreinfo="none">||</literal></entry>
+
+                  <entry>Right associative</entry>
+                </row>
+
+                <row>
+                  <entry><literal moreinfo="none">,</literal></entry>
+
+                  <entry/>
+                </row>
+
+                <row>
+                  <entry><literal moreinfo="none">&lt;-</literal>,
+                  <literal moreinfo="none">:=</literal></entry>
+
+                  <entry>Right associative</entry>
+                </row>
+
+                <row>
+                  <entry><literal moreinfo="none">if</literal></entry>
+
+                  <entry/>
+                </row>
+
+                <row>
+                  <entry><literal moreinfo="none">;</literal></entry>
+
+                  <entry>Right associative</entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </informaltable>
+
+          <para>There's one important special case: <literal moreinfo="none">-</literal> and
+          <literal moreinfo="none">-.</literal>, which are the integer and floating-point
+          subtraction operators, can act as both prefix operators (for
+          negation) and infix operators (for subtraction), So, both
+          <literal moreinfo="none">-x</literal> and <literal moreinfo="none">x - y</literal> are meaningful
+          expressions. Another thing to remember about negation is that it has
+          lower precedence than function application, which means that if you
+          want to pass a negative value, you need to wrap it in parentheses,
+          as you can see below.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          29)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Int.max 3 (-4);;</userinput>
+<computeroutput moreinfo="none">- : int = 3</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">Int.max 3 -4;;</userinput>
+<computeroutput moreinfo="none">Characters -1-9:</computeroutput>
+<computeroutput moreinfo="none">Error: This expression has type int -&gt; int</computeroutput>
+<computeroutput moreinfo="none">       but an expression was expected of type int</computeroutput>
+</programlisting>
+
+          <para>Here, OCaml is interpreting the second expression as
+          equivalent to:</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          30)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">(Int.max 3) - 4;;</userinput>
+<computeroutput moreinfo="none">Characters 1-10:</computeroutput>
+<computeroutput moreinfo="none">Error: This expression has type int -&gt; int</computeroutput>
+<computeroutput moreinfo="none">       but an expression was expected of type int</computeroutput>
+</programlisting>
+
+          <para>which obviously doesn't make sense.</para>
+
+          <para>Here's an example of a very useful operator from the standard
+          library whose behavior depends critically on the precedence rules
+          described above. Here's the code.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          31)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let (|&gt;) x f = f x ;;</userinput>
+<computeroutput moreinfo="none">val ( |&gt; ) : 'a -&gt; ('a -&gt; 'b) -&gt; 'b = &lt;fun&gt;</computeroutput>
+</programlisting>
+
+          <para>It's not quite obvious at first what the purpose of this
+          operator is: it just takes a value and a function, and applies the
+          function to the value. Despite that bland sounding description, it
+          has the useful role of a sequencing operator, similar in spirit to
+          using pipe in the UNIX shell. Consider, for example, the following
+          code for printing out the unique elements of your
+          <literal moreinfo="none">PATH</literal>. Note that <literal moreinfo="none">List.dedup</literal>
+          below removes duplicates from a list by sorting the list using the
+          provided comparison function.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          32)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let path = "/usr/bin:/usr/local/bin:/bin:/sbin";;</userinput>
+<computeroutput moreinfo="none">val path : string = "/usr/bin:/usr/local/bin:/bin:/sbin"</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">  String.split ~on:':' path</userinput>
+<userinput moreinfo="none">  |&gt; List.dedup ~compare:String.compare</userinput>
+<userinput moreinfo="none">  |&gt; List.iter ~f:print_endline</userinput>
+<userinput moreinfo="none">  ;;</userinput>
+<computeroutput moreinfo="none">/bin</computeroutput>
+<computeroutput moreinfo="none">/sbin</computeroutput>
+<computeroutput moreinfo="none">/usr/bin</computeroutput>
+<computeroutput moreinfo="none">/usr/local/bin</computeroutput>
+<computeroutput moreinfo="none">- : unit = ()</computeroutput>
+</programlisting>
+
+          <para>Note that we can do this without <literal moreinfo="none">|&gt;</literal>, but
+          the result is a bit more verbose.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          33)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">  let split_path = String.split ~on:':' path in</userinput>
+<userinput moreinfo="none">  let deduped_path = List.dedup ~compare:String.compare split_path in</userinput>
+<userinput moreinfo="none">  List.iter ~f:print_endline deduped_path</userinput>
+<userinput moreinfo="none">  ;;</userinput>
+<computeroutput moreinfo="none">/bin</computeroutput>
+<computeroutput moreinfo="none">/sbin</computeroutput>
+<computeroutput moreinfo="none">/usr/bin</computeroutput>
+<computeroutput moreinfo="none">/usr/local/bin</computeroutput>
+<computeroutput moreinfo="none">- : unit = ()</computeroutput>
+</programlisting>
+
+          <para>An important part of what's happening here is partial
+          application. For example, <literal moreinfo="none">List.iter</literal> normally
+          takes two arguments: a function to be called on each element of the
+          list, and the list to iterate over. We can call
+          <literal moreinfo="none">List.iter</literal> with all its arguments:</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          34)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.iter ~f:print_endline ["Two"; "lines"];;</userinput>
+<computeroutput moreinfo="none">Two</computeroutput>
+<computeroutput moreinfo="none">lines</computeroutput>
+<computeroutput moreinfo="none">- : unit = ()</computeroutput>
+</programlisting>
+
+          <para>Or, we can pass it just the function argument, leaving us with
+          a function for printing out a list of strings.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          35)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.iter ~f:print_endline;;</userinput>
+<computeroutput moreinfo="none">- : string list -&gt; unit = &lt;fun&gt;</computeroutput>
+</programlisting>
+
+          <para>It is this later form that we're using in the
+          <literal moreinfo="none">|&gt;</literal> pipeline above.</para>
+
+          <para>Note that <literal moreinfo="none">|&gt;</literal> only works in the intended
+          way because it is left-associative. Indeed, let's see what happens
+          if we try using a right associative operator, like (^&gt;).</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          36)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let (^&gt;) x f = f x;;</userinput>
+<computeroutput moreinfo="none">val ( ^&gt; ) : 'a -&gt; ('a -&gt; 'b) -&gt; 'b = &lt;fun&gt;</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">Sys.getenv_exn "PATH"</userinput>
+<userinput moreinfo="none">  ^&gt; String.split ~on:':' path</userinput>
+<userinput moreinfo="none">  ^&gt; List.dedup ~compare:String.compare</userinput>
+<userinput moreinfo="none">  ^&gt; List.iter ~f:print_endline</userinput>
+<userinput moreinfo="none">  ;;</userinput>
+<computeroutput moreinfo="none">Characters 98-124:</computeroutput>
+<computeroutput moreinfo="none">Error: This expression has type string list -&gt; unit</computeroutput>
+<computeroutput moreinfo="none">       but an expression was expected of type</computeroutput>
+<computeroutput moreinfo="none">         (string list -&gt; string list) -&gt; 'a</computeroutput>
+<computeroutput moreinfo="none">       Type string list is not compatible with type</computeroutput>
+<computeroutput moreinfo="none">         string list -&gt; string list </computeroutput>
+</programlisting>
+
+          <para>The above type error is a little bewildering at first glance.
+          What's going on is that, because <literal moreinfo="none">^&gt;</literal> is right
+          associative, the operator is trying to feed the value
+          <literal moreinfo="none">List.dedup ~compare:String.compare</literal> to the
+          function <literal moreinfo="none">List.iter ~f:print_endline</literal>. But
+          <literal moreinfo="none">List.iter ~f:print_endline</literal> expects a list of
+          strings as its input, not a function.</para>
+
+          <para>The type error aside, this example highlights the importance
+          of choosing the operator you use with care, particularly with
+          respect to associativity.</para>
+        </sect2>
+
+        <sect2 id="declaring-functions-with-function">
+          <title>Declaring functions with <literal moreinfo="none">function</literal></title>
+
+          <para>Another way to define a function is using the
+          <literal moreinfo="none">function</literal> keyword. Instead of having syntactic
+          support for declaring multi-argument (curried) functions,
+          <literal moreinfo="none">function</literal> has built-in pattern matching. Here's an
+          example:</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          37)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let some_or_zero = function</userinput>
+<userinput moreinfo="none">     | Some x -&gt; x</userinput>
+<userinput moreinfo="none">     | None -&gt; 0</userinput>
+<userinput moreinfo="none">  ;;</userinput>
+<computeroutput moreinfo="none">val some_or_zero : int option -&gt; int = &lt;fun&gt;</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.map ~f:some_or_zero [Some 3; None; Some 4];;</userinput>
+<computeroutput moreinfo="none">- : int list = [3; 0; 4]</computeroutput>
+</programlisting>
+
+          <para>This is equivalent to combining an ordinary function
+          definition with a <literal moreinfo="none">match</literal>.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          38)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let some_or_zero num_opt =</userinput>
+<userinput moreinfo="none">    match num_opt with</userinput>
+<userinput moreinfo="none">    | Some x -&gt; x</userinput>
+<userinput moreinfo="none">    | None -&gt; 0</userinput>
+<userinput moreinfo="none">  ;;</userinput>
+<computeroutput moreinfo="none">val some_or_zero : int option -&gt; int = &lt;fun&gt;</computeroutput>
+</programlisting>
+
+          <para>We can also combine the different styles of function
+          declaration together, as in the following example where we declare a
+          two argument (curried) function with a pattern match on the second
+          argument.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          39)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let some_or_default default = function</userinput>
+<userinput moreinfo="none">     | Some x -&gt; x</userinput>
+<userinput moreinfo="none">     | None -&gt; default</userinput>
+<userinput moreinfo="none">  ;;</userinput>
+<computeroutput moreinfo="none">val some_or_default : 'a -&gt; 'a option -&gt; 'a = &lt;fun&gt;</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">some_or_default 3 (Some 5);;</userinput>
+<computeroutput moreinfo="none">- : int = 5</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.map ~f:(some_or_default 100) [Some 3; None; Some 4];;</userinput>
+<computeroutput moreinfo="none">- : int list = [3; 100; 4]</computeroutput>
+</programlisting>
+
+          <para>Also, note the use of partial application to generate the
+          function passed to <literal moreinfo="none">List.map</literal>. In other words,
+          <literal moreinfo="none">some_or_default 100</literal> is a function that was
+          created by feeding just the first argument to
+          <literal moreinfo="none">some_or_default</literal>.</para>
+        </sect2>
+
+        <sect2 id="labeled-arguments">
+          <title>Labeled arguments</title>
+
+          <para>Up until now, the functions we've defined have specified their
+          arguments positionally, <emphasis>i.e.</emphasis>, by the order in
+          which the arguments are passed to the function. OCaml also supports
+          labeled arguments, which let you identify a function argument by
+          name. Indeed, we've already encountered functions from Core like
+          <literal moreinfo="none">List.map</literal> that use labeled arguments. Labeled
+          arguments are marked by a leading tilde, and a label (followed by a
+          colon) are put in front of the variable to be labeled. Here's an
+          example.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          40)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let ratio ~num ~denom = float num /. float denom;;</userinput>
+<computeroutput moreinfo="none">val ratio : num:int -&gt; denom:int -&gt; float = &lt;fun&gt;</computeroutput>
+</programlisting>
+
+          <para>We can then provide a labeled argument using a similar
+          convention. As you can see, the arguments can be provided in any
+          order.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          41)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">ratio ~num:3 ~denom:10;;</userinput>
+<computeroutput moreinfo="none">- : float = 0.3</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">ratio ~denom:10 ~num:3;;</userinput>
+<computeroutput moreinfo="none">- : float = 0.3</computeroutput>
+</programlisting>
+
+          <para>OCaml also supports <emphasis>label punning</emphasis>,
+          meaning that you get to drop the text after the <literal moreinfo="none">:</literal>
+          if the name of the label and the name of the variable being used are
+          the same. We were actually already using label punning when defining
+          <literal moreinfo="none">ratio</literal> above. The following shows how punning can
+          be used when invoking a function.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          42)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let num = 3 in</userinput>
+<userinput moreinfo="none">let denom = 4 in</userinput>
+<userinput moreinfo="none">ratio ~num ~denom;;</userinput>
+<computeroutput moreinfo="none">- : float = 0.75</computeroutput>
+</programlisting>
+
+          <para>Labeled arguments are useful in a few different cases:</para>
+
+          <itemizedlist>
+            <listitem>
+              <para>When defining a function with lots of arguments. Beyond a
+              certain number, arguments are easier to remember by name than by
+              position.</para>
+            </listitem>
+
+            <listitem>
+              <para>When the meaning of a particular argument is unclear from
+              the type alone. Consider a function for creating a hash table
+              whose first argument is the initial size of the array backing
+              the hashtable, and the second is a Boolean flag which indicates
+              whether that array will ever shrink when elements are
+              removed.</para>
+
+              <para role="sourcecode">OCaml:
+              <filename moreinfo="none">variables-and-functions/htable_sig1.ml</filename></para>
+
+              <programlisting language="ocaml" format="linespecific">val create_hashtable : int -&gt; bool -&gt; ('a,'b) Hashtable.t</programlisting>
+
+              <para>The above signature makes it hard to divine the meaning of
+              those two arguments. but with labeled arguments, we can make the
+              intent immediately clear.</para>
+
+              <para role="sourcecode">OCaml:
+              <filename moreinfo="none">variables-and-functions/htable_sig2.ml</filename></para>
+
+              <programlisting language="ocaml" format="linespecific">val create_hashtable :
+  init_size:int -&gt; allow_shrinking:bool -&gt; ('a,'b) Hashtable.t</programlisting>
+
+              <para>Choosing label names well is especially important for
+              Boolean values, since it's often easy to get confused about
+              whether a value being true is meant ot enable or disable a given
+              feature.</para>
+            </listitem>
+
+            <listitem>
+              <para>When defining functions that have multiple arguments that
+              might get confused with each other. This is most at issue when
+              the arguments are of the same type. For example, consider this
+              signature for a function that extracts a substring.</para>
+
+              <para role="sourcecode">OCaml:
+              <filename moreinfo="none">variables-and-functions/substring_sig1.ml</filename></para>
+
+              <programlisting language="ocaml" format="linespecific">val substring: string -&gt; int -&gt; int -&gt; string</programlisting>
+
+              <para>Here, the two ints are the starting position and length of
+              the substring to extract, respectively. We can can make this
+              fact more obvious from the signature by adding labels.</para>
+
+              <para role="sourcecode">OCaml:
+              <filename moreinfo="none">variables-and-functions/substring_sig2.ml</filename></para>
+
+              <programlisting language="ocaml" format="linespecific">val substring: string -&gt; pos:int -&gt; len:int -&gt; string</programlisting>
+
+              <para>This improves the readability of both the signature and of
+              client code that makes use of <literal moreinfo="none">substring</literal>, and
+              makes it harder to accidentally swap the position and the
+              length.</para>
+            </listitem>
+
+            <listitem>
+              <para>When you want flexibility on the order in which arguments
+              are passed. Consider a function like
+              <literal moreinfo="none">List.iter</literal>, that takes two arguments: a
+              function, and a list of elements to call that function on. A
+              common pattern is to partially apply
+              <literal moreinfo="none">List.iter</literal> by giving it just the function, as
+              in the following example from earlier in the chapter.</para>
+
+              <para role="sourcecode">OCaml Utop:
+              <filename moreinfo="none">variables-and-functions/main.topscript</filename>
+              (part 43)</para>
+
+              <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">  String.split ~on:':' path</userinput>
+<userinput moreinfo="none">  |&gt; List.dedup ~compare:String.compare</userinput>
+<userinput moreinfo="none">  |&gt; List.iter ~f:print_endline</userinput>
+<userinput moreinfo="none">  ;;</userinput>
+<computeroutput moreinfo="none">/bin</computeroutput>
+<computeroutput moreinfo="none">/sbin</computeroutput>
+<computeroutput moreinfo="none">/usr/bin</computeroutput>
+<computeroutput moreinfo="none">/usr/local/bin</computeroutput>
+<computeroutput moreinfo="none">- : unit = ()</computeroutput>
+</programlisting>
+
+              <para>This requires that we put the function argument first. In
+              other cases, you want to put the function argument second. One
+              common reason is readability. In particular, a multi-line
+              function passed as an argument to another function is easiest to
+              read when it is the final argument to that function.</para>
+            </listitem>
+          </itemizedlist>
+
+          <sect3 id="higher-order-functions-and-labels">
+            <title>Higher-order functions and labels</title>
+
+            <para>One surprising gotcha with labeled arguments is that while
+            order doesn't matter when calling a function with labeled
+            arguments, it does matter in a higher-order context,
+            <emphasis>e.g.</emphasis>, when passing a function with labeled
+            arguments to another function. Here's an example.</para>
+
+            <para role="sourcecode">OCaml Utop:
+            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            44)</para>
+
+            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let apply_to_tuple f (first,second) = f ~first ~second;;</userinput>
+<computeroutput moreinfo="none">val apply_to_tuple : (first:'a -&gt; second:'b -&gt; 'c) -&gt; 'a * 'b -&gt; 'c = &lt;fun&gt;</computeroutput>
+</programlisting>
+
+            <para>Here, the definition of <literal moreinfo="none">apply_to_tuple</literal>
+            sets up the expectation that its first argument is a function with
+            two labeled arguments, <literal moreinfo="none">first</literal> and
+            <literal moreinfo="none">second</literal>, listed in that order. We could have
+            defined <literal moreinfo="none">apply_to_tuple</literal> differently to change
+            the order in which the labeled arguments were listed.</para>
+
+            <para role="sourcecode">OCaml Utop:
+            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            45)</para>
+
+            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let apply_to_tuple_2 f (first,second) = f ~second ~first;;</userinput>
+<computeroutput moreinfo="none">val apply_to_tuple_2 : (second:'a -&gt; first:'b -&gt; 'c) -&gt; 'b * 'a -&gt; 'c = &lt;fun&gt;</computeroutput>
+</programlisting>
+
+            <para>It turns out this order matters. In particular, if we define
+            a function that has a different order</para>
+
+            <para role="sourcecode">OCaml Utop:
+            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            46)</para>
+
+            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let divide ~first ~second = first / second;;</userinput>
+<computeroutput moreinfo="none">val divide : first:int -&gt; second:int -&gt; int = &lt;fun&gt;</computeroutput>
+</programlisting>
+
+            <para>we'll find that it can't be passed in to
+            <literal moreinfo="none">apply_to_tuple_2</literal>.</para>
+
+            <para role="sourcecode">OCaml Utop:
+            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            47)</para>
+
+            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">apply_to_tuple_2 divide (3,4);;</userinput>
+<computeroutput moreinfo="none">Characters 17-23:</computeroutput>
+<computeroutput moreinfo="none">Error: This expression has type first:int -&gt; second:int -&gt; int</computeroutput>
+<computeroutput moreinfo="none">       but an expression was expected of type second:'a -&gt; first:'b -&gt; 'c</computeroutput>
+</programlisting>
+
+            <para>But, it works smoothly with the original
+            <literal moreinfo="none">apply_to_tuple</literal>.</para>
+
+            <para role="sourcecode">OCaml Utop:
+            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            48)</para>
+
+            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let apply_to_tuple f (first,second) = f ~first ~second;;</userinput>
+<computeroutput moreinfo="none">val apply_to_tuple : (first:'a -&gt; second:'b -&gt; 'c) -&gt; 'a * 'b -&gt; 'c = &lt;fun&gt;</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">apply_to_tuple divide (3,4);;</userinput>
+<computeroutput moreinfo="none">- : int = 0</computeroutput>
+</programlisting>
+
+            <para>As a result, when passing labeled functions as arguments,
+            you need to take care to be consistent in your ordering of labeled
+            arguments.</para>
+          </sect3>
+        </sect2>
+
+        <sect2 id="optional-arguments">
+          <title>Optional arguments</title>
+
+          <para>An optional argument is like a labeled argument that the
+          caller can choose whether or not to provide. Optional arguments are
+          passed in using the same syntax as labeled arguments, and, like
+          labeled arguments, can be provided in any order.</para>
+
+          <para>Here's an example of a string concatenation function with an
+          optional separator. This function uses the <literal moreinfo="none">^</literal>
+          operator for pairwise string concatenation.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          49)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let concat ?sep x y =</userinput>
+<userinput moreinfo="none">     let sep = match sep with None -&gt; "" | Some x -&gt; x in</userinput>
+<userinput moreinfo="none">     x ^ sep ^ y</userinput>
+<userinput moreinfo="none">  ;;</userinput>
+<computeroutput moreinfo="none">val concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;fun&gt;</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">concat "foo" "bar"             (* without the optional argument *);;</userinput>
+<computeroutput moreinfo="none">- : string = "foobar"</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">concat ~sep:":" "foo" "bar"    (* with the optional argument    *);;</userinput>
+<computeroutput moreinfo="none">- : string = "foo:bar"</computeroutput>
+</programlisting>
+
+          <para>Here, <literal moreinfo="none">?</literal> is used in the definition of the
+          function to mark <literal moreinfo="none">sep</literal> as optional. And while the
+          caller can pass a value of type <literal moreinfo="none">string</literal> for
+          <literal moreinfo="none">sep</literal>, internally to the function,
+          <literal moreinfo="none">sep</literal> is seen as a <literal moreinfo="none">string
+          option</literal>, with <literal moreinfo="none">None</literal> appearing when
+          <literal moreinfo="none">sep</literal> is not provided by the caller.</para>
+
+          <para>The above example needed a bit of boilerplate to choose a
+          default separator when none was provided. This is a common enough
+          pattern that there's an explicit syntax for providing a default
+          value, which allows us to write <literal moreinfo="none">concat</literal> more
+          concisely.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          50)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let concat ?(sep="") x y = x ^ sep ^ y ;;</userinput>
+<computeroutput moreinfo="none">val concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;fun&gt;</computeroutput>
+</programlisting>
+
+          <para>Optional arguments are very useful, but they're also easy to
+          abuse. The key advantage of optional arguments is that they let you
+          write functions with multiple arguments that users can ignore most
+          of the time, only worrying about them when they specifically want to
+          invoke those options. They also allow you to extend an API with new
+          functionality without changing existing code that calls that
+          function.</para>
+
+          <para>The downside is that the caller may be unaware that there is a
+          choice to be made, and so may unknowingly (and wrongly) pick the
+          default behavior. Optional arguments really only make sense when the
+          extra concision of omitting the argument outweighs the corresponding
+          loss of explicitness.</para>
+
+          <para>This means that rarely used functions should not have optional
+          arguments. A good rule of thumb is to avoid optional arguments for
+          functions internal to a module, <emphasis>i.e.</emphasis>, functions
+          that are not included in the module's interface, or
+          <literal moreinfo="none">mli</literal> file. We'll learn more about
+          <literal moreinfo="none">mli</literal>s in <xref linkend="files-modules-and-programs"/>.</para>
+
+          <sect3 id="explicit-passing-of-an-optional-argument">
+            <title>Explicit passing of an optional argument</title>
+
+            <para>Under the covers, a function with an optional argument
+            receives <literal moreinfo="none">None</literal> when the caller doesn't provide
+            the argument, and <literal moreinfo="none">Some</literal> when it does. But the
+            <literal moreinfo="none">Some</literal> and <literal moreinfo="none">None</literal> are normally
+            not explicitly passed in by the caller.</para>
+
+            <para>But sometimes, passing in <literal moreinfo="none">Some</literal> or
+            <literal moreinfo="none">None</literal> explicitly is exactly what you want. OCaml
+            lets you do this by using <literal moreinfo="none">?</literal> instead of
+            <literal moreinfo="none">~</literal> to mark the argument. Thus, the following two
+            lines are equivalent ways of specifying the <literal moreinfo="none">sep</literal>
+            argument to concat.</para>
+
+            <para role="sourcecode">OCaml Utop:
+            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            51)</para>
+
+            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">concat ~sep:":" "foo" "bar" (* provide the optional argument *);;</userinput>
+<computeroutput moreinfo="none">- : string = "foo:bar"</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">concat ?sep:(Some ":") "foo" "bar" (* pass an explicit [Some] *);;</userinput>
+<computeroutput moreinfo="none">- : string = "foo:bar"</computeroutput>
+</programlisting>
+
+            <para>And the following two lines are equivalent ways of calling
+            <literal moreinfo="none">concat</literal> without specifying
+            <literal moreinfo="none">sep</literal>.</para>
+
+            <para role="sourcecode">OCaml Utop:
+            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            52)</para>
+
+            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">concat "foo" "bar" (* don't provide the optional argument *);;</userinput>
+<computeroutput moreinfo="none">- : string = "foobar"</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">concat ?sep:None "foo" "bar" (* explicitly pass `None` *);;</userinput>
+<computeroutput moreinfo="none">- : string = "foobar"</computeroutput>
+</programlisting>
+
+            <para>One use-case for this is when you want to define a wrapper
+            function that mimics the optional arguments of the function it's
+            wrapping. For example, imagine we wanted to create a function
+            called <literal moreinfo="none">uppercase_concat</literal>, which is the same as
+            <literal moreinfo="none">concat</literal> except that it converts the first string
+            that it's passed to uppercase. We could write the function as
+            follows.</para>
+
+            <para role="sourcecode">OCaml Utop:
+            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            53)</para>
+
+            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let uppercase_concat ?(sep="") a b = concat ~sep (String.uppercase a) b ;;</userinput>
+<computeroutput moreinfo="none">val uppercase_concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;fun&gt;</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">uppercase_concat "foo" "bar";;</userinput>
+<computeroutput moreinfo="none">- : string = "FOObar"</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">uppercase_concat "foo" "bar" ~sep:":";;</userinput>
+<computeroutput moreinfo="none">- : string = "FOO:bar"</computeroutput>
+</programlisting>
+
+            <para>In the way we've written it, we've been forced to separately
+            make the decision as to what the default separator is. Thus, if we
+            later change <literal moreinfo="none">concat</literal>'s default behavior, we'll
+            need to remember to change <literal moreinfo="none">uppercase_concat</literal> to
+            match it.</para>
+
+            <para>Instead, we can have <literal moreinfo="none">uppercase_concat</literal>
+            simply pass through the optional argument to
+            <literal moreinfo="none">concat</literal> using the <literal moreinfo="none">?</literal>
+            syntax.</para>
+
+            <para role="sourcecode">OCaml Utop:
+            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            54)</para>
+
+            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let uppercase_concat ?sep a b = concat ?sep (String.uppercase a) b ;;</userinput>
+<computeroutput moreinfo="none">val uppercase_concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;fun&gt;</computeroutput>
+</programlisting>
+
+            <para>Now, if someone calls <literal moreinfo="none">uppercase_concat</literal>
+            without an argument, an explicit <literal moreinfo="none">None</literal> will be
+            passed to <literal moreinfo="none">concat</literal>, leaving
+            <literal moreinfo="none">concat</literal> to decide what the default behavior
+            should be.</para>
+          </sect3>
+
+          <sect3 id="inference-of-labeled-and-optional-arguments">
+            <title>Inference of labeled and optional arguments</title>
+
+            <para>One subtle aspect of labeled and optional arguments is how
+            they are inferred by the type system. Consider the following
+            example for computing numerical derivatives of a function of two
+            real variables. The function takes an argument
+            <literal moreinfo="none">delta</literal> which determines the scale at which to
+            compute the derivative, values <literal moreinfo="none">x</literal> and
+            <literal moreinfo="none">y</literal> which determine which point to compute the
+            derivative at, and the function <literal moreinfo="none">f</literal> whose
+            derivative is being computed. The function <literal moreinfo="none">f</literal>
+            itself takes two labeled arguments <literal moreinfo="none">x</literal> and
+            <literal moreinfo="none">y</literal>. Note that you can use an apostrophe as part
+            of a variable name, so <literal moreinfo="none">x'</literal> and
+            <literal moreinfo="none">y'</literal> are just ordinary variables.</para>
+
+            <para role="sourcecode">OCaml Utop:
+            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            55)</para>
+
+            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let numeric_deriv ~delta ~x ~y ~f =</userinput>
+<userinput moreinfo="none">    let x' = x +. delta in</userinput>
+<userinput moreinfo="none">    let y' = y +. delta in</userinput>
+<userinput moreinfo="none">    let base = f ~x ~y in</userinput>
+<userinput moreinfo="none">    let dx = (f ~x:x' ~y -. base) /. delta in</userinput>
+<userinput moreinfo="none">    let dy = (f ~x ~y:y' -. base) /. delta in</userinput>
+<userinput moreinfo="none">    (dx,dy)</userinput>
+<userinput moreinfo="none">  ;;</userinput>
+<computeroutput moreinfo="none">val numeric_deriv :</computeroutput>
+<computeroutput moreinfo="none">  delta:float -&gt;</computeroutput>
+<computeroutput moreinfo="none">  x:float -&gt; y:float -&gt; f:(x:float -&gt; y:float -&gt; float) -&gt; float * float =</computeroutput>
+<computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput>
+</programlisting>
+
+            <para>In principle, it's not obvious how the order of the
+            arguments to <literal moreinfo="none">f</literal> should be chosen. Since labeled
+            arguments can be passed in arbitrary order, it seems like it could
+            as well be <literal moreinfo="none">y:float -&gt; x:float -&gt; float</literal> as
+            it is <literal moreinfo="none">x:float -&gt; y:float -&gt; float</literal>.</para>
+
+            <para>Even worse, it would be perfectly consistent for
+            <literal moreinfo="none">f</literal> to take an optional argument instead of a
+            labeled one, which could lead to this type signature for
+            <literal moreinfo="none">numeric_deriv</literal>.</para>
+
+            <para role="sourcecode">OCaml:
+            <filename moreinfo="none">variables-and-functions/numerical_deriv_alt_sig.mli</filename></para>
+
+            <programlisting language="ocaml" format="linespecific">val numeric_deriv :
+  delta:float -&gt;
+  x:float -&gt; y:float -&gt; f:(?x:float -&gt; y:float -&gt; float) -&gt; float * float</programlisting>
+
+            <para>Since there are multiple plausible types to choose from,
+            OCaml needs some heuristic for choosing between them. The
+            heuristic the compiler uses is to prefer labels to options, and to
+            choose the order of arguments that shows up in the source
+            code.</para>
+
+            <para>Note that these heuristics might at different points in the
+            source suggest different types. Here's a version of
+            <literal moreinfo="none">numeric_deriv</literal> where different invocations of
+            <literal moreinfo="none">f</literal> list the arguments in different
+            orders.</para>
+
+            <para role="sourcecode">OCaml Utop:
+            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            56)</para>
+
+            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let numeric_deriv ~delta ~x ~y ~f =</userinput>
+<userinput moreinfo="none">    let x' = x +. delta in</userinput>
+<userinput moreinfo="none">    let y' = y +. delta in</userinput>
+<userinput moreinfo="none">    let base = f ~x ~y in</userinput>
+<userinput moreinfo="none">    let dx = (f ~y ~x:x' -. base) /. delta in</userinput>
+<userinput moreinfo="none">    let dy = (f ~x ~y:y' -. base) /. delta in</userinput>
+<userinput moreinfo="none">    (dx,dy)</userinput>
+<userinput moreinfo="none">  ;;</userinput>
+<computeroutput moreinfo="none">Characters 130-131:</computeroutput>
+<computeroutput moreinfo="none">Error: This function is applied to arguments</computeroutput>
+<computeroutput moreinfo="none">in an order different from other calls.</computeroutput>
+<computeroutput moreinfo="none">This is only allowed when the real type is known.</computeroutput>
+</programlisting>
+
+            <para>As suggested by the error message, we can get OCaml to
+            accept the fact that <literal moreinfo="none">f</literal> is used with different
+            argument orders if we provide explicit type information. Thus, the
+            following code compiles without error, due to the type annotation
+            on <literal moreinfo="none">f</literal>.</para>
+
+            <para role="sourcecode">OCaml Utop:
+            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            57)</para>
+
+            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let numeric_deriv ~delta ~x ~y ~(f: x:float -&gt; y:float -&gt; float) =</userinput>
+<userinput moreinfo="none">    let x' = x +. delta in</userinput>
+<userinput moreinfo="none">    let y' = y +. delta in</userinput>
+<userinput moreinfo="none">    let base = f ~x ~y in</userinput>
+<userinput moreinfo="none">    let dx = (f ~y ~x:x' -. base) /. delta in</userinput>
+<userinput moreinfo="none">    let dy = (f ~x ~y:y' -. base) /. delta in</userinput>
+<userinput moreinfo="none">    (dx,dy)</userinput>
+<userinput moreinfo="none">  ;;</userinput>
+<computeroutput moreinfo="none">val numeric_deriv :</computeroutput>
+<computeroutput moreinfo="none">  delta:float -&gt;</computeroutput>
+<computeroutput moreinfo="none">  x:float -&gt; y:float -&gt; f:(x:float -&gt; y:float -&gt; float) -&gt; float * float =</computeroutput>
+<computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput>
+</programlisting>
+          </sect3>
+
+          <sect3 id="optional-arguments-and-partial-application">
+            <title>Optional arguments and partial application</title>
+
+            <para>Optional arguments can be tricky to think about in the
+            presence of partial application. We can of course partially apply
+            the optional argument itself:</para>
+
+            <para role="sourcecode">OCaml Utop:
+            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            58)</para>
+
+            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let colon_concat = concat ~sep:":";;</userinput>
+<computeroutput moreinfo="none">val colon_concat : string -&gt; string -&gt; string = &lt;fun&gt;</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">colon_concat "a" "b";;</userinput>
+<computeroutput moreinfo="none">- : string = "a:b"</computeroutput>
+</programlisting>
+
+            <para>But what happens if we partially apply just the first
+            argument?</para>
+
+            <para role="sourcecode">OCaml Utop:
+            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            59)</para>
+
+            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let prepend_pound = concat "# ";;</userinput>
+<computeroutput moreinfo="none">val prepend_pound : string -&gt; string = &lt;fun&gt;</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">prepend_pound "a BASH comment";;</userinput>
+<computeroutput moreinfo="none">- : string = "# a BASH comment"</computeroutput>
+</programlisting>
+
+            <para>The optional argument <literal moreinfo="none">?sep</literal> has now
+            disappeared, or been <emphasis>erased</emphasis>. Indeed, if we
+            try to pass in that optional argument now, it will be
+            rejected.</para>
+
+            <para role="sourcecode">OCaml Utop:
+            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            60)</para>
+
+            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">prepend_pound "a BASH comment" ~sep:":";;</userinput>
+<computeroutput moreinfo="none">Characters -1-13:</computeroutput>
+<computeroutput moreinfo="none">Error: This function has type string -&gt; string</computeroutput>
+<computeroutput moreinfo="none">       It is applied to too many arguments; maybe you forgot a `;'.</computeroutput>
+</programlisting>
+
+            <para>So when does OCaml decide to erase an optional
+            argument?</para>
+
+            <para>The rule is: an optional argument is erased as soon as the
+            first positional (<emphasis>i.e.</emphasis>, neither labeled nor
+            optional) argument defined <emphasis>after</emphasis> the optional
+            argument is passed in. That explains the behavior of
+            <literal moreinfo="none">prepend_pound</literal> above. But if we had instead
+            defined <literal moreinfo="none">concat</literal> with the optional argument in
+            the second position:</para>
+
+            <para role="sourcecode">OCaml Utop:
+            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            61)</para>
+
+            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let concat x ?(sep="") y = x ^ sep ^ y ;;</userinput>
+<computeroutput moreinfo="none">val concat : string -&gt; ?sep:string -&gt; string -&gt; string = &lt;fun&gt;</computeroutput>
+</programlisting>
+
+            <para>then application of the first argument would not cause the
+            optional argument to be erased.</para>
+
+            <para role="sourcecode">OCaml Utop:
+            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            62)</para>
+
+            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let prepend_pound = concat "# ";;</userinput>
+<computeroutput moreinfo="none">val prepend_pound : ?sep:string -&gt; string -&gt; string = &lt;fun&gt;</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">prepend_pound "a BASH comment";;</userinput>
+<computeroutput moreinfo="none">- : string = "# a BASH comment"</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">prepend_pound "a BASH comment" ~sep:"--- ";;</userinput>
+<computeroutput moreinfo="none">- : string = "# --- a BASH comment"</computeroutput>
+</programlisting>
+
+            <para>However, if all arguments to a function are presented at
+            once, then erasure of optional arguments isn't applied until all
+            of the arguments are passed in. This preserves our ability to pass
+            in optional arguments anywhere on the argument list. Thus, we can
+            write:</para>
+
+            <para role="sourcecode">OCaml Utop:
+            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            63)</para>
+
+            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">concat "a" "b" ~sep:"=";;</userinput>
+<computeroutput moreinfo="none">- : string = "a=b"</computeroutput>
+</programlisting>
+
+            <para>An optional argument that doesn't have any following
+            positional arguments can't be erased at all, which leads to a
+            compiler warning.</para>
+
+            <para role="sourcecode">OCaml Utop:
+            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            64)</para>
+
+            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let concat x y ?(sep="") = x ^ sep ^ y ;;</userinput>
+<computeroutput moreinfo="none">Characters 15-38:</computeroutput>
+<computeroutput moreinfo="none">Warning 16: this optional argument cannot be erased.</computeroutput>
+<computeroutput moreinfo="none">val concat : string -&gt; string -&gt; ?sep:string -&gt; string = &lt;fun&gt;</computeroutput>
+</programlisting>
+
+            <para>And indeed, when we provide the two positional arguments,
+            the <literal moreinfo="none">sep</literal> argument is not erased, instead
+            returning a function that expects the <literal moreinfo="none">sep</literal>
+            argument to be provided.</para>
+
+            <para role="sourcecode">OCaml Utop:
+            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            65)</para>
+
+            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">concat "a" "b";;</userinput>
+<computeroutput moreinfo="none">- : ?sep:string -&gt; string = &lt;fun&gt;</computeroutput>
+</programlisting>
+
+            <para>As you can see, OCaml's support for labeled and optional
+            arguments is not without its complexities. But don't let these
+            complexities obscure the usefulness of these features. Labels and
+            optional arguments are very effective tools for making your APIs
+            both more convenient and safer, and it's worth the effort of
+            learning how to use them effectively.</para>
+          </sect3>
+        </sect2>
+      </sect1>
+    </chapter>

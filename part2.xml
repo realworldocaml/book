@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE part PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<part label="II">
+    <title>Tools and Techniques</title>
+
+    <partintro>
+      <para>Part II builds on the basics by working through higher-level tools
+      and techniques for using OCaml effectively. Here you'll learn about
+      useful libraries for building command-line interfaces and networked
+      applications, as well as functional design patterns that help combine
+      different features of the language to good effect.</para>
+
+      <para>The focus throughout this section is on networked systems, and
+      among other examples we'll build a simple tool that will perform
+      Internet queries using the DuckDuckGo search engine.</para>
+    </partintro>
+
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch13.xml"/>
+
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch14.xml"/>
+
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch15.xml"/>
+
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch16.xml"/>
+
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch17.xml"/>
+
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch18.xml"/>
+  </part>

@@ -1,0 +1,1498 @@
+<?xml version="1.0"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<chapter id="classes">
+      <title>Classes</title>
+
+      <para>Programming with objects directly is great for encapsulation, but
+      one of the main goals of object-oriented programming is code re-use
+      through inheritance. For inheritance, we need to introduce
+      <emphasis>classes</emphasis>. In object-oriented programming, a class is
+      a "recipe" for creating objects. The recipe can be changed by adding new
+      methods and fields, or it can be changed by modifying existing
+      methods.</para>
+
+      <sect1 id="ocaml-classes">
+        <title>OCaml classes</title>
+
+        <para>In OCaml, class definitions must be defined as toplevel
+        statements in a module. The syntax for a class definition uses the
+        keyword <literal moreinfo="none">class</literal>.</para>
+
+        <para role="sourcecode">OCaml Utop:
+        <filename moreinfo="none">classes/istack.topscript</filename></para>
+
+        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">class istack = object</userinput>
+<userinput moreinfo="none">    val mutable v = [0; 2]</userinput>
+<userinput moreinfo="none"/>
+<userinput moreinfo="none">    method pop =</userinput>
+<userinput moreinfo="none">      match v with</userinput>
+<userinput moreinfo="none">      | hd :: tl -&gt;</userinput>
+<userinput moreinfo="none">          v &lt;- tl;</userinput>
+<userinput moreinfo="none">          Some hd</userinput>
+<userinput moreinfo="none">      | [] -&gt; None</userinput>
+<userinput moreinfo="none"/>
+<userinput moreinfo="none">    method push hd =</userinput>
+<userinput moreinfo="none">      v &lt;- hd :: v</userinput>
+<userinput moreinfo="none">  end ;;</userinput>
+<computeroutput moreinfo="none">class istack :</computeroutput>
+<computeroutput moreinfo="none">  object</computeroutput>
+<computeroutput moreinfo="none">    val mutable v : int list</computeroutput>
+<computeroutput moreinfo="none">    method pop : int option</computeroutput>
+<computeroutput moreinfo="none">    method push : int -&gt; unit</computeroutput>
+<computeroutput moreinfo="none">  end</computeroutput>
+</programlisting>
+
+        <para>The <literal moreinfo="none">class istack : object ... end</literal> result
+        shows that we have created a class <literal moreinfo="none">istack</literal> with
+        <emphasis>class type</emphasis> <literal moreinfo="none">object ... end</literal>.
+        Like module types, class types are completely separate from regular
+        OCaml types (e.g. <literal moreinfo="none">int</literal>, <literal moreinfo="none">string</literal>,
+        <literal moreinfo="none">list</literal>) and, in particular, should not be confused
+        with object types (e.g. <literal moreinfo="none">&lt; get : int; .. &gt;</literal>).
+        The class type describes the class itself rather than the objects that
+        the class creates. This particular class type specifies that the
+        <literal moreinfo="none">istack</literal> class defines a mutable field
+        <literal moreinfo="none">v</literal>, a method <literal moreinfo="none">pop</literal> that returns an
+        <literal moreinfo="none">int option</literal>, and a method <literal moreinfo="none">push</literal>
+        with type <literal moreinfo="none">int -&gt; unit</literal>.</para>
+
+        <para>To produce an object, classes are instantiated with the keyword
+        <literal moreinfo="none">new</literal>.</para>
+
+        <para role="sourcecode">OCaml Utop:
+        <filename moreinfo="none">classes/istack.topscript</filename> (part 1)</para>
+
+        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let s = new istack ;;</userinput>
+<computeroutput moreinfo="none">val s : istack = &lt;obj&gt;</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">s#pop ;;</userinput>
+<computeroutput moreinfo="none">- : int option = Some 0</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">s#push 5 ;;</userinput>
+<computeroutput moreinfo="none">- : unit = ()</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">s#pop ;;</userinput>
+<computeroutput moreinfo="none">- : int option = Some 5</computeroutput>
+</programlisting>
+
+        <para>You may have noticed that the object <literal moreinfo="none">s</literal> has
+        been given the type <literal moreinfo="none">istack</literal>. But wait, we've
+        stressed <emphasis>classes are not types</emphasis>, so what's up with
+        that? In fact, what we've said is entirely true, classes and class
+        names <emphasis>are not</emphasis> types. However, for convenience,
+        the definition of the class <literal moreinfo="none">istack</literal> also defines an
+        object type <literal moreinfo="none">istack</literal> with the same methods as the
+        class. This type definition is equivalent to:</para>
+
+        <para role="sourcecode">OCaml Utop:
+        <filename moreinfo="none">classes/istack.topscript</filename> (part 2)</para>
+
+        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type istack = &lt; pop: int option; push: int -&gt; unit &gt; ;;</userinput>
+<computeroutput moreinfo="none">type istack = &lt; pop : int option; push : int -&gt; unit &gt;</computeroutput>
+</programlisting>
+
+        <para>Note that this type represents any object with these methods:
+        objects created using the <literal moreinfo="none">istack</literal> class will have
+        this type, but objects with this type may not have been created by the
+        <literal moreinfo="none">istack</literal> class.</para>
+      </sect1>
+
+      <sect1 id="class-parameters-and-polymorphism">
+        <title>Class parameters and polymorphism</title>
+
+        <para>A class definition serves as the
+        <emphasis>constructor</emphasis> for the class. In general, a class
+        definition may have parameters that must be provided as arguments when
+        the object is created with <literal moreinfo="none">new</literal>.</para>
+
+        <para>Let's implement a variant of the <literal moreinfo="none">istack</literal> class
+        that can hold any values, not just integers. When defining the class,
+        the type parameters are placed in square brackets before the class
+        name in the class definition. We also add a parameter
+        <literal moreinfo="none">init</literal> for the initial contents of the stack.</para>
+
+        <para role="sourcecode">OCaml Utop:
+        <filename moreinfo="none">classes/stack.topscript</filename></para>
+
+        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">class ['a] stack init = object</userinput>
+<userinput moreinfo="none">    val mutable v : 'a list = init</userinput>
+<userinput moreinfo="none"/>
+<userinput moreinfo="none">    method pop =</userinput>
+<userinput moreinfo="none">      match v with</userinput>
+<userinput moreinfo="none">      | hd :: tl -&gt;</userinput>
+<userinput moreinfo="none">        v &lt;- tl;</userinput>
+<userinput moreinfo="none">        Some hd</userinput>
+<userinput moreinfo="none">      | [] -&gt; None</userinput>
+<userinput moreinfo="none"/>
+<userinput moreinfo="none">    method push hd =</userinput>
+<userinput moreinfo="none">      v &lt;- hd :: v</userinput>
+<userinput moreinfo="none">  end ;;</userinput>
+<computeroutput moreinfo="none">class ['a] stack :</computeroutput>
+<computeroutput moreinfo="none">  'a list -&gt;</computeroutput>
+<computeroutput moreinfo="none">  object</computeroutput>
+<computeroutput moreinfo="none">    val mutable v : 'a list</computeroutput>
+<computeroutput moreinfo="none">    method pop : 'a option</computeroutput>
+<computeroutput moreinfo="none">    method push : 'a -&gt; unit</computeroutput>
+<computeroutput moreinfo="none">  end</computeroutput>
+</programlisting>
+
+        <para>Note that the type parameter <literal moreinfo="none">['a]</literal> in the
+        definition uses square brackets, but for other uses of the type they
+        are omitted (or replaced with parentheses if there is more than one
+        type parameter).</para>
+
+        <para>The type annotation on the declaration of <literal moreinfo="none">v</literal>
+        is used to constrain type inference. If we omit this annotation, the
+        type inferred for the class will be "too polymorphic":
+        <literal moreinfo="none">init</literal> could have some type <literal moreinfo="none">'b
+        list</literal>.</para>
+
+        <para role="sourcecode">OCaml Utop:
+        <filename moreinfo="none">classes/stack.topscript</filename> (part 1)</para>
+
+        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">class ['a] stack init = object</userinput>
+<userinput moreinfo="none">      val mutable v = init</userinput>
+<userinput moreinfo="none">    </userinput>
+<userinput moreinfo="none">      method pop = </userinput>
+<userinput moreinfo="none">        match v with</userinput>
+<userinput moreinfo="none">        | hd :: tl -&gt; </userinput>
+<userinput moreinfo="none">          v &lt;- tl;</userinput>
+<userinput moreinfo="none">          Some hd</userinput>
+<userinput moreinfo="none">        | [] -&gt; None</userinput>
+<userinput moreinfo="none"/>
+<userinput moreinfo="none">      method push hd = </userinput>
+<userinput moreinfo="none">        v &lt;- hd :: v</userinput>
+<userinput moreinfo="none">  end ;;</userinput>
+<computeroutput moreinfo="none">Characters 6-16:</computeroutput>
+<computeroutput moreinfo="none">Error: Some type variables are unbound in this type:</computeroutput>
+<computeroutput moreinfo="none">         class ['a] stack :</computeroutput>
+<computeroutput moreinfo="none">           'b list -&gt;</computeroutput>
+<computeroutput moreinfo="none">           object</computeroutput>
+<computeroutput moreinfo="none">             val mutable v : 'b list</computeroutput>
+<computeroutput moreinfo="none">             method pop : 'b option</computeroutput>
+<computeroutput moreinfo="none">             method push : 'b -&gt; unit</computeroutput>
+<computeroutput moreinfo="none">           end</computeroutput>
+<computeroutput moreinfo="none">       The method pop has type 'b option where 'b is unbound</computeroutput>
+</programlisting>
+
+        <para>In general, we need to provide enough constraints so that the
+        compiler will infer the correct type. We can add type constraints to
+        the parameters, to the fields, and to the methods. It is a matter of
+        preference how many constraints to add. You can add type constraints
+        in all three places, but the extra text may not help clarity. A
+        convenient middle ground is to annotate the fields and/or class
+        parameters, and add constraints to methods only if necessary.</para>
+      </sect1>
+
+      <sect1 id="object-types-as-interfaces">
+        <title>Object types as interfaces</title>
+
+        <para>We may wish to traverse the elements on our stack. One common
+        style for doing this in object-oriented languages is to define a class
+        for an <literal moreinfo="none">iterator</literal> object. An iterator provides a
+        generic mechanism to inspect and traverse the elements of a
+        collection.</para>
+
+        <para>There are two common styles for defining abstract interfaces
+        like this. In Java, an iterator would normally be specified with an
+        interface, which specifies a set of method types.</para>
+
+        <para role="sourcecode">Java:
+        <filename moreinfo="none">classes/Iterator.java</filename></para>
+
+        <programlisting language="java" format="linespecific">// Java-style iterator, specified as an interface.
+interface &lt;T&gt; iterator {
+  T Get();
+  boolean HasValue();
+  void Next();
+};
+</programlisting>
+
+        <para>In languages without interfaces, like C++, the specification
+        would normally use <emphasis>abstract</emphasis> classes to specify
+        the methods without implementing them (C++ uses the "= 0" definition
+        to mean "not implemented").</para>
+
+        <para role="sourcecode">C:
+        <filename moreinfo="none">classes/citerator.cpp</filename></para>
+
+        <programlisting language="c" format="linespecific">// Abstract class definition in C++.
+template&lt;typename T&gt;
+class Iterator {
+ public:
+  virtual ~Iterator() {}
+  virtual T get() const = 0;
+  virtual bool has_value() const = 0;
+  virtual void next() = 0;
+};
+</programlisting>
+
+        <para>OCaml supports both styles. In fact, OCaml is more flexible than
+        these approaches because an object type can be implemented by any
+        object with the appropriate methods; it does not have to be specified
+        by the object's class <emphasis>a priori</emphasis>. We'll leave
+        abstract classes for later. Let's demonstrate the technique using
+        object types.</para>
+
+        <para>First, we'll define an object type <literal moreinfo="none">iterator</literal>
+        that specifies the methods in an iterator.</para>
+
+        <para role="sourcecode">OCaml Utop:
+        <filename moreinfo="none">classes/iter.topscript</filename></para>
+
+        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type 'a iterator = &lt; get : 'a; has_value : bool; next : unit &gt; ;;</userinput>
+<computeroutput moreinfo="none">type 'a iterator = &lt; get : 'a; has_value : bool; next : unit &gt;</computeroutput>
+</programlisting>
+
+        <para>Next, we'll define an actual iterator for lists. We can use this
+        to iterate over the contents of our stack.</para>
+
+        <para role="sourcecode">OCaml Utop:
+        <filename moreinfo="none">classes/iter.topscript</filename> (part 1)</para>
+
+        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">class ['a] list_iterator init = object</userinput>
+<userinput moreinfo="none">    val mutable current : 'a list = init</userinput>
+<userinput moreinfo="none"/>
+<userinput moreinfo="none">    method has_value = current &lt;&gt; []</userinput>
+<userinput moreinfo="none"/>
+<userinput moreinfo="none">    method get =</userinput>
+<userinput moreinfo="none">      match current with</userinput>
+<userinput moreinfo="none">      | hd :: tl -&gt; hd</userinput>
+<userinput moreinfo="none">      | [] -&gt; raise (Invalid_argument "no value")</userinput>
+<userinput moreinfo="none"/>
+<userinput moreinfo="none">    method next =</userinput>
+<userinput moreinfo="none">      match current with</userinput>
+<userinput moreinfo="none">      | hd :: tl -&gt; current &lt;- tl</userinput>
+<userinput moreinfo="none">      | [] -&gt; raise (Invalid_argument "no value")</userinput>
+<userinput moreinfo="none">   end  ;;</userinput>
+<computeroutput moreinfo="none">class ['a] list_iterator :</computeroutput>
+<computeroutput moreinfo="none">  'a list -&gt;</computeroutput>
+<computeroutput moreinfo="none">  object</computeroutput>
+<computeroutput moreinfo="none">    val mutable current : 'a list</computeroutput>
+<computeroutput moreinfo="none">    method get : 'a</computeroutput>
+<computeroutput moreinfo="none">    method has_value : bool</computeroutput>
+<computeroutput moreinfo="none">    method next : unit</computeroutput>
+<computeroutput moreinfo="none">  end</computeroutput>
+</programlisting>
+
+        <para>Finally, we add a method <literal moreinfo="none">iterator</literal> to the
+        <literal moreinfo="none">stack</literal> class to produce an iterator. To do so, we
+        construct a <literal moreinfo="none">list_iterator</literal> that refers to the
+        current contents of the stack.</para>
+
+        <para role="sourcecode">OCaml Utop:
+        <filename moreinfo="none">classes/iter.topscript</filename> (part 2)</para>
+
+        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">class ['a] stack init = object</userinput>
+<userinput moreinfo="none">    val mutable v : 'a list = init</userinput>
+<userinput moreinfo="none"/>
+<userinput moreinfo="none">    method pop =</userinput>
+<userinput moreinfo="none">      match v with</userinput>
+<userinput moreinfo="none">      | hd :: tl -&gt;</userinput>
+<userinput moreinfo="none">        v &lt;- tl;</userinput>
+<userinput moreinfo="none">        Some hd</userinput>
+<userinput moreinfo="none">      | [] -&gt; None</userinput>
+<userinput moreinfo="none"/>
+<userinput moreinfo="none">    method push hd =</userinput>
+<userinput moreinfo="none">      v &lt;- hd :: v</userinput>
+<userinput moreinfo="none"/>
+<userinput moreinfo="none">    method iterator : 'a iterator =</userinput>
+<userinput moreinfo="none">      new list_iterator v</userinput>
+<userinput moreinfo="none">  end ;;</userinput>
+<computeroutput moreinfo="none">class ['a] stack :</computeroutput>
+<computeroutput moreinfo="none">  'a list -&gt;</computeroutput>
+<computeroutput moreinfo="none">  object</computeroutput>
+<computeroutput moreinfo="none">    val mutable v : 'a list</computeroutput>
+<computeroutput moreinfo="none">    method iterator : 'a iterator</computeroutput>
+<computeroutput moreinfo="none">    method pop : 'a option</computeroutput>
+<computeroutput moreinfo="none">    method push : 'a -&gt; unit</computeroutput>
+<computeroutput moreinfo="none">  end</computeroutput>
+</programlisting>
+
+        <para>Now we can build a new stack, push some values to it, and
+        iterate over them.</para>
+
+        <para role="sourcecode">OCaml Utop:
+        <filename moreinfo="none">classes/iter.topscript</filename> (part 3)</para>
+
+        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let s = new stack [] ;;</userinput>
+<computeroutput moreinfo="none">val s : '_a stack = &lt;obj&gt;</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">s#push 5 ;;</userinput>
+<computeroutput moreinfo="none">- : unit = ()</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">s#push 4 ;;</userinput>
+<computeroutput moreinfo="none">- : unit = ()</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">let it = s#iterator ;;</userinput>
+<computeroutput moreinfo="none">val it : int iterator = &lt;obj&gt;</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">it#get ;;</userinput>
+<computeroutput moreinfo="none">- : int = 4</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">it#next ;;</userinput>
+<computeroutput moreinfo="none">- : unit = ()</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">it#get ;;</userinput>
+<computeroutput moreinfo="none">- : int = 5</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">it#next ;;</userinput>
+<computeroutput moreinfo="none">- : unit = ()</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">it#has_value ;;</userinput>
+<computeroutput moreinfo="none">- : bool = false</computeroutput>
+</programlisting>
+
+        <sect2 id="functional-iterators">
+          <title>Functional iterators</title>
+
+          <para>In practise, most OCaml programmers avoid iterator objects in
+          favor of functional-style techniques. For example, the alternative
+          stack class below takes a function <literal moreinfo="none">f</literal> and applies
+          it to each of the elements on the stack.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">classes/iter.topscript</filename> (part 4)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">class ['a] stack init = object</userinput>
+<userinput moreinfo="none">    val mutable v : 'a list = init</userinput>
+<userinput moreinfo="none"/>
+<userinput moreinfo="none">    method pop =</userinput>
+<userinput moreinfo="none">      match v with</userinput>
+<userinput moreinfo="none">      | hd :: tl -&gt;</userinput>
+<userinput moreinfo="none">        v &lt;- tl;</userinput>
+<userinput moreinfo="none">        Some hd</userinput>
+<userinput moreinfo="none">      | [] -&gt; None</userinput>
+<userinput moreinfo="none"/>
+<userinput moreinfo="none">    method push hd =</userinput>
+<userinput moreinfo="none">      v &lt;- hd :: v</userinput>
+<userinput moreinfo="none"/>
+<userinput moreinfo="none">   method iter f = </userinput>
+<userinput moreinfo="none">     List.iter ~f v </userinput>
+<userinput moreinfo="none">  end ;;</userinput>
+<computeroutput moreinfo="none">class ['a] stack :</computeroutput>
+<computeroutput moreinfo="none">  'a list -&gt;</computeroutput>
+<computeroutput moreinfo="none">  object</computeroutput>
+<computeroutput moreinfo="none">    val mutable v : 'a list</computeroutput>
+<computeroutput moreinfo="none">    method iter : ('a -&gt; unit) -&gt; unit</computeroutput>
+<computeroutput moreinfo="none">    method pop : 'a option</computeroutput>
+<computeroutput moreinfo="none">    method push : 'a -&gt; unit</computeroutput>
+<computeroutput moreinfo="none">  end</computeroutput>
+</programlisting>
+
+          <para>What about functional operations like <literal moreinfo="none">map</literal>
+          and <literal moreinfo="none">fold</literal>? In general, these methods take a
+          function that produces a value of some other type than the elements
+          of the set.</para>
+
+          <para>For example, a <literal moreinfo="none">fold</literal> method for our
+          <literal moreinfo="none">['a] stack</literal> class should have type <literal moreinfo="none">('b
+          -&gt; 'a -&gt; 'b) -&gt; 'b -&gt; 'b</literal>, where the
+          <literal moreinfo="none">'b</literal> is polymorphic. To express a polymorphic
+          method type like this we must use a type quantifier, as shown in the
+          following example.</para>
+
+          <para role="sourcecode">OCaml Utop:
+          <filename moreinfo="none">classes/iter.topscript</filename> (part 5)</para>
+
+          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">class ['a] stack init = object</userinput>
+<userinput moreinfo="none">    val mutable v : 'a list = init</userinput>
+<userinput moreinfo="none"/>
+<userinput moreinfo="none">    method pop =</userinput>
+<userinput moreinfo="none">      match v with</userinput>
+<userinput moreinfo="none">      | hd :: tl -&gt;</userinput>
+<userinput moreinfo="none">        v &lt;- tl;</userinput>
+<userinput moreinfo="none">        Some hd</userinput>
+<userinput moreinfo="none">      | [] -&gt; None</userinput>
+<userinput moreinfo="none"/>
+<userinput moreinfo="none">    method push hd =</userinput>
+<userinput moreinfo="none">      v &lt;- hd :: v</userinput>
+<userinput moreinfo="none"/>
+<userinput moreinfo="none">    method fold : 'b. ('b -&gt; 'a -&gt; 'b) -&gt; 'b -&gt; 'b =</userinput>
+<userinput moreinfo="none">     (fun f init -&gt; List.fold ~f ~init v) </userinput>
+<userinput moreinfo="none">  end ;;</userinput>
+<computeroutput moreinfo="none">class ['a] stack :</computeroutput>
+<computeroutput moreinfo="none">  'a list -&gt;</computeroutput>
+<computeroutput moreinfo="none">  object</computeroutput>
+<computeroutput moreinfo="none">    val mutable v : 'a list</computeroutput>
+<computeroutput moreinfo="none">    method fold : ('b -&gt; 'a -&gt; 'b) -&gt; 'b -&gt; 'b</computeroutput>
+<computeroutput moreinfo="none">    method pop : 'a option</computeroutput>
+<computeroutput moreinfo="none">    method push : 'a -&gt; unit</computeroutput>
+<computeroutput moreinfo="none">  end</computeroutput>
+</programlisting>
+
+          <para>The type quantifier <literal moreinfo="none">'b.</literal> can be read as "for
+          all <literal moreinfo="none">'b</literal>". Type quantifiers can only be used
+          <emphasis>directly after</emphasis> the method name, which means
+          that method parameters must be expressed using a
+          <literal moreinfo="none">fun</literal> or <literal moreinfo="none">function</literal>
+          expression.</para>
+        </sect2>
+      </sect1>
+
+      <sect1 id="inheritance">
+        <title>Inheritance</title>
+
+        <para>Inheritance uses an existing class to define a new one. For
+        example, the following class definition inherits from our stack class
+        for strings and adds a new method <literal moreinfo="none">print</literal> that prints
+        all the strings on the stack.</para>
+
+        <para role="sourcecode">OCaml Utop:
+        <filename moreinfo="none">classes/stack.topscript</filename> (part 2)</para>
+
+        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">class sstack init = object</userinput>
+<userinput moreinfo="none">    inherit [string] stack init</userinput>
+<userinput moreinfo="none"/>
+<userinput moreinfo="none">    method print =</userinput>
+<userinput moreinfo="none">      List.iter ~f:print_string v</userinput>
+<userinput moreinfo="none">  end ;;</userinput>
+<computeroutput moreinfo="none">class sstack :</computeroutput>
+<computeroutput moreinfo="none">  string list -&gt;</computeroutput>
+<computeroutput moreinfo="none">  object</computeroutput>
+<computeroutput moreinfo="none">    val mutable v : string list</computeroutput>
+<computeroutput moreinfo="none">    method pop : string option</computeroutput>
+<computeroutput moreinfo="none">    method print : unit</computeroutput>
+<computeroutput moreinfo="none">    method push : string -&gt; unit</computeroutput>
+<computeroutput moreinfo="none">  end</computeroutput>
+</programlisting>
+
+        <para>A class can override methods from classes it inherits. For
+        example, this class creates stacks of integers that double the
+        integers before they are pushed onto the stack.</para>
+
+        <para role="sourcecode">OCaml Utop:
+        <filename moreinfo="none">classes/stack.topscript</filename> (part 3)</para>
+
+        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">class double_stack init = object</userinput>
+<userinput moreinfo="none">    inherit [int] stack init as super</userinput>
+<userinput moreinfo="none"/>
+<userinput moreinfo="none">    method push hd =</userinput>
+<userinput moreinfo="none">      super#push (hd * 2)</userinput>
+<userinput moreinfo="none">  end ;;</userinput>
+<computeroutput moreinfo="none">class double_stack :</computeroutput>
+<computeroutput moreinfo="none">  int list -&gt;</computeroutput>
+<computeroutput moreinfo="none">  object</computeroutput>
+<computeroutput moreinfo="none">    val mutable v : int list</computeroutput>
+<computeroutput moreinfo="none">    method pop : int option</computeroutput>
+<computeroutput moreinfo="none">    method push : int -&gt; unit</computeroutput>
+<computeroutput moreinfo="none">  end</computeroutput>
+</programlisting>
+
+        <para>The <literal moreinfo="none">as super</literal> statement above creates a
+        special object called <literal moreinfo="none">super</literal> which can be used to
+        call superclass methods. Note that <literal moreinfo="none">super</literal> is not a
+        real object and can only be used to call methods.</para>
+      </sect1>
+
+      <sect1 id="class-types">
+        <title>Class types</title>
+
+        <para>To allow code in a different file or module to inherit from a
+        class we must expose it and give it a class type. What is the class
+        type?</para>
+
+        <para>As an example, let's wrap up our <literal moreinfo="none">stack</literal> class
+        in an explicit module (we'll use explicit modules for illustration,
+        but the process is similar when we want to define a
+        <literal moreinfo="none">.mli</literal> file). In keeping with the usual style for
+        modules, we define a type <literal moreinfo="none">'a t</literal> to represent the
+        type of our stacks.</para>
+
+        <para role="sourcecode">OCaml:
+        <filename moreinfo="none">classes/class_types_stack.ml</filename></para>
+
+        <programlisting language="ocaml" format="linespecific">module Stack = struct
+  class ['a] stack init = object
+    ...    
+  end
+
+  type 'a t = 'a stack
+
+  let make init = new stack init
+end</programlisting>
+
+        <para>We have multiple choices in defining the module type, depending
+        on how much of the implementation we want to expose. At one extreme, a
+        maximally-abstract signature would completely hide the class
+        definitions.</para>
+
+        <para role="sourcecode">OCaml:
+        <filename moreinfo="none">classes/class_types_stack.ml</filename> (part 1)</para>
+
+        <programlisting language="ocaml" format="linespecific">module AbstractStack : sig
+   type 'a t = &lt; pop: 'a option; push: 'a -&gt; unit &gt;
+
+   val make : unit -&gt; 'a t
+end = Stack</programlisting>
+
+        <para>The abstract signature is simple because we ignore the classes.
+        But what if we want to include them in the signature, so that other
+        modules can inherit from the class definitions? For this, we need to
+        specify types for the classes, called <emphasis>class
+        types</emphasis>.</para>
+
+        <para>Class types do not appear in mainstream object-oriented
+        programming languages, so you may not be familiar with them, but the
+        concept is pretty simple. A class type specifies the type of each of
+        the visible parts of the class, including both fields and methods.
+        Just like for module types, you don't have to give a type for
+        everything; anything you omit will be hidden.</para>
+
+        <para role="sourcecode">OCaml:
+        <filename moreinfo="none">classes/class_types_stack.ml</filename> (part 2)</para>
+
+        <programlisting language="ocaml" format="linespecific">module VisibleStack : sig
+  
+  type 'a t = &lt; pop: 'a option; push: 'a -&gt; unit &gt;
+
+  class ['a] stack : object
+    val mutable v : 'a list
+    method pop : 'a option
+    method push : 'a -&gt; unit
+  end
+
+  val make : unit -&gt; 'a t
+end = Stack</programlisting>
+
+        <para>In this signature, we've chosen to make everything visible. The
+        class type for <literal moreinfo="none">stack</literal> specifies the types of the
+        field <literal moreinfo="none">v</literal>, as well as the types of each of the
+        methods.</para>
+      </sect1>
+
+      <sect1 id="open-recursion">
+        <title>Open recursion</title>
+
+        <para>Open recursion allows an object's methods to invoke other
+        methods on the same object. These calls are looked up dynamically
+        allowing a method in one class to call a method from another class, if
+        both classes are inherited by the same object. This allows mutually
+        recursive parts of an object to be defined separately.</para>
+
+        <para>This ability to define mutually recursive methods from separate
+        components is a key feature of classes: achieving similar
+        functionality with datatypes or modules is much more cumbersome and
+        verbose.</para>
+
+        <para>For example, consider writing recursive functions over a simple
+        document format. This format is represented as a tree with three
+        different types of node:</para>
+
+        <para role="sourcecode">OCaml:
+        <filename moreinfo="none">classes/doc.ml</filename></para>
+
+        <programlisting language="ocaml" format="linespecific">type doc =
+  | Heading of string
+  | Paragraph of text_item list
+  | Definition of string list_item list
+
+and text_item =
+  | Raw of string
+  | Bold of text_item list
+  | Enumerate of int list_item list
+  | Quote of doc
+
+and 'a list_item = 
+  { tag: 'a;
+    text: text_item list }</programlisting>
+
+        <para>It is quite easy to write a function that operates by
+        recursively traversing this data. However, what if you need to write
+        many similar recursive functions? How can you factor out the common
+        parts of these functions to avoid repetitive boilerplate?</para>
+
+        <para>The simplest way is to use classes and open recursion. For
+        example, the following class defines objects which fold over the
+        document data:</para>
+
+        <para role="sourcecode">OCaml: <filename moreinfo="none">classes/doc.ml</filename>
+        (part 1)</para>
+
+        <programlisting language="ocaml" format="linespecific">open Core.Std
+
+class ['a] folder = object(self)
+  method doc acc = function
+  | Heading _ -&gt; acc
+  | Paragraph text -&gt; List.fold ~f:self#text_item ~init:acc text
+  | Definition list -&gt; List.fold ~f:self#list_item ~init:acc list
+
+  method list_item: 'b. 'a -&gt; 'b list_item -&gt; 'a = 
+    fun acc {tag; text} -&gt;
+      List.fold ~f:self#text_item ~init:acc text
+
+  method text_item acc = function
+  | Raw _ -&gt; acc
+  | Bold text -&gt; List.fold ~f:self#text_item ~init:acc text
+  | Enumerate list -&gt; List.fold ~f:self#list_item ~init:acc list
+  | Quote doc -&gt; self#doc acc doc
+end</programlisting>
+
+        <para>The <literal moreinfo="none">object (self)</literal> syntax binds
+        <literal moreinfo="none">self</literal> to the current object, allowing the
+        <literal moreinfo="none">doc</literal>, <literal moreinfo="none">list_item</literal> and
+        <literal moreinfo="none">text_item</literal> methods to call each other.</para>
+
+        <para>By inheriting from this class we can create functions which fold
+        over the document data. For example, the <literal moreinfo="none">count_doc</literal>
+        function counts the number of bold tags in the document that are not
+        within a list:</para>
+
+        <para role="sourcecode">OCaml: <filename moreinfo="none">classes/doc.ml</filename>
+        (part 2)</para>
+
+        <programlisting language="ocaml" format="linespecific">class counter = object
+  inherit [int] folder as super
+
+  method list_item acc li = acc
+
+  method text_item acc ti =
+    let acc = super#text_item acc ti in
+    match ti with
+    | Bold _ -&gt; acc + 1
+    | _ -&gt; acc
+end
+
+let count_doc = (new counter)#doc</programlisting>
+
+        <para>Note how the <literal moreinfo="none">super</literal> special object is used in
+        <literal moreinfo="none">text_item</literal> to call the <literal moreinfo="none">[int]
+        folder</literal> class's <literal moreinfo="none">text_item</literal> method to fold
+        over the children of the <literal moreinfo="none">text_item</literal> node.</para>
+      </sect1>
+
+      <sect1 id="private-methods">
+        <title>Private methods</title>
+
+        <para>Methods can be declared <emphasis>private</emphasis>, which
+        means that they may be called by subclasses, but they are not visible
+        otherwise (similar to a <emphasis>protected</emphasis> method in
+        C++).</para>
+
+        <para>For example, we may want to include methods in our
+        <literal moreinfo="none">folder</literal> class for handling each of the different
+        cases in <literal moreinfo="none">doc</literal> and <literal moreinfo="none">text_item</literal>.
+        However, we may not want to force subclasses of
+        <literal moreinfo="none">folder</literal> to expose these methods as they probably
+        shouldn't be called directly.</para>
+
+        <para role="sourcecode">OCaml: <filename moreinfo="none">classes/doc.ml</filename>
+        (part 3)</para>
+
+        <programlisting language="ocaml" format="linespecific">class ['a] folder2 = object(self)
+  method doc acc = function
+  | Heading str -&gt; self#heading acc str
+  | Paragraph text -&gt; self#paragraph acc text
+  | Definition list -&gt; self#definition acc list
+
+  method list_item: 'b. 'a -&gt; 'b list_item -&gt; 'a =
+    fun acc {tag; text} -&gt;
+      List.fold ~f:self#text_item ~init:acc text
+
+  method text_item acc = function
+  | Raw str -&gt; self#raw acc str
+  | Bold text -&gt; self#bold acc text
+  | Enumerate list -&gt; self#enumerate acc list
+  | Quote doc -&gt; self#quote acc doc
+
+  method private heading acc str = acc
+  method private paragraph acc text =
+    List.fold ~f:self#text_item ~init:acc text
+  method private definition acc list =
+    List.fold ~f:self#list_item ~init:acc list
+
+  method private raw acc str = acc
+  method private bold acc text = 
+    List.fold ~f:self#text_item ~init:acc text
+  method private enumerate acc list = 
+    List.fold ~f:self#list_item ~init:acc list
+  method private quote acc doc = self#doc acc doc
+end
+
+let f :
+  &lt; doc : int -&gt; doc -&gt; int;
+    list_item : 'a . int -&gt; 'a list_item -&gt; int;
+    text_item : int -&gt; text_item -&gt; int &gt;  = new folder2</programlisting>
+
+        <para>The final statement that builds the value <literal moreinfo="none">f</literal>
+        shows how the instantiation of a <literal moreinfo="none">folder2</literal> object has
+        a type that hides the private methods.</para>
+
+        <para>To be precise, the private methods are part of the class type,
+        but not part of the object type. This means, for example, that the
+        object <literal moreinfo="none">f</literal> has no method <literal moreinfo="none">bold</literal>.
+        However, the private methods are available to subclasses: we can use
+        them to simplify our <literal moreinfo="none">counter</literal> class.</para>
+
+        <para role="sourcecode">OCaml: <filename moreinfo="none">classes/doc.ml</filename>
+        (part 4)</para>
+
+        <programlisting language="ocaml" format="linespecific">class counter_with_private_method = object
+  inherit [int] folder2 as super
+
+  method list_item acc li = acc
+
+  method private bold acc txt = 
+    let acc = super#bold acc txt in
+    acc + 1
+end</programlisting>
+
+        <para>The key property of private methods is that they are visible to
+        subclasses, but not anywhere else. If you want the stronger guarantee
+        that a method is <emphasis>really</emphasis> private, not even
+        accessible in subclasses, you can use an explicit class type that
+        omits the method. In the following code, the private methods are
+        explicitly omitted from the class type of
+        <literal moreinfo="none">counter_with_sig</literal>, and can't be invoked in
+        subclasses of <literal moreinfo="none">counter_with_sig</literal>.</para>
+
+        <para role="sourcecode">OCaml: <filename moreinfo="none">classes/doc.ml</filename>
+        (part 5)</para>
+
+        <programlisting language="ocaml" format="linespecific">class counter_with_sig : object
+  method doc : int -&gt; doc -&gt; int
+  method list_item : int -&gt; 'b list_item -&gt; int
+  method text_item : int -&gt; text_item -&gt; int
+end = object
+  inherit [int] folder2 as super
+
+  method list_item acc li = acc
+
+  method private bold acc txt = 
+    let acc = super#bold acc txt in
+    acc + 1
+end</programlisting>
+      </sect1>
+
+      <sect1 id="binary-methods">
+        <title>Binary methods</title>
+
+        <para>A <emphasis>binary method</emphasis> is a method that takes an
+        object of <literal moreinfo="none">self</literal> type. One common example is defining
+        a method for equality.</para>
+
+        <para role="sourcecode">OCaml Utop:
+        <filename moreinfo="none">classes/binary.topscript</filename></para>
+
+        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">class square w = object(self : 'self) </userinput>
+<userinput moreinfo="none">    method width = w</userinput>
+<userinput moreinfo="none">    method area = Float.of_int (self#width * self#width)</userinput>
+<userinput moreinfo="none">    method equals (other : 'self) = other#width = self#width</userinput>
+<userinput moreinfo="none">  end ;;</userinput>
+<computeroutput moreinfo="none">class square :</computeroutput>
+<computeroutput moreinfo="none">  int -&gt;</computeroutput>
+<computeroutput moreinfo="none">  object ('a)</computeroutput>
+<computeroutput moreinfo="none">    method area : float</computeroutput>
+<computeroutput moreinfo="none">    method equals : 'a -&gt; bool</computeroutput>
+<computeroutput moreinfo="none">    method width : int</computeroutput>
+<computeroutput moreinfo="none">  end</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">class circle r = object(self : 'self)</userinput>
+<userinput moreinfo="none">    method radius = r</userinput>
+<userinput moreinfo="none">    method area = 3.14 *. (Float.of_int self#radius) ** 2.0</userinput>
+<userinput moreinfo="none">    method equals (other : 'self) = other#radius = self#radius</userinput>
+<userinput moreinfo="none">  end ;;</userinput>
+<computeroutput moreinfo="none">class circle :</computeroutput>
+<computeroutput moreinfo="none">  int -&gt;</computeroutput>
+<computeroutput moreinfo="none">  object ('a)</computeroutput>
+<computeroutput moreinfo="none">    method area : float</computeroutput>
+<computeroutput moreinfo="none">    method equals : 'a -&gt; bool</computeroutput>
+<computeroutput moreinfo="none">    method radius : int</computeroutput>
+<computeroutput moreinfo="none">  end</computeroutput>
+</programlisting>
+
+        <para>Note how we can use the type annotation <literal moreinfo="none">(self:
+        'self)</literal> to obtain the type of the current object.</para>
+
+        <para>We can now test different object instances for equality by using
+        the <literal moreinfo="none">equals</literal> binary method.</para>
+
+        <para role="sourcecode">OCaml Utop:
+        <filename moreinfo="none">classes/binary.topscript</filename> (part 1)</para>
+
+        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">(new square 5)#equals (new square 5) ;;</userinput>
+<computeroutput moreinfo="none">- : bool = true</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">(new circle 10)#equals (new circle 7) ;;</userinput>
+<computeroutput moreinfo="none">- : bool = false</computeroutput>
+</programlisting>
+
+        <para>This works, but there is a problem lurking here. The method
+        <literal moreinfo="none">equals</literal> takes an object of the exact type
+        <literal moreinfo="none">square</literal> or <literal moreinfo="none">circle</literal>. Because of
+        this, we can't define a common base class <literal moreinfo="none">shape</literal>
+        that also includes an equality method.</para>
+
+        <para role="sourcecode">OCaml Utop:
+        <filename moreinfo="none">classes/binary.topscript</filename> (part 2)</para>
+
+        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type shape = &lt; equals : shape -&gt; bool; area : float &gt; ;;</userinput>
+<computeroutput moreinfo="none">type shape = &lt; area : float; equals : shape -&gt; bool &gt;</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">(new square 5 :&gt; shape) ;;</userinput>
+<computeroutput moreinfo="none">Characters -1-23:</computeroutput>
+<computeroutput moreinfo="none">Error: Type square = &lt; area : float; equals : square -&gt; bool; width : int &gt;</computeroutput>
+<computeroutput moreinfo="none">       is not a subtype of shape = &lt; area : float; equals : shape -&gt; bool &gt; </computeroutput>
+<computeroutput moreinfo="none">       Type shape = &lt; area : float; equals : shape -&gt; bool &gt;</computeroutput>
+<computeroutput moreinfo="none">       is not a subtype of</computeroutput>
+<computeroutput moreinfo="none">         square = &lt; area : float; equals : square -&gt; bool; width : int &gt; </computeroutput>
+</programlisting>
+
+        <para>The problem is that a <literal moreinfo="none">square</literal> expects to be
+        compared with a <literal moreinfo="none">square</literal>, not an arbitrary shape;
+        similarly for <literal moreinfo="none">circle</literal>. This problem is fundamental.
+        Many languages solve it either with narrowing (with dynamic type
+        checking), or by method overloading. Since OCaml has neither of these,
+        what can we do?</para>
+
+        <para>Since the problematic method is equality, one proposal we could
+        consider is to just drop it from the base type
+        <literal moreinfo="none">shape</literal> and use polymorphic equality instead.
+        However, the built-in polymorphic equality has very poor behavior when
+        applied to objects.</para>
+
+        <para role="sourcecode">OCaml Utop:
+        <filename moreinfo="none">classes/binary.topscript</filename> (part 3)</para>
+
+        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">(object method area = 5 end) = (object method area = 5 end) ;;</userinput>
+<computeroutput moreinfo="none">- : bool = false</computeroutput>
+</programlisting>
+
+        <para>The problem here is that two objects are considered equal by the
+        built-in polymorphic equality if and only if they are physically
+        equal. There are other reasons not to use the built-in polymorphic
+        equality, but these false negatives are a showstopper.</para>
+
+        <para>If we want to define equality for shapes in general, the
+        remaining solution is to use the same approach as we described for
+        narrowing. That is, introduce a <emphasis>representation</emphasis>
+        type implemented using variants, and implement the comparison based on
+        the representation type.</para>
+
+        <para role="sourcecode">OCaml Utop:
+        <filename moreinfo="none">classes/binary.topscript</filename> (part 4)</para>
+
+        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type shape_repr =</userinput>
+<userinput moreinfo="none">  | Square of int</userinput>
+<userinput moreinfo="none">  | Circle of int ;;</userinput>
+<computeroutput moreinfo="none">type shape_repr = Square of int | Circle of int</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">type shape =</userinput>
+<userinput moreinfo="none">  &lt; repr : shape_repr; equals : shape -&gt; bool; area : float &gt; ;;</userinput>
+<computeroutput moreinfo="none">type shape = &lt; area : float; equals : shape -&gt; bool; repr : shape_repr &gt;</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">class square w = object(self) </userinput>
+<userinput moreinfo="none">    method width = w</userinput>
+<userinput moreinfo="none">    method area = Float.of_int (self#width * self#width)</userinput>
+<userinput moreinfo="none">    method repr = Square self#width</userinput>
+<userinput moreinfo="none">    method equals (other : shape) = other#repr = self#repr</userinput>
+<userinput moreinfo="none">  end ;;</userinput>
+<computeroutput moreinfo="none">class square :</computeroutput>
+<computeroutput moreinfo="none">  int -&gt;</computeroutput>
+<computeroutput moreinfo="none">  object</computeroutput>
+<computeroutput moreinfo="none">    method area : float</computeroutput>
+<computeroutput moreinfo="none">    method equals : shape -&gt; bool</computeroutput>
+<computeroutput moreinfo="none">    method repr : shape_repr</computeroutput>
+<computeroutput moreinfo="none">    method width : int</computeroutput>
+<computeroutput moreinfo="none">  end</computeroutput>
+</programlisting>
+
+        <para>The binary method <literal moreinfo="none">equals</literal> is now implemented
+        in terms of the concrete type <literal moreinfo="none">shape_repr</literal>. When
+        using this pattern, you will not be able to hide the
+        <literal moreinfo="none">repr</literal> method, but you can hide the type definition
+        using the module system.</para>
+
+        <para role="sourcecode">OCaml:
+        <filename moreinfo="none">classes/binary_module.ml</filename></para>
+
+        <programlisting language="ocaml" format="linespecific">module Shapes : sig
+  type shape_repr
+  type shape =
+    &lt; repr : shape_repr; equals : shape -&gt; bool; area: float &gt;
+
+  class square : int -&gt;
+    object
+      method width : int
+      method area : float
+      method repr : shape_repr
+      method equals : shape -&gt; bool
+    end
+end = struct
+  type shape_repr = 
+  | Square of int 
+  | Circle of int 
+  ...
+end</programlisting>
+
+        <para>Note that this solution prevents us from adding new kinds of
+        shape without adding new constructors to the
+        <literal moreinfo="none">shape_repr</literal> type, which is quite restrictive. The
+        objects created by these classes are also in one-to-one correspondence
+        with members of the representation type, making the objects seem
+        somewhat redundant.</para>
+
+        <para>However, equality is quite an extreme instance of a binary
+        method: it needs access to all the information of the other object.
+        Many other binary methods need only partial information about the
+        object. For instance, a method that compares shapes by their
+        sizes:</para>
+
+        <para role="sourcecode">OCaml:
+        <filename moreinfo="none">classes/binary_larger.ml</filename></para>
+
+        <programlisting language="ocaml" format="linespecific">class square w = object(self) 
+  method width = w
+  method area = Float.of_int (self#width * self#width)
+  method larger other = self#area &gt; other#area
+end</programlisting>
+
+        <para>In this case, there is no one-to-one correspondence between the
+        objects and their sizes, and we can still easily define new kinds of
+        shape.</para>
+      </sect1>
+
+      <sect1 id="virtual-classes-and-methods">
+        <title>Virtual classes and methods</title>
+
+        <para>A <emphasis>virtual</emphasis> class is a class where some
+        methods or fields are declared, but not implemented. This should not
+        be confused with the word <literal moreinfo="none">virtual</literal> as it is used in
+        C++. A <literal moreinfo="none">virtual</literal> method in C++ uses dynamic dispatch,
+        while regular non-virtual methods are statically dispatched. In OCaml,
+        <emphasis>all</emphasis> methods use dynamic dispatch, but the keyword
+        <literal moreinfo="none">virtual</literal> means that the method or field is not
+        implemented. A class containing virtual methods must also be flagged
+        <literal moreinfo="none">virtual</literal> and cannot be directly instantiated (i.e.
+        no object of this class can be created).</para>
+
+        <para>To explore this, let's extend our shapes examples to simple
+        interactive graphics. We will use the Async concurrency library and
+        the <ulink url="http://github.com/lpw25/async_graphics/">Async_graphics</ulink>
+        library, which provides an asynchronous interface to OCaml's built in
+        Graphics library. Concurrent programming with Async will be explored
+        later in <xref linkend="concurrent-programming-with-async"/>; for now
+        you can safely ignore the details. You just need to run <literal moreinfo="none">opam
+        install async_graphics</literal> to get the library installed on your
+        system.</para>
+
+        <para>We will give each shape a <literal moreinfo="none">draw</literal> method that
+        describes how to draw the shape on the
+        <literal moreinfo="none">Async_graphics</literal> display:</para>
+
+        <para role="sourcecode">OCaml:
+        <filename moreinfo="none">classes-async/shapes.ml</filename></para>
+
+        <programlisting language="ocaml" format="linespecific">open Core.Std
+open Async.Std
+open Async_graphics
+
+type drawable = &lt; draw: unit &gt;</programlisting>
+
+        <sect2 id="create-some-simple-shapes">
+          <title>Create some simple shapes</title>
+
+          <para>Now let's add classes for making squares and circles. We
+          include an <literal moreinfo="none">on_click</literal> method for adding event
+          handlers to the shapes.</para>
+
+          <para role="sourcecode">OCaml:
+          <filename moreinfo="none">classes-async/verbose_shapes.ml</filename> (part 1)</para>
+
+          <programlisting language="ocaml" format="linespecific">class square w x y = object(self)
+  val mutable x: int = x
+  method x = x
+
+  val mutable y: int = y
+  method y = y
+
+  val mutable width = w
+  method width = width
+
+  method draw = fill_rect x y width width
+
+  method private contains x' y' =
+    x &lt;= x' &amp;&amp; x' &lt;= x + width &amp;&amp;
+      y &lt;= y' &amp;&amp; y' &lt;= y + width
+
+  method on_click ?start ?stop f =
+    on_click ?start ?stop
+      (fun ev -&gt;
+         if self#contains ev.mouse_x ev.mouse_y then
+           f ev.mouse_x ev.mouse_y)
+end</programlisting>
+
+          <para>The <literal moreinfo="none">square</literal> class is pretty straightforward,
+          and the <literal moreinfo="none">circle</literal> class below also looks very
+          similar.</para>
+
+          <para role="sourcecode">OCaml:
+          <filename moreinfo="none">classes-async/verbose_shapes.ml</filename> (part 2)</para>
+
+          <programlisting language="ocaml" format="linespecific">class circle r x y = object(self)
+  val mutable x: int = x
+  method x = x
+
+  val mutable y: int = y
+  method y = y
+
+  val mutable radius = r
+  method radius = radius
+
+  method draw = fill_circle x y radius
+
+  method private contains x' y' =
+    let dx = abs (x' - x) in
+    let dy = abs (y' - y) in
+    let dist = sqrt (Float.of_int ((dx * dx) + (dy * dy))) in
+      dist &lt;= (Float.of_int radius)
+
+  method on_click ?start ?stop f =
+    on_click ?start ?stop
+      (fun ev -&gt;
+         if self#contains ev.mouse_x ev.mouse_y then
+           f ev.mouse_x ev.mouse_y)
+end</programlisting>
+
+          <para>These classes have a lot in common, and it would be useful to
+          factor out this common functionality into a superclass. We can
+          easily move the definitions of <literal moreinfo="none">x</literal> and
+          <literal moreinfo="none">y</literal> into a superclass, but what about
+          <literal moreinfo="none">on_click</literal>? Its definition depends on
+          <literal moreinfo="none">contains</literal> which has a different definition in each
+          class. The solution is to create a <emphasis>virtual</emphasis>
+          class. This class will declare a <literal moreinfo="none">contains</literal> method,
+          but leave its definition to the subclasses.</para>
+
+          <para>Here is the more succinct definition, starting with a virtual
+          <literal moreinfo="none">shape</literal> class that implements
+          <literal moreinfo="none">on_click</literal> and
+          <literal moreinfo="none">on_mousedown</literal>.</para>
+
+          <para role="sourcecode">OCaml:
+          <filename moreinfo="none">classes-async/shapes.ml</filename> (part 1)</para>
+
+          <programlisting language="ocaml" format="linespecific">class virtual shape x y = object(self)
+  method virtual private contains: int -&gt; int -&gt; bool
+
+  val mutable x: int = x
+  method x = x
+
+  val mutable y: int = y
+  method y = y
+
+  method on_click ?start ?stop f =
+    on_click ?start ?stop
+      (fun ev -&gt;  
+         if self#contains ev.mouse_x ev.mouse_y then
+           f ev.mouse_x ev.mouse_y)
+
+  method on_mousedown ?start ?stop f =
+    on_mousedown ?start ?stop
+      (fun ev -&gt;
+         if self#contains ev.mouse_x ev.mouse_y then
+           f ev.mouse_x ev.mouse_y)
+end</programlisting>
+
+          <para>Now we can define <literal moreinfo="none">square</literal> and
+          <literal moreinfo="none">circle</literal> by inheriting from
+          <literal moreinfo="none">shape</literal>.</para>
+
+          <para role="sourcecode">OCaml:
+          <filename moreinfo="none">classes-async/shapes.ml</filename> (part 2)</para>
+
+          <programlisting language="ocaml" format="linespecific">class square w x y = object
+  inherit shape x y
+
+  val mutable width = w
+  method width = width
+
+  method draw = fill_rect x y width width
+
+  method private contains x' y' = 
+    x &lt;= x' &amp;&amp; x' &lt;= x + width &amp;&amp;
+    y &lt;= y' &amp;&amp; y' &lt;= y + width 
+end 
+
+class circle r x y = object
+  inherit shape x y
+
+  val mutable radius = r
+  method radius = radius
+
+  method draw = fill_circle x y radius
+
+  method private contains x' y' =
+    let dx = abs (x' - x) in
+    let dy = abs (y' - y) in
+    let dist = sqrt (Float.of_int ((dx * dx) + (dy * dy))) in
+    dist &lt;= (Float.of_int radius)
+end</programlisting>
+
+          <para>One way to view a <literal moreinfo="none">virtual</literal> class is that it
+          is like a functor, where the "inputs" are the declared, but not
+          defined, virtual methods and fields. The functor application is
+          implemented through inheritance, when virtual methods are given
+          concrete implementations.</para>
+        </sect2>
+      </sect1>
+
+      <sect1 id="initializers">
+        <title>Initializers</title>
+
+        <para>You can execute expressions during the instantiation of a class
+        by placing them before the object expression or in the initial value
+        of a field:</para>
+
+        <para role="sourcecode">OCaml Utop:
+        <filename moreinfo="none">classes/initializer.topscript</filename></para>
+
+        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">class obj x = </userinput>
+<userinput moreinfo="none">    let () = printf "Creating obj %d\n" x in</userinput>
+<userinput moreinfo="none">    object </userinput>
+<userinput moreinfo="none">      val field = printf "Initializing field\n"; x</userinput>
+<userinput moreinfo="none">    end ;;</userinput>
+<computeroutput moreinfo="none">class obj : int -&gt; object val field : int end</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">let o = new obj 3 ;;</userinput>
+<computeroutput moreinfo="none">Creating obj 3</computeroutput>
+<computeroutput moreinfo="none">Initializing field</computeroutput>
+<computeroutput moreinfo="none">val o : obj = &lt;obj&gt;</computeroutput>
+</programlisting>
+
+        <para>However, these expressions are executed before the object has
+        been created, and cannot refer to the methods of the object. If you
+        need to use an object's methods during instantiation you can use an
+        initializer. An initializer is an expression that will be executed
+        during instantiation but after the object has been created.</para>
+
+        <para>For example, suppose we wanted to extend our previous shapes
+        module with a <literal moreinfo="none">growing_circle</literal> class for circles that
+        expand when clicked. We could inherit from <literal moreinfo="none">circle</literal>
+        and used the inherited <literal moreinfo="none">on_click</literal> to add a handler
+        for click events.</para>
+
+        <para role="sourcecode">OCaml:
+        <filename moreinfo="none">classes-async/shapes.ml</filename> (part 3)</para>
+
+        <programlisting language="ocaml" format="linespecific">class growing_circle r x y = object(self)
+  inherit circle r x y
+
+  initializer
+    self#on_click (fun _x _y -&gt; radius &lt;- radius * 2)
+end</programlisting>
+      </sect1>
+
+      <sect1 id="multiple-inheritance">
+        <title>Multiple inheritance</title>
+
+        <para>When a class inherits from more than one superclass, it is using
+        <emphasis>multiple inheritance</emphasis>. Multiple inheritance
+        extends the variety of ways in which classes can be combined, and it
+        can be quite useful, particularly with virtual classes. However, it
+        can be tricky to use, particularly when the inheritance hierarchy is a
+        graph rather than a tree, so it should be used with care.</para>
+
+        <sect2 id="how-names-are-resolved">
+          <title>How names are resolved</title>
+
+          <para>The main trickiness of multiple inheritance is due to
+          naming—what happens when a method or field with some name is defined
+          in more than one class?</para>
+
+          <para>If there is one thing to remember about inheritance in OCaml,
+          it is this: inheritance is like textual inclusion. If there is more
+          than one definition for a name, the last definition wins.</para>
+
+          <para>For example, consider this class which inherits from
+          <literal moreinfo="none">square</literal> and defines a new <literal moreinfo="none">draw</literal>
+          method that uses <literal moreinfo="none">draw_rect</literal> instead of
+          <literal moreinfo="none">fill_rect</literal> to draw the square.</para>
+
+          <para role="sourcecode">OCaml:
+          <filename moreinfo="none">classes-async/multiple_inheritance.ml</filename> (part
+          1)</para>
+
+          <programlisting language="ocaml" format="linespecific">class square_outline w x y = object
+  inherit square w x y
+  method draw = draw_rect x y width width
+end</programlisting>
+
+          <para>Since the <literal moreinfo="none">inherit</literal> declaration comes before
+          the method definition, the new <literal moreinfo="none">draw</literal> method
+          overrides the old one, and the square is drawn using
+          <literal moreinfo="none">draw_rect</literal>. But, what if we had defined
+          <literal moreinfo="none">square_outline</literal> as follows?</para>
+
+          <para role="sourcecode">OCaml:
+          <filename moreinfo="none">classes-async/multiple_inheritance_wrong.ml</filename>
+          (part 1)</para>
+
+          <programlisting language="ocaml" format="linespecific">class square_outline w x y = object
+  method draw = draw_rect x y w w
+  inherit square w x y
+end</programlisting>
+
+          <para>Here the <literal moreinfo="none">inherit</literal> declaration comes after
+          the method definition, so the <literal moreinfo="none">draw</literal> method from
+          <literal moreinfo="none">square</literal> will override the other definition, and
+          the square will be drawn using <literal moreinfo="none">fill_rect</literal>.</para>
+
+          <para>To reiterate, to understand what inheritance means, replace
+          each <literal moreinfo="none">inherit</literal> directive with its definition, and
+          take the last definition of each method or field. Note that the
+          methods and fields added by an inheritance are those listed in its
+          class type, so private methods that are hidden by the type will not
+          be included.</para>
+        </sect2>
+
+        <sect2 id="mixins">
+          <title>Mixins</title>
+
+          <para>When should you use multiple inheritance? If you ask multiple
+          people, you're likely to get multiple (perhaps heated) answers. Some
+          will argue that multiple inheritance is overly complicated; others
+          will argue that inheritance is problematic in general, and one
+          should use object composition instead. But regardless of who you
+          talk to, you will rarely hear that multiple inheritance is great and
+          you should use it widely.</para>
+
+          <para>In any case, if you're programming with objects, there's one
+          general pattern for multiple inheritance that is both useful and
+          reasonably simple, the <emphasis>mixin</emphasis> pattern.
+          Generically, a <emphasis>mixin</emphasis> is just a virtual class
+          that implements a feature based on another one. If you have a class
+          that implements methods <emphasis>A</emphasis>, and you have a mixin
+          <emphasis>M</emphasis> that provides methods <emphasis>B</emphasis>
+          from <emphasis>A</emphasis>, then you can inherit from
+          <emphasis>M</emphasis>—"mixing" it in—to get features
+          <emphasis>B</emphasis>.</para>
+
+          <para>That's too abstract, so let's give some examples based on our
+          interactive shapes. We may wish to allow a shape to be dragged by
+          the mouse. We can define this functionality for any object which has
+          mutable <literal moreinfo="none">x</literal> and <literal moreinfo="none">y</literal> fields and an
+          <literal moreinfo="none">on_mousedown</literal> method for adding event
+          handlers:</para>
+
+          <para role="sourcecode">OCaml:
+          <filename moreinfo="none">classes-async/shapes.ml</filename> (part 4)</para>
+
+          <programlisting language="ocaml" format="linespecific">class virtual draggable = object(self)
+  method virtual on_mousedown: 
+    ?start:unit Deferred.t -&gt; 
+    ?stop:unit Deferred.t -&gt; 
+    (int -&gt; int -&gt; unit) -&gt; unit
+  val virtual mutable x: int  
+  val virtual mutable y: int  
+
+  val mutable dragging = false
+  method dragging = dragging
+
+  initializer 
+    self#on_mousedown 
+      (fun mouse_x mouse_y -&gt;
+         let offset_x = x - mouse_x in
+         let offset_y = y - mouse_y in
+         let mouse_up = Ivar.create () in
+         let stop = Ivar.read mouse_up in
+         dragging &lt;- true;
+         on_mouseup ~stop
+           (fun _ -&gt;
+              Ivar.fill mouse_up ();
+              dragging &lt;- false);
+         on_mousemove ~stop
+           (fun ev -&gt;
+              x &lt;- ev.mouse_x + offset_x;
+              y &lt;- ev.mouse_y + offset_y))
+end</programlisting>
+
+          <para>This allows us to create draggable shapes using multiple
+          inheritance.</para>
+
+          <para role="sourcecode">OCaml:
+          <filename moreinfo="none">classes-async/shapes.ml</filename> (part 5)</para>
+
+          <programlisting language="ocaml" format="linespecific">class small_square = object
+  inherit square 20 40 40
+  inherit draggable 
+end</programlisting>
+
+          <para>We can also use mixins to create animated shapes. Each
+          animated shape has a list of update functions to be called during
+          animation. We create an <literal moreinfo="none">animated</literal> mixin to provide
+          this update list and ensure that the functions in it are called
+          regular intervals when the shape is animated.</para>
+
+          <para role="sourcecode">OCaml:
+          <filename moreinfo="none">classes-async/shapes.ml</filename> (part 6)</para>
+
+          <programlisting language="ocaml" format="linespecific">class virtual animated span = object(self)
+  method virtual on_click: 
+    ?start:unit Deferred.t -&gt; 
+    ?stop:unit Deferred.t -&gt; 
+    (int -&gt; int -&gt; unit) -&gt; unit
+  val mutable updates: (int -&gt; unit) list = []
+  val mutable step = 0
+  val mutable running = false
+
+  method running = running
+
+  method animate =
+    step &lt;- 0;
+    running &lt;- true;
+    let stop =
+      Clock.after span
+      &gt;&gt;| fun () -&gt; running &lt;- false 
+    in
+    Clock.every ~stop (Time.Span.of_sec (1.0 /. 24.0))
+      (fun () -&gt;
+         step &lt;- step + 1;
+         List.iter ~f:(fun f -&gt; f step) updates
+      )
+
+  initializer
+    self#on_click (fun _x _y -&gt; if not self#running then self#animate)
+end</programlisting>
+
+          <para>We use initializers to add functions to this update list. For
+          example, this class will produce circles that move to the right for
+          a second when clicked:</para>
+
+          <para role="sourcecode">OCaml:
+          <filename moreinfo="none">classes-async/shapes.ml</filename> (part 7)</para>
+
+          <programlisting language="ocaml" format="linespecific">class my_circle = object
+  inherit circle 20 50 50
+  inherit animated Time.Span.second
+  initializer updates &lt;- [fun _ -&gt; x &lt;- x + 5]
+end</programlisting>
+
+          <para>These initializers can also be added using mixins:</para>
+
+          <para role="sourcecode">OCaml:
+          <filename moreinfo="none">classes-async/shapes.ml</filename> (part 8)</para>
+
+          <programlisting language="ocaml" format="linespecific">class virtual linear x' y' = object
+  val virtual mutable updates: (int -&gt; unit) list
+  val virtual mutable x: int
+  val virtual mutable y: int
+
+  initializer
+    let update _ =
+      x &lt;- x + x';
+      y &lt;- y + y'
+    in
+    updates &lt;- update :: updates
+end
+
+let pi = (atan 1.0) *. 4.0
+
+class virtual harmonic offset x' y' = object
+  val virtual mutable updates: (int -&gt; unit) list
+  val virtual mutable x: int
+  val virtual mutable y: int
+
+  initializer
+    let update step =
+      let m = sin (offset +. ((Float.of_int step) *. (pi /. 64.))) in
+      let x' = Float.to_int (m *. Float.of_int x') in
+      let y' = Float.to_int (m *. Float.of_int y') in
+      x &lt;- x + x';
+      y &lt;- y + y'
+    in
+    updates &lt;- update :: updates
+end</programlisting>
+
+          <para>Since the <literal moreinfo="none">linear</literal> and
+          <literal moreinfo="none">harmonic</literal> mixins are only used for there
+          side-effects, they can be inherited multiple times within the same
+          object to produce a variety of different animations.</para>
+
+          <para role="sourcecode">OCaml:
+          <filename moreinfo="none">classes-async/shapes.ml</filename> (part 9)</para>
+
+          <programlisting language="ocaml" format="linespecific">class my_square x y = object
+  inherit square 40 x y
+  inherit draggable
+  inherit animated (Time.Span.of_int_sec 5)
+  inherit linear 5 0
+  inherit harmonic 0.0 7 ~-10
+end
+
+let my_circle = object
+  inherit circle 30 250 250
+  inherit animated (Time.Span.minute)
+  inherit harmonic 0.0 10 0
+  inherit harmonic (pi /. 2.0) 0 10
+end</programlisting>
+        </sect2>
+
+        <sect2 id="displaying-the-animated-shapes">
+          <title>Displaying the animated shapes</title>
+
+          <para>We finish our shapes module by creating a
+          <literal moreinfo="none">main</literal> function to draw some shapes on the
+          graphical display, and running that function using the Async
+          scheduler.</para>
+
+          <para role="sourcecode">OCaml:
+          <filename moreinfo="none">classes-async/shapes.ml</filename> (part 10)</para>
+
+          <programlisting language="ocaml" format="linespecific">let main () =
+  let shapes = [ 
+     (my_circle :&gt; drawable); 
+     (new my_square 50 350 :&gt; drawable); 
+     (new my_square 50 200 :&gt; drawable);
+     (new growing_circle 20 70 70 :&gt; drawable);
+  ] in
+  let repaint () =
+    clear_graph ();
+    List.iter ~f:(fun s -&gt; s#draw) shapes;
+    synchronize ()
+  in 
+    open_graph "";
+    auto_synchronize false;
+    Clock.every (Time.Span.of_sec (1.0 /. 24.0)) repaint
+
+let () = never_returns (Scheduler.go_main ~main ())</programlisting>
+
+          <para>Our <literal moreinfo="none">main</literal> function creates a list of shapes
+          to be displayed and defines a <literal moreinfo="none">repaint</literal> function
+          that actually draws them on the display. We then open a graphical
+          display and ask Async to run <literal moreinfo="none">repaint</literal> at regular
+          intervals.</para>
+
+          <para>Finally, build the binary by linking against the
+          <literal moreinfo="none">async_graphics</literal> package, which will pull in all
+          the other dependencies.</para>
+
+          <para role="sourcecode">Terminal:
+          <filename moreinfo="none">classes-async/build_shapes.out</filename></para>
+
+          <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg async_graphics shapes.native</userinput>
+</programlisting>
+
+          <para>When you run the binary, a new graphical window should appear
+          (on MacOS X, you will need to install the X11 package first, which
+          you will be prompted for). Try clicking on the various widgets, and
+          gasp in awe at the sophisticated animations that unfold as a
+          result.</para>
+
+          <para>The graphics library described here is the one built into
+          OCaml, and is more useful as a learning tool than anything else.
+          There are several third-party libraries that provide more
+          sophisticated bindings to various graphics subsystems.</para>
+
+          <itemizedlist>
+            <listitem>
+              <para><ulink url="http://lablgtk.forge.ocamlcore.org">Lablgtk</ulink> is a
+              strongly-typed interface to the GTK widget library.</para>
+            </listitem>
+
+            <listitem>
+              <para><ulink url="https://forge.ocamlcore.org/projects/lablgl/">LablGL</ulink>
+              is an interface between OCaml and OpenGL, a widely supported
+              standard for 3D rendering.</para>
+            </listitem>
+
+            <listitem>
+              <para><ulink url="http://ocsigen.org/js_of_ocaml/api/Js">js_of_ocaml</ulink>
+              compiles OCaml code to JavaScript, and has bindings to WebGL.
+              This is the emerging standard for 3D rendering in web
+              browsers.</para>
+            </listitem>
+          </itemizedlist>
+
+          <note>
+            <title>Production note</title>
+
+            <para>This chapter contains significant external contributions
+            from Leo White.</para>
+          </note>
+        </sect2>
+      </sect1>
+    </chapter>

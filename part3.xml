@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!DOCTYPE part PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<part label="III">
+    <title>The Runtime System</title>
+
+    <partintro>
+      <para>Part III is all about understanding the compiler toolchain and
+      runtime system in OCaml. It's a remarkably simple system in comparison
+      to other language runtimes (such as Java or the .NET CLR).</para>
+
+      <para>You'll need to read this to build very high performance systems
+      that have to minimise resource usage or interface to C libraries. This
+      is also where we talk about profiling and debugging techniques using
+      tools such as GNU gdb.</para>
+    </partintro>
+
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch19.xml"/>
+
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch20.xml"/>
+
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch21.xml"/>
+
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch22.xml"/>
+
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch23.xml"/>
+  </part>
