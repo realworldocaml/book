@@ -6,9 +6,10 @@ p.sourcecode {
   text-align: right;
   display: block;
   hyphens: none;
-  margin-bottom: -2pt;
+  margin-bottom: 0;
   font-size: 8.3pt;
   font-style: italic;
+  page-break-after: avoid
 }
 
 /*----Uncomment to turn on automatic code wrapping
