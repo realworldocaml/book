@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="maps-and-hash-tables">
       <title>Maps and Hash Tables</title>
@@ -18,8 +18,7 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val digit_alist : (int * string) list =</computeroutput>
 <computeroutput moreinfo="none">  [(0, "zero"); (1, "one"); (2, "two"); (3, "three"); (4, "four");</computeroutput>
-<computeroutput moreinfo="none">   (5, "five"); (6, "six"); (7, "seven"); (8, "eight"); (9, "nine")]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">   (5, "five"); (6, "six"); (7, "seven"); (8, "eight"); (9, "nine")]</computeroutput></programlisting>
 
       <para>We can use functions from the <literal moreinfo="none">List.Assoc</literal> module
       to manipulate such an association list.</para>
@@ -34,8 +33,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.Assoc.add digit_alist 0 "zilch";;</userinput>
 <computeroutput moreinfo="none">- : (int, string) List.Assoc.t =</computeroutput>
 <computeroutput moreinfo="none">[(0, "zilch"); (1, "one"); (2, "two"); (3, "three"); (4, "four");</computeroutput>
-<computeroutput moreinfo="none"> (5, "five"); (6, "six"); (7, "seven"); (8, "eight"); (9, "nine")]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none"> (5, "five"); (6, "six"); (7, "seven"); (8, "eight"); (9, "nine")]</computeroutput></programlisting>
 
       <para>Association lists are simple and easy to use, but their
       performance is not ideal, since almost every non-trivial operation on an
@@ -145,8 +143,7 @@ let touch t s =
 <userinput moreinfo="none">                     ~comparator:Int.comparator;;</userinput>
 <computeroutput moreinfo="none">val digit_map : (int, string, Int.comparator) Map.t = &lt;abstr&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Map.find digit_map 3;;</userinput>
-<computeroutput moreinfo="none">- : string option = Some "three"</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string option = Some "three"</computeroutput></programlisting>
 
           <para>The above uses <literal moreinfo="none">Map.of_alist_exn</literal> which
           creates a map from an association list, throwing an exception if
@@ -161,8 +158,7 @@ let touch t s =
           4)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let zilch_map = Map.add digit_map ~key:0 ~data:"zilch";;</userinput>
-<computeroutput moreinfo="none">val zilch_map : (int, string, Int.comparator) Map.t = &lt;abstr&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val zilch_map : (int, string, Int.comparator) Map.t = &lt;abstr&gt;</computeroutput></programlisting>
 
           <para>The type <literal moreinfo="none">Map.t</literal> has three type parameters:
           one for the key, one for the value, and one to identify the
@@ -188,8 +184,7 @@ let touch t s =
 <computeroutput moreinfo="none">val right : int String.Map.t = &lt;abstr&gt;</computeroutput>
 <computeroutput moreinfo="none">val diff :</computeroutput>
 <computeroutput moreinfo="none">  (string * [ `Left of int | `Right of int | `Unequal of int * int ]) list =</computeroutput>
-<computeroutput moreinfo="none">  [("foo", `Unequal (1, 0)); ("bar", `Left 3)]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  [("foo", `Unequal (1, 0)); ("bar", `Left 3)]</computeroutput></programlisting>
 
           <para>The type of <literal moreinfo="none">Map.symmetric_diff</literal>, shown
           below, requires that the two maps it compares have the same
@@ -205,8 +200,7 @@ let touch t s =
 <computeroutput moreinfo="none">    ('k, 'v, 'cmp) Map.t -&gt;</computeroutput>
 <computeroutput moreinfo="none">    data_equal:('v -&gt; 'v -&gt; bool) -&gt;</computeroutput>
 <computeroutput moreinfo="none">    ('k * [ `Left of 'v | `Right of 'v | `Unequal of 'v * 'v ]) list</computeroutput>
-<computeroutput moreinfo="none">= &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">= &lt;fun&gt;</computeroutput></programlisting>
 
           <para>This constraint is important because the algorithm that
           <literal moreinfo="none">Map.symmetric_diff</literal> uses depends for its
@@ -239,8 +233,7 @@ let touch t s =
 <computeroutput moreinfo="none">    val sexp_of_t : t -&gt; Sexp.t</computeroutput>
 <computeroutput moreinfo="none">    type comparator</computeroutput>
 <computeroutput moreinfo="none">    val comparator : (t, comparator) Comparator.t_</computeroutput>
-<computeroutput moreinfo="none">  end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
           <para>As you can see below, both
           <literal moreinfo="none">Reverse.comparator</literal> and
@@ -256,8 +249,7 @@ let touch t s =
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let ord_map = Map.of_alist_exn ~comparator:String.comparator alist;;</userinput>
 <computeroutput moreinfo="none">val ord_map : (string, int, String.comparator) Map.t = &lt;abstr&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rev_map = Map.of_alist_exn ~comparator:Reverse.comparator alist;;</userinput>
-<computeroutput moreinfo="none">val rev_map : (string, int, Reverse.comparator) Map.t = &lt;abstr&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val rev_map : (string, int, Reverse.comparator) Map.t = &lt;abstr&gt;</computeroutput></programlisting>
 
           <para><literal moreinfo="none">Map.min_elt</literal> returns the key and value for
           the smallest key in the map, which lets us see that these two maps
@@ -270,8 +262,7 @@ let touch t s =
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Map.min_elt ord_map;;</userinput>
 <computeroutput moreinfo="none">- : (string * int) option = Some ("foo", 0)</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Map.min_elt rev_map;;</userinput>
-<computeroutput moreinfo="none">- : (string * int) option = Some ("snoo", 3)</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : (string * int) option = Some ("snoo", 3)</computeroutput></programlisting>
 
           <para>Accordingly, if we try to use
           <literal moreinfo="none">Map.symmetric_diff</literal> on these two maps, we'll get a
@@ -286,8 +277,7 @@ let touch t s =
 <computeroutput moreinfo="none">Error: This expression has type (string, int, Reverse.comparator) Map.t</computeroutput>
 <computeroutput moreinfo="none">       but an expression was expected of type</computeroutput>
 <computeroutput moreinfo="none">         (string, int, String.comparator) Map.t</computeroutput>
-<computeroutput moreinfo="none">       Type Reverse.comparator is not compatible with type String.comparator </computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">       Type Reverse.comparator is not compatible with type String.comparator </computeroutput></programlisting>
         </sect2>
 
         <sect2 id="trees">
@@ -305,8 +295,7 @@ let touch t s =
           11)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let ord_tree = Map.to_tree ord_map;;</userinput>
-<computeroutput moreinfo="none">val ord_tree : (string, int, String.comparator) Map.Tree.t = &lt;abstr&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val ord_tree : (string, int, String.comparator) Map.Tree.t = &lt;abstr&gt;</computeroutput></programlisting>
 
           <para>Even though a <literal moreinfo="none">Map.Tree.t</literal> doesn't physically
           include a comparator, it does include the comparator in its type.
@@ -325,8 +314,7 @@ let touch t s =
           12)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Map.Tree.find ~comparator:String.comparator ord_tree "snoo";;</userinput>
-<computeroutput moreinfo="none">- : int option = Some 3</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int option = Some 3</computeroutput></programlisting>
 
           <para>The algorithm of <literal moreinfo="none">Map.Tree.find</literal> depends on
           the fact that it's using the same comparator when looking a value up
@@ -343,8 +331,7 @@ let touch t s =
 <computeroutput moreinfo="none">Error: This expression has type (string, int, String.comparator) Map.Tree.t</computeroutput>
 <computeroutput moreinfo="none">       but an expression was expected of type</computeroutput>
 <computeroutput moreinfo="none">         (string, int, Reverse.comparator) Map.Tree.t</computeroutput>
-<computeroutput moreinfo="none">       Type String.comparator is not compatible with type Reverse.comparator </computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">       Type String.comparator is not compatible with type Reverse.comparator </computeroutput></programlisting>
         </sect2>
 
         <sect2 id="the-polymorphic-comparator">
@@ -362,8 +349,7 @@ let touch t s =
           14)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Map.of_alist_exn ~comparator:Comparator.Poly.comparator digit_alist;;</userinput>
-<computeroutput moreinfo="none">- : (int, string, Comparator.Poly.comparator) Map.t = &lt;abstr&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : (int, string, Comparator.Poly.comparator) Map.t = &lt;abstr&gt;</computeroutput></programlisting>
 
           <para>Or, equivalently:</para>
 
@@ -372,8 +358,7 @@ let touch t s =
           15)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Map.Poly.of_alist_exn digit_alist;;</userinput>
-<computeroutput moreinfo="none">- : (int, string) Map.Poly.t = &lt;abstr&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : (int, string) Map.Poly.t = &lt;abstr&gt;</computeroutput></programlisting>
 
           <para>Note that maps based on the polymorphic comparator are not
           equivalent to those based on the type-specific comparators from the
@@ -392,8 +377,7 @@ let touch t s =
 <computeroutput moreinfo="none">       but an expression was expected of type</computeroutput>
 <computeroutput moreinfo="none">         (int, string, Comparator.Poly.comparator) Map.t</computeroutput>
 <computeroutput moreinfo="none">       Type Int.comparator is not compatible with type</computeroutput>
-<computeroutput moreinfo="none">         Comparator.Poly.comparator </computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">         Comparator.Poly.comparator </computeroutput></programlisting>
 
           <para>This is rejected for good reason: there's no guarantee that
           the comparator associated with a given type will order things in the
@@ -435,8 +419,7 @@ let touch t s =
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let (s1,s2) = (Int.Set.of_list [1;2],</userinput>
 <userinput moreinfo="none">                 Int.Set.of_list [2;1]);;</userinput>
 <computeroutput moreinfo="none">val s1 : Int.Set.t = &lt;abstr&gt;</computeroutput>
-<computeroutput moreinfo="none">val s2 : Int.Set.t = &lt;abstr&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val s2 : Int.Set.t = &lt;abstr&gt;</computeroutput></programlisting>
 
             <para>Logically, these two sets should be equal, and that's the
             result that you get if you call <literal moreinfo="none">Set.equal</literal> on
@@ -447,8 +430,7 @@ let touch t s =
             19)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Set.equal s1 s2;;</userinput>
-<computeroutput moreinfo="none">- : bool = true</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : bool = true</computeroutput></programlisting>
 
             <para>But because the elements were added in different orders, the
             layout of the trees underlying the sets will be different. As
@@ -465,8 +447,7 @@ let touch t s =
             20)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">s1 = s2;;</userinput>
-<computeroutput moreinfo="none">Exception: (Invalid_argument "equal: functional value").</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Exception: (Invalid_argument "equal: functional value").</computeroutput></programlisting>
 
             <para>We can however use the function
             <literal moreinfo="none">Set.to_tree</literal> to expose the underlying tree
@@ -477,8 +458,7 @@ let touch t s =
             21)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Set.to_tree s1 = Set.to_tree s2;;</userinput>
-<computeroutput moreinfo="none">- : bool = false</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : bool = false</computeroutput></programlisting>
 
             <para>This can cause real and quite subtle bugs. If, for example,
             you use a map whose keys contain sets, then the map built with the
@@ -513,8 +493,7 @@ let touch t s =
 <computeroutput moreinfo="none">val dedup :</computeroutput>
 <computeroutput moreinfo="none">  comparator:('a, 'b) Core_kernel.Comparator.t_ -&gt; 'a list -&gt; 'a list = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">dedup ~comparator:Int.comparator [8;3;2;3;7;8;10];;</userinput>
-<computeroutput moreinfo="none">- : int list = [2; 3; 7; 8; 10]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int list = [2; 3; 7; 8; 10]</computeroutput></programlisting>
 
           <para>In addition to the operators you would expect to have for
           maps, sets support the traditional set operations, including union,
@@ -594,8 +573,7 @@ sig
 
     ...
 
-end</computeroutput>
-</programlisting>
+end</computeroutput></programlisting>
 
           <para>We don't include the full response from the top-level because
           it is quite lengthy, but <literal moreinfo="none">Foo_and_bar</literal> does satisfy
@@ -629,8 +607,7 @@ sig
 
   ...
 
-end</computeroutput>
-</programlisting>
+end</computeroutput></programlisting>
 
           <para>The comparison function created by
           <literal moreinfo="none">comparelib</literal> for a given type will call out to the
@@ -671,8 +648,7 @@ sig
   ...
 
 end
-</computeroutput>
-</programlisting>
+</computeroutput></programlisting>
 
           <para>That said, for reasons we discussed earlier, polymorphic
           compare should be used sparingly.</para>
@@ -745,8 +721,7 @@ end
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Hashtbl.replace table ~key:"three" ~data:3;;</userinput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Hashtbl.find table "three";;</userinput>
-<computeroutput moreinfo="none">- : int option = Some 3</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int option = Some 3</computeroutput></programlisting>
 
         <para>The <literal moreinfo="none">hashable</literal> value is included as part of the
         <literal moreinfo="none">Hashable.S</literal> interface, which is satisfied by most
@@ -759,8 +734,7 @@ end
         26)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let table = String.Table.create ();;</userinput>
-<computeroutput moreinfo="none">val table : '_a String.Table.t = &lt;abstr&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val table : '_a String.Table.t = &lt;abstr&gt;</computeroutput></programlisting>
 
         <para>There is also a polymorphic <literal moreinfo="none">hashable</literal> value,
         corresponding to the polymorphic hash function provided by the OCaml
@@ -772,8 +746,7 @@ end
         27)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let table = Hashtbl.create ~hashable:Hashtbl.Poly.hashable ();;</userinput>
-<computeroutput moreinfo="none">val table : ('_a, '_b) Hashtbl.t = &lt;abstr&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val table : ('_a, '_b) Hashtbl.t = &lt;abstr&gt;</computeroutput></programlisting>
 
         <para>Or, equivalently:</para>
 
@@ -782,8 +755,7 @@ end
         28)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let table = Hashtbl.Poly.create ();;</userinput>
-<computeroutput moreinfo="none">val table : ('_a, '_b) Hashtbl.t = &lt;abstr&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val table : ('_a, '_b) Hashtbl.t = &lt;abstr&gt;</computeroutput></programlisting>
 
         <para>Note that, unlike the comparators used with maps and sets,
         hashables don't show up in the type of a <literal moreinfo="none">Hashtbl.t</literal>.
@@ -820,8 +792,7 @@ end
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Caml.Hashtbl.hash (List.range 0 11);;</userinput>
 <computeroutput moreinfo="none">- : int = 182325193</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Caml.Hashtbl.hash (List.range 0 100);;</userinput>
-<computeroutput moreinfo="none">- : int = 182325193</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 182325193</computeroutput></programlisting>
 
           <para>As you can see, the hash function stops after the first 10
           elements. The same can happen with any large data structure,
@@ -869,8 +840,7 @@ sig
 
   ...
 
-end</computeroutput>
-</programlisting>
+end</computeroutput></programlisting>
 
           <para>Note that in order to satisfy hashable, one also needs to
           provide a comparison function. That's because Core's hash tables use
@@ -962,8 +932,7 @@ let () =
 <computeroutput moreinfo="none"> ------- ------------ --------- </computeroutput>
 <computeroutput moreinfo="none">  map     31_698_313      1.00  </computeroutput>
 <computeroutput moreinfo="none">  table    7_202_631      4.40  </computeroutput>
-<computeroutput moreinfo="none">                                </computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">                                </computeroutput></programlisting>
 
         <para>We can make the speedup smaller or larger depending on the
         details of the test; for example, it will vary with the number of
@@ -1044,8 +1013,7 @@ let () =
 <computeroutput moreinfo="none"> ------- ----------- --------- </computeroutput>
 <computeroutput moreinfo="none">  map       218_581     12.03  </computeroutput>
 <computeroutput moreinfo="none">  table   2_628_423      1.00  </computeroutput>
-<computeroutput moreinfo="none">                               </computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">                               </computeroutput></programlisting>
 
         <para>These numbers can be made more extreme by increasing the size of
         the tables or the length of the list.</para>
@@ -1096,8 +1064,7 @@ let () =
 <computeroutput moreinfo="none">Error: This expression has type int but an expression was expected of type</computeroutput>
 <computeroutput moreinfo="none">         [ `Consider_using_phys_equal ]</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">phys_equal 1 2 ;;</userinput>
-<computeroutput moreinfo="none">- : bool = false</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : bool = false</computeroutput></programlisting>
 
           <para>If you feel like hanging your OCaml interpreter, you can
           verify what happens with recursive values and structural equality
@@ -1116,8 +1083,7 @@ and t2 = { foo2 : int; bar2 : t1; }</computeroutput>
 <userinput moreinfo="none"># phys_equal v1 v1;;</userinput>
 <computeroutput moreinfo="none">- : bool = true</computeroutput>
 <userinput moreinfo="none"># v1 = v1 ;;</userinput>
-<computeroutput moreinfo="none">&lt;press ^Z and kill the process now&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">&lt;press ^Z and kill the process now&gt;</computeroutput></programlisting>
         </sidebar>
       </sect1>
     </chapter>

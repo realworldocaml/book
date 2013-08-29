@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="first-class-modules">
       <title>First-Class Modules</title>
@@ -37,8 +37,7 @@
         <filename moreinfo="none">fcm/main.topscript</filename></para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module type X_int = sig val x : int end;;</userinput>
-<computeroutput moreinfo="none">module type X_int = sig val x : int end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">module type X_int = sig val x : int end</computeroutput></programlisting>
 
         <para>We can also create a module that matches this signature.</para>
 
@@ -48,8 +47,7 @@
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Three : X_int = struct let x = 3 end;;</userinput>
 <computeroutput moreinfo="none">module Three : X_int</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Three.x;;</userinput>
-<computeroutput moreinfo="none">- : int = 3</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 3</computeroutput></programlisting>
 
         <para>A first-class module is created by packaging up a module with a
         signature that it satisfies. This is done using the
@@ -58,8 +56,7 @@
         <para role="sourcecode">Syntax:
         <filename moreinfo="none">fcm/pack.syntax</filename></para>
 
-        <programlisting language="" format="linespecific">(module &lt;Module&gt; : &lt;Module_type&gt;)
-</programlisting>
+        <programlisting language="" format="linespecific">(module &lt;Module&gt; : &lt;Module_type&gt;)</programlisting>
 
         <para>So, we can convert <literal moreinfo="none">Three</literal> into a first-class
         module as follows.</para>
@@ -68,8 +65,7 @@
         <filename moreinfo="none">fcm/main.topscript</filename> (part 2)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let three = (module Three : X_int);;</userinput>
-<computeroutput moreinfo="none">val three : (module X_int) = &lt;module&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val three : (module X_int) = &lt;module&gt;</computeroutput></programlisting>
 
         <para>The module type doesn't need to be part of the construction of a
         first-class module if it can be inferred. Thus, we can write:</para>
@@ -80,8 +76,7 @@
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Four = struct let x = 4 end;;</userinput>
 <computeroutput moreinfo="none">module Four : sig val x : int end</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let numbers = [ three; (module Four) ];;</userinput>
-<computeroutput moreinfo="none">val numbers : (module X_int) list = [&lt;module&gt;; &lt;module&gt;]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val numbers : (module X_int) list = [&lt;module&gt;; &lt;module&gt;]</computeroutput></programlisting>
 
         <para>We can also create a first-class module from an anonymous
         module:</para>
@@ -90,8 +85,7 @@
         <filename moreinfo="none">fcm/main.topscript</filename> (part 4)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let numbers = [three; (module struct let x = 4 end)];;</userinput>
-<computeroutput moreinfo="none">val numbers : (module X_int) list = [&lt;module&gt;; &lt;module&gt;]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val numbers : (module X_int) list = [&lt;module&gt;; &lt;module&gt;]</computeroutput></programlisting>
 
         <para>In order to access the contents of a first-class module, you
         need to unpack it into an ordinary module. This can be done using the
@@ -100,8 +94,7 @@
         <para role="sourcecode">Syntax:
         <filename moreinfo="none">fcm/unpack.syntax</filename></para>
 
-        <programlisting language="" format="linespecific">(val &lt;first_class_module&gt; : &lt;Module_type&gt;)
-</programlisting>
+        <programlisting language="" format="linespecific">(val &lt;first_class_module&gt; : &lt;Module_type&gt;)</programlisting>
 
         <para>And here's an example.</para>
 
@@ -111,8 +104,7 @@
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module New_three = (val three : X_int) ;;</userinput>
 <computeroutput moreinfo="none">module New_three : X_int</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">New_three.x;;</userinput>
-<computeroutput moreinfo="none">- : int = 3</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 3</computeroutput></programlisting>
 
         <sidebar>
           <title>Equality of first-class module types</title>
@@ -134,8 +126,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">[three; five];;</userinput>
 <computeroutput moreinfo="none">Characters 8-12:</computeroutput>
 <computeroutput moreinfo="none">Error: This expression has type (module Y_int)</computeroutput>
-<computeroutput moreinfo="none">       but an expression was expected of type (module X_int)</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">       but an expression was expected of type (module X_int)</computeroutput></programlisting>
 
           <para>Even though their types as first-class modules are distinct,
           the underlying module types are compatible (indeed, identical), so
@@ -145,8 +136,7 @@
           <filename moreinfo="none">fcm/main.topscript</filename> (part 7)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">[three; (module (val five))];;</userinput>
-<computeroutput moreinfo="none">- : (module X_int) list = [&lt;module&gt;; &lt;module&gt;]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : (module X_int) list = [&lt;module&gt;; &lt;module&gt;]</computeroutput></programlisting>
 
           <para>The way in which type equality for first-class modules is
           determined can be confusing. One common and problematic case is that
@@ -180,8 +170,7 @@
 <userinput moreinfo="none">       let x = to_int m1 + to_int m2</userinput>
 <userinput moreinfo="none">     end : X_int)</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val plus : (module X_int) -&gt; (module X_int) -&gt; (module X_int) = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val plus : (module X_int) -&gt; (module X_int) -&gt; (module X_int) = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>With these functions in hand, we can now work with values of
         type <literal moreinfo="none">(module X_int)</literal> in a more natural style, taking
@@ -193,8 +182,7 @@
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let six = plus three three;;</userinput>
 <computeroutput moreinfo="none">val six : (module X_int) = &lt;module&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">to_int (List.fold ~init:six ~f:plus [three;three]);;</userinput>
-<computeroutput moreinfo="none">- : int = 12</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 12</computeroutput></programlisting>
 
         <para>There are some useful syntactic shortcuts when dealing with
         first class modules. One notable one is that you can do the conversion
@@ -205,8 +193,7 @@
         <filename moreinfo="none">fcm/main.topscript</filename> (part 10)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let to_int (module M : X_int) = M.x ;;</userinput>
-<computeroutput moreinfo="none">val to_int : (module X_int) -&gt; int = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val to_int : (module X_int) -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>First-class modules can contain types and functions in addition
         to simple values like <literal moreinfo="none">int</literal>. Here's an interface that
@@ -220,8 +207,7 @@
 <userinput moreinfo="none">    type t</userinput>
 <userinput moreinfo="none">    val bump : t -&gt; t</userinput>
 <userinput moreinfo="none">  end;;</userinput>
-<computeroutput moreinfo="none">module type Bumpable = sig type t val bump : t -&gt; t end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">module type Bumpable = sig type t val bump : t -&gt; t end</computeroutput></programlisting>
 
         <para>We can create multiple instances of this module with different
         underlying types.</para>
@@ -238,8 +224,7 @@
 <userinput moreinfo="none">     type t = float</userinput>
 <userinput moreinfo="none">     let bump n = n +. 1.</userinput>
 <userinput moreinfo="none">  end;;</userinput>
-<computeroutput moreinfo="none">module Float_bumper : sig type t = float val bump : t -&gt; t end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">module Float_bumper : sig type t = float val bump : t -&gt; t end</computeroutput></programlisting>
 
         <para>And we can convert these to first-class modules.</para>
 
@@ -247,8 +232,7 @@
         <filename moreinfo="none">fcm/main.topscript</filename> (part 13)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let int_bumper = (module Int_bumper : Bumpable);;</userinput>
-<computeroutput moreinfo="none">val int_bumper : (module Bumpable) = &lt;module&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val int_bumper : (module Bumpable) = &lt;module&gt;</computeroutput></programlisting>
 
         <para>But you can't do much with <literal moreinfo="none">int_bumper</literal>, since
         <literal moreinfo="none">int_bumper</literal> is fully abstract, so that we can no
@@ -262,8 +246,7 @@
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let (module Bumpable) = int_bumper in Bumpable.bump 3;;</userinput>
 <computeroutput moreinfo="none">Characters 52-53:</computeroutput>
 <computeroutput moreinfo="none">Error: This expression has type int but an expression was expected of type</computeroutput>
-<computeroutput moreinfo="none">         Bumpable.t</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">         Bumpable.t</computeroutput></programlisting>
 
         <para>To make <literal moreinfo="none">int_bumper</literal> usable, we need to expose
         the type, which we can do as follows.</para>
@@ -274,8 +257,7 @@
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let int_bumper = (module Int_bumper : Bumpable with type t = int);;</userinput>
 <computeroutput moreinfo="none">val int_bumper : (module Bumpable with type t = int) = &lt;module&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let float_bumper = (module Float_bumper : Bumpable with type t = float);;</userinput>
-<computeroutput moreinfo="none">val float_bumper : (module Bumpable with type t = float) = &lt;module&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val float_bumper : (module Bumpable with type t = float) = &lt;module&gt;</computeroutput></programlisting>
 
         <para>The sharing constraints we've added above make the resulting
         first-class modules polymorphic in the type <literal moreinfo="none">t</literal>. As a
@@ -288,8 +270,7 @@
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let (module Bumpable) = int_bumper in Bumpable.bump 3;;</userinput>
 <computeroutput moreinfo="none">- : int = 4</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let (module Bumpable) = float_bumper in Bumpable.bump 3.5;;</userinput>
-<computeroutput moreinfo="none">- : float = 4.5</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : float = 4.5</computeroutput></programlisting>
 
         <para>We can also write functions that use such first-class modules
         polymorphically. The following function takes two arguments: a
@@ -307,8 +288,7 @@
 <userinput moreinfo="none">    List.map ~f:B.bump l</userinput>
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val bump_list : (module Bumpable with type t = 'a) -&gt; 'a list -&gt; 'a list =</computeroutput>
-<computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput></programlisting>
 
         <para>Here, we used a feature of OCaml that hasn't come up before: a
         <emphasis>locally abstract type</emphasis>. For any function, you can
@@ -329,8 +309,7 @@
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">bump_list int_bumper [1;2;3];;</userinput>
 <computeroutput moreinfo="none">- : int list = [2; 3; 4]</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">bump_list float_bumper [1.5;2.5;3.5];;</userinput>
-<computeroutput moreinfo="none">- : float list = [2.5; 3.5; 4.5]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : float list = [2.5; 3.5; 4.5]</computeroutput></programlisting>
 
         <para>Polymorphic first-class modules are important because they allow
         you to connect the types associated with a first-class module to the
@@ -348,8 +327,7 @@
           <filename moreinfo="none">fcm/main.topscript</filename> (part 19)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let wrap_in_list (type a) (x:a) = [x];;</userinput>
-<computeroutput moreinfo="none">val wrap_in_list : 'a -&gt; 'a list = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val wrap_in_list : 'a -&gt; 'a list = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>This compiles successfully because the type
           <literal moreinfo="none">a</literal> is used in a way that is compatible with it
@@ -365,8 +343,7 @@
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let wrap_int_in_list (type a) (x:a) = x + x;;</userinput>
 <computeroutput moreinfo="none">Characters 38-39:</computeroutput>
-<computeroutput moreinfo="none">Error: This expression has type a but an expression was expected of type int</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Error: This expression has type a but an expression was expected of type int</computeroutput></programlisting>
 
           <para>One common use of locally abstract types is to create a new
           type that can be used in constructing a module. Here's an example of
@@ -391,8 +368,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">create_comparable Int.compare;;</userinput>
 <computeroutput moreinfo="none">- : (module Comparable with type t = int) = &lt;module&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">create_comparable Float.compare;;</userinput>
-<computeroutput moreinfo="none">- : (module Comparable with type t = float) = &lt;module&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : (module Comparable with type t = float) = &lt;module&gt;</computeroutput></programlisting>
 
           <para>Here, what we effectively do is capture a polymorphic type and
           export it as a concrete type within a module.</para>
@@ -441,8 +417,7 @@
 <computeroutput moreinfo="none">    val eval : t -&gt; Sexp.t -&gt; Sexp.t Or_error.t</computeroutput>
 <computeroutput moreinfo="none">    val config_of_sexp : Sexp.t -&gt; config</computeroutput>
 <computeroutput moreinfo="none">    val sexp_of_config : config -&gt; Sexp.t</computeroutput>
-<computeroutput moreinfo="none">  end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
         <para>In the above we use s-expressions as the format for queries and
         responses, as well for the config. S-expressions are a simple,
@@ -463,8 +438,7 @@
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module type M = sig type t with sexp end;;</userinput>
 <computeroutput moreinfo="none">module type M =</computeroutput>
-<computeroutput moreinfo="none">  sig type t val t_of_sexp : Sexp.t -&gt; t val sexp_of_t : t -&gt; Sexp.t end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  sig type t val t_of_sexp : Sexp.t -&gt; t val sexp_of_t : t -&gt; Sexp.t end</computeroutput></programlisting>
 
         <para>In a module, <literal moreinfo="none">with sexp</literal> adds the
         implementation of those functions. Thus, we can write</para>
@@ -479,8 +453,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">sexp_of_u {a=3;b=7.};;</userinput>
 <computeroutput moreinfo="none">- : Sexp.t = ((a 3) (b 7))</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">u_of_sexp (Sexp.of_string "((a 43) (b 3.4))");;</userinput>
-<computeroutput moreinfo="none">- : u = {a = 43; b = 3.4}</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : u = {a = 43; b = 3.4}</computeroutput></programlisting>
 
         <para>This is all described in more detail in <xref linkend="data-serialization-with-s-expressions"/>.</para>
 
@@ -522,8 +495,7 @@
 <computeroutput moreinfo="none">    val name : string</computeroutput>
 <computeroutput moreinfo="none">    val create : config -&gt; t</computeroutput>
 <computeroutput moreinfo="none">    val eval : t -&gt; Sexp.t -&gt; (Sexp.t, Error.t) Result.t</computeroutput>
-<computeroutput moreinfo="none">  end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
           <para>We can use this module to create an instance of the
           <literal moreinfo="none">Unique</literal> query handler and interact with it
@@ -537,8 +509,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Unique.eval unique Sexp.unit;;</userinput>
 <computeroutput moreinfo="none">- : (Sexp.t, Error.t) Result.t = Ok 0</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Unique.eval unique Sexp.unit;;</userinput>
-<computeroutput moreinfo="none">- : (Sexp.t, Error.t) Result.t = Ok 1</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : (Sexp.t, Error.t) Result.t = Ok 1</computeroutput></programlisting>
 
           <para>Here's another example: a query handler that does directory
           listings. Here, the config is the default directory that relative
@@ -578,8 +549,7 @@
 <computeroutput moreinfo="none">    val name : config</computeroutput>
 <computeroutput moreinfo="none">    val create : config -&gt; t</computeroutput>
 <computeroutput moreinfo="none">    val eval : t -&gt; Sexp.t -&gt; (Sexp.t, Error.t) Result.t</computeroutput>
-<computeroutput moreinfo="none">  end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
           <para>Again, we can create an instance of this query handler and
           interact with it directly.</para>
@@ -593,8 +563,7 @@
 <computeroutput moreinfo="none">- : (Sexp.t, Error.t) Result.t =</computeroutput>
 <computeroutput moreinfo="none">Ok (lib mail cache www spool run log lock opt local backups tmp)</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">List_dir.eval list_dir (sexp_of_string "yp");;</userinput>
-<computeroutput moreinfo="none">Exception: (Sys_error "/var/yp: No such file or directory").</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Exception: (Sys_error "/var/yp: No such file or directory").</computeroutput></programlisting>
         </sect2>
 
         <sect2 id="dispatching-to-multiple-query-handlers">
@@ -616,8 +585,7 @@
 <userinput moreinfo="none">    val this : Query_handler.t</userinput>
 <userinput moreinfo="none">  end;;</userinput>
 <computeroutput moreinfo="none">module type Query_handler_instance =</computeroutput>
-<computeroutput moreinfo="none">  sig module Query_handler : Query_handler val this : Query_handler.t end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  sig module Query_handler : Query_handler val this : Query_handler.t end</computeroutput></programlisting>
 
           <para>With this signature, we can create a first-class module that
           encompasses both an instance of the query and the matching
@@ -633,8 +601,7 @@
 <userinput moreinfo="none">       module Query_handler = Unique</userinput>
 <userinput moreinfo="none">       let this = Unique.create 0</userinput>
 <userinput moreinfo="none">     end : Query_handler_instance);;</userinput>
-<computeroutput moreinfo="none">val unique_instance : (module Query_handler_instance) = &lt;module&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val unique_instance : (module Query_handler_instance) = &lt;module&gt;</computeroutput></programlisting>
 
           <para>Constructing instances in this way is a little verbose, but we
           can write a function that eliminates most of this boilerplate. Note
@@ -655,8 +622,7 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val build_instance :</computeroutput>
 <computeroutput moreinfo="none">  (module Query_handler with type config = 'a) -&gt;</computeroutput>
-<computeroutput moreinfo="none">  'a -&gt; (module Query_handler_instance) = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  'a -&gt; (module Query_handler_instance) = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>Using <literal moreinfo="none">build_instance</literal>, constructing a new
           instance becomes a one-liner:</para>
@@ -667,8 +633,7 @@
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let unique_instance = build_instance (module Unique) 0;;</userinput>
 <computeroutput moreinfo="none">val unique_instance : (module Query_handler_instance) = &lt;module&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let list_dir_instance = build_instance (module List_dir)  "/var";;</userinput>
-<computeroutput moreinfo="none">val list_dir_instance : (module Query_handler_instance) = &lt;module&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val list_dir_instance : (module Query_handler_instance) = &lt;module&gt;</computeroutput></programlisting>
 
           <para>We can now write code that lets you dispatch queries to one of
           a list of query handler instances. We assume that the shape of the
@@ -677,8 +642,7 @@
           <para role="sourcecode">Scheme:
           <filename moreinfo="none">fcm/query-syntax.scm</filename></para>
 
-          <programlisting language="scheme" format="linespecific">(query-name query)
-</programlisting>
+          <programlisting language="scheme" format="linespecific">(query-name query)</programlisting>
 
           <para>where <emphasis><literal moreinfo="none">query-name</literal></emphasis> is
           the name used to determine which query handler to dispatch the query
@@ -701,8 +665,7 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val build_dispatch_table :</computeroutput>
 <computeroutput moreinfo="none">  (module Query_handler_instance) list -&gt;</computeroutput>
-<computeroutput moreinfo="none">  (module Query_handler_instance) String.Table.t = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  (module Query_handler_instance) String.Table.t = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>Now, we need a function that dispatches to a handler using a
           dispatch table.</para>
@@ -725,8 +688,7 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val dispatch :</computeroutput>
 <computeroutput moreinfo="none">  (string, (module Query_handler_instance)) Hashtbl.t -&gt;</computeroutput>
-<computeroutput moreinfo="none">  Sexp.t -&gt; Sexp.t Or_error.t = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  Sexp.t -&gt; Sexp.t Or_error.t = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>This function interacts with an instance by unpacking it into
           a module <literal moreinfo="none">I</literal> and then using the query handler
@@ -768,8 +730,7 @@
 <userinput moreinfo="none">      printf "%s\n%!" msg;</userinput>
 <userinput moreinfo="none">      cli dispatch_table</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val cli : (string, (module Query_handler_instance)) Hashtbl.t -&gt; unit = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val cli : (string, (module Query_handler_instance)) Hashtbl.t -&gt; unit = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>We can most effectively run this command-line interface from a
           standalone program, which we can do by putting the above code in a
@@ -983,8 +944,7 @@ end</programlisting>
 <computeroutput moreinfo="none">&gt;&gt;&gt; (loader known_services)</computeroutput>
 <computeroutput moreinfo="none">(ls unique)</computeroutput>
 <computeroutput moreinfo="none">&gt;&gt;&gt; (loader active_services)</computeroutput>
-<computeroutput moreinfo="none">(loader)</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">(loader)</computeroutput></programlisting>
 
           <para>Any attempt to use an inactive query handler will fail.</para>
 
@@ -992,8 +952,7 @@ end</programlisting>
           <filename moreinfo="none">fcm/loader_cli2.out</filename></para>
 
           <programlisting language="console" format="linespecific"><computeroutput moreinfo="none">&gt;&gt;&gt; (ls .)</computeroutput>
-<computeroutput moreinfo="none">Could not find matching handler: ls</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Could not find matching handler: ls</computeroutput></programlisting>
 
           <para>But, we can load the <literal moreinfo="none">ls</literal> handler with a
           config of our choice, at which point, it will be available for use.
@@ -1011,8 +970,7 @@ end</programlisting>
 <computeroutput moreinfo="none">&gt;&gt;&gt; (loader (unload ls))</computeroutput>
 <computeroutput moreinfo="none">()</computeroutput>
 <computeroutput moreinfo="none">&gt;&gt;&gt; (ls /var)</computeroutput>
-<computeroutput moreinfo="none">Could not find matching handler: ls</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Could not find matching handler: ls</computeroutput></programlisting>
 
           <para>Notably, the loader can't be loaded (since it's not on the
           list of known handlers), and can't be unloaded either.</para>
@@ -1021,8 +979,7 @@ end</programlisting>
           <filename moreinfo="none">fcm/loader_cli4.out</filename></para>
 
           <programlisting language="console" format="linespecific"><computeroutput moreinfo="none">&gt;&gt;&gt; (loader (unload loader))</computeroutput>
-<computeroutput moreinfo="none">It's unwise to unload yourself</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">It's unwise to unload yourself</computeroutput></programlisting>
 
           <para>We can push this dynamism yet further using libraries like
           <literal moreinfo="none">ocaml_plugin</literal>, which use OCaml's dynamic linking
@@ -1053,8 +1010,7 @@ end</programlisting>
 <computeroutput moreinfo="none">  name : string;</computeroutput>
 <computeroutput moreinfo="none">  eval : Sexp.t -&gt; Sexp.t Or_error.t;</computeroutput>
 <computeroutput moreinfo="none">}</computeroutput>
-<computeroutput moreinfo="none">type query_handler = Sexp.t -&gt; query_handler_instance</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">type query_handler = Sexp.t -&gt; query_handler_instance</computeroutput></programlisting>
 
         <para>The idea here is that we hide the true types of the objects in
         question behind the functions stored in the closure. Thus, we could
@@ -1071,8 +1027,7 @@ end</programlisting>
 <userinput moreinfo="none">    ; eval = (fun config -&gt; Unique.eval unique config)</userinput>
 <userinput moreinfo="none">    }</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val unique_handler : Sexp.t -&gt; query_handler_instance = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val unique_handler : Sexp.t -&gt; query_handler_instance = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>For an example on this scale, the above approach is completely
         reasonable, and first-class modules are not really necessary. But the

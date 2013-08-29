@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="handling-json-data">
       <title>Handling JSON data</title>
@@ -62,8 +62,7 @@
     { "name": "Yaron Minsky", "affiliation": "Jane Street"}
   ],
   "is_online": true
-}
-</programlisting>
+}</programlisting>
 
         <para>The outermost JSON value is usually a record (delimited by the
         curly braces) and contains an unordered set of key/value pairs. The
@@ -102,8 +101,7 @@
           <filename moreinfo="none">json/install.topscript</filename></para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">#require "yojson" ;;</userinput>
-<prompt moreinfo="none"># </prompt><userinput moreinfo="none">open Yojson ;;</userinput>
-</programlisting>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">open Yojson ;;</userinput></programlisting>
         </note>
       </sect1>
 
@@ -227,8 +225,7 @@ let () =
 
         <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg yojson read_json.native</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./read_json.native</userinput>
-<computeroutput moreinfo="none">OK</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">OK</computeroutput></programlisting>
 
         <para>The <literal moreinfo="none">from_file</literal> function accepts an input
         filename and takes care of opening and closing it for you. It's far
@@ -289,8 +286,7 @@ let () =
 <computeroutput moreinfo="none">Authors: Jason Hickey, Anil Madhavapeddy, Yaron Minsky</computeroutput>
 <computeroutput moreinfo="none">Tags: functional programming, ocaml, algorithms</computeroutput>
 <computeroutput moreinfo="none">Online: yes</computeroutput>
-<computeroutput moreinfo="none">Translated: &lt;unknown&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Translated: &lt;unknown&gt;</computeroutput></programlisting>
 
         <para>This code introduces the <literal moreinfo="none">Yojson.Basic.Util</literal>
         module, which contains <emphasis>combinator</emphasis> functions that
@@ -414,8 +410,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">open Yojson.Basic.Util ;;</userinput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let title = json |&gt; member "title" |&gt; to_string ;;</userinput>
-<computeroutput moreinfo="none">val title : string = "Real World OCaml"</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val title : string = "Real World OCaml"</computeroutput></programlisting>
 
         <para>The <literal moreinfo="none">member</literal> function accepts a JSON object and
         named key and returns the JSON field associated with that key, or
@@ -433,8 +428,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let tags = json |&gt; member "tags" |&gt; to_list |&gt; filter_string ;;</userinput>
 <computeroutput moreinfo="none">val tags : string list = ["functional programming"; "ocaml"; "algorithms"]</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let pages = json |&gt; member "pages" |&gt; to_int ;;</userinput>
-<computeroutput moreinfo="none">val pages : int = 450</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val pages : int = 450</computeroutput></programlisting>
 
         <para>The <literal moreinfo="none">tags</literal> field is similar to
         <literal moreinfo="none">title</literal>, but the field is a list of strings instead
@@ -453,8 +447,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let is_online = json |&gt; member "is_online" |&gt; to_bool_option ;;</userinput>
 <computeroutput moreinfo="none">val is_online : bool option = Some true</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let is_translated = json |&gt; member "is_translated" |&gt; to_bool_option ;;</userinput>
-<computeroutput moreinfo="none">val is_translated : bool option = None</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val is_translated : bool option = None</computeroutput></programlisting>
 
         <para>The <literal moreinfo="none">is_online</literal> and
         <literal moreinfo="none">is_translated</literal> fields are optional in our JSON
@@ -477,8 +470,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
 <computeroutput moreinfo="none">      ("affiliation", `String "Cambridge")];</computeroutput>
 <computeroutput moreinfo="none">   `Assoc</computeroutput>
 <computeroutput moreinfo="none">     [("name", `String "Yaron Minsky");</computeroutput>
-<computeroutput moreinfo="none">      ("affiliation", `String "Jane Street")]]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">      ("affiliation", `String "Jane Street")]]</computeroutput></programlisting>
 
         <para>The final use of JSON combinators is to extract all the
         <literal moreinfo="none">name</literal> fields from the list of authors. We first
@@ -495,8 +487,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
 <userinput moreinfo="none">  json |&gt; member "authors" |&gt; to_list </userinput>
 <userinput moreinfo="none">  |&gt; List.map ~f:(fun json -&gt; member "name" json |&gt; to_string) ;;</userinput>
 <computeroutput moreinfo="none">val names : string list =</computeroutput>
-<computeroutput moreinfo="none">  ["Jason Hickey"; "Anil Madhavapeddy"; "Yaron Minsky"]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  ["Jason Hickey"; "Anil Madhavapeddy"; "Yaron Minsky"]</computeroutput></programlisting>
 
         <para>This style of programming which omits variable names and chains
         functions together is known as <emphasis>point-free
@@ -543,8 +534,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let person = `Assoc [ ("name", `String "Anil") ] ;;</userinput>
 <computeroutput moreinfo="none">val person : [&gt; `Assoc of (string * [&gt; `String of string ]) list ] =</computeroutput>
-<computeroutput moreinfo="none">  `Assoc [("name", `String "Anil")]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  `Assoc [("name", `String "Anil")]</computeroutput></programlisting>
 
         <para>In the example above, we've constructed a simple JSON object
         that represents a single person. We haven't actually defined the type
@@ -564,8 +554,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
         <filename moreinfo="none">json/build_json.topscript</filename> (part 2)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Yojson.Basic.pretty_to_string ;;</userinput>
-<computeroutput moreinfo="none">- : ?std:bool -&gt; Yojson.Basic.json -&gt; string = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : ?std:bool -&gt; Yojson.Basic.json -&gt; string = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>The <literal moreinfo="none">pretty_to_string</literal> function has a more
         explicit signature that requires an argument of type
@@ -582,8 +571,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
 <computeroutput moreinfo="none">- : string = "{ \"name\": \"Anil\" }"</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Yojson.Basic.pretty_to_channel stdout person ;;</userinput>
 <computeroutput moreinfo="none">{ "name": "Anil" }</computeroutput>
-<computeroutput moreinfo="none">- : unit = ()</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
 
         <para>In this case, there are no problems. Our
         <literal moreinfo="none">person</literal> value has an inferred type that is a valid
@@ -612,8 +600,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
 <computeroutput moreinfo="none">Error: This expression has type</computeroutput>
 <computeroutput moreinfo="none">         [&gt; `Assoc of string * [&gt; `String of string ] ]</computeroutput>
 <computeroutput moreinfo="none">       but an expression was expected of type Yojson.Basic.json</computeroutput>
-<computeroutput moreinfo="none">       Types for tag `Assoc are incompatible</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">       Types for tag `Assoc are incompatible</computeroutput></programlisting>
 
           <para>The type error above is more verbose than it needs to be,
           which can be inconvenient to wade through for larger values. You can
@@ -629,8 +616,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
 <computeroutput moreinfo="none">Characters 37-68:</computeroutput>
 <computeroutput moreinfo="none">Error: This expression has type 'a * 'b</computeroutput>
 <computeroutput moreinfo="none">       but an expression was expected of type</computeroutput>
-<computeroutput moreinfo="none">         (string * Yojson.Basic.json) list</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">         (string * Yojson.Basic.json) list</computeroutput></programlisting>
 
           <para>We've annotated <literal moreinfo="none">person</literal> as being of type
           <literal moreinfo="none">Yojson.Basic.json</literal>, and as a result the compiler
@@ -763,8 +749,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">opam install atdgen</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">atdgen -version</userinput>
-<computeroutput moreinfo="none">1.2.3</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">1.2.3</computeroutput></programlisting>
 
           <para>The command-line tool will be installed within your
           <filename moreinfo="none">~/.opam</filename> directory, and should already be on
@@ -886,8 +871,7 @@ type authorization_response = {
 <computeroutput moreinfo="none">  id : int;</computeroutput>
 <computeroutput moreinfo="none">  note : string option;</computeroutput>
 <computeroutput moreinfo="none">  note_url : string option;</computeroutput>
-<computeroutput moreinfo="none">}</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">}</computeroutput></programlisting>
 
           <para>There is an obvious correspondence to the ATD definition. Note
           that field names in OCaml records in the same module cannot shadow
@@ -1012,8 +996,7 @@ val string_of_authorization_response :
 <computeroutput moreinfo="none">  blog: string option;</computeroutput>
 <computeroutput moreinfo="none">  email: string option;</computeroutput>
 <computeroutput moreinfo="none">  public_repos: int</computeroutput>
-<computeroutput moreinfo="none">}</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">}</computeroutput></programlisting>
 
           <para>The OCaml type has an obvious mapping to the ATD spec, but we
           still need the logic to convert JSON buffers to and from this type.
@@ -1058,8 +1041,7 @@ val string_of_authorization_response :
 <computeroutput moreinfo="none">val org_of_string :</computeroutput>
 <computeroutput moreinfo="none">  string -&gt; org</computeroutput>
 <computeroutput moreinfo="none">  (** Deserialize JSON data of type {!org}. *)</computeroutput>
-<computeroutput moreinfo="none"> </computeroutput>
-</programlisting>
+<computeroutput moreinfo="none"> </computeroutput></programlisting>
 
           <para>The <literal moreinfo="none">Github_org_j</literal> serializer interface
           contains everything we need to map to-and-from the OCaml types and
@@ -1111,8 +1093,7 @@ let () =
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">atdgen -j github_org.atd</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg core_extended,yojson,atdgen github_org_info.native</userinput>
 <computeroutput moreinfo="none">File "github_org_j.ml", line 19, characters 4-16:</computeroutput>
-<computeroutput moreinfo="none">Warning 32: unused value string_of__1.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Warning 32: unused value string_of__1.</computeroutput></programlisting>
 
           <para>You can now run the command-line tool with a single argument
           to specify the name of the organization, and it will dynamically
@@ -1125,8 +1106,7 @@ let () =
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./github_org_info.native mirage</userinput>
 <computeroutput moreinfo="none">Mirage account (131943) with 37 public repos</computeroutput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./github_org_info.native janestreet</userinput>
-<computeroutput moreinfo="none">??? (3384712) with 34 public repos</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">??? (3384712) with 34 public repos</computeroutput></programlisting>
 
           <para>The JSON returned from the <literal moreinfo="none">janestreet</literal> query
           is missing an organization name, but this is explicitly reflected in

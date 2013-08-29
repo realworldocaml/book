@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="understanding-the-garbage-collector">
       <title>Understanding the Garbage Collector</title>
@@ -136,8 +136,7 @@
           <programlisting language="" format="linespecific">                &lt;---- size ----&gt;
  base --- start ---------------- end
           limit      ptr &lt;------
-                          blocks
-</programlisting>
+                          blocks</programlisting>
 
           <para>The runtime stores the boundaries of the minor heap in two
           pointers that delimit the start and end of the heap region
@@ -195,8 +194,7 @@
 <computeroutput moreinfo="none">   major_heap_increment = 1000448; space_overhead = 100; verbose = 0;</computeroutput>
 <computeroutput moreinfo="none">   max_overhead = 500; stack_limit = 1048576; allocation_policy = 0}</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Gc.tune ~minor_heap_size:(262144 * 2) () ;;</userinput>
-<computeroutput moreinfo="none">- : unit = ()</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
 
             <para>Changing the GC size dynamically will trigger an immediate
             minor heap collection. Note that Core increases the default minor
@@ -311,8 +309,7 @@
             <filename moreinfo="none">gc/tune.topscript</filename> (part 1)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Gc.tune ~major_heap_increment:(1000448 * 4) () ;;</userinput>
-<computeroutput moreinfo="none">- : unit = ()</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
           </note>
 
           <para>Allocating an OCaml value on the major heap first checks the
@@ -510,8 +507,7 @@
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Gc.major_slice 0 ;;</userinput>
 <computeroutput moreinfo="none">- : int = 260440</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Gc.full_major () ;;</userinput>
-<computeroutput moreinfo="none">- : unit = ()</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
 
             <para>The <literal moreinfo="none">space_overhead</literal> setting controls how
             aggressive the GC is about setting the slice size to a large size.
@@ -560,8 +556,7 @@
             <filename moreinfo="none">gc/tune.topscript</filename> (part 3)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Gc.tune ~max_overhead:0 () ;;</userinput>
-<computeroutput moreinfo="none">- : unit = ()</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
           </note>
         </sect2>
 
@@ -656,8 +651,7 @@ let () =
 <computeroutput moreinfo="none"> ----------- ----------- ----------- ------- ---------- ---------- </computeroutput>
 <computeroutput moreinfo="none">  mutable     6_304_612   2_000_004    9.05       9.05     100.00  </computeroutput>
 <computeroutput moreinfo="none">  immutable   4_775_718   5_000_005    0.03       0.03      75.75  </computeroutput>
-<computeroutput moreinfo="none">                                                                   </computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">                                                                   </computeroutput></programlisting>
 
             <para>There is a stark space/time tradeoff here. The mutable
             version takes significantly longer to complete than the immutable
@@ -729,8 +723,7 @@ let () =
 <computeroutput moreinfo="none">  [-version]           print the version of this build and exit</computeroutput>
 <computeroutput moreinfo="none">  [-help]              print this help text and exit</computeroutput>
 <computeroutput moreinfo="none">                       (alias: -?)</computeroutput>
-<computeroutput moreinfo="none"> </computeroutput>
-</programlisting>
+<computeroutput moreinfo="none"> </computeroutput></programlisting>
 
             <para>The <literal moreinfo="none">-no-compactions</literal> and
             <literal moreinfo="none">-stabilize-gc</literal> options can help force a
@@ -846,8 +839,7 @@ let () =
 <computeroutput moreinfo="none">    allocated record: OK</computeroutput>
 <computeroutput moreinfo="none">    allocated string: OK</computeroutput>
 <computeroutput moreinfo="none">   allocated variant: OK</computeroutput>
-<computeroutput moreinfo="none">     allocated float: OK</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">     allocated float: OK</computeroutput></programlisting>
 
         <para>The GC calls the finalization functions in the order of the
         deallocation. If several values become unreachable during the same GC

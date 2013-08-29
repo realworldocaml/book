@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE colophon PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<colophon id="colophon">
+  <title>Colophon</title>  
+  <para>The animal on the cover of <emphasis>FILL IN TITLE</emphasis>
+  is FILL IN DESCRIPTION.
+  </para> 
+  <para>The cover image is from FILL IN CREDITS. The cover font is Adobe ITC
+  Garamond. The text font is Adobe Minion Pro; the heading font is Adobe
+  Myriad Condensed; and the code font is Dalton Maag's Ubuntu Mono.</para>
+</colophon>

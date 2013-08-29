@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="lists-and-patterns">
       <title>Lists and Patterns</title>
@@ -19,8 +19,7 @@
         <filename moreinfo="none">lists-and-patterns/main.topscript</filename></para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">[1;2;3];;</userinput>
-<computeroutput moreinfo="none">- : int list = [1; 2; 3]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int list = [1; 2; 3]</computeroutput></programlisting>
 
         <para>And they can also be generated using the equivalent
         <literal moreinfo="none">::</literal> notation.</para>
@@ -31,8 +30,7 @@
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">1 :: (2 :: (3 :: [])) ;;</userinput>
 <computeroutput moreinfo="none">- : int list = [1; 2; 3]</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">1 :: 2 :: 3 :: [] ;;</userinput>
-<computeroutput moreinfo="none">- : int list = [1; 2; 3]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int list = [1; 2; 3]</computeroutput></programlisting>
 
         <para>As you can see, the <literal moreinfo="none">::</literal> operator is
         right-associative, which means that we can build up lists without
@@ -48,8 +46,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">3 :: empty;;</userinput>
 <computeroutput moreinfo="none">- : int list = [3]</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">"three" :: empty;;</userinput>
-<computeroutput moreinfo="none">- : string list = ["three"]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string list = ["three"]</computeroutput></programlisting>
 
         <para>The way in which the <literal moreinfo="none">::</literal> operator attaches
         elements to the front of a list reflects the fact that OCaml's lists
@@ -63,8 +60,7 @@
 
         <programlisting language="" format="linespecific">+---+---+   +---+---+   +---+---+
 | 1 | *----&gt;| 2 | *----&gt;| 3 | *----&gt;||
-+---+---+   +---+---+   +---+---+
-</programlisting>
++---+---+   +---+---+   +---+---+</programlisting>
 
         <para>Each <literal moreinfo="none">::</literal> essentially adds a new block to the
         picture above. Such a block contains two things: a reference to the
@@ -81,8 +77,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let m = 0 :: l;;</userinput>
 <computeroutput moreinfo="none">val m : int list = [0; 1; 2; 3]</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">l;;</userinput>
-<computeroutput moreinfo="none">- : int list = [1; 2; 3]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int list = [1; 2; 3]</computeroutput></programlisting>
       </sect1>
 
       <sect1 id="using-patterns-to-extract-data-from-a-list">
@@ -104,8 +99,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">sum [1;2;3];;</userinput>
 <computeroutput moreinfo="none">- : int = 6</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">sum [];;</userinput>
-<computeroutput moreinfo="none">- : int = 0</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 0</computeroutput></programlisting>
 
         <para>This code follows the convention of using <literal moreinfo="none">hd</literal>
         to represent the first element (or head) of the list, and
@@ -139,8 +133,7 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">Characters 114-122:</computeroutput>
 <computeroutput moreinfo="none">Warning 11: this match case is unused.</computeroutput>
-<computeroutput moreinfo="none">val drop_value : 'a list -&gt; 'a -&gt; 'a list = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val drop_value : 'a list -&gt; 'a -&gt; 'a list = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>Moreover, the function clearly does the wrong thing, filtering
         out all elements of the list rather than just those equal to the
@@ -150,8 +143,7 @@
         <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part 6)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">drop_value [1;2;3] 2;;</userinput>
-<computeroutput moreinfo="none">- : int list = []</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int list = []</computeroutput></programlisting>
 
         <para>So, what's going on?</para>
 
@@ -182,8 +174,7 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val drop_value : 'a list -&gt; 'a -&gt; 'a list = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">drop_value [1;2;3] 2;;</userinput>
-<computeroutput moreinfo="none">- : int list = [1; 3]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int list = [1; 3]</computeroutput></programlisting>
 
         <para>Note that if we wanted to drop a particular literal value
         (rather than a value that was passed in), we could do this using
@@ -201,8 +192,7 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val drop_zero : int list -&gt; int list = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">drop_zero [1;2;0;3];;</userinput>
-<computeroutput moreinfo="none">- : int list = [1; 2; 3]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int list = [1; 2; 3]</computeroutput></programlisting>
       </sect1>
 
       <sect1 id="limitations-and-blessings-of-pattern-matching">
@@ -257,8 +247,7 @@
 <userinput moreinfo="none">    else x + 1</userinput>
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val plus_one_match : int -&gt; int = &lt;fun&gt;</computeroutput>
-<computeroutput moreinfo="none">val plus_one_if : int -&gt; int = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val plus_one_if : int -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>Note the use of <literal moreinfo="none">_</literal> in the above match. This
           is a wild-card pattern that matches any value, but without binding a
@@ -298,8 +287,7 @@
 <computeroutput moreinfo="none">  plus_one_match       46.81      68.21  </computeroutput>
 <computeroutput moreinfo="none">  plus_one_if          68.63     100.00  </computeroutput>
 <computeroutput moreinfo="none">                                         </computeroutput>
-<computeroutput moreinfo="none">- : unit = ()</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
 
           <para>Here's another less artificial example. We can rewrite the
           <literal moreinfo="none">sum</literal> function we described earlier in the chapter
@@ -317,8 +305,7 @@
 <userinput moreinfo="none">    if List.is_empty l then 0</userinput>
 <userinput moreinfo="none">    else List.hd_exn l + sum_if (List.tl_exn l)</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val sum_if : int list -&gt; int = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val sum_if : int list -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>Again, we can benchmark these to see the difference.</para>
 
@@ -338,8 +325,7 @@
 <computeroutput moreinfo="none">  sum_if     110_535     100.00  </computeroutput>
 <computeroutput moreinfo="none">  sum         22_361      20.23  </computeroutput>
 <computeroutput moreinfo="none">                                 </computeroutput>
-<computeroutput moreinfo="none">- : unit = ()</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
 
           <para>In this case, the <literal moreinfo="none">match</literal>-based
           implementation is many times faster than the
@@ -389,8 +375,7 @@
 <computeroutput moreinfo="none">Warning 8: this pattern-matching is not exhaustive.</computeroutput>
 <computeroutput moreinfo="none">Here is an example of a value that is not matched:</computeroutput>
 <computeroutput moreinfo="none">1::_</computeroutput>
-<computeroutput moreinfo="none">val drop_zero : int list -&gt; 'a list = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val drop_zero : int list -&gt; 'a list = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>Even for simple examples like this, exhaustiveness checks are
           pretty useful. But as we'll see in <xref linkend="variants"/>, they
@@ -434,8 +419,7 @@
 <computeroutput moreinfo="none">| C        | Dennis Ritchie | 1969          |</computeroutput>
 <computeroutput moreinfo="none">| ML       | Robin Milner   | 1973          |</computeroutput>
 <computeroutput moreinfo="none">| OCaml    | Xavier Leroy   | 1996          |</computeroutput>
-<computeroutput moreinfo="none">- : unit = ()</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
 
         <para>The first step is to write a function to compute the maximum
         width of each column of data. We can do this by converting the header
@@ -456,8 +440,7 @@
         14)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.map ~f:String.length ["Hello"; "World!"];;</userinput>
-<computeroutput moreinfo="none">- : int list = [5; 6]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int list = [5; 6]</computeroutput></programlisting>
 
         <para><literal moreinfo="none">List.map2_exn</literal> is similar to
         <literal moreinfo="none">List.map</literal>, except that it takes two lists and a
@@ -468,8 +451,7 @@
         15)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.map2_exn ~f:Int.max [1;2;3] [3;2;1];;</userinput>
-<computeroutput moreinfo="none">- : int list = [3; 2; 3]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int list = [3; 2; 3]</computeroutput></programlisting>
 
         <para>The <literal moreinfo="none">_exn</literal> is there because the function throws
         an exception if the lists are of mismatched length.</para>
@@ -479,8 +461,7 @@
         16)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.map2_exn ~f:Int.max [1;2;3] [3;2;1;0];;</userinput>
-<computeroutput moreinfo="none">Exception: (Invalid_argument "length mismatch in rev_map2_exn: 3 &lt;&gt; 4 ").</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Exception: (Invalid_argument "length mismatch in rev_map2_exn: 3 &lt;&gt; 4 ").</computeroutput></programlisting>
 
         <para><literal moreinfo="none">List.fold</literal> is the most complicated of the
         three, taking three arguments: a list to process, an initial
@@ -496,8 +477,7 @@
         17)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.fold;;</userinput>
-<computeroutput moreinfo="none">- : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt; 'accum = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt; 'accum = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>We can use <literal moreinfo="none">List.fold</literal> for something as simple
         as summing up a list:</para>
@@ -507,8 +487,7 @@
         18)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.fold ~init:0 ~f:(+) [1;2;3;4];;</userinput>
-<computeroutput moreinfo="none">- : int = 10</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 10</computeroutput></programlisting>
 
         <para>This example is particularly simple because the accumulator and
         the list elements are of the same type. But <literal moreinfo="none">fold</literal> is
@@ -521,8 +500,7 @@
         19)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.fold ~init:[] ~f:(fun list x -&gt; x :: list) [1;2;3;4];;</userinput>
-<computeroutput moreinfo="none">- : int list = [4; 3; 2; 1]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int list = [4; 3; 2; 1]</computeroutput></programlisting>
 
         <para>Let's bring our three functions together to compute the maximum
         column widths.</para>
@@ -538,8 +516,7 @@
 <userinput moreinfo="none">      ~f:(fun acc row -&gt;</userinput>
 <userinput moreinfo="none">        List.map2_exn ~f:Int.max acc (lengths row))</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val max_widths : string list -&gt; string list list -&gt; int list = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val max_widths : string list -&gt; string list list -&gt; int list = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>Using <literal moreinfo="none">List.map</literal> we define the function
         <literal moreinfo="none">lengths</literal> which converts a list of strings to a list
@@ -572,8 +549,7 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val render_separator : int list -&gt; string = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">render_separator [3;6;2];;</userinput>
-<computeroutput moreinfo="none">- : string = "|-----+--------+----|"</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string = "|-----+--------+----|"</computeroutput></programlisting>
 
         <para>Note that we make the line of dashes two larger than the
         provided width to provide some whitespace around each entry in the
@@ -595,8 +571,7 @@
           22)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let s = "." ^ "."  ^ "."  ^ "."  ^ "."  ^ "."  ^ ".";;</userinput>
-<computeroutput moreinfo="none">val s : string = "......."</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val s : string = "......."</computeroutput></programlisting>
 
           <para>will allocate strings of length 2, 3, 4, 5, 6 and 7, whereas
           this code:</para>
@@ -606,8 +581,7 @@
           23)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let s = String.concat [".";".";".";".";".";".";"."];;</userinput>
-<computeroutput moreinfo="none">val s : string = "......."</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val s : string = "......."</computeroutput></programlisting>
 
           <para>allocates one string of size 7, as well as a list of length 7.
           At these small sizes, the differences don't amount to much, but for
@@ -628,8 +602,7 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val pad : string -&gt; int -&gt; string = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">pad "hello" 10;;</userinput>
-<computeroutput moreinfo="none">- : string = " hello      "</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string = " hello      "</computeroutput></programlisting>
 
         <para>We can render a row of data by merging together the padded
         strings. Again, we'll use <literal moreinfo="none">List.map2_exn</literal> for
@@ -645,8 +618,7 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val render_row : string list -&gt; int list -&gt; string = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">render_row ["Hello";"World"] [10;15];;</userinput>
-<computeroutput moreinfo="none">- : string = "| Hello      | World           |"</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string = "| Hello      | World           |"</computeroutput></programlisting>
 
         <para>Now we can bring this all together in a single function that
         renders the table.</para>
@@ -663,8 +635,7 @@
 <userinput moreinfo="none">       :: List.map rows ~f:(fun row -&gt; render_row row widths)</userinput>
 <userinput moreinfo="none">      )</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val render_table : string list -&gt; string list list -&gt; string = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val render_table : string list -&gt; string list list -&gt; string = &lt;fun&gt;</computeroutput></programlisting>
 
         <sect2 id="more-useful-list-functions">
           <title>More useful list functions</title>
@@ -695,8 +666,7 @@
             27)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.reduce;;</userinput>
-<computeroutput moreinfo="none">- : 'a list -&gt; f:('a -&gt; 'a -&gt; 'a) -&gt; 'a option = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : 'a list -&gt; f:('a -&gt; 'a -&gt; 'a) -&gt; 'a option = &lt;fun&gt;</computeroutput></programlisting>
 
             <para><literal moreinfo="none">reduce</literal> returns an optional result,
             returning <literal moreinfo="none">None</literal> when the input list is
@@ -711,8 +681,7 @@
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.reduce ~f:(+) [1;2;3;4;5];;</userinput>
 <computeroutput moreinfo="none">- : int option = Some 15</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.reduce ~f:(+) [];;</userinput>
-<computeroutput moreinfo="none">- : int option = None</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int option = None</computeroutput></programlisting>
           </sect3>
 
           <sect3 id="filtering-with-list.filter-and-list.filter_map">
@@ -729,8 +698,7 @@
             29)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.filter ~f:(fun x -&gt; x mod 2 = 0) [1;2;3;4;5];;</userinput>
-<computeroutput moreinfo="none">- : int list = [2; 4]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int list = [2; 4]</computeroutput></programlisting>
 
             <para>Note that the <literal moreinfo="none">mod</literal> used above is an infix
             operator, as described in <xref linkend="variables-and-functions"/>.</para>
@@ -761,8 +729,7 @@
 <userinput moreinfo="none">      Some ext)</userinput>
 <userinput moreinfo="none">  |&gt; List.dedup</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">- : string list = ["ascii"; "ml"; "mli"; "topscript"]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string list = ["ascii"; "ml"; "mli"; "topscript"]</computeroutput></programlisting>
 
             <para>The above is also an example of an or-patterns, which allows
             you to have multiple sub-patterns within a larger pattern. In this
@@ -797,8 +764,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let (ml_files,other_files) =</userinput>
 <userinput moreinfo="none">    List.partition_tf (Sys.ls_dir ".")  ~f:is_ocaml_source;;</userinput>
 <computeroutput moreinfo="none">val ml_files : string list = ["example.mli"; "example.ml"]</computeroutput>
-<computeroutput moreinfo="none">val other_files : string list = ["main.topscript"; "lists_layout.ascii"]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val other_files : string list = ["main.topscript"; "lists_layout.ascii"]</computeroutput></programlisting>
           </sect3>
 
           <sect3 id="combining-lists">
@@ -814,8 +780,7 @@
             32)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.append [1;2;3] [4;5;6];;</userinput>
-<computeroutput moreinfo="none">- : int list = [1; 2; 3; 4; 5; 6]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int list = [1; 2; 3; 4; 5; 6]</computeroutput></programlisting>
 
             <para>There's also <literal moreinfo="none">@</literal>, an operator equivalent of
             <literal moreinfo="none">List.append</literal>.</para>
@@ -825,8 +790,7 @@
             33)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">[1;2;3] @ [4;5;6];;</userinput>
-<computeroutput moreinfo="none">- : int list = [1; 2; 3; 4; 5; 6]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int list = [1; 2; 3; 4; 5; 6]</computeroutput></programlisting>
 
             <para>In addition, there is <literal moreinfo="none">List.concat</literal>, for
             concatenating a list of lists.</para>
@@ -836,8 +800,7 @@
             34)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.concat [[1;2];[3;4;5];[6];[]];;</userinput>
-<computeroutput moreinfo="none">- : int list = [1; 2; 3; 4; 5; 6]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int list = [1; 2; 3; 4; 5; 6]</computeroutput></programlisting>
 
             <para>Here's an example of using <literal moreinfo="none">List.concat</literal>
             along with <literal moreinfo="none">List.map</literal> to compute a recursive
@@ -855,8 +818,7 @@
 <userinput moreinfo="none">      |&gt; List.map ~f:(fun sub -&gt; ls_rec (s ^/ sub))</userinput>
 <userinput moreinfo="none">      |&gt; List.concat</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val ls_rec : string -&gt; string list = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val ls_rec : string -&gt; string list = &lt;fun&gt;</computeroutput></programlisting>
 
             <para>Note that <literal moreinfo="none">^/</literal> is an infix operator
             provided by Core for adding a new element to a string representing
@@ -879,8 +841,7 @@
 <userinput moreinfo="none">      Sys.ls_dir s</userinput>
 <userinput moreinfo="none">      |&gt; List.concat_map ~f:(fun sub -&gt; ls_rec (s ^/ sub))</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val ls_rec : string -&gt; string list = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val ls_rec : string -&gt; string list = &lt;fun&gt;</computeroutput></programlisting>
           </sect3>
         </sect2>
       </sect1>
@@ -903,8 +864,7 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val length : 'a list -&gt; int = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">length [1;2;3];;</userinput>
-<computeroutput moreinfo="none">- : int = 3</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 3</computeroutput></programlisting>
 
         <para>This looks simple enough, but you'll discover that this
         implementation runs into problems on very large lists, as we'll show
@@ -919,8 +879,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">length (make_list 10);;</userinput>
 <computeroutput moreinfo="none">- : int = 10</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">length (make_list 10_000_000);;</userinput>
-<computeroutput moreinfo="none">Stack overflow during evaluation (looping recursion?).</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Stack overflow during evaluation (looping recursion?).</computeroutput></programlisting>
 
         <para>The above example creates lists using
         <literal moreinfo="none">List.init</literal>, which takes an integer
@@ -958,8 +917,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let length l = length_plus_n l 0 ;;</userinput>
 <computeroutput moreinfo="none">val length : 'a list -&gt; int = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">length [1;2;3;4];;</userinput>
-<computeroutput moreinfo="none">- : int = 4</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 4</computeroutput></programlisting>
 
         <para>This implementation depends on a helper function,
         <literal moreinfo="none">length_plus_n</literal>, that computes the length of a given
@@ -986,8 +944,7 @@
         40)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">length (make_list 10_000_000);;</userinput>
-<computeroutput moreinfo="none">- : int = 10000000</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 10000000</computeroutput></programlisting>
 
         <para>So when is a call a tail call? Let's think about the situation
         of one function (the <emphasis>caller</emphasis>) invokes another (the
@@ -1028,8 +985,7 @@
 <userinput moreinfo="none">      if hd = hd' then destutter (hd' :: tl)</userinput>
 <userinput moreinfo="none">      else hd :: destutter (hd' :: tl)</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val destutter : 'a list -&gt; 'a list = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val destutter : 'a list -&gt; 'a list = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>We'll consider some ways of making this code more concise and
         more efficient.</para>
@@ -1057,8 +1013,7 @@
 <userinput moreinfo="none">      if hd = hd' then destutter tl</userinput>
 <userinput moreinfo="none">      else hd :: destutter tl</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val destutter : 'a list -&gt; 'a list = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val destutter : 'a list -&gt; 'a list = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>We can further collapse this by combining the first two cases
         into one, using an or-pattern.</para>
@@ -1073,8 +1028,7 @@
 <userinput moreinfo="none">      if hd = hd' then destutter tl</userinput>
 <userinput moreinfo="none">      else hd :: destutter tl</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val destutter : 'a list -&gt; 'a list = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val destutter : 'a list -&gt; 'a list = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>We can make the code slightly terser now by using a
         <literal moreinfo="none">when</literal> clause. A <literal moreinfo="none">when</literal> clause
@@ -1091,8 +1045,7 @@
 <userinput moreinfo="none">    | hd :: (hd' :: _ as tl) when hd = hd' -&gt; destutter tl</userinput>
 <userinput moreinfo="none">    | hd :: tl -&gt; hd :: destutter tl</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val destutter : 'a list -&gt; 'a list = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val destutter : 'a list -&gt; 'a list = &lt;fun&gt;</computeroutput></programlisting>
 
         <sidebar>
           <title>Polymorphic compare</title>
@@ -1111,8 +1064,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">[3;4;5] = [3;4;5];;</userinput>
 <computeroutput moreinfo="none">- : bool = true</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">[Some 3; None] = [None; Some 3];;</userinput>
-<computeroutput moreinfo="none">- : bool = false</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : bool = false</computeroutput></programlisting>
 
           <para>Indeed, if we look at the type of the equality operator, we'll
           see that it is polymorphic:</para>
@@ -1122,8 +1074,7 @@
           46)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">(=);;</userinput>
-<computeroutput moreinfo="none">- : 'a -&gt; 'a -&gt; bool = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : 'a -&gt; 'a -&gt; bool = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>OCaml actually comes with a whole family of polymorphic
           comparison operators, including the standard infix comparators,
@@ -1151,8 +1102,7 @@
           47)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">(fun x -&gt; x + 1) = (fun x -&gt; x + 1);;</userinput>
-<computeroutput moreinfo="none">Exception: (Invalid_argument "equal: functional value").</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Exception: (Invalid_argument "equal: functional value").</computeroutput></programlisting>
 
           <para>Similarly, it will fail on values that come from outside the
           OCaml heap, like values from C-bindings. But it will work in a
@@ -1199,8 +1149,7 @@
 <computeroutput moreinfo="none">Here is an example of a value that is not matched:</computeroutput>
 <computeroutput moreinfo="none">_::_</computeroutput>
 <computeroutput moreinfo="none">(However, some guarded clause may match this value.)</computeroutput>
-<computeroutput moreinfo="none">val count_some : 'a option list -&gt; int = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val count_some : 'a option list -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>Despite the warning, the function does work fine.</para>
 
@@ -1209,8 +1158,7 @@
         49)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">count_some [Some 3; None; Some 4];;</userinput>
-<computeroutput moreinfo="none">- : int = 2</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 2</computeroutput></programlisting>
 
         <para>If we add another redundant case without a
         <literal moreinfo="none">when</literal> clause, the compiler will stop complaining
@@ -1228,8 +1176,7 @@
 <userinput moreinfo="none">    | x :: tl when Option.is_some x -&gt; 1 + count_some tl</userinput>
 <userinput moreinfo="none">    | x :: tl -&gt; -1 (* unreachable *)</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val count_some : 'a option list -&gt; int = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val count_some : 'a option list -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>Probably a better approach is to simply drop the second
         <literal moreinfo="none">when</literal> clause.</para>
@@ -1244,8 +1191,7 @@
 <userinput moreinfo="none">    | x :: tl when Option.is_none x -&gt; count_some tl</userinput>
 <userinput moreinfo="none">    | _ :: tl -&gt; 1 + count_some tl</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val count_some : 'a option list -&gt; int = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val count_some : 'a option list -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>This is a little less clear, however, than the direct pattern
         matching solution, where the meaning of each pattern is clearer on its
@@ -1261,8 +1207,7 @@
 <userinput moreinfo="none">    | None   :: tl -&gt; count_some tl</userinput>
 <userinput moreinfo="none">    | Some _ :: tl -&gt; 1 + count_some tl</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val count_some : 'a option list -&gt; int = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val count_some : 'a option list -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>The takeaway from all of this is that, while
         <literal moreinfo="none">when</literal> clauses can be useful, one should prefer
@@ -1279,7 +1224,6 @@
         53)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let count_some l = List.count ~f:Option.is_some l;;</userinput>
-<computeroutput moreinfo="none">val count_some : 'a option list -&gt; int = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val count_some : 'a option list -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
       </sect1>
     </chapter>

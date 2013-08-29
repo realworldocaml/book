@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="the-compiler-backend-byte-code-and-native-code">
       <title>The Compiler Backend: Byte-code and Native-code</title>
@@ -82,8 +82,7 @@ let test v =
 <computeroutput moreinfo="none">          case int 1: 101</computeroutput>
 <computeroutput moreinfo="none">          case int 2: 102</computeroutput>
 <computeroutput moreinfo="none">          case int 3: 103)))</computeroutput>
-<computeroutput moreinfo="none">    (makeblock 0 test/1013)))</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">    (makeblock 0 test/1013)))</computeroutput></programlisting>
 
           <para>It's not important to understand every detail of this internal
           form and it is explicitly undocumented since it can change across
@@ -141,8 +140,7 @@ let test v =
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc -dlambda -c pattern_monomorphic_small.ml 2&gt;&amp;1</userinput>
 <computeroutput moreinfo="none">(setglobal Pattern_monomorphic_small!</computeroutput>
 <computeroutput moreinfo="none">  (let (test/1011 (function v/1012 (if (!= v/1012 0) 101 100)))</computeroutput>
-<computeroutput moreinfo="none">    (makeblock 0 test/1011)))</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">    (makeblock 0 test/1011)))</computeroutput></programlisting>
 
           <para>The compiler emits simpler conditional jumps rather than
           setting up a jump table, since it statically determines that the
@@ -176,8 +174,7 @@ let test v =
 <computeroutput moreinfo="none">           (if (&gt;= v/1009 482771474) (if (&gt;= v/1009 884917024) 100 102)</computeroutput>
 <computeroutput moreinfo="none">             (if (&gt;= v/1009 3457716) 104 103))</computeroutput>
 <computeroutput moreinfo="none">           101)))</computeroutput>
-<computeroutput moreinfo="none">    (makeblock 0 test/1008)))</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">    (makeblock 0 test/1008)))</computeroutput></programlisting>
 
           <para>We mentioned earlier in <xref linkend="variants"/> that
           pattern matching over polymorphic variants is slightly less
@@ -288,8 +285,7 @@ let () =
 <computeroutput moreinfo="none">  Polymorphic pattern              31.51     100.00  </computeroutput>
 <computeroutput moreinfo="none">  Monomorphic larger pattern       29.19      92.62  </computeroutput>
 <computeroutput moreinfo="none">  Monomorphic small pattern        16.25      51.57  </computeroutput>
-<computeroutput moreinfo="none">                                                     </computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">                                                     </computeroutput></programlisting>
 
           <para>These results confirm our earlier performance hypothesis
           obtained from inspecting the lambda code. The shortest running time
@@ -380,8 +376,7 @@ let () =
 <computeroutput moreinfo="none">	makeblock 1, 0</computeroutput>
 <computeroutput moreinfo="none">	pop 1</computeroutput>
 <computeroutput moreinfo="none">	setglobal Pattern_monomorphic_small!</computeroutput>
-<computeroutput moreinfo="none"> </computeroutput>
-</programlisting>
+<computeroutput moreinfo="none"> </computeroutput></programlisting>
 
         <para>The bytecode above has been simplified from the lambda form into
         a set of simple instructions that are executed serially by the
@@ -558,8 +553,7 @@ main (int argc, char **argv)
   caml_startup (argv);
   printf("After calling OCaml\n");
   return 0;
-}
-</programlisting>
+}</programlisting>
 
           <para>Now compile the OCaml files into a standalone object
           file.</para>
@@ -568,8 +562,7 @@ main (int argc, char **argv)
           <filename moreinfo="none">back-end-embed/build_embed.out</filename></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">rm -f embed_out.c</userinput>
-<prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc -output-obj -o embed_out.o embed_me1.ml embed_me2.ml</userinput>
-</programlisting>
+<prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc -output-obj -o embed_out.o embed_me1.ml embed_me2.ml</userinput></programlisting>
 
           <para>After this point, you no longer need the OCaml compiler, as
           <literal moreinfo="none">embed_out.o</literal> has all of the OCaml code compiled
@@ -585,8 +578,7 @@ main (int argc, char **argv)
 <computeroutput moreinfo="none">Before calling OCaml</computeroutput>
 <computeroutput moreinfo="none">hello embedded world 1</computeroutput>
 <computeroutput moreinfo="none">hello embedded world 2</computeroutput>
-<computeroutput moreinfo="none">After calling OCaml</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">After calling OCaml</computeroutput></programlisting>
 
           <para>You can inspect the commands that <command moreinfo="none">ocamlc</command> is
           invoking by adding <literal moreinfo="none">-verbose</literal> to the command line
@@ -726,8 +718,7 @@ main (int argc, char **argv)
 .L100:
         movq    %rbx, %rax
         ret
-        .cfi_endproc
-</programlisting>
+        .cfi_endproc</programlisting>
 
             <para>The <literal moreinfo="none">_camlCompare_mono__cmp_1008</literal> is an
             assembly label that has been computed from the module name
@@ -786,8 +777,7 @@ main (int argc, char **argv)
         .cfi_adjust_cfa_offset  -24
         ret
         .cfi_adjust_cfa_offset  24
-        .cfi_endproc
-</programlisting>
+        .cfi_endproc</programlisting>
 
             <para>The <literal moreinfo="none">.cfi</literal> directives are assembler hints
             that contain Call Frame Information that lets the GNU debugger
@@ -860,8 +850,7 @@ let () =
 <computeroutput moreinfo="none"> ------------------------ ----------- ---------- </computeroutput>
 <computeroutput moreinfo="none">  Polymorphic comparison      13_919     100.00  </computeroutput>
 <computeroutput moreinfo="none">  Monomorphic comparison         815       5.86  </computeroutput>
-<computeroutput moreinfo="none">                                                 </computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">                                                 </computeroutput></programlisting>
 
             <para>We see that the polymorphic comparison is close to 20 times
             slower! These results shouldn't be taken too seriously as this is
@@ -993,8 +982,7 @@ let () =
 
             <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -tag debug alternate_list.native</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./alternate_list.native -ascii</userinput>
-<computeroutput moreinfo="none">1,3,5,7,9</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">1,3,5,7,9</computeroutput></programlisting>
 
             <para>Now we can run this interactively within
             <command moreinfo="none">gdb</command>.</para>
@@ -1013,8 +1001,7 @@ let () =
 <computeroutput moreinfo="none">For bug reporting instructions, please see:</computeroutput>
 <computeroutput moreinfo="none">&lt;http://www.gnu.org/software/gdb/bugs/&gt;...</computeroutput>
 <computeroutput moreinfo="none">Reading symbols from /home/avsm/alternate_list.native...done.</computeroutput>
-<computeroutput moreinfo="none">(gdb)</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">(gdb)</computeroutput></programlisting>
 
             <para>The <command moreinfo="none">gdb</command> prompt lets you enter debug
             directives. Let's set the program to break just before the first
@@ -1024,8 +1011,7 @@ let () =
             <filename moreinfo="none">back-end/gdb_alternate1.out</filename></para>
 
             <programlisting language="console" format="linespecific"><computeroutput moreinfo="none">(gdb) break camlAlternate_list__take_69242 </computeroutput>
-<computeroutput moreinfo="none">Breakpoint 1 at 0x5658d0: file alternate_list.ml, line 5.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Breakpoint 1 at 0x5658d0: file alternate_list.ml, line 5.</computeroutput></programlisting>
 
             <para>We used the C symbol name by following the name mangling
             rules defined earlier. A convenient way to figure out the full
@@ -1045,8 +1031,7 @@ let () =
 <computeroutput moreinfo="none">Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".</computeroutput>
 <computeroutput moreinfo="none"> </computeroutput>
 <computeroutput moreinfo="none">Breakpoint 1, camlAlternate_list__take_69242 () at alternate_list.ml:5</computeroutput>
-<computeroutput moreinfo="none">4         function</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">4         function</computeroutput></programlisting>
 
             <para>The binary has run until the first take invocation and
             stopped, waiting for further instructions. GDB has lots of
@@ -1080,8 +1065,7 @@ let () =
 <computeroutput moreinfo="none">(gdb) cont</computeroutput>
 <computeroutput moreinfo="none">Continuing.</computeroutput>
 <computeroutput moreinfo="none">1,3,5,7,9</computeroutput>
-<computeroutput moreinfo="none">[Inferior 1 (process 3546) exited normally]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">[Inferior 1 (process 3546) exited normally]</computeroutput></programlisting>
 
             <para>The <literal moreinfo="none">cont</literal> command resumes execution after
             a breakpoint has paused it, <literal moreinfo="none">bt</literal> displays a stack
@@ -1182,8 +1166,7 @@ let () =
 <computeroutput moreinfo="none">  immutable   7_545_126   7_537_837-7_551_193       100.00</computeroutput>
 <computeroutput moreinfo="none"> </computeroutput>
 <computeroutput moreinfo="none">[ perf record: Woken up 11 times to write data ]</computeroutput>
-<computeroutput moreinfo="none">[ perf record: Captured and wrote 2.722 MB perf.data (~118926 samples) ]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">[ perf record: Captured and wrote 2.722 MB perf.data (~118926 samples) ]</computeroutput></programlisting>
 
             <para>When this completes, you can interactively explore the
             results.</para>
@@ -1194,8 +1177,7 @@ let () =
             <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">perf report -g</userinput>
 <computeroutput moreinfo="none">+  48.86%  barrier.native  barrier.native  [.] camlBarrier__test_immutable_69282</computeroutput>
 <computeroutput moreinfo="none">+  30.22%  barrier.native  barrier.native  [.] camlBarrier__test_mutable_69279</computeroutput>
-<computeroutput moreinfo="none">+  20.22%  barrier.native  barrier.native  [.] caml_modify</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">+  20.22%  barrier.native  barrier.native  [.] caml_modify</computeroutput></programlisting>
 
             <para>This trace broadly reflects the results of the benchmark
             itself. The mutable benchmark consists of the combination of the
@@ -1272,8 +1254,7 @@ let () =
 <computeroutput moreinfo="none">Before calling OCaml</computeroutput>
 <computeroutput moreinfo="none">hello embedded world 1</computeroutput>
 <computeroutput moreinfo="none">hello embedded world 2</computeroutput>
-<computeroutput moreinfo="none">After calling OCaml</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">After calling OCaml</computeroutput></programlisting>
 
           <para>The <literal moreinfo="none">embed_native.o</literal> is a standalone object
           file that has no further references to OCaml code beyond the runtime
@@ -1309,8 +1290,7 @@ let () =
 <computeroutput moreinfo="none">Initial max overhead: 500%</computeroutput>
 <computeroutput moreinfo="none">Initial heap increment: 992k bytes</computeroutput>
 <computeroutput moreinfo="none">Initial allocation policy: 0</computeroutput>
-<computeroutput moreinfo="none">Hello OCaml World!</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Hello OCaml World!</computeroutput></programlisting>
 
             <para>If you get an error that <literal moreinfo="none">libasmrund.a</literal> is
             not found, then this is probably because you're using OCaml 4.00

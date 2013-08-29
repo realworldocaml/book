@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="command-line-parsing">
       <title>Command Line Parsing</title>
@@ -228,8 +228,7 @@ let do_hash file =
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./basic_md5.native -version</userinput>
 <computeroutput moreinfo="none">1.0</computeroutput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./basic_md5.native -build-info</userinput>
-<computeroutput moreinfo="none">RWO</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">RWO</computeroutput></programlisting>
 
           <para>The versions that you see in the output were defined via the
           optional arguments to <literal moreinfo="none">Command.run</literal>. You can leave
@@ -255,8 +254,7 @@ let do_hash file =
 <computeroutput moreinfo="none">  [-help]        print this help text and exit</computeroutput>
 <computeroutput moreinfo="none">                 (alias: -?)</computeroutput>
 <computeroutput moreinfo="none"> </computeroutput>
-<computeroutput moreinfo="none">missing anonymous argument: FILENAME</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">missing anonymous argument: FILENAME</computeroutput></programlisting>
 
           <para>When we invoke this binary without any arguments, it helpfully
           displays all of the command-line options available, along with a
@@ -271,8 +269,7 @@ let do_hash file =
           <filename moreinfo="none">command-line-parsing/run_basic_md5.out</filename></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./basic_md5.native ./basic_md5.native</userinput>
-<computeroutput moreinfo="none">b5ee7de449a2e0c6c01d4f2d898926de</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">b5ee7de449a2e0c6c01d4f2d898926de</computeroutput></programlisting>
 
           <para>And that's all it took to build our little MD5 utility! Here's
           a complete version of the example we just walked through, but made
@@ -425,8 +422,7 @@ let () =
 <computeroutput moreinfo="none"> </computeroutput>
 <computeroutput moreinfo="none">Raised by primitive operation at file "pervasives.ml", line 292, characters 20-46</computeroutput>
 <computeroutput moreinfo="none">Called from file "lib/in_channel.ml", line 19, characters 46-65</computeroutput>
-<computeroutput moreinfo="none">Called from file "lib/exn.ml", line 87, characters 6-10</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Called from file "lib/exn.ml", line 87, characters 6-10</computeroutput></programlisting>
 
         <sect2 id="defining-custom-argument-types">
           <title>Defining custom argument types</title>
@@ -483,8 +479,7 @@ let () =
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./basic_md5_with_custom_arg.native /etc/passwd</userinput>
 <computeroutput moreinfo="none">8cfb68a5622dd12932df658a54698aad</computeroutput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./basic_md5_with_custom_arg.native /dev/null</userinput>
-<computeroutput moreinfo="none">'/dev/null' is not a regular file.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">'/dev/null' is not a regular file.</computeroutput></programlisting>
         </sect2>
 
         <sect2 id="optional-and-default-arguments">
@@ -520,8 +515,7 @@ let () =
 <computeroutput moreinfo="none">Error: This expression has type string -&gt; unit -&gt; unit</computeroutput>
 <computeroutput moreinfo="none">       but an expression was expected of type string option -&gt; unit -&gt; unit</computeroutput>
 <computeroutput moreinfo="none">       Type string is not compatible with type string option </computeroutput>
-<computeroutput moreinfo="none">Command exited with code 2.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Command exited with code 2.</computeroutput></programlisting>
 
           <para>This is because changing the argument type has also changed
           the type of the callback function. It now wants a <literal moreinfo="none">string
@@ -613,8 +607,7 @@ let () =
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">cat /etc/passwd | ./basic_md5_with_optional_file.native</userinput>
 <computeroutput moreinfo="none">8cfb68a5622dd12932df658a54698aad</computeroutput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">cat /etc/passwd | ./basic_md5_with_default_file.native</userinput>
-<computeroutput moreinfo="none">8cfb68a5622dd12932df658a54698aad</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">8cfb68a5622dd12932df658a54698aad</computeroutput></programlisting>
         </sect2>
 
         <sect2 id="sequences-of-arguments">
@@ -746,8 +739,7 @@ let () = Command.run command</programlisting>
 <computeroutput moreinfo="none">                 (alias: -?)</computeroutput>
 <computeroutput moreinfo="none"> </computeroutput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./basic_md5_with_flags.native -s "ocaml rocks"</userinput>
-<computeroutput moreinfo="none">5a118fe92ac3b6c7854c595ecf6419cb</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">5a118fe92ac3b6c7854c595ecf6419cb</computeroutput></programlisting>
 
         <para>The <literal moreinfo="none">-s</literal> flag in our specification requires a
         <literal moreinfo="none">string</literal> argument and isn't optional. The Command
@@ -839,8 +831,7 @@ let () = Command.run command</programlisting>
         <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">opam config env</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">opam remote list -k git</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">opam install --help</userinput>
-<prompt moreinfo="none">$ </prompt><userinput moreinfo="none">opam install cryptokit --verbose</userinput>
-</programlisting>
+<prompt moreinfo="none">$ </prompt><userinput moreinfo="none">opam install cryptokit --verbose</userinput></programlisting>
 
         <para>The <literal moreinfo="none">config</literal>, <literal moreinfo="none">remote</literal> and
         <literal moreinfo="none">install</literal> keywords form a logical grouping of
@@ -866,8 +857,7 @@ let () = Command.run command</programlisting>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Command.group ;;</userinput>
 <computeroutput moreinfo="none">- : summary:string -&gt;</computeroutput>
 <computeroutput moreinfo="none">    ?readme:(unit -&gt; string) -&gt; (string * Command.t) list -&gt; Command.t</computeroutput>
-<computeroutput moreinfo="none">= &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">= &lt;fun&gt;</computeroutput></programlisting>
 
         <para>The <literal moreinfo="none">group</literal> signature accepts a list of basic
         <literal moreinfo="none">Command.t</literal> values and their corresponding names.
@@ -961,8 +951,7 @@ let () = Command.run command</programlisting>
 <computeroutput moreinfo="none">  diff     Show days between [date1] and [date2]</computeroutput>
 <computeroutput moreinfo="none">  version  print version information</computeroutput>
 <computeroutput moreinfo="none">  help     explain a given subcommand (perhaps recursively)</computeroutput>
-<computeroutput moreinfo="none"> </computeroutput>
-</programlisting>
+<computeroutput moreinfo="none"> </computeroutput></programlisting>
 
         <para>We can invoke the two commands we just defined to verify that
         they work and see the date parsing in action.</para>
@@ -973,8 +962,7 @@ let () = Command.run command</programlisting>
         <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./cal_add_sub_days.native add 2012-12-25 40</userinput>
 <computeroutput moreinfo="none">2013-02-03</computeroutput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./cal_add_sub_days.native diff 2012-12-25 2012-11-01</userinput>
-<computeroutput moreinfo="none">54 days</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">54 days</computeroutput></programlisting>
       </sect1>
 
       <sect1 id="advanced-control-over-parsing">
@@ -1044,8 +1032,7 @@ let () = Command.run command</programlisting>
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Command.Spec.empty ;;</userinput>
 <computeroutput moreinfo="none">- : ('m, 'm) Command.Spec.t = &lt;abstr&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Command.Spec.(empty +&gt; anon ("foo" %: int)) ;;</userinput>
-<computeroutput moreinfo="none">- : (int -&gt; '_a, '_a) Command.Spec.t = &lt;abstr&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : (int -&gt; '_a, '_a) Command.Spec.t = &lt;abstr&gt;</computeroutput></programlisting>
 
           <para>The empty specification is simple as it doesn't add any
           parameters to the callback type. The second example adds an
@@ -1068,8 +1055,7 @@ let () = Command.run command</programlisting>
 <computeroutput moreinfo="none">- : summary:string -&gt;</computeroutput>
 <computeroutput moreinfo="none">    ?readme:(unit -&gt; string) -&gt;</computeroutput>
 <computeroutput moreinfo="none">    ('main, unit -&gt; unit) Command.Spec.t -&gt; 'main -&gt; Command.t</computeroutput>
-<computeroutput moreinfo="none">= &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">= &lt;fun&gt;</computeroutput></programlisting>
 
           <para>The parameters to <literal moreinfo="none">Spec.t</literal> are important
           here. They show that the callback function for a spec should consume
@@ -1165,8 +1151,7 @@ let diff ~common =
 <computeroutput moreinfo="none">       but an expression was expected of type</computeroutput>
 <computeroutput moreinfo="none">         (bool -&gt; unit -&gt; unit -&gt; unit, unit -&gt; unit) Command.Spec.t</computeroutput>
 <computeroutput moreinfo="none">       Type unit -&gt; unit is not compatible with type unit </computeroutput>
-<computeroutput moreinfo="none">Command exited with code 2.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Command exited with code 2.</computeroutput></programlisting>
 
           <para>While this does look scary, the key line to scan is the last
           one, where it's telling you that you have supplied too many
@@ -1269,8 +1254,7 @@ let () = Command.run add</programlisting>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./cal_add_interactive.native 2013-12-01</userinput>
 <computeroutput moreinfo="none">enter days:</computeroutput>
 <computeroutput moreinfo="none">35</computeroutput>
-<computeroutput moreinfo="none">2014-01-05</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">2014-01-05</computeroutput></programlisting>
 
           <para>The transformation means that the <literal moreinfo="none">add_days</literal>
           callback can just keep its original definition of <literal moreinfo="none">Date.t
@@ -1291,8 +1275,7 @@ let () = Command.run add</programlisting>
 <userinput moreinfo="none">  | None -&gt;</userinput>
 <userinput moreinfo="none">     print_endline "enter days: ";</userinput>
 <userinput moreinfo="none">     m base (read_int ())) ;;</userinput>
-<computeroutput moreinfo="none">- : (Date.t -&gt; int -&gt; '_a, Date.t -&gt; int option -&gt; '_a) t = &lt;abstr&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : (Date.t -&gt; int -&gt; '_a, Date.t -&gt; int option -&gt; '_a) t = &lt;abstr&gt;</computeroutput></programlisting>
 
           <para>The first half of the <literal moreinfo="none">Spec.t</literal> shows that the
           callback type is <literal moreinfo="none">Date.t -&gt; int</literal>, whereas the
@@ -1453,8 +1436,7 @@ let () = Command.run add</programlisting>
 <computeroutput moreinfo="none">  COMP_WORDS[0]=./basic_md5_with_flags.native</computeroutput>
 <computeroutput moreinfo="none">  COMPREPLY=($("${COMP_WORDS[@]}"))</computeroutput>
 <computeroutput moreinfo="none">}</computeroutput>
-<computeroutput moreinfo="none">complete -F _jsautocom_23343 ./basic_md5_with_flags.native</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">complete -F _jsautocom_23343 ./basic_md5_with_flags.native</computeroutput></programlisting>
 
           <para>Recall that we used the <literal moreinfo="none">Arg_type.file</literal> to
           specify the argument type. This also supplies the completion logic
@@ -1477,8 +1459,7 @@ let () = Command.run add</programlisting>
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">env COMMAND_OUTPUT_INSTALLATION_BASH=1 ./cal_add_sub_days.native &gt; cal.cmd</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">. cal.cmd</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./cal_add_sub_days.native &lt;tab&gt;</userinput>
-<computeroutput moreinfo="none">add      diff     help     version</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">add      diff     help     version</computeroutput></programlisting>
 
           <para>Command completion support works for flags and grouped
           commands, and is very useful when building larger command-line

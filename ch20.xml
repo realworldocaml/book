@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="memory-representation-of-values">
       <title>Memory Representation of Values</title>
@@ -72,8 +72,7 @@
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type t = { foo: int; bar: int } ;;</userinput>
 <computeroutput moreinfo="none">type t = { foo : int; bar : int; }</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let x = { foo = 13; bar = 14 } ;;</userinput>
-<computeroutput moreinfo="none">val x : t = {foo = 13; bar = 14}</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val x : t = {foo = 13; bar = 14}</computeroutput></programlisting>
 
         <para>The type declaration <literal moreinfo="none">t</literal> doesn't take up any
         memory at runtime, but the subsequent <literal moreinfo="none">let</literal> binding
@@ -190,8 +189,7 @@
         <programlisting language="" format="linespecific">+------------------------+---------+----------+----------+----------+----
 | size of block in words |  color  | tag byte | value[0] | value[1] | ...
 +------------------------+---------+----------+----------+----------+----
- &lt;-either 22 or 54 bits-&gt; &lt;-2 bit-&gt; &lt;--8 bit--&gt;
-</programlisting>
+ &lt;-either 22 or 54 bits-&gt; &lt;-2 bit-&gt; &lt;--8 bit--&gt;</programlisting>
 
         <para>The <literal moreinfo="none">size</literal> field records the length of the
         block in memory words. This is 22 bits on 32-bit platforms, which is
@@ -341,8 +339,7 @@
 
         <programlisting language="" format="linespecific">+---------+----------+----------- - - - -
 | header  | value[0] | value[1] | ....
-+---------+----------+----------+- - - - -
-</programlisting>
++---------+----------+----------+- - - - -</programlisting>
 
         <para>Tuples, records and arrays are all represented identically at
         runtime as a block with tag <literal moreinfo="none">0</literal>. Tuples and records
@@ -361,8 +358,7 @@
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Obj.is_block (Obj.repr (1,2,3)) ;;</userinput>
 <computeroutput moreinfo="none">- : bool = true</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Obj.is_block (Obj.repr 1) ;;</userinput>
-<computeroutput moreinfo="none">- : bool = false</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : bool = false</computeroutput></programlisting>
 
         <para>The <literal moreinfo="none">Obj.repr</literal> function retrieves the runtime
         representation of any OCaml value. <literal moreinfo="none">Obj.is_block</literal>
@@ -384,8 +380,7 @@
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Obj.tag (Obj.repr 1.0) ;;</userinput>
 <computeroutput moreinfo="none">- : int = 253</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Obj.double_tag ;;</userinput>
-<computeroutput moreinfo="none">- : int = 253</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 253</computeroutput></programlisting>
 
           <para>Since each floating-point value is boxed in a separate memory
           block, it can be inefficient to handle large arrays of floats in
@@ -401,8 +396,7 @@
 
           <programlisting language="" format="linespecific">+---------+----------+----------- - - - -
 | header  | float[0] | float[1] | ....
-+---------+----------+----------+- - - - -
-</programlisting>
++---------+----------+----------+- - - - -</programlisting>
 
           <para>First, let's check that float arrays do in fact have a
           different tag number from normal floating-point values.</para>
@@ -413,8 +407,7 @@
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Obj.double_tag ;;</userinput>
 <computeroutput moreinfo="none">- : int = 253</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Obj.double_array_tag ;;</userinput>
-<computeroutput moreinfo="none">- : int = 254</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 254</computeroutput></programlisting>
 
           <para>This tells us that float arrays have a tag value of 254. Now
           let's test some sample values using the <literal moreinfo="none">Obj.tag</literal>
@@ -432,8 +425,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Obj.double_field (Obj.repr [| 1.1; 2.2; 3.3 |]) 1 ;;</userinput>
 <computeroutput moreinfo="none">- : float = 2.2</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Obj.double_field (Obj.repr 1.234) 0 ;;</userinput>
-<computeroutput moreinfo="none">- : float = 1.234</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : float = 1.234</computeroutput></programlisting>
 
           <para>The first thing we tested above was that a float array has the
           correct unboxed float array tag value (254). However, the next line
@@ -464,8 +456,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">((Obj.magic (Obj.repr Pear)) : int) ;;</userinput>
 <computeroutput moreinfo="none">- : int = 2</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Obj.is_block (Obj.repr Apple) ;;</userinput>
-<computeroutput moreinfo="none">- : bool = false</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : bool = false</computeroutput></programlisting>
 
         <para><literal moreinfo="none">Obj.magic</literal> unsafely forces a type cast between
         any two OCaml types; in this example the <literal moreinfo="none">int</literal> type
@@ -493,8 +484,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">(Obj.magic (Obj.field (Obj.repr (Orange 1234)) 0) : int) ;;</userinput>
 <computeroutput moreinfo="none">- : int = 1234</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">(Obj.magic (Obj.field (Obj.repr (Pear "xyz")) 0) : string) ;;</userinput>
-<computeroutput moreinfo="none">- : string = "xyz"</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string = "xyz"</computeroutput></programlisting>
 
         <para>In the above example, the <literal moreinfo="none">Apple</literal> and
         <literal moreinfo="none">Kiwi</literal> values are still stored as normal OCaml
@@ -563,8 +553,7 @@
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Pa_type_conv.hash_variant "Foo" ;;</userinput>
 <computeroutput moreinfo="none">- : int = 3505894</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">(Obj.magic (Obj.repr `Foo) : int) ;;</userinput>
-<computeroutput moreinfo="none">- : int = 3505894</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 3505894</computeroutput></programlisting>
 
         <para>The hash function is designed to give the same results on 32-bit
         and 64-bit architectures, so the memory representation is stable
@@ -616,8 +605,7 @@
         <programlisting language="" format="linespecific">+---------------+----------------+--------+-----------+
 | header        | 'a' 'b' 'c' 'd' 'e' 'f' | '\O' '\1' |
 +---------------+----------------+--------+-----------+
-                L data                    L padding
-</programlisting>
+                L data                    L padding</programlisting>
 
         <para>On a 32-bit machine, the padding is calculated based on the
         modulo of the string length and word size to ensure the result is
@@ -674,8 +662,7 @@
         <para role="sourcecode">Diagram:
         <filename moreinfo="none">memory-repr/string_size_calc.ascii</filename></para>
 
-        <programlisting language="" format="linespecific">number_of_words_in_block * sizeof(word) - last_byte_of_block - 1
-</programlisting>
+        <programlisting language="" format="linespecific">number_of_words_in_block * sizeof(word) - last_byte_of_block - 1</programlisting>
 
         <para>The guaranteed <literal moreinfo="none">NULL</literal>-termination comes in
         handy when passing a string to C, but is not relied upon to compute
@@ -721,8 +708,7 @@
                     /*out*/ uintnat * wsize_64 /*size in bytes*/);
   uintnat (*deserialize)(void * dst);
   int (*compare_ext)(value v1, value v2);
-};
-</programlisting>
+};</programlisting>
 
         <para>The custom operations specify how the runtime should perform
         polymorphic comparison, hashing and binary marshalling. They also

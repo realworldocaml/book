@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE appendix PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <appendix id="installation">
     <title>Installation</title>
@@ -50,19 +50,19 @@
 
       <itemizedlist>
         <listitem>
-          <para><ulink url="https://realworldocaml.org/install"><literal moreinfo="none">https://realworldocaml.org/install</literal></ulink>
+          <para><ulink url="https://realworldocaml.org/install"/>
           and follow the instructions for your operating system.</para>
         </listitem>
 
         <listitem>
-          <para><ulink url="https://realworldocaml.org/code"><literal moreinfo="none">https://realworldocaml.org/code</literal></ulink>
+          <para><ulink url="https://realworldocaml.org/code"/>
           has all of the example code freely available under a
           public-domain-like license, so that you can copy them for use in
           your own projects.</para>
         </listitem>
 
         <listitem>
-          <para><ulink url="https://realworldocaml.org/doc"><literal moreinfo="none">https://realworldocaml.org/doc</literal></ulink>
+          <para><ulink url="https://realworldocaml.org/doc"/>
           contains the HTML documentation for all the libraries used within
           the book. This is a convenient reference for the Core interfaces,
           and also the other third-party software we use such as Yojson or

@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="parsing-with-ocamllex-and-menhir">
       <title>Parsing with OCamllex and Menhir</title>
@@ -90,8 +90,7 @@
     { "name": "Chicago",  "zips": [60601] },
     { "name": "New York", "zips": [10004] } 
   ]
-}
-</programlisting>
+}</programlisting>
 
         <para>At a syntactic level, we can think of a JSON file as a series of
         simple logical units, like curly braces, square brackets, commas,
@@ -805,8 +804,7 @@ null
   "field2": 17e13,
   "field3": [1, 2, 3],
   "field4": { "fieldA": 1, "fieldB": "Hello" }
-}
-</programlisting>
+}</programlisting>
 
         <para>Now build and run the example using this file, and you can see
         the full parser in action.</para>
@@ -825,8 +823,7 @@ null
 <computeroutput moreinfo="none">  "field2": 170000000000000.000000,</computeroutput>
 <computeroutput moreinfo="none">  "field3": [1, 2, 3],</computeroutput>
 <computeroutput moreinfo="none">  "field4": { "fieldA": 1,</computeroutput>
-<computeroutput moreinfo="none">  "fieldB": "Hello" } }</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  "fieldB": "Hello" } }</computeroutput></programlisting>
 
         <para>With our simple error handling scheme, errors are fatal and
         cause the program to terminate with a non-zero exit code.</para>
@@ -842,8 +839,7 @@ null
 <computeroutput moreinfo="none">  "zips": [10004]</computeroutput>
 <computeroutput moreinfo="none">}</computeroutput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./test.native test2.json</userinput>
-<computeroutput moreinfo="none">test2.json:3:2: syntax error</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">test2.json:3:2: syntax error</computeroutput></programlisting>
 
         <para>That wraps up our parsing tutorial. As an aside, notice that the
         JSON polymorphic variant type that we defined in this chapter is

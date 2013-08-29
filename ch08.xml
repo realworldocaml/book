@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="imperative-programming-1">
       <title>Imperative Programming</title>
@@ -166,8 +166,7 @@ let find t key =
         1)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.find_map;;</userinput>
-<computeroutput moreinfo="none">- : 'a list -&gt; f:('a -&gt; 'b option) -&gt; 'b option = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : 'a list -&gt; f:('a -&gt; 'b option) -&gt; 'b option = &lt;fun&gt;</computeroutput></programlisting>
 
         <para><literal moreinfo="none">List.find_map</literal> iterates over the elements of
         the list, calling <literal moreinfo="none">f</literal> on each one until a
@@ -270,8 +269,7 @@ let remove t key =
         <programlisting language="" format="linespecific">&lt;expr1&gt;;
 &lt;expr2&gt;;
 ...
-&lt;exprN&gt;
-</programlisting>
+&lt;exprN&gt;</programlisting>
 
         <para>is equivalent to</para>
 
@@ -281,8 +279,7 @@ let remove t key =
         <programlisting language="" format="linespecific">let () = &lt;expr1&gt; in
 let () = &lt;expr2&gt; in
 ...
-&lt;exprN&gt;
-</programlisting>
+&lt;exprN&gt;</programlisting>
 
         <para>When a sequence expression <literal moreinfo="none">expr1; expr2</literal> is
         evaluated, <literal moreinfo="none">expr1</literal> is evaluated first, and then
@@ -337,16 +334,14 @@ let () = &lt;expr2&gt; in
             <para role="sourcecode">Syntax:
             <filename moreinfo="none">imperative-programming/array-get.syntax</filename></para>
 
-            <programlisting language="" format="linespecific">&lt;array_expr&gt;.(&lt;index_expr&gt;)
-</programlisting>
+            <programlisting language="" format="linespecific">&lt;array_expr&gt;.(&lt;index_expr&gt;)</programlisting>
 
             <para>and for setting an element in an array:</para>
 
             <para role="sourcecode">Syntax:
             <filename moreinfo="none">imperative-programming/array-set.syntax</filename></para>
 
-            <programlisting language="" format="linespecific">&lt;array_expr&gt;.(&lt;index_expr&gt;) &lt;- &lt;value_expr&gt;
-</programlisting>
+            <programlisting language="" format="linespecific">&lt;array_expr&gt;.(&lt;index_expr&gt;) &lt;- &lt;value_expr&gt;</programlisting>
 
             <para>Out-of-bounds accesses for arrays (and indeed for all the
             array-like data structures) will lead to an exception being
@@ -376,8 +371,7 @@ let () = &lt;expr2&gt; in
             <filename moreinfo="none">imperative-programming/string.syntax</filename></para>
 
             <programlisting language="" format="linespecific">&lt;string_expr&gt;.[&lt;index_expr&gt;]
-&lt;string_expr&gt;.[&lt;index_expr&gt;] &lt;- &lt;char_expr&gt;
-</programlisting>
+&lt;string_expr&gt;.[&lt;index_expr&gt;] &lt;- &lt;char_expr&gt;</programlisting>
 
             <para>And string literals are bounded by quotes. There's also a
             module <literal moreinfo="none">String</literal> where you'll find useful
@@ -397,8 +391,7 @@ let () = &lt;expr2&gt; in
             <filename moreinfo="none">imperative-programming/bigarray.syntax</filename></para>
 
             <programlisting language="" format="linespecific">&lt;bigarray_expr&gt;.{&lt;index_expr&gt;}
-&lt;bigarray_expr&gt;.{&lt;index_expr&gt;} &lt;- &lt;value_expr&gt;
-</programlisting>
+&lt;bigarray_expr&gt;.{&lt;index_expr&gt;} &lt;- &lt;value_expr&gt;</programlisting>
           </sect3>
         </sect2>
 
@@ -433,8 +426,7 @@ let () = &lt;expr2&gt; in
             1)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type 'a ref = { mutable contents : 'a };;</userinput>
-<computeroutput moreinfo="none">type 'a ref = { mutable contents : 'a; }</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">type 'a ref = { mutable contents : 'a; }</computeroutput></programlisting>
 
             <para>The standard library defines the following operators for
             working with refs.</para>
@@ -470,8 +462,7 @@ let () = &lt;expr2&gt; in
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">  x := !x + 1;;</userinput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">  !x;;</userinput>
-<computeroutput moreinfo="none">- : int = 2</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 2</computeroutput></programlisting>
 
             <para>The above are just ordinary OCaml functions which could be
             defined as follows.</para>
@@ -485,8 +476,7 @@ let () = &lt;expr2&gt; in
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">  let (!) r = r.contents;;</userinput>
 <computeroutput moreinfo="none">val ( ! ) : 'a ref -&gt; 'a = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">  let (:=) r x = r.contents &lt;- x;;</userinput>
-<computeroutput moreinfo="none">val ( := ) : 'a ref -&gt; 'a -&gt; unit = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val ( := ) : 'a ref -&gt; 'a -&gt; unit = &lt;fun&gt;</computeroutput></programlisting>
           </sect3>
         </sect2>
 
@@ -531,8 +521,7 @@ let () = &lt;expr2&gt; in
 <computeroutput moreinfo="none">i = 1</computeroutput>
 <computeroutput moreinfo="none">i = 2</computeroutput>
 <computeroutput moreinfo="none">i = 3</computeroutput>
-<computeroutput moreinfo="none">- : unit = ()</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
 
         <para>As you can see, the upper and lower bounds are inclusive. We can
         also use <literal moreinfo="none">downto</literal> to iterate in the other
@@ -547,8 +536,7 @@ let () = &lt;expr2&gt; in
 <computeroutput moreinfo="none">i = 2</computeroutput>
 <computeroutput moreinfo="none">i = 1</computeroutput>
 <computeroutput moreinfo="none">i = 0</computeroutput>
-<computeroutput moreinfo="none">- : unit = ()</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
 
         <para>Note that the loop variable of a <literal moreinfo="none">for</literal> loop,
         <literal moreinfo="none">i</literal> in this case, is immutable in the scope of the
@@ -585,8 +573,7 @@ let () = &lt;expr2&gt; in
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">rev_inplace nums;;</userinput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">nums;;</userinput>
-<computeroutput moreinfo="none">- : int array = [|5; 4; 3; 2; 1|]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int array = [|5; 4; 3; 2; 1|]</computeroutput></programlisting>
 
         <para>In the above, we used <literal moreinfo="none">incr</literal> and
         <literal moreinfo="none">decr</literal>, which are built-in functions for incrementing
@@ -720,8 +707,7 @@ let prev elt = elt.prev</programlisting>
 <computeroutput moreinfo="none">   1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1;</computeroutput>
 <computeroutput moreinfo="none">   2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2;</computeroutput>
 <computeroutput moreinfo="none">   3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2;</computeroutput>
-<computeroutput moreinfo="none">   ...]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">   ...]</computeroutput></programlisting>
 
           <para>This approach is quite limited, however. General purpose
           cyclic data structures require mutation.</para>
@@ -896,8 +882,7 @@ let find_el t ~f =
 <computeroutput moreinfo="none">performing lazy computation</computeroutput>
 <computeroutput moreinfo="none">- : float = 4.</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Lazy.force v;;</userinput>
-<computeroutput moreinfo="none">- : float = 4.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : float = 4.</computeroutput></programlisting>
 
         <para>You can see from the print statement that the actual computation
         was performed only once, and only after <literal moreinfo="none">force</literal> had
@@ -916,8 +901,7 @@ let find_el t ~f =
 <userinput moreinfo="none">    | Value of 'a</userinput>
 <userinput moreinfo="none">    | Exn of exn</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">type 'a lazy_state = Delayed of (unit -&gt; 'a) | Value of 'a | Exn of exn</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">type 'a lazy_state = Delayed of (unit -&gt; 'a) | Value of 'a | Exn of exn</computeroutput></programlisting>
 
         <para>A <literal moreinfo="none">lazy_state</literal> represents the possible states
         of a lazy value. A lazy value is <literal moreinfo="none">Delayed</literal> before it
@@ -945,8 +929,7 @@ let find_el t ~f =
 <computeroutput moreinfo="none">val create_lazy : (unit -&gt; 'a) -&gt; 'a lazy_state ref = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let v = create_lazy</userinput>
 <userinput moreinfo="none">    (fun () -&gt; print_string "performing lazy computation\n"; sqrt 16.);;</userinput>
-<computeroutput moreinfo="none">val v : float lazy_state ref = {contents = Delayed &lt;fun&gt;}</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val v : float lazy_state ref = {contents = Delayed &lt;fun&gt;}</computeroutput></programlisting>
 
         <para>Now we just need a way to force a lazy value. The following
         function does just that.</para>
@@ -968,8 +951,7 @@ let find_el t ~f =
 <userinput moreinfo="none">        v := Exn exn;</userinput>
 <userinput moreinfo="none">        raise exn</userinput>
 <userinput moreinfo="none">     ;;</userinput>
-<computeroutput moreinfo="none">val force : 'a lazy_state ref -&gt; 'a = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val force : 'a lazy_state ref -&gt; 'a = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>Which we can use in the same way we used
         <literal moreinfo="none">Lazy.force</literal>:</para>
@@ -982,8 +964,7 @@ let find_el t ~f =
 <computeroutput moreinfo="none">performing lazy computation</computeroutput>
 <computeroutput moreinfo="none">- : float = 4.</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">force v;;</userinput>
-<computeroutput moreinfo="none">- : float = 4.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : float = 4.</computeroutput></programlisting>
 
         <para>The main user-visible difference between our implementation of
         laziness and the built-in version is syntax. Rather than writing
@@ -1018,8 +999,7 @@ let find_el t ~f =
 <userinput moreinfo="none">        Hashtbl.add_exn table ~key:x ~data:y;</userinput>
 <userinput moreinfo="none">        y</userinput>
 <userinput moreinfo="none">    );;</userinput>
-<computeroutput moreinfo="none">val memoize : ('a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val memoize : ('a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>The code above is a bit tricky. <literal moreinfo="none">memoize</literal>
           takes as its argument a function <literal moreinfo="none">f</literal>, and then
@@ -1072,8 +1052,7 @@ let find_el t ~f =
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val edit_distance : string -&gt; string -&gt; int = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">edit_distance "OCaml" "ocaml";;</userinput>
-<computeroutput moreinfo="none">- : int = 2</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 2</computeroutput></programlisting>
 
           <para>The thing to note is that if you call <literal moreinfo="none">edit_distance
           "OCaml" "ocaml"</literal>, then that will in turn dispatch the
@@ -1084,8 +1063,7 @@ let find_el t ~f =
 
           <programlisting language="" format="linespecific">edit_distance "OCam" "ocaml"
 edit_distance "OCaml" "ocam"
-edit_distance "OCam" "ocam"
-</programlisting>
+edit_distance "OCam" "ocam"</programlisting>
 
           <para>And these calls will in turn dispatch other calls:</para>
 
@@ -1103,8 +1081,7 @@ edit_distance "OCaml" "ocam"
 edit_distance "OCam" "ocam"
    edit_distance "OCa" "ocam"
    edit_distance "OCam" "oca"
-   edit_distance "OCa" "oca"
-</programlisting>
+   edit_distance "OCa" "oca"</programlisting>
 
           <para>As you can see, some of these calls are repeats. For example,
           there are two different calls to <literal moreinfo="none">edit_distance "OCam"
@@ -1123,8 +1100,7 @@ edit_distance "OCam" "ocam"
 <userinput moreinfo="none">    let stop = Time.now () in</userinput>
 <userinput moreinfo="none">    printf "Time: %s\n" (Time.Span.to_string (Time.diff stop start));</userinput>
 <userinput moreinfo="none">    x ;;</userinput>
-<computeroutput moreinfo="none">val time : (unit -&gt; 'a) -&gt; 'a = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val time : (unit -&gt; 'a) -&gt; 'a = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>And now we can use this to try out some examples.</para>
 
@@ -1137,8 +1113,7 @@ edit_distance "OCam" "ocam"
 <computeroutput moreinfo="none">- : int = 2</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">time (fun () -&gt; edit_distance "OCaml 4.01" "ocaml 4.01");;</userinput>
 <computeroutput moreinfo="none">Time: 6.79065s</computeroutput>
-<computeroutput moreinfo="none">- : int = 2</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 2</computeroutput></programlisting>
 
           <para>Just those few extra characters made it thousands of times
           slower!</para>
@@ -1160,8 +1135,7 @@ edit_distance "OCam" "ocam"
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec fib i =</userinput>
 <userinput moreinfo="none">    if i &lt;= 1 then 1 else fib (i - 1) + fib (i - 2);;</userinput>
-<computeroutput moreinfo="none">val fib : int -&gt; int = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val fib : int -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>This is, however, exponentially slow, for the same reason that
           <literal moreinfo="none">edit_distance</literal> was slow: we end up making many
@@ -1177,8 +1151,7 @@ edit_distance "OCam" "ocam"
 <computeroutput moreinfo="none">- : int = 10946</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">time (fun () -&gt; fib 40);;</userinput>
 <computeroutput moreinfo="none">Time: 12.7751s</computeroutput>
-<computeroutput moreinfo="none">- : int = 165580141</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 165580141</computeroutput></programlisting>
 
           <para>As you can see, <literal moreinfo="none">fib 40</literal> takes thousands of
           times longer to compute than <literal moreinfo="none">fib 20</literal>.</para>
@@ -1201,8 +1174,7 @@ edit_distance "OCam" "ocam"
 <computeroutput moreinfo="none">- : int = 165580141</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">time (fun () -&gt; fib 40);;</userinput>
 <computeroutput moreinfo="none">Time: 0.00309944ms</computeroutput>
-<computeroutput moreinfo="none">- : int = 165580141</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 165580141</computeroutput></programlisting>
 
           <para>In order to make <literal moreinfo="none">fib</literal> fast, our first step
           will be to rewrite <literal moreinfo="none">fib</literal> in a way that unwinds the
@@ -1217,8 +1189,7 @@ edit_distance "OCam" "ocam"
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let fib_norec fib i =</userinput>
 <userinput moreinfo="none">    if i &lt;= 1 then i</userinput>
 <userinput moreinfo="none">    else fib (i - 1) + fib (i - 2) ;;</userinput>
-<computeroutput moreinfo="none">val fib_norec : (int -&gt; int) -&gt; int -&gt; int = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val fib_norec : (int -&gt; int) -&gt; int -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>We can now turn this back into an ordinary Fibonacci function
           by tying the recursive knot, as shown below.</para>
@@ -1230,8 +1201,7 @@ edit_distance "OCam" "ocam"
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec fib i = fib_norec fib i;;</userinput>
 <computeroutput moreinfo="none">val fib : int -&gt; int = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">fib 20;;</userinput>
-<computeroutput moreinfo="none">- : int = 6765</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 6765</computeroutput></programlisting>
 
           <para>We can even write a polymorphic function that we'll call
           <literal moreinfo="none">make_rec</literal> that can tie the recursive knot for any
@@ -1249,8 +1219,7 @@ edit_distance "OCam" "ocam"
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let fib = make_rec fib_norec;;</userinput>
 <computeroutput moreinfo="none">val fib : int -&gt; int = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">fib 20;;</userinput>
-<computeroutput moreinfo="none">- : int = 6765</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 6765</computeroutput></programlisting>
 
           <para>This is a pretty strange piece of code, and it may take a few
           minutes of thought to figure out what's going on. Like
@@ -1277,8 +1246,7 @@ edit_distance "OCam" "ocam"
 <userinput moreinfo="none">    fref := f;</userinput>
 <userinput moreinfo="none">    f x</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val memo_rec : (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val memo_rec : (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>Note that <literal moreinfo="none">memo_rec</literal> has the same signature
           as <literal moreinfo="none">make_rec</literal>.</para>
@@ -1298,8 +1266,7 @@ edit_distance "OCam" "ocam"
 <computeroutput moreinfo="none">val fib : int -&gt; int = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">time (fun () -&gt; fib 40);;</userinput>
 <computeroutput moreinfo="none">Time: 0.0591278ms</computeroutput>
-<computeroutput moreinfo="none">- : int = 102334155</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 102334155</computeroutput></programlisting>
 
           <para>And as you can see, the exponential time complexity is now
           gone.</para>
@@ -1325,8 +1292,7 @@ edit_distance "OCam" "ocam"
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let fib = memo_rec (fun fib i -&gt;</userinput>
 <userinput moreinfo="none">    if i &lt;= 1 then 1 else fib (i - 1) + fib (i - 2));;</userinput>
-<computeroutput moreinfo="none">val fib : int -&gt; int = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val fib : int -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>Memoization is overkill for implementing Fibonacci, and
           indeed, the <literal moreinfo="none">fib</literal> defined above is not especially
@@ -1362,8 +1328,7 @@ edit_distance "OCam" "ocam"
 <userinput moreinfo="none">        ; edit_distance (s ,t') + 1</userinput>
 <userinput moreinfo="none">        ; edit_distance (s',t') + cost_to_drop_both</userinput>
 <userinput moreinfo="none">        ]) ;;</userinput>
-<computeroutput moreinfo="none">val edit_distance : string * string -&gt; int = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val edit_distance : string * string -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>This new version of <literal moreinfo="none">edit_distance</literal> is much
           more efficient than the one we started with; the following call is
@@ -1376,8 +1341,7 @@ edit_distance "OCam" "ocam"
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">time (fun () -&gt; edit_distance ("OCaml 4.01","ocaml 4.01"));;</userinput>
 <computeroutput moreinfo="none">Time: 0.500917ms</computeroutput>
-<computeroutput moreinfo="none">- : int = 2</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 2</computeroutput></programlisting>
 
           <note>
             <title>Limitations of <literal moreinfo="none">let rec</literal></title>
@@ -1396,8 +1360,7 @@ edit_distance "OCam" "ocam"
 <userinput moreinfo="none">    f</userinput>
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">Characters 39-69:</computeroutput>
-<computeroutput moreinfo="none">Error: This kind of expression is not allowed as right-hand side of `let rec'</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Error: This kind of expression is not allowed as right-hand side of `let rec'</computeroutput></programlisting>
 
             <para>OCaml rejects the definition because OCaml, as a strict
             language, has limits on what it can put on the right hand side of
@@ -1435,8 +1398,7 @@ edit_distance "OCam" "ocam"
             2)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec x = lazy (Lazy.force x + 1);;</userinput>
-<computeroutput moreinfo="none">val x : int lazy_t = &lt;lazy&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val x : int lazy_t = &lt;lazy&gt;</computeroutput></programlisting>
 
             <para>Of course, actually trying to compute this will fail.
             OCaml's <literal moreinfo="none">lazy</literal> throws an exception when a lazy
@@ -1447,8 +1409,7 @@ edit_distance "OCam" "ocam"
             3)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Lazy.force x;;</userinput>
-<computeroutput moreinfo="none">Exception: Lazy.Undefined.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Exception: Lazy.Undefined.</computeroutput></programlisting>
 
             <para>But we can also create useful recursive definitions with
             <literal moreinfo="none">lazy</literal>. In particular, we can use laziness to
@@ -1466,8 +1427,7 @@ edit_distance "OCam" "ocam"
 <computeroutput moreinfo="none">val lazy_memo_rec : (('a -&gt; 'b) -&gt; 'a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">time (fun () -&gt; lazy_memo_rec fib_norec 40);;</userinput>
 <computeroutput moreinfo="none">Time: 0.0650883ms</computeroutput>
-<computeroutput moreinfo="none">- : int = 102334155</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 102334155</computeroutput></programlisting>
 
             <para>Laziness is more constrained than explicit mutation, and so
             in some cases can lead to code whose behavior is easier to think
@@ -1578,8 +1538,7 @@ let () =
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild time_converter.byte</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./time_converter.byte</userinput>
-<computeroutput moreinfo="none">Pick a timezone:</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Pick a timezone:</computeroutput></programlisting>
 
           <para>You can then type in the name of a timezone and hit return,
           and it will print out the current time in the timezone in
@@ -1589,8 +1548,7 @@ let () =
           <filename moreinfo="none">imperative-programming/time_converter2.out</filename></para>
 
           <programlisting language="console" format="linespecific"><computeroutput moreinfo="none">Pick a timezone: Europe/London</computeroutput>
-<computeroutput moreinfo="none">The time in Europe/London is 2013-08-15 00:03:10.666220+01:00.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">The time in Europe/London is 2013-08-15 00:03:10.666220+01:00.</computeroutput></programlisting>
 
           <para>We called <literal moreinfo="none">Out_channel.flush</literal> on
           <literal moreinfo="none">stdout</literal> because <literal moreinfo="none">out_channel</literal>s
@@ -1633,8 +1591,7 @@ let () =
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">printf "%i is an integer, %F is a float, \"%s\" is a string\n"</userinput>
 <userinput moreinfo="none">    3 4.5 "five";;</userinput>
 <computeroutput moreinfo="none">3 is an integer, 4.5 is a float, "five" is a string</computeroutput>
-<computeroutput moreinfo="none">- : unit = ()</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
 
           <para>Unlike C's <literal moreinfo="none">printf</literal>, the
           <literal moreinfo="none">printf</literal> in OCaml is type-safe. In particular, if
@@ -1648,8 +1605,7 @@ let () =
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">printf "An integer: %i\n" 4.5;;</userinput>
 <computeroutput moreinfo="none">Characters 26-29:</computeroutput>
 <computeroutput moreinfo="none">Error: This expression has type float but an expression was expected of type</computeroutput>
-<computeroutput moreinfo="none">         int</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">         int</computeroutput></programlisting>
 
           <sidebar>
             <title>Understanding format strings</title>
@@ -1679,8 +1635,7 @@ let () =
 <computeroutput moreinfo="none">Error: This expression has type string but an expression was expected of type</computeroutput>
 <computeroutput moreinfo="none">         ('a -&gt; 'b -&gt; 'c -&gt; 'd, out_channel, unit) format =</computeroutput>
 <computeroutput moreinfo="none">           ('a -&gt; 'b -&gt; 'c -&gt; 'd, out_channel, unit, unit, unit, unit)</computeroutput>
-<computeroutput moreinfo="none">           format6</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">           format6</computeroutput></programlisting>
 
             <para>If OCaml infers that a given string literal is a format
             string, then it parses it at compile time as such, choosing its
@@ -1695,8 +1650,7 @@ let () =
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let fmt : ('a, 'b, 'c) format =</userinput>
 <userinput moreinfo="none">    "%i is an integer, %F is a float, \"%s\" is a string\n";;</userinput>
-<computeroutput moreinfo="none">val fmt : (int -&gt; float -&gt; string -&gt; 'c, 'b, 'c) format = &lt;abstr&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val fmt : (int -&gt; float -&gt; string -&gt; 'c, 'b, 'c) format = &lt;abstr&gt;</computeroutput></programlisting>
 
             <para>And accordingly, we can pass it to
             <literal moreinfo="none">printf</literal>.</para>
@@ -1707,8 +1661,7 @@ let () =
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let fmt : ('a, 'b, 'c) format =</userinput>
 <userinput moreinfo="none">    "%i is an integer, %F is a float, \"%s\" is a string\n";;</userinput>
-<computeroutput moreinfo="none">val fmt : (int -&gt; float -&gt; string -&gt; 'c, 'b, 'c) format = &lt;abstr&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val fmt : (int -&gt; float -&gt; string -&gt; 'c, 'b, 'c) format = &lt;abstr&gt;</computeroutput></programlisting>
 
             <para>If this looks different from everything else you've seen so
             far, that's because it is. This is really a special case in the
@@ -1820,8 +1773,7 @@ let () =
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">create_number_file "numbers.txt" [1;2;3;4;5];;</userinput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">sum_file "numbers.txt";;</userinput>
-<computeroutput moreinfo="none">- : int = 15</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 15</computeroutput></programlisting>
 
           <para>For both of these functions we followed the same basic
           sequence: we first create the channel, then use the channel, and
@@ -1839,8 +1791,7 @@ let () =
           2)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">sum_file "/etc/hosts";;</userinput>
-<computeroutput moreinfo="none">Exception: (Failure "Int.of_string: \"127.0.0.1    localhost\"").</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Exception: (Failure "Int.of_string: \"127.0.0.1    localhost\"").</computeroutput></programlisting>
 
           <para>And if we do this over and over in a loop, we'll eventually
           run out of file descriptors.</para>
@@ -1852,8 +1803,7 @@ let () =
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -&gt; () done;;</userinput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">sum_file "numbers.txt";;</userinput>
-<computeroutput moreinfo="none">Exception: (Sys_error "numbers.txt: Too many open files").</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Exception: (Sys_error "numbers.txt: Too many open files").</computeroutput></programlisting>
 
           <para>And now, you'll need to restart your toplevel if you want to
           open any more files!</para>
@@ -1874,8 +1824,7 @@ let () =
 <userinput moreinfo="none">        List.fold ~init:0 ~f:(+) numbers)</userinput>
 <userinput moreinfo="none">      ~finally:(fun () -&gt; In_channel.close file)</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val sum_file : string -&gt; int = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val sum_file : string -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>And now, the file descriptor leak is gone:</para>
 
@@ -1886,8 +1835,7 @@ let () =
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">for i = 1 to 10000 do try ignore (sum_file "/etc/hosts") with _ -&gt; () done;;</userinput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">sum_file "numbers.txt";;</userinput>
-<computeroutput moreinfo="none">- : int = 15</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 15</computeroutput></programlisting>
 
           <para>This is really an example of a more general issue with
           imperative programming. When programming imperatively, you need to
@@ -1911,8 +1859,7 @@ let () =
 <userinput moreinfo="none">      let numbers = List.map ~f:Int.of_string (In_channel.input_lines file) in</userinput>
 <userinput moreinfo="none">      List.fold ~init:0 ~f:(+) numbers)</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val sum_file : string -&gt; int = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val sum_file : string -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>Another misfeature of our implementation of
           <literal moreinfo="none">sum_file</literal> is that we read the entire file into
@@ -1930,8 +1877,7 @@ let () =
 <userinput moreinfo="none">      In_channel.fold_lines file ~init:0 ~f:(fun sum line -&gt;</userinput>
 <userinput moreinfo="none">        sum + Int.of_string line))</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val sum_file : string -&gt; int = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val sum_file : string -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>This is just a taste of the functionality of
           <literal moreinfo="none">In_channel</literal> and <literal moreinfo="none">Out_channel</literal>. To
@@ -1967,8 +1913,7 @@ let () =
 <userinput moreinfo="none">  let z = sin 128. in</userinput>
 <userinput moreinfo="none">  List.exists ~f:(fun x -&gt; x &lt; 0.) [x;y;z]</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">- : bool = true</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : bool = true</computeroutput></programlisting>
 
         <para>In some sense, we don't really need to compute the <literal moreinfo="none">sin
         128.</literal>, because <literal moreinfo="none">sin 75.</literal> is negative, so we
@@ -1988,8 +1933,7 @@ let () =
 <userinput moreinfo="none">  let z = lazy (sin 128.) in</userinput>
 <userinput moreinfo="none">  List.exists ~f:(fun x -&gt; Lazy.force x &lt; 0.) [x;y;z]</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">- : bool = true</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : bool = true</computeroutput></programlisting>
 
         <para>We can confirm that fact by a few well placed
         <literal moreinfo="none">printf</literal>s.</para>
@@ -2005,8 +1949,7 @@ let () =
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">1</computeroutput>
 <computeroutput moreinfo="none">2</computeroutput>
-<computeroutput moreinfo="none">- : bool = true</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : bool = true</computeroutput></programlisting>
 
         <para>OCaml is strict by default for a good reason: Lazy evaluation
         and imperative programming generally don't mix well, because laziness
@@ -2037,8 +1980,7 @@ let () =
 <computeroutput moreinfo="none">3</computeroutput>
 <computeroutput moreinfo="none">2</computeroutput>
 <computeroutput moreinfo="none">1</computeroutput>
-<computeroutput moreinfo="none">- : bool = true</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : bool = true</computeroutput></programlisting>
 
         <para>Here, you can see that the sub-expression that came last was
         actually evaluated first! This is generally the case for many
@@ -2063,8 +2005,7 @@ let () =
 <userinput moreinfo="none">       | Some y -&gt; y</userinput>
 <userinput moreinfo="none">       | None -&gt; cache := Some x; x)</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val remember : '_a -&gt; '_a = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val remember : '_a -&gt; '_a = &lt;fun&gt;</computeroutput></programlisting>
 
         <para><literal moreinfo="none">remember</literal> simply caches the first value that's
         passed to it, returning that value on every call. That's because
@@ -2094,8 +2035,7 @@ let () =
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">identity 3;;</userinput>
 <computeroutput moreinfo="none">- : int = 3</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">identity "five";;</userinput>
-<computeroutput moreinfo="none">- : string = "five"</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string = "five"</computeroutput></programlisting>
 
         <para>As you can see, the polymorphic type of
         <literal moreinfo="none">identity</literal> lets it operate on values with different
@@ -2135,8 +2075,7 @@ let () =
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">remember "avocado";;</userinput>
 <computeroutput moreinfo="none">Characters 9-18:</computeroutput>
 <computeroutput moreinfo="none">Error: This expression has type string but an expression was expected of type</computeroutput>
-<computeroutput moreinfo="none">         int</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">         int</computeroutput></programlisting>
 
         <para>Note that the type of <literal moreinfo="none">remember</literal> was settled by
         the definition of <literal moreinfo="none">remember_three</literal>, even though
@@ -2198,8 +2137,7 @@ let () =
           (part 1)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">(fun x -&gt; [x;x]);;</userinput>
-<computeroutput moreinfo="none">- : 'a -&gt; 'a list = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : 'a -&gt; 'a list = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>But, if we write down an expression that isn't a simple value
           by the above definition, we'll get different results. For example,
@@ -2211,8 +2149,7 @@ let () =
           (part 2)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">memoize (fun x -&gt; [x;x]);;</userinput>
-<computeroutput moreinfo="none">- : '_a -&gt; '_a list = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : '_a -&gt; '_a list = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>The memoized version of the function does in fact need to be
           restricted to a single type, because it uses mutable state behind
@@ -2226,8 +2163,7 @@ let () =
           (part 3)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">identity (fun x -&gt; [x;x]);;</userinput>
-<computeroutput moreinfo="none">- : '_a -&gt; '_a list = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : '_a -&gt; '_a list = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>It would be safe to infer a fully polymorphic variable here,
           but because OCaml's type system doesn't distinguish between pure and
@@ -2244,8 +2180,7 @@ let () =
           (part 4)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let f () = ref None;;</userinput>
-<computeroutput moreinfo="none">val f : unit -&gt; 'a option ref = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val f : unit -&gt; 'a option ref = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>But a function that has a mutable cache that persists across
           calls, like memoize, can only be weakly polymorphic.</para>
@@ -2274,8 +2209,7 @@ let () =
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.init;;</userinput>
 <computeroutput moreinfo="none">- : int -&gt; f:(int -&gt; 'a) -&gt; 'a list = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.init 10 ~f:Int.to_string;;</userinput>
-<computeroutput moreinfo="none">- : string list = ["0"; "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string list = ["0"; "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"]</computeroutput></programlisting>
 
           <para>Imagine we wanted to create a specialized version of
           <literal moreinfo="none">List.init</literal> that always created lists of length 10.
@@ -2286,8 +2220,7 @@ let () =
           (part 6)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let list_init_10 = List.init 10;;</userinput>
-<computeroutput moreinfo="none">val list_init_10 : f:(int -&gt; '_a) -&gt; '_a list = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val list_init_10 : f:(int -&gt; '_a) -&gt; '_a list = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>As you can see, we now infer a weakly polymorphic type for the
           resulting function. That's because there's nothing that guarantees
@@ -2302,8 +2235,7 @@ let () =
           (part 7)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let list_init_10 ~f = List.init 10 ~f;;</userinput>
-<computeroutput moreinfo="none">val list_init_10 : f:(int -&gt; 'a) -&gt; 'a list = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val list_init_10 : f:(int -&gt; 'a) -&gt; 'a list = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>This transformation is referred to as <emphasis>eta
           expansion</emphasis>, and is often useful to resolve problems that
@@ -2333,8 +2265,7 @@ let () =
           (part 8)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">identity (fun x -&gt; [x;x]);;</userinput>
-<computeroutput moreinfo="none">- : '_a -&gt; '_a list = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : '_a -&gt; '_a list = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>But that's not always the case. When the type of the returned
           value is immutable, then OCaml can typically infer a fully
@@ -2345,8 +2276,7 @@ let () =
           (part 9)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">identity [];;</userinput>
-<computeroutput moreinfo="none">- : 'a list = []</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : 'a list = []</computeroutput></programlisting>
 
           <para>On the other hand, if the returned type is potentially
           mutable, then the result will be weakly polymorphic.</para>
@@ -2358,8 +2288,7 @@ let () =
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">[||];;</userinput>
 <computeroutput moreinfo="none">- : 'a array = [||]</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">identity [||];;</userinput>
-<computeroutput moreinfo="none">- : '_a array = [||]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : '_a array = [||]</computeroutput></programlisting>
 
           <para>A more important example of this comes up when defining
           abstract data types. Consider the following simple data-structure
@@ -2401,8 +2330,7 @@ let () =
 <computeroutput moreinfo="none">    val singleton : 'a -&gt; 'a t</computeroutput>
 <computeroutput moreinfo="none">    val concat : 'a t -&gt; 'a t -&gt; 'a t</computeroutput>
 <computeroutput moreinfo="none">    val to_list : 'a t -&gt; 'a list</computeroutput>
-<computeroutput moreinfo="none">  end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
           <para>The details of the implementation don't matter so much, but
           it's important to note that a <literal moreinfo="none">Concat_list.t</literal> is
@@ -2416,8 +2344,7 @@ let () =
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Concat_list.empty;;</userinput>
 <computeroutput moreinfo="none">- : 'a Concat_list.t = &lt;abstr&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">identity Concat_list.empty;;</userinput>
-<computeroutput moreinfo="none">- : '_a Concat_list.t = &lt;abstr&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : '_a Concat_list.t = &lt;abstr&gt;</computeroutput></programlisting>
 
           <para>The issue here is that the signature, by virtue of being
           abstract, has obscured the fact that
@@ -2461,8 +2388,7 @@ let () =
     val singleton : 'a -&gt; 'a t
     val concat : 'a t -&gt; 'a t -&gt; 'a t
     val to_list : 'a t -&gt; 'a list
-  end</computeroutput>
-</programlisting>
+  end</computeroutput></programlisting>
 
           <para>Now, we can apply the identity function to
           <literal moreinfo="none">Concat_list.empty</literal> without without losing any
@@ -2473,8 +2399,7 @@ let () =
           (part 14)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">identity Concat_list.empty;;</userinput>
-<computeroutput moreinfo="none">- : 'a Concat_list.t = &lt;abstr&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : 'a Concat_list.t = &lt;abstr&gt;</computeroutput></programlisting>
         </sect2>
       </sect1>
 

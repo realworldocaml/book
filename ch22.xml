@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="the-compiler-frontend-parsing-and-type-checking">
       <title>The Compiler Frontend: Parsing and Type Checking</title>
@@ -96,8 +96,7 @@
     |               | code generation
     |               | assembly &amp; linking
     v               v
- Interpreted    Compiled
-</programlisting>
+ Interpreted    Compiled</programlisting>
 
         <para>Notice that the pipeline branches towards the end. OCaml has
         multiple compiler backends that reuse the early stages of compilation,
@@ -268,8 +267,7 @@
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc -c broken_module.ml</userinput>
 <computeroutput moreinfo="none">File "broken_module.ml", line 2, characters 2-8:</computeroutput>
-<computeroutput moreinfo="none">Error: Syntax error</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Error: Syntax error</computeroutput></programlisting>
 
           <para>The correct version of this source code creates the
           <literal moreinfo="none">MyString</literal> module correctly via a local open, and
@@ -321,8 +319,7 @@ let () =
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc -c follow_on_function.ml</userinput>
 <computeroutput moreinfo="none">File "follow_on_function.ml", line 11, characters 0-3:</computeroutput>
-<computeroutput moreinfo="none">Error: Syntax error</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Error: Syntax error</computeroutput></programlisting>
 
           <para>The line number in the error points to the end of the
           <literal moreinfo="none">add_and_print</literal> function, but the actual error is
@@ -359,8 +356,7 @@ let () =
 <computeroutput moreinfo="none">let () =</computeroutput>
 <computeroutput moreinfo="none">  let _x = add_and_print 1 2 in</computeroutput>
 <computeroutput moreinfo="none">  let _y = concat_and_print "a" "b" in</computeroutput>
-<computeroutput moreinfo="none">  ()</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  ()</computeroutput></programlisting>
 
           <para>The <literal moreinfo="none">add_and_print</literal> definition has been
           indented as if it were part of the first
@@ -386,8 +382,7 @@ let () =
 <computeroutput moreinfo="none">let () =</computeroutput>
 <computeroutput moreinfo="none">  let _x = add_and_print 1 2 in</computeroutput>
 <computeroutput moreinfo="none">  let _y = concat_and_print "a" "b" in</computeroutput>
-<computeroutput moreinfo="none">  ()</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  ()</computeroutput></programlisting>
 
           <para>The <command moreinfo="none">ocp-indent</command> <ulink url="https://github.com/OCamlPro/ocp-indent">homepage</ulink>
           documents how to integrate it with your favorite editor. All the
@@ -453,8 +448,7 @@ let what_is_the_weather_in location =
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">mkdir -p html man/man3</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamldoc -html -d html doc.ml</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamldoc -man -d man/man3 doc.ml</userinput>
-<prompt moreinfo="none">$ </prompt><userinput moreinfo="none">man -M man Doc</userinput>
-</programlisting>
+<prompt moreinfo="none">$ </prompt><userinput moreinfo="none">man -M man Doc</userinput></programlisting>
 
           <para>You should now have HTML files inside the
           <literal moreinfo="none">html/</literal> directory and also be able to view the UNIX
@@ -556,8 +550,7 @@ type t = {
 
         <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlfind ocamlc -c type_conv_example.ml</userinput>
 <computeroutput moreinfo="none">File "type_conv_example.ml", line 6, characters 2-6:</computeroutput>
-<computeroutput moreinfo="none">Error: Syntax error</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Error: Syntax error</computeroutput></programlisting>
 
         <para>Now add in the syntax extension packages for Fieldslib and
         Sexplib, and everything will compile again.</para>
@@ -566,8 +559,7 @@ type t = {
         <filename moreinfo="none">front-end/build_type_conv_with_camlp4.out</filename></para>
 
         <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \</userinput>
-<computeroutput moreinfo="none">    -package fieldslib.syntax type_conv_example.ml</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">    -package fieldslib.syntax type_conv_example.ml</computeroutput></programlisting>
 
         <para>We've specified a couple of additional flags here. The
         <literal moreinfo="none">-syntax</literal> flag directs <command moreinfo="none">ocamlfind</command>
@@ -632,8 +624,7 @@ type t = {
 <computeroutput moreinfo="none">  #thread;;                 to enable threads</computeroutput>
 <computeroutput moreinfo="none"/>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput>
-<prompt moreinfo="none"># </prompt><userinput moreinfo="none">#camlp4o ;;</userinput>
-</programlisting>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">#camlp4o ;;</userinput></programlisting>
 
           <para>The first directive loads the <command moreinfo="none">ocamlfind</command>
           top-level interface that lets you require
@@ -665,8 +656,7 @@ type t = {
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">type t = { foo: string; bar: t } with compare ;;</userinput>
 <computeroutput moreinfo="none">type t = { foo : string; bar : t; }</computeroutput>
 <computeroutput moreinfo="none">val compare : t -&gt; t -&gt; int = &lt;fun&gt;</computeroutput>
-<computeroutput moreinfo="none">val compare_t : t -&gt; t -&gt; int = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val compare_t : t -&gt; t -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>The first definition of <literal moreinfo="none">t</literal> is a standard
           OCaml phrase and results in the expected output. The second one
@@ -709,8 +699,7 @@ type t = {
 OCAMLFIND="ocamlfind query -predicates syntax,preprocessor -r"
 INCLUDE=`$OCAMLFIND -i-format comparelib.syntax`
 ARCHIVES=`$OCAMLFIND -a-format comparelib.syntax`
-camlp4o -printer o $INCLUDE $ARCHIVES $1
-</programlisting>
+camlp4o -printer o $INCLUDE $ARCHIVES $1</programlisting>
 
           <para>The script uses the <command moreinfo="none">ocamlfind</command> package
           manager to list the include and library paths needed by
@@ -745,8 +734,7 @@ camlp4o -printer o $INCLUDE $ARCHIVES $1
 <computeroutput moreinfo="none">  </computeroutput>
 <computeroutput moreinfo="none">let _ = compare_t</computeroutput>
 <computeroutput moreinfo="none">  </computeroutput>
-<computeroutput moreinfo="none"> </computeroutput>
-</programlisting>
+<computeroutput moreinfo="none"> </computeroutput></programlisting>
 
           <para>The output contains the original type definition accompanied
           by some automatically generated code that implements an explicit
@@ -785,8 +773,7 @@ camlp4o -printer o $INCLUDE $ARCHIVES $1
             <para role="sourcecode">Syntax:
             <filename moreinfo="none">front-end/let_unit.syntax</filename></para>
 
-            <programlisting language="" format="linespecific">let () = &lt;expr&gt;
-</programlisting>
+            <programlisting language="" format="linespecific">let () = &lt;expr&gt;</programlisting>
 
             <para>If the expression has a different type, then write it
             explicitly.</para>
@@ -849,8 +836,7 @@ let () = don't_wait_for (&lt;expr&gt;</programlisting>
 <computeroutput moreinfo="none"> </computeroutput>
 <computeroutput moreinfo="none">val compare : t -&gt; t -&gt; int</computeroutput>
 <computeroutput moreinfo="none">  </computeroutput>
-<computeroutput moreinfo="none"> </computeroutput>
-</programlisting>
+<computeroutput moreinfo="none"> </computeroutput></programlisting>
 
           <para>The external signature generated by
           <literal moreinfo="none">comparelib</literal> is much simpler than the actual code.
@@ -989,8 +975,7 @@ let v = Foo</programlisting>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc -i typedef.ml</userinput>
 <computeroutput moreinfo="none">type t = Foo | Bar</computeroutput>
-<computeroutput moreinfo="none">val v : t</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val v : t</computeroutput></programlisting>
 
           <para>The output is the default signature for the module which
           represents the input file. It's often useful to redirect this output
@@ -1021,8 +1006,7 @@ let v = Foo</programlisting>
 <computeroutput moreinfo="none">       is not included in</computeroutput>
 <computeroutput moreinfo="none">         type t = Bar</computeroutput>
 <computeroutput moreinfo="none">       File "test.ml", line 1, characters 5-12: Actual declaration</computeroutput>
-<computeroutput moreinfo="none">       Fields number 1 have different names, Foo and Bar.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">       Fields number 1 have different names, Foo and Bar.</computeroutput></programlisting>
 
           <note>
             <title>Which comes first: the <literal moreinfo="none">ml</literal> or the
@@ -1158,8 +1142,7 @@ let _ =
 <computeroutput moreinfo="none">               as 'a) *</computeroutput>
 <computeroutput moreinfo="none">              [&gt; `Sub of 'a * [&gt; `Mul of [&gt; `Nu of int ] * [&gt; `Num of int ] ] ] ]</computeroutput>
 <computeroutput moreinfo="none">       but an expression was expected of type 'a</computeroutput>
-<computeroutput moreinfo="none">       The second variant type does not allow tag(s) `Nu</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">       The second variant type does not allow tag(s) `Nu</computeroutput></programlisting>
 
             <para>The type error is perfectly accurate, but rather verbose and
             with a line number that doesn't point to the exact location of the
@@ -1219,8 +1202,7 @@ let _ =
 <computeroutput moreinfo="none">File "broken_poly_with_annot.ml", line 22, characters 14-21:</computeroutput>
 <computeroutput moreinfo="none">Error: This expression has type [&gt; `Nu of int ]</computeroutput>
 <computeroutput moreinfo="none">       but an expression was expected of type t</computeroutput>
-<computeroutput moreinfo="none">       The second variant type does not allow tag(s) `Nu</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">       The second variant type does not allow tag(s) `Nu</computeroutput></programlisting>
 
             <para>This error points directly to the correct line number that
             contains the typo. Once you fix the problem, you can remove the
@@ -1292,8 +1274,7 @@ let f x =
 <computeroutput moreinfo="none">Warning 18: this type-based field disambiguation is not principal.</computeroutput>
 <computeroutput moreinfo="none">type s = { foo : int; bar : unit; }</computeroutput>
 <computeroutput moreinfo="none">type t = { foo : int; }</computeroutput>
-<computeroutput moreinfo="none">val f : s -&gt; int</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val f : s -&gt; int</computeroutput></programlisting>
 
             <para>This example isn't principal since the inferred type for
             <literal moreinfo="none">x.foo</literal> is guided by the inferred type of
@@ -1326,8 +1307,7 @@ let f (x:s) =
             <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc -i -principal principal.ml</userinput>
 <computeroutput moreinfo="none">type s = { foo : int; bar : unit; }</computeroutput>
 <computeroutput moreinfo="none">type t = { foo : int; }</computeroutput>
-<computeroutput moreinfo="none">val f : s -&gt; int</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val f : s -&gt; int</computeroutput></programlisting>
 
             <para>The <command moreinfo="none">ocamlbuild</command> equivalent is to add the
             tag <literal moreinfo="none">principal</literal> to your build. The
@@ -1340,8 +1320,7 @@ let f (x:s) =
 
             <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -tag principal principal.cmi non_principal.cmi</userinput>
 <computeroutput moreinfo="none">File "non_principal.ml", line 6, characters 4-7:</computeroutput>
-<computeroutput moreinfo="none">Warning 18: this type-based field disambiguation is not principal.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Warning 18: this type-based field disambiguation is not principal.</computeroutput></programlisting>
 
             <para>Ideally, all code should systematically use
             <literal moreinfo="none">-principal</literal>. It reduces variance in type
@@ -1487,8 +1466,7 @@ end</programlisting>
 <computeroutput moreinfo="none">Unit name: Typedef</computeroutput>
 <computeroutput moreinfo="none">Interfaces imported:</computeroutput>
 <computeroutput moreinfo="none">	bd274dc132ce5c3d8b6774d19cd373a6	Typedef</computeroutput>
-<computeroutput moreinfo="none">	36b5bc8227dc9914c6d9fd9bdcfadb45	Pervasives</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">	36b5bc8227dc9914c6d9fd9bdcfadb45	Pervasives</computeroutput></programlisting>
 
               <para><literal moreinfo="none">ocamlobjinfo</literal> examines the compiled
               interface and displays what other compilation units it depends
@@ -1515,8 +1493,7 @@ end</programlisting>
 <computeroutput moreinfo="none">File "foo.ml", line 1, characters 0-1:</computeroutput>
 <computeroutput moreinfo="none">Error: The files /home/build/bar.cmi</computeroutput>
 <computeroutput moreinfo="none">       and /usr/lib/ocaml/map.cmi make inconsistent assumptions</computeroutput>
-<computeroutput moreinfo="none">       over interface Map</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">       over interface Map</computeroutput></programlisting>
 
               <para>This hash check is very conservative, but ensures that
               separate compilation remains type-safe all the way up to the
@@ -1577,8 +1554,7 @@ end</programlisting>
 <computeroutput moreinfo="none">&lt;*.cmx&gt; and not "X.cmx": for-pack(X)</computeroutput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">cat X.mlpack</userinput>
 <computeroutput moreinfo="none">A</computeroutput>
-<computeroutput moreinfo="none">B</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">B</computeroutput></programlisting>
 
           <para>You can now run <literal moreinfo="none">corebuild</literal> to build the
           <literal moreinfo="none">X.cmx</literal> file directly, but let's create a new
@@ -1612,8 +1588,7 @@ let w = X.B.w</programlisting>
 <computeroutput moreinfo="none">Interfaces imported:</computeroutput>
 <computeroutput moreinfo="none">	906fc1b74451f0c24ceaa085e0f26e5f	Test</computeroutput>
 <computeroutput moreinfo="none">	36b5bc8227dc9914c6d9fd9bdcfadb45	Pervasives</computeroutput>
-<computeroutput moreinfo="none">	25f4b4e10ec64c56b2987f5900045fec	X</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">	25f4b4e10ec64c56b2987f5900045fec	X</computeroutput></programlisting>
 
           <warning>
             <title>Packing and search paths</title>
@@ -1660,8 +1635,7 @@ let w = X.B.w</programlisting>
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocaml</userinput>
 <computeroutput moreinfo="none"># List.map print_endline "" ;;</computeroutput>
 <computeroutput moreinfo="none">Error: This expression has type string but an expression was expected of type</computeroutput>
-<computeroutput moreinfo="none">         string list</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">         string list</computeroutput></programlisting>
 
           <para>This type error without <literal moreinfo="none">Core.Std</literal> has a
           straightforward type error. When we switch to Core, though, it gets
@@ -1674,8 +1648,7 @@ let w = X.B.w</programlisting>
 <computeroutput moreinfo="none"># open Core.Std ;;</computeroutput>
 <computeroutput moreinfo="none"># List.map ~f:print_endline "" ;;</computeroutput>
 <computeroutput moreinfo="none">Error: This expression has type string but an expression was expected of type</computeroutput>
-<computeroutput moreinfo="none">         'a Core.Std.List.t = 'a list</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">         'a Core.Std.List.t = 'a list</computeroutput></programlisting>
 
           <para>The default <literal moreinfo="none">List</literal> module in OCaml is
           overridden by <literal moreinfo="none">Core.Std.List</literal>. The compiler does
@@ -1696,8 +1669,7 @@ let w = X.B.w</programlisting>
 <computeroutput moreinfo="none"># open Core.Std;;</computeroutput>
 <computeroutput moreinfo="none"># List.map ~f:print_endline "foo";;</computeroutput>
 <computeroutput moreinfo="none">Error: This expression has type string but an expression was expected of type</computeroutput>
-<computeroutput moreinfo="none">         'a list</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">         'a list</computeroutput></programlisting>
 
           <para>The <command moreinfo="none">utop</command> enhanced top-level activates short
           paths by default, which is why you've not had to do this before in
@@ -1743,8 +1715,7 @@ let w = X.B.w</programlisting>
           <filename moreinfo="none">front-end/install_ocp_index.out</filename></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">opam install ocp-index</userinput>
-<prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocp-index</userinput>
-</programlisting>
+<prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocp-index</userinput></programlisting>
 
           <para>Let's refer back to our Ncurses binding example from the
           beginning of <xref linkend="foreign-function-interface"/>. This
@@ -1772,8 +1743,7 @@ let w = X.B.w</programlisting>
 <computeroutput moreinfo="none">Ncurses.mvwaddstr val Ncurses.window -&gt; int -&gt; int -&gt; string -&gt; unit</computeroutput>
 <computeroutput moreinfo="none">Ncurses.addstr val string -&gt; unit</computeroutput>
 <computeroutput moreinfo="none">Ncurses.box val Ncurses.window -&gt; char -&gt; char -&gt; unit</computeroutput>
-<computeroutput moreinfo="none">Ncurses.cbreak val unit -&gt; int</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Ncurses.cbreak val unit -&gt; int</computeroutput></programlisting>
 
           <para>You need to pass <command moreinfo="none">ocp-index</command> a set of
           directories to search for <literal moreinfo="none">cmt</literal> files in, and a
@@ -1844,8 +1814,7 @@ let v = Foo</programlisting>
 <computeroutput moreinfo="none">          false</computeroutput>
 <computeroutput moreinfo="none">    ]</computeroutput>
 <computeroutput moreinfo="none">]</computeroutput>
-<computeroutput moreinfo="none"> </computeroutput>
-</programlisting>
+<computeroutput moreinfo="none"> </computeroutput></programlisting>
 
           <para>This is rather a lot of output for a simple two-line program,
           but it shows just how much structure the OCaml parser generates even
@@ -1899,8 +1868,7 @@ let v = Foo</programlisting>
 <computeroutput moreinfo="none">          false</computeroutput>
 <computeroutput moreinfo="none">    ]</computeroutput>
 <computeroutput moreinfo="none">]</computeroutput>
-<computeroutput moreinfo="none"> </computeroutput>
-</programlisting>
+<computeroutput moreinfo="none"> </computeroutput></programlisting>
 
           <para>The typed AST is more explicit than the untyped syntax tree.
           For instance, the type declaration has been given a unique name

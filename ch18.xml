@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="concurrent-programming-with-async">
       <title>Concurrent Programming with Async</title>
@@ -58,8 +58,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Out_channel.write_all "test.txt" ~data:"This is only a test.";;</userinput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">In_channel.read_all "test.txt";;</userinput>
-<computeroutput moreinfo="none">- : string = "This is only a test."</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string = "This is only a test."</computeroutput></programlisting>
 
         <para>From the type of <literal moreinfo="none">In_channel.read_all</literal>, you can
         see that it must be a blocking operation. In particular, the fact that
@@ -79,8 +78,7 @@
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">#require "async";;</userinput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">open Async.Std;;</userinput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Reader.file_contents;;</userinput>
-<computeroutput moreinfo="none">- : string -&gt; string Deferred.t = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string -&gt; string Deferred.t = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>We first load the Async package in the toplevel using
         <literal moreinfo="none">#require</literal>, and then open
@@ -102,8 +100,7 @@
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let contents = Reader.file_contents "test.txt";;</userinput>
 <computeroutput moreinfo="none">val contents : string Deferred.t = &lt;abstr&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Deferred.peek contents;;</userinput>
-<computeroutput moreinfo="none">- : string option = None</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string option = None</computeroutput></programlisting>
 
         <para>The value in <literal moreinfo="none">contents</literal> isn't yet determined in
         part because there's nothing running that could do the necessary I/O.
@@ -120,8 +117,7 @@
         <filename moreinfo="none">async/main.topscript</filename> (part 5)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">contents;;</userinput>
-<computeroutput moreinfo="none">- : string = "This is only a test."</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string = "This is only a test."</computeroutput></programlisting>
 
         <para>If we peek again, we'll see that the value of
         <literal moreinfo="none">contents</literal> has been determined.</para>
@@ -130,8 +126,7 @@
         <filename moreinfo="none">async/main.topscript</filename> (part 6)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Deferred.peek contents;;</userinput>
-<computeroutput moreinfo="none">- : string option = Some "This is only a test."</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string option = Some "This is only a test."</computeroutput></programlisting>
 
         <para>In order to do real work with deferreds, we need a way of
         waiting for a deferred computation to finish, which we do using
@@ -142,8 +137,7 @@
         <filename moreinfo="none">async/main.topscript</filename> (part 7)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Deferred.bind ;;</userinput>
-<computeroutput moreinfo="none">- : 'a Deferred.t -&gt; ('a -&gt; 'b Deferred.t) -&gt; 'b Deferred.t = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : 'a Deferred.t -&gt; ('a -&gt; 'b Deferred.t) -&gt; 'b Deferred.t = &lt;fun&gt;</computeroutput></programlisting>
 
         <para><literal moreinfo="none">Deferred.bind d f</literal> takes a deferred value
         <literal moreinfo="none">d</literal> and a function <literal moreinfo="none">f</literal> that is to be
@@ -175,8 +169,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">uppercase_file "test.txt";;</userinput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Reader.file_contents "test.txt";;</userinput>
-<computeroutput moreinfo="none">- : string = "THIS IS ONLY A TEST."</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string = "THIS IS ONLY A TEST."</computeroutput></programlisting>
 
         <para>Writing out <literal moreinfo="none">Deferred.bind</literal> explicitly can be
         rather verbose, and so <literal moreinfo="none">Async.Std</literal> includes an infix
@@ -191,8 +184,7 @@
 <userinput moreinfo="none">    &gt;&gt;= fun text -&gt;</userinput>
 <userinput moreinfo="none">    Writer.save filename ~contents:(String.uppercase text)</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val uppercase_file : string -&gt; unit Deferred.t = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val uppercase_file : string -&gt; unit Deferred.t = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>In the above we've dropped the parentheses around the function
         on the right-hand side of the bind, and we didn't add a level of
@@ -213,8 +205,7 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">Characters 85-125:</computeroutput>
 <computeroutput moreinfo="none">Error: This expression has type int but an expression was expected of type</computeroutput>
-<computeroutput moreinfo="none">         'a Deferred.t</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">         'a Deferred.t</computeroutput></programlisting>
 
         <para>This looks reasonable enough, but as you can see, the compiler
         is unhappy. The issue here is that bind expects a function that
@@ -232,8 +223,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let three = return 3;;</userinput>
 <computeroutput moreinfo="none">val three : int Deferred.t = &lt;abstr&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">three;;</userinput>
-<computeroutput moreinfo="none">- : int = 3</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 3</computeroutput></programlisting>
 
         <para>Using <literal moreinfo="none">return</literal>, we can make
         <literal moreinfo="none">count_lines</literal> compile.</para>
@@ -246,8 +236,7 @@
 <userinput moreinfo="none">    &gt;&gt;= fun text -&gt;</userinput>
 <userinput moreinfo="none">    return (List.length (String.split text ~on:'\n'))</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val count_lines : string -&gt; int Deferred.t = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val count_lines : string -&gt; int Deferred.t = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>Together, <literal moreinfo="none">bind</literal> and <literal moreinfo="none">return</literal>
         form a design pattern in functional programming known as a
@@ -264,8 +253,7 @@
         <filename moreinfo="none">async/main.topscript</filename> (part 13)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Deferred.map;;</userinput>
-<computeroutput moreinfo="none">- : 'a Deferred.t -&gt; f:('a -&gt; 'b) -&gt; 'b Deferred.t = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : 'a Deferred.t -&gt; f:('a -&gt; 'b) -&gt; 'b Deferred.t = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>and comes with its own infix equivalent,
         <literal moreinfo="none">&gt;&gt;|</literal>. Using it, we can rewrite
@@ -281,8 +269,7 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val count_lines : string -&gt; int Deferred.t = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">count_lines "/etc/hosts";;</userinput>
-<computeroutput moreinfo="none">- : int = 12</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 12</computeroutput></programlisting>
 
         <para>Note that <literal moreinfo="none">count_lines</literal> returns a deferred, but
         <command moreinfo="none">utop</command> waits for that deferred to become determined,
@@ -319,8 +306,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Ivar.fill ivar "Hello";;</userinput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Deferred.peek def;;</userinput>
-<computeroutput moreinfo="none">- : string option = Some "Hello"</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string option = Some "Hello"</computeroutput></programlisting>
 
           <para>Ivars are something of a low-level feature; operators like
           map, bind and return are typically easier to use and think about.
@@ -346,8 +332,7 @@
 <computeroutput moreinfo="none">    type t</computeroutput>
 <computeroutput moreinfo="none">    val create : Core.Span.t -&gt; t</computeroutput>
 <computeroutput moreinfo="none">    val schedule : t -&gt; (unit -&gt; 'a Deferred.t) -&gt; 'a Deferred.t</computeroutput>
-<computeroutput moreinfo="none">  end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
           <para>An action is handed to <literal moreinfo="none">schedule</literal> in the form
           of a deferred-returning thunk (a thunk is a function whose argument
@@ -361,8 +346,7 @@
           <filename moreinfo="none">async/main.topscript</filename> (part 17)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">upon;;</userinput>
-<computeroutput moreinfo="none">- : 'a Deferred.t -&gt; ('a -&gt; unit) -&gt; unit = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : 'a Deferred.t -&gt; ('a -&gt; unit) -&gt; unit = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>Like <literal moreinfo="none">bind</literal> and <literal moreinfo="none">return</literal>,
           <literal moreinfo="none">upon</literal> schedules a callback to be executed when the
@@ -397,8 +381,7 @@
 <userinput moreinfo="none">        job ());</userinput>
 <userinput moreinfo="none">      Ivar.read ivar</userinput>
 <userinput moreinfo="none">  end;;</userinput>
-<computeroutput moreinfo="none">module Delayer : Delayer_intf</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">module Delayer : Delayer_intf</computeroutput></programlisting>
 
           <para>This code isn't particularly long, but it is subtle. In
           particular, note how the queue of thunks is used to ensure that the
@@ -539,8 +522,7 @@ let () =
 <computeroutput moreinfo="none">This is an echo server</computeroutput>
 <computeroutput moreinfo="none">This is an echo server</computeroutput>
 <computeroutput moreinfo="none">It repeats whatever I write.</computeroutput>
-<computeroutput moreinfo="none">It repeats whatever I write.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">It repeats whatever I write.</computeroutput></programlisting>
 
         <sidebar>
           <title>Functions that never return</title>
@@ -558,8 +540,7 @@ let () =
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec loop_forever () = loop_forever ();;</userinput>
 <computeroutput moreinfo="none">val loop_forever : unit -&gt; 'a = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let always_fail () = assert false;;</userinput>
-<computeroutput moreinfo="none">val always_fail : unit -&gt; 'a = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val always_fail : unit -&gt; 'a = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>This can be surprising when you call a function like this
           expecting it to return unit. The type-checker won't necessarily
@@ -573,8 +554,7 @@ let () =
 <userinput moreinfo="none">    if n &gt; 0 then loop_forever ();</userinput>
 <userinput moreinfo="none">    x + n</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val do_stuff : int -&gt; int = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val do_stuff : int -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>With a name like <literal moreinfo="none">loop_forever</literal>, the meaning
           is clear enough. But with something like
@@ -587,8 +567,7 @@ let () =
           <filename moreinfo="none">async/main.topscript</filename> (part 21)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec loop_forever () : never_returns = loop_forever ();;</userinput>
-<computeroutput moreinfo="none">val loop_forever : unit -&gt; never_returns = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val loop_forever : unit -&gt; never_returns = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>The type <literal moreinfo="none">never_returns</literal> is uninhabited, so a
           function can't return a value of type
@@ -607,8 +586,7 @@ let () =
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">Characters 38-67:</computeroutput>
 <computeroutput moreinfo="none">Error: This expression has type unit but an expression was expected of type</computeroutput>
-<computeroutput moreinfo="none">         never_returns</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">         never_returns</computeroutput></programlisting>
 
           <para>We can resolve the error by calling the function
           <literal moreinfo="none">never_returns</literal>.</para>
@@ -623,8 +601,7 @@ let () =
 <userinput moreinfo="none">    if n &gt; 0 then never_returns (loop_forever ());</userinput>
 <userinput moreinfo="none">    x + n</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val do_stuff : int -&gt; int = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val do_stuff : int -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>Thus, we got the compilation to go through by explicitly
           marking in the source that the call to
@@ -711,8 +688,7 @@ let () =
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let (r,w) = Pipe.create ();;</userinput>
 <computeroutput moreinfo="none">val r : '_a Pipe.Reader.t = &lt;abstr&gt;</computeroutput>
-<computeroutput moreinfo="none">val w : '_a Pipe.Writer.t = &lt;abstr&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val w : '_a Pipe.Writer.t = &lt;abstr&gt;</computeroutput></programlisting>
 
           <para><literal moreinfo="none">r</literal> and <literal moreinfo="none">w</literal> are really just
           read and write handles to the same underlying object. Note that
@@ -728,8 +704,7 @@ let () =
           <filename moreinfo="none">async/pipe_write_break.rawscript</filename></para>
 
           <programlisting language="ocaml" format="linespecific"><userinput moreinfo="none"># Pipe.write w "Hello World!";;</userinput>
-<computeroutput moreinfo="none">Interrupted.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Interrupted.</computeroutput></programlisting>
 
           <para>The deferred returned by write completes on its own once the
           value written into the pipe has been read out:</para>
@@ -745,8 +720,7 @@ let () =
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Pipe.read r;;</userinput>
 <computeroutput moreinfo="none">- : [ `Eof | `Ok of string ] = `Ok "Hello World!"</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">write_complete;;</userinput>
-<computeroutput moreinfo="none">- : unit = ()</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
 
           <para>In the function <literal moreinfo="none">run</literal> above, we're taking
           advantage of one of the many utility functions provided for pipes in
@@ -760,8 +734,7 @@ let () =
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Pipe.transfer;;</userinput>
 <computeroutput moreinfo="none">- : 'a Pipe.Reader.t -&gt; 'b Pipe.Writer.t -&gt; f:('a -&gt; 'b) -&gt; unit Deferred.t =</computeroutput>
-<computeroutput moreinfo="none">&lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">&lt;fun&gt;</computeroutput></programlisting>
 
           <para>The two pipes being connected are generated by the
           <literal moreinfo="none">Reader.pipe</literal> and <literal moreinfo="none">Writer.pipe</literal>
@@ -790,8 +763,7 @@ let () =
 <computeroutput moreinfo="none">- : summary:string -&gt;</computeroutput>
 <computeroutput moreinfo="none">    ?readme:(unit -&gt; string) -&gt;</computeroutput>
 <computeroutput moreinfo="none">    ('a, unit -&gt; unit Deferred.t) Command.Spec.t -&gt; 'a -&gt; Command.t</computeroutput>
-<computeroutput moreinfo="none">= &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">= &lt;fun&gt;</computeroutput></programlisting>
 
           <para>This differs from the ordinary
           <literal moreinfo="none">Command.basic</literal> call in that the main function must
@@ -935,8 +907,7 @@ let get_definition word =
 <computeroutput moreinfo="none">- : ?interrupt:unit Deferred.t -&gt;</computeroutput>
 <computeroutput moreinfo="none">    ?headers:Cohttp.Header.t -&gt;</computeroutput>
 <computeroutput moreinfo="none">    Uri.t -&gt; (Cohttp.Response.t * string Pipe.Reader.t) Deferred.t</computeroutput>
-<computeroutput moreinfo="none">= &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">= &lt;fun&gt;</computeroutput></programlisting>
 
           <para>The <literal moreinfo="none">get</literal> call takes as a required argument a
           URI, and returns a deferred value containing a
@@ -1002,8 +973,7 @@ let search_and_print words =
           <filename moreinfo="none">async/main.topscript</filename> (part 29)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Deferred.all;;</userinput>
-<computeroutput moreinfo="none">- : 'a Deferred.t list -&gt; 'a list Deferred.t = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : 'a Deferred.t list -&gt; 'a list Deferred.t = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>Note that the list returned by <literal moreinfo="none">Deferred.all</literal>
           reflects the order of the deferreds passed to it. As such, the
@@ -1034,8 +1004,7 @@ let search_and_print words =
           <filename moreinfo="none">async/main.topscript</filename> (part 30)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Deferred.all_unit;;</userinput>
-<computeroutput moreinfo="none">- : unit Deferred.t list -&gt; unit Deferred.t = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : unit Deferred.t list -&gt; unit Deferred.t = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>Finally, we create a command line interface using
           <literal moreinfo="none">Command.async_basic</literal>.</para>
@@ -1074,8 +1043,7 @@ let search_and_print words =
 <computeroutput moreinfo="none">"OCaml, originally known as Objective Caml, is the main implementation</computeroutput>
 <computeroutput moreinfo="none">of the Caml programming language, created by Xavier Leroy, Jérôme</computeroutput>
 <computeroutput moreinfo="none">Vouillon, Damien Doligez, Didier Rémy and others in 1996."</computeroutput>
-<computeroutput moreinfo="none"> </computeroutput>
-</programlisting>
+<computeroutput moreinfo="none"> </computeroutput></programlisting>
         </sect2>
       </sect1>
 
@@ -1121,8 +1089,7 @@ let search_and_print words =
 <computeroutput moreinfo="none">   (((name block_on_async) (here ()) (id 55) (has_seen_error true)</computeroutput>
 <computeroutput moreinfo="none">     (someone_is_listening true) (kill_index 0))</computeroutput>
 <computeroutput moreinfo="none">    ((name main) (here ()) (id 1) (has_seen_error false)</computeroutput>
-<computeroutput moreinfo="none">     (someone_is_listening false) (kill_index 0)))))).</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">     (someone_is_listening false) (kill_index 0)))))).</computeroutput></programlisting>
 
         <para>In <command moreinfo="none">utop</command>, the exception thrown by
         <literal moreinfo="none">maybe_raise ()</literal> terminates the evaluation of just
@@ -1154,8 +1121,7 @@ let search_and_print words =
 <computeroutput moreinfo="none">   (((name block_on_async) (here ()) (id 59) (has_seen_error true)</computeroutput>
 <computeroutput moreinfo="none">     (someone_is_listening true) (kill_index 0))</computeroutput>
 <computeroutput moreinfo="none">    ((name main) (here ()) (id 1) (has_seen_error false)</computeroutput>
-<computeroutput moreinfo="none">     (someone_is_listening false) (kill_index 0)))))).</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">     (someone_is_listening false) (kill_index 0)))))).</computeroutput></programlisting>
 
         <para>This didn't work because <literal moreinfo="none">try/with</literal> only
         captures exceptions that are thrown in the code directly executed
@@ -1179,8 +1145,7 @@ let search_and_print words =
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">handle_error ();;</userinput>
 <computeroutput moreinfo="none">- : string = "success"</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">handle_error ();;</userinput>
-<computeroutput moreinfo="none">- : string = "failure"</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string = "failure"</computeroutput></programlisting>
 
         <para><literal moreinfo="none">try_with f</literal> takes as its argument a
         deferred-returning thunk <literal moreinfo="none">f</literal>, and returns a deferred
@@ -1236,8 +1201,7 @@ let search_and_print words =
 <computeroutput moreinfo="none">    ((name block_on_async) (here ()) (id 70) (has_seen_error false)</computeroutput>
 <computeroutput moreinfo="none">     (someone_is_listening true) (kill_index 0))</computeroutput>
 <computeroutput moreinfo="none">    ((name main) (here ()) (id 1) (has_seen_error false)</computeroutput>
-<computeroutput moreinfo="none">     (someone_is_listening false) (kill_index 0)))))).</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">     (someone_is_listening false) (kill_index 0)))))).</computeroutput></programlisting>
 
           <para>In addition to the ordinary stack-trace, the exception
           displays the trace of monitors through which the exception traveled,
@@ -1268,8 +1232,7 @@ let search_and_print words =
 <computeroutput moreinfo="none">val swallow_error : unit -&gt; 'a Deferred.t = &lt;fun&gt;</computeroutput>
 <userinput moreinfo="none"># swallow_error ();;</userinput>
 <computeroutput moreinfo="none">an error happened
-</computeroutput>
-</programlisting>
+</computeroutput></programlisting>
 
           <para>The message "an error happened" is printed out, but the
           deferred returned by <literal moreinfo="none">swallow_error</literal> is never
@@ -1303,8 +1266,7 @@ let search_and_print words =
 <userinput moreinfo="none">       after (Time.Span.of_sec 0.5)</userinput>
 <userinput moreinfo="none">       &gt;&gt;= fun () -&gt; raise exn_to_raise)</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val swallow_some_errors : exn -&gt; 'a Deferred.t = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val swallow_some_errors : exn -&gt; 'a Deferred.t = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>Note that we use <literal moreinfo="none">Monitor.extract_exn</literal> to
           grab the underlying exception that was thrown. Async wraps
@@ -1330,8 +1292,7 @@ let search_and_print words =
 <computeroutput moreinfo="none">    ((name block_on_async) (here ()) (id 74) (has_seen_error true)</computeroutput>
 <computeroutput moreinfo="none">     (someone_is_listening true) (kill_index 0))</computeroutput>
 <computeroutput moreinfo="none">    ((name main) (here ()) (id 1) (has_seen_error false)</computeroutput>
-<computeroutput moreinfo="none">     (someone_is_listening false) (kill_index 0)))))).</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">     (someone_is_listening false) (kill_index 0)))))).</computeroutput></programlisting>
 
           <para>If instead we use <literal moreinfo="none">Ignore_me</literal>, the exception
           will be ignored, and we again see that the deferred never returns,
@@ -1341,8 +1302,7 @@ let search_and_print words =
           <filename moreinfo="none">async/main-38.rawscript</filename></para>
 
           <programlisting language="ocaml" format="linespecific"><userinput moreinfo="none"># swallow_some_errors Ignore_me;;</userinput>
-<computeroutput moreinfo="none">ignoring exn</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">ignoring exn</computeroutput></programlisting>
 
           <para>In practice, you should rarely use monitors directly, instead
           using functions like <literal moreinfo="none">try_with</literal> and
@@ -1412,8 +1372,7 @@ let query_uri ~server query =
 <computeroutput moreinfo="none">       (someone_is_listening true) (kill_index 0))</computeroutput>
 <computeroutput moreinfo="none">      ((name main) (here ()) (id 1) (has_seen_error true)</computeroutput>
 <computeroutput moreinfo="none">       (someone_is_listening false) (kill_index 0))))))</computeroutput>
-<computeroutput moreinfo="none">  (Pid 15971)))</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  (Pid 15971)))</computeroutput></programlisting>
 
           <para>As you can see, we got a "Connection refused" failure which
           ends the entire program, even though one of the two queries would
@@ -1486,8 +1445,7 @@ let print_result (word,definition) =
 <computeroutput moreinfo="none">"OCaml, originally known as Objective Caml, is the main implementation</computeroutput>
 <computeroutput moreinfo="none">of the Caml programming language, created by Xavier Leroy, Jérôme</computeroutput>
 <computeroutput moreinfo="none">Vouillon, Damien Doligez, Didier Rémy and others in 1996."</computeroutput>
-<computeroutput moreinfo="none"> </computeroutput>
-</programlisting>
+<computeroutput moreinfo="none"> </computeroutput></programlisting>
 
           <para>Now, only the query that went to <literal moreinfo="none">localhost</literal>
           failed.</para>
@@ -1525,8 +1483,7 @@ let print_result (word,definition) =
 <userinput moreinfo="none">   (after (sec 0.25) &gt;&gt;| fun () -&gt; 32.33);;</userinput>
 <computeroutput moreinfo="none">val string_and_float : (string * float) Deferred.t = &lt;abstr&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">string_and_float;;</userinput>
-<computeroutput moreinfo="none">- : string * float = ("A", 32.33)</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string * float = ("A", 32.33)</computeroutput></programlisting>
 
         <para>Sometimes, however, we want to wait only for the first of
         multiple events to occur. This happens particularly when dealing with
@@ -1540,8 +1497,7 @@ let print_result (word,definition) =
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Deferred.any [ (after (sec 0.5) &gt;&gt;| fun () -&gt; "half a second")</userinput>
 <userinput moreinfo="none">               ; (after (sec 10.) &gt;&gt;| fun () -&gt; "ten seconds") ] ;;</userinput>
-<computeroutput moreinfo="none">- : string = "half a second"</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string = "half a second"</computeroutput></programlisting>
 
         <para>Let's use this to add timeouts to our DuckDuckGo searches. The
         code below is a wrapper for <literal moreinfo="none">get_definition</literal> that
@@ -1640,8 +1596,7 @@ let get_definition ~server ~interrupt word =
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">choice;;</userinput>
 <computeroutput moreinfo="none">- : 'a Deferred.t -&gt; ('a -&gt; 'b) -&gt; 'b Deferred.choice = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">choose;;</userinput>
-<computeroutput moreinfo="none">- : 'a Deferred.choice list -&gt; 'a Deferred.t = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : 'a Deferred.choice list -&gt; 'a Deferred.t = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>Note that there's no guarantee that the winning deferred will be
         the one that becomes determined first. But <literal moreinfo="none">choose</literal>
@@ -1694,8 +1649,7 @@ let get_definition ~server ~interrupt word =
 <computeroutput moreinfo="none"> </computeroutput>
 <computeroutput moreinfo="none">"OCaml or Objective Caml, is the main implementation of the Caml</computeroutput>
 <computeroutput moreinfo="none">programming language, created by Xavier Leroy, Jérôme Vouillon,</computeroutput>
-<computeroutput moreinfo="none">Damien Doligez, Didier Rémy and others in 1996."</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Damien Doligez, Didier Rémy and others in 1996."</computeroutput></programlisting>
       </sect1>
 
       <sect1 id="working-with-system-threads">
@@ -1753,8 +1707,7 @@ let get_definition ~server ~interrupt word =
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let def = In_thread.run (fun () -&gt; List.range 1 10);;</userinput>
 <computeroutput moreinfo="none">val def : int list Deferred.t = &lt;abstr&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">def;;</userinput>
-<computeroutput moreinfo="none">- : int list = [1; 2; 3; 4; 5; 6; 7; 8; 9]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int list = [1; 2; 3; 4; 5; 6; 7; 8; 9]</computeroutput></programlisting>
 
         <para>to cause <literal moreinfo="none">List.range 1 10</literal> to be run on one of
         Async's worker threads. When the computation is complete, the result
@@ -1782,8 +1735,7 @@ let get_definition ~server ~interrupt word =
 <userinput moreinfo="none">    Clock.every (sec 0.1) ~stop:d print_time;</userinput>
 <userinput moreinfo="none">    d &gt;&gt;| fun () -&gt; print_time (); printf "\n"</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val log_delays : (unit -&gt; unit Deferred.t) -&gt; unit Deferred.t = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val log_delays : (unit -&gt; unit Deferred.t) -&gt; unit Deferred.t = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>If we feed this function a simple timeout deferred, it works as
         you might expect, waking up roughly every 100 milliseconds.</para>
@@ -1793,8 +1745,7 @@ let get_definition ~server ~interrupt word =
 
         <programlisting language="ocaml" format="linespecific"><userinput moreinfo="none"># log_delays (fun () -&gt; after (sec 0.5));;</userinput>
 <computeroutput moreinfo="none">0.154972ms, 102.126ms, 203.658ms, 305.73ms, 407.903ms, 501.563ms,
-- : unit = ()</computeroutput>
-</programlisting>
+- : unit = ()</computeroutput></programlisting>
 
         <para>Now see what happens if, instead of waiting on a clock event, we
         wait for a busy-loop to finish running.</para>
@@ -1809,8 +1760,7 @@ let get_definition ~server ~interrupt word =
 <computeroutput moreinfo="none">val busy_loop : 'a -&gt; unit = &lt;fun&gt;</computeroutput>
 <userinput moreinfo="none"># log_delays (fun () -&gt; return (busy_loop ()));;</userinput>
 <computeroutput moreinfo="none">19.2185s,
-- : unit = ()</computeroutput>
-</programlisting>
+- : unit = ()</computeroutput></programlisting>
 
         <para>As you can see, instead of waking up ten times a second,
         <literal moreinfo="none">log_delays</literal> is blocked out entirely while
@@ -1825,8 +1775,7 @@ let get_definition ~server ~interrupt word =
 
         <programlisting language="ocaml" format="linespecific"><userinput moreinfo="none"># log_delays (fun () -&gt; In_thread.run busy_loop);;</userinput>
 <computeroutput moreinfo="none">0.332117ms, 16.6319s, 18.8722s,
-- : unit = ()</computeroutput>
-</programlisting>
+- : unit = ()</computeroutput></programlisting>
 
         <para>Now <literal moreinfo="none">log_delays</literal> does get a chance to run, but
         not nearly as often as every 100 milliseconds. The reason for this is
@@ -1852,8 +1801,7 @@ let get_definition ~server ~interrupt word =
 <computeroutput moreinfo="none">val noalloc_busy_loop : unit -&gt; unit = &lt;fun&gt;</computeroutput>
 <userinput moreinfo="none"># log_delays (fun () -&gt; In_thread.run noalloc_busy_loop);;</userinput>
 <computeroutput moreinfo="none">0.169039ms, 4.58345s, 4.77866s, 4.87957s, 12.4723s, 15.0134s,
-- : unit = ()</computeroutput>
-</programlisting>
+- : unit = ()</computeroutput></programlisting>
 
         <para>But if we compile this to a native-code executable, then the
         non-allocating busy-loop will block anything else from running.</para>
@@ -1864,8 +1812,7 @@ let get_definition ~server ~interrupt word =
         <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg async native_code_log_delays.native</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./native_code_log_delays.native</userinput>
 <computeroutput moreinfo="none">15.5686s, </computeroutput>
-<prompt moreinfo="none">$ </prompt><userinput moreinfo="none"/>
-</programlisting>
+<prompt moreinfo="none">$ </prompt><userinput moreinfo="none"/></programlisting>
 
         <para>The takeaway from these examples is that predicting thread
         interleavings is a subtle business. Staying within the bounds of Async

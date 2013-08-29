@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="files-modules-and-programs">
       <title>Files, Modules and Programs</title>
@@ -43,8 +43,7 @@
 <computeroutput moreinfo="none">- : (string, int) List.Assoc.t =</computeroutput>
 <computeroutput moreinfo="none">[("four", 4); ("one", 1); ("two", 2); ("three", 3)]</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.Assoc.add assoc "two"  4 (* overwrite an existing key *) ;;</userinput>
-<computeroutput moreinfo="none">- : (string, int) List.Assoc.t = [("two", 4); ("one", 1); ("three", 3)]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : (string, int) List.Assoc.t = [("two", 4); ("one", 1); ("three", 3)]</computeroutput></programlisting>
 
         <para>Note that <literal moreinfo="none">List.Assoc.add</literal> doesn't modify the
         original list, but instead allocates a new list with the requisite
@@ -119,8 +118,7 @@ let () =
 
         <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc freq.ml -o freq.byte</userinput>
 <computeroutput moreinfo="none">File "freq.ml", line 1, characters 0-13:</computeroutput>
-<computeroutput moreinfo="none">Error: Unbound module Core</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Error: Unbound module Core</computeroutput></programlisting>
 
         <para>But as you can see, it fails because it can't find Core. We need
         a somewhat more complex invocation to get Core linked in:</para>
@@ -181,8 +179,7 @@ let () =
 <computeroutput moreinfo="none">  4: #lor</computeroutput>
 <computeroutput moreinfo="none">  4: $land</computeroutput>
 <computeroutput moreinfo="none">  4: #mod</computeroutput>
-<computeroutput moreinfo="none">  3: 6	.section .rdata,"dr"</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  3: 6	.section .rdata,"dr"</computeroutput></programlisting>
 
         <note>
           <title>Bytecode vs native code</title>
@@ -323,8 +320,7 @@ let () =
         <para role="sourcecode">Syntax:
         <filename moreinfo="none">files-modules-and-programs/val.syntax</filename></para>
 
-        <programlisting language="" format="linespecific">val &lt;identifier&gt; : &lt;type&gt;
-</programlisting>
+        <programlisting language="" format="linespecific">val &lt;identifier&gt; : &lt;type&gt;</programlisting>
 
         <para>Using this syntax, we can write the signature of
         <literal moreinfo="none">counter.ml</literal> as follows.</para>
@@ -355,8 +351,7 @@ val touch : (string * int) list -&gt; string -&gt; (string * int) list</programl
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild counter.inferred.mli</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">cat _build/counter.inferred.mli</userinput>
 <computeroutput moreinfo="none">val touch :</computeroutput>
-<computeroutput moreinfo="none">  ('a, int) Core.Std.List.Assoc.t -&gt; 'a -&gt; ('a, int) Core.Std.List.Assoc.t</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  ('a, int) Core.Std.List.Assoc.t -&gt; 'a -&gt; ('a, int) Core.Std.List.Assoc.t</computeroutput></programlisting>
 
           <para>The generated code is basically equivalent to the
           <literal moreinfo="none">mli</literal> that we wrote by hand, but is a bit uglier
@@ -437,8 +432,7 @@ let touch t s =
 <computeroutput moreinfo="none">Error: This expression has type Counter.t -&gt; string -&gt; Counter.t</computeroutput>
 <computeroutput moreinfo="none">       but an expression was expected of type 'a list -&gt; string -&gt; 'a list</computeroutput>
 <computeroutput moreinfo="none">       Type Counter.t is not compatible with type 'a list </computeroutput>
-<computeroutput moreinfo="none">Command exited with code 2.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Command exited with code 2.</computeroutput></programlisting>
 
         <para>This is because <literal moreinfo="none">freq.ml</literal> depends on the fact
         that frequency counts are represented as association lists, a fact
@@ -612,8 +606,7 @@ end</programlisting>
         <para role="sourcecode">Syntax:
         <filename moreinfo="none">files-modules-and-programs/module.syntax</filename></para>
 
-        <programlisting language="" format="linespecific">module &lt;name&gt; : &lt;signature&gt; = &lt;implementation&gt;
-</programlisting>
+        <programlisting language="" format="linespecific">module &lt;name&gt; : &lt;signature&gt; = &lt;implementation&gt;</programlisting>
 
         <para>We could have written this slightly differently, by giving the
         signature its own toplevel <literal moreinfo="none">module type</literal> declaration,
@@ -660,8 +653,7 @@ let sessions_have_same_user s1 s2 =
 <computeroutput moreinfo="none">File "session_info.ml", line 24, characters 12-19:</computeroutput>
 <computeroutput moreinfo="none">Error: This expression has type Hostname.t</computeroutput>
 <computeroutput moreinfo="none">       but an expression was expected of type Username.t</computeroutput>
-<computeroutput moreinfo="none">Command exited with code 2.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Command exited with code 2.</computeroutput></programlisting>
 
         <para>This is a trivial example, but confusing different kinds of
         identifiers is a very real source of bugs, and the approach of minting
@@ -698,8 +690,7 @@ let sessions_have_same_user s1 s2 =
 <computeroutput moreinfo="none">Error: Unbound value foo</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">open M;;</userinput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">foo;;</userinput>
-<computeroutput moreinfo="none">- : int = 3</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 3</computeroutput></programlisting>
 
         <para><literal moreinfo="none">open</literal> is essential when you want to modify
         your environment for a standard library like Core, but it's generally
@@ -732,8 +723,7 @@ let sessions_have_same_user s1 s2 =
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let average x y =</userinput>
 <userinput moreinfo="none">    let open Int64 in</userinput>
 <userinput moreinfo="none">    x + y / of_int 2;;</userinput>
-<computeroutput moreinfo="none">val average : int64 -&gt; int64 -&gt; int64 = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val average : int64 -&gt; int64 -&gt; int64 = &lt;fun&gt;</computeroutput></programlisting>
 
             <para>In the above, <literal moreinfo="none">of_int</literal> and the infix
             operators are the ones from the <literal moreinfo="none">Int64</literal>
@@ -748,8 +738,7 @@ let sessions_have_same_user s1 s2 =
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let average x y =</userinput>
 <userinput moreinfo="none">    Int64.(x + y / of_int 2);;</userinput>
-<computeroutput moreinfo="none">val average : int64 -&gt; int64 -&gt; int64 = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val average : int64 -&gt; int64 -&gt; int64 = &lt;fun&gt;</computeroutput></programlisting>
           </listitem>
 
           <listitem>
@@ -809,8 +798,7 @@ let sessions_have_same_user s1 s2 =
 <userinput moreinfo="none">      if high &lt; low then Empty else Interval (low,high)</userinput>
 <userinput moreinfo="none">  end;;</userinput>
 <computeroutput moreinfo="none">module Interval :</computeroutput>
-<computeroutput moreinfo="none">  sig type t = Interval of int * int | Empty val create : int -&gt; int -&gt; t end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  sig type t = Interval of int * int | Empty val create : int -&gt; int -&gt; t end</computeroutput></programlisting>
 
         <para>We can use the <literal moreinfo="none">include</literal> directive to create a
         new, extended version of the <literal moreinfo="none">Interval</literal>
@@ -835,8 +823,7 @@ let sessions_have_same_user s1 s2 =
 <computeroutput moreinfo="none">    val contains : t -&gt; int -&gt; bool</computeroutput>
 <computeroutput moreinfo="none">  end</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Extended_interval.contains (Extended_interval.create 3 10) 4;;</userinput>
-<computeroutput moreinfo="none">- : bool = true</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : bool = true</computeroutput></programlisting>
 
         <para>The difference between <literal moreinfo="none">include</literal> and
         <literal moreinfo="none">open</literal> is that we've done more than change how
@@ -860,8 +847,7 @@ let sessions_have_same_user s1 s2 =
 <computeroutput moreinfo="none">  sig val contains : Extended_interval.t -&gt; int -&gt; bool end</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Extended_interval.contains (Extended_interval.create 3 10) 4;;</userinput>
 <computeroutput moreinfo="none">Characters 28-52:</computeroutput>
-<computeroutput moreinfo="none">Error: Unbound value Extended_interval.create</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Error: Unbound value Extended_interval.create</computeroutput></programlisting>
 
         <para>To consider a more realistic example, imagine you wanted to
         build an extended version of the <literal moreinfo="none">List</literal> module, where
@@ -962,8 +948,7 @@ val touch : string -&gt; t -&gt; t</programlisting>
 <computeroutput moreinfo="none">       but an expression was expected of type</computeroutput>
 <computeroutput moreinfo="none">         Counter.t -&gt; string -&gt; Counter.t</computeroutput>
 <computeroutput moreinfo="none">       Type string is not compatible with type Counter.t </computeroutput>
-<computeroutput moreinfo="none">Command exited with code 2.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Command exited with code 2.</computeroutput></programlisting>
         </sect2>
 
         <sect2 id="missing-definitions">
@@ -991,8 +976,7 @@ val touch : string -&gt; t -&gt; t</programlisting>
 <computeroutput moreinfo="none">Error: The implementation counter.ml</computeroutput>
 <computeroutput moreinfo="none">       does not match the interface counter.cmi:</computeroutput>
 <computeroutput moreinfo="none">       The field `count' is required but not provided</computeroutput>
-<computeroutput moreinfo="none">Command exited with code 2.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Command exited with code 2.</computeroutput></programlisting>
 
           <para>A missing type definition will lead to a similar error.</para>
         </sect2>
@@ -1033,8 +1017,7 @@ type median = | Before_and_after of string * string
 <computeroutput moreinfo="none">         type median = Before_and_after of string * string | Median of string</computeroutput>
 <computeroutput moreinfo="none">       File "counter.ml", line 18, characters 5-84: Actual declaration</computeroutput>
 <computeroutput moreinfo="none">       Fields number 1 have different names, Median and Before_and_after.</computeroutput>
-<computeroutput moreinfo="none">Command exited with code 2.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Command exited with code 2.</computeroutput></programlisting>
 
           <para>Order is similarly important to other type declarations,
           including the order in which record fields are declared and the
@@ -1079,8 +1062,7 @@ type median = | Before_and_after of string * string
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild freq.byte</userinput>
 <computeroutput moreinfo="none">File "counter.ml", line 18, characters 18-31:</computeroutput>
 <computeroutput moreinfo="none">Error: Unbound module Counter</computeroutput>
-<computeroutput moreinfo="none">Command exited with code 2.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Command exited with code 2.</computeroutput></programlisting>
 
           <para>The problem manifests in a different way if we create cyclic
           references between files. We could create such a situation by adding
@@ -1104,8 +1086,7 @@ type median = | Before_and_after of string * string
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild freq.byte</userinput>
 <computeroutput moreinfo="none">Circular dependencies: "freq.cmo" already seen in</computeroutput>
 <computeroutput moreinfo="none">  [ "counter.cmo"; "freq.cmo" ]</computeroutput>
-<computeroutput moreinfo="none"> </computeroutput>
-</programlisting>
+<computeroutput moreinfo="none"> </computeroutput></programlisting>
         </sect2>
       </sect1>
     </chapter>

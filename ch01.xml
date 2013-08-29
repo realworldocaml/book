@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="a-guided-tour">
       <title>A Guided Tour</title>
@@ -50,8 +50,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">30_000_000 / 300_000;;</userinput>
 <computeroutput moreinfo="none">- : int = 100</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">sqrt 9.;;</userinput>
-<computeroutput moreinfo="none">- : float = 3.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : float = 3.</computeroutput></programlisting>
 
         <para>By and large, this is pretty similar to what you'd find in any
         programming language, but there are a few things that jump right out
@@ -114,8 +113,7 @@
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let x = 3 + 4;;</userinput>
 <computeroutput moreinfo="none">val x : int = 7</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let y = x + x;;</userinput>
-<computeroutput moreinfo="none">val y : int = 14</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val y : int = 14</computeroutput></programlisting>
 
         <para>After a new variable is created, the toplevel tells us the name
         of the variable (<literal moreinfo="none">x</literal> or <literal moreinfo="none">y</literal>), in
@@ -139,8 +137,7 @@
 <computeroutput moreinfo="none">val x' : int = 8</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let _x' = x' + x';;</userinput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">_x';;</userinput>
-<computeroutput moreinfo="none">- : int = 16</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 16</computeroutput></programlisting>
 
         <para>Note that by default, <command moreinfo="none">utop</command> doesn't bother to
         print out variables starting with an underscore.</para>
@@ -159,8 +156,7 @@
 <computeroutput moreinfo="none">int</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let x-plus-y = x + y;;</userinput>
 <computeroutput moreinfo="none">Characters 4-5:</computeroutput>
-<computeroutput moreinfo="none">Error: Parse error: [fun_binding] expected after [ipatt] (in [let_binding])</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Error: Parse error: [fun_binding] expected after [ipatt] (in [let_binding])</computeroutput></programlisting>
 
         <para>The error messages here are a little confusing, but they'll make
         more sense as you learn more about the language.</para>
@@ -180,8 +176,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">square 2;;</userinput>
 <computeroutput moreinfo="none">- : int = 4</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">square (square 2);;</userinput>
-<computeroutput moreinfo="none">- : int = 16</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 16</computeroutput></programlisting>
 
         <para>Functions in OCaml are values like any other, which is why we
         use the <literal moreinfo="none">let</literal> keyword to bind a function to a
@@ -209,8 +204,7 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val ratio : int -&gt; int -&gt; float = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">ratio 4 7;;</userinput>
-<computeroutput moreinfo="none">- : float = 0.571428571429</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : float = 0.571428571429</computeroutput></programlisting>
 
         <para>The above also happens to be our first use of modules. Here,
         <literal moreinfo="none">Float.of_int</literal> refers to the
@@ -241,8 +235,7 @@
 <userinput moreinfo="none">    (if test first then first else 0)</userinput>
 <userinput moreinfo="none">    + (if test second then second else 0)</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val sum_if_true : (int -&gt; bool) -&gt; int -&gt; int -&gt; int = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val sum_if_true : (int -&gt; bool) -&gt; int -&gt; int -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>If we look at the inferred type signature in detail, we see that
         the first argument is a function that takes an integer and returns a
@@ -258,8 +251,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">sum_if_true even 3 4;;</userinput>
 <computeroutput moreinfo="none">- : int = 4</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">sum_if_true even 2 4;;</userinput>
-<computeroutput moreinfo="none">- : int = 6</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 6</computeroutput></programlisting>
 
         <para>Note that in the definition of <literal moreinfo="none">even</literal> we used
         <literal moreinfo="none">=</literal> in two different ways: once as the part of the
@@ -340,8 +332,7 @@
 <userinput moreinfo="none">     (if test x then x else 0)</userinput>
 <userinput moreinfo="none">     + (if test y then y else 0)</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val sum_if_true : (int -&gt; bool) -&gt; int -&gt; int -&gt; int = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val sum_if_true : (int -&gt; bool) -&gt; int -&gt; int -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>In the above, we've marked every argument to the function with
           its type, with the final annotation indicating the type of the
@@ -361,8 +352,7 @@
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let first_if_true test x y =</userinput>
 <userinput moreinfo="none">    if test x then x else y</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val first_if_true : ('a -&gt; bool) -&gt; 'a -&gt; 'a -&gt; 'a = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val first_if_true : ('a -&gt; bool) -&gt; 'a -&gt; 'a -&gt; 'a = &lt;fun&gt;</computeroutput></programlisting>
 
           <para><literal moreinfo="none">first_if_true</literal> takes as its arguments a
           function <literal moreinfo="none">test</literal>, and two values,
@@ -400,8 +390,7 @@
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let long_string s = String.length s &gt; 6;;</userinput>
 <computeroutput moreinfo="none">val long_string : string -&gt; bool = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">first_if_true long_string "short" "loooooong";;</userinput>
-<computeroutput moreinfo="none">- : string = "loooooong"</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string = "loooooong"</computeroutput></programlisting>
 
           <para>As well as this.</para>
 
@@ -411,8 +400,7 @@
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let big_number x = x &gt; 3;;</userinput>
 <computeroutput moreinfo="none">val big_number : int -&gt; bool = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">first_if_true big_number 4 3;;</userinput>
-<computeroutput moreinfo="none">- : int = 4</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 4</computeroutput></programlisting>
 
           <para>Both <literal moreinfo="none">long_string</literal> and
           <literal moreinfo="none">big_number</literal> are functions, and each is passed to
@@ -428,8 +416,7 @@
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">first_if_true big_number "short" "loooooong";;</userinput>
 <computeroutput moreinfo="none">Characters 25-32:</computeroutput>
 <computeroutput moreinfo="none">Error: This expression has type string but an expression was expected of type</computeroutput>
-<computeroutput moreinfo="none">         int</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">         int</computeroutput></programlisting>
 
           <para>In this example, <literal moreinfo="none">big_number</literal> requires that
           <literal moreinfo="none">'a</literal> be instantiated as <literal moreinfo="none">int</literal>,
@@ -458,8 +445,7 @@
 <userinput moreinfo="none">     x + "potato";;</userinput>
 <computeroutput moreinfo="none">Characters 28-36:</computeroutput>
 <computeroutput moreinfo="none">Error: This expression has type string but an expression was expected of type</computeroutput>
-<computeroutput moreinfo="none">         int</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">         int</computeroutput></programlisting>
 
             <para>are compile-time errors (because <literal moreinfo="none">+</literal>
             requires that both its arguments be of type
@@ -476,8 +462,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">is_a_multiple 8 2;;</userinput>
 <computeroutput moreinfo="none">- : bool = true</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">is_a_multiple 8 0;;</userinput>
-<computeroutput moreinfo="none">Exception: Division_by_zero.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Exception: Division_by_zero.</computeroutput></programlisting>
 
             <para>The distinction here is that type errors will stop you
             whether or not the offending code is ever actually executed.
@@ -510,8 +495,7 @@
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let a_tuple = (3,"three");;</userinput>
 <computeroutput moreinfo="none">val a_tuple : int * string = (3, "three")</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let another_tuple = (3,"four",5.);;</userinput>
-<computeroutput moreinfo="none">val another_tuple : int * string * float = (3, "four", 5.)</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val another_tuple : int * string * float = (3, "four", 5.)</computeroutput></programlisting>
 
           <para>(For the mathematically inclined, the <literal moreinfo="none">*</literal>
           character is used because the set of all pairs of type <literal moreinfo="none">t *
@@ -527,8 +511,7 @@
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let (x,y) = a_tuple;;</userinput>
 <computeroutput moreinfo="none">val x : int = 3</computeroutput>
-<computeroutput moreinfo="none">val y : string = "three"</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val y : string = "three"</computeroutput></programlisting>
 
           <para>Here, the <literal moreinfo="none">(x,y)</literal> on the left-hand side of
           the <literal moreinfo="none">let</literal> binding is the pattern. This pattern lets
@@ -541,8 +524,7 @@
           <filename moreinfo="none">guided-tour/main.topscript</filename> (part 18)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">x + String.length y;;</userinput>
-<computeroutput moreinfo="none">- : int = 8</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 8</computeroutput></programlisting>
 
           <para>Note that the same syntax is used both for constructing and
           for pattern matching on tuples.</para>
@@ -559,8 +541,7 @@
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let distance (x1,y1) (x2,y2) =</userinput>
 <userinput moreinfo="none">    sqrt ((x1 -. x2) ** 2. +. (y1 -. y2) ** 2.)</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val distance : float * float -&gt; float * float -&gt; float = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val distance : float * float -&gt; float * float -&gt; float = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>The <literal moreinfo="none">**</literal> operator used above is for raising a
           floating-point number to a power.</para>
@@ -581,8 +562,7 @@
           <filename moreinfo="none">guided-tour/main.topscript</filename> (part 20)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let languages = ["OCaml";"Perl";"C"];;</userinput>
-<computeroutput moreinfo="none">val languages : string list = ["OCaml"; "Perl"; "C"]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val languages : string list = ["OCaml"; "Perl"; "C"]</computeroutput></programlisting>
 
           <para>Note that you can't mix elements of different types in the
           same list, unlike tuples.</para>
@@ -593,8 +573,7 @@
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let numbers = [3;"four";5];;</userinput>
 <computeroutput moreinfo="none">Characters 17-23:</computeroutput>
 <computeroutput moreinfo="none">Error: This expression has type string but an expression was expected of type</computeroutput>
-<computeroutput moreinfo="none">         int</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">         int</computeroutput></programlisting>
 
           <sect3 id="the-list-module">
             <title>The <literal moreinfo="none">List</literal> module</title>
@@ -608,8 +587,7 @@
             <filename moreinfo="none">guided-tour/main.topscript</filename> (part 22)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.length languages;;</userinput>
-<computeroutput moreinfo="none">- : int = 3</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 3</computeroutput></programlisting>
 
             <para>Here's something a little more complicated. We can compute
             the list of the lengths of each language as follows.</para>
@@ -618,8 +596,7 @@
             <filename moreinfo="none">guided-tour/main.topscript</filename> (part 23)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.map languages ~f:String.length;;</userinput>
-<computeroutput moreinfo="none">- : int list = [5; 4; 1]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int list = [5; 4; 1]</computeroutput></programlisting>
 
             <para><literal moreinfo="none">List.map</literal> takes two arguments: a list and
             a function for transforming the elements of that list. It returns
@@ -637,8 +614,7 @@
             <filename moreinfo="none">guided-tour/main.topscript</filename> (part 24)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.map ~f:String.length languages;;</userinput>
-<computeroutput moreinfo="none">- : int list = [5; 4; 1]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int list = [5; 4; 1]</computeroutput></programlisting>
 
             <para>We'll learn more about labeled arguments and why they're
             important in <xref linkend="variables-and-functions"/>.</para>
@@ -655,8 +631,7 @@
             <filename moreinfo="none">guided-tour/main.topscript</filename> (part 25)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">"French" :: "Spanish" :: languages;;</userinput>
-<computeroutput moreinfo="none">- : string list = ["French"; "Spanish"; "OCaml"; "Perl"; "C"]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string list = ["French"; "Spanish"; "OCaml"; "Perl"; "C"]</computeroutput></programlisting>
 
             <para>Here, we're creating a new and extended list, not changing
             the list we started with, as you can see below.</para>
@@ -665,8 +640,7 @@
             <filename moreinfo="none">guided-tour/main.topscript</filename> (part 26)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">languages;;</userinput>
-<computeroutput moreinfo="none">- : string list = ["OCaml"; "Perl"; "C"]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string list = ["OCaml"; "Perl"; "C"]</computeroutput></programlisting>
 
             <note>
               <title>Semicolons vs. commas</title>
@@ -681,8 +655,7 @@
               <filename moreinfo="none">guided-tour/main.topscript</filename> (part 27)</para>
 
               <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">["OCaml", "Perl", "C"];;</userinput>
-<computeroutput moreinfo="none">- : (string * string * string) list = [("OCaml", "Perl", "C")]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : (string * string * string) list = [("OCaml", "Perl", "C")]</computeroutput></programlisting>
 
               <para>In particular, rather than a list of three strings, what
               we have is a singleton list containing a three-tuple of
@@ -696,8 +669,7 @@
               <filename moreinfo="none">guided-tour/main.topscript</filename> (part 28)</para>
 
               <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">1,2,3;;</userinput>
-<computeroutput moreinfo="none">- : int * int * int = (1, 2, 3)</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int * int * int = (1, 2, 3)</computeroutput></programlisting>
 
               <para>to allocate a tuple of integers. This is generally
               considered poor style and should be avoided.</para>
@@ -717,8 +689,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">1 :: (2 :: (3 :: []));;</userinput>
 <computeroutput moreinfo="none">- : int list = [1; 2; 3]</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">1 :: 2 :: 3 :: [];;</userinput>
-<computeroutput moreinfo="none">- : int list = [1; 2; 3]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int list = [1; 2; 3]</computeroutput></programlisting>
 
             <para>The <literal moreinfo="none">::</literal> operator can only be used for
             adding one element to the front of the list, with the list
@@ -730,8 +701,7 @@
             <filename moreinfo="none">guided-tour/main.topscript</filename> (part 30)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">[1;2;3] @ [4;5;6];;</userinput>
-<computeroutput moreinfo="none">- : int list = [1; 2; 3; 4; 5; 6]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int list = [1; 2; 3; 4; 5; 6]</computeroutput></programlisting>
 
             <para>It's important to remember that, unlike
             <literal moreinfo="none">::</literal>, this is not a constant-time operation.
@@ -757,8 +727,7 @@
 <computeroutput moreinfo="none">Warning 8: this pattern-matching is not exhaustive.</computeroutput>
 <computeroutput moreinfo="none">Here is an example of a value that is not matched:</computeroutput>
 <computeroutput moreinfo="none">[]</computeroutput>
-<computeroutput moreinfo="none">val my_favorite_language : 'a list -&gt; 'a = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val my_favorite_language : 'a list -&gt; 'a = &lt;fun&gt;</computeroutput></programlisting>
 
             <para>By pattern matching using <literal moreinfo="none">::</literal>, we've
             isolated and named the first element of the list
@@ -783,8 +752,7 @@
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">my_favorite_language ["English";"Spanish";"French"];;</userinput>
 <computeroutput moreinfo="none">- : string = "English"</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">my_favorite_language [];;</userinput>
-<computeroutput moreinfo="none">Exception: (Match_failure //toplevel// 0 25).</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Exception: (Match_failure //toplevel// 0 25).</computeroutput></programlisting>
 
             <para>You can avoid these warnings, and more importantly make sure
             that your code actually handles all of the possible cases, by
@@ -816,8 +784,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">my_favorite_language ["English";"Spanish";"French"];;</userinput>
 <computeroutput moreinfo="none">- : string = "English"</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">my_favorite_language [];;</userinput>
-<computeroutput moreinfo="none">- : string = "OCaml"</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string = "OCaml"</computeroutput></programlisting>
 
             <para>The above code also includes our first comment. OCaml
             comments are bounded by <literal moreinfo="none">(*</literal> and
@@ -862,8 +829,7 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val sum : int list -&gt; int = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">sum [1;2;3];;</userinput>
-<computeroutput moreinfo="none">- : int = 6</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 6</computeroutput></programlisting>
 
             <para>Following the common OCaml idiom, we use
             <literal moreinfo="none">hd</literal> to refer to the head of the list and
@@ -910,8 +876,7 @@
 <computeroutput moreinfo="none">Warning 8: this pattern-matching is not exhaustive.</computeroutput>
 <computeroutput moreinfo="none">Here is an example of a value that is not matched:</computeroutput>
 <computeroutput moreinfo="none">_::[]</computeroutput>
-<computeroutput moreinfo="none">val destutter : 'a list -&gt; 'a list = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val destutter : 'a list -&gt; 'a list = &lt;fun&gt;</computeroutput></programlisting>
 
             <para>Again, the first arm of the match is the base case, and the
             second is the inductive. Unfortunately, this code has a problem,
@@ -932,8 +897,7 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val destutter : 'a list -&gt; 'a list = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">destutter ["hey";"hey";"hey";"man!"];;</userinput>
-<computeroutput moreinfo="none">- : string list = ["hey"; "man!"]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string list = ["hey"; "man!"]</computeroutput></programlisting>
 
             <para>Note that this code used another variant of the list
             pattern, <literal moreinfo="none">[hd]</literal>, to match a list with a single
@@ -964,8 +928,7 @@
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let divide x y =</userinput>
 <userinput moreinfo="none">    if y = 0 then None else Some (x/y) ;;</userinput>
-<computeroutput moreinfo="none">val divide : int -&gt; int -&gt; int option = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val divide : int -&gt; int -&gt; int option = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>The function <literal moreinfo="none">divide</literal> either returns
           <literal moreinfo="none">None</literal>, if the divisor is zero, or
@@ -998,8 +961,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">log_entry (Some Time.epoch) "A long long time ago";;</userinput>
 <computeroutput moreinfo="none">- : string = "1970-01-01 01:00:00 -- A long long time ago"</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">log_entry None "Up to the minute";;</userinput>
-<computeroutput moreinfo="none">- : string = "2013-08-18 14:48:08 -- Up to the minute"</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string = "2013-08-18 14:48:08 -- Up to the minute"</computeroutput></programlisting>
 
           <para>This example uses Core's <literal moreinfo="none">Time</literal> module for
           dealing with time as well as the <literal moreinfo="none">^</literal> operator for
@@ -1025,8 +987,7 @@
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let x = 7 in</userinput>
 <userinput moreinfo="none">  x + x</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">- : int = 14</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 14</computeroutput></programlisting>
 
             <para>Note that the scope of the let binding is terminated by the
             double-semicolon, so the value of <literal moreinfo="none">x</literal> is no
@@ -1038,8 +999,7 @@
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">x;;</userinput>
 <computeroutput moreinfo="none">Characters -1-1:</computeroutput>
-<computeroutput moreinfo="none">Error: Unbound value x</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Error: Unbound value x</computeroutput></programlisting>
 
             <para>We can also have multiple let statements in a row, each one
             adding a new variable binding to what came before.</para>
@@ -1052,8 +1012,7 @@
 <userinput moreinfo="none">  let y = x * x in</userinput>
 <userinput moreinfo="none">  x + y</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">- : int = 56</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 56</computeroutput></programlisting>
 
             <para>This kind of nested let binding is a common way of building
             up a complex expression, with each <literal moreinfo="none">let</literal> naming
@@ -1093,8 +1052,7 @@
         <filename moreinfo="none">guided-tour/main.topscript</filename> (part 41)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type point2d = { x : float; y : float };;</userinput>
-<computeroutput moreinfo="none">type point2d = { x : float; y : float; }</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">type point2d = { x : float; y : float; }</computeroutput></programlisting>
 
         <para><literal moreinfo="none">point2d</literal> is a <emphasis>record</emphasis>
         type, which you can think of as a tuple where the individual fields
@@ -1105,8 +1063,7 @@
         <filename moreinfo="none">guided-tour/main.topscript</filename> (part 42)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let p = { x = 3.; y = -4. };;</userinput>
-<computeroutput moreinfo="none">val p : point2d = {x = 3.; y = -4.}</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val p : point2d = {x = 3.; y = -4.}</computeroutput></programlisting>
 
         <para>And we can get access to the contents of these types using
         pattern matching:</para>
@@ -1116,8 +1073,7 @@
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let magnitude { x = x_pos; y = y_pos } =</userinput>
 <userinput moreinfo="none">    sqrt (x_pos ** 2. +. y_pos ** 2.);;</userinput>
-<computeroutput moreinfo="none">val magnitude : point2d -&gt; float = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val magnitude : point2d -&gt; float = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>The pattern match here binds the variable
         <literal moreinfo="none">x_pos</literal> to the value contained in the
@@ -1134,8 +1090,7 @@
         <filename moreinfo="none">guided-tour/main.topscript</filename> (part 44)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let magnitude { x; y } = sqrt (x ** 2. +. y ** 2.);;</userinput>
-<computeroutput moreinfo="none">val magnitude : point2d -&gt; float = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val magnitude : point2d -&gt; float = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>We can also use dot-notation for accessing record fields:</para>
 
@@ -1144,8 +1099,7 @@
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let distance v1 v2 =</userinput>
 <userinput moreinfo="none">     magnitude { x = v1.x -. v2.x; y = v1.y -. v2.y };;</userinput>
-<computeroutput moreinfo="none">val distance : point2d -&gt; point2d -&gt; float = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val distance : point2d -&gt; point2d -&gt; float = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>And we can of course include our newly defined types as
         components in larger types. Here, for example, are some types for
@@ -1160,8 +1114,7 @@
 <userinput moreinfo="none">  type segment_desc = { endpoint1: point2d; endpoint2: point2d } ;;</userinput>
 <computeroutput moreinfo="none">type circle_desc = { center : point2d; radius : float; }</computeroutput>
 <computeroutput moreinfo="none">type rect_desc = { lower_left : point2d; width : float; height : float; }</computeroutput>
-<computeroutput moreinfo="none">type segment_desc = { endpoint1 : point2d; endpoint2 : point2d; }</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">type segment_desc = { endpoint1 : point2d; endpoint2 : point2d; }</computeroutput></programlisting>
 
         <para>Now, imagine that you want to combine multiple objects of these
         types together as a description of a multi-object scene. You need some
@@ -1180,8 +1133,7 @@
 <computeroutput moreinfo="none">type scene_element =</computeroutput>
 <computeroutput moreinfo="none">    Circle of circle_desc</computeroutput>
 <computeroutput moreinfo="none">  | Rect of rect_desc</computeroutput>
-<computeroutput moreinfo="none">  | Segment of segment_desc</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  | Segment of segment_desc</computeroutput></programlisting>
 
         <para>The <literal moreinfo="none">|</literal> character separates the different cases
         of the variant (the first <literal moreinfo="none">|</literal> is optional), and each
@@ -1216,8 +1168,7 @@
 <computeroutput moreinfo="none">- : bool = false</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">is_inside_scene {x=3.;y=7.}</userinput>
 <userinput moreinfo="none">    [ Circle {center = {x=4.;y= 4.}; radius = 5.0 } ];;</userinput>
-<computeroutput moreinfo="none">- : bool = true</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : bool = true</computeroutput></programlisting>
 
         <para>You might at this point notice that the use of
         <literal moreinfo="none">match</literal> here is reminiscent of how we used
@@ -1280,8 +1231,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">numbers.(2) &lt;- 4;;</userinput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">numbers;;</userinput>
-<computeroutput moreinfo="none">- : int array = [|1; 2; 4; 4|]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int array = [|1; 2; 4; 4|]</computeroutput></programlisting>
 
           <para>the <literal moreinfo="none">.(i)</literal> syntax is used to refer to an
           element of an array, and the <literal moreinfo="none">&lt;-</literal> syntax is for
@@ -1324,8 +1274,7 @@
 <computeroutput moreinfo="none">  mutable sum : float;</computeroutput>
 <computeroutput moreinfo="none">  mutable sum_sq : float;</computeroutput>
 <computeroutput moreinfo="none">  mutable samples : int;</computeroutput>
-<computeroutput moreinfo="none">}</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">}</computeroutput></programlisting>
 
           <para>The fields in <literal moreinfo="none">running_sum</literal> are designed to
           be easy to extend incrementally, and sufficient to compute means and
@@ -1342,8 +1291,7 @@
 <userinput moreinfo="none">     sqrt (rsum.sum_sq /. float rsum.samples</userinput>
 <userinput moreinfo="none">           -. (rsum.sum /. float rsum.samples) ** 2.) ;;</userinput>
 <computeroutput moreinfo="none">val mean : running_sum -&gt; float = &lt;fun&gt;</computeroutput>
-<computeroutput moreinfo="none">val stdev : running_sum -&gt; float = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val stdev : running_sum -&gt; float = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>We use the function <literal moreinfo="none">float</literal> above, which is a
           convenient equivalent of <literal moreinfo="none">Float.of_int</literal> which is
@@ -1362,8 +1310,7 @@
 <userinput moreinfo="none">     rsum.sum_sq  &lt;- rsum.sum_sq  +. x *. x</userinput>
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val create : unit -&gt; running_sum = &lt;fun&gt;</computeroutput>
-<computeroutput moreinfo="none">val update : running_sum -&gt; float -&gt; unit = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val update : running_sum -&gt; float -&gt; unit = &lt;fun&gt;</computeroutput></programlisting>
 
           <para><literal moreinfo="none">create</literal> returns a
           <literal moreinfo="none">running_sum</literal> corresponding to the empty set, and
@@ -1392,8 +1339,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">mean rsum;;</userinput>
 <computeroutput moreinfo="none">- : float = 1.33333333333</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">stdev rsum;;</userinput>
-<computeroutput moreinfo="none">- : float = 3.94405318873</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : float = 3.94405318873</computeroutput></programlisting>
 
           <para>It's worth noting that the above algorithm is numerically
           naive, and has poor precision in the presence of cancellation. You
@@ -1419,8 +1365,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">x.contents &lt;- x.contents + 1;;</userinput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">x;;</userinput>
-<computeroutput moreinfo="none">- : int ref = {contents = 1}</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int ref = {contents = 1}</computeroutput></programlisting>
 
           <para>There are a handful of useful functions and operators defined
           for <literal moreinfo="none">ref</literal>s to make them more convenient to work
@@ -1436,8 +1381,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">x := !x + 1    (* assignment, i.e., x.contents &lt;- ... *) ;;</userinput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">!x ;;</userinput>
-<computeroutput moreinfo="none">- : int = 1</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 1</computeroutput></programlisting>
 
           <para>There's nothing magical with these operators either. You can
           completely reimplement the <literal moreinfo="none">ref</literal> type and all of
@@ -1455,8 +1399,7 @@
 <computeroutput moreinfo="none">type 'a ref = { mutable contents : 'a; }</computeroutput>
 <computeroutput moreinfo="none">val ref : 'a -&gt; 'a ref = &lt;fun&gt;</computeroutput>
 <computeroutput moreinfo="none">val ( ! ) : 'a ref -&gt; 'a = &lt;fun&gt;</computeroutput>
-<computeroutput moreinfo="none">val ( := ) : 'a ref -&gt; 'a -&gt; unit = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val ( := ) : 'a ref -&gt; 'a -&gt; unit = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>The <literal moreinfo="none">'a</literal> before the ref indicates that the
           <literal moreinfo="none">ref</literal> type is polymorphic, in the same way that
@@ -1481,8 +1424,7 @@
 <userinput moreinfo="none">    List.iter list ~f:(fun x -&gt; sum := !sum + x);</userinput>
 <userinput moreinfo="none">    !sum</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val sum : int list -&gt; int = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val sum : int list -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>This isn't the most idiomatic (or the fastest) way to sum up a
           list, but it shows how you can use a ref in place of a mutable
@@ -1514,8 +1456,7 @@
 <userinput moreinfo="none">       array.(j) &lt;- tmp</userinput>
 <userinput moreinfo="none">    done</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val permute : 'a array -&gt; unit = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val permute : 'a array -&gt; unit = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>From a syntactic perspective, you should note the keywords
           that distinguish a for loop: <literal moreinfo="none">for</literal>,
@@ -1534,8 +1475,7 @@
 <computeroutput moreinfo="none">- : unit = ()</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">ar;;</userinput>
 <computeroutput moreinfo="none">- : int array =</computeroutput>
-<computeroutput moreinfo="none">[|1; 2; 4; 6; 11; 7; 14; 9; 10; 0; 13; 16; 19; 12; 17; 5; 3; 18; 8; 15|]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">[|1; 2; 4; 6; 11; 7; 14; 9; 10; 0; 13; 16; 19; 12; 17; 5; 3; 18; 8; 15|]</computeroutput></programlisting>
 
           <para>OCaml also supports while loops, as shown in the following
           function for finding the position of the first negative entry in an
@@ -1556,8 +1496,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">find_first_negative_entry [|1;2;0;3|];;</userinput>
 <computeroutput moreinfo="none">- : int option = None</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">find_first_negative_entry [|1;-2;0;3|];;</userinput>
-<computeroutput moreinfo="none">- : int option = Some 1</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int option = Some 1</computeroutput></programlisting>
 
           <para>As a side note, the above code takes advantage of the fact
           that <literal moreinfo="none">&amp;&amp;</literal>, OCaml's and operator,
@@ -1587,8 +1526,7 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val find_first_negative_entry : int array -&gt; int option = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">find_first_negative_entry [|1;2;0;3|];;</userinput>
-<computeroutput moreinfo="none">Exception: (Invalid_argument "index out of bounds").</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Exception: (Invalid_argument "index out of bounds").</computeroutput></programlisting>
 
           <para>The or operator, <literal moreinfo="none">||</literal> short-circuits in a
           similar way to <literal moreinfo="none">&amp;&amp;</literal>.</para>
@@ -1671,8 +1609,7 @@ let () =
 <computeroutput moreinfo="none">2</computeroutput>
 <computeroutput moreinfo="none">3</computeroutput>
 <computeroutput moreinfo="none">94.5</computeroutput>
-<computeroutput moreinfo="none">Total: 100.5</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Total: 100.5</computeroutput></programlisting>
 
           <para>More work is needed to make a really usable command-line
           program, including a proper command-line parsing interface and

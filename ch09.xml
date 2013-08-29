@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="functors">
       <title>Functors</title>
@@ -63,8 +63,7 @@
         <filename moreinfo="none">functors/main.topscript</filename></para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module type X_int = sig val x : int end;;</userinput>
-<computeroutput moreinfo="none">module type X_int = sig val x : int end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">module type X_int = sig val x : int end</computeroutput></programlisting>
 
         <para>Now we can define our functor. We'll use
         <literal moreinfo="none">X_int</literal> both to constrain the argument to the
@@ -76,8 +75,7 @@
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Increment (M : X_int) : X_int = struct</userinput>
 <userinput moreinfo="none">    let x = M.x + 1</userinput>
 <userinput moreinfo="none">  end;;</userinput>
-<computeroutput moreinfo="none">module Increment : functor (M : X_int) -&gt; X_int</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">module Increment : functor (M : X_int) -&gt; X_int</computeroutput></programlisting>
 
         <para>One thing that immediately jumps out is that functors are more
         syntactically heavyweight than ordinary functions. For one thing,
@@ -96,8 +94,7 @@
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Increment (M : X_int) = struct</userinput>
 <userinput moreinfo="none">    let x = M.x + 1</userinput>
 <userinput moreinfo="none">  end;;</userinput>
-<computeroutput moreinfo="none">module Increment : functor (M : X_int) -&gt; sig val x : int end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">module Increment : functor (M : X_int) -&gt; sig val x : int end</computeroutput></programlisting>
 
         <para>We can see that the inferred module type of the output is now
         written out explicitly, rather than being a reference to the named
@@ -114,8 +111,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Four = Increment(Three);;</userinput>
 <computeroutput moreinfo="none">module Four : sig val x : int end</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Four.x - Three.x;;</userinput>
-<computeroutput moreinfo="none">- : int = 1</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int = 1</computeroutput></programlisting>
 
         <para>In this case, we applied <literal moreinfo="none">Increment</literal> to a
         module whose signature is exactly equal to <literal moreinfo="none">X_int</literal>.
@@ -136,8 +132,7 @@
 <userinput moreinfo="none">  end;;</userinput>
 <computeroutput moreinfo="none">module Three_and_more : sig val x : int val y : string end</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Four = Increment(Three_and_more);;</userinput>
-<computeroutput moreinfo="none">module Four : sig val x : int end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">module Four : sig val x : int end</computeroutput></programlisting>
 
         <para>The rules for determining whether a module matches a given
         signature are similar in spirit to the rules in an object-oriented
@@ -174,8 +169,7 @@
 <userinput moreinfo="none">    type t</userinput>
 <userinput moreinfo="none">    val compare : t -&gt; t -&gt; int</userinput>
 <userinput moreinfo="none">  end ;;</userinput>
-<computeroutput moreinfo="none">module type Comparable = sig type t val compare : t -&gt; t -&gt; int end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">module type Comparable = sig type t val compare : t -&gt; t -&gt; int end</computeroutput></programlisting>
 
         <para>The comparison function follows the standard OCaml idiom for
         such functions, returning <literal moreinfo="none">0</literal> if the two elements are
@@ -250,8 +244,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
 <computeroutput moreinfo="none">      val is_empty : t -&gt; bool</computeroutput>
 <computeroutput moreinfo="none">      val contains : t -&gt; Endpoint.t -&gt; bool</computeroutput>
 <computeroutput moreinfo="none">      val intersect : t -&gt; t -&gt; t</computeroutput>
-<computeroutput moreinfo="none">    end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">    end</computeroutput></programlisting>
 
         <para>We can instantiate the functor by applying it to a module with
         the right signature. In the following, rather than name the module
@@ -273,8 +266,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
 <computeroutput moreinfo="none">    val is_empty : t -&gt; bool</computeroutput>
 <computeroutput moreinfo="none">    val contains : t -&gt; int -&gt; bool</computeroutput>
 <computeroutput moreinfo="none">    val intersect : t -&gt; t -&gt; t</computeroutput>
-<computeroutput moreinfo="none">  end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
         <para>If the input interface for your functor is aligned with the
         standards of the libraries you use, then you don't need to construct a
@@ -305,8 +297,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
 <computeroutput moreinfo="none">    val is_empty : t -&gt; bool</computeroutput>
 <computeroutput moreinfo="none">    val contains : t -&gt; string -&gt; bool</computeroutput>
 <computeroutput moreinfo="none">    val intersect : t -&gt; t -&gt; t</computeroutput>
-<computeroutput moreinfo="none">  end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
         <para>This works because many modules in Core, including
         <literal moreinfo="none">Int</literal> and <literal moreinfo="none">String</literal>, satisfy an
@@ -326,8 +317,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let i2 = Int_interval.create 4 10;;</userinput>
 <computeroutput moreinfo="none">val i2 : Int_interval.t = Int_interval.Interval (4, 10)</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Int_interval.intersect i1 i2;;</userinput>
-<computeroutput moreinfo="none">- : Int_interval.t = Int_interval.Interval (4, 8)</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : Int_interval.t = Int_interval.Interval (4, 8)</computeroutput></programlisting>
 
         <para>This design gives us the freedom to use any comparison function
         we want for comparing the endpoints. We could, for example, create a
@@ -349,8 +339,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
 <computeroutput moreinfo="none">    val is_empty : t -&gt; bool</computeroutput>
 <computeroutput moreinfo="none">    val contains : t -&gt; int -&gt; bool</computeroutput>
 <computeroutput moreinfo="none">    val intersect : t -&gt; t -&gt; t</computeroutput>
-<computeroutput moreinfo="none">  end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
         <para>The behavior of <literal moreinfo="none">Rev_int_interval</literal> is of course
         different from <literal moreinfo="none">Int_interval</literal>, as we can see
@@ -362,8 +351,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let interval = Int_interval.create 4 3;;</userinput>
 <computeroutput moreinfo="none">val interval : Int_interval.t = Int_interval.Empty</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rev_interval = Rev_int_interval.create 4 3;;</userinput>
-<computeroutput moreinfo="none">val rev_interval : Rev_int_interval.t = Rev_int_interval.Interval (4, 3)</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val rev_interval : Rev_int_interval.t = Rev_int_interval.Interval (4, 3)</computeroutput></programlisting>
 
         <para>Importantly, <literal moreinfo="none">Rev_int_interval.t</literal> is a
         different type than <literal moreinfo="none">Int_interval.t</literal>, even though its
@@ -376,8 +364,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Int_interval.contains rev_interval 3;;</userinput>
 <computeroutput moreinfo="none">Characters 22-34:</computeroutput>
 <computeroutput moreinfo="none">Error: This expression has type Rev_int_interval.t</computeroutput>
-<computeroutput moreinfo="none">       but an expression was expected of type Int_interval.t</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">       but an expression was expected of type Int_interval.t</computeroutput></programlisting>
 
         <para>This is important, because confusing the two kinds of intervals
         would be a semantic error, and it's an easy one to make. The ability
@@ -402,8 +389,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
 <computeroutput moreinfo="none">- : bool = true</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Int_interval.is_empty (* bypassing create *)</userinput>
 <userinput moreinfo="none">    (Int_interval.Interval (4,3)) ;;</userinput>
-<computeroutput moreinfo="none">- : bool = false</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : bool = false</computeroutput></programlisting>
 
           <para>To make <literal moreinfo="none">Int_interval.t</literal> abstract, we need to
           restrict the output of <literal moreinfo="none">Make_interval</literal> with an
@@ -429,8 +415,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
 <computeroutput moreinfo="none">    val is_empty : t -&gt; bool</computeroutput>
 <computeroutput moreinfo="none">    val contains : t -&gt; endpoint -&gt; bool</computeroutput>
 <computeroutput moreinfo="none">    val intersect : t -&gt; t -&gt; t</computeroutput>
-<computeroutput moreinfo="none">  end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
           <para>This interface includes the type <literal moreinfo="none">endpoint</literal>
           to give us a way of referring to the endpoint type. Given this
@@ -450,8 +435,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
     ...
 
   end ;;</userinput>
-<computeroutput moreinfo="none">  module Make_interval : functor (Endpoint : Comparable) -&gt; Interval_intf</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  module Make_interval : functor (Endpoint : Comparable) -&gt; Interval_intf</computeroutput></programlisting>
         </sect2>
 
         <sect2 id="sharing-constraints">
@@ -478,8 +462,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Int_interval.create 3 4;;</userinput>
 <computeroutput moreinfo="none">Characters 20-21:</computeroutput>
 <computeroutput moreinfo="none">Error: This expression has type int but an expression was expected of type</computeroutput>
-<computeroutput moreinfo="none">         Int_interval.endpoint</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">         Int_interval.endpoint</computeroutput></programlisting>
 
           <para>To fix this, we need to expose the fact that
           <literal moreinfo="none">endpoint</literal> is equal to <literal moreinfo="none">Int.t</literal> (or
@@ -493,8 +476,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
           <para role="sourcecode">Syntax:
           <filename moreinfo="none">functors/sharing_constraint.syntax</filename></para>
 
-          <programlisting language="" format="linespecific">&lt;Module_type&gt; with type &lt;type&gt; = &lt;type'&gt;
-</programlisting>
+          <programlisting language="" format="linespecific">&lt;Module_type&gt; with type &lt;type&gt; = &lt;type'&gt;</programlisting>
 
           <para>The result of this expression is a new signature that's been
           modified so that it exposes the fact that
@@ -506,8 +488,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
           <para role="sourcecode">Syntax:
           <filename moreinfo="none">functors/multi_sharing_constraint.syntax</filename></para>
 
-          <programlisting language="" format="linespecific">&lt;Module_type&gt; with type &lt;type1&gt; = &lt;type1'&gt; and &lt;type2&gt; = &lt;type2'&gt;
-</programlisting>
+          <programlisting language="" format="linespecific">&lt;Module_type&gt; with type &lt;type1&gt; = &lt;type1'&gt; and &lt;type2&gt; = &lt;type2'&gt;</programlisting>
 
           <para>We can use a sharing constraint to create a specialized
           version of <literal moreinfo="none">Interval_intf</literal> for integer
@@ -526,8 +507,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
 <computeroutput moreinfo="none">    val is_empty : t -&gt; bool</computeroutput>
 <computeroutput moreinfo="none">    val contains : t -&gt; endpoint -&gt; bool</computeroutput>
 <computeroutput moreinfo="none">    val intersect : t -&gt; t -&gt; t</computeroutput>
-<computeroutput moreinfo="none">  end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
           <para>We can also use sharing constraints in the context of a
           functor. The most common use case is where you want to expose that
@@ -563,8 +543,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
       val is_empty : t -&gt; bool
       val contains : t -&gt; endpoint -&gt; bool
       val intersect : t -&gt; t -&gt; t
-    end</computeroutput>
-</programlisting>
+    end</computeroutput></programlisting>
 
           <para>So now, the interface is as it was, except that
           <literal moreinfo="none">endpoint</literal> is now known to be equal to
@@ -588,8 +567,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let i = Int_interval.create 3 4;;</userinput>
 <computeroutput moreinfo="none">val i : Int_interval.t = &lt;abstr&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Int_interval.contains i 5;;</userinput>
-<computeroutput moreinfo="none">- : bool = false</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : bool = false</computeroutput></programlisting>
         </sect2>
 
         <sect2 id="destructive-substitution">
@@ -609,8 +587,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
           <para role="sourcecode">Syntax:
           <filename moreinfo="none">functors/destructive_sub.syntax</filename></para>
 
-          <programlisting language="" format="linespecific">&lt;Module_type&gt; with type &lt;type&gt; := &lt;type'&gt;
-</programlisting>
+          <programlisting language="" format="linespecific">&lt;Module_type&gt; with type &lt;type&gt; := &lt;type'&gt;</programlisting>
 
           <para>The following shows how we could use this with
           <literal moreinfo="none">Make_interval</literal>.</para>
@@ -627,8 +604,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
 <computeroutput moreinfo="none">    val is_empty : t -&gt; bool</computeroutput>
 <computeroutput moreinfo="none">    val contains : t -&gt; int -&gt; bool</computeroutput>
 <computeroutput moreinfo="none">    val intersect : t -&gt; t -&gt; t</computeroutput>
-<computeroutput moreinfo="none">  end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
           <para>There's now no <literal moreinfo="none">endpoint</literal> type: all of its
           occurrences of have been replaced by <literal moreinfo="none">int</literal>. As with
@@ -656,8 +632,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
       val is_empty : t -&gt; bool
       val contains : t -&gt; Endpoint.t -&gt; bool
       val intersect : t -&gt; t -&gt; t
-    end</computeroutput>
-</programlisting>
+    end</computeroutput></programlisting>
 
           <para>The interface is precisely what we want: the type
           <literal moreinfo="none">t</literal> is abstract, the type of the endpoint is
@@ -684,8 +659,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Int_interval.is_empty</userinput>
 <userinput moreinfo="none">    (Int_interval.Interval (4,3));;</userinput>
 <computeroutput moreinfo="none">Characters 40-48:</computeroutput>
-<computeroutput moreinfo="none">Error: Unbound constructor Int_interval.Interval</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Error: Unbound constructor Int_interval.Interval</computeroutput></programlisting>
 
           <para>In addition, the <literal moreinfo="none">endpoint</literal> type is gone from
           the interface, meaning we no longer need to define the
@@ -714,8 +688,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
           <filename moreinfo="none">functors/main.topscript</filename> (part 23)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Sexp.of_string "(This is (an s-expression))";;</userinput>
-<computeroutput moreinfo="none">- : Sexp.t = (This is (an s-expression))</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : Sexp.t = (This is (an s-expression))</computeroutput></programlisting>
 
           <para>Core comes with a syntax extension called Sexplib which can
           autogenerate s-expression conversion functions from a type
@@ -733,8 +706,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">sexp_of_some_type (33, ["one"; "two"]);;</userinput>
 <computeroutput moreinfo="none">- : Sexp.t = (33 (one two))</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Sexp.of_string "(44 (five six))" |&gt; some_type_of_sexp;;</userinput>
-<computeroutput moreinfo="none">- : int * string list = (44, ["five"; "six"])</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int * string list = (44, ["five"; "six"])</computeroutput></programlisting>
 
           <para>We'll discuss s-expressions and Sexplib in more detail in
           <xref linkend="data-serialization-with-s-expressions"/>, but for
@@ -756,8 +728,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
 
   end ;;</userinput>
 <computeroutput moreinfo="none">  Characters 136-146:
-    Error: Unbound value Endpoint.t_of_sexp</computeroutput>
-</programlisting>
+    Error: Unbound value Endpoint.t_of_sexp</computeroutput></programlisting>
 
           <para>The problem is that <literal moreinfo="none">with sexp</literal> adds code for
           defining the s-expression converters, and that code assumes that
@@ -806,8 +777,7 @@ end</programlisting>
 <computeroutput moreinfo="none">    val intersect : t -&gt; t -&gt; t</computeroutput>
 <computeroutput moreinfo="none">    val t_of_sexp : Sexp.t -&gt; t</computeroutput>
 <computeroutput moreinfo="none">    val sexp_of_t : t -&gt; Sexp.t</computeroutput>
-<computeroutput moreinfo="none">  end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
           <para>Equivalently, we can define a type <literal moreinfo="none">t</literal> within
           our new module, and apply destructive substitutions to all of the
@@ -834,8 +804,7 @@ end</programlisting>
 <computeroutput moreinfo="none">    val intersect : t -&gt; t -&gt; t</computeroutput>
 <computeroutput moreinfo="none">    val t_of_sexp : Sexp.t -&gt; t</computeroutput>
 <computeroutput moreinfo="none">    val sexp_of_t : t -&gt; Sexp.t</computeroutput>
-<computeroutput moreinfo="none">  end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
           <para>Now we can write the functor itself. We have been careful to
           override the sexp-converter here to ensure that the data structure's
@@ -909,8 +878,7 @@ end</programlisting>
 <computeroutput moreinfo="none">      val intersect : t -&gt; t -&gt; t</computeroutput>
 <computeroutput moreinfo="none">      val t_of_sexp : Sexp.t -&gt; t</computeroutput>
 <computeroutput moreinfo="none">      val sexp_of_t : t -&gt; Sexp.t</computeroutput>
-<computeroutput moreinfo="none">    end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">    end</computeroutput></programlisting>
 
           <para>And now, we can use that sexp-converter in the ordinary
           way:</para>
@@ -932,8 +900,7 @@ end</programlisting>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Int_interval.sexp_of_t (Int_interval.create 3 4);;</userinput>
 <computeroutput moreinfo="none">- : Sexp.t = (Interval 3 4)</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Int_interval.sexp_of_t (Int_interval.create 4 3);;</userinput>
-<computeroutput moreinfo="none">- : Sexp.t = Empty</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : Sexp.t = Empty</computeroutput></programlisting>
         </sect2>
       </sect1>
 

@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="classes">
       <title>Classes</title>
@@ -39,8 +39,7 @@
 <computeroutput moreinfo="none">    val mutable v : int list</computeroutput>
 <computeroutput moreinfo="none">    method pop : int option</computeroutput>
 <computeroutput moreinfo="none">    method push : int -&gt; unit</computeroutput>
-<computeroutput moreinfo="none">  end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
         <para>The <literal moreinfo="none">class istack : object ... end</literal> result
         shows that we have created a class <literal moreinfo="none">istack</literal> with
@@ -69,8 +68,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">s#push 5 ;;</userinput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">s#pop ;;</userinput>
-<computeroutput moreinfo="none">- : int option = Some 5</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int option = Some 5</computeroutput></programlisting>
 
         <para>You may have noticed that the object <literal moreinfo="none">s</literal> has
         been given the type <literal moreinfo="none">istack</literal>. But wait, we've
@@ -85,8 +83,7 @@
         <filename moreinfo="none">classes/istack.topscript</filename> (part 2)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type istack = &lt; pop: int option; push: int -&gt; unit &gt; ;;</userinput>
-<computeroutput moreinfo="none">type istack = &lt; pop : int option; push : int -&gt; unit &gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">type istack = &lt; pop : int option; push : int -&gt; unit &gt;</computeroutput></programlisting>
 
         <para>Note that this type represents any object with these methods:
         objects created using the <literal moreinfo="none">istack</literal> class will have
@@ -130,8 +127,7 @@
 <computeroutput moreinfo="none">    val mutable v : 'a list</computeroutput>
 <computeroutput moreinfo="none">    method pop : 'a option</computeroutput>
 <computeroutput moreinfo="none">    method push : 'a -&gt; unit</computeroutput>
-<computeroutput moreinfo="none">  end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
         <para>Note that the type parameter <literal moreinfo="none">['a]</literal> in the
         definition uses square brackets, but for other uses of the type they
@@ -169,8 +165,7 @@
 <computeroutput moreinfo="none">             method pop : 'b option</computeroutput>
 <computeroutput moreinfo="none">             method push : 'b -&gt; unit</computeroutput>
 <computeroutput moreinfo="none">           end</computeroutput>
-<computeroutput moreinfo="none">       The method pop has type 'b option where 'b is unbound</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">       The method pop has type 'b option where 'b is unbound</computeroutput></programlisting>
 
         <para>In general, we need to provide enough constraints so that the
         compiler will infer the correct type. We can add type constraints to
@@ -202,8 +197,7 @@ interface &lt;T&gt; iterator {
   T Get();
   boolean HasValue();
   void Next();
-};
-</programlisting>
+};</programlisting>
 
         <para>In languages without interfaces, like C++, the specification
         would normally use <emphasis>abstract</emphasis> classes to specify
@@ -221,8 +215,7 @@ class Iterator {
   virtual T get() const = 0;
   virtual bool has_value() const = 0;
   virtual void next() = 0;
-};
-</programlisting>
+};</programlisting>
 
         <para>OCaml supports both styles. In fact, OCaml is more flexible than
         these approaches because an object type can be implemented by any
@@ -238,8 +231,7 @@ class Iterator {
         <filename moreinfo="none">classes/iter.topscript</filename></para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type 'a iterator = &lt; get : 'a; has_value : bool; next : unit &gt; ;;</userinput>
-<computeroutput moreinfo="none">type 'a iterator = &lt; get : 'a; has_value : bool; next : unit &gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">type 'a iterator = &lt; get : 'a; has_value : bool; next : unit &gt;</computeroutput></programlisting>
 
         <para>Next, we'll define an actual iterator for lists. We can use this
         to iterate over the contents of our stack.</para>
@@ -269,8 +261,7 @@ class Iterator {
 <computeroutput moreinfo="none">    method get : 'a</computeroutput>
 <computeroutput moreinfo="none">    method has_value : bool</computeroutput>
 <computeroutput moreinfo="none">    method next : unit</computeroutput>
-<computeroutput moreinfo="none">  end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
         <para>Finally, we add a method <literal moreinfo="none">iterator</literal> to the
         <literal moreinfo="none">stack</literal> class to produce an iterator. To do so, we
@@ -303,8 +294,7 @@ class Iterator {
 <computeroutput moreinfo="none">    method iterator : 'a iterator</computeroutput>
 <computeroutput moreinfo="none">    method pop : 'a option</computeroutput>
 <computeroutput moreinfo="none">    method push : 'a -&gt; unit</computeroutput>
-<computeroutput moreinfo="none">  end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
         <para>Now we can build a new stack, push some values to it, and
         iterate over them.</para>
@@ -329,8 +319,7 @@ class Iterator {
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">it#next ;;</userinput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">it#has_value ;;</userinput>
-<computeroutput moreinfo="none">- : bool = false</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : bool = false</computeroutput></programlisting>
 
         <sect2 id="functional-iterators">
           <title>Functional iterators</title>
@@ -366,8 +355,7 @@ class Iterator {
 <computeroutput moreinfo="none">    method iter : ('a -&gt; unit) -&gt; unit</computeroutput>
 <computeroutput moreinfo="none">    method pop : 'a option</computeroutput>
 <computeroutput moreinfo="none">    method push : 'a -&gt; unit</computeroutput>
-<computeroutput moreinfo="none">  end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
           <para>What about functional operations like <literal moreinfo="none">map</literal>
           and <literal moreinfo="none">fold</literal>? In general, these methods take a
@@ -407,8 +395,7 @@ class Iterator {
 <computeroutput moreinfo="none">    method fold : ('b -&gt; 'a -&gt; 'b) -&gt; 'b -&gt; 'b</computeroutput>
 <computeroutput moreinfo="none">    method pop : 'a option</computeroutput>
 <computeroutput moreinfo="none">    method push : 'a -&gt; unit</computeroutput>
-<computeroutput moreinfo="none">  end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
           <para>The type quantifier <literal moreinfo="none">'b.</literal> can be read as "for
           all <literal moreinfo="none">'b</literal>". Type quantifiers can only be used
@@ -443,8 +430,7 @@ class Iterator {
 <computeroutput moreinfo="none">    method pop : string option</computeroutput>
 <computeroutput moreinfo="none">    method print : unit</computeroutput>
 <computeroutput moreinfo="none">    method push : string -&gt; unit</computeroutput>
-<computeroutput moreinfo="none">  end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
         <para>A class can override methods from classes it inherits. For
         example, this class creates stacks of integers that double the
@@ -465,8 +451,7 @@ class Iterator {
 <computeroutput moreinfo="none">    val mutable v : int list</computeroutput>
 <computeroutput moreinfo="none">    method pop : int option</computeroutput>
 <computeroutput moreinfo="none">    method push : int -&gt; unit</computeroutput>
-<computeroutput moreinfo="none">  end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
         <para>The <literal moreinfo="none">as super</literal> statement above creates a
         special object called <literal moreinfo="none">super</literal> which can be used to
@@ -786,8 +771,7 @@ end</programlisting>
 <computeroutput moreinfo="none">    method area : float</computeroutput>
 <computeroutput moreinfo="none">    method equals : 'a -&gt; bool</computeroutput>
 <computeroutput moreinfo="none">    method radius : int</computeroutput>
-<computeroutput moreinfo="none">  end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
         <para>Note how we can use the type annotation <literal moreinfo="none">(self:
         'self)</literal> to obtain the type of the current object.</para>
@@ -801,8 +785,7 @@ end</programlisting>
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">(new square 5)#equals (new square 5) ;;</userinput>
 <computeroutput moreinfo="none">- : bool = true</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">(new circle 10)#equals (new circle 7) ;;</userinput>
-<computeroutput moreinfo="none">- : bool = false</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : bool = false</computeroutput></programlisting>
 
         <para>This works, but there is a problem lurking here. The method
         <literal moreinfo="none">equals</literal> takes an object of the exact type
@@ -821,8 +804,7 @@ end</programlisting>
 <computeroutput moreinfo="none">       is not a subtype of shape = &lt; area : float; equals : shape -&gt; bool &gt; </computeroutput>
 <computeroutput moreinfo="none">       Type shape = &lt; area : float; equals : shape -&gt; bool &gt;</computeroutput>
 <computeroutput moreinfo="none">       is not a subtype of</computeroutput>
-<computeroutput moreinfo="none">         square = &lt; area : float; equals : square -&gt; bool; width : int &gt; </computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">         square = &lt; area : float; equals : square -&gt; bool; width : int &gt; </computeroutput></programlisting>
 
         <para>The problem is that a <literal moreinfo="none">square</literal> expects to be
         compared with a <literal moreinfo="none">square</literal>, not an arbitrary shape;
@@ -841,8 +823,7 @@ end</programlisting>
         <filename moreinfo="none">classes/binary.topscript</filename> (part 3)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">(object method area = 5 end) = (object method area = 5 end) ;;</userinput>
-<computeroutput moreinfo="none">- : bool = false</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : bool = false</computeroutput></programlisting>
 
         <para>The problem here is that two objects are considered equal by the
         built-in polymorphic equality if and only if they are physically
@@ -878,8 +859,7 @@ end</programlisting>
 <computeroutput moreinfo="none">    method equals : shape -&gt; bool</computeroutput>
 <computeroutput moreinfo="none">    method repr : shape_repr</computeroutput>
 <computeroutput moreinfo="none">    method width : int</computeroutput>
-<computeroutput moreinfo="none">  end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
         <para>The binary method <literal moreinfo="none">equals</literal> is now implemented
         in terms of the concrete type <literal moreinfo="none">shape_repr</literal>. When
@@ -1140,8 +1120,7 @@ end</programlisting>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let o = new obj 3 ;;</userinput>
 <computeroutput moreinfo="none">Creating obj 3</computeroutput>
 <computeroutput moreinfo="none">Initializing field</computeroutput>
-<computeroutput moreinfo="none">val o : obj = &lt;obj&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val o : obj = &lt;obj&gt;</computeroutput></programlisting>
 
         <para>However, these expressions are executed before the object has
         been created, and cannot refer to the methods of the object. If you

@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="variants">
       <title>Variants</title>
@@ -19,8 +19,7 @@
       <programlisting language="" format="linespecific">type &lt;variant&gt; =
   | &lt;Tag&gt; [ of &lt;type&gt; [* &lt;type&gt;]... ]
   | &lt;Tag&gt; [ of &lt;type&gt; [* &lt;type&gt;]... ]
-  | ...
-</programlisting>
+  | ...</programlisting>
 
       <para>Each row essentially represents a case of the variant. Each case
       has an assocaited tag, and may optionally have a sequence of fields,
@@ -50,8 +49,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Cyan ;;</userinput>
 <computeroutput moreinfo="none">- : basic_color = Cyan</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">[Blue; Magenta; Red] ;;</userinput>
-<computeroutput moreinfo="none">- : basic_color list = [Blue; Magenta; Red]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : basic_color list = [Blue; Magenta; Red]</computeroutput></programlisting>
 
       <para>The following function uses pattern matching to convert a
       <literal moreinfo="none">basic_color</literal> to a corresponding integer. The
@@ -66,8 +64,7 @@
 <userinput moreinfo="none">  | Blue  -&gt; 4 | Magenta -&gt; 5 | Cyan  -&gt; 6 | White  -&gt; 7 ;;</userinput>
 <computeroutput moreinfo="none">val basic_color_to_int : basic_color -&gt; int = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.map ~f:basic_color_to_int [Blue;Red];;</userinput>
-<computeroutput moreinfo="none">- : int list = [4; 1]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int list = [4; 1]</computeroutput></programlisting>
 
       <para>Using the above, we can generate escape codes to change the color
       of a given string displayed in a terminal.</para>
@@ -81,8 +78,7 @@
 <userinput moreinfo="none"># let blue = color_by_number (basic_color_to_int Blue) "Blue";;</userinput>
 <computeroutput moreinfo="none">val blue : string = "\027[38;5;4mBlue\027[0m"</computeroutput>
 <userinput moreinfo="none"># printf "Hello %s World!\n" blue;;</userinput>
-<computeroutput moreinfo="none">Hello Blue World!</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Hello Blue World!</computeroutput></programlisting>
 
       <para>On most terminals, that word "Blue" will be rendered in
       blue.</para>
@@ -131,8 +127,7 @@
 <computeroutput moreinfo="none">  | RGB of int * int * int</computeroutput>
 <computeroutput moreinfo="none">  | Gray of int</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">[RGB (250,70,70); Basic (Green, Regular)];;</userinput>
-<computeroutput moreinfo="none">- : color list = [RGB (250, 70, 70); Basic (Green, Regular)]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : color list = [RGB (250, 70, 70); Basic (Green, Regular)]</computeroutput></programlisting>
 
       <para>Once again, we'll use pattern matching to convert a color to a
       corresponding integer. But in this case, the pattern matching does more
@@ -148,8 +143,7 @@
 <userinput moreinfo="none">      base + basic_color_to_int basic_color</userinput>
 <userinput moreinfo="none">    | RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36</userinput>
 <userinput moreinfo="none">    | Gray i -&gt; 232 + i ;;</userinput>
-<computeroutput moreinfo="none">val color_to_int : color -&gt; int = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val color_to_int : color -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
       <para>Now, we can print text using the full set of available
       colors.</para>
@@ -163,8 +157,7 @@
 <userinput moreinfo="none"># color_print (Basic (Red,Bold)) "A bold red!";;</userinput>
 <computeroutput moreinfo="none">A bold red!</computeroutput>
 <userinput moreinfo="none"># color_print (Gray 4) "A muted gray...";;</userinput>
-<computeroutput moreinfo="none">A muted gray...</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">A muted gray...</computeroutput></programlisting>
 
       <sect1 id="catch-all-cases-and-refactoring">
         <title>Catch-all cases and refactoring</title>
@@ -190,8 +183,7 @@
 <computeroutput moreinfo="none">    Basic of basic_color</computeroutput>
 <computeroutput moreinfo="none">  | Bold of basic_color</computeroutput>
 <computeroutput moreinfo="none">  | RGB of int * int * int</computeroutput>
-<computeroutput moreinfo="none">  | Gray of int</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  | Gray of int</computeroutput></programlisting>
 
         <para>We've essentially broken out the <literal moreinfo="none">Basic</literal> case
         into two cases, <literal moreinfo="none">Basic</literal> and <literal moreinfo="none">Bold</literal>,
@@ -211,8 +203,7 @@
 <userinput moreinfo="none">    | Gray i -&gt; 232 + i ;;</userinput>
 <computeroutput moreinfo="none">Characters 34-60:</computeroutput>
 <computeroutput moreinfo="none">Error: This pattern matches values of type 'a * 'b</computeroutput>
-<computeroutput moreinfo="none">       but a pattern was expected which matches values of type basic_color</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">       but a pattern was expected which matches values of type basic_color</computeroutput></programlisting>
 
         <para>Here, the compiler is complaining that the
         <literal moreinfo="none">Basic</literal> tag is used with the wrong number of
@@ -231,8 +222,7 @@
 <computeroutput moreinfo="none">Warning 8: this pattern-matching is not exhaustive.</computeroutput>
 <computeroutput moreinfo="none">Here is an example of a value that is not matched:</computeroutput>
 <computeroutput moreinfo="none">Bold _</computeroutput>
-<computeroutput moreinfo="none">val color_to_int : color -&gt; int = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val color_to_int : color -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>Fixing this now leads us to the correct implementation.</para>
 
@@ -244,8 +234,7 @@
 <userinput moreinfo="none">    | Bold  basic_color -&gt; 8 + basic_color_to_int basic_color</userinput>
 <userinput moreinfo="none">    | RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36</userinput>
 <userinput moreinfo="none">    | Gray i -&gt; 232 + i ;;</userinput>
-<computeroutput moreinfo="none">val color_to_int : color -&gt; int = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val color_to_int : color -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>As we've seen, the type errors identified the things that needed
         to be fixed to complete the refactoring of the code. This is
@@ -271,8 +260,7 @@
 <userinput moreinfo="none">    | _ -&gt; basic_color_to_int White;;</userinput>
 <computeroutput moreinfo="none">Characters 44-70:</computeroutput>
 <computeroutput moreinfo="none">Error: This pattern matches values of type 'a * 'b</computeroutput>
-<computeroutput moreinfo="none">       but a pattern was expected which matches values of type basic_color</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">       but a pattern was expected which matches values of type basic_color</computeroutput></programlisting>
 
         <para>But because the catch-all case encompasses all possibilities,
         the type system will no longer warn us that we have missed the new
@@ -321,8 +309,7 @@
 <computeroutput moreinfo="none">      important : bool;</computeroutput>
 <computeroutput moreinfo="none">      message : string;</computeroutput>
 <computeroutput moreinfo="none">    }</computeroutput>
-<computeroutput moreinfo="none">  end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
         <para>This record type combines multiple pieces of data into one
         value. In particular, a single <literal moreinfo="none">Log_entry.t</literal> has a
@@ -344,8 +331,7 @@
 <computeroutput moreinfo="none">type client_message =</computeroutput>
 <computeroutput moreinfo="none">    Logon of Logon.t</computeroutput>
 <computeroutput moreinfo="none">  | Heartbeat of Heartbeat.t</computeroutput>
-<computeroutput moreinfo="none">  | Log_entry of Log_entry.t</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  | Log_entry of Log_entry.t</computeroutput></programlisting>
 
         <para>A <literal moreinfo="none">client_message</literal> is a
         <literal moreinfo="none">Logon</literal> <emphasis>or</emphasis> a
@@ -404,8 +390,7 @@
 <userinput moreinfo="none">    List.rev user_messages</userinput>
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val messages_for_user : string -&gt; client_message list -&gt; client_message list =</computeroutput>
-<computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput></programlisting>
 
         <para>There's one awkward part of the above code, which is the logic
         that determines the session id. The code is somewhat repetitive,
@@ -438,8 +423,7 @@
 <userinput moreinfo="none">  end ;;</userinput>
 <computeroutput moreinfo="none">module Log_entry : sig type t = { important : bool; message : string; } end</computeroutput>
 <computeroutput moreinfo="none">module Heartbeat : sig type t = { status_message : string; } end</computeroutput>
-<computeroutput moreinfo="none">module Logon : sig type t = { user : string; credentials : string; } end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">module Logon : sig type t = { user : string; credentials : string; } end</computeroutput></programlisting>
 
         <para>We can then define a variant type that combines these
         types.</para>
@@ -455,8 +439,7 @@
 <computeroutput moreinfo="none">type details =</computeroutput>
 <computeroutput moreinfo="none">    Logon of Logon.t</computeroutput>
 <computeroutput moreinfo="none">  | Heartbeat of Heartbeat.t</computeroutput>
-<computeroutput moreinfo="none">  | Log_entry of Log_entry.t</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  | Log_entry of Log_entry.t</computeroutput></programlisting>
 
         <para>Separately, we need a record that contains the fields that are
         common across all messages.</para>
@@ -469,8 +452,7 @@
 <userinput moreinfo="none">               time: Time.t;</userinput>
 <userinput moreinfo="none">             }</userinput>
 <userinput moreinfo="none">  end ;;</userinput>
-<computeroutput moreinfo="none">module Common : sig type t = { session_id : string; time : Time.t; } end</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">module Common : sig type t = { session_id : string; time : Time.t; } end</computeroutput></programlisting>
 
         <para>A full message can then be represented as a pair of a
         <literal moreinfo="none">Common.t</literal> and a <literal moreinfo="none">details</literal>. Using
@@ -498,8 +480,7 @@
 <userinput moreinfo="none">    List.rev user_messages</userinput>
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val messages_for_user :</computeroutput>
-<computeroutput moreinfo="none">  string -&gt; (Common.t * details) list -&gt; (Common.t * details) list = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  string -&gt; (Common.t * details) list -&gt; (Common.t * details) list = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>As you can see, the code for extracting the session id has been
         replaced with the simple expression
@@ -523,8 +504,7 @@
 <userinput moreinfo="none">    | Heartbeat m -&gt; handle_heartbeat server_state (common,m)</userinput>
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">Characters 95-111:</computeroutput>
-<computeroutput moreinfo="none">Error: Unbound value handle_log_entry</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Error: Unbound value handle_log_entry</computeroutput></programlisting>
 
         <para>And it's explicit at the type level that
         <literal moreinfo="none">handle_log_entry</literal> sees only
@@ -560,8 +540,7 @@
 <computeroutput moreinfo="none">  | Const of bool</computeroutput>
 <computeroutput moreinfo="none">  | And of 'a expr list</computeroutput>
 <computeroutput moreinfo="none">  | Or of 'a expr list</computeroutput>
-<computeroutput moreinfo="none">  | Not of 'a expr</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  | Not of 'a expr</computeroutput></programlisting>
 
         <para>Note that the definition of the type <literal moreinfo="none">expr</literal> is
         recursive, meaning that a <literal moreinfo="none">expr</literal> may contain other
@@ -591,8 +570,7 @@
 <userinput moreinfo="none">                          contains: string }</userinput>
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">type mail_field = To | From | CC | Date | Subject</computeroutput>
-<computeroutput moreinfo="none">type mail_predicate = { field : mail_field; contains : string; }</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">type mail_predicate = { field : mail_field; contains : string; }</computeroutput></programlisting>
 
         <para>Using the above, we can construct a simple expression with
         <literal moreinfo="none">mail_predicate</literal> as its base predicate.</para>
@@ -611,8 +589,7 @@
 <computeroutput moreinfo="none"> [Or</computeroutput>
 <computeroutput moreinfo="none">   [Base {field = To; contains = "doligez"};</computeroutput>
 <computeroutput moreinfo="none">    Base {field = CC; contains = "doligez"}];</computeroutput>
-<computeroutput moreinfo="none">  Base {field = Subject; contains = "runtime"}]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  Base {field = Subject; contains = "runtime"}]</computeroutput></programlisting>
 
         <para>Being able to construct such expressions isn't enough; we also
         need to be able to evaluate them. Here's a function for doing just
@@ -632,8 +609,7 @@
 <userinput moreinfo="none">    | Or    exprs -&gt; List.exists  exprs ~f:eval'</userinput>
 <userinput moreinfo="none">    | Not   expr  -&gt; not (eval' expr)</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val eval : 'a expr -&gt; ('a -&gt; bool) -&gt; bool = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val eval : 'a expr -&gt; ('a -&gt; bool) -&gt; bool = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>The structure of the code is pretty straightforward—we're just
         pattern matching over the structure of the data, doing the appropriate
@@ -671,8 +647,7 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val and_ : 'a expr list -&gt; 'a expr = &lt;fun&gt;</computeroutput>
 <computeroutput moreinfo="none">val or_ : 'a expr list -&gt; 'a expr = &lt;fun&gt;</computeroutput>
-<computeroutput moreinfo="none">val not_ : 'a expr -&gt; 'a expr = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val not_ : 'a expr -&gt; 'a expr = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>We can now write a simplification routine that is based on the
         above functions.</para>
@@ -686,8 +661,7 @@
 <userinput moreinfo="none">    | Or l  -&gt; or_  (List.map ~f:simplify l)</userinput>
 <userinput moreinfo="none">    | Not e -&gt; not_ (simplify e)</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val simplify : 'a expr -&gt; 'a expr = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val simplify : 'a expr -&gt; 'a expr = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>We can apply this to a boolean expression and see how good of a
         job it does at simplifying it.</para>
@@ -697,8 +671,7 @@
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">simplify (Not (And [ Or [Base "it's snowing"; Const true];</userinput>
 <userinput moreinfo="none">                       Base "it's raining"]));;</userinput>
-<computeroutput moreinfo="none">- : string expr = Not (Base "it's raining")</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string expr = Not (Base "it's raining")</computeroutput></programlisting>
 
         <para>Here, it correctly converted the <literal moreinfo="none">Or</literal> branch to
         <literal moreinfo="none">Const true</literal>, and then eliminated the
@@ -713,8 +686,7 @@
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">simplify (Not (And [ Or [Base "it's snowing"; Const true];</userinput>
 <userinput moreinfo="none">                       Not (Not (Base "it's raining"))]));;</userinput>
-<computeroutput moreinfo="none">- : string expr = Not (Not (Not (Base "it's raining")))</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string expr = Not (Not (Not (Base "it's raining")))</computeroutput></programlisting>
 
         <para>It fails to remove the double negation, and it's easy to see
         why. The <literal moreinfo="none">not_</literal> function has a catch-all case, so it
@@ -730,8 +702,7 @@
 <userinput moreinfo="none">    | Const b -&gt; Const (not b)</userinput>
 <userinput moreinfo="none">    | (Base _ | And _ | Or _ | Not _) as e -&gt; Not e</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val not_ : 'a expr -&gt; 'a expr = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val not_ : 'a expr -&gt; 'a expr = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>We can of course fix this by handling simply adding an explicit
         case for double-negation.</para>
@@ -744,8 +715,7 @@
 <userinput moreinfo="none">    | Not e -&gt; e</userinput>
 <userinput moreinfo="none">    | (Base _ | And _ | Or _ ) as e -&gt; Not e</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val not_ : 'a expr -&gt; 'a expr = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val not_ : 'a expr -&gt; 'a expr = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>The example of a boolean expression language is more than a toy.
         There's a module very much in this spirit in Core called
@@ -785,8 +755,7 @@
 <computeroutput moreinfo="none">val nan : [&gt; `Not_a_number ] = `Not_a_number</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">[three; four; nan];;</userinput>
 <computeroutput moreinfo="none">- : [&gt; `Float of float | `Int of int | `Not_a_number ] list =</computeroutput>
-<computeroutput moreinfo="none">[`Int 3; `Float 4.; `Not_a_number]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">[`Int 3; `Float 4.; `Not_a_number]</computeroutput></programlisting>
 
         <para>As you can see, polymorphic variant types are inferred
         automatically, and when we combine variants with different tags, the
@@ -808,8 +777,7 @@
 <computeroutput moreinfo="none">Error: This expression has type [&gt; `Int of string ]</computeroutput>
 <computeroutput moreinfo="none">       but an expression was expected of type</computeroutput>
 <computeroutput moreinfo="none">         [&gt; `Float of float | `Int of int ]</computeroutput>
-<computeroutput moreinfo="none">       Types for tag `Int are incompatible</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">       Types for tag `Int are incompatible</computeroutput></programlisting>
 
         <para>The <literal moreinfo="none">&gt;</literal> at the beginning of the variant
         types above is critical, because it marks the types as being open to
@@ -831,8 +799,7 @@
 <userinput moreinfo="none">     | `Int   x -&gt; x &gt; 0</userinput>
 <userinput moreinfo="none">     | `Float x -&gt; x &gt; 0.</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val is_positive : [&lt; `Float of float | `Int of int ] -&gt; bool = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val is_positive : [&lt; `Float of float | `Int of int ] -&gt; bool = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>The <literal moreinfo="none">&lt;</literal> is there because
         <literal moreinfo="none">is_positive</literal> has no way of dealing with values that
@@ -850,8 +817,7 @@
         <filename moreinfo="none">variants/main.topscript</filename> (part 9)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let exact = List.filter ~f:is_positive [three;four];;</userinput>
-<computeroutput moreinfo="none">val exact : [ `Float of float | `Int of int ] list = [`Int 3; `Float 4.]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val exact : [ `Float of float | `Int of int ] list = [`Int 3; `Float 4.]</computeroutput></programlisting>
 
         <para>Perhaps surprisingly, we can also create polymorphic variant
         types that have different upper and lower bounds. Note that
@@ -872,8 +838,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.filter [three; four] ~f:(fun x -&gt;</userinput>
 <userinput moreinfo="none">     match is_positive x with Error _ -&gt; false | Ok b -&gt; b);;</userinput>
 <computeroutput moreinfo="none">- : [&lt; `Float of float | `Int of int | `Not_a_number &gt; `Float `Int ] list =</computeroutput>
-<computeroutput moreinfo="none">[`Int 3; `Float 4.]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">[`Int 3; `Float 4.]</computeroutput></programlisting>
 
         <para>Here, the inferred type states that the tags can be no more than
         <literal moreinfo="none">`Float</literal>, <literal moreinfo="none">`Int</literal> and
@@ -904,8 +869,7 @@
 <computeroutput moreinfo="none">    Basic of basic_color * weight</computeroutput>
 <computeroutput moreinfo="none">  | RGB of int * int * int</computeroutput>
 <computeroutput moreinfo="none">  | Gray of int</computeroutput>
-<computeroutput moreinfo="none">  | RGBA of int * int * int * int</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  | RGBA of int * int * int * int</computeroutput></programlisting>
 
           <para>We want to write a function
           <literal moreinfo="none">extended_color_to_int</literal>, that works like
@@ -922,8 +886,7 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">Characters 154-159:</computeroutput>
 <computeroutput moreinfo="none">Error: This expression has type extended_color</computeroutput>
-<computeroutput moreinfo="none">       but an expression was expected of type color</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">       but an expression was expected of type color</computeroutput></programlisting>
 
           <para>The code looks reasonable enough, but it leads to a type error
           because <literal moreinfo="none">extended_color</literal> and
@@ -968,8 +931,7 @@
 <computeroutput moreinfo="none">       [&lt; `Bold | `Regular ]</computeroutput>
 <computeroutput moreinfo="none">   | `Gray of int</computeroutput>
 <computeroutput moreinfo="none">   | `RGB of int * int * int ] -&gt;</computeroutput>
-<computeroutput moreinfo="none">  int = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  int = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>Now we can try writing
           <literal moreinfo="none">extended_color_to_int</literal>. The key issue with this
@@ -1003,8 +965,7 @@
 <computeroutput moreinfo="none">   | `Gray of int</computeroutput>
 <computeroutput moreinfo="none">   | `RGB of int * int * int</computeroutput>
 <computeroutput moreinfo="none">   | `RGBA of int * int * int * int ] -&gt;</computeroutput>
-<computeroutput moreinfo="none">  int = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  int = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>The above code is more delicately balanced than one might
           imagine. In particular, if we use a catch-all case instead of an
@@ -1033,8 +994,7 @@
 <computeroutput moreinfo="none">              [&lt; `Bold | `Regular ]</computeroutput>
 <computeroutput moreinfo="none">          | `Gray of int</computeroutput>
 <computeroutput moreinfo="none">          | `RGB of int * int * int ]</computeroutput>
-<computeroutput moreinfo="none">       The second variant type does not allow tag(s) `RGBA</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">       The second variant type does not allow tag(s) `RGBA</computeroutput></programlisting>
 
           <note>
             <title>Polymorphic variants and catch-all cases</title>
@@ -1059,8 +1019,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">is_positive_permissive (`Int 0);;</userinput>
 <computeroutput moreinfo="none">- : (bool, string) Result.t = Ok false</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">is_positive_permissive (`Ratio (3,4));;</userinput>
-<computeroutput moreinfo="none">- : (bool, string) Result.t = Error "Unknown number type"</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : (bool, string) Result.t = Error "Unknown number type"</computeroutput></programlisting>
 
             <para>Catch-all cases are error-prone even with ordinary variants,
             but they are especially so with polymorphic variants. That's
@@ -1075,8 +1034,7 @@
             <filename moreinfo="none">variants/main.topscript</filename> (part 17)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">is_positive_permissive (`Floot 3.5);;</userinput>
-<computeroutput moreinfo="none">- : (bool, string) Result.t = Error "Unknown number type"</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : (bool, string) Result.t = Error "Unknown number type"</computeroutput></programlisting>
 
             <para>With ordinary variants, such a typo would have been caught
             as an unknown tag. As a general matter, one should be wary about
@@ -1186,8 +1144,7 @@ let extended_color_to_int = function
 <computeroutput moreinfo="none">Error: This pattern matches values of type [? `Grey of 'a ]</computeroutput>
 <computeroutput moreinfo="none">       but a pattern was expected which matches values of type extended_color</computeroutput>
 <computeroutput moreinfo="none">       The second variant type does not allow tag(s) `Grey</computeroutput>
-<computeroutput moreinfo="none">Command exited with code 2.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Command exited with code 2.</computeroutput></programlisting>
 
           <para>Once we have type definitions at our disposal, we can revisit
           the question of how we write the pattern match that narrows the

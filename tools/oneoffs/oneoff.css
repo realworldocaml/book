@@ -1,0 +1,12 @@
+@charset "UTF-8";
+
+@import "DYNAMIC CSS PLACEHOLDER";
+
+p.sourcecode {
+  text-align: right;
+  display: block;
+  hyphens: none;
+  margin-bottom: -2pt;
+  font-size: 9.3pt;
+  font-style: italic;
+}

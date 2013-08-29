@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="error-handling">
       <title>Error Handling</title>
@@ -29,8 +29,7 @@
         <filename moreinfo="none">error-handling/main.topscript</filename></para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.find;;</userinput>
-<computeroutput moreinfo="none">- : 'a list -&gt; f:('a -&gt; bool) -&gt; 'a option = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : 'a list -&gt; f:('a -&gt; bool) -&gt; 'a option = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>The option in the return type indicates that the function may
         not succeed in finding a suitable element, as you can see
@@ -42,8 +41,7 @@
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.find [1;2;3] ~f:(fun x -&gt; x &gt;= 2) ;;</userinput>
 <computeroutput moreinfo="none">- : int option = Some 2</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.find [1;2;3] ~f:(fun x -&gt; x &gt;= 10) ;;</userinput>
-<computeroutput moreinfo="none">- : int option = None</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int option = None</computeroutput></programlisting>
 
         <para>Including errors in the return values of your functions requires
         the caller to handle the error explicitly, allowing the caller to make
@@ -68,8 +66,7 @@
 <userinput moreinfo="none">    | Some x, Some y -&gt; Some (x,y)</userinput>
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val compute_bounds : cmp:('a -&gt; 'a -&gt; int) -&gt; 'a list -&gt; ('a * 'a) option =</computeroutput>
-<computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput></programlisting>
 
         <para>The match statement is used to handle the error cases,
         propagating a <literal moreinfo="none">None</literal> in <literal moreinfo="none">hd</literal> or
@@ -94,8 +91,7 @@
 <userinput moreinfo="none">     )</userinput>
 <userinput moreinfo="none"> ;;</userinput>
 <computeroutput moreinfo="none">val find_mismatches : ('a, 'b) Hashtbl.t -&gt; ('a, 'b) Hashtbl.t -&gt; 'a list =</computeroutput>
-<computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput></programlisting>
 
         <para>The use of options to encode errors underlines the fact that
         it's not clear whether a particular outcome, like not finding
@@ -135,8 +131,7 @@ end</programlisting>
           <filename moreinfo="none">error-handling/main.topscript</filename> (part 4)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">[ Ok 3; Error "abject failure"; Ok 4 ];;</userinput>
-<computeroutput moreinfo="none">- : (int, string) Result.t list = [Ok 3; Error "abject failure"; Ok 4]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : (int, string) Result.t list = [Ok 3; Error "abject failure"; Ok 4]</computeroutput></programlisting>
 
           <para>without first opening the <literal moreinfo="none">Result</literal>
           module.</para>
@@ -177,8 +172,7 @@ end</programlisting>
           <filename moreinfo="none">error-handling/main.topscript</filename> (part 5)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Error.of_string "something went wrong";;</userinput>
-<computeroutput moreinfo="none">- : Error.t = something went wrong</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : Error.t = something went wrong</computeroutput></programlisting>
 
           <para>But you can also construct an <literal moreinfo="none">Error.t</literal> from
           a <emphasis>thunk</emphasis>, <emphasis>i.e.</emphasis>, a function
@@ -189,8 +183,7 @@ end</programlisting>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Error.of_thunk (fun () -&gt;</userinput>
 <userinput moreinfo="none">    sprintf "something went wrong: %f" 32.3343);;</userinput>
-<computeroutput moreinfo="none">- : Error.t = something went wrong: 32.334300</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : Error.t = something went wrong: 32.334300</computeroutput></programlisting>
 
           <para>In this case, we can benefit from the laziness of
           <literal moreinfo="none">Error</literal>, since the thunk won't be called unless the
@@ -204,8 +197,7 @@ end</programlisting>
           <para role="sourcecode">Scheme:
           <filename moreinfo="none">error-handling/sexpr.scm</filename></para>
 
-          <programlisting language="scheme" format="linespecific">(This (is an) (s expression))
-</programlisting>
+          <programlisting language="scheme" format="linespecific">(This (is an) (s expression))</programlisting>
 
           <para>S-expressions are supported by the Sexplib package that is
           distributed with Core, and is the most common serialization format
@@ -219,8 +211,7 @@ end</programlisting>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Error.create "Something failed a long time ago" Time.epoch Time.sexp_of_t;;</userinput>
 <computeroutput moreinfo="none">- : Error.t =</computeroutput>
-<computeroutput moreinfo="none">Something failed a long time ago: (1970-01-01 01:00:00.000000+01:00)</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Something failed a long time ago: (1970-01-01 01:00:00.000000+01:00)</computeroutput></programlisting>
 
           <para>Note that the time isn't actually serialized into an
           s-expression until the error is printed out.</para>
@@ -236,8 +227,7 @@ end</programlisting>
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let custom_to_sexp = &lt;:sexp_of&lt;float * string list * int&gt;&gt;;;</userinput>
 <computeroutput moreinfo="none">val custom_to_sexp : float * string list * int -&gt; Sexp.t = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">custom_to_sexp (3.5, ["a";"b";"c"], 6034);;</userinput>
-<computeroutput moreinfo="none">- : Sexp.t = (3.5 (a b c) 6034)</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : Sexp.t = (3.5 (a b c) 6034)</computeroutput></programlisting>
 
           <para>We can use this same idiom for generating an error.</para>
 
@@ -247,8 +237,7 @@ end</programlisting>
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Error.create "Something went terribly wrong"</userinput>
 <userinput moreinfo="none">    (3.5, ["a";"b";"c"], 6034)</userinput>
 <userinput moreinfo="none">    &lt;:sexp_of&lt;float * string list * int&gt;&gt; ;;</userinput>
-<computeroutput moreinfo="none">- : Error.t = Something went terribly wrong: (3.5(a b c)6034)</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : Error.t = Something went terribly wrong: (3.5(a b c)6034)</computeroutput></programlisting>
 
           <para><literal moreinfo="none">Error</literal> also supports operations for
           transforming errors. For example, it's often useful to augment an
@@ -266,8 +255,7 @@ end</programlisting>
 <userinput moreinfo="none">    "over the weekend"</userinput>
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">- : Error.t =</computeroutput>
-<computeroutput moreinfo="none">over the weekend: Your tires were slashed; Your windshield was smashed</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">over the weekend: Your tires were slashed; Your windshield was smashed</computeroutput></programlisting>
 
           <para>The type <literal moreinfo="none">'a Or_error.t</literal> is just a shorthand
           for <literal moreinfo="none">('a,Error.t) Result.t</literal>, and it is, after
@@ -296,8 +284,7 @@ end</programlisting>
 <userinput moreinfo="none">    | None -&gt; None</userinput>
 <userinput moreinfo="none">    | Some x -&gt; f x</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val bind : 'a option -&gt; ('a -&gt; 'b option) -&gt; 'b option = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val bind : 'a option -&gt; ('a -&gt; 'b option) -&gt; 'b option = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>As you can see, <literal moreinfo="none">bind None f</literal> returns
           <literal moreinfo="none">None</literal> without calling <literal moreinfo="none">f</literal>, and
@@ -318,8 +305,7 @@ end</programlisting>
 <userinput moreinfo="none">        Some (first,last)))</userinput>
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val compute_bounds : cmp:('a -&gt; 'a -&gt; int) -&gt; 'a list -&gt; ('a * 'a) option =</computeroutput>
-<computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput></programlisting>
 
           <para>The above code is a little bit hard to swallow, however, on a
           syntactic level. We can make it easier to read, and drop some of the
@@ -340,8 +326,7 @@ end</programlisting>
 <userinput moreinfo="none">    Some (first,last)</userinput>
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val compute_bounds : cmp:('a -&gt; 'a -&gt; int) -&gt; 'a list -&gt; ('a * 'a) option =</computeroutput>
-<computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput></programlisting>
 
           <para>This use of <literal moreinfo="none">bind</literal> isn't really materially
           better than the one we started with, and indeed, for small examples
@@ -366,8 +351,7 @@ end</programlisting>
 <userinput moreinfo="none">    Option.both (List.hd sorted) (List.last sorted)</userinput>
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val compute_bounds : cmp:('a -&gt; 'a -&gt; int) -&gt; 'a list -&gt; ('a * 'a) option =</computeroutput>
-<computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput></programlisting>
 
           <para>These error-handling functions are valuable because they let
           you express your error handling both explicitly and concisely. We've
@@ -394,8 +378,7 @@ end</programlisting>
         <filename moreinfo="none">error-handling/main.topscript</filename> (part 15)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">3 / 0;;</userinput>
-<computeroutput moreinfo="none">Exception: Division_by_zero.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Exception: Division_by_zero.</computeroutput></programlisting>
 
         <para>And an exception can terminate a computation even if it happens
         nested somewhere deep within it.</para>
@@ -404,8 +387,7 @@ end</programlisting>
         <filename moreinfo="none">error-handling/main.topscript</filename> (part 16)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.map ~f:(fun x -&gt; 100 / x) [1;3;0;4];;</userinput>
-<computeroutput moreinfo="none">Exception: Division_by_zero.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Exception: Division_by_zero.</computeroutput></programlisting>
 
         <para>If we put a <literal moreinfo="none">printf</literal> in the middle of the
         computation, we can see that <literal moreinfo="none">List.map</literal> is
@@ -419,8 +401,7 @@ end</programlisting>
 <computeroutput moreinfo="none">1</computeroutput>
 <computeroutput moreinfo="none">3</computeroutput>
 <computeroutput moreinfo="none">0</computeroutput>
-<computeroutput moreinfo="none">Exception: Division_by_zero.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Exception: Division_by_zero.</computeroutput></programlisting>
 
         <para>In addition to built-in exceptions like
         <literal moreinfo="none">Divide_by_zero</literal>, OCaml lets you define your
@@ -432,8 +413,7 @@ end</programlisting>
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">exception Key_not_found of string;;</userinput>
 <computeroutput moreinfo="none">exception Key_not_found of string</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">raise (Key_not_found "a");;</userinput>
-<computeroutput moreinfo="none">Exception: Key_not_found("a").</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Exception: Key_not_found("a").</computeroutput></programlisting>
 
         <para>Exceptions are ordinary values, and can be manipulated just like
         other OCaml values, as you can see below.</para>
@@ -446,8 +426,7 @@ end</programlisting>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.filter exceptions  ~f:(function</userinput>
 <userinput moreinfo="none">    | Key_not_found _ | Not_found -&gt; true</userinput>
 <userinput moreinfo="none">    | _ -&gt; false);;</userinput>
-<computeroutput moreinfo="none">- : exn list = [Not_found; Key_not_found("b")]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : exn list = [Not_found; Key_not_found("b")]</computeroutput></programlisting>
 
         <para>Exceptions are all of the same type, <literal moreinfo="none">exn</literal>. The
         <literal moreinfo="none">exn</literal> type is something of a special case in the
@@ -477,8 +456,7 @@ end</programlisting>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">find_exn alist "a";;</userinput>
 <computeroutput moreinfo="none">- : int = 1</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">find_exn alist "c";;</userinput>
-<computeroutput moreinfo="none">Exception: Key_not_found("c").</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Exception: Key_not_found("c").</computeroutput></programlisting>
 
         <para>Note that we named the function <literal moreinfo="none">find_exn</literal> to
         warn the user that the function routinely throws exceptions, a
@@ -492,8 +470,7 @@ end</programlisting>
         <filename moreinfo="none">error-handling/main.topscript</filename> (part 21)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">raise;;</userinput>
-<computeroutput moreinfo="none">- : exn -&gt; 'a = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : exn -&gt; 'a = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>The return type of <literal moreinfo="none">'a</literal> makes it look like
         <literal moreinfo="none">raise</literal> manufactures a value to return that is
@@ -508,8 +485,7 @@ end</programlisting>
         <filename moreinfo="none">error-handling/main.topscript</filename> (part 22)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec forever () = forever ();;</userinput>
-<computeroutput moreinfo="none">val forever : unit -&gt; 'a = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val forever : unit -&gt; 'a = &lt;fun&gt;</computeroutput></programlisting>
 
         <para><literal moreinfo="none">forever</literal> doesn't return a value for a
         different reason: it's an infinite loop.</para>
@@ -532,8 +508,7 @@ end</programlisting>
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">exception Wrong_date of Date.t;;</userinput>
 <computeroutput moreinfo="none">exception Wrong_date of Date.t</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Wrong_date (Date.of_string "2011-02-23");;</userinput>
-<computeroutput moreinfo="none">- : exn = Wrong_date(_)</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : exn = Wrong_date(_)</computeroutput></programlisting>
 
           <para>But if we declare the exception using <literal moreinfo="none">with
           sexp</literal> (and the constituent types have sexp converters),
@@ -545,8 +520,7 @@ end</programlisting>
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">exception Wrong_date of Date.t with sexp;;</userinput>
 <computeroutput moreinfo="none">exception Wrong_date of Date.t</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Wrong_date (Date.of_string "2011-02-23");;</userinput>
-<computeroutput moreinfo="none">- : exn = (//toplevel//.Wrong_date 2011-02-23)</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : exn = (//toplevel//.Wrong_date 2011-02-23)</computeroutput></programlisting>
 
           <para>The period in front of <literal moreinfo="none">Wrong_date</literal> is there
           because the representation generated by <literal moreinfo="none">with sexp</literal>
@@ -572,8 +546,7 @@ end</programlisting>
           <filename moreinfo="none">error-handling/main.topscript</filename> (part 25)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let failwith msg = raise (Failure msg);;</userinput>
-<computeroutput moreinfo="none">val failwith : string -&gt; 'a = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val failwith : string -&gt; 'a = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>There are several other useful functions for raising
           exceptions, which can be found in the API documentation for the
@@ -605,8 +578,7 @@ end</programlisting>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">merge_lists [1;2;3] [-1;1;2] ~f:(+);;</userinput>
 <computeroutput moreinfo="none">- : int list option = Some [0; 3; 5]</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">merge_lists [1;2;3] [-1;1] ~f:(+);;</userinput>
-<computeroutput moreinfo="none">- : int list option = None</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int list option = None</computeroutput></programlisting>
 
           <para>Here we use <literal moreinfo="none">assert false</literal>, which means that
           the assert is guaranteed to trigger. In general, one can put an
@@ -631,8 +603,7 @@ end</programlisting>
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val merge_lists : 'a list -&gt; 'b list -&gt; f:('a -&gt; 'b -&gt; 'c) -&gt; 'c list = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">merge_lists [1;2;3] [-1] ~f:(+);;</userinput>
-<computeroutput moreinfo="none">Exception: (Assert_failure //toplevel// 5 13).</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Exception: (Assert_failure //toplevel// 5 13).</computeroutput></programlisting>
 
           <para>This shows what's special about <literal moreinfo="none">assert</literal>: it
           captures the line number and character offset of the source location
@@ -657,8 +628,7 @@ end</programlisting>
           <programlisting language="" format="linespecific">try &lt;expr&gt; with
 | &lt;pat1&gt; -&gt; &lt;expr1&gt;
 | &lt;pat2&gt; -&gt; &lt;expr2&gt;
-...
-</programlisting>
+...</programlisting>
 
           <para>A <literal moreinfo="none">try/with</literal> clause first evaluates its body,
           <literal moreinfo="none">&lt;expr&gt;</literal>. If no exception is thrown, then the
@@ -698,8 +668,7 @@ end</programlisting>
 <userinput moreinfo="none">    In_channel.close inc;</userinput>
 <userinput moreinfo="none">    reminders</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val load_reminders : string -&gt; (Time.t * string) list = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val load_reminders : string -&gt; (Time.t * string) list = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>The problem with this code is that the function that loads the
           s-expression and parses it into a list of
@@ -728,8 +697,7 @@ end</programlisting>
 <userinput moreinfo="none">    protect ~f:(fun () -&gt; reminders_of_sexp (Sexp.input_sexp inc))</userinput>
 <userinput moreinfo="none">      ~finally:(fun () -&gt; In_channel.close inc)</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val load_reminders : string -&gt; (Time.t * string) list = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val load_reminders : string -&gt; (Time.t * string) list = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>This is a common enough problem that
           <literal moreinfo="none">In_channel</literal> has a function called
@@ -742,8 +710,7 @@ end</programlisting>
 <userinput moreinfo="none">    In_channel.with_file filename ~f:(fun inc -&gt;</userinput>
 <userinput moreinfo="none">      reminders_of_sexp (Sexp.input_sexp inc))</userinput>
 <userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">val reminders_of_sexp : string -&gt; (Time.t * string) list = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val reminders_of_sexp : string -&gt; (Time.t * string) list = &lt;fun&gt;</computeroutput></programlisting>
 
           <para><literal moreinfo="none">In_channel.with_file</literal> is built on top of
           <literal moreinfo="none">protect</literal> so that it can clean up after itself in
@@ -771,8 +738,7 @@ end</programlisting>
 <userinput moreinfo="none">      Not_found -&gt; 0. ;;</userinput>
 <computeroutput moreinfo="none">val lookup_weight :</computeroutput>
 <computeroutput moreinfo="none">  compute_weight:('a -&gt; float) -&gt; ('b, 'a) List.Assoc.t -&gt; 'b -&gt; float =</computeroutput>
-<computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput></programlisting>
 
           <para>As you can see from the type, <literal moreinfo="none">lookup_weight</literal>
           takes an association list, a key for looking up a corresponding
@@ -792,8 +758,7 @@ end</programlisting>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">lookup_weight ~compute_weight:(fun _ -&gt; raise Not_found)</userinput>
 <userinput moreinfo="none">    ["a",3; "b",4] "a" ;;</userinput>
-<computeroutput moreinfo="none">- : float = 0.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : float = 0.</computeroutput></programlisting>
 
           <para>This kind of problem is hard to detect in advance, because the
           type system doesn't tell you what exceptions a given function might
@@ -815,8 +780,7 @@ end</programlisting>
 <userinput moreinfo="none">    | Some data -&gt; compute_weight data ;;</userinput>
 <computeroutput moreinfo="none">val lookup_weight :</computeroutput>
 <computeroutput moreinfo="none">  compute_weight:('a -&gt; float) -&gt; ('b, 'a) List.Assoc.t -&gt; 'b -&gt; float =</computeroutput>
-<computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput></programlisting>
 
           <para>At which point, it makes sense to simply use the non-exception
           throwing function, <literal moreinfo="none">List.Assoc.find</literal>,
@@ -831,8 +795,7 @@ end</programlisting>
 <userinput moreinfo="none">    | Some data -&gt; compute_weight data ;;</userinput>
 <computeroutput moreinfo="none">val lookup_weight :</computeroutput>
 <computeroutput moreinfo="none">  compute_weight:('a -&gt; float) -&gt; ('b, 'a) List.Assoc.t -&gt; 'b -&gt; float =</computeroutput>
-<computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput></programlisting>
         </sect2>
 
         <sect2 id="backtraces">
@@ -869,8 +832,7 @@ let () =
 <computeroutput moreinfo="none">3</computeroutput>
 <computeroutput moreinfo="none">Fatal error: exception Blow_up.Empty_list</computeroutput>
 <computeroutput moreinfo="none">Raised at file "blow_up.ml", line 5, characters 16-26</computeroutput>
-<computeroutput moreinfo="none">Called from file "blow_up.ml", line 10, characters 17-28</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Called from file "blow_up.ml", line 10, characters 17-28</computeroutput></programlisting>
 
           <para>You can also capture a backtrace within your program by
           calling <literal moreinfo="none">Exn.backtrace</literal>, which returns the
@@ -895,8 +857,7 @@ let () =
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild blow_up.byte</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">OCAMLRUNPARAM= ./blow_up.byte</userinput>
 <computeroutput moreinfo="none">3</computeroutput>
-<computeroutput moreinfo="none">Fatal error: exception Blow_up.Empty_list</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Fatal error: exception Blow_up.Empty_list</computeroutput></programlisting>
 
           <para>The resulting error message is considerably less informative.
           You can also turn backtraces off in your code by calling
@@ -959,8 +920,7 @@ let () =
 <computeroutput moreinfo="none">  simple computation                279         117      76.40  </computeroutput>
 <computeroutput moreinfo="none">  simple computation w/handler      308         129      84.36  </computeroutput>
 <computeroutput moreinfo="none">  end with exn                      366         153     100.00  </computeroutput>
-<computeroutput moreinfo="none">                                                                </computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">                                                                </computeroutput></programlisting>
 
           <para>Here, we see that we lose something like 20 cycles to adding
           an exception handler, and 30 more to actually throwing and catching
@@ -978,8 +938,7 @@ let () =
 <computeroutput moreinfo="none">  simple computation                279         116      83.50  </computeroutput>
 <computeroutput moreinfo="none">  simple computation w/handler      308         128      92.09  </computeroutput>
 <computeroutput moreinfo="none">  end with exn                      334         140     100.00  </computeroutput>
-<computeroutput moreinfo="none">                                                                </computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">                                                                </computeroutput></programlisting>
 
           <para>Here, the handler costs about the same, at 20 cycles, but the
           exception itself costs only 20, as opposed to 30 additional cycles.
@@ -1007,8 +966,7 @@ let () =
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">find ["a",1; "b",2] "c";;</userinput>
 <computeroutput moreinfo="none">- : int option = None</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">find ["a",1; "b",2] "b";;</userinput>
-<computeroutput moreinfo="none">- : int option = Some 2</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int option = Some 2</computeroutput></programlisting>
 
           <para>And <literal moreinfo="none">Result</literal> and <literal moreinfo="none">Or_error</literal>
           have similar <literal moreinfo="none">try_with</literal> functions. So, we could
@@ -1021,8 +979,7 @@ let () =
 <userinput moreinfo="none">    Or_error.try_with (fun () -&gt; find_exn alist key) ;;</userinput>
 <computeroutput moreinfo="none">val find : (string * 'a) list -&gt; string -&gt; 'a Or_error.t = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">find ["a",1; "b",2] "c";;</userinput>
-<computeroutput moreinfo="none">- : int Or_error.t = Core_kernel.Result.Error ("Key_not_found(\"c\")")</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int Or_error.t = Core_kernel.Result.Error ("Key_not_found(\"c\")")</computeroutput></programlisting>
 
           <para>And then we can re-raise that exception:</para>
 
@@ -1032,8 +989,7 @@ let () =
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Or_error.ok_exn (find ["a",1; "b",2] "b");;</userinput>
 <computeroutput moreinfo="none">- : int = 2</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Or_error.ok_exn (find ["a",1; "b",2] "c");;</userinput>
-<computeroutput moreinfo="none">Exception: ("Key_not_found(\"c\")").</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Exception: ("Key_not_found(\"c\")").</computeroutput></programlisting>
         </sect2>
       </sect1>
 

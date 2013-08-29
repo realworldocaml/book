@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE preface PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <preface id="prologue">
     <title>Prologue</title>
@@ -302,7 +302,7 @@
         copy and use any of the snippets as you see fit in your own code,
         without any attribution or other restrictions on their use.</para>
 
-        <para>The code repository is available online at: <ulink url="https://github.com/realworldocaml/examples"><literal moreinfo="none">https://github.com/realworldocaml/examples</literal></ulink>.
+        <para>The code repository is available online at: <ulink url="https://github.com/realworldocaml/examples"/>.
         Every code snippet in the book has a header which tells you the
         filename in that repository to the find the source code, shell script,
         or ancillary data file that the snippet was sourced from.</para>

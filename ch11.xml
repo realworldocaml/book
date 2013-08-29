@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="objects">
       <title>Objects</title>
@@ -106,8 +106,7 @@
 <userinput moreinfo="none">    method push hd = </userinput>
 <userinput moreinfo="none">      v &lt;- hd :: v</userinput>
 <userinput moreinfo="none">  end ;;</userinput>
-<computeroutput moreinfo="none">val s : &lt; pop : int option; push : int -&gt; unit &gt; = &lt;obj&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val s : &lt; pop : int option; push : int -&gt; unit &gt; = &lt;obj&gt;</computeroutput></programlisting>
 
         <para>The object has an integer list value <literal moreinfo="none">v</literal>, a
         method <literal moreinfo="none">pop</literal> that returns the head of
@@ -129,8 +128,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">s#push 4 ;;</userinput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">s#pop ;;</userinput>
-<computeroutput moreinfo="none">- : int option = Some 4</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int option = Some 4</computeroutput></programlisting>
 
         <para>Note that unlike functions, methods can have zero parameters,
         since the method call is routed to a concrete object instance. That's
@@ -162,8 +160,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let s = stack [3; 2; 1] ;;</userinput>
 <computeroutput moreinfo="none">val s : &lt; pop : int option; push : int -&gt; unit &gt; = &lt;obj&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">s#pop ;;</userinput>
-<computeroutput moreinfo="none">- : int option = Some 3</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : int option = Some 3</computeroutput></programlisting>
 
         <para>Note that the types of the function <literal moreinfo="none">stack</literal> and
         the returned object now use the polymorphic type
@@ -188,8 +185,7 @@
 <computeroutput moreinfo="none">val minimize : &lt; resize : int -&gt; unit; .. &gt; -&gt; unit = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let limit sq = </userinput>
 <userinput moreinfo="none">    if (area sq) &gt; 100 then minimize sq ;;</userinput>
-<computeroutput moreinfo="none">val limit : &lt; resize : int -&gt; unit; width : int; .. &gt; -&gt; unit = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val limit : &lt; resize : int -&gt; unit; width : int; .. &gt; -&gt; unit = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>As you can see object types are inferred automatically from the
         methods that are invoked on them.</para>
@@ -206,8 +202,7 @@
 <computeroutput moreinfo="none">Characters 80-82:</computeroutput>
 <computeroutput moreinfo="none">Error: This expression has type &lt; resize : [&gt; `Fullscreen ] -&gt; unit; .. &gt;</computeroutput>
 <computeroutput moreinfo="none">       but an expression was expected of type &lt; resize : int -&gt; unit; .. &gt;</computeroutput>
-<computeroutput moreinfo="none">       Types for method resize are incompatible</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">       Types for method resize are incompatible</computeroutput></programlisting>
 
         <para>The <literal moreinfo="none">..</literal> in the inferred object types are
         ellipses, standing for other unspecified methods that the object may
@@ -233,8 +228,7 @@
 <computeroutput moreinfo="none">Characters 12-14:</computeroutput>
 <computeroutput moreinfo="none">Error: This expression has type &lt; name : string; width : int &gt;</computeroutput>
 <computeroutput moreinfo="none">       but an expression was expected of type &lt; width : int &gt;</computeroutput>
-<computeroutput moreinfo="none">       The second object type has no method name</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">       The second object type has no method name</computeroutput></programlisting>
 
         <note>
           <title>Elisions are polymorphic</title>
@@ -251,8 +245,7 @@
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type square = &lt; width : int; ..&gt; ;;</userinput>
 <computeroutput moreinfo="none">Characters 5-32:</computeroutput>
 <computeroutput moreinfo="none">Error: A type variable is unbound in this type declaration.</computeroutput>
-<computeroutput moreinfo="none">In type &lt; width : int; .. &gt; as 'a the variable 'a is unbound</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">In type &lt; width : int; .. &gt; as 'a the variable 'a is unbound</computeroutput></programlisting>
 
           <para>This is because <literal moreinfo="none">..</literal> is really a special kind
           of type variable called a <emphasis>row variable</emphasis>.</para>
@@ -284,8 +277,7 @@
 <computeroutput moreinfo="none">val t : &lt; pop : int option &gt; = &lt;obj&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">print_pop t ;;</userinput>
 <computeroutput moreinfo="none">Popped: 1376833904</computeroutput>
-<computeroutput moreinfo="none">- : unit = ()</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
       </sect1>
 
       <sect1 id="immutable-objects">
@@ -315,8 +307,7 @@
 <userinput moreinfo="none">      {&lt; v = hd :: v &gt;}</userinput>
 <userinput moreinfo="none">  end ;;</userinput>
 <computeroutput moreinfo="none">val imm_stack :</computeroutput>
-<computeroutput moreinfo="none">  'a list -&gt; (&lt; pop : ('a * 'b) option; push : 'a -&gt; 'b &gt; as 'b) = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  'a list -&gt; (&lt; pop : ('a * 'b) option; push : 'a -&gt; 'b &gt; as 'b) = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>The key parts of this implementation are in the
         <literal moreinfo="none">pop</literal> and <literal moreinfo="none">push</literal> methods. The
@@ -338,8 +329,7 @@
 <computeroutput moreinfo="none">Some (3, &lt;obj&gt;)</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">t#pop ;;</userinput>
 <computeroutput moreinfo="none">- : (int * (&lt; pop : 'a; push : int -&gt; 'b &gt; as 'b)) option as 'a =</computeroutput>
-<computeroutput moreinfo="none">Some (4, &lt;obj&gt;)</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Some (4, &lt;obj&gt;)</computeroutput></programlisting>
 
         <para>There are some restriction on the use of the expression
         <literal moreinfo="none">{&lt; ... &gt;}</literal>. It can be used only within a
@@ -448,8 +438,7 @@ end</programlisting>
 <computeroutput moreinfo="none">       but an expression was expected of type shape</computeroutput>
 <computeroutput moreinfo="none">       The second object type has no method width</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let shape w : shape = (square w :&gt; shape) ;;</userinput>
-<computeroutput moreinfo="none">val shape : int -&gt; shape = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val shape : int -&gt; shape = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>This form of object subtyping is called
           <emphasis>width</emphasis> subtyping. Width subtyping means that an
@@ -485,8 +474,7 @@ end</programlisting>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let map = object</userinput>
 <userinput moreinfo="none">    method shape = square 10</userinput>
 <userinput moreinfo="none">  end ;;</userinput>
-<computeroutput moreinfo="none">val map : &lt; shape : &lt; area : float; width : int &gt; &gt; = &lt;obj&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val map : &lt; shape : &lt; area : float; width : int &gt; &gt; = &lt;obj&gt;</computeroutput></programlisting>
 
           <para>Both these objects have a <literal moreinfo="none">shape</literal> method
           whose type is a subtype of the <literal moreinfo="none">shape</literal> type, so
@@ -499,8 +487,7 @@ end</programlisting>
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type item = &lt; shape : shape &gt; ;;</userinput>
 <computeroutput moreinfo="none">type item = &lt; shape : shape &gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let items = [ (coin :&gt; item) ; (map :&gt; item) ] ;;</userinput>
-<computeroutput moreinfo="none">val items : item list = [&lt;obj&gt;; &lt;obj&gt;]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val items : item list = [&lt;obj&gt;; &lt;obj&gt;]</computeroutput></programlisting>
 
           <note>
             <title>Polymorphic variant subtyping</title>
@@ -521,8 +508,7 @@ end</programlisting>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let n : num = `Int 3 ;;</userinput>
 <computeroutput moreinfo="none">val n : num = `Int 3</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let c : const = (n :&gt; const) ;;</userinput>
-<computeroutput moreinfo="none">val c : const = `Int 3</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val c : const = `Int 3</computeroutput></programlisting>
           </note>
         </sect2>
 
@@ -540,8 +526,7 @@ end</programlisting>
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let squares: square list = [ square 10; square 20 ] ;;</userinput>
 <computeroutput moreinfo="none">val squares : square list = [&lt;obj&gt;; &lt;obj&gt;]</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let shapes: shape list = (squares :&gt; shape list) ;;</userinput>
-<computeroutput moreinfo="none">val shapes : shape list = [&lt;obj&gt;; &lt;obj&gt;]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val shapes : shape list = [&lt;obj&gt;; &lt;obj&gt;]</computeroutput></programlisting>
 
           <para>Note that this relies on lists being immutable. It would not
           be safe to treat a <literal moreinfo="none">square array</literal> as a
@@ -559,8 +544,7 @@ end</programlisting>
 <computeroutput moreinfo="none">Error: Type square array is not a subtype of shape array </computeroutput>
 <computeroutput moreinfo="none">       Type square = &lt; area : float; width : int &gt;</computeroutput>
 <computeroutput moreinfo="none">       is not compatible with type shape = &lt; area : float &gt; </computeroutput>
-<computeroutput moreinfo="none">       The second object type has no method width</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">       The second object type has no method width</computeroutput></programlisting>
 
           <para>We say that <literal moreinfo="none">'a list</literal> is
           <emphasis>covariant</emphasis> (in <literal moreinfo="none">'a</literal>), whilst
@@ -584,8 +568,7 @@ end</programlisting>
 <computeroutput moreinfo="none">val shape_to_string : shape -&gt; string = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let square_to_string: square -&gt; string = </userinput>
 <userinput moreinfo="none">    (shape_to_string :&gt; square -&gt; string) ;;</userinput>
-<computeroutput moreinfo="none">val square_to_string : square -&gt; string = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val square_to_string : square -&gt; string = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>We say that <literal moreinfo="none">'a -&gt; string</literal> is
           <emphasis>contravariant</emphasis> in <literal moreinfo="none">'a</literal>. In
@@ -615,8 +598,7 @@ end</programlisting>
 <computeroutput moreinfo="none">    val right : 'a -&gt; ('b, 'a) t</computeroutput>
 <computeroutput moreinfo="none">  end</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">(Either.left (square 40) :&gt; (shape, shape) Either.t) ;;</userinput>
-<computeroutput moreinfo="none">- : (shape, shape) Either.t = Either.Left &lt;obj&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : (shape, shape) Either.t = Either.Left &lt;obj&gt;</computeroutput></programlisting>
 
             <para>However, if the definition is hidden by a signature then
             OCaml is forced to assume that the type is invariant.</para>
@@ -643,8 +625,7 @@ end</programlisting>
 <computeroutput moreinfo="none">       but is here used with type (shape, shape) AbstractEither.t</computeroutput>
 <computeroutput moreinfo="none">       Type &lt; area : float; width : int &gt; is not compatible with type</computeroutput>
 <computeroutput moreinfo="none">         shape = &lt; area : float &gt; </computeroutput>
-<computeroutput moreinfo="none">       The second object type has no method width</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">       The second object type has no method width</computeroutput></programlisting>
 
             <para>We can fix this by adding <emphasis>variance
             annotations</emphasis> to the type's parameters in the signature:
@@ -666,8 +647,7 @@ end</programlisting>
 <computeroutput moreinfo="none">    val right : 'b -&gt; ('a, 'b) t</computeroutput>
 <computeroutput moreinfo="none">  end</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">(VarEither.left (square 40) :&gt; (shape, shape) VarEither.t) ;;</userinput>
-<computeroutput moreinfo="none">- : (shape, shape) VarEither.t = &lt;abstr&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : (shape, shape) VarEither.t = &lt;abstr&gt;</computeroutput></programlisting>
           </sidebar>
 
           <para>For a more concrete example of variance, let's create some
@@ -700,8 +680,7 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</programlisting>
 <userinput moreinfo="none">        loop acc</userinput>
 <userinput moreinfo="none">    in</userinput>
 <userinput moreinfo="none">      List.fold ~init:0.0 ~f:stack_area shape_stacks ;;</userinput>
-<computeroutput moreinfo="none">val total_area : shape stack list -&gt; float = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val total_area : shape stack list -&gt; float = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>However, when we try to apply this function to our objects we
           get an error:</para>
@@ -715,8 +694,7 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</programlisting>
 <computeroutput moreinfo="none">       is not a subtype of</computeroutput>
 <computeroutput moreinfo="none">         shape stack = &lt; pop : shape option; push : shape -&gt; unit &gt; </computeroutput>
 <computeroutput moreinfo="none">       Type shape = &lt; area : float &gt; is not a subtype of</computeroutput>
-<computeroutput moreinfo="none">         square = &lt; area : float; width : int &gt; </computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">         square = &lt; area : float; width : int &gt; </computeroutput></programlisting>
 
           <para>As you can see, <literal moreinfo="none">square stack</literal> and
           <literal moreinfo="none">circle stack</literal> are not subtypes of <literal moreinfo="none">shape
@@ -759,8 +737,7 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</programlisting>
 <userinput moreinfo="none">      List.fold ~init:0.0 ~f:stack_area shape_stacks ;;</userinput>
 <computeroutput moreinfo="none">val total_area : shape readonly_stack list -&gt; float = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">total_area [(square_stack :&gt; shape readonly_stack); (circle_stack :&gt; shape readonly_stack)] ;;</userinput>
-<computeroutput moreinfo="none">- : float = 7280.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : float = 7280.</computeroutput></programlisting>
 
           <para>Aspects of this section may seem fairly complicated, but it
           should be pointed out that this typing <emphasis>works</emphasis>,
@@ -823,8 +800,7 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</programlisting>
   } else {
     return "Other";
   }
-}
-</programlisting>
+}</programlisting>
 
           <para>Most programmers would consider this code to be "wrong."
           Instead of performing a case analysis on the type of object, it
@@ -845,8 +821,7 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</programlisting>
   return s.length == 3 &amp;&amp; (s[0] instanceof Circle) &amp;&amp;
     (s[1] instanceof Line) &amp;&amp; (s[2] instanceof Circle) &amp;&amp;
         ((Circle) s[0]).radius() == ((Circle) s[2]).radius();
-}
-</programlisting>
+}</programlisting>
 
           <para>In this case, it is much less clear how to augment the
           <literal moreinfo="none">Shape</literal> class to support this kind of pattern
@@ -905,8 +880,7 @@ let is_barbell = function
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let remove_large l =</userinput>
 <userinput moreinfo="none">    List.filter ~f:(fun s -&gt; s#area &lt;= 100.) l ;;</userinput>
-<computeroutput moreinfo="none">val remove_large : (&lt; area : float; .. &gt; as 'a) list -&gt; 'a list = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val remove_large : (&lt; area : float; .. &gt; as 'a) list -&gt; 'a list = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>The return type of this function is built from the open object
           type of its argument, preserving any additional methods that it may
@@ -920,8 +894,7 @@ let is_barbell = function
 <userinput moreinfo="none">    [square 5; square 15; square 10] ;;</userinput>
 <computeroutput moreinfo="none">val squares : &lt; area : float; width : int &gt; list = [&lt;obj&gt;; &lt;obj&gt;; &lt;obj&gt;]</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">remove_large squares ;;</userinput>
-<computeroutput moreinfo="none">- : &lt; area : float; width : int &gt; list = [&lt;obj&gt;; &lt;obj&gt;]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : &lt; area : float; width : int &gt; list = [&lt;obj&gt;; &lt;obj&gt;]</computeroutput></programlisting>
 
           <para>Writing a similar function with a closed type and applying it
           using subtyping does not preserve the methods of the argument: the
@@ -936,8 +909,7 @@ let is_barbell = function
 <userinput moreinfo="none">    List.filter ~f:(fun s -&gt; s#area &lt;= 100.) l ;;</userinput>
 <computeroutput moreinfo="none">val remove_large : &lt; area : float &gt; list -&gt; &lt; area : float &gt; list = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">remove_large (squares :&gt; &lt; area : float &gt; list ) ;;</userinput>
-<computeroutput moreinfo="none">- : &lt; area : float &gt; list = [&lt;obj&gt;; &lt;obj&gt;]</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : &lt; area : float &gt; list = [&lt;obj&gt;; &lt;obj&gt;]</computeroutput></programlisting>
 
           <para>However, there are some situations where we cannot use row
           polymorphism. In particular, row polymorphism cannot be used to
@@ -953,8 +925,7 @@ let is_barbell = function
 <computeroutput moreinfo="none">Characters 49-58:</computeroutput>
 <computeroutput moreinfo="none">Error: This expression has type &lt; area : float; radius : int &gt;</computeroutput>
 <computeroutput moreinfo="none">       but an expression was expected of type &lt; area : float; width : int &gt;</computeroutput>
-<computeroutput moreinfo="none">       The second object type has no method radius</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">       The second object type has no method radius</computeroutput></programlisting>
 
           <para>Similarly, we cannot use row polymorphism to store different
           types of object in the same reference:</para>
@@ -969,8 +940,7 @@ let is_barbell = function
 <computeroutput moreinfo="none">Characters 13-22:</computeroutput>
 <computeroutput moreinfo="none">Error: This expression has type &lt; area : float; radius : int &gt;</computeroutput>
 <computeroutput moreinfo="none">       but an expression was expected of type &lt; area : float; width : int &gt;</computeroutput>
-<computeroutput moreinfo="none">       The second object type has no method radius</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">       The second object type has no method radius</computeroutput></programlisting>
 
           <para>In both these cases we must use subtyping:</para>
 
@@ -983,8 +953,7 @@ let is_barbell = function
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let shape_ref: shape ref = ref (square 40 :&gt; shape) ;;</userinput>
 <computeroutput moreinfo="none">val shape_ref : shape ref = {contents = &lt;obj&gt;}</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">shape_ref := (circle 20 :&gt; shape) ;;</userinput>
-<computeroutput moreinfo="none">- : unit = ()</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
 
           <note>
             <title>Production note</title>

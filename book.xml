@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
-<book>
+<book role="animal">
   <title>Real World OCaml</title>
 
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="bookinfo.xml"/>
@@ -14,4 +14,6 @@
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="part3.xml"/>
 
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="appa.xml"/>
+<index/>
+<xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="colo.xml"/>
 </book>

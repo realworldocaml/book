@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="foreign-function-interface">
       <title>Foreign Function Interface</title>
@@ -61,8 +61,7 @@
         <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">brew install libffi     # for MacOS X users</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">opam install ctypes</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">utop</userinput>
-<computeroutput moreinfo="none"># require "ctypes.foreign" ;;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none"># require "ctypes.foreign" ;;</computeroutput></programlisting>
 
         <para>You'll also need the Ncurses library for the first example. This
         comes pre-installed on many operating systems such as MacOS X and
@@ -97,8 +96,7 @@ void    addstr (const char *);
 int     mvwaddch  (WINDOW *, int, int, const chtype);
 void    mvwaddstr (WINDOW *, int, int, char *);
 void    box (WINDOW *, chtype, chtype);
-int     cbreak (void);
-</programlisting>
+int     cbreak (void);</programlisting>
 
         <para>The Ncurses functions either operate on the current
         pseudo-terminal or on a window that has been created via
@@ -227,8 +225,7 @@ let cbreak =
         <filename moreinfo="none">ffi/infer_ncurses.out</filename></para>
 
         <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg ctypes.foreign ncurses.inferred.mli</userinput>
-<prompt moreinfo="none">$ </prompt><userinput moreinfo="none">cp _build/ncurses.inferred.mli .</userinput>
-</programlisting>
+<prompt moreinfo="none">$ </prompt><userinput moreinfo="none">cp _build/ncurses.inferred.mli .</userinput></programlisting>
 
         <para>The <literal moreinfo="none">inferred.mli</literal> target instructs the
         compiler to generate the default signature for a module file, and
@@ -481,8 +478,7 @@ val complex64 : Complex.t typ</programlisting>
 
         <programlisting language="c" format="linespecific">time_t time(time_t *);
 double difftime(time_t, time_t);
-char *ctime(const time_t *timep);
-</programlisting>
+char *ctime(const time_t *timep);</programlisting>
 
         <para>The <literal moreinfo="none">time</literal> function returns the current
         calendar time and is a simple start. The first step is to open some of
@@ -518,8 +514,7 @@ char *ctime(const time_t *timep);
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">open PosixTypes ;;</userinput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">open Foreign ;;</userinput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let time = foreign "time" (ptr time_t @-&gt; returning time_t) ;;</userinput>
-<computeroutput moreinfo="none">val time : time_t ptr -&gt; time_t = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val time : time_t ptr -&gt; time_t = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>The <literal moreinfo="none">foreign</literal> function is the main link between
         OCaml and C. It takes two arguments: the name of the C function to
@@ -537,8 +532,7 @@ char *ctime(const time_t *timep);
         <filename moreinfo="none">ffi/posix.topscript</filename> (part 1)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let cur_time = time (from_voidp time_t null) ;;</userinput>
-<computeroutput moreinfo="none">val cur_time : time_t = 1376834134</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val cur_time : time_t = 1376834134</computeroutput></programlisting>
 
         <para>Since we're going to call <literal moreinfo="none">time</literal> a few times,
         let's create a wrapper function that passes the null pointer
@@ -548,8 +542,7 @@ char *ctime(const time_t *timep);
         <filename moreinfo="none">ffi/posix.topscript</filename> (part 2)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let time' () = time (from_voidp time_t null) ;;</userinput>
-<computeroutput moreinfo="none">val time' : unit -&gt; time_t = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val time' : unit -&gt; time_t = &lt;fun&gt;</computeroutput></programlisting>
 
         <para>Since <literal moreinfo="none">time_t</literal> is an abstract type, we can't
         actually do anything useful with it directly. We need to bind a second
@@ -568,8 +561,7 @@ char *ctime(const time_t *timep);
 <userinput moreinfo="none">    Unix.sleep 2;</userinput>
 <userinput moreinfo="none">    let t2 = time' () in </userinput>
 <userinput moreinfo="none">    difftime t2 t1 ;;</userinput>
-<computeroutput moreinfo="none">- : float = 2.</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : float = 2.</computeroutput></programlisting>
 
         <para>The binding to <literal moreinfo="none">difftime</literal> above is sufficient
         to compare two <literal moreinfo="none">time_t</literal> values.</para>
@@ -587,8 +579,7 @@ char *ctime(const time_t *timep);
           <filename moreinfo="none">ffi/posix.topscript</filename> (part 4)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let ctime = foreign "ctime" (ptr time_t @-&gt; returning string) ;;</userinput>
-<computeroutput moreinfo="none">val ctime : time_t ptr -&gt; string = &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val ctime : time_t ptr -&gt; string = &lt;fun&gt;</computeroutput></programlisting>
 
           <para>The binding is continued in the top-level to add to our
           growing collection. However, we can't just pass the result of
@@ -600,8 +591,7 @@ char *ctime(const time_t *timep);
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">ctime (time' ()) ;;</userinput>
 <computeroutput moreinfo="none">Characters 7-15:</computeroutput>
 <computeroutput moreinfo="none">Error: This expression has type time_t but an expression was expected of type</computeroutput>
-<computeroutput moreinfo="none">         time_t ptr</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">         time_t ptr</computeroutput></programlisting>
 
           <para>This is because <literal moreinfo="none">ctime</literal> needs a pointer to
           the <literal moreinfo="none">time_t</literal> rather than passing it by value. We
@@ -612,8 +602,7 @@ char *ctime(const time_t *timep);
           <filename moreinfo="none">ffi/posix.topscript</filename> (part 6)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let t_ptr = allocate time_t (time' ()) ;;</userinput>
-<computeroutput moreinfo="none">val t_ptr : time_t ptr = (int64_t*) 0x238ac30</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val t_ptr : time_t ptr = (int64_t*) 0x238ac30</computeroutput></programlisting>
 
           <para>The <literal moreinfo="none">allocate</literal> function takes the type of the
           memory to be allocated and the initial value, and it returns a
@@ -624,8 +613,7 @@ char *ctime(const time_t *timep);
           <filename moreinfo="none">ffi/posix.topscript</filename> (part 7)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">ctime t_ptr ;;</userinput>
-<computeroutput moreinfo="none">- : string = "Sun Aug 18 14:55:36 2013\n"</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : string = "Sun Aug 18 14:55:36 2013\n"</computeroutput></programlisting>
         </sect2>
 
         <sect2 id="using-views-to-map-complex-values">
@@ -738,8 +726,7 @@ val char_ptr_of_string : string -&gt; char ptr</programlisting>
   long tv_usec;
 };
 
-int gettimeofday(struct timeval *, struct timezone *tv);
-</programlisting>
+int gettimeofday(struct timeval *, struct timezone *tv);</programlisting>
 
           <para>Using Ctypes, we can describe this type as follows in our
           top-level, continuing on from the previous definitions.</para>
@@ -750,8 +737,7 @@ int gettimeofday(struct timeval *, struct timezone *tv);
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type timeval ;;</userinput>
 <computeroutput moreinfo="none">type timeval</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let timeval : timeval structure typ = structure "timeval" ;;</userinput>
-<computeroutput moreinfo="none">val timeval : timeval structure typ = struct timeval</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val timeval : timeval structure typ = struct timeval</computeroutput></programlisting>
 
           <para>The first command defines a new OCaml type
           <literal moreinfo="none">timeval</literal> that we'll use to instantiate the OCaml
@@ -782,8 +768,7 @@ int gettimeofday(struct timeval *, struct timezone *tv);
 <computeroutput moreinfo="none">val tv_usec : (Signed.long, (timeval, [ `Struct ]) structured) field =</computeroutput>
 <computeroutput moreinfo="none">  &lt;abstr&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">seal timeval ;;</userinput>
-<computeroutput moreinfo="none">- : unit = ()</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
 
           <para>The <literal moreinfo="none">field</literal> function appends a field to the
           structure, as shown with <literal moreinfo="none">tv_sec</literal> and
@@ -811,8 +796,7 @@ int gettimeofday(struct timeval *, struct timezone *tv);
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type timezone ;;</userinput>
 <computeroutput moreinfo="none">type timezone</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let timezone : timezone structure typ = structure "timezone" ;;</userinput>
-<computeroutput moreinfo="none">val timezone : timezone structure typ = struct timezone</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">val timezone : timezone structure typ = struct timezone</computeroutput></programlisting>
 
           <para>We don't ever need to create <literal moreinfo="none">struct
           timezone</literal> values, so we can leave this struct as incomplete
@@ -830,8 +814,7 @@ int gettimeofday(struct timeval *, struct timezone *tv);
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let gettimeofday = foreign "gettimeofday"</userinput>
 <userinput moreinfo="none">    (ptr timeval @-&gt; ptr timezone @-&gt; returning_checking_errno int) ;;</userinput>
 <computeroutput moreinfo="none">val gettimeofday : timeval structure ptr -&gt; timezone structure ptr -&gt; int =</computeroutput>
-<computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput></programlisting>
 
           <para>There's one other new feature here: the
           <literal moreinfo="none">returning_checking_errno</literal> function behaves like
@@ -859,8 +842,7 @@ int gettimeofday(struct timeval *, struct timezone *tv);
 <userinput moreinfo="none">  Pervasives.(float secs +. float usecs /. 1000000.0) ;;</userinput>
 <computeroutput moreinfo="none">val gettimeofday' : unit -&gt; float = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">gettimeofday' () ;;</userinput>
-<computeroutput moreinfo="none">- : float = 1376834137.14</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">- : float = 1376834137.14</computeroutput></programlisting>
 
           <para>You need to be a little careful not to get all the open
           modules mixed up here. Both <literal moreinfo="none">Pervasives</literal> and
@@ -933,8 +915,7 @@ let () =
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./datetime.native</userinput>
 <computeroutput moreinfo="none">1376833554.984496</computeroutput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./datetime.native -a</userinput>
-<computeroutput moreinfo="none">Sun Aug 18 14:45:55 2013</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">Sun Aug 18 14:45:55 2013</computeroutput></programlisting>
 
             <sidebar>
               <title>Why do we need to use
@@ -991,16 +972,14 @@ val difftime: time_t @-&gt; time_t @-&gt; double</programlisting>
               <para role="sourcecode">C:
               <filename moreinfo="none">ffi/return_c_frag.h</filename></para>
 
-              <programlisting language="c" format="linespecific">int uncurried_C(int, int);
-</programlisting>
+              <programlisting language="c" format="linespecific">int uncurried_C(int, int);</programlisting>
 
               <para>and the arguments must always be supplied together:</para>
 
               <para role="sourcecode">C:
               <filename moreinfo="none">ffi/return_c_frag.c</filename></para>
 
-              <programlisting language="c" format="linespecific">uncurried_C(3, 4);
-</programlisting>
+              <programlisting language="c" format="linespecific">uncurried_C(3, 4);</programlisting>
 
               <para>A C function that's written in curried style looks very
               different:</para>
@@ -1017,8 +996,7 @@ function_t *curried_C(int);
 curried_C(3)(4);
 
 /* supply one argument at a time */
-function_t *f = curried_C(3); f(4);
-</programlisting>
+function_t *f = curried_C(3); f(4);</programlisting>
 
               <para>The OCaml type of <literal moreinfo="none">uncurried_C</literal> when
               bound by Ctypes is <literal moreinfo="none">int -&gt; int -&gt; int</literal>: a
@@ -1151,8 +1129,7 @@ end</programlisting>
         <para role="sourcecode">C: <filename moreinfo="none">ffi/qsort.h</filename></para>
 
         <programlisting language="c" format="linespecific">void qsort(void *base, size_t nmemb, size_t size,
-           int(*compar)(const void *, const void *));
-</programlisting>
+           int(*compar)(const void *, const void *));</programlisting>
 
         <para>C programmers often use <literal moreinfo="none">typedef</literal> to make type
         definitions involving function pointers easier to read. Using a
@@ -1164,8 +1141,7 @@ end</programlisting>
 
         <programlisting language="c" format="linespecific">typedef int(compare_t)(const void *, const void *);
 
-void qsort(void *base, size_t nmemb, size_t size, compare_t *);
-</programlisting>
+void qsort(void *base, size_t nmemb, size_t size, compare_t *);</programlisting>
 
         <para>This also happens to be a close mapping to the corresponding
         Ctypes definition. Since type descriptions are regular values, we can
@@ -1187,8 +1163,7 @@ void qsort(void *base, size_t nmemb, size_t size, compare_t *);
 <userinput moreinfo="none">    funptr compare_t @-&gt; returning void) ;;</userinput>
 <computeroutput moreinfo="none">val qsort :</computeroutput>
 <computeroutput moreinfo="none">  unit ptr -&gt; size_t -&gt; size_t -&gt; (unit ptr -&gt; unit ptr -&gt; int) -&gt; unit =</computeroutput>
-<computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput>
-</programlisting>
+<computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput></programlisting>
 
         <para>We only use <literal moreinfo="none">compare_t</literal> once (in the
         <literal moreinfo="none">qsort</literal> definition), so you can choose to inline it
@@ -1269,8 +1244,7 @@ let () =
 <computeroutput moreinfo="none">4</computeroutput>
 <computeroutput moreinfo="none">5</computeroutput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg ctypes.foreign qsort.inferred.mli</userinput>
-<prompt moreinfo="none">$ </prompt><userinput moreinfo="none">cp _build/qsort.inferred.mli qsort.mli</userinput>
-</programlisting>
+<prompt moreinfo="none">$ </prompt><userinput moreinfo="none">cp _build/qsort.inferred.mli qsort.mli</userinput></programlisting>
 
           <para>The inferred interface shows us the types of the raw
           <literal moreinfo="none">qsort</literal> binding and also the
