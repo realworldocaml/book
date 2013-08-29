@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="variables-and-functions">
       <title>Variables and Functions</title>
@@ -28,7 +28,7 @@
         with a lowercase letter or an underscore.</para>
 
         <para role="sourcecode">Syntax:
-        <filename moreinfo="none">variables-and-functions/let.syntax</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/let.syntax">variables-and-functions/let.syntax</ulink></para>
 
         <programlisting language="" format="linespecific">let &lt;variable&gt; = &lt;expr&gt;</programlisting>
 
@@ -44,7 +44,7 @@
         <para>Here's a simple example.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variables-and-functions/main.topscript</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink></para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let x = 3;;</userinput>
 <computeroutput moreinfo="none">val x : int = 3</computeroutput>
@@ -58,7 +58,7 @@
         following syntax.</para>
 
         <para role="sourcecode">Syntax:
-        <filename moreinfo="none">variables-and-functions/let_in.syntax</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/let_in.syntax">variables-and-functions/let_in.syntax</ulink></para>
 
         <programlisting language="" format="linespecific">let &lt;variable&gt; = &lt;expr1&gt; in &lt;expr2&gt;</programlisting>
 
@@ -71,7 +71,7 @@
         looks in practice.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
         1)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let languages = "OCaml,Perl,C++,C";;</userinput>
@@ -88,7 +88,7 @@
         can see if we try to access it now.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
         2)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">language_list;;</userinput>
@@ -101,7 +101,7 @@
         follows:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
         3)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let languages = "OCaml,Perl,C++,C";;</userinput>
@@ -120,7 +120,7 @@
         closed and the original definition of languages reappears.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
         4)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">languages;;</userinput>
@@ -131,7 +131,7 @@
         the components of a larger computation. Thus, we might write:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
         5)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let area_of_ring inner_radius outer_radius =</userinput>
@@ -149,7 +149,7 @@
         this purposefully confusing bit of code.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
         6)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let area_of_ring inner_radius outer_radius =</userinput>
@@ -211,7 +211,7 @@
           pairs into a pair of lists.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           7)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let (ints,strings) = List.unzip [(1,"one"); (2,"two"); (3,"three")];;</userinput>
@@ -234,7 +234,7 @@
           comma-separated list.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           8)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let upcase_first_entry line =</userinput>
@@ -254,7 +254,7 @@
           such cases explicitly:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           9)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let upcase_first_entry line =</userinput>
@@ -290,7 +290,7 @@
           keyword, as shown here.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           10)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">(fun x -&gt; x + 1);;</userinput>
@@ -301,7 +301,7 @@
           argument.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           11)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">(fun x -&gt; x + 1) 7;;</userinput>
@@ -312,7 +312,7 @@
           common use-case for anonymous functions.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           12)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.map ~f:(fun x -&gt; x + 1) [1;2;3];;</userinput>
@@ -321,7 +321,7 @@
           <para>You can even stuff them into a data structure.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           13)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let increments = [ (fun x -&gt; x + 1); (fun x -&gt; x + 2) ] ;;</userinput>
@@ -348,7 +348,7 @@
           let binding.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           14)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let plusone = (fun x -&gt; x + 1);;</userinput>
@@ -362,7 +362,7 @@
           above.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           15)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let plusone x = x + 1;;</userinput>
@@ -381,7 +381,7 @@
             the following two expressions are nearly equivalent:</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
             16)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">(fun x -&gt; x + 1) 7;;</userinput>
@@ -401,7 +401,7 @@
           example:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           17)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let abs_diff x y = abs (x - y);;</userinput>
@@ -415,7 +415,7 @@
           form, using the <literal moreinfo="none">fun</literal> keyword:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           18)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let abs_diff =</userinput>
@@ -441,7 +441,7 @@
           follows.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">variables-and-functions/abs_diff.mli</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/abs_diff.mli">variables-and-functions/abs_diff.mli</ulink></para>
 
           <programlisting language="ocaml" format="linespecific">val abs_diff : int -&gt; (int -&gt; int)</programlisting>
 
@@ -455,7 +455,7 @@
           a given number from <literal moreinfo="none">3</literal>.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           19)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let dist_from_3 = abs_diff 3;;</userinput>
@@ -475,7 +475,7 @@
           above.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           20)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let abs_diff = (fun x y -&gt; abs (x - y));;</userinput>
@@ -491,7 +491,7 @@
           a tuple as different arguments. So, we could write:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           21)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let abs_diff (x,y) = abs (x - y);;</userinput>
@@ -528,7 +528,7 @@
           element in a list.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           22)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec find_first_stutter list =</userinput>
@@ -555,7 +555,7 @@
           keyword. Here's a (gratuitously inefficient) example.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           23)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec is_even x =</userinput>
@@ -597,7 +597,7 @@
           and infix style:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           24)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Int.max 3 4  (* prefix *);;</userinput>
@@ -612,7 +612,7 @@
           you can use it as an ordinary prefix function.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           25)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">(+) 3 4;;</userinput>
@@ -630,7 +630,7 @@
           characters from the following set:</para>
 
           <para role="sourcecode">Syntax:
-          <filename moreinfo="none">variables-and-functions/operators.syntax</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/operators.syntax">variables-and-functions/operators.syntax</ulink></para>
 
           <programlisting language="" format="linespecific">! $ % &amp; * + - . / : &lt; = &gt; ? @ ^ | ~</programlisting>
 
@@ -643,7 +643,7 @@
           an example of a simple vector-addition operator on int pairs.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           26)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let (+!) (x1,y1) (x2,y2) = (x1 + x2, y1 + y2);;</userinput>
@@ -656,7 +656,7 @@
           example.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           27)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let (***) x y = (x ** y) ** y;;</userinput>
@@ -670,7 +670,7 @@
           that begins or ends with <literal moreinfo="none">*</literal>.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           28)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let ( *** ) x y = (x ** y) ** y;;</userinput>
@@ -820,7 +820,7 @@
           as you can see below.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           29)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Int.max 3 (-4);;</userinput>
@@ -834,7 +834,7 @@
           equivalent to:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           30)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">(Int.max 3) - 4;;</userinput>
@@ -849,7 +849,7 @@
           described above. Here's the code.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           31)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let (|&gt;) x f = f x ;;</userinput>
@@ -866,7 +866,7 @@
           provided comparison function.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           32)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let path = "/usr/bin:/usr/local/bin:/bin:/sbin";;</userinput>
@@ -885,7 +885,7 @@
           the result is a bit more verbose.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           33)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">  let split_path = String.split ~on:':' path in</userinput>
@@ -905,7 +905,7 @@
           <literal moreinfo="none">List.iter</literal> with all its arguments:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           34)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.iter ~f:print_endline ["Two"; "lines"];;</userinput>
@@ -917,7 +917,7 @@
           a function for printing out a list of strings.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           35)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.iter ~f:print_endline;;</userinput>
@@ -931,7 +931,7 @@
           if we try using a right associative operator, like (^&gt;).</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           36)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let (^&gt;) x f = f x;;</userinput>
@@ -971,7 +971,7 @@
           example:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           37)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let some_or_zero = function</userinput>
@@ -986,7 +986,7 @@
           definition with a <literal moreinfo="none">match</literal>.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           38)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let some_or_zero num_opt =</userinput>
@@ -1002,7 +1002,7 @@
           argument.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           39)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let some_or_default default = function</userinput>
@@ -1036,7 +1036,7 @@
           example.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           40)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let ratio ~num ~denom = float num /. float denom;;</userinput>
@@ -1047,7 +1047,7 @@
           order.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           41)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">ratio ~num:3 ~denom:10;;</userinput>
@@ -1063,7 +1063,7 @@
           be used when invoking a function.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           42)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let num = 3 in</userinput>
@@ -1089,7 +1089,7 @@
               removed.</para>
 
               <para role="sourcecode">OCaml:
-              <filename moreinfo="none">variables-and-functions/htable_sig1.ml</filename></para>
+              <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/htable_sig1.ml">variables-and-functions/htable_sig1.ml</ulink></para>
 
               <programlisting language="ocaml" format="linespecific">val create_hashtable : int -&gt; bool -&gt; ('a,'b) Hashtable.t</programlisting>
 
@@ -1098,7 +1098,7 @@
               intent immediately clear.</para>
 
               <para role="sourcecode">OCaml:
-              <filename moreinfo="none">variables-and-functions/htable_sig2.ml</filename></para>
+              <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/htable_sig2.ml">variables-and-functions/htable_sig2.ml</ulink></para>
 
               <programlisting language="ocaml" format="linespecific">val create_hashtable :
   init_size:int -&gt; allow_shrinking:bool -&gt; ('a,'b) Hashtable.t</programlisting>
@@ -1116,7 +1116,7 @@
               signature for a function that extracts a substring.</para>
 
               <para role="sourcecode">OCaml:
-              <filename moreinfo="none">variables-and-functions/substring_sig1.ml</filename></para>
+              <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/substring_sig1.ml">variables-and-functions/substring_sig1.ml</ulink></para>
 
               <programlisting language="ocaml" format="linespecific">val substring: string -&gt; int -&gt; int -&gt; string</programlisting>
 
@@ -1125,7 +1125,7 @@
               fact more obvious from the signature by adding labels.</para>
 
               <para role="sourcecode">OCaml:
-              <filename moreinfo="none">variables-and-functions/substring_sig2.ml</filename></para>
+              <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/substring_sig2.ml">variables-and-functions/substring_sig2.ml</ulink></para>
 
               <programlisting language="ocaml" format="linespecific">val substring: string -&gt; pos:int -&gt; len:int -&gt; string</programlisting>
 
@@ -1145,7 +1145,7 @@
               in the following example from earlier in the chapter.</para>
 
               <para role="sourcecode">OCaml Utop:
-              <filename moreinfo="none">variables-and-functions/main.topscript</filename>
+              <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
               (part 43)</para>
 
               <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">  String.split ~on:':' path</userinput>
@@ -1176,7 +1176,7 @@
             arguments to another function. Here's an example.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
             44)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let apply_to_tuple f (first,second) = f ~first ~second;;</userinput>
@@ -1190,7 +1190,7 @@
             the order in which the labeled arguments were listed.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
             45)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let apply_to_tuple_2 f (first,second) = f ~second ~first;;</userinput>
@@ -1200,7 +1200,7 @@
             a function that has a different order</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
             46)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let divide ~first ~second = first / second;;</userinput>
@@ -1210,7 +1210,7 @@
             <literal moreinfo="none">apply_to_tuple_2</literal>.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
             47)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">apply_to_tuple_2 divide (3,4);;</userinput>
@@ -1222,7 +1222,7 @@
             <literal moreinfo="none">apply_to_tuple</literal>.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
             48)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let apply_to_tuple f (first,second) = f ~first ~second;;</userinput>
@@ -1249,7 +1249,7 @@
           operator for pairwise string concatenation.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           49)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let concat ?sep x y =</userinput>
@@ -1277,7 +1277,7 @@
           concisely.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
           50)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let concat ?(sep="") x y = x ^ sep ^ y ;;</userinput>
@@ -1321,7 +1321,7 @@
             argument to concat.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
             51)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">concat ~sep:":" "foo" "bar" (* provide the optional argument *);;</userinput>
@@ -1334,7 +1334,7 @@
             <literal moreinfo="none">sep</literal>.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
             52)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">concat "foo" "bar" (* don't provide the optional argument *);;</userinput>
@@ -1351,7 +1351,7 @@
             follows.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
             53)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let uppercase_concat ?(sep="") a b = concat ~sep (String.uppercase a) b ;;</userinput>
@@ -1373,7 +1373,7 @@
             syntax.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
             54)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let uppercase_concat ?sep a b = concat ?sep (String.uppercase a) b ;;</userinput>
@@ -1404,7 +1404,7 @@
             <literal moreinfo="none">y'</literal> are just ordinary variables.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
             55)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let numeric_deriv ~delta ~x ~y ~f =</userinput>
@@ -1432,7 +1432,7 @@
             <literal moreinfo="none">numeric_deriv</literal>.</para>
 
             <para role="sourcecode">OCaml:
-            <filename moreinfo="none">variables-and-functions/numerical_deriv_alt_sig.mli</filename></para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/numerical_deriv_alt_sig.mli">variables-and-functions/numerical_deriv_alt_sig.mli</ulink></para>
 
             <programlisting language="ocaml" format="linespecific">val numeric_deriv :
   delta:float -&gt;
@@ -1451,7 +1451,7 @@
             orders.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
             56)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let numeric_deriv ~delta ~x ~y ~f =</userinput>
@@ -1474,7 +1474,7 @@
             on <literal moreinfo="none">f</literal>.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
             57)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let numeric_deriv ~delta ~x ~y ~(f: x:float -&gt; y:float -&gt; float) =</userinput>
@@ -1499,7 +1499,7 @@
             the optional argument itself:</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
             58)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let colon_concat = concat ~sep:":";;</userinput>
@@ -1511,7 +1511,7 @@
             argument?</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
             59)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let prepend_pound = concat "# ";;</userinput>
@@ -1525,7 +1525,7 @@
             rejected.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
             60)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">prepend_pound "a BASH comment" ~sep:":";;</userinput>
@@ -1545,7 +1545,7 @@
             the second position:</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
             61)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let concat x ?(sep="") y = x ^ sep ^ y ;;</userinput>
@@ -1555,7 +1555,7 @@
             optional argument to be erased.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
             62)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let prepend_pound = concat "# ";;</userinput>
@@ -1572,7 +1572,7 @@
             write:</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
             63)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">concat "a" "b" ~sep:"=";;</userinput>
@@ -1583,7 +1583,7 @@
             compiler warning.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
             64)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let concat x y ?(sep="") = x ^ sep ^ y ;;</userinput>
@@ -1597,7 +1597,7 @@
             argument to be provided.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">variables-and-functions/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink> (part
             65)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">concat "a" "b";;</userinput>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="foreign-function-interface">
       <title>Foreign Function Interface</title>
@@ -56,7 +56,7 @@
         <para>Once that's done, Ctypes is available via OPAM as usual.</para>
 
         <para role="sourcecode">Terminal:
-        <filename moreinfo="none">ffi/install.out</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/install.out">ffi/install.out</ulink></para>
 
         <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">brew install libffi     # for MacOS X users</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">opam install ctypes</userinput>
@@ -82,7 +82,7 @@
         We'll just use the small excerpt that's shown below since we just want
         to demonstrate Ctypes in action.</para>
 
-        <para role="sourcecode">C: <filename moreinfo="none">ffi/ncurses.h</filename></para>
+        <para role="sourcecode">C: <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/ncurses.h">ffi/ncurses.h</ulink></para>
 
         <programlisting language="c" format="linespecific">typedef struct _win_st WINDOW;
 typedef unsigned int chtype;
@@ -125,7 +125,7 @@ int     cbreak (void);</programlisting>
         the <literal moreinfo="none">WINDOW</literal> state pointer.</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">ffi/ncurses.ml</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/ncurses.ml">ffi/ncurses.ml</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">open Ctypes
 
@@ -139,7 +139,7 @@ let window : window typ = ptr void</programlisting>
         pointer. This value is used later in the Ctypes function
         definitions.</para>
 
-        <para role="sourcecode">OCaml: <filename moreinfo="none">ffi/ncurses.ml</filename>
+        <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/ncurses.ml">ffi/ncurses.ml</ulink>
         (part 1)</para>
 
         <programlisting language="ocaml" format="linespecific">open Foreign
@@ -169,7 +169,7 @@ let initscr =
         <para>The remainder of the Ncurses binding simply expands on these
         definitions.</para>
 
-        <para role="sourcecode">OCaml: <filename moreinfo="none">ffi/ncurses.ml</filename>
+        <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/ncurses.ml">ffi/ncurses.ml</ulink>
         (part 2)</para>
 
         <programlisting language="ocaml" format="linespecific">let newwin =
@@ -222,7 +222,7 @@ let cbreak =
         target.</para>
 
         <para role="sourcecode">Terminal:
-        <filename moreinfo="none">ffi/infer_ncurses.out</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/infer_ncurses.out">ffi/infer_ncurses.out</ulink></para>
 
         <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg ctypes.foreign ncurses.inferred.mli</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">cp _build/ncurses.inferred.mli .</userinput></programlisting>
@@ -238,7 +238,7 @@ let cbreak =
         other libraries.</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">ffi/ncurses.mli</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/ncurses.mli">ffi/ncurses.mli</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">type window
 val window : window Ctypes.typ
@@ -263,7 +263,7 @@ val cbreak : unit -&gt; int</programlisting>
         all together.</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">ffi/hello.ml</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/hello.ml">ffi/hello.ml</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">open Ncurses
 
@@ -284,7 +284,7 @@ let () =
         with the <literal moreinfo="none">ctypes.foreign</literal> OCamlfind package.</para>
 
         <para role="sourcecode">Terminal:
-        <filename moreinfo="none">ffi/build_hello.out</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/build_hello.out">ffi/build_hello.out</ulink></para>
 
         <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg ctypes.foreign -lflags -cclib,-lncurses hello.native </userinput>
 </programlisting>
@@ -345,7 +345,7 @@ let () =
         definition below.</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">ctypes/ctypes.mli</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ctypes/ctypes.mli">ctypes/ctypes.mli</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">type 'a typ</programlisting>
 
@@ -390,7 +390,7 @@ let () =
         <para>Here are the definitions for most of the standard C99 scalar
         types, including some platform-dependent ones.</para>
 
-        <para role="sourcecode">OCaml: <filename moreinfo="none">ctypes/ctypes.mli</filename>
+        <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ctypes/ctypes.mli">ctypes/ctypes.mli</ulink>
         (part 1)</para>
 
         <programlisting language="ocaml" format="linespecific">val void      : unit typ
@@ -474,7 +474,7 @@ val complex64 : Complex.t typ</programlisting>
         functions.</para>
 
         <para role="sourcecode">C:
-        <filename moreinfo="none">ffi/posix_headers.h</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/posix_headers.h">ffi/posix_headers.h</ulink></para>
 
         <programlisting language="c" format="linespecific">time_t time(time_t *);
 double difftime(time_t, time_t);
@@ -506,7 +506,7 @@ char *ctime(const time_t *timep);</programlisting>
         from the top-level.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">ffi/posix.topscript</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/posix.topscript">ffi/posix.topscript</ulink></para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">#require "ctypes.foreign" ;;</userinput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">#require "ctypes.top" ;;</userinput>
@@ -529,7 +529,7 @@ char *ctime(const time_t *timep);</programlisting>
         <literal moreinfo="none">time_t</literal>.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">ffi/posix.topscript</filename> (part 1)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/posix.topscript">ffi/posix.topscript</ulink> (part 1)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let cur_time = time (from_voidp time_t null) ;;</userinput>
 <computeroutput moreinfo="none">val cur_time : time_t = 1376834134</computeroutput></programlisting>
@@ -539,7 +539,7 @@ char *ctime(const time_t *timep);</programlisting>
         through.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">ffi/posix.topscript</filename> (part 2)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/posix.topscript">ffi/posix.topscript</ulink> (part 2)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let time' () = time (from_voidp time_t null) ;;</userinput>
 <computeroutput moreinfo="none">val time' : unit -&gt; time_t = &lt;fun&gt;</computeroutput></programlisting>
@@ -551,7 +551,7 @@ char *ctime(const time_t *timep);</programlisting>
         the second C function in our prototype list above.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">ffi/posix.topscript</filename> (part 3)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/posix.topscript">ffi/posix.topscript</ulink> (part 3)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let difftime =</userinput>
 <userinput moreinfo="none">    foreign "difftime" (time_t @-&gt; time_t @-&gt; returning double) ;;</userinput>
@@ -576,7 +576,7 @@ char *ctime(const time_t *timep);</programlisting>
           string.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">ffi/posix.topscript</filename> (part 4)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/posix.topscript">ffi/posix.topscript</ulink> (part 4)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let ctime = foreign "ctime" (ptr time_t @-&gt; returning string) ;;</userinput>
 <computeroutput moreinfo="none">val ctime : time_t ptr -&gt; string = &lt;fun&gt;</computeroutput></programlisting>
@@ -586,7 +586,7 @@ char *ctime(const time_t *timep);</programlisting>
           <literal moreinfo="none">time</literal> to <literal moreinfo="none">ctime</literal>.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">ffi/posix.topscript</filename> (part 5)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/posix.topscript">ffi/posix.topscript</ulink> (part 5)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">ctime (time' ()) ;;</userinput>
 <computeroutput moreinfo="none">Characters 7-15:</computeroutput>
@@ -599,7 +599,7 @@ char *ctime(const time_t *timep);</programlisting>
           and obtain its memory address.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">ffi/posix.topscript</filename> (part 6)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/posix.topscript">ffi/posix.topscript</ulink> (part 6)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let t_ptr = allocate time_t (time' ()) ;;</userinput>
 <computeroutput moreinfo="none">val t_ptr : time_t ptr = (int64_t*) 0x238ac30</computeroutput></programlisting>
@@ -610,7 +610,7 @@ char *ctime(const time_t *timep);</programlisting>
           passing the pointer as an argument:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">ffi/posix.topscript</filename> (part 7)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/posix.topscript">ffi/posix.topscript</ulink> (part 7)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">ctime t_ptr ;;</userinput>
 <computeroutput moreinfo="none">- : string = "Sun Aug 18 14:55:36 2013\n"</computeroutput></programlisting>
@@ -635,7 +635,7 @@ char *ctime(const time_t *timep);</programlisting>
           <literal moreinfo="none">Ctypes.view</literal> function.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">ctypes/ctypes.mli</filename> (part 2)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ctypes/ctypes.mli">ctypes/ctypes.mli</ulink> (part 2)</para>
 
           <programlisting language="ocaml" format="linespecific">val view :
   read:('a -&gt; 'b) -&gt;
@@ -648,7 +648,7 @@ char *ctime(const time_t *timep);</programlisting>
           They have the following type signature.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">ctypes/ctypes.mli</filename> (part 3)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ctypes/ctypes.mli">ctypes/ctypes.mli</ulink> (part 3)</para>
 
           <programlisting language="ocaml" format="linespecific">val string_of_char_ptr : char ptr -&gt; string
 val char_ptr_of_string : string -&gt; char ptr</programlisting>
@@ -658,7 +658,7 @@ val char_ptr_of_string : string -&gt; char ptr</programlisting>
           simple.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">ctypes/ctypes_impl.ml</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ctypes/ctypes_impl.ml">ctypes/ctypes_impl.ml</ulink></para>
 
           <programlisting language="ocaml" format="linespecific">let string = 
   view (char ptr)
@@ -670,7 +670,7 @@ val char_ptr_of_string : string -&gt; char ptr</programlisting>
           the view function.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">ctypes/ctypes.mli</filename> (part 4)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ctypes/ctypes.mli">ctypes/ctypes.mli</ulink> (part 4)</para>
 
           <programlisting language="ocaml" format="linespecific">val string    : string.typ</programlisting>
 
@@ -719,7 +719,7 @@ val char_ptr_of_string : string -&gt; char ptr</programlisting>
           structure definitions.</para>
 
           <para role="sourcecode">C:
-          <filename moreinfo="none">ffi/timeval_headers.h</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/timeval_headers.h">ffi/timeval_headers.h</ulink></para>
 
           <programlisting language="c" format="linespecific">struct timeval {
   long tv_sec;
@@ -732,7 +732,7 @@ int gettimeofday(struct timeval *, struct timezone *tv);</programlisting>
           top-level, continuing on from the previous definitions.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">ffi/posix.topscript</filename> (part 8)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/posix.topscript">ffi/posix.topscript</ulink> (part 8)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type timeval ;;</userinput>
 <computeroutput moreinfo="none">type timeval</computeroutput>
@@ -760,7 +760,7 @@ int gettimeofday(struct timeval *, struct timezone *tv);</programlisting>
           doesn't have any fields, so we need to add those next.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">ffi/posix.topscript</filename> (part 9)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/posix.topscript">ffi/posix.topscript</ulink> (part 9)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let tv_sec  = field timeval "tv_sec" long ;;</userinput>
 <computeroutput moreinfo="none">val tv_sec : (Signed.long, (timeval, [ `Struct ]) structured) field = &lt;abstr&gt;</computeroutput>
@@ -791,7 +791,7 @@ int gettimeofday(struct timeval *, struct timezone *tv);</programlisting>
           define a second structure type.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">ffi/posix.topscript</filename> (part 10)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/posix.topscript">ffi/posix.topscript</ulink> (part 10)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type timezone ;;</userinput>
 <computeroutput moreinfo="none">type timezone</computeroutput>
@@ -809,7 +809,7 @@ int gettimeofday(struct timeval *, struct timezone *tv);</programlisting>
           now.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">ffi/posix.topscript</filename> (part 11)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/posix.topscript">ffi/posix.topscript</ulink> (part 11)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let gettimeofday = foreign "gettimeofday"</userinput>
 <userinput moreinfo="none">    (ptr timeval @-&gt; ptr timezone @-&gt; returning_checking_errno int) ;;</userinput>
@@ -832,7 +832,7 @@ int gettimeofday(struct timeval *, struct timezone *tv);</programlisting>
           a structure.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">ffi/posix.topscript</filename> (part 12)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/posix.topscript">ffi/posix.topscript</ulink> (part 12)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let gettimeofday' () =</userinput>
 <userinput moreinfo="none">  let tv = make timeval in</userinput>
@@ -861,7 +861,7 @@ int gettimeofday(struct timeval *, struct timezone *tv);</programlisting>
             with a command-line frontend.</para>
 
             <para role="sourcecode">OCaml:
-            <filename moreinfo="none">ffi/datetime.ml</filename></para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/datetime.ml">ffi/datetime.ml</ulink></para>
 
             <programlisting language="ocaml" format="linespecific">open Core.Std
 open Ctypes
@@ -909,7 +909,7 @@ let () =
             <para>This can be compiled and run in the usual way.</para>
 
             <para role="sourcecode">Terminal:
-            <filename moreinfo="none">ffi/build_datetime.out</filename></para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/build_datetime.out">ffi/build_datetime.out</ulink></para>
 
             <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg ctypes.foreign datetime.native</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./datetime.native</userinput>
@@ -926,7 +926,7 @@ let () =
               <literal moreinfo="none">returning</literal>.</para>
 
               <para role="sourcecode">OCaml:
-              <filename moreinfo="none">ffi/return_frag.ml</filename></para>
+              <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/return_frag.ml">ffi/return_frag.ml</ulink></para>
 
               <programlisting language="ocaml" format="linespecific">(* correct types *)
 val time: ptr time_t @-&gt; returning time_t
@@ -937,7 +937,7 @@ val difftime: time_t @-&gt; time_t @-&gt; returning double</programlisting>
               follows?</para>
 
               <para role="sourcecode">OCaml:
-              <filename moreinfo="none">ffi/return_frag.ml</filename> (part 1)</para>
+              <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/return_frag.ml">ffi/return_frag.ml</ulink> (part 1)</para>
 
               <programlisting language="ocaml" format="linespecific">(* incorrect types *)
 val time: ptr time_t @-&gt; time_t
@@ -954,14 +954,14 @@ val difftime: time_t @-&gt; time_t @-&gt; double</programlisting>
               written as follows:</para>
 
               <para role="sourcecode">OCaml:
-              <filename moreinfo="none">ffi/return_frag.ml</filename> (part 2)</para>
+              <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/return_frag.ml">ffi/return_frag.ml</ulink> (part 2)</para>
 
               <programlisting language="ocaml" format="linespecific">val curried : int -&gt; int -&gt; int</programlisting>
 
               <para>but this really means</para>
 
               <para role="sourcecode">OCaml:
-              <filename moreinfo="none">ffi/return_frag.ml</filename> (part 3)</para>
+              <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/return_frag.ml">ffi/return_frag.ml</ulink> (part 3)</para>
 
               <programlisting language="ocaml" format="linespecific">val curried : int -&gt; (int -&gt; int)</programlisting>
 
@@ -970,14 +970,14 @@ val difftime: time_t @-&gt; time_t @-&gt; double</programlisting>
               at once. The equivalent C function type is the following:</para>
 
               <para role="sourcecode">C:
-              <filename moreinfo="none">ffi/return_c_frag.h</filename></para>
+              <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/return_c_frag.h">ffi/return_c_frag.h</ulink></para>
 
               <programlisting language="c" format="linespecific">int uncurried_C(int, int);</programlisting>
 
               <para>and the arguments must always be supplied together:</para>
 
               <para role="sourcecode">C:
-              <filename moreinfo="none">ffi/return_c_frag.c</filename></para>
+              <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/return_c_frag.c">ffi/return_c_frag.c</ulink></para>
 
               <programlisting language="c" format="linespecific">uncurried_C(3, 4);</programlisting>
 
@@ -985,7 +985,7 @@ val difftime: time_t @-&gt; time_t @-&gt; double</programlisting>
               different:</para>
 
               <para role="sourcecode">C:
-              <filename moreinfo="none">ffi/return_c_uncurried.c</filename></para>
+              <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/return_c_uncurried.c">ffi/return_c_uncurried.c</ulink></para>
 
               <programlisting language="c" format="linespecific">/* A function that accepts an int, and returns a function
    pointer that accepts a second int and returns an int. */
@@ -1023,7 +1023,7 @@ function_t *f = curried_C(3); f(4);</programlisting>
           via the <literal moreinfo="none">Array</literal> module.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">ctypes/ctypes.mli</filename> (part 5)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ctypes/ctypes.mli">ctypes/ctypes.mli</ulink> (part 5)</para>
 
           <programlisting language="ocaml" format="linespecific">module Array : sig
   type 'a t = 'a array
@@ -1126,7 +1126,7 @@ end</programlisting>
         pointer. The signature for <literal moreinfo="none">qsort</literal> is as
         follows:</para>
 
-        <para role="sourcecode">C: <filename moreinfo="none">ffi/qsort.h</filename></para>
+        <para role="sourcecode">C: <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/qsort.h">ffi/qsort.h</ulink></para>
 
         <programlisting language="c" format="linespecific">void qsort(void *base, size_t nmemb, size_t size,
            int(*compar)(const void *, const void *));</programlisting>
@@ -1137,7 +1137,7 @@ end</programlisting>
         palatable.</para>
 
         <para role="sourcecode">C:
-        <filename moreinfo="none">ffi/qsort_typedef.h</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/qsort_typedef.h">ffi/qsort_typedef.h</ulink></para>
 
         <programlisting language="c" format="linespecific">typedef int(compare_t)(const void *, const void *);
 
@@ -1150,7 +1150,7 @@ void qsort(void *base, size_t nmemb, size_t size, compare_t *);</programlisting>
         <literal moreinfo="none">qsort</literal>.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">ffi/qsort.topscript</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/qsort.topscript">ffi/qsort.topscript</ulink></para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">#require "ctypes.foreign" ;;</userinput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">open Ctypes ;;</userinput>
@@ -1187,7 +1187,7 @@ void qsort(void *base, size_t nmemb, size_t size, compare_t *);</programlisting>
           supplied on the standard input.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">ffi/qsort.ml</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/qsort.ml">ffi/qsort.ml</ulink></para>
 
           <programlisting language="ocaml" format="linespecific">open Core.Std
 open Ctypes
@@ -1228,7 +1228,7 @@ let () =
           examine it more closely.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">ffi/build_qsort.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/build_qsort.out">ffi/build_qsort.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg ctypes.foreign qsort.native</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">cat input.txt</userinput>
@@ -1251,7 +1251,7 @@ let () =
           <literal moreinfo="none">qsort'</literal> wrapper function.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">ffi/qsort.mli</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/qsort.mli">ffi/qsort.mli</ulink></para>
 
           <programlisting language="ocaml" format="linespecific">val compare_t : (unit Ctypes.ptr -&gt; unit Ctypes.ptr -&gt; int) Ctypes.fn
 val qsort :

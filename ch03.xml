@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="lists-and-patterns">
       <title>Lists and Patterns</title>
@@ -16,7 +16,7 @@
         bracket-and-semicolon notation:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink></para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">[1;2;3];;</userinput>
 <computeroutput moreinfo="none">- : int list = [1; 2; 3]</computeroutput></programlisting>
@@ -25,7 +25,7 @@
         <literal moreinfo="none">::</literal> notation.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part 1)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part 1)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">1 :: (2 :: (3 :: [])) ;;</userinput>
 <computeroutput moreinfo="none">- : int list = [1; 2; 3]</computeroutput>
@@ -39,7 +39,7 @@
         used with elements of any type, as you can see below.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part 2)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part 2)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let empty = [];;</userinput>
 <computeroutput moreinfo="none">val empty : 'a list = []</computeroutput>
@@ -56,7 +56,7 @@
         <literal moreinfo="none">3</literal>) points to the empty list.</para>
 
         <para role="sourcecode">Diagram:
-        <filename moreinfo="none">lists-and-patterns/lists_layout.ascii</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/lists_layout.ascii">lists-and-patterns/lists_layout.ascii</ulink></para>
 
         <programlisting language="" format="linespecific">+---+---+   +---+---+   +---+---+
 | 1 | *----&gt;| 2 | *----&gt;| 3 | *----&gt;||
@@ -70,7 +70,7 @@
         to change any of the existing ones, as you can see:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part 3)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part 3)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let l = 1 :: 2 :: 3 :: [];;</userinput>
 <computeroutput moreinfo="none">val l : int list = [1; 2; 3]</computeroutput>
@@ -88,7 +88,7 @@
         elements of a list.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part 4)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part 4)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec sum l =</userinput>
 <userinput moreinfo="none">    match l with</userinput>
@@ -123,7 +123,7 @@
         is wrong.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part 5)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part 5)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec drop_value l to_drop =</userinput>
 <userinput moreinfo="none">    match l with</userinput>
@@ -140,7 +140,7 @@
         provided value, as you can see below.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part 6)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part 6)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">drop_value [1;2;3] 2;;</userinput>
 <computeroutput moreinfo="none">- : int list = []</computeroutput></programlisting>
@@ -163,7 +163,7 @@
         if-statement.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part 7)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part 7)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec drop_value l to_drop =</userinput>
 <userinput moreinfo="none">    match l with</userinput>
@@ -182,7 +182,7 @@
         <literal moreinfo="none">drop_value</literal>.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part 8)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part 8)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec drop_zero l =</userinput>
 <userinput moreinfo="none">    match l with</userinput>
@@ -230,7 +230,7 @@
           statements.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
           9)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let plus_one_match x =</userinput>
@@ -262,7 +262,7 @@
           the command-line.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
           10)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">#require "core_bench";;</userinput>
@@ -298,7 +298,7 @@
           to implement the entire function without pattern matching.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
           11)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec sum_if l =</userinput>
@@ -310,7 +310,7 @@
           <para>Again, we can benchmark these to see the difference.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
           12)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let numbers = List.range 0 1000 in</userinput>
@@ -363,7 +363,7 @@
           an example of an unmatched pattern.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
           13)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec drop_zero l =</userinput>
@@ -402,7 +402,7 @@
         formatted text table, as follows.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
         69)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">printf "%s\n"</userinput>
@@ -436,7 +436,7 @@
         write:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
         14)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.map ~f:String.length ["Hello"; "World!"];;</userinput>
@@ -447,7 +447,7 @@
         function for combining them. Thus, we might write:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
         15)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.map2_exn ~f:Int.max [1;2;3] [3;2;1];;</userinput>
@@ -457,7 +457,7 @@
         an exception if the lists are of mismatched length.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
         16)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.map2_exn ~f:Int.max [1;2;3] [3;2;1;0];;</userinput>
@@ -473,7 +473,7 @@
         <literal moreinfo="none">fold</literal>.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
         17)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.fold;;</userinput>
@@ -483,7 +483,7 @@
         as summing up a list:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
         18)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.fold ~init:0 ~f:(+) [1;2;3;4];;</userinput>
@@ -496,7 +496,7 @@
         accumulator is itself a list.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
         19)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.fold ~init:[] ~f:(fun list x -&gt; x :: list) [1;2;3;4];;</userinput>
@@ -506,7 +506,7 @@
         column widths.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
         20)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let max_widths header rows =</userinput>
@@ -538,7 +538,7 @@
         outside.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
         21)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let render_separator widths =</userinput>
@@ -567,7 +567,7 @@
           the following code:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
           22)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let s = "." ^ "."  ^ "."  ^ "."  ^ "."  ^ "."  ^ ".";;</userinput>
@@ -577,7 +577,7 @@
           this code:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
           23)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let s = String.concat [".";".";".";".";".";".";"."];;</userinput>
@@ -594,7 +594,7 @@
         to a specified length plus one blank space on either side.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
         24)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let pad s length =</userinput>
@@ -609,7 +609,7 @@
         combining the list of data in the row with the list of widths.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
         25)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let render_row row widths =</userinput>
@@ -624,7 +624,7 @@
         renders the table.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
         26)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let render_table header rows =</userinput>
@@ -662,7 +662,7 @@
             <para>Here's the type signature:</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
             27)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.reduce;;</userinput>
@@ -675,7 +675,7 @@
             <para>Now we can see reduce in action.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
             28)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.reduce ~f:(+) [1;2;3;4;5];;</userinput>
@@ -694,7 +694,7 @@
             that.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
             29)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.filter ~f:(fun x -&gt; x mod 2 = 0) [1;2;3;4;5];;</userinput>
@@ -719,7 +719,7 @@
             a string on the rightmost appearance of a given character.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
             30)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.filter_map (Sys.ls_dir ".") ~f:(fun fname -&gt;</userinput>
@@ -752,7 +752,7 @@
             example.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
             31)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let is_ocaml_source s =</userinput>
@@ -776,7 +776,7 @@
             concatenating a pair of lists.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
             32)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.append [1;2;3] [4;5;6];;</userinput>
@@ -786,7 +786,7 @@
             <literal moreinfo="none">List.append</literal>.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
             33)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">[1;2;3] @ [4;5;6];;</userinput>
@@ -796,7 +796,7 @@
             concatenating a list of lists.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
             34)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.concat [[1;2];[3;4;5];[6];[]];;</userinput>
@@ -807,7 +807,7 @@
             listing of a directory tree.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
             35)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec ls_rec s =</userinput>
@@ -831,7 +831,7 @@
             into one, more efficient operation.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
             36)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec ls_rec s =</userinput>
@@ -855,7 +855,7 @@
         function for doing so.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
         37)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec length = function</userinput>
@@ -871,7 +871,7 @@
         below.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
         38)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let make_list n = List.init n ~f:(fun x -&gt; x);;</userinput>
@@ -905,7 +905,7 @@
         implementation.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
         39)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec length_plus_n l n =</userinput>
@@ -940,7 +940,7 @@
         list as input without blowing the stack.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
         40)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">length (make_list 10_000_000);;</userinput>
@@ -974,7 +974,7 @@
         a list. Here's the implementation that was described earlier.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
         41)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec destutter list =</userinput>
@@ -1003,7 +1003,7 @@
         explicit match.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
         42)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec destutter = function</userinput>
@@ -1019,7 +1019,7 @@
         into one, using an or-pattern.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
         43)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec destutter = function</userinput>
@@ -1037,7 +1037,7 @@
         check on whether the first two elements are equal.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
         44)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec destutter = function</userinput>
@@ -1056,7 +1056,7 @@
           write:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
           45)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">3 = 4;;</userinput>
@@ -1070,7 +1070,7 @@
           see that it is polymorphic:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
           46)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">(=);;</userinput>
@@ -1098,7 +1098,7 @@
           it will fail at runtime if it encounters a function value.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
           47)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">(fun x -&gt; x + 1) = (fun x -&gt; x + 1);;</userinput>
@@ -1135,7 +1135,7 @@
         is exhaustive.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
         48)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec count_some list =</userinput>
@@ -1154,7 +1154,7 @@
         <para>Despite the warning, the function does work fine.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
         49)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">count_some [Some 3; None; Some 4];;</userinput>
@@ -1166,7 +1166,7 @@
         redundancy.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
         50)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec count_some list =</userinput>
@@ -1182,7 +1182,7 @@
         <literal moreinfo="none">when</literal> clause.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
         51)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec count_some list =</userinput>
@@ -1198,7 +1198,7 @@
         own.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
         52)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec count_some list =</userinput>
@@ -1220,7 +1220,7 @@
         <literal moreinfo="none">Core</literal>:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">lists-and-patterns/main.topscript</filename> (part
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
         53)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let count_some l = List.count ~f:Option.is_some l;;</userinput>

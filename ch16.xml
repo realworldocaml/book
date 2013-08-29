@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="parsing-with-ocamllex-and-menhir">
       <title>Parsing with OCamllex and Menhir</title>
@@ -82,7 +82,7 @@
         codes.</para>
 
         <para role="sourcecode">JSON:
-        <filename moreinfo="none">parsing/example.json</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/example.json">parsing/example.json</ulink></para>
 
         <programlisting language="json" format="linespecific">{
   "title": "Cities",
@@ -99,7 +99,7 @@
         type.</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">parsing/manual_token_type.ml</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/manual_token_type.ml">parsing/manual_token_type.ml</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">type token =
   | NULL
@@ -127,7 +127,7 @@
         it would look something like this.</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">parsing/tokens.ml</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/tokens.ml">parsing/tokens.ml</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">[ LEFT_BRACE; ID("title"); COLON; STRING("Cities"); COMMA; ID("cities"); ...</programlisting>
 
@@ -137,7 +137,7 @@
         than the simple AST we used for representing JSON data in <xref linkend="handling-json-data"/>, shown below.</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">parsing/json.ml</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/json.ml">parsing/json.ml</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">type value = [
   | `Assoc of (string * value) list
@@ -157,7 +157,7 @@
         below for our earlier JSON example.</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">parsing/parsed_example.ml</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/parsed_example.ml">parsing/parsed_example.ml</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">`Assoc
   ["title", `String "Cities";
@@ -186,7 +186,7 @@
         punctuation.</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">parsing/parser.mly</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/parser.mly">parsing/parser.mly</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">%token &lt;int&gt; INT
 %token &lt;float&gt; FLOAT
@@ -240,7 +240,7 @@
           with a <literal moreinfo="none">%%</literal>.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">parsing/parser.mly</filename> (part 1)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/parser.mly">parsing/parser.mly</ulink> (part 1)</para>
 
           <programlisting language="ocaml" format="linespecific">%start &lt;Json.value option&gt; prog
 %%</programlisting>
@@ -252,7 +252,7 @@
           for <literal moreinfo="none">prog</literal>.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">parsing/parser.mly</filename> (part 2)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/parser.mly">parsing/parser.mly</ulink> (part 2)</para>
 
           <programlisting language="ocaml" format="linespecific">prog:
   | EOF       { None }
@@ -283,7 +283,7 @@
           the <literal moreinfo="none">value</literal> symbol.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">parsing/parser.mly</filename> (part 3)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/parser.mly">parsing/parser.mly</ulink> (part 3)</para>
 
           <programlisting language="ocaml" format="linespecific">value:
   | LEFT_BRACE; obj = object_fields; RIGHT_BRACE
@@ -341,7 +341,7 @@
           *)</literal> is used to make this clear.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">parsing/parser.mly</filename> (part 4)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/parser.mly">parsing/parser.mly</ulink> (part 4)</para>
 
           <programlisting language="ocaml" format="linespecific">object_fields: obj = rev_object_fields { List.rev obj };
 
@@ -359,7 +359,7 @@ rev_object_fields:
           space to read object field definitions.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">parsing/right_rec_rule.mly</filename> (part 4)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/right_rec_rule.mly">parsing/right_rec_rule.mly</ulink> (part 4)</para>
 
           <programlisting language="ocaml" format="linespecific">(* Inefficient right-recursive rule *)
 object_fields:
@@ -374,7 +374,7 @@ object_fields:
           list.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">parsing/quadratic_rule.mly</filename> (part 4)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/quadratic_rule.mly">parsing/quadratic_rule.mly</ulink> (part 4)</para>
 
           <programlisting language="ocaml" format="linespecific">(* Quadratic left-recursive rule *)
 object_fields:
@@ -397,7 +397,7 @@ object_fields:
           lists with one rule.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">parsing/short_parser.mly</filename> (part 1)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/short_parser.mly">parsing/short_parser.mly</ulink> (part 1)</para>
 
           <programlisting language="ocaml" format="linespecific">prog:
   | v = value { Some v }
@@ -429,7 +429,7 @@ list_fields:
           handle files with the <literal moreinfo="none">.mly</literal> suffix.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">parsing/build_short_parser.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/build_short_parser.out">parsing/build_short_parser.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -use-menhir short_parser.mli</userinput>
 </programlisting>
@@ -452,7 +452,7 @@ list_fields:
           is bounded by a pair of curly braces.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">parsing/lexer.mll</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/lexer.mll">parsing/lexer.mll</ulink></para>
 
           <programlisting language="ocaml" format="linespecific">{
 open Lexing
@@ -491,7 +491,7 @@ let next_line lexbuf =
           syntax for declaring regular expressions. Here's an example.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">parsing/lexer.mll</filename> (part 1)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/lexer.mll">parsing/lexer.mll</ulink> (part 1)</para>
 
           <programlisting language="ocaml" format="linespecific">let int = '-'? ['0'-'9'] ['0'-'9']*</programlisting>
 
@@ -512,7 +512,7 @@ let next_line lexbuf =
           than creating one big and impenetrable expression.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">parsing/lexer.mll</filename> (part 2)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/lexer.mll">parsing/lexer.mll</ulink> (part 2)</para>
 
           <programlisting language="ocaml" format="linespecific">let digit = ['0'-'9']
 let frac = '.' digit*
@@ -523,7 +523,7 @@ let float = digit* frac? exp?</programlisting>
           identifiers.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">parsing/lexer.mll</filename> (part 3)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/lexer.mll">parsing/lexer.mll</ulink> (part 3)</para>
 
           <programlisting language="ocaml" format="linespecific">let white = [' ' '\t']+
 let newline = '\r' | '\n' | "\r\n"
@@ -546,7 +546,7 @@ let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*</programlisting>
           expression.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">parsing/lexer.mll</filename> (part 4)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/lexer.mll">parsing/lexer.mll</ulink> (part 4)</para>
 
           <programlisting language="ocaml" format="linespecific">rule read =
   parse
@@ -584,7 +584,7 @@ let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*</programlisting>
           action.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">parsing/lexer_int_fragment.mll</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/lexer_int_fragment.mll">parsing/lexer_int_fragment.mll</ulink></para>
 
           <programlisting language="ocaml" format="linespecific">| int { INT (int_of_string (Lexing.lexeme lexbuf)) }</programlisting>
 
@@ -638,7 +638,7 @@ let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*</programlisting>
           rule definition.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">parsing/lexer.mll</filename> (part 5)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/lexer.mll">parsing/lexer.mll</ulink> (part 5)</para>
 
           <programlisting language="ocaml" format="linespecific">and read_string buf =
   parse
@@ -723,7 +723,7 @@ let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*</programlisting>
         <literal moreinfo="none">lexbuf</literal>.</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">parsing/prog.mli</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/prog.mli">parsing/prog.mli</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">val prog:(Lexing.lexbuf -&gt; token) -&gt; Lexing.lexbuf -&gt; Json.value option</programlisting>
 
@@ -735,7 +735,7 @@ let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*</programlisting>
         below.</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">parsing-test/test.ml</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing-test/test.ml">parsing-test/test.ml</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">open Core.Std
 open Lexer
@@ -773,7 +773,7 @@ let parse_with_error lexbuf =
         print a <literal moreinfo="none">Json.value</literal>.</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">parsing-test/test.ml</filename> (part 1)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing-test/test.ml">parsing-test/test.ml</ulink> (part 1)</para>
 
         <programlisting language="ocaml" format="linespecific">let rec parse_and_print lexbuf =
   match parse_with_error lexbuf with
@@ -793,7 +793,7 @@ let loop filename () =
         wrote.</para>
 
         <para role="sourcecode">JSON:
-        <filename moreinfo="none">parsing-test/test1.json</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing-test/test1.json">parsing-test/test1.json</ulink></para>
 
         <programlisting language="json" format="linespecific">true
 false
@@ -810,7 +810,7 @@ null
         the full parser in action.</para>
 
         <para role="sourcecode">Terminal:
-        <filename moreinfo="none">parsing-test/build_test.out</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing-test/build_test.out">parsing-test/build_test.out</ulink></para>
 
         <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlbuild -use-menhir -tag thread -use-ocamlfind -quiet -pkg core test.native</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./test.native test1.json</userinput>
@@ -829,7 +829,7 @@ null
         cause the program to terminate with a non-zero exit code.</para>
 
         <para role="sourcecode">Terminal:
-        <filename moreinfo="none">parsing-test/run_broken_test.out</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing-test/run_broken_test.out">parsing-test/run_broken_test.out</ulink></para>
 
         <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">cat test2.json</userinput>
 <computeroutput moreinfo="none">{ "name": "Chicago",</computeroutput>

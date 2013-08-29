@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="records">
       <title>Records</title>
@@ -14,7 +14,7 @@
       syntax for a record type declaration is as follows.</para>
 
       <para role="sourcecode">Syntax:
-      <filename moreinfo="none">records/record.syntax</filename></para>
+      <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/record.syntax">records/record.syntax</ulink></para>
 
       <programlisting language="" format="linespecific">type &lt;record-name&gt; =
   { &lt;field&gt; : &lt;type&gt; ;
@@ -29,7 +29,7 @@
       that summarizes information about a given computer.</para>
 
       <para role="sourcecode">OCaml Utop:
-      <filename moreinfo="none">records/main.topscript</filename></para>
+      <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink></para>
 
       <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type host_info =</userinput>
 <userinput moreinfo="none">    { hostname   : string;</userinput>
@@ -52,7 +52,7 @@
       <literal moreinfo="none">Time</literal> module.</para>
 
       <para role="sourcecode">OCaml Utop:
-      <filename moreinfo="none">records/main.topscript</filename> (part 1)</para>
+      <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 1)</para>
 
       <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">#require "core_extended";;</userinput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">open Core_extended.Std;;</userinput>
@@ -78,7 +78,7 @@
       the record field using dot-notation.</para>
 
       <para role="sourcecode">OCaml Utop:
-      <filename moreinfo="none">records/main.topscript</filename> (part 2)</para>
+      <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 2)</para>
 
       <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">my_host.cpu_arch;;</userinput>
 <computeroutput moreinfo="none">- : string = "unknown"</computeroutput></programlisting>
@@ -89,7 +89,7 @@
       arbitrary items.</para>
 
       <para role="sourcecode">OCaml Utop:
-      <filename moreinfo="none">records/main.topscript</filename> (part 3)</para>
+      <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 3)</para>
 
       <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type 'a timestamped = { item: 'a; time: Time.t };;</userinput>
 <computeroutput moreinfo="none">type 'a timestamped = { item : 'a; time : Time.t; }</computeroutput></programlisting>
@@ -98,7 +98,7 @@
       parameterized type.</para>
 
       <para role="sourcecode">OCaml Utop:
-      <filename moreinfo="none">records/main.topscript</filename> (part 4)</para>
+      <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 4)</para>
 
       <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let first_timestamped list =</userinput>
 <userinput moreinfo="none">    List.reduce list ~f:(fun a b -&gt; if a.time &lt; b.time then a else b)</userinput>
@@ -113,7 +113,7 @@
         <literal moreinfo="none">host_info_to_string</literal> below.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 5)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 5)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let host_info_to_string { hostname = h; os_name = os;</userinput>
 <userinput moreinfo="none">                            cpu_arch = c; timestamp = ts;</userinput>
@@ -145,7 +145,7 @@
         <literal moreinfo="none">os_release</literal>, as shown below.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 6)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 6)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type host_info =</userinput>
 <userinput moreinfo="none">    { hostname   : string;</userinput>
@@ -175,7 +175,7 @@
         compiler will warn about the missing field.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 7)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 7)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">#warnings "+9";;</userinput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let host_info_to_string { hostname = h; os_name = os;</userinput>
@@ -193,7 +193,7 @@
         adding an underscore to the pattern, as shown below.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 8)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 8)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let host_info_to_string { hostname = h; os_name = os;</userinput>
 <userinput moreinfo="none">                            cpu_arch = c; timestamp = ts; _</userinput>
@@ -214,7 +214,7 @@
           follows.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">records/warn_help.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/warn_help.out">records/warn_help.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocaml -warn-help | egrep '\b9\b'</userinput>
 <computeroutput moreinfo="none">  9 Missing fields in a record pattern.</computeroutput>
@@ -254,7 +254,7 @@
         punning</emphasis>.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 9)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 9)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let host_info_to_string { hostname; os_name; cpu_arch; timestamp; _ } =</userinput>
 <userinput moreinfo="none">     sprintf "%s (%s / %s) &lt;%s&gt;" hostname os_name cpu_arch</userinput>
@@ -266,7 +266,7 @@
         record.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 10)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 10)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let my_host =</userinput>
 <userinput moreinfo="none">    let sh cmd = Shell.sh_one_exn cmd in</userinput>
@@ -290,7 +290,7 @@
         arguments, as shown below.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 11)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 11)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let create_host_info ~hostname ~os_name ~cpu_arch ~os_release =</userinput>
 <userinput moreinfo="none">    { os_name; cpu_arch; os_release;</userinput>
@@ -304,7 +304,7 @@
         without punning.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 12)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 12)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let create_host_info</userinput>
 <userinput moreinfo="none">    ~hostname:hostname ~os_name:os_name</userinput>
@@ -344,7 +344,7 @@
         id and the time the message was generated.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 13)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 13)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type log_entry =</userinput>
 <userinput moreinfo="none">    { session_id: string;</userinput>
@@ -387,7 +387,7 @@
         type will it have?</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 14)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 14)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let get_session_id t = t.session_id;;</userinput>
 <computeroutput moreinfo="none">val get_session_id : logon -&gt; string = &lt;fun&gt;</computeroutput></programlisting>
@@ -398,7 +398,7 @@
         annotation.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 15)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 15)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let get_heartbeat_session_id (t:heartbeat) = t.session_id;;</userinput>
 <computeroutput moreinfo="none">val get_heartbeat_session_id : heartbeat -&gt; string = &lt;fun&gt;</computeroutput></programlisting>
@@ -409,7 +409,7 @@
         heartbeat.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 16)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 16)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let status_and_session t = (t.status_message, t.session_id);;</userinput>
 <computeroutput moreinfo="none">val status_and_session : heartbeat -&gt; string * string = &lt;fun&gt;</computeroutput>
@@ -438,7 +438,7 @@
         <literal moreinfo="none">t</literal>. Using this style we would write:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 17)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 17)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Log_entry = struct</userinput>
 <userinput moreinfo="none">    type t =</userinput>
@@ -490,7 +490,7 @@
         follows.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 18)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 18)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let create_log_entry ~session_id ~important message =</userinput>
 <userinput moreinfo="none">     { Log_entry.time = Time.now (); Log_entry.session_id;</userinput>
@@ -508,7 +508,7 @@
         name.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 19)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 19)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let create_log_entry ~session_id ~important message =</userinput>
 <userinput moreinfo="none">     { Log_entry.</userinput>
@@ -521,7 +521,7 @@
         same trick when pattern matching.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 20)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 20)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let message_to_string { Log_entry.important; message; _ } =</userinput>
 <userinput moreinfo="none">    if important then String.uppercase message else message</userinput>
@@ -532,7 +532,7 @@
         qualify the field by the module directly.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 21)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 21)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let is_important t = t.Log_entry.important;;</userinput>
 <computeroutput moreinfo="none">val is_important : Log_entry.t -&gt; bool = &lt;fun&gt;</computeroutput></programlisting>
@@ -563,7 +563,7 @@
         the client information when a new heartbeat arrives.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 22)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 22)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type client_info =</userinput>
 <userinput moreinfo="none">   { addr: Unix.Inet_addr.t;</userinput>
@@ -595,7 +595,7 @@
         The syntax of a functional update is as follows.</para>
 
         <para role="sourcecode">Syntax:
-        <filename moreinfo="none">records/functional_update.syntax</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/functional_update.syntax">records/functional_update.syntax</ulink></para>
 
         <programlisting language="" format="linespecific">{ &lt;record&gt; with &lt;field&gt; = &lt;value&gt;;
                 &lt;field&gt; = &lt;value&gt;;
@@ -610,7 +610,7 @@
         more concisely.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 23)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 23)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let register_heartbeat t hb =</userinput>
 <userinput moreinfo="none">    { t with last_heartbeat_time = hb.Heartbeat.time };;</userinput>
@@ -625,7 +625,7 @@
         a field for the status message received on the last heartbeat.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 24)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 24)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type client_info =</userinput>
 <userinput moreinfo="none">   { addr: Unix.Inet_addr.t;</userinput>
@@ -652,7 +652,7 @@
         correct thing to do would be to update the code as follows.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 25)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 25)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let register_heartbeat t hb =</userinput>
 <userinput moreinfo="none">    { t with last_heartbeat_time   = hb.Heartbeat.time;</userinput>
@@ -670,7 +670,7 @@
         <literal moreinfo="none">client_info</literal> mutable.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 26)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 26)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type client_info =</userinput>
 <userinput moreinfo="none">   { addr: Unix.Inet_addr.t;</userinput>
@@ -695,7 +695,7 @@
         follows.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 27)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 27)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let register_heartbeat t hb =</userinput>
 <userinput moreinfo="none">    t.last_heartbeat_time   &lt;- hb.Heartbeat.time;</userinput>
@@ -721,7 +721,7 @@
         from a list of <literal moreinfo="none">Logon</literal> messages.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 28)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 28)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let get_users logons =</userinput>
 <userinput moreinfo="none">     List.dedup (List.map logons ~f:(fun x -&gt; x.Logon.user));;</userinput>
@@ -740,7 +740,7 @@
         <literal moreinfo="none">Logon</literal> as follows.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main-29.rawscript</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main-29.rawscript">records/main-29.rawscript</ulink></para>
 
         <programlisting language="ocaml" format="linespecific"><userinput moreinfo="none"># module Logon = struct
     type t =
@@ -791,7 +791,7 @@
         message.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 30)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 30)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let get_users logons = List.dedup (List.map logons ~f:Logon.user);;</userinput>
 <computeroutput moreinfo="none">val get_users : Logon.t list -&gt; string list = &lt;fun&gt;</computeroutput></programlisting>
@@ -839,7 +839,7 @@
         <literal moreinfo="none">Logon.t</literal>.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 31)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 31)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Field.get Logon.Fields.user;;</userinput>
 <computeroutput moreinfo="none">- : Logon.t -&gt; string = &lt;fun&gt;</computeroutput></programlisting>
@@ -854,7 +854,7 @@
         see below.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 32)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 32)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Field.get;;</userinput>
 <computeroutput moreinfo="none">- : ('b, 'r, 'a) Field.t_with_perm -&gt; 'r -&gt; 'a = &lt;fun&gt;</computeroutput></programlisting>
@@ -869,7 +869,7 @@
         function for displaying a record field.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 33)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 33)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let show_field field to_string record =</userinput>
 <userinput moreinfo="none">    let name = Field.name field in</userinput>
@@ -887,7 +887,7 @@
         action.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 34)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 34)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let logon = { Logon.</userinput>
 <userinput moreinfo="none">                session_id = "26685";</userinput>
@@ -915,7 +915,7 @@
         the field iterator has the following type.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 35)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 35)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Logon.Fields.iter;;</userinput>
 <computeroutput moreinfo="none">- : session_id:(([&lt; `Read | `Set_and_create ], Logon.t, string)</computeroutput>
@@ -943,7 +943,7 @@
         <literal moreinfo="none">Logon</literal> record.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">records/main.topscript</filename> (part 36)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink> (part 36)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let print_logon logon =</userinput>
 <userinput moreinfo="none">    let print to_string field =</userinput>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="variants">
       <title>Variants</title>
@@ -14,7 +14,7 @@
       follows.</para>
 
       <para role="sourcecode">Syntax:
-      <filename moreinfo="none">variants/variant.syntax</filename></para>
+      <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/variant.syntax">variants/variant.syntax</ulink></para>
 
       <programlisting language="" format="linespecific">type &lt;variant&gt; =
   | &lt;Tag&gt; [ of &lt;type&gt; [* &lt;type&gt;]... ]
@@ -33,7 +33,7 @@
       variant tags must be capitalized.</para>
 
       <para role="sourcecode">OCaml Utop:
-      <filename moreinfo="none">variants/main.topscript</filename></para>
+      <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink></para>
 
       <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type basic_color =</userinput>
 <userinput moreinfo="none">   | Black | Red | Green | Yellow | Blue | Magenta | Cyan | White ;;</userinput>
@@ -57,7 +57,7 @@
       warn us if we miss a color.</para>
 
       <para role="sourcecode">OCaml Utop:
-      <filename moreinfo="none">variants/main.topscript</filename> (part 1)</para>
+      <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink> (part 1)</para>
 
       <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let basic_color_to_int = function</userinput>
 <userinput moreinfo="none">  | Black -&gt; 0 | Red     -&gt; 1 | Green -&gt; 2 | Yellow -&gt; 3</userinput>
@@ -70,7 +70,7 @@
       of a given string displayed in a terminal.</para>
 
       <para role="sourcecode">OCaml Utop:
-      <filename moreinfo="none">variants/main-2.rawscript</filename></para>
+      <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main-2.rawscript">variants/main-2.rawscript</ulink></para>
 
       <programlisting language="ocaml" format="linespecific"><userinput moreinfo="none"># let color_by_number number text =
     sprintf "\027[38;5;%dm%s\027[0m" number text;;</userinput>
@@ -113,7 +113,7 @@
       <literal moreinfo="none">*</literal>'s.</para>
 
       <para role="sourcecode">OCaml Utop:
-      <filename moreinfo="none">variants/main.topscript</filename> (part 3)</para>
+      <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink> (part 3)</para>
 
       <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type weight = Regular | Bold</userinput>
 <userinput moreinfo="none">  type color =</userinput>
@@ -135,7 +135,7 @@
       data associated with each tag.</para>
 
       <para role="sourcecode">OCaml Utop:
-      <filename moreinfo="none">variants/main.topscript</filename> (part 4)</para>
+      <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink> (part 4)</para>
 
       <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let color_to_int = function</userinput>
 <userinput moreinfo="none">    | Basic (basic_color,weight) -&gt;</userinput>
@@ -149,7 +149,7 @@
       colors.</para>
 
       <para role="sourcecode">OCaml Utop:
-      <filename moreinfo="none">variants/main-5.rawscript</filename></para>
+      <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main-5.rawscript">variants/main-5.rawscript</ulink></para>
 
       <programlisting language="ocaml" format="linespecific"><userinput moreinfo="none"># let color_print color s =
      printf "%s\n" (color_by_number (color_to_int color) s);;</userinput>
@@ -171,7 +171,7 @@
         of <literal moreinfo="none">color</literal> to the following.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/catch_all.topscript</filename> (part 1)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/catch_all.topscript">variants/catch_all.topscript</ulink> (part 1)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type color =</userinput>
 <userinput moreinfo="none">  | Basic of basic_color     (* basic colors *)</userinput>
@@ -193,7 +193,7 @@
         again, the compiler will notice the discrepancy.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/catch_all.topscript</filename> (part 2)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/catch_all.topscript">variants/catch_all.topscript</ulink> (part 2)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let color_to_int = function</userinput>
 <userinput moreinfo="none">    | Basic (basic_color,weight) -&gt;</userinput>
@@ -212,7 +212,7 @@
         <literal moreinfo="none">Bold</literal> tag.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/catch_all.topscript</filename> (part 3)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/catch_all.topscript">variants/catch_all.topscript</ulink> (part 3)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let color_to_int = function</userinput>
 <userinput moreinfo="none">    | Basic basic_color -&gt; basic_color_to_int basic_color</userinput>
@@ -227,7 +227,7 @@
         <para>Fixing this now leads us to the correct implementation.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/catch_all.topscript</filename> (part 4)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/catch_all.topscript">variants/catch_all.topscript</ulink> (part 4)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let color_to_int = function</userinput>
 <userinput moreinfo="none">    | Basic basic_color -&gt; basic_color_to_int basic_color</userinput>
@@ -251,7 +251,7 @@
         as white. We might have written the function as follows.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/catch_all.topscript</filename> (part 5)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/catch_all.topscript">variants/catch_all.topscript</ulink> (part 5)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let oldschool_color_to_int = function</userinput>
 <userinput moreinfo="none">    | Basic (basic_color,weight) -&gt;</userinput>
@@ -290,7 +290,7 @@
         ourselves of the definition of <literal moreinfo="none">Log_entry.t</literal>.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/logger.topscript</filename> (part 1)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/logger.topscript">variants/logger.topscript</ulink> (part 1)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Log_entry = struct</userinput>
 <userinput moreinfo="none">    type t =</userinput>
@@ -322,7 +322,7 @@
         following example.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/logger.topscript</filename> (part 2)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/logger.topscript">variants/logger.topscript</ulink> (part 2)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type client_message = | Logon of Logon.t</userinput>
 <userinput moreinfo="none">                        | Heartbeat of Heartbeat.t</userinput>
@@ -365,7 +365,7 @@
         <para>Here's the concrete code.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/logger.topscript</filename> (part 3)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/logger.topscript">variants/logger.topscript</ulink> (part 3)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let messages_for_user user messages =</userinput>
 <userinput moreinfo="none">    let (user_messages,_) =</userinput>
@@ -406,7 +406,7 @@
         record to contain just the information unique to that record.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/logger.topscript</filename> (part 4)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/logger.topscript">variants/logger.topscript</ulink> (part 4)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Log_entry = struct</userinput>
 <userinput moreinfo="none">    type t = { important: bool;</userinput>
@@ -429,7 +429,7 @@
         types.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/logger.topscript</filename> (part 5)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/logger.topscript">variants/logger.topscript</ulink> (part 5)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type details =</userinput>
 <userinput moreinfo="none">    | Logon of Logon.t</userinput>
@@ -445,7 +445,7 @@
         common across all messages.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/logger.topscript</filename> (part 6)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/logger.topscript">variants/logger.topscript</ulink> (part 6)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Common = struct</userinput>
 <userinput moreinfo="none">    type t = { session_id: string;</userinput>
@@ -459,7 +459,7 @@
         this, we can rewrite our example above as follows:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/logger.topscript</filename> (part 7)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/logger.topscript">variants/logger.topscript</ulink> (part 7)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let messages_for_user user messages =</userinput>
 <userinput moreinfo="none">    let (user_messages,_) =</userinput>
@@ -495,7 +495,7 @@
         message types, we could write a dispatch function as follows.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/logger.topscript</filename> (part 8)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/logger.topscript">variants/logger.topscript</ulink> (part 8)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let handle_message server_state (common,details) =</userinput>
 <userinput moreinfo="none">    match details with</userinput>
@@ -526,7 +526,7 @@
         want to support.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/blang.topscript</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">variants/blang.topscript</ulink></para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type 'a expr =</userinput>
 <userinput moreinfo="none">    | Base  of 'a</userinput>
@@ -563,7 +563,7 @@
         you would run against an email, as in the following example.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/blang.topscript</filename> (part 1)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">variants/blang.topscript</ulink> (part 1)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type mail_field = To | From | CC | Date | Subject</userinput>
 <userinput moreinfo="none">  type mail_predicate = { field: mail_field;</userinput>
@@ -576,7 +576,7 @@
         <literal moreinfo="none">mail_predicate</literal> as its base predicate.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/blang.topscript</filename> (part 2)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">variants/blang.topscript</ulink> (part 2)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let test field contains = Base { field; contains };;</userinput>
 <computeroutput moreinfo="none">val test : mail_field -&gt; string -&gt; mail_predicate expr = &lt;fun&gt;</computeroutput>
@@ -596,7 +596,7 @@
         that.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/blang.topscript</filename> (part 3)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">variants/blang.topscript</ulink> (part 3)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec eval expr base_eval =</userinput>
 <userinput moreinfo="none">    (* a shortcut, so we don't need to repeatedly pass [base_eval]</userinput>
@@ -623,7 +623,7 @@
         the tags of an <literal moreinfo="none">expr</literal>.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/blang.topscript</filename> (part 4)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">variants/blang.topscript</ulink> (part 4)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let and_ l =</userinput>
 <userinput moreinfo="none">    if List.mem l (Const false) then Const false</userinput>
@@ -653,7 +653,7 @@
         above functions.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/blang.topscript</filename> (part 5)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">variants/blang.topscript</ulink> (part 5)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec simplify = function</userinput>
 <userinput moreinfo="none">    | Base _ | Const _ as x -&gt; x</userinput>
@@ -667,7 +667,7 @@
         job it does at simplifying it.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/blang.topscript</filename> (part 6)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">variants/blang.topscript</ulink> (part 6)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">simplify (Not (And [ Or [Base "it's snowing"; Const true];</userinput>
 <userinput moreinfo="none">                       Base "it's raining"]));;</userinput>
@@ -682,7 +682,7 @@
         particular, see what happens if we add a double negation in.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/blang.topscript</filename> (part 7)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">variants/blang.topscript</ulink> (part 7)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">simplify (Not (And [ Or [Base "it's snowing"; Const true];</userinput>
 <userinput moreinfo="none">                       Not (Not (Base "it's raining"))]));;</userinput>
@@ -696,7 +696,7 @@
         double-negation is more obvious.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/blang.topscript</filename> (part 8)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">variants/blang.topscript</ulink> (part 8)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let not_ = function</userinput>
 <userinput moreinfo="none">    | Const b -&gt; Const (not b)</userinput>
@@ -708,7 +708,7 @@
         case for double-negation.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/blang.topscript</filename> (part 9)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">variants/blang.topscript</ulink> (part 9)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let not_ = function</userinput>
 <userinput moreinfo="none">    | Const b -&gt; Const (not b)</userinput>
@@ -745,7 +745,7 @@
         declaration.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/main.topscript</filename> (part 6)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink> (part 6)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let three = `Int 3;;</userinput>
 <computeroutput moreinfo="none">val three : [&gt; `Int of int ] = `Int 3</computeroutput>
@@ -768,7 +768,7 @@
         the same tag:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/main.topscript</filename> (part 7)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink> (part 7)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let five = `Int "five";;</userinput>
 <computeroutput moreinfo="none">val five : [&gt; `Int of string ] = `Int "five"</computeroutput>
@@ -793,7 +793,7 @@
         following example.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/main.topscript</filename> (part 8)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink> (part 8)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let is_positive = function</userinput>
 <userinput moreinfo="none">     | `Int   x -&gt; x &gt; 0</userinput>
@@ -814,7 +814,7 @@
         example:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/main.topscript</filename> (part 9)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink> (part 9)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let exact = List.filter ~f:is_positive [three;four];;</userinput>
 <computeroutput moreinfo="none">val exact : [ `Float of float | `Int of int ] list = [`Int 3; `Float 4.]</computeroutput></programlisting>
@@ -826,7 +826,7 @@
         Core.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">variants/main.topscript</filename> (part 10)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink> (part 10)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let is_positive = function</userinput>
 <userinput moreinfo="none">     | `Int   x -&gt; Ok (x &gt; 0)</userinput>
@@ -857,7 +857,7 @@
           colors as follows, using an ordinary variant.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variants/main.topscript</filename> (part 11)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink> (part 11)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type extended_color =</userinput>
 <userinput moreinfo="none">    | Basic of basic_color * weight  (* basic colors, regular and bold *)</userinput>
@@ -878,7 +878,7 @@
           channel. One might try to write such a function as follows.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variants/main.topscript</filename> (part 12)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink> (part 12)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let extended_color_to_int = function</userinput>
 <userinput moreinfo="none">    | RGBA (r,g,b,a) -&gt; 256 + a + b * 6 + g * 36 + r * 216</userinput>
@@ -902,7 +902,7 @@
           translation here is pretty straightforward.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variants/main.topscript</filename> (part 13)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink> (part 13)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let basic_color_to_int = function</userinput>
 <userinput moreinfo="none">    | `Black -&gt; 0 | `Red     -&gt; 1 | `Green -&gt; 2 | `Yellow -&gt; 3</userinput>
@@ -945,7 +945,7 @@
           <literal moreinfo="none">`Gray</literal>, and not <literal moreinfo="none">`RGBA</literal>.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variants/main.topscript</filename> (part 14)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink> (part 14)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let extended_color_to_int = function</userinput>
 <userinput moreinfo="none">    | `RGBA (r,g,b,a) -&gt; 256 + a + b * 6 + g * 36 + r * 216</userinput>
@@ -973,7 +973,7 @@
           and so compilation fails.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">variants/main.topscript</filename> (part 15)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink> (part 15)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let extended_color_to_int = function</userinput>
 <userinput moreinfo="none">    | `RGBA (r,g,b,a) -&gt; 256 + a + b * 6 + g * 36 + r * 216</userinput>
@@ -1007,7 +1007,7 @@
             with a lower bound.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">variants/main.topscript</filename> (part 16)</para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink> (part 16)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let is_positive_permissive = function</userinput>
 <userinput moreinfo="none">     | `Int   x -&gt; Ok (x &gt; 0)</userinput>
@@ -1031,7 +1031,7 @@
             the erroneous code will compile without complaint.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">variants/main.topscript</filename> (part 17)</para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink> (part 17)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">is_positive_permissive (`Floot 3.5);;</userinput>
 <computeroutput moreinfo="none">- : (bool, string) Result.t = Error "Unknown number type"</computeroutput></programlisting>
@@ -1048,7 +1048,7 @@
           <literal moreinfo="none">mli</literal>.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">variants-termcol/terminal_color.mli</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants-termcol/terminal_color.mli">variants-termcol/terminal_color.mli</ulink></para>
 
           <programlisting language="ocaml" format="linespecific">open Core.Std
 
@@ -1074,7 +1074,7 @@ val extended_color_to_int : extended_color -&gt; int</programlisting>
           library as follows.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">variants-termcol/terminal_color.ml</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants-termcol/terminal_color.ml">variants-termcol/terminal_color.ml</ulink></para>
 
           <programlisting language="ocaml" format="linespecific">open Core.Std
 
@@ -1125,7 +1125,7 @@ let extended_color_to_int = function
           has enough information to warn us.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">variants-termcol-annotated/terminal_color.ml</filename>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants-termcol-annotated/terminal_color.ml">variants-termcol-annotated/terminal_color.ml</ulink>
           (part 1)</para>
 
           <programlisting language="ocaml" format="linespecific">let extended_color_to_int : extended_color -&gt; int = function
@@ -1137,7 +1137,7 @@ let extended_color_to_int = function
           <literal moreinfo="none">`Grey</literal> case is unused.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">variants-termcol-annotated/build.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants-termcol-annotated/build.out">variants-termcol-annotated/build.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild terminal_color.native</userinput>
 <computeroutput moreinfo="none">File "terminal_color.ml", line 30, characters 4-11:</computeroutput>
@@ -1153,7 +1153,7 @@ let extended_color_to_int = function
           <literal moreinfo="none">#</literal>.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">variants-termcol-fixed/terminal_color.ml</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/variants-termcol-fixed/terminal_color.ml">variants-termcol-fixed/terminal_color.ml</ulink> (part
           1)</para>
 
           <programlisting language="ocaml" format="linespecific">let extended_color_to_int : extended_color -&gt; int = function

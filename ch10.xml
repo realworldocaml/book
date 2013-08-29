@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="first-class-modules">
       <title>First-Class Modules</title>
@@ -34,7 +34,7 @@
         a single integer variable.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">fcm/main.topscript</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink></para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module type X_int = sig val x : int end;;</userinput>
 <computeroutput moreinfo="none">module type X_int = sig val x : int end</computeroutput></programlisting>
@@ -42,7 +42,7 @@
         <para>We can also create a module that matches this signature.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">fcm/main.topscript</filename> (part 1)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 1)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Three : X_int = struct let x = 3 end;;</userinput>
 <computeroutput moreinfo="none">module Three : X_int</computeroutput>
@@ -54,7 +54,7 @@
         <literal moreinfo="none">module</literal> keyword, using the following syntax:</para>
 
         <para role="sourcecode">Syntax:
-        <filename moreinfo="none">fcm/pack.syntax</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/pack.syntax">fcm/pack.syntax</ulink></para>
 
         <programlisting language="" format="linespecific">(module &lt;Module&gt; : &lt;Module_type&gt;)</programlisting>
 
@@ -62,7 +62,7 @@
         module as follows.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">fcm/main.topscript</filename> (part 2)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 2)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let three = (module Three : X_int);;</userinput>
 <computeroutput moreinfo="none">val three : (module X_int) = &lt;module&gt;</computeroutput></programlisting>
@@ -71,7 +71,7 @@
         first-class module if it can be inferred. Thus, we can write:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">fcm/main.topscript</filename> (part 3)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 3)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Four = struct let x = 4 end;;</userinput>
 <computeroutput moreinfo="none">module Four : sig val x : int end</computeroutput>
@@ -82,7 +82,7 @@
         module:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">fcm/main.topscript</filename> (part 4)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 4)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let numbers = [three; (module struct let x = 4 end)];;</userinput>
 <computeroutput moreinfo="none">val numbers : (module X_int) list = [&lt;module&gt;; &lt;module&gt;]</computeroutput></programlisting>
@@ -92,14 +92,14 @@
         <literal moreinfo="none">val</literal> keyword, using this syntax:</para>
 
         <para role="sourcecode">Syntax:
-        <filename moreinfo="none">fcm/unpack.syntax</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/unpack.syntax">fcm/unpack.syntax</ulink></para>
 
         <programlisting language="" format="linespecific">(val &lt;first_class_module&gt; : &lt;Module_type&gt;)</programlisting>
 
         <para>And here's an example.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">fcm/main.topscript</filename> (part 5)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 5)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module New_three = (val three : X_int) ;;</userinput>
 <computeroutput moreinfo="none">module New_three : X_int</computeroutput>
@@ -117,7 +117,7 @@
           you can see below.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">fcm/main.topscript</filename> (part 6)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 6)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module type Y_int = X_int;;</userinput>
 <computeroutput moreinfo="none">module type Y_int = X_int</computeroutput>
@@ -133,7 +133,7 @@
           we can unify the types by unpacking and repacking the module.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">fcm/main.topscript</filename> (part 7)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 7)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">[three; (module (val five))];;</userinput>
 <computeroutput moreinfo="none">- : (module X_int) list = [&lt;module&gt;; &lt;module&gt;]</computeroutput></programlisting>
@@ -158,7 +158,7 @@
         X_int)</literal>s.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">fcm/main.topscript</filename> (part 8)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 8)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let to_int m =</userinput>
 <userinput moreinfo="none">    let module M = (val m : X_int) in</userinput>
@@ -177,7 +177,7 @@
         advantage of the concision and simplicity of the core language.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">fcm/main.topscript</filename> (part 9)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 9)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let six = plus three three;;</userinput>
 <computeroutput moreinfo="none">val six : (module X_int) = &lt;module&gt;</computeroutput>
@@ -190,7 +190,7 @@
         <literal moreinfo="none">to_int</literal> function as follows.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">fcm/main.topscript</filename> (part 10)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 10)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let to_int (module M : X_int) = M.x ;;</userinput>
 <computeroutput moreinfo="none">val to_int : (module X_int) -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
@@ -201,7 +201,7 @@
         that takes a value of the type and produces a new one.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">fcm/main.topscript</filename> (part 11)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 11)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module type Bumpable = sig</userinput>
 <userinput moreinfo="none">    type t</userinput>
@@ -213,7 +213,7 @@
         underlying types.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">fcm/main.topscript</filename> (part 12)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 12)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Int_bumper = struct</userinput>
 <userinput moreinfo="none">    type t = int</userinput>
@@ -229,7 +229,7 @@
         <para>And we can convert these to first-class modules.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">fcm/main.topscript</filename> (part 13)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 13)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let int_bumper = (module Int_bumper : Bumpable);;</userinput>
 <computeroutput moreinfo="none">val int_bumper : (module Bumpable) = &lt;module&gt;</computeroutput></programlisting>
@@ -241,7 +241,7 @@
         as you can see below.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">fcm/main.topscript</filename> (part 14)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 14)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let (module Bumpable) = int_bumper in Bumpable.bump 3;;</userinput>
 <computeroutput moreinfo="none">Characters 52-53:</computeroutput>
@@ -252,7 +252,7 @@
         the type, which we can do as follows.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">fcm/main.topscript</filename> (part 15)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 15)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let int_bumper = (module Int_bumper : Bumpable with type t = int);;</userinput>
 <computeroutput moreinfo="none">val int_bumper : (module Bumpable with type t = int) = &lt;module&gt;</computeroutput>
@@ -265,7 +265,7 @@
         type.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">fcm/main.topscript</filename> (part 16)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 16)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let (module Bumpable) = int_bumper in Bumpable.bump 3;;</userinput>
 <computeroutput moreinfo="none">- : int = 4</computeroutput>
@@ -278,7 +278,7 @@
         type as the type <literal moreinfo="none">t</literal> of the module.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">fcm/main.topscript</filename> (part 17)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 17)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let bump_list</userinput>
 <userinput moreinfo="none">       (type a)</userinput>
@@ -304,7 +304,7 @@
         this function in action below.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">fcm/main.topscript</filename> (part 18)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 18)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">bump_list int_bumper [1;2;3];;</userinput>
 <computeroutput moreinfo="none">- : int list = [2; 3; 4]</computeroutput>
@@ -324,7 +324,7 @@
           example.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">fcm/main.topscript</filename> (part 19)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 19)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let wrap_in_list (type a) (x:a) = [x];;</userinput>
 <computeroutput moreinfo="none">val wrap_in_list : 'a -&gt; 'a list = &lt;fun&gt;</computeroutput></programlisting>
@@ -339,7 +339,7 @@
           <literal moreinfo="none">int</literal>, then the compiler will complain.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">fcm/main.topscript</filename> (part 20)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 20)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let wrap_int_in_list (type a) (x:a) = x + x;;</userinput>
 <computeroutput moreinfo="none">Characters 38-39:</computeroutput>
@@ -350,7 +350,7 @@
           doing this to create a new first-class module.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">fcm/main.topscript</filename> (part 21)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 21)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module type Comparable = sig</userinput>
 <userinput moreinfo="none">    type t</userinput>
@@ -387,7 +387,7 @@
         signature for a module that implements a query handler.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">fcm/query_handler.topscript</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink></para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module type Query_handler = sig</userinput>
 <userinput moreinfo="none"/>
@@ -434,7 +434,7 @@
         <emphasis>e.g.</emphasis>,</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">fcm/query_handler.topscript</filename> (part 1)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 1)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module type M = sig type t with sexp end;;</userinput>
 <computeroutput moreinfo="none">module type M =</computeroutput>
@@ -444,7 +444,7 @@
         implementation of those functions. Thus, we can write</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">fcm/query_handler.topscript</filename> (part 2)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 2)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type u = { a: int; b: float } with sexp;;</userinput>
 <computeroutput moreinfo="none">type u = { a : int; b : float; }</computeroutput>
@@ -469,7 +469,7 @@
           <literal moreinfo="none">Sexp.unit</literal>.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">fcm/query_handler.topscript</filename> (part 3)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 3)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Unique = struct</userinput>
 <userinput moreinfo="none">    type config = int with sexp</userinput>
@@ -502,7 +502,7 @@
           directly.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">fcm/query_handler.topscript</filename> (part 4)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 4)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let unique = Unique.create 0;;</userinput>
 <computeroutput moreinfo="none">val unique : Unique.t = {Unique.next_id = 0}</computeroutput>
@@ -516,7 +516,7 @@
           paths are interpreted within.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">fcm/query_handler.topscript</filename> (part 5)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 5)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module List_dir = struct</userinput>
 <userinput moreinfo="none">    type config = string with sexp</userinput>
@@ -555,7 +555,7 @@
           interact with it directly.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">fcm/query_handler.topscript</filename> (part 6)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 6)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let list_dir = List_dir.create "/var";;</userinput>
 <computeroutput moreinfo="none">val list_dir : List_dir.t = {List_dir.cwd = "/var"}</computeroutput>
@@ -578,7 +578,7 @@
           with an instantiated query handler.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">fcm/query_handler.topscript</filename> (part 7)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 7)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module type Query_handler_instance = sig</userinput>
 <userinput moreinfo="none">    module Query_handler : Query_handler</userinput>
@@ -594,7 +594,7 @@
           <para>We can create an instance as follows.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">fcm/query_handler.topscript</filename> (part 8)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 8)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let unique_instance =</userinput>
 <userinput moreinfo="none">    (module struct</userinput>
@@ -608,7 +608,7 @@
           that we are again making use of a locally abstract type.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">fcm/query_handler.topscript</filename> (part 9)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 9)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let build_instance</userinput>
 <userinput moreinfo="none">        (type a)</userinput>
@@ -628,7 +628,7 @@
           instance becomes a one-liner:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">fcm/query_handler.topscript</filename> (part 10)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 10)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let unique_instance = build_instance (module Unique) 0;;</userinput>
 <computeroutput moreinfo="none">val unique_instance : (module Query_handler_instance) = &lt;module&gt;</computeroutput>
@@ -640,7 +640,7 @@
           query is as follows:</para>
 
           <para role="sourcecode">Scheme:
-          <filename moreinfo="none">fcm/query-syntax.scm</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query-syntax.scm">fcm/query-syntax.scm</ulink></para>
 
           <programlisting language="scheme" format="linespecific">(query-name query)</programlisting>
 
@@ -654,7 +654,7 @@
           it.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">fcm/query_handler.topscript</filename> (part 11)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 11)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let build_dispatch_table handlers =</userinput>
 <userinput moreinfo="none">    let table = String.Table.create () in</userinput>
@@ -671,7 +671,7 @@
           dispatch table.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">fcm/query_handler.topscript</filename> (part 12)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 12)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let dispatch dispatch_table name_and_query =</userinput>
 <userinput moreinfo="none">    match name_and_query with</userinput>
@@ -707,7 +707,7 @@
           a command-line interface.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">fcm/query_handler.topscript</filename> (part 13)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 13)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec cli dispatch_table =</userinput>
 <userinput moreinfo="none">    printf "&gt;&gt;&gt; %!";</userinput>
@@ -737,7 +737,7 @@
           file along with following command to launch the interface.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">fcm/query_handler.ml</filename> (part 1)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.ml">fcm/query_handler.ml</ulink> (part 1)</para>
 
           <programlisting language="ocaml" format="linespecific">let () =
   cli (build_dispatch_table [unique_instance; list_dir_instance])</programlisting>
@@ -745,7 +745,7 @@
           <para>Here's an example of a session with this program.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">fcm/query_example.rawscript</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_example.rawscript">fcm/query_example.rawscript</ulink></para>
 
           <programlisting language="ocaml" format="linespecific"><computeroutput moreinfo="none">$ ./query_handler.byte 
 &gt;&gt;&gt; (unique ())
@@ -776,7 +776,7 @@
           basic types.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">fcm/query_handler_core.ml</filename> (part 1)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler_core.ml">fcm/query_handler_core.ml</ulink> (part 1)</para>
 
           <programlisting language="ocaml" format="linespecific">module Loader = struct
   type config = (module Query_handler) list sexp_opaque
@@ -801,7 +801,7 @@
           starts out as empty.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">fcm/query_handler_core.ml</filename> (part 2)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler_core.ml">fcm/query_handler_core.ml</ulink> (part 2)</para>
 
           <programlisting language="ocaml" format="linespecific">let create known_list =
     let active = String.Table.create () in
@@ -821,7 +821,7 @@
           table.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">fcm/query_handler_core.ml</filename> (part 3)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler_core.ml">fcm/query_handler_core.ml</ulink> (part 3)</para>
 
           <programlisting language="ocaml" format="linespecific">let load t handler_name config =
     if Hashtbl.mem t.active handler_name then
@@ -847,7 +847,7 @@
           refuses to unload itself.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">fcm/query_handler_core.ml</filename> (part 4)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler_core.ml">fcm/query_handler_core.ml</ulink> (part 4)</para>
 
           <programlisting language="ocaml" format="linespecific">let unload t handler_name =
     if not (Hashtbl.mem t.active handler_name) then
@@ -866,7 +866,7 @@
           from the user.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">fcm/query_handler_core.ml</filename> (part 5)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler_core.ml">fcm/query_handler_core.ml</ulink> (part 5)</para>
 
           <programlisting language="ocaml" format="linespecific">type request =
     | Load of string * Sexp.t
@@ -886,7 +886,7 @@
           <literal moreinfo="none">Loader</literal> module.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">fcm/query_handler_core.ml</filename> (part 6)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler_core.ml">fcm/query_handler_core.ml</ulink> (part 6)</para>
 
           <programlisting language="ocaml" format="linespecific">let eval t sexp =
     match Or_error.try_with (fun () -&gt; request_of_sexp sexp) with
@@ -908,7 +908,7 @@ end</programlisting>
           table.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">fcm/query_handler_loader.ml</filename> (part 1)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler_loader.ml">fcm/query_handler_loader.ml</ulink> (part 1)</para>
 
           <programlisting language="ocaml" format="linespecific">let () =
   let loader = Loader.create [(module Unique); (module List_dir)] in
@@ -926,7 +926,7 @@ end</programlisting>
           it.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">fcm/build_query_handler_loader.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/build_query_handler_loader.out">fcm/build_query_handler_loader.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild query_handler_loader.byte</userinput>
 </programlisting>
@@ -938,7 +938,7 @@ end</programlisting>
           itself as the only active handler.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">fcm/loader_cli1.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/loader_cli1.out">fcm/loader_cli1.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./query_handler_loader.byte</userinput>
 <computeroutput moreinfo="none">&gt;&gt;&gt; (loader known_services)</computeroutput>
@@ -949,7 +949,7 @@ end</programlisting>
           <para>Any attempt to use an inactive query handler will fail.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">fcm/loader_cli2.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/loader_cli2.out">fcm/loader_cli2.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><computeroutput moreinfo="none">&gt;&gt;&gt; (ls .)</computeroutput>
 <computeroutput moreinfo="none">Could not find matching handler: ls</computeroutput></programlisting>
@@ -960,7 +960,7 @@ end</programlisting>
           be reloaded with a different config.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">fcm/loader_cli3.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/loader_cli3.out">fcm/loader_cli3.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><computeroutput moreinfo="none">&gt;&gt;&gt; (loader (load ls /var))</computeroutput>
 <computeroutput moreinfo="none">()</computeroutput>
@@ -976,7 +976,7 @@ end</programlisting>
           list of known handlers), and can't be unloaded either.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">fcm/loader_cli4.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/loader_cli4.out">fcm/loader_cli4.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><computeroutput moreinfo="none">&gt;&gt;&gt; (loader (unload loader))</computeroutput>
 <computeroutput moreinfo="none">It's unwise to unload yourself</computeroutput></programlisting>
@@ -999,7 +999,7 @@ end</programlisting>
         without first-class modules using the following types:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">fcm/query_handler.topscript</filename> (part 14)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 14)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type query_handler_instance = { name : string</userinput>
 <userinput moreinfo="none">                                ; eval : Sexp.t -&gt; Sexp.t Or_error.t</userinput>
@@ -1018,7 +1018,7 @@ end</programlisting>
         follows.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">fcm/query_handler.topscript</filename> (part 15)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 15)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let unique_handler config_sexp =</userinput>
 <userinput moreinfo="none">    let config = Unique.config_of_sexp config_sexp in</userinput>

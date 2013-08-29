@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="error-handling">
       <title>Error Handling</title>
@@ -26,7 +26,7 @@
         module.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">error-handling/main.topscript</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink></para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.find;;</userinput>
 <computeroutput moreinfo="none">- : 'a list -&gt; f:('a -&gt; bool) -&gt; 'a option = &lt;fun&gt;</computeroutput></programlisting>
@@ -36,7 +36,7 @@
         below.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">error-handling/main.topscript</filename> (part 1)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 1)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.find [1;2;3] ~f:(fun x -&gt; x &gt;= 2) ;;</userinput>
 <computeroutput moreinfo="none">- : int option = Some 2</computeroutput>
@@ -57,7 +57,7 @@
         smallest element of the list.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">error-handling/main.topscript</filename> (part 2)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 2)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let compute_bounds ~cmp list =</userinput>
 <userinput moreinfo="none">    let sorted = List.sort ~cmp list in</userinput>
@@ -81,7 +81,7 @@
         find a key in one table isn't a failure of any sort.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">error-handling/main.topscript</filename> (part 3)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 3)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let find_mismatches table1 table2 =</userinput>
 <userinput moreinfo="none">     Hashtbl.fold table1 ~init:[] ~f:(fun ~key ~data mismatches -&gt;</userinput>
@@ -113,7 +113,7 @@
           deficiency. The type is defined as follows.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">error-handling/result.mli</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/result.mli">error-handling/result.mli</ulink></para>
 
           <programlisting language="ocaml" format="linespecific">module Result : sig
    type ('a,'b) t = | Ok of 'a
@@ -128,7 +128,7 @@ end</programlisting>
           <literal moreinfo="none">Core.Std</literal>. As such, we can write:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">error-handling/main.topscript</filename> (part 4)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 4)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">[ Ok 3; Error "abject failure"; Ok 4 ];;</userinput>
 <computeroutput moreinfo="none">- : (int, string) Result.t list = [Ok 3; Error "abject failure"; Ok 4]</computeroutput></programlisting>
@@ -169,7 +169,7 @@ end</programlisting>
           You can of course construct an error directly from a string:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">error-handling/main.topscript</filename> (part 5)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 5)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Error.of_string "something went wrong";;</userinput>
 <computeroutput moreinfo="none">- : Error.t = something went wrong</computeroutput></programlisting>
@@ -179,7 +179,7 @@ end</programlisting>
           that takes a single argument of type <literal moreinfo="none">unit</literal>.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">error-handling/main.topscript</filename> (part 6)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 6)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Error.of_thunk (fun () -&gt;</userinput>
 <userinput moreinfo="none">    sprintf "something went wrong: %f" 32.3343);;</userinput>
@@ -195,7 +195,7 @@ end</programlisting>
           expressions are strings. Here's a simple example.</para>
 
           <para role="sourcecode">Scheme:
-          <filename moreinfo="none">error-handling/sexpr.scm</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/sexpr.scm">error-handling/sexpr.scm</ulink></para>
 
           <programlisting language="scheme" format="linespecific">(This (is an) (s expression))</programlisting>
 
@@ -207,7 +207,7 @@ end</programlisting>
           <literal moreinfo="none">Time.sexp_of_t</literal>.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">error-handling/main.topscript</filename> (part 7)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 7)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Error.create "Something failed a long time ago" Time.epoch Time.sexp_of_t;;</userinput>
 <computeroutput moreinfo="none">- : Error.t =</computeroutput>
@@ -222,7 +222,7 @@ end</programlisting>
           sexp-converters for newly generated types, as shown below.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">error-handling/main.topscript</filename> (part 8)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 8)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let custom_to_sexp = &lt;:sexp_of&lt;float * string list * int&gt;&gt;;;</userinput>
 <computeroutput moreinfo="none">val custom_to_sexp : float * string list * int -&gt; Sexp.t = &lt;fun&gt;</computeroutput>
@@ -232,7 +232,7 @@ end</programlisting>
           <para>We can use this same idiom for generating an error.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">error-handling/main.topscript</filename> (part 9)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 9)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Error.create "Something went terribly wrong"</userinput>
 <userinput moreinfo="none">    (3.5, ["a";"b";"c"], 6034)</userinput>
@@ -247,7 +247,7 @@ end</programlisting>
           below.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">error-handling/main.topscript</filename> (part 10)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 10)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Error.tag</userinput>
 <userinput moreinfo="none">    (Error.of_list [ Error.of_string "Your tires were slashed";</userinput>
@@ -277,7 +277,7 @@ end</programlisting>
           of <literal moreinfo="none">bind</literal> for options.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">error-handling/main.topscript</filename> (part 11)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 11)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let bind option f =</userinput>
 <userinput moreinfo="none">    match option with</userinput>
@@ -296,7 +296,7 @@ end</programlisting>
           <literal moreinfo="none">bind</literal>s.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">error-handling/main.topscript</filename> (part 12)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 12)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let compute_bounds ~cmp list =</userinput>
 <userinput moreinfo="none">    let sorted = List.sort ~cmp list in</userinput>
@@ -316,7 +316,7 @@ end</programlisting>
           which we'll see again in <xref linkend="concurrent-programming-with-async"/>.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">error-handling/main.topscript</filename> (part 13)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 13)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let compute_bounds ~cmp list =</userinput>
 <userinput moreinfo="none">    let open Option.Monad_infix in</userinput>
@@ -344,7 +344,7 @@ end</programlisting>
           <literal moreinfo="none">compute_bounds</literal> even shorter.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">error-handling/main.topscript</filename> (part 14)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 14)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let compute_bounds ~cmp list =</userinput>
 <userinput moreinfo="none">    let sorted = List.sort ~cmp list in</userinput>
@@ -375,7 +375,7 @@ end</programlisting>
         integer by zero:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">error-handling/main.topscript</filename> (part 15)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 15)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">3 / 0;;</userinput>
 <computeroutput moreinfo="none">Exception: Division_by_zero.</computeroutput></programlisting>
@@ -384,7 +384,7 @@ end</programlisting>
         nested somewhere deep within it.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">error-handling/main.topscript</filename> (part 16)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 16)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.map ~f:(fun x -&gt; 100 / x) [1;3;0;4];;</userinput>
 <computeroutput moreinfo="none">Exception: Division_by_zero.</computeroutput></programlisting>
@@ -395,7 +395,7 @@ end</programlisting>
         of the list.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">error-handling/main.topscript</filename> (part 17)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 17)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.map ~f:(fun x -&gt; printf "%d\n%!" x; 100 / x) [1;3;0;4];;</userinput>
 <computeroutput moreinfo="none">1</computeroutput>
@@ -408,7 +408,7 @@ end</programlisting>
         own.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">error-handling/main.topscript</filename> (part 18)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 18)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">exception Key_not_found of string;;</userinput>
 <computeroutput moreinfo="none">exception Key_not_found of string</computeroutput>
@@ -419,7 +419,7 @@ end</programlisting>
         other OCaml values, as you can see below.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">error-handling/main.topscript</filename> (part 19)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 19)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let exceptions = [ Not_found; Division_by_zero; Key_not_found "b" ];;</userinput>
 <computeroutput moreinfo="none">val exceptions : exn list = [Not_found; Division_by_zero; Key_not_found("b")]</computeroutput>
@@ -444,7 +444,7 @@ end</programlisting>
         exception we defined above to signal an error.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">error-handling/main.topscript</filename> (part 20)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 20)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec find_exn alist key = match alist with</userinput>
 <userinput moreinfo="none">    | [] -&gt; raise (Key_not_found key)</userinput>
@@ -467,7 +467,7 @@ end</programlisting>
         bit surprising when you first see it:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">error-handling/main.topscript</filename> (part 21)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 21)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">raise;;</userinput>
 <computeroutput moreinfo="none">- : exn -&gt; 'a = &lt;fun&gt;</computeroutput></programlisting>
@@ -482,7 +482,7 @@ end</programlisting>
         that doesn't return a value.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">error-handling/main.topscript</filename> (part 22)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 22)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec forever () = forever ();;</userinput>
 <computeroutput moreinfo="none">val forever : unit -&gt; 'a = &lt;fun&gt;</computeroutput></programlisting>
@@ -503,7 +503,7 @@ end</programlisting>
           an exception. For example:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">error-handling/main.topscript</filename> (part 23)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 23)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">exception Wrong_date of Date.t;;</userinput>
 <computeroutput moreinfo="none">exception Wrong_date of Date.t</computeroutput>
@@ -515,7 +515,7 @@ end</programlisting>
           we'll get something with more information.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">error-handling/main.topscript</filename> (part 24)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 24)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">exception Wrong_date of Date.t with sexp;;</userinput>
 <computeroutput moreinfo="none">exception Wrong_date of Date.t</computeroutput>
@@ -543,7 +543,7 @@ end</programlisting>
           follows:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">error-handling/main.topscript</filename> (part 25)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 25)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let failwith msg = raise (Failure msg);;</userinput>
 <computeroutput moreinfo="none">val failwith : string -&gt; 'a = &lt;fun&gt;</computeroutput></programlisting>
@@ -560,7 +560,7 @@ end</programlisting>
           together two lists.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">error-handling/main.topscript</filename> (part 26)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 26)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let merge_lists xs ys ~f =</userinput>
 <userinput moreinfo="none">    if List.length xs &lt;&gt; List.length ys then None</userinput>
@@ -590,7 +590,7 @@ end</programlisting>
           that we drop this test, then we can trigger the assert.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">error-handling/main.topscript</filename> (part 27)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 27)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let merge_lists xs ys ~f =</userinput>
 <userinput moreinfo="none">    let rec loop xs ys =</userinput>
@@ -623,7 +623,7 @@ end</programlisting>
           basic syntax.</para>
 
           <para role="sourcecode">Syntax:
-          <filename moreinfo="none">error-handling/try_with.syntax</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/try_with.syntax">error-handling/try_with.syntax</ulink></para>
 
           <programlisting language="" format="linespecific">try &lt;expr&gt; with
 | &lt;pat1&gt; -&gt; &lt;expr1&gt;
@@ -656,7 +656,7 @@ end</programlisting>
           reminders, formatted as s-expressions.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">error-handling/main.topscript</filename> (part 28)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 28)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let reminders_of_sexp =</userinput>
 <userinput moreinfo="none">    &lt;:of_sexp&lt;(Time.t * string) list&gt;&gt;</userinput>
@@ -690,7 +690,7 @@ end</programlisting>
           <literal moreinfo="none">load_reminders</literal>.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">error-handling/main.topscript</filename> (part 29)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 29)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let load_reminders filename =</userinput>
 <userinput moreinfo="none">    let inc = In_channel.create filename in</userinput>
@@ -704,7 +704,7 @@ end</programlisting>
           <literal moreinfo="none">with_file</literal> that automates this pattern.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">error-handling/main.topscript</filename> (part 30)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 30)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let reminders_of_sexp filename =</userinput>
 <userinput moreinfo="none">    In_channel.with_file filename ~f:(fun inc -&gt;</userinput>
@@ -728,7 +728,7 @@ end</programlisting>
           this. In particular, consider the following function</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">error-handling/main.topscript</filename> (part 31)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 31)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let lookup_weight ~compute_weight alist key =</userinput>
 <userinput moreinfo="none">    try</userinput>
@@ -754,7 +754,7 @@ end</programlisting>
           then that's not what will happen:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">error-handling/main.topscript</filename> (part 32)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 32)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">lookup_weight ~compute_weight:(fun _ -&gt; raise Not_found)</userinput>
 <userinput moreinfo="none">    ["a",3; "b",4] "a" ;;</userinput>
@@ -769,7 +769,7 @@ end</programlisting>
           failed.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">error-handling/main.topscript</filename> (part 33)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 33)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let lookup_weight ~compute_weight alist key =</userinput>
 <userinput moreinfo="none">    match</userinput>
@@ -787,7 +787,7 @@ end</programlisting>
           instead.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">error-handling/main.topscript</filename> (part 34)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 34)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let lookup_weight ~compute_weight alist key =</userinput>
 <userinput moreinfo="none">    match List.Assoc.find alist key with</userinput>
@@ -806,7 +806,7 @@ end</programlisting>
           Consider the following simple program.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">error-handling/blow_up.ml</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/blow_up.ml">error-handling/blow_up.ml</ulink></para>
 
           <programlisting language="ocaml" format="linespecific">open Core.Std
 exception Empty_list
@@ -825,7 +825,7 @@ let () =
           the error.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">error-handling/build_blow_up.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/build_blow_up.out">error-handling/build_blow_up.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild blow_up.byte</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./blow_up.byte</userinput>
@@ -852,7 +852,7 @@ let () =
           environment variable to be empty.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">error-handling/build_blow_up_notrace.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/build_blow_up_notrace.out">error-handling/build_blow_up_notrace.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild blow_up.byte</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">OCAMLRUNPARAM= ./blow_up.byte</userinput>
@@ -870,7 +870,7 @@ let () =
           package.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">error-handling/exn_cost.ml</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/exn_cost.ml">error-handling/exn_cost.ml</ulink></para>
 
           <programlisting language="ocaml" format="linespecific">open Core.Std
 open Core_bench.Std
@@ -909,7 +909,7 @@ let () =
           like this.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">error-handling/run_exn_cost.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/run_exn_cost.out">error-handling/run_exn_cost.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg core_bench exn_cost.native</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./exn_cost.native -ascii cycles</userinput>
@@ -928,7 +928,7 @@ let () =
           this.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">error-handling/run_exn_cost_notrace.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/run_exn_cost_notrace.out">error-handling/run_exn_cost_notrace.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">OCAMLRUNPARAM= ./exn_cost.native -ascii cycles</userinput>
 <computeroutput moreinfo="none">Estimated testing time 30s (change using -quota SECS).</computeroutput>
@@ -958,7 +958,7 @@ let () =
           follows:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">error-handling/main.topscript</filename> (part 35)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 35)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let find alist key =</userinput>
 <userinput moreinfo="none">    Option.try_with (fun () -&gt; find_exn alist key) ;;</userinput>
@@ -973,7 +973,7 @@ let () =
           write:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">error-handling/main.topscript</filename> (part 36)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 36)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let find alist key =</userinput>
 <userinput moreinfo="none">    Or_error.try_with (fun () -&gt; find_exn alist key) ;;</userinput>
@@ -984,7 +984,7 @@ let () =
           <para>And then we can re-raise that exception:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">error-handling/main.topscript</filename> (part 37)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink> (part 37)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Or_error.ok_exn (find ["a",1; "b",2] "b");;</userinput>
 <computeroutput moreinfo="none">- : int = 2</computeroutput>

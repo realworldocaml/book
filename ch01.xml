@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="a-guided-tour">
       <title>A Guided Tour</title>
@@ -27,7 +27,7 @@
         <literal moreinfo="none">Core.Std</literal>.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">guided-tour/main.topscript</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink></para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">open Core.Std;;</userinput>
 </programlisting>
@@ -39,7 +39,7 @@
         <para>Now let's try a few simple numerical calculations.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">guided-tour/main.topscript</filename> (part 1)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 1)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">3 + 4;;</userinput>
 <computeroutput moreinfo="none">- : int = 7</computeroutput>
@@ -108,7 +108,7 @@
         a <emphasis>let binding</emphasis>.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">guided-tour/main.topscript</filename> (part 2)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 2)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let x = 3 + 4;;</userinput>
 <computeroutput moreinfo="none">val x : int = 7</computeroutput>
@@ -127,7 +127,7 @@
         legal:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">guided-tour/main.topscript</filename> (part 3)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 3)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let x7 = 3 + 4;;</userinput>
 <computeroutput moreinfo="none">val x7 : int = 7</computeroutput>
@@ -145,7 +145,7 @@
         <para>The following examples, however, are not legal.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">guided-tour/main.topscript</filename> (part 4)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 4)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let Seven = 3 + 4;;</userinput>
 <computeroutput moreinfo="none">Characters 4-9:</computeroutput>
@@ -169,7 +169,7 @@
         function.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">guided-tour/main.topscript</filename> (part 5)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 5)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let square x = x * x ;;</userinput>
 <computeroutput moreinfo="none">val square : int -&gt; int = &lt;fun&gt;</computeroutput>
@@ -197,7 +197,7 @@
         earlier.)</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">guided-tour/main.topscript</filename> (part 6)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 6)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let ratio x y =</userinput>
 <userinput moreinfo="none">     Float.of_int x /. Float.of_int y</userinput>
@@ -229,7 +229,7 @@
         sum of the integers that pass the test.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">guided-tour/main.topscript</filename> (part 7)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 7)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let sum_if_true test first second =</userinput>
 <userinput moreinfo="none">    (if test first then first else 0)</userinput>
@@ -243,7 +243,7 @@
         example of this function in action.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">guided-tour/main.topscript</filename> (part 8)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 8)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let even x =</userinput>
 <userinput moreinfo="none">    x mod 2 = 0 ;;</userinput>
@@ -326,7 +326,7 @@
           <literal moreinfo="none">sum_if_true</literal>:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">guided-tour/main.topscript</filename> (part 9)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 9)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let sum_if_true (test : int -&gt; bool) (x : int) (y : int) : int =</userinput>
 <userinput moreinfo="none">     (if test x then x else 0)</userinput>
@@ -347,7 +347,7 @@
           the concrete type of a given value. Consider this function.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">guided-tour/main.topscript</filename> (part 10)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 10)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let first_if_true test x y =</userinput>
 <userinput moreinfo="none">    if test x then x else y</userinput>
@@ -385,7 +385,7 @@
           to write this.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">guided-tour/main.topscript</filename> (part 11)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 11)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let long_string s = String.length s &gt; 6;;</userinput>
 <computeroutput moreinfo="none">val long_string : string -&gt; bool = &lt;fun&gt;</computeroutput>
@@ -395,7 +395,7 @@
           <para>As well as this.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">guided-tour/main.topscript</filename> (part 12)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 12)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let big_number x = x &gt; 3;;</userinput>
 <computeroutput moreinfo="none">val big_number : int -&gt; bool = &lt;fun&gt;</computeroutput>
@@ -411,7 +411,7 @@
           <literal moreinfo="none">first_if_true</literal>.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">guided-tour/main.topscript</filename> (part 13)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 13)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">first_if_true big_number "short" "loooooong";;</userinput>
 <computeroutput moreinfo="none">Characters 25-32:</computeroutput>
@@ -439,7 +439,7 @@
             still there. Generally, type errors, like this one:</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">guided-tour/main.topscript</filename> (part 14)</para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 14)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let add_potato x =</userinput>
 <userinput moreinfo="none">     x + "potato";;</userinput>
@@ -454,7 +454,7 @@
             exceptions.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">guided-tour/main.topscript</filename> (part 15)</para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 15)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let is_a_multiple x y =</userinput>
 <userinput moreinfo="none">     x mod y = 0 ;;</userinput>
@@ -490,7 +490,7 @@
           joining values together with a comma.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">guided-tour/main.topscript</filename> (part 16)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 16)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let a_tuple = (3,"three");;</userinput>
 <computeroutput moreinfo="none">val a_tuple : int * string = (3, "three")</computeroutput>
@@ -507,7 +507,7 @@
           pattern matching syntax, as shown below.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">guided-tour/main.topscript</filename> (part 17)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 17)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let (x,y) = a_tuple;;</userinput>
 <computeroutput moreinfo="none">val x : int = 3</computeroutput>
@@ -521,7 +521,7 @@
           expressions.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">guided-tour/main.topscript</filename> (part 18)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 18)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">x + String.length y;;</userinput>
 <computeroutput moreinfo="none">- : int = 8</computeroutput></programlisting>
@@ -536,7 +536,7 @@
           at the values we need with a minimum of fuss.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">guided-tour/main.topscript</filename> (part 19)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 19)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let distance (x1,y1) (x2,y2) =</userinput>
 <userinput moreinfo="none">    sqrt ((x1 -. x2) ** 2. +. (y1 -. y2) ** 2.)</userinput>
@@ -559,7 +559,7 @@
           items of the same type. Consider the following example.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">guided-tour/main.topscript</filename> (part 20)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 20)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let languages = ["OCaml";"Perl";"C"];;</userinput>
 <computeroutput moreinfo="none">val languages : string list = ["OCaml"; "Perl"; "C"]</computeroutput></programlisting>
@@ -568,7 +568,7 @@
           same list, unlike tuples.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">guided-tour/main.topscript</filename> (part 21)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 21)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let numbers = [3;"four";5];;</userinput>
 <computeroutput moreinfo="none">Characters 17-23:</computeroutput>
@@ -584,7 +584,7 @@
             this is how we compute the length of a list.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">guided-tour/main.topscript</filename> (part 22)</para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 22)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.length languages;;</userinput>
 <computeroutput moreinfo="none">- : int = 3</computeroutput></programlisting>
@@ -593,7 +593,7 @@
             the list of the lengths of each language as follows.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">guided-tour/main.topscript</filename> (part 23)</para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 23)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.map languages ~f:String.length;;</userinput>
 <computeroutput moreinfo="none">- : int list = [5; 4; 1]</computeroutput></programlisting>
@@ -611,7 +611,7 @@
             behavior, as you can see here.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">guided-tour/main.topscript</filename> (part 24)</para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 24)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.map ~f:String.length languages;;</userinput>
 <computeroutput moreinfo="none">- : int list = [5; 4; 1]</computeroutput></programlisting>
@@ -628,7 +628,7 @@
             front of a list.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">guided-tour/main.topscript</filename> (part 25)</para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 25)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">"French" :: "Spanish" :: languages;;</userinput>
 <computeroutput moreinfo="none">- : string list = ["French"; "Spanish"; "OCaml"; "Perl"; "C"]</computeroutput></programlisting>
@@ -637,7 +637,7 @@
             the list we started with, as you can see below.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">guided-tour/main.topscript</filename> (part 26)</para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 26)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">languages;;</userinput>
 <computeroutput moreinfo="none">- : string list = ["OCaml"; "Perl"; "C"]</computeroutput></programlisting>
@@ -652,7 +652,7 @@
               doesn't do quite what you might expect.</para>
 
               <para role="sourcecode">OCaml Utop:
-              <filename moreinfo="none">guided-tour/main.topscript</filename> (part 27)</para>
+              <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 27)</para>
 
               <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">["OCaml", "Perl", "C"];;</userinput>
 <computeroutput moreinfo="none">- : (string * string * string) list = [("OCaml", "Perl", "C")]</computeroutput></programlisting>
@@ -666,7 +666,7 @@
               write:</para>
 
               <para role="sourcecode">OCaml Utop:
-              <filename moreinfo="none">guided-tour/main.topscript</filename> (part 28)</para>
+              <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 28)</para>
 
               <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">1,2,3;;</userinput>
 <computeroutput moreinfo="none">- : int * int * int = (1, 2, 3)</computeroutput></programlisting>
@@ -682,7 +682,7 @@
             right-associative.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">guided-tour/main.topscript</filename> (part 29)</para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 29)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">[1; 2; 3];;</userinput>
 <computeroutput moreinfo="none">- : int list = [1; 2; 3]</computeroutput>
@@ -698,7 +698,7 @@
             concatenate two lists.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">guided-tour/main.topscript</filename> (part 30)</para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 30)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">[1;2;3] @ [4;5;6];;</userinput>
 <computeroutput moreinfo="none">- : int list = [1; 2; 3; 4; 5; 6]</computeroutput></programlisting>
@@ -718,7 +718,7 @@
             example.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">guided-tour/main.topscript</filename> (part 31)</para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 31)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let my_favorite_language (my_favorite :: the_rest) =</userinput>
 <userinput moreinfo="none">     my_favorite</userinput>
@@ -747,7 +747,7 @@
             that it works on non-empty list, and fails on empty ones.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">guided-tour/main.topscript</filename> (part 32)</para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 32)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">my_favorite_language ["English";"Spanish";"French"];;</userinput>
 <computeroutput moreinfo="none">- : string = "English"</computeroutput>
@@ -773,7 +773,7 @@
             warning.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">guided-tour/main.topscript</filename> (part 33)</para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 33)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let my_favorite_language languages =</userinput>
 <userinput moreinfo="none">    match languages with</userinput>
@@ -820,7 +820,7 @@
             the elements of a list.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">guided-tour/main.topscript</filename> (part 34)</para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 34)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec sum l =</userinput>
 <userinput moreinfo="none">    match l with</userinput>
@@ -845,7 +845,7 @@
             by step.</para>
 
             <para role="sourcecode">OCaml:
-            <filename moreinfo="none">guided-tour/recursion.ml</filename></para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/recursion.ml">guided-tour/recursion.ml</ulink></para>
 
             <programlisting language="ocaml" format="linespecific">sum [1;2;3]
 = 1 + sum [2;3]
@@ -863,7 +863,7 @@
             Here's a function for removing sequential duplicates.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">guided-tour/main.topscript</filename> (part 35)</para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 35)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec destutter list =</userinput>
 <userinput moreinfo="none">    match list with</userinput>
@@ -885,7 +885,7 @@
             another case to the match.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">guided-tour/main.topscript</filename> (part 36)</para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 36)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec destutter list =</userinput>
 <userinput moreinfo="none">    match list with</userinput>
@@ -924,7 +924,7 @@
           present. For example,</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">guided-tour/main.topscript</filename> (part 37)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 37)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let divide x y =</userinput>
 <userinput moreinfo="none">    if y = 0 then None else Some (x/y) ;;</userinput>
@@ -947,7 +947,7 @@
           its place.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">guided-tour/main.topscript</filename> (part 38)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 38)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let log_entry maybe_time message =</userinput>
 <userinput moreinfo="none">    let time =</userinput>
@@ -982,7 +982,7 @@
             which the new variable can be used. Thus, we could write:</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">guided-tour/local_let.topscript</filename></para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/local_let.topscript">guided-tour/local_let.topscript</ulink></para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let x = 7 in</userinput>
 <userinput moreinfo="none">  x + x</userinput>
@@ -994,7 +994,7 @@
             longer available.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">guided-tour/local_let.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/local_let.topscript">guided-tour/local_let.topscript</ulink> (part
             1)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">x;;</userinput>
@@ -1005,7 +1005,7 @@
             adding a new variable binding to what came before.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">guided-tour/local_let.topscript</filename> (part
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/local_let.topscript">guided-tour/local_let.topscript</ulink> (part
             2)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let x = 7 in</userinput>
@@ -1049,7 +1049,7 @@
         representing a point in 2-dimensional space:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">guided-tour/main.topscript</filename> (part 41)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 41)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type point2d = { x : float; y : float };;</userinput>
 <computeroutput moreinfo="none">type point2d = { x : float; y : float; }</computeroutput></programlisting>
@@ -1060,7 +1060,7 @@
         easy enough to construct:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">guided-tour/main.topscript</filename> (part 42)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 42)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let p = { x = 3.; y = -4. };;</userinput>
 <computeroutput moreinfo="none">val p : point2d = {x = 3.; y = -4.}</computeroutput></programlisting>
@@ -1069,7 +1069,7 @@
         pattern matching:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">guided-tour/main.topscript</filename> (part 43)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 43)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let magnitude { x = x_pos; y = y_pos } =</userinput>
 <userinput moreinfo="none">    sqrt (x_pos ** 2. +. y_pos ** 2.);;</userinput>
@@ -1087,7 +1087,7 @@
         magnitude function can be rewritten as follows.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">guided-tour/main.topscript</filename> (part 44)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 44)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let magnitude { x; y } = sqrt (x ** 2. +. y ** 2.);;</userinput>
 <computeroutput moreinfo="none">val magnitude : point2d -&gt; float = &lt;fun&gt;</computeroutput></programlisting>
@@ -1095,7 +1095,7 @@
         <para>We can also use dot-notation for accessing record fields:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">guided-tour/main.topscript</filename> (part 45)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 45)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let distance v1 v2 =</userinput>
 <userinput moreinfo="none">     magnitude { x = v1.x -. v2.x; y = v1.y -. v2.y };;</userinput>
@@ -1107,7 +1107,7 @@
         <literal moreinfo="none">point2d</literal>.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">guided-tour/main.topscript</filename> (part 46)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 46)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type circle_desc  = { center: point2d; radius: float }</userinput>
 <userinput moreinfo="none">  type rect_desc    = { lower_left: point2d; width: float; height: float }</userinput>
@@ -1123,7 +1123,7 @@
         type:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">guided-tour/main.topscript</filename> (part 47)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 47)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type scene_element =</userinput>
 <userinput moreinfo="none">    | Circle  of circle_desc</userinput>
@@ -1146,7 +1146,7 @@
         <literal moreinfo="none">scene_element</literal>s.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">guided-tour/main.topscript</filename> (part 48)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 48)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let is_inside_scene_element point scene_element =</userinput>
 <userinput moreinfo="none">     match scene_element with</userinput>
@@ -1224,7 +1224,7 @@
           OCaml, including lists. Here's an example:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">guided-tour/main.topscript</filename> (part 49)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 49)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let numbers = [| 1; 2; 3; 4 |];;</userinput>
 <computeroutput moreinfo="none">val numbers : int array = [|1; 2; 3; 4|]</computeroutput>
@@ -1262,7 +1262,7 @@
           structure:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">guided-tour/main.topscript</filename> (part 50)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 50)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type running_sum =</userinput>
 <userinput moreinfo="none">   { mutable sum: float;</userinput>
@@ -1284,7 +1284,7 @@
           process the input, not to separate two declarations.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">guided-tour/main.topscript</filename> (part 51)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 51)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let mean rsum = rsum.sum /. float rsum.samples</userinput>
 <userinput moreinfo="none">  let stdev rsum =</userinput>
@@ -1301,7 +1301,7 @@
           <literal moreinfo="none">running_sum</literal>s:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">guided-tour/main.topscript</filename> (part 52)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 52)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let create () = { sum = 0.; sum_sq = 0.; samples = 0 }</userinput>
 <userinput moreinfo="none">  let update rsum x =</userinput>
@@ -1330,7 +1330,7 @@
           <literal moreinfo="none">~f</literal> on each element of the provided list.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">guided-tour/main.topscript</filename> (part 53)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 53)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rsum = create ();;</userinput>
 <computeroutput moreinfo="none">val rsum : running_sum = {sum = 0.; sum_sq = 0.; samples = 0}</computeroutput>
@@ -1358,7 +1358,7 @@
           field called <literal moreinfo="none">contents</literal>.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">guided-tour/main.topscript</filename> (part 54)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 54)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let x = { contents = 0 };;</userinput>
 <computeroutput moreinfo="none">val x : int ref = {contents = 0}</computeroutput>
@@ -1372,7 +1372,7 @@
           with.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">guided-tour/main.topscript</filename> (part 55)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 55)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let x = ref 0  (* create a ref, i.e., { contents = 0 } *) ;;</userinput>
 <computeroutput moreinfo="none">val x : int ref = {contents = 0}</computeroutput>
@@ -1388,7 +1388,7 @@
           these operators in just a few lines of code.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">guided-tour/main.topscript</filename> (part 56)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 56)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type 'a ref = { mutable contents : 'a }</userinput>
 <userinput moreinfo="none"/>
@@ -1417,7 +1417,7 @@
           results.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">guided-tour/main.topscript</filename> (part 57)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 57)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let sum list =</userinput>
 <userinput moreinfo="none">    let sum = ref 0 in</userinput>
@@ -1443,7 +1443,7 @@
           random.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">guided-tour/main.topscript</filename> (part 58)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 58)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let permute array =</userinput>
 <userinput moreinfo="none">    let length = Array.length array in</userinput>
@@ -1466,7 +1466,7 @@
           <para>Here's an example run of this code.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">guided-tour/main.topscript</filename> (part 59)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 59)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let ar = Array.init 20 ~f:(fun i -&gt; i);;</userinput>
 <computeroutput moreinfo="none">val ar : int array =</computeroutput>
@@ -1483,7 +1483,7 @@
           <literal moreinfo="none">for</literal>) is also a keyword.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">guided-tour/main.topscript</filename> (part 60)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 60)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let find_first_negative_entry array =</userinput>
 <userinput moreinfo="none">     let pos = ref 0 in</userinput>
@@ -1511,7 +1511,7 @@
           by rewriting the function to avoid the short-circuiting.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">guided-tour/main.topscript</filename> (part 61)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 61)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let find_first_negative_entry array =</userinput>
 <userinput moreinfo="none">     let pos = ref 0 in</userinput>
@@ -1547,7 +1547,7 @@
         toplevel.</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">guided-tour/sum.ml</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/sum.ml">guided-tour/sum.ml</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">open Core.Std
 
@@ -1589,7 +1589,7 @@ let () =
           program with Core.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">guided-tour/build_sum.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/build_sum.out">guided-tour/build_sum.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild sum.native</userinput>
 </programlisting>
@@ -1602,7 +1602,7 @@ let () =
           <literal moreinfo="none">control-d</literal> when we're done.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">guided-tour/sum.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/sum.out">guided-tour/sum.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./sum.native</userinput>
 <computeroutput moreinfo="none">1</computeroutput>

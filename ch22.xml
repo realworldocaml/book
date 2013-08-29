@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="the-compiler-frontend-parsing-and-type-checking">
       <title>The Compiler Frontend: Parsing and Type Checking</title>
@@ -67,7 +67,7 @@
         <para>The overall compilation pipeline looks like this:</para>
 
         <para role="sourcecode">Diagram:
-        <filename moreinfo="none">front-end/pipeline.ascii</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/pipeline.ascii">front-end/pipeline.ascii</ulink></para>
 
         <programlisting language="" format="linespecific">    Source code
         |
@@ -254,7 +254,7 @@
           module assignment as a statement instead of as a let-binding.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">front-end/broken_module.ml</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/broken_module.ml">front-end/broken_module.ml</ulink></para>
 
           <programlisting language="ocaml" format="linespecific">let () =
   module MyString = String;
@@ -263,7 +263,7 @@
           <para>The above code results in a syntax error when compiled.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">front-end/build_broken_module.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/build_broken_module.out">front-end/build_broken_module.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc -c broken_module.ml</userinput>
 <computeroutput moreinfo="none">File "broken_module.ml", line 2, characters 2-8:</computeroutput>
@@ -274,7 +274,7 @@
           compiles successfully.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">front-end/fixed_module.ml</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/fixed_module.ml">front-end/fixed_module.ml</ulink></para>
 
           <programlisting language="ocaml" format="linespecific">let () =
   let module MyString = String in
@@ -294,7 +294,7 @@
           error in the following function definitions.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">front-end/follow_on_function.ml</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/follow_on_function.ml">front-end/follow_on_function.ml</ulink></para>
 
           <programlisting language="ocaml" format="linespecific">let concat_and_print x y =
   let v = x ^ y in
@@ -315,7 +315,7 @@ let () =
           again.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">front-end/build_follow_on_function.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/build_follow_on_function.out">front-end/build_follow_on_function.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc -c follow_on_function.ml</userinput>
 <computeroutput moreinfo="none">File "follow_on_function.ml", line 11, characters 0-3:</computeroutput>
@@ -340,7 +340,7 @@ let () =
           <command moreinfo="none">ocp-indent</command> and see how it processes it.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">front-end/indent_follow_on_function.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/indent_follow_on_function.out">front-end/indent_follow_on_function.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocp-indent follow_on_function.ml</userinput>
 <computeroutput moreinfo="none">let concat_and_print x y =</computeroutput>
@@ -366,7 +366,7 @@ let () =
           the syntax is correct.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">front-end/indent_follow_on_function_fixed.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/indent_follow_on_function_fixed.out">front-end/indent_follow_on_function_fixed.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocp-indent follow_on_function_fixed.ml</userinput>
 <computeroutput moreinfo="none">let concat_and_print x y =</computeroutput>
@@ -410,7 +410,7 @@ let () =
           <command moreinfo="none">ocamldoc</command> comments.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">front-end/doc.ml</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/doc.ml">front-end/doc.ml</ulink></para>
 
           <programlisting language="ocaml" format="linespecific">(** example.ml: The first special comment of the file is the comment 
     associated with the whole module. *)
@@ -443,7 +443,7 @@ let what_is_the_weather_in location =
           running <command moreinfo="none">ocamldoc</command> over the source file.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">front-end/build_ocamldoc.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/build_ocamldoc.out">front-end/build_ocamldoc.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">mkdir -p html man/man3</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamldoc -html -d html doc.ml</userinput>
@@ -532,7 +532,7 @@ let what_is_the_weather_in location =
         example, here's a trivial use of Sexplib and Fieldslib.</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">front-end/type_conv_example.ml</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/type_conv_example.ml">front-end/type_conv_example.ml</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">open Sexplib.Std
 
@@ -546,7 +546,7 @@ type t = {
         normally allowed after a type definition.</para>
 
         <para role="sourcecode">Terminal:
-        <filename moreinfo="none">front-end/build_type_conv_without_camlp4.out</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/build_type_conv_without_camlp4.out">front-end/build_type_conv_without_camlp4.out</ulink></para>
 
         <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlfind ocamlc -c type_conv_example.ml</userinput>
 <computeroutput moreinfo="none">File "type_conv_example.ml", line 6, characters 2-6:</computeroutput>
@@ -556,7 +556,7 @@ type t = {
         Sexplib, and everything will compile again.</para>
 
         <para role="sourcecode">Terminal:
-        <filename moreinfo="none">front-end/build_type_conv_with_camlp4.out</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/build_type_conv_with_camlp4.out">front-end/build_type_conv_with_camlp4.out</ulink></para>
 
         <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \</userinput>
 <computeroutput moreinfo="none">    -package fieldslib.syntax type_conv_example.ml</computeroutput></programlisting>
@@ -610,7 +610,7 @@ type t = {
           more information).</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">front-end/camlp4_toplevel.topscript</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/camlp4_toplevel.topscript">front-end/camlp4_toplevel.topscript</ulink></para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">#use "topfind" ;;</userinput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput>
@@ -647,7 +647,7 @@ type t = {
           problem by running it in <command moreinfo="none">utop</command>.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">front-end/camlp4_toplevel.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/camlp4_toplevel.topscript">front-end/camlp4_toplevel.topscript</ulink> (part
           1)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">#require "comparelib.syntax" ;;</userinput>
@@ -680,7 +680,7 @@ type t = {
           that contains the type declaration from earlier.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">front-end/comparelib_test.ml</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/comparelib_test.ml">front-end/comparelib_test.ml</ulink></para>
 
           <programlisting language="ocaml" format="linespecific">type t = { 
   foo: string; 
@@ -692,7 +692,7 @@ type t = {
           this invocation.</para>
 
           <para role="sourcecode">Shell script:
-          <filename moreinfo="none">front-end/camlp4_dump.cmd</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/camlp4_dump.cmd">front-end/camlp4_dump.cmd</ulink></para>
 
           <programlisting language="bash" format="linespecific">#!/bin/sh
 
@@ -708,7 +708,7 @@ camlp4o -printer o $INCLUDE $ARCHIVES $1</programlisting>
           the resulting AST to the standard output.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">front-end/process_comparelib_test.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/process_comparelib_test.out">front-end/process_comparelib_test.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">sh camlp4_dump.cmd comparelib_test.ml</userinput>
 <computeroutput moreinfo="none">type t = { foo : string; bar : t }</computeroutput>
@@ -771,7 +771,7 @@ camlp4o -printer o $INCLUDE $ARCHIVES $1</programlisting>
             due to code refactoring).</para>
 
             <para role="sourcecode">Syntax:
-            <filename moreinfo="none">front-end/let_unit.syntax</filename></para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/let_unit.syntax">front-end/let_unit.syntax</ulink></para>
 
             <programlisting language="" format="linespecific">let () = &lt;expr&gt;</programlisting>
 
@@ -779,7 +779,7 @@ camlp4o -printer o $INCLUDE $ARCHIVES $1</programlisting>
             explicitly.</para>
 
             <para role="sourcecode">OCaml:
-            <filename moreinfo="none">front-end/let_notunit.ml</filename></para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/let_notunit.ml">front-end/let_notunit.ml</ulink></para>
 
             <programlisting language="ocaml" format="linespecific">let (_:some_type) = &lt;expr&gt;
 let () = ignore (&lt;expr&gt; : some_type)
@@ -798,7 +798,7 @@ let () = don't_wait_for (&lt;expr&gt;</programlisting>
             underscore.</para>
 
             <para role="sourcecode">OCaml:
-            <filename moreinfo="none">front-end/unused_var.ml</filename></para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/unused_var.ml">front-end/unused_var.ml</ulink></para>
 
             <programlisting language="ocaml" format="linespecific">let fn x y =
   let _z = x + y in
@@ -818,7 +818,7 @@ let () = don't_wait_for (&lt;expr&gt;</programlisting>
           exactly the same content.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">front-end/comparelib_test.mli</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/comparelib_test.mli">front-end/comparelib_test.mli</ulink></para>
 
           <programlisting language="ocaml" format="linespecific">type t = { 
   foo: string; 
@@ -829,7 +829,7 @@ let () = don't_wait_for (&lt;expr&gt;</programlisting>
           different code is produced for signature files.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">front-end/process_comparelib_interface.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/process_comparelib_interface.out">front-end/process_comparelib_interface.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">sh camlp4_dump.cmd comparelib_test.mli</userinput>
 <computeroutput moreinfo="none">type t = { foo : string; bar : t }</computeroutput>
@@ -960,7 +960,7 @@ let () = don't_wait_for (&lt;expr&gt;</programlisting>
           Create a file with a single type definition and value.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">front-end/typedef.ml</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/typedef.ml">front-end/typedef.ml</ulink></para>
 
           <programlisting language="ocaml" format="linespecific">type t = Foo | Bar
 let v = Foo</programlisting>
@@ -971,7 +971,7 @@ let v = Foo</programlisting>
           interface to the standard output.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">front-end/infer_typedef.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/infer_typedef.out">front-end/infer_typedef.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc -i typedef.ml</userinput>
 <computeroutput moreinfo="none">type t = Foo | Bar</computeroutput>
@@ -994,7 +994,7 @@ let v = Foo</programlisting>
           checker throws an immediate error if this isn't the case.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">front-end/conflicting_interfaces.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/conflicting_interfaces.out">front-end/conflicting_interfaces.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">echo type t = Foo &gt; test.ml</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">echo type t = Bar &gt; test.mli</userinput>
@@ -1102,7 +1102,7 @@ let v = Foo</programlisting>
             some simple algebraic operations over integers.</para>
 
             <para role="sourcecode">OCaml:
-            <filename moreinfo="none">front-end/broken_poly.ml</filename></para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/broken_poly.ml">front-end/broken_poly.ml</ulink></para>
 
             <programlisting language="ocaml" format="linespecific">let rec algebra =
   function
@@ -1128,7 +1128,7 @@ let _ =
             resulting type error is impressive.</para>
 
             <para role="sourcecode">Terminal:
-            <filename moreinfo="none">front-end/build_broken_poly.out</filename></para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/build_broken_poly.out">front-end/build_broken_poly.out</ulink></para>
 
             <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc -c broken_poly.ml</userinput>
 <computeroutput moreinfo="none">File "broken_poly.ml", line 9, characters 10-154:</computeroutput>
@@ -1161,7 +1161,7 @@ let _ =
             help the compiler out.</para>
 
             <para role="sourcecode">OCaml:
-            <filename moreinfo="none">front-end/broken_poly_with_annot.ml</filename></para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/broken_poly_with_annot.ml">front-end/broken_poly_with_annot.ml</ulink></para>
 
             <programlisting language="ocaml" format="linespecific">type t = [
   | `Add of t * t
@@ -1196,7 +1196,7 @@ let _ =
             now.</para>
 
             <para role="sourcecode">Terminal:
-            <filename moreinfo="none">front-end/build_broken_poly_with_annot.out</filename></para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/build_broken_poly_with_annot.out">front-end/build_broken_poly_with_annot.out</ulink></para>
 
             <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc -i broken_poly_with_annot.ml</userinput>
 <computeroutput moreinfo="none">File "broken_poly_with_annot.ml", line 22, characters 14-21:</computeroutput>
@@ -1254,7 +1254,7 @@ let _ =
             record disambiguation.</para>
 
             <para role="sourcecode">OCaml:
-            <filename moreinfo="none">front-end/non_principal.ml</filename></para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/non_principal.ml">front-end/non_principal.ml</ulink></para>
 
             <programlisting language="ocaml" format="linespecific">type s = { foo: int; bar: unit }
 type t = { foo: int }
@@ -1267,7 +1267,7 @@ let f x =
             will show you a new warning.</para>
 
             <para role="sourcecode">Terminal:
-            <filename moreinfo="none">front-end/build_non_principal.out</filename></para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/build_non_principal.out">front-end/build_non_principal.out</ulink></para>
 
             <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc -i -principal non_principal.ml</userinput>
 <computeroutput moreinfo="none">File "non_principal.ml", line 6, characters 4-7:</computeroutput>
@@ -1288,7 +1288,7 @@ let f x =
             declarations, or by adding an explicit type annotation.</para>
 
             <para role="sourcecode">OCaml:
-            <filename moreinfo="none">front-end/principal.ml</filename></para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/principal.ml">front-end/principal.ml</ulink></para>
 
             <programlisting language="ocaml" format="linespecific">type s = { foo: int; bar: unit }
 type t = { foo: int }
@@ -1302,7 +1302,7 @@ let f (x:s) =
             inference of the sub-expressions no longer matters.</para>
 
             <para role="sourcecode">Terminal:
-            <filename moreinfo="none">front-end/build_principal.out</filename></para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/build_principal.out">front-end/build_principal.out</ulink></para>
 
             <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc -i -principal principal.ml</userinput>
 <computeroutput moreinfo="none">type s = { foo : int; bar : unit; }</computeroutput>
@@ -1316,7 +1316,7 @@ let f (x:s) =
             below.</para>
 
             <para role="sourcecode">Terminal:
-            <filename moreinfo="none">principal/build_principal.out</filename></para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/principal/build_principal.out">principal/build_principal.out</ulink></para>
 
             <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -tag principal principal.cmi non_principal.cmi</userinput>
 <computeroutput moreinfo="none">File "non_principal.ml", line 6, characters 4-7:</computeroutput>
@@ -1377,14 +1377,14 @@ let f (x:s) =
             following contents.</para>
 
             <para role="sourcecode">OCaml:
-            <filename moreinfo="none">front-end/alice.ml</filename></para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/alice.ml">front-end/alice.ml</ulink></para>
 
             <programlisting language="ocaml" format="linespecific">let friends = [ Bob.name ]</programlisting>
 
             <para>and a corresponding signature file.</para>
 
             <para role="sourcecode">OCaml:
-            <filename moreinfo="none">front-end/alice.mli</filename></para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/alice.mli">front-end/alice.mli</ulink></para>
 
             <programlisting language="ocaml" format="linespecific">val friends : Bob.t list</programlisting>
 
@@ -1393,7 +1393,7 @@ let f (x:s) =
             <literal moreinfo="none">Alice</literal>.</para>
 
             <para role="sourcecode">OCaml:
-            <filename moreinfo="none">front-end/alice_combined.ml</filename></para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/alice_combined.ml">front-end/alice_combined.ml</ulink></para>
 
             <programlisting language="ocaml" format="linespecific">module Alice : sig
   val friends : Bob.t list
@@ -1458,7 +1458,7 @@ end</programlisting>
               <literal moreinfo="none">typedef.ml</literal> more closely.</para>
 
               <para role="sourcecode">Terminal:
-              <filename moreinfo="none">front-end/typedef_objinfo.out</filename></para>
+              <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/typedef_objinfo.out">front-end/typedef_objinfo.out</ulink></para>
 
               <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc -c typedef.ml</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlobjinfo typedef.cmi</userinput>
@@ -1487,7 +1487,7 @@ end</programlisting>
               this:</para>
 
               <para role="sourcecode">Terminal:
-              <filename moreinfo="none">front-end/inconsistent_compilation_units.out</filename></para>
+              <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/inconsistent_compilation_units.out">front-end/inconsistent_compilation_units.out</ulink></para>
 
               <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc -c foo.ml</userinput>
 <computeroutput moreinfo="none">File "foo.ml", line 1, characters 0-1:</computeroutput>
@@ -1544,7 +1544,7 @@ end</programlisting>
           equivalent.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">packing/show_files.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/packing/show_files.out">packing/show_files.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">cat A.ml</userinput>
 <computeroutput moreinfo="none">let v = "hello"</computeroutput>
@@ -1562,7 +1562,7 @@ end</programlisting>
           example.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">packing/test.ml</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/packing/test.ml">packing/test.ml</ulink></para>
 
           <programlisting language="ocaml" format="linespecific">let v = X.A.v
 let w = X.B.w</programlisting>
@@ -1576,7 +1576,7 @@ let w = X.B.w</programlisting>
           used.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">packing/build_test.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/packing/build_test.out">packing/build_test.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild test.inferred.mli test.cmi</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">cat _build/test.inferred.mli</userinput>
@@ -1630,7 +1630,7 @@ let w = X.B.w</programlisting>
           top-level (not <command moreinfo="none">utop</command>).</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">front-end/short_paths_1.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/short_paths_1.out">front-end/short_paths_1.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocaml</userinput>
 <computeroutput moreinfo="none"># List.map print_endline "" ;;</computeroutput>
@@ -1642,7 +1642,7 @@ let w = X.B.w</programlisting>
           more verbose.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">front-end/short_paths_2.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/short_paths_2.out">front-end/short_paths_2.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocaml</userinput>
 <computeroutput moreinfo="none"># open Core.Std ;;</computeroutput>
@@ -1663,7 +1663,7 @@ let w = X.B.w</programlisting>
           top-level too.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">front-end/short_paths_3.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/short_paths_3.out">front-end/short_paths_3.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocaml -short-paths</userinput>
 <computeroutput moreinfo="none"># open Core.Std;;</computeroutput>
@@ -1712,7 +1712,7 @@ let w = X.B.w</programlisting>
           it via OPAM as follows.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">front-end/install_ocp_index.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/install_ocp_index.out">front-end/install_ocp_index.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">opam install ocp-index</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocp-index</userinput></programlisting>
@@ -1725,7 +1725,7 @@ let w = X.B.w</programlisting>
           then run <command moreinfo="none">ocp-index</command> in completion mode.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">ocp-index/index_ncurses.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/ocp-index/index_ncurses.out">ocp-index/index_ncurses.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg ctypes.foreign -tag bin_annot ncurses.cmi</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocp-index complete -I . Ncur</userinput>
@@ -1764,7 +1764,7 @@ let w = X.B.w</programlisting>
           <para>We'll use our toy <literal moreinfo="none">typedef.ml</literal> again.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">front-end/typedef.ml</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/typedef.ml">front-end/typedef.ml</ulink></para>
 
           <programlisting language="ocaml" format="linespecific">type t = Foo | Bar
 let v = Foo</programlisting>
@@ -1773,7 +1773,7 @@ let v = Foo</programlisting>
           from the parsing phase.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">front-end/parsetree_typedef.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/parsetree_typedef.out">front-end/parsetree_typedef.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc -dparsetree typedef.ml 2&gt;&amp;1</userinput>
 <computeroutput moreinfo="none">[</computeroutput>
@@ -1831,7 +1831,7 @@ let v = Foo</programlisting>
           option.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">front-end/typedtree_typedef.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/typedtree_typedef.out">front-end/typedtree_typedef.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc -dtypedtree typedef.ml 2&gt;&amp;1</userinput>
 <computeroutput moreinfo="none">[</computeroutput>

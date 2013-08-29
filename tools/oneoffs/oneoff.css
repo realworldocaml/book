@@ -7,6 +7,49 @@ p.sourcecode {
   display: block;
   hyphens: none;
   margin-bottom: -2pt;
-  font-size: 9.3pt;
+  font-size: 8.3pt;
   font-style: italic;
 }
+
+/*----Uncomment to turn on automatic code wrapping
+
+pre.programlisting, pre.screen, pre.literallayout {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+----*/
+
+/*----Uncomment to fix a bad break in the title 
+      (increase padding value to push down, decrease 
+      value to pull up)
+
+div.book div.booktitlepage h1.title {
+  padding-left: 1.5in;
+}
+----*/
+
+/*----Uncomment to fix a bad break in the subtitle
+      (increase padding value to push down, decrease
+      value to pull up)
+
+div.book div.booktitlepage h2.subtitle {
+  padding-left: 1in;
+}
+----*/
+
+/*----Uncomment to fix a bad break in the author names 
+      (increase padding value to push down, decrease 
+      value to pull up)
+
+p.titlepageauthor {
+  padding-left: 3in;
+}
+----*/
+
+/*----Uncomment to suuppress colophon, show only 
+      "About the Authors"
+
+div.colophon {
+  display: none;
+}
+----*/

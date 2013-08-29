@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="objects">
       <title>Objects</title>
@@ -91,7 +91,7 @@
         of a simple object.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">objects/stack.topscript</filename> (part 1)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/stack.topscript">objects/stack.topscript</ulink> (part 1)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let s = object</userinput>
 <userinput moreinfo="none">    val mutable v = [0; 2]</userinput>
@@ -121,7 +121,7 @@
         character.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">objects/stack.topscript</filename> (part 2)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/stack.topscript">objects/stack.topscript</ulink> (part 2)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">s#pop ;;</userinput>
 <computeroutput moreinfo="none">- : int option = Some 0</computeroutput>
@@ -141,7 +141,7 @@
         takes the value and returns an object.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">objects/stack.topscript</filename> (part 3)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/stack.topscript">objects/stack.topscript</ulink> (part 3)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let stack init = object</userinput>
 <userinput moreinfo="none">    val mutable v = init</userinput>
@@ -177,7 +177,7 @@
         explicit type declaration.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">objects/polymorphism.topscript</filename> (part 1)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/polymorphism.topscript">objects/polymorphism.topscript</ulink> (part 1)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let area sq = sq#width * sq#width ;;</userinput>
 <computeroutput moreinfo="none">val area : &lt; width : int; .. &gt; -&gt; int = &lt;fun&gt;</computeroutput>
@@ -194,7 +194,7 @@
         the same method:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">objects/polymorphism.topscript</filename> (part 2)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/polymorphism.topscript">objects/polymorphism.topscript</ulink> (part 2)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let toggle sq b : unit = </userinput>
 <userinput moreinfo="none">    if b then sq#resize `Fullscreen</userinput>
@@ -215,7 +215,7 @@
         a type annotation:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">objects/polymorphism.topscript</filename> (part 3)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/polymorphism.topscript">objects/polymorphism.topscript</ulink> (part 3)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let area_closed (sq: &lt; width : int &gt;) = sq#width * sq#width ;;</userinput>
 <computeroutput moreinfo="none">val area_closed : &lt; width : int &gt; -&gt; int = &lt;fun&gt;</computeroutput>
@@ -240,7 +240,7 @@
           get an "unbound type variable" error.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">objects/polymorphism.topscript</filename> (part 4)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/polymorphism.topscript">objects/polymorphism.topscript</ulink> (part 4)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type square = &lt; width : int; ..&gt; ;;</userinput>
 <computeroutput moreinfo="none">Characters 5-32:</computeroutput>
@@ -264,7 +264,7 @@
         run is determined by the object.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">objects/stack.topscript</filename> (part 4)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/stack.topscript">objects/stack.topscript</ulink> (part 4)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let print_pop st = Option.iter ~f:(printf "Popped: %d\n") st#pop ;;</userinput>
 <computeroutput moreinfo="none">val print_pop : &lt; pop : int option; .. &gt; -&gt; unit = &lt;fun&gt;</computeroutput>
@@ -293,7 +293,7 @@
         objects.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">objects/immutable.topscript</filename> (part 1)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/immutable.topscript">objects/immutable.topscript</ulink> (part 1)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let imm_stack init = object</userinput>
 <userinput moreinfo="none">    val v = init</userinput>
@@ -318,7 +318,7 @@
         v</literal>. The original object is not modified.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">objects/immutable.topscript</filename> (part 2)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/immutable.topscript">objects/immutable.topscript</ulink> (part 2)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let s = imm_stack [3; 2; 1] ;;</userinput>
 <computeroutput moreinfo="none">val s : &lt; pop : (int * 'a) option; push : int -&gt; 'a &gt; as 'a = &lt;obj&gt;</computeroutput>
@@ -405,7 +405,7 @@
           <literal moreinfo="none">circle</literal> are specific kinds of shape.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">objects/subtyping.ml</filename> (part 1)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.ml">objects/subtyping.ml</ulink> (part 1)</para>
 
           <programlisting language="ocaml" format="linespecific">type shape = &lt; area : float &gt;
 
@@ -430,7 +430,7 @@ end</programlisting>
           is. The coercion <literal moreinfo="none">:&gt;</literal> must be explicit.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">objects/subtyping.topscript</filename> (part 1)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink> (part 1)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let shape w : shape = square w ;;</userinput>
 <computeroutput moreinfo="none">Characters 22-30:</computeroutput>
@@ -464,7 +464,7 @@ end</programlisting>
           <literal moreinfo="none">shape</literal> method:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">objects/subtyping.topscript</filename> (part 2)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink> (part 2)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let coin = object</userinput>
 <userinput moreinfo="none">    method shape = circle 5</userinput>
@@ -482,7 +482,7 @@ end</programlisting>
           shape &gt;</literal></para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">objects/subtyping.topscript</filename> (part 3)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink> (part 3)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type item = &lt; shape : shape &gt; ;;</userinput>
 <computeroutput moreinfo="none">type item = &lt; shape : shape &gt;</computeroutput>
@@ -499,7 +499,7 @@ end</programlisting>
             <emphasis>B</emphasis>.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">objects/subtyping.topscript</filename> (part 4)</para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink> (part 4)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type num = [ `Int of int | `Float of float ] ;;</userinput>
 <computeroutput moreinfo="none">type num = [ `Float of float | `Int of int ]</computeroutput>
@@ -521,7 +521,7 @@ end</programlisting>
           list</literal>. OCaml does indeed allow such coercions:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">objects/subtyping.topscript</filename> (part 5)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink> (part 5)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let squares: square list = [ square 10; square 20 ] ;;</userinput>
 <computeroutput moreinfo="none">val squares : square list = [&lt;obj&gt;; &lt;obj&gt;]</computeroutput>
@@ -535,7 +535,7 @@ end</programlisting>
           recognizes this and does not allow the coercion:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">objects/subtyping.topscript</filename> (part 6)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink> (part 6)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let square_array: square array = [| square 10; square 20 |] ;;</userinput>
 <computeroutput moreinfo="none">val square_array : square array = [|&lt;obj&gt;; &lt;obj&gt;|]</computeroutput>
@@ -561,7 +561,7 @@ end</programlisting>
           -&gt; string</literal>.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">objects/subtyping.topscript</filename> (part 7)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink> (part 7)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let shape_to_string: shape -&gt; string = </userinput>
 <userinput moreinfo="none">    fun s -&gt; sprintf "Shape(%F)" s#area ;;</userinput>
@@ -582,7 +582,7 @@ end</programlisting>
             definition.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">objects/subtyping.topscript</filename> (part 8)</para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink> (part 8)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Either = struct</userinput>
 <userinput moreinfo="none">    type ('a, 'b) t = </userinput>
@@ -604,7 +604,7 @@ end</programlisting>
             OCaml is forced to assume that the type is invariant.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">objects/subtyping.topscript</filename> (part 9)</para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink> (part 9)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module AbstractEither : sig </userinput>
 <userinput moreinfo="none">    type ('a, 'b) t</userinput>
@@ -633,7 +633,7 @@ end</programlisting>
             contravariance.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">objects/subtyping.topscript</filename> (part 10)</para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink> (part 10)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module VarEither : sig </userinput>
 <userinput moreinfo="none">    type (+'a, +'b) t</userinput>
@@ -655,7 +655,7 @@ end</programlisting>
           function to some squares and some circles.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">objects/subtyping.ml</filename> (part 2)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.ml">objects/subtyping.ml</ulink> (part 2)</para>
 
           <programlisting language="ocaml" format="linespecific">type 'a stack = &lt; pop: 'a option; push: 'a -&gt; unit &gt;
 
@@ -668,7 +668,7 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</programlisting>
           try:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">objects/subtyping.topscript</filename> (part 11)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink> (part 11)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let total_area (shape_stacks: shape stack list) =</userinput>
 <userinput moreinfo="none">    let stack_area acc st = </userinput>
@@ -686,7 +686,7 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</programlisting>
           get an error:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">objects/subtyping.topscript</filename> (part 12)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink> (part 12)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">total_area [(square_stack :&gt; shape stack); (circle_stack :&gt; shape stack)] ;;</userinput>
 <computeroutput moreinfo="none">Characters 12-41:</computeroutput>
@@ -721,7 +721,7 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</programlisting>
           confirm that we can coerce the list of stacks to it.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">objects/subtyping.topscript</filename> (part 13)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink> (part 13)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type 'a readonly_stack = &lt; pop : 'a option &gt; ;;</userinput>
 <computeroutput moreinfo="none">type 'a readonly_stack = &lt; pop : 'a option &gt;</computeroutput>
@@ -790,7 +790,7 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</programlisting>
           shape object.</para>
 
           <para role="sourcecode">Java:
-          <filename moreinfo="none">objects/Shape.java</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/Shape.java">objects/Shape.java</ulink></para>
 
           <programlisting language="java" format="linespecific">String GetShapeName(Shape s) {
   if (s instanceof Square) {
@@ -815,7 +815,7 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</programlisting>
           radius.</para>
 
           <para role="sourcecode">Java:
-          <filename moreinfo="none">objects/IsBarbell.java</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/IsBarbell.java">objects/IsBarbell.java</ulink></para>
 
           <programlisting language="java" format="linespecific">boolean IsBarbell(Shape[] s) {
   return s.length == 3 &amp;&amp; (s[0] instanceof Circle) &amp;&amp;
@@ -830,7 +830,7 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</programlisting>
           fit.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">objects/is_barbell.ml</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/is_barbell.ml">objects/is_barbell.ml</ulink></para>
 
           <programlisting language="ocaml" format="linespecific">let is_barbell = function
 | [Circle r1; Line _; Circle r2] when r1 = r2 -&gt; true
@@ -842,7 +842,7 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</programlisting>
           object into a variant type.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">objects/narrowing.ml</filename> (part 1)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/narrowing.ml">objects/narrowing.ml</ulink> (part 1)</para>
 
           <programlisting language="ocaml" format="linespecific">type shape = &lt; variant : repr; area : float&gt;
 and circle = &lt; variant : repr; area : float; radius : int &gt;
@@ -875,7 +875,7 @@ let is_barbell = function
           allowing functions like the following:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">objects/row_polymorphism.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/row_polymorphism.topscript">objects/row_polymorphism.topscript</ulink> (part
           1)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let remove_large l =</userinput>
@@ -887,7 +887,7 @@ let is_barbell = function
           have.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">objects/row_polymorphism.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/row_polymorphism.topscript">objects/row_polymorphism.topscript</ulink> (part
           2)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let squares : &lt; area : float; width : int &gt; list = </userinput>
@@ -902,7 +902,7 @@ let is_barbell = function
           method.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">objects/row_polymorphism.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/row_polymorphism.topscript">objects/row_polymorphism.topscript</ulink> (part
           3)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let remove_large (l: &lt; area : float &gt; list) = </userinput>
@@ -918,7 +918,7 @@ let is_barbell = function
           polymorphism:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">objects/row_polymorphism.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/row_polymorphism.topscript">objects/row_polymorphism.topscript</ulink> (part
           4)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let hlist: &lt; area: float; ..&gt; list = [square 10; circle 30] ;;</userinput>
@@ -931,7 +931,7 @@ let is_barbell = function
           types of object in the same reference:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">objects/row_polymorphism.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/row_polymorphism.topscript">objects/row_polymorphism.topscript</ulink> (part
           5)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let shape_ref: &lt; area: float; ..&gt; ref = ref (square 40) ;;</userinput>
@@ -945,7 +945,7 @@ let is_barbell = function
           <para>In both these cases we must use subtyping:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">objects/row_polymorphism.topscript</filename> (part
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/row_polymorphism.topscript">objects/row_polymorphism.topscript</ulink> (part
           6)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let hlist: shape list = [(square 10 :&gt; shape); (circle 30 :&gt; shape)] ;;</userinput>

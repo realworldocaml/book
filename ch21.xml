@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="understanding-the-garbage-collector">
       <title>Understanding the Garbage Collector</title>
@@ -131,7 +131,7 @@
           quickly.</para>
 
           <para role="sourcecode">Diagram:
-          <filename moreinfo="none">gc/minor_heap.ascii</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/minor_heap.ascii">gc/minor_heap.ascii</ulink></para>
 
           <programlisting language="" format="linespecific">                &lt;---- size ----&gt;
  base --- start ---------------- end
@@ -186,7 +186,7 @@
             function.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">gc/tune.topscript</filename></para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">gc/tune.topscript</ulink></para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let c = Gc.get () ;;</userinput>
 <computeroutput moreinfo="none">val c : Gc.control =</computeroutput>
@@ -306,7 +306,7 @@
             them.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">gc/tune.topscript</filename> (part 1)</para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">gc/tune.topscript</ulink> (part 1)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Gc.tune ~major_heap_increment:(1000448 * 4) () ;;</userinput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
@@ -502,7 +502,7 @@
             calls if necessary.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">gc/tune.topscript</filename> (part 2)</para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">gc/tune.topscript</ulink> (part 2)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Gc.major_slice 0 ;;</userinput>
 <computeroutput moreinfo="none">- : int = 260440</computeroutput>
@@ -553,7 +553,7 @@
             compactions.</para>
 
             <para role="sourcecode">OCaml Utop:
-            <filename moreinfo="none">gc/tune.topscript</filename> (part 3)</para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">gc/tune.topscript</ulink> (part 3)</para>
 
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Gc.tune ~max_overhead:0 () ;;</userinput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
@@ -600,7 +600,7 @@
             code.</para>
 
             <para role="sourcecode">OCaml:
-            <filename moreinfo="none">gc/barrier_bench.ml</filename></para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/barrier_bench.ml">gc/barrier_bench.ml</ulink></para>
 
             <programlisting language="ocaml" format="linespecific">open Core.Std
 open Core_bench.Std
@@ -641,7 +641,7 @@ let () =
             garbage collection occurring.</para>
 
             <para role="sourcecode">Terminal:
-            <filename moreinfo="none">gc/run_barrier_bench.out</filename></para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/run_barrier_bench.out">gc/run_barrier_bench.out</ulink></para>
 
             <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg core_bench barrier_bench.native</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./barrier_bench.native -ascii name alloc</userinput>
@@ -669,7 +669,7 @@ let () =
             collection behavior.</para>
 
             <para role="sourcecode">Terminal:
-            <filename moreinfo="none">gc/show_barrier_bench_help.out</filename></para>
+            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/show_barrier_bench_help.out">gc/show_barrier_bench_help.out</ulink></para>
 
             <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./barrier_bench.native -help</userinput>
 <computeroutput moreinfo="none">Benchmark for mutable, immutable</computeroutput>
@@ -786,7 +786,7 @@ let () =
         compile-time constants.</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">gc/finalizer.ml</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/finalizer.ml">gc/finalizer.ml</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">open Core.Std
 open Async.Std
@@ -826,7 +826,7 @@ let () =
         output.</para>
 
         <para role="sourcecode">Terminal:
-        <filename moreinfo="none">gc/run_finalizer.out</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/run_finalizer.out">gc/run_finalizer.out</ulink></para>
 
         <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg async finalizer.native</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./finalizer.native</userinput>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="handling-json-data">
       <title>Handling JSON data</title>
@@ -50,7 +50,7 @@
         record for an example book description looks like:</para>
 
         <para role="sourcecode">JSON:
-        <filename moreinfo="none">json/book.json</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/book.json">json/book.json</ulink></para>
 
         <programlisting language="json" format="linespecific">{
   "title": "Real World OCaml",
@@ -98,7 +98,7 @@
           <command moreinfo="none">utop</command> toplevel by:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">json/install.topscript</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/install.topscript">json/install.topscript</ulink></para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">#require "yojson" ;;</userinput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">open Yojson ;;</userinput></programlisting>
@@ -113,7 +113,7 @@
         express any valid JSON structure.</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">json/yojson_basic.mli</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/yojson_basic.mli">json/yojson_basic.mli</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">type json = [
   | `Assoc of (string * json) list
@@ -158,7 +158,7 @@
         we find these helpful functions:</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">json/yojson_basic.mli</filename> (part 1)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/yojson_basic.mli">json/yojson_basic.mli</ulink> (part 1)</para>
 
         <programlisting language="ocaml" format="linespecific">val from_string : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt;
    string -&gt; json
@@ -192,7 +192,7 @@ val from_channel : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt;
         filesystem, or via a buffered input channel.</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">json/yojson_basic_simple.mli</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/yojson_basic_simple.mli">json/yojson_basic_simple.mli</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">val from_string  : string     -&gt; json
 val from_file    : string     -&gt; json
@@ -203,7 +203,7 @@ val from_channel : in_channel -&gt; json</programlisting>
         <literal moreinfo="none">book.json</literal>.</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">json/read_json.ml</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/read_json.ml">json/read_json.ml</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">open Core.Std
 
@@ -221,7 +221,7 @@ let () =
         <command moreinfo="none">corebuild</command>.</para>
 
         <para role="sourcecode">Terminal:
-        <filename moreinfo="none">json/run_read_json.out</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/run_read_json.out">json/run_read_json.out</ulink></para>
 
         <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg yojson read_json.native</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./read_json.native</userinput>
@@ -244,7 +244,7 @@ let () =
         fields.</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">json/parse_book.ml</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/parse_book.ml">json/parse_book.ml</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">open Core.Std
 
@@ -278,7 +278,7 @@ let () =
         example.</para>
 
         <para role="sourcecode">Terminal:
-        <filename moreinfo="none">json/run_parse_book.out</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/run_parse_book.out">json/run_parse_book.out</ulink></para>
 
         <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg yojson parse_book.native</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./parse_book.native</userinput>
@@ -307,7 +307,7 @@ let () =
           <literal moreinfo="none">List</literal> module:</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">json/list_excerpt.mli</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/list_excerpt.mli">json/list_excerpt.mli</ulink></para>
 
           <programlisting language="ocaml" format="linespecific">val map  : 'a list -&gt; f:('a -&gt; 'b)   -&gt; 'b list
 val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt; 'accum</programlisting>
@@ -321,7 +321,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
           result, and returns that instead.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">json/list_excerpt.mli</filename> (part 1)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/list_excerpt.mli">json/list_excerpt.mli</ulink> (part 1)</para>
 
           <programlisting language="ocaml" format="linespecific">val iter : 'a list -&gt; f:('a -&gt; unit) -&gt; unit</programlisting>
 
@@ -406,7 +406,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
         field from the record.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">json/parse_book.topscript</filename> (part 1)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/parse_book.topscript">json/parse_book.topscript</ulink> (part 1)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">open Yojson.Basic.Util ;;</userinput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let title = json |&gt; member "title" |&gt; to_string ;;</userinput>
@@ -423,7 +423,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
         these operations together.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">json/parse_book.topscript</filename> (part 2)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/parse_book.topscript">json/parse_book.topscript</ulink> (part 2)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let tags = json |&gt; member "tags" |&gt; to_list |&gt; filter_string ;;</userinput>
 <computeroutput moreinfo="none">val tags : string list = ["functional programming"; "ocaml"; "algorithms"]</computeroutput>
@@ -442,7 +442,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
         <literal moreinfo="none">filter_string</literal>.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">json/parse_book.topscript</filename> (part 3)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/parse_book.topscript">json/parse_book.topscript</ulink> (part 3)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let is_online = json |&gt; member "is_online" |&gt; to_bool_option ;;</userinput>
 <computeroutput moreinfo="none">val is_online : bool option = Some true</computeroutput>
@@ -459,7 +459,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
         <literal moreinfo="none">None</literal>.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">json/parse_book.topscript</filename> (part 4)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/parse_book.topscript">json/parse_book.topscript</ulink> (part 4)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let authors = json |&gt; member "authors" |&gt; to_list ;;</userinput>
 <computeroutput moreinfo="none">val authors : Yojson.Basic.json list =</computeroutput>
@@ -481,7 +481,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
         pipe-forward operator:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">json/parse_book.topscript</filename> (part 5)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/parse_book.topscript">json/parse_book.topscript</ulink> (part 5)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let names =</userinput>
 <userinput moreinfo="none">  json |&gt; member "authors" |&gt; to_list </userinput>
@@ -513,7 +513,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
         of the <literal moreinfo="none">Yojson.Basic.json</literal> type again.</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">json/yojson_basic.mli</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/yojson_basic.mli">json/yojson_basic.mli</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">type json = [
   | `Assoc of (string * json) list
@@ -530,7 +530,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
         module to display JSON output.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">json/build_json.topscript</filename> (part 1)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/build_json.topscript">json/build_json.topscript</ulink> (part 1)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let person = `Assoc [ ("name", `String "Anil") ] ;;</userinput>
 <computeroutput moreinfo="none">val person : [&gt; `Assoc of (string * [&gt; `String of string ]) list ] =</computeroutput>
@@ -551,7 +551,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
         <literal moreinfo="none">Null</literal>).</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">json/build_json.topscript</filename> (part 2)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/build_json.topscript">json/build_json.topscript</ulink> (part 2)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Yojson.Basic.pretty_to_string ;;</userinput>
 <computeroutput moreinfo="none">- : ?std:bool -&gt; Yojson.Basic.json -&gt; string = &lt;fun&gt;</computeroutput></programlisting>
@@ -565,7 +565,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
         compatible.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">json/build_json.topscript</filename> (part 3)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/build_json.topscript">json/build_json.topscript</ulink> (part 3)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Yojson.Basic.pretty_to_string person ;;</userinput>
 <computeroutput moreinfo="none">- : string = "{ \"name\": \"Anil\" }"</computeroutput>
@@ -590,7 +590,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
           a single value instead of a list of keys:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">json/build_json.topscript</filename> (part 4)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/build_json.topscript">json/build_json.topscript</ulink> (part 4)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let person = `Assoc ("name", `String "Anil");;</userinput>
 <computeroutput moreinfo="none">val person : [&gt; `Assoc of string * [&gt; `String of string ] ] =</computeroutput>
@@ -609,7 +609,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
           intentions.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">json/build_json.topscript</filename> (part 5)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/build_json.topscript">json/build_json.topscript</ulink> (part 5)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let (person : Yojson.Basic.json) =</userinput>
 <userinput moreinfo="none">  `Assoc ("name", `String "Anil");;</userinput>
@@ -644,7 +644,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
         this:</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">json/yojson_safe.mli</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/yojson_safe.mli">json/yojson_safe.mli</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">type json = [
   | `Assoc of (string * json) list
@@ -706,7 +706,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
         <literal moreinfo="none">to_basic</literal> function as follows.</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">json/yojson_safe.mli</filename> (part 1)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/yojson_safe.mli">json/yojson_safe.mli</ulink> (part 1)</para>
 
         <programlisting language="ocaml" format="linespecific">val to_basic : json -&gt; Yojson.Basic.json
 (** Tuples are converted to JSON arrays, Variants are converted to
@@ -745,7 +745,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
           be installed via OPAM:</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">json/install_atdgen.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/install_atdgen.out">json/install_atdgen.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">opam install atdgen</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">atdgen -version</userinput>
@@ -775,7 +775,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
           based on a pseudo-standard web protocol known as OAuth).</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">json/github.atd</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/github.atd">json/github.atd</ulink></para>
 
           <programlisting language="ocaml" format="linespecific">type scope = [
     User &lt;json name="user"&gt;
@@ -851,7 +851,7 @@ type authorization_response = {
           types defines that correspond to the ATD file.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">json/build_github_atd.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/build_github_atd.out">json/build_github_atd.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">atdgen -t github.atd</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">atdgen -j github.atd</userinput>
@@ -891,7 +891,7 @@ type authorization_response = {
           and from a string. For our example above, this looks like:</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">json/github_j_excerpt.mli</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/github_j_excerpt.mli">json/github_j_excerpt.mli</ulink></para>
 
           <programlisting language="ocaml" format="linespecific">val string_of_authorization_request :
   ?len:int -&gt; authorization_request -&gt; string
@@ -965,7 +965,7 @@ val string_of_authorization_response :
           every field that GitHub might send back.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">json/github_org.atd</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/github_org.atd">json/github_org.atd</ulink></para>
 
           <programlisting language="ocaml" format="linespecific">type org = {
   login: string;
@@ -981,7 +981,7 @@ val string_of_authorization_response :
           <literal moreinfo="none">atdgen -t</literal> on the specification file.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">json/generate_github_org_types.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/generate_github_org_types.out">json/generate_github_org_types.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">atdgen -t github_org.atd</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">cat github_org_t.mli</userinput>
@@ -1005,7 +1005,7 @@ val string_of_authorization_response :
           <literal moreinfo="none">github_org_j.ml</literal>.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">json/generate_github_org_json.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/generate_github_org_json.out">json/generate_github_org_json.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">atdgen -j github_org.atd</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">cat github_org_j.mli</userinput>
@@ -1063,7 +1063,7 @@ val string_of_authorization_response :
           if you haven't installed it previously.</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">json/github_org_info.ml</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/github_org_info.ml">json/github_org_info.ml</ulink></para>
 
           <programlisting language="ocaml" format="linespecific">open Core.Std
 
@@ -1087,7 +1087,7 @@ let () =
           code and also builds the final executable.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">json/build_github_org.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/build_github_org.out">json/build_github_org.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">atdgen -t github_org.atd</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">atdgen -j github_org.atd</userinput>
@@ -1101,7 +1101,7 @@ let () =
           your console.</para>
 
           <para role="sourcecode">Terminal:
-          <filename moreinfo="none">json/run_github_org.out</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/json/run_github_org.out">json/run_github_org.out</ulink></para>
 
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./github_org_info.native mirage</userinput>
 <computeroutput moreinfo="none">Mirage account (131943) with 37 public repos</computeroutput>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="functors">
       <title>Functors</title>
@@ -60,7 +60,7 @@
         single value of type <literal moreinfo="none">int</literal>.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">functors/main.topscript</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink></para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module type X_int = sig val x : int end;;</userinput>
 <computeroutput moreinfo="none">module type X_int = sig val x : int end</computeroutput></programlisting>
@@ -70,7 +70,7 @@
         functor, and to constrain the module returned by the functor.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">functors/main.topscript</filename> (part 1)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink> (part 1)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Increment (M : X_int) : X_int = struct</userinput>
 <userinput moreinfo="none">    let x = M.x + 1</userinput>
@@ -89,7 +89,7 @@
         for the output of the functor.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">functors/main.topscript</filename> (part 2)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink> (part 2)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Increment (M : X_int) = struct</userinput>
 <userinput moreinfo="none">    let x = M.x + 1</userinput>
@@ -104,7 +104,7 @@
         modules.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">functors/main.topscript</filename> (part 3)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink> (part 3)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Three = struct let x = 3 end;;</userinput>
 <computeroutput moreinfo="none">module Three : sig val x : int end</computeroutput>
@@ -124,7 +124,7 @@
         example:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">functors/main.topscript</filename> (part 4)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink> (part 4)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Three_and_more = struct</userinput>
 <userinput moreinfo="none">    let x = 3</userinput>
@@ -163,7 +163,7 @@
         comparison function, and the type of the values to be compared.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">functors/main.topscript</filename> (part 5)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink> (part 5)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module type Comparable = sig</userinput>
 <userinput moreinfo="none">    type t</userinput>
@@ -179,7 +179,7 @@
         top of <literal moreinfo="none">compare</literal> as shown below.</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">functors/compare_example.ml</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/compare_example.ml">functors/compare_example.ml</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">compare x y &lt; 0     (* x &lt; y *)
 compare x y = 0     (* x = y *)
@@ -199,7 +199,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
         intervals.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">functors/main.topscript</filename> (part 6)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink> (part 6)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Make_interval(Endpoint : Comparable) = struct</userinput>
 <userinput moreinfo="none"/>
@@ -252,7 +252,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
         anonymous module.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">functors/main.topscript</filename> (part 7)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink> (part 7)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Int_interval =</userinput>
 <userinput moreinfo="none">    Make_interval(struct</userinput>
@@ -275,7 +275,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
         provided by Core.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">functors/main.topscript</filename> (part 8)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink> (part 8)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Int_interval = Make_interval(Int) ;;</userinput>
 <computeroutput moreinfo="none">module Int_interval :</computeroutput>
@@ -310,7 +310,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
         module like any ordinary module.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">functors/main.topscript</filename> (part 9)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink> (part 9)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let i1 = Int_interval.create 3 8;;</userinput>
 <computeroutput moreinfo="none">val i1 : Int_interval.t = Int_interval.Interval (3, 8)</computeroutput>
@@ -325,7 +325,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
         follows:</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">functors/main.topscript</filename> (part 10)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink> (part 10)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Rev_int_interval =</userinput>
 <userinput moreinfo="none">    Make_interval(struct</userinput>
@@ -346,7 +346,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
         below.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">functors/main.topscript</filename> (part 11)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink> (part 11)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let interval = Int_interval.create 4 3;;</userinput>
 <computeroutput moreinfo="none">val interval : Int_interval.t = Int_interval.Empty</computeroutput>
@@ -359,7 +359,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
         prevent us from confusing them.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">functors/main.topscript</filename> (part 12)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink> (part 12)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Int_interval.contains rev_interval 3;;</userinput>
 <computeroutput moreinfo="none">Characters 22-34:</computeroutput>
@@ -382,7 +382,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
           the <literal moreinfo="none">create</literal> function.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">functors/main.topscript</filename> (part 13)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink> (part 13)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Int_interval.is_empty (* going through create *)</userinput>
 <userinput moreinfo="none">    (Int_interval.create 4 3) ;;</userinput>
@@ -397,7 +397,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
           purpose.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">functors/main.topscript</filename> (part 14)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink> (part 14)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module type Interval_intf = sig</userinput>
 <userinput moreinfo="none">   type t</userinput>
@@ -425,7 +425,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
           match <literal moreinfo="none">Interval_intf</literal>.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">functors/main-15.rawscript</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main-15.rawscript">functors/main-15.rawscript</ulink></para>
 
           <programlisting language="ocaml" format="linespecific"><userinput moreinfo="none"># module Make_interval(Endpoint : Comparable) : Interval_intf = struct
     type endpoint = Endpoint.t
@@ -447,7 +447,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
           construct an interval anymore.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">functors/main.topscript</filename> (part 16)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink> (part 16)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Int_interval = Make_interval(Int);;</userinput>
 <computeroutput moreinfo="none">module Int_interval :</computeroutput>
@@ -474,7 +474,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
           sharing constraint is as follows.</para>
 
           <para role="sourcecode">Syntax:
-          <filename moreinfo="none">functors/sharing_constraint.syntax</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/sharing_constraint.syntax">functors/sharing_constraint.syntax</ulink></para>
 
           <programlisting language="" format="linespecific">&lt;Module_type&gt; with type &lt;type&gt; = &lt;type'&gt;</programlisting>
 
@@ -486,7 +486,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
           the same signature.</para>
 
           <para role="sourcecode">Syntax:
-          <filename moreinfo="none">functors/multi_sharing_constraint.syntax</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/multi_sharing_constraint.syntax">functors/multi_sharing_constraint.syntax</ulink></para>
 
           <programlisting language="" format="linespecific">&lt;Module_type&gt; with type &lt;type1&gt; = &lt;type1'&gt; and &lt;type2&gt; = &lt;type2'&gt;</programlisting>
 
@@ -495,7 +495,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
           intervals.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">functors/main.topscript</filename> (part 17)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink> (part 17)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module type Int_interval_intf =</userinput>
 <userinput moreinfo="none">    Interval_intf with type endpoint = int;;</userinput>
@@ -521,7 +521,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
           this as follows.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">functors/main-18.rawscript</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main-18.rawscript">functors/main-18.rawscript</ulink></para>
 
           <programlisting language="ocaml" format="linespecific"><userinput moreinfo="none"># module Make_interval(Endpoint : Comparable)
       : (Interval_intf with type endpoint = Endpoint.t)
@@ -552,7 +552,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
           exposed, like constructing intervals.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">functors/main.topscript</filename> (part 19)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink> (part 19)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Int_interval = Make_interval(Int);;</userinput>
 <computeroutput moreinfo="none">module Int_interval :</computeroutput>
@@ -585,7 +585,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
           Here's the basic syntax.</para>
 
           <para role="sourcecode">Syntax:
-          <filename moreinfo="none">functors/destructive_sub.syntax</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/destructive_sub.syntax">functors/destructive_sub.syntax</ulink></para>
 
           <programlisting language="" format="linespecific">&lt;Module_type&gt; with type &lt;type&gt; := &lt;type'&gt;</programlisting>
 
@@ -593,7 +593,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
           <literal moreinfo="none">Make_interval</literal>.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">functors/main.topscript</filename> (part 20)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink> (part 20)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module type Int_interval_intf =</userinput>
 <userinput moreinfo="none">    Interval_intf with type endpoint := int;;</userinput>
@@ -612,7 +612,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
           functor.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">functors/main-21.rawscript</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main-21.rawscript">functors/main-21.rawscript</ulink></para>
 
           <programlisting language="ocaml" format="linespecific"><userinput moreinfo="none"># module Make_interval(Endpoint : Comparable)
     : Interval_intf with type endpoint := Endpoint.t =
@@ -642,7 +642,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
           invariants of the module, as you can see below.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">functors/main.topscript</filename> (part 22)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink> (part 22)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Int_interval = Make_interval(Int);;</userinput>
 <computeroutput moreinfo="none">module Int_interval :</computeroutput>
@@ -685,7 +685,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
           an example.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">functors/main.topscript</filename> (part 23)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink> (part 23)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Sexp.of_string "(This is (an s-expression))";;</userinput>
 <computeroutput moreinfo="none">- : Sexp.t = (This is (an s-expression))</computeroutput></programlisting>
@@ -697,7 +697,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
           Thus, we can write:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">functors/main.topscript</filename> (part 24)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink> (part 24)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type some_type = int * string list with sexp;;</userinput>
 <computeroutput moreinfo="none">type some_type = int * string list</computeroutput>
@@ -715,7 +715,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
           within the functor.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">functors/main-25.rawscript</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main-25.rawscript">functors/main-25.rawscript</ulink></para>
 
           <programlisting language="ocaml" format="linespecific"><userinput moreinfo="none"># module Make_interval(Endpoint : Comparable)
     : (Interval_intf with type endpoint := Endpoint.t) = struct
@@ -743,7 +743,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
           follows:</para>
 
           <para role="sourcecode">OCaml:
-          <filename moreinfo="none">functors/sexpable.ml</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/sexpable.ml">functors/sexpable.ml</ulink></para>
 
           <programlisting language="ocaml" format="linespecific">module type Sexpable = sig
   type t
@@ -761,7 +761,7 @@ end</programlisting>
           <literal moreinfo="none">t</literal>'s clashing with each other.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">functors/main.topscript</filename> (part 26)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink> (part 26)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module type Interval_intf_with_sexp = sig</userinput>
 <userinput moreinfo="none">   include Interval_intf</userinput>
@@ -787,7 +787,7 @@ end</programlisting>
           are being handled equivalently.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">functors/main.topscript</filename> (part 27)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink> (part 27)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module type Interval_intf_with_sexp = sig</userinput>
 <userinput moreinfo="none">   type t</userinput>
@@ -812,7 +812,7 @@ end</programlisting>
           s-expression.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">functors/main.topscript</filename> (part 28)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink> (part 28)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Make_interval(Endpoint : sig</userinput>
 <userinput moreinfo="none">                         type t</userinput>
@@ -884,7 +884,7 @@ end</programlisting>
           way:</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">functors/main.topscript</filename> (part 29)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink> (part 29)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module Int_interval = Make_interval(Int) ;;</userinput>
 <computeroutput moreinfo="none">module Int_interval :</computeroutput>
@@ -918,7 +918,7 @@ end</programlisting>
         module.</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">functors/fqueue.mli</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/fqueue.mli">functors/fqueue.mli</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">type 'a t
 
@@ -952,7 +952,7 @@ val fold : 'a t -&gt; init:'acc -&gt; f:('acc -&gt; 'a -&gt; 'acc) -&gt; 'acc</p
         the new output list. Here's the implementation.</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">functors/fqueue.ml</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/fqueue.ml">functors/fqueue.ml</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">open Core.Std
 
@@ -1002,7 +1002,7 @@ let fold (in_list, out_list) ~init ~f =
         matches <literal moreinfo="none">Foldable.S</literal>.</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">functors/foldable.ml</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/foldable.ml">functors/foldable.ml</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">open Core.Std
 
@@ -1050,7 +1050,7 @@ end</programlisting>
         rewrite the interface of <literal moreinfo="none">Fqueue</literal> as follows.</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">functors/extended_fqueue.mli</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/extended_fqueue.mli">functors/extended_fqueue.mli</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">type 'a t
 include (module type of Fqueue) with type 'a t := 'a t
@@ -1062,7 +1062,7 @@ include Foldable.Extension with type 'a t := 'a t</programlisting>
         <literal moreinfo="none">T</literal>.</para>
 
         <para role="sourcecode">OCaml:
-        <filename moreinfo="none">functors/extended_fqueue.ml</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/extended_fqueue.ml">functors/extended_fqueue.ml</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">include Fqueue
 include Foldable.Extend(Fqueue)</programlisting>

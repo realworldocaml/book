@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="memory-representation-of-values">
       <title>Memory Representation of Values</title>
@@ -67,7 +67,7 @@
         created.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">memory-repr/simple_record.topscript</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/simple_record.topscript">memory-repr/simple_record.topscript</ulink></para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type t = { foo: int; bar: int } ;;</userinput>
 <computeroutput moreinfo="none">type t = { foo : int; bar : int; }</computeroutput>
@@ -184,7 +184,7 @@
         described earlier.</para>
 
         <para role="sourcecode">Diagram:
-        <filename moreinfo="none">memory-repr/block.ascii</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/block.ascii">memory-repr/block.ascii</ulink></para>
 
         <programlisting language="" format="linespecific">+------------------------+---------+----------+----------+----------+----
 | size of block in words |  color  | tag byte | value[0] | value[1] | ...
@@ -335,7 +335,7 @@
         <title>Tuples, records and arrays</title>
 
         <para role="sourcecode">Diagram:
-        <filename moreinfo="none">memory-repr/tuple_layout.ascii</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/tuple_layout.ascii">memory-repr/tuple_layout.ascii</ulink></para>
 
         <programlisting language="" format="linespecific">+---------+----------+----------- - - - -
 | header  | value[0] | value[1] | ....
@@ -353,7 +353,7 @@
         exposes the internal representation of values to OCaml code.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">memory-repr/reprs.topscript</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">memory-repr/reprs.topscript</ulink></para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Obj.is_block (Obj.repr (1,2,3)) ;;</userinput>
 <computeroutput moreinfo="none">- : bool = true</computeroutput>
@@ -375,7 +375,7 @@
           collector that the floating-point value is not to be scanned.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">memory-repr/reprs.topscript</filename> (part 1)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">memory-repr/reprs.topscript</ulink> (part 1)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Obj.tag (Obj.repr 1.0) ;;</userinput>
 <computeroutput moreinfo="none">- : int = 253</computeroutput>
@@ -392,7 +392,7 @@
           that the contents are not OCaml values.</para>
 
           <para role="sourcecode">Diagram:
-          <filename moreinfo="none">memory-repr/float_array_layout.ascii</filename></para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/float_array_layout.ascii">memory-repr/float_array_layout.ascii</ulink></para>
 
           <programlisting language="" format="linespecific">+---------+----------+----------- - - - -
 | header  | float[0] | float[1] | ....
@@ -402,7 +402,7 @@
           different tag number from normal floating-point values.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">memory-repr/reprs.topscript</filename> (part 2)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">memory-repr/reprs.topscript</ulink> (part 2)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Obj.double_tag ;;</userinput>
 <computeroutput moreinfo="none">- : int = 253</computeroutput>
@@ -416,7 +416,7 @@
           float from within the block.</para>
 
           <para role="sourcecode">OCaml Utop:
-          <filename moreinfo="none">memory-repr/reprs.topscript</filename> (part 3)</para>
+          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">memory-repr/reprs.topscript</ulink> (part 3)</para>
 
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Obj.tag (Obj.repr [| 1.0; 2.0; 3.0 |]) ;;</userinput>
 <computeroutput moreinfo="none">- : int = 254</computeroutput>
@@ -447,7 +447,7 @@
         order.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">memory-repr/reprs.topscript</filename> (part 4)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">memory-repr/reprs.topscript</ulink> (part 4)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type t = Apple | Orange | Pear ;;</userinput>
 <computeroutput moreinfo="none">type t = Apple | Orange | Pear</computeroutput>
@@ -471,7 +471,7 @@
         block.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">memory-repr/reprs.topscript</filename> (part 5)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">memory-repr/reprs.topscript</ulink> (part 5)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type t = Apple | Orange of int | Pear of string | Kiwi ;;</userinput>
 <computeroutput moreinfo="none">type t = Apple | Orange of int | Pear of string | Kiwi</computeroutput>
@@ -548,7 +548,7 @@
         implementation.</para>
 
         <para role="sourcecode">OCaml Utop:
-        <filename moreinfo="none">memory-repr/reprs.topscript</filename> (part 6)</para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">memory-repr/reprs.topscript</ulink> (part 6)</para>
 
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Pa_type_conv.hash_variant "Foo" ;;</userinput>
 <computeroutput moreinfo="none">- : int = 3505894</computeroutput>
@@ -600,7 +600,7 @@
         boundary.</para>
 
         <para role="sourcecode">Diagram:
-        <filename moreinfo="none">memory-repr/string_block.ascii</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/string_block.ascii">memory-repr/string_block.ascii</ulink></para>
 
         <programlisting language="" format="linespecific">+---------------+----------------+--------+-----------+
 | header        | 'a' 'b' 'c' 'd' 'e' 'f' | '\O' '\1' |
@@ -660,7 +660,7 @@
         following formula is used:</para>
 
         <para role="sourcecode">Diagram:
-        <filename moreinfo="none">memory-repr/string_size_calc.ascii</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/string_size_calc.ascii">memory-repr/string_size_calc.ascii</ulink></para>
 
         <programlisting language="" format="linespecific">number_of_words_in_block * sizeof(word) - last_byte_of_block - 1</programlisting>
 
@@ -696,7 +696,7 @@
         garbage collector.</para>
 
         <para role="sourcecode">C:
-        <filename moreinfo="none">memory-repr/custom_ops.c</filename></para>
+        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/custom_ops.c">memory-repr/custom_ops.c</ulink></para>
 
         <programlisting language="c" format="linespecific">struct custom_operations {
   char *identifier;
