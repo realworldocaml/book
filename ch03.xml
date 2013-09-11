@@ -1,96 +1,111 @@
-<?xml version="1.0"?>
-<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="lists-and-patterns">
-      <title>Lists and Patterns</title>
+  <title>Lists and Patterns</title>
 
-      <para>This chapter will focus on two common elements of programming in
-      OCaml: lists and pattern matching. Both of these were discussed in <xref linkend="a-guided-tour"/>, but we'll go into more depth here,
-      presenting the two topics together and using one to help illustrate the
-      other.</para>
+  <para>This chapter will focus on two common elements of programming in
+  OCaml: lists and pattern matching. Both of these were discussed in <xref
+  linkend="a-guided-tour" />, but we'll go into more depth here, presenting
+  the two topics together and using one to help illustrate the other.</para>
 
-      <sect1 id="list-basics">
-        <title>List basics</title>
+  <sect1 id="list-basics">
+    <title>List basics</title>
 
-        <para>An OCaml list is an immutable, finite sequence of elements of
-        the same type. As we've seen, OCaml lists can be generated using a
-        bracket-and-semicolon notation:</para>
+    <para>An OCaml list is an immutable, finite sequence of elements of the
+    same type. As we've seen, OCaml lists can be generated using a
+    bracket-and-semicolon notation:</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink></para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink></para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">[1;2;3];;</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">[1;2;3];;</userinput>
 <computeroutput moreinfo="none">- : int list = [1; 2; 3]</computeroutput></programlisting>
 
-        <para>And they can also be generated using the equivalent
-        <literal moreinfo="none">::</literal> notation.</para>
+    <para>And they can also be generated using the equivalent <literal
+    moreinfo="none">::</literal> notation.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part 1)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 1)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">1 :: (2 :: (3 :: [])) ;;</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">1 :: (2 :: (3 :: [])) ;;</userinput>
 <computeroutput moreinfo="none">- : int list = [1; 2; 3]</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">1 :: 2 :: 3 :: [] ;;</userinput>
 <computeroutput moreinfo="none">- : int list = [1; 2; 3]</computeroutput></programlisting>
 
-        <para>As you can see, the <literal moreinfo="none">::</literal> operator is
-        right-associative, which means that we can build up lists without
-        parentheses. The empty list <literal moreinfo="none">[]</literal> is used to terminate
-        a list. Note that the empty list is polymorphic, meaning it can be
-        used with elements of any type, as you can see below.</para>
+    <para>As you can see, the <literal moreinfo="none">::</literal> operator
+    is right-associative, which means that we can build up lists without
+    parentheses. The empty list <literal moreinfo="none">[]</literal> is used
+    to terminate a list. Note that the empty list is polymorphic, meaning it
+    can be used with elements of any type, as you can see below.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part 2)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 2)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let empty = [];;</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">let empty = [];;</userinput>
 <computeroutput moreinfo="none">val empty : 'a list = []</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">3 :: empty;;</userinput>
 <computeroutput moreinfo="none">- : int list = [3]</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">"three" :: empty;;</userinput>
 <computeroutput moreinfo="none">- : string list = ["three"]</computeroutput></programlisting>
 
-        <para>The way in which the <literal moreinfo="none">::</literal> operator attaches
-        elements to the front of a list reflects the fact that OCaml's lists
-        are in fact singly-linked lists. The following is a rough graphical
-        representation of how the list <literal moreinfo="none">1 :: 2 :: 3 :: []</literal> is
-        laid out as a data-structure. The final arrow (from the box containing
-        <literal moreinfo="none">3</literal>) points to the empty list.</para>
+    <para>The way in which the <literal moreinfo="none">::</literal> operator
+    attaches elements to the front of a list reflects the fact that OCaml's
+    lists are in fact singly-linked lists. The following is a rough graphical
+    representation of how the list <literal moreinfo="none">1 :: 2 :: 3 ::
+    []</literal> is laid out as a data-structure. The final arrow (from the
+    box containing <literal moreinfo="none">3</literal>) points to the empty
+    list.</para>
 
-        <para role="sourcecode">Diagram:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/lists_layout.ascii">lists-and-patterns/lists_layout.ascii</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/lists_layout.ascii">Diagram</ulink></para>
 
-        <programlisting language="" format="linespecific">+---+---+   +---+---+   +---+---+
-| 1 | *----&gt;| 2 | *----&gt;| 3 | *----&gt;||
-+---+---+   +---+---+   +---+---+</programlisting>
+    <informalfigure>
+      <mediaobject>
+        <imageobject role="web">
+          <imagedata fileref="images/rwoc_0301.png" format="PNG" />
+        </imageobject>
+      </mediaobject>
+    </informalfigure>
 
-        <para>Each <literal moreinfo="none">::</literal> essentially adds a new block to the
-        picture above. Such a block contains two things: a reference to the
-        data in that list element, and a reference to the remainder of the
-        list. This is why <literal moreinfo="none">::</literal> can extend a list without
-        modifying it; extension allocates a new list element but doesn't need
-        to change any of the existing ones, as you can see:</para>
+    <para>Each <literal moreinfo="none">::</literal> essentially adds a new
+    block to the picture above. Such a block contains two things: a reference
+    to the data in that list element, and a reference to the remainder of the
+    list. This is why <literal moreinfo="none">::</literal> can extend a list
+    without modifying it; extension allocates a new list element but doesn't
+    need to change any of the existing ones, as you can see:</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part 3)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 3)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let l = 1 :: 2 :: 3 :: [];;</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">let l = 1 :: 2 :: 3 :: [];;</userinput>
 <computeroutput moreinfo="none">val l : int list = [1; 2; 3]</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let m = 0 :: l;;</userinput>
 <computeroutput moreinfo="none">val m : int list = [0; 1; 2; 3]</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">l;;</userinput>
 <computeroutput moreinfo="none">- : int list = [1; 2; 3]</computeroutput></programlisting>
-      </sect1>
+  </sect1>
 
-      <sect1 id="using-patterns-to-extract-data-from-a-list">
-        <title>Using patterns to extract data from a list</title>
+  <sect1 id="using-patterns-to-extract-data-from-a-list">
+    <title>Using patterns to extract data from a list</title>
 
-        <para>We can read data out of a list using a match statement. Here's a
-        simple example of a recursive function that computes the sum of all
-        elements of a list.</para>
+    <para>We can read data out of a list using a match statement. Here's a
+    simple example of a recursive function that computes the sum of all
+    elements of a list.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part 4)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 4)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec sum l =</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">let rec sum l =</userinput>
 <userinput moreinfo="none">    match l with</userinput>
 <userinput moreinfo="none">    | [] -&gt; 0</userinput>
 <userinput moreinfo="none">    | hd :: tl -&gt; hd + sum tl</userinput>
@@ -101,31 +116,33 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">sum [];;</userinput>
 <computeroutput moreinfo="none">- : int = 0</computeroutput></programlisting>
 
-        <para>This code follows the convention of using <literal moreinfo="none">hd</literal>
-        to represent the first element (or head) of the list, and
-        <literal moreinfo="none">tl</literal> to represent the remainder (or tail).</para>
+    <para>This code follows the convention of using <literal
+    moreinfo="none">hd</literal> to represent the first element (or head) of
+    the list, and <literal moreinfo="none">tl</literal> to represent the
+    remainder (or tail).</para>
 
-        <para>The match statement in <literal moreinfo="none">sum</literal> is really doing
-        two things: first, it's acting as a case-analysis tool, breaking down
-        the possibilities into a pattern-indexed list of cases. Second, it
-        lets you name sub-structures within the data-structure being matched.
-        In this case, the variables <literal moreinfo="none">hd</literal> and
-        <literal moreinfo="none">tl</literal> are bound by the pattern that defines the second
-        case of the match statement. Variables that are bound in this way can
-        be used in the expression to the right of the arrow for the pattern in
-        question.</para>
+    <para>The match statement in <literal moreinfo="none">sum</literal> is
+    really doing two things: first, it's acting as a case-analysis tool,
+    breaking down the possibilities into a pattern-indexed list of cases.
+    Second, it lets you name sub-structures within the data-structure being
+    matched. In this case, the variables <literal moreinfo="none">hd</literal>
+    and <literal moreinfo="none">tl</literal> are bound by the pattern that
+    defines the second case of the match statement. Variables that are bound
+    in this way can be used in the expression to the right of the arrow for
+    the pattern in question.</para>
 
-        <para>The fact that match statements can be used to bind new variables
-        can be a source of confusion. To see how, imagine we wanted to write a
-        function that filtered out from a list all elements equal to a
-        particular value. You might be tempted to write that code as follows,
-        but when you do, the compiler will immediately warn you that something
-        is wrong.</para>
+    <para>The fact that match statements can be used to bind new variables can
+    be a source of confusion. To see how, imagine we wanted to write a
+    function that filtered out from a list all elements equal to a particular
+    value. You might be tempted to write that code as follows, but when you
+    do, the compiler will immediately warn you that something is wrong.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part 5)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 5)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec drop_value l to_drop =</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">let rec drop_value l to_drop =</userinput>
 <userinput moreinfo="none">    match l with</userinput>
 <userinput moreinfo="none">    | [] -&gt; []</userinput>
 <userinput moreinfo="none">    | to_drop :: tl -&gt; drop_value tl to_drop</userinput>
@@ -135,37 +152,42 @@
 <computeroutput moreinfo="none">Warning 11: this match case is unused.</computeroutput>
 <computeroutput moreinfo="none">val drop_value : 'a list -&gt; 'a -&gt; 'a list = &lt;fun&gt;</computeroutput></programlisting>
 
-        <para>Moreover, the function clearly does the wrong thing, filtering
-        out all elements of the list rather than just those equal to the
-        provided value, as you can see below.</para>
+    <para>Moreover, the function clearly does the wrong thing, filtering out
+    all elements of the list rather than just those equal to the provided
+    value, as you can see below.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part 6)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 6)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">drop_value [1;2;3] 2;;</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">drop_value [1;2;3] 2;;</userinput>
 <computeroutput moreinfo="none">- : int list = []</computeroutput></programlisting>
 
-        <para>So, what's going on?</para>
+    <para>So, what's going on?</para>
 
-        <para>The key observation is that the appearance of
-        <literal moreinfo="none">to_drop</literal> in the second case doesn't imply a check
-        that the first element is equal to the value
-        <literal moreinfo="none">to_drop</literal> passed in as an argument to
-        <literal moreinfo="none">drop_value</literal>. Instead, it just causes a new variable
-        <literal moreinfo="none">to_drop</literal> to be bound to whatever happens to be in
-        the first element of the list, shadowing the earlier definition of
-        <literal moreinfo="none">to_drop</literal>. The third case is unused because it is
-        essentially the same pattern as we had in the second case.</para>
+    <para>The key observation is that the appearance of <literal
+    moreinfo="none">to_drop</literal> in the second case doesn't imply a check
+    that the first element is equal to the value <literal
+    moreinfo="none">to_drop</literal> passed in as an argument to <literal
+    moreinfo="none">drop_value</literal>. Instead, it just causes a new
+    variable <literal moreinfo="none">to_drop</literal> to be bound to
+    whatever happens to be in the first element of the list, shadowing the
+    earlier definition of <literal moreinfo="none">to_drop</literal>. The
+    third case is unused because it is essentially the same pattern as we had
+    in the second case.</para>
 
-        <para>A better way to write this code is not to use pattern matching
-        for determining whether the first element is equal to
-        <literal moreinfo="none">to_drop</literal>, but to instead use an ordinary
-        if-statement.</para>
+    <para>A better way to write this code is not to use pattern matching for
+    determining whether the first element is equal to <literal
+    moreinfo="none">to_drop</literal>, but to instead use an ordinary
+    if-statement.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part 7)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 7)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec drop_value l to_drop =</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">let rec drop_value l to_drop =</userinput>
 <userinput moreinfo="none">    match l with</userinput>
 <userinput moreinfo="none">    | [] -&gt; []</userinput>
 <userinput moreinfo="none">    | hd :: tl -&gt;</userinput>
@@ -176,15 +198,17 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">drop_value [1;2;3] 2;;</userinput>
 <computeroutput moreinfo="none">- : int list = [1; 3]</computeroutput></programlisting>
 
-        <para>Note that if we wanted to drop a particular literal value
-        (rather than a value that was passed in), we could do this using
-        something like our original implementation of
-        <literal moreinfo="none">drop_value</literal>.</para>
+    <para>Note that if we wanted to drop a particular literal value (rather
+    than a value that was passed in), we could do this using something like
+    our original implementation of <literal
+    moreinfo="none">drop_value</literal>.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part 8)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 8)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec drop_zero l =</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">let rec drop_zero l =</userinput>
 <userinput moreinfo="none">    match l with</userinput>
 <userinput moreinfo="none">    | [] -&gt; []</userinput>
 <userinput moreinfo="none">    | 0  :: tl -&gt; drop_zero tl</userinput>
@@ -193,53 +217,52 @@
 <computeroutput moreinfo="none">val drop_zero : int list -&gt; int list = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">drop_zero [1;2;0;3];;</userinput>
 <computeroutput moreinfo="none">- : int list = [1; 2; 3]</computeroutput></programlisting>
-      </sect1>
+  </sect1>
 
-      <sect1 id="limitations-and-blessings-of-pattern-matching">
-        <title>Limitations (and blessings) of pattern matching</title>
+  <sect1 id="limitations-and-blessings-of-pattern-matching">
+    <title>Limitations (and blessings) of pattern matching</title>
 
-        <para>The above example highlights an important fact about patterns,
-        which is that they can't be used to express arbitrary conditions.
-        Patterns can characterize the layout of a data-structure, and can even
-        include literals as in the <literal moreinfo="none">drop_zero</literal> example, but
-        that's where they stop. A pattern can check if a list has two
-        elements, but it can't check if the first two elements are equal to
-        each other.</para>
+    <para>The above example highlights an important fact about patterns, which
+    is that they can't be used to express arbitrary conditions. Patterns can
+    characterize the layout of a data-structure, and can even include literals
+    as in the <literal moreinfo="none">drop_zero</literal> example, but that's
+    where they stop. A pattern can check if a list has two elements, but it
+    can't check if the first two elements are equal to each other.</para>
 
-        <para>You can think of patterns as a specialized sub-language that can
-        express a limited (though still quite rich) set of conditions. The
-        fact that the pattern language is limited turns out to be a very good
-        thing, making it possible to build better support for patterns in the
-        compiler. In particular, both the efficiency of match statements and
-        the ability of the compiler to detect errors in matches depend on the
-        constrained nature of patterns.</para>
+    <para>You can think of patterns as a specialized sub-language that can
+    express a limited (though still quite rich) set of conditions. The fact
+    that the pattern language is limited turns out to be a very good thing,
+    making it possible to build better support for patterns in the compiler.
+    In particular, both the efficiency of match statements and the ability of
+    the compiler to detect errors in matches depend on the constrained nature
+    of patterns.</para>
 
-        <sect2 id="performance">
-          <title>Performance</title>
+    <sect2 id="performance">
+      <title>Performance</title>
 
-          <para>Naively, you might think that it would be necessary to check
-          each case in a <literal moreinfo="none">match</literal> in sequence to figure out
-          which one fires. If the cases of a match were guarded by arbitrary
-          code, that would be the case. But OCaml is often able to generate
-          machine code that jumps directly to the matched case based on an
-          efficiently chosen set of runtime checks.</para>
+      <para>Naively, you might think that it would be necessary to check each
+      case in a <literal moreinfo="none">match</literal> in sequence to figure
+      out which one fires. If the cases of a match were guarded by arbitrary
+      code, that would be the case. But OCaml is often able to generate
+      machine code that jumps directly to the matched case based on an
+      efficiently chosen set of runtime checks.</para>
 
-          <para>As an example, consider the following rather silly functions
-          for incrementing an integer by one. The first is implemented with a
-          match statement, and the second with a sequence of if
-          statements.</para>
+      <para>As an example, consider the following rather silly functions for
+      incrementing an integer by one. The first is implemented with a match
+      statement, and the second with a sequence of if statements.</para>
 
-          <para role="sourcecode">OCaml Utop:
-          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-          9)</para>
+      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+      (part 9)</para>
 
-          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let plus_one_match x =</userinput>
+      <programlisting format="linespecific" language="ocaml"><prompt
+          moreinfo="none"># </prompt><userinput moreinfo="none">let plus_one_match x =</userinput>
 <userinput moreinfo="none">    match x with</userinput>
 <userinput moreinfo="none">    | 0 -&gt; 1</userinput>
 <userinput moreinfo="none">    | 1 -&gt; 2</userinput>
 <userinput moreinfo="none">    | 2 -&gt; 3</userinput>
 <userinput moreinfo="none">    | _ -&gt; x + 1</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">  let plus_one_if x =</userinput>
 <userinput moreinfo="none">    if      x = 0 then 1</userinput>
 <userinput moreinfo="none">    else if x = 1 then 2</userinput>
@@ -249,23 +272,24 @@
 <computeroutput moreinfo="none">val plus_one_match : int -&gt; int = &lt;fun&gt;</computeroutput>
 <computeroutput moreinfo="none">val plus_one_if : int -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
-          <para>Note the use of <literal moreinfo="none">_</literal> in the above match. This
-          is a wild-card pattern that matches any value, but without binding a
-          variable name to the value in question.</para>
+      <para>Note the use of <literal moreinfo="none">_</literal> in the above
+      match. This is a wild-card pattern that matches any value, but without
+      binding a variable name to the value in question.</para>
 
-          <para>If you benchmark these functions, you'll see that
-          <literal moreinfo="none">plus_one_if</literal> is considerably slower than
-          <literal moreinfo="none">plus_one_match</literal>, and the advantage gets larger as
-          the number of cases increases. Here, we'll benchmark these functions
-          using the <literal moreinfo="none">core_bench</literal> library, which can be
-          installed by running <literal moreinfo="none">opam install core_bench</literal> from
-          the command-line.</para>
+      <para>If you benchmark these functions, you'll see that <literal
+      moreinfo="none">plus_one_if</literal> is considerably slower than
+      <literal moreinfo="none">plus_one_match</literal>, and the advantage
+      gets larger as the number of cases increases. Here, we'll benchmark
+      these functions using the <literal moreinfo="none">core_bench</literal>
+      library, which can be installed by running <literal moreinfo="none">opam
+      install core_bench</literal> from the command-line.</para>
 
-          <para role="sourcecode">OCaml Utop:
-          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-          10)</para>
+      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+      (part 10)</para>
 
-          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">#require "core_bench";;</userinput>
+      <programlisting format="linespecific" language="ocaml"><prompt
+          moreinfo="none"># </prompt><userinput moreinfo="none">#require "core_bench";;</userinput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">open Core_bench.Std;;</userinput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let run_bench tests =</userinput>
 <userinput moreinfo="none">  Bench.bench</userinput>
@@ -289,31 +313,35 @@
 <computeroutput moreinfo="none">                                         </computeroutput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
 
-          <para>Here's another less artificial example. We can rewrite the
-          <literal moreinfo="none">sum</literal> function we described earlier in the chapter
-          using an <literal moreinfo="none">if</literal> statement rather than a match. We can
-          then use the functions <literal moreinfo="none">is_empty</literal>,
-          <literal moreinfo="none">hd_exn</literal> and <literal moreinfo="none">tl_exn</literal> from the
-          <literal moreinfo="none">List</literal> module to deconstruct the list, allowing us
-          to implement the entire function without pattern matching.</para>
+      <para>Here's another less artificial example. We can rewrite the
+      <literal moreinfo="none">sum</literal> function we described earlier in
+      the chapter using an <literal moreinfo="none">if</literal> statement
+      rather than a match. We can then use the functions <literal
+      moreinfo="none">is_empty</literal>, <literal
+      moreinfo="none">hd_exn</literal> and <literal
+      moreinfo="none">tl_exn</literal> from the <literal
+      moreinfo="none">List</literal> module to deconstruct the list, allowing
+      us to implement the entire function without pattern matching.</para>
 
-          <para role="sourcecode">OCaml Utop:
-          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-          11)</para>
+      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+      (part 11)</para>
 
-          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec sum_if l =</userinput>
+      <programlisting format="linespecific" language="ocaml"><prompt
+          moreinfo="none"># </prompt><userinput moreinfo="none">let rec sum_if l =</userinput>
 <userinput moreinfo="none">    if List.is_empty l then 0</userinput>
 <userinput moreinfo="none">    else List.hd_exn l + sum_if (List.tl_exn l)</userinput>
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val sum_if : int list -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
-          <para>Again, we can benchmark these to see the difference.</para>
+      <para>Again, we can benchmark these to see the difference.</para>
 
-          <para role="sourcecode">OCaml Utop:
-          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-          12)</para>
+      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+      (part 12)</para>
 
-          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let numbers = List.range 0 1000 in</userinput>
+      <programlisting format="linespecific" language="ocaml"><prompt
+          moreinfo="none"># </prompt><userinput moreinfo="none">let numbers = List.range 0 1000 in</userinput>
 <userinput moreinfo="none">  [ Bench.Test.create ~name:"sum_if" (fun () -&gt; ignore (sum_if numbers))</userinput>
 <userinput moreinfo="none">  ; Bench.Test.create ~name:"sum"    (fun () -&gt; ignore (sum numbers)) ]</userinput>
 <userinput moreinfo="none">  |&gt; run_bench</userinput>
@@ -327,46 +355,46 @@
 <computeroutput moreinfo="none">                                 </computeroutput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
 
-          <para>In this case, the <literal moreinfo="none">match</literal>-based
-          implementation is many times faster than the
-          <literal moreinfo="none">if</literal>-based implementation. The difference comes
-          because we need to effectively do the same work multiple times,
-          since each function we call has to re-examine the first element of
-          the list to determine whether or not it's the empty cell. With a
-          match statement, this work happens exactly once per list
-          element.</para>
+      <para>In this case, the <literal moreinfo="none">match</literal>-based
+      implementation is many times faster than the <literal
+      moreinfo="none">if</literal>-based implementation. The difference comes
+      because we need to effectively do the same work multiple times, since
+      each function we call has to re-examine the first element of the list to
+      determine whether or not it's the empty cell. With a match statement,
+      this work happens exactly once per list element.</para>
 
-          <para>Generally, pattern matching is more efficient than the
-          alternatives you might code by hand. One notable exception is
-          matches over strings, which are in fact tested sequentially, so
-          matches containing a long sequence of strings can be outperformed by
-          a hash table. But most of the time, pattern matching is a clear
-          performance win.</para>
-        </sect2>
+      <para>Generally, pattern matching is more efficient than the
+      alternatives you might code by hand. One notable exception is matches
+      over strings, which are in fact tested sequentially, so matches
+      containing a long sequence of strings can be outperformed by a hash
+      table. But most of the time, pattern matching is a clear performance
+      win.</para>
+    </sect2>
 
-        <sect2 id="detecting-errors">
-          <title>Detecting errors</title>
+    <sect2 id="detecting-errors">
+      <title>Detecting errors</title>
 
-          <para>The error-detecting capabilities of match statements are if
-          anything more important than their performance. We've already seen
-          one example of OCaml's ability to find problems in a pattern match:
-          in our broken implementation of <literal moreinfo="none">drop_value</literal>, OCaml
-          warned us that the final case was redundant. There are no algorithms
-          for determining if a predicate written in a general-purpose language
-          is redundant, but it can be solved reliably in the context of
-          patterns.</para>
+      <para>The error-detecting capabilities of match statements are if
+      anything more important than their performance. We've already seen one
+      example of OCaml's ability to find problems in a pattern match: in our
+      broken implementation of <literal moreinfo="none">drop_value</literal>,
+      OCaml warned us that the final case was redundant. There are no
+      algorithms for determining if a predicate written in a general-purpose
+      language is redundant, but it can be solved reliably in the context of
+      patterns.</para>
 
-          <para>OCaml also checks match statements for exhaustiveness.
-          Consider what happens if we modify <literal moreinfo="none">drop_zero</literal> by
-          deleting the handler for one of the cases. As you can see, the
-          compiler will produce a warning that we've missed a case, along with
-          an example of an unmatched pattern.</para>
+      <para>OCaml also checks match statements for exhaustiveness. Consider
+      what happens if we modify <literal moreinfo="none">drop_zero</literal>
+      by deleting the handler for one of the cases. As you can see, the
+      compiler will produce a warning that we've missed a case, along with an
+      example of an unmatched pattern.</para>
 
-          <para role="sourcecode">OCaml Utop:
-          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-          13)</para>
+      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+      (part 13)</para>
 
-          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec drop_zero l =</userinput>
+      <programlisting format="linespecific" language="ocaml"><prompt
+          moreinfo="none"># </prompt><userinput moreinfo="none">let rec drop_zero l =</userinput>
 <userinput moreinfo="none">    match l with</userinput>
 <userinput moreinfo="none">    | [] -&gt; []</userinput>
 <userinput moreinfo="none">    | 0  :: tl -&gt; drop_zero tl</userinput>
@@ -377,35 +405,37 @@
 <computeroutput moreinfo="none">1::_</computeroutput>
 <computeroutput moreinfo="none">val drop_zero : int list -&gt; 'a list = &lt;fun&gt;</computeroutput></programlisting>
 
-          <para>Even for simple examples like this, exhaustiveness checks are
-          pretty useful. But as we'll see in <xref linkend="variants"/>, they
-          become yet more valuable as you get to more complicated examples,
-          especially those involving user-defined types. In addition to
-          catching outright errors, they act as a sort of refactoring tool,
-          guiding you to the locations where you need to adapt your code to
-          deal with changing types.</para>
-        </sect2>
-      </sect1>
+      <para>Even for simple examples like this, exhaustiveness checks are
+      pretty useful. But as we'll see in <xref linkend="variants" />, they
+      become yet more valuable as you get to more complicated examples,
+      especially those involving user-defined types. In addition to catching
+      outright errors, they act as a sort of refactoring tool, guiding you to
+      the locations where you need to adapt your code to deal with changing
+      types.</para>
+    </sect2>
+  </sect1>
 
-      <sect1 id="using-the-list-module-effectively">
-        <title>Using the <literal moreinfo="none">List</literal> module effectively</title>
+  <sect1 id="using-the-list-module-effectively">
+    <title>Using the <literal moreinfo="none">List</literal> module
+    effectively</title>
 
-        <para>We've so far written a fair amount of list-munging code using
-        pattern matching and recursive functions. But in real life, you're
-        usually better off using the <literal moreinfo="none">List</literal> module, which is
-        full of reusable functions that abstract out common patterns for
-        computing with lists.</para>
+    <para>We've so far written a fair amount of list-munging code using
+    pattern matching and recursive functions. But in real life, you're usually
+    better off using the <literal moreinfo="none">List</literal> module, which
+    is full of reusable functions that abstract out common patterns for
+    computing with lists.</para>
 
-        <para>Let's work through a concrete example to see this in action.
-        We'll write a function <literal moreinfo="none">render_table</literal> that, given a
-        list of column headers and a list of rows, prints them out in a well
-        formatted text table, as follows.</para>
+    <para>Let's work through a concrete example to see this in action. We'll
+    write a function <literal moreinfo="none">render_table</literal> that,
+    given a list of column headers and a list of rows, prints them out in a
+    well formatted text table, as follows.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-        69)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 69)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">printf "%s\n"</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">printf "%s\n"</userinput>
 <userinput moreinfo="none">   (render_table</userinput>
 <userinput moreinfo="none">     ["language";"architect";"first release"]</userinput>
 <userinput moreinfo="none">     [ ["Lisp" ;"John McCarthy" ;"1958"] ;</userinput>
@@ -421,95 +451,103 @@
 <computeroutput moreinfo="none">| OCaml    | Xavier Leroy   | 1996          |</computeroutput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
 
-        <para>The first step is to write a function to compute the maximum
-        width of each column of data. We can do this by converting the header
-        and each row into a list of integer lengths, and then taking the
-        element-wise max of those lists of lengths. Writing the code for all
-        of this directly would be a bit of a chore, but we can do it quite
-        concisely by making use of three functions from the
-        <literal moreinfo="none">List</literal> module: <literal moreinfo="none">map</literal>,
-        <literal moreinfo="none">map2_exn</literal>, and <literal moreinfo="none">fold</literal>.</para>
+    <para>The first step is to write a function to compute the maximum width
+    of each column of data. We can do this by converting the header and each
+    row into a list of integer lengths, and then taking the element-wise max
+    of those lists of lengths. Writing the code for all of this directly would
+    be a bit of a chore, but we can do it quite concisely by making use of
+    three functions from the <literal moreinfo="none">List</literal> module:
+    <literal moreinfo="none">map</literal>, <literal
+    moreinfo="none">map2_exn</literal>, and <literal
+    moreinfo="none">fold</literal>.</para>
 
-        <para><literal moreinfo="none">List.map</literal> is the simplest to explain. It takes
-        a list and a function for transforming elements of that list, and
-        returns a new list with the transformed elements. Thus, we can
-        write:</para>
+    <para><literal moreinfo="none">List.map</literal> is the simplest to
+    explain. It takes a list and a function for transforming elements of that
+    list, and returns a new list with the transformed elements. Thus, we can
+    write:</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-        14)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 14)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.map ~f:String.length ["Hello"; "World!"];;</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">List.map ~f:String.length ["Hello"; "World!"];;</userinput>
 <computeroutput moreinfo="none">- : int list = [5; 6]</computeroutput></programlisting>
 
-        <para><literal moreinfo="none">List.map2_exn</literal> is similar to
-        <literal moreinfo="none">List.map</literal>, except that it takes two lists and a
-        function for combining them. Thus, we might write:</para>
+    <para><literal moreinfo="none">List.map2_exn</literal> is similar to
+    <literal moreinfo="none">List.map</literal>, except that it takes two
+    lists and a function for combining them. Thus, we might write:</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-        15)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 15)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.map2_exn ~f:Int.max [1;2;3] [3;2;1];;</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">List.map2_exn ~f:Int.max [1;2;3] [3;2;1];;</userinput>
 <computeroutput moreinfo="none">- : int list = [3; 2; 3]</computeroutput></programlisting>
 
-        <para>The <literal moreinfo="none">_exn</literal> is there because the function throws
-        an exception if the lists are of mismatched length.</para>
+    <para>The <literal moreinfo="none">_exn</literal> is there because the
+    function throws an exception if the lists are of mismatched length.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-        16)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 16)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.map2_exn ~f:Int.max [1;2;3] [3;2;1;0];;</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">List.map2_exn ~f:Int.max [1;2;3] [3;2;1;0];;</userinput>
 <computeroutput moreinfo="none">Exception: (Invalid_argument "length mismatch in rev_map2_exn: 3 &lt;&gt; 4 ").</computeroutput></programlisting>
 
-        <para><literal moreinfo="none">List.fold</literal> is the most complicated of the
-        three, taking three arguments: a list to process, an initial
-        accumulator value, and a function for updating the accumulator with
-        the information from a list element. <literal moreinfo="none">List.fold</literal>
-        walks over the list from left to right, updating the accumulator at
-        each step and returning the final value of the accumulator when it's
-        done. You can see some of this by looking at the type-signature for
-        <literal moreinfo="none">fold</literal>.</para>
+    <para><literal moreinfo="none">List.fold</literal> is the most complicated
+    of the three, taking three arguments: a list to process, an initial
+    accumulator value, and a function for updating the accumulator with the
+    information from a list element. <literal
+    moreinfo="none">List.fold</literal> walks over the list from left to
+    right, updating the accumulator at each step and returning the final value
+    of the accumulator when it's done. You can see some of this by looking at
+    the type-signature for <literal moreinfo="none">fold</literal>.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-        17)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 17)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.fold;;</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">List.fold;;</userinput>
 <computeroutput moreinfo="none">- : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt; 'accum = &lt;fun&gt;</computeroutput></programlisting>
 
-        <para>We can use <literal moreinfo="none">List.fold</literal> for something as simple
-        as summing up a list:</para>
+    <para>We can use <literal moreinfo="none">List.fold</literal> for
+    something as simple as summing up a list:</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-        18)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 18)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.fold ~init:0 ~f:(+) [1;2;3;4];;</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">List.fold ~init:0 ~f:(+) [1;2;3;4];;</userinput>
 <computeroutput moreinfo="none">- : int = 10</computeroutput></programlisting>
 
-        <para>This example is particularly simple because the accumulator and
-        the list elements are of the same type. But <literal moreinfo="none">fold</literal> is
-        not limited to such cases. We can for example use
-        <literal moreinfo="none">fold</literal> to reverse a list, in which case the
-        accumulator is itself a list.</para>
+    <para>This example is particularly simple because the accumulator and the
+    list elements are of the same type. But <literal
+    moreinfo="none">fold</literal> is not limited to such cases. We can for
+    example use <literal moreinfo="none">fold</literal> to reverse a list, in
+    which case the accumulator is itself a list.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-        19)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 19)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.fold ~init:[] ~f:(fun list x -&gt; x :: list) [1;2;3;4];;</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">List.fold ~init:[] ~f:(fun list x -&gt; x :: list) [1;2;3;4];;</userinput>
 <computeroutput moreinfo="none">- : int list = [4; 3; 2; 1]</computeroutput></programlisting>
 
-        <para>Let's bring our three functions together to compute the maximum
-        column widths.</para>
+    <para>Let's bring our three functions together to compute the maximum
+    column widths.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-        20)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 20)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let max_widths header rows =</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">let max_widths header rows =</userinput>
 <userinput moreinfo="none">    let lengths l = List.map ~f:String.length l in</userinput>
 <userinput moreinfo="none">    List.fold rows</userinput>
 <userinput moreinfo="none">      ~init:(lengths header)</userinput>
@@ -518,30 +556,31 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val max_widths : string list -&gt; string list list -&gt; int list = &lt;fun&gt;</computeroutput></programlisting>
 
-        <para>Using <literal moreinfo="none">List.map</literal> we define the function
-        <literal moreinfo="none">lengths</literal> which converts a list of strings to a list
-        of integer lengths. <literal moreinfo="none">List.fold</literal> is then used to
-        iterate over the rows, using <literal moreinfo="none">map2_exn</literal> to take the
-        max of the accumulator with the lengths of the strings in each row of
-        the table, with the accumulator initialized to the lengths of the
-        header row.</para>
+    <para>Using <literal moreinfo="none">List.map</literal> we define the
+    function <literal moreinfo="none">lengths</literal> which converts a list
+    of strings to a list of integer lengths. <literal
+    moreinfo="none">List.fold</literal> is then used to iterate over the rows,
+    using <literal moreinfo="none">map2_exn</literal> to take the max of the
+    accumulator with the lengths of the strings in each row of the table, with
+    the accumulator initialized to the lengths of the header row.</para>
 
-        <para>Now that we know how to compute column widths, we can write the
-        code to generate the line that separates the header from the rest of
-        the text table. We'll do this in part by mapping
-        <literal moreinfo="none">String.make</literal> over the lengths of the columns to
-        generate a string of dashes of the appropriate length. We'll then join
-        these sequences of dashes together using
-        <literal moreinfo="none">String.concat</literal>, which concatenates a list of strings
-        with an optional separator string, and <literal moreinfo="none">^</literal>, which is
-        a pairwise string concatenation function, to add the delimiters on the
-        outside.</para>
+    <para>Now that we know how to compute column widths, we can write the code
+    to generate the line that separates the header from the rest of the text
+    table. We'll do this in part by mapping <literal
+    moreinfo="none">String.make</literal> over the lengths of the columns to
+    generate a string of dashes of the appropriate length. We'll then join
+    these sequences of dashes together using <literal
+    moreinfo="none">String.concat</literal>, which concatenates a list of
+    strings with an optional separator string, and <literal
+    moreinfo="none">^</literal>, which is a pairwise string concatenation
+    function, to add the delimiters on the outside.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-        21)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 21)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let render_separator widths =</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">let render_separator widths =</userinput>
 <userinput moreinfo="none">    let pieces = List.map widths</userinput>
 <userinput moreinfo="none">      ~f:(fun w -&gt; String.make (w + 2) '-')</userinput>
 <userinput moreinfo="none">    in</userinput>
@@ -551,68 +590,72 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">render_separator [3;6;2];;</userinput>
 <computeroutput moreinfo="none">- : string = "|-----+--------+----|"</computeroutput></programlisting>
 
-        <para>Note that we make the line of dashes two larger than the
-        provided width to provide some whitespace around each entry in the
-        table.</para>
+    <para>Note that we make the line of dashes two larger than the provided
+    width to provide some whitespace around each entry in the table.</para>
 
-        <note>
-          <title>Performance of <literal moreinfo="none">String.concat</literal> and
-          <literal moreinfo="none">^</literal></title>
+    <note>
+      <title>Performance of <literal moreinfo="none">String.concat</literal>
+      and <literal moreinfo="none">^</literal></title>
 
-          <para>In the above, we're using two different ways of concatenating
-          strings, <literal moreinfo="none">String.concat</literal>, which operates on lists
-          of strings, and <literal moreinfo="none">^</literal>, which is a pairwise operator.
-          You should avoid <literal moreinfo="none">^</literal> for joining long numbers of
-          strings, since, it allocates a new string every time it runs. Thus,
-          the following code:</para>
+      <para>In the above, we're using two different ways of concatenating
+      strings, <literal moreinfo="none">String.concat</literal>, which
+      operates on lists of strings, and <literal moreinfo="none">^</literal>,
+      which is a pairwise operator. You should avoid <literal
+      moreinfo="none">^</literal> for joining long numbers of strings, since,
+      it allocates a new string every time it runs. Thus, the following
+      code:</para>
 
-          <para role="sourcecode">OCaml Utop:
-          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-          22)</para>
+      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+      (part 22)</para>
 
-          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let s = "." ^ "."  ^ "."  ^ "."  ^ "."  ^ "."  ^ ".";;</userinput>
+      <programlisting format="linespecific" language="ocaml"><prompt
+          moreinfo="none"># </prompt><userinput moreinfo="none">let s = "." ^ "."  ^ "."  ^ "."  ^ "."  ^ "."  ^ ".";;</userinput>
 <computeroutput moreinfo="none">val s : string = "......."</computeroutput></programlisting>
 
-          <para>will allocate strings of length 2, 3, 4, 5, 6 and 7, whereas
-          this code:</para>
+      <para>will allocate strings of length 2, 3, 4, 5, 6 and 7, whereas this
+      code:</para>
 
-          <para role="sourcecode">OCaml Utop:
-          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-          23)</para>
+      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+      (part 23)</para>
 
-          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let s = String.concat [".";".";".";".";".";".";"."];;</userinput>
+      <programlisting format="linespecific" language="ocaml"><prompt
+          moreinfo="none"># </prompt><userinput moreinfo="none">let s = String.concat [".";".";".";".";".";".";"."];;</userinput>
 <computeroutput moreinfo="none">val s : string = "......."</computeroutput></programlisting>
 
-          <para>allocates one string of size 7, as well as a list of length 7.
-          At these small sizes, the differences don't amount to much, but for
-          assembling of large strings, it can be a serious performance
-          issue.</para>
-        </note>
+      <para>allocates one string of size 7, as well as a list of length 7. At
+      these small sizes, the differences don't amount to much, but for
+      assembling of large strings, it can be a serious performance
+      issue.</para>
+    </note>
 
-        <para>Now we need code for rendering a row with data in it. We'll
-        first write a function <literal moreinfo="none">pad</literal> for padding out a string
-        to a specified length plus one blank space on either side.</para>
+    <para>Now we need code for rendering a row with data in it. We'll first
+    write a function <literal moreinfo="none">pad</literal> for padding out a
+    string to a specified length plus one blank space on either side.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-        24)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 24)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let pad s length =</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">let pad s length =</userinput>
 <userinput moreinfo="none">    " " ^ s ^ String.make (length - String.length s + 1) ' '</userinput>
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val pad : string -&gt; int -&gt; string = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">pad "hello" 10;;</userinput>
 <computeroutput moreinfo="none">- : string = " hello      "</computeroutput></programlisting>
 
-        <para>We can render a row of data by merging together the padded
-        strings. Again, we'll use <literal moreinfo="none">List.map2_exn</literal> for
-        combining the list of data in the row with the list of widths.</para>
+    <para>We can render a row of data by merging together the padded strings.
+    Again, we'll use <literal moreinfo="none">List.map2_exn</literal> for
+    combining the list of data in the row with the list of widths.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-        25)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 25)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let render_row row widths =</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">let render_row row widths =</userinput>
 <userinput moreinfo="none">    let padded = List.map2_exn row widths ~f:pad in</userinput>
 <userinput moreinfo="none">    "|" ^ String.concat ~sep:"|" padded ^ "|"</userinput>
 <userinput moreinfo="none">  ;;</userinput>
@@ -620,14 +663,15 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">render_row ["Hello";"World"] [10;15];;</userinput>
 <computeroutput moreinfo="none">- : string = "| Hello      | World           |"</computeroutput></programlisting>
 
-        <para>Now we can bring this all together in a single function that
-        renders the table.</para>
+    <para>Now we can bring this all together in a single function that renders
+    the table.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-        26)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 26)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let render_table header rows =</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">let render_table header rows =</userinput>
 <userinput moreinfo="none">    let widths = max_widths header rows in</userinput>
 <userinput moreinfo="none">    String.concat ~sep:"\n"</userinput>
 <userinput moreinfo="none">      (render_row header widths</userinput>
@@ -637,92 +681,99 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val render_table : string list -&gt; string list list -&gt; string = &lt;fun&gt;</computeroutput></programlisting>
 
-        <sect2 id="more-useful-list-functions">
-          <title>More useful list functions</title>
+    <sect2 id="more-useful-list-functions">
+      <title>More useful list functions</title>
 
-          <para>The example we worked through above only touched on three of
-          the function in <literal moreinfo="none">List</literal>. We won't cover the entire
-          interface (for that you should look at the <ulink url="http://realworldocaml.org/doc">online docs</ulink>), but there
-          are a few more functions that are useful enough to mention
-          here.</para>
+      <para>The example we worked through above only touched on three of the
+      function in <literal moreinfo="none">List</literal>. We won't cover the
+      entire interface (for that you should look at the <ulink
+      url="http://realworldocaml.org/doc">online docs</ulink>), but there are
+      a few more functions that are useful enough to mention here.</para>
 
-          <sect3 id="combining-list-elements-with-list.reduce">
-            <title>Combining list elements with
-            <literal moreinfo="none">List.reduce</literal></title>
+      <sect3 id="combining-list-elements-with-list.reduce">
+        <title>Combining list elements with <literal
+        moreinfo="none">List.reduce</literal></title>
 
-            <para><literal moreinfo="none">List.fold</literal>, which we described earlier, is
-            a very general and powerful function. Sometimes, however, you want
-            something simpler and easier to use. One such function is
-            <literal moreinfo="none">List.reduce</literal>, which is essentially a specialized
-            version of <literal moreinfo="none">List.fold</literal> that doesn't require an
-            explicit starting value, and whose accumulator has to consume and
-            produce values of the same type as the elements of the list it
-            applies to.</para>
+        <para><literal moreinfo="none">List.fold</literal>, which we described
+        earlier, is a very general and powerful function. Sometimes, however,
+        you want something simpler and easier to use. One such function is
+        <literal moreinfo="none">List.reduce</literal>, which is essentially a
+        specialized version of <literal moreinfo="none">List.fold</literal>
+        that doesn't require an explicit starting value, and whose accumulator
+        has to consume and produce values of the same type as the elements of
+        the list it applies to.</para>
 
-            <para>Here's the type signature:</para>
+        <para>Here's the type signature:</para>
 
-            <para role="sourcecode">OCaml Utop:
-            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-            27)</para>
+        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+        (part 27)</para>
 
-            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.reduce;;</userinput>
+        <programlisting format="linespecific" language="ocaml"><prompt
+            moreinfo="none"># </prompt><userinput moreinfo="none">List.reduce;;</userinput>
 <computeroutput moreinfo="none">- : 'a list -&gt; f:('a -&gt; 'a -&gt; 'a) -&gt; 'a option = &lt;fun&gt;</computeroutput></programlisting>
 
-            <para><literal moreinfo="none">reduce</literal> returns an optional result,
-            returning <literal moreinfo="none">None</literal> when the input list is
-            empty.</para>
+        <para><literal moreinfo="none">reduce</literal> returns an optional
+        result, returning <literal moreinfo="none">None</literal> when the
+        input list is empty.</para>
 
-            <para>Now we can see reduce in action.</para>
+        <para>Now we can see reduce in action.</para>
 
-            <para role="sourcecode">OCaml Utop:
-            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-            28)</para>
+        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+        (part 28)</para>
 
-            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.reduce ~f:(+) [1;2;3;4;5];;</userinput>
+        <programlisting format="linespecific" language="ocaml"><prompt
+            moreinfo="none"># </prompt><userinput moreinfo="none">List.reduce ~f:(+) [1;2;3;4;5];;</userinput>
 <computeroutput moreinfo="none">- : int option = Some 15</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.reduce ~f:(+) [];;</userinput>
 <computeroutput moreinfo="none">- : int option = None</computeroutput></programlisting>
-          </sect3>
+      </sect3>
 
-          <sect3 id="filtering-with-list.filter-and-list.filter_map">
-            <title>Filtering with <literal moreinfo="none">List.filter</literal> and
-            <literal moreinfo="none">List.filter_map</literal></title>
+      <sect3 id="filtering-with-list.filter-and-list.filter_map">
+        <title>Filtering with <literal moreinfo="none">List.filter</literal>
+        and <literal moreinfo="none">List.filter_map</literal></title>
 
-            <para>Very often when processing lists, one wants to restrict your
-            attention to a subset of the values on your list. The
-            <literal moreinfo="none">List.filter</literal> function is one way of doing
-            that.</para>
+        <para>Very often when processing lists, one wants to restrict your
+        attention to a subset of the values on your list. The <literal
+        moreinfo="none">List.filter</literal> function is one way of doing
+        that.</para>
 
-            <para role="sourcecode">OCaml Utop:
-            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-            29)</para>
+        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+        (part 29)</para>
 
-            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.filter ~f:(fun x -&gt; x mod 2 = 0) [1;2;3;4;5];;</userinput>
+        <programlisting format="linespecific" language="ocaml"><prompt
+            moreinfo="none"># </prompt><userinput moreinfo="none">List.filter ~f:(fun x -&gt; x mod 2 = 0) [1;2;3;4;5];;</userinput>
 <computeroutput moreinfo="none">- : int list = [2; 4]</computeroutput></programlisting>
 
-            <para>Note that the <literal moreinfo="none">mod</literal> used above is an infix
-            operator, as described in <xref linkend="variables-and-functions"/>.</para>
+        <para>Note that the <literal moreinfo="none">mod</literal> used above
+        is an infix operator, as described in <xref
+        linkend="variables-and-functions" />.</para>
 
-            <para>Sometimes, you want to both transform and filter as part of
-            the same computation. In that case,
-            <literal moreinfo="none">List.filter_map</literal> is what you need. The function
-            passed to <literal moreinfo="none">List.filter_map</literal> returns an optional
-            value, and <literal moreinfo="none">List.filter_map</literal> drops all elements
-            for which <literal moreinfo="none">None</literal> is returned.</para>
+        <para>Sometimes, you want to both transform and filter as part of the
+        same computation. In that case, <literal
+        moreinfo="none">List.filter_map</literal> is what you need. The
+        function passed to <literal moreinfo="none">List.filter_map</literal>
+        returns an optional value, and <literal
+        moreinfo="none">List.filter_map</literal> drops all elements for which
+        <literal moreinfo="none">None</literal> is returned.</para>
 
-            <para>Here's an example. The following expression computes the
-            list of file extensions in the current directory, piping the
-            results through <literal moreinfo="none">List.dedup</literal> to remove
-            duplicates. Note that this example also uses some functions from
-            other modules, including <literal moreinfo="none">Sys.ls_dir</literal> to get a
-            directory listing, and <literal moreinfo="none">String.rsplit2</literal> to split
-            a string on the rightmost appearance of a given character.</para>
+        <para>Here's an example. The following expression computes the list of
+        file extensions in the current directory, piping the results through
+        <literal moreinfo="none">List.dedup</literal> to remove duplicates.
+        Note that this example also uses some functions from other modules,
+        including <literal moreinfo="none">Sys.ls_dir</literal> to get a
+        directory listing, and <literal
+        moreinfo="none">String.rsplit2</literal> to split a string on the
+        rightmost appearance of a given character.</para>
 
-            <para role="sourcecode">OCaml Utop:
-            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-            30)</para>
+        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+        (part 30)</para>
 
-            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.filter_map (Sys.ls_dir ".") ~f:(fun fname -&gt;</userinput>
+        <programlisting format="linespecific" language="ocaml"><prompt
+            moreinfo="none"># </prompt><userinput moreinfo="none">List.filter_map (Sys.ls_dir ".") ~f:(fun fname -&gt;</userinput>
 <userinput moreinfo="none">    match String.rsplit2 ~on:'.' fname with</userinput>
 <userinput moreinfo="none">    | None  | Some ("",_) -&gt; None</userinput>
 <userinput moreinfo="none">    | Some (_,ext) -&gt;</userinput>
@@ -731,31 +782,33 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">- : string list = ["ascii"; "ml"; "mli"; "topscript"]</computeroutput></programlisting>
 
-            <para>The above is also an example of an or-patterns, which allows
-            you to have multiple sub-patterns within a larger pattern. In this
-            case, <literal moreinfo="none">None | Some ("",_)</literal> is an or-pattern. As
-            we'll see later, or-patterns can be nested anywhere within larger
-            patterns.</para>
-          </sect3>
+        <para>The above is also an example of an or-patterns, which allows you
+        to have multiple sub-patterns within a larger pattern. In this case,
+        <literal moreinfo="none">None | Some ("",_)</literal> is an
+        or-pattern. As we'll see later, or-patterns can be nested anywhere
+        within larger patterns.</para>
+      </sect3>
 
-          <sect3 id="partitioning-with-list.partition_tf">
-            <title>Partitioning with
-            <literal moreinfo="none">List.partition_tf</literal></title>
+      <sect3 id="partitioning-with-list.partition_tf">
+        <title>Partitioning with <literal
+        moreinfo="none">List.partition_tf</literal></title>
 
-            <para>Another useful operation that's closely related to filtering
-            is partitioning. The function <literal moreinfo="none">List.partition_tf</literal>
-            takes a list and a function for computing a boolean condition on
-            the list elements, and returns two lists. The
-            <literal moreinfo="none">tf</literal> in the name is a mnemonic to remind the user
-            that <literal moreinfo="none">true</literal> elements go to the first list and
-            <literal moreinfo="none">false</literal> ones go to the second. Here's an
-            example.</para>
+        <para>Another useful operation that's closely related to filtering is
+        partitioning. The function <literal
+        moreinfo="none">List.partition_tf</literal> takes a list and a
+        function for computing a boolean condition on the list elements, and
+        returns two lists. The <literal moreinfo="none">tf</literal> in the
+        name is a mnemonic to remind the user that <literal
+        moreinfo="none">true</literal> elements go to the first list and
+        <literal moreinfo="none">false</literal> ones go to the second. Here's
+        an example.</para>
 
-            <para role="sourcecode">OCaml Utop:
-            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-            31)</para>
+        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+        (part 31)</para>
 
-            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let is_ocaml_source s =</userinput>
+        <programlisting format="linespecific" language="ocaml"><prompt
+            moreinfo="none"># </prompt><userinput moreinfo="none">let is_ocaml_source s =</userinput>
 <userinput moreinfo="none">    match String.rsplit2 s ~on:'.' with</userinput>
 <userinput moreinfo="none">    | Some (_,("ml"|"mli")) -&gt; true</userinput>
 <userinput moreinfo="none">    | _ -&gt; false</userinput>
@@ -765,52 +818,58 @@
 <userinput moreinfo="none">    List.partition_tf (Sys.ls_dir ".")  ~f:is_ocaml_source;;</userinput>
 <computeroutput moreinfo="none">val ml_files : string list = ["example.mli"; "example.ml"]</computeroutput>
 <computeroutput moreinfo="none">val other_files : string list = ["main.topscript"; "lists_layout.ascii"]</computeroutput></programlisting>
-          </sect3>
+      </sect3>
 
-          <sect3 id="combining-lists">
-            <title>Combining lists</title>
+      <sect3 id="combining-lists">
+        <title>Combining lists</title>
 
-            <para>Another very common operation on lists is concatenation. The
-            list module actually comes with a few different ways of doing
-            this. First, there's <literal moreinfo="none">List.append</literal>, for
-            concatenating a pair of lists.</para>
+        <para>Another very common operation on lists is concatenation. The
+        list module actually comes with a few different ways of doing this.
+        First, there's <literal moreinfo="none">List.append</literal>, for
+        concatenating a pair of lists.</para>
 
-            <para role="sourcecode">OCaml Utop:
-            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-            32)</para>
+        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+        (part 32)</para>
 
-            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.append [1;2;3] [4;5;6];;</userinput>
+        <programlisting format="linespecific" language="ocaml"><prompt
+            moreinfo="none"># </prompt><userinput moreinfo="none">List.append [1;2;3] [4;5;6];;</userinput>
 <computeroutput moreinfo="none">- : int list = [1; 2; 3; 4; 5; 6]</computeroutput></programlisting>
 
-            <para>There's also <literal moreinfo="none">@</literal>, an operator equivalent of
-            <literal moreinfo="none">List.append</literal>.</para>
+        <para>There's also <literal moreinfo="none">@</literal>, an operator
+        equivalent of <literal moreinfo="none">List.append</literal>.</para>
 
-            <para role="sourcecode">OCaml Utop:
-            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-            33)</para>
+        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+        (part 33)</para>
 
-            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">[1;2;3] @ [4;5;6];;</userinput>
+        <programlisting format="linespecific" language="ocaml"><prompt
+            moreinfo="none"># </prompt><userinput moreinfo="none">[1;2;3] @ [4;5;6];;</userinput>
 <computeroutput moreinfo="none">- : int list = [1; 2; 3; 4; 5; 6]</computeroutput></programlisting>
 
-            <para>In addition, there is <literal moreinfo="none">List.concat</literal>, for
-            concatenating a list of lists.</para>
+        <para>In addition, there is <literal
+        moreinfo="none">List.concat</literal>, for concatenating a list of
+        lists.</para>
 
-            <para role="sourcecode">OCaml Utop:
-            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-            34)</para>
+        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+        (part 34)</para>
 
-            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.concat [[1;2];[3;4;5];[6];[]];;</userinput>
+        <programlisting format="linespecific" language="ocaml"><prompt
+            moreinfo="none"># </prompt><userinput moreinfo="none">List.concat [[1;2];[3;4;5];[6];[]];;</userinput>
 <computeroutput moreinfo="none">- : int list = [1; 2; 3; 4; 5; 6]</computeroutput></programlisting>
 
-            <para>Here's an example of using <literal moreinfo="none">List.concat</literal>
-            along with <literal moreinfo="none">List.map</literal> to compute a recursive
-            listing of a directory tree.</para>
+        <para>Here's an example of using <literal
+        moreinfo="none">List.concat</literal> along with <literal
+        moreinfo="none">List.map</literal> to compute a recursive listing of a
+        directory tree.</para>
 
-            <para role="sourcecode">OCaml Utop:
-            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-            35)</para>
+        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+        (part 35)</para>
 
-            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec ls_rec s =</userinput>
+        <programlisting format="linespecific" language="ocaml"><prompt
+            moreinfo="none"># </prompt><userinput moreinfo="none">let rec ls_rec s =</userinput>
 <userinput moreinfo="none">    if Sys.is_file_exn ~follow_symlinks:true s</userinput>
 <userinput moreinfo="none">    then [s]</userinput>
 <userinput moreinfo="none">    else</userinput>
@@ -820,21 +879,23 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val ls_rec : string -&gt; string list = &lt;fun&gt;</computeroutput></programlisting>
 
-            <para>Note that <literal moreinfo="none">^/</literal> is an infix operator
-            provided by Core for adding a new element to a string representing
-            a file path. It is equivalent to Core's
-            <literal moreinfo="none">Filename.concat</literal>.</para>
+        <para>Note that <literal moreinfo="none">^/</literal> is an infix
+        operator provided by Core for adding a new element to a string
+        representing a file path. It is equivalent to Core's <literal
+        moreinfo="none">Filename.concat</literal>.</para>
 
-            <para>The above combination of <literal moreinfo="none">List.map</literal> and
-            <literal moreinfo="none">List.concat</literal> is common enough that there is a
-            function <literal moreinfo="none">List.concat_map</literal> that combines these
-            into one, more efficient operation.</para>
+        <para>The above combination of <literal
+        moreinfo="none">List.map</literal> and <literal
+        moreinfo="none">List.concat</literal> is common enough that there is a
+        function <literal moreinfo="none">List.concat_map</literal> that
+        combines these into one, more efficient operation.</para>
 
-            <para role="sourcecode">OCaml Utop:
-            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-            36)</para>
+        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+        (part 36)</para>
 
-            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec ls_rec s =</userinput>
+        <programlisting format="linespecific" language="ocaml"><prompt
+            moreinfo="none"># </prompt><userinput moreinfo="none">let rec ls_rec s =</userinput>
 <userinput moreinfo="none">    if Sys.is_file_exn ~follow_symlinks:true s</userinput>
 <userinput moreinfo="none">    then [s]</userinput>
 <userinput moreinfo="none">    else</userinput>
@@ -842,23 +903,24 @@
 <userinput moreinfo="none">      |&gt; List.concat_map ~f:(fun sub -&gt; ls_rec (s ^/ sub))</userinput>
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val ls_rec : string -&gt; string list = &lt;fun&gt;</computeroutput></programlisting>
-          </sect3>
-        </sect2>
-      </sect1>
+      </sect3>
+    </sect2>
+  </sect1>
 
-      <sect1 id="tail-recursion">
-        <title>Tail recursion</title>
+  <sect1 id="tail-recursion">
+    <title>Tail recursion</title>
 
-        <para>The only way to compute the length of an OCaml list is to walk
-        the list from beginning to end. As a result, computing the length of a
-        list takes time linear in the size of the list. Here's a simple
-        function for doing so.</para>
+    <para>The only way to compute the length of an OCaml list is to walk the
+    list from beginning to end. As a result, computing the length of a list
+    takes time linear in the size of the list. Here's a simple function for
+    doing so.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-        37)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 37)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec length = function</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">let rec length = function</userinput>
 <userinput moreinfo="none">    | [] -&gt; 0</userinput>
 <userinput moreinfo="none">    | _ :: tl -&gt; 1 + length tl</userinput>
 <userinput moreinfo="none">  ;;</userinput>
@@ -866,49 +928,52 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">length [1;2;3];;</userinput>
 <computeroutput moreinfo="none">- : int = 3</computeroutput></programlisting>
 
-        <para>This looks simple enough, but you'll discover that this
-        implementation runs into problems on very large lists, as we'll show
-        below.</para>
+    <para>This looks simple enough, but you'll discover that this
+    implementation runs into problems on very large lists, as we'll show
+    below.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-        38)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 38)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let make_list n = List.init n ~f:(fun x -&gt; x);;</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">let make_list n = List.init n ~f:(fun x -&gt; x);;</userinput>
 <computeroutput moreinfo="none">val make_list : int -&gt; int list = &lt;fun&gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">length (make_list 10);;</userinput>
 <computeroutput moreinfo="none">- : int = 10</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">length (make_list 10_000_000);;</userinput>
 <computeroutput moreinfo="none">Stack overflow during evaluation (looping recursion?).</computeroutput></programlisting>
 
-        <para>The above example creates lists using
-        <literal moreinfo="none">List.init</literal>, which takes an integer
-        <literal moreinfo="none">n</literal> and a function <literal moreinfo="none">f</literal> and creates a
-        list of length <literal moreinfo="none">n</literal> where the data for each element is
-        created by calling <literal moreinfo="none">f</literal> on the index of that
-        element.</para>
+    <para>The above example creates lists using <literal
+    moreinfo="none">List.init</literal>, which takes an integer <literal
+    moreinfo="none">n</literal> and a function <literal
+    moreinfo="none">f</literal> and creates a list of length <literal
+    moreinfo="none">n</literal> where the data for each element is created by
+    calling <literal moreinfo="none">f</literal> on the index of that
+    element.</para>
 
-        <para>To understand where the error in the above example comes from,
-        you need to learn a bit more about how function calls work. Typically,
-        a function call needs some space to keep track of information
-        associated with the call, such as the arguments passed to the
-        function, or the location of the code that needs to start executing
-        when the function call is complete. To allow for nested function
-        calls, this information is typically organized in a stack, where a new
-        <emphasis>stack frame</emphasis> is allocated for each nested function
-        call, and then deallocated when the function call is complete.</para>
+    <para>To understand where the error in the above example comes from, you
+    need to learn a bit more about how function calls work. Typically, a
+    function call needs some space to keep track of information associated
+    with the call, such as the arguments passed to the function, or the
+    location of the code that needs to start executing when the function call
+    is complete. To allow for nested function calls, this information is
+    typically organized in a stack, where a new <emphasis>stack
+    frame</emphasis> is allocated for each nested function call, and then
+    deallocated when the function call is complete.</para>
 
-        <para>And that's the problem with our call to
-        <literal moreinfo="none">length</literal>: it tried to allocate ten million stack
-        frames, which exhausted the available stack space. Happily, there's a
-        way around this problem. Consider the following alternative
-        implementation.</para>
+    <para>And that's the problem with our call to <literal
+    moreinfo="none">length</literal>: it tried to allocate ten million stack
+    frames, which exhausted the available stack space. Happily, there's a way
+    around this problem. Consider the following alternative
+    implementation.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-        39)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 39)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec length_plus_n l n =</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">let rec length_plus_n l n =</userinput>
 <userinput moreinfo="none">    match l with</userinput>
 <userinput moreinfo="none">    | [] -&gt; n</userinput>
 <userinput moreinfo="none">    | _ :: tl -&gt; length_plus_n tl (n + 1)</userinput>
@@ -919,65 +984,67 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">length [1;2;3;4];;</userinput>
 <computeroutput moreinfo="none">- : int = 4</computeroutput></programlisting>
 
-        <para>This implementation depends on a helper function,
-        <literal moreinfo="none">length_plus_n</literal>, that computes the length of a given
-        list plus a given <literal moreinfo="none">n</literal>. In practice,
-        <literal moreinfo="none">n</literal> acts as an accumulator in which the answer is
-        built up, step by step. As a result, we can do the additions along the
-        way rather than doing them as we unwind the nested sequence of
-        function calls, as we did in our first implementation of
-        <literal moreinfo="none">length</literal>.</para>
+    <para>This implementation depends on a helper function, <literal
+    moreinfo="none">length_plus_n</literal>, that computes the length of a
+    given list plus a given <literal moreinfo="none">n</literal>. In practice,
+    <literal moreinfo="none">n</literal> acts as an accumulator in which the
+    answer is built up, step by step. As a result, we can do the additions
+    along the way rather than doing them as we unwind the nested sequence of
+    function calls, as we did in our first implementation of <literal
+    moreinfo="none">length</literal>.</para>
 
-        <para>The advantage of this approach is that the recursive call in
-        <literal moreinfo="none">length_plus_n</literal> is a <emphasis>tail call</emphasis>.
-        We'll explain more precisely what it means to be a tail call shortly,
-        but the reason it's important is that tail calls don't require the
-        allocation of a new stack frame, due to what is called the
-        <emphasis>tail-call optimization</emphasis>. A recursive function is
-        said to be <emphasis>tail recursive</emphasis> if all of its recursive
-        calls are tail calls. <literal moreinfo="none">length_plus_n</literal> is indeed tail
-        recursive, and as a result, <literal moreinfo="none">length</literal> can take a long
-        list as input without blowing the stack.</para>
+    <para>The advantage of this approach is that the recursive call in
+    <literal moreinfo="none">length_plus_n</literal> is a <emphasis>tail
+    call</emphasis>. We'll explain more precisely what it means to be a tail
+    call shortly, but the reason it's important is that tail calls don't
+    require the allocation of a new stack frame, due to what is called the
+    <emphasis>tail-call optimization</emphasis>. A recursive function is said
+    to be <emphasis>tail recursive</emphasis> if all of its recursive calls
+    are tail calls. <literal moreinfo="none">length_plus_n</literal> is indeed
+    tail recursive, and as a result, <literal moreinfo="none">length</literal>
+    can take a long list as input without blowing the stack.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-        40)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 40)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">length (make_list 10_000_000);;</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">length (make_list 10_000_000);;</userinput>
 <computeroutput moreinfo="none">- : int = 10000000</computeroutput></programlisting>
 
-        <para>So when is a call a tail call? Let's think about the situation
-        of one function (the <emphasis>caller</emphasis>) invokes another (the
-        <emphasis>callee</emphasis>). The invocation is considered a tail call
-        when the caller doesn't do anything with the value returned by the
-        callee except to return it. The tail-call optimization makes sense
-        because, when a caller makes a tail call, the caller's stack frame
-        need never be used again, and so you don't need to keep it around.
-        Thus, instead of allocating a new stack frame for the callee, the
-        compiler is free to reuse the caller's stack frame.</para>
+    <para>So when is a call a tail call? Let's think about the situation of
+    one function (the <emphasis>caller</emphasis>) invokes another (the
+    <emphasis>callee</emphasis>). The invocation is considered a tail call
+    when the caller doesn't do anything with the value returned by the callee
+    except to return it. The tail-call optimization makes sense because, when
+    a caller makes a tail call, the caller's stack frame need never be used
+    again, and so you don't need to keep it around. Thus, instead of
+    allocating a new stack frame for the callee, the compiler is free to reuse
+    the caller's stack frame.</para>
 
-        <para>Tail recursion is important for more than just lists. Ordinary
-        (non-tail) recursive calls are reasonable when dealing with
-        data-structures like binary trees where the depth of the tree is
-        logarithmic in the size of your data. But when dealing with situations
-        where the depth of the sequence of nested calls is on the order of the
-        size of your data, tail recursion is usually the right
-        approach.</para>
-      </sect1>
+    <para>Tail recursion is important for more than just lists. Ordinary
+    (non-tail) recursive calls are reasonable when dealing with
+    data-structures like binary trees where the depth of the tree is
+    logarithmic in the size of your data. But when dealing with situations
+    where the depth of the sequence of nested calls is on the order of the
+    size of your data, tail recursion is usually the right approach.</para>
+  </sect1>
 
-      <sect1 id="terser-and-faster-patterns">
-        <title>Terser and faster patterns</title>
+  <sect1 id="terser-and-faster-patterns">
+    <title>Terser and faster patterns</title>
 
-        <para>Now that we know more about how lists and patterns work, let's
-        consider how we can improve on an example from <xref linkend="recursive-list-functions"/>: the function
-        <literal moreinfo="none">destutter</literal>, which removes sequential duplicates from
-        a list. Here's the implementation that was described earlier.</para>
+    <para>Now that we know more about how lists and patterns work, let's
+    consider how we can improve on an example from <xref
+    linkend="recursive-list-functions" />: the function <literal
+    moreinfo="none">destutter</literal>, which removes sequential duplicates
+    from a list. Here's the implementation that was described earlier.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-        41)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 41)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec destutter list =</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">let rec destutter list =</userinput>
 <userinput moreinfo="none">    match list with</userinput>
 <userinput moreinfo="none">    | [] -&gt; []</userinput>
 <userinput moreinfo="none">    | [hd] -&gt; [hd]</userinput>
@@ -987,26 +1054,27 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val destutter : 'a list -&gt; 'a list = &lt;fun&gt;</computeroutput></programlisting>
 
-        <para>We'll consider some ways of making this code more concise and
-        more efficient.</para>
+    <para>We'll consider some ways of making this code more concise and more
+    efficient.</para>
 
-        <para>First, let's consider efficiency. One problem with the
-        <literal moreinfo="none">destutter</literal> code above is that it in some cases
-        recreates on the right-hand side of the arrow a value that already
-        existed on the left hand side. Thus, the pattern <literal moreinfo="none">[hd] -&gt;
-        [hd]</literal> actually allocates a new list element, which really, it
-        should be able to just return the list being matched. We can reduce
-        allocation here by using an <literal moreinfo="none">as</literal> pattern, which
-        allows us to declare a name for the thing matched by a pattern or
-        sub-pattern. While we're at it, we'll use the
-        <literal moreinfo="none">function</literal> keyword to eliminate the need for an
-        explicit match.</para>
+    <para>First, let's consider efficiency. One problem with the <literal
+    moreinfo="none">destutter</literal> code above is that it in some cases
+    recreates on the right-hand side of the arrow a value that already existed
+    on the left hand side. Thus, the pattern <literal moreinfo="none">[hd]
+    -&gt; [hd]</literal> actually allocates a new list element, which really,
+    it should be able to just return the list being matched. We can reduce
+    allocation here by using an <literal moreinfo="none">as</literal> pattern,
+    which allows us to declare a name for the thing matched by a pattern or
+    sub-pattern. While we're at it, we'll use the <literal
+    moreinfo="none">function</literal> keyword to eliminate the need for an
+    explicit match.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-        42)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 42)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec destutter = function</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">let rec destutter = function</userinput>
 <userinput moreinfo="none">    | [] as l -&gt; l</userinput>
 <userinput moreinfo="none">    | [_] as l -&gt; l</userinput>
 <userinput moreinfo="none">    | hd :: (hd' :: _ as tl) -&gt;</userinput>
@@ -1015,14 +1083,15 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val destutter : 'a list -&gt; 'a list = &lt;fun&gt;</computeroutput></programlisting>
 
-        <para>We can further collapse this by combining the first two cases
-        into one, using an or-pattern.</para>
+    <para>We can further collapse this by combining the first two cases into
+    one, using an or-pattern.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-        43)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 43)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec destutter = function</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">let rec destutter = function</userinput>
 <userinput moreinfo="none">    | [] | [_] as l -&gt; l</userinput>
 <userinput moreinfo="none">    | hd :: (hd' :: _ as tl) -&gt;</userinput>
 <userinput moreinfo="none">      if hd = hd' then destutter tl</userinput>
@@ -1030,115 +1099,122 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val destutter : 'a list -&gt; 'a list = &lt;fun&gt;</computeroutput></programlisting>
 
-        <para>We can make the code slightly terser now by using a
-        <literal moreinfo="none">when</literal> clause. A <literal moreinfo="none">when</literal> clause
-        allows one to add an extra precondition on a pattern in the form of an
-        arbitrary OCaml expression. In this case, we can use it to include the
-        check on whether the first two elements are equal.</para>
+    <para>We can make the code slightly terser now by using a <literal
+    moreinfo="none">when</literal> clause. A <literal
+    moreinfo="none">when</literal> clause allows one to add an extra
+    precondition on a pattern in the form of an arbitrary OCaml expression. In
+    this case, we can use it to include the check on whether the first two
+    elements are equal.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-        44)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 44)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec destutter = function</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">let rec destutter = function</userinput>
 <userinput moreinfo="none">    | [] | [_] as l -&gt; l</userinput>
 <userinput moreinfo="none">    | hd :: (hd' :: _ as tl) when hd = hd' -&gt; destutter tl</userinput>
 <userinput moreinfo="none">    | hd :: tl -&gt; hd :: destutter tl</userinput>
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val destutter : 'a list -&gt; 'a list = &lt;fun&gt;</computeroutput></programlisting>
 
-        <sidebar>
-          <title>Polymorphic compare</title>
+    <sidebar>
+      <title>Polymorphic compare</title>
 
-          <para>In the <literal moreinfo="none">destutter</literal> example above, we made use
-          of the fact that OCaml lets us test equality between values of any
-          type, using the <literal moreinfo="none">=</literal> operator. Thus, we can
-          write:</para>
+      <para>In the <literal moreinfo="none">destutter</literal> example above,
+      we made use of the fact that OCaml lets us test equality between values
+      of any type, using the <literal moreinfo="none">=</literal> operator.
+      Thus, we can write:</para>
 
-          <para role="sourcecode">OCaml Utop:
-          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-          45)</para>
+      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+      (part 45)</para>
 
-          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">3 = 4;;</userinput>
+      <programlisting format="linespecific" language="ocaml"><prompt
+          moreinfo="none"># </prompt><userinput moreinfo="none">3 = 4;;</userinput>
 <computeroutput moreinfo="none">- : bool = false</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">[3;4;5] = [3;4;5];;</userinput>
 <computeroutput moreinfo="none">- : bool = true</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">[Some 3; None] = [None; Some 3];;</userinput>
 <computeroutput moreinfo="none">- : bool = false</computeroutput></programlisting>
 
-          <para>Indeed, if we look at the type of the equality operator, we'll
-          see that it is polymorphic:</para>
+      <para>Indeed, if we look at the type of the equality operator, we'll see
+      that it is polymorphic:</para>
 
-          <para role="sourcecode">OCaml Utop:
-          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-          46)</para>
+      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+      (part 46)</para>
 
-          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">(=);;</userinput>
+      <programlisting format="linespecific" language="ocaml"><prompt
+          moreinfo="none"># </prompt><userinput moreinfo="none">(=);;</userinput>
 <computeroutput moreinfo="none">- : 'a -&gt; 'a -&gt; bool = &lt;fun&gt;</computeroutput></programlisting>
 
-          <para>OCaml actually comes with a whole family of polymorphic
-          comparison operators, including the standard infix comparators,
-          <literal moreinfo="none">&lt;</literal>, <literal moreinfo="none">&gt;=</literal>,
-          <emphasis>etc.</emphasis>, as well as the function
-          <literal moreinfo="none">compare</literal> that returns <literal moreinfo="none">-1</literal>,
-          <literal moreinfo="none">0</literal> or <literal moreinfo="none">1</literal> to flag whether the
-          first operand is smaller than, equal to, or greater than the second,
-          respectively.</para>
+      <para>OCaml actually comes with a whole family of polymorphic comparison
+      operators, including the standard infix comparators, <literal
+      moreinfo="none">&lt;</literal>, <literal
+      moreinfo="none">&gt;=</literal>, <emphasis>etc.</emphasis>, as well as
+      the function <literal moreinfo="none">compare</literal> that returns
+      <literal moreinfo="none">-1</literal>, <literal
+      moreinfo="none">0</literal> or <literal moreinfo="none">1</literal> to
+      flag whether the first operand is smaller than, equal to, or greater
+      than the second, respectively.</para>
 
-          <para>You might wonder how you could build functions like these
-          yourself if OCaml didn't come with them built-in. It turns out that
-          you <emphasis>can't</emphasis> build these functions on your own.
-          OCaml's polymorphic comparison functions are actually built-in to
-          the runtime to a low level. These comparisons are polymorphic on the
-          basis of ignoring almost everything about the types of the values
-          that are being compared, paying attention only to the structure of
-          the values as they're laid out in memory.</para>
+      <para>You might wonder how you could build functions like these yourself
+      if OCaml didn't come with them built-in. It turns out that you
+      <emphasis>can't</emphasis> build these functions on your own. OCaml's
+      polymorphic comparison functions are actually built-in to the runtime to
+      a low level. These comparisons are polymorphic on the basis of ignoring
+      almost everything about the types of the values that are being compared,
+      paying attention only to the structure of the values as they're laid out
+      in memory.</para>
 
-          <para>Polymorphic compare does have some limitations. For example,
-          it will fail at runtime if it encounters a function value.</para>
+      <para>Polymorphic compare does have some limitations. For example, it
+      will fail at runtime if it encounters a function value.</para>
 
-          <para role="sourcecode">OCaml Utop:
-          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-          47)</para>
+      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+      (part 47)</para>
 
-          <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">(fun x -&gt; x + 1) = (fun x -&gt; x + 1);;</userinput>
+      <programlisting format="linespecific" language="ocaml"><prompt
+          moreinfo="none"># </prompt><userinput moreinfo="none">(fun x -&gt; x + 1) = (fun x -&gt; x + 1);;</userinput>
 <computeroutput moreinfo="none">Exception: (Invalid_argument "equal: functional value").</computeroutput></programlisting>
 
-          <para>Similarly, it will fail on values that come from outside the
-          OCaml heap, like values from C-bindings. But it will work in a
-          reasonable way for other kinds of values.</para>
+      <para>Similarly, it will fail on values that come from outside the OCaml
+      heap, like values from C-bindings. But it will work in a reasonable way
+      for other kinds of values.</para>
 
-          <para>For simple atomic types, polymorphic compare has the semantics
-          you would expect: for floating-point numbers and integer,
-          polymorphic compare corresponds to the expected numerical comparison
-          functions. For strings, it's a lexicographic comparison.</para>
+      <para>For simple atomic types, polymorphic compare has the semantics you
+      would expect: for floating-point numbers and integer, polymorphic
+      compare corresponds to the expected numerical comparison functions. For
+      strings, it's a lexicographic comparison.</para>
 
-          <para>Sometimes, however, the type-ignoring nature of polymorphic
-          compare is a problem, particularly when you have your own notion of
-          equality and ordering that you want to impose. We'll discuss this
-          issue more, as well as some of the other downsides of polymorphic
-          compare, in <xref linkend="maps-and-hash-tables"/>.</para>
-        </sidebar>
+      <para>Sometimes, however, the type-ignoring nature of polymorphic
+      compare is a problem, particularly when you have your own notion of
+      equality and ordering that you want to impose. We'll discuss this issue
+      more, as well as some of the other downsides of polymorphic compare, in
+      <xref linkend="maps-and-hash-tables" />.</para>
+    </sidebar>
 
-        <para>Note that <literal moreinfo="none">when</literal> clauses have some downsides.
-        As we noted earlier, the static checks associated with pattern matches
-        rely on the fact that patterns are restricted in what they can
-        express. Once we add the ability to add an arbitrary condition to a
-        pattern, something will be lost. In particular, the ability for the
-        compiler to determine if a match is exhaustive, or if some case is
-        redundant, is compromised.</para>
+    <para>Note that <literal moreinfo="none">when</literal> clauses have some
+    downsides. As we noted earlier, the static checks associated with pattern
+    matches rely on the fact that patterns are restricted in what they can
+    express. Once we add the ability to add an arbitrary condition to a
+    pattern, something will be lost. In particular, the ability for the
+    compiler to determine if a match is exhaustive, or if some case is
+    redundant, is compromised.</para>
 
-        <para>Consider the following function which takes a list of optional
-        values, and returns the number of those values that are
-        <literal moreinfo="none">Some</literal>. Because this implementation uses
-        <literal moreinfo="none">when</literal> clauses, the compiler can't tell that the code
-        is exhaustive.</para>
+    <para>Consider the following function which takes a list of optional
+    values, and returns the number of those values that are <literal
+    moreinfo="none">Some</literal>. Because this implementation uses <literal
+    moreinfo="none">when</literal> clauses, the compiler can't tell that the
+    code is exhaustive.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-        48)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 48)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec count_some list =</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">let rec count_some list =</userinput>
 <userinput moreinfo="none">    match list with</userinput>
 <userinput moreinfo="none">    | [] -&gt; 0</userinput>
 <userinput moreinfo="none">    | x :: tl when Option.is_none x -&gt; count_some tl</userinput>
@@ -1151,25 +1227,27 @@
 <computeroutput moreinfo="none">(However, some guarded clause may match this value.)</computeroutput>
 <computeroutput moreinfo="none">val count_some : 'a option list -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
-        <para>Despite the warning, the function does work fine.</para>
+    <para>Despite the warning, the function does work fine.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-        49)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 49)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">count_some [Some 3; None; Some 4];;</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">count_some [Some 3; None; Some 4];;</userinput>
 <computeroutput moreinfo="none">- : int = 2</computeroutput></programlisting>
 
-        <para>If we add another redundant case without a
-        <literal moreinfo="none">when</literal> clause, the compiler will stop complaining
-        about exhaustiveness, and won't produce a warning about the
-        redundancy.</para>
+    <para>If we add another redundant case without a <literal
+    moreinfo="none">when</literal> clause, the compiler will stop complaining
+    about exhaustiveness, and won't produce a warning about the
+    redundancy.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-        50)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 50)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec count_some list =</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">let rec count_some list =</userinput>
 <userinput moreinfo="none">    match list with</userinput>
 <userinput moreinfo="none">    | [] -&gt; 0</userinput>
 <userinput moreinfo="none">    | x :: tl when Option.is_none x -&gt; count_some tl</userinput>
@@ -1178,14 +1256,15 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val count_some : 'a option list -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
-        <para>Probably a better approach is to simply drop the second
-        <literal moreinfo="none">when</literal> clause.</para>
+    <para>Probably a better approach is to simply drop the second <literal
+    moreinfo="none">when</literal> clause.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-        51)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 51)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec count_some list =</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">let rec count_some list =</userinput>
 <userinput moreinfo="none">    match list with</userinput>
 <userinput moreinfo="none">    | [] -&gt; 0</userinput>
 <userinput moreinfo="none">    | x :: tl when Option.is_none x -&gt; count_some tl</userinput>
@@ -1193,15 +1272,16 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val count_some : 'a option list -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
-        <para>This is a little less clear, however, than the direct pattern
-        matching solution, where the meaning of each pattern is clearer on its
-        own.</para>
+    <para>This is a little less clear, however, than the direct pattern
+    matching solution, where the meaning of each pattern is clearer on its
+    own.</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-        52)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 52)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec count_some list =</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">let rec count_some list =</userinput>
 <userinput moreinfo="none">    match list with</userinput>
 <userinput moreinfo="none">    | [] -&gt; 0</userinput>
 <userinput moreinfo="none">    | None   :: tl -&gt; count_some tl</userinput>
@@ -1209,21 +1289,22 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val count_some : 'a option list -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
-        <para>The takeaway from all of this is that, while
-        <literal moreinfo="none">when</literal> clauses can be useful, one should prefer
-        patterns wherever they are sufficient.</para>
+    <para>The takeaway from all of this is that, while <literal
+    moreinfo="none">when</literal> clauses can be useful, one should prefer
+    patterns wherever they are sufficient.</para>
 
-        <para>As a side note, the above implementation of
-        <literal moreinfo="none">count_some</literal> is longer than necessary, and even worse
-        is not tail recursive. In real life, you would probably just use the
-        <literal moreinfo="none">List.count</literal> function from
-        <literal moreinfo="none">Core</literal>:</para>
+    <para>As a side note, the above implementation of <literal
+    moreinfo="none">count_some</literal> is longer than necessary, and even
+    worse is not tail recursive. In real life, you would probably just use the
+    <literal moreinfo="none">List.count</literal> function from <literal
+    moreinfo="none">Core</literal>:</para>
 
-        <para role="sourcecode">OCaml Utop:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink> (part
-        53)</para>
+    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    (part 53)</para>
 
-        <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let count_some l = List.count ~f:Option.is_some l;;</userinput>
+    <programlisting format="linespecific" language="ocaml"><prompt
+        moreinfo="none"># </prompt><userinput moreinfo="none">let count_some l = List.count ~f:Option.is_some l;;</userinput>
 <computeroutput moreinfo="none">val count_some : 'a option list -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
-      </sect1>
-    </chapter>
+  </sect1>
+</chapter>

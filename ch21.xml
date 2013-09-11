@@ -1,194 +1,203 @@
-<?xml version="1.0"?>
-<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="understanding-the-garbage-collector">
-      <title>Understanding the Garbage Collector</title>
+  <title>Understanding the Garbage Collector</title>
 
-      <para>We've described the runtime format of individual OCaml variables
-      earlier in <xref linkend="memory-representation-of-values"/>. When you
-      execute your program, OCaml manages the lifecycle of these variables by
-      regularly scanning allocated values and freeing them when they're no
-      longer needed. This in turn means that your applications don't need to
-      manually implement memory management and greatly reduces the likelihood
-      of memory leaks creeping into your code.</para>
+  <para>We've described the runtime format of individual OCaml variables
+  earlier in <xref linkend="memory-representation-of-values" />. When you
+  execute your program, OCaml manages the lifecycle of these variables by
+  regularly scanning allocated values and freeing them when they're no longer
+  needed. This in turn means that your applications don't need to manually
+  implement memory management and greatly reduces the likelihood of memory
+  leaks creeping into your code.</para>
 
-      <para>The OCaml runtime is a C library that provides routines that can
-      be called from running OCaml programs. The runtime manages a
-      <emphasis>heap</emphasis>, which is a collection of memory regions that
-      it obtains from the operating system. The runtime uses this memory to
-      hold <emphasis>heap blocks</emphasis> that it fills up with OCaml values
-      in response to allocation requests by the OCaml program.</para>
+  <para>The OCaml runtime is a C library that provides routines that can be
+  called from running OCaml programs. The runtime manages a
+  <emphasis>heap</emphasis>, which is a collection of memory regions that it
+  obtains from the operating system. The runtime uses this memory to hold
+  <emphasis>heap blocks</emphasis> that it fills up with OCaml values in
+  response to allocation requests by the OCaml program.</para>
 
-      <sect1 id="mark-and-sweep-garbage-collection">
-        <title>Mark and sweep garbage collection</title>
+  <sect1 id="mark-and-sweep-garbage-collection">
+    <title>Mark and sweep garbage collection</title>
 
-        <para>When there isn't enough memory available to satisfy an
-        allocation request from the pool of allocated heap blocks, the runtime
-        system invokes the <emphasis>garbage collector</emphasis> (or GC). An
-        OCaml program can't explicitly free a value when it is done with it.
-        Instead, the GC regularly determines which values are
-        <emphasis>live</emphasis> and which values are
-        <emphasis>dead</emphasis>, <emphasis>i.e.</emphasis> no longer in use.
-        Dead values are collected and their memory made available for reuse by
-        the application.</para>
+    <para>When there isn't enough memory available to satisfy an allocation
+    request from the pool of allocated heap blocks, the runtime system invokes
+    the <emphasis>garbage collector</emphasis> (or GC). An OCaml program can't
+    explicitly free a value when it is done with it. Instead, the GC regularly
+    determines which values are <emphasis>live</emphasis> and which values are
+    <emphasis>dead</emphasis>, <emphasis>i.e.</emphasis> no longer in use.
+    Dead values are collected and their memory made available for reuse by the
+    application.</para>
 
-        <para>The garbage collector doesn't keep constant track of values as
-        they are allocated and used. Instead, it regularly scans them by
-        starting from a set of <emphasis>root</emphasis> values that the
-        application always has access to (such as the stack). The GC maintains
-        a directed graph in which heap blocks are nodes, and there is an edge
-        from heap block <literal moreinfo="none">b1</literal> to heap block
-        <literal moreinfo="none">b2</literal> if some field of <literal moreinfo="none">b1</literal> is a
-        pointer to <literal moreinfo="none">b2</literal>.</para>
+    <para>The garbage collector doesn't keep constant track of values as they
+    are allocated and used. Instead, it regularly scans them by starting from
+    a set of <emphasis>root</emphasis> values that the application always has
+    access to (such as the stack). The GC maintains a directed graph in which
+    heap blocks are nodes, and there is an edge from heap block <literal
+    moreinfo="none">b1</literal> to heap block <literal
+    moreinfo="none">b2</literal> if some field of <literal
+    moreinfo="none">b1</literal> is a pointer to <literal
+    moreinfo="none">b2</literal>.</para>
 
-        <para>All blocks reachable from the roots by following edges in the
-        graph must be retained, and unreachable blocks can be reused by the
-        application. The algorithm used by OCaml to perform this heap
-        traversal is commonly known as <emphasis>mark and sweep</emphasis>
-        garbage collection, and we'll explain it further now.</para>
-      </sect1>
+    <para>All blocks reachable from the roots by following edges in the graph
+    must be retained, and unreachable blocks can be reused by the application.
+    The algorithm used by OCaml to perform this heap traversal is commonly
+    known as <emphasis>mark and sweep</emphasis> garbage collection, and we'll
+    explain it further now.</para>
+  </sect1>
 
-      <sect1 id="generational-garbage-collection">
-        <title>Generational garbage collection</title>
+  <sect1 id="generational-garbage-collection">
+    <title>Generational garbage collection</title>
 
-        <para>The usual OCaml programming style involves allocating many small
-        variables that are used for a short period of time and then never
-        accessed again. OCaml takes advantage of this fact to improve
-        performance by using a <emphasis>generational</emphasis> garbage
-        collector.</para>
+    <para>The usual OCaml programming style involves allocating many small
+    variables that are used for a short period of time and then never accessed
+    again. OCaml takes advantage of this fact to improve performance by using
+    a <emphasis>generational</emphasis> garbage collector.</para>
 
-        <para>A generational GC maintains separate memory regions to hold
-        blocks based on how long the blocks have been live. OCaml's heap is
-        split in two such regions:</para>
+    <para>A generational GC maintains separate memory regions to hold blocks
+    based on how long the blocks have been live. OCaml's heap is split in two
+    such regions:</para>
 
-        <itemizedlist>
-          <listitem>
-            <para>a small fixed-size <emphasis>minor heap</emphasis> where
-            most blocks are initially allocated.</para>
-          </listitem>
+    <itemizedlist>
+      <listitem>
+        <para>a small fixed-size <emphasis>minor heap</emphasis> where most
+        blocks are initially allocated.</para>
+      </listitem>
 
-          <listitem>
-            <para>a larger variable-sized <emphasis>major heap</emphasis> for
-            blocks that have been live longer.</para>
-          </listitem>
-        </itemizedlist>
+      <listitem>
+        <para>a larger variable-sized <emphasis>major heap</emphasis> for
+        blocks that have been live longer.</para>
+      </listitem>
+    </itemizedlist>
 
-        <para>A typical functional programming style means that young blocks
-        tend to die young and old blocks tend to stay around for longer than
-        young ones. This is often referred to as the <emphasis>generational
-        hypothesis</emphasis>.</para>
+    <para>A typical functional programming style means that young blocks tend
+    to die young and old blocks tend to stay around for longer than young
+    ones. This is often referred to as the <emphasis>generational
+    hypothesis</emphasis>.</para>
 
-        <para>OCaml uses different memory layouts and garbage collection
-        algorithms for the major and minor heaps to account for this
-        generational difference. We'll explain how they differ in more detail
-        next.</para>
+    <para>OCaml uses different memory layouts and garbage collection
+    algorithms for the major and minor heaps to account for this generational
+    difference. We'll explain how they differ in more detail next.</para>
 
-        <sidebar>
-          <title>The <literal moreinfo="none">Gc</literal> module and
-          <literal moreinfo="none">OCAMLRUNPARAM</literal></title>
+    <sidebar>
+      <title>The <literal moreinfo="none">Gc</literal> module and <literal
+      moreinfo="none">OCAMLRUNPARAM</literal></title>
 
-          <para>OCaml provides several mechanisms to query and alter the
-          behavior of the runtime system. The <literal moreinfo="none">Gc</literal> module
-          provides this functionality from within OCaml code, and we'll
-          frequently refer to it in the rest of the chapter. As with several
-          other standard library modules, Core alters the
-          <literal moreinfo="none">Gc</literal> interface from the standard OCaml library.
-          We'll assume that you've opened <literal moreinfo="none">Core.Std</literal> in our
-          explanations.</para>
+      <para>OCaml provides several mechanisms to query and alter the behavior
+      of the runtime system. The <literal moreinfo="none">Gc</literal> module
+      provides this functionality from within OCaml code, and we'll frequently
+      refer to it in the rest of the chapter. As with several other standard
+      library modules, Core alters the <literal moreinfo="none">Gc</literal>
+      interface from the standard OCaml library. We'll assume that you've
+      opened <literal moreinfo="none">Core.Std</literal> in our
+      explanations.</para>
 
-          <para>You can also control the behavior of OCaml programs by setting
-          the <literal moreinfo="none">OCAMLRUNPARAM</literal> environment variable before
-          launching your application. This lets you set garbage collector
-          parameters without recompiling, for example to benchmark the effects
-          of different settings. The format of
-          <literal moreinfo="none">OCAMLRUNPARAM</literal> is documented in the <ulink url="http://caml.inria.fr/pub/docs/manual-ocaml/manual024.html">OCaml
-          manual</ulink>.</para>
-        </sidebar>
-      </sect1>
+      <para>You can also control the behavior of OCaml programs by setting the
+      <literal moreinfo="none">OCAMLRUNPARAM</literal> environment variable
+      before launching your application. This lets you set garbage collector
+      parameters without recompiling, for example to benchmark the effects of
+      different settings. The format of <literal
+      moreinfo="none">OCAMLRUNPARAM</literal> is documented in the <ulink
+      url="http://caml.inria.fr/pub/docs/manual-ocaml/manual024.html">OCaml
+      manual</ulink>.</para>
+    </sidebar>
+  </sect1>
 
-      <sect1 id="the-fast-minor-heap">
-        <title>The fast minor heap</title>
+  <sect1 id="the-fast-minor-heap">
+    <title>The fast minor heap</title>
 
-        <para>The minor heap is where most of your short-lived values are
-        held. It consists of one contiguous chunk of virtual memory containing
-        a sequence of OCaml blocks. If there is space, allocating a new block
-        is a fast constant-time operation that requires just a couple of CPU
-        instructions.</para>
+    <para>The minor heap is where most of your short-lived values are held. It
+    consists of one contiguous chunk of virtual memory containing a sequence
+    of OCaml blocks. If there is space, allocating a new block is a fast
+    constant-time operation that requires just a couple of CPU
+    instructions.</para>
 
-        <para>To garbage collect the minor heap, OCaml uses <emphasis>copying
-        collection</emphasis> to move all live blocks in the minor heap to the
-        major heap. This takes work proportional to the number of live blocks
-        in the minor heap, which is typically small according to the
-        generational hypothesis. The minor collection <emphasis>stops the
-        world</emphasis> (that it, halts the application) while it runs, which
-        is why it's so important that it complete quickly to let the
-        application resume running with minimal interruption.</para>
+    <para>To garbage collect the minor heap, OCaml uses <emphasis>copying
+    collection</emphasis> to move all live blocks in the minor heap to the
+    major heap. This takes work proportional to the number of live blocks in
+    the minor heap, which is typically small according to the generational
+    hypothesis. The minor collection <emphasis>stops the world</emphasis>
+    (that it, halts the application) while it runs, which is why it's so
+    important that it complete quickly to let the application resume running
+    with minimal interruption.</para>
 
-        <sect2 id="allocating-on-the-minor-heap">
-          <title>Allocating on the minor heap</title>
+    <sect2 id="allocating-on-the-minor-heap">
+      <title>Allocating on the minor heap</title>
 
-          <para>The minor heap is a contiguous chunk of virtual memory that is
-          usually a few megabytes in size so that it can be scanned
-          quickly.</para>
+      <para>The minor heap is a contiguous chunk of virtual memory that is
+      usually a few megabytes in size so that it can be scanned
+      quickly.</para>
 
-          <para role="sourcecode">Diagram:
-          <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/minor_heap.ascii">gc/minor_heap.ascii</ulink></para>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/minor_heap.ascii">Diagram</ulink></para>
 
-          <programlisting language="" format="linespecific">                &lt;---- size ----&gt;
- base --- start ---------------- end
-          limit      ptr &lt;------
-                          blocks</programlisting>
+      <informalfigure>
+        <mediaobject>
+          <imageobject role="web">
+            <imagedata fileref="images/rwoc_2101.png" format="PNG" />
+          </imageobject>
+        </mediaobject>
+      </informalfigure>
 
-          <para>The runtime stores the boundaries of the minor heap in two
-          pointers that delimit the start and end of the heap region
-          (<literal moreinfo="none">caml_young_start</literal> and
-          <literal moreinfo="none">caml_young_end</literal>, but we will drop the
-          <literal moreinfo="none">caml_young</literal> prefix for brevity). The
-          <literal moreinfo="none">base</literal> is the memory address returned by the system
-          <literal moreinfo="none">malloc</literal>, and <literal moreinfo="none">start</literal> is aligned
-          against the next nearest word boundary from <literal moreinfo="none">base</literal>
-          to make it easier to store OCaml values.</para>
+      <para>The runtime stores the boundaries of the minor heap in two
+      pointers that delimit the start and end of the heap region (<literal
+      moreinfo="none">caml_young_start</literal> and <literal
+      moreinfo="none">caml_young_end</literal>, but we will drop the <literal
+      moreinfo="none">caml_young</literal> prefix for brevity). The <literal
+      moreinfo="none">base</literal> is the memory address returned by the
+      system <literal moreinfo="none">malloc</literal>, and <literal
+      moreinfo="none">start</literal> is aligned against the next nearest word
+      boundary from <literal moreinfo="none">base</literal> to make it easier
+      to store OCaml values.</para>
 
-          <para>In a fresh minor heap, the <literal moreinfo="none">limit</literal> equals the
-          <literal moreinfo="none">start</literal> and the current <literal moreinfo="none">ptr</literal> will
-          equal the <literal moreinfo="none">end</literal>. <literal moreinfo="none">ptr</literal> decreases
-          as blocks are allocated until it reaches <literal moreinfo="none">limit</literal>,
-          at which point a minor garbage collection is triggered.</para>
+      <para>In a fresh minor heap, the <literal
+      moreinfo="none">limit</literal> equals the <literal
+      moreinfo="none">start</literal> and the current <literal
+      moreinfo="none">ptr</literal> will equal the <literal
+      moreinfo="none">end</literal>. <literal moreinfo="none">ptr</literal>
+      decreases as blocks are allocated until it reaches <literal
+      moreinfo="none">limit</literal>, at which point a minor garbage
+      collection is triggered.</para>
 
-          <para>Allocating a block in the minor heap just requires
-          <literal moreinfo="none">ptr</literal> to be decremented by the size of the block
-          (including the header) and checking that it's not less than
-          <literal moreinfo="none">limit</literal>. If there isn't enough space left for the
-          block without decrementing past the <literal moreinfo="none">limit</literal>, a
-          minor garbage collection is triggered. This is a very fast check
-          (with no branching) on most CPU architectures.</para>
+      <para>Allocating a block in the minor heap just requires <literal
+      moreinfo="none">ptr</literal> to be decremented by the size of the block
+      (including the header) and checking that it's not less than <literal
+      moreinfo="none">limit</literal>. If there isn't enough space left for
+      the block without decrementing past the <literal
+      moreinfo="none">limit</literal>, a minor garbage collection is
+      triggered. This is a very fast check (with no branching) on most CPU
+      architectures.</para>
 
-          <para>You may wonder why <literal moreinfo="none">limit</literal> is required at
-          all, since it always seems to equal <literal moreinfo="none">start</literal>. It's
-          because the easiest way for the runtime to schedule a minor heap
-          collection is by setting <literal moreinfo="none">limit</literal> to equal
-          <literal moreinfo="none">end</literal>. The next allocation will never have enough
-          space after this is done and will always trigger a garbage
-          collection. There are various internal reasons for such early
-          collections, such as handling pending UNIX signals, and they don't
-          ordinarily matter for application code.</para>
+      <para>You may wonder why <literal moreinfo="none">limit</literal> is
+      required at all, since it always seems to equal <literal
+      moreinfo="none">start</literal>. It's because the easiest way for the
+      runtime to schedule a minor heap collection is by setting <literal
+      moreinfo="none">limit</literal> to equal <literal
+      moreinfo="none">end</literal>. The next allocation will never have
+      enough space after this is done and will always trigger a garbage
+      collection. There are various internal reasons for such early
+      collections, such as handling pending UNIX signals, and they don't
+      ordinarily matter for application code.</para>
 
-          <note>
-            <title>Setting the size of the minor heap</title>
+      <note>
+        <title>Setting the size of the minor heap</title>
 
-            <para>The default minor heap size in OCaml is normally 2MB on
-            64-bit platforms, but this is increased to 8MB if you use Core
-            (which generally prefers default settings that improves
-            performance but at the cost of a bigger memory profile). This
-            setting can be overridden via the
-            <literal moreinfo="none">s=&lt;words&gt;</literal> argument to
-            <literal moreinfo="none">OCAMLRUNPARAM</literal>. You can change it after the
-            program has started by calling the <literal moreinfo="none">Gc.set</literal>
-            function.</para>
+        <para>The default minor heap size in OCaml is normally 2MB on 64-bit
+        platforms, but this is increased to 8MB if you use Core (which
+        generally prefers default settings that improves performance but at
+        the cost of a bigger memory profile). This setting can be overridden
+        via the <literal moreinfo="none">s=&lt;words&gt;</literal> argument to
+        <literal moreinfo="none">OCAMLRUNPARAM</literal>. You can change it
+        after the program has started by calling the <literal
+        moreinfo="none">Gc.set</literal> function.</para>
 
-            <para role="sourcecode">OCaml Utop:
-            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">gc/tune.topscript</ulink></para>
+        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">gc/tune.topscript</ulink></para>
 
-            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let c = Gc.get () ;;</userinput>
+        <programlisting format="linespecific" language="ocaml"><prompt
+            moreinfo="none"># </prompt><userinput moreinfo="none">let c = Gc.get () ;;</userinput>
 <computeroutput moreinfo="none">val c : Gc.control =</computeroutput>
 <computeroutput moreinfo="none">  {Core.Std.Gc.Control.minor_heap_size = 1000000;</computeroutput>
 <computeroutput moreinfo="none">   major_heap_increment = 1000448; space_overhead = 100; verbose = 0;</computeroutput>
@@ -196,413 +205,411 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Gc.tune ~minor_heap_size:(262144 * 2) () ;;</userinput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
 
-            <para>Changing the GC size dynamically will trigger an immediate
-            minor heap collection. Note that Core increases the default minor
-            heap size from the standard OCaml installation quite
-            significantly, and you'll want to reduce this if running in very
-            memory-constrained environments.</para>
-          </note>
-        </sect2>
-      </sect1>
+        <para>Changing the GC size dynamically will trigger an immediate minor
+        heap collection. Note that Core increases the default minor heap size
+        from the standard OCaml installation quite significantly, and you'll
+        want to reduce this if running in very memory-constrained
+        environments.</para>
+      </note>
+    </sect2>
+  </sect1>
 
-      <sect1 id="the-long-lived-major-heap">
-        <title>The long-lived major heap</title>
+  <sect1 id="the-long-lived-major-heap">
+    <title>The long-lived major heap</title>
 
-        <para>The major heap is where the bulk of the longer-lived and larger
-        values in your program are stored. It consists of any number of
-        non-contiguous chunks of virtual memory, each containing live blocks
-        interspersed with regions of free memory. The runtime system maintains
-        a free-list data structure that indexes all the free memory that it
-        has allocated, and uses it to satisfy allocation requests for OCaml
-        blocks.</para>
+    <para>The major heap is where the bulk of the longer-lived and larger
+    values in your program are stored. It consists of any number of
+    non-contiguous chunks of virtual memory, each containing live blocks
+    interspersed with regions of free memory. The runtime system maintains a
+    free-list data structure that indexes all the free memory that it has
+    allocated, and uses it to satisfy allocation requests for OCaml
+    blocks.</para>
 
-        <para>The major heap is typically much larger than the minor heap and
-        can scale to gigabytes in size. It is cleaned via a mark-and-sweep
-        garbage collection algorithm that operates in several phases.</para>
+    <para>The major heap is typically much larger than the minor heap and can
+    scale to gigabytes in size. It is cleaned via a mark-and-sweep garbage
+    collection algorithm that operates in several phases.</para>
 
-        <itemizedlist>
-          <listitem>
-            <para>The <emphasis>mark</emphasis> phase scans the block graph
-            and marks all live blocks by setting a bit in the tag of the block
-            header (known as the <emphasis>color</emphasis> tag).</para>
-          </listitem>
+    <itemizedlist>
+      <listitem>
+        <para>The <emphasis>mark</emphasis> phase scans the block graph and
+        marks all live blocks by setting a bit in the tag of the block header
+        (known as the <emphasis>color</emphasis> tag).</para>
+      </listitem>
 
-          <listitem>
-            <para>The <emphasis>sweep</emphasis> phase sequentially scans the
-            heap chunks and identifies dead blocks that weren't marked
-            earlier.</para>
-          </listitem>
+      <listitem>
+        <para>The <emphasis>sweep</emphasis> phase sequentially scans the heap
+        chunks and identifies dead blocks that weren't marked earlier.</para>
+      </listitem>
 
-          <listitem>
-            <para>The <emphasis>compact</emphasis> phase relocates live blocks
-            into a freshly allocated heap to eliminate gaps in the free list.
-            This prevents the fragmentation of heap blocks in long-running
-            programs, and normally occurs much less frequently than the mark
-            and sweep phases.</para>
-          </listitem>
-        </itemizedlist>
+      <listitem>
+        <para>The <emphasis>compact</emphasis> phase relocates live blocks
+        into a freshly allocated heap to eliminate gaps in the free list. This
+        prevents the fragmentation of heap blocks in long-running programs,
+        and normally occurs much less frequently than the mark and sweep
+        phases.</para>
+      </listitem>
+    </itemizedlist>
 
-        <para>A major garbage collection must also stop the world to ensure
-        that blocks can be moved around without this being observed by the
-        live application. The mark-and-sweep phases run incrementally over
-        slices of the heap to avoid pausing the application for long periods
-        of time, and also precede each slice with a fast minor collection.
-        Only the compaction phase touches all the memory in one go, and is a
-        relatively rare operation.</para>
+    <para>A major garbage collection must also stop the world to ensure that
+    blocks can be moved around without this being observed by the live
+    application. The mark-and-sweep phases run incrementally over slices of
+    the heap to avoid pausing the application for long periods of time, and
+    also precede each slice with a fast minor collection. Only the compaction
+    phase touches all the memory in one go, and is a relatively rare
+    operation.</para>
 
-        <sect2 id="allocating-on-the-major-heap">
-          <title>Allocating on the major heap</title>
+    <sect2 id="allocating-on-the-major-heap">
+      <title>Allocating on the major heap</title>
 
-          <para>The major heap consists of a singly-linked list of contiguous
-          memory chunks sorted in increasing order of virtual address. Each
-          chunk is a single memory region allocated via
-          <emphasis>malloc(3)</emphasis> and consists of a header and data
-          area which contains OCaml heap chunks. A heap chunk header
-          contains:</para>
+      <para>The major heap consists of a singly-linked list of contiguous
+      memory chunks sorted in increasing order of virtual address. Each chunk
+      is a single memory region allocated via <emphasis>malloc(3)</emphasis>
+      and consists of a header and data area which contains OCaml heap chunks.
+      A heap chunk header contains:</para>
 
-          <itemizedlist>
-            <listitem>
-              <para>the <emphasis>malloc</emphasis>'ed virtual address of the
-              memory region containing the chunk.</para>
-            </listitem>
+      <itemizedlist>
+        <listitem>
+          <para>the <emphasis>malloc</emphasis>'ed virtual address of the
+          memory region containing the chunk.</para>
+        </listitem>
 
-            <listitem>
-              <para>the size in bytes of the data area.</para>
-            </listitem>
+        <listitem>
+          <para>the size in bytes of the data area.</para>
+        </listitem>
 
-            <listitem>
-              <para>an allocation size in bytes used during heap compaction to
-              merge small blocks to defragment the heap.</para>
-            </listitem>
+        <listitem>
+          <para>an allocation size in bytes used during heap compaction to
+          merge small blocks to defragment the heap.</para>
+        </listitem>
 
-            <listitem>
-              <para>a link to the next heap chunk in the list.</para>
-            </listitem>
-          </itemizedlist>
+        <listitem>
+          <para>a link to the next heap chunk in the list.</para>
+        </listitem>
+      </itemizedlist>
 
-          <para>Each chunk's data area starts on a page boundary and its size
-          is a multiple of the page size (4KB). It contains a contiguous
-          sequence of heap blocks which can be as small as one or two 4KB
-          pages, but are usually allocated in 1MB chunks (or 512KB on 32-bit
-          architectures).</para>
+      <para>Each chunk's data area starts on a page boundary and its size is a
+      multiple of the page size (4KB). It contains a contiguous sequence of
+      heap blocks which can be as small as one or two 4KB pages, but are
+      usually allocated in 1MB chunks (or 512KB on 32-bit
+      architectures).</para>
 
-          <note>
-            <title>Controlling major heap growth</title>
+      <note>
+        <title>Controlling major heap growth</title>
 
-            <para>The <literal moreinfo="none">Gc</literal> module uses the
-            <literal moreinfo="none">major_heap_increment</literal> value to control the major
-            heap growth. This defines the number of words to add to the major
-            heap per expansion, and is the only memory allocation operation
-            that the operating system observes from the OCaml runtime after
-            initial startup (since the minor is fixed in size).</para>
+        <para>The <literal moreinfo="none">Gc</literal> module uses the
+        <literal moreinfo="none">major_heap_increment</literal> value to
+        control the major heap growth. This defines the number of words to add
+        to the major heap per expansion, and is the only memory allocation
+        operation that the operating system observes from the OCaml runtime
+        after initial startup (since the minor is fixed in size).</para>
 
-            <para>If you anticipate allocating some large OCaml values or many
-            small values in one go, then setting the heap increment to a
-            larger value will improve performance by reducing the amount of
-            heap resizing required in order to satisfy the allocation
-            requiests. A small increment may result in lots of smaller heap
-            chunks spread across different regions of virtual memory that
-            require more housekeeping in the OCaml runtime to keep track of
-            them.</para>
+        <para>If you anticipate allocating some large OCaml values or many
+        small values in one go, then setting the heap increment to a larger
+        value will improve performance by reducing the amount of heap resizing
+        required in order to satisfy the allocation requiests. A small
+        increment may result in lots of smaller heap chunks spread across
+        different regions of virtual memory that require more housekeeping in
+        the OCaml runtime to keep track of them.</para>
 
-            <para role="sourcecode">OCaml Utop:
-            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">gc/tune.topscript</ulink> (part 1)</para>
+        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">gc/tune.topscript</ulink>
+        (part 1)</para>
 
-            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Gc.tune ~major_heap_increment:(1000448 * 4) () ;;</userinput>
+        <programlisting format="linespecific" language="ocaml"><prompt
+            moreinfo="none"># </prompt><userinput moreinfo="none">Gc.tune ~major_heap_increment:(1000448 * 4) () ;;</userinput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
-          </note>
+      </note>
 
-          <para>Allocating an OCaml value on the major heap first checks the
-          free list of blocks for a suitable region to place it. If there
-          isn't enough room on the free list, the runtime expands the major
-          heap by allocating a fresh heap chunk that will be large enough.
-          That chunk is then added to the free list and the free list is
-          checked again (and this time will definitely succeed).</para>
+      <para>Allocating an OCaml value on the major heap first checks the free
+      list of blocks for a suitable region to place it. If there isn't enough
+      room on the free list, the runtime expands the major heap by allocating
+      a fresh heap chunk that will be large enough. That chunk is then added
+      to the free list and the free list is checked again (and this time will
+      definitely succeed).</para>
 
-          <para>Remember that most allocations to the major heap will go via
-          the minor heap, and only be promoted if they are still used by the
-          program after a minor collection. The one exception to this is for
-          values larger than 256 words (that is, 2kB on 64-bit platforms).
-          These will be allocated directly on the major heap since an
-          allocation on the minor heap would likely trigger an immediate
-          collection and copy it to the major heap anyway.</para>
-        </sect2>
+      <para>Remember that most allocations to the major heap will go via the
+      minor heap, and only be promoted if they are still used by the program
+      after a minor collection. The one exception to this is for values larger
+      than 256 words (that is, 2kB on 64-bit platforms). These will be
+      allocated directly on the major heap since an allocation on the minor
+      heap would likely trigger an immediate collection and copy it to the
+      major heap anyway.</para>
+    </sect2>
 
-        <sect2 id="memory-allocation-strategies">
-          <title>Memory allocation strategies</title>
+    <sect2 id="memory-allocation-strategies">
+      <title>Memory allocation strategies</title>
 
-          <para>The major heap does its best to manage memory allocation as
-          efficiently as possible, and relies on heap compaction to ensure
-          that memory stays contiguous and unfragmented. The default
-          allocation policy normally works fine for most applications, but
-          it's worth bearing in mind that there are other options too.</para>
+      <para>The major heap does its best to manage memory allocation as
+      efficiently as possible, and relies on heap compaction to ensure that
+      memory stays contiguous and unfragmented. The default allocation policy
+      normally works fine for most applications, but it's worth bearing in
+      mind that there are other options too.</para>
 
-          <para>The free list of blocks is always checked first when
-          allocating a new block in the major heap. The default free list
-          search is called <emphasis>next-fit allocation</emphasis>, with an
-          alternative <emphasis>first-fit</emphasis> algorithm also
-          available.</para>
+      <para>The free list of blocks is always checked first when allocating a
+      new block in the major heap. The default free list search is called
+      <emphasis>next-fit allocation</emphasis>, with an alternative
+      <emphasis>first-fit</emphasis> algorithm also available.</para>
 
-          <sect3 id="next-fit-allocation">
-            <title>Next-fit allocation</title>
+      <sect3 id="next-fit-allocation">
+        <title>Next-fit allocation</title>
 
-            <para>Next-fit allocation keeps a pointer to the block in the free
-            list that was most recently used to satisfy a request. When a new
-            request comes in, the allocator searches from the next block until
-            the end of the free list, and then from the beginning of the free
-            list up to that block.</para>
+        <para>Next-fit allocation keeps a pointer to the block in the free
+        list that was most recently used to satisfy a request. When a new
+        request comes in, the allocator searches from the next block until the
+        end of the free list, and then from the beginning of the free list up
+        to that block.</para>
 
-            <para>Next-fit allocation is the default allocation strategy. It's
-            quite a cheap allocation mechanism since the same heap chunk can
-            be reused across allocation requests until it runs out. This in
-            turn means that there is good memory locality to use CPU caches
-            better.</para>
-          </sect3>
+        <para>Next-fit allocation is the default allocation strategy. It's
+        quite a cheap allocation mechanism since the same heap chunk can be
+        reused across allocation requests until it runs out. This in turn
+        means that there is good memory locality to use CPU caches
+        better.</para>
+      </sect3>
 
-          <sect3 id="first-fit-allocation">
-            <title>First-fit allocation</title>
+      <sect3 id="first-fit-allocation">
+        <title>First-fit allocation</title>
 
-            <para>If your programs allocates values of many varied sizes, you
-            may sometimes find that your free list becomes fragmented. In this
-            situation, the GC is forced to perform an expensive compaction
-            despite there being free chunks, since none of the chunks alone
-            are big enough to satisfy the request.</para>
+        <para>If your programs allocates values of many varied sizes, you may
+        sometimes find that your free list becomes fragmented. In this
+        situation, the GC is forced to perform an expensive compaction despite
+        there being free chunks, since none of the chunks alone are big enough
+        to satisfy the request.</para>
 
-            <para>First-fit allocation focuses on reducing memory
-            fragmentation (and hence the number of compactions), but at the
-            expense of slower memory allocation. Every allocation scans the
-            free list from the beginning for a suitable free chunk, instead of
-            reusing the most recent heap chunk as the next-fit allocator
-            does.</para>
+        <para>First-fit allocation focuses on reducing memory fragmentation
+        (and hence the number of compactions), but at the expense of slower
+        memory allocation. Every allocation scans the free list from the
+        beginning for a suitable free chunk, instead of reusing the most
+        recent heap chunk as the next-fit allocator does.</para>
 
-            <para>For some workloads that need more real-time behavior under
-            load, the reduction in the frequency in heap compaction will
-            outweigh the extra allocation cost.</para>
+        <para>For some workloads that need more real-time behavior under load,
+        the reduction in the frequency in heap compaction will outweigh the
+        extra allocation cost.</para>
 
-            <note>
-              <title>Controlling the heap allocation policy</title>
+        <note>
+          <title>Controlling the heap allocation policy</title>
 
-              <para>You can set the heap allocation policy via the
-              <literal moreinfo="none">Gc.allocation_policy</literal> field. A value of
-              <literal moreinfo="none">0</literal> (the default) sets it to next-fit, and
-              <literal moreinfo="none">1</literal> to the first-fit allocator.</para>
+          <para>You can set the heap allocation policy via the <literal
+          moreinfo="none">Gc.allocation_policy</literal> field. A value of
+          <literal moreinfo="none">0</literal> (the default) sets it to
+          next-fit, and <literal moreinfo="none">1</literal> to the first-fit
+          allocator.</para>
 
-              <para>The same behavior can be controlled at runtime by setting
-              <literal moreinfo="none">a=0</literal> or <literal moreinfo="none">a=1</literal> in
-              <literal moreinfo="none">OCAMLRUNPARAM</literal>.</para>
-            </note>
-          </sect3>
-        </sect2>
+          <para>The same behavior can be controlled at runtime by setting
+          <literal moreinfo="none">a=0</literal> or <literal
+          moreinfo="none">a=1</literal> in <literal
+          moreinfo="none">OCAMLRUNPARAM</literal>.</para>
+        </note>
+      </sect3>
+    </sect2>
 
-        <sect2 id="marking-and-scanning-the-heap">
-          <title>Marking and scanning the heap</title>
+    <sect2 id="marking-and-scanning-the-heap">
+      <title>Marking and scanning the heap</title>
 
-          <para>The marking process can take a long time to run over the
-          complete major heap, and has to pause the main application while
-          it's active. It therefore runs incrementally by marking the heap in
-          <emphasis>slices</emphasis>. Each value in the heap has a 2-bit
-          <emphasis>color</emphasis> field in its header that is used to store
-          information about whether the value has been marked, so that the GC
-          can resume easily between slices.</para>
+      <para>The marking process can take a long time to run over the complete
+      major heap, and has to pause the main application while it's active. It
+      therefore runs incrementally by marking the heap in
+      <emphasis>slices</emphasis>. Each value in the heap has a 2-bit
+      <emphasis>color</emphasis> field in its header that is used to store
+      information about whether the value has been marked, so that the GC can
+      resume easily between slices.</para>
 
-          <informaltable>
-            <tgroup cols="2">
-              <colspec align="left"/>
+      <informaltable>
+        <tgroup cols="2">
+          <colspec align="left" />
 
-              <colspec align="left"/>
+          <colspec align="left" />
 
-              <thead>
-                <row>
-                  <entry>Tag Color</entry>
+          <thead>
+            <row>
+              <entry>Tag Color</entry>
 
-                  <entry>Block Status</entry>
-                </row>
-              </thead>
+              <entry>Block Status</entry>
+            </row>
+          </thead>
 
-              <tbody>
-                <row>
-                  <entry>blue</entry>
+          <tbody>
+            <row>
+              <entry>blue</entry>
 
-                  <entry>on the free list and not currently in use</entry>
-                </row>
+              <entry>on the free list and not currently in use</entry>
+            </row>
 
-                <row>
-                  <entry>white (during marking)</entry>
+            <row>
+              <entry>white (during marking)</entry>
 
-                  <entry>not reached yet, but possibly reachable</entry>
-                </row>
+              <entry>not reached yet, but possibly reachable</entry>
+            </row>
 
-                <row>
-                  <entry>white (during sweeping)</entry>
+            <row>
+              <entry>white (during sweeping)</entry>
 
-                  <entry>unreachable and can be freed</entry>
-                </row>
+              <entry>unreachable and can be freed</entry>
+            </row>
 
-                <row>
-                  <entry>gray</entry>
+            <row>
+              <entry>gray</entry>
 
-                  <entry>reachable, but its fields have not been
-                  scanned</entry>
-                </row>
+              <entry>reachable, but its fields have not been scanned</entry>
+            </row>
 
-                <row>
-                  <entry>black</entry>
+            <row>
+              <entry>black</entry>
 
-                  <entry>reachable, and its fields have been scanned</entry>
-                </row>
-              </tbody>
-            </tgroup>
-          </informaltable>
+              <entry>reachable, and its fields have been scanned</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
 
-          <para>The color tags in the value headers store most of the state of
-          the marking process, allowing it to be paused and resumed later. The
-          GC and application alternate between marking a slice of the major
-          heap and actually getting on with executing the program logic. The
-          OCaml runtime calculates a sensible value for the size of each major
-          heap slice based on the rate of allocation and available memory (see
-          below).</para>
+      <para>The color tags in the value headers store most of the state of the
+      marking process, allowing it to be paused and resumed later. The GC and
+      application alternate between marking a slice of the major heap and
+      actually getting on with executing the program logic. The OCaml runtime
+      calculates a sensible value for the size of each major heap slice based
+      on the rate of allocation and available memory (see below).</para>
 
-          <para>The marking process starts with a set of
-          <emphasis>root</emphasis> values that are always live (such as the
-          application stack). All values on the heap are initially marked as
-          white values that are possibly reachable, but haven't been scanned
-          yet. It recursively follows all the fields in the roots via a
-          depth-first search, and pushes newly encountered white blocks onto
-          an intermediate stack of <emphasis>gray values</emphasis> while it
-          follows their fields. When a gray value's fields have all been
-          followed it is popped off the stack and colored black.</para>
+      <para>The marking process starts with a set of <emphasis>root</emphasis>
+      values that are always live (such as the application stack). All values
+      on the heap are initially marked as white values that are possibly
+      reachable, but haven't been scanned yet. It recursively follows all the
+      fields in the roots via a depth-first search, and pushes newly
+      encountered white blocks onto an intermediate stack of <emphasis>gray
+      values</emphasis> while it follows their fields. When a gray value's
+      fields have all been followed it is popped off the stack and colored
+      black.</para>
 
-          <para>This process is repeated until the gray value stack is empty
-          and there are no further values to mark. There's one important edge
-          case in this process, though. The gray value stack can only grow to
-          a certain size, after which the GC can no longer recurse into
-          intermediate values since it has nowhere to store them while it
-          follows their fields. If this happens, the heap is marked as
-          <emphasis>impure</emphasis> and a more expensive check is initiated
-          once the existing gray values have been processed.</para>
+      <para>This process is repeated until the gray value stack is empty and
+      there are no further values to mark. There's one important edge case in
+      this process, though. The gray value stack can only grow to a certain
+      size, after which the GC can no longer recurse into intermediate values
+      since it has nowhere to store them while it follows their fields. If
+      this happens, the heap is marked as <emphasis>impure</emphasis> and a
+      more expensive check is initiated once the existing gray values have
+      been processed.</para>
 
-          <para>To mark an impure heap, the GC first marks it as pure and
-          walks through the entire heap block-by-block in increasing order of
-          memory address. If it finds a gray block, it adds it to the gray
-          list and recursively marks it using the usual strategy for a pure
-          heap. Once the scan of the complete heap is finished, the mark phase
-          checks again whether the heap has again become impure, and repeats
-          the scan until it is pure again. These full-heap scans will continue
-          until a successful scan completes without overflowing the gray
-          list.</para>
+      <para>To mark an impure heap, the GC first marks it as pure and walks
+      through the entire heap block-by-block in increasing order of memory
+      address. If it finds a gray block, it adds it to the gray list and
+      recursively marks it using the usual strategy for a pure heap. Once the
+      scan of the complete heap is finished, the mark phase checks again
+      whether the heap has again become impure, and repeats the scan until it
+      is pure again. These full-heap scans will continue until a successful
+      scan completes without overflowing the gray list.</para>
 
-          <note>
-            <title>Controlling major heap collections</title>
+      <note>
+        <title>Controlling major heap collections</title>
 
-            <para>You can trigger a single slice of the major GC via the
-            <literal moreinfo="none">major_slice</literal> call. This performs a minor
-            collection first, and then a single slice. The size of the slice
-            is normally automatically computed by the GC to an appropriate
-            value, and returns this value so that you can modify it in future
-            calls if necessary.</para>
+        <para>You can trigger a single slice of the major GC via the <literal
+        moreinfo="none">major_slice</literal> call. This performs a minor
+        collection first, and then a single slice. The size of the slice is
+        normally automatically computed by the GC to an appropriate value, and
+        returns this value so that you can modify it in future calls if
+        necessary.</para>
 
-            <para role="sourcecode">OCaml Utop:
-            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">gc/tune.topscript</ulink> (part 2)</para>
+        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">gc/tune.topscript</ulink>
+        (part 2)</para>
 
-            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Gc.major_slice 0 ;;</userinput>
+        <programlisting format="linespecific" language="ocaml"><prompt
+            moreinfo="none"># </prompt><userinput moreinfo="none">Gc.major_slice 0 ;;</userinput>
 <computeroutput moreinfo="none">- : int = 260440</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Gc.full_major () ;;</userinput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
 
-            <para>The <literal moreinfo="none">space_overhead</literal> setting controls how
-            aggressive the GC is about setting the slice size to a large size.
-            This represents the proportion of memory used for live data that
-            will be "wasted" because the GC doesn't immediately collect
-            unreachable blocks. Core defaults this to <literal moreinfo="none">100</literal>
-            to reflect a typical system that isn't overly memory-constrained.
-            Set this even higher if you have lots of memory, or lower to cause
-            the GC to work harder and collect blocks faster at the expense of
-            using more CPU time.</para>
-          </note>
-        </sect2>
+        <para>The <literal moreinfo="none">space_overhead</literal> setting
+        controls how aggressive the GC is about setting the slice size to a
+        large size. This represents the proportion of memory used for live
+        data that will be "wasted" because the GC doesn't immediately collect
+        unreachable blocks. Core defaults this to <literal
+        moreinfo="none">100</literal> to reflect a typical system that isn't
+        overly memory-constrained. Set this even higher if you have lots of
+        memory, or lower to cause the GC to work harder and collect blocks
+        faster at the expense of using more CPU time.</para>
+      </note>
+    </sect2>
 
-        <sect2 id="heap-compaction">
-          <title>Heap Compaction</title>
+    <sect2 id="heap-compaction">
+      <title>Heap Compaction</title>
 
-          <para>After a certain number of major GC cycles have completed, the
-          heap may begin to be fragmented due to values being deallocated out
-          of order from how they were allocated. This makes it harder for the
-          GC to find a contiguous block of memory for fresh allocations, which
-          in turn would require the heap to be grown unnecessarily.</para>
+      <para>After a certain number of major GC cycles have completed, the heap
+      may begin to be fragmented due to values being deallocated out of order
+      from how they were allocated. This makes it harder for the GC to find a
+      contiguous block of memory for fresh allocations, which in turn would
+      require the heap to be grown unnecessarily.</para>
 
-          <para>The heap compaction cycle avoids this by relocating all the
-          values in the major heap into a fresh heap that places them all
-          contiguously in memory again. A naive implementation of the
-          algorithm would require extra memory to store the new heap, but
-          OCaml performs the compaction in-place within the existing
-          heap.</para>
+      <para>The heap compaction cycle avoids this by relocating all the values
+      in the major heap into a fresh heap that places them all contiguously in
+      memory again. A naive implementation of the algorithm would require
+      extra memory to store the new heap, but OCaml performs the compaction
+      in-place within the existing heap.</para>
 
-          <note>
-            <title>Controlling frequency of compactions</title>
+      <note>
+        <title>Controlling frequency of compactions</title>
 
-            <para>The <literal moreinfo="none">max_overhead</literal> setting in the
-            <literal moreinfo="none">Gc</literal> module defines the connection between free
-            memory and allocated memory after which compaction is
-            activated.</para>
+        <para>The <literal moreinfo="none">max_overhead</literal> setting in
+        the <literal moreinfo="none">Gc</literal> module defines the
+        connection between free memory and allocated memory after which
+        compaction is activated.</para>
 
-            <para>A value of <literal moreinfo="none">0</literal> triggers a compaction after
-            every major garbage collection cycle, whereas the maximum value of
-            <literal moreinfo="none">1000000</literal> disables heap compaction completely.
-            The default settings should be fine unless you have unusual
-            allocation patterns that are causing a higher-than-usual rate of
-            compactions.</para>
+        <para>A value of <literal moreinfo="none">0</literal> triggers a
+        compaction after every major garbage collection cycle, whereas the
+        maximum value of <literal moreinfo="none">1000000</literal> disables
+        heap compaction completely. The default settings should be fine unless
+        you have unusual allocation patterns that are causing a
+        higher-than-usual rate of compactions.</para>
 
-            <para role="sourcecode">OCaml Utop:
-            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">gc/tune.topscript</ulink> (part 3)</para>
+        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">gc/tune.topscript</ulink>
+        (part 3)</para>
 
-            <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">Gc.tune ~max_overhead:0 () ;;</userinput>
+        <programlisting format="linespecific" language="ocaml"><prompt
+            moreinfo="none"># </prompt><userinput moreinfo="none">Gc.tune ~max_overhead:0 () ;;</userinput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
-          </note>
-        </sect2>
+      </note>
+    </sect2>
 
-        <sect2 id="inter-generational-pointers">
-          <title>Inter-generational pointers</title>
+    <sect2 id="inter-generational-pointers">
+      <title>Inter-generational pointers</title>
 
-          <para>One complexity of generational collection arises from the fact
-          that minor heap sweeps are much more frequent than major heap
-          collections. In order to know which blocks in the minor heap are
-          live, the collector must track which minor-heap blocks are directly
-          pointed to by major-heap blocks. Without this information, each
-          minor collection would also require scanning the much larger major
-          heap.</para>
+      <para>One complexity of generational collection arises from the fact
+      that minor heap sweeps are much more frequent than major heap
+      collections. In order to know which blocks in the minor heap are live,
+      the collector must track which minor-heap blocks are directly pointed to
+      by major-heap blocks. Without this information, each minor collection
+      would also require scanning the much larger major heap.</para>
 
-          <para>OCaml maintains a set of such <emphasis>inter-generational
-          pointers</emphasis> to avoid this dependency between a major and
-          minor heap collection. The compiler introduces a write barrier to
-          update this so-called <emphasis>remembered set</emphasis> whenever a
-          major-heap block is modified to point at a minor-heap block.</para>
+      <para>OCaml maintains a set of such <emphasis>inter-generational
+      pointers</emphasis> to avoid this dependency between a major and minor
+      heap collection. The compiler introduces a write barrier to update this
+      so-called <emphasis>remembered set</emphasis> whenever a major-heap
+      block is modified to point at a minor-heap block.</para>
 
-          <sect3 id="the-mutable-write-barrier">
-            <title>The mutable write barrier</title>
+      <sect3 id="the-mutable-write-barrier">
+        <title>The mutable write barrier</title>
 
-            <para>The write barrier can have profound implications for the
-            structure of your code. It's one of the reasons why using
-            immutable data structures and allocating a fresh copy with changes
-            can sometimes be faster than mutating a record in-place.</para>
+        <para>The write barrier can have profound implications for the
+        structure of your code. It's one of the reasons why using immutable
+        data structures and allocating a fresh copy with changes can sometimes
+        be faster than mutating a record in-place.</para>
 
-            <para>The OCaml compiler keeps track of any mutable types and adds
-            a call to the runtime <literal moreinfo="none">caml_modify</literal> function
-            before making the change. This checks the location of target write
-            and the value it's being changed to, and ensures that the
-            remembered set is consistent. Although the write barrier is
-            reasonably efficient, it can sometimes be slower than simply
-            allocating a fresh value on the fast minor heap and doing some
-            extra minor collections.</para>
+        <para>The OCaml compiler keeps track of any mutable types and adds a
+        call to the runtime <literal moreinfo="none">caml_modify</literal>
+        function before making the change. This checks the location of target
+        write and the value it's being changed to, and ensures that the
+        remembered set is consistent. Although the write barrier is reasonably
+        efficient, it can sometimes be slower than simply allocating a fresh
+        value on the fast minor heap and doing some extra minor
+        collections.</para>
 
-            <para>Let's see this for ourselves with a simple test program.
-            You'll need to install the Core benchmarking suite via
-            <literal moreinfo="none">opam install core_bench</literal> before you compile this
-            code.</para>
+        <para>Let's see this for ourselves with a simple test program. You'll
+        need to install the Core benchmarking suite via <literal
+        moreinfo="none">opam install core_bench</literal> before you compile
+        this code.</para>
 
-            <para role="sourcecode">OCaml:
-            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/barrier_bench.ml">gc/barrier_bench.ml</ulink></para>
+        <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/barrier_bench.ml">gc/barrier_bench.ml</ulink></para>
 
-            <programlisting language="ocaml" format="linespecific">open Core.Std
+        <programlisting format="linespecific" language="ocaml">open Core.Std
 open Core_bench.Std
 
 type t1 = { mutable iters1: int; mutable count1: float }
@@ -634,16 +641,18 @@ let () =
   ] in
   Bench.make_command tests |&gt; Command.run</programlisting>
 
-            <para>This program defines a type <literal moreinfo="none">t1</literal> that is
-            mutable and <literal moreinfo="none">t2</literal> that is immutable. The benchmark
-            loop iterates over both fields and increments a counter. Compile
-            and execute this with some extra options to show the amount of
-            garbage collection occurring.</para>
+        <para>This program defines a type <literal
+        moreinfo="none">t1</literal> that is mutable and <literal
+        moreinfo="none">t2</literal> that is immutable. The benchmark loop
+        iterates over both fields and increments a counter. Compile and
+        execute this with some extra options to show the amount of garbage
+        collection occurring.</para>
 
-            <para role="sourcecode">Terminal:
-            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/run_barrier_bench.out">gc/run_barrier_bench.out</ulink></para>
+        <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/run_barrier_bench.out">gc/run_barrier_bench.out</ulink></para>
 
-            <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg core_bench barrier_bench.native</userinput>
+        <programlisting format="linespecific" language="console"><prompt
+            moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg core_bench barrier_bench.native</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./barrier_bench.native -ascii name alloc</userinput>
 <computeroutput moreinfo="none">Estimated testing time 20s (change using -quota SECS).</computeroutput>
 <computeroutput moreinfo="none">                                                                   </computeroutput>
@@ -653,25 +662,26 @@ let () =
 <computeroutput moreinfo="none">  immutable   4_775_718   5_000_005    0.03       0.03      75.75  </computeroutput>
 <computeroutput moreinfo="none">                                                                   </computeroutput></programlisting>
 
-            <para>There is a stark space/time tradeoff here. The mutable
-            version takes significantly longer to complete than the immutable
-            one, but allocates many fewer minor heap words than the immutable
-            version. Minor allocation in OCaml is very fast and so it is often
-            better to use immutable data structures in preference to the more
-            conventional mutable versions. On the other hand, if you only
-            rarely mutate a value, it can be faster to take the write barrier
-            hit and not allocate at all.</para>
+        <para>There is a stark space/time tradeoff here. The mutable version
+        takes significantly longer to complete than the immutable one, but
+        allocates many fewer minor heap words than the immutable version.
+        Minor allocation in OCaml is very fast and so it is often better to
+        use immutable data structures in preference to the more conventional
+        mutable versions. On the other hand, if you only rarely mutate a
+        value, it can be faster to take the write barrier hit and not allocate
+        at all.</para>
 
-            <para>The only way to know for sure is to benchmark your program
-            under real-world scenarios using <literal moreinfo="none">Core_bench</literal>,
-            and experiment with the tradeoffs. The command-line benchmark
-            binaries have a number of useful options that affect garbage
-            collection behavior.</para>
+        <para>The only way to know for sure is to benchmark your program under
+        real-world scenarios using <literal
+        moreinfo="none">Core_bench</literal>, and experiment with the
+        tradeoffs. The command-line benchmark binaries have a number of useful
+        options that affect garbage collection behavior.</para>
 
-            <para role="sourcecode">Terminal:
-            <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/show_barrier_bench_help.out">gc/show_barrier_bench_help.out</ulink></para>
+        <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/show_barrier_bench_help.out">gc/show_barrier_bench_help.out</ulink></para>
 
-            <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./barrier_bench.native -help</userinput>
+        <programlisting format="linespecific" language="console"><prompt
+            moreinfo="none">$ </prompt><userinput moreinfo="none">./barrier_bench.native -help</userinput>
 <computeroutput moreinfo="none">Benchmark for mutable, immutable</computeroutput>
 <computeroutput moreinfo="none"> </computeroutput>
 <computeroutput moreinfo="none">  barrier_bench.native [COLUMN ...]</computeroutput>
@@ -725,70 +735,71 @@ let () =
 <computeroutput moreinfo="none">                       (alias: -?)</computeroutput>
 <computeroutput moreinfo="none"> </computeroutput></programlisting>
 
-            <para>The <literal moreinfo="none">-no-compactions</literal> and
-            <literal moreinfo="none">-stabilize-gc</literal> options can help force a
-            situation where your application has fragmented memory. This can
-            simulate the behavior of a long-running application without you
-            having to actually wait that long to recreate the behavior in a
-            performance unit test.</para>
-          </sect3>
-        </sect2>
-      </sect1>
+        <para>The <literal moreinfo="none">-no-compactions</literal> and
+        <literal moreinfo="none">-stabilize-gc</literal> options can help
+        force a situation where your application has fragmented memory. This
+        can simulate the behavior of a long-running application without you
+        having to actually wait that long to recreate the behavior in a
+        performance unit test.</para>
+      </sect3>
+    </sect2>
+  </sect1>
 
-      <sect1 id="attaching-finalizer-functions-to-values">
-        <title>Attaching finalizer functions to values</title>
+  <sect1 id="attaching-finalizer-functions-to-values">
+    <title>Attaching finalizer functions to values</title>
 
-        <para>OCaml's automatic memory management guarantees that a value will
-        eventually be freed when it's no longer in use, either via the garbage
-        collector sweeping it or the program terminating. It's sometimes
-        useful to run extra code just before a value is freed by the garbage
-        collector, for example to check that a file descriptor has been
-        closed, or that a log message is recorded.</para>
+    <para>OCaml's automatic memory management guarantees that a value will
+    eventually be freed when it's no longer in use, either via the garbage
+    collector sweeping it or the program terminating. It's sometimes useful to
+    run extra code just before a value is freed by the garbage collector, for
+    example to check that a file descriptor has been closed, or that a log
+    message is recorded.</para>
 
-        <note>
-          <title>What values can be finalized?</title>
+    <note>
+      <title>What values can be finalized?</title>
 
-          <para>Various values cannot have finalizers attached since they
-          aren't heap-allocated. Some examples of values that are not
-          heap-allocated are integers, constant constructors, booleans, the
-          empty array, the empty list and the unit value. The exact list of
-          what is heap-allocated or not is implementation-dependent, which is
-          why Core provides the <literal moreinfo="none">Heap_block</literal> module to
-          explicitly check before attaching the finalizer.</para>
+      <para>Various values cannot have finalizers attached since they aren't
+      heap-allocated. Some examples of values that are not heap-allocated are
+      integers, constant constructors, booleans, the empty array, the empty
+      list and the unit value. The exact list of what is heap-allocated or not
+      is implementation-dependent, which is why Core provides the <literal
+      moreinfo="none">Heap_block</literal> module to explicitly check before
+      attaching the finalizer.</para>
 
-          <para>Some constant values can be heap-allocated but never
-          deallocated during the lifetime of the program, for example a list
-          of integer constants. <literal moreinfo="none">Heap_block</literal> explicitly
-          checks to see if the value is in the major or minor heap, and
-          rejects most constant values. Compiler optimizations may also
-          duplicate some immutable values such as floating-point values in
-          arrays. These may be finalized while another duplicate copy is being
-          used by the program.</para>
+      <para>Some constant values can be heap-allocated but never deallocated
+      during the lifetime of the program, for example a list of integer
+      constants. <literal moreinfo="none">Heap_block</literal> explicitly
+      checks to see if the value is in the major or minor heap, and rejects
+      most constant values. Compiler optimizations may also duplicate some
+      immutable values such as floating-point values in arrays. These may be
+      finalized while another duplicate copy is being used by the
+      program.</para>
 
-          <para>For this reason, attach finalizers only to values that you are
-          explicitly sure are heap-allocated and aren't immutable. A common
-          use is to attach them to file descriptors to ensure it is closed.
-          However, the finalizer normally shouldn't be the primary way of
-          closing the file descriptor, since it depends on the garbage
-          collector running in order to collect the value. For a busy system,
-          you can easily run out of a scarce resource such as file descriptors
-          before the GC catches up.</para>
-        </note>
+      <para>For this reason, attach finalizers only to values that you are
+      explicitly sure are heap-allocated and aren't immutable. A common use is
+      to attach them to file descriptors to ensure it is closed. However, the
+      finalizer normally shouldn't be the primary way of closing the file
+      descriptor, since it depends on the garbage collector running in order
+      to collect the value. For a busy system, you can easily run out of a
+      scarce resource such as file descriptors before the GC catches
+      up.</para>
+    </note>
 
-        <para>Core provides a <literal moreinfo="none">Heap_block</literal> module that
-        dynamically checks if a given value is suitable for finalizing. This
-        block is then passed to Async's <literal moreinfo="none">Gc.add_finalizer</literal>
-        function that schedules the finalizer safely with respect to all the
-        other concurrent program threads.</para>
+    <para>Core provides a <literal moreinfo="none">Heap_block</literal> module
+    that dynamically checks if a given value is suitable for finalizing. This
+    block is then passed to Async's <literal
+    moreinfo="none">Gc.add_finalizer</literal> function that schedules the
+    finalizer safely with respect to all the other concurrent program
+    threads.</para>
 
-        <para>Let's explore this with a small example that finalizes values of
-        different types, some of which are heap-allocated and others which are
-        compile-time constants.</para>
+    <para>Let's explore this with a small example that finalizes values of
+    different types, some of which are heap-allocated and others which are
+    compile-time constants.</para>
 
-        <para role="sourcecode">OCaml:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/finalizer.ml">gc/finalizer.ml</ulink></para>
+    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/finalizer.ml">gc/finalizer.ml</ulink></para>
 
-        <programlisting language="ocaml" format="linespecific">open Core.Std
+    <programlisting format="linespecific" language="ocaml">open Core.Std
 open Async.Std
 
 let attach_finalizer n v =
@@ -822,13 +833,13 @@ let () =
     Command.Spec.empty main
   |&gt; Command.run</programlisting>
 
-        <para>Building and running this should show the following
-        output.</para>
+    <para>Building and running this should show the following output.</para>
 
-        <para role="sourcecode">Terminal:
-        <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/run_finalizer.out">gc/run_finalizer.out</ulink></para>
+    <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/run_finalizer.out">gc/run_finalizer.out</ulink></para>
 
-        <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg async finalizer.native</userinput>
+    <programlisting format="linespecific" language="console"><prompt
+        moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg async finalizer.native</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./finalizer.native</userinput>
 <computeroutput moreinfo="none">       immediate int: FAIL</computeroutput>
 <computeroutput moreinfo="none">     immediate float: FAIL</computeroutput>
@@ -841,32 +852,34 @@ let () =
 <computeroutput moreinfo="none">   allocated variant: OK</computeroutput>
 <computeroutput moreinfo="none">     allocated float: OK</computeroutput></programlisting>
 
-        <para>The GC calls the finalization functions in the order of the
-        deallocation. If several values become unreachable during the same GC
-        cycle, the finalization functions will be called in the reverse order
-        of the corresponding calls to <literal moreinfo="none">add_finalizer</literal>. Each
-        call to <literal moreinfo="none">add_finalizer</literal> adds to the set of functions
-        that are run when the value becomes unreachable. You can have many
-        finalizers all pointing to the same heap block if you wish.</para>
+    <para>The GC calls the finalization functions in the order of the
+    deallocation. If several values become unreachable during the same GC
+    cycle, the finalization functions will be called in the reverse order of
+    the corresponding calls to <literal
+    moreinfo="none">add_finalizer</literal>. Each call to <literal
+    moreinfo="none">add_finalizer</literal> adds to the set of functions that
+    are run when the value becomes unreachable. You can have many finalizers
+    all pointing to the same heap block if you wish.</para>
 
-        <para>After a garbage collection determines that a heap block
-        <literal moreinfo="none">b</literal> is unreachable, it removes from the set of
-        finalizers all the functions associated with <literal moreinfo="none">b</literal>, and
-        serially applies each of those functions to <literal moreinfo="none">b</literal>.
-        Thus, every finalizer function attached to <literal moreinfo="none">b</literal> will
-        run at most once. However, program termination will not cause all the
-        finalizers to be run before the runtime exits.</para>
+    <para>After a garbage collection determines that a heap block <literal
+    moreinfo="none">b</literal> is unreachable, it removes from the set of
+    finalizers all the functions associated with <literal
+    moreinfo="none">b</literal>, and serially applies each of those functions
+    to <literal moreinfo="none">b</literal>. Thus, every finalizer function
+    attached to <literal moreinfo="none">b</literal> will run at most once.
+    However, program termination will not cause all the finalizers to be run
+    before the runtime exits.</para>
 
-        <para>The finalizer can use all features of OCaml, including
-        assignments that make the value reachable again and thus prevent it
-        from being garbage collected. It can also loop forever, which will
-        cause other finalizers to be interleaved with it.</para>
+    <para>The finalizer can use all features of OCaml, including assignments
+    that make the value reachable again and thus prevent it from being garbage
+    collected. It can also loop forever, which will cause other finalizers to
+    be interleaved with it.</para>
 
-        <note>
-          <title>Production note</title>
+    <note>
+      <title>Production note</title>
 
-          <para>This chapter contains significant contributions from Stephen
-          Weeks.</para>
-        </note>
-      </sect1>
-    </chapter>
+      <para>This chapter contains significant contributions from Stephen
+      Weeks.</para>
+    </note>
+  </sect1>
+</chapter>
