@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+    
+        <meta charset="utf-8"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW"/>
+        
+        <title>Chapter 2. Variables and Functions / Real World OCaml</title>
+        
+        <link rel="stylesheet" href="../../media/css/main.css"/>
+        
+        <script src="../../media/js/require.js" data-main="../../media/js/main.js"> </script>
+        <script>
+            require.config({
+                config: {
+                    gitHub: {
+                        user: 'ocamllabs',
+                        repo: 'rwo\u002Dcomments',
+                        milestone: 'beta3',
+                        page: 'variables\u002Dand\u002Dfunctions.html'
+                    }
+                }
+            });
+        </script>
+        
+    
+    </head>
+    
+    <body>
+    
+        <div class="body">
+        
+            <header class="header">
+                <h1><img src="../../media/img/header.png" width="213" height="59" alt="Real World OCaml, by Jason Hickey, Anil Madhavapeddy and Yaron Minsky"/></h1>
+            </header>
+    
+            <nav class="navigation">
+                <ul>
+                    <li>
+                        <a href="index.html">Table of Contents</a>
+                    </li>
+                    
+                        <li>
+                            <a href="prologue.html">Prologue</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt01.html">I. Language Concepts</a>
+                            
+                                 
+                                    <ul>
+                                        
+                                            <li>
+                                                <a href="a-guided-tour.html">1. A Guided Tour</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="variables-and-functions.html" class="here">2. Variables and Functions</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="lists-and-patterns.html">3. Lists and Patterns</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="files-modules-and-programs.html">4. Files, Modules and Programs</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="records.html">5. Records</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="variants.html">6. Variants</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="error-handling.html">7. Error Handling</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="imperative-programming-1.html">8. Imperative Programming</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="functors.html">9. Functors</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="first-class-modules.html">10. First-Class Modules</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="objects.html">11. Objects</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="classes.html">12. Classes</a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt02.html">II. Tools and Techniques</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt03.html">III. The Runtime System</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="installation.html">A. Installation</a>
+                            
+                                
+                            
+                        </li>
+                    
+                </ul>
+            </nav>
+        
+            <article class="page">
+        
+                <h1>Chapter 2. Variables and Functions</h1>
+                
+                
+
+    <p id="idp6390176">
+    Variables and functions are fundamental ideas that show up in
+    virtually all programming languages. OCaml has a different take on
+    these concepts than most languages you're liketly to have
+    encountered, so this chapter will cover OCaml's approach to
+    variables and functions in some detail, starting with the basics of
+    how to define a variable, and ending with the intricacies of
+    functions with labeled and optional arguments.
+  </p><p id="idp6391024">
+    Don't be discouraged if you find yourself overwhelmed by some of the
+    details, especially towards the end of the chapter. The concepts
+    here are important, but if they don't connect for you on your first
+    read, you should return to this chapter after you've gotten a better
+    sense for the language and fill in your understanding.
+  </p><section><h1 id="variables">Variables</h1><p id="idp6392656">
+      At its simplest, a variable is an identifier whose meaning is
+      bound to a particular value. In OCaml these bindings are often
+      introduced using the <code>let</code> keyword. We can type a
+      so-called <span><em>top-level</em></span> <code>let</code>
+      binding with the following syntax. Note that variable names must
+      start with a lowercase letter or an underscore.
+    </p><div class="rwocode"><pre><code><pre>let &lt;variable&gt; = &lt;expr&gt;
+</pre></code></pre><div class="rwocodeinfo">Syntax ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/let.syntax">variables-and-functions/let.syntax</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp6395696">
+      As we'll see when we get to the module system in
+      <a href="files-modules-and-programs.html">Chapter 4, <i>Files, Modules and Programs</i></a>, this same
+      syntax is used for let bindings at the top-level of a module.
+    </p><p id="idp6396752">
+      Every variable binding has a <span><em>scope</em></span>, which is
+      the portion of the code that can refer to that binding. When using
+      <span><strong>utop</strong></span>, the scope of a top-level let binding is
+      everything that follows it in the session. When it shows up in a
+      module, the scope is the remainder of that module.
+    </p><p id="idp6398448">
+      Here's a simple example.
+    </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> x <span class="keyword2">=</span> <span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val x : int = 3
+</div># <span class="keyword4">let</span> y <span class="keyword2">=</span> <span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val y : int = 4
+</div># <span class="keyword4">let</span> z <span class="keyword2">=</span> x <span class="keyword2">+</span> y<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val z : int = 7
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp6399552">
+<code>let</code> can also be used to create a variable
+      binding whose scope is limited to a particular expression, using
+      the following syntax.
+    </p><div class="rwocode"><pre><code><pre>let &lt;variable&gt; = &lt;expr1&gt; in &lt;expr2&gt;
+</pre></code></pre><div class="rwocodeinfo">Syntax ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/let_in.syntax">variables-and-functions/let_in.syntax</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp6401424">
+      This first evaluates
+      <span><em><code>&lt;expr1&gt;</code></em></span> and then
+      evaluates <span><em><code>&lt;expr2&gt;</code></em></span>
+      with <span><em><code>&lt;variable&gt;</code></em></span>
+      bound to whatever value was produced by the evaluation of
+      <span><em><code>&lt;expr1&gt;</code></em></span>. Here's how
+      it looks in practice.
+    </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> languages <span class="keyword2">=</span> <span class="keyword7">&quot;OCaml,Perl,C++,C&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val languages : string = &quot;OCaml,Perl,C++,C&quot;
+</div># <span class="keyword4">let</span> dashed_languages <span class="keyword2">=</span>
+    <span class="keyword4">let</span> language_list <span class="keyword2">=</span> <span class="keyword5">String.</span>split languages ~on<span class="keyword2">:</span>',' <span class="keyword4">in</span>
+    <span class="keyword5">String.</span>concat ~sep<span class="keyword2">:</span><span class="keyword7">&quot;-&quot;</span> language_list
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val dashed_languages : string = &quot;OCaml-Perl-C++-C&quot;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp6405616">
+      Note that the scope of <code>language_list</code> is just
+      the expression
+      <code>String.concat ~sep:&quot;-&quot; language_list</code>,
+      and is not available at the top level, as we can see if we try to
+      access it now.
+    </p><div class="rwocode"><pre><code># language_list<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters -1-13:
+Error: Unbound value language_list
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp6408080">
+      A let binding in an inner scope can <span><em>shadow</em></span>,
+      or hide, the definition from an outer scope. So, for example, we
+      could have written the <code>dashed_languages</code> example
+      as follows:
+    </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> languages <span class="keyword2">=</span> <span class="keyword7">&quot;OCaml,Perl,C++,C&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val languages : string = &quot;OCaml,Perl,C++,C&quot;
+</div># <span class="keyword4">let</span> dashed_languages <span class="keyword2">=</span>
+     <span class="keyword4">let</span> languages <span class="keyword2">=</span> <span class="keyword5">String.</span>split languages ~on<span class="keyword2">:</span>',' <span class="keyword4">in</span>
+     <span class="keyword5">String.</span>concat ~sep<span class="keyword2">:</span><span class="keyword7">&quot;-&quot;</span> languages
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val dashed_languages : string = &quot;OCaml-Perl-C++-C&quot;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 3) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp6410304">
+      This time, in the inner scope we called the list of strings
+      <code>languages</code> instead of
+      <code>language_list</code>, thus hiding the original
+      definition of <code>languages</code>. But once the
+      definition of <code>dashed_languages</code> is complete, the
+      inner scope has closed and the original definition of languages
+      reappears.
+    </p><div class="rwocode"><pre><code># languages<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot;OCaml,Perl,C++,C&quot;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp6414128">
+      One common idiom is to use a series of nested
+      <code>let</code>/<code>in</code> expressions to build
+      up the components of a larger computation. Thus, we might write:
+    </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> area_of_ring inner_radius outer_radius <span class="keyword2">=</span>
+     <span class="keyword4">let</span> pi <span class="keyword2">=</span> acos <span class="keyword2">(</span><span class="keyword8">-1</span>.<span class="keyword2">)</span> <span class="keyword4">in</span>
+     <span class="keyword4">let</span> area_of_circle r <span class="keyword2">=</span> pi <span class="keyword2">*</span>. r <span class="keyword2">*</span>. r <span class="keyword4">in</span>
+     area_of_circle outer_radius -. area_of_circle inner_radius
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val area_of_ring : float -&gt; float -&gt; float = &lt;fun&gt;
+</div># area_of_ring <span class="keyword8">1</span>. <span class="keyword8">3</span>.<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : float = 25.1327412287
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 5) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp6416672">
+      It's important not to confuse a sequence of let bindings with the
+      modification of a mutable variable. For example, consider how
+      <code>area_of_ring</code> would work if we had instead
+      written this purposefully confusing bit of code.
+    </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> area_of_ring inner_radius outer_radius <span class="keyword2">=</span>
+     <span class="keyword4">let</span> pi <span class="keyword2">=</span> acos <span class="keyword2">(</span><span class="keyword8">-1</span>.<span class="keyword2">)</span> <span class="keyword4">in</span>
+     <span class="keyword4">let</span> area_of_circle r <span class="keyword2">=</span> pi <span class="keyword2">*</span>. r <span class="keyword2">*</span>. r <span class="keyword4">in</span>
+     <span class="keyword4">let</span> pi <span class="keyword2">=</span> <span class="keyword8">0</span>. <span class="keyword4">in</span>
+     area_of_circle outer_radius -. area_of_circle inner_radius
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"><br/>Characters 126-128:
+Warning 26: unused variable pi.val area_of_ring : float -&gt; float -&gt; float = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 6) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp6418672">
+      Here, we redefined <code>pi</code> to be zero after the
+      definition of <code>area_of_circle</code>. You might think
+      that this would mean that the result of the computation would now
+      be zero, but in fact, the behavior of the function is unchanged.
+      That's because the original definition of <code>pi</code>
+      wasn't changed, it was just shadowed, which means that any
+      subsequent reference to <code>pi</code> would see the new
+      definition of <code>pi</code> as zero, but earlier
+      references would be unchanged. But there is no later use of
+      <code>pi</code>, so the binding of <code>0.</code> to
+      <code>pi</code> made no difference. This explains the
+      warning produced by the toplevel telling us that there is an
+      unused definition of <code>pi</code>.
+    </p><p id="idp6425264">
+      In OCaml, let bindings are immutable. There are many kinds of
+      mutable values in OCaml, which we'll discuss in
+      <a href="imperative-programming-1.html">Chapter 8, <i>Imperative Programming</i></a>, but there
+      are no mutable variables.
+    </p><aside class="note"><h1> 
+    Why don't variables vary?
+    </h1><p id="idp6426928">
+      One source of confusion for people new to OCaml is the fact that
+      variables are immutable. This seems pretty surprising even on
+      linguistic terms. Isn't the whole point of a variable that it can
+      vary?
+    </p><p id="idp6427552">
+      The answer to this is that variables in OCaml (and generally in
+      functional languages) are really more like variables in an
+      equation than a variable in an imperative language. If you think
+      about the mathematical equation
+      <code>x(y + z) = xy + xz</code>, there's no notion of
+      mutating the variables <code>x</code>, <code>y</code>
+      and <code>z</code>. They vary in the sense that you can
+      instantiate this equation with different numbers for those
+      variables, and it still holds.
+    </p><p id="idp6430864">
+      The same is true in a functional language. A function can be
+      applied to different inputs, and thus its variables will take on
+      different values, even without mutation.
+    </p></aside><section><h1 id="pattern-matching-and-let">Pattern matching and <code>let</code></h1><p id="idp6432960">
+        Another useful feature of let bindings is that they support the
+        use of <span><em>patterns</em></span> on the left-hand side.
+        Consider the following code, which uses
+        <code>List.unzip</code>, a function for converting a list
+        of pairs into a pair of lists.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword2">(</span>ints,strings<span class="keyword2">)</span> <span class="keyword2">=</span> <span class="keyword5">List.</span>unzip <span class="keyword2">[</span><span class="keyword2">(</span><span class="keyword8">1</span>,<span class="keyword7">&quot;one&quot;</span><span class="keyword2">)</span><span class="keyword2">;</span> <span class="keyword2">(</span><span class="keyword8">2</span>,<span class="keyword7">&quot;two&quot;</span><span class="keyword2">)</span><span class="keyword2">;</span> <span class="keyword2">(</span><span class="keyword8">3</span>,<span class="keyword7">&quot;three&quot;</span><span class="keyword2">)</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val ints : int list = [1; 2; 3]
+val strings : string list = [&quot;one&quot;; &quot;two&quot;; &quot;three&quot;]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 7) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp6435376">
+        Here, <code>(ints,strings)</code> is a pattern, and the
+        <code>let</code> binding assigns values to both of the
+        identifiers that show up in that pattern. A pattern is
+        essentially a description of the shape of a data-structure,
+        where some components are identifiers to be bound. As we saw in
+        <a href="a-guided-tour.html#tuples-lists-options-and-pattern-matching">the section called “Tuples, lists, options, and pattern matching”</a>,
+        OCaml has patterns for a variety of different data-types.
+      </p><p id="idp6437872">
+        Using a pattern in a let-binding makes the most sense for a
+        pattern that is <span><em>irrefutable</em></span>,
+        <span><em>i.e.</em></span>, where any value of the type in
+        question is guaranteed to match the pattern. Tuple and record
+        patterns are irrefutable, but list patterns are not. Consider
+        the following code that implements a function for up-casing the
+        first element of a comma-separated list.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> upcase_first_entry line <span class="keyword2">=</span>
+     <span class="keyword4">let</span> <span class="keyword2">(</span>first <span class="keyword2">:</span><span class="keyword2">:</span> rest<span class="keyword2">)</span> <span class="keyword2">=</span> <span class="keyword5">String.</span>split ~on<span class="keyword2">:</span>',' line <span class="keyword4">in</span>
+     <span class="keyword5">String.</span>concat ~sep<span class="keyword2">:</span><span class="keyword7">&quot;,&quot;</span> <span class="keyword2">(</span><span class="keyword5">String.</span>uppercase first <span class="keyword2">:</span><span class="keyword2">:</span> rest<span class="keyword2">)</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"><br/>Characters 40-53:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+[]val upcase_first_entry : string -&gt; string = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 8) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp6440176">
+        This case can't really come up in practice, because
+        <code>String.split</code> always returns a list with at
+        least one element. But the compiler doesn't know this, and so it
+        emits the warning. It's generally better to use a match
+        statement to handle such cases explicitly:
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> upcase_first_entry line <span class="keyword2">=</span>
+     <span class="keyword1">match</span> <span class="keyword5">String.</span>split ~on<span class="keyword2">:</span>',' line <span class="keyword1">with</span>
+     <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span> -<span class="keyword2">&gt;</span> <span class="keyword1">assert</span> false <span class="comments">(* String.split returns at least one element *)</span>
+     <span class="keyword2">|</span> first <span class="keyword2">:</span><span class="keyword2">:</span> rest -<span class="keyword2">&gt;</span> <span class="keyword5">String.</span>concat ~sep<span class="keyword2">:</span><span class="keyword7">&quot;,&quot;</span> <span class="keyword2">(</span><span class="keyword5">String.</span>uppercase first <span class="keyword2">:</span><span class="keyword2">:</span> rest<span class="keyword2">)</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val upcase_first_entry : string -&gt; string = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 9) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp6442224">
+        Note that this is our first use of <code>assert</code>,
+        which is useful for marking cases that should be impossible.
+        We'll discuss <code>assert</code> in more detail in
+        <a href="error-handling.html">Chapter 7, <i>Error Handling</i></a>.
+      </p></section></section><section><h1 id="functions">Functions</h1><p id="idp6445600">
+      Given that OCaml is a functional language, it's no surprise that
+      functions are important and pervasive. Indeed, functions have come
+      up in almost every example we've done so far. This section will go
+      into more depth, explaining the details of how OCaml's functions
+      work. As you'll see, functions in OCaml differ in a variety of
+      ways from what you'll find in most mainstream languages.
+    </p><section><h1 id="anonymous-functions">Anonymous Functions</h1><p id="idp6447312">
+        We'll start by looking at the most basic style of function
+        declaration in OCaml: the <span><em>anonymous
+        function</em></span>. An anonymous function is a function value
+        that is declared without being named. They can be declared using
+        the <code>fun</code> keyword, as shown here.
+      </p><div class="rwocode"><pre><code># <span class="keyword2">(</span><span class="keyword1">fun</span> x -<span class="keyword2">&gt;</span> x <span class="keyword2">+</span> <span class="keyword8">1</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int -&gt; int = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 10) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp6449680">
+        Anonymous functions operate in much the same way as named
+        functions. For example, we can apply an anonymous function to an
+        argument.
+      </p><div class="rwocode"><pre><code># <span class="keyword2">(</span><span class="keyword1">fun</span> x -<span class="keyword2">&gt;</span> x <span class="keyword2">+</span> <span class="keyword8">1</span><span class="keyword2">)</span> <span class="keyword8">7</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 8
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 11) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp6450960">
+        Or pass it to another function. Passing functions to iteration
+        functions like <code>List.map</code> is probably the most
+        common use-case for anonymous functions.
+      </p><div class="rwocode"><pre><code># <span class="keyword5">List.</span>map ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> x -<span class="keyword2">&gt;</span> x <span class="keyword2">+</span> <span class="keyword8">1</span><span class="keyword2">)</span> <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = [2; 3; 4]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 12) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp6452896">
+        You can even stuff them into a data structure.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> increments <span class="keyword2">=</span> <span class="keyword2">[</span> <span class="keyword2">(</span><span class="keyword1">fun</span> x -<span class="keyword2">&gt;</span> x <span class="keyword2">+</span> <span class="keyword8">1</span><span class="keyword2">)</span><span class="keyword2">;</span> <span class="keyword2">(</span><span class="keyword1">fun</span> x -<span class="keyword2">&gt;</span> x <span class="keyword2">+</span> <span class="keyword8">2</span><span class="keyword2">)</span> <span class="keyword2">]</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val increments : (int -&gt; int) list = [&lt;fun&gt;; &lt;fun&gt;]
+</div># <span class="keyword5">List.</span>map ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> g -<span class="keyword2">&gt;</span> g <span class="keyword8">5</span><span class="keyword2">)</span> increments<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = [6; 7]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 13) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp6454080">
+        It's worth stopping for a moment to puzzle this example out,
+        since this kind of higher-order use of functions can be a bit
+        obscure at first. The first thing to understand is the function
+        <code>(fun g -&gt; g 5)</code>, which takes a function as
+        its argument and applies that function to the number
+        <code>5</code>. The invocation of
+        <code>List.map</code> applies
+        <code>(fun g -&gt; g 5)</code> to the elements of the
+        <code>increments</code> list (which are themselves
+        functions) and returns the list containing the results of these
+        function applications.
+      </p><p id="idp6458096">
+        The key thing to understand is that functions are ordinary
+        values in OCaml, and you can do everything with them that you'd
+        do with an ordinary value, including passing them to and
+        returning them from other functions and storing them in data
+        structures. We even name functions in the same way that we name
+        other values, by using a let binding.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> plusone <span class="keyword2">=</span> <span class="keyword2">(</span><span class="keyword1">fun</span> x -<span class="keyword2">&gt;</span> x <span class="keyword2">+</span> <span class="keyword8">1</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val plusone : int -&gt; int = &lt;fun&gt;
+</div># plusone <span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 4
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 14) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp6459616">
+        Defining named functions is so common that there is some
+        syntactic sugar for it. Thus, the following definition of
+        <code>plusone</code> is equivalent to the definition
+        above.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> plusone x <span class="keyword2">=</span> x <span class="keyword2">+</span> <span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val plusone : int -&gt; int = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 15) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp6461504">
+        This is the most common and convenient way to declare a
+        function, but syntactic niceties aside, the two styles of
+        function definition are entirely equivalent.
+      </p><aside class="note"><h1>
+let and fun
+</h1><p id="idp6463984">
+        Functions and let bindings have a lot to do with each other. In
+        some sense, you can think of the parameter of a function as a
+        variable being bound to the value passed by the caller. Indeed,
+        the following two expressions are nearly equivalent:
+      </p><div class="rwocode"><pre><code># <span class="keyword2">(</span><span class="keyword1">fun</span> x -<span class="keyword2">&gt;</span> x <span class="keyword2">+</span> <span class="keyword8">1</span><span class="keyword2">)</span> <span class="keyword8">7</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 8
+</div># <span class="keyword4">let</span> x <span class="keyword2">=</span> <span class="keyword8">7</span> <span class="keyword4">in</span> x <span class="keyword2">+</span> <span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 8
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 16) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp6465392">
+        This connection is important, and will come up more when
+        programming in a monadic style, as we'll see in
+        <a href="concurrent-programming-with-async.html">Chapter 18, <i>Concurrent Programming with Async</i></a>.
+      </p></aside></section><section><h1 id="multi-argument-functions">Multi-argument functions</h1><p id="idp6467552">
+        OCaml of course also supports multi-argument functions, for
+        example:
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> abs_diff x y <span class="keyword2">=</span> abs <span class="keyword2">(</span>x - y<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val abs_diff : int -&gt; int -&gt; int = &lt;fun&gt;
+</div># abs_diff <span class="keyword8">3</span> <span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 1
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 17) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp6468768">
+        You may find the type signature of <code>abs_diff</code>
+        with all of its arrows a little hard to parse. To understand
+        what's going on, let's rewrite <code>abs_diff</code> in an
+        equivalent form, using the <code>fun</code> keyword:
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> abs_diff <span class="keyword2">=</span>
+    <span class="keyword2">(</span><span class="keyword1">fun</span> x -<span class="keyword2">&gt;</span> <span class="keyword2">(</span><span class="keyword1">fun</span> y -<span class="keyword2">&gt;</span> abs <span class="keyword2">(</span>x - y<span class="keyword2">)</span><span class="keyword2">)</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val abs_diff : int -&gt; int -&gt; int = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 18) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp6471872">
+        This rewrite makes it explicit that <code>abs_diff</code>
+        is actually a function of one argument that returns another
+        function of one argument, which itself returns the final result.
+        Because the functions are nested, the inner expression
+        <code>abs (x - y)</code> has access to both
+        <code>x</code>, which was bound by the outer function
+        application, and <code>y</code>, which was bound by the
+        inner one.
+      </p><p id="idp6475056">
+        This style of function is called a <span><em>curried</em></span>
+        function. (Currying is named after Haskell Curry, a logician who
+        had a significant impact on the design and theory of programming
+        languages.) The key to interpreting the type signature of a
+        curried function is the observation that
+        <code>-&gt;</code> is right-associative. The type
+        signature of <code>abs_diff</code> can therefore be
+        parenthesized as follows.
+      </p><div class="rwocode"><pre><code><span class="keyword4">val</span> abs_diff <span class="keyword2">:</span> <span class="keyword3">int</span> -<span class="keyword2">&gt;</span> <span class="keyword2">(</span><span class="keyword3">int</span> -<span class="keyword2">&gt;</span> <span class="keyword3">int</span><span class="keyword2">)</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/abs_diff.mli">variables-and-functions/abs_diff.mli</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp6478144">
+        The parentheses above don't change the meaning of the signature,
+        but it makes it easier to see the currying.
+      </p><p id="idp6478672">
+        Currying is more than just a theoretical curiosity. You can make
+        use of currying to specialize a function by feeding in some of
+        the arguments. Here's an example where we create a specialized
+        version of <code>abs_diff</code> that measures the
+        distance of a given number from <code>3</code>.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> dist_from_3 <span class="keyword2">=</span> abs_diff <span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val dist_from_3 : int -&gt; int = &lt;fun&gt;
+</div># dist_from_3 <span class="keyword8">8</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 5
+</div># dist_from_3 <span class="keyword2">(</span><span class="keyword8">-1</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 4
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 19) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp6481360">
+        The practice of applying some of the arguments of a curried
+        function to get a new function is called <span><em>partial
+        application</em></span>.
+      </p><p id="idp6482256">
+        Note that the <code>fun</code> keyword supports its own
+        syntax for currying, so the following definition of
+        <code>abs_diff</code> is equivalent to the definition
+        above.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> abs_diff <span class="keyword2">=</span> <span class="keyword2">(</span><span class="keyword1">fun</span> x y -<span class="keyword2">&gt;</span> abs <span class="keyword2">(</span>x - y<span class="keyword2">)</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val abs_diff : int -&gt; int -&gt; int = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 20) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp6484720">
+        You might worry that curried functions are terribly expensive,
+        but this is not the case. In OCaml, there is no penalty for
+        calling a curried function with all of its arguments. (Partial
+        application, unsurprisingly, does have a small extra cost.)
+      </p><p id="idp6485408">
+        Currying is not the only way of writing a multi-argument
+        function in OCaml. It's also possible to use the different parts
+        of a tuple as different arguments. So, we could write:
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> abs_diff <span class="keyword2">(</span>x,y<span class="keyword2">)</span> <span class="keyword2">=</span> abs <span class="keyword2">(</span>x - y<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val abs_diff : int * int -&gt; int = &lt;fun&gt;
+</div># abs_diff <span class="keyword2">(</span><span class="keyword8">3</span>,<span class="keyword8">4</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 1
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 21) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp6486736">
+        OCaml handles this calling convention efficiently as well. In
+        particular it does not generally have to allocate a tuple just
+        for the purpose of sending arguments to a tuple-style function.
+        You can't, however, use partial application for this style of
+        function.
+      </p><p id="idp6487440">
+        There are small tradeoffs between these two approaches, but most
+        of the time, one should stick to currying, since it's the
+        default style in the OCaml world.
+      </p></section><section><h1 id="recursive-functions">Recursive functions</h1><p id="idp6489040">
+        A function is <span><em>recursive</em></span> if it refers to
+        itself in its definition. Recursion is important in any
+        programming language, but is particularly important in
+        functional languages, because it is the way in which you build
+        looping constructs. (As will be discussed in more detail in
+        <a href="imperative-programming-1.html">Chapter 8, <i>Imperative Programming</i></a>, OCaml also
+        supports imperative looping constructs like
+        <code>for</code> and <code>while</code>, but these
+        are only useful when using OCaml's imperative features.)
+      </p><p id="idp7282656">
+        In order to define a recursive function, you need to mark the
+        let binding as recursive with the <code>rec</code>
+        keyword, as shown in this function for finding the first
+        sequentially-repeated element in a list.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword4">rec</span> find_first_stutter <span class="keyword3">list</span> <span class="keyword2">=</span>
+    <span class="keyword1">match</span> <span class="keyword3">list</span> <span class="keyword1">with</span>
+    <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span> <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword8">_</span><span class="keyword2">]</span> -<span class="keyword2">&gt;</span>
+      <span class="comments">(* only zero or one elements, so no repeats *)</span>
+      <span class="keyword6">None
+</span>    <span class="keyword2">|</span> x <span class="keyword2">:</span><span class="keyword2">:</span> y <span class="keyword2">:</span><span class="keyword2">:</span> tl -<span class="keyword2">&gt;</span>
+      <span class="keyword1">if</span> x <span class="keyword2">=</span> y <span class="keyword1">then</span> <span class="keyword6">Some </span>x <span class="keyword1">else</span> find_first_stutter <span class="keyword2">(</span>y<span class="keyword2">:</span><span class="keyword2">:</span>tl<span class="keyword2">)</span>
+   <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val find_first_stutter : 'a list -&gt; 'a option = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 22) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7284656">
+        Note that in the above, the pattern
+        <code>| [] | [_]</code> is what's called an
+        <span><em>or-pattern</em></span>, which is a disjunction of two
+        patterns, meaning that it will be considered a match if either
+        pattern matches. In this case, <code>[]</code>, matches
+        the empty list, and <code>[_]</code>, matches any single
+        element list. The <code>_</code> is there so we don't have
+        to put an explicit name on that single element.
+      </p><p id="idp7288192">
+        We can also define multiple mutually recursive values by using
+        <code>let rec</code> combined with the
+        <code>and</code> keyword. Here's a (gratuitously
+        inefficient) example.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword4">rec</span> is_even x <span class="keyword2">=</span>
+    <span class="keyword1">if</span> x <span class="keyword2">=</span> <span class="keyword8">0</span> <span class="keyword1">then</span> true <span class="keyword1">else</span> is_odd <span class="keyword2">(</span>x - <span class="keyword8">1</span><span class="keyword2">)</span>
+  <span class="keyword4">and</span> is_odd x <span class="keyword2">=</span>
+    <span class="keyword1">if</span> x <span class="keyword2">=</span> <span class="keyword8">0</span> <span class="keyword1">then</span> false <span class="keyword1">else</span> is_even <span class="keyword2">(</span>x - <span class="keyword8">1</span><span class="keyword2">)</span>
+ <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val is_even : int -&gt; bool = &lt;fun&gt;
+val is_odd : int -&gt; bool = &lt;fun&gt;
+</div># <span class="keyword5">List.</span>map ~f<span class="keyword2">:</span>is_even <span class="keyword2">[</span><span class="keyword8">0</span><span class="keyword2">;</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword8">5</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : bool list = [true; false; true; false; true; false]
+</div># <span class="keyword5">List.</span>map ~f<span class="keyword2">:</span>is_odd <span class="keyword2">[</span><span class="keyword8">0</span><span class="keyword2">;</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword8">5</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : bool list = [false; true; false; true; false; true]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 23) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7290720">
+        OCaml distinguishes between non-recursive definitions (using
+        <code>let</code>) and recursive definitions (using
+        <code>let rec</code>) largely for technical reasons: the
+        type-inference algorithm needs to know when a set of function
+        definitions are mutually recursive, and for reasons that don't
+        apply to a pure language like Haskell, these have to be marked
+        explicitly by the programmer.
+      </p><p id="idp7292752">
+        But this decision has some good effects. For one thing,
+        recursive (and especially mutually recursive) definitions are
+        harder to reason about than non-recursive ones. It's therefore
+        useful that, in the absence of an explicit
+        <code>rec</code>, you can assume that a let binding is
+        non-recursive, and so can only build upon previous bindings.
+      </p><p id="idp7294176">
+        In addition, having a non-recursive form makes it easier to
+        create a new definition that extends and supersedes an existing
+        one by shadowing it.
+      </p></section><section><h1 id="prefix-and-infix-operators">Prefix and infix operators</h1><p id="idp7295760">
+        So far, we've seen examples of functions used in both prefix and
+        infix style:
+      </p><div class="rwocode"><pre><code># <span class="keyword5">Int.</span>max <span class="keyword8">3</span> <span class="keyword8">4</span>  <span class="comments">(* prefix *)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 4
+</div># <span class="keyword8">3</span> <span class="keyword2">+</span> <span class="keyword8">4</span>        <span class="comments">(* infix  *)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 7
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 24) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7296976">
+        You might not have thought of the second example as an ordinary
+        function, but it very much is. Infix operators like
+        <code>+</code> really only differ syntactically from other
+        functions. In fact, if we put parentheses around an infix
+        operator, you can use it as an ordinary prefix function.
+      </p><div class="rwocode"><pre><code># <span class="keyword2">(</span><span class="keyword2">+</span><span class="keyword2">)</span> <span class="keyword8">3</span> <span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 7
+</div># <span class="keyword5">List.</span>map ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword2">(</span><span class="keyword2">+</span><span class="keyword2">)</span> <span class="keyword8">3</span><span class="keyword2">)</span> <span class="keyword2">[</span><span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword8">5</span><span class="keyword2">;</span><span class="keyword8">6</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = [7; 8; 9]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 25) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7299056">
+        In the second expression, we've partially applied
+        <code>(+)</code> to create a function that increments its
+        single argument by <code>3</code>.
+      </p><p id="idp7300848">
+        A function is treated syntactically as an operator if the name
+        of that function is chosen from one of a specialized set of
+        identifiers. This set includes identifiers that are sequences of
+        characters from the following set:
+      </p><div class="rwocode"><pre><code><pre>! $ % &amp; * + - . / : &lt; = &gt; ? @ ^ | ~
+</pre></code></pre><div class="rwocodeinfo">Syntax ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/operators.syntax">variables-and-functions/operators.syntax</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7302208">
+        or is one of a handful of pre-determined strings, including
+        <code>mod</code>, the modulus operator, and
+        <code>lsl</code>, for &quot;logical shift left&quot;, a
+        bit-shifting operation.
+      </p><p id="idp7304176">
+        We can define (or redefine) the meaning of an operator. Here's
+        an example of a simple vector-addition operator on int pairs.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword2">(</span><span class="keyword2">+</span><span class="keyword2">!</span><span class="keyword2">)</span> <span class="keyword2">(</span>x1,y1<span class="keyword2">)</span> <span class="keyword2">(</span>x2,y2<span class="keyword2">)</span> <span class="keyword2">=</span> <span class="keyword2">(</span>x1 <span class="keyword2">+</span> x2, y1 <span class="keyword2">+</span> y2<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val ( +! ) : int * int -&gt; int * int -&gt; int * int = &lt;fun&gt;
+</div># <span class="keyword2">(</span><span class="keyword8">3</span>,<span class="keyword8">2</span><span class="keyword2">)</span> <span class="keyword2">+</span><span class="keyword2">!</span> <span class="keyword2">(</span><span class="keyword8">-2</span>,<span class="keyword8">4</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int * int = (1, 6)
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 26) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7305440">
+        Note that you have to be careful when dealing with operators
+        containing <code>*</code>. Consider the following example.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="comments">(***)</span> x y <span class="keyword2">=</span> <span class="keyword2">(</span>x <span class="keyword2">*</span><span class="keyword2">*</span> y<span class="keyword2">)</span> <span class="keyword2">*</span><span class="keyword2">*</span> y<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 17-18:
+Error: This expression has type int but an expression was expected of type
+         float
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 27) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7307280">
+        What's going on is that <code>(***)</code> isn't
+        interpreted as an operator at all; it's read as a comment! To
+        get this to work properly, we need to put spaces around any
+        operator that begins or ends with <code>*</code>.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword2">(</span> <span class="keyword2">*</span><span class="keyword2">*</span><span class="keyword2">*</span> <span class="keyword2">)</span> x y <span class="keyword2">=</span> <span class="keyword2">(</span>x <span class="keyword2">*</span><span class="keyword2">*</span> y<span class="keyword2">)</span> <span class="keyword2">*</span><span class="keyword2">*</span> y<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val ( *** ) : float -&gt; float -&gt; float = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 28) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7309840">
+        The syntactic role of an operator is typically determined by its
+        first character or two, though there are a few exceptions. This
+        table breaks the different operators and other syntactic forms
+        into groups from highest to lowest precedence, explaining how
+        each behaves syntactically. We write <code>!</code>... to
+        indicate the class of operators beginning with
+        <code>!</code>.
+      </p><table><thead><tr><th>
+                Prefix
+              </th><th>
+                Usage
+              </th></tr></thead><tbody><tr><td>
+<code>!</code>..., <code>?</code>...,
+                <code>~</code>...
+              </td><td>
+                Prefix
+              </td></tr><tr><td>
+<code>.</code>, <code>.(</code>,
+                <code>.[</code>
+</td><td>
+</td></tr><tr><td>
+                function application, constructor,
+                <code>assert</code>, <code>lazy</code>
+</td><td>
+                Left associative
+              </td></tr><tr><td>
+<code>-</code>, <code>-.</code>
+</td><td>
+                Prefix
+              </td></tr><tr><td>
+<code>**</code>..., <code>lsl</code>,
+                <code>lsr</code>, <code>asr</code>
+</td><td>
+                Right associative
+              </td></tr><tr><td>
+<code>*</code>..., <code>/</code>...,
+                <code>%</code>..., <code>mod</code>,
+                <code>land</code>, <code>lor</code>,
+                <code>lxor</code>
+</td><td>
+                Left associative
+              </td></tr><tr><td>
+<code>+</code>, <code>-</code>
+</td><td>
+                Left associative
+              </td></tr><tr><td>
+<code>::</code>
+</td><td>
+                Right associative
+              </td></tr><tr><td>
+<code>@</code>..., <code>^</code>...
+              </td><td>
+                Right associative
+              </td></tr><tr><td>
+<code>=</code>..., <code>&lt;</code>...,
+                <code>&gt;</code>..., <code>|</code>...,
+                <code>&amp;</code>..., <code>$</code>...
+              </td><td>
+                Left associative
+              </td></tr><tr><td>
+<code>&amp;</code>, <code>&amp;&amp;</code>
+</td><td>
+                Right associative
+              </td></tr><tr><td>
+<code>or</code>, <code>||</code>
+</td><td>
+                Right associative
+              </td></tr><tr><td>
+<code>,</code>
+</td><td>
+</td></tr><tr><td>
+<code>&lt;-</code>, <code>:=</code>
+</td><td>
+                Right associative
+              </td></tr><tr><td>
+<code>if</code>
+</td><td>
+</td></tr><tr><td>
+<code>;</code>
+</td><td>
+                Right associative
+              </td></tr></tbody></table><p id="idp7360624">
+        There's one important special case: <code>-</code> and
+        <code>-.</code>, which are the integer and floating-point
+        subtraction operators, can act as both prefix operators (for
+        negation) and infix operators (for subtraction), So, both
+        <code>-x</code> and <code>x - y</code> are
+        meaningful expressions. Another thing to remember about negation
+        is that it has lower precedence than function application, which
+        means that if you want to pass a negative value, you need to
+        wrap it in parentheses, as you can see below.
+      </p><div class="rwocode"><pre><code># <span class="keyword5">Int.</span>max <span class="keyword8">3</span> <span class="keyword2">(</span><span class="keyword8">-4</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 3
+</div># <span class="keyword5">Int.</span>max <span class="keyword8">3</span> <span class="keyword8">-4</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters -1-9:
+Error: This expression has type int -&gt; int
+       but an expression was expected of type int
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 29) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7364736">
+        Here, OCaml is interpreting the second expression as equivalent
+        to:
+      </p><div class="rwocode"><pre><code># <span class="keyword2">(</span><span class="keyword5">Int.</span>max <span class="keyword8">3</span><span class="keyword2">)</span> - <span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 1-10:
+Error: This expression has type int -&gt; int
+       but an expression was expected of type int
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 30) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7365952">
+        which obviously doesn't make sense.
+      </p><p id="idp7366336">
+        Here's an example of a very useful operator from the standard
+        library whose behavior depends critically on the precedence
+        rules described above. Here's the code.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword2">(</span><span class="keyword2">|</span><span class="keyword2">&gt;</span><span class="keyword2">)</span> x f <span class="keyword2">=</span> f x <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val ( |&gt; ) : 'a -&gt; ('a -&gt; 'b) -&gt; 'b = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 31) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7367648">
+        It's not quite obvious at first what the purpose of this
+        operator is: it just takes a value and a function, and applies
+        the function to the value. Despite that bland sounding
+        description, it has the useful role of a sequencing operator,
+        similar in spirit to using pipe in the UNIX shell. Consider, for
+        example, the following code for printing out the unique elements
+        of your <code>PATH</code>. Note that
+        <code>List.dedup</code> below removes duplicates from a
+        list by sorting the list using the provided comparison function.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> path <span class="keyword2">=</span> <span class="keyword7">&quot;/usr/bin:/usr/local/bin:/bin:/sbin&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val path : string = &quot;/usr/bin:/usr/local/bin:/bin:/sbin&quot;
+</div>#   <span class="keyword5">String.</span>split ~on<span class="keyword2">:</span>'<span class="keyword2">:</span>' path
+  <span class="keyword2">|</span><span class="keyword2">&gt;</span> <span class="keyword5">List.</span>dedup ~compare<span class="keyword2">:</span><span class="keyword5">String.</span>compare
+  <span class="keyword2">|</span><span class="keyword2">&gt;</span> <span class="keyword5">List.</span>iter ~f<span class="keyword2">:</span>print_endline
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"><br/>/bin
+/sbin
+/usr/bin
+/usr/local/bin
+- : unit = ()
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 32) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7370576">
+        Note that we can do this without <code>|&gt;</code>, but
+        the result is a bit more verbose.
+      </p><div class="rwocode"><pre><code>#   <span class="keyword4">let</span> split_path <span class="keyword2">=</span> <span class="keyword5">String.</span>split ~on<span class="keyword2">:</span>'<span class="keyword2">:</span>' path <span class="keyword4">in</span>
+  <span class="keyword4">let</span> deduped_path <span class="keyword2">=</span> <span class="keyword5">List.</span>dedup ~compare<span class="keyword2">:</span><span class="keyword5">String.</span>compare split_path <span class="keyword4">in</span>
+  <span class="keyword5">List.</span>iter ~f<span class="keyword2">:</span>print_endline deduped_path
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"><br/>/bin
+/sbin
+/usr/bin
+/usr/local/bin
+- : unit = ()
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 33) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7372304">
+        An important part of what's happening here is partial
+        application. For example, <code>List.iter</code> normally
+        takes two arguments: a function to be called on each element of
+        the list, and the list to iterate over. We can call
+        <code>List.iter</code> with all its arguments:
+      </p><div class="rwocode"><pre><code># <span class="keyword5">List.</span>iter ~f<span class="keyword2">:</span>print_endline <span class="keyword2">[</span><span class="keyword7">&quot;Two&quot;</span><span class="keyword2">;</span> <span class="keyword7">&quot;lines&quot;</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"><br/>Two
+lines
+- : unit = ()
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 34) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7374928">
+        Or, we can pass it just the function argument, leaving us with a
+        function for printing out a list of strings.
+      </p><div class="rwocode"><pre><code># <span class="keyword5">List.</span>iter ~f<span class="keyword2">:</span>print_endline<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string list -&gt; unit = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 35) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7376176">
+        It is this later form that we're using in the
+        <code>|&gt;</code> pipeline above.
+      </p><p id="idp7377264">
+        Note that <code>|&gt;</code> only works in the intended
+        way because it is left-associative. Indeed, let's see what
+        happens if we try using a right associative operator, like
+        (^&gt;).
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword2">(</span><span class="keyword2">^</span><span class="keyword2">&gt;</span><span class="keyword2">)</span> x f <span class="keyword2">=</span> f x<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val ( ^&gt; ) : 'a -&gt; ('a -&gt; 'b) -&gt; 'b = &lt;fun&gt;
+</div># <span class="keyword5">Sys.</span>getenv_exn <span class="keyword7">&quot;PATH&quot;</span>
+  <span class="keyword2">^</span><span class="keyword2">&gt;</span> <span class="keyword5">String.</span>split ~on<span class="keyword2">:</span>'<span class="keyword2">:</span>' path
+  <span class="keyword2">^</span><span class="keyword2">&gt;</span> <span class="keyword5">List.</span>dedup ~compare<span class="keyword2">:</span><span class="keyword5">String.</span>compare
+  <span class="keyword2">^</span><span class="keyword2">&gt;</span> <span class="keyword5">List.</span>iter ~f<span class="keyword2">:</span>print_endline
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 98-124:
+Error: This expression has type string list -&gt; unit
+       but an expression was expected of type
+         (string list -&gt; string list) -&gt; 'a
+       Type string list is not compatible with type
+         string list -&gt; string list 
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 36) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7379360">
+        The above type error is a little bewildering at first glance.
+        What's going on is that, because <code>^&gt;</code> is
+        right associative, the operator is trying to feed the value
+        <code>List.dedup ~compare:String.compare</code> to the
+        function <code>List.iter ~f:print_endline</code>. But
+        <code>List.iter ~f:print_endline</code> expects a list of
+        strings as its input, not a function.
+      </p><p id="idp7382544">
+        The type error aside, this example highlights the importance of
+        choosing the operator you use with care, particularly with
+        respect to associativity.
+      </p></section><section><h1 id="declaring-functions-with-function">Declaring functions with
+      <code>function</code></h1><p id="idp7384624">
+        Another way to define a function is using the
+        <code>function</code> keyword. Instead of having syntactic
+        support for declaring multi-argument (curried) functions,
+        <code>function</code> has built-in pattern matching.
+        Here's an example:
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> some_or_zero <span class="keyword2">=</span> <span class="keyword1">function</span>
+     <span class="keyword2">|</span> <span class="keyword6">Some </span>x -<span class="keyword2">&gt;</span> x
+     <span class="keyword2">|</span> <span class="keyword6">None </span>-<span class="keyword2">&gt;</span> <span class="keyword8">0</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val some_or_zero : int option -&gt; int = &lt;fun&gt;
+</div># <span class="keyword5">List.</span>map ~f<span class="keyword2">:</span>some_or_zero <span class="keyword2">[</span><span class="keyword6">Some </span><span class="keyword8">3</span><span class="keyword2">;</span> None<span class="keyword2">;</span> <span class="keyword6">Some </span><span class="keyword8">4</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = [3; 0; 4]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 37) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7387264">
+        This is equivalent to combining an ordinary function definition
+        with a <code>match</code>.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> some_or_zero num_opt <span class="keyword2">=</span>
+    <span class="keyword1">match</span> num_opt <span class="keyword1">with</span>
+    <span class="keyword2">|</span> <span class="keyword6">Some </span>x -<span class="keyword2">&gt;</span> x
+    <span class="keyword2">|</span> <span class="keyword6">None </span>-<span class="keyword2">&gt;</span> <span class="keyword8">0</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val some_or_zero : int option -&gt; int = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 38) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7389104">
+        We can also combine the different styles of function declaration
+        together, as in the following example where we declare a two
+        argument (curried) function with a pattern match on the second
+        argument.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> some_or_default default <span class="keyword2">=</span> <span class="keyword1">function</span>
+     <span class="keyword2">|</span> <span class="keyword6">Some </span>x -<span class="keyword2">&gt;</span> x
+     <span class="keyword2">|</span> <span class="keyword6">None </span>-<span class="keyword2">&gt;</span> default
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val some_or_default : 'a -&gt; 'a option -&gt; 'a = &lt;fun&gt;
+</div># some_or_default <span class="keyword8">3</span> <span class="keyword2">(</span><span class="keyword6">Some </span><span class="keyword8">5</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 5
+</div># <span class="keyword5">List.</span>map ~f<span class="keyword2">:</span><span class="keyword2">(</span>some_or_default <span class="keyword8">100</span><span class="keyword2">)</span> <span class="keyword2">[</span><span class="keyword6">Some </span><span class="keyword8">3</span><span class="keyword2">;</span> None<span class="keyword2">;</span> <span class="keyword6">Some </span><span class="keyword8">4</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = [3; 100; 4]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 39) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7390464">
+        Also, note the use of partial application to generate the
+        function passed to <code>List.map</code>. In other words,
+        <code>some_or_default 100</code> is a function that was
+        created by feeding just the first argument to
+        <code>some_or_default</code>.
+      </p></section><section><h1 id="labeled-arguments">Labeled arguments</h1><p id="idp7393936">
+        Up until now, the functions we've defined have specified their
+        arguments positionally, <span><em>i.e.</em></span>, by the order
+        in which the arguments are passed to the function. OCaml also
+        supports labeled arguments, which let you identify a function
+        argument by name. Indeed, we've already encountered functions
+        from Core like <code>List.map</code> that use labeled
+        arguments. Labeled arguments are marked by a leading tilde, and
+        a label (followed by a colon) are put in front of the variable
+        to be labeled. Here's an example.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> ratio ~num ~denom <span class="keyword2">=</span> <span class="keyword3">float</span> num /. <span class="keyword3">float</span> denom<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val ratio : num:int -&gt; denom:int -&gt; float = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 40) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7396672">
+        We can then provide a labeled argument using a similar
+        convention. As you can see, the arguments can be provided in any
+        order.
+      </p><div class="rwocode"><pre><code># ratio ~num<span class="keyword2">:</span><span class="keyword8">3</span> ~denom<span class="keyword2">:</span><span class="keyword8">10</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : float = 0.3
+</div># ratio ~denom<span class="keyword2">:</span><span class="keyword8">10</span> ~num<span class="keyword2">:</span><span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : float = 0.3
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 41) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7397952">
+        OCaml also supports <span><em>label punning</em></span>, meaning
+        that you get to drop the text after the <code>:</code> if
+        the name of the label and the name of the variable being used
+        are the same. We were actually already using label punning when
+        defining <code>ratio</code> above. The following shows how
+        punning can be used when invoking a function.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> num <span class="keyword2">=</span> <span class="keyword8">3</span> <span class="keyword4">in</span>
+<span class="keyword4">let</span> denom <span class="keyword2">=</span> <span class="keyword8">4</span> <span class="keyword4">in</span>
+ratio ~num ~denom<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : float = 0.75
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 42) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7401056">
+        Labeled arguments are useful in a few different cases:
+      </p><ul><li><p id="idp7402032">
+            When defining a function with lots of arguments. Beyond a
+            certain number, arguments are easier to remember by name
+            than by position.
+          </p></li><li><p id="idp7402992">
+            When the meaning of a particular argument is unclear from
+            the type alone. Consider a function for creating a hash
+            table whose first argument is the initial size of the array
+            backing the hashtable, and the second is a Boolean flag
+            which indicates whether that array will ever shrink when
+            elements are removed.
+          </p><div class="rwocode"><pre><code><span class="keyword4">val</span> create_hashtable <span class="keyword2">:</span> <span class="keyword3">int</span> -<span class="keyword2">&gt;</span> bool -<span class="keyword2">&gt;</span> <span class="keyword2">(</span>'a,'b<span class="keyword2">)</span> <span class="keyword5">Hashtable.</span>t</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/htable_sig1.ml">variables-and-functions/htable_sig1.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7404496">
+            The above signature makes it hard to divine the meaning of
+            those two arguments. but with labeled arguments, we can make
+            the intent immediately clear.
+          </p><div class="rwocode"><pre><code><span class="keyword4">val</span> create_hashtable <span class="keyword2">:</span>
+  init_size<span class="keyword2">:</span><span class="keyword3">int</span> -<span class="keyword2">&gt;</span> allow_shrinking<span class="keyword2">:</span>bool -<span class="keyword2">&gt;</span> <span class="keyword2">(</span>'a,'b<span class="keyword2">)</span> <span class="keyword5">Hashtable.</span>t</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/htable_sig2.ml">variables-and-functions/htable_sig2.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7405792">
+            Choosing label names well is especially important for
+            Boolean values, since it's often easy to get confused about
+            whether a value being true is meant ot enable or disable a
+            given feature.
+          </p></li><li><p id="idp7406816">
+            When defining functions that have multiple arguments that
+            might get confused with each other. This is most at issue
+            when the arguments are of the same type. For example,
+            consider this signature for a function that extracts a
+            substring.
+          </p><div class="rwocode"><pre><code><span class="keyword4">val</span> substring<span class="keyword2">:</span> <span class="keyword3">string</span> -<span class="keyword2">&gt;</span> <span class="keyword3">int</span> -<span class="keyword2">&gt;</span> <span class="keyword3">int</span> -<span class="keyword2">&gt;</span> <span class="keyword3">string</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/substring_sig1.ml">variables-and-functions/substring_sig1.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7408224">
+            Here, the two ints are the starting position and length of
+            the substring to extract, respectively. We can can make this
+            fact more obvious from the signature by adding labels.
+          </p><div class="rwocode"><pre><code><span class="keyword4">val</span> substring<span class="keyword2">:</span> <span class="keyword3">string</span> -<span class="keyword2">&gt;</span> pos<span class="keyword2">:</span><span class="keyword3">int</span> -<span class="keyword2">&gt;</span> len<span class="keyword2">:</span><span class="keyword3">int</span> -<span class="keyword2">&gt;</span> <span class="keyword3">string</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/substring_sig2.ml">variables-and-functions/substring_sig2.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7409552">
+            This improves the readability of both the signature and of
+            client code that makes use of <code>substring</code>,
+            and makes it harder to accidentally swap the position and
+            the length.
+          </p></li><li><p id="idp7411200">
+            When you want flexibility on the order in which arguments
+            are passed. Consider a function like
+            <code>List.iter</code>, that takes two arguments: a
+            function, and a list of elements to call that function on. A
+            common pattern is to partially apply
+            <code>List.iter</code> by giving it just the function,
+            as in the following example from earlier in the chapter.
+          </p><div class="rwocode"><pre><code>#   <span class="keyword5">String.</span>split ~on<span class="keyword2">:</span>'<span class="keyword2">:</span>' path
+  <span class="keyword2">|</span><span class="keyword2">&gt;</span> <span class="keyword5">List.</span>dedup ~compare<span class="keyword2">:</span><span class="keyword5">String.</span>compare
+  <span class="keyword2">|</span><span class="keyword2">&gt;</span> <span class="keyword5">List.</span>iter ~f<span class="keyword2">:</span>print_endline
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"><br/>/bin
+/sbin
+/usr/bin
+/usr/local/bin
+- : unit = ()
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 43) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7414000">
+            This requires that we put the function argument first. In
+            other cases, you want to put the function argument second.
+            One common reason is readability. In particular, a
+            multi-line function passed as an argument to another
+            function is easiest to read when it is the final argument to
+            that function.
+          </p></li></ul><section><h1 id="higher-order-functions-and-labels">Higher-order functions and labels</h1><p id="idp7415920">
+          One surprising gotcha with labeled arguments is that while
+          order doesn't matter when calling a function with labeled
+          arguments, it does matter in a higher-order context,
+          <span><em>e.g.</em></span>, when passing a function with
+          labeled arguments to another function. Here's an example.
+        </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> apply_to_tuple f <span class="keyword2">(</span>first,second<span class="keyword2">)</span> <span class="keyword2">=</span> f ~first ~second<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val apply_to_tuple : (first:'a -&gt; second:'b -&gt; 'c) -&gt; 'a * 'b -&gt; 'c = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 44) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7417760">
+          Here, the definition of <code>apply_to_tuple</code> sets
+          up the expectation that its first argument is a function with
+          two labeled arguments, <code>first</code> and
+          <code>second</code>, listed in that order. We could have
+          defined <code>apply_to_tuple</code> differently to
+          change the order in which the labeled arguments were listed.
+        </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> apply_to_tuple_2 f <span class="keyword2">(</span>first,second<span class="keyword2">)</span> <span class="keyword2">=</span> f ~second ~first<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val apply_to_tuple_2 : (second:'a -&gt; first:'b -&gt; 'c) -&gt; 'b * 'a -&gt; 'c = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 45) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7421680">
+          It turns out this order matters. In particular, if we define a
+          function that has a different order
+        </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> divide ~first ~second <span class="keyword2">=</span> first / second<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val divide : first:int -&gt; second:int -&gt; int = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 46) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7422928">
+          we'll find that it can't be passed in to
+          <code>apply_to_tuple_2</code>.
+        </p><div class="rwocode"><pre><code># apply_to_tuple_2 divide <span class="keyword2">(</span><span class="keyword8">3</span>,<span class="keyword8">4</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 17-23:
+Error: This expression has type first:int -&gt; second:int -&gt; int
+       but an expression was expected of type second:'a -&gt; first:'b -&gt; 'c
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 47) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7424736">
+          But, it works smoothly with the original
+          <code>apply_to_tuple</code>.
+        </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> apply_to_tuple f <span class="keyword2">(</span>first,second<span class="keyword2">)</span> <span class="keyword2">=</span> f ~first ~second<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val apply_to_tuple : (first:'a -&gt; second:'b -&gt; 'c) -&gt; 'a * 'b -&gt; 'c = &lt;fun&gt;
+</div># apply_to_tuple divide <span class="keyword2">(</span><span class="keyword8">3</span>,<span class="keyword8">4</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 0
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 48) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7426544">
+          As a result, when passing labeled functions as arguments, you
+          need to take care to be consistent in your ordering of labeled
+          arguments.
+        </p></section></section><section><h1 id="optional-arguments">Optional arguments</h1><p id="idp7428256">
+        An optional argument is like a labeled argument that the caller
+        can choose whether or not to provide. Optional arguments are
+        passed in using the same syntax as labeled arguments, and, like
+        labeled arguments, can be provided in any order.
+      </p><p id="idp7428928">
+        Here's an example of a string concatenation function with an
+        optional separator. This function uses the <code>^</code>
+        operator for pairwise string concatenation.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> concat ?sep x y <span class="keyword2">=</span>
+     <span class="keyword4">let</span> sep <span class="keyword2">=</span> <span class="keyword1">match</span> sep <span class="keyword1">with</span> <span class="keyword6">None </span>-<span class="keyword2">&gt;</span> <span class="keyword7">&quot;&quot;</span> <span class="keyword2">|</span> <span class="keyword6">Some </span>x -<span class="keyword2">&gt;</span> x <span class="keyword4">in</span>
+     x <span class="keyword2">^</span> sep <span class="keyword2">^</span> y
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;fun&gt;
+</div># concat <span class="keyword7">&quot;foo&quot;</span> <span class="keyword7">&quot;bar&quot;</span>             <span class="comments">(* without the optional argument *)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot;foobar&quot;
+</div># concat ~sep<span class="keyword2">:</span><span class="keyword7">&quot;:&quot;</span> <span class="keyword7">&quot;foo&quot;</span> <span class="keyword7">&quot;bar&quot;</span>    <span class="comments">(* with the optional argument    *)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot;foo:bar&quot;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 49) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7430880">
+        Here, <code>?</code> is used in the definition of the
+        function to mark <code>sep</code> as optional. And while
+        the caller can pass a value of type <code>string</code>
+        for <code>sep</code>, internally to the function,
+        <code>sep</code> is seen as a
+        <code>string option</code>, with <code>None</code>
+        appearing when <code>sep</code> is not provided by the
+        caller.
+      </p><p id="idp7436416">
+        The above example needed a bit of boilerplate to choose a
+        default separator when none was provided. This is a common
+        enough pattern that there's an explicit syntax for providing a
+        default value, which allows us to write
+        <code>concat</code> more concisely.
+      </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> concat ?<span class="keyword2">(</span>sep<span class="keyword2">=</span><span class="keyword7">&quot;&quot;</span><span class="keyword2">)</span> x y <span class="keyword2">=</span> x <span class="keyword2">^</span> sep <span class="keyword2">^</span> y <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 50) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7438416">
+        Optional arguments are very useful, but they're also easy to
+        abuse. The key advantage of optional arguments is that they let
+        you write functions with multiple arguments that users can
+        ignore most of the time, only worrying about them when they
+        specifically want to invoke those options. They also allow you
+        to extend an API with new functionality without changing
+        existing code that calls that function.
+      </p><p id="idp7439280">
+        The downside is that the caller may be unaware that there is a
+        choice to be made, and so may unknowingly (and wrongly) pick the
+        default behavior. Optional arguments really only make sense when
+        the extra concision of omitting the argument outweighs the
+        corresponding loss of explicitness.
+      </p><p id="idp7440016">
+        This means that rarely used functions should not have optional
+        arguments. A good rule of thumb is to avoid optional arguments
+        for functions internal to a module, <span><em>i.e.</em></span>,
+        functions that are not included in the module's interface, or
+        <code>mli</code> file. We'll learn more about
+        <code>mli</code>s in
+        <a href="files-modules-and-programs.html">Chapter 4, <i>Files, Modules and Programs</i></a>.
+      </p><section><h1 id="explicit-passing-of-an-optional-argument">Explicit passing of an optional argument</h1><p id="idp7443712">
+          Under the covers, a function with an optional argument
+          receives <code>None</code> when the caller doesn't
+          provide the argument, and <code>Some</code> when it
+          does. But the <code>Some</code> and
+          <code>None</code> are normally not explicitly passed in
+          by the caller.
+        </p><p id="idp7446864">
+          But sometimes, passing in <code>Some</code> or
+          <code>None</code> explicitly is exactly what you want.
+          OCaml lets you do this by using <code>?</code> instead
+          of <code>~</code> to mark the argument. Thus, the
+          following two lines are equivalent ways of specifying the
+          <code>sep</code> argument to concat.
+        </p><div class="rwocode"><pre><code># concat ~sep<span class="keyword2">:</span><span class="keyword7">&quot;:&quot;</span> <span class="keyword7">&quot;foo&quot;</span> <span class="keyword7">&quot;bar&quot;</span> <span class="comments">(* provide the optional argument *)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot;foo:bar&quot;
+</div># concat ?sep<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword6">Some </span><span class="keyword7">&quot;:&quot;</span><span class="keyword2">)</span> <span class="keyword7">&quot;foo&quot;</span> <span class="keyword7">&quot;bar&quot;</span> <span class="comments">(* pass an explicit [Some] *)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot;foo:bar&quot;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 51) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7451312">
+          And the following two lines are equivalent ways of calling
+          <code>concat</code> without specifying
+          <code>sep</code>.
+        </p><div class="rwocode"><pre><code># concat <span class="keyword7">&quot;foo&quot;</span> <span class="keyword7">&quot;bar&quot;</span> <span class="comments">(* don't provide the optional argument *)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot;foobar&quot;
+</div># concat ?sep<span class="keyword2">:</span><span class="keyword6">None </span><span class="keyword7">&quot;foo&quot;</span> <span class="keyword7">&quot;bar&quot;</span> <span class="comments">(* explicitly pass `None` *)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot;foobar&quot;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 52) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7453760">
+          One use-case for this is when you want to define a wrapper
+          function that mimics the optional arguments of the function
+          it's wrapping. For example, imagine we wanted to create a
+          function called <code>uppercase_concat</code>, which is
+          the same as <code>concat</code> except that it converts
+          the first string that it's passed to uppercase. We could write
+          the function as follows.
+        </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> uppercase_concat ?<span class="keyword2">(</span>sep<span class="keyword2">=</span><span class="keyword7">&quot;&quot;</span><span class="keyword2">)</span> a b <span class="keyword2">=</span> concat ~sep <span class="keyword2">(</span><span class="keyword5">String.</span>uppercase a<span class="keyword2">)</span> b <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val uppercase_concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;fun&gt;
+</div># uppercase_concat <span class="keyword7">&quot;foo&quot;</span> <span class="keyword7">&quot;bar&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot;FOObar&quot;
+</div># uppercase_concat <span class="keyword7">&quot;foo&quot;</span> <span class="keyword7">&quot;bar&quot;</span> ~sep<span class="keyword2">:</span><span class="keyword7">&quot;:&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot;FOO:bar&quot;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 53) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7456528">
+          In the way we've written it, we've been forced to separately
+          make the decision as to what the default separator is. Thus,
+          if we later change <code>concat</code>'s default
+          behavior, we'll need to remember to change
+          <code>uppercase_concat</code> to match it.
+        </p><p id="idp7458448">
+          Instead, we can have <code>uppercase_concat</code>
+          simply pass through the optional argument to
+          <code>concat</code> using the <code>?</code>
+          syntax.
+        </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> uppercase_concat ?sep a b <span class="keyword2">=</span> concat ?sep <span class="keyword2">(</span><span class="keyword5">String.</span>uppercase a<span class="keyword2">)</span> b <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val uppercase_concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 54) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7461504">
+          Now, if someone calls <code>uppercase_concat</code>
+          without an argument, an explicit <code>None</code> will
+          be passed to <code>concat</code>, leaving
+          <code>concat</code> to decide what the default behavior
+          should be.
+        </p></section><section><h1 id="inference-of-labeled-and-optional-arguments">Inference of labeled and optional arguments</h1><p id="idp7465472">
+          One subtle aspect of labeled and optional arguments is how
+          they are inferred by the type system. Consider the following
+          example for computing numerical derivatives of a function of
+          two real variables. The function takes an argument
+          <code>delta</code> which determines the scale at which
+          to compute the derivative, values <code>x</code> and
+          <code>y</code> which determine which point to compute
+          the derivative at, and the function <code>f</code> whose
+          derivative is being computed. The function
+          <code>f</code> itself takes two labeled arguments
+          <code>x</code> and <code>y</code>. Note that you
+          can use an apostrophe as part of a variable name, so
+          <code>x'</code> and <code>y'</code> are just
+          ordinary variables.
+        </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> numeric_deriv ~delta ~x ~y ~f <span class="keyword2">=</span>
+    <span class="keyword4">let</span> x' <span class="keyword2">=</span> x <span class="keyword2">+</span>. delta <span class="keyword4">in</span>
+    <span class="keyword4">let</span> y' <span class="keyword2">=</span> y <span class="keyword2">+</span>. delta <span class="keyword4">in</span>
+    <span class="keyword4">let</span> base <span class="keyword2">=</span> f ~x ~y <span class="keyword4">in</span>
+    <span class="keyword4">let</span> dx <span class="keyword2">=</span> <span class="keyword2">(</span>f ~x<span class="keyword2">:</span>x' ~y -. base<span class="keyword2">)</span> /. delta <span class="keyword4">in</span>
+    <span class="keyword4">let</span> dy <span class="keyword2">=</span> <span class="keyword2">(</span>f ~x ~y<span class="keyword2">:</span>y' -. base<span class="keyword2">)</span> /. delta <span class="keyword4">in</span>
+    <span class="keyword2">(</span>dx,dy<span class="keyword2">)</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val numeric_deriv :
+  delta:float -&gt;
+  x:float -&gt; y:float -&gt; f:(x:float -&gt; y:float -&gt; float) -&gt; float * float =
+  &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 55) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7472880">
+          In principle, it's not obvious how the order of the arguments
+          to <code>f</code> should be chosen. Since labeled
+          arguments can be passed in arbitrary order, it seems like it
+          could as well be
+          <code>y:float -&gt; x:float -&gt; float</code> as it is
+          <code>x:float -&gt; y:float -&gt; float</code>.
+        </p><p id="idp7475392">
+          Even worse, it would be perfectly consistent for
+          <code>f</code> to take an optional argument instead of a
+          labeled one, which could lead to this type signature for
+          <code>numeric_deriv</code>.
+        </p><div class="rwocode"><pre><code><span class="keyword4">val</span> numeric_deriv <span class="keyword2">:</span>
+  delta<span class="keyword2">:</span><span class="keyword3">float</span> -<span class="keyword2">&gt;</span>
+  x<span class="keyword2">:</span><span class="keyword3">float</span> -<span class="keyword2">&gt;</span> y<span class="keyword2">:</span><span class="keyword3">float</span> -<span class="keyword2">&gt;</span> f<span class="keyword2">:</span><span class="keyword2">(</span>?x<span class="keyword2">:</span><span class="keyword3">float</span> -<span class="keyword2">&gt;</span> y<span class="keyword2">:</span><span class="keyword3">float</span> -<span class="keyword2">&gt;</span> <span class="keyword3">float</span><span class="keyword2">)</span> -<span class="keyword2">&gt;</span> <span class="keyword3">float</span> <span class="keyword2">*</span> <span class="keyword3">float</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/numerical_deriv_alt_sig.mli">variables-and-functions/numerical_deriv_alt_sig.mli</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7477968">
+          Since there are multiple plausible types to choose from, OCaml
+          needs some heuristic for choosing between them. The heuristic
+          the compiler uses is to prefer labels to options, and to
+          choose the order of arguments that shows up in the source
+          code.
+        </p><p id="idp7478672">
+          Note that these heuristics might at different points in the
+          source suggest different types. Here's a version of
+          <code>numeric_deriv</code> where different invocations
+          of <code>f</code> list the arguments in different
+          orders.
+        </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> numeric_deriv ~delta ~x ~y ~f <span class="keyword2">=</span>
+    <span class="keyword4">let</span> x' <span class="keyword2">=</span> x <span class="keyword2">+</span>. delta <span class="keyword4">in</span>
+    <span class="keyword4">let</span> y' <span class="keyword2">=</span> y <span class="keyword2">+</span>. delta <span class="keyword4">in</span>
+    <span class="keyword4">let</span> base <span class="keyword2">=</span> f ~x ~y <span class="keyword4">in</span>
+    <span class="keyword4">let</span> dx <span class="keyword2">=</span> <span class="keyword2">(</span>f ~y ~x<span class="keyword2">:</span>x' -. base<span class="keyword2">)</span> /. delta <span class="keyword4">in</span>
+    <span class="keyword4">let</span> dy <span class="keyword2">=</span> <span class="keyword2">(</span>f ~x ~y<span class="keyword2">:</span>y' -. base<span class="keyword2">)</span> /. delta <span class="keyword4">in</span>
+    <span class="keyword2">(</span>dx,dy<span class="keyword2">)</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 130-131:
+Error: This function is applied to arguments
+in an order different from other calls.
+This is only allowed when the real type is known.
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 56) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7481264">
+          As suggested by the error message, we can get OCaml to accept
+          the fact that <code>f</code> is used with different
+          argument orders if we provide explicit type information. Thus,
+          the following code compiles without error, due to the type
+          annotation on <code>f</code>.
+        </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> numeric_deriv ~delta ~x ~y ~<span class="keyword2">(</span>f<span class="keyword2">:</span> x<span class="keyword2">:</span><span class="keyword3">float</span> -<span class="keyword2">&gt;</span> y<span class="keyword2">:</span><span class="keyword3">float</span> -<span class="keyword2">&gt;</span> <span class="keyword3">float</span><span class="keyword2">)</span> <span class="keyword2">=</span>
+    <span class="keyword4">let</span> x' <span class="keyword2">=</span> x <span class="keyword2">+</span>. delta <span class="keyword4">in</span>
+    <span class="keyword4">let</span> y' <span class="keyword2">=</span> y <span class="keyword2">+</span>. delta <span class="keyword4">in</span>
+    <span class="keyword4">let</span> base <span class="keyword2">=</span> f ~x ~y <span class="keyword4">in</span>
+    <span class="keyword4">let</span> dx <span class="keyword2">=</span> <span class="keyword2">(</span>f ~y ~x<span class="keyword2">:</span>x' -. base<span class="keyword2">)</span> /. delta <span class="keyword4">in</span>
+    <span class="keyword4">let</span> dy <span class="keyword2">=</span> <span class="keyword2">(</span>f ~x ~y<span class="keyword2">:</span>y' -. base<span class="keyword2">)</span> /. delta <span class="keyword4">in</span>
+    <span class="keyword2">(</span>dx,dy<span class="keyword2">)</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val numeric_deriv :
+  delta:float -&gt;
+  x:float -&gt; y:float -&gt; f:(x:float -&gt; y:float -&gt; float) -&gt; float * float =
+  &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 57) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></section><section><h1 id="optional-arguments-and-partial-application">Optional arguments and partial application</h1><p id="idp7484944">
+          Optional arguments can be tricky to think about in the
+          presence of partial application. We can of course partially
+          apply the optional argument itself:
+        </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> colon_concat <span class="keyword2">=</span> concat ~sep<span class="keyword2">:</span><span class="keyword7">&quot;:&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val colon_concat : string -&gt; string -&gt; string = &lt;fun&gt;
+</div># colon_concat <span class="keyword7">&quot;a&quot;</span> <span class="keyword7">&quot;b&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot;a:b&quot;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 58) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7486256">
+          But what happens if we partially apply just the first
+          argument?
+        </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> prepend_pound <span class="keyword2">=</span> concat <span class="keyword7">&quot;# &quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val prepend_pound : string -&gt; string = &lt;fun&gt;
+</div># prepend_pound <span class="keyword7">&quot;a BASH comment&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot;# a BASH comment&quot;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 59) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7487472">
+          The optional argument <code>?sep</code> has now
+          disappeared, or been <span><em>erased</em></span>. Indeed, if
+          we try to pass in that optional argument now, it will be
+          rejected.
+        </p><div class="rwocode"><pre><code># prepend_pound <span class="keyword7">&quot;a BASH comment&quot;</span> ~sep<span class="keyword2">:</span><span class="keyword7">&quot;:&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters -1-13:
+Error: This function has type string -&gt; string
+       It is applied to too many arguments; maybe you forgot a `;'.
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 60) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7489712">
+          So when does OCaml decide to erase an optional argument?
+        </p><p id="idp7490192">
+          The rule is: an optional argument is erased as soon as the
+          first positional (<span><em>i.e.</em></span>, neither labeled
+          nor optional) argument defined <span><em>after</em></span> the
+          optional argument is passed in. That explains the behavior of
+          <code>prepend_pound</code> above. But if we had instead
+          defined <code>concat</code> with the optional argument
+          in the second position:
+        </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> concat x ?<span class="keyword2">(</span>sep<span class="keyword2">=</span><span class="keyword7">&quot;&quot;</span><span class="keyword2">)</span> y <span class="keyword2">=</span> x <span class="keyword2">^</span> sep <span class="keyword2">^</span> y <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val concat : string -&gt; ?sep:string -&gt; string -&gt; string = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 61) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7493680">
+          then application of the first argument would not cause the
+          optional argument to be erased.
+        </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> prepend_pound <span class="keyword2">=</span> concat <span class="keyword7">&quot;# &quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val prepend_pound : ?sep:string -&gt; string -&gt; string = &lt;fun&gt;
+</div># prepend_pound <span class="keyword7">&quot;a BASH comment&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot;# a BASH comment&quot;
+</div># prepend_pound <span class="keyword7">&quot;a BASH comment&quot;</span> ~sep<span class="keyword2">:</span><span class="keyword7">&quot;--- &quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot;# --- a BASH comment&quot;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 62) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7494928">
+          However, if all arguments to a function are presented at once,
+          then erasure of optional arguments isn't applied until all of
+          the arguments are passed in. This preserves our ability to
+          pass in optional arguments anywhere on the argument list.
+          Thus, we can write:
+        </p><div class="rwocode"><pre><code># concat <span class="keyword7">&quot;a&quot;</span> <span class="keyword7">&quot;b&quot;</span> ~sep<span class="keyword2">:</span><span class="keyword7">&quot;=&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot;a=b&quot;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 63) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7496368">
+          An optional argument that doesn't have any following
+          positional arguments can't be erased at all, which leads to a
+          compiler warning.
+        </p><div class="rwocode"><pre><code># <span class="keyword4">let</span> concat x y ?<span class="keyword2">(</span>sep<span class="keyword2">=</span><span class="keyword7">&quot;&quot;</span><span class="keyword2">)</span> <span class="keyword2">=</span> x <span class="keyword2">^</span> sep <span class="keyword2">^</span> y <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"><br/>Characters 15-38:
+Warning 16: this optional argument cannot be erased.val concat : string -&gt; string -&gt; ?sep:string -&gt; string = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 64) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7497664">
+          And indeed, when we provide the two positional arguments, the
+          <code>sep</code> argument is not erased, instead
+          returning a function that expects the <code>sep</code>
+          argument to be provided.
+        </p><div class="rwocode"><pre><code># concat <span class="keyword7">&quot;a&quot;</span> <span class="keyword7">&quot;b&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : ?sep:string -&gt; string = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</a> , continued (part 65) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idp7500208">
+          As you can see, OCaml's support for labeled and optional
+          arguments is not without its complexities. But don't let these
+          complexities obscure the usefulness of these features. Labels
+          and optional arguments are very effective tools for making
+          your APIs both more convenient and safer, and it's worth the
+          effort of learning how to use them effectively.
+        </p></section></section></section>
+
+
+                
+            </article>
+            
+            
+    
+                <nav class="pagination">
+                    
+                        <a rel="previous" href="a-guided-tour.html">
+                            &lt; Previous
+                        </a>
+                    
+                    
+                        <a rel="next" href="lists-and-patterns.html">
+                            Next &gt;
+                        </a>
+                    
+                </nav>
+            
+            
+            
+            <footer class="footer">
+                <p>Copyright 2012-2013, Jason Hickey, Anil Madhavapeddy and Yaron Minsky. Licensed under <a href="http://creativecommons.org/licenses/by-nc-nd/3.0/us/">CC BY-NC-ND 3.0 US</a>.</p>
+            </footer>
+            
+        </div>
+    
+    </body>
+
+</html>
