@@ -1,0 +1,86 @@
+Page 15: AU: Adding commas will help readability here. Is "polymorphic methods, variants, and labeled and optional arguments" OK?
+Page 16: AU: Since you've already italicized "utop" earlier in this paragraph, there's no need to do so again.
+Page 16: AU: Is the hyphen part of the term? Normally we wouldn't use one between an adverb and the word it modifies.
+Page 20: AU: Forthcoming, in parentheses) is how the Chicago Manual of Style suggests wording a not-yet-published book that is under contract. Is that the case?
+Page 21: AU: Previously, this term was lowercase. OK?
+Page 25: AU: Since you've already italicized "utop," there's no need to do it again, so put the following terms in roman. Unless there's another reason for the font.
+Page 29: AU: Please turn this into a numbered list.
+Page 35: AU: Should the languages be in constant width?
+Page 35: AU: For ease of reading, I would not have a fragment followed by a complete sentence in parentheses. How about, "...patterns, separated by |'s. (The one before the first case is optional.)" ?
+Page 36: AU: Is the comma part of the code? If not, I would lose it to avoid confusion.
+Page 45: AU: constant width
+Page 45: AU: constant width
+Page 45: AU: constant width
+Page 45: AU: OK that the loops aren't in constant width?
+Page 47: AU: No italics.
+Page 47: AU: Files should be italicized instead of in constant width.
+Page 49: AU: No italics.
+Page 50: AU: In the last chapter, you spelled "toplevel," when used as a noun, like that. Just checking that that's the standard spelling so that I can make the word consistent throughout the book.
+Page 52: AU: In this chapter, you've hyphenated and not hyphenated this phrase. How would you like it to appear throughout the book?
+Page 52: AU: Since in the code, the compound is closed, is it OK to keep it closed in the regular text?
+Page 58: AU: Typo?
+Page 58: AU: constant width?
+Page 63: AU: constant width?
+Page 81: AU: "pattern"?
+Page 89: AU: If this is a file name, please italicize.
+Page 91: AU: Is the noun form hyphenated? It makes sense that the adjectival form would be.
+Page 92: AU: Here, the noun form is open, so that's why I asked about the hyphenation earlier. Also, please caps once we decide on which way to punctuate.
+Page 93: AU: Filenames should be italicized instead of in constant width.
+Page 95: AU: constant width?
+Page 120: AU: Italicize whole phrase.
+Page 120: AU: Please make variable list instead of bulleted list, and have all definitions without periods.
+Page 141: AU: Please turn this all into a variable list.
+Page 163: AU: Please make variable list.
+Page 167: AU: Please make variable list.
+Page 182: AU: Please put in variable list.
+Page 197: AU: Please turn into variable list.
+Page 200: AU: constant width?
+Page 214: AU: Please turn into variable list.
+Page 233: AU: Please turn into variable list.
+Page 255: AU: Typo?
+Page 271: AU: "their side effects"?
+Page 272: AU: Please turn into variable list. 
+Page 287: AU: Incomplete thought?
+Page 287: AU: Incomplete?
+Page 295: AU: Turn into variable list.
+Page 312: AU: No italics.
+Page 312: AU: File names should be in italics, not constant width.
+Page 313: AU: No italics.
+Page 314: AU: Please turn into variable list.
+Page 318: AU: File names should be in italics.
+Page 324: AU: Please make variable list.
+Page 327: AU: Did you mean to use "and"?
+Page 328: AU: Convert to variable list.
+Page 334: AU: No italics necessary in this section.
+Page 352: AU: The following syntaxes should be defined through a variable list to ease of reading.
+Page 352: AU: "open parentheses"?
+Page 364: AU: No italics.
+Page 374: AU: Make sure colon is not in constant width.
+Page 375: AU: Turn into variable list.
+Page 377: AU: Colon shouldn't be in constant width.
+Page 383: AU: "; instead use functions"?
+Page 383: AU: I would just start a new sentence here.
+Page 385: AU: Does "concurrent" make "in the same program" repetitive here?
+Page 387: AU: Make sure colon not on constant width.
+Page 391: AU: Consider rewriting to avoid repetitive "follow."
+Page 402: AU: Put in variable list.
+Page 427: AU: Please use variable list.
+Page 433: AU: Apostrophe should be going the other way.
+Page 435: AU: Are you referring to the code here?
+Page 445: AU: The following bullets should be turned into a variable list.
+Page 445: AU: The following should also be a variable list.
+Page 450: AU: Please turn into variable list.
+Page 456: AU: Please put the following terms and definitions in a variable list.
+Page 458: AU: Should this be capitalized?
+Page 465: AU: Could you look at this sentence again and rework it so there's parallel structure? The "but still compile" is where it starts to diverge.
+Page 473: AU: Since "bytecode" and "native code" have been spelled differently so far in this chapter, I just wanted to know which way you wanted to go: hyphen or no hyphen, space or no space.
+Page 478: AU: "Tool-chain" has also been spelled differently throughout the book, so let me know how you want it.
+Page 478: AU: Please put in variable list.
+Page 478: AU: Please do the same here.
+Page 479: AU: Please put the period inside the quotation marks.
+Page 489: AU: Please put period inside quotes.
+Page 489: AU: If more than two, put it as "one another."
+Page 491: AU: Although the word was hyphenated in the heading, it isn't here. How would you like it?
+Page 498: AU: Italics
+Page 498: AU: Italics
+Page 498: AU: Italics
