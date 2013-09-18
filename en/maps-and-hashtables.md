@@ -221,65 +221,7 @@ This is rejected for good reason: there's no guarantee that the
 comparator associated with a given type will order things in the same
 way that polymorphic compare does.
 
-<note>
-<title> `=`, `==`, and `phys_equal` </title>
-
-If you come from a C/C++ background, you'll probably reflexively use
-`==` to test two values for equality.  In OCaml, the `==` operator
-tests for *physical* equality while the `=` operator tests for
-*structural* equality.
-
-The physical equality test will match if two data structures have
-precisely the same pointer in memory.  Two data structures that have
-identical contents but are constructed separately will not match using
-`==`.
-
-The `=` structural equality operator recursively inspects each field
-in the two values and tests them individually for equality.
-Crucially, if your data structure is cyclical (that is, a value
-recursively points back to another field within the same structure),
-the `=` operator will never terminate, and your program will hang!
-You therefore must use the physical equality operator or write a
-custom comparison function when comparing cyclic values.
-
-It's quite easy to mix up the use of `=` and `==`, so Core disables
-the `==` operator and provides the more explicit `phys_equal` function
-instead.  You'll see a type error if you use `==` anywhere in code
-that opens `Core.Std`.
-
-```frag
-((typ ocamltop)(name maps-and-hash-tables/core_phys_equal.topscript))
-```
-
-If you feel like hanging your OCaml interpreter, you can verify what
-happens with recursive values and structural equality for yourself:
-
-```frag
-((typ ocamlrawtop)(name maps-and-hash-tables/phys_equal.rawscript))
-```
-
-</note>
-
-### Sets
-
-Sometimes, instead of keeping track of a set of key/value pairs, you
-just want a data-type for keeping track of a set of keys.  You could
-build this on top of a map by representing a set of values by a map
-whose data type is `unit`.  But a more idiomatic (and efficient)
-solution is to use Core's set type, which is similar in design and
-spirit to the map type, while having an API better tuned to working
-with sets, and a lower memory footprint.  Here's a simple example:
-
-```frag
-((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 17))
-```
-
-In addition to the operators you would expect to have for maps, sets
-support the traditional set operations, including union, intersection
-and set difference.  And, as with maps, we can create sets based on
-type-specific comparators or on the polymorphic comparator.
-
-<warning> <title> The perils of polymorphic compare </title>
+<sidebar> <title> The perils of polymorphic compare </title>
 
 Polymorphic compare is highly convenient, but it has serious downsides
 as well, and should be used with care.  In particular, polymorphic
@@ -342,7 +284,26 @@ others, since if the sets are built in a consistent order, then they
 will work as expected, but once the order changes, the behavior will
 change.
 
-</warning>
+</sidebar>
+
+### Sets
+
+Sometimes, instead of keeping track of a set of key/value pairs, you
+just want a data-type for keeping track of a set of keys.  You could
+build this on top of a map by representing a set of values by a map
+whose data type is `unit`.  But a more idiomatic (and efficient)
+solution is to use Core's set type, which is similar in design and
+spirit to the map type, while having an API better tuned to working
+with sets, and a lower memory footprint.  Here's a simple example:
+
+```frag
+((typ ocamltop)(name maps-and-hash-tables/main.topscript)(part 17))
+```
+
+In addition to the operators you would expect to have for maps, sets
+support the traditional set operations, including union, intersection
+and set difference.  And, as with maps, we can create sets based on
+type-specific comparators or on the polymorphic comparator.
 
 ### Satisfying the `Comparable.S` interface
 
@@ -617,7 +578,7 @@ also need to call `Hashtbl.copy` to take snapshots of the table.
 ```
 
 Unsurprisingly, maps perform far better than hash tables on this
-benchmark, in this case by more than a factor of ten.  
+benchmark, in this case by more than a factor of ten.
 
 ```frag
 ((typ console)(name maps-and-hash-tables/run_map_vs_hash2.out))
@@ -630,3 +591,44 @@ As you can see, the relative performance of trees and maps depends a
 great deal on the details of how they're used, and so whether to
 choose one data structure or the other will depend on the details of
 the application.
+
+<sidebar>
+<title> `=`, `==`, and `phys_equal` </title>
+
+If you come from a C/C++ background, you'll probably reflexively use
+`==` to test two values for equality.  In OCaml, the `==` operator
+tests for *physical* equality while the `=` operator tests for
+*structural* equality.
+
+The physical equality test will match if two data structures have
+precisely the same pointer in memory.  Two data structures that have
+identical contents but are constructed separately will not match using
+`==`.
+
+The `=` structural equality operator recursively inspects each field
+in the two values and tests them individually for equality.
+Crucially, if your data structure is cyclical (that is, a value
+recursively points back to another field within the same structure),
+the `=` operator will never terminate, and your program will hang!
+You therefore must use the physical equality operator or write a
+custom comparison function when comparing cyclic values.
+
+It's quite easy to mix up the use of `=` and `==`, so Core disables
+the `==` operator and provides the more explicit `phys_equal` function
+instead.  You'll see a type error if you use `==` anywhere in code
+that opens `Core.Std`.
+
+```frag
+((typ ocamltop)(name maps-and-hash-tables/core_phys_equal.topscript))
+```
+
+If you feel like hanging your OCaml interpreter, you can verify what
+happens with recursive values and structural equality for yourself:
+
+```frag
+((typ ocamlrawtop)(name maps-and-hash-tables/phys_equal.rawscript))
+```
+
+</sidebar>
+
+

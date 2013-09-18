@@ -943,7 +943,7 @@ presented in the format string, we'll get a type error.
 ((typ ocamltop)(name imperative-programming/printf.topscript)(part 2))
 ```
 
-<note> <title> Understanding format strings </title>
+<sidebar> <title> Understanding format strings </title>
 
 The format strings used by `printf` turn out to be quite different
 from ordinary strings.  This difference ties to the fact that OCaml
@@ -984,7 +984,7 @@ special handling of format strings&#x2014;you can just use `printf` and
 not worry about the details.  But it's useful to keep the broad
 outlines of the story in the back of your head.
 
-</note>
+</sidebar>
 
 Now let's see how we can rewrite our time conversion program to be a
 little more concise using `printf`.

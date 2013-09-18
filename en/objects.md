@@ -321,10 +321,10 @@ with type `square -> string`.
 We say that `'a -> string` is _contravariant_ in `'a`. In general, function types
 are contravariant in their arguments and covariant in their results.
 
-<note>
+<sidebar>
 <title>Variance annotations</title>
 
-OCaml works out the variance of a type using that type's definition. 
+OCaml works out the variance of a type using that type's definition.
 
 ```frag
 ((typ ocamltop)(name objects/subtyping.topscript)(part 8))
@@ -344,7 +344,7 @@ for covariance or `-` for contravariance.
 ((typ ocamltop)(name objects/subtyping.topscript)(part 10))
 ```
 
-</note>
+</sidebar>
 
 For a more concrete example of variance, let's create some stacks containing
 shapes by applying our `stack` function to some squares and some circles.

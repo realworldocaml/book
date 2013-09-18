@@ -346,7 +346,7 @@ using the netcat tool, which is invoked as `nc`.
 ((typ console)(name async/run_echo.out))
 ```
 
-<note>
+<sidebar>
 <title>Functions that never return</title>
 
 You might wonder what's going on with the call to `never_returns`
@@ -394,7 +394,7 @@ We can resolve the error by calling the function `never_returns`.
 Thus, we got the compilation to go through by explicitly marking in
 the source that the call to `loop_forever` never returns.
 
-</note>
+</sidebar>
 
 ### Improving the echo server
 
