@@ -31,15 +31,13 @@
   and help you use them to their fullest.</para>
 
   <sect1 id="example-imperative-dictionaries">
-    <title>Example: Imperative dictionaries</title>
+    <title>Example: Imperative Dictionaries</title>
 
-    <para>We'll start with the implementation of a simple imperative
-    dictionary, <emphasis>i.e.</emphasis>, a mutable mapping from keys to
-    values. This is really for illustration purposes; both Core and the
-    standard library provide imperative dictionaries, and for most real world
-    tasks, you should use one of those implementations. There's more advice on
-    using Core's implementation in particular in <xref
-    linkend="maps-and-hash-tables" />.</para>
+    <para>We'll start with the implementation of a simple imperative dictionary, i.e., a mutable
+      mapping from keys to values. This is really for illustration purposes; both Core and the
+      standard library provide imperative dictionaries, and for most real-world tasks, you should
+      use one of those implementations. There's more advice on using Core's implementation in
+      particular in <xref linkend="maps-and-hash-tables"/>.</para>
 
     <para>The dictionary we'll describe now, like those in Core and the
     standard library, will be implemented as a hash table. In particular,
@@ -47,11 +45,10 @@
     table will be an array of buckets, each bucket containing a list of
     key/value pairs that have been hashed into that bucket.</para>
 
-    <para>Here's the interface we'll match, provided as an <literal
-    moreinfo="none">mli</literal>. The type <literal moreinfo="none">('a, 'b)
-    t</literal> represents a dictionary with keys of type <literal
-    moreinfo="none">'a</literal> and data of type <literal
-    moreinfo="none">'b</literal>.</para>
+    <para>Here's the interface we'll match, provided as an <literal moreinfo="none">mli</literal>.
+      The type <literal moreinfo="none">('a, 'b) t</literal> represents a dictionary with keys of
+      type <literal moreinfo="none">'a</literal> and data of type <literal moreinfo="none"
+        >'b</literal>:</para>
 
     <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dictionary.mli">imperative-programming/dictionary.mli</ulink>
@@ -69,19 +66,17 @@ val find   : ('a, 'b) t -&gt; 'a -&gt; 'b option
 val iter   : ('a, 'b) t -&gt; f:(key:'a -&gt; data:'b -&gt; unit) -&gt; unit
 val remove : ('a, 'b) t -&gt; 'a -&gt; unit</programlisting>
 
-    <para>The <literal moreinfo="none">mli</literal> also includes a
-    collection of helper functions whose purpose and behavior should be
-    largely inferrable from their names and type signatures. Notice that a
-    number of the functions, in particular, ones like <literal
-    moreinfo="none">add</literal> that modify the dictionary, return unit.
-    This is typical of functions that act by side-effect.</para>
+    <para>The <literal moreinfo="none">mli</literal> also includes a collection of helper functions
+      whose purpose and behavior should be largely inferrable from their names and type signatures.
+      Notice that a number of the functions, in particular, ones like <literal moreinfo="none"
+        >add</literal> that modify the dictionary, return unit. This is typical of functions that
+      act by side effect.</para>
 
     <para>We'll now walk through the implementation (contained in the
     corresponding <literal moreinfo="none">ml</literal> file) piece by piece,
     explaining different imperative constructs as they come up.</para>
 
-    <para>Our first step is to define the type of a dictionary as a record
-    with two fields.</para>
+    <para>Our first step is to define the type of a dictionary as a record with two fields:</para>
 
     <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dictionary.ml">imperative-programming/dictionary.ml</ulink>
@@ -94,14 +89,12 @@ type ('a, 'b) t = { mutable length: int;
                     buckets: ('a * 'b) list array;
                   }</programlisting>
 
-    <para>The first field, <literal moreinfo="none">length</literal> is
-    declared as mutable. In OCaml, records are immutable by default, but
-    individual fields are mutable when marked as such. The second field,
-    <literal moreinfo="none">buckets</literal>, is immutable, but contains an
-    array, which is itself a mutable data structure.</para>
+    <para>The first field, <literal moreinfo="none">length</literal> is declared as mutable. In
+      OCaml, records are immutable by default, but individual fields are mutable when marked as
+      such. The second field, <literal moreinfo="none">buckets</literal>, is immutable but contains
+      an array, which is itself a mutable data structure.</para>
 
-    <para>Now we'll start putting together the basic functions for
-    manipulating a dictionary.</para>
+    <para>Now we'll start putting together the basic functions for manipulating a dictionary:</para>
 
     <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dictionary.ml">imperative-programming/dictionary.ml</ulink>
@@ -138,31 +131,31 @@ let find t key =
 
     <para>The other functions defined above are fairly straightforward:</para>
 
-    <itemizedlist>
-      <listitem>
-        <para><literal moreinfo="none">create</literal> creates an empty
-        dictionary.</para>
-      </listitem>
-
-      <listitem>
-        <para><literal moreinfo="none">length</literal> grabs the length from
+    <variablelist>
+      <varlistentry>
+        <term><literal moreinfo="none">create</literal></term> <listitem><para>Creates an empty
+        dictionary.</para></listitem>
+      </varlistentry>
+      
+      <varlistentry>
+        <term><literal moreinfo="none">length</literal></term> <listitem><para>Grabs the length from
         the corresponding record field, thus returning the number of entries
-        stored in the dictionary.</para>
-      </listitem>
-
-      <listitem>
-        <para><literal moreinfo="none">find</literal> looks for a matching key
+        stored in the dictionary.</para></listitem>
+      </varlistentry>
+      
+      <varlistentry>
+       <term> <literal moreinfo="none">find</literal></term> <listitem><para>Looks for a matching key
         in the table and returns the corresponding value if found as an
-        option.</para>
-      </listitem>
-    </itemizedlist>
-
+        option.</para></listitem>
+      </varlistentry>
+    </variablelist>
+    
     <para>Another important piece of imperative syntax shows up in <literal
     moreinfo="none">find</literal>: we write <literal
     moreinfo="none">array.(index)</literal> to grab a value from an array.
     <literal moreinfo="none">find</literal> also uses <literal
     moreinfo="none">List.find_map</literal>, which you can see the type of by
-    typing it into the toplevel.</para>
+    typing it into the toplevel:</para>
 
     <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/examples.topscript">imperative-programming/examples.topscript</ulink>
@@ -213,7 +206,7 @@ let find t key =
     more familiar and idiomatic in the context of imperative code.</para>
 
     <para>The following code is for adding and removing mappings from the
-    dictionary.</para>
+    dictionary:</para>
 
     <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dictionary.ml">imperative-programming/dictionary.ml</ulink>
@@ -244,7 +237,7 @@ let remove t key =
     t.length &lt;- t.length - 1
   )</programlisting>
 
-    <para>This above code is made more complicated by the fact that we need to
+    <para>This preceding code is made more complicated by the fact that we need to
     detect whether we are overwriting or removing an existing binding, so we
     can decide whether <literal moreinfo="none">t.length</literal> needs to be
     changed. The helper function <literal
@@ -311,7 +304,7 @@ let () = &lt;expr2&gt; in
   </sect1>
 
   <sect1 id="primitive-mutable-data">
-    <title>Primitive mutable data</title>
+    <title>Primitive Mutable Data</title>
 
     <para>Now that we've looked at a complete example, let's take a more
     systematic look at imperative programming in OCaml. We encountered two
@@ -320,12 +313,11 @@ let () = &lt;expr2&gt; in
     primitive forms of mutable data that are available in OCaml.</para>
 
     <sect2 id="array-like-data">
-      <title>Array-like data</title>
+      <title>Array-like Data</title>
 
-      <para>OCaml supports a number of array-like data structures;
-      <emphasis>i.e.</emphasis>, mutable integer-indexed containers that
-      provide constant-time access to their elements. We'll discuss several of
-      them below.</para>
+      <para>OCaml supports a number of array-like data structures; i.e., mutable integer-indexed
+        containers that provide constant-time access to their elements. We'll discuss several of
+        them in this section.</para>
 
       <sect3 id="ordinary-arrays">
         <title>Ordinary arrays</title>
@@ -368,14 +360,12 @@ let () = &lt;expr2&gt; in
       <sect3 id="strings">
         <title>Strings</title>
 
-        <para>Strings are essentially byte-arrays which are often used for
-        textual data. The main advantage of using a <literal
-        moreinfo="none">string</literal> in place of a <literal
-        moreinfo="none">Char.t array</literal> (a <literal
-        moreinfo="none">Char.t</literal> is an 8-bit character) is that the
-        former is considerably more space efficient; an array uses one word—8
-        bytes on a 64-bit machine—to store a single entry, whereas strings use
-        one byte per character.</para>
+        <para>Strings are essentially byte arrays which are often used for textual data. The main
+          advantage of using a <literal moreinfo="none">string</literal> in place of a <literal
+            moreinfo="none">Char.t array</literal> (a <literal moreinfo="none">Char.t</literal> is
+          an 8-bit character) is that the former is considerably more space efficient; an array uses
+          one word—eight bytes on a 64-bit machine—to store a single entry, whereas strings use one
+          byte per character.</para>
 
         <para>Strings also come with their own syntax for getting and setting
         values:</para>
@@ -409,13 +399,12 @@ let () = &lt;expr2&gt; in
     </sect2>
 
     <sect2 id="mutable-record-and-object-fields-and-ref-cells">
-      <title>Mutable record and object fields and ref cells</title>
+      <title>Mutable Record and Object Fields and Ref Cells</title>
 
-      <para>As we've seen, records are immutable by default, but individual
-      record fields can be declared as mutable. These mutable fields can be
-      set using the <literal moreinfo="none">&lt;-</literal> operator,
-      <emphasis>i.e.</emphasis>, <literal moreinfo="none">record.field &lt;-
-      expr</literal>.</para>
+      <para>As we've seen, records are immutable by default, but individual record fields can be
+        declared as mutable. These mutable fields can be set using the <literal moreinfo="none"
+          >&lt;-</literal> operator, i.e., <literal moreinfo="none">record.field &lt;-
+          expr</literal>.</para>
 
       <para>As we'll see in <xref linkend="objects" />, fields of an object
       can similarly be declared as mutable, and can then be modified in much
@@ -445,25 +434,25 @@ let () = &lt;expr2&gt; in
         <para>The standard library defines the following operators for working
         with refs.</para>
 
-        <itemizedlist>
-          <listitem>
-            <para><literal moreinfo="none">ref expr</literal> constructs a
+        <variablelist>
+          <varlistentry>
+            <term><literal moreinfo="none">ref expr</literal></term> <listitem><para>Constructs a
             reference cell containing the value defined by the expression
-            <literal moreinfo="none">expr</literal>.</para>
-          </listitem>
-
-          <listitem>
-            <para><literal moreinfo="none">!refcell</literal> returns the
-            contents of the reference cell.</para>
-          </listitem>
-
-          <listitem>
-            <para><literal moreinfo="none">refcell := expr</literal> replaces
-            the contents of the reference cell.</para>
-          </listitem>
-        </itemizedlist>
-
-        <para>You can see these in action below.</para>
+              <literal moreinfo="none">expr</literal>.</para></listitem>
+          </varlistentry>
+          
+          
+           <varlistentry> <term><literal moreinfo="none">!refcell</literal></term> <listitem><para>Returns the
+             contents of the reference cell.</para></listitem></varlistentry>
+          
+          
+          <varlistentry>
+            <term><literal moreinfo="none">refcell := expr</literal></term> <listitem><para>Replaces
+            the contents of the reference cell.</para></listitem>
+          </varlistentry>
+        </variablelist>
+        
+        <para>You can see these in action:</para>
 
         <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/ref.topscript">imperative-programming/ref.topscript</ulink>
@@ -479,8 +468,8 @@ let () = &lt;expr2&gt; in
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">  !x;;</userinput>
 <computeroutput moreinfo="none">- : int = 2</computeroutput></programlisting>
 
-        <para>The above are just ordinary OCaml functions which could be
-        defined as follows.</para>
+        <para>The preceding are just ordinary OCaml functions, which could be defined as
+          follows:</para>
 
         <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/ref.topscript">imperative-programming/ref.topscript</ulink>
@@ -497,7 +486,7 @@ let () = &lt;expr2&gt; in
     </sect2>
 
     <sect2 id="foreign-functions">
-      <title>Foreign functions</title>
+      <title>Foreign Functions</title>
 
       <para>Another source of imperative operations in OCaml is resources that
       come from interfacing with external libraries through OCaml's foreign
@@ -511,8 +500,8 @@ let () = &lt;expr2&gt; in
   </sect1>
 
   <sect1 id="for-and-while-loops-1">
-    <title><literal moreinfo="none">for</literal> and <literal
-    moreinfo="none">while</literal> loops</title>
+    <title><literal moreinfo="none">for</literal> and <literal moreinfo="none">while</literal>
+      Loops</title>
 
     <para>OCaml provides support for traditional imperative looping
     constructs, in particular, <literal moreinfo="none">for</literal> and
@@ -523,12 +512,10 @@ let () = &lt;expr2&gt; in
     loops are both more concise and more idiomatic when programming
     imperatively.</para>
 
-    <para>The <literal moreinfo="none">for</literal> loop is the simpler of
-    the two. Indeed, we've already seen the <literal
-    moreinfo="none">for</literal> loop in action—the <literal
-    moreinfo="none">iter</literal> function in <literal
-    moreinfo="none">Dictionary</literal> is built using it. Here's a simple
-    example of <literal moreinfo="none">for</literal>.</para>
+    <para>The <literal moreinfo="none">for</literal> loop is the simpler of the two. Indeed, we've
+      already seen the <literal moreinfo="none">for</literal> loop in action—the <literal
+        moreinfo="none">iter</literal> function in <literal moreinfo="none">Dictionary</literal> is
+      built using it. Here's a simple example of <literal moreinfo="none">for</literal>:</para>
 
     <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/for.topscript">imperative-programming/for.topscript</ulink>
@@ -542,9 +529,8 @@ let () = &lt;expr2&gt; in
 <computeroutput moreinfo="none">i = 3</computeroutput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
 
-    <para>As you can see, the upper and lower bounds are inclusive. We can
-    also use <literal moreinfo="none">downto</literal> to iterate in the other
-    direction.</para>
+    <para>As you can see, the upper and lower bounds are inclusive. We can also use <literal
+        moreinfo="none">downto</literal> to iterate in the other direction:</para>
 
     <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/for.topscript">imperative-programming/for.topscript</ulink>
@@ -558,17 +544,14 @@ let () = &lt;expr2&gt; in
 <computeroutput moreinfo="none">i = 0</computeroutput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
 
-    <para>Note that the loop variable of a <literal
-    moreinfo="none">for</literal> loop, <literal moreinfo="none">i</literal>
-    in this case, is immutable in the scope of the loop, and is also local to
-    the loop, <emphasis>i.e.</emphasis>, it can't be referenced outside of the
-    loop.</para>
+    <para>Note that the loop variable of a <literal moreinfo="none">for</literal> loop, <literal
+        moreinfo="none">i</literal> in this case, is immutable in the scope of the loop and is also
+      local to the loop, i.e., it can't be referenced outside of the loop.</para>
 
-    <para>OCaml also supports <literal moreinfo="none">while</literal> loops,
-    which include a condition and a body. The loop first evaluates the
-    condition, and then, if it evaluates to true, evaluates the body and
-    starts the loop again. Here's a simple example of a function for reversing
-    an array in-place.</para>
+    <para>OCaml also supports <literal moreinfo="none">while</literal> loops, which include a
+      condition and a body. The loop first evaluates the condition, and then, if it evaluates to
+      true, evaluates the body and starts the loop again. Here's a simple example of a function for
+      reversing an array in place:</para>
 
     <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/for.topscript">imperative-programming/for.topscript</ulink>
@@ -597,24 +580,21 @@ let () = &lt;expr2&gt; in
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">nums;;</userinput>
 <computeroutput moreinfo="none">- : int array = [|5; 4; 3; 2; 1|]</computeroutput></programlisting>
 
-    <para>In the above, we used <literal moreinfo="none">incr</literal> and
-    <literal moreinfo="none">decr</literal>, which are built-in functions for
-    incrementing and decrementing an <literal moreinfo="none">int
-    ref</literal> by one, respectively.</para>
+    <para>In the preceding example, we used <literal moreinfo="none">incr</literal> and <literal
+        moreinfo="none">decr</literal>, which are built-in functions for incrementing and
+      decrementing an <literal moreinfo="none">int ref</literal> by one, respectively.</para>
   </sect1>
 
   <sect1 id="example-doubly-linked-lists">
-    <title>Example: Doubly-linked lists</title>
+    <title>Example: Doubly-Linked Lists</title>
 
-    <para>Another common imperative data structure is the doubly-linked list.
-    Doubly-linked lists can be traversed in both directions and elements can
-    be added and removed from the list in constant time. Core defines a
-    doubly-linked list (the module is called <literal
-    moreinfo="none">Doubly_linked</literal>), but we'll define our own linked
-    list library as an illustration.</para>
+    <para>Another common imperative data structure is the doubly-linked list. Doubly-linked lists
+      can be traversed in both directions, and elements can be added and removed from the list in
+      constant time. Core defines a doubly-linked list (the module is called <literal
+        moreinfo="none">Doubly_linked</literal>), but we'll define our own linked list library as an
+      illustration.</para>
 
-    <para>Here's the <literal moreinfo="none">mli</literal> of the module
-    we'll build.</para>
+    <para>Here's the <literal moreinfo="none">mli</literal> of the module we'll build:</para>
 
     <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dlist.mli">imperative-programming/dlist.mli</ulink></para>
@@ -644,15 +624,13 @@ val insert_first : 'a t -&gt; 'a -&gt; 'a element
 val insert_after : 'a element -&gt; 'a -&gt; 'a element
 val remove : 'a t -&gt; 'a element -&gt; unit</programlisting>
 
-    <para>Note that there are two types defined here: <literal
-    moreinfo="none">'a t</literal>, the type of a list, and <literal
-    moreinfo="none">'a element</literal>, the type of an element. Elements act
-    as pointers to the interior of a list, and allow us to navigate the list
-    and give us a point at which to apply mutating operations.</para>
+    <para>Note that there are two types defined here: <literal moreinfo="none">'a t</literal>, the
+      type of a list; and <literal moreinfo="none">'a element</literal>, the type of an element.
+      Elements act as pointers to the interior of a list and allow us to navigate the list and give
+      us a point at which to apply mutating operations.</para>
 
-    <para>Now let's look at the implementation. We'll start by defining
-    <literal moreinfo="none">'a element</literal> and <literal
-    moreinfo="none">'a t</literal>.</para>
+    <para>Now let's look at the implementation. We'll start by defining <literal moreinfo="none">'a
+        element</literal> and <literal moreinfo="none">'a t</literal>:</para>
 
     <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dlist.ml">imperative-programming/dlist.ml</ulink>
@@ -683,8 +661,7 @@ type 'a t = 'a element option ref</programlisting>
     moreinfo="none">None</literal> if the list is empty, and <literal
     moreinfo="none">Some</literal> otherwise.</para>
 
-    <para>Now we can define a few basic functions that operate on lists and
-    elements.</para>
+    <para>Now we can define a few basic functions that operate on lists and elements:</para>
 
     <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dlist.ml">imperative-programming/dlist.ml</ulink>
@@ -699,21 +676,18 @@ let first t = !t
 let next elt = elt.next
 let prev elt = elt.prev</programlisting>
 
-    <para>These all follow relatively straight-forwardly from our type
-    definitions.</para>
+    <para>These all follow relatively straightforwardly from our type definitions.</para>
 
     <note>
-      <title>Cyclic data structures</title>
+      <title>Cyclic Data Structures</title>
 
-      <para>Doubly-linked lists are a cyclic data structure, meaning that it
-      is possible to follow a nontrivial sequence of pointers that closes in
-      on itself. In general, building cyclic data structures requires the use
-      of side-effects. This is done by constructing the data elements first,
-      and then adding cycles using assignment afterwards.</para>
+      <para>Doubly-linked lists are a cyclic data structure, meaning that it is possible to follow a
+        nontrivial sequence of pointers that closes in on itself. In general, building cyclic data
+        structures requires the use of side effects. This is done by constructing the data elements
+        first, and then adding cycles using assignment afterward.</para>
 
-      <para>There is an exception to this, though: you can construct
-      fixed-size cyclic data-structures using <literal moreinfo="none">let
-      rec</literal>.</para>
+      <para>There is an exception to this, though: you can construct fixed-size cyclic
+        data-structures using <literal moreinfo="none">let rec</literal>:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/examples.topscript">imperative-programming/examples.topscript</ulink>
@@ -741,11 +715,11 @@ let prev elt = elt.prev</programlisting>
     </note>
 
     <sect2 id="modifying-the-list">
-      <title>Modifying the list</title>
+      <title>Modifying the List</title>
 
-      <para>Now, we'll start considering operations that mutate the list,
-      starting with <literal moreinfo="none">insert_first</literal>, which
-      inserts an element at the front of the list.</para>
+      <para>Now, we'll start considering operations that mutate the list, starting with <literal
+          moreinfo="none">insert_first</literal>, which inserts an element at the front of the
+        list:</para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dlist.ml">imperative-programming/dlist.ml</ulink>
@@ -760,23 +734,19 @@ let prev elt = elt.prev</programlisting>
   t := Some new_elt;
   new_elt</programlisting>
 
-      <para><literal moreinfo="none">insert_first</literal> first defines a
-      new element <literal moreinfo="none">new_elt</literal>, and then links
-      it into the list, finally setting the list itself to point to <literal
-      moreinfo="none">new_elt</literal>. Note that the precedence of a
-      <literal moreinfo="none">match</literal> expression is very low, so to
-      separate it from the following assignment (<literal moreinfo="none">t :=
-      Some new_elt</literal>) we surround the match with <literal
-      moreinfo="none">begin ... end</literal>. We could have used parenthesis
-      for the same purpose. Without some kind of bracketing, the final
-      assignment would incorrectly become part of the <literal
-      moreinfo="none">None</literal> case.</para>
+      <para><literal moreinfo="none">insert_first</literal> first defines a new element <literal
+          moreinfo="none">new_elt</literal>, and then links it into the list, finally setting the
+        list itself to point to <literal moreinfo="none">new_elt</literal>. Note that the precedence
+        of a <literal moreinfo="none">match</literal> expression is very low, so to separate it from
+        the following assignment (<literal moreinfo="none">t := Some new_elt</literal>), we surround
+        the match with <literal moreinfo="none">begin ... end</literal>. We could have used
+        parentheses for the same purpose. Without some kind of bracketing, the final assignment
+        would incorrectly become part of the <literal moreinfo="none">None</literal> case.</para>
 
-      <para>We can use <literal moreinfo="none">insert_after</literal> to
-      insert elements later in the list. <literal
-      moreinfo="none">insert_after</literal> takes as arguments both an
-      <literal moreinfo="none">element</literal> after which to insert the new
-      node, and a value to insert.</para>
+      <para>We can use <literal moreinfo="none">insert_after</literal> to insert elements later in
+        the list. <literal moreinfo="none">insert_after</literal> takes as arguments both an
+          <literal moreinfo="none">element</literal> after which to insert the new node and a value
+        to insert:</para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dlist.ml">imperative-programming/dlist.ml</ulink>
@@ -791,8 +761,7 @@ let prev elt = elt.prev</programlisting>
   elt.next &lt;- Some new_elt;
   new_elt</programlisting>
 
-      <para>Finally, we need a <literal moreinfo="none">remove</literal>
-      function.</para>
+      <para>Finally, we need a <literal moreinfo="none">remove</literal> function:</para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dlist.ml">imperative-programming/dlist.ml</ulink>
@@ -811,13 +780,11 @@ let prev elt = elt.prev</programlisting>
   elt.prev &lt;- None;
   elt.next &lt;- None</programlisting>
 
-      <para>Note that the above code is careful to change the <literal
-      moreinfo="none">prev</literal> pointer of the following element, and the
-      <literal moreinfo="none">next</literal> pointer of the previous element,
-      if they exist. If there's no previous element, then the list pointer
-      itself is updated. In any case, the next and previous pointers of the
-      element itself are set to <literal
-      moreinfo="none">None</literal>.</para>
+      <para>Note that the preceding code is careful to change the <literal moreinfo="none"
+          >prev</literal> pointer of the following element and the <literal moreinfo="none"
+          >next</literal> pointer of the previous element, if they exist. If there's no previous
+        element, then the list pointer itself is updated. In any case, the next and previous
+        pointers of the element itself are set to <literal moreinfo="none">None</literal>.</para>
 
       <para>These functions are more fragile than they may seem. In
       particular, misuse of the interface may lead to corrupted data. For
@@ -826,18 +793,16 @@ let prev elt = elt.prev</programlisting>
       list. Similar problems arise from removing an element from a list it
       doesn't belong to.</para>
 
-      <para>This shouldn't be a big surprise. Complex imperative data
-      structures can be quite tricky; considerably trickier than their pure
-      equivalents. The issues described above can be dealt with by more
-      careful error detection, and such error correction is taken care of in
-      modules like Core's <literal moreinfo="none">Doubly_linked</literal>.
-      You should use imperative data structures from a well-designed library
-      when you can. And when you can't, you should make sure to put great care
-      into your error handling.</para>
+      <para>This shouldn't be a big surprise. Complex imperative data structures can be quite
+        tricky, considerably trickier than their pure equivalents. The issues described previously
+        can be dealt with by more careful error detection, and such error correction is taken care
+        of in modules like Core's <literal moreinfo="none">Doubly_linked</literal>. You should use
+        imperative data structures from a well-designed library when you can. And when you can't,
+        you should make sure to put great care into your error handling.</para>
     </sect2>
 
     <sect2 id="iteration-functions">
-      <title>Iteration functions</title>
+      <title>Iteration Functions</title>
 
       <para>When defining containers like lists, dictionaries and trees,
       you'll typically want to define a set of iteration functions, like
@@ -846,18 +811,15 @@ let prev elt = elt.prev</programlisting>
       moreinfo="none">fold</literal>, which let you concisely express common
       iteration patterns.</para>
 
-      <para><literal moreinfo="none">Dlist</literal> has two such iterators:
-      <literal moreinfo="none">iter</literal>, the goal of which is to call a
-      <literal moreinfo="none">unit</literal> producing function on every
-      element of the list, in order; and <literal
-      moreinfo="none">find_el</literal>, which runs a provided test function
-      on each values stored in the list, returning the first <literal
-      moreinfo="none">element</literal> that passes the test. Both <literal
-      moreinfo="none">iter</literal> and <literal
-      moreinfo="none">find_el</literal> are implemented using simple recursive
-      loops that use <literal moreinfo="none">next</literal> to walk from
-      element to element, and <literal moreinfo="none">value</literal> to
-      extract the element from a given node.</para>
+      <para><literal moreinfo="none">Dlist</literal> has two such iterators: <literal
+          moreinfo="none">iter</literal>, the goal of which is to call a <literal moreinfo="none"
+          >unit</literal> producing function on every element of the list, in order; and <literal
+          moreinfo="none">find_el</literal>, which runs a provided test function on each values
+        stored in the list, returning the first <literal moreinfo="none">element</literal> that
+        passes the test. Both <literal moreinfo="none">iter</literal> and <literal moreinfo="none"
+          >find_el</literal> are implemented using simple recursive loops that use <literal
+          moreinfo="none">next</literal> to walk from element to element and <literal
+          moreinfo="none">value</literal> to extract the element from a given node:</para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dlist.ml">imperative-programming/dlist.ml</ulink>
@@ -879,35 +841,30 @@ let find_el t ~f =
   in
   loop !t</programlisting>
 
-      <para>This completes our implementation, but there's still considerably
-      more work to be done to make a really usable doubly-linked list. As
-      mentioned earlier, you're probably better off using something like
-      Core's <literal moreinfo="none">Doubly_linked</literal> module that has
-      a more complete interface and has more of the tricky corner cases worked
-      out. Nonetheless, this example should serve to demonstrate some of the
-      techniques you can use to build non-trivial imperative data structure in
-      OCaml, as well as some of the pitfalls.</para>
+      <para>This completes our implementation, but there's still considerably more work to be done
+        to make a really usable doubly-linked list. As mentioned earlier, you're probably better off
+        using something like Core's <literal moreinfo="none">Doubly_linked</literal> module that has
+        a more complete interface and has more of the tricky corner cases worked out. Nonetheless,
+        this example should serve to demonstrate some of the techniques you can use to build
+        nontrivial imperative data structure in OCaml, as well as some of the pitfalls.</para>
     </sect2>
   </sect1>
 
   <sect1 id="laziness-and-other-benign-effects">
-    <title>Laziness and other benign effects</title>
+    <title>Laziness and Other Benign Effects</title>
 
-    <para>There are many instances where you basically want to program in a
-    pure style, but you want to make limited use of side-effects to improve
-    the performance of your code. Such side effects are sometimes called
-    <emphasis>benign effects</emphasis>, and they are a useful way of
-    leveraging OCaml's imperative features while still maintaining most of the
-    benefits of pure programming.</para>
+    <para>There are many instances where you basically want to program in a pure style, but you want
+      to make limited use of side effects to improve the performance of your code. Such side effects
+      are sometimes called <emphasis>benign effects</emphasis>, and they are a useful way of
+      leveraging OCaml's imperative features while still maintaining most of the benefits of pure
+      programming.</para>
 
-    <para>One of the simplest benign effects is <emphasis>laziness</emphasis>.
-    A lazy value is one that is not computed until it is actually needed. In
-    OCaml, lazy values are created using the <literal
-    moreinfo="none">lazy</literal> keyword, which can be used to convert any
-    expression of type <literal moreinfo="none">s</literal> into a lazy value
-    of type <literal moreinfo="none">s Lazy.t</literal>. The evaluation of
-    that expression is delayed until forced with <literal
-    moreinfo="none">Lazy.force</literal>.</para>
+    <para>One of the simplest benign effects is <emphasis>laziness</emphasis>. A lazy value is one
+      that is not computed until it is actually needed. In OCaml, lazy values are created using the
+        <literal moreinfo="none">lazy</literal> keyword, which can be used to convert any expression
+      of type <literal moreinfo="none">s</literal> into a lazy value of type <literal
+        moreinfo="none">s Lazy.t</literal>. The evaluation of that expression is delayed until
+      forced with <literal moreinfo="none">Lazy.force</literal>:</para>
 
     <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/lazy.topscript">imperative-programming/lazy.topscript</ulink>
@@ -926,9 +883,8 @@ let find_el t ~f =
     performed only once, and only after <literal
     moreinfo="none">force</literal> had been called.</para>
 
-    <para>To better understand how laziness works, let's walk through the
-    implementation of our own lazy type. We'll start by declaring types to
-    represent a lazy value.</para>
+    <para>To better understand how laziness works, let's walk through the implementation of our own
+      lazy type. We'll start by declaring types to represent a lazy value:</para>
 
     <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/lazy.topscript">imperative-programming/lazy.topscript</ulink>
@@ -958,9 +914,9 @@ let find_el t ~f =
     <literal moreinfo="none">Value</literal> or <literal
     moreinfo="none">Exn</literal> states.</para>
 
-    <para>We can create a lazy value from a thunk, <emphasis>i.e.</emphasis>,
-    a function that takes a unit argument. Wrapping an expression in a thunk
-    is another way to suspend the computation of an expression.</para>
+    <para>We can create a lazy value from a thunk, i.e., a function that takes a unit argument.
+      Wrapping an expression in a thunk is another way to suspend the computation of an
+      expression:</para>
 
     <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/lazy.topscript">imperative-programming/lazy.topscript</ulink>
@@ -973,8 +929,8 @@ let find_el t ~f =
 <userinput moreinfo="none">    (fun () -&gt; print_string "performing lazy computation\n"; sqrt 16.);;</userinput>
 <computeroutput moreinfo="none">val v : float lazy_state ref = {contents = Delayed &lt;fun&gt;}</computeroutput></programlisting>
 
-    <para>Now we just need a way to force a lazy value. The following function
-    does just that.</para>
+    <para>Now we just need a way to force a lazy value. The following function does just
+      that:</para>
 
     <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/lazy.topscript">imperative-programming/lazy.topscript</ulink>
@@ -1017,18 +973,17 @@ let find_el t ~f =
     moreinfo="none">lazy (sqrt 16.)</literal>.</para>
 
     <sect2 id="memoization-and-dynamic-programming">
-      <title>Memoization and dynamic programming</title>
+      <title>Memoization and Dynamic Programming</title>
 
       <para>Another benign effect is <emphasis>memoization</emphasis>. A
       memoized function remembers the result of previous invocations of the
       function so that they can be returned without further computation when
       the same arguments are presented again.</para>
 
-      <para>Here's a function that takes as an argument an arbitrary
-      single-argument function and returns a memoized version of that
-      function. Here we'll use Core's <literal
-      moreinfo="none">Hashtbl</literal> module, rather than our toy <literal
-      moreinfo="none">Dictionary</literal>.</para>
+      <para>Here's a function that takes as an argument an arbitrary single-argument function and
+        returns a memoized version of that function. Here we'll use Core's <literal moreinfo="none"
+          >Hashtbl</literal> module, rather than our toy <literal moreinfo="none"
+          >Dictionary</literal>:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/memo.topscript">imperative-programming/memo.topscript</ulink>
@@ -1047,24 +1002,20 @@ let find_el t ~f =
 <userinput moreinfo="none">    );;</userinput>
 <computeroutput moreinfo="none">val memoize : ('a -&gt; 'b) -&gt; 'a -&gt; 'b = &lt;fun&gt;</computeroutput></programlisting>
 
-      <para>The code above is a bit tricky. <literal
-      moreinfo="none">memoize</literal> takes as its argument a function
-      <literal moreinfo="none">f</literal>, and then allocates a hash table
-      (called <literal moreinfo="none">table</literal>) and returns a new
-      function as the memoized version of <literal
-      moreinfo="none">f</literal>. When called, this new function looks in
-      <literal moreinfo="none">table</literal> first, and if it fails to find
-      a value, calls <literal moreinfo="none">f</literal> and stashes the
-      result in <literal moreinfo="none">table</literal>. Note that <literal
-      moreinfo="none">table</literal> doesn't go out of scope as long as the
-      function returned by <literal moreinfo="none">memoize</literal> is in
-      scope.</para>
+      <para>The preceding code is a bit tricky. <literal moreinfo="none">memoize</literal> takes as
+        its argument a function <literal moreinfo="none">f</literal> and then allocates a hash table
+        (called <literal moreinfo="none">table</literal>) and returns a new function as the memoized
+        version of <literal moreinfo="none">f</literal>. When called, this new function looks in
+          <literal moreinfo="none">table</literal> first, and if it fails to find a value, calls
+          <literal moreinfo="none">f</literal> and stashes the result in <literal moreinfo="none"
+          >table</literal>. Note that <literal moreinfo="none">table</literal> doesn't go out of
+        scope as long as the function returned by <literal moreinfo="none">memoize</literal> is in
+        scope.</para>
 
-      <para>Memoization can be useful whenever you have a function that is
-      expensive to recompute, and you don't mind caching old values
-      indefinitely. One important caution: a memoized function by its nature
-      leaks memory. As long as you hold on to the memoized function, you're
-      holding every result it has returned thus far.</para>
+      <para>Memoization can be useful whenever you have a function that is expensive to recompute
+        and you don't mind caching old values indefinitely. One important caution: a memoized
+        function by its nature leaks memory. As long as you hold on to the memoized function, you're
+        holding every result it has returned thus far.</para>
 
       <para>Memoization is also useful for efficiently implementing some
       recursive algorithms. One good example is the algorithm for computing
@@ -1075,9 +1026,9 @@ let find_el t ~f =
       distance metric can be useful for a variety of approximate string
       matching problems, like spell checkers.</para>
 
-      <para>Consider the following code for computing the edit distance.
-      Understanding the algorithm isn't important here, but you should pay
-      attention to the structure of the recursive calls.</para>
+      <para>Consider the following code for computing the edit distance. Understanding the algorithm
+        isn't important here, but you should pay attention to the structure of the recursive
+        calls:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/memo.topscript">imperative-programming/memo.topscript</ulink>
@@ -1131,13 +1082,11 @@ let find_el t ~f =
         </mediaobject>
       </informalfigure>
 
-      <para>As you can see, some of these calls are repeats. For example,
-      there are two different calls to <literal moreinfo="none">edit_distance
-      "OCam" "oca"</literal>. The number of redundant calls grows
-      exponentially with the size of the strings, meaning that our
-      implementation of <literal moreinfo="none">edit_distance</literal> is
-      brutally slow for large strings. We can see this by writing a small
-      timing function.</para>
+      <para>As you can see, some of these calls are repeats. For example, there are two different
+        calls to <literal moreinfo="none">edit_distance "OCam" "oca"</literal>. The number of
+        redundant calls grows exponentially with the size of the strings, meaning that our
+        implementation of <literal moreinfo="none">edit_distance</literal> is brutally slow for
+        large strings. We can see this by writing a small timing function:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/memo.topscript">imperative-programming/memo.topscript</ulink>
@@ -1152,7 +1101,7 @@ let find_el t ~f =
 <userinput moreinfo="none">    x ;;</userinput>
 <computeroutput moreinfo="none">val time : (unit -&gt; 'a) -&gt; 'a = &lt;fun&gt;</computeroutput></programlisting>
 
-      <para>And now we can use this to try out some examples.</para>
+      <para>And now we can use this to try out some examples:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/memo.topscript">imperative-programming/memo.topscript</ulink>
@@ -1169,17 +1118,14 @@ let find_el t ~f =
       <para>Just those few extra characters made it thousands of times
       slower!</para>
 
-      <para>Memoization would be a huge help here, but to fix the problem, we
-      need to memoize the calls that <literal
-      moreinfo="none">edit_distance</literal> makes to itself. This technique
-      is sometimes referred to as <emphasis>dynamic programming</emphasis>. To
-      see how to do this, let's step away from <literal
-      moreinfo="none">edit_distance</literal>, and instead consider a much
-      simpler example: computing the nth element of the Fibonacci sequence.
-      The Fibonacci sequence by definition starts out with two <literal
-      moreinfo="none">1</literal>'s, with every subsequent element being the
-      sum of the previous two. The classic recursive definition of Fibonacci
-      is as follows:</para>
+      <para>Memoization would be a huge help here, but to fix the problem, we need to memoize the
+        calls that <literal moreinfo="none">edit_distance</literal> makes to itself. This technique
+        is sometimes referred to as <emphasis>dynamic programming</emphasis>. To see how to do this,
+        let's step away from <literal moreinfo="none">edit_distance</literal> and instead consider a
+        much simpler example: computing the nth element of the Fibonacci sequence. The Fibonacci
+        sequence by definition starts out with two <literal moreinfo="none">1</literal>'s, with
+        every subsequent element being the sum of the previous two. The classic recursive definition
+        of Fibonacci is as follows:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">imperative-programming/fib.topscript</ulink>
@@ -1190,10 +1136,9 @@ let find_el t ~f =
 <userinput moreinfo="none">    if i &lt;= 1 then 1 else fib (i - 1) + fib (i - 2);;</userinput>
 <computeroutput moreinfo="none">val fib : int -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
-      <para>This is, however, exponentially slow, for the same reason that
-      <literal moreinfo="none">edit_distance</literal> was slow: we end up
-      making many redundant calls to <literal moreinfo="none">fib</literal>.
-      It shows up quite dramatically in the performance.</para>
+      <para>This is, however, exponentially slow, for the same reason that <literal moreinfo="none"
+          >edit_distance</literal> was slow: we end up making many redundant calls to <literal
+          moreinfo="none">fib</literal>. It shows up quite dramatically in the performance:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">imperative-programming/fib.topscript</ulink>
@@ -1211,12 +1156,11 @@ let find_el t ~f =
       thousands of times longer to compute than <literal moreinfo="none">fib
       20</literal>.</para>
 
-      <para>So, how can we use memoization to make this faster? The tricky bit
-      is that we need to insert the memoization before the recursive calls
-      within <literal moreinfo="none">fib</literal>. We can't just define
-      <literal moreinfo="none">fib</literal> in the ordinary way and memoize
-      it after the fact and expect the first call to <literal
-      moreinfo="none">fib</literal> to be improved.</para>
+      <para>So, how can we use memoization to make this faster? The tricky bit is that we need to
+        insert the memoization before the recursive calls within <literal moreinfo="none"
+          >fib</literal>. We can't just define <literal moreinfo="none">fib</literal> in the
+        ordinary way and memoize it after the fact and expect the first call to <literal
+          moreinfo="none">fib</literal> to be improved:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">imperative-programming/fib.topscript</ulink>
@@ -1232,12 +1176,10 @@ let find_el t ~f =
 <computeroutput moreinfo="none">Time: 0.00309944ms</computeroutput>
 <computeroutput moreinfo="none">- : int = 165580141</computeroutput></programlisting>
 
-      <para>In order to make <literal moreinfo="none">fib</literal> fast, our
-      first step will be to rewrite <literal moreinfo="none">fib</literal> in
-      a way that unwinds the recursion. The following version expects as its
-      first argument a function (called <literal
-      moreinfo="none">fib</literal>) that will be called in lieu of the usual
-      recursive call.</para>
+      <para>In order to make <literal moreinfo="none">fib</literal> fast, our first step will be to
+        rewrite <literal moreinfo="none">fib</literal> in a way that unwinds the recursion. The
+        following version expects as its first argument a function (called <literal moreinfo="none"
+          >fib</literal>) that will be called in lieu of the usual recursive call:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">imperative-programming/fib.topscript</ulink>
@@ -1249,8 +1191,8 @@ let find_el t ~f =
 <userinput moreinfo="none">    else fib (i - 1) + fib (i - 2) ;;</userinput>
 <computeroutput moreinfo="none">val fib_norec : (int -&gt; int) -&gt; int -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
-      <para>We can now turn this back into an ordinary Fibonacci function by
-      tying the recursive knot, as shown below.</para>
+      <para>We can now turn this back into an ordinary Fibonacci function by tying the recursive
+        knot:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">imperative-programming/fib.topscript</ulink>
@@ -1262,9 +1204,8 @@ let find_el t ~f =
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">fib 20;;</userinput>
 <computeroutput moreinfo="none">- : int = 6765</computeroutput></programlisting>
 
-      <para>We can even write a polymorphic function that we'll call <literal
-      moreinfo="none">make_rec</literal> that can tie the recursive knot for
-      any function of this form.</para>
+      <para>We can even write a polymorphic function that we'll call <literal moreinfo="none"
+          >make_rec</literal> that can tie the recursive knot for any function of this form:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">imperative-programming/fib.topscript</ulink>
@@ -1281,21 +1222,18 @@ let find_el t ~f =
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">fib 20;;</userinput>
 <computeroutput moreinfo="none">- : int = 6765</computeroutput></programlisting>
 
-      <para>This is a pretty strange piece of code, and it may take a few
-      minutes of thought to figure out what's going on. Like <literal
-      moreinfo="none">fib_norec</literal>, the function <literal
-      moreinfo="none">f_norec</literal> passed into <literal
-      moreinfo="none">make_rec</literal> is a function that isn't recursive,
-      but takes as an argument a function that it will call. What <literal
-      moreinfo="none">make_rec</literal> does is to essentially feed <literal
-      moreinfo="none">f_norec</literal> to itself, thus making it a true
-      recursive function.</para>
+      <para>This is a pretty strange piece of code, and it may take a few minutes of thought to
+        figure out what's going on. Like <literal moreinfo="none">fib_norec</literal>, the function
+          <literal moreinfo="none">f_norec</literal> passed into <literal moreinfo="none"
+          >make_rec</literal> is a function that isn't recursive but takes as an argument a function
+        that it will call. What <literal moreinfo="none">make_rec</literal> does is to essentially
+        feed <literal moreinfo="none">f_norec</literal> to itself, thus making it a true recursive
+        function.</para>
 
-      <para>This is clever enough, but all we've really done is find a new way
-      to implement the same old slow Fibonacci function. To make it faster, we
-      need a variant on <literal moreinfo="none">make_rec</literal> that
-      inserts memoization when it ties the recursive knot. We'll call that
-      function <literal moreinfo="none">memo_rec</literal>.</para>
+      <para>This is clever enough, but all we've really done is find a new way to implement the same
+        old slow Fibonacci function. To make it faster, we need a variant on <literal
+          moreinfo="none">make_rec</literal> that inserts memoization when it ties the recursive
+        knot. We'll call that function <literal moreinfo="none">memo_rec</literal>:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">imperative-programming/fib.topscript</ulink>
@@ -1317,9 +1255,8 @@ let find_el t ~f =
       knot without using a <literal moreinfo="none">let rec</literal>, which
       for reasons we'll describe later wouldn't work here.</para>
 
-      <para>Using <literal moreinfo="none">memo_rec</literal>, we can now
-      build an efficient version of <literal
-      moreinfo="none">fib</literal>.</para>
+      <para>Using <literal moreinfo="none">memo_rec</literal>, we can now build an efficient version
+        of <literal moreinfo="none">fib</literal>:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">imperative-programming/fib.topscript</ulink>
@@ -1348,9 +1285,9 @@ let find_el t ~f =
       memory leak—the memoization table is collected after the computation
       completes.</para>
 
-      <para>We can use <literal moreinfo="none">memo_rec</literal> as part of
-      a single declaration that makes this look like it's little more than a
-      special form of <literal moreinfo="none">let rec</literal>.</para>
+      <para>We can use <literal moreinfo="none">memo_rec</literal> as part of a single declaration
+        that makes this look like it's little more than a special form of <literal moreinfo="none"
+          >let rec</literal>:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">imperative-programming/fib.topscript</ulink>
@@ -1399,10 +1336,9 @@ let find_el t ~f =
 <userinput moreinfo="none">        ]) ;;</userinput>
 <computeroutput moreinfo="none">val edit_distance : string * string -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
-      <para>This new version of <literal
-      moreinfo="none">edit_distance</literal> is much more efficient than the
-      one we started with; the following call is many thousands of times
-      faster than it was without memoization.</para>
+      <para>This new version of <literal moreinfo="none">edit_distance</literal> is much more
+        efficient than the one we started with; the following call is many thousands of times faster
+        than it was without memoization:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/memo.topscript">imperative-programming/memo.topscript</ulink>
@@ -1435,10 +1371,9 @@ let find_el t ~f =
 <computeroutput moreinfo="none">Characters 39-69:</computeroutput>
 <computeroutput moreinfo="none">Error: This kind of expression is not allowed as right-hand side of `let rec'</computeroutput></programlisting>
 
-        <para>OCaml rejects the definition because OCaml, as a strict
-        language, has limits on what it can put on the right hand side of a
-        <literal moreinfo="none">let rec</literal>. In particular, imagine how
-        the following code snippet would be compiled.</para>
+        <para>OCaml rejects the definition because OCaml, as a strict language, has limits on what
+          it can put on the right hand side of a <literal moreinfo="none">let rec</literal>. In
+          particular, imagine how the following code snippet would be compiled:</para>
 
         <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/let_rec.ml">imperative-programming/let_rec.ml</ulink></para>
@@ -1487,11 +1422,9 @@ let find_el t ~f =
             moreinfo="none"># </prompt><userinput moreinfo="none">Lazy.force x;;</userinput>
 <computeroutput moreinfo="none">Exception: Lazy.Undefined.</computeroutput></programlisting>
 
-        <para>But we can also create useful recursive definitions with
-        <literal moreinfo="none">lazy</literal>. In particular, we can use
-        laziness to make our definition of <literal
-        moreinfo="none">memo_rec</literal> work without explicit
-        mutation.</para>
+        <para>But we can also create useful recursive definitions with <literal moreinfo="none"
+            >lazy</literal>. In particular, we can use laziness to make our definition of <literal
+            moreinfo="none">memo_rec</literal> work without explicit mutation:</para>
 
         <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/letrec.topscript">imperative-programming/letrec.topscript</ulink>
@@ -1515,16 +1448,14 @@ let find_el t ~f =
   </sect1>
 
   <sect1 id="input-and-output">
-    <title>Input and output</title>
+    <title>Input and Output</title>
 
-    <para>Imperative programming is about more than modifying in-memory
-    data-structures. Any function that doesn't boil down to a deterministic
-    transformation from its arguments to its return value is imperative in
-    nature. That includes not only things that mutate your program's data, but
-    also operations that interact with the world outside of your program. An
-    important example of this kind of interaction is I/O,
-    <emphasis>i.e.</emphasis>, operations for reading or writing data to
-    things like files, terminal input and output, and network sockets.</para>
+    <para>Imperative programming is about more than modifying in-memory data structures. Any
+      function that doesn't boil down to a deterministic transformation from its arguments to its
+      return value is imperative in nature. That includes not only things that mutate your program's
+      data, but also operations that interact with the world outside of your program. An important
+      example of this kind of interaction is I/O, i.e., operations for reading or writing data to
+      things like files, terminal input and output, and network sockets.</para>
 
     <para>There are multiple I/O libraries in OCaml. In this section we'll
     discuss OCaml's buffered I/O library that can be used through the <literal
@@ -1556,42 +1487,40 @@ let find_el t ~f =
       around three channels, which correspond to the three standard file
       descriptors in Unix:</para>
 
-      <itemizedlist>
-        <listitem>
-          <para><literal moreinfo="none">In_channel.stdin</literal>. The
-          "standard input" channel. By default, input comes from the terminal,
-          which handles keyboard input.</para>
-        </listitem>
-
-        <listitem>
-          <para><literal moreinfo="none">Out_channel.stdout</literal>. The
+      <variablelist>
+        <varlistentry>
+          <term><literal moreinfo="none">In_channel.stdin</literal></term> <listitem><para>The
+            "standard input" channel. By default, input comes from the terminal,
+            which handles keyboard input.</para></listitem>
+        </varlistentry>
+        
+        <varlistentry>
+         <term> <literal moreinfo="none">Out_channel.stdout</literal></term> <listitem><para>The
           "standard output" channel. By default, output written to <literal
           moreinfo="none">stdout</literal> appears on the user
-          terminal.</para>
-        </listitem>
-
-        <listitem>
-          <para><literal moreinfo="none">Out_channel.stderr</literal>. The
+          terminal.</para></listitem>
+        </varlistentry>
+        
+        <varlistentry>
+          <term><literal moreinfo="none">Out_channel.stderr</literal></term> <listitem><para>The
           "standard error" channel. This is similar to <literal
-          moreinfo="none">stdout</literal>, but is intended for error
-          messages.</para>
-        </listitem>
-      </itemizedlist>
+          moreinfo="none">stdout</literal> but is intended for error
+          messages.</para></listitem>
+        </varlistentry>
+      </variablelist>
+      
+      <para>The values <literal moreinfo="none">stdin</literal>, <literal moreinfo="none"
+          >stdout</literal>, and <literal moreinfo="none">stderr</literal> are useful enough that
+        they are also available in the global namespace directly, without having to go through the
+          <literal moreinfo="none">In_channel</literal> and <literal moreinfo="none"
+          >Out_channel</literal> modules.</para>
 
-      <para>The values <literal moreinfo="none">stdin</literal>, <literal
-      moreinfo="none">stdout</literal> and <literal
-      moreinfo="none">stderr</literal> are useful enough that they are also
-      available in the global name-space directly, without having to go
-      through the <literal moreinfo="none">In_channel</literal> and <literal
-      moreinfo="none">Out_channel</literal> modules.</para>
-
-      <para>Let's see this in action in a simple interactive application. The
-      following program, <literal moreinfo="none">time_converter</literal>,
-      prompts the user for a timezone, and then prints out the current time in
-      that timezone. Here, we use Core's <literal
-      moreinfo="none">Zone</literal> module for looking up a timezone, and the
-      <literal moreinfo="none">Time</literal> module for computing the current
-      time and printing it out in the timezone in question.</para>
+      <para>Let's see this in action in a simple interactive application. The following program,
+          <literal moreinfo="none">time_converter</literal>, prompts the user for a timezone, and
+        then prints out the current time in that timezone. Here, we use Core's <literal
+          moreinfo="none">Zone</literal> module for looking up a timezone, and the <literal
+          moreinfo="none">Time</literal> module for computing the current time and printing it out
+        in the timezone in question:</para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/time_converter.ml">imperative-programming/time_converter.ml</ulink></para>
@@ -1623,8 +1552,8 @@ let () =
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./time_converter.byte</userinput>
 <computeroutput moreinfo="none">Pick a timezone:</computeroutput></programlisting>
 
-      <para>You can then type in the name of a timezone and hit return, and it
-      will print out the current time in the timezone in question.</para>
+      <para>You can then type in the name of a timezone and hit Return, and it will print out the
+        current time in the timezone in question:</para>
 
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/time_converter2.out">imperative-programming/time_converter2.out</ulink></para>
@@ -1633,32 +1562,26 @@ let () =
           moreinfo="none">Pick a timezone: Europe/London</computeroutput>
 <computeroutput moreinfo="none">The time in Europe/London is 2013-08-15 00:03:10.666220+01:00.</computeroutput></programlisting>
 
-      <para>We called <literal moreinfo="none">Out_channel.flush</literal> on
-      <literal moreinfo="none">stdout</literal> because <literal
-      moreinfo="none">out_channel</literal>s are buffered, which is to say
-      that OCaml doesn't immediately do a write every time you call <literal
-      moreinfo="none">output_string</literal>. Instead, writes are buffered
-      until either enough has been written to trigger the flushing of the
-      buffers, or until a flush is explicitly requested. This greatly
-      increases the efficiency of the writing process, by reducing the number
-      of system calls.</para>
+      <para>We called <literal moreinfo="none">Out_channel.flush</literal> on <literal
+          moreinfo="none">stdout</literal> because <literal moreinfo="none">out_channel</literal>s
+        are buffered, which is to say that OCaml doesn't immediately do a write every time you call
+          <literal moreinfo="none">output_string</literal>. Instead, writes are buffered until
+        either enough has been written to trigger the flushing of the buffers, or until a flush is
+        explicitly requested. This greatly increases the efficiency of the writing process by
+        reducing the number of system calls.</para>
 
-      <para>Note that <literal moreinfo="none">In_channel.input_line</literal>
-      returns a <literal moreinfo="none">string option</literal>, with
-      <literal moreinfo="none">None</literal> indicating that the input stream
-      has ended (<emphasis>i.e.</emphasis>, an end-of-file condition).
-      <literal moreinfo="none">Out_channel.output_string</literal> is used to
-      print the final output, and <literal
-      moreinfo="none">Out_channel.flush</literal> is called to flush that
-      output to the screen. The final flush is not technically required, since
-      the program ends after that instruction, at which point all remaining
-      output will be flushed anyway, but the explicit flush is nonetheless
-      good practice.</para>
+      <para>Note that <literal moreinfo="none">In_channel.input_line</literal> returns a <literal
+          moreinfo="none">string option</literal>, with <literal moreinfo="none">None</literal>
+        indicating that the input stream has ended (i.e., an end-of-file condition). <literal
+          moreinfo="none">Out_channel.output_string</literal> is used to print the final output, and
+          <literal moreinfo="none">Out_channel.flush</literal> is called to flush that output to the
+        screen. The final flush is not technically required, since the program ends after that
+        instruction, at which point all remaining output will be flushed anyway, but the explicit
+        flush is nonetheless good practice.</para>
     </sect2>
 
     <sect2 id="formatted-output-with-printf">
-      <title>Formatted output with <literal
-      moreinfo="none">printf</literal></title>
+      <title>Formatted Output with <literal moreinfo="none">printf</literal></title>
 
       <para>Generating output with functions like <literal
       moreinfo="none">Out_channel.output_string</literal> is simple and easy
@@ -1681,10 +1604,9 @@ let () =
 <computeroutput moreinfo="none">3 is an integer, 4.5 is a float, "five" is a string</computeroutput>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
 
-      <para>Unlike C's <literal moreinfo="none">printf</literal>, the <literal
-      moreinfo="none">printf</literal> in OCaml is type-safe. In particular,
-      if we provide an argument whose type doesn't match what's presented in
-      the format string, we'll get a type error.</para>
+      <para>Unlike C's <literal moreinfo="none">printf</literal>, the <literal moreinfo="none"
+          >printf</literal> in OCaml is type-safe. In particular, if we provide an argument whose
+        type doesn't match what's presented in the format string, we'll get a type error:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/printf.topscript">imperative-programming/printf.topscript</ulink>
@@ -1697,7 +1619,7 @@ let () =
 <computeroutput moreinfo="none">         int</computeroutput></programlisting>
 
       <sidebar>
-        <title>Understanding format strings</title>
+        <title>Understanding Format Strings</title>
 
         <para>The format strings used by <literal
         moreinfo="none">printf</literal> turn out to be quite different from
@@ -1707,11 +1629,10 @@ let () =
         match the types of the rest of the arguments passed to <literal
         moreinfo="none">printf</literal>.</para>
 
-        <para>To check this, OCaml needs to analyze the contents of the format
-        string at compile time, which means the format string needs to be
-        available as a string literal at compile time. Indeed, if you try to
-        pass an ordinary string to <literal moreinfo="none">printf</literal>,
-        the compiler will complain.</para>
+        <para>To check this, OCaml needs to analyze the contents of the format string at compile
+          time, which means the format string needs to be available as a string literal at compile
+          time. Indeed, if you try to pass an ordinary string to <literal moreinfo="none"
+            >printf</literal>, the compiler will complain:</para>
 
         <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/printf.topscript">imperative-programming/printf.topscript</ulink>
@@ -1742,8 +1663,7 @@ let () =
 <userinput moreinfo="none">    "%i is an integer, %F is a float, \"%s\" is a string\n";;</userinput>
 <computeroutput moreinfo="none">val fmt : (int -&gt; float -&gt; string -&gt; 'c, 'b, 'c) format = &lt;abstr&gt;</computeroutput></programlisting>
 
-        <para>And accordingly, we can pass it to <literal
-        moreinfo="none">printf</literal>.</para>
+        <para>And accordingly, we can pass it to <literal moreinfo="none">printf</literal>:</para>
 
         <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/printf.topscript">imperative-programming/printf.topscript</ulink>
@@ -1763,9 +1683,8 @@ let () =
         your head.</para>
       </sidebar>
 
-      <para>Now let's see how we can rewrite our time conversion program to be
-      a little more concise using <literal
-      moreinfo="none">printf</literal>.</para>
+      <para>Now let's see how we can rewrite our time conversion program to be a little more concise
+        using <literal moreinfo="none">printf</literal>:</para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/time_converter2.ml">imperative-programming/time_converter2.ml</ulink></para>
@@ -1781,10 +1700,10 @@ let () =
     let time_string = Time.to_string_abs (Time.now ()) ~zone in
     printf "The time in %s is %s.\n%!" (Zone.to_string zone) time_string</programlisting>
 
-      <para>In the above example, we've used only two formatting directives:
-      <literal moreinfo="none">%s</literal>, for including a string, and
-      <literal moreinfo="none">%!</literal> which causes <literal
-      moreinfo="none">printf</literal> to flush the channel.</para>
+      <para>In the preceding example, we've used only two formatting directives: <literal
+          moreinfo="none">%s</literal>, for including a string, and <literal moreinfo="none"
+          >%!</literal> which causes <literal moreinfo="none">printf</literal> to flush the
+        channel.</para>
 
       <para><literal moreinfo="none">printf</literal>'s formatting directives
       offer a significant amount of control, allowing you to specify things
@@ -1792,20 +1711,19 @@ let () =
 
       <itemizedlist>
         <listitem>
-          <para>alignment and padding</para>
+          <para>Alignment and padding</para>
         </listitem>
 
         <listitem>
-          <para>escaping rules for strings</para>
+          <para>Escaping rules for strings</para>
         </listitem>
 
         <listitem>
-          <para>whether numbers should be formatted in decimal, hex or
-          binary</para>
+          <para>Whether numbers should be formatted in decimal, hex, or binary</para>
         </listitem>
 
         <listitem>
-          <para>precision of float conversions</para>
+          <para>Precision of float conversions</para>
         </listitem>
       </itemizedlist>
 
@@ -1838,12 +1756,10 @@ let () =
     <sect2 id="file-io">
       <title>File I/O</title>
 
-      <para>Another common use of <literal
-      moreinfo="none">in_channel</literal>s and <literal
-      moreinfo="none">out_channel</literal>s is for working with files. Here's
-      a couple of functions, one that creates a file full of numbers, and the
-      other that reads in such a file and returns the sum of those
-      numbers.</para>
+      <para>Another common use of <literal moreinfo="none">in_channel</literal>s and <literal
+          moreinfo="none">out_channel</literal>s is for working with files. Here's a couple of
+        functions, one that creates a file full of numbers, and the other that reads in such a file
+        and returns the sum of those numbers:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/file.topscript">imperative-programming/file.topscript</ulink>
@@ -1869,16 +1785,14 @@ let () =
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">sum_file "numbers.txt";;</userinput>
 <computeroutput moreinfo="none">- : int = 15</computeroutput></programlisting>
 
-      <para>For both of these functions we followed the same basic sequence:
-      we first create the channel, then use the channel, and finally close the
-      channel. The closing of the channel is important, since without it, we
-      won't release resources associated with the file back to the operating
-      system.</para>
+      <para>For both of these functions, we followed the same basic sequence: we first create the
+        channel, then use the channel, and finally close the channel. The closing of the channel is
+        important, since without it, we won't release resources associated with the file back to the
+        operating system.</para>
 
-      <para>One problem with the code above is that if it throws an exception
-      in the middle of its work, it won't actually close the file. If we try
-      to read a file that doesn't actually contain numbers, we'll see such an
-      error:</para>
+      <para>One problem with the preceding code is that if it throws an exception in the middle of
+        its work, it won't actually close the file. If we try to read a file that doesn't actually
+        contain numbers, we'll see such an error:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/file.topscript">imperative-programming/file.topscript</ulink>
@@ -1888,8 +1802,8 @@ let () =
           moreinfo="none"># </prompt><userinput moreinfo="none">sum_file "/etc/hosts";;</userinput>
 <computeroutput moreinfo="none">Exception: (Failure "Int.of_string: \"127.0.0.1    localhost\"").</computeroutput></programlisting>
 
-      <para>And if we do this over and over in a loop, we'll eventually run
-      out of file descriptors.</para>
+      <para>And if we do this over and over in a loop, we'll eventually run out of file
+        descriptors:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/file.topscript">imperative-programming/file.topscript</ulink>
@@ -1904,10 +1818,9 @@ let () =
       <para>And now, you'll need to restart your toplevel if you want to open
       any more files!</para>
 
-      <para>To avoid this, we need to make sure that our code cleans up after
-      itself. We can do this using the <literal
-      moreinfo="none">protect</literal> function described in <xref
-      linkend="error-handling" />, as follows.</para>
+      <para>To avoid this, we need to make sure that our code cleans up after itself. We can do this
+        using the <literal moreinfo="none">protect</literal> function described in <xref
+          linkend="error-handling"/>, as follows:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/file2.topscript">imperative-programming/file2.topscript</ulink>
@@ -1939,14 +1852,12 @@ let () =
       programming. When programming imperatively, you need to be quite careful
       to make sure that exceptions don't leave you in an awkward state.</para>
 
-      <para><literal moreinfo="none">In_channel</literal> has functions that
-      automate the handling of some of these details. For example, <literal
-      moreinfo="none">In_channel.with_file</literal> takes a filename and a
-      function for processing data from an <literal
-      moreinfo="none">in_channel</literal>, and takes care of the bookkeeping
-      associated with opening and closing the file. We can rewrite <literal
-      moreinfo="none">sum_file</literal> using this function, as shown
-      here.</para>
+      <para><literal moreinfo="none">In_channel</literal> has functions that automate the handling
+        of some of these details. For example, <literal moreinfo="none"
+          >In_channel.with_file</literal> takes a filename and a function for processing data from
+        an <literal moreinfo="none">in_channel</literal> and takes care of the bookkeeping
+        associated with opening and closing the file. We can rewrite <literal moreinfo="none"
+          >sum_file</literal> using this function, as shown here:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/file2.topscript">imperative-programming/file2.topscript</ulink>
@@ -1960,12 +1871,10 @@ let () =
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val sum_file : string -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
-      <para>Another misfeature of our implementation of <literal
-      moreinfo="none">sum_file</literal> is that we read the entire file into
-      memory before processing it. For a large file, it's more efficient to
-      process a line at a time. You can use the <literal
-      moreinfo="none">In_channel.fold_lines</literal> function to do just
-      that.</para>
+      <para>Another misfeature of our implementation of <literal moreinfo="none">sum_file</literal>
+        is that we read the entire file into memory before processing it. For a large file, it's
+        more efficient to process a line at a time. You can use the <literal moreinfo="none"
+          >In_channel.fold_lines</literal> function to do just that:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/file2.topscript">imperative-programming/file2.topscript</ulink>
@@ -1979,29 +1888,26 @@ let () =
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val sum_file : string -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
-      <para>This is just a taste of the functionality of <literal
-      moreinfo="none">In_channel</literal> and <literal
-      moreinfo="none">Out_channel</literal>. To get a fuller understanding you
-      should review the API documentation for those modules.</para>
+      <para>This is just a taste of the functionality of <literal moreinfo="none"
+          >In_channel</literal> and <literal moreinfo="none">Out_channel</literal>. To get a fuller
+        understanding, you should review the API documentation for those modules.</para>
     </sect2>
   </sect1>
 
   <sect1 id="order-of-evaluation">
-    <title>Order of evaluation</title>
+    <title>Order of Evaluation</title>
 
-    <para>The order in which expressions are evaluated is an important part of
-    the definition of a programming language, and it is particularly important
-    when programming imperatively. Most programming languages you're likely to
-    have encountered are <emphasis>strict</emphasis>, and OCaml is too. In a
-    strict language, when you bind an identifier to the result of some
-    expression, the expression is evaluated before the variable is defined.
-    Similarly, if you call a function on a set of arguments, those arguments
-    are evaluated before they are passed to the function.</para>
+    <para>The order in which expressions are evaluated is an important part of the definition of a
+      programming language, and it is particularly important when programming imperatively. Most
+      programming languages you're likely to have encountered are <emphasis>strict</emphasis>, and
+      OCaml is, too. In a strict language, when you bind an identifier to the result of some
+      expression, the expression is evaluated before the variable is defined. Similarly, if you call
+      a function on a set of arguments, those arguments are evaluated before they are passed to the
+      function.</para>
 
-    <para>Consider the following simple example. Here, we have a collection of
-    angles and we want to determine if any of them have a negative <literal
-    moreinfo="none">sin</literal>. The following snippet of code would answer
-    that question.</para>
+    <para>Consider the following simple example. Here, we have a collection of angles and we want to
+      determine if any of them have a negative <literal moreinfo="none">sin</literal>. The following
+      snippet of code would answer that question:</para>
 
     <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/order.topscript">imperative-programming/order.topscript</ulink>
@@ -2015,15 +1921,13 @@ let () =
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">- : bool = true</computeroutput></programlisting>
 
-    <para>In some sense, we don't really need to compute the <literal
-    moreinfo="none">sin 128.</literal>, because <literal moreinfo="none">sin
-    75.</literal> is negative, so we could know the answer before even
-    computing <literal moreinfo="none">sin 128.</literal>.</para>
+    <para>In some sense, we don't really need to compute the <literal moreinfo="none">sin
+        128.</literal> because <literal moreinfo="none">sin 75.</literal> is negative, so we could
+      know the answer before even computing <literal moreinfo="none">sin 128.</literal>.</para>
 
-    <para>It doesn't have to be this way. Using the <literal
-    moreinfo="none">lazy</literal> keyword, we can write the original
-    computation so that <literal moreinfo="none">sin 128.</literal> won't ever
-    be computed.</para>
+    <para>It doesn't have to be this way. Using the <literal moreinfo="none">lazy</literal> keyword,
+      we can write the original computation so that <literal moreinfo="none">sin 128.</literal>
+      won't ever be computed:</para>
 
     <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/order.topscript">imperative-programming/order.topscript</ulink>
@@ -2037,8 +1941,8 @@ let () =
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">- : bool = true</computeroutput></programlisting>
 
-    <para>We can confirm that fact by a few well placed <literal
-    moreinfo="none">printf</literal>s.</para>
+    <para>We can confirm that fact by a few well-placed <literal moreinfo="none"
+      >printf</literal>s:</para>
 
     <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/order.topscript">imperative-programming/order.topscript</ulink>
@@ -2054,22 +1958,19 @@ let () =
 <computeroutput moreinfo="none">2</computeroutput>
 <computeroutput moreinfo="none">- : bool = true</computeroutput></programlisting>
 
-    <para>OCaml is strict by default for a good reason: Lazy evaluation and
-    imperative programming generally don't mix well, because laziness makes it
-    harder to reason about when a given side effect is going to occur.
-    Understanding the order of side-effects is essential to reasoning about
-    the behavior of an imperative program.</para>
+    <para>OCaml is strict by default for a good reason: lazy evaluation and imperative programming
+      generally don't mix well because laziness makes it harder to reason about when a given side
+      effect is going to occur. Understanding the order of side effects is essential to reasoning
+      about the behavior of an imperative program.</para>
 
-    <para>In a strict language, we know that expressions that are bound by a
-    sequence of let-bindings will be evaluated in the order that they're
-    defined. But what about the evaluation order within a single expression?
-    Officially, the answer is that evaluation order within an expression is
-    undefined. In practice, OCaml has only one compiler, and that behavior is
-    a kind of <emphasis>de facto</emphasis> standard. Unfortunately, the
-    evaluation order in this case is often the opposite of what one might
-    expect.</para>
+    <para>In a strict language, we know that expressions that are bound by a sequence of
+      let-bindings will be evaluated in the order that they're defined. But what about the
+      evaluation order within a single expression? Officially, the answer is that evaluation order
+      within an expression is undefined. In practice, OCaml has only one compiler, and that behavior
+      is a kind of de facto standard. Unfortunately, the evaluation order in this case is often the
+      opposite of what one might expect.</para>
 
-    <para>Consider the following example.</para>
+    <para>Consider the following example:</para>
 
     <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/order.topscript">imperative-programming/order.topscript</ulink>
@@ -2086,17 +1987,16 @@ let () =
 <computeroutput moreinfo="none">1</computeroutput>
 <computeroutput moreinfo="none">- : bool = true</computeroutput></programlisting>
 
-    <para>Here, you can see that the sub-expression that came last was
-    actually evaluated first! This is generally the case for many different
-    kinds of expressions. If you want to make sure of the evaluation order of
-    different sub-expressions, you should express them as a series of <literal
-    moreinfo="none">let</literal> bindings.</para>
+    <para>Here, you can see that the subexpression that came last was actually evaluated first! This
+      is generally the case for many different kinds of expressions. If you want to make sure of the
+      evaluation order of different subexpressions, you should express them as a series of <literal
+        moreinfo="none">let</literal> bindings.</para>
   </sect1>
 
   <sect1 id="side-effects-and-weak-polymorphism">
-    <title>Side-effects and weak polymorphism</title>
+    <title>Side Effects and Weak Polymorphism</title>
 
-    <para>Consider the following simple imperative function.</para>
+    <para>Consider the following simple, imperative function:</para>
 
     <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/weak.topscript">imperative-programming/weak.topscript</ulink>
@@ -2112,27 +2012,23 @@ let () =
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val remember : '_a -&gt; '_a = &lt;fun&gt;</computeroutput></programlisting>
 
-    <para><literal moreinfo="none">remember</literal> simply caches the first
-    value that's passed to it, returning that value on every call. That's
-    because <literal moreinfo="none">cache</literal> is created and
-    initialized once, and is shared across invocations of <literal
-    moreinfo="none">remember</literal>.</para>
+    <para><literal moreinfo="none">remember</literal> simply caches the first value that's passed to
+      it, returning that value on every call. That's because <literal moreinfo="none"
+        >cache</literal> is created and initialized once and is shared across invocations of
+        <literal moreinfo="none">remember</literal>.</para>
 
     <para><literal moreinfo="none">remember</literal> is not a terribly useful
     function, but it raises an interesting question: what is its type?</para>
 
-    <para>On its first call, <literal moreinfo="none">remember</literal>
-    returns the same value its passed, which means its input type and return
-    type should match. Accordingly, <literal
-    moreinfo="none">remember</literal> should have type <literal
-    moreinfo="none">t -&gt; t</literal> for some type <literal
-    moreinfo="none">t</literal>. There's nothing about <literal
-    moreinfo="none">remember</literal> that ties the choice of <literal
-    moreinfo="none">t</literal> to any particular type, so you might expect
-    OCaml to generalize, replacing <literal moreinfo="none">t</literal> with a
-    polymorphic type variable. It's this kind of generalization that gives us
-    polymorphic types in the first place. The identity function, as an
-    example, gets a polymorphic type in this way.</para>
+    <para>On its first call, <literal moreinfo="none">remember</literal> returns the same value it's
+      passed, which means its input type and return type should match. Accordingly, <literal
+        moreinfo="none">remember</literal> should have type <literal moreinfo="none">t -&gt;
+        t</literal> for some type <literal moreinfo="none">t</literal>. There's nothing about
+        <literal moreinfo="none">remember</literal> that ties the choice of <literal moreinfo="none"
+        >t</literal> to any particular type, so you might expect OCaml to generalize, replacing
+        <literal moreinfo="none">t</literal> with a polymorphic type variable. It's this kind of
+      generalization that gives us polymorphic types in the first place. The identity function, as
+      an example, gets a polymorphic type in this way:</para>
 
     <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/weak.topscript">imperative-programming/weak.topscript</ulink>
@@ -2150,30 +2046,25 @@ let () =
     moreinfo="none">identity</literal> lets it operate on values with
     different types.</para>
 
-    <para>This is not what happens with <literal
-    moreinfo="none">remember</literal>, though. As you can see from the
-    <command moreinfo="none">utop</command> output above, the type that OCaml
-    infers for <literal moreinfo="none">remember</literal> looks almost, but
-    not quite, like the type of the identity function. Here it is
-    again:</para>
+    <para>This is not what happens with <literal moreinfo="none">remember</literal>, though. As you
+      can see from the preceding <command moreinfo="none">utop</command>, the type that OCaml infers
+      for <literal moreinfo="none">remember</literal> looks almost, but not quite, like the type of
+      the identity function. Here it is again:</para>
 
     <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/remember_type.ml">imperative-programming/remember_type.ml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">val remember : '_a -&gt; '_a = &lt;fun&gt;</programlisting>
 
-    <para>The underscore in the type variable <literal
-    moreinfo="none">'_a</literal> tells us that the variable is only
-    <emphasis>weakly polymorphic</emphasis>, which is to say that it can be
-    used with any <emphasis>single</emphasis> type. That makes sense, because,
-    unlike <literal moreinfo="none">identity</literal>, <literal
-    moreinfo="none">remember</literal> always returns the value it was passed
-    on its first invocation, which means its return value must always have the
-    same type.</para>
+    <para>The underscore in the type variable <literal moreinfo="none">'_a</literal> tells us that
+      the variable is only <emphasis>weakly polymorphic</emphasis>, which is to say that it can be
+      used with any <emphasis>single</emphasis> type. That makes sense because, unlike <literal
+        moreinfo="none">identity</literal>, <literal moreinfo="none">remember</literal> always
+      returns the value it was passed on its first invocation, which means its return value must
+      always have the same type.</para>
 
-    <para>OCaml will convert a weakly polymorphic variable to a concrete type
-    as soon as it gets a clue as to what concrete type it is to be used as, as
-    you can see below.</para>
+    <para>OCaml will convert a weakly polymorphic variable to a concrete type as soon as it gets a
+      clue as to what concrete type it is to be used as:</para>
 
     <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/weak.topscript">imperative-programming/weak.topscript</ulink>
@@ -2195,7 +2086,7 @@ let () =
     moreinfo="none">remember_three</literal> was never called!</para>
 
     <sect2 id="the-value-restriction">
-      <title>The value restriction</title>
+      <title>The Value Restriction</title>
 
       <para>So, when does the compiler infer weakly polymorphic types? As
       we've seen, we need weakly polymorphic types when a value of unknown
@@ -2213,8 +2104,7 @@ let () =
 
       <itemizedlist>
         <listitem>
-          <para>Constants (<emphasis>i.e.</emphasis>, things like integer and
-          floating-point literals)</para>
+          <para>Constants (i.e., things like integer and floating-point literals)</para>
         </listitem>
 
         <listitem>
@@ -2222,29 +2112,26 @@ let () =
         </listitem>
 
         <listitem>
-          <para>Function declarations, <emphasis>i.e.</emphasis>, expressions
-          that begin with <literal moreinfo="none">fun</literal> or <literal
-          moreinfo="none">function</literal>, or, the equivalent let binding,
-          <literal moreinfo="none">let f x = ...</literal>.</para>
+          <para>Function declarations, i.e., expressions that begin with <literal moreinfo="none"
+              >fun</literal> or <literal moreinfo="none">function</literal>, or the equivalent let
+            binding, <literal moreinfo="none">let f x = ...</literal></para>
         </listitem>
 
         <listitem>
-          <para><literal moreinfo="none">let</literal> bindings of the form
-          <literal moreinfo="none">let</literal> <emphasis><literal
-          moreinfo="none">var</literal></emphasis> <literal
-          moreinfo="none">=</literal> <emphasis><literal
-          moreinfo="none">expr1</literal></emphasis> <literal
-          moreinfo="none">in</literal> <emphasis><literal
-          moreinfo="none">expr2</literal></emphasis>, where both
-          <emphasis><literal moreinfo="none">expr1</literal></emphasis> and
-          <emphasis><literal moreinfo="none">expr2</literal></emphasis> are
-          simple values.</para>
+          <para><literal moreinfo="none">let</literal> bindings of the form <literal moreinfo="none"
+              >let</literal>
+            <emphasis><literal moreinfo="none">var</literal></emphasis>
+            <literal moreinfo="none">=</literal>
+            <emphasis><literal moreinfo="none">expr1</literal></emphasis>
+            <literal moreinfo="none">in</literal>
+            <emphasis><literal moreinfo="none">expr2</literal></emphasis>, where both
+                <emphasis><literal moreinfo="none">expr1</literal></emphasis> and <emphasis><literal
+                moreinfo="none">expr2</literal></emphasis> are simple values</para>
         </listitem>
       </itemizedlist>
 
-      <para>Thus, the following expression is a simple value, and as a result,
-      the types of values contained within it are allowed to be
-      polymorphic.</para>
+      <para>Thus, the following expression is a simple value, and as a result, the types of values
+        contained within it are allowed to be polymorphic:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">imperative-programming/value_restriction.topscript</ulink>
@@ -2254,9 +2141,9 @@ let () =
           moreinfo="none"># </prompt><userinput moreinfo="none">(fun x -&gt; [x;x]);;</userinput>
 <computeroutput moreinfo="none">- : 'a -&gt; 'a list = &lt;fun&gt;</computeroutput></programlisting>
 
-      <para>But, if we write down an expression that isn't a simple value by
-      the above definition, we'll get different results. For example, consider
-      what happens if we try to memoize the function defined above.</para>
+      <para>But, if we write down an expression that isn't a simple value by the preceding
+        definition, we'll get different results. For example, consider what happens if we try to
+        memoize the function defined previously.</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">imperative-programming/value_restriction.topscript</ulink>
@@ -2266,11 +2153,10 @@ let () =
           moreinfo="none"># </prompt><userinput moreinfo="none">memoize (fun x -&gt; [x;x]);;</userinput>
 <computeroutput moreinfo="none">- : '_a -&gt; '_a list = &lt;fun&gt;</computeroutput></programlisting>
 
-      <para>The memoized version of the function does in fact need to be
-      restricted to a single type, because it uses mutable state behind the
-      scenes to cache values returned by previous invocations of the function.
-      But OCaml would make the same determination even if the function in
-      question did no such thing. Consider this example:</para>
+      <para>The memoized version of the function does in fact need to be restricted to a single type
+        because it uses mutable state behind the scenes to cache values returned by previous
+        invocations of the function. But OCaml would make the same determination even if the
+        function in question did no such thing. Consider this example:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">imperative-programming/value_restriction.topscript</ulink>
@@ -2303,20 +2189,18 @@ let () =
     </sect2>
 
     <sect2 id="partial-application-and-the-value-restriction">
-      <title>Partial application and the value restriction</title>
+      <title>Partial Application and the Value Restriction</title>
 
-      <para>Most of the time, when the value restriction kicks in, it's for a
-      good reason, <emphasis>i.e.</emphasis>, it's because the value in
-      question can actually only safely be used with a single type. But
-      sometimes, the value restriction kicks in when you don't want it. The
-      most common such case is partially applied functions. A partially
-      applied function, like any function application, is not a simple value,
-      and as such, functions created by partial application are sometimes less
-      general than you might expect.</para>
+      <para>Most of the time, when the value restriction kicks in, it's for a good reason, i.e.,
+        it's because the value in question can actually only safely be used with a single type. But
+        sometimes, the value restriction kicks in when you don't want it. The most common such case
+        is partially applied functions. A partially applied function, like any function application,
+        is not a simple value, and as such, functions created by partial application are sometimes
+        less general than you might expect.</para>
 
-      <para>Consider the <literal moreinfo="none">List.init</literal>
-      function, which is used for creating lists where each element is created
-      by calling a function on the index of that element.</para>
+      <para>Consider the <literal moreinfo="none">List.init</literal> function, which is used for
+        creating lists where each element is created by calling a function on the index of that
+        element:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">imperative-programming/value_restriction.topscript</ulink>
@@ -2328,9 +2212,9 @@ let () =
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.init 10 ~f:Int.to_string;;</userinput>
 <computeroutput moreinfo="none">- : string list = ["0"; "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9"]</computeroutput></programlisting>
 
-      <para>Imagine we wanted to create a specialized version of <literal
-      moreinfo="none">List.init</literal> that always created lists of length
-      10. We could do that using partial application, as follows.</para>
+      <para>Imagine we wanted to create a specialized version of <literal moreinfo="none"
+          >List.init</literal> that always created lists of length 10. We could do that using
+        partial application, as follows:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">imperative-programming/value_restriction.topscript</ulink>
@@ -2340,14 +2224,12 @@ let () =
           moreinfo="none"># </prompt><userinput moreinfo="none">let list_init_10 = List.init 10;;</userinput>
 <computeroutput moreinfo="none">val list_init_10 : f:(int -&gt; '_a) -&gt; '_a list = &lt;fun&gt;</computeroutput></programlisting>
 
-      <para>As you can see, we now infer a weakly polymorphic type for the
-      resulting function. That's because there's nothing that guarantees that
-      <literal moreinfo="none">List.init</literal> isn't creating a persistent
-      <literal moreinfo="none">ref</literal> somewhere inside of it that would
-      be shared across multiple calls to <literal
-      moreinfo="none">list_init_10</literal>. We can eliminate this
-      possibility, and at the same time get the compiler to infer a
-      polymorphic type, by avoiding partial application.</para>
+      <para>As you can see, we now infer a weakly polymorphic type for the resulting function.
+        That's because there's nothing that guarantees that <literal moreinfo="none"
+          >List.init</literal> isn't creating a persistent <literal moreinfo="none">ref</literal>
+        somewhere inside of it that would be shared across multiple calls to <literal
+          moreinfo="none">list_init_10</literal>. We can eliminate this possibility, and at the same
+        time get the compiler to infer a polymorphic type, by avoiding partial application:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">imperative-programming/value_restriction.topscript</ulink>
@@ -2357,27 +2239,25 @@ let () =
           moreinfo="none"># </prompt><userinput moreinfo="none">let list_init_10 ~f = List.init 10 ~f;;</userinput>
 <computeroutput moreinfo="none">val list_init_10 : f:(int -&gt; 'a) -&gt; 'a list = &lt;fun&gt;</computeroutput></programlisting>
 
-      <para>This transformation is referred to as <emphasis>eta
-      expansion</emphasis>, and is often useful to resolve problems that arise
-      from the value restriction.</para>
+      <para>This transformation is referred to as <emphasis>eta expansion</emphasis> and is often
+        useful to resolve problems that arise from the value restriction.</para>
     </sect2>
 
     <sect2 id="relaxing-the-value-restriction">
-      <title>Relaxing the value restriction</title>
+      <title>Relaxing the Value Restriction</title>
 
-      <para>OCaml is actually a little better at inferring polymorphic types
-      than is suggested above. The value restriction as we described it above
-      is basically a syntactic check: there are a few operations that you can
-      do that count as simple values, and anything that's a simple value can
-      be generalized.</para>
+      <para>OCaml is actually a little better at inferring polymorphic types than is suggested
+        previously. The value restriction as we described it is basically a syntactic check: there
+        are a few operations that you can do that count as simple values, and anything that's a
+        simple value can be generalized.</para>
 
       <para>But OCaml actually has a relaxed version of the value restriction
       that can make some use of type information to allow polymorphic types
       for things that are not simple values.</para>
 
-      <para>For example, we saw above that a function application, even a
-      simple application of the identity function, is not a simple value and
-      thus can turn a polymorphic value into a weakly polymorphic one.</para>
+      <para>For example, we saw that a function application, even a simple application of the
+        identity function, is not a simple value and thus can turn a polymorphic value into a weakly
+        polymorphic one:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">imperative-programming/value_restriction.topscript</ulink>
@@ -2387,9 +2267,8 @@ let () =
           moreinfo="none"># </prompt><userinput moreinfo="none">identity (fun x -&gt; [x;x]);;</userinput>
 <computeroutput moreinfo="none">- : '_a -&gt; '_a list = &lt;fun&gt;</computeroutput></programlisting>
 
-      <para>But that's not always the case. When the type of the returned
-      value is immutable, then OCaml can typically infer a fully polymorphic
-      type.</para>
+      <para>But that's not always the case. When the type of the returned value is immutable, then
+        OCaml can typically infer a fully polymorphic type:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">imperative-programming/value_restriction.topscript</ulink>
@@ -2399,8 +2278,8 @@ let () =
           moreinfo="none"># </prompt><userinput moreinfo="none">identity [];;</userinput>
 <computeroutput moreinfo="none">- : 'a list = []</computeroutput></programlisting>
 
-      <para>On the other hand, if the returned type is potentially mutable,
-      then the result will be weakly polymorphic.</para>
+      <para>On the other hand, if the returned type is potentially mutable, then the result will be
+        weakly polymorphic:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">imperative-programming/value_restriction.topscript</ulink>
@@ -2412,9 +2291,9 @@ let () =
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">identity [||];;</userinput>
 <computeroutput moreinfo="none">- : '_a array = [||]</computeroutput></programlisting>
 
-      <para>A more important example of this comes up when defining abstract
-      data types. Consider the following simple data-structure for an
-      immutable list type that supports constant-time concatenation.</para>
+      <para>A more important example of this comes up when defining abstract data types. Consider
+        the following simple data structure for an immutable list type that supports constant-time
+        concatenation:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">imperative-programming/value_restriction.topscript</ulink>
@@ -2454,11 +2333,10 @@ let () =
 <computeroutput moreinfo="none">    val to_list : 'a t -&gt; 'a list</computeroutput>
 <computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
-      <para>The details of the implementation don't matter so much, but it's
-      important to note that a <literal
-      moreinfo="none">Concat_list.t</literal> is unquestionably an immutable
-      value. However, when it comes to the value restriction, OCaml treats it
-      as if it were mutable.</para>
+      <para>The details of the implementation don't matter so much, but it's important to note that
+        a <literal moreinfo="none">Concat_list.t</literal> is unquestionably an immutable value.
+        However, when it comes to the value restriction, OCaml treats it as if it were
+        mutable:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">imperative-programming/value_restriction.topscript</ulink>
@@ -2470,25 +2348,20 @@ let () =
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">identity Concat_list.empty;;</userinput>
 <computeroutput moreinfo="none">- : '_a Concat_list.t = &lt;abstr&gt;</computeroutput></programlisting>
 
-      <para>The issue here is that the signature, by virtue of being abstract,
-      has obscured the fact that <literal
-      moreinfo="none">Concat_list.t</literal> is in fact an immutable
-      data-type. We can resolve this in one of two ways: either by making the
-      type concrete (<emphasis>i.e.</emphasis>, exposing the implementation in
-      the <literal moreinfo="none">mli</literal>), which is often not
-      desirable; or by marking the type variable in question as
-      <emphasis>covariant</emphasis>. We'll learn more about covariance and
-      contravariance in <xref linkend="objects" />, but for now, you can think
-      of it as an annotation which can be put in the interface of a pure data
-      structure.</para>
+      <para>The issue here is that the signature, by virtue of being abstract, has obscured the fact
+        that <literal moreinfo="none">Concat_list.t</literal> is in fact an immutable data type. We
+        can resolve this in one of two ways: either by making the type concrete (i.e., exposing the
+        implementation in the <literal moreinfo="none">mli</literal>), which is often not desirable;
+        or by marking the type variable in question as <emphasis>covariant</emphasis>. We'll learn
+        more about covariance and contravariance in <xref linkend="objects"/>, but for now, you can
+        think of it as an annotation which can be put in the interface of a pure data
+        structure.</para>
 
-      <para>In particular, if we replace <literal moreinfo="none">type 'a
-      t</literal> in the interface with <literal moreinfo="none">type +'a
-      t</literal>, that will make it explicit in the interface that the
-      data-structure doesn't contain any persistent references to values of
-      type <literal moreinfo="none">'a</literal>, at which point, OCaml can
-      infer polymorphic types for expressions of this type that are not simple
-      values.</para>
+      <para>In particular, if we replace <literal moreinfo="none">type 'a t</literal> in the
+        interface with <literal moreinfo="none">type +'a t</literal>, that will make it explicit in
+        the interface that the data structure doesn't contain any persistent references to values of
+        type <literal moreinfo="none">'a</literal>, at which point, OCaml can infer polymorphic
+        types for expressions of this type that are not simple values:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction-13.rawscript">imperative-programming/value_restriction-13.rawscript</ulink></para>
@@ -2516,9 +2389,8 @@ let () =
     val to_list : 'a t -&gt; 'a list
   end</computeroutput></programlisting>
 
-      <para>Now, we can apply the identity function to <literal
-      moreinfo="none">Concat_list.empty</literal> without without losing any
-      polymorphism.</para>
+      <para>Now, we can apply the identity function to <literal moreinfo="none"
+          >Concat_list.empty</literal> without without losing any polymorphism:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">imperative-programming/value_restriction.topscript</ulink>
@@ -2537,31 +2409,28 @@ let () =
 
     <itemizedlist>
       <listitem>
-        <para>Discussing the building blocks of mutable data-structures as
-        well as the basic imperative constructs like <literal
-        moreinfo="none">for</literal> loops, <literal
-        moreinfo="none">while</literal> loops, and the sequencing operator
-        <literal moreinfo="none">;</literal>.</para>
+        <para>Discussing the building blocks of mutable data structures as well as the basic
+          imperative constructs like <literal moreinfo="none">for</literal> loops, <literal
+            moreinfo="none">while</literal> loops, and the sequencing operator <literal
+            moreinfo="none">;</literal></para>
       </listitem>
 
       <listitem>
-        <para>Walking through the implementation of a couple of classic
-        imperative data structures.</para>
+        <para>Walking through the implementation of a couple of classic imperative data
+          structures</para>
       </listitem>
 
       <listitem>
-        <para>Discussing so-called benign effects like memoization and
-        laziness.</para>
+        <para>Discussing so-called benign effects like memoization and laziness</para>
       </listitem>
 
       <listitem>
-        <para>Covering OCaml's API for blocking I/O.</para>
+        <para>Covering OCaml's API for blocking I/O</para>
       </listitem>
 
       <listitem>
-        <para>Discussing how language-level issues like order of evaluation
-        and weak polymorphism interact with OCaml's imperative
-        features.</para>
+        <para>Discussing how language-level issues like order of evaluation and weak polymorphism
+          interact with OCaml's imperative features</para>
       </listitem>
     </itemizedlist>
 

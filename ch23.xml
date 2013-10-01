@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="the-compiler-backend-byte-code-and-native-code">
-      <title>The Compiler Backend: Byte-code and Native-code</title>
+      <title>The Compiler Backend: Bytecode and Native code</title>
 
       <para>Once OCaml has passed the type checking stage, it can stop
       emitting syntax and type errors and begin the process of compiling the
@@ -11,23 +11,22 @@
 
       <itemizedlist>
         <listitem>
-          <para>the untyped intermediate lambda code where pattern matching is
-          optimized.</para>
+          <para>The untyped intermediate lambda code where pattern matching is optimized</para>
         </listitem>
 
         <listitem>
-          <para>the bytecode <command moreinfo="none">ocamlc</command> compiler and
-          <command moreinfo="none">ocamlrun</command> interpreter.</para>
+          <para>The bytecode <command moreinfo="none">ocamlc</command> compiler and <command
+          moreinfo="none">ocamlrun</command> interpreter</para>
         </listitem>
 
         <listitem>
-          <para>the native code <command moreinfo="none">ocamlopt</command> code generator,
-          and debugging and profiling native code.</para>
+          <para>The native code <command moreinfo="none">ocamlopt</command> code generator, and
+        debugging and profiling native code</para>
         </listitem>
       </itemizedlist>
 
       <sect1 id="the-untyped-lambda-form">
-        <title>The untyped lambda form</title>
+        <title>The Untyped Lambda Form</title>
 
         <para>The first code generation phase eliminates all the static type
         information into a simpler intermediate <emphasis>lambda
@@ -44,16 +43,15 @@
         statements.</para>
 
         <sect2 id="pattern-matching-optimization">
-          <title>Pattern matching optimization</title>
+          <title>Pattern Matching Optimization</title>
 
-          <para>The compiler dumps the lambda form in an s-expression syntax
-          if you add the <literal moreinfo="none">-dlambda</literal> directive to the
-          command-line. Let's use this to learn more about how the OCaml
-          pattern matching engine works by building three different pattern
-          matches and comparing their lambda forms.</para>
+          <para>The compiler dumps the lambda form in an s-expression syntax if you add the <literal
+          moreinfo="none">-dlambda</literal> directive to the command line. Let's use this to learn
+        more about how the OCaml pattern matching engine works by building three different pattern
+        matches and comparing their lambda forms.</para>
 
-          <para>Let's start by creating a straightforward exhaustive pattern
-          match using four normal variants.</para>
+          <para>Let's start by creating a straightforward exhaustive pattern match using four normal
+        variants:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/pattern_monomorphic_large.ml">back-end/pattern_monomorphic_large.ml</ulink></para>
@@ -67,7 +65,7 @@ let test v =
   | Charlie -&gt; 102
   | David   -&gt; 103</programlisting>
 
-          <para>The lambda output for this code looks like this.</para>
+          <para>The lambda output for this code looks like this:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/lambda_for_pattern_monomorphic_large.out">back-end/lambda_for_pattern_monomorphic_large.out</ulink></para>
@@ -84,17 +82,16 @@ let test v =
 <computeroutput moreinfo="none">          case int 3: 103)))</computeroutput>
 <computeroutput moreinfo="none">    (makeblock 0 test/1013)))</computeroutput></programlisting>
 
-          <para>It's not important to understand every detail of this internal
-          form and it is explicitly undocumented since it can change across
-          compiler revisions. Despite these caveats, some interesting points
-          emerge from reading it.</para>
+          <para>It's not important to understand every detail of this internal form, and it is
+        explicitly undocumented since it can change across compiler revisions. Despite these
+        caveats, some interesting points emerge from reading it:</para>
 
           <itemizedlist>
             <listitem>
-              <para>There are no mention of modules or types any more. Global
-              values are created via <literal moreinfo="none">setglobal</literal> and OCaml
-              values are constructed by <literal moreinfo="none">makeblock</literal>. The
-              blocks are the runtime values you should remember from <xref linkend="memory-representation-of-values"/>.</para>
+              <para>There are no mention of modules or types any more. Global values are created via
+              <literal moreinfo="none">setglobal</literal>, and OCaml values are constructed by
+              <literal moreinfo="none">makeblock</literal>. The blocks are the runtime values you
+            should remember from <xref linkend="memory-representation-of-values"/>.</para>
             </listitem>
 
             <listitem>
@@ -107,20 +104,18 @@ let test v =
             </listitem>
 
             <listitem>
-              <para>Values are addressed by a unique name that distinguished
-              shadowed values by appending a number (<emphasis>e.g.</emphasis>
-              <literal moreinfo="none">v/1014</literal>). The type safety checks in the
-              earlier phase ensure that these low-level accesses never violate
-              runtime memory safety, so this layer doesn't do any dynamic
-              checks. Unwise use of unsafe features such as the
-              <literal moreinfo="none">Obj.magic</literal> module can still easily induce
-              crashes at this level.</para>
+              <para>Values are addressed by a unique name that distinguished shadowed values by
+            appending a number (e.g., <literal moreinfo="none">v/1014</literal>). The type safety
+            checks in the earlier phase ensure that these low-level accesses never violate runtime
+            memory safety, so this layer doesn't do any dynamic checks. Unwise use of unsafe
+            features such as the <literal moreinfo="none">Obj.magic</literal> module can still
+            easily induce crashes at this level.</para>
             </listitem>
           </itemizedlist>
 
-          <para>The compiler computes a jump table in order to handle all four
-          cases. If we drop the number of variants to just two, then there's
-          no need for the complexity of computing this table.</para>
+          <para>The compiler computes a jump table in order to handle all four cases. If we drop the
+        number of variants to just two, then there's no need for the complexity of computing this
+        table:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/pattern_monomorphic_small.ml">back-end/pattern_monomorphic_small.ml</ulink></para>
@@ -132,7 +127,7 @@ let test v =
   | Alice   -&gt; 100
   | Bob     -&gt; 101</programlisting>
 
-          <para>The lambda output for this code is now quite different.</para>
+          <para>The lambda output for this code is now quite different:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/lambda_for_pattern_monomorphic_small.out">back-end/lambda_for_pattern_monomorphic_small.out</ulink></para>
@@ -142,11 +137,10 @@ let test v =
 <computeroutput moreinfo="none">  (let (test/1011 (function v/1012 (if (!= v/1012 0) 101 100)))</computeroutput>
 <computeroutput moreinfo="none">    (makeblock 0 test/1011)))</computeroutput></programlisting>
 
-          <para>The compiler emits simpler conditional jumps rather than
-          setting up a jump table, since it statically determines that the
-          range of possible variants is small enough. Finally, let's look at
-          the same code, but with polymorphic variants instead of normal
-          variants.</para>
+          <para>The compiler emits simpler conditional jumps rather than setting up a jump table,
+        since it statically determines that the range of possible variants is small enough. Finally,
+        let's look at the same code, but with polymorphic variants instead of normal
+        variants:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/pattern_polymorphic.ml">back-end/pattern_polymorphic.ml</ulink></para>
@@ -159,8 +153,8 @@ let test v =
   | `David   -&gt; 103
   | `Eve     -&gt; 104</programlisting>
 
-          <para>The lambda form for this also shows up the runtime
-          representation of polymorphic variants.</para>
+          <para>The lambda form for this also shows up the runtime representation of polymorphic
+        variants:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/lambda_for_pattern_polymorphic.out">back-end/lambda_for_pattern_polymorphic.out</ulink></para>
@@ -186,7 +180,7 @@ let test v =
           comparisons as possible.</para>
 
           <note>
-            <title>Learning more about pattern matching compilation</title>
+            <title>Learning More About Pattern Matching Compilation</title>
 
             <para>Pattern matching is an important part of OCaml programming.
             You'll often encounter deeply nested pattern matches over complex
@@ -200,22 +194,20 @@ let test v =
             information and control flow optimizations via static
             exceptions.</para>
 
-            <para>It's not essential that you understand all of this just to
-            use pattern matching of course, but it'll give you insight as to
-            why pattern matching is such a lightweight language construct to
-            use in OCaml code.</para>
+            <para>It's not essential that you understand all of this just to use pattern matching,
+          of course, but it'll give you insight as to why pattern matching is such a lightweight
+          language construct to use in OCaml code.</para>
           </note>
         </sect2>
 
         <sect2 id="benchmarking-pattern-matching">
-          <title>Benchmarking pattern matching</title>
+          <title>Benchmarking Pattern Matching</title>
 
-          <para>Let's benchmark these three pattern matching techniques to
-          quantify their runtime costs more accurately. The
-          <literal moreinfo="none">Core_bench</literal> module runs the tests thousands of
-          times and also calculates statistical variance of the results.
-          You'll need to <literal moreinfo="none">opam install core_bench</literal> to get the
-          library.</para>
+          <para>Let's benchmark these three pattern matching techniques to quantify their runtime
+        costs more accurately. The <literal moreinfo="none">Core_bench</literal> module runs the
+        tests thousands of times and also calculates statistical variance of the results. You'll
+        need to <literal moreinfo="none">opam install core_bench</literal> to get the
+        library:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-bench/bench_patterns.ml">back-end-bench/bench_patterns.ml</ulink></para>
@@ -269,9 +261,8 @@ let () =
   |&gt; Bench.make_command
   |&gt; Command.run</programlisting>
 
-          <para>Building and executing this example will run for around 30
-          seconds by default, and you'll see the results summarized in a neat
-          table.</para>
+          <para>Building and executing this example will run for around 30 seconds by default, and
+        you'll see the results summarized in a neat table:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-bench/run_bench_patterns.out">back-end-bench/run_bench_patterns.out</ulink></para>
@@ -287,13 +278,11 @@ let () =
 <computeroutput moreinfo="none">  Monomorphic small pattern        16.25      51.57  </computeroutput>
 <computeroutput moreinfo="none">                                                     </computeroutput></programlisting>
 
-          <para>These results confirm our earlier performance hypothesis
-          obtained from inspecting the lambda code. The shortest running time
-          comes from the small conditional pattern match and polymorphic
-          variant pattern matching is the slowest. There isn't a hugely
-          significant difference in these examples, but you can use the same
-          techniques to peer into the innards of your own source code and
-          narrow down any performance hotspots.</para>
+          <para>These results confirm our earlier performance hypothesis obtained from inspecting
+        the lambda code. The shortest running time comes from the small conditional pattern match,
+        and polymorphic variant pattern matching is the slowest. There isn't a hugely significant
+        difference in these examples, but you can use the same techniques to peer into the innards
+        of your own source code and narrow down any performance hotspots.</para>
 
           <para>The lambda form is primarily a stepping stone to the bytecode
           executable format that we'll cover next. It's often easier to look
@@ -303,27 +292,25 @@ let () =
       </sect1>
 
       <sect1 id="generating-portable-bytecode">
-        <title>Generating portable bytecode</title>
+        <title>Generating Portable Bytecode</title>
 
-        <para>After the lambda form has been generated, we are very close to
-        having executable code. The OCaml tool-chain branches into two
-        separate compilers at this point. We'll describe the bytecode compiler
-        first, which consists of two pieces:</para>
+        <para>After the lambda form has been generated, we are very close to having executable code.
+      The OCaml toolchain branches into two separate compilers at this point. We'll describe the
+      bytecode compiler first, which consists of two pieces:</para>
 
-        <itemizedlist>
-          <listitem>
-            <para><command moreinfo="none">ocamlc</command> compiles files into a bytecode
-            that is a close mapping to the lambda form.</para>
-          </listitem>
-
-          <listitem>
-            <para><command moreinfo="none">ocamlrun</command> is a portable interpreter that
-            executes the bytecode.</para>
-          </listitem>
-        </itemizedlist>
-
+        <variablelist>
+          <varlistentry><term><command moreinfo="none">ocamlc</command></term><listitem>
+            <para> Compiles files into a bytecode that is a
+          close mapping to the lambda form</para>
+          </listitem></varlistentry>
+          
+          <varlistentry> <term><command moreinfo="none">ocamlrun</command></term><listitem>
+            <para> A portable interpreter that executes the bytecode</para>
+          </listitem></varlistentry>
+        </variablelist>
+        
         <para>The big advantage of using bytecode is simplicity, portability
-        and compilation speed. The mapping from the lambda form to bytecode is
+          and compilation speed. The mapping from the lambda form to bytecode is
         straightforward, and this results in predictable (but slow) execution
         speed.</para>
 
@@ -331,30 +318,27 @@ let () =
         machine. The OCaml stack and an associated accumulator stores values
         that consist of:</para>
 
-        <itemizedlist>
-          <listitem>
-            <para><emphasis>long</emphasis> values corresponding to an OCaml
-            <literal moreinfo="none">int</literal> type.</para>
-          </listitem>
-
-          <listitem>
-            <para><emphasis>block</emphasis> values that contain the block
-            header and a memory address with the data fields that contain
-            further OCaml values indexed by an integer.</para>
-          </listitem>
-
-          <listitem>
-            <para><emphasis>code offset</emphasis> values that are relative to
-            the starting code address.</para>
-          </listitem>
-        </itemizedlist>
-
-        <para>The interpreter virtual machine only has seven registers in
-        total: the program counter, stack pointer, accumulator, exception and
-        argument pointers, and environment and global data. You can display
-        the bytecode instructions in textual form via
-        <literal moreinfo="none">-dinstr</literal>. Try this on one of our earlier pattern
-        matching examples.</para>
+        <variablelist>
+         <varlistentry> <term>long</term><listitem>
+            <para>Values that correspond to an OCaml <literal moreinfo="none">int</literal>
+            type</para>
+          </listitem></varlistentry>
+          
+         <varlistentry> <term>block</term><listitem>
+            <para>Values that contain the block header and a memory address with the data fields
+            that contain further OCaml values indexed by an integer</para>
+          </listitem></varlistentry>
+          
+          <varlistentry><term>code offset</term><listitem>
+            <para>Values that are relative to the starting code address</para>
+          </listitem></varlistentry>
+        </variablelist>
+        
+        <para>The interpreter virtual machine only has seven registers in total: the program
+      counter, stack pointer, accumulator, exception and argument pointers, and environment and
+      global data. You can display the bytecode instructions in textual form via <literal
+        moreinfo="none">-dinstr</literal>. Try this on one of our earlier pattern matching
+      examples:</para>
 
         <para role="sourcecode">Terminal:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/instr_for_pattern_monomorphic_small.out">back-end/instr_for_pattern_monomorphic_small.out</ulink></para>
@@ -378,24 +362,22 @@ let () =
 <computeroutput moreinfo="none">	setglobal Pattern_monomorphic_small!</computeroutput>
 <computeroutput moreinfo="none"> </computeroutput></programlisting>
 
-        <para>The bytecode above has been simplified from the lambda form into
-        a set of simple instructions that are executed serially by the
-        interpreter.</para>
+        <para>The preceding bytecode has been simplified from the lambda form into a set of simple
+      instructions that are executed serially by the interpreter.</para>
 
-        <para>There are around 140 instructions in total, but most are just
-        minor variants of commonly encountered operations
-        (<emphasis>e.g.</emphasis> function application at a specific arity).
-        You can find full details <ulink url="http://cadmium.x9c.fr/distrib/caml-instructions.pdf">online</ulink>.</para>
+        <para>There are around 140 instructions in total, but most are just minor variants of
+      commonly encountered operations (e.g., function application at a specific arity). You can find
+      full details <ulink url="http://cadmium.x9c.fr/distrib/caml-instructions.pdf"
+      >online</ulink>.</para>
 
         <note>
-          <title>Where did the bytecode instruction set come from?</title>
+          <title>Where Did the Bytecode Instruction Set Come From?</title>
 
-          <para>The bytecode interpreter is much slower than compiled native
-          code, but is still remarkably performant for an interpreter without
-          a JIT compiler. Its efficiency can be traced back to Xavier Leroy's
-          ground-breaking work in 1990 on <ulink url="http://hal.inria.fr/docs/00/07/00/49/PS/RT-0117.ps">"The ZINC
-          experiment: An Economical Implementation of the ML
-          Language"</ulink>.</para>
+          <para>The bytecode interpreter is much slower than compiled native code, but is still
+        remarkably performant for an interpreter without a JIT compiler. Its efficiency can be
+        traced back to Xavier Leroy's ground-breaking work in 1990, <ulink
+          url="http://hal.inria.fr/docs/00/07/00/49/PS/RT-0117.ps">"The ZINC experiment: An
+          Economical Implementation of the ML Language".</ulink></para>
 
           <para>This paper laid the theoretical basis for the implementation
           of an instruction set for a strictly evaluated functional language
@@ -411,14 +393,13 @@ let () =
         </note>
 
         <sect2 id="compiling-and-linking-bytecode">
-          <title>Compiling and linking bytecode</title>
+          <title>Compiling and Linking Bytecode</title>
 
-          <para>The <command moreinfo="none">ocamlc</command> command compiles individual
-          <literal moreinfo="none">ml</literal> files into bytecode files that have a
-          <literal moreinfo="none">cmo</literal> extension. The compiled bytecode files are
-          matched with the associated <literal moreinfo="none">cmi</literal> interface which
-          contains the type signature exported to other compilation
-          units.</para>
+          <para>The <command moreinfo="none">ocamlc</command> command compiles individual <literal
+          moreinfo="none">ml</literal> files into bytecode files that have a <literal
+          moreinfo="none">cmo</literal> extension. The compiled bytecode files are matched with the
+        associated <literal moreinfo="none">cmi</literal> interface, which contains the type
+        signature exported to other compilation units.</para>
 
           <para>A typical OCaml library consists of multiple source files, and
           hence multiple <literal moreinfo="none">cmo</literal> files that all need to be
@@ -428,14 +409,13 @@ let () =
           Bytecode archives are denoted by the <literal moreinfo="none">cma</literal>
           extension.</para>
 
-          <para>The individual objects in the library are linked as regular
-          <literal moreinfo="none">cmo</literal> files in the order specified when the library
-          file was built. If an object file within the library isn't
-          referenced elsewhere in the program, then it isn't included in the
-          final binary unless the <literal moreinfo="none">-linkall</literal> flag forces its
-          inclusion. This behavior is analogous to how C handles object files
-          and archives (<literal moreinfo="none">.o</literal> and <literal moreinfo="none">.a</literal>
-          respectively).</para>
+          <para>The individual objects in the library are linked as regular <literal moreinfo="none"
+          >cmo</literal> files in the order specified when the library file was built. If an object
+        file within the library isn't referenced elsewhere in the program, then it isn't included in
+        the final binary unless the <literal moreinfo="none">-linkall</literal> flag forces its
+        inclusion. This behavior is analogous to how C handles object files and archives (<literal
+          moreinfo="none">.o</literal> and <literal moreinfo="none">.a</literal>,
+        respectively).</para>
 
           <para>The bytecode files are then linked together with the OCaml
           standard library to produce an executable program. The order in

@@ -4,42 +4,38 @@
 <chapter id="the-compiler-frontend-parsing-and-type-checking">
   <title>The Compiler Frontend: Parsing and Type Checking</title>
 
-  <para>Compiling source code into executable programs is a fairly complex
-  process that involves quite a few tools—preprocessors, compilers, runtime
-  libraries, linkers and assemblers. It's important to understand how these
-  fit together to help with your day-to-day workflow of developing, debugging
-  and deploying applications.</para>
+  <para>Compiling source code into executable programs is a fairly complex process that involves
+    quite a few tools—preprocessors, compilers, runtime libraries, linkers, and assemblers. It's
+    important to understand how these fit together to help with your day-to-day workflow of
+    developing, debugging, and deploying applications.</para>
 
-  <para>OCaml has a strong emphasis on static type safety and rejects source
-  code that doesn't meet its requirements as early as possible. The compiler
-  does this by running the source code through a series of checks and
-  transformations. Each stage performs its job (<emphasis>e.g.</emphasis> type
-  checking, optimization or code generation) and discards some information
-  from the previous stage. The final native code output is low-level assembly
-  code that doesn't know anything about the OCaml modules or objects that the
-  compiler started with.</para>
+  <para>OCaml has a strong emphasis on static type safety and rejects source code that doesn't meet
+    its requirements as early as possible. The compiler does this by running the source code through
+    a series of checks and transformations. Each stage performs its job (e.g., type checking,
+    optimization, or code generation) and discards some information from the previous stage. The
+    final native code output is low-level assembly code that doesn't know anything about the OCaml
+    modules or objects that the compiler started with.</para>
 
-  <para>You don't have to do all this manually, of course. The compiler
-  frontends (<literal moreinfo="none">ocamlc</literal> and <literal
-  moreinfo="none">ocamlopt</literal>) are invoked via the command-line and
-  chain the stages together for you. Sometimes though, you'll need to dive
-  into the toolchain to hunt down a bug or investigate a performance problem.
-  This chapter explains the compiler pipeline in more depth so you understand
-  how to harness the command-line tools effectively.</para>
+  <para>You don't have to do all this manually, of course. The compiler frontends (<literal
+      moreinfo="none">ocamlc</literal> and <literal moreinfo="none">ocamlopt</literal>) are invoked
+    via the command line and chain the stages together for you. Sometimes though, you'll need to
+    dive into the toolchain to hunt down a bug or investigate a performance problem. This chapter
+    explains the compiler pipeline in more depth so you understand how to harness the command-line
+    tools effectively.</para>
 
   <para>In this chapter, we'll cover the following topics:</para>
 
   <itemizedlist>
     <listitem>
-      <para>the compilation pipeline and what each stage represents.</para>
+      <para>The compilation pipeline and what each stage represents</para>
     </listitem>
 
     <listitem>
-      <para>source preprocessing via Camlp4 and the intermediate forms.</para>
+      <para>Source preprocessing via Camlp4 and the intermediate forms</para>
     </listitem>
 
     <listitem>
-      <para>the type-checking process, including module resolution.</para>
+      <para>The type-checking process, including module resolution</para>
     </listitem>
   </itemizedlist>
 
@@ -48,14 +44,13 @@
   linkend="the-compiler-backend-byte-code-and-native-code" />.</para>
 
   <sect1 id="an-overview-of-the-toolchain">
-    <title>An overview of the toolchain</title>
+    <title>An Overview of the Toolchain</title>
 
-    <para>The OCaml tools accept textual source code as input, using filename
-    extensions of <literal moreinfo="none">.ml</literal> and <literal
-    moreinfo="none">.mli</literal> for modules and signatures respectively. We
-    explained the basics of the build process earlier in <xref
-    linkend="files-modules-and-programs" />, so we'll assume you've built a
-    few OCaml programs already by this point.</para>
+    <para>The OCaml tools accept textual source code as input, using filename extensions of <literal
+        moreinfo="none">.ml</literal> and <literal moreinfo="none">.mli</literal> for modules and
+      signatures, respectively. We explained the basics of the build process earlier in <xref
+        linkend="files-modules-and-programs"/>, so we'll assume you've built a few OCaml programs
+      already by this point.</para>
 
     <para>Each source file represents a <emphasis>compilation unit</emphasis>
     that is built separately. The compiler generates intermediate files with
@@ -77,18 +72,17 @@
       </mediaobject>
     </informalfigure>
 
-    <para>Notice that the pipeline branches towards the end. OCaml has
-    multiple compiler backends that reuse the early stages of compilation, but
-    produce very different final outputs. The <emphasis>bytecode</emphasis>
-    can be run by a portable interpreter, and can even be transformed into
-    JavaScript (via <ulink
-    url="http://ocsigen.org/js_of_ocaml">js_of_ocaml</ulink>) or C source code
-    (via <ulink url="https://github.com/ocaml-bytes/ocamlcc">OCamlCC</ulink>).
-    The <emphasis>native code</emphasis> compiler generates specialized
-    executable binaries suitable for high-performance applications.</para>
+    <para>Notice that the pipeline branches towards the end. OCaml has multiple compiler backends
+      that reuse the early stages of compilation but produce very different final outputs. The
+        <emphasis>bytecode</emphasis> can be run by a portable interpreter and can even be
+      transformed into JavaScript (via <ulink url="http://ocsigen.org/js_of_ocaml"
+        >js_of_ocaml</ulink>) or C source code (via <ulink
+        url="https://github.com/ocaml-bytes/ocamlcc">OCamlCC</ulink>). The <emphasis>native
+        code</emphasis> compiler generates specialized executable binaries suitable for
+      high-performance applications.</para>
 
     <sidebar>
-      <title>Obtaining the compiler source code</title>
+      <title>Obtaining the Compiler Source Code</title>
 
       <para>Although it's not necessary to understand the examples, you may
       find it useful to have a copy of the OCaml source tree checked out while
@@ -98,123 +92,121 @@
       <itemizedlist>
         <listitem>
           <para>Stable releases as zip and tar archives from the <ulink
-          url="http://caml.inria.fr/download.en.html">OCaml download
-          site</ulink>.</para>
+              url="http://caml.inria.fr/download.en.html">OCaml download site</ulink></para>
         </listitem>
 
         <listitem>
-          <para>A Subversion anonymous mirror of the main development sources
-          available on the <ulink
-          url="http://caml.inria.fr/ocaml/anonsvn.en.html">development
-          resources</ulink> page online.</para>
+          <para>A Subversion anonymous mirror of the main development sources available on the
+              <ulink url="http://caml.inria.fr/ocaml/anonsvn.en.html">development resources</ulink>
+            page online</para>
         </listitem>
 
         <listitem>
-          <para>A Git mirror of the Subversion repository with all the history
-          and development branches included, browsable online at <ulink
-          url="https://github.com/ocaml/ocaml">Github</ulink>.</para>
+          <para>A Git mirror of the Subversion repository with all the history and development
+            branches included, browsable online at <ulink url="https://github.com/ocaml/ocaml"
+              >Github</ulink></para>
         </listitem>
       </itemizedlist>
 
-      <para>The source tree is split up into sub-directories. The core
+      <para>The source tree is split up into subdirectories. The core
       compiler consists of:</para>
 
-      <itemizedlist>
-        <listitem>
-          <para><literal moreinfo="none">config/</literal>: configuration
-          directives to tailor OCaml for your operating system and
+      <variablelist>
+        <varlistentry><term><literal moreinfo="none">config/</literal></term> <listitem>
+          <para> Configuration directives to tailor OCaml for your operating system and
           architecture.</para>
-        </listitem>
-
-        <listitem>
-          <para><literal moreinfo="none">bytecomp/</literal> and <literal
-          moreinfo="none">byterun/</literal>: byte-code compiler and runtime,
-          including the garbage collector.</para>
-        </listitem>
-
-        <listitem>
-          <para><literal moreinfo="none">asmcomp/</literal> and <literal
-          moreinfo="none">asmrun/</literal>: native-code compiler and runtime.
-          The native runtime symlinks many modules from the <literal
+        </listitem></varlistentry>
+        
+        <varlistentry> <term><literal moreinfo="none">bytecomp/</literal> and <literal
+          moreinfo="none">byterun/</literal></term><listitem>
+          <para> Byte-code compiler and runtime,
+            including the garbage collector.</para>
+        </listitem></varlistentry>
+        
+        <varlistentry><term><literal moreinfo="none">asmcomp/</literal> and <literal
+          moreinfo="none">asmrun/</literal></term><listitem>
+          <para> Native-code compiler and runtime.
+            The native runtime symlinks many modules from the <literal
           moreinfo="none">byterun</literal> directory to share code, most
           notably the garbage collector.</para>
-        </listitem>
-
-        <listitem>
-          <para><literal moreinfo="none">parsing/</literal>: the OCaml lexer,
-          parser and libraries for manipulating them.</para>
-        </listitem>
-
-        <listitem>
-          <para><literal moreinfo="none">typing/</literal>: the static type
-          checking implementation and type definitions.</para>
-        </listitem>
-
-        <listitem>
-          <para><literal moreinfo="none">camlp4/</literal>: the source code
-          macro preprocessor.</para>
-        </listitem>
-
-        <listitem>
-          <para><literal moreinfo="none">driver/</literal>: command-line
-          interfaces for the compiler tools.</para>
-        </listitem>
-      </itemizedlist>
-
+        </listitem></varlistentry>
+        
+        <varlistentry> <term><literal moreinfo="none">parsing/</literal></term> <listitem>
+          <para>The OCaml lexer,
+            parser, and libraries for manipulating them.</para>
+        </listitem></varlistentry>
+        
+        <varlistentry> <term><literal moreinfo="none">typing/</literal></term><listitem>
+          <para>The static type
+            checking implementation and type definitions.</para>
+        </listitem></varlistentry>
+        
+        <varlistentry><term><literal moreinfo="none">camlp4/</literal></term> <listitem>
+          <para> The source code
+            macro preprocessor.</para>
+        </listitem></varlistentry>
+        
+        <varlistentry><term><literal moreinfo="none">driver/</literal></term><listitem>
+          <para> Command-line
+            interfaces for the compiler tools.</para>
+        </listitem></varlistentry>
+      </variablelist>
+      
       <para>There are a number of tools and scripts also built alongside the
-      core compiler:</para>
-
-      <itemizedlist>
-        <listitem>
-          <para><literal moreinfo="none">debugger/</literal>: the interactive
+        core compiler:</para>
+      
+      <variablelist>
+        <varlistentry> <term><literal moreinfo="none">debugger/</literal></term><listitem>
+          <para>The interactive
           byte-code debugger.</para>
-        </listitem>
-
-        <listitem>
-          <para><literal moreinfo="none">toplevel/</literal>: interactive
-          top-level console.</para>
-        </listitem>
-
-        <listitem>
-          <para><literal moreinfo="none">emacs/</literal>: a
-          <emphasis>caml-mode</emphasis> for the Emacs editor.</para>
-        </listitem>
-
-        <listitem>
-          <para><literal moreinfo="none">stdlib/</literal>: the compiler
-          standard library, including the <literal
-          moreinfo="none">Pervasives</literal> module.</para>
-        </listitem>
-
-        <listitem>
-          <para><literal moreinfo="none">ocamlbuild/</literal>: build system
-          that automates common OCaml compilation modes.</para>
-        </listitem>
-
-        <listitem>
-          <para><literal moreinfo="none">otherlibs/</literal>: optional
-          libraries such as the Unix and graphics modules.</para>
-        </listitem>
-
-        <listitem>
-          <para><literal moreinfo="none">tools/</literal>: command-line
-          utilities such as <literal moreinfo="none">ocamldep</literal> that
-          are installed with the compiler.</para>
-        </listitem>
-
-        <listitem>
-          <para><literal moreinfo="none">testsuite/</literal>: regression
-          tests for the core compiler.</para>
-        </listitem>
-      </itemizedlist>
+        </listitem></varlistentry>
+        
+        <varlistentry> <term><literal moreinfo="none">toplevel/</literal></term> <listitem>
+          <para> Interactive
+            top-level console.</para>
+        </listitem></varlistentry>
+        
+        <varlistentry><term><literal moreinfo="none">emacs/</literal></term><listitem>
+          <para>: A
+            <emphasis>caml-mode</emphasis> for the Emacs editor.</para>
+        </listitem></varlistentry>
+        
+        <varlistentry><term><literal moreinfo="none">stdlib/</literal></term><listitem>
+          <para> The compiler
+            standard library, including the <literal
+              moreinfo="none">Pervasives</literal> module.</para>
+        </listitem></varlistentry>
+        
+        <varlistentry> <term><literal moreinfo="none">ocamlbuild/</literal></term><listitem>
+          <para> Build system
+            that automates common OCaml compilation modes.</para>
+        </listitem></varlistentry>
+        
+        <varlistentry><term><literal moreinfo="none">otherlibs/</literal></term><listitem>
+          <para> Optional
+            libraries such as the Unix and graphics modules.</para>
+        </listitem></varlistentry>
+        
+        <varlistentry><term><literal moreinfo="none">tools/</literal></term><listitem>
+          <para> Command-line
+            utilities such as <literal moreinfo="none">ocamldep</literal> that
+            are installed with the compiler.</para>
+        </listitem></varlistentry>
+        
+        <varlistentry><term><literal moreinfo="none">testsuite/</literal></term><listitem>
+          <para> Regression
+            tests for the core compiler.</para>
+        </listitem></varlistentry>
+        
+      </variablelist>
     </sidebar>
-
+    
     <para>We'll go through each of the compilation stages now and explain how
-    that'll be useful to you during day-to-day OCaml development.</para>
+      that'll be useful to you during day-to-day OCaml development.</para>
   </sect1>
 
   <sect1 id="parsing-source-code">
-    <title>Parsing source code</title>
+    <title>Parsing Source Code</title>
 
     <para>When a source file is passed to the OCaml compiler, its first task
     is to parse the text into a more structured Abstract Syntax Tree (AST).
@@ -225,7 +217,7 @@
     distribution.</para>
 
     <sect2 id="syntax-errors">
-      <title>Syntax errors</title>
+      <title>Syntax Errors</title>
 
       <para>The OCaml parser's goal is to output a well-formed AST data
       structure to the next phase of compilation, and so it rejects any source
@@ -234,8 +226,8 @@
       the filename and line and character number that's as close to the error
       as possible.</para>
 
-      <para>Here's an example syntax error that we obtain by performing a
-      module assignment as a statement instead of as a let-binding.</para>
+      <para>Here's an example syntax error that we obtain by performing a module assignment as a
+        statement instead of as a let-binding:</para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/broken_module.ml">front-end/broken_module.ml</ulink></para>
@@ -244,7 +236,7 @@
   module MyString = String;
   ()</programlisting>
 
-      <para>The above code results in a syntax error when compiled.</para>
+      <para>The code results in a syntax error when compiled:</para>
 
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/build_broken_module.out">front-end/build_broken_module.out</ulink></para>
@@ -254,9 +246,8 @@
 <computeroutput moreinfo="none">File "broken_module.ml", line 2, characters 2-8:</computeroutput>
 <computeroutput moreinfo="none">Error: Syntax error</computeroutput></programlisting>
 
-      <para>The correct version of this source code creates the <literal
-      moreinfo="none">MyString</literal> module correctly via a local open,
-      and compiles successfully.</para>
+      <para>The correct version of this source code creates the <literal moreinfo="none"
+          >MyString</literal> module correctly via a local open, and compiles successfully:</para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/fixed_module.ml">front-end/fixed_module.ml</ulink></para>
@@ -265,18 +256,17 @@
   let module MyString = String in
   ()</programlisting>
 
-      <para>The syntax error points to the line and character number of the
-      first token that couldn't be parsed. In the broken example the <literal
-      moreinfo="none">module</literal> keyword isn't a valid token at that
-      point in parsing, so the error location information is correct.</para>
+      <para>The syntax error points to the line and character number of the first token that
+        couldn't be parsed. In the broken example, the <literal moreinfo="none">module</literal>
+        keyword isn't a valid token at that point in parsing, so the error location information is
+        correct.</para>
     </sect2>
 
     <sect2 id="automatically-indenting-source-code">
-      <title>Automatically indenting source code</title>
+      <title>Automatically Indenting Source Code</title>
 
-      <para>Sadly, syntax errors do get more inaccurate sometimes depending on
-      the nature of your mistake. Try to spot the deliberate error in the
-      following function definitions.</para>
+      <para>Sadly, syntax errors do get more inaccurate sometimes, depending on the nature of your
+        mistake. Try to spot the deliberate error in the following function definitions:</para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/follow_on_function.ml">front-end/follow_on_function.ml</ulink></para>
@@ -296,7 +286,7 @@ let () =
   let _y = concat_and_print "a" "b" in
   ()</programlisting>
 
-      <para>When you compile this file you'll get a syntax error again.</para>
+      <para>When you compile this file, you'll get a syntax error again:</para>
 
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/build_follow_on_function.out">front-end/build_follow_on_function.out</ulink></para>
@@ -321,8 +311,8 @@ let () =
       basis. This not only beautifies your code layout, but it also makes this
       syntax error much easier to locate.</para>
 
-      <para>Let's run our erroneous file through <command
-      moreinfo="none">ocp-indent</command> and see how it processes it.</para>
+      <para>Let's run our erroneous file through <command moreinfo="none">ocp-indent</command> and
+        see how it processes it:</para>
 
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/indent_follow_on_function.out">front-end/indent_follow_on_function.out</ulink></para>
@@ -344,12 +334,11 @@ let () =
 <computeroutput moreinfo="none">  let _y = concat_and_print "a" "b" in</computeroutput>
 <computeroutput moreinfo="none">  ()</computeroutput></programlisting>
 
-      <para>The <literal moreinfo="none">add_and_print</literal> definition
-      has been indented as if it were part of the first <literal
-      moreinfo="none">concat_and_print</literal> definition, and the errant
-      semicolon is now much easier to spot. We just need to remove that
-      semicolon and re-run <command moreinfo="none">ocp-indent</command> to
-      verify that the syntax is correct.</para>
+      <para>The <literal moreinfo="none">add_and_print</literal> definition has been indented as if
+        it were part of the first <literal moreinfo="none">concat_and_print</literal> definition,
+        and the errant semicolon is now much easier to spot. We just need to remove that semicolon
+        and re-run <command moreinfo="none">ocp-indent</command> to verify that the syntax is
+        correct:</para>
 
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/indent_follow_on_function_fixed.out">front-end/indent_follow_on_function_fixed.out</ulink></para>
@@ -379,23 +368,22 @@ let () =
     </sect2>
 
     <sect2 id="generating-documentation-from-interfaces">
-      <title>Generating documentation from interfaces</title>
+      <title>Generating Documentation from Interfaces</title>
 
       <para>Whitespace and source code comments are removed during parsing and
       aren't significant in determining the semantics of the program. However,
       other tools in the OCaml distribution can interpret comments for their
       own ends.</para>
 
-      <para>The <command moreinfo="none">ocamldoc</command> tool uses
-      specially formatted comments in the source code to generate
-      documentation bundles. These comments are combined with the function
-      definitions and signatures and output as structured documentation in a
-      variety of formats. It can generate HTML pages, LaTeX and PDF documents,
-      UNIX manual pages and even module dependency graphs that can be viewed
-      using <ulink url="http://www.graphviz.org">Graphviz</ulink>.</para>
+      <para>The <command moreinfo="none">ocamldoc</command> tool uses specially formatted comments
+        in the source code to generate documentation bundles. These comments are combined with the
+        function definitions and signatures and output as structured documentation in a variety of
+        formats. It can generate HTML pages, LaTeX and PDF documents, UNIX manual pages, and even
+        module dependency graphs that can be viewed using <ulink url="http://www.graphviz.org"
+          >Graphviz</ulink>.</para>
 
-      <para>Here's a sample of some source code that's been annotated with
-      <command moreinfo="none">ocamldoc</command> comments.</para>
+      <para>Here's a sample of some source code that's been annotated with <command moreinfo="none"
+          >ocamldoc</command> comments:</para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/doc.ml">front-end/doc.ml</ulink></para>
@@ -427,8 +415,8 @@ let what_is_the_weather_in location =
       For instance, the <literal moreinfo="none">@tag</literal> fields mark
       specific properties such as the author of that section of code.</para>
 
-      <para>Try compiling the HTML documentation and UNIX man pages by running
-      <command moreinfo="none">ocamldoc</command> over the source file.</para>
+      <para>Try compiling the HTML documentation and UNIX man pages by running <command
+          moreinfo="none">ocamldoc</command> over the source file:</para>
 
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/build_ocamldoc.out">front-end/build_ocamldoc.out</ulink></para>
@@ -448,14 +436,12 @@ let what_is_the_weather_in location =
       manual</ulink> for the complete list.</para>
 
       <tip>
-        <title>Using custom <command moreinfo="none">ocamldoc</command>
-        generators</title>
+        <title>Using Custom ocamldoc Generators</title>
 
-        <para>The default HTML output stylesheets from <command
-        moreinfo="none">ocamldoc</command> are pretty spartan and distinctly
-        Web 1.0. The tool supports plugging in custom documentation
-        generators, and there are several available that provide prettier or
-        more detailed output.</para>
+        <para>The default HTML output stylesheets from <command moreinfo="none">ocamldoc</command>
+          are pretty spartan and distinctly Web 1.0. The tool supports plugging in custom
+          documentation generators, and there are several available that provide prettier or more
+          detailed output:</para>
 
         <itemizedlist>
           <listitem>
@@ -483,7 +469,7 @@ let what_is_the_weather_in location =
   </sect1>
 
   <sect1 id="preprocessing-source-code">
-    <title>Preprocessing source code</title>
+    <title>Preprocessing Source Code</title>
 
     <para>One powerful feature in OCaml is a facility to extend the standard
     language grammar without having to modify the compiler. You can roughly
@@ -501,28 +487,25 @@ let what_is_the_weather_in location =
 
     <para>We've already seen several Core libraries that use Camlp4:</para>
 
-    <itemizedlist>
-      <listitem>
-        <para><literal moreinfo="none">Fieldslib</literal> generates
-        first-class values that represent fields of a record.</para>
-      </listitem>
-
-      <listitem>
-        <para><literal moreinfo="none">Sexplib</literal> to convert types to
-        textual s-expressions.</para>
-      </listitem>
-
-      <listitem>
-        <para><literal moreinfo="none">Bin_prot</literal> for efficient binary
-        conversion and parsing.</para>
-      </listitem>
-    </itemizedlist>
-
-    <para>These libraries all extend the language in quite a minimal way by
-    adding a <literal moreinfo="none">with</literal> keyword to type
-    declarations to signify that extra code should be generated from that
-    declaration. For example, here's a trivial use of Sexplib and
-    Fieldslib.</para>
+    <variablelist>
+      <varlistentry> <term><literal moreinfo="none">Fieldslib</literal></term><listitem>
+        <para> Generates first-class values that
+          represent fields of a record</para>
+      </listitem></varlistentry>
+      
+      <varlistentry><term><literal moreinfo="none">Sexplib</literal></term> <listitem>
+        <para> To convert types to textual s-expressions</para>
+      </listitem></varlistentry>
+      
+      <varlistentry><term><literal moreinfo="none">Bin_prot</literal></term><listitem>
+        <para> For efficient binary conversion and parsing</para>
+      </listitem></varlistentry>
+    </variablelist>
+    
+    <para>These libraries all extend the language in quite a minimal way by adding a <literal
+        moreinfo="none">with</literal> keyword to type declarations to signify that extra code
+      should be generated from that declaration. For example, here's a trivial use of Sexplib and
+      Fieldslib:</para>
 
     <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/type_conv_example.ml">front-end/type_conv_example.ml</ulink></para>
@@ -534,9 +517,9 @@ type t = {
   bar: string
 } with sexp, fields</programlisting>
 
-    <para>Compiling this code will normally give you a syntax error if you do
-    so without Camlp4 since the <literal moreinfo="none">with</literal>
-    keyword isn't normally allowed after a type definition.</para>
+    <para>Compiling this code will normally give you a syntax error if you do so without Camlp4
+      since the <literal moreinfo="none">with</literal> keyword isn't normally allowed after a type
+      definition:</para>
 
     <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/build_type_conv_without_camlp4.out">front-end/build_type_conv_without_camlp4.out</ulink></para>
@@ -546,8 +529,8 @@ type t = {
 <computeroutput moreinfo="none">File "type_conv_example.ml", line 6, characters 2-6:</computeroutput>
 <computeroutput moreinfo="none">Error: Syntax error</computeroutput></programlisting>
 
-    <para>Now add in the syntax extension packages for Fieldslib and Sexplib,
-    and everything will compile again.</para>
+    <para>Now add in the syntax extension packages for Fieldslib and Sexplib, and everything will
+      compile again:</para>
 
     <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/build_type_conv_with_camlp4.out">front-end/build_type_conv_with_camlp4.out</ulink></para>
@@ -556,22 +539,18 @@ type t = {
         moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \</userinput>
 <computeroutput moreinfo="none">    -package fieldslib.syntax type_conv_example.ml</computeroutput></programlisting>
 
-    <para>We've specified a couple of additional flags here. The <literal
-    moreinfo="none">-syntax</literal> flag directs <command
-    moreinfo="none">ocamlfind</command> to add the <literal
-    moreinfo="none">-pp</literal> flag to the compiler command-line. This flag
-    instructs the compiler to run the preprocessor during its parsing
-    phase.</para>
+    <para>We've specified a couple of additional flags here. The <literal moreinfo="none"
+        >-syntax</literal> flag directs <command moreinfo="none">ocamlfind</command> to add the
+        <literal moreinfo="none">-pp</literal> flag to the compiler command line. This flag
+      instructs the compiler to run the preprocessor during its parsing phase.</para>
 
-    <para>The <literal moreinfo="none">-package</literal> flag imports other
-    OCaml libraries. The <literal moreinfo="none">.syntax</literal> suffix in
-    the package name is a convention that indicates these libraries are
-    preprocessors that should be run during parsing. The syntax extension
-    modules are dynamically loaded into the <command
-    moreinfo="none">camlp4o</command> command which rewrites the input source
-    code into conventional OCaml code that has no trace of the new keywords.
-    The compiler then compiles this transformed code with no knowledge of the
-    preprocessor's actions.</para>
+    <para>The <literal moreinfo="none">-package</literal> flag imports other OCaml libraries. The
+        <literal moreinfo="none">.syntax</literal> suffix in the package name is a convention that
+      indicates these libraries are preprocessors that should be run during parsing. The syntax
+      extension modules are dynamically loaded into the <command moreinfo="none">camlp4o</command>
+      command, which rewrites the input source code into conventional OCaml code that has no trace
+      of the new keywords. The compiler then compiles this transformed code with no knowledge of the
+      preprocessor's actions.</para>
 
     <para>Both Fieldslib and Sexplib need this new <literal
     moreinfo="none">with</literal> keyword, but they both can't register the
@@ -589,22 +568,20 @@ type t = {
     Camlp4, and type information can be discarded from the runtime
     image.</para>
 
-    <para>The syntax extensions accept an input AST and output a modified one.
-    If you're not familiar with the Camlp4 module in question, how do you
-    figure out what changes it's made to your code? The obvious way is to read
-    the documentation that accompanies the extension. Another approach is to
-    use the top-level to explore the extension's behavior or run Camlp4
-    manually yourself to see the transformation in action. We'll show you how
-    to do both of these now.</para>
+    <para>The syntax extensions accept an input AST and output a modified one. If you're not
+      familiar with the Camlp4 module in question, how do you figure out what changes it's made to
+      your code? The obvious way is to read the documentation that accompanies the extension.
+      Another approach is to use the toplevel to explore the extension's behavior or run Camlp4
+      manually yourself to see the transformation in action. We'll show you how to do both of these
+      now.</para>
 
     <sect2 id="using-camlp4-interactively">
-      <title>Using Camlp4 interactively</title>
+      <title>Using Camlp4 Interactively</title>
 
-      <para>The <command moreinfo="none">utop</command> top-level can run the
-      phrases that you type through <command moreinfo="none">camlp4</command>
-      automatically. You should have at least these lines in your <literal
-      moreinfo="none">~/.ocamlinit</literal> file in your home directory (see
-      <xref linkend="installation" /> for more information).</para>
+      <para>The <command moreinfo="none">utop</command> toplevel can run the phrases that you type
+        through <command moreinfo="none">camlp4</command> automatically. You should have at least
+        these lines in your <literal moreinfo="none">~/.ocamlinit</literal> file in your home
+        directory (see <xref linkend="installation"/> for more information):</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/camlp4_toplevel.topscript">front-end/camlp4_toplevel.topscript</ulink></para>
@@ -624,14 +601,12 @@ type t = {
 <computeroutput moreinfo="none">- : unit = ()</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">#camlp4o ;;</userinput></programlisting>
 
-      <para>The first directive loads the <command
-      moreinfo="none">ocamlfind</command> top-level interface that lets you
-      require <command moreinfo="none">ocamlfind</command> packages (including
-      all their dependent packages). The second directive instructs the
-      top-level to filter all phrases via Camlp4. You can now run <command
-      moreinfo="none">utop</command> and load the syntax extensions in. We'll
-      use the <literal moreinfo="none">comparelib</literal> syntax extension
-      for our experiments.</para>
+      <para>The first directive loads the <command moreinfo="none">ocamlfind</command> top-level
+        interface that lets you require <command moreinfo="none">ocamlfind</command> packages
+        (including all their dependent packages). The second directive instructs the toplevel to
+        filter all phrases via Camlp4. You can now run <command moreinfo="none">utop</command> and
+        load the syntax extensions in. We'll use the <literal moreinfo="none">comparelib</literal>
+        syntax extension for our experiments.</para>
 
       <para>OCaml provides a built-in polymorphic comparison operator that
       inspects the runtime representation of two values to see if they're
@@ -641,9 +616,8 @@ type t = {
       to manually define comparison functions for complex type
       definitions.</para>
 
-      <para>Let's see how <literal moreinfo="none">comparelib</literal> solves
-      this problem by running it in <command
-      moreinfo="none">utop</command>.</para>
+      <para>Let's see how <literal moreinfo="none">comparelib</literal> solves this problem by
+        running it in <command moreinfo="none">utop</command>:</para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/camlp4_toplevel.topscript">front-end/camlp4_toplevel.topscript</ulink>
@@ -667,17 +641,16 @@ type t = {
     </sect2>
 
     <sect2 id="running-camlp4-from-the-command-line">
-      <title>Running Camlp4 from the command line</title>
+      <title>Running Camlp4 from the Command Line</title>
 
-      <para>The top-level is a quick way to examine the signatures generated
-      from the extensions, but how can we see what these new functions
-      actually do? You can't do this from <command
-      moreinfo="none">utop</command> directly since it embeds the Camlp4
-      invocation as an automated part of its operation.</para>
+      <para>The toplevel is a quick way to examine the signatures generated from the extensions, but
+        how can we see what these new functions actually do? You can't do this from <command
+          moreinfo="none">utop</command> directly, since it embeds the Camlp4 invocation as an
+        automated part of its operation.</para>
 
-      <para>Let's turn to the command-line to obtain the result of the
-      <literal moreinfo="none">comparelib</literal> transformation instead.
-      Create a file that contains the type declaration from earlier.</para>
+      <para>Let's turn to the command line to obtain the result of the <literal moreinfo="none"
+          >comparelib</literal> transformation instead. Create a file that contains the type
+        declaration from earlier:</para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/comparelib_test.ml">front-end/comparelib_test.ml</ulink></para>
@@ -687,9 +660,8 @@ type t = {
   bar: t
 } with compare</programlisting>
 
-      <para>We need to run the Camlp4 binary with the library paths to
-      Comparelib and Type_conv. Let's use a small shell script to wrap this
-      invocation.</para>
+      <para>We need to run the Camlp4 binary with the library paths to Comparelib and Type_conv.
+        Let's use a small shell script to wrap this invocation:</para>
 
       <para role="sourcecode">Shell script: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/camlp4_dump.cmd">front-end/camlp4_dump.cmd</ulink></para>
@@ -701,11 +673,10 @@ INCLUDE=`$OCAMLFIND -i-format comparelib.syntax`
 ARCHIVES=`$OCAMLFIND -a-format comparelib.syntax`
 camlp4o -printer o $INCLUDE $ARCHIVES $1</programlisting>
 
-      <para>The script uses the <command moreinfo="none">ocamlfind</command>
-      package manager to list the include and library paths needed by <literal
-      moreinfo="none">comparelib</literal>. It then invokes the <command
-      moreinfo="none">camlp4o</command> preprocessor with these paths and
-      outputs the resulting AST to the standard output.</para>
+      <para>The script uses the <command moreinfo="none">ocamlfind</command> package manager to list
+        the include and library paths needed by <literal moreinfo="none">comparelib</literal>. It
+        then invokes the <command moreinfo="none">camlp4o</command> preprocessor with these paths
+        and outputs the resulting AST to the standard output:</para>
 
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/process_comparelib_test.out">front-end/process_comparelib_test.out</ulink></para>
@@ -737,26 +708,22 @@ camlp4o -printer o $INCLUDE $ARCHIVES $1</programlisting>
 <computeroutput moreinfo="none">  </computeroutput>
 <computeroutput moreinfo="none"> </computeroutput></programlisting>
 
-      <para>The output contains the original type definition accompanied by
-      some automatically generated code that implements an explicit comparison
-      function for each field in the record. If you're using the extension in
-      your compiler command-line, this generated code is then compiled as if
-      you had typed it in yourself.</para>
+      <para>The output contains the original type definition accompanied by some automatically
+        generated code that implements an explicit comparison function for each field in the record.
+        If you're using the extension in your compiler command line, this generated code is then
+        compiled as if you had typed it in yourself.</para>
 
-      <para>Note that although the generated code uses <literal
-      moreinfo="none">Pervasives.compare</literal>, it is also annotated with
-      a <literal moreinfo="none">string</literal> type. This lets the compiler
-      use a specialized string comparison function and not actually call the
-      runtime polymorphic comparison function. This has implications for
-      correctness too: recall from <xref linkend="maps-and-hash-tables" />
-      that <literal moreinfo="none">comparelib</literal> provides reliable
-      comparison functions that work for values that are logically the same
-      but that have differing internal representations (e.g. <literal
-      moreinfo="none">Int.Set.t</literal>).</para>
+      <para>Note that although the generated code uses <literal moreinfo="none"
+          >Pervasives.compare</literal>, it is also annotated with a <literal moreinfo="none"
+          >string</literal> type. This lets the compiler use a specialized string comparison
+        function and not actually call the runtime polymorphic comparison function. This has
+        implications for correctness, too: recall from <xref linkend="maps-and-hash-tables"/> that
+          <literal moreinfo="none">comparelib</literal> provides reliable comparison functions that
+        work for values that are logically the same but that have differing internal representations
+        (e.g., <literal moreinfo="none">Int.Set.t</literal>).</para>
 
       <note>
-        <title>A style note: wildcards in <literal
-        moreinfo="none">let</literal> bindings</title>
+        <title>A Style Note: Wildcards in <literal moreinfo="none">let</literal> Bindings</title>
 
         <para>You may have noticed the <literal moreinfo="none">let _ =
         fun</literal> construct in the autogenerated code above. The
@@ -764,20 +731,17 @@ camlp4o -printer o $INCLUDE $ARCHIVES $1</programlisting>
         the same as a wildcard underscore in a pattern match, and tells the
         compiler to accept any return value and discard it immediately.</para>
 
-        <para>This is fine for mechanically generated code from Type_conv, but
-        should be avoided in code that you write by hand. If it's a
-        unit-returning expression, then write a <literal
-        moreinfo="none">unit</literal> binding explicitly instead. This will
-        cause a type error if the expression changes type in the future
-        (<emphasis>e.g.</emphasis> due to code refactoring).</para>
+        <para>This is fine for mechanically generated code from Type_conv but should be avoided in
+          code that you write by hand. If it's a unit-returning expression, then write a <literal
+            moreinfo="none">unit</literal> binding explicitly instead. This will cause a type error
+          if the expression changes type in the future (e.g., due to code refactoring):</para>
 
         <para role="sourcecode">Syntax: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/let_unit.syntax">front-end/let_unit.syntax</ulink></para>
 
         <programlisting format="linespecific" language="">let () = &lt;expr&gt;</programlisting>
 
-        <para>If the expression has a different type, then write it
-        explicitly.</para>
+        <para>If the expression has a different type, then write it explicitly:</para>
 
         <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/let_notunit.ml">front-end/let_notunit.ml</ulink></para>
@@ -790,11 +754,10 @@ let () = don't_wait_for (&lt;expr&gt;</programlisting>
         <para>The last one is used to ignore Async expressions that should run
         in the background rather than blocking in the current thread.</para>
 
-        <para>One other important reason for using wildcard matches is to bind
-        a variable name to something that you want to use in future code, but
-        don't want to use right away. This would normally generate an "unused
-        value" compiler warning. These warnings are suppressed for any
-        variable name that's prepended with an underscore.</para>
+        <para>One other important reason for using wildcard matches is to bind a variable name to
+          something that you want to use in future code but don't want to use right away. This would
+          normally generate an "unused value" compiler warning. These warnings are suppressed for
+          any variable name that's prepended with an underscore:</para>
 
         <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/unused_var.ml">front-end/unused_var.ml</ulink></para>
@@ -809,13 +772,11 @@ let () = don't_wait_for (&lt;expr&gt;</programlisting>
     </sect2>
 
     <sect2 id="preprocessing-module-signatures">
-      <title>Preprocessing module signatures</title>
+      <title>Preprocessing Module Signatures</title>
 
-      <para>Another useful feature of <literal
-      moreinfo="none">type_conv</literal> is that it can generate module
-      signatures too. Copy the earlier type definition into a <literal
-      moreinfo="none">comparelib_test.mli</literal> that's got exactly the
-      same content.</para>
+      <para>Another useful feature of <literal moreinfo="none">type_conv</literal> is that it can
+        generate module signatures, too. Copy the earlier type definition into a <literal
+          moreinfo="none">comparelib_test.mli</literal> that's got exactly the same content:</para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/comparelib_test.mli">front-end/comparelib_test.mli</ulink></para>
@@ -825,8 +786,8 @@ let () = don't_wait_for (&lt;expr&gt;</programlisting>
   bar: t
 } with compare</programlisting>
 
-      <para>If you rerun the Camlp4 dumper script now, you'll see that
-      different code is produced for signature files.</para>
+      <para>If you rerun the Camlp4 dumper script now, you'll see that different code is produced
+        for signature files:</para>
 
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/process_comparelib_interface.out">front-end/process_comparelib_interface.out</ulink></para>
@@ -845,7 +806,7 @@ let () = don't_wait_for (&lt;expr&gt;</programlisting>
       these all these transformations precisely.</para>
 
       <caution>
-        <title>Don't overdo the syntax extensions</title>
+        <title>Don't Overdo the Syntax Extensions</title>
 
         <para>Syntax extensions are a powerful extension mechanism that can
         completely alter your source code's layout and style. Core includes a
@@ -874,7 +835,7 @@ let () = don't_wait_for (&lt;expr&gt;</programlisting>
     </sect2>
 
     <sect2 id="further-reading-on-camlp4">
-      <title>Further reading on Camlp4</title>
+      <title>Further Reading on Camlp4</title>
 
       <para>We've deliberately only shown you how to use Camlp4 extensions
       here, and not how to build your own. The full details of building new
@@ -885,28 +846,27 @@ let () = don't_wait_for (&lt;expr&gt;</programlisting>
 
       <itemizedlist>
         <listitem>
-          <para>a series of <ulink
-          url="http://ambassadortothecomputers.blogspot.co.uk/p/reading-camlp4.html">blog
-          posts</ulink> by Jake Donham describe the internals of Camlp4 and
-          its syntax extension mechanism.</para>
+          <para>A series of <ulink
+              url="http://ambassadortothecomputers.blogspot.co.uk/p/reading-camlp4.html">blog
+              posts</ulink> by Jake Donham describe the internals of Camlp4 and its syntax extension
+            mechanism</para>
         </listitem>
 
         <listitem>
-          <para>the online <ulink
-          url="http://brion.inria.fr/gallium/index.php/Camlp4">Camlp4
-          wiki</ulink>.</para>
+          <para>The online <ulink url="http://brion.inria.fr/gallium/index.php/Camlp4">Camlp4
+              wiki</ulink></para>
         </listitem>
 
         <listitem>
-          <para>using OPAM to install existing Camlp4 extensions and
-          inspecting their source code.</para>
+          <para>Using OPAM to install existing Camlp4 extensions and inspecting their source
+            code</para>
         </listitem>
       </itemizedlist>
     </sect2>
   </sect1>
 
   <sect1 id="static-type-checking">
-    <title>Static type checking</title>
+    <title>Static Type Checking</title>
 
     <para>After obtaining a valid abstract syntax tree, the compiler has to
     verify that the code obeys the rules of the OCaml type system. Code that
@@ -917,26 +877,23 @@ let () = don't_wait_for (&lt;expr&gt;</programlisting>
     actually consists of three distinct steps that happen
     simultaneously:</para>
 
-    <itemizedlist>
-      <listitem>
-        <para>an <emphasis>automatic type inference</emphasis> algorithm that
-        calculates types for a module without requiring manual type
-        annotations.</para>
-      </listitem>
-
-      <listitem>
-        <para>a <emphasis>module system</emphasis> that combines software
-        components with explicit knowledge of their type signatures.</para>
-      </listitem>
-
-      <listitem>
-        <para><emphasis>explicit subtyping</emphasis> checks for objects and
-        polymorphic variants.</para>
-      </listitem>
-    </itemizedlist>
-
+    <variablelist>
+     <varlistentry> <term>automatic type inference</term><listitem>
+        <para>An algorithm that calculates types for a module without requiring manual type
+            annotations</para>
+      </listitem></varlistentry>
+      
+     <varlistentry><term>module system</term> <listitem>
+        <para>Combines software components with explicit knowledge of their type signatures</para>
+      </listitem></varlistentry>
+      
+     <varlistentry> <term>explicit subtyping</term> <listitem>
+        <para>Checks for objects and polymorphic variants</para>
+      </listitem></varlistentry>
+    </variablelist>
+    
     <para>Automatic type inference lets you write succinct code for a
-    particular task and have the compiler ensure that your use of variables is
+      particular task and have the compiler ensure that your use of variables is
     locally consistent.</para>
 
     <para>Type inference doesn't scale to very large code bases that depend on
@@ -953,12 +910,11 @@ let () = don't_wait_for (&lt;expr&gt;</programlisting>
     separate concern.</para>
 
     <sect2 id="displaying-inferred-types-from-the-compiler">
-      <title>Displaying inferred types from the compiler</title>
+      <title>Displaying Inferred Types from the Compiler</title>
 
-      <para>We've already seen how you can explore type inference directly
-      from the top-level. It's also possible to generate type signatures for
-      an entire file by asking the compiler to do the work for you. Create a
-      file with a single type definition and value.</para>
+      <para>We've already seen how you can explore type inference directly from the toplevel. It's
+        also possible to generate type signatures for an entire file by asking the compiler to do
+        the work for you. Create a file with a single type definition and value:</para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/typedef.ml">front-end/typedef.ml</ulink></para>
@@ -966,10 +922,9 @@ let () = don't_wait_for (&lt;expr&gt;</programlisting>
       <programlisting format="linespecific" language="ocaml">type t = Foo | Bar
 let v = Foo</programlisting>
 
-      <para>Now run the compiler with the <literal
-      moreinfo="none">-i</literal> flag to infer the type signature for that
-      file. This runs the type checker but doesn't compile the code any
-      further after displaying the interface to the standard output.</para>
+      <para>Now run the compiler with the <literal moreinfo="none">-i</literal> flag to infer the
+        type signature for that file. This runs the type checker but doesn't compile the code any
+        further after displaying the interface to the standard output:</para>
 
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/infer_typedef.out">front-end/infer_typedef.out</ulink></para>
@@ -991,10 +946,9 @@ let v = Foo</programlisting>
       signature file for a module, or by the inferred type if there is only an
       <literal moreinfo="none">ml</literal> implementation present.</para>
 
-      <para>The compiler makes sure that your <literal
-      moreinfo="none">ml</literal> and <literal moreinfo="none">mli</literal>
-      files have compatible signatures. The type checker throws an immediate
-      error if this isn't the case.</para>
+      <para>The compiler makes sure that your <literal moreinfo="none">ml</literal> and <literal
+          moreinfo="none">mli</literal> files have compatible signatures. The type checker throws an
+        immediate error if this isn't the case:</para>
 
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/conflicting_interfaces.out">front-end/conflicting_interfaces.out</ulink></para>
@@ -1013,23 +967,20 @@ let v = Foo</programlisting>
 <computeroutput moreinfo="none">       Fields number 1 have different names, Foo and Bar.</computeroutput></programlisting>
 
       <note>
-        <title>Which comes first: the <literal moreinfo="none">ml</literal> or
-        the <literal moreinfo="none">mli</literal>?</title>
+        <title>Which Comes First: The <literal moreinfo="none">ml</literal> or the <literal
+            moreinfo="none">mli</literal>?</title>
 
-        <para>There are two schools of thought on which order OCaml code
-        should be written in. It's very easy to begin writing code by starting
-        with an <literal moreinfo="none">ml</literal> file and using the type
-        inference to guide you as you build up your functions. The <literal
-        moreinfo="none">mli</literal> file can then be generated as described
-        above, and the exported functions documented.</para>
+        <para>There are two schools of thought on which order OCaml code should be written in. It's
+          very easy to begin writing code by starting with an <literal moreinfo="none">ml</literal>
+          file and using the type inference to guide you as you build up your functions. The
+            <literal moreinfo="none">mli</literal> file can then be generated as described, and the
+          exported functions documented.</para>
 
-        <para>If you're writing code that spans multiple files, it's sometimes
-        easier to start by writing all the <literal
-        moreinfo="none">mli</literal> signatures and checking that they type
-        check against each other. Once the signatures are in place, you can
-        write the implementations with the confidence that they'll all glue
-        together correctly with no cyclic dependencies between the
-        modules.</para>
+        <para>If you're writing code that spans multiple files, it's sometimes easier to start by
+          writing all the <literal moreinfo="none">mli</literal> signatures and checking that they
+          type check against one another. Once the signatures are in place, you can write the
+          implementations with the confidence that they'll all glue together correctly with no
+          cyclic dependencies among the modules.</para>
 
         <para>As with any such stylistic debate, you should experiment with
         which system works best for you. Everyone agrees on one thing though:
@@ -1041,36 +992,33 @@ let v = Foo</programlisting>
         file if you're only declaring signatures (such as module
         types).</para>
 
-        <para>Signature files provide a place to write succinct documentation
-        and to abstract internal details that shouldn't be exported.
-        Maintaining separate signature files also speeds up incremental
-        compilation in larger code-bases, since recompiling a <literal
-        moreinfo="none">mli</literal> signature is much faster than a full
-        compilation of the implementation to native code.</para>
+        <para>Signature files provide a place to write succinct documentation and to abstract
+          internal details that shouldn't be exported. Maintaining separate signature files also
+          speeds up incremental compilation in larger code bases, since recompiling a <literal
+            moreinfo="none">mli</literal> signature is much faster than a full compilation of the
+          implementation to native code.</para>
       </note>
     </sect2>
 
     <sect2 id="type-inference-1">
-      <title>Type inference</title>
+      <title>Type Inference</title>
 
       <para>Type inference is the process of determining the appropriate types
       for expressions based on their use. It's a feature that's partially
       present in many other languages such as Haskell and Scala, but OCaml
       embeds it as a fundamental feature throughout the core language.</para>
 
-      <para>OCaml type inference is based on the Hindley-Milner algorithm,
-      which is notable for its ability to infer the most general type for an
-      expression without requiring any explicit type annotations. The
-      algorithm can deduce multiple types for an expression, and has the
-      notion of a <emphasis>principal type</emphasis> that is the most general
-      choice from the possible inferences. Manual type annotations can
-      specialize the type explicitly, but the automatic inference selects the
-      most general type unless told otherwise.</para>
+      <para>OCaml type inference is based on the Hindley-Milner algorithm, which is notable for its
+        ability to infer the most general type for an expression without requiring any explicit type
+        annotations. The algorithm can deduce multiple types for an expression and has the notion of
+        a <emphasis>principal type</emphasis> that is the most general choice from the possible
+        inferences. Manual type annotations can specialize the type explicitly, but the automatic
+        inference selects the most general type unless told otherwise.</para>
 
-      <para>OCaml does have some language extensions which strain the limits
-      of principal type inference, but by and large most programs you write
-      will never <emphasis>require</emphasis> annotations (although they
-      sometimes help the compiler produce better error messages).</para>
+      <para>OCaml does have some language extensions that strain the limits of principal type
+        inference, but by and large, most programs you write will never <emphasis>require</emphasis>
+        annotations (although they sometimes help the compiler produce better error
+        messages).</para>
 
       <sect3 id="adding-type-annotations-to-find-errors">
         <title>Adding type annotations to find errors</title>
@@ -1099,8 +1047,8 @@ let v = Foo</programlisting>
         to propagate more widely than if you are using more explicitly typed
         variants or classes.</para>
 
-        <para>For instance, consider this broken example that expresses some
-        simple algebraic operations over integers.</para>
+        <para>For instance, consider this broken example that expresses some simple algebraic
+          operations over integers:</para>
 
         <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/broken_poly.ml">front-end/broken_poly.ml</ulink></para>
@@ -1124,10 +1072,9 @@ let _ =
         ))
     ))</programlisting>
 
-        <para>There's a single character typo in the code so that it uses
-        <literal moreinfo="none">Nu</literal> instead of <literal
-        moreinfo="none">Num</literal>. The resulting type error is
-        impressive.</para>
+        <para>There's a single character typo in the code so that it uses <literal moreinfo="none"
+            >Nu</literal> instead of <literal moreinfo="none">Num</literal>. The resulting type
+          error is impressive:</para>
 
         <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/build_broken_poly.out">front-end/build_broken_poly.out</ulink></para>
@@ -1160,8 +1107,8 @@ let _ =
         when they don't match up, outputs the difference as best it
         can.</para>
 
-        <para>Let's see what happens with an explicit type annotation to help
-        the compiler out.</para>
+        <para>Let's see what happens with an explicit type annotation to help the compiler
+          out:</para>
 
         <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/broken_poly_with_annot.ml">front-end/broken_poly_with_annot.ml</ulink></para>
@@ -1192,10 +1139,10 @@ let _ =
         ))
     ))</programlisting>
 
-        <para>This code contains exactly the same error as before, but we've
-        added a closed type definition of the polymorphic variants, and a type
-        annotation to the <literal moreinfo="none">algebra</literal>
-        definition. The compiler error we get is much more useful now.</para>
+        <para>This code contains exactly the same error as before, but we've added a closed type
+          definition of the polymorphic variants, and a type annotation to the <literal
+            moreinfo="none">algebra</literal> definition. The compiler error we get is much more
+          useful now:</para>
 
         <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/build_broken_poly_with_annot.out">front-end/build_broken_poly_with_annot.out</ulink></para>
@@ -1207,11 +1154,10 @@ let _ =
 <computeroutput moreinfo="none">       but an expression was expected of type t</computeroutput>
 <computeroutput moreinfo="none">       The second variant type does not allow tag(s) `Nu</computeroutput></programlisting>
 
-        <para>This error points directly to the correct line number that
-        contains the typo. Once you fix the problem, you can remove the manual
-        annotations if you prefer more succinct code. You can also leave the
-        annotations there of course, to help with future refactoring and
-        debugging.</para>
+        <para>This error points directly to the correct line number that contains the typo. Once you
+          fix the problem, you can remove the manual annotations if you prefer more succinct code.
+          You can also leave the annotations there, of course, to help with future refactoring and
+          debugging.</para>
       </sect3>
 
       <sect3 id="enforcing-principal-typing">
@@ -1230,26 +1176,25 @@ let _ =
 
         <itemizedlist>
           <listitem>
-            <para>polymorphic methods for objects.</para>
+            <para>Polymorphic methods for objects</para>
           </listitem>
 
           <listitem>
-            <para>permuting the order of labeled arguments in a function from
-            their type definition.</para>
+            <para>Permuting the order of labeled arguments in a function from their type
+              definition</para>
           </listitem>
 
           <listitem>
-            <para>discarding optional labeled arguments.</para>
+            <para>Discarding optional labeled arguments</para>
           </listitem>
 
           <listitem>
-            <para>generalized algebraic data types (GADTs) present from OCaml
-            4.0 onwards.</para>
+            <para>Generalized algebraic data types (GADTs) present from OCaml 4.0 onwards</para>
           </listitem>
 
           <listitem>
-            <para>automatic disambiguation of record field and constructor
-            names (since OCaml 4.1)</para>
+            <para>Automatic disambiguation of record field and constructor names (since OCaml
+              4.1)</para>
           </listitem>
         </itemizedlist>
 
@@ -1266,9 +1211,8 @@ let f x =
   x.bar;
   x.foo</programlisting>
 
-        <para>Inferring the signature with <literal
-        moreinfo="none">-principal</literal> will show you a new
-        warning.</para>
+        <para>Inferring the signature with <literal moreinfo="none">-principal</literal> will show
+          you a new warning:</para>
 
         <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/build_non_principal.out">front-end/build_non_principal.out</ulink></para>
@@ -1281,17 +1225,16 @@ let f x =
 <computeroutput moreinfo="none">type t = { foo : int; }</computeroutput>
 <computeroutput moreinfo="none">val f : s -&gt; int</computeroutput></programlisting>
 
-        <para>This example isn't principal since the inferred type for
-        <literal moreinfo="none">x.foo</literal> is guided by the inferred
-        type of <literal moreinfo="none">x.bar</literal>, whereas principal
-        typing requires that each sub-expression's type can be calculated
-        independently. If the <literal moreinfo="none">x.bar</literal> use is
-        removed from the definition of <literal moreinfo="none">f</literal>,
-        its argument would be of type <literal moreinfo="none">t</literal> and
-        not <literal moreinfo="none">type s</literal>.</para>
+        <para>This example isn't principal, since the inferred type for <literal moreinfo="none"
+            >x.foo</literal> is guided by the inferred type of <literal moreinfo="none"
+            >x.bar</literal>, whereas principal typing requires that each subexpression's type can
+          be calculated independently. If the <literal moreinfo="none">x.bar</literal> use is
+          removed from the definition of <literal moreinfo="none">f</literal>, its argument would be
+          of type <literal moreinfo="none">t</literal> and not <literal moreinfo="none">type
+            s</literal>.</para>
 
-        <para>You can fix this either by permuting the order of the type
-        declarations, or by adding an explicit type annotation.</para>
+        <para>You can fix this either by permuting the order of the type declarations, or by adding
+          an explicit type annotation:</para>
 
         <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/principal.ml">front-end/principal.ml</ulink></para>
@@ -1303,9 +1246,9 @@ let f (x:s) =
   x.bar;
   x.foo</programlisting>
 
-        <para>There is now no ambiguity about the inferred types, since we've
-        explicitly given the argument a type and the order of inference of the
-        sub-expressions no longer matters.</para>
+        <para>There is now no ambiguity about the inferred types, since we've explicitly given the
+          argument a type, and the order of inference of the subexpressions no longer
+          matters.</para>
 
         <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/build_principal.out">front-end/build_principal.out</ulink></para>
@@ -1316,11 +1259,10 @@ let f (x:s) =
 <computeroutput moreinfo="none">type t = { foo : int; }</computeroutput>
 <computeroutput moreinfo="none">val f : s -&gt; int</computeroutput></programlisting>
 
-        <para>The <command moreinfo="none">ocamlbuild</command> equivalent is
-        to add the tag <literal moreinfo="none">principal</literal> to your
-        build. The <literal moreinfo="none">corebuild</literal> wrapper script
-        actually adds this by default, but it does no harm to explicitly
-        repeat it, as below.</para>
+        <para>The <command moreinfo="none">ocamlbuild</command> equivalent is to add the tag
+            <literal moreinfo="none">principal</literal> to your build. The <literal moreinfo="none"
+            >corebuild</literal> wrapper script actually adds this by default, but it does no harm
+          to explicitly repeat it:</para>
 
         <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/principal/build_principal.out">principal/build_principal.out</ulink></para>
@@ -1330,20 +1272,18 @@ let f (x:s) =
 <computeroutput moreinfo="none">File "non_principal.ml", line 6, characters 4-7:</computeroutput>
 <computeroutput moreinfo="none">Warning 18: this type-based field disambiguation is not principal.</computeroutput></programlisting>
 
-        <para>Ideally, all code should systematically use <literal
-        moreinfo="none">-principal</literal>. It reduces variance in type
-        inference and enforces the notion of a single known type. However,
-        there are drawbacks to this mode: type inference is slower and the
-        <literal moreinfo="none">cmi</literal> files become larger. This is
-        generally only a problem if you use objects extensively, which usually
-        have larger type signature to cover all their methods.</para>
+        <para>Ideally, all code should systematically use <literal moreinfo="none"
+            >-principal</literal>. It reduces variance in type inference and enforces the notion of
+          a single known type. However, there are drawbacks to this mode: type inference is slower,
+          and the <literal moreinfo="none">cmi</literal> files become larger. This is generally only
+          a problem if you extensively use objects, which usually have larger type signature to
+          cover all their methods.</para>
 
-        <para>If compiling in principal mode works, it is guaranteed that the
-        program will pass type checking in non-principal mode too. For this
-        reason, the <command moreinfo="none">corebuild</command> wrapper
-        script activates principal mode by default, preferring stricter type
-        inference over a small loss in compilation speed and extra disk space
-        usage.</para>
+        <para>If compiling in principal mode works, it is guaranteed that the program will pass type
+          checking in nonprincipal mode, too. For this reason, the <command moreinfo="none"
+            >corebuild</command> wrapper script activates principal mode by default, preferring
+          stricter type inference over a small loss in compilation speed and extra disk space
+          usage.</para>
 
         <para>Bear in mind that the <literal moreinfo="none">cmi</literal>
         files generated in principal mode differ from the default mode. Try to
@@ -1355,15 +1295,14 @@ let f (x:s) =
     </sect2>
 
     <sect2 id="modules-and-separate-compilation">
-      <title>Modules and separate compilation</title>
+      <title>Modules and Separate Compilation</title>
 
-      <para>The OCaml module system enables smaller components to be reused
-      effectively in large projects while still retaining all the benefits of
-      static type safety. We covered the basics of using modules earlier in
-      <xref linkend="files-modules-and-programs" />. The module language that
-      operates over these signatures also extends to functors and first-class
-      modules, described in <xref linkend="functors" /> and <xref
-      linkend="first-class-modules" /> respectively.</para>
+      <para>The OCaml module system enables smaller components to be reused effectively in large
+        projects while still retaining all the benefits of static type safety. We covered the basics
+        of using modules earlier in <xref linkend="files-modules-and-programs"/>. The module
+        language that operates over these signatures also extends to functors and first-class
+        modules, described in <xref linkend="functors"/> and <xref linkend="first-class-modules"/>,
+        respectively.</para>
 
       <para>This section discusses how the compiler implements them in more
       detail. Modules are essential for larger projects that consist of many
@@ -1380,24 +1319,23 @@ let f (x:s) =
         between files and modules can be explained directly in terms of the
         module system.</para>
 
-        <para>Create a file called <literal moreinfo="none">alice.ml</literal>
-        with the following contents.</para>
+        <para>Create a file called <literal moreinfo="none">alice.ml</literal> with the following
+          contents:</para>
 
         <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/alice.ml">front-end/alice.ml</ulink></para>
 
         <programlisting format="linespecific" language="ocaml">let friends = [ Bob.name ]</programlisting>
 
-        <para>and a corresponding signature file.</para>
+        <para>and a corresponding signature file:</para>
 
         <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/alice.mli">front-end/alice.mli</ulink></para>
 
         <programlisting format="linespecific" language="ocaml">val friends : Bob.t list</programlisting>
 
-        <para>These two files are exactly analogous to including the following
-        code directly in another module that references <literal
-        moreinfo="none">Alice</literal>.</para>
+        <para>These two files are exactly analogous to including the following code directly in
+          another module that references <literal moreinfo="none">Alice</literal>:</para>
 
         <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/alice_combined.ml">front-end/alice_combined.ml</ulink></para>
@@ -1412,48 +1350,40 @@ end</programlisting>
       <sect3 id="defining-a-module-search-path">
         <title>Defining a module search path</title>
 
-        <para>In the example above, <literal moreinfo="none">Alice</literal>
-        also has a reference to another module <literal
-        moreinfo="none">Bob</literal>. For the overall type of <literal
-        moreinfo="none">Alice</literal> to be valid, the compiler also needs
-        to check that the <literal moreinfo="none">Bob</literal> module
-        contains at least a <literal moreinfo="none">Bob.name</literal> value
-        and defines a <literal moreinfo="none">Bob.t</literal> type.</para>
+        <para>In the preceding example, <literal moreinfo="none">Alice</literal> also has a
+          reference to another module <literal moreinfo="none">Bob</literal>. For the overall type
+          of <literal moreinfo="none">Alice</literal> to be valid, the compiler also needs to check
+          that the <literal moreinfo="none">Bob</literal> module contains at least a <literal
+            moreinfo="none">Bob.name</literal> value and defines a <literal moreinfo="none"
+            >Bob.t</literal> type.</para>
 
-        <para>The type checker resolves such module references into concrete
-        structures and signatures in order to unify types across module
-        boundaries. It does this by searching a list of directories for a
-        compiled interface file matching that module's name. For example, it
-        will look for <literal moreinfo="none">alice.cmi</literal> and
-        <literal moreinfo="none">bob.cmi</literal> on the search path, and use
-        the first ones it encounters as the interfaces for <literal
-        moreinfo="none">Alice</literal> and <literal
-        moreinfo="none">Bob</literal>.</para>
+        <para>The type checker resolves such module references into concrete structures and
+          signatures in order to unify types across module boundaries. It does this by searching a
+          list of directories for a compiled interface file matching that module's name. For
+          example, it will look for <literal moreinfo="none">alice.cmi</literal> and <literal
+            moreinfo="none">bob.cmi</literal> on the search path and use the first ones it
+          encounters as the interfaces for <literal moreinfo="none">Alice</literal> and <literal
+            moreinfo="none">Bob</literal>.</para>
 
-        <para>The module search path is set by adding <literal
-        moreinfo="none">-I</literal> flags to the compiler command-line with
-        the directory containing the <literal moreinfo="none">cmi</literal>
-        files as the argument. Manually specifying these flags gets complex
-        when you have lots of libraries, and is the reason why the OCamlfind
-        frontend to the compiler exists. OCamlfind automates the process of
-        turning third-party package names and build descriptions into
-        command-line flags that are passed to the compiler
-        command-line.</para>
+        <para>The module search path is set by adding <literal moreinfo="none">-I</literal> flags to
+          the compiler command line with the directory containing the <literal moreinfo="none"
+            >cmi</literal> files as the argument. Manually specifying these flags gets complex when
+          you have lots of libraries, and is the reason why the OCamlfind frontend to the compiler
+          exists. OCamlfind automates the process of turning third-party package names and build
+          descriptions into command-line flags that are passed to the compiler command line.</para>
 
-        <para>By default, only the current directory and the OCaml standard
-        library will be searched for <literal moreinfo="none">cmi</literal>
-        files. The <literal moreinfo="none">Pervasives</literal> module from
-        the standard library will also be opened by default in every
-        compilation unit. The standard library location is obtained by running
-        <literal moreinfo="none">ocamlc -where</literal>, and can be
-        overridden by setting the <literal moreinfo="none">CAMLLIB</literal>
-        environment variable. Needless to say, don't override the default path
-        unless you have a good reason to (such as setting up a
-        cross-compilation environment).</para>
+        <para>By default, only the current directory and the OCaml standard library will be searched
+          for <literal moreinfo="none">cmi</literal> files. The <literal moreinfo="none"
+            >Pervasives</literal> module from the standard library will also be opened by default in
+          every compilation unit. The standard library location is obtained by running <literal
+            moreinfo="none">ocamlc -where</literal> and can be overridden by setting the <literal
+            moreinfo="none">CAMLLIB</literal> environment variable. Needless to say, don't override
+          the default path unless you have a good reason to (such as setting up a cross-compilation
+          environment).</para>
 
         <sidebar>
-          <title>Inspecting compilation units with <literal
-          moreinfo="none">ocamlobjinfo</literal></title>
+          <title>Inspecting Compilation Units with <literal moreinfo="none"
+            >ocamlobjinfo</literal></title>
 
           <para>For separate compilation to be sound, we need to ensure that
           all the <literal moreinfo="none">cmi</literal> files used to
@@ -1463,9 +1393,9 @@ end</programlisting>
           lets the program completely violate the static type system and can
           lead to memory corruption and crashes.</para>
 
-          <para>OCaml guards against this by recording a MD5 checksum in every
-          <literal moreinfo="none">cmi</literal>. Let's examine our earlier
-          <literal moreinfo="none">typedef.ml</literal> more closely.</para>
+          <para>OCaml guards against this by recording a MD5 checksum in every <literal
+              moreinfo="none">cmi</literal>. Let's examine our earlier <literal moreinfo="none"
+              >typedef.ml</literal> more closely:</para>
 
           <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
           url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/typedef_objinfo.out">front-end/typedef_objinfo.out</ulink></para>
@@ -1479,23 +1409,19 @@ end</programlisting>
 <computeroutput moreinfo="none">	bd274dc132ce5c3d8b6774d19cd373a6	Typedef</computeroutput>
 <computeroutput moreinfo="none">	36b5bc8227dc9914c6d9fd9bdcfadb45	Pervasives</computeroutput></programlisting>
 
-          <para><literal moreinfo="none">ocamlobjinfo</literal> examines the
-          compiled interface and displays what other compilation units it
-          depends on. In this case, we don't use any external modules other
-          than <literal moreinfo="none">Pervasives</literal>. Every module
-          depends on <literal moreinfo="none">Pervasives</literal> by default,
-          unless you use the <literal moreinfo="none">-nopervasives</literal>
-          flag (this is an advanced use-case, and you shouldn't normally need
-          it).</para>
+          <para><literal moreinfo="none">ocamlobjinfo</literal> examines the compiled interface and
+            displays what other compilation units it depends on. In this case, we don't use any
+            external modules other than <literal moreinfo="none">Pervasives</literal>. Every module
+            depends on <literal moreinfo="none">Pervasives</literal> by default, unless you use the
+              <literal moreinfo="none">-nopervasives</literal> flag (this is an advanced use case,
+            and you shouldn't normally need it).</para>
 
-          <para>The long alphanumeric identifier beside each module name is a
-          hash calculated from all the types and values exported from that
-          compilation unit. It's used during type-checking and linking to
-          ensure that all of the compilation units have been compiled
-          consistently against each other. A difference in the hashes means
-          that a compilation unit with the same module name may have
-          conflicting type signatures in different modules. The compiler will
-          reject such programs with an error similar to this:</para>
+          <para>The long alphanumeric identifier beside each module name is a hash calculated from
+            all the types and values exported from that compilation unit. It's used during
+            type-checking and linking to ensure that all of the compilation units have been compiled
+            consistently against one another. A difference in the hashes means that a compilation
+            unit with the same module name may have conflicting type signatures in different
+            modules. The compiler will reject such programs with an error similar to this:</para>
 
           <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
           url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/inconsistent_compilation_units.out">front-end/inconsistent_compilation_units.out</ulink></para>
@@ -1507,34 +1433,28 @@ end</programlisting>
 <computeroutput moreinfo="none">       and /usr/lib/ocaml/map.cmi make inconsistent assumptions</computeroutput>
 <computeroutput moreinfo="none">       over interface Map</computeroutput></programlisting>
 
-          <para>This hash check is very conservative, but ensures that
-          separate compilation remains type-safe all the way up to the final
-          link phase. Your build system should ensure that you never see the
-          error messages above, but if you do run into it, just clean out your
-          intermediate files and recompile from scratch.</para>
+          <para>This hash check is very conservative, but ensures that separate compilation remains
+            type-safe all the way up to the final link phase. Your build system should ensure that
+            you never see the preceding error messages, but if you do run into it, just clean out
+            your intermediate files and recompile from scratch.</para>
         </sidebar>
       </sect3>
     </sect2>
 
     <sect2 id="packing-modules-together">
-      <title>Packing modules together</title>
+      <title>Packing Modules Together</title>
 
-      <para>The module-to-file mapping described so far rigidly enforces a 1:1
-      mapping between a top-level module and a file. It's often convenient to
-      split larger modules into separate files to make editing and version
-      control easier, but still compile them all into a single OCaml
-      module.</para>
+      <para>The module-to-file mapping described so far rigidly enforces a 1:1 mapping between a
+        top-level module and a file. It's often convenient to split larger modules into separate
+        files to make editing easier, but still compile them all into a single OCaml module.</para>
 
-      <para>The <literal moreinfo="none">-pack</literal> compiler option
-      accepts a list of compiled object files (<literal
-      moreinfo="none">.cmo</literal> in bytecode and <literal
-      moreinfo="none">.cmx</literal> for native code) and their associated
-      <literal moreinfo="none">.cmi</literal> compiled interfaces, and
-      combines them into a single module that contains them as sub-modules of
-      the output. Packing thus generates an entirely new <literal
-      moreinfo="none">.cmo</literal> (or <literal
-      moreinfo="none">.cmx</literal> file) and <literal
-      moreinfo="none">.cmi</literal> that includes the input modules.</para>
+      <para>The <literal moreinfo="none">-pack</literal> compiler option accepts a list of compiled
+        object files (<literal moreinfo="none">.cmo</literal> in bytecode and <literal
+          moreinfo="none">.cmx</literal> for native code) and their associated <literal
+          moreinfo="none">.cmi</literal> compiled interfaces, and combines them into a single module
+        that contains them as submodules of the output. Packing thus generates an entirely new
+          <literal moreinfo="none">.cmo</literal> (or <literal moreinfo="none">.cmx</literal> file)
+        and <literal moreinfo="none">.cmi</literal> that includes the input modules.</para>
 
       <para>Packing for native code introduces an additional requirement: the
       modules that are intended to be packed must be compiled with the
@@ -1544,19 +1464,16 @@ end</programlisting>
       command-line arguments for you, so let's try that out next with a simple
       example.</para>
 
-      <para>First, create a couple of toy modules called <literal
-      moreinfo="none">A.ml</literal> and <literal
-      moreinfo="none">B.ml</literal> that contain a single value. You will
-      also need a <literal moreinfo="none">_tags</literal> file that adds the
-      <literal moreinfo="none">-for-pack</literal> option for the <literal
-      moreinfo="none">cmx</literal> files (but careful to exclude the pack
-      target itself). Finally, the <literal moreinfo="none">X.mlpack</literal>
-      file contains the list of modules that are intended to be packed under
-      module <literal moreinfo="none">X</literal>. There are special rules in
-      <command moreinfo="none">ocamlbuild</command> that tell it how to map
-      <literal moreinfo="none">%.mlpack</literal> files to the packed <literal
-      moreinfo="none">%.cmx</literal> or <literal
-      moreinfo="none">%.cmo</literal> equivalent.</para>
+      <para>First, create a couple of toy modules called <literal moreinfo="none">A.ml</literal> and
+          <literal moreinfo="none">B.ml</literal> that contain a single value. You will also need a
+          <literal moreinfo="none">_tags</literal> file that adds the <literal moreinfo="none"
+          >-for-pack</literal> option for the <literal moreinfo="none">cmx</literal> files (but
+        careful to exclude the pack target itself). Finally, the <literal moreinfo="none"
+          >X.mlpack</literal> file contains the list of modules that are intended to be packed under
+        module <literal moreinfo="none">X</literal>. There are special rules in <command
+          moreinfo="none">ocamlbuild</command> that tell it how to map <literal moreinfo="none"
+          >%.mlpack</literal> files to the packed <literal moreinfo="none">%.cmx</literal> or
+          <literal moreinfo="none">%.cmo</literal> equivalent:</para>
 
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/packing/show_files.out">packing/show_files.out</ulink></para>
@@ -1572,10 +1489,9 @@ end</programlisting>
 <computeroutput moreinfo="none">A</computeroutput>
 <computeroutput moreinfo="none">B</computeroutput></programlisting>
 
-      <para>You can now run <literal moreinfo="none">corebuild</literal> to
-      build the <literal moreinfo="none">X.cmx</literal> file directly, but
-      let's create a new module to link against <literal
-      moreinfo="none">X</literal> to complete the example.</para>
+      <para>You can now run <literal moreinfo="none">corebuild</literal> to build the <literal
+          moreinfo="none">X.cmx</literal> file directly, but let's create a new module to link
+        against <literal moreinfo="none">X</literal> to complete the example:</para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/packing/test.ml">packing/test.ml</ulink></para>
@@ -1583,14 +1499,12 @@ end</programlisting>
       <programlisting format="linespecific" language="ocaml">let v = X.A.v
 let w = X.B.w</programlisting>
 
-      <para>You can now compile this test module and see that its inferred
-      interface is the result of using the packed contents of <literal
-      moreinfo="none">X</literal>. We further verify this by examining the
-      imported interfaces in <literal moreinfo="none">Test</literal> and
-      confirming that neither <literal moreinfo="none">A</literal> nor
-      <literal moreinfo="none">B</literal> are mentioned in there and that
-      only the packed <literal moreinfo="none">X</literal> module is
-      used.</para>
+      <para>You can now compile this test module and see that its inferred interface is the result
+        of using the packed contents of <literal moreinfo="none">X</literal>. We further verify this
+        by examining the imported interfaces in <literal moreinfo="none">Test</literal> and
+        confirming that neither <literal moreinfo="none">A</literal> nor <literal moreinfo="none"
+          >B</literal> are mentioned in there and that only the packed <literal moreinfo="none"
+          >X</literal> module is used:</para>
 
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/packing/build_test.out">packing/build_test.out</ulink></para>
@@ -1609,23 +1523,19 @@ let w = X.B.w</programlisting>
 <computeroutput moreinfo="none">	25f4b4e10ec64c56b2987f5900045fec	X</computeroutput></programlisting>
 
       <warning>
-        <title>Packing and search paths</title>
+        <title>Packing and Search Paths</title>
 
-        <para>One very common build error that happens with packing is
-        confusion resulting from building the packed <literal
-        moreinfo="none">cmi</literal> in the same directory as the
-        sub-modules. When you add this directory to your module search path,
-        the sub-modules are also visible. If you forget to include the
-        top-level prefix (e.g <literal moreinfo="none">X.A</literal>) and
-        instead use a sub-module directly (<literal
-        moreinfo="none">A</literal>), then this will compile and link
-        fine.</para>
+        <para>One very common build error that happens with packing is confusion resulting from
+          building the packed <literal moreinfo="none">cmi</literal> in the same directory as the
+          submodules. When you add this directory to your module search path, the submodules are
+          also visible. If you forget to include the top-level prefix (e.g., <literal
+            moreinfo="none">X.A</literal>) and instead use a submodule directly (<literal
+            moreinfo="none">A</literal>), then this will compile and link fine.</para>
 
-        <para>However, the types of <literal moreinfo="none">A</literal> and
-        <literal moreinfo="none">X.A</literal> are <emphasis>not</emphasis>
-        automatically equivalent, and so the type checker will complain if you
-        attempt to mix-and-match the packed and unpacked versions of the
-        library.</para>
+        <para>However, the types of <literal moreinfo="none">A</literal> and <literal
+            moreinfo="none">X.A</literal> are <emphasis>not</emphasis> automatically equivalent, and
+          so the type checker will complain if you attempt to mix and match the packed and unpacked
+          versions of the library.</para>
 
         <para>This mostly only happens with unit tests since they are built at
         the same time as the library. You can avoid it by being aware of the
@@ -1636,17 +1546,16 @@ let w = X.B.w</programlisting>
     </sect2>
 
     <sect2 id="shorter-module-paths-in-type-errors">
-      <title>Shorter module paths in type errors</title>
+      <title>Shorter Module Paths in Type Errors</title>
 
-      <para>Core uses the OCaml module system quite extensively to provide a
-      complete replacement standard library. It collects these modules into a
-      single <literal moreinfo="none">Std</literal> module which provides a
-      single module that needs to be opened to import the replacement modules
-      and functions.</para>
+      <para>Core uses the OCaml module system quite extensively to provide a complete replacement
+        standard library. It collects these modules into a single <literal moreinfo="none"
+          >Std</literal> module which provides a single module, that needs to be opened to import
+        the replacement modules and functions.</para>
 
-      <para>There's one downside to this approach: type errors suddenly get
-      much more verbose. We can see this if you run the vanilla OCaml
-      top-level (not <command moreinfo="none">utop</command>).</para>
+      <para>There's one downside to this approach: type errors suddenly get much more verbose. We
+        can see this if you run the vanilla OCaml toplevel (not <command moreinfo="none"
+          >utop</command>).</para>
 
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/short_paths_1.out">front-end/short_paths_1.out</ulink></para>
@@ -1657,9 +1566,8 @@ let w = X.B.w</programlisting>
 <computeroutput moreinfo="none">Error: This expression has type string but an expression was expected of type</computeroutput>
 <computeroutput moreinfo="none">         string list</computeroutput></programlisting>
 
-      <para>This type error without <literal
-      moreinfo="none">Core.Std</literal> has a straightforward type error.
-      When we switch to Core, though, it gets more verbose.</para>
+      <para>This type error without <literal moreinfo="none">Core.Std</literal> has a
+        straightforward type error. When we switch to Core, though, it gets more verbose:</para>
 
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/short_paths_2.out">front-end/short_paths_2.out</ulink></para>
@@ -1676,12 +1584,10 @@ let w = X.B.w</programlisting>
       The compiler does its best to show the type equivalence, but at the cost
       of a more verbose error message.</para>
 
-      <para>The compiler can remedy this via a so-called "short paths"
-      heuristic. This causes the compiler to search all the type aliases for
-      the shortest module path, and use that as the preferred output type. The
-      option is activated by passing <literal
-      moreinfo="none">-short-paths</literal> to the compiler, and works on the
-      top-level too.</para>
+      <para>The compiler can remedy this via a so-called short paths heuristic. This causes the
+        compiler to search all the type aliases for the shortest module path and use that as the
+        preferred output type. The option is activated by passing <literal moreinfo="none"
+          >-short-paths</literal> to the compiler, and works on the toplevel, too.</para>
 
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/short_paths_3.out">front-end/short_paths_3.out</ulink></para>
@@ -1693,12 +1599,11 @@ let w = X.B.w</programlisting>
 <computeroutput moreinfo="none">Error: This expression has type string but an expression was expected of type</computeroutput>
 <computeroutput moreinfo="none">         'a list</computeroutput></programlisting>
 
-      <para>The <command moreinfo="none">utop</command> enhanced top-level
-      activates short paths by default, which is why you've not had to do this
-      before in our interactive examples. However, the compiler doesn't
-      default to the short path heuristic since there are some situations
-      where the type aliasing information is useful to know, and would be lost
-      in the error if the shortest module path is always picked.</para>
+      <para>The <command moreinfo="none">utop</command> enhanced toplevel activates short paths by
+        default, which is why you've not had to do this before in our interactive examples. However,
+        the compiler doesn't default to the short path heuristic, since there are some situations
+        where the type aliasing information is useful to know, and would be lost in the error if the
+        shortest module path is always picked.</para>
 
       <para>You'll need to choose for yourself if you prefer short paths or
       the default behavior in your own projects, and pass the <literal
@@ -1708,7 +1613,7 @@ let w = X.B.w</programlisting>
   </sect1>
 
   <sect1 id="the-typed-syntax-tree">
-    <title>The typed syntax tree</title>
+    <title>The Typed Syntax Tree</title>
 
     <para>When the type checking process has successfully completed, it is
     combined with the AST to form a <emphasis>typed abstract syntax
@@ -1727,11 +1632,10 @@ let w = X.B.w</programlisting>
     to the inferred or external types.</para>
 
     <sect2 id="using-ocp-index-for-auto-completion">
-      <title>Using ocp-index for auto-completion</title>
+      <title>Using ocp-index for Autocompletion</title>
 
-      <para>One such command-line tool to display auto-completion information
-      in your editor is <command moreinfo="none">ocp-index</command>. Install
-      it via OPAM as follows.</para>
+      <para>One such command-line tool to display autocompletion information in your editor is
+          <command moreinfo="none">ocp-index</command>. Install it via OPAM as follows:</para>
 
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/install_ocp_index.out">front-end/install_ocp_index.out</ulink></para>
@@ -1740,13 +1644,12 @@ let w = X.B.w</programlisting>
           moreinfo="none">$ </prompt><userinput moreinfo="none">opam install ocp-index</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocp-index</userinput></programlisting>
 
-      <para>Let's refer back to our Ncurses binding example from the beginning
-      of <xref linkend="foreign-function-interface" />. This module defined
-      bindings for the Ncurses library. First, compile the interfaces with
-      <literal moreinfo="none">-bin-annot</literal> so that we can obtain the
-      <literal moreinfo="none">cmt</literal> and <literal
-      moreinfo="none">cmti</literal> files, and then run <command
-      moreinfo="none">ocp-index</command> in completion mode.</para>
+      <para>Let's refer back to our Ncurses binding example from the beginning of <xref
+          linkend="foreign-function-interface"/>. This module defined bindings for the Ncurses
+        library. First, compile the interfaces with <literal moreinfo="none">-bin-annot</literal> so
+        that we can obtain the <literal moreinfo="none">cmt</literal> and <literal moreinfo="none"
+          >cmti</literal> files, and then run <command moreinfo="none">ocp-index</command> in
+        completion mode:</para>
 
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/ocp-index/index_ncurses.out">ocp-index/index_ncurses.out</ulink></para>
@@ -1780,15 +1683,14 @@ let w = X.B.w</programlisting>
     </sect2>
 
     <sect2 id="examining-the-typed-syntax-tree-directly">
-      <title>Examining the typed syntax tree directly</title>
+      <title>Examining the Typed Syntax Tree Directly</title>
 
       <para>The compiler has a couple of advanced flags that can dump the raw
       output of the internal AST representation. You can't depend on these
       flags to give the same output across compiler revisions, but they are a
       useful learning tool.</para>
 
-      <para>We'll use our toy <literal moreinfo="none">typedef.ml</literal>
-      again.</para>
+      <para>We'll use our toy <literal moreinfo="none">typedef.ml</literal> again:</para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/typedef.ml">front-end/typedef.ml</ulink></para>
@@ -1796,8 +1698,8 @@ let w = X.B.w</programlisting>
       <programlisting format="linespecific" language="ocaml">type t = Foo | Bar
 let v = Foo</programlisting>
 
-      <para>Let's first look at the untyped syntax tree that's generated from
-      the parsing phase.</para>
+      <para>Let's first look at the untyped syntax tree that's generated from the parsing
+        phase:</para>
 
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/parsetree_typedef.out">front-end/parsetree_typedef.out</ulink></para>
@@ -1853,10 +1755,9 @@ let v = Foo</programlisting>
       token). This code hasn't been type checked yet, and so the raw tokens
       are all included.</para>
 
-      <para>The typed AST that is normally output as a compiled <literal
-      moreinfo="none">cmt</literal> file can be displayed in a more
-      developer-readable form via the <literal
-      moreinfo="none">-dtypedtree</literal> option.</para>
+      <para>The typed AST that is normally output as a compiled <literal moreinfo="none"
+          >cmt</literal> file can be displayed in a more developer-readable form via the <literal
+          moreinfo="none">-dtypedtree</literal> option:</para>
 
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/typedtree_typedef.out">front-end/typedtree_typedef.out</ulink></para>

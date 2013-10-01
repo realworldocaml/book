@@ -1,75 +1,66 @@
 <?xml version="1.0"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="command-line-parsing">
-      <title>Command Line Parsing</title>
+      <title>Command-Line Parsing</title>
 
-      <para>Many of the OCaml programs that you'll write will end up as
-      binaries that need to be run from a command prompt. Any non-trivial
-      command-line should support a collection of basic features:</para>
+      <para>Many of the OCaml programs that you'll write will end up as binaries that need to be run
+    from a command prompt. Any nontrivial command line should support a collection of basic
+    features:</para>
 
       <itemizedlist>
         <listitem>
-          <para>Parsing of command line arguments.</para>
+          <para>Parsing of command-line arguments</para>
         </listitem>
 
         <listitem>
-          <para>Generation of error messages in response to incorrect
-          inputs.</para>
+          <para>Generation of error messages in response to incorrect inputs</para>
         </listitem>
 
         <listitem>
-          <para>Help for all the available options.</para>
+          <para>Help for all the available options</para>
         </listitem>
 
         <listitem>
-          <para>Interactive auto-completion.</para>
+          <para>Interactive autocompletion</para>
         </listitem>
       </itemizedlist>
 
-      <para>It's tedious and error-prone to code all this manually for every
-      program you write. Core provides the Command library that simplifies all
-      of this by letting you declare all your command-line options in one
-      place, and deriving all of the above functionality from these
-      declarations.</para>
+      <para>It's tedious and error-prone to code all this manually for every program you write. Core
+    provides the Command library, which simplifies all of this by letting you declare all your
+    command-line options in one place and by deriving all of the above functionality from these
+    declarations.</para>
 
-      <para>Command is simple to use for simple applications, but also also
-      scales well as your needs grow more complex. In particular, Command
-      provides a sophisticated subcommand mode that groups related commands
-      together as the complexity of your user interface grows. You may already
-      be familiar with this command-line style from the Git or Mercurial
-      version control systems.</para>
+      <para>Command is simple to use for simple applications but also scales well as your needs grow
+    more complex. In particular, Command provides a sophisticated subcommand mode that groups
+    related commands together as the complexity of your user interface grows. You may already be
+    familiar with this command-line style from the Git or Mercurial version control systems.</para>
 
       <para>In this chapter, we'll:</para>
 
       <itemizedlist>
         <listitem>
-          <para>Learn how to use Command to construct basic and grouped
-          command-line interfaces.</para>
+          <para>Learn how to use Command to construct basic and grouped command-line
+        interfaces</para>
         </listitem>
 
         <listitem>
-          <para>See examples that extend the cryptographic utility from <xref linkend="classes"/> and build a simple equivalent to the
-          <literal moreinfo="none">md5</literal> and <literal moreinfo="none">shasum</literal>
-          utilities.</para>
+          <para>See examples that extend the cryptographic utility from <xref linkend="classes"/>
+        and build a simple equivalent to the <literal moreinfo="none">md5</literal> and <literal moreinfo="none">shasum</literal> utilities</para>
         </listitem>
 
         <listitem>
-          <para>Demonstrate how <emphasis>functional combinators</emphasis>
-          can be used to declare complex command line interfaces in a
-          type-safe and elegant way.</para>
+          <para>Demonstrate how <emphasis>functional combinators</emphasis> can be used to declare
+        complex command line interfaces in a type-safe and elegant way</para>
         </listitem>
       </itemizedlist>
 
       <sect1 id="basic-command-line-parsing">
-        <title>Basic command-line parsing</title>
+        <title>Basic Command-Line Parsing</title>
 
-        <para>Let's start by working through a clone of the
-        <literal moreinfo="none">md5sum</literal> command that is present on most Linux
-        installations (the equivalent command on MacOS X is simply
-        <literal moreinfo="none">md5</literal>). The function defined below reads in the
-        contents of a file, applies the MD5 one-way cryptographic hash
-        function to the data, and outputs an ASCII hex representation of the
-        result.</para>
+        <para>Let's start by working through a clone of the <literal moreinfo="none">md5sum</literal> command that is present on most Linux installations (the equivalent
+      command on Mac OS X is simply <literal moreinfo="none">md5</literal>). The following function
+      defined below reads in the contents of a file, applies the MD5 one-way cryptographic hash
+      function to the data, and outputs an ASCII hex representation of the result:</para>
 
         <para role="sourcecode">OCaml:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/basic_md5.ml">command-line-parsing/basic_md5.ml</ulink></para>
@@ -84,23 +75,19 @@ let do_hash file =
     |&gt; print_endline
   )</programlisting>
 
-        <para>The <literal moreinfo="none">do_hash</literal> function accepts a
-        <literal moreinfo="none">filename</literal> parameter and prints the human-readable
-        MD5 string to the console standard output. The first step towards
-        turning this function into a command-line program is to declare all
-        the possible command-line arguments in a
-        <emphasis>specification</emphasis>. <literal moreinfo="none">Command.Spec</literal>
-        defines combinators that can be chained together to define optional
-        flags and positional arguments, what types they should map to, and
-        whether to take special actions (such as pausing for interactive
-        input) if certain inputs are encountered.</para>
+        <para>The <literal moreinfo="none">do_hash</literal> function accepts a <literal moreinfo="none">filename</literal> parameter and prints the human-readable MD5 string to the
+      console standard output. The first step toward turning this function into a command-line
+      program is to declare all the possible command-line arguments in a
+        <emphasis>specification</emphasis>. <literal moreinfo="none">Command.Spec</literal> defines
+      combinators that can be chained together to define optional flags and positional arguments,
+      what types they should map to, and whether to take special actions (such as pausing for
+      interactive input) if certain inputs are encountered.</para>
 
         <sect2 id="anonymous-arguments">
-          <title>Anonymous arguments</title>
+          <title>Anonymous Arguments</title>
 
-          <para>Let's build the specification for a single argument that is
-          passed directly on the command-line. This is known as an
-          <emphasis>anonymous</emphasis> argument.</para>
+          <para>Let's build the specification for a single argument that is passed directly on the
+        command line. This is known as an <emphasis>anonymous</emphasis> argument:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/basic_md5.ml">command-line-parsing/basic_md5.ml</ulink> (part
@@ -111,29 +98,20 @@ let do_hash file =
   empty
   +&gt; anon ("filename" %: string)</programlisting>
 
-          <para>The <literal moreinfo="none">Command.Spec</literal> module defines the tools
-          you'll need to build up a command-line specification. We start with
-          the <literal moreinfo="none">empty</literal> value, and add parameters to that using
-          the <literal moreinfo="none">+&gt;</literal> combinator. (Both of these values come
-          from <literal moreinfo="none">Command.Spec</literal>.)</para>
+          <para>The <literal moreinfo="none">Command.Spec</literal> module defines the tools you'll
+        need to build up a command-line specification. We start with the <literal moreinfo="none">empty</literal> value and add parameters to that using the <literal moreinfo="none">+&gt;</literal> combinator. (Both of these values come from <literal moreinfo="none">Command.Spec</literal>.)</para>
 
-          <para>In this case, we defined a single anonymous argument called
-          <literal moreinfo="none">filename</literal> which takes a value of type
-          <literal moreinfo="none">string</literal>. Anonymous parameters are created using
-          the <literal moreinfo="none">%:</literal> operator, which binds a textual name (used
-          in the help text to identify the parameter) to an OCaml conversion
-          function that parses the command-line string fragments into a
-          higher-level OCaml data type. In the example above this is just
-          <literal moreinfo="none">Command.Spec.string</literal>, but we'll see more complex
-          conversion options later in the chapter.</para>
+          <para>In this case, we defined a single anonymous argument called <literal moreinfo="none">filename</literal>, which takes a value of type <literal moreinfo="none">string</literal>. Anonymous parameters are created using the <literal moreinfo="none">%:</literal> operator, which binds a textual name (used in the help text to identify the
+        parameter) to an OCaml conversion function that parses the command-line string fragments
+        into a higher-level OCaml data type. In the preceding example, this is just <literal moreinfo="none">Command.Spec.string</literal>, but we'll see more complex conversion
+        options later in the chapter.</para>
         </sect2>
 
         <sect2 id="defining-basic-commands">
-          <title>Defining basic commands</title>
+          <title>Defining Basic Commands</title>
 
-          <para>Once we've defined a specification, we need to put it to work
-          on real input. The simplest way is to directly create a command-line
-          interface via the <literal moreinfo="none">Command.basic</literal> module.</para>
+          <para>Once we've defined a specification, we need to put it to work on real input. The
+        simplest way is to directly create a command-line interface via the <literal moreinfo="none">Command.basic</literal> module:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/basic_md5.ml">command-line-parsing/basic_md5.ml</ulink> (part
@@ -146,29 +124,27 @@ let do_hash file =
     spec
     (fun filename () -&gt; do_hash filename)</programlisting>
 
-          <para><literal moreinfo="none">Command.basic</literal> defines a complete
-          command-line interface that takes the following extra arguments, in
-          addition to the ones defined in the specification.</para>
+          <para><literal moreinfo="none">Command.basic</literal> defines a complete command-line
+        interface that takes the following extra arguments, in addition to the ones defined in the
+        specification:</para>
 
-          <itemizedlist>
-            <listitem>
-              <para><literal moreinfo="none">summary</literal> is a required one-line
-              description to go at the top of the command help screen.</para>
-            </listitem>
-
-            <listitem>
-              <para><literal moreinfo="none">readme</literal> is for longer help text when the
+          <variablelist>
+            <varlistentry>
+              <term><literal moreinfo="none">summary</literal></term> <listitem><para>A required one-line
+              description to go at the top of the command help screen.</para></listitem>
+            </varlistentry>
+            
+            <varlistentry>
+              <term><literal moreinfo="none">readme</literal></term><listitem> <para>For longer help text when the
               command is called with <literal moreinfo="none">-help</literal>. The
               <literal moreinfo="none">readme</literal> argument is a function that is only
-              evaluated when the help text is actually needed.</para>
-            </listitem>
-
-            <listitem>
-              <para>The specification and the callback function follow as
-              non-labeled arguments.</para>
-            </listitem>
-          </itemizedlist>
-
+              evaluated when the help text is actually needed.</para></listitem>
+            </varlistentry>
+            
+          </variablelist>
+          
+          
+          <para>The specification and the callback function follow as nonlabeled arguments.</para>
           <para>The callback function is where all the work happens after the
           command-line parsing is complete. This function is applied with the
           arguments containing the parsed command-line values, and it takes
@@ -177,14 +153,11 @@ let do_hash file =
           (using the <literal moreinfo="none">+&gt;</literal> operator).</para>
 
           <note>
-            <title>The extra <literal moreinfo="none">unit</literal> argument to
-            callbacks</title>
+            <title>The Extra <literal moreinfo="none">unit</literal> Argument to Callbacks</title>
 
-            <para>The callback above needs an extra <literal moreinfo="none">unit</literal>
-            argument after <literal moreinfo="none">filename</literal>. This is to ensure that
-            specifications can work even when they are empty
-            (<emphasis>i.e.</emphasis> the
-            <literal moreinfo="none">Command.Spec.empty</literal> value).</para>
+            <para>The preceding callback needs an extra <literal moreinfo="none">unit</literal>
+          argument after <literal moreinfo="none">filename</literal>. This is to ensure that
+          specifications can work even when they are empty (i.e. the <literal moreinfo="none">Command.Spec.empty</literal> value).</para>
 
             <para>Every OCaml function needs at least one argument, so the
             final <literal moreinfo="none">unit</literal> guarantees that it will not be
@@ -194,10 +167,10 @@ let do_hash file =
         </sect2>
 
         <sect2 id="running-basic-commands">
-          <title>Running basic commands</title>
+          <title>Running Basic Commands</title>
 
-          <para>Once we've defined the basic command, running it is just one
-          function call away.</para>
+          <para>Once we've defined the basic command, running it is just one function call
+        away:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/basic_md5.ml">command-line-parsing/basic_md5.ml</ulink> (part
@@ -206,12 +179,11 @@ let do_hash file =
           <programlisting language="ocaml" format="linespecific">let () =
   Command.run ~version:"1.0" ~build_info:"RWO" command</programlisting>
 
-          <para><literal moreinfo="none">Command.run</literal> takes a couple of optional
-          arguments that are useful to identify which version of the binary
-          you are running in production. You'll need to install Cryptokit via
-          <literal moreinfo="none">opam install cryptokit</literal> before building this
-          example. Once that's completed, run the following to compile the
-          binary.</para>
+          <para><literal moreinfo="none">Command.run</literal> takes a couple of optional arguments
+        that are useful to identify which version of the binary you are running in production.
+        You'll need to install Cryptokit via <literal moreinfo="none">opam install
+          cryptokit</literal> before building this example. Once that's completed, run the following
+        to compile the binary:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/build_basic_md5.out">command-line-parsing/build_basic_md5.out</ulink></para>
@@ -219,8 +191,7 @@ let do_hash file =
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg cryptokit basic_md5.native</userinput>
 </programlisting>
 
-          <para>You can now query the version information for the binary you
-          just compiled.</para>
+          <para>You can now query the version information for the binary you just compiled:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/get_basic_md5_version.out">command-line-parsing/get_basic_md5_version.out</ulink></para>
@@ -230,12 +201,11 @@ let do_hash file =
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./basic_md5.native -build-info</userinput>
 <computeroutput moreinfo="none">RWO</computeroutput></programlisting>
 
-          <para>The versions that you see in the output were defined via the
-          optional arguments to <literal moreinfo="none">Command.run</literal>. You can leave
-          these blank in your own programs or get your build system to
-          generate them directly from your version control system
-          (<emphasis>e.g.</emphasis> by running <literal moreinfo="none">hg id</literal> to
-          generate a build revision number, in the case of Mercurial).</para>
+          <para>The versions that you see in the output were defined via the optional arguments to
+          <literal moreinfo="none">Command.run</literal>. You can leave these blank in your own
+        programs or get your build system to generate them directly from your version control system
+        (e.g. by running <literal moreinfo="none">hg id</literal> to generate a build revision
+        number, in the case of Mercurial):</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/get_basic_md5_help.out">command-line-parsing/get_basic_md5_help.out</ulink></para>
@@ -261,9 +231,9 @@ let do_hash file =
           message to the standard error that informs you that a required
           argument <literal moreinfo="none">filename</literal> is missing.</para>
 
-          <para>If you do supply the <literal moreinfo="none">filename</literal> argument,
-          then <literal moreinfo="none">do_hash</literal> is called with the argument and the
-          MD5 output is displayed to the standard output.</para>
+          <para>If you do supply the <literal moreinfo="none">filename</literal> argument, then
+          <literal moreinfo="none">do_hash</literal> is called with the argument and the MD5 output
+        is displayed to the standard output:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/run_basic_md5.out">command-line-parsing/run_basic_md5.out</ulink></para>
@@ -271,9 +241,9 @@ let do_hash file =
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./basic_md5.native ./basic_md5.native</userinput>
 <computeroutput moreinfo="none">b5ee7de449a2e0c6c01d4f2d898926de</computeroutput></programlisting>
 
-          <para>And that's all it took to build our little MD5 utility! Here's
-          a complete version of the example we just walked through, but made
-          slightly more succinct by removing intermediate variables.</para>
+          <para>And that's all it took to build our little MD5 utility! Here's a complete version of
+        the example we just walked through, made slightly more succinct by removing intermediate
+        variables:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/basic_md5_succinct.ml">command-line-parsing/basic_md5_succinct.ml</ulink></para>
@@ -304,12 +274,10 @@ let () =
       </sect1>
 
       <sect1 id="argument-types">
-        <title>Argument types</title>
+        <title>Argument Types</title>
 
-        <para>You aren't just limited to parsing command lines as strings, of
-        course. <literal moreinfo="none">Command.Spec</literal> defines several other
-        conversion functions that validate and parse input into various
-        types.</para>
+        <para>You aren't just limited to parsing command lines as strings, of course. <literal moreinfo="none">Command.Spec</literal> defines several other conversion functions that
+      validate and parse input into various types:</para>
 
         <informaltable>
           <tgroup cols="3">
@@ -389,9 +357,8 @@ let () =
           </tgroup>
         </informaltable>
 
-        <para>We can tighten up the specification of the command to
-        <literal moreinfo="none">file</literal> to reflect that the argument must be a valid
-        filename, and not just any string.</para>
+        <para>We can tighten up the specification of the command to <literal moreinfo="none">file</literal> to reflect that the argument must be a valid filename, and not just any
+      string:</para>
 
         <para role="sourcecode">OCaml:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/basic_md5_as_filename.ml">command-line-parsing/basic_md5_as_filename.ml</ulink>
@@ -407,10 +374,9 @@ let () =
 let () =
   Command.run ~version:"1.0" ~build_info:"RWO" command</programlisting>
 
-        <para>Running this with a non-existent filename will now output an
-        error if the file doesn't exist. As a bonus, it also enables
-        interactive command-line completion to work on the filename argument
-        (explained later in the chapter).</para>
+        <para>Running this with a nonexistent filename will now output an error if the file doesn't
+      exist. As a bonus, it also enables interactive command-line completion to work on the filename
+      argument (explained later in the chapter):</para>
 
         <para role="sourcecode">Terminal:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/run_basic_md5_as_filename.out">command-line-parsing/run_basic_md5_as_filename.out</ulink></para>
@@ -425,13 +391,12 @@ let () =
 <computeroutput moreinfo="none">Called from file "lib/exn.ml", line 87, characters 6-10</computeroutput></programlisting>
 
         <sect2 id="defining-custom-argument-types">
-          <title>Defining custom argument types</title>
+          <title>Defining Custom Argument Types</title>
 
-          <para>We can also define our own argument types if the predefined
-          ones aren't sufficient. For instance, let's make a
-          <literal moreinfo="none">regular_file</literal> argument type that ensures that the
-          input file isn't a character device or some other odd UNIX file type
-          that can't be fully read.</para>
+          <para>We can also define our own argument types if the predefined ones aren't sufficient.
+        For instance, let's make a <literal moreinfo="none">regular_file</literal> argument type
+        that ensures that the input file isn't a character device or some other odd UNIX file type
+        that can't be fully read:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/basic_md5_with_custom_arg.ml">command-line-parsing/basic_md5_with_custom_arg.ml</ulink></para>
@@ -466,12 +431,9 @@ let command =
 let () =
   Command.run ~version:"1.0" ~build_info:"RWO" command</programlisting>
 
-          <para>The <literal moreinfo="none">regular_file</literal> function transforms a
-          <literal moreinfo="none">filename</literal> string parameter into the same string,
-          but first checks that the file exists and is a regular file type.
-          When you build and run this code, you will see the new error
-          messages if you try to open a special device such as
-          <literal moreinfo="none">/dev/null</literal>.</para>
+          <para>The <literal moreinfo="none">regular_file</literal> function transforms a <literal moreinfo="none">filename</literal> string parameter into the same string but first checks
+        that the file exists and is a regular file type. When you build and run this code, you will
+        see the new error messages if you try to open a special device such as <literal moreinfo="none">/dev/null</literal>:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/run_basic_md5_with_custom_arg.out">command-line-parsing/run_basic_md5_with_custom_arg.out</ulink></para>
@@ -483,10 +445,9 @@ let () =
         </sect2>
 
         <sect2 id="optional-and-default-arguments">
-          <title>Optional and default arguments</title>
+          <title>Optional and Default Arguments</title>
 
-          <para>A more realistic MD5 binary could also read from the standard
-          input if a <literal moreinfo="none">filename</literal> isn't specified.</para>
+          <para>A more realistic MD5 binary could also read from the standard input if a <literal moreinfo="none">filename</literal> isn't specified:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/basic_md5_with_optional_file_broken.ml">command-line-parsing/basic_md5_with_optional_file_broken.ml</ulink>
@@ -502,10 +463,9 @@ let () =
 let () =
   Command.run ~version:"1.0" ~build_info:"RWO" command</programlisting>
 
-          <para>This just wraps the <literal moreinfo="none">filename</literal> argument
-          declaration in the <literal moreinfo="none">maybe</literal> function to mark it as
-          an optional argument. However, building this results in a
-          compile-time error.</para>
+          <para>This just wraps the <literal moreinfo="none">filename</literal> argument declaration
+        in the <literal moreinfo="none">maybe</literal> function to mark it as an optional argument.
+        However, building this results in a compile-time error:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/build_basic_md5_with_optional_file_broken.out">command-line-parsing/build_basic_md5_with_optional_file_broken.out</ulink></para>
@@ -517,12 +477,11 @@ let () =
 <computeroutput moreinfo="none">       Type string is not compatible with type string option </computeroutput>
 <computeroutput moreinfo="none">Command exited with code 2.</computeroutput></programlisting>
 
-          <para>This is because changing the argument type has also changed
-          the type of the callback function. It now wants a <literal moreinfo="none">string
-          option</literal> instead of a <literal moreinfo="none">string</literal> since the
-          value has become optional. We can adapt our example to use the new
-          information and read from standard input if no file is
-          specified.</para>
+          <para>This is because changing the argument type has also changed the type of the callback
+        function. It now wants a <literal moreinfo="none">string option</literal> instead of a
+          <literal moreinfo="none">string</literal>, since the value has become optional. We can
+        adapt our example to use the new information and read from standard input if no file is
+        specified:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/basic_md5_with_optional_file.ml">command-line-parsing/basic_md5_with_optional_file.ml</ulink></para>
@@ -565,9 +524,8 @@ let () =
           with the benefit of not having to change the callback parameter type
           (which may be a problem in more complex applications).</para>
 
-          <para>The example below behaves exactly the same as the previous
-          example, but replaces <literal moreinfo="none">maybe</literal> with
-          <literal moreinfo="none">maybe_with_default</literal>.</para>
+          <para>The following example behaves exactly the same as the previous example, but replaces
+          <literal moreinfo="none">maybe</literal> with <literal moreinfo="none">maybe_with_default</literal>:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/basic_md5_with_default_file.ml">command-line-parsing/basic_md5_with_default_file.ml</ulink></para>
@@ -598,8 +556,8 @@ let command =
 let () =
   Command.run ~version:"1.0" ~build_info:"RWO" command</programlisting>
 
-          <para>Building and running both against a system file confirms that
-          they have the same behavior.</para>
+          <para>Building and running both against a system file confirms that they have the same
+        behavior:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/run_basic_and_default_md5.out">command-line-parsing/run_basic_and_default_md5.out</ulink></para>
@@ -611,12 +569,11 @@ let () =
         </sect2>
 
         <sect2 id="sequences-of-arguments">
-          <title>Sequences of arguments</title>
+          <title>Sequences of Arguments</title>
 
-          <para>One last transformation that's useful is to obtain lists of
-          anonymous arguments rather than a single one. As an example, let's
-          modify our MD5 code to take a collection of files to process on the
-          command line.</para>
+          <para>One last transformation that's useful is to obtain lists of anonymous arguments
+        rather than a single one. As an example, let's modify our MD5 code to take a collection of
+        files to process on the command line:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/basic_md5_sequence.ml">command-line-parsing/basic_md5_sequence.ml</ulink></para>
@@ -646,30 +603,27 @@ let command =
 let () =
   Command.run ~version:"1.0" ~build_info:"RWO" command</programlisting>
 
-          <para>The callback function is a little more complex now to handle
-          the extra options. The <literal moreinfo="none">files</literal> are now a
-          <literal moreinfo="none">string list</literal>, and an empty list reverts to using
-          standard input just as our previous <literal moreinfo="none">maybe</literal> and
-          <literal moreinfo="none">maybe_with_default</literal> examples did. If the list of
-          files isn't empty, then it opens up each file and runs them through
-          <literal moreinfo="none">do_hash</literal> sequentially.</para>
+          <para>The callback function is a little more complex now to handle the extra options. The
+          <literal moreinfo="none">files</literal> are now a <literal moreinfo="none">string
+          list</literal>, and an empty list reverts to using standard input, just as our previous
+          <literal moreinfo="none">maybe</literal> and <literal moreinfo="none">maybe_with_default</literal> examples did. If the list of files isn't empty, then it
+        opens up each file and runs them through <literal moreinfo="none">do_hash</literal>
+        sequentially.</para>
         </sect2>
       </sect1>
 
       <sect1 id="adding-labeled-flags-to-the-command-line">
-        <title>Adding labeled flags to the command line</title>
+        <title>Adding Labeled Flags to the Command Line</title>
 
-        <para>You aren't just limited to anonymous arguments on the
-        command-line. A <emphasis>flag</emphasis> is a named field that can be
-        followed by an optional argument. These flags can appear in any order
-        on the command-line, or multiple times, depending on how they're
-        declared in the specification.</para>
+        <para>You aren't just limited to anonymous arguments on the command line. A
+        <emphasis>flag</emphasis> is a named field that can be followed by an optional argument.
+      These flags can appear in any order on the command line, or multiple times, depending on how
+      they're declared in the specification.</para>
 
-        <para>Let's add two arguments to our <literal moreinfo="none">md5</literal> command
-        that mimics the MacOS X version. A <literal moreinfo="none">-s</literal> flag
-        specifies the string to be hashed directly on the command-line and
-        <literal moreinfo="none">-t</literal> runs a self-test. The complete example is
-        below.</para>
+        <para>Let's add two arguments to our <literal moreinfo="none">md5</literal> command that
+      mimics the Mac OS X version. A <literal moreinfo="none">-s</literal> flag specifies the string
+      to be hashed directly on the command line and <literal moreinfo="none">-t</literal> runs a
+      self-test. The complete example follows:</para>
 
         <para role="sourcecode">OCaml:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/basic_md5_with_flags.ml">command-line-parsing/basic_md5_with_flags.ml</ulink></para>
@@ -712,14 +666,11 @@ let command =
 
 let () = Command.run command</programlisting>
 
-        <para>The specification now uses the <literal moreinfo="none">flag</literal> function
-        to define the two new labeled command-line arguments. The
-        <literal moreinfo="none">doc</literal> string is formatted so that the first word is
-        the short name that appears in the usage text, with the remainder
-        being the full help text. Notice that the <literal moreinfo="none">-t</literal> flag
-        has no argument, and so we prepend its <literal moreinfo="none">doc</literal> text
-        with a blank space. The help text for the above code looks like
-        this.</para>
+        <para>The specification now uses the <literal moreinfo="none">flag</literal> function to
+      define the two new labeled, command-line arguments. The <literal moreinfo="none">doc</literal>
+      string is formatted so that the first word is the short name that appears in the usage text,
+      with the remainder being the full help text. Notice that the <literal moreinfo="none">-t</literal> flag has no argument, and so we prepend its <literal moreinfo="none">doc</literal> text with a blank space. The help text for the preceding code looks like
+      this:</para>
 
         <para role="sourcecode">Terminal:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/run_basic_md5_flags_help.out">command-line-parsing/run_basic_md5_flags_help.out</ulink></para>
@@ -812,18 +763,16 @@ let () = Command.run command</programlisting>
       </sect1>
 
       <sect1 id="grouping-sub-commands-together">
-        <title>Grouping sub-commands together</title>
+        <title>Grouping Subcommands Together</title>
 
-        <para>You can get pretty far by using flags and anonymous arguments to
-        assemble complex command-line interfaces. After a while though, too
-        many options can make the program very confusing for newcomers to your
-        application. One way to solve this is by grouping common operations
-        together and adding some hierarchy to the command-line
-        interface.</para>
+        <para>You can get pretty far by using flags and anonymous arguments to assemble complex,
+      command-line interfaces. After a while though, too many options can make the program very
+      confusing for newcomers to your application. One way to solve this is by grouping common
+      operations together and adding some hierarchy to the command-line interface.</para>
 
-        <para>You'll have run across this style already when using the OPAM
-        package manager (or, in the non-OCaml world, the Git or Mercurial
-        commands). OPAM exposes commands in this form.</para>
+        <para>You'll have run across this style already when using the OPAM package manager (or, in
+      the non-OCaml world, the Git or Mercurial commands). OPAM exposes commands in this
+      form:</para>
 
         <para role="sourcecode">Terminal:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/opam.out">command-line-parsing/opam.out</ulink></para>
@@ -833,18 +782,14 @@ let () = Command.run command</programlisting>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">opam install --help</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">opam install cryptokit --verbose</userinput></programlisting>
 
-        <para>The <literal moreinfo="none">config</literal>, <literal moreinfo="none">remote</literal> and
-        <literal moreinfo="none">install</literal> keywords form a logical grouping of
-        commands that factor out a set of flags and arguments. This lets you
-        prevent flags that are specific to a particular sub-command from
-        leaking into the general configuration space.</para>
+        <para>The <literal moreinfo="none">config</literal>, <literal moreinfo="none">remote</literal>, and <literal moreinfo="none">install</literal> keywords form a logical
+      grouping of commands that factor out a set of flags and arguments. This lets you prevent flags
+      that are specific to a particular subcommand from leaking into the general configuration
+      space.</para>
 
-        <para>This usually only becomes a concern when your application
-        organically grows features. Luckily, it's simple to extend your
-        application to do this in Command: just swap the
-        <literal moreinfo="none">Command.basic</literal> for <literal moreinfo="none">Command.group</literal>,
-        which takes an association list of specifications and handles the
-        sub-command parsing and help output for you.</para>
+        <para>This usually only becomes a concern when your application organically grows features.
+      Luckily, it's simple to extend your application to do this in Command: just swap the <literal moreinfo="none">Command.basic</literal> for <literal moreinfo="none">Command.group</literal>, which takes an association list of specifications and handles the
+      subcommand parsing and help output for you:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/group.topscript">command-line-parsing/group.topscript</ulink></para>
@@ -860,14 +805,13 @@ let () = Command.run command</programlisting>
 <computeroutput moreinfo="none">= &lt;fun&gt;</computeroutput></programlisting>
 
         <para>The <literal moreinfo="none">group</literal> signature accepts a list of basic
-        <literal moreinfo="none">Command.t</literal> values and their corresponding names.
-        When executed, it looks for the appropriate sub-command from the name
-        list, and dispatches it to the right command handler.</para>
+        <literal moreinfo="none">Command.t</literal> values and their corresponding names. When
+      executed, it looks for the appropriate subcommand from the name list, and dispatches it to the
+      right command handler.</para>
 
-        <para>Let's build the outline of a calendar tool that does a few
-        operations over dates from the command-line. We first need to define a
-        command that adds days to an input date and prints the resulting
-        date.</para>
+        <para>Let's build the outline of a calendar tool that does a few operations over dates from
+      the command line. We first need to define a command that adds days to an input date and prints
+      the resulting date:</para>
 
         <para role="sourcecode">OCaml:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/cal_add_days.ml">command-line-parsing/cal_add_days.ml</ulink></para>
@@ -890,11 +834,10 @@ let add =
 
 let () = Command.run add</programlisting>
 
-        <para>Everything in this command should be familiar to you by now.
-        Once you've tested it and made sure it works, we can define another
-        new command that takes the difference of two dates. However, instead
-        of creating a new binary, we group both operations as sub-commands
-        using <literal moreinfo="none">Command.group</literal>.</para>
+        <para>Everything in this command should be familiar to you by now. Once you've tested it and
+      made sure it works, we can define another new command that takes the difference of two dates.
+      However, instead of creating a new binary, we group both operations as subcommands using
+        <literal moreinfo="none">Command.group</literal>:</para>
 
         <para role="sourcecode">OCaml:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/cal_add_sub_days.ml">command-line-parsing/cal_add_sub_days.ml</ulink></para>
@@ -932,9 +875,9 @@ let command =
 
 let () = Command.run command</programlisting>
 
-        <para>And that's all you really need to add sub-command support! Let's
-        build the example first in the usual way and inspect the help output,
-        which now reflects the sub-commands we just added.</para>
+        <para>And that's all you really need to add subcommand support! Let's build the example
+      first in the usual way and inspect the help output, which now reflects the subcommands we just
+      added.</para>
 
         <para role="sourcecode">Terminal:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/build_cal_add_sub_days.out">command-line-parsing/build_cal_add_sub_days.out</ulink></para>
@@ -953,8 +896,8 @@ let () = Command.run command</programlisting>
 <computeroutput moreinfo="none">  help     explain a given subcommand (perhaps recursively)</computeroutput>
 <computeroutput moreinfo="none"> </computeroutput></programlisting>
 
-        <para>We can invoke the two commands we just defined to verify that
-        they work and see the date parsing in action.</para>
+        <para>We can invoke the two commands we just defined to verify that they work and see the
+      date parsing in action:</para>
 
         <para role="sourcecode">Terminal:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/run_cal_add_sub_days.out">command-line-parsing/run_cal_add_sub_days.out</ulink></para>
@@ -966,27 +909,25 @@ let () = Command.run command</programlisting>
       </sect1>
 
       <sect1 id="advanced-control-over-parsing">
-        <title>Advanced control over parsing</title>
+        <title>Advanced Control over Parsing</title>
 
         <para>The functions for generating a specification may seem like
         magic. In particular, even if you know how to use them, it's not
         entirely clear how they work, and in particular, why the types work
         out the way they do.</para>
 
-        <para>Understanding the details of how these specifications fit
-        together becomes more useful as your command line interfaces get more
-        complex. In particular, you may want to factor out common
-        functionality between specifications, or interrupt the parsing to
-        perform special processing, such as requesting an interactive
-        passphrase from the user before proceeding. All of this is helped by a
-        deeper understanding of the Command library.</para>
+        <para>Understanding the details of how these specifications fit together becomes more useful
+      as your command-line interfaces get more complex. In particular, you may want to factor out
+      common functionality between specifications or interrupt the parsing to perform special
+      processing, such as requesting an interactive passphrase from the user before proceeding. All
+      of this is helped by a deeper understanding of the Command library.</para>
 
-        <para>In the following, we'll explain the logic behind the combinators
-        we've already described and show you some new combinators that let you
-        use Command even more effectively.</para>
+        <para>In the following sections we'll explain the logic behind the combinators we've already
+      described and show you some new combinators that let you use Command even more
+      effectively.</para>
 
         <sect2 id="the-types-behind-command.spec">
-          <title>The types behind <literal moreinfo="none">Command.Spec</literal></title>
+          <title>The Types Behind <literal moreinfo="none">Command.Spec</literal></title>
 
           <para>The Command module's safety relies on the specification's
           output values precisely matching the callback function which invokes
@@ -1003,15 +944,15 @@ let () = Command.run command</programlisting>
 
           <itemizedlist>
             <listitem>
-              <para>how to parse the command line</para>
+              <para>How to parse the command line</para>
             </listitem>
 
             <listitem>
-              <para>what the command does and how to call it</para>
+              <para>What the command does and how to call it</para>
             </listitem>
 
             <listitem>
-              <para>how to auto-complete a partial command line</para>
+              <para>How to autocomplete a partial command line</para>
             </listitem>
           </itemizedlist>
 
@@ -1153,23 +1094,20 @@ let diff ~common =
 <computeroutput moreinfo="none">       Type unit -&gt; unit is not compatible with type unit </computeroutput>
 <computeroutput moreinfo="none">Command exited with code 2.</computeroutput></programlisting>
 
-          <para>While this does look scary, the key line to scan is the last
-          one, where it's telling you that you have supplied too many
-          arguments in the callback function (<literal moreinfo="none">unit -&gt;
-          unit</literal> vs <literal moreinfo="none">unit</literal>). If you started with a
-          working program and made this single change, you typically don't
-          even need to read the type error, as the filename and location
-          information is sufficient to make the obvious fix.</para>
+          <para>While this does look scary, the key line to scan is the last one, where it's telling
+        you that you have supplied too many arguments in the callback function (<literal moreinfo="none">unit -&gt; unit</literal> versus <literal moreinfo="none">unit</literal>).
+        If you started with a working program and made this single change, you typically don't even
+        need to read the type error, as the filename and location information is sufficient to make
+        the obvious fix.</para>
         </sect2>
 
         <sect2 id="prompting-for-interactive-input">
-          <title>Prompting for interactive input</title>
+          <title>Prompting for Interactive Input</title>
 
-          <para>The <literal moreinfo="none">step</literal> combinator lets you control the
-          normal course of parsing by supplying a function that maps callback
-          arguments to a new set of values. For instance, let's revisit our
-          first calendar application that added a number of days onto a
-          supplied base date.</para>
+          <para>The <literal moreinfo="none">step</literal> combinator lets you control the normal
+        course of parsing by supplying a function that maps callback arguments to a new set of
+        values. For instance, let's revisit our first calendar application that added a number of
+        days onto a supplied base date:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/cal_add_days.ml">command-line-parsing/cal_add_days.ml</ulink></para>
@@ -1192,12 +1130,10 @@ let add =
 
 let () = Command.run add</programlisting>
 
-          <para>This program requires you to specify both the
-          <literal moreinfo="none">base</literal> date and the number of
-          <literal moreinfo="none">days</literal> to add onto it. If <literal moreinfo="none">days</literal>
-          isn't supplied on the command-line, an error is output. Now let's
-          modify it to interactively prompt for a number of days if only the
-          <literal moreinfo="none">base</literal> date is supplied.</para>
+          <para>This program requires you to specify both the <literal moreinfo="none">base</literal> date and the number of <literal moreinfo="none">days</literal> to add onto
+        it. If <literal moreinfo="none">days</literal> isn't supplied on the command line, an error
+        is output. Now let's modify it to interactively prompt for a number of days if only the
+          <literal moreinfo="none">base</literal> date is supplied:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/cal_add_interactive.ml">command-line-parsing/cal_add_interactive.ml</ulink></para>
@@ -1230,22 +1166,15 @@ let add =
 
 let () = Command.run add</programlisting>
 
-          <para>The <literal moreinfo="none">days</literal> anonymous argument is now an
-          optional integer in the spec, and we want to transform it into a
-          non-optional value before calling our <literal moreinfo="none">add_days</literal>
-          callback. The <literal moreinfo="none">step</literal> combinator lets us perform
-          this transformation by applying its supplied callback function
-          first. In the example, the callback first checks if
-          <literal moreinfo="none">day</literal> is defined. If it's undefined, then it
-          interactively reads an integer from the standard input.</para>
+          <para>The <literal moreinfo="none">days</literal> anonymous argument is now an optional
+        integer in the spec, and we want to transform it into a nonoptional value before calling our
+          <literal moreinfo="none">add_days</literal> callback. The <literal moreinfo="none">step</literal> combinator lets us perform this transformation by applying its supplied
+        callback function first. In the example, the callback first checks if <literal moreinfo="none">day</literal> is defined. If it's undefined, then it interactively reads
+        an integer from the standard input.</para>
 
-          <para>The first <literal moreinfo="none">m</literal> argument to the
-          <literal moreinfo="none">step</literal> callback is the next callback function in
-          the chain. The transformation is completed by calling <literal moreinfo="none">m
-          base days</literal> to continue processing with the new values we've
-          just calculated. The <literal moreinfo="none">days</literal> value that is passed
-          onto the next callback now has a non-optional <literal moreinfo="none">int</literal>
-          type.</para>
+          <para>The first <literal moreinfo="none">m</literal> argument to the <literal moreinfo="none">step</literal> callback is the next callback function in the chain. The
+        transformation is completed by calling <literal moreinfo="none">m base days</literal> to
+        continue processing with the new values we've just calculated. The <literal moreinfo="none">days</literal> value that is passed onto the next callback now has a nonoptional <literal moreinfo="none">int</literal> type:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/build_and_run_cal_add_interactive.out">command-line-parsing/build_and_run_cal_add_interactive.out</ulink></para>
@@ -1284,12 +1213,11 @@ let () = Command.run add</programlisting>
         </sect2>
 
         <sect2 id="adding-labeled-arguments-to-callbacks">
-          <title>Adding labeled arguments to callbacks</title>
+          <title>Adding Labeled Arguments to Callbacks</title>
 
-          <para>The <literal moreinfo="none">step</literal> chaining lets you control the
-          types of your callbacks very easily. This can help you match
-          existing interfaces or make things more explicit by adding labeled
-          arguments.</para>
+          <para>The <literal moreinfo="none">step</literal> chaining lets you control the types of
+        your callbacks very easily. This can help you match existing interfaces or make things more
+        explicit by adding labeled arguments:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/cal_add_labels.ml">command-line-parsing/cal_add_labels.ml</ulink></para>
@@ -1313,12 +1241,10 @@ let add =
 
 let () = Command.run add</programlisting>
 
-          <para>This <literal moreinfo="none">cal_add_labels</literal> example goes back to
-          our non-interactive calendar addition program, but the
-          <literal moreinfo="none">add_days</literal> main function now expects labeled
-          arguments. The <literal moreinfo="none">step</literal> function in the specification
-          simply converts the default <literal moreinfo="none">base</literal> and
-          <literal moreinfo="none">days</literal> arguments into a labeled function.</para>
+          <para>This <literal moreinfo="none">cal_add_labels</literal> example goes back to our
+        noninteractive calendar addition program, but the <literal moreinfo="none">add_days</literal> main function now expects labeled arguments. The <literal moreinfo="none">step</literal> function in the specification simply converts the default
+          <literal moreinfo="none">base</literal> and <literal moreinfo="none">days</literal>
+        arguments into a labeled function.</para>
 
           <para>Labelled arguments are more verbose but can also help prevent
           errors with command-line arguments with similar types but different
@@ -1329,16 +1255,12 @@ let () = Command.run add</programlisting>
       </sect1>
 
       <sect1 id="command-line-auto-completion-with-bash">
-        <title>Command-line auto-completion with
-        <command moreinfo="none">bash</command></title>
+        <title>Command-Line Autocompletion with <command moreinfo="none">bash</command></title>
 
-        <para>Modern UNIX shells usually have a tab-completion feature to
-        interactively help you figure out how to build a command-line. These
-        work by pressing the <literal moreinfo="none">&lt;tab&gt;</literal> key in the middle
-        of typing a command, and seeing the options that pop up. You've
-        probably used this most often to find the files in the current
-        directory, but it can actually be extended for other parts of the
-        command too.</para>
+        <para>Modern UNIX shells usually have a tab-completion feature to interactively help you
+      figure out how to build a command line. These work by pressing the <literal moreinfo="none">&lt;tab&gt;</literal> key in the middle of typing a command, and seeing the options that
+      pop up. You've probably used this most often to find the files in the current directory, but
+      it can actually be extended for other parts of the command, too.</para>
 
         <para>The precise mechanism for autocompletion varies depending on
         what shell you are using, but we'll assume you are using the most
@@ -1360,9 +1282,9 @@ let () = Command.run add</programlisting>
 
             <thead>
               <row>
-                <entry>Operating System</entry>
+                <entry>Operating system</entry>
 
-                <entry>Package Manager</entry>
+                <entry>Package manager</entry>
 
                 <entry>Package</entry>
               </row>
@@ -1396,36 +1318,28 @@ let () = Command.run add</programlisting>
           </tgroup>
         </informaltable>
 
-        <para>Once bash completion is installed and configured, check that it
-        works by typing the <literal moreinfo="none">ssh</literal> command, and pressing
-        <literal moreinfo="none">&lt;tab&gt;</literal>. This should show you the list of known
-        hosts from your <literal moreinfo="none">~/.ssh/known_hosts</literal> file. If it
-        lists some hosts that you've recently connected to, you can continue
-        on. If it lists the files in your current directory instead, then
-        check your OS documentation to configure completion correctly.</para>
+        <para>Once bash completion is installed and configured, check that it works by typing the
+        <literal moreinfo="none">ssh</literal> command and pressing <literal moreinfo="none">&lt;tab&gt;</literal>. This should show you the list of known hosts from your
+        <emphasis>~/.ssh/known_hosts</emphasis> file. If it lists some hosts that you've recently
+      connected to, you can continue on. If it lists the files in your current directory instead,
+      then check your OS documentation to configure completion correctly.</para>
 
-        <para>One last bit of information you'll need to find is the location
-        of the <filename moreinfo="none">bash_completion.d</filename> directory. This is where
-        all the shell fragments that contain the completion logic are held. On
-        Linux, this is often in <filename moreinfo="none">/etc/bash_completion.d</filename>,
-        and in Homebrew on Mac OS X it would be
-        <filename moreinfo="none">/usr/local/etc/bash_completion.d</filename> by
-        default.</para>
+        <para>One last bit of information you'll need to find is the location of the <filename moreinfo="none">bash_completion.d</filename> directory. This is where all the shell
+      fragments that contain the completion logic are held. On Linux, this is often in <filename moreinfo="none">/etc/bash_completion.d</filename>, and in Homebrew on Mac OS X, it would be
+        <filename moreinfo="none">/usr/local/etc/bash_completion.d</filename> by default.</para>
 
         <sect2 id="generating-completion-fragments-from-command">
-          <title>Generating completion fragments from Command</title>
+          <title>Generating Completion Fragments from Command</title>
 
-          <para>The Command library has a declarative description of all the
-          possible valid options, and it can use this information to generate
-          a shell script which provides completion support for that command.
-          To generate the fragment, just run the command with the
-          <envar>COMMAND_OUTPUT_INSTALLATION_BASH</envar> environment variable
-          set to any value.</para>
+          <para>The Command library has a declarative description of all the possible valid options,
+        and it can use this information to generate a shell script that provides completion support
+        for that command. To generate the fragment, just run the command with the
+          <envar>COMMAND_OUTPUT_INSTALLATION_BASH</envar> environment variable set to any
+        value.</para>
 
-          <para>For example, let's try it on our MD5 example from earlier,
-          assuming that the binary is called
-          <command moreinfo="none">basic_md5_with_flags</command> in the current
-          directory.</para>
+          <para>For example, let's try it on our MD5 example from earlier, assuming that the binary
+        is called <command moreinfo="none">basic_md5_with_flags</command> in the current
+        directory:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/md5_completion.out">command-line-parsing/md5_completion.out</ulink></para>
@@ -1445,13 +1359,12 @@ let () = Command.run add</programlisting>
         </sect2>
 
         <sect2 id="installing-the-completion-fragment">
-          <title>Installing the completion fragment</title>
+          <title>Installing the Completion Fragment</title>
 
-          <para>You don't need to worry about what the output script above
-          actually does (unless you have an unhealthy fascination with shell
-          scripting internals, that is). Instead, redirect the output to a
-          file in your current directory and source it into your current
-          shell.</para>
+          <para>You don't need to worry about what the preceding output script actually does (unless
+        you have an unhealthy fascination with shell scripting internals, that is). Instead,
+        redirect the output to a file in your current directory and source it into your current
+        shell:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/cal_completion.out">command-line-parsing/cal_completion.out</ulink></para>
@@ -1461,14 +1374,13 @@ let () = Command.run add</programlisting>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./cal_add_sub_days.native &lt;tab&gt;</userinput>
 <computeroutput moreinfo="none">add      diff     help     version</computeroutput></programlisting>
 
-          <para>Command completion support works for flags and grouped
-          commands, and is very useful when building larger command-line
-          interfaces. Don't forget to install the shell fragment into your
-          global <filename moreinfo="none">bash_completion.d</filename> directory if you want
-          it to be loaded in all of your login shells.</para>
+          <para>Command completion support works for flags and grouped commands and is very useful
+        when building larger command-line interfaces. Don't forget to install the shell fragment
+        into your global <filename moreinfo="none">bash_completion.d</filename> directory if you
+        want it to be loaded in all of your login shells.</para>
 
           <note>
-            <title>Installing a generic completion handler</title>
+            <title>Installing a Generic Completion Handler</title>
 
             <para>Sadly, <command moreinfo="none">bash</command> doesn't support installing a
             generic handler for all Command-based applications. This means
@@ -1484,47 +1396,46 @@ let () = Command.run add</programlisting>
       </sect1>
 
       <sect1 id="alternative-command-line-parsers">
-        <title>Alternative command-line parsers</title>
+        <title>Alternative Command-Line Parsers</title>
 
-        <para>This rounds up our tour of the Command library. This isn't the
-        only way to parse command-line arguments of course; there are several
-        alternatives available on OPAM. Three of the most prominent ones are
-        introduced below.</para>
+        <para>This rounds up our tour of the Command library. This isn't the only way to parse
+      command-line arguments of course; there are several alternatives available on OPAM. Three of
+      the most prominent ones follow:</para>
 
-        <itemizedlist>
-          <listitem>
-            <para>The <literal moreinfo="none">Arg</literal> module from the OCaml standard
-            library, which is used by the compiler itself to handle its
-            command-line interface. Command is generally more featureful than
-            Arg (mainly via support for sub-commands, the
-            <literal moreinfo="none">step</literal> combinator to transform inputs, and help
-            generation), but there's absolutely nothing wrong with using Arg
-            either.</para>
+        <variablelist>
+          <varlistentry>
+           <term> The <literal moreinfo="none">Arg</literal> module</term>  <listitem><para>The<literal> Arg</literal> module is from the OCaml standard library, which is used by the
+            compiler itself to handle its command-line interface. Command is generally more
+            featureful than Arg (mainly via support for subcommands, the <literal moreinfo="none"
+              >step</literal> combinator to transform inputs, and help generation), but there's
+            absolutely nothing wrong with using Arg either.</para>
 
             <para>You can use the
             <literal moreinfo="none">Command.Spec.flags_of_args_exn</literal> function to
             convert Arg specifications into ones compatible with Command. This
             is quite often used to help port older non-Core code into the Core
             standard library world.</para>
-          </listitem>
-
-          <listitem>
-            <para><ulink url="https://forge.ocamlcore.org/projects/ocaml-getopt/">ocaml-getopt</ulink>
-            provides the general command-line syntax of GNU
-            <literal moreinfo="none">getopt</literal> and <literal moreinfo="none">getopt_long</literal>. The
-            GNU conventions are widely used in the open-source world, and this
-            library lets your OCaml programs obey the same rules.</para>
-          </listitem>
-
-          <listitem>
-            <para><ulink url="http://erratique.ch/software/cmdliner">Cmdliner</ulink> is a
-            mix between the Command and Getopt libraries. It allows for the
-            declarative definition of command-line interfaces, but exposes a
-            more <literal moreinfo="none">getopt</literal>-like interface. It also automates
-            the generation of UNIX <literal moreinfo="none">man</literal> pages as part of the
-            specification. Cmdliner is the parser used by OPAM to manage its
-            command-line.</para>
-          </listitem>
-        </itemizedlist>
+          </listitem></varlistentry>
+          
+          <varlistentry>
+            <term>
+              <ulink url="https://forge.ocamlcore.org/projects/ocaml-getopt/">ocaml-getopt</ulink>
+            </term>
+            <listitem><para> ocaml-getopt provides the general command-line syntax of GNU <literal moreinfo="none"
+              >getopt</literal> and <literal moreinfo="none">getopt_long</literal>. The GNU
+            conventions are widely used in the open source world, and this library lets your OCaml
+            programs obey the same rules.</para></listitem>
+          </varlistentry>
+          
+          <varlistentry>
+            <term>
+              <ulink url="http://erratique.ch/software/cmdliner">Cmdliner</ulink></term>
+            <listitem><para> Cmdliner is a mix between the Command and Getopt libraries. It allows for the declarative
+            definition of command-line interfaces but exposes a more <literal moreinfo="none"
+              >getopt</literal>-like interface. It also automates the generation of UNIX <literal
+              moreinfo="none">man</literal> pages as part of the specification. Cmdliner is the
+            parser used by OPAM to manage its command line.</para></listitem>
+          </varlistentry>
+        </variablelist>
       </sect1>
     </chapter>

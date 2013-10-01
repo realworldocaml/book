@@ -3,13 +3,11 @@
 <chapter id="parsing-with-ocamllex-and-menhir">
       <title>Parsing with OCamllex and Menhir</title>
 
-      <para>Many programming tasks start with the interpretion of some form of
-      structured textual data. <emphasis>Parsing</emphasis> is the process of
-      converting such data into data structures that are easy to program
-      against. For simple formats, it's often enough to parse the data in an
-      ad-hoc way, say, by breaking up the data into lines, and then using
-      regular expressions for breaking those lines down into their component
-      pieces.</para>
+      <para>Many programming tasks start with the interpretion of some form of structured textual
+    data. <emphasis>Parsing</emphasis> is the process of converting such data into data structures
+    that are easy to program against. For simple formats, it's often enough to parse the data in an
+    ad hoc way, say, by breaking up the data into lines, and then using regular expressions for
+    breaking those lines down into their component pieces.</para>
 
       <para>But this simplistic approach tends to fall down when parsing more
       complicated data, particularly data with the kind of recursive structure
@@ -38,8 +36,7 @@
       pragmatic introduction of how to build a parser in OCaml.</para>
 
       <note>
-        <title>Menhir <emphasis>vs</emphasis>
-        <command moreinfo="none">ocamlyacc</command></title>
+        <title>Menhir vs ocamlyacc</title>
 
         <para>Menhir is an alternative parser generator that is generally
         superior to the venerable <command moreinfo="none">ocamlyacc</command>, which dates
@@ -54,32 +51,28 @@
         easily. We recommend that any new code you develop should use Menhir
         instead of <command moreinfo="none">ocamlyacc</command>.</para>
 
-        <para>Menhir isn't distributed directly with OCaml, but is available
-        through OPAM by running <literal moreinfo="none">opam install menhir</literal>.</para>
+        <para>Menhir isn't distributed directly with OCaml but is available through OPAM by running
+        <literal moreinfo="none">opam install menhir</literal>.</para>
       </note>
 
       <sect1 id="lexing-and-parsing">
-        <title>Lexing and parsing</title>
+        <title>Lexing and Parsing</title>
 
-        <para>Parsing is traditionally broken down into two parts:
-        <emphasis>lexical analysis</emphasis>, which is a kind of simplified
-        parsing phase that converts a stream of characters into a stream of
-        logical tokens; and full-on parsing, which involves converting a
-        stream of tokens into the final representation, which is often in the
-        form of a tree-like data-structure called an <emphasis>abstract
-        syntax-tree</emphasis>, or AST.</para>
+        <para>Parsing is traditionally broken down into two parts: <emphasis>lexical
+        analysis</emphasis>, which is a kind of simplified parsing phase that converts a stream of
+      characters into a stream of logical tokens; and full-on parsing, which involves converting a
+      stream of tokens into the final representation, which is often in the form of a tree-like data
+      structure called an <emphasis>abstract syntax-tree</emphasis>, or AST.</para>
 
-        <para>It's confusing that the term parsing is applied to both the
-        overall process of converting textual data to structured data, and
-        also more specifically to the second phase of converting a stream of
-        tokens to an AST, so from here on in, we'll use the term parsing to
-        refer only to this second phase.</para>
+        <para>It's confusing that the term parsing is applied to both the overall process of
+      converting textual data to structured data, and also more specifically to the second phase of
+      converting a stream of tokens to an AST; so from here on out, we'll use the term parsing to
+      refer only to this second phase.</para>
 
-        <para>Let's consider lexing and parsing in the context of the JSON
-        format. Here's an example of a snippet of text that represents a JSON
-        object containing a string labeled <literal moreinfo="none">title</literal>, and an
-        array containing two objects, each with a name and array of zip
-        codes.</para>
+        <para>Let's consider lexing and parsing in the context of the JSON format. Here's an example
+      of a snippet of text that represents a JSON object containing a string labeled <literal
+        moreinfo="none">title</literal> and an array containing two objects, each with a name and
+      array of zip codes:</para>
 
         <para role="sourcecode">JSON:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/example.json">parsing/example.json</ulink></para>
@@ -92,11 +85,9 @@
   ]
 }</programlisting>
 
-        <para>At a syntactic level, we can think of a JSON file as a series of
-        simple logical units, like curly braces, square brackets, commas,
-        colons, identifiers, numbers, and quoted strings. Thus, we could
-        represent our JSON text as a sequence of tokens of the following
-        type.</para>
+        <para>At a syntactic level, we can think of a JSON file as a series of simple logical units,
+      like curly braces, square brackets, commas, colons, identifiers, numbers, and quoted strings.
+      Thus, we could represent our JSON text as a sequence of tokens of the following type:</para>
 
         <para role="sourcecode">OCaml:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/manual_token_type.ml">parsing/manual_token_type.ml</ulink></para>
@@ -123,18 +114,18 @@
         of the original text that are not required for understanding its
         meaning.</para>
 
-        <para>If we converted the above example into a list of these tokens,
-        it would look something like this.</para>
+        <para>If we converted the preceding example into a list of these tokens, it would look
+      something like this:</para>
 
         <para role="sourcecode">OCaml:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/tokens.ml">parsing/tokens.ml</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">[ LEFT_BRACE; ID("title"); COLON; STRING("Cities"); COMMA; ID("cities"); ...</programlisting>
 
-        <para>This kind of representation is easier to work with than the
-        original text, since it gets rid of some unimportant syntactic details
-        and adds useful structure. But it's still a good deal more low-level
-        than the simple AST we used for representing JSON data in <xref linkend="handling-json-data"/>, shown below.</para>
+        <para>This kind of representation is easier to work with than the original text, since it
+      gets rid of some unimportant syntactic details and adds useful structure. But it's still a
+      good deal more low-level than the simple AST we used for representing JSON data in <xref
+        linkend="handling-json-data"/>:</para>
 
         <para role="sourcecode">OCaml:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/json.ml">parsing/json.ml</ulink></para>
@@ -149,12 +140,11 @@
   | `String of string
 ]</programlisting>
 
-        <para>This representation is much richer than our token stream,
-        capturing the fact that JSON values can be nested inside each other,
-        and that JSON has a variety of value types, including numbers,
-        strings, arrays, and objects. The job of the parser we'll write will
-        be to convert a token stream into a value of this AST type, as shown
-        below for our earlier JSON example.</para>
+        <para>This representation is much richer than our token stream, capturing the fact that JSON
+      values can be nested inside each other and that JSON has a variety of value types, including
+      numbers, strings, arrays, and objects. The job of the parser we'll write will be to convert a
+      token stream into a value of this AST type, as shown below for our earlier JSON
+      example:</para>
 
         <para role="sourcecode">OCaml:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/parsed_example.ml">parsing/parsed_example.ml</ulink></para>
@@ -167,23 +157,21 @@
       </sect1>
 
       <sect1 id="defining-a-parser">
-        <title>Defining a parser</title>
+        <title>Defining a Parser</title>
 
-        <para>A parser-specification file has suffix <literal moreinfo="none">.mly</literal>
-        and contains several sections that are broken up by separator lines
-        consisting of the characters <literal moreinfo="none">%%</literal> on a line by
-        themselves. The first section of the file is for declarations,
-        including token and type specifications, precedence directives, and
-        other output directives, and the second section is for specifying the
-        grammar of the language to be parsed.</para>
+        <para>A parser-specification file has suffix <literal moreinfo="none">.mly</literal> and
+      contains several sections that are broken up by separator lines consisting of the characters
+        <literal moreinfo="none">%%</literal> on a line by themselves. The first section of the file
+      is for declarations, including token and type specifications, precedence directives, and other
+      output directives; and the second section is for specifying the grammar of the language to be
+      parsed.</para>
 
-        <para>We'll start by declaring the list of tokens. A token is declared
-        using the syntax <literal moreinfo="none">%token
-        &lt;</literal><emphasis>type</emphasis><literal moreinfo="none">&gt;</literal>
-        <emphasis>uid</emphasis>, where the <literal moreinfo="none">&lt;type&gt;</literal> is
-        optional, and <emphasis>uid</emphasis> is a capitalized identifier.
-        For JSON, we need tokens for numbers, strings, identifiers, and
-        punctuation.</para>
+        <para>We'll start by declaring the list of tokens. A token is declared using the syntax
+        <literal moreinfo="none">%token &lt;</literal><emphasis>type</emphasis><literal
+        moreinfo="none">&gt;</literal>
+      <emphasis>uid</emphasis>, where the <literal moreinfo="none">&lt;type&gt;</literal> is
+      optional and <emphasis>uid</emphasis> is a capitalized identifier. For JSON, we need tokens
+      for numbers, strings, identifiers, and punctuation:</para>
 
         <para role="sourcecode">OCaml:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/parser.mly">parsing/parser.mly</ulink></para>
@@ -203,41 +191,36 @@
 %token COMMA
 %token EOF</programlisting>
 
-        <para>The
-        <literal moreinfo="none">&lt;</literal><emphasis>type</emphasis><literal moreinfo="none">&gt;</literal>
-        specifications mean that a token carries a value. The
-        <literal moreinfo="none">INT</literal> token carries an integer value with it,
-        <literal moreinfo="none">FLOAT</literal> has a <literal moreinfo="none">float</literal> value, and
-        <literal moreinfo="none">STRING</literal> carries a <literal moreinfo="none">string</literal> value.
-        The remaining tokens, such as <literal moreinfo="none">TRUE</literal>,
-        <literal moreinfo="none">FALSE</literal> or the punctuation, aren't associated with
-        any value and so we can omit the
-        <literal moreinfo="none">&lt;</literal><emphasis>type</emphasis><literal moreinfo="none">&gt;</literal>
-        specification.</para>
+        <para>The <literal moreinfo="none">&lt;</literal><emphasis>type</emphasis><literal
+        moreinfo="none">&gt;</literal> specifications mean that a token carries a value. The
+        <literal moreinfo="none">INT</literal> token carries an integer value with it, <literal
+        moreinfo="none">FLOAT</literal> has a <literal moreinfo="none">float</literal> value, and
+        <literal moreinfo="none">STRING</literal> carries a <literal moreinfo="none"
+        >string</literal> value. The remaining tokens, such as <literal moreinfo="none"
+        >TRUE</literal>, <literal moreinfo="none">FALSE</literal> or the punctuation, aren't
+      associated with any value, and so we can omit the <literal moreinfo="none"
+        >&lt;</literal><emphasis>type</emphasis><literal moreinfo="none">&gt;</literal>
+      specification.</para>
 
         <sect2 id="describing-the-grammar">
-          <title>Describing the grammar</title>
+          <title>Describing the Grammar</title>
 
-          <para>The next thing we need to do is to specify the grammar of a
-          JSON expression. <command moreinfo="none">menhir</command>, like many parser
-          generators, expresses grammars as <emphasis>context free
-          grammars</emphasis>. (More precisely, <command moreinfo="none">menhir</command>
-          supports LR(1) grammars, but we will ignore that technical
-          distinction here.) You can think of a context-free grammar as a set
-          of abstract names, called <emphasis>non-terminal symbols</emphasis>,
-          along with a collection of rules for transforming a non-terminal
-          symbol into a sequence of tokens and non-terminal symbols. A
-          sequence of tokens is parsable by a grammar if you can apply the
-          grammar's rules to produce a series of transformations, starting at
-          a distinguished <emphasis>start symbol</emphasis>, that produces the
-          token sequence in question.</para>
+          <para>The next thing we need to do is to specify the grammar of a JSON expression.
+          <command moreinfo="none">menhir</command>, like many parser generators, expresses grammars
+        as <emphasis>context free grammars</emphasis>. (More precisely, <command moreinfo="none"
+          >menhir</command> supports LR(1) grammars, but we will ignore that technical distinction
+        here.) You can think of a context-free grammar as a set of abstract names, called
+          <emphasis>non-terminal symbols</emphasis>, along with a collection of rules for
+        transforming a nonterminal symbol into a sequence of tokens and nonterminal symbols. A
+        sequence of tokens is parsable by a grammar if you can apply the grammar's rules to produce
+        a series of transformations, starting at a distinguished <emphasis>start symbol</emphasis>
+        that produces the token sequence in question.</para>
 
-          <para>We'll start describing the JSON grammar by declaring the start
-          symbol to be the non-terminal symbol <literal moreinfo="none">prog</literal>, and by
-          declaring that when parsed, a <literal moreinfo="none">prog</literal> value should
-          be converted into an OCaml value of type <literal moreinfo="none">Json.value
-          option</literal>. We then end the declaration section of the parser
-          with a <literal moreinfo="none">%%</literal>.</para>
+          <para>We'll start describing the JSON grammar by declaring the start symbol to be the
+        non-terminal symbol <literal moreinfo="none">prog</literal>, and by declaring that when
+        parsed, a <literal moreinfo="none">prog</literal> value should be converted into an OCaml
+        value of type <literal moreinfo="none">Json.value option</literal>. We then end the
+        declaration section of the parser with a <literal moreinfo="none">%%</literal>:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/parser.mly">parsing/parser.mly</ulink> (part 1)</para>
@@ -245,11 +228,11 @@
           <programlisting language="ocaml" format="linespecific">%start &lt;Json.value option&gt; prog
 %%</programlisting>
 
-          <para>Once that's in place, we can start specifying the productions.
-          In <command moreinfo="none">menhir</command>, productions are organized into
-          <emphasis>rules</emphasis>, where each rule lists all the possible
-          productions for a given non-terminal. Here, for example, is the rule
-          for <literal moreinfo="none">prog</literal>.</para>
+          <para>Once that's in place, we can start specifying the productions. In <command
+          moreinfo="none">menhir</command>, productions are organized into
+          <emphasis>rules</emphasis>, where each rule lists all the possible productions for a given
+        nonterminal. Here, for example, is the rule for <literal moreinfo="none"
+        >prog</literal>:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/parser.mly">parsing/parser.mly</ulink> (part 2)</para>
@@ -259,28 +242,25 @@
   | v = value { Some v }
   ;</programlisting>
 
-          <para>The syntax for this is reminiscent of an OCaml match
-          statement. The pipes separate the individual productions, and the
-          curly braces contain a <emphasis>semantic action</emphasis>: OCaml
-          code that generates the OCaml value corresponding to the production
-          in question. Semantic actions are arbitrary OCaml expressions that
-          are evaluated during parsing to produce a value that is attached to
-          the non-terminal in the rule.</para>
+          <para>The syntax for this is reminiscent of an OCaml match statement. The pipes separate
+        the individual productions, and the curly braces contain a <emphasis>semantic
+          action</emphasis>: OCaml code that generates the OCaml value corresponding to the
+        production in question. Semantic actions are arbitrary OCaml expressions that are evaluated
+        during parsing to produce a value that is attached to the nonterminal in the rule.</para>
 
-          <para>In the case of <literal moreinfo="none">prog</literal>, we have two cases:
-          either there's an <literal moreinfo="none">EOF</literal>, which means the text is
-          empty, and so there's no JSON value to read, and so we return the
-          OCaml value <literal moreinfo="none">None</literal>; or we have an instance of the
-          <literal moreinfo="none">value</literal> non-terminal, which corresponds to a
-          well-formed JSON value, in which case we wrap the corresponding
-          <literal moreinfo="none">Json.value</literal> in a <literal moreinfo="none">Some</literal> tag. Note
-          that in the <literal moreinfo="none">value</literal> case, we wrote <literal moreinfo="none">v =
-          value</literal> to bind the OCaml value that corresponds to the
-          variable <literal moreinfo="none">v</literal>, which we can then use within the
-          curly-braces for that production.</para>
+          <para>In the case of <literal moreinfo="none">prog</literal>, we have two cases: either
+        there's an <literal moreinfo="none">EOF</literal>, which means the text is empty, and so
+        there's no JSON value to read, and so we return the OCaml value <literal moreinfo="none"
+          >None</literal>; or we have an instance of the <literal moreinfo="none">value</literal>
+        nonterminal, which corresponds to a well-formed JSON value, in which case we wrap the
+        corresponding <literal moreinfo="none">Json.value</literal> in a <literal moreinfo="none"
+          >Some</literal> tag. Note that in the <literal moreinfo="none">value</literal> case, we
+        wrote <literal moreinfo="none">v = value</literal> to bind the OCaml value that corresponds
+        to the variable <literal moreinfo="none">v</literal>, which we can then use within the curly
+        braces for that production.</para>
 
-          <para>Now let's consider a more complicated example, the rule for
-          the <literal moreinfo="none">value</literal> symbol.</para>
+          <para>Now let's consider a more complicated example, the rule for the <literal
+          moreinfo="none">value</literal> symbol:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/parser.mly">parsing/parser.mly</ulink> (part 3)</para>
@@ -309,36 +289,34 @@
 
           <itemizedlist>
             <listitem>
-              <para>an object bracketed by curly braces,</para>
+              <para>An object bracketed by curly braces</para>
             </listitem>
 
             <listitem>
-              <para>an array bracketed by square braces,</para>
+              <para>An array bracketed by square braces</para>
             </listitem>
 
             <listitem>
-              <para>a string, integer, float, bool, or null value.</para>
+              <para>A string, integer, float, bool, or null value</para>
             </listitem>
           </itemizedlist>
 
-          <para>In each of the productions, the OCaml code in curly-braces
-          shows what to transform the object in question to. Note that we
-          still have two non-terminals whose definitions we depend on here,
-          but have not yet defined: <literal moreinfo="none">object_fields</literal> and
-          <literal moreinfo="none">array_values</literal>. We'll look at how these are parsed
-          next.</para>
+          <para>In each of the productions, the OCaml code in curly braces shows what to transform
+        the object in question to. Note that we still have two nonterminals whose definitions we
+        depend on here but have not yet defined: <literal moreinfo="none">object_fields</literal>
+        and <literal moreinfo="none">array_values</literal>. We'll look at how these are parsed
+        next.</para>
         </sect2>
 
         <sect2 id="parsing-sequences">
-          <title>Parsing sequences</title>
+          <title>Parsing Sequences</title>
 
-          <para>The rule for <literal moreinfo="none">object_fields</literal> is shown below,
-          and is really just a thin wrapper that reverses the list returned by
-          the following rule for <literal moreinfo="none">rev_object_fields</literal>. Note
-          that the first production in <literal moreinfo="none">rev_object_fields</literal>
-          has an empty left-hand side, because what we're matching on in this
-          case is an empty sequence of tokens. The comment <literal moreinfo="none">(* empty
-          *)</literal> is used to make this clear.</para>
+          <para>The rule for <literal moreinfo="none">object_fields</literal> follows, and is really
+        just a thin wrapper that reverses the list returned by the following rule for <literal
+          moreinfo="none">rev_object_fields</literal>. Note that the first production in <literal
+          moreinfo="none">rev_object_fields</literal> has an empty lefthand side, because what we're
+        matching on in this case is an empty sequence of tokens. The comment <literal
+          moreinfo="none">(* empty *)</literal> is used to make this clear:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/parser.mly">parsing/parser.mly</ulink> (part 4)</para>
@@ -351,12 +329,11 @@ rev_object_fields:
     { (k, v) :: obj }
   ;</programlisting>
 
-          <para>The rules are structured as they are because
-          <command moreinfo="none">menhir</command> generates left-recursive parsers, which
-          means that the constructed pushdown automaton uses less stack space
-          with left-recursive definitions. The following right-recursive rule
-          accepts the same input, but during parsing it requires linear stack
-          space to read object field definitions.</para>
+          <para>The rules are structured as they are because <command moreinfo="none"
+          >menhir</command> generates left-recursive parsers, which means that the constructed
+        pushdown automaton uses less stack space with left-recursive definitions. The following
+        right-recursive rule accepts the same input, but during parsing, it requires linear stack
+        space to read object field definitions:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/right_rec_rule.mly">parsing/right_rec_rule.mly</ulink> (part 4)</para>
@@ -367,11 +344,9 @@ object_fields:
   | k = ID; COLON; v = value; COMMA; obj = object_fields
     { (k, v) :: obj }</programlisting>
 
-          <para>Alternatively, we could keep the left-recursive definition and
-          simply construct the returned value in left-to-right order. This is
-          even less efficient, since the complexity of building the list
-          incrementally in this way is quadratic in the length of the
-          list.</para>
+          <para>Alternatively, we could keep the left-recursive definition and simply construct the
+        returned value in left-to-right order. This is even less efficient, since the complexity of
+        building the list incrementally in this way is quadratic in the length of the list:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/quadratic_rule.mly">parsing/quadratic_rule.mly</ulink> (part 4)</para>
@@ -383,18 +358,16 @@ object_fields:
     { obj @ [k, v] }
   ;</programlisting>
 
-          <para>Assembling lists like this is a pretty common requirement in
-          most realistic grammars, and the above rules (while useful for
-          illustrating how parsing works) are rather verbose. Menhir features
-          an extended standard library of built-in rules to simplify this
-          handling. These rules are detailed in the Menhir manual, and include
-          optional values, pairs of values with optional separators, and lists
-          of elements (also with optional separators).</para>
+          <para>Assembling lists like this is a pretty common requirement in most realistic
+        grammars, and the preceding rules (while useful for illustrating how parsing works) are
+        rather verbose. Menhir features an extended standard library of built-in rules to simplify
+        this handling. These rules are detailed in the Menhir manual and include optional values,
+        pairs of values with optional separators, and lists of elements (also with optional
+        separators).</para>
 
-          <para>A version of the JSON grammar using these more succinct Menhir
-          rules is shown below. Notice the use of
-          <literal moreinfo="none">separated_list</literal> to parse both JSON objects and
-          lists with one rule.</para>
+          <para>A version of the JSON grammar using these more succinct Menhir rules follows. Notice
+        the use of <literal moreinfo="none">separated_list</literal> to parse both JSON objects and
+        lists with one rule:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/short_parser.mly">parsing/short_parser.mly</ulink> (part 1)</para>
@@ -422,11 +395,11 @@ obj_field:
 list_fields:
     vl = separated_list(COMMA, value)         { vl } ;</programlisting>
 
-          <para>We can invoke <command moreinfo="none">menhir</command> by using
-          <command moreinfo="none">corebuild</command> with the <literal moreinfo="none">-use-menhir</literal>
-          flag. This tells the build system to switch to using
-          <command moreinfo="none">menhir</command> instead of <command moreinfo="none">ocamlyacc</command> to
-          handle files with the <literal moreinfo="none">.mly</literal> suffix.</para>
+          <para>We can invoke <command moreinfo="none">menhir</command> by using <command
+          moreinfo="none">corebuild</command> with the <literal moreinfo="none"
+          >-use-menhir</literal> flag. This tells the build system to switch to using <command
+          moreinfo="none">menhir</command> instead of <command moreinfo="none">ocamlyacc</command>
+        to handle files with the <literal moreinfo="none">.mly</literal> suffix:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/build_short_parser.out">parsing/build_short_parser.out</ulink></para>
@@ -437,7 +410,7 @@ list_fields:
       </sect1>
 
       <sect1 id="defining-a-lexer">
-        <title>Defining a lexer</title>
+        <title>Defining a Lexer</title>
 
         <para>Now we can define a lexer, using <command moreinfo="none">ocamllex</command>, to
         convert our input text into a stream of tokens. The specification of
@@ -445,11 +418,10 @@ list_fields:
         suffix.</para>
 
         <sect2 id="ocaml-prelude">
-          <title>OCaml prelude</title>
+          <title>OCaml Prelude</title>
 
-          <para>Let's walk through the definition of a lexer section by
-          section. The first section is on optional chunk of OCaml code that
-          is bounded by a pair of curly braces.</para>
+          <para>Let's walk through the definition of a lexer section by section. The first section
+        is on optional chunk of OCaml code that is bounded by a pair of curly braces:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/lexer.mll">parsing/lexer.mll</ulink></para>
@@ -468,10 +440,9 @@ let next_line lexbuf =
     }
 }</programlisting>
 
-          <para>This code is there to define utility functions used by later
-          snippets of OCaml code, and to set up the environment by opening
-          useful modules, and define an exception,
-          <literal moreinfo="none">SyntaxError</literal>.</para>
+          <para>This code is there to define utility functions used by later snippets of OCaml code
+        and to set up the environment by opening useful modules and define an exception, <literal
+          moreinfo="none">SyntaxError</literal>.</para>
 
           <para>We also define a utility function <literal moreinfo="none">next_line</literal>
           for tracking the location of tokens across line breaks. The
@@ -483,12 +454,12 @@ let next_line lexbuf =
         </sect2>
 
         <sect2 id="regular-expressions">
-          <title>Regular expressions</title>
+          <title>Regular Expressions</title>
 
-          <para>The next section of the lexing file is a collection of named
-          regular expressions. These look syntactically like ordinary OCaml
-          <literal moreinfo="none">let</literal> bindings, but really this is a specialized
-          syntax for declaring regular expressions. Here's an example.</para>
+          <para>The next section of the lexing file is a collection of named regular expressions.
+        These look syntactically like ordinary OCaml <literal moreinfo="none">let</literal>
+        bindings, but really this is a specialized syntax for declaring regular expressions. Here's
+        an example:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/lexer.mll">parsing/lexer.mll</ulink> (part 1)</para>
@@ -506,10 +477,9 @@ let next_line lexbuf =
           and the <literal moreinfo="none">*</literal> operator is used to indicate a
           (possibly empty) repetition.</para>
 
-          <para>Floating-point numbers are specified similarly, but we deal
-          with decimal points and exponents. We make the expression easier to
-          read by building up a sequence of named regular expressions, rather
-          than creating one big and impenetrable expression.</para>
+          <para>Floating-point numbers are specified similarly, but we deal with decimal points and
+        exponents. We make the expression easier to read by building up a sequence of named regular
+        expressions, rather than creating one big and impenetrable expression:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/lexer.mll">parsing/lexer.mll</ulink> (part 2)</para>
@@ -519,8 +489,7 @@ let frac = '.' digit*
 let exp = ['e' 'E'] ['-' '+']? digit+
 let float = digit* frac? exp?</programlisting>
 
-          <para>Finally, we define whitespace, newlines and
-          identifiers.</para>
+          <para>Finally, we define whitespace, newlines, and identifiers:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/lexer.mll">parsing/lexer.mll</ulink> (part 3)</para>
@@ -529,21 +498,19 @@ let float = digit* frac? exp?</programlisting>
 let newline = '\r' | '\n' | "\r\n"
 let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*</programlisting>
 
-          <para>The <literal moreinfo="none">newline</literal> introduces the
-          <literal moreinfo="none">|</literal> operator which lets one of several alternative
-          regular expressions match (in this case, the various carriage return
-          combinations of CR, LF, or CRLF).</para>
+          <para>The <literal moreinfo="none">newline</literal> introduces the <literal
+          moreinfo="none">|</literal> operator, which lets one of several alternative regular
+        expressions match (in this case, the various carriage return combinations of CR, LF, or
+        CRLF).</para>
         </sect2>
 
         <sect2 id="lexing-rules">
-          <title>Lexing rules</title>
+          <title>Lexing Rules</title>
 
-          <para>The lexing rules are essentially functions that consume the
-          data, producing OCaml expressions that evaluate to tokens. These
-          OCaml expressions can be quite complicated, using side-effects and
-          invoking other rules as part ofthe body of the rule. Let's look at
-          the <literal moreinfo="none">read</literal> rule for parsing a JSON
-          expression.</para>
+          <para>The lexing rules are essentially functions that consume the data, producing OCaml
+        expressions that evaluate to tokens. These OCaml expressions can be quite complicated, using
+        side effects and invoking other rules as part ofthe body of the rule. Let's look at the
+          <literal moreinfo="none">read</literal> rule for parsing a JSON expression:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/lexer.mll">parsing/lexer.mll</ulink> (part 4)</para>
@@ -567,21 +534,17 @@ let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*</programlisting>
   | _ { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
   | eof      { EOF }</programlisting>
 
-          <para>The rules are structured very similarly to pattern matches,
-          except that the variants are replaced by regular expressions on the
-          left hand side. The right hand side clause is the parsed OCaml
-          return value of that rule. The OCaml code for the rules has a
-          parameter called <literal moreinfo="none">lexbuf</literal> that defines the input,
-          including the position in the input file, as well as the text that
-          was matched by the regular expression.</para>
+          <para>The rules are structured very similarly to pattern matches, except that the variants
+        are replaced by regular expressions on the lefthand side. The righthand side clause is the
+        parsed OCaml return value of that rule. The OCaml code for the rules has a parameter called
+          <literal moreinfo="none">lexbuf</literal> that defines the input, including the position
+        in the input file, as well as the text that was matched by the regular expression.</para>
 
-          <para>The first <literal moreinfo="none">white { read lexbuf }</literal> calls the
-          lexer recursively. That is, it skips the input whitespace and
-          returns the following token. The action <literal moreinfo="none">newline { next_line
-          lexbuf; read lexbuf }</literal> is similar, but we use it to advance
-          the line number for the lexer using the utility function that we
-          defined at the top of the file. Let's skip to the third
-          action.</para>
+          <para>The first <literal moreinfo="none">white { read lexbuf }</literal> calls the lexer
+        recursively. That is, it skips the input whitespace and returns the following token. The
+        action <literal moreinfo="none">newline { next_line lexbuf; read lexbuf }</literal> is
+        similar, but we use it to advance the line number for the lexer using the utility function
+        that we defined at the top of the file. Let's skip to the third action:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/lexer_int_fragment.mll">parsing/lexer_int_fragment.mll</ulink></para>
@@ -597,45 +560,42 @@ let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*</programlisting>
           the <literal moreinfo="none">int_of_string</literal> function to convert it to a
           number.</para>
 
-          <para>There are actions for each different kind of token. The string
-          expressions like <literal moreinfo="none">"true" { TRUE }</literal> are used for
-          keywords, and the special characters have actions too, like
-          <literal moreinfo="none">'{' { LEFT_BRACE }</literal>.</para>
+          <para>There are actions for each different kind of token. The string expressions like
+          <literal moreinfo="none">"true" { TRUE }</literal> are used for keywords, and the special
+        characters have actions, too, like <literal moreinfo="none">'{' { LEFT_BRACE
+        }</literal>.</para>
 
-          <para>Some of these patterns overlap. For example, the regular
-          expression <literal moreinfo="none">"true"</literal> is also matched by the
-          <literal moreinfo="none">id</literal> pattern. <command moreinfo="none">ocamllex</command> used the
-          following disambiguation when a prefix of the input is matched by
-          more than one pattern.</para>
+          <para>Some of these patterns overlap. For example, the regular expression <literal
+          moreinfo="none">"true"</literal> is also matched by the <literal moreinfo="none"
+          >id</literal> pattern. <command moreinfo="none">ocamllex</command> used the following
+        disambiguation when a prefix of the input is matched by more than one pattern:</para>
 
           <itemizedlist>
             <listitem>
-              <para>The longest match always wins. For example, the first
-              input <literal moreinfo="none">trueX: 167</literal> matches the regular
-              expression <literal moreinfo="none">"true"</literal> for 4 characters, and it
-              matches <literal moreinfo="none">id</literal> for 5 characters. The longer match
-              wins, and the return value is <literal moreinfo="none">ID
-              "trueX"</literal>.</para>
+              <para>The longest match always wins. For example, the first input <literal
+              moreinfo="none">trueX: 167</literal> matches the regular expression <literal
+              moreinfo="none">"true"</literal> for four characters, and it matches <literal
+              moreinfo="none">id</literal> for five characters. The longer match wins, and the
+            return value is <literal moreinfo="none">ID "trueX"</literal>.</para>
             </listitem>
 
             <listitem>
-              <para>If all matches have the same length, then the first action
-              wins. If the input were <literal moreinfo="none">true: 167</literal>, then both
-              <literal moreinfo="none">"true"</literal> and <literal moreinfo="none">id</literal> match the
-              first 4 characters; <literal moreinfo="none">"true"</literal> is first, so the
-              return value is <literal moreinfo="none">TRUE</literal>.</para>
+              <para>If all matches have the same length, then the first action wins. If the input
+            were <literal moreinfo="none">true: 167</literal>, then both <literal moreinfo="none"
+              >"true"</literal> and <literal moreinfo="none">id</literal> match the first four
+            characters; <literal moreinfo="none">"true"</literal> is first, so the return value is
+              <literal moreinfo="none">TRUE</literal>.</para>
             </listitem>
           </itemizedlist>
         </sect2>
 
         <sect2 id="recursive-rules">
-          <title>Recursive rules</title>
+          <title>Recursive Rules</title>
 
-          <para>Unlike many other lexer generators,
-          <command moreinfo="none">ocamllex</command> allows the definition of multiple lexers
-          in the same file, and the definitions can be recursive. In this
-          case, we use recursion to match string literals using the following
-          rule definition.</para>
+          <para>Unlike many other lexer generators, <command moreinfo="none">ocamllex</command>
+        allows the definition of multiple lexers in the same file, and the definitions can be
+        recursive. In this case, we use recursion to match string literals using the following rule
+        definition:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/lexer.mll">parsing/lexer.mll</ulink> (part 5)</para>
@@ -662,12 +622,11 @@ let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*</programlisting>
           <literal moreinfo="none">"</literal>, then we return the contents of the buffer as a
           <literal moreinfo="none">STRING</literal>.</para>
 
-          <para>The other cases are for handling the string contents. The
-          action <literal moreinfo="none">[^ '"' '\\']+ { ... }</literal> matches normal input
-          that does not contain a double-quote or backslash. The actions
-          beginning with a backslash <literal moreinfo="none">\</literal> define what to do
-          for escape sequences. In each of these cases, the final step
-          includes a recursive call to the lexer.</para>
+          <para>The other cases are for handling the string contents. The action <literal
+          moreinfo="none">[^ '"' '\\']+ { ... }</literal> matches normal input that does not contain
+        a double quote or backslash. The actions beginning with a backslash <literal moreinfo="none"
+          >\</literal> define what to do for escape sequences. In each of these cases, the final
+        step includes a recursive call to the lexer.</para>
 
           <para>That covers the lexer. Next, we need to combine the lexer with
           the parser to bring it all together.</para>
@@ -675,11 +634,9 @@ let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*</programlisting>
           <note>
             <title>Handling Unicode</title>
 
-            <para>We've glossed over an important detail here: parsing Unicode
-            characters to handle the full spectrum of the world's writing
-            systems. OCaml has several third-party solutions to handling
-            Unicode, with varying degrees of flexibility and
-            complexity.</para>
+            <para>We've glossed over an important detail here: parsing Unicode characters to handle
+          the full spectrum of the world's writing systems. OCaml has several third-party solutions
+          to handling Unicode, with varying degrees of flexibility and complexity:</para>
 
             <itemizedlist>
               <listitem>
@@ -696,14 +653,13 @@ let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*</programlisting>
               </listitem>
 
               <listitem>
-                <para><ulink url="http://erratique.ch/software/uutf">Uutf</ulink> is a
-                non-blocking streaming Unicode codec for OCaml, available as a
-                standalone library. It is accompanied by the <ulink url="http://erratique.ch/software/uunf">Uunf</ulink> text
-                normalization and <ulink url="http://erratique.ch/software/uucd">Uucd</ulink> Unicode
-                character database libraries. There is also a robust parser
-                for <ulink url="http://erratique.ch/software/jsonm">JSON</ulink>
-                available that illustrates the use of Uutf in your own
-                libraries.</para>
+                <para><ulink url="http://erratique.ch/software/uutf">Uutf</ulink> is a nonblocking
+              streaming Unicode codec for OCaml, available as a standalone library. It is
+              accompanied by the <ulink url="http://erratique.ch/software/uunf">Uunf</ulink> text
+              normalization and <ulink url="http://erratique.ch/software/uucd">Uucd</ulink> Unicode
+              character database libraries. There is also a robust parser for <ulink
+                url="http://erratique.ch/software/jsonm">JSON</ulink> available that illustrates the
+              use of Uutf in your own libraries.</para>
               </listitem>
             </itemizedlist>
 
@@ -714,25 +670,22 @@ let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*</programlisting>
       </sect1>
 
       <sect1 id="bringing-it-all-together">
-        <title>Bringing it all together</title>
+        <title>Bringing It All Together</title>
 
-        <para>For the final part, we need to compose the lexer and parser. As
-        we saw in the type definition in <literal moreinfo="none">parser.mli</literal>, the
-        parsing function expects a lexer of type <literal moreinfo="none">Lexing.lexbuf -&gt;
-        token</literal>, and it also expects a
-        <literal moreinfo="none">lexbuf</literal>.</para>
+        <para>For the final part, we need to compose the lexer and parser. As we saw in the type
+      definition in <literal moreinfo="none">parser.mli</literal>, the parsing function expects a
+      lexer of type <literal moreinfo="none">Lexing.lexbuf -&gt; token</literal>, and it also
+      expects a <literal moreinfo="none">lexbuf</literal>:</para>
 
         <para role="sourcecode">OCaml:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/prog.mli">parsing/prog.mli</ulink></para>
 
         <programlisting language="ocaml" format="linespecific">val prog:(Lexing.lexbuf -&gt; token) -&gt; Lexing.lexbuf -&gt; Json.value option</programlisting>
 
-        <para>Before we start with the lexing, let's first define some
-        functions to handle parsing errors. There are currently two errors:
-        <literal moreinfo="none">Parser.Error</literal> and
-        <literal moreinfo="none">Lexer.SyntaxError</literal>. A simple solution when
-        encountering an error is to print the error and give up, which we do
-        below.</para>
+        <para>Before we start with the lexing, let's first define some functions to handle parsing
+      errors. There are currently two errors: <literal moreinfo="none">Parser.Error</literal> and
+        <literal moreinfo="none">Lexer.SyntaxError</literal>. A simple solution when encountering an
+      error is to print the error and give up:</para>
 
         <para role="sourcecode">OCaml:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing-test/test.ml">parsing-test/test.ml</ulink></para>
@@ -762,15 +715,15 @@ let parse_with_error lexbuf =
         errors. These are described in detail in its reference <ulink url="http://gallium.inria.fr/~fpottier/menhir/">manual</ulink>.</para>
 
         <para>The standard lexing library <literal moreinfo="none">Lexing</literal> provides a
-        function <literal moreinfo="none">from_channel</literal> to read the input from a
-        channel. The following function describes the structure, where the
-        <literal moreinfo="none">Lexing.from_channel</literal> function is used to construct a
-        <literal moreinfo="none">lexbuf</literal>, which is passed with the lexing function
-        <literal moreinfo="none">Lexer.read</literal> to the <literal moreinfo="none">Parser.prog</literal>
-        function. <literal moreinfo="none">Parsing.prog</literal> returns
-        <literal moreinfo="none">None</literal> when it reaches end of file. We define a
-        function <literal moreinfo="none">Json.output_value</literal>, not shown here, to
-        print a <literal moreinfo="none">Json.value</literal>.</para>
+      function <literal moreinfo="none">from_channel</literal> to read the input from a channel. The
+      following function describes the structure, where the <literal moreinfo="none"
+        >Lexing.from_channel</literal> function is used to construct a <literal moreinfo="none"
+        >lexbuf</literal>, which is passed with the lexing function <literal moreinfo="none"
+        >Lexer.read</literal> to the <literal moreinfo="none">Parser.prog</literal> function.
+        <literal moreinfo="none">Parsing.prog</literal> returns <literal moreinfo="none"
+        >None</literal> when it reaches end of file. We define a function <literal moreinfo="none"
+        >Json.output_value</literal>, not shown here, to print a <literal moreinfo="none"
+        >Json.value</literal>:</para>
 
         <para role="sourcecode">OCaml:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing-test/test.ml">parsing-test/test.ml</ulink> (part 1)</para>
@@ -789,8 +742,7 @@ let loop filename () =
   parse_and_print lexbuf;
   In_channel.close inx</programlisting>
 
-        <para>Here's a test input file we can use to test the code we just
-        wrote.</para>
+        <para>Here's a test input file we can use to test the code we just wrote:</para>
 
         <para role="sourcecode">JSON:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing-test/test1.json">parsing-test/test1.json</ulink></para>
@@ -806,8 +758,8 @@ null
   "field4": { "fieldA": 1, "fieldB": "Hello" }
 }</programlisting>
 
-        <para>Now build and run the example using this file, and you can see
-        the full parser in action.</para>
+        <para>Now build and run the example using this file, and you can see the full parser in
+      action:</para>
 
         <para role="sourcecode">Terminal:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing-test/build_test.out">parsing-test/build_test.out</ulink></para>
@@ -825,8 +777,8 @@ null
 <computeroutput moreinfo="none">  "field4": { "fieldA": 1,</computeroutput>
 <computeroutput moreinfo="none">  "fieldB": "Hello" } }</computeroutput></programlisting>
 
-        <para>With our simple error handling scheme, errors are fatal and
-        cause the program to terminate with a non-zero exit code.</para>
+        <para>With our simple error handling scheme, errors are fatal and cause the program to
+      terminate with a nonzero exit code:</para>
 
         <para role="sourcecode">Terminal:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing-test/run_broken_test.out">parsing-test/run_broken_test.out</ulink></para>

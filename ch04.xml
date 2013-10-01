@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="files-modules-and-programs">
-      <title>Files, Modules and Programs</title>
+      <title>Files, Modules, and Programs</title>
 
       <para>We've so far experienced OCaml largely through the toplevel. As
       you move from exercises to real-world programs, you'll need to leave the
@@ -15,22 +15,19 @@
       module signatures.</para>
 
       <sect1 id="single-file-programs">
-        <title>Single file programs</title>
+        <title>Single File Programs</title>
 
-        <para>We'll start with an example: a utility that reads lines from
-        <literal moreinfo="none">stdin</literal> and computes a frequency count of the lines
-        that have been read in. At the end, the 10 lines with the highest
-        frequency counts are written out. We'll start with a simple
-        implementation, which we'll save as the file
-        <literal moreinfo="none">freq.ml</literal>.</para>
+        <para>We'll start with an example: a utility that reads lines from <literal moreinfo="none"
+        >stdin</literal> and computes a frequency count of the lines that have been read in. At the
+      end, the 10 lines with the highest frequency counts are written out. We'll start with a simple
+      implementation, which we'll save as the file <emphasis>freq.ml</emphasis>.</para>
 
-        <para>This implementation will use two functions from the
-        <literal moreinfo="none">List.Assoc</literal> module, which provides utility functions
-        for interacting with association lists, <emphasis>i.e.</emphasis>,
-        lists of key/value pairs. In particular, we use the function
-        <literal moreinfo="none">List.Assoc.find</literal>, which looks up a key in an
-        association list, and <literal moreinfo="none">List.Assoc.add</literal>, which adds a
-        new binding to an association list, as shown below.</para>
+        <para>This implementation will use two functions from the <literal moreinfo="none"
+        >List.Assoc</literal> module, which provides utility functions for interacting with
+      association lists, i.e., lists of key/value pairs. In particular, we use the function <literal
+        moreinfo="none">List.Assoc.find</literal>, which looks up a key in an association list; and
+        <literal moreinfo="none">List.Assoc.add</literal>, which adds a new binding to an
+      association list, as shown below:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/intro.topscript">files-modules-and-programs/intro.topscript</ulink></para>
@@ -49,7 +46,7 @@
         original list, but instead allocates a new list with the requisite
         key/value pair added.</para>
 
-        <para>Now we can write down <literal moreinfo="none">freq.ml</literal>.</para>
+        <para>Now we can write down <literal moreinfo="none">freq.ml</literal>:</para>
 
         <para role="sourcecode">OCaml:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq/freq.ml">files-modules-and-programs-freq/freq.ml</ulink></para>
@@ -81,14 +78,13 @@ let () =
         accumulator. That accumulator is initialized to the empty list.</para>
 
         <para>With <literal moreinfo="none">build_counts</literal> defined, we then call the
-        function to build the association list, sort that list by frequency in
-        descending order, grab the first 10 elements off the list, and then
-        iterate over those ten elements and print them to the screen. These
-        operations are tied together using the <literal moreinfo="none">|&gt;</literal>
-        operator described in <xref linkend="variables-and-functions"/>.</para>
+      function to build the association list, sort that list by frequency in descending order, grab
+      the first 10 elements off the list, and then iterate over those 10 elements and print them to
+      the screen. These operations are tied together using the <literal moreinfo="none"
+        >|&gt;</literal> operator described in <xref linkend="variables-and-functions"/>:</para>
 
         <note>
-          <title>Where is the main function?</title>
+          <title>Where Is the Main Function?</title>
 
           <para>Unlike C, programs in OCaml do not have a unique
           <literal moreinfo="none">main</literal> function. When an OCaml program is
@@ -102,12 +98,11 @@ let () =
           the full codebase is one big <literal moreinfo="none">main</literal>
           function.</para>
 
-          <para>The idiom of writing <literal moreinfo="none">let () =</literal> may seem a
-          bit odd, but it has a purpose. The let binding here is a
-          pattern-match to a value of type <literal moreinfo="none">unit</literal>, which is
-          there to ensure that the expression on the right-hand side returns
-          <literal moreinfo="none">unit</literal>, as is common for functions that operate
-          primarily by side-effect.</para>
+          <para>The idiom of writing <literal moreinfo="none">let () =</literal> may seem a bit odd,
+        but it has a purpose. The let binding here is a pattern-match to a value of type <literal
+          moreinfo="none">unit</literal>, which is there to ensure that the expression on the
+        righthand side returns <literal moreinfo="none">unit</literal>, as is common for functions
+        that operate primarily by side effect.</para>
         </note>
 
         <para>If we weren't using Core or any other external libraries, we
@@ -139,15 +134,14 @@ let () =
         <literal moreinfo="none">-thread</literal> turns on threading support, which is
         required for Core.</para>
 
-        <para>While this works well enough for a one-file project, more
-        complicated projects require a tool to orchestrate the build. One good
-        tool for this task is <command moreinfo="none">ocamlbuild</command>, which is shipped
-        with the OCaml compiler. We'll talk more about
-        <command moreinfo="none">ocamlbuild</command> in <xref linkend="the-compiler-frontend-parsing-and-type-checking"/>, but for
-        now, we'll just use a simple wrapper around
-        <command moreinfo="none">ocamlbuild</command> called <command moreinfo="none">corebuild</command> that
-        sets build parameters appropriately for building against Core and its
-        related libraries.</para>
+        <para>While this works well enough for a one-file project, more complicated projects require
+      a tool to orchestrate the build. One good tool for this task is <command moreinfo="none"
+        >ocamlbuild</command>, which is shipped with the OCaml compiler. We'll talk more about
+        <command moreinfo="none">ocamlbuild</command> in <xref
+        linkend="the-compiler-frontend-parsing-and-type-checking"/>, but for now, we'll just use a
+      simple wrapper around <command moreinfo="none">ocamlbuild</command> called <command
+        moreinfo="none">corebuild</command> that sets build parameters appropriately for building
+      against Core and its related libraries:</para>
 
         <para role="sourcecode">Terminal:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-obuild/build.out">files-modules-and-programs-freq-obuild/build.out</ulink></para>
@@ -155,16 +149,14 @@ let () =
         <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild freq.byte</userinput>
 </programlisting>
 
-        <para>If we'd invoked <command moreinfo="none">corebuild</command> with a target of
-        <literal moreinfo="none">freq.native</literal> instead of
-        <literal moreinfo="none">freq.byte</literal>, we would have gotten native-code
-        instead.</para>
+        <para>If we'd invoked <command moreinfo="none">corebuild</command> with a target of <literal
+        moreinfo="none">freq.native</literal> instead of <literal moreinfo="none"
+        >freq.byte</literal>, we would have gotten native code instead.</para>
 
-        <para>We can run the resulting executable from the command-line. The
-        following line extracts strings from the <command moreinfo="none">ocamlopt</command>
-        binary, reporting the most frequently occurring ones. Note that the
-        specific results will vary from platform to platform, since the binary
-        itself will differ between platforms.</para>
+        <para>We can run the resulting executable from the command line. The following line extracts
+      strings from the <command moreinfo="none">ocamlopt</command> binary, reporting the most
+      frequently occurring ones. Note that the specific results will vary from platform to platform,
+      since the binary itself will differ between platforms:</para>
 
         <para role="sourcecode">Terminal:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-obuild/test.out">files-modules-and-programs-freq-obuild/test.out</ulink></para>
@@ -182,7 +174,7 @@ let () =
 <computeroutput moreinfo="none">  3: 6	.section .rdata,"dr"</computeroutput></programlisting>
 
         <note>
-          <title>Bytecode vs native code</title>
+          <title>Bytecode Versus Native Code</title>
 
           <para>OCaml ships with two compilers: the <command moreinfo="none">ocamlc</command>
           bytecode compiler and the <command moreinfo="none">ocamlopt</command> native-code
@@ -195,18 +187,15 @@ let () =
           those ending with <literal moreinfo="none">.native</literal> are built as native
           code.</para>
 
-          <para>Aside from performance, executables generated by the two
-          compilers have nearly identical behavior. There are a few things to
-          be aware of. First, the bytecode compiler can be used on more
-          architectures, and has some tools that are not available for native
-          code. For example, the OCaml debugger only works with bytecode
-          (although <command moreinfo="none">gdb</command>, the GNU Debugger, works with OCaml
-          native-code applications). The bytecode compiler is also quicker
-          than the native-code compiler. In addition, in order to run a
-          bytecode executable you typically need to have OCaml installed on
-          the system in question. That's not strictly required, though, since
-          you can build a bytecode executable with an embedded runtime, using
-          the <literal moreinfo="none">-custom</literal> compiler flag.</para>
+          <para>Aside from performance, executables generated by the two compilers have nearly
+        identical behavior. There are a few things to be aware of. First, the bytecode compiler can
+        be used on more architectures, and has some tools that are not available for native code.
+        For example, the OCaml debugger only works with bytecode (although <command moreinfo="none"
+          >gdb</command>, the GNU Debugger, works with OCaml native-code applications). The bytecode
+        compiler is also quicker than the native-code compiler. In addition, in order to run a
+        bytecode executable, you typically need to have OCaml installed on the system in question.
+        That's not strictly required, though, since you can build a bytecode executable with an
+        embedded runtime, using the <literal moreinfo="none">-custom</literal> compiler flag.</para>
 
           <para>As a general matter, production executables should usually be
           built using the native-code compiler, but it sometimes makes sense
@@ -218,7 +207,7 @@ let () =
       </sect1>
 
       <sect1 id="multi-file-programs-and-modules">
-        <title>Multi-file programs and modules</title>
+        <title>Multifile Programs and Modules</title>
 
         <para>Source files in OCaml are tied into the module system, with each
         file compiling down into a module whose name is derived from the name
@@ -242,11 +231,10 @@ let () =
         We can consider alternative (and more efficient) implementations once
         we have a clear interface to program against.</para>
 
-        <para>We'll start by creating a file, <literal moreinfo="none">counter.ml</literal>,
-        that contains the logic for maintaining the association list used to
-        represent the frequency counts. The key function, called
-        <literal moreinfo="none">touch</literal>, bumps the frequency count of a given line by
-        one.</para>
+        <para>We'll start by creating a file, <literal moreinfo="none">counter.ml</literal>, that
+      contains the logic for maintaining the association list used to represent the frequency
+      counts. The key function, called <literal moreinfo="none">touch</literal>, bumps the frequency
+      count of a given line by one:</para>
 
         <para role="sourcecode">OCaml:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-counter/counter.ml">files-modules-and-programs-freq-with-counter/counter.ml</ulink></para>
@@ -261,17 +249,15 @@ let touch t s =
   in
   List.Assoc.add t s (count + 1)</programlisting>
 
-        <para>The file <literal moreinfo="none">counter.ml</literal> will be compiled into a
-        module named <literal moreinfo="none">Counter</literal>, where the name of the module
-        is derived automatically from the filename. The module name is
-        capitalized even if the file is not. Indeed, module names are always
-        capitalized.</para>
+        <para>The file <emphasis>counter.ml</emphasis> will be compiled into a module named <literal
+        moreinfo="none">Counter</literal>, where the name of the module is derived automatically
+      from the filename. The module name is capitalized even if the file is not. Indeed, module
+      names are always capitalized.</para>
 
-        <para>We can now rewrite <literal moreinfo="none">freq.ml</literal> to use
-        <literal moreinfo="none">Counter</literal>. Note that the resulting code can still be
-        built with <command moreinfo="none">ocamlbuild</command>, which will discover
-        dependencies and realize that <literal moreinfo="none">counter.ml</literal> needs to
-        be compiled.</para>
+        <para>We can now rewrite <literal moreinfo="none">freq.ml</literal> to use <literal
+        moreinfo="none">Counter</literal>. Note that the resulting code can still be built with
+        <command moreinfo="none">ocamlbuild</command>, which will discover dependencies and realize
+      that <literal moreinfo="none">counter.ml</literal> needs to be compiled:</para>
 
         <para role="sourcecode">OCaml:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-counter/freq.ml">files-modules-and-programs-freq-with-counter/freq.ml</ulink></para>
@@ -289,7 +275,7 @@ let () =
       </sect1>
 
       <sect1 id="signatures-and-abstract-types">
-        <title>Signatures and abstract types</title>
+        <title>Signatures and Abstract Types</title>
 
         <para>While we've pushed some of the logic to the
         <literal moreinfo="none">Counter</literal> module, the code in
@@ -302,13 +288,12 @@ let () =
         <literal moreinfo="none">Counter</literal> without needing to change client code like
         that in <literal moreinfo="none">freq.ml</literal>.</para>
 
-        <para>The implementation details of a module can be hidden by
-        attaching an <emphasis>interface</emphasis>. (Note that in the context
-        of OCaml, the terms <emphasis>interface</emphasis>,
-        <emphasis>signature</emphasis> and <emphasis>module type</emphasis>
-        are all used interchangeably.) A module defined by a file
-        <literal moreinfo="none">filename.ml</literal> can be constrained by a signature
-        placed in a file called <literal moreinfo="none">filename.mli</literal>.</para>
+        <para>The implementation details of a module can be hidden by attaching an
+        <emphasis>interface</emphasis>. (Note that in the context of OCaml, the terms
+        <emphasis>interface</emphasis>, <emphasis>signature</emphasis>, and <emphasis>module
+        type</emphasis> are all used interchangeably.) A module defined by a file <literal
+        moreinfo="none">filename.ml</literal> can be constrained by a signature placed in a file
+      called <literal moreinfo="none">filename.mli</literal>.</para>
 
         <para>For <literal moreinfo="none">counter.mli</literal>, we'll start by writing down
         an interface that describes what's currently available in
@@ -322,8 +307,8 @@ let () =
 
         <programlisting language="" format="linespecific">val &lt;identifier&gt; : &lt;type&gt;</programlisting>
 
-        <para>Using this syntax, we can write the signature of
-        <literal moreinfo="none">counter.ml</literal> as follows.</para>
+        <para>Using this syntax, we can write the signature of <literal moreinfo="none"
+        >counter.ml</literal> as follows:</para>
 
         <para role="sourcecode">OCaml:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-sig/counter.mli">files-modules-and-programs-freq-with-sig/counter.mli</ulink></para>
@@ -338,12 +323,11 @@ val touch : (string * int) list -&gt; string -&gt; (string * int) list</programl
         build.</para>
 
         <note>
-          <title>Auto-generating <literal moreinfo="none">mli</literal> files</title>
+          <title>Autogenerating <literal moreinfo="none">mli</literal> Files</title>
 
-          <para>If you don't want to construct an mli entirely by hand, you
-          can ask OCaml to auto-generate one for you from the source, which
-          you can then adjust to fit your needs. Here's how you can do that
-          using <literal moreinfo="none">corebuild</literal>.</para>
+          <para>If you don't want to construct an <literal>mli</literal> entirely by hand, you can
+        ask OCaml to autogenerate one for you from the source, which you can then adjust to fit your
+        needs. Here's how you can do that using <literal moreinfo="none">corebuild</literal>:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-counter/infer_mli.out">files-modules-and-programs-freq-with-counter/infer_mli.out</ulink></para>
@@ -353,13 +337,12 @@ val touch : (string * int) list -&gt; string -&gt; (string * int) list</programl
 <computeroutput moreinfo="none">val touch :</computeroutput>
 <computeroutput moreinfo="none">  ('a, int) Core.Std.List.Assoc.t -&gt; 'a -&gt; ('a, int) Core.Std.List.Assoc.t</computeroutput></programlisting>
 
-          <para>The generated code is basically equivalent to the
-          <literal moreinfo="none">mli</literal> that we wrote by hand, but is a bit uglier
-          and more verbose, and, of course, has no comments. In general,
-          auto-generated <literal moreinfo="none">mli</literal>'s are only useful as a
-          starting point. In OCaml, the <literal moreinfo="none">mli</literal> is the key
-          place where you present and document your interface, and there's no
-          replacement for careful human editing and organization.</para>
+          <para>The generated code is basically equivalent to the <literal moreinfo="none"
+          >mli</literal> that we wrote by hand but is a bit uglier and more verbose and, of course,
+        has no comments. In general, autogenerated <literal moreinfo="none">mli</literal>'s are only
+        useful as a starting point. In OCaml, the <literal moreinfo="none">mli</literal> is the key
+        place where you present and document your interface, and there's no replacement for careful
+        human editing and organization.</para>
         </note>
 
         <para>To hide the fact that frequency counts are represented as
@@ -399,8 +382,8 @@ val to_list : t -&gt; (string * int) list</programlisting>
         when generating API documentation. We'll discuss
         <command moreinfo="none">ocamldoc</command> more in <xref linkend="the-compiler-frontend-parsing-and-type-checking"/>.</para>
 
-        <para>Here's a rewrite of <literal moreinfo="none">counter.ml</literal> to match the
-        new <literal moreinfo="none">counter.mli</literal>.</para>
+        <para>Here's a rewrite of <literal moreinfo="none">counter.ml</literal> to match the new
+        <literal moreinfo="none">counter.mli</literal>:</para>
 
         <para role="sourcecode">OCaml:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-sig-abstract/counter.ml">files-modules-and-programs-freq-with-sig-abstract/counter.ml</ulink></para>
@@ -434,14 +417,12 @@ let touch t s =
 <computeroutput moreinfo="none">       Type Counter.t is not compatible with type 'a list </computeroutput>
 <computeroutput moreinfo="none">Command exited with code 2.</computeroutput></programlisting>
 
-        <para>This is because <literal moreinfo="none">freq.ml</literal> depends on the fact
-        that frequency counts are represented as association lists, a fact
-        that we've just hidden. We just need to fix
-        <literal moreinfo="none">build_counts</literal> to use
-        <literal moreinfo="none">Counter.empty</literal> instead of <literal moreinfo="none">[]</literal> and
-        <literal moreinfo="none">Counter.to_list</literal> to get the association list out at
-        the end for processing and printing. The resulting implementation is
-        shown below.</para>
+        <para>This is because <literal moreinfo="none">freq.ml</literal> depends on the fact that
+      frequency counts are represented as association lists, a fact that we've just hidden. We just
+      need to fix <literal moreinfo="none">build_counts</literal> to use <literal moreinfo="none"
+        >Counter.empty</literal> instead of <literal moreinfo="none">[]</literal> and <literal
+        moreinfo="none">Counter.to_list</literal> to get the association list out at the end for
+      processing and printing. The resulting implementation is shown below:</para>
 
         <para role="sourcecode">OCaml:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-sig-abstract-fixed/freq.ml">files-modules-and-programs-freq-with-sig-abstract-fixed/freq.ml</ulink></para>
@@ -458,10 +439,9 @@ let () =
   |&gt; (fun counts -&gt; List.take counts 10)
   |&gt; List.iter ~f:(fun (line,count) -&gt; printf "%3d: %s\n" count line)</programlisting>
 
-        <para>Now we can turn to optimizing the implementation of
-        <literal moreinfo="none">Counter</literal>. Here's an alternate and far more efficient
-        implementation, based on the <literal moreinfo="none">Map</literal> datastructure in
-        Core.</para>
+        <para>Now we can turn to optimizing the implementation of <literal moreinfo="none"
+        >Counter</literal>. Here's an alternate and far more efficient implementation, based on the
+        <literal moreinfo="none">Map</literal> datastructure in Core:</para>
 
         <para role="sourcecode">OCaml:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-fast/counter.ml">files-modules-and-programs-freq-fast/counter.ml</ulink></para>
@@ -482,17 +462,16 @@ let touch t s =
   in
   Map.add t ~key:s ~data:(count + 1)</programlisting>
 
-        <para>Note that in the above we use <literal moreinfo="none">String.Map</literal> in
-        some places and simply <literal moreinfo="none">Map</literal> in others. This has to
-        do with the fact that for some operations, like creating a
-        <literal moreinfo="none">Map.t</literal>, you need access to type-specialized
-        information, and for others, like looking something up in
-        <literal moreinfo="none">Map.t</literal>, you don't. This is covered in more detail in
-        <xref linkend="maps-and-hash-tables"/>.</para>
+        <para>Note that in the preceding example we use <literal moreinfo="none"
+        >String.Map</literal> in some places and simply <literal moreinfo="none">Map</literal> in
+      others. This has to do with the fact that for some operations, like creating a <literal
+        moreinfo="none">Map.t</literal>, you need access to type-specialized information, and for
+      others, like looking something up in <literal moreinfo="none">Map.t</literal>, you don't. This
+      is covered in more detail in <xref linkend="maps-and-hash-tables"/>.</para>
       </sect1>
 
       <sect1 id="concrete-types-in-signatures">
-        <title>Concrete types in signatures</title>
+        <title>Concrete Types in Signatures</title>
 
         <para>In our frequency-count example, the module
         <literal moreinfo="none">Counter</literal> had an abstract type
@@ -501,13 +480,11 @@ let touch t s =
         interface <emphasis>concrete</emphasis>, by including the type
         definition in the interface.</para>
 
-        <para>For example, imagine we wanted to add a function to
-        <literal moreinfo="none">Counter</literal> for returning the line with the median
-        frequency count. If the number of lines is even, then there is no
-        precise median and the function would return the lines before and
-        after the median instead. We'll use a custom type to represent the
-        fact that there are two possible return values. Here's a possible
-        implementation.</para>
+        <para>For example, imagine we wanted to add a function to <literal moreinfo="none"
+        >Counter</literal> for returning the line with the median frequency count. If the number of
+      lines is even, then there is no precise median, and the function would return the lines before
+      and after the median instead. We'll use a custom type to represent the fact that there are two
+      possible return values. Here's a possible implementation:</para>
 
         <para role="sourcecode">OCaml:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-median/counter.ml">files-modules-and-programs-freq-median/counter.ml</ulink>
@@ -527,18 +504,16 @@ let median t =
   then Median (nth (len/2))
   else Before_and_after (nth (len/2 - 1), nth (len/2));;</programlisting>
 
-        <para>In the above, we use <literal moreinfo="none">failwith</literal> to throw an
-        exception for the case of the empty list. We'll discuss exceptions
-        more in <xref linkend="error-handling"/>. Note also that the function
-        <literal moreinfo="none">fst</literal> simply returns the first element of any
-        2-tuple.</para>
+        <para>In the preceding implementation, we use <literal moreinfo="none">failwith</literal> to
+      throw an exception for the case of the empty list. We'll discuss exceptions more in <xref
+        linkend="error-handling"/>. Note also that the function <literal moreinfo="none"
+        >fst</literal> simply returns the first element of any two-tuple.</para>
 
-        <para>Now, to expose this usefully in the interface, we need to expose
-        both the function and the type <literal moreinfo="none">median</literal> with its
-        definition. Note that values (of which functions are an example) and
-        types have distinct namespaces, so there's no name clash here. Adding
-        the following two lines added to <literal moreinfo="none">counter.mli</literal> does
-        the trick.</para>
+        <para>Now, to expose this usefully in the interface, we need to expose both the function and
+      the type <literal moreinfo="none">median</literal> with its definition. Note that values (of
+      which functions are an example) and types have distinct namespaces, so there's no name clash
+      here. Adding the following two lines added to <literal moreinfo="none">counter.mli</literal>
+      does the trick:</para>
 
         <para role="sourcecode">OCaml:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-median/counter.mli">files-modules-and-programs-freq-median/counter.mli</ulink>
@@ -562,7 +537,7 @@ val median : t -&gt; median</programlisting>
       </sect1>
 
       <sect1 id="nested-modules">
-        <title>Nested modules</title>
+        <title>Nested Modules</title>
 
         <para>Up until now, we've only considered modules that correspond to
         files, like <literal moreinfo="none">counter.ml</literal>. But modules (and module
@@ -577,8 +552,7 @@ val median : t -&gt; median</programlisting>
         username with a hostname, and if you do need to convert, you can do so
         using explicit conversions to and from the string type.</para>
 
-        <para>Here's how you might create such an abstract type, within a
-        sub-module:</para>
+        <para>Here's how you might create such an abstract type, within a submodule:</para>
 
         <para role="sourcecode">OCaml:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/abstract_username.ml">files-modules-and-programs/abstract_username.ml</ulink></para>
@@ -608,10 +582,10 @@ end</programlisting>
 
         <programlisting language="" format="linespecific">module &lt;name&gt; : &lt;signature&gt; = &lt;implementation&gt;</programlisting>
 
-        <para>We could have written this slightly differently, by giving the
-        signature its own toplevel <literal moreinfo="none">module type</literal> declaration,
-        making it possible to create multiple distinct types with the same
-        underlying implementation in a lightweight way.</para>
+        <para>We could have written this slightly differently, by giving the signature its own
+      top-level <literal moreinfo="none">module type</literal> declaration, making it possible to
+      create multiple distinct types with the same underlying implementation in a lightweight
+      way:</para>
 
         <para role="sourcecode">OCaml:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/session_info.ml">files-modules-and-programs/session_info.ml</ulink></para>
@@ -641,10 +615,9 @@ type session_info = { user: Username.t;
 let sessions_have_same_user s1 s2 =
   s1.user = s2.host</programlisting>
 
-        <para>The above code has a bug: it compares the username in one
-        session to the host in the other session, when it should be comparing
-        the usernames in both cases. Because of how we defined our types,
-        however, the compiler will flag this bug for us.</para>
+        <para>The preceding code has a bug: it compares the username in one session to the host in
+      the other session, when it should be comparing the usernames in both cases. Because of how we
+      defined our types, however, the compiler will flag this bug for us:</para>
 
         <para role="sourcecode">Terminal:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/build_session_info.out">files-modules-and-programs/build_session_info.out</ulink></para>
@@ -662,23 +635,20 @@ let sessions_have_same_user s1 s2 =
       </sect1>
 
       <sect1 id="opening-modules">
-        <title>Opening modules</title>
+        <title>Opening Modules</title>
 
-        <para>Most of the time, you refer to values and types within a module
-        by using the module name as an explicit qualifier.
-        <emphasis>e.g.</emphasis>, you write <literal moreinfo="none">List.map</literal> to
-        refer to the <literal moreinfo="none">map</literal> function in the
-        <literal moreinfo="none">List</literal> module. Sometimes, though, you want to be able
-        to refer to the contents of a module without this explicit
-        qualification. That's what the <literal moreinfo="none">open</literal> statement is
-        for.</para>
+        <para>Most of the time, you refer to values and types within a module by using the module
+      name as an explicit qualifier. e.g., you write <literal moreinfo="none">List.map</literal> to
+      refer to the <literal moreinfo="none">map</literal> function in the <literal moreinfo="none"
+        >List</literal> module. Sometimes, though, you want to be able to refer to the contents of a
+      module without this explicit qualification. That's what the <literal moreinfo="none"
+        >open</literal> statement is for.</para>
 
-        <para>We've encountered <literal moreinfo="none">open</literal> already, specifically
-        where we've written <literal moreinfo="none">open Core.Std</literal> to get access to
-        the standard definitions in the Core library. In general, opening a
-        module adds the contents of that module to the environment that the
-        compiler looks at to find the definition of various identifiers.
-        Here's an example.</para>
+        <para>We've encountered <literal moreinfo="none">open</literal> already, specifically where
+      we've written <literal moreinfo="none">open Core.Std</literal> to get access to the standard
+      definitions in the Core library. In general, opening a module adds the contents of that module
+      to the environment that the compiler looks at to find the definition of various identifiers.
+      Here's an example:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/main.topscript">files-modules-and-programs/main.topscript</ulink></para>
@@ -700,7 +670,7 @@ let sessions_have_same_user s1 s2 =
         harder it is to look at an identifier and figure out where it comes
         from.</para>
 
-        <para>Here's some general advice on how to deal with opens.</para>
+        <para>Here's some general advice on how to deal with opens:</para>
 
         <itemizedlist>
           <listitem>
@@ -725,9 +695,8 @@ let sessions_have_same_user s1 s2 =
 <userinput moreinfo="none">    x + y / of_int 2;;</userinput>
 <computeroutput moreinfo="none">val average : int64 -&gt; int64 -&gt; int64 = &lt;fun&gt;</computeroutput></programlisting>
 
-            <para>In the above, <literal moreinfo="none">of_int</literal> and the infix
-            operators are the ones from the <literal moreinfo="none">Int64</literal>
-            module.</para>
+            <para>Here, <literal moreinfo="none">of_int</literal> and the infix operators are the
+          ones from the <literal moreinfo="none">Int64</literal> module.</para>
 
             <para>There's another even more lightweight syntax for local
             opens, which is particularly useful for small expressions:</para>
@@ -779,12 +748,12 @@ let sessions_have_same_user s1 s2 =
       </sect1>
 
       <sect1 id="including-modules">
-        <title>Including modules</title>
+        <title>Including Modules</title>
 
-        <para>While opening a module affects the environment used to search
-        for identifiers, <emphasis>including</emphasis> a module is a way of
-        actually adding new identifiers to a module proper. Consider the
-        following simple module for representing a range of intervals.</para>
+        <para>While opening a module affects the environment used to search for identifiers,
+        <emphasis>including</emphasis> a module is a way of actually adding new identifiers to a
+      module proper. Consider the following simple module for representing a range of
+      intervals:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/main.topscript">files-modules-and-programs/main.topscript</ulink> (part
@@ -800,9 +769,8 @@ let sessions_have_same_user s1 s2 =
 <computeroutput moreinfo="none">module Interval :</computeroutput>
 <computeroutput moreinfo="none">  sig type t = Interval of int * int | Empty val create : int -&gt; int -&gt; t end</computeroutput></programlisting>
 
-        <para>We can use the <literal moreinfo="none">include</literal> directive to create a
-        new, extended version of the <literal moreinfo="none">Interval</literal>
-        module.</para>
+        <para>We can use the <literal moreinfo="none">include</literal> directive to create a new,
+      extended version of the <literal moreinfo="none">Interval</literal> module:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/main.topscript">files-modules-and-programs/main.topscript</ulink> (part
@@ -825,11 +793,10 @@ let sessions_have_same_user s1 s2 =
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Extended_interval.contains (Extended_interval.create 3 10) 4;;</userinput>
 <computeroutput moreinfo="none">- : bool = true</computeroutput></programlisting>
 
-        <para>The difference between <literal moreinfo="none">include</literal> and
-        <literal moreinfo="none">open</literal> is that we've done more than change how
-        identifiers are searched for: we've changed what's in the module. If
-        we'd used <literal moreinfo="none">open</literal>, we'd have gotten a quite different
-        result.</para>
+        <para>The difference between <literal moreinfo="none">include</literal> and <literal
+        moreinfo="none">open</literal> is that we've done more than change how identifiers are
+      searched for: we've changed what's in the module. If we'd used <literal moreinfo="none"
+        >open</literal>, we'd have gotten a quite different result:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/main.topscript">files-modules-and-programs/main.topscript</ulink> (part
@@ -849,11 +816,10 @@ let sessions_have_same_user s1 s2 =
 <computeroutput moreinfo="none">Characters 28-52:</computeroutput>
 <computeroutput moreinfo="none">Error: Unbound value Extended_interval.create</computeroutput></programlisting>
 
-        <para>To consider a more realistic example, imagine you wanted to
-        build an extended version of the <literal moreinfo="none">List</literal> module, where
-        you've added some functionality not present in the module as
-        distributed in Core. <literal moreinfo="none">include</literal> allows us to do just
-        that.</para>
+        <para>To consider a more realistic example, imagine you wanted to build an extended version
+      of the <literal moreinfo="none">List</literal> module, where you've added some functionality
+      not present in the module as distributed in Core. <literal moreinfo="none">include</literal>
+      allows us to do just that:</para>
 
         <para role="sourcecode">OCaml:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/ext_list.ml">files-modules-and-programs/ext_list.ml</ulink></para>
@@ -869,13 +835,12 @@ let rec intersperse list el =
 (* The remainder of the list module *)
 include List</programlisting>
 
-        <para>Now, how do we write an interface for this new module? It turns
-        out that <literal moreinfo="none">include</literal> works on signatures as well, so we
-        can pull essentially the same trick to write our
-        <literal moreinfo="none">mli</literal>. The only issues is that we need to get our
-        hands on the signature for the <literal moreinfo="none">List</literal> module. This
-        can be done using <literal moreinfo="none">module type of</literal>, which computes a
-        signature from a module.</para>
+        <para>Now, how do we write an interface for this new module? It turns out that <literal
+        moreinfo="none">include</literal> works on signatures as well, so we can pull essentially
+      the same trick to write our <literal moreinfo="none">mli</literal>. The only issues is that we
+      need to get our hands on the signature for the <literal moreinfo="none">List</literal> module.
+      This can be done using <literal moreinfo="none">module type of</literal>, which computes a
+      signature from a module:</para>
 
         <para role="sourcecode">OCaml:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/ext_list.mli">files-modules-and-programs/ext_list.mli</ulink></para>
@@ -914,7 +879,7 @@ val intersperse : 'a list -&gt; 'a -&gt; 'a list</programlisting>
       </sect1>
 
       <sect1 id="common-errors-with-modules">
-        <title>Common errors with modules</title>
+        <title>Common Errors with Modules</title>
 
         <para>When OCaml compiles a program with an <literal moreinfo="none">ml</literal> and
         an <literal moreinfo="none">mli</literal>, it will complain if it detects a mismatch
@@ -922,7 +887,7 @@ val intersperse : 'a list -&gt; 'a -&gt; 'a list</programlisting>
         into.</para>
 
         <sect2 id="type-mismatches">
-          <title>Type mismatches</title>
+          <title>Type Mismatches</title>
 
           <para>The simplest kind of error is where the type specified in the
           signature does not match up with the type in the implementation of
@@ -937,7 +902,7 @@ val intersperse : 'a list -&gt; 'a -&gt; 'a list</programlisting>
           <programlisting language="ocaml" format="linespecific">(** Bump the frequency count for the given string. *)
 val touch : string -&gt; t -&gt; t</programlisting>
 
-          <para>and we try to compile, we'll get the following error.</para>
+          <para>and we try to compile, we'll get the following error:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-sig-mismatch/build.out">files-modules-and-programs-freq-with-sig-mismatch/build.out</ulink></para>
@@ -952,12 +917,11 @@ val touch : string -&gt; t -&gt; t</programlisting>
         </sect2>
 
         <sect2 id="missing-definitions">
-          <title>Missing definitions</title>
+          <title>Missing Definitions</title>
 
-          <para>We might decide that we want a new function in
-          <literal moreinfo="none">Counter</literal> for pulling out the frequency count of a
-          given string. We can update the <literal moreinfo="none">mli</literal> by adding the
-          following line.</para>
+          <para>We might decide that we want a new function in <literal moreinfo="none"
+          >Counter</literal> for pulling out the frequency count of a given string. We can update
+        the <literal moreinfo="none">mli</literal> by adding the following line:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-missing-def/counter.mli">files-modules-and-programs-freq-with-missing-def/counter.mli</ulink>
@@ -982,7 +946,7 @@ val touch : string -&gt; t -&gt; t</programlisting>
         </sect2>
 
         <sect2 id="type-definition-mismatches">
-          <title>Type definition mismatches</title>
+          <title>Type Definition Mismatches</title>
 
           <para>Type definitions that show up in an <literal moreinfo="none">mli</literal>
           need to match up with corresponding definitions in the
@@ -1026,27 +990,23 @@ type median = | Before_and_after of string * string
         </sect2>
 
         <sect2 id="cyclic-dependencies">
-          <title>Cyclic dependencies</title>
+          <title>Cyclic Dependencies</title>
 
-          <para>In most cases, OCaml doesn't allow cyclic dependencies,
-          <emphasis>i.e.</emphasis>, a collection of definitions that all
-          refer to each other. If you want to create such definitions, you
-          typically have to mark them specially. For example, when defining a
-          set of mutually recursive values (like the definition of
-          <literal moreinfo="none">is_even</literal> and <literal moreinfo="none">is_odd</literal> in <xref linkend="recursive-functions"/>), you need to define them using
-          <literal moreinfo="none">let rec</literal> rather than ordinary
+          <para>In most cases, OCaml doesn't allow cyclic dependencies, i.e., a collection of
+        definitions that all refer to one another. If you want to create such definitions, you
+        typically have to mark them specially. For example, when defining a set of mutually
+        recursive values (like the definition of <literal moreinfo="none">is_even</literal> and
+          <literal moreinfo="none">is_odd</literal> in <xref linkend="recursive-functions"/>), you
+        need to define them using <literal moreinfo="none">let rec</literal> rather than ordinary
           <literal moreinfo="none">let</literal>.</para>
 
-          <para>The same is true at the module level. By default, cyclic
-          dependencies between modules are not allowed, and cyclic
-          dependencies among files are never allowed. Recursive modules are
-          possible, but are a rare case and we won't discuss them further
-          here.</para>
+          <para>The same is true at the module level. By default, cyclic dependencies between
+        modules are not allowed, and cyclic dependencies among files are never allowed. Recursive
+        modules are possible but are a rare case, and we won't discuss them further here.</para>
 
-          <para>The simplest example of a forbidden circular reference is a
-          module referring to its own module name. So, if we tried to add a
-          reference to <literal moreinfo="none">Counter</literal> from within
-          <literal moreinfo="none">counter.ml</literal></para>
+          <para>The simplest example of a forbidden circular reference is a module referring to its
+        own module name. So, if we tried to add a reference to <literal moreinfo="none"
+          >Counter</literal> from within <literal moreinfo="none">counter.ml</literal>:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-cyclic1/counter.ml">files-modules-and-programs-freq-cyclic1/counter.ml</ulink>
@@ -1064,11 +1024,10 @@ type median = | Before_and_after of string * string
 <computeroutput moreinfo="none">Error: Unbound module Counter</computeroutput>
 <computeroutput moreinfo="none">Command exited with code 2.</computeroutput></programlisting>
 
-          <para>The problem manifests in a different way if we create cyclic
-          references between files. We could create such a situation by adding
-          a reference to <literal moreinfo="none">Freq</literal> from
-          <literal moreinfo="none">counter.ml</literal>, <emphasis>e.g.</emphasis>, by adding
-          the following line.</para>
+          <para>The problem manifests in a different way if we create cyclic references between
+        files. We could create such a situation by adding a reference to <literal moreinfo="none"
+          >Freq</literal> from <literal moreinfo="none">counter.ml</literal>, e.g., by adding the
+        following line:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-cyclic2/counter.ml">files-modules-and-programs-freq-cyclic2/counter.ml</ulink>
@@ -1076,9 +1035,9 @@ type median = | Before_and_after of string * string
 
           <programlisting language="ocaml" format="linespecific">let _build_counts = Freq.build_counts</programlisting>
 
-          <para>In this case, <command moreinfo="none">ocamlbuild</command> (which is invoked
-          by the <command moreinfo="none">corebuild</command> script) will notice the error
-          and complain explicitly about the cycle.</para>
+          <para>In this case, <command moreinfo="none">ocamlbuild</command> (which is invoked by the
+          <command moreinfo="none">corebuild</command> script) will notice the error and complain
+        explicitly about the cycle:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-cyclic2/build.out">files-modules-and-programs-freq-cyclic2/build.out</ulink></para>

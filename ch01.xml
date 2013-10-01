@@ -21,10 +21,10 @@
       chapter. Look at <xref linkend="installation"/> for details.</para>
 
       <sect1 id="ocaml-as-a-calculator">
-        <title>OCaml as a calculator</title>
+        <title>OCaml as a Calculator</title>
 
-        <para>The first thing you need to do when using Core is to open
-        <literal moreinfo="none">Core.Std</literal>.</para>
+        <para>The first thing you need to do when using Core is to open <literal moreinfo="none"
+        >Core.Std</literal>:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink></para>
@@ -32,11 +32,10 @@
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">open Core.Std;;</userinput>
 </programlisting>
 
-        <para>This makes the definitions in Core available, and is required
-        for many of the examples in the tour and in the remainder of the
-        book.</para>
+        <para>This makes the definitions in Core available and is required for many of the examples
+      in the tour and in the remainder of the book.</para>
 
-        <para>Now let's try a few simple numerical calculations.</para>
+        <para>Now let's try a few simple numerical calculations:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 1)</para>
@@ -52,9 +51,8 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">sqrt 9.;;</userinput>
 <computeroutput moreinfo="none">- : float = 3.</computeroutput></programlisting>
 
-        <para>By and large, this is pretty similar to what you'd find in any
-        programming language, but there are a few things that jump right out
-        at you.</para>
+        <para>By and large, this is pretty similar to what you'd find in any programming language,
+      but there are a few things that jump right out at you:</para>
 
         <itemizedlist>
           <listitem>
@@ -79,33 +77,30 @@
           </listitem>
 
           <listitem>
-            <para>OCaml allows you to place underscores in the middle of your
-            numeric literals, to improve readability. Note that underscores
-            can be placed anywhere within a number, not just every three
-            digits.</para>
+            <para>OCaml allows you to place underscores in the middle of your numeric literals to
+          improve readability. Note that underscores can be placed anywhere within a number, not
+          just every three digits.</para>
           </listitem>
 
           <listitem>
-            <para>OCaml carefully distinguishes between
-            <literal moreinfo="none">float</literal>, the type for floating point numbers and
-            <literal moreinfo="none">int</literal>, the type for integers. The types have
-            different literals (<literal moreinfo="none">6.</literal> instead of
-            <literal moreinfo="none">6</literal>) and different infix operators
-            (<literal moreinfo="none">+.</literal> instead of <literal moreinfo="none">+</literal>), and OCaml
-            doesn't automatically cast between these types. This can be a bit
-            of a nuisance, but it has its benefits, since it prevents some
-            kinds of bugs that arise in other languages due to unexpected
-            differences between the behavior of <literal moreinfo="none">int</literal> and
-            <literal moreinfo="none">float</literal>. For example, in many languages,
-            <literal moreinfo="none">1 / 3</literal> is <literal moreinfo="none">0</literal>, but <literal moreinfo="none">1 /
-            3.0</literal> is a third. OCaml requires you to be explicit about
-            which operation you're doing.</para>
+            <para>OCaml carefully distinguishes between <literal moreinfo="none">float</literal>,
+          the type for floating point numbers, and <literal moreinfo="none">int</literal>, the type
+          for integers. The types have different literals (<literal moreinfo="none">6.</literal>
+          instead of <literal moreinfo="none">6</literal>) and different infix operators (<literal
+            moreinfo="none">+.</literal> instead of <literal moreinfo="none">+</literal>), and OCaml
+          doesn't automatically cast between these types. This can be a bit of a nuisance, but it
+          has its benefits, since it prevents some kinds of bugs that arise in other languages due
+          to unexpected differences between the behavior of <literal moreinfo="none">int</literal>
+          and <literal moreinfo="none">float</literal>. For example, in many languages, <literal
+            moreinfo="none">1 / 3</literal> is <literal moreinfo="none">0</literal>, but <literal
+            moreinfo="none">1 / 3.0</literal> is a third. OCaml requires you to be explicit about
+          which operation you're doing.</para>
           </listitem>
         </itemizedlist>
 
-        <para>We can also create a variable to name the value of a given
-        expression, using the <literal moreinfo="none">let</literal> keyword. This is known as
-        a <emphasis>let binding</emphasis>.</para>
+        <para>We can also create a variable to name the value of a given expression, using the
+        <literal moreinfo="none">let</literal> keyword. This is known as a <emphasis>let
+        binding</emphasis>:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 2)</para>
@@ -142,7 +137,7 @@
         <para>Note that by default, <command moreinfo="none">utop</command> doesn't bother to
         print out variables starting with an underscore.</para>
 
-        <para>The following examples, however, are not legal.</para>
+        <para>The following examples, however, are not legal:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 4)</para>
@@ -158,15 +153,15 @@
 <computeroutput moreinfo="none">Characters 4-5:</computeroutput>
 <computeroutput moreinfo="none">Error: Parse error: [fun_binding] expected after [ipatt] (in [let_binding])</computeroutput></programlisting>
 
-        <para>The error messages here are a little confusing, but they'll make
-        more sense as you learn more about the language.</para>
+        <para>The error messages here are a little confusing, but they'll make more sense as you
+      learn more about the language:</para>
       </sect1>
 
       <sect1 id="functions-and-type-inference">
-        <title>Functions and type inference</title>
+        <title>Functions and Type Inference</title>
 
         <para>The <literal moreinfo="none">let</literal> syntax can also be used to define a
-        function.</para>
+      function:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 5)</para>
@@ -206,27 +201,24 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">ratio 4 7;;</userinput>
 <computeroutput moreinfo="none">- : float = 0.571428571429</computeroutput></programlisting>
 
-        <para>The above also happens to be our first use of modules. Here,
-        <literal moreinfo="none">Float.of_int</literal> refers to the
-        <literal moreinfo="none">of_int</literal> function contained in the
-        <literal moreinfo="none">Float</literal> module. This is different from what you might
-        expect from an object-oriented language, where dot-notation is
-        typically used for accessing a method of an object. Note that module
-        names always start with a capital letter.</para>
+        <para>The preceding example also happens to be our first use of modules. Here, <literal
+        moreinfo="none">Float.of_int</literal> refers to the <literal moreinfo="none"
+        >of_int</literal> function contained in the <literal moreinfo="none">Float</literal> module.
+      This is different from what you might expect from an object-oriented language, where
+      dot-notation is typically used for accessing a method of an object. Note that module names
+      always start with a capital letter.</para>
 
-        <para>The notation for the type-signature of a multi-argument function
-        may be a little surprising at first, but we'll explain where it comes
-        from when we get to function currying in <xref linkend="multi-argument-functions"/>. For the moment, think of the
-        arrows as separating different arguments of the function, with the
-        type after the final arrow being the return value. Thus, <literal moreinfo="none">int
-        -&gt; int -&gt; float</literal> describes a function that takes two
-        <literal moreinfo="none">int</literal> arguments and returns a
+        <para>The notation for the type-signature of a multiargument function may be a little
+      surprising at first, but we'll explain where it comes from when we get to function currying in
+        <xref linkend="multi-argument-functions"/>. For the moment, think of the arrows as
+      separating different arguments of the function, with the type after the final arrow being the
+      return value. Thus, <literal moreinfo="none">int -&gt; int -&gt; float</literal> describes a
+      function that takes two <literal moreinfo="none">int</literal> arguments and returns a
         <literal moreinfo="none">float</literal>.</para>
 
-        <para>We can also write functions that take other functions as
-        arguments. Here's an example of a function that takes three arguments:
-        a test function and two integer arguments. The function returns the
-        sum of the integers that pass the test.</para>
+        <para>We can also write functions that take other functions as arguments. Here's an example
+      of a function that takes three arguments: a test function and two integer arguments. The
+      function returns the sum of the integers that pass the test:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 7)</para>
@@ -237,10 +229,9 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val sum_if_true : (int -&gt; bool) -&gt; int -&gt; int -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
-        <para>If we look at the inferred type signature in detail, we see that
-        the first argument is a function that takes an integer and returns a
-        boolean, and that the remaining two arguments are integers. Here's an
-        example of this function in action.</para>
+        <para>If we look at the inferred type signature in detail, we see that the first argument is
+      a function that takes an integer and returns a boolean, and that the remaining two arguments
+      are integers. Here's an example of this function in action:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 8)</para>
@@ -253,15 +244,15 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">sum_if_true even 2 4;;</userinput>
 <computeroutput moreinfo="none">- : int = 6</computeroutput></programlisting>
 
-        <para>Note that in the definition of <literal moreinfo="none">even</literal> we used
-        <literal moreinfo="none">=</literal> in two different ways: once as the part of the
-        let binding that separates the thing being defined from its
-        definition; and once as an equality test, when comparing <literal moreinfo="none">x
-        mod 2</literal> to <literal moreinfo="none">0</literal>. These are very different
-        operations despite the fact that they share some syntax.</para>
+        <para>Note that in the definition of <literal moreinfo="none">even</literal>, we used
+        <literal moreinfo="none">=</literal> in two different ways: once as the part of the let
+      binding that separates the thing being defined from its definition; and once as an equality
+      test, when comparing <literal moreinfo="none">x mod 2</literal> to <literal moreinfo="none"
+        >0</literal>. These are very different operations despite the fact that they share some
+      syntax.</para>
 
         <sect2 id="type-inference">
-          <title>Type inference</title>
+          <title>Type Inference</title>
 
           <para>As the types we encounter get more complicated, you might ask
           yourself how OCaml is able to figure them out, given that we didn't
@@ -273,10 +264,10 @@
           types of variables along with constraints that are implied by the
           structure of the expression.</para>
 
-          <para>As an example, let's walk through the process of inferring the
-          type of <literal moreinfo="none">sum_if_true</literal>.</para>
+          <para>As an example, let's walk through the process of inferring the type of <literal
+          moreinfo="none">sum_if_true</literal>:</para>
 
-          <itemizedlist>
+          <orderedlist>
             <listitem>
               <para>OCaml requires that both branches of an
               <literal moreinfo="none">if</literal> statement have the same type, so the
@@ -307,7 +298,7 @@
               <literal moreinfo="none">int</literal> implies that the return value of
               <literal moreinfo="none">sum_if_true</literal> must be int.</para>
             </listitem>
-          </itemizedlist>
+          </orderedlist>
 
           <para>Together, that nails down the types of all the variables,
           which determines the overall type of
@@ -334,14 +325,13 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val sum_if_true : (int -&gt; bool) -&gt; int -&gt; int -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
-          <para>In the above, we've marked every argument to the function with
-          its type, with the final annotation indicating the type of the
-          return value. Such type annotations can be placed on any expression
-          in an OCaml program.</para>
+          <para>In the above, we've marked every argument to the function with its type, with the
+        final annotation indicating the type of the return value. Such type annotations can be
+        placed on any expression in an OCaml program:</para>
         </sect2>
 
         <sect2 id="inferring-generic-types">
-          <title>Inferring generic types</title>
+          <title>Inferring Generic Types</title>
 
           <para>Sometimes, there isn't enough information to fully determine
           the concrete type of a given value. Consider this function.</para>
@@ -365,24 +355,22 @@
           <literal moreinfo="none">y</literal> are. That makes it seem like one could use
           <literal moreinfo="none">first_if_true</literal> on values of any type.</para>
 
-          <para>Indeed, if we look at the type returned by the toplevel, we
-          see that rather than choose a single concrete type, OCaml has
-          introduced a <emphasis>type variable</emphasis>
-          <literal moreinfo="none">'a</literal> to express that the type is generic. (You can
-          tell it's a type variable by the leading single-quote.) In
-          particular, the type of the <literal moreinfo="none">test</literal> argument is
-          <literal moreinfo="none">('a -&gt; bool)</literal>, which means that
-          <literal moreinfo="none">test</literal> is a one-argument function whose return
-          value is <literal moreinfo="none">bool</literal>, and whose argument could be of any
-          type <literal moreinfo="none">'a</literal>. But, whatever type <literal moreinfo="none">'a</literal>
-          is, it has to be the same as the type of the other two arguments,
-          <literal moreinfo="none">x</literal> and <literal moreinfo="none">y</literal>, and of the return
-          value of <literal moreinfo="none">first_if_true</literal>. This kind of genericity
-          is called <emphasis>parametric polymorphism</emphasis>, and is very
-          similar to generics in C# and Java.</para>
+          <para>Indeed, if we look at the type returned by the toplevel, we see that rather than
+        choose a single concrete type, OCaml has introduced a <emphasis>type variable</emphasis>
+        <literal moreinfo="none">'a</literal> to express that the type is generic. (You can tell
+        it's a type variable by the leading single quote mark.) In particular, the type of the
+          <literal moreinfo="none">test</literal> argument is <literal moreinfo="none">('a -&gt;
+          bool)</literal>, which means that <literal moreinfo="none">test</literal> is a
+        one-argument function whose return value is <literal moreinfo="none">bool</literal> and
+        whose argument could be of any type <literal moreinfo="none">'a</literal>. But, whatever
+        type <literal moreinfo="none">'a</literal> is, it has to be the same as the type of the
+        other two arguments, <literal moreinfo="none">x</literal> and <literal moreinfo="none"
+          >y</literal>, and of the return value of <literal moreinfo="none">first_if_true</literal>.
+        This kind of genericity is called <emphasis>parametric polymorphism</emphasis> and is very
+        similar to generics in C# and Java.</para>
 
-          <para>The generic type of <literal moreinfo="none">first_if_true</literal> allows us
-          to write this.</para>
+          <para>The generic type of <literal moreinfo="none">first_if_true</literal> allows us to
+        write this:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 11)</para>
@@ -392,7 +380,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">first_if_true long_string "short" "loooooong";;</userinput>
 <computeroutput moreinfo="none">- : string = "loooooong"</computeroutput></programlisting>
 
-          <para>As well as this.</para>
+          <para>As well as this:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 12)</para>
@@ -402,13 +390,12 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">first_if_true big_number 4 3;;</userinput>
 <computeroutput moreinfo="none">- : int = 4</computeroutput></programlisting>
 
-          <para>Both <literal moreinfo="none">long_string</literal> and
-          <literal moreinfo="none">big_number</literal> are functions, and each is passed to
-          <literal moreinfo="none">first_if_true</literal> with two other arguments of the
-          appropriate type (strings in the first example, and integers in the
-          second). But we can't mix and match two different concrete types for
-          <literal moreinfo="none">'a</literal> in the same use of
-          <literal moreinfo="none">first_if_true</literal>.</para>
+          <para>Both <literal moreinfo="none">long_string</literal> and <literal moreinfo="none"
+          >big_number</literal> are functions, and each is passed to <literal moreinfo="none"
+          >first_if_true</literal> with two other arguments of the appropriate type (strings in the
+        first example, and integers in the second). But we can't mix and match two different
+        concrete types for <literal moreinfo="none">'a</literal> in the same use of <literal
+          moreinfo="none">first_if_true</literal>:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 13)</para>
@@ -426,17 +413,16 @@
           right at the same time.</para>
 
           <note>
-            <title>Type errors vs exceptions</title>
+            <title>Type Errors Versus Exceptions</title>
 
-            <para>There's a big difference in OCaml (and really in any
-            compiled language) between errors that are caught at compile time
-            and those that are caught at run time. It's better to catch errors
-            as early as possible in the development process, and compilation
-            time is best of all.</para>
+            <para>There's a big difference in OCaml (and really in any compiled language) between
+          errors that are caught at compile time and those that are caught at runtime. It's better
+          to catch errors as early as possible in the development process, and compilation time is
+          best of all.</para>
 
-            <para>Working in the toplevel somewhat obscures the difference
-            between run time and compile time errors, but that difference is
-            still there. Generally, type errors, like this one:</para>
+            <para>Working in the toplevel somewhat obscures the difference between runtime and
+          compile time errors, but that difference is still there. Generally, type errors, like this
+          one:</para>
 
             <para role="sourcecode">OCaml Utop:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 14)</para>
@@ -447,11 +433,10 @@
 <computeroutput moreinfo="none">Error: This expression has type string but an expression was expected of type</computeroutput>
 <computeroutput moreinfo="none">         int</computeroutput></programlisting>
 
-            <para>are compile-time errors (because <literal moreinfo="none">+</literal>
-            requires that both its arguments be of type
-            <literal moreinfo="none">int</literal>), whereas errors that can't be caught by
-            the type system, like division by zero, lead to runtime
-            exceptions.</para>
+            <para>are compile-time errors (because <literal moreinfo="none">+</literal> requires
+          that both its arguments be of type <literal moreinfo="none">int</literal>), whereas errors
+          that can't be caught by the type system, like division by zero, lead to runtime
+          exceptions:</para>
 
             <para role="sourcecode">OCaml Utop:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 15)</para>
@@ -475,19 +460,18 @@
       </sect1>
 
       <sect1 id="tuples-lists-options-and-pattern-matching">
-        <title>Tuples, lists, options, and pattern matching</title>
+        <title>Tuples, Lists, Options, and Pattern Matching</title>
 
         <sect2 id="tuples">
           <title>Tuples</title>
 
-          <para>So far we've encountered a handful of basic types like
-          <literal moreinfo="none">int</literal>, <literal moreinfo="none">float</literal> and
-          <literal moreinfo="none">string</literal> as well as function types like
-          <literal moreinfo="none">string -&gt; int</literal>. But we haven't yet talked about
-          any data structures. We'll start by looking at a particularly simple
-          data structure, the tuple. A tuple is an ordered collection of
-          values that can each be of different type. You can create a tuple by
-          joining values together with a comma.</para>
+          <para>So far we've encountered a handful of basic types like <literal moreinfo="none"
+          >int</literal>, <literal moreinfo="none">float</literal>, and <literal moreinfo="none"
+          >string</literal> as well as function types like <literal moreinfo="none">string -&gt;
+          int</literal>. But we haven't yet talked about any data structures. We'll start by looking
+        at a particularly simple data structure, the tuple. A tuple is an ordered collection of
+        values that can each be of different type. You can create a tuple by joining values together
+        with a comma:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 16)</para>
@@ -503,8 +487,8 @@
           elements of type <literal moreinfo="none">t</literal> and the set of elements of
           type <literal moreinfo="none">s</literal>.)</para>
 
-          <para>You can extract the components of a tuple using OCaml's
-          pattern matching syntax, as shown below.</para>
+          <para>You can extract the components of a tuple using OCaml's pattern matching syntax, as
+        shown below:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 17)</para>
@@ -513,12 +497,11 @@
 <computeroutput moreinfo="none">val x : int = 3</computeroutput>
 <computeroutput moreinfo="none">val y : string = "three"</computeroutput></programlisting>
 
-          <para>Here, the <literal moreinfo="none">(x,y)</literal> on the left-hand side of
-          the <literal moreinfo="none">let</literal> binding is the pattern. This pattern lets
-          us mint the new variables <literal moreinfo="none">x</literal> and
-          <literal moreinfo="none">y</literal>, each bound to different components of the
-          value being matched, which can now be used in subsequent
-          expressions.</para>
+          <para>Here, the <literal moreinfo="none">(x,y)</literal> on the lefthand side of the
+          <literal moreinfo="none">let</literal> binding is the pattern. This pattern lets us mint
+        the new variables <literal moreinfo="none">x</literal> and <literal moreinfo="none"
+          >y</literal>, each bound to different components of the value being matched, which can now
+        be used in subsequent expressions:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 18)</para>
@@ -529,11 +512,10 @@
           <para>Note that the same syntax is used both for constructing and
           for pattern matching on tuples.</para>
 
-          <para>Pattern matching can also show up in function arguments.
-          Here's a function for computing the distance between two points on
-          the plane, where each point is represented as a pair of
-          <literal moreinfo="none">float</literal>s. The pattern matching syntax lets us get
-          at the values we need with a minimum of fuss.</para>
+          <para>Pattern matching can also show up in function arguments. Here's a function for
+        computing the distance between two points on the plane, where each point is represented as a
+        pair of <literal moreinfo="none">float</literal>s. The pattern matching syntax lets us get
+        at the values we need with a minimum of fuss:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 19)</para>
@@ -554,9 +536,9 @@
         <sect2 id="lists">
           <title>Lists</title>
 
-          <para>Where tuples let you combine a fixed number of items,
-          potentially of different types, lists let you hold any number of
-          items of the same type. Consider the following example.</para>
+          <para>Where tuples let you combine a fixed number of items, potentially of different
+        types, lists let you hold any number of items of the same type. Consider the following
+        example:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 20)</para>
@@ -564,8 +546,8 @@
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let languages = ["OCaml";"Perl";"C"];;</userinput>
 <computeroutput moreinfo="none">val languages : string list = ["OCaml"; "Perl"; "C"]</computeroutput></programlisting>
 
-          <para>Note that you can't mix elements of different types in the
-          same list, unlike tuples.</para>
+          <para>Note that you can't mix elements of different types in the same list, unlike
+        tuples:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 21)</para>
@@ -578,10 +560,9 @@
           <sect3 id="the-list-module">
             <title>The <literal moreinfo="none">List</literal> module</title>
 
-            <para>Core comes with a <literal moreinfo="none">List</literal> module that has a
-            rich collection of functions for working with lists. We can access
-            values from within a module by using dot-notation. For example,
-            this is how we compute the length of a list.</para>
+            <para>Core comes with a <literal moreinfo="none">List</literal> module that has a rich
+          collection of functions for working with lists. We can access values from within a module
+          by using dot-notation. For example, this is how we compute the length of a list:</para>
 
             <para role="sourcecode">OCaml Utop:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 22)</para>
@@ -589,8 +570,8 @@
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.length languages;;</userinput>
 <computeroutput moreinfo="none">- : int = 3</computeroutput></programlisting>
 
-            <para>Here's something a little more complicated. We can compute
-            the list of the lengths of each language as follows.</para>
+            <para>Here's something a little more complicated. We can compute the list of the lengths
+          of each language as follows:</para>
 
             <para role="sourcecode">OCaml Utop:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 23)</para>
@@ -598,17 +579,15 @@
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.map languages ~f:String.length;;</userinput>
 <computeroutput moreinfo="none">- : int list = [5; 4; 1]</computeroutput></programlisting>
 
-            <para><literal moreinfo="none">List.map</literal> takes two arguments: a list and
-            a function for transforming the elements of that list. It returns
-            a new list with the transformed elements, and does not modify the
-            original list.</para>
+            <para><literal moreinfo="none">List.map</literal> takes two arguments: a list and a
+          function for transforming the elements of that list. It returns a new list with the
+          transformed elements and does not modify the original list.</para>
 
-            <para>Notably, the function passed to <literal moreinfo="none">List.map</literal>
-            is passed under a <emphasis>labeled argument</emphasis>
-            <literal moreinfo="none">~f</literal>. Labeled arguments are specified by name
-            rather than by position, and thus allow you to change the order in
-            which arguments are presented to a function without changing its
-            behavior, as you can see here.</para>
+            <para>Notably, the function passed to <literal moreinfo="none">List.map</literal> is
+          passed under a <emphasis>labeled argument</emphasis>
+          <literal moreinfo="none">~f</literal>. Labeled arguments are specified by name rather than
+          by position, and thus allow you to change the order in which arguments are presented to a
+          function without changing its behavior, as you can see here:</para>
 
             <para role="sourcecode">OCaml Utop:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 24)</para>
@@ -623,9 +602,8 @@
           <sect3 id="constructing-lists-with">
             <title>Constructing lists with <literal moreinfo="none">::</literal></title>
 
-            <para>In addition to constructing lists using brackets, we can use
-            the operator <literal moreinfo="none">::</literal> for adding elements to the
-            front of a list.</para>
+            <para>In addition to constructing lists using brackets, we can use the operator <literal
+            moreinfo="none">::</literal> for adding elements to the front of a list:</para>
 
             <para role="sourcecode">OCaml Utop:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 25)</para>
@@ -633,8 +611,8 @@
             <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">"French" :: "Spanish" :: languages;;</userinput>
 <computeroutput moreinfo="none">- : string list = ["French"; "Spanish"; "OCaml"; "Perl"; "C"]</computeroutput></programlisting>
 
-            <para>Here, we're creating a new and extended list, not changing
-            the list we started with, as you can see below.</para>
+            <para>Here, we're creating a new and extended list, not changing the list we started
+          with, as you can see in the following code snippet:</para>
 
             <para role="sourcecode">OCaml Utop:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 26)</para>
@@ -643,13 +621,12 @@
 <computeroutput moreinfo="none">- : string list = ["OCaml"; "Perl"; "C"]</computeroutput></programlisting>
 
             <note>
-              <title>Semicolons vs. commas</title>
+              <title>Semicolons vs. Versus Commas</title>
 
-              <para>Unlike many other languages, OCaml uses semicolons to
-              separate list elements in lists rather than commas. Commas,
-              instead, are used for separating elements in a tuple. If you try
-              to use commas instead, you'll see that your code compiles, but
-              doesn't do quite what you might expect.</para>
+              <para>Unlike many other languages, OCaml uses semicolons to separate list elements in
+            lists rather than commas. Commas, instead, are used for separating elements in a tuple.
+            If you try to use commas instead, you'll see that your code compiles but doesn't do
+            quite what you might expect:</para>
 
               <para role="sourcecode">OCaml Utop:
               <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 27)</para>
@@ -675,11 +652,10 @@
               considered poor style and should be avoided.</para>
             </note>
 
-            <para>The bracket notation for lists is really just syntactic
-            sugar for <literal moreinfo="none">::</literal>. Thus, the following declarations
-            are all equivalent. Note that <literal moreinfo="none">[]</literal> is used to
-            represent the empty list, and that <literal moreinfo="none">::</literal> is
-            right-associative.</para>
+            <para>The bracket notation for lists is really just syntactic sugar for <literal
+            moreinfo="none">::</literal>. Thus, the following declarations are all equivalent. Note
+          that <literal moreinfo="none">[]</literal> is used to represent the empty list and that
+            <literal moreinfo="none">::</literal> is right-associative:</para>
 
             <para role="sourcecode">OCaml Utop:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 29)</para>
@@ -691,11 +667,10 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">1 :: 2 :: 3 :: [];;</userinput>
 <computeroutput moreinfo="none">- : int list = [1; 2; 3]</computeroutput></programlisting>
 
-            <para>The <literal moreinfo="none">::</literal> operator can only be used for
-            adding one element to the front of the list, with the list
-            terminating at <literal moreinfo="none">[]</literal>, the empty list. There's also
-            a list concatenation operator, <literal moreinfo="none">@</literal>, which can
-            concatenate two lists.</para>
+            <para>The <literal moreinfo="none">::</literal> operator can only be used for adding one
+          element to the front of the list, with the list terminating at <literal moreinfo="none"
+            >[]</literal>, the empty list. There's also a list concatenation operator, <literal
+            moreinfo="none">@</literal>, which can concatenate two lists:</para>
 
             <para role="sourcecode">OCaml Utop:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 30)</para>
@@ -712,10 +687,9 @@
           <sect3 id="list-patterns-using-match">
             <title>List patterns using <literal moreinfo="none">match</literal></title>
 
-            <para>The elements of a list can be accessed through pattern
-            matching. List patterns are based on the two list constructors,
-            <literal moreinfo="none">[]</literal> and <literal moreinfo="none">::</literal>. Here's a simple
-            example.</para>
+            <para>The elements of a list can be accessed through pattern matching. List patterns are
+          based on the two list constructors, <literal moreinfo="none">[]</literal> and <literal
+            moreinfo="none">::</literal>. Here's a simple example:</para>
 
             <para role="sourcecode">OCaml Utop:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 31)</para>
@@ -737,14 +711,13 @@
             <literal moreinfo="none">car</literal> and <literal moreinfo="none">cdr</literal> to isolate the
             first element of a list and the remainder of that list.</para>
 
-            <para>As you can see, however, the toplevel did not like this
-            definition, and spit out a warning indicating that the pattern is
-            not exhaustive. This means that there are values of the type in
-            question that won't be captured by the pattern. The warning even
-            gives an example of a value that doesn't match the provided
-            pattern, in particular, <literal moreinfo="none">[]</literal>, the empty list. If
-            we try to run <literal moreinfo="none">my_favorite_language</literal>, we'll see
-            that it works on non-empty list, and fails on empty ones.</para>
+            <para>As you can see, however, the toplevel did not like this definition and spit out a
+          warning indicating that the pattern is not exhaustive. This means that there are values of
+          the type in question that won't be captured by the pattern. The warning even gives an
+          example of a value that doesn't match the provided pattern, in particular, <literal
+            moreinfo="none">[]</literal>, the empty list. If we try to run <literal moreinfo="none"
+            >my_favorite_language</literal>, we'll see that it works on nonempty list and fails on
+          empty ones:</para>
 
             <para role="sourcecode">OCaml Utop:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 32)</para>
@@ -759,18 +732,15 @@
             using a <literal moreinfo="none">match</literal> statement instead.</para>
 
             <para>A <literal moreinfo="none">match</literal> statement is a kind of juiced-up
-            version of the switch statement found in <literal moreinfo="none">C</literal> and
-            <literal moreinfo="none">Java</literal>. It essentially lets you list a sequence
-            of patterns (separated by <literal moreinfo="none">|</literal>'s. The one before
-            the first case is optional), and the compiler then dispatches to
-            the code following the first matching pattern. As we've already
-            seen, the pattern can mint new variables that correspond to
-            sub-structures of the value being matched.</para>
+          version of the switch statement found in C and Java. It essentially lets you list a
+          sequence of patterns, separated by <literal moreinfo="none">|</literal>'s. (The one before
+          the first case is optional.) The compiler then dispatches to the code following the first
+          matching pattern. As we've already seen, the pattern can mint new variables that
+          correspond to substructures of the value being matched.</para>
 
-            <para>Here's a new version of
-            <literal moreinfo="none">my_favorite_language</literal> that uses
-            <literal moreinfo="none">match</literal> and doesn't trigger a compiler
-            warning.</para>
+            <para>Here's a new version of <literal moreinfo="none">my_favorite_language</literal>
+          that uses <literal moreinfo="none">match</literal> and doesn't trigger a compiler
+          warning:</para>
 
             <para role="sourcecode">OCaml Utop:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 33)</para>
@@ -786,11 +756,10 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">my_favorite_language [];;</userinput>
 <computeroutput moreinfo="none">- : string = "OCaml"</computeroutput></programlisting>
 
-            <para>The above code also includes our first comment. OCaml
-            comments are bounded by <literal moreinfo="none">(*</literal> and
-            <literal moreinfo="none">*)</literal>, and can be nested arbitrarily and cover
-            multiple lines. There's no equivalent of C++-style single line
-            comments that are prefixed by <literal moreinfo="none">//</literal>.</para>
+            <para>The preceding code also includes our first comment. OCaml comments are bounded by
+            <literal moreinfo="none">(*</literal> and <literal moreinfo="none">*)</literal> and can
+          be nested arbitrarily and cover multiple lines. There's no equivalent of C++-style single
+          line comments that are prefixed by <literal moreinfo="none">//</literal>.</para>
 
             <para>The first pattern, <literal moreinfo="none">first :: the_rest</literal>,
             covers the case where <literal moreinfo="none">languages</literal> has at least
@@ -805,19 +774,16 @@
           <sect3 id="recursive-list-functions">
             <title>Recursive list functions</title>
 
-            <para>Recursive functions, or, functions that call themselves, are
-            an important technique in OCaml and in any functional language.
-            The typical approach to designing a recursive function is to
-            separate the logic into a set of <emphasis>base cases</emphasis>,
-            that can be solved directly, and a set of <emphasis>inductive
-            cases</emphasis>, where the function breaks the problem down into
-            smaller pieces and then calls itself to solve those smaller
-            problems.</para>
+            <para>Recursive functions, or functions that call themselves, are an important technique
+          in OCaml and in any functional language. The typical approach to designing a recursive
+          function is to separate the logic into a set of <emphasis>base cases</emphasis> that can
+          be solved directly and a set of <emphasis>inductive cases</emphasis>, where the function
+          breaks the problem down into smaller pieces and then calls itself to solve those smaller
+          problems.</para>
 
-            <para>When writing recursive list functions, this separation
-            between the base cases and the inductive cases is often done using
-            pattern matching. Here's a simple example of a function that sums
-            the elements of a list.</para>
+            <para>When writing recursive list functions, this separation between the base cases and
+          the inductive cases is often done using pattern matching. Here's a simple example of a
+          function that sums the elements of a list:</para>
 
             <para role="sourcecode">OCaml Utop:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 34)</para>
@@ -839,10 +805,9 @@
             the base case and inductive case are different arms of the
             match.</para>
 
-            <para>Logically, you can think of the evaluation of a simple
-            recursive function like <literal moreinfo="none">sum</literal> almost as if it
-            were a mathematical equation whose meaning you were unfolding step
-            by step.</para>
+            <para>Logically, you can think of the evaluation of a simple recursive function like
+            <literal moreinfo="none">sum</literal> almost as if it were a mathematical equation
+          whose meaning you were unfolding step by step:</para>
 
             <para role="sourcecode">OCaml:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/recursion.ml">guided-tour/recursion.ml</ulink></para>
@@ -859,8 +824,8 @@
             <para>This suggests a reasonable mental model for what OCaml is
             actually doing to evaluate a recursive function.</para>
 
-            <para>We can introduce more complicated list patterns as well.
-            Here's a function for removing sequential duplicates.</para>
+            <para>We can introduce more complicated list patterns as well. Here's a function for
+          removing sequential duplicates:</para>
 
             <para role="sourcecode">OCaml Utop:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 35)</para>
@@ -878,11 +843,10 @@
 <computeroutput moreinfo="none">_::[]</computeroutput>
 <computeroutput moreinfo="none">val destutter : 'a list -&gt; 'a list = &lt;fun&gt;</computeroutput></programlisting>
 
-            <para>Again, the first arm of the match is the base case, and the
-            second is the inductive. Unfortunately, this code has a problem,
-            as is indicated by the warning message. In particular we don't
-            handle one-element lists. We can fix this warning by adding
-            another case to the match.</para>
+            <para>Again, the first arm of the match is the base case, and the second is the
+          inductive. Unfortunately, this code has a problem, as is indicated by the warning message.
+          In particular, we don't handle one-element lists. We can fix this warning by adding
+          another case to the match:</para>
 
             <para role="sourcecode">OCaml Utop:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 36)</para>
@@ -899,13 +863,12 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">destutter ["hey";"hey";"hey";"man!"];;</userinput>
 <computeroutput moreinfo="none">- : string list = ["hey"; "man!"]</computeroutput></programlisting>
 
-            <para>Note that this code used another variant of the list
-            pattern, <literal moreinfo="none">[hd]</literal>, to match a list with a single
-            element. We can do this to match a list with any fixed number of
-            elements, <emphasis>e.g.</emphasis>, <literal moreinfo="none">[x;y;z]</literal>
-            will match any list with exactly three elements, and will bind
-            those elements to the variables <literal moreinfo="none">x</literal>,
-            <literal moreinfo="none">y</literal> and <literal moreinfo="none">z</literal>.</para>
+            <para>Note that this code used another variant of the list pattern, <literal
+            moreinfo="none">[hd]</literal>, to match a list with a single element. We can do this to
+          match a list with any fixed number of elements, e.g., <literal moreinfo="none"
+            >[x;y;z]</literal> will match any list with exactly three elements and will bind those
+          elements to the variables <literal moreinfo="none">x</literal>, <literal moreinfo="none"
+            >y</literal>, and <literal moreinfo="none">z</literal>.</para>
 
             <para>In the last few examples, our list processing code involved
             a lot of recursive functions. In practice, this isn't usually
@@ -919,9 +882,8 @@
         <sect2 id="options">
           <title>Options</title>
 
-          <para>Another common data structure in OCaml is the option. An
-          option is used to express that a value might or might not be
-          present. For example,</para>
+          <para>Another common data structure in OCaml is the option. An option is used to express
+        that a value might or might not be present. For example:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 37)</para>
@@ -930,21 +892,18 @@
 <userinput moreinfo="none">    if y = 0 then None else Some (x/y) ;;</userinput>
 <computeroutput moreinfo="none">val divide : int -&gt; int -&gt; int option = &lt;fun&gt;</computeroutput></programlisting>
 
-          <para>The function <literal moreinfo="none">divide</literal> either returns
-          <literal moreinfo="none">None</literal>, if the divisor is zero, or
-          <literal moreinfo="none">Some</literal> of the result of the division, otherwise.
-          <literal moreinfo="none">Some</literal> and <literal moreinfo="none">None</literal> are
-          constructors, like <literal moreinfo="none">::</literal> and <literal moreinfo="none">[]</literal>
-          for lists, which let you build optional values. You can think of an
-          option as a specialized list that can only have zero or one
-          element.</para>
+          <para>The function <literal moreinfo="none">divide</literal> either returns <literal
+          moreinfo="none">None</literal>, if the divisor is zero; or <literal moreinfo="none"
+          >Some</literal> of the result of the division, otherwise. <literal moreinfo="none"
+          >Some</literal> and <literal moreinfo="none">None</literal> are constructors, like
+          <literal moreinfo="none">::</literal> and <literal moreinfo="none">[]</literal> for lists,
+        which let you build optional values. You can think of an option as a specialized list that
+        can only have zero or one element.</para>
 
-          <para>To examine the contents of an option, we use pattern matching,
-          as we did with tuples and lists. Consider the following function for
-          creating a log entry string given an optional time and a message. If
-          no time is provided (<emphasis>i.e.</emphasis>, if the time is
-          <literal moreinfo="none">None</literal>), the current time is computed and used in
-          its place.</para>
+          <para>To examine the contents of an option, we use pattern matching, as we did with tuples
+        and lists. Consider the following function for creating a log entry string given an optional
+        time and a message. If no time is provided (i.e., if the time is <literal moreinfo="none"
+          >None</literal>), the current time is computed and used in its place:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 38)</para>
@@ -989,9 +948,8 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">- : int = 14</computeroutput></programlisting>
 
-            <para>Note that the scope of the let binding is terminated by the
-            double-semicolon, so the value of <literal moreinfo="none">x</literal> is no
-            longer available.</para>
+            <para>Note that the scope of the let binding is terminated by the double-semicolon, so
+          the value of <literal moreinfo="none">x</literal> is no longer available:</para>
 
             <para role="sourcecode">OCaml Utop:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/local_let.topscript">guided-tour/local_let.topscript</ulink> (part
@@ -1001,8 +959,8 @@
 <computeroutput moreinfo="none">Characters -1-1:</computeroutput>
 <computeroutput moreinfo="none">Error: Unbound value x</computeroutput></programlisting>
 
-            <para>We can also have multiple let statements in a row, each one
-            adding a new variable binding to what came before.</para>
+            <para>We can also have multiple let statements in a row, each one adding a new variable
+          binding to what came before:</para>
 
             <para role="sourcecode">OCaml Utop:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/local_let.topscript">guided-tour/local_let.topscript</ulink> (part
@@ -1041,12 +999,11 @@
       </sect1>
 
       <sect1 id="records-and-variants">
-        <title>Records and variants</title>
+        <title>Records and Variants</title>
 
-        <para>So far, we've only looked at data structures that were
-        predefined in the language, like lists and tuples. But OCaml also
-        allows us to define new datatypes. Here's a toy example of a datatype
-        representing a point in 2-dimensional space:</para>
+        <para>So far, we've only looked at data structures that were predefined in the language,
+      like lists and tuples. But OCaml also allows us to define new datatypes. Here's a toy example
+      of a datatype representing a point in two-dimensional space:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 41)</para>
@@ -1080,11 +1037,10 @@
         <literal moreinfo="none">x</literal> field, and the variable <literal moreinfo="none">y_pos</literal>
         to the value in the <literal moreinfo="none">y</literal> field.</para>
 
-        <para>We can write this more tersely using what's called
-        <emphasis>field punning</emphasis>. In particular, when the name of
-        the field and the name of the variable it is bound to in the match
-        coincide, we don't have to write them both down. Using this, our
-        magnitude function can be rewritten as follows.</para>
+        <para>We can write this more tersely using what's called <emphasis>field punning</emphasis>.
+      In particular, when the name of the field and the name of the variable it is bound to in the
+      match coincide, we don't have to write them both down. Using this, our magnitude function can
+      be rewritten as follows:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 44)</para>
@@ -1101,10 +1057,9 @@
 <userinput moreinfo="none">     magnitude { x = v1.x -. v2.x; y = v1.y -. v2.y };;</userinput>
 <computeroutput moreinfo="none">val distance : point2d -&gt; point2d -&gt; float = &lt;fun&gt;</computeroutput></programlisting>
 
-        <para>And we can of course include our newly defined types as
-        components in larger types. Here, for example, are some types for
-        modeling different geometric objects that contain values of type
-        <literal moreinfo="none">point2d</literal>.</para>
+        <para>And we can of course include our newly defined types as components in larger types.
+      Here, for example, are some types for modeling different geometric objects that contain values
+      of type <literal moreinfo="none">point2d</literal>:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 46)</para>
@@ -1116,11 +1071,10 @@
 <computeroutput moreinfo="none">type rect_desc = { lower_left : point2d; width : float; height : float; }</computeroutput>
 <computeroutput moreinfo="none">type segment_desc = { endpoint1 : point2d; endpoint2 : point2d; }</computeroutput></programlisting>
 
-        <para>Now, imagine that you want to combine multiple objects of these
-        types together as a description of a multi-object scene. You need some
-        unified way of representing these objects together in a single type.
-        One way of doing this is using a <emphasis>variant</emphasis>
-        type:</para>
+        <para>Now, imagine that you want to combine multiple objects of these types together as a
+      description of a multiobject scene. You need some unified way of representing these objects
+      together in a single type. One way of doing this is using a <emphasis>variant</emphasis>
+      type:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 47)</para>
@@ -1141,9 +1095,8 @@
         <literal moreinfo="none">Rect</literal> and <literal moreinfo="none">Segment</literal>, to distinguish
         that case from the others.</para>
 
-        <para>Here's how we might write a function for testing whether a point
-        is in the interior of some element of a list of
-        <literal moreinfo="none">scene_element</literal>s.</para>
+        <para>Here's how we might write a function for testing whether a point is in the interior of
+      some element of a list of <literal moreinfo="none">scene_element</literal>s:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 48)</para>
@@ -1194,7 +1147,7 @@
       </sect1>
 
       <sect1 id="imperative-programming">
-        <title>Imperative programming</title>
+        <title>Imperative Programming</title>
 
         <para>The code we've written so far has been almost entirely
         <emphasis>pure</emphasis> or <emphasis>functional</emphasis>, which
@@ -1233,26 +1186,23 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">numbers;;</userinput>
 <computeroutput moreinfo="none">- : int array = [|1; 2; 4; 4|]</computeroutput></programlisting>
 
-          <para>the <literal moreinfo="none">.(i)</literal> syntax is used to refer to an
-          element of an array, and the <literal moreinfo="none">&lt;-</literal> syntax is for
-          modification. Because the elements of the array are counted starting
-          at zero, element <literal moreinfo="none">.(2)</literal> is the third
-          element.</para>
+          <para>The <literal moreinfo="none">.(i)</literal> syntax is used to refer to an element of
+        an array, and the <literal moreinfo="none">&lt;-</literal> syntax is for modification.
+        Because the elements of the array are counted starting at zero, element <literal
+          moreinfo="none">.(2)</literal> is the third element.</para>
 
-          <para>The <literal moreinfo="none">unit</literal> type that we see above is
-          interesting in that it has only one possible value, written
-          <literal moreinfo="none">()</literal>. This means that a value of type
-          <literal moreinfo="none">unit</literal> doesn't convey any information, and so tends
-          to be used as a placeholder. Thus, we use <literal moreinfo="none">unit</literal>
-          for the return value of an operation like setting a mutable field
-          that communicates by side effect rather than by returning a value.
-          It's also used as the argument to functions that don't require an
-          input value. This is similar to the role that
-          <literal moreinfo="none">void</literal> plays in languages like C and Java.</para>
+          <para>The <literal moreinfo="none">unit</literal> type that we see in the preceding code
+        is interesting in that it has only one possible value, written <literal moreinfo="none"
+          >()</literal>. This means that a value of type <literal moreinfo="none">unit</literal>
+        doesn't convey any information, and so tends to be used as a placeholder. Thus, we use
+          <literal moreinfo="none">unit</literal> for the return value of an operation like setting
+        a mutable field that communicates by side effect rather than by returning a value. It's also
+        used as the argument to functions that don't require an input value. This is similar to the
+        role that <literal moreinfo="none">void</literal> plays in languages like C and Java.</para>
         </sect2>
 
         <sect2 id="mutable-record-fields">
-          <title>Mutable record fields</title>
+          <title>Mutable Record Fields</title>
 
           <para>The array is an important mutable data structure, but it's not
           the only one. Records, which are immutable by default, can have some
@@ -1276,12 +1226,11 @@
 <computeroutput moreinfo="none">  mutable samples : int;</computeroutput>
 <computeroutput moreinfo="none">}</computeroutput></programlisting>
 
-          <para>The fields in <literal moreinfo="none">running_sum</literal> are designed to
-          be easy to extend incrementally, and sufficient to compute means and
-          standard deviations, as shown below. Note that there are two
-          let-bindings in a row without a double semicolon between them.
-          That's because the double semicolon is required only to tell utop to
-          process the input, not to separate two declarations.</para>
+          <para>The fields in <literal moreinfo="none">running_sum</literal> are designed to be easy
+        to extend incrementally, and sufficient to compute means and standard deviations, as shown
+        in the following example. Note that there are two let-bindings in a row without a double
+        semicolon between them. That's because the double semicolon is required only to tell utop to
+        process the input, not to separate two declarations:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 51)</para>
@@ -1319,15 +1268,14 @@
           by updating the number of samples, the sum, and the sum of
           squares.</para>
 
-          <para>Note the use in the above code of single semi-colons to
-          sequence operations. When we were working purely functionally, this
-          wasn't necessary, but you start needing it when you're writing
-          imperative code.</para>
+          <para>Note the use in the above code of single semicolons to sequence operations. When we
+        were working purely functionally, this wasn't necessary, but you start needing it when
+        you're writing imperative code.</para>
 
-          <para>Here's an example of <literal moreinfo="none">create</literal> and
-          <literal moreinfo="none">update</literal> in action. Note that this code uses
-          <literal moreinfo="none">List.iter</literal>, which calls the function
-          <literal moreinfo="none">~f</literal> on each element of the provided list.</para>
+          <para>Here's an example of <literal moreinfo="none">create</literal> and <literal
+          moreinfo="none">update</literal> in action. Note that this code uses <literal
+          moreinfo="none">List.iter</literal>, which calls the function <literal moreinfo="none"
+          >~f</literal> on each element of the provided list:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 53)</para>
@@ -1341,21 +1289,20 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">stdev rsum;;</userinput>
 <computeroutput moreinfo="none">- : float = 3.94405318873</computeroutput></programlisting>
 
-          <para>It's worth noting that the above algorithm is numerically
-          naive, and has poor precision in the presence of cancellation. You
-          can look at this Wikipedia <ulink url="http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance">article</ulink>
-          for more details, paying particular attention to the weighted
-          incremental and parallel algorithms.</para>
+          <para>It's worth noting that the preceding algorithm is numerically naive and has poor
+        precision in the presence of cancellation. You can look at this Wikipedia <ulink
+          url="http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance">article</ulink> for
+        more details, paying particular attention to the weighted incremental and parallel
+        algorithms.</para>
         </sect2>
 
         <sect2 id="refs">
           <title>Refs</title>
 
-          <para>We can create a single mutable value by using a
-          <literal moreinfo="none">ref</literal>. The <literal moreinfo="none">ref</literal> type comes
-          pre-defined in the standard library, but there's nothing really
-          special about it. It's just a record type with a single mutable
-          field called <literal moreinfo="none">contents</literal>.</para>
+          <para>We can create a single mutable value by using a <literal moreinfo="none"
+          >ref</literal>. The <literal moreinfo="none">ref</literal> type comes predefined in the
+        standard library, but there's nothing really special about it. It's just a record type with
+        a single mutable field called <literal moreinfo="none">contents</literal>:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 54)</para>
@@ -1367,9 +1314,8 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">x;;</userinput>
 <computeroutput moreinfo="none">- : int ref = {contents = 1}</computeroutput></programlisting>
 
-          <para>There are a handful of useful functions and operators defined
-          for <literal moreinfo="none">ref</literal>s to make them more convenient to work
-          with.</para>
+          <para>There are a handful of useful functions and operators defined for <literal
+          moreinfo="none">ref</literal>s to make them more convenient to work with:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 55)</para>
@@ -1383,9 +1329,9 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">!x ;;</userinput>
 <computeroutput moreinfo="none">- : int = 1</computeroutput></programlisting>
 
-          <para>There's nothing magical with these operators either. You can
-          completely reimplement the <literal moreinfo="none">ref</literal> type and all of
-          these operators in just a few lines of code.</para>
+          <para>There's nothing magical with these operators either. You can completely reimplement
+        the <literal moreinfo="none">ref</literal> type and all of these operators in just a few
+        lines of code:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 56)</para>
@@ -1401,20 +1347,18 @@
 <computeroutput moreinfo="none">val ( ! ) : 'a ref -&gt; 'a = &lt;fun&gt;</computeroutput>
 <computeroutput moreinfo="none">val ( := ) : 'a ref -&gt; 'a -&gt; unit = &lt;fun&gt;</computeroutput></programlisting>
 
-          <para>The <literal moreinfo="none">'a</literal> before the ref indicates that the
-          <literal moreinfo="none">ref</literal> type is polymorphic, in the same way that
-          lists are polymorphic, meaning it can contain values of any type.
-          The parentheses around <literal moreinfo="none">!</literal> and
-          <literal moreinfo="none">:=</literal> are needed because these are operators, rather
-          than ordinary functions.</para>
+          <para>The <literal moreinfo="none">'a</literal> before the <literal>ref</literal>
+        indicates that the <literal moreinfo="none">ref</literal> type is polymorphic, in the same
+        way that lists are polymorphic, meaning it can contain values of any type. The parentheses
+        around <literal moreinfo="none">!</literal> and <literal moreinfo="none">:=</literal> are
+        needed because these are operators, rather than ordinary functions.</para>
 
-          <para>Even though a <literal moreinfo="none">ref</literal> is just another record
-          type, it's important because it is the standard way of simulating
-          the traditional mutable variables you'll find in most languages. For
-          example, we can sum over the elements of a list imperatively by
-          calling <literal moreinfo="none">List.iter</literal> to call a simple function on
-          every element of a list, using a ref to accumulate the
-          results.</para>
+          <para>Even though a <literal moreinfo="none">ref</literal> is just another record type,
+        it's important because it is the standard way of simulating the traditional mutable
+        variables you'll find in most languages. For example, we can sum over the elements of a list
+        imperatively by calling <literal moreinfo="none">List.iter</literal> to call a simple
+        function on every element of a list, using a <literal>ref</literal> to accumulate the
+        results:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 57)</para>
@@ -1426,21 +1370,19 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val sum : int list -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
-          <para>This isn't the most idiomatic (or the fastest) way to sum up a
-          list, but it shows how you can use a ref in place of a mutable
-          variable.</para>
+          <para>This isn't the most idiomatic (or the fastest) way to sum up a list, but it shows
+        how you can use a <literal>ref</literal> in place of a mutable variable.</para>
         </sect2>
 
         <sect2 id="for-and-while-loops">
-          <title>For and while loops</title>
+          <title>For and While Loops</title>
 
-          <para>OCaml also supports traditional imperative control-flow
-          constructs like for and while loops. Here, for example, is some code
-          for permuting an array that uses a for loop. We use the
-          <literal moreinfo="none">Random</literal> module as our source of randomness.
-          <literal moreinfo="none">Random</literal> starts with a default seed, but you can
-          call <literal moreinfo="none">Random.self_init</literal> to choose a new seed at
-          random.</para>
+          <para>OCaml also supports traditional imperative control-flow constructs like <literal>for
+          and while</literal> loops. Here, for example, is some code for permuting an array that
+        uses a for loop. We use the <literal moreinfo="none">Random</literal> module as our source
+        of randomness. <literal moreinfo="none">Random</literal> starts with a default seed, but you
+        can call <literal moreinfo="none">Random.self_init</literal> to choose a new seed at
+        random:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 58)</para>
@@ -1458,12 +1400,11 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val permute : 'a array -&gt; unit = &lt;fun&gt;</computeroutput></programlisting>
 
-          <para>From a syntactic perspective, you should note the keywords
-          that distinguish a for loop: <literal moreinfo="none">for</literal>,
-          <literal moreinfo="none">to</literal>, <literal moreinfo="none">do</literal> and
-          <literal moreinfo="none">done</literal>.</para>
+          <para>From a syntactic perspective, you should note the keywords that distinguish a for
+        loop: <literal moreinfo="none">for</literal>, <literal moreinfo="none">to</literal>,
+          <literal moreinfo="none">do</literal>, and <literal moreinfo="none">done</literal>.</para>
 
-          <para>Here's an example run of this code.</para>
+          <para>Here's an example run of this code:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 59)</para>
@@ -1477,10 +1418,9 @@
 <computeroutput moreinfo="none">- : int array =</computeroutput>
 <computeroutput moreinfo="none">[|1; 2; 4; 6; 11; 7; 14; 9; 10; 0; 13; 16; 19; 12; 17; 5; 3; 18; 8; 15|]</computeroutput></programlisting>
 
-          <para>OCaml also supports while loops, as shown in the following
-          function for finding the position of the first negative entry in an
-          array. Note that <literal moreinfo="none">while</literal> (like
-          <literal moreinfo="none">for</literal>) is also a keyword.</para>
+          <para>OCaml also supports while loops, as shown in the following function for finding the
+        position of the first negative entry in an array. Note that <literal moreinfo="none"
+          >while</literal> (like <literal moreinfo="none">for</literal>) is also a keyword:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 60)</para>
@@ -1498,17 +1438,15 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">find_first_negative_entry [|1;-2;0;3|];;</userinput>
 <computeroutput moreinfo="none">- : int option = Some 1</computeroutput></programlisting>
 
-          <para>As a side note, the above code takes advantage of the fact
-          that <literal moreinfo="none">&amp;&amp;</literal>, OCaml's and operator,
-          short-circuits. In particular, in an expression of the form
-          <emphasis><literal moreinfo="none">expr1</literal></emphasis>
-          <literal moreinfo="none">&amp;&amp;</literal>
-          <emphasis><literal moreinfo="none">expr2</literal></emphasis>,
-          <emphasis><literal moreinfo="none">expr2</literal></emphasis> will only be evaluated
-          if <emphasis><literal moreinfo="none">expr1</literal></emphasis> evaluated to true.
-          Were it not for that, then the above function would result in an
-          out-of-bounds error. Indeed, we can trigger that out-of-bounds error
-          by rewriting the function to avoid the short-circuiting.</para>
+          <para>As a side note, the preceding code takes advantage of the fact that <literal
+          moreinfo="none">&amp;&amp;</literal>, OCaml's and operator, short-circuits. In particular,
+        in an expression of the form <emphasis><literal moreinfo="none">expr1</literal></emphasis>
+        <literal moreinfo="none">&amp;&amp;</literal>
+        <emphasis><literal moreinfo="none">expr2</literal></emphasis>, <emphasis><literal
+            moreinfo="none">expr2</literal></emphasis> will only be evaluated if <emphasis><literal
+            moreinfo="none">expr1</literal></emphasis> evaluated to true. Were it not for that, then
+        the preceding function would result in an out-of-bounds error. Indeed, we can trigger that
+        out-of-bounds error by rewriting the function to avoid the short-circuiting:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink> (part 61)</para>
@@ -1528,23 +1466,22 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">find_first_negative_entry [|1;2;0;3|];;</userinput>
 <computeroutput moreinfo="none">Exception: (Invalid_argument "index out of bounds").</computeroutput></programlisting>
 
-          <para>The or operator, <literal moreinfo="none">||</literal> short-circuits in a
-          similar way to <literal moreinfo="none">&amp;&amp;</literal>.</para>
+          <para>The or operator, <literal moreinfo="none">||</literal>, short-circuits in a similar
+        way to <literal moreinfo="none">&amp;&amp;</literal>.</para>
         </sect2>
       </sect1>
 
       <sect1 id="a-complete-program">
-        <title>A complete program</title>
+        <title>A Complete Program</title>
 
         <para>So far, we've played with the basic features of the language via
         <command moreinfo="none">utop</command>. Now we'll show how to create a simple
         standalone program. In particular, we'll create a program that sums up
         a list of numbers read in from the standard input.</para>
 
-        <para>Here's the code, which you can save in a file called
-        <literal moreinfo="none">sum.ml</literal>. Note that we don't terminate expressions
-        with <literal moreinfo="none">;;</literal> here, since it's not required outside the
-        toplevel.</para>
+        <para>Here's the code, which you can save in a file called <filename>sum.ml</filename>. Note
+      that we don't terminate expressions with <literal moreinfo="none">;;</literal> here, since
+      it's not required outside the toplevel:</para>
 
         <para role="sourcecode">OCaml:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/sum.ml">guided-tour/sum.ml</ulink></para>
@@ -1579,14 +1516,13 @@ let () =
         <literal moreinfo="none">float</literal>.</para>
 
         <sect2 id="compiling-and-running">
-          <title>Compiling and running</title>
+          <title>Compiling and Running</title>
 
-          <para>We'll compile our program using <command moreinfo="none">corebuild</command>,
-          a small wrapper on top of <command moreinfo="none">ocamlbuild</command>, a
-          build-tool that ships with the OCaml compiler. The
-          <command moreinfo="none">corebuild</command> script is installed along with Core,
-          and its purpose is to pass in the flags required for building a
-          program with Core.</para>
+          <para>We'll compile our program using <command moreinfo="none">corebuild</command>, a
+        small wrapper on top of <command moreinfo="none">ocamlbuild</command>, a build-tool that
+        ships with the OCaml compiler. The <command moreinfo="none">corebuild</command> script is
+        installed along with Core, and its purpose is to pass in the flags required for building a
+        program with Core:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/build_sum.out">guided-tour/build_sum.out</ulink></para>
@@ -1594,12 +1530,12 @@ let () =
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild sum.native</userinput>
 </programlisting>
 
-          <para>The <literal moreinfo="none">.native</literal> suffix indicates that we're
-          building a native-code executable, which we'll discuss more in <xref linkend="files-modules-and-programs"/>. Once the build completes,
-          we can use the resulting program like any command-line utility. We
-          can feed input to <literal moreinfo="none">build_sum.native</literal> by typing in a
-          sequence of numbers, one per line, hitting
-          <literal moreinfo="none">control-d</literal> when we're done.</para>
+          <para>The <literal moreinfo="none">.native</literal> suffix indicates that we're building
+        a native-code executable, which we'll discuss more in <xref
+          linkend="files-modules-and-programs"/>. Once the build completes, we can use the resulting
+        program like any command-line utility. We can feed input to <literal moreinfo="none"
+          >build_sum.native</literal> by typing in a sequence of numbers, one per line, hitting
+          <literal moreinfo="none">control-d</literal> when we're done:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/sum.out">guided-tour/sum.out</ulink></para>
@@ -1618,7 +1554,7 @@ let () =
       </sect1>
 
       <sect1 id="where-to-go-from-here">
-        <title>Where to go from here</title>
+        <title>Where to Go from Here</title>
 
         <para>That's it for the guided tour! There are plenty of features left
         and lots of details to explain, but we hope that you now have a sense

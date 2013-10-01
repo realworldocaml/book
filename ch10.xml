@@ -6,7 +6,7 @@
       <para>You can think of OCaml as being broken up into two parts: a core
       language that is concerned with values and types, and a module language
       that is concerned with modules and module signatures. These
-      sub-languages are stratified, in that modules can contain types and
+      sublanguages are stratified, in that modules can contain types and
       values, but ordinary values can't contain modules or module types. That
       means you can't do things like define a variable whose value is a
       module, or a function that takes a module as an argument.</para>
@@ -24,14 +24,14 @@
       systems.</para>
 
       <sect1 id="working-with-first-class-modules">
-        <title>Working with first-class modules</title>
+        <title>Working with First-Class Modules</title>
 
         <para>We'll start out by covering the basic mechanics of first-class
         modules by working through some toy examples. We'll get to more
         realistic examples in the next section.</para>
 
-        <para>In that light, consider the following signature of a module with
-        a single integer variable.</para>
+        <para>In that light, consider the following signature of a module with a single integer
+      variable:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink></para>
@@ -39,7 +39,7 @@
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module type X_int = sig val x : int end;;</userinput>
 <computeroutput moreinfo="none">module type X_int = sig val x : int end</computeroutput></programlisting>
 
-        <para>We can also create a module that matches this signature.</para>
+        <para>We can also create a module that matches this signature:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 1)</para>
@@ -58,8 +58,8 @@
 
         <programlisting language="" format="linespecific">(module &lt;Module&gt; : &lt;Module_type&gt;)</programlisting>
 
-        <para>So, we can convert <literal moreinfo="none">Three</literal> into a first-class
-        module as follows.</para>
+        <para>So, we can convert <literal moreinfo="none">Three</literal> into a first-class module
+      as follows:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 2)</para>
@@ -96,7 +96,7 @@
 
         <programlisting language="" format="linespecific">(val &lt;first_class_module&gt; : &lt;Module_type&gt;)</programlisting>
 
-        <para>And here's an example.</para>
+        <para>And here's an example:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 5)</para>
@@ -107,14 +107,12 @@
 <computeroutput moreinfo="none">- : int = 3</computeroutput></programlisting>
 
         <sidebar>
-          <title>Equality of first-class module types</title>
+          <title>Equality of First-Class Module Types</title>
 
-          <para>The type of the first-class module, <emphasis>e.g.</emphasis>,
-          <literal moreinfo="none">(module X_int)</literal>, is based on the fully-qualified
-          name of the signature that was used to construct it. A first-class
-          module based on a signature with a different name, even if it is
-          substantively the same signature, will result in a distinct type, as
-          you can see below.</para>
+          <para>The type of the first-class module, e.g., <literal moreinfo="none">(module
+          X_int)</literal>, is based on the fully-qualified name of the signature that was used to
+        construct it. A first-class module based on a signature with a different name, even if it is
+        substantively the same signature, will result in a distinct type:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 6)</para>
@@ -128,9 +126,9 @@
 <computeroutput moreinfo="none">Error: This expression has type (module Y_int)</computeroutput>
 <computeroutput moreinfo="none">       but an expression was expected of type (module X_int)</computeroutput></programlisting>
 
-          <para>Even though their types as first-class modules are distinct,
-          the underlying module types are compatible (indeed, identical), so
-          we can unify the types by unpacking and repacking the module.</para>
+          <para>Even though their types as first-class modules are distinct, the underlying module
+        types are compatible (indeed, identical), so we can unify the types by unpacking and
+        repacking the module:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 7)</para>
@@ -138,24 +136,21 @@
           <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">[three; (module (val five))];;</userinput>
 <computeroutput moreinfo="none">- : (module X_int) list = [&lt;module&gt;; &lt;module&gt;]</computeroutput></programlisting>
 
-          <para>The way in which type equality for first-class modules is
-          determined can be confusing. One common and problematic case is that
-          of creating an alias of a module type defined elsewhere. This is
-          often done to improve readability, and can happen both through an
-          explicit declaration of a module type or implicitly through an
-          <literal moreinfo="none">include</literal> declaration. In both cases, this has the
-          unintended side effect of making first-class modules built off of
-          the alias incompatible with those built off of the original module
-          type. To deal with this, one should be disciplined in how one refers
-          to signatures when constructing first-class modules.</para>
+          <para>The way in which type equality for first-class modules is determined can be
+        confusing. One common and problematic case is that of creating an alias of a module type
+        defined elsewhere. This is often done to improve readability and can happen both through an
+        explicit declaration of a module type or implicitly through an <literal moreinfo="none"
+          >include</literal> declaration. In both cases, this has the unintended side effect of
+        making first-class modules built off of the alias incompatible with those built off of the
+        original module type. To deal with this, one should be disciplined in how one refers to
+        signatures when constructing first-class modules.</para>
         </sidebar>
 
-        <para>We can also write ordinary functions which consume and create
-        first class modules. The following shows the definition of two
-        functions: <literal moreinfo="none">to_int</literal>, which converts a
-        <literal moreinfo="none">(module X_int)</literal> into an <literal moreinfo="none">int</literal>; and
-        <literal moreinfo="none">plus</literal>, which returns the sum of two <literal moreinfo="none">(module
-        X_int)</literal>s.</para>
+        <para>We can also write ordinary functions which consume and create first class modules. The
+      following shows the definition of two functions: <literal moreinfo="none">to_int</literal>,
+      which converts a <literal moreinfo="none">(module X_int)</literal> into an <literal
+        moreinfo="none">int</literal>; and <literal moreinfo="none">plus</literal>, which returns
+      the sum of two <literal moreinfo="none">(module X_int)</literal>:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 8)</para>
@@ -172,9 +167,9 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val plus : (module X_int) -&gt; (module X_int) -&gt; (module X_int) = &lt;fun&gt;</computeroutput></programlisting>
 
-        <para>With these functions in hand, we can now work with values of
-        type <literal moreinfo="none">(module X_int)</literal> in a more natural style, taking
-        advantage of the concision and simplicity of the core language.</para>
+        <para>With these functions in hand, we can now work with values of type <literal
+        moreinfo="none">(module X_int)</literal> in a more natural style, taking advantage of the
+      concision and simplicity of the core language:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 9)</para>
@@ -184,10 +179,9 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">to_int (List.fold ~init:six ~f:plus [three;three]);;</userinput>
 <computeroutput moreinfo="none">- : int = 12</computeroutput></programlisting>
 
-        <para>There are some useful syntactic shortcuts when dealing with
-        first class modules. One notable one is that you can do the conversion
-        to an ordinary module within a pattern match. Thus, we can rewrite the
-        <literal moreinfo="none">to_int</literal> function as follows.</para>
+        <para>There are some useful syntactic shortcuts when dealing with first-class modules. One
+      notable one is that you can do the conversion to an ordinary module within a pattern match.
+      Thus, we can rewrite the <literal moreinfo="none">to_int</literal> function as follows:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 10)</para>
@@ -195,10 +189,10 @@
         <programlisting language="ocaml" format="linespecific"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let to_int (module M : X_int) = M.x ;;</userinput>
 <computeroutput moreinfo="none">val to_int : (module X_int) -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
-        <para>First-class modules can contain types and functions in addition
-        to simple values like <literal moreinfo="none">int</literal>. Here's an interface that
-        contains a type and a corresponding <literal moreinfo="none">bump</literal> operation
-        that takes a value of the type and produces a new one.</para>
+        <para>First-class modules can contain types and functions in addition to simple values like
+        <literal moreinfo="none">int</literal>. Here's an interface that contains a type and a
+      corresponding <literal moreinfo="none">bump</literal> operation that takes a value of the type
+      and produces a new one:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 11)</para>
@@ -209,8 +203,8 @@
 <userinput moreinfo="none">  end;;</userinput>
 <computeroutput moreinfo="none">module type Bumpable = sig type t val bump : t -&gt; t end</computeroutput></programlisting>
 
-        <para>We can create multiple instances of this module with different
-        underlying types.</para>
+        <para>We can create multiple instances of this module with different underlying
+      types:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 12)</para>
@@ -226,7 +220,7 @@
 <userinput moreinfo="none">  end;;</userinput>
 <computeroutput moreinfo="none">module Float_bumper : sig type t = float val bump : t -&gt; t end</computeroutput></programlisting>
 
-        <para>And we can convert these to first-class modules.</para>
+        <para>And we can convert these to first-class modules:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 13)</para>
@@ -235,10 +229,9 @@
 <computeroutput moreinfo="none">val int_bumper : (module Bumpable) = &lt;module&gt;</computeroutput></programlisting>
 
         <para>But you can't do much with <literal moreinfo="none">int_bumper</literal>, since
-        <literal moreinfo="none">int_bumper</literal> is fully abstract, so that we can no
-        longer recover the fact that the type in question is
-        <literal moreinfo="none">int</literal>. This means you can't really do much with it,
-        as you can see below.</para>
+        <literal moreinfo="none">int_bumper</literal> is fully abstract, so that we can no longer
+      recover the fact that the type in question is <literal moreinfo="none">int</literal>. This
+      means you can't really do much with it:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 14)</para>
@@ -248,8 +241,8 @@
 <computeroutput moreinfo="none">Error: This expression has type int but an expression was expected of type</computeroutput>
 <computeroutput moreinfo="none">         Bumpable.t</computeroutput></programlisting>
 
-        <para>To make <literal moreinfo="none">int_bumper</literal> usable, we need to expose
-        the type, which we can do as follows.</para>
+        <para>To make <literal moreinfo="none">int_bumper</literal> usable, we need to expose the
+      type, which we can do as follows:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 15)</para>
@@ -259,10 +252,9 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let float_bumper = (module Float_bumper : Bumpable with type t = float);;</userinput>
 <computeroutput moreinfo="none">val float_bumper : (module Bumpable with type t = float) = &lt;module&gt;</computeroutput></programlisting>
 
-        <para>The sharing constraints we've added above make the resulting
-        first-class modules polymorphic in the type <literal moreinfo="none">t</literal>. As a
-        result, we can now use these values on values of the matching
-        type.</para>
+        <para>The sharing constraints we've added above make the resulting first-class modules
+      polymorphic in the type <literal moreinfo="none">t</literal>. As a result, we can now use
+      these values on values of the matching type:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 16)</para>
@@ -272,10 +264,10 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let (module Bumpable) = float_bumper in Bumpable.bump 3.5;;</userinput>
 <computeroutput moreinfo="none">- : float = 4.5</computeroutput></programlisting>
 
-        <para>We can also write functions that use such first-class modules
-        polymorphically. The following function takes two arguments: a
-        <literal moreinfo="none">Bumpable</literal> module, and a list of elements of the same
-        type as the type <literal moreinfo="none">t</literal> of the module.</para>
+        <para>We can also write functions that use such first-class modules polymorphically. The
+      following function takes two arguments: a <literal moreinfo="none">Bumpable</literal> module
+      and a list of elements of the same type as the type <literal moreinfo="none">t</literal> of
+      the module:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 17)</para>
@@ -299,9 +291,8 @@
         <literal moreinfo="none">B.t</literal> with the type of the elements of the list
         passed in.</para>
 
-        <para>The resulting function is polymorphic in both the type of the
-        list element and the type <literal moreinfo="none">Bumpable.t</literal>. We can see
-        this function in action below.</para>
+        <para>The resulting function is polymorphic in both the type of the list element and the
+      type <literal moreinfo="none">Bumpable.t</literal>. We can see this function in action:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 18)</para>
@@ -316,12 +307,11 @@
         types of other values you're working with.</para>
 
         <note>
-          <title>More on locally abstract types</title>
+          <title>More on Locally Abstract Types</title>
 
-          <para>One of the key properties of locally abstract types is that
-          they're dealt with as abstract types in the function they're defined
-          within, but are polymorphic from the outside. Consider the following
-          example.</para>
+          <para>One of the key properties of locally abstract types is that they're dealt with as
+        abstract types in the function they're defined within, but are polymorphic from the outside.
+        Consider the following example:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 19)</para>
@@ -334,9 +324,9 @@
           being abstract, but the type of the function that is inferred is
           polymorphic.</para>
 
-          <para>If, on the other hand, we try to use the type
-          <literal moreinfo="none">a</literal> as equivalent to some concrete type, say,
-          <literal moreinfo="none">int</literal>, then the compiler will complain.</para>
+          <para>If, on the other hand, we try to use the type <literal moreinfo="none">a</literal>
+        as equivalent to some concrete type, say, <literal moreinfo="none">int</literal>, then the
+        compiler will complain:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 20)</para>
@@ -345,9 +335,9 @@
 <computeroutput moreinfo="none">Characters 38-39:</computeroutput>
 <computeroutput moreinfo="none">Error: This expression has type a but an expression was expected of type int</computeroutput></programlisting>
 
-          <para>One common use of locally abstract types is to create a new
-          type that can be used in constructing a module. Here's an example of
-          doing this to create a new first-class module.</para>
+          <para>One common use of locally abstract types is to create a new type that can be used in
+        constructing a module. Here's an example of doing this to create a new first-class
+        module:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink> (part 21)</para>
@@ -380,11 +370,11 @@
       </sect1>
 
       <sect1 id="example-a-query-handling-framework">
-        <title>Example: A query handling framework</title>
+        <title>Example: A Query-Handling Framework</title>
 
-        <para>Now let's look at first-class modules in the context of a more
-        complete and realistic example. In particular, consider the following
-        signature for a module that implements a query handler.</para>
+        <para>Now let's look at first-class modules in the context of a more complete and realistic
+      example. In particular, consider the following signature for a module that implements a query
+      handler:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink></para>
@@ -419,19 +409,16 @@
 <computeroutput moreinfo="none">    val sexp_of_config : config -&gt; Sexp.t</computeroutput>
 <computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
-        <para>In the above we use s-expressions as the format for queries and
-        responses, as well for the config. S-expressions are a simple,
-        flexible, and human-readable serialization format commonly used in
-        Core. For now, it's enough to think of them as balanced parenthetical
-        expressions whose atomic values are strings,
-        <emphasis>e.g.</emphasis>, <literal moreinfo="none">(this (is an) (s
-        expression))</literal>.</para>
+        <para>In the preceding example, we use s-expressions as the format for queries and
+      responses, as well for the config. S-expressions are a simple, flexible, and human-readable
+      serialization format commonly used in Core. For now, it's enough to think of them as balanced
+      parenthetical expressions whose atomic values are strings, e.g., <literal moreinfo="none"
+        >(this (is an) (s expression))</literal>.</para>
 
-        <para>In addition, we use the Sexplib syntax extension which extends
-        OCaml by adding the <literal moreinfo="none">with sexp</literal> declaration. When
-        attached to a type in a signature, <literal moreinfo="none">with sexp</literal> adds
-        declarations of s-expression converters,
-        <emphasis>e.g.</emphasis>,</para>
+        <para>In addition, we use the Sexplib syntax extension which extends OCaml by adding the
+        <literal moreinfo="none">with sexp</literal> declaration. When attached to a type in a
+      signature, <literal moreinfo="none">with sexp</literal> adds declarations of s-expression
+      converters, for example:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 1)</para>
@@ -440,8 +427,8 @@
 <computeroutput moreinfo="none">module type M =</computeroutput>
 <computeroutput moreinfo="none">  sig type t val t_of_sexp : Sexp.t -&gt; t val sexp_of_t : t -&gt; Sexp.t end</computeroutput></programlisting>
 
-        <para>In a module, <literal moreinfo="none">with sexp</literal> adds the
-        implementation of those functions. Thus, we can write</para>
+        <para>In a module, <literal moreinfo="none">with sexp</literal> adds the implementation of
+      those functions. Thus, we can write:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 2)</para>
@@ -458,15 +445,14 @@
         <para>This is all described in more detail in <xref linkend="data-serialization-with-s-expressions"/>.</para>
 
         <sect2 id="implementing-a-query-handler">
-          <title>Implementing a query handler</title>
+          <title>Implementing a Query Handler</title>
 
-          <para>Let's look at some examples of query handlers that satisfy the
-          <literal moreinfo="none">Query_handler</literal> interface. The first example is a
-          handler that produces unique integer ids. It works by keeping an
-          internal counter which it bumps every time it produces a new value.
-          The input to the query in this case is just the trivial s-expression
-          <literal moreinfo="none">()</literal>, otherwise known as
-          <literal moreinfo="none">Sexp.unit</literal>.</para>
+          <para>Let's look at some examples of query handlers that satisfy the <literal
+          moreinfo="none">Query_handler</literal> interface. The first example is a handler that
+        produces unique integer IDs. It works by keeping an internal counter which it bumps every
+        time it produces a new value. The input to the query in this case is just the trivial
+        s-expression <literal moreinfo="none">()</literal>, otherwise known as <literal
+          moreinfo="none">Sexp.unit</literal>:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 3)</para>
@@ -497,9 +483,8 @@
 <computeroutput moreinfo="none">    val eval : t -&gt; Sexp.t -&gt; (Sexp.t, Error.t) Result.t</computeroutput>
 <computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
-          <para>We can use this module to create an instance of the
-          <literal moreinfo="none">Unique</literal> query handler and interact with it
-          directly.</para>
+          <para>We can use this module to create an instance of the <literal moreinfo="none"
+          >Unique</literal> query handler and interact with it directly:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 4)</para>
@@ -511,9 +496,8 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Unique.eval unique Sexp.unit;;</userinput>
 <computeroutput moreinfo="none">- : (Sexp.t, Error.t) Result.t = Ok 1</computeroutput></programlisting>
 
-          <para>Here's another example: a query handler that does directory
-          listings. Here, the config is the default directory that relative
-          paths are interpreted within.</para>
+          <para>Here's another example: a query handler that does directory listings. Here, the
+        config is the default directory that relative paths are interpreted within:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 5)</para>
@@ -551,8 +535,8 @@
 <computeroutput moreinfo="none">    val eval : t -&gt; Sexp.t -&gt; (Sexp.t, Error.t) Result.t</computeroutput>
 <computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
-          <para>Again, we can create an instance of this query handler and
-          interact with it directly.</para>
+          <para>Again, we can create an instance of this query handler and interact with it
+        directly:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 6)</para>
@@ -567,15 +551,14 @@
         </sect2>
 
         <sect2 id="dispatching-to-multiple-query-handlers">
-          <title>Dispatching to multiple query handlers</title>
+          <title>Dispatching to Multiple Query Handlers</title>
 
-          <para>Now, what if we want to dispatch queries to any of an
-          arbitrary collection of handlers? Ideally, we'd just like to pass in
-          the handlers as a simple data structure like a list. This is awkward
-          to do with modules and functors alone, but it's quite natural with
-          first-class modules. The first thing we'll need to do is create a
-          signature that combines a <literal moreinfo="none">Query_handler</literal> module
-          with an instantiated query handler.</para>
+          <para>Now, what if we want to dispatch queries to any of an arbitrary collection of
+        handlers? Ideally, we'd just like to pass in the handlers as a simple data structure like a
+        list. This is awkward to do with modules and functors alone, but it's quite natural with
+        first-class modules. The first thing we'll need to do is create a signature that combines a
+          <literal moreinfo="none">Query_handler</literal> module with an instantiated query
+        handler:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 7)</para>
@@ -591,7 +574,7 @@
           encompasses both an instance of the query and the matching
           operations for working with that query.</para>
 
-          <para>We can create an instance as follows.</para>
+          <para>We can create an instance as follows:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 8)</para>
@@ -603,9 +586,9 @@
 <userinput moreinfo="none">     end : Query_handler_instance);;</userinput>
 <computeroutput moreinfo="none">val unique_instance : (module Query_handler_instance) = &lt;module&gt;</computeroutput></programlisting>
 
-          <para>Constructing instances in this way is a little verbose, but we
-          can write a function that eliminates most of this boilerplate. Note
-          that we are again making use of a locally abstract type.</para>
+          <para>Constructing instances in this way is a little verbose, but we can write a function
+        that eliminates most of this boilerplate. Note that we are again making use of a locally
+        abstract type:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 9)</para>
@@ -649,9 +632,8 @@
           to, and <emphasis><literal moreinfo="none">query</literal></emphasis> is the body of
           the query.</para>
 
-          <para>The first thing we'll need is a function that takes a list of
-          query handler instances and constructs a dispatch table from
-          it.</para>
+          <para>The first thing we'll need is a function that takes a list of query handler
+        instances and constructs a dispatch table from it:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 11)</para>
@@ -667,8 +649,7 @@
 <computeroutput moreinfo="none">  (module Query_handler_instance) list -&gt;</computeroutput>
 <computeroutput moreinfo="none">  (module Query_handler_instance) String.Table.t = &lt;fun&gt;</computeroutput></programlisting>
 
-          <para>Now, we need a function that dispatches to a handler using a
-          dispatch table.</para>
+          <para>Now, we need a function that dispatches to a handler using a dispatch table:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 12)</para>
@@ -703,8 +684,8 @@
           power allows you to build more sophisticated components that involve
           multiple interdependent types and values.</para>
 
-          <para>Now let's turn this into a complete, running example by adding
-          a command-line interface.</para>
+          <para>Now let's turn this into a complete, running example by adding a command-line
+        interface:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 13)</para>
@@ -732,9 +713,9 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val cli : (string, (module Query_handler_instance)) Hashtbl.t -&gt; unit = &lt;fun&gt;</computeroutput></programlisting>
 
-          <para>We can most effectively run this command-line interface from a
-          standalone program, which we can do by putting the above code in a
-          file along with following command to launch the interface.</para>
+          <para>We can most effectively run this command-line interface from a standalone program,
+        which we can do by putting the above code in a file along with following command to launch
+        the interface:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.ml">fcm/query_handler.ml</ulink> (part 1)</para>
@@ -742,7 +723,7 @@
           <programlisting language="ocaml" format="linespecific">let () =
   cli (build_dispatch_table [unique_instance; list_dir_instance])</programlisting>
 
-          <para>Here's an example of a session with this program.</para>
+          <para>Here's an example of a session with this program:</para>
 
           <para role="sourcecode">OCaml Utop:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_example.rawscript">fcm/query_example.rawscript</ulink></para>
@@ -762,18 +743,17 @@
         </sect2>
 
         <sect2 id="loading-and-unloading-query-handlers">
-          <title>Loading and unloading query handlers</title>
+          <title>Loading and Unloading Query Handlers</title>
 
           <para>One of the advantages of first-class modules is that they
           afford a great deal of dynamism and flexibility. For example, it's a
           fairly simple matter to change our design to allow query handlers to
           be loaded and unloaded at runtime.</para>
 
-          <para>We'll do this by creating a query handler whose job is to
-          control the set of active query handlers. The module in question
-          will be called <literal moreinfo="none">Loader</literal>, and its configuration is a
-          list of known <literal moreinfo="none">Query_handler</literal> modules. Here are the
-          basic types.</para>
+          <para>We'll do this by creating a query handler whose job is to control the set of active
+        query handlers. The module in question will be called <literal moreinfo="none"
+          >Loader</literal>, and its configuration is a list of known <literal moreinfo="none"
+          >Query_handler</literal> modules. Here are the basic types:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler_core.ml">fcm/query_handler_core.ml</ulink> (part 1)</para>
@@ -795,10 +775,9 @@
           table, as well as for removing instances, all in response to user
           queries.</para>
 
-          <para>Next, we'll need a function for creating a
-          <literal moreinfo="none">Loader.t</literal>. This function requires the list of
-          known query handler modules. Note that the table of active modules
-          starts out as empty.</para>
+          <para>Next, we'll need a function for creating a <literal moreinfo="none"
+          >Loader.t</literal>. This function requires the list of known query handler modules. Note
+        that the table of active modules starts out as empty:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler_core.ml">fcm/query_handler_core.ml</ulink> (part 2)</para>
@@ -811,14 +790,12 @@
         Hashtbl.replace known ~key:Q.name ~data:q);
     { known; active }</programlisting>
 
-          <para>Now we'll start writing out the functions for manipulating the
-          table of active query handlers. We'll start with the function for
-          loading an instance. Note that it takes as an argument both the name
-          of the query handler, and the configuration for instantiating that
-          handler, in the form of an s-expression. These are used for creating
-          a first-class module of type <literal moreinfo="none">(module
-          Query_handler_instance)</literal>, which is then added to the active
-          table.</para>
+          <para>Now we'll start writing out the functions for manipulating the table of active query
+        handlers. We'll start with the function for loading an instance. Note that it takes as an
+        argument both the name of the query handler, and the configuration for instantiating that
+        handler, in the form of an s-expression. These are used for creating a first-class module of
+        type <literal moreinfo="none">(module Query_handler_instance)</literal>, which is then added
+        to the active table:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler_core.ml">fcm/query_handler_core.ml</ulink> (part 3)</para>
@@ -841,10 +818,9 @@
         Hashtbl.replace t.active ~key:handler_name ~data:instance;
         Ok Sexp.unit</programlisting>
 
-          <para>Since the <literal moreinfo="none">load</literal> function will refuse to
-          <literal moreinfo="none">load</literal> an already active handler, we also need the
-          ability to unload a handler. Note that the handler explicitly
-          refuses to unload itself.</para>
+          <para>Since the <literal moreinfo="none">load</literal> function will refuse to <literal
+          moreinfo="none">load</literal> an already active handler, we also need the ability to
+        unload a handler. Note that the handler explicitly refuses to unload itself:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler_core.ml">fcm/query_handler_core.ml</ulink> (part 4)</para>
@@ -859,11 +835,10 @@
       Ok Sexp.unit
     )</programlisting>
 
-          <para>Finally, we need to implement the <literal moreinfo="none">eval</literal>
-          function, which will determine the query interface presented to the
-          user. We'll do this by creating a variant type, and using the
-          s-expression converter generated for that type to parse the query
-          from the user.</para>
+          <para>Finally, we need to implement the <literal moreinfo="none">eval</literal> function,
+        which will determine the query interface presented to the user. We'll do this by creating a
+        variant type, and using the s-expression converter generated for that type to parse the
+        query from the user:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler_core.ml">fcm/query_handler_core.ml</ulink> (part 5)</para>
@@ -875,15 +850,14 @@
     | Active_services
   with sexp</programlisting>
 
-          <para>The eval function itself is fairly straight-forward,
-          dispatching to the appropriate functions to respond to each type of
-          query. Note that we use write <literal moreinfo="none">&lt;sexp_of&lt;string
-          list&gt;&gt;</literal> to autogenerate a function for converting a
-          list of strings to an s-expression. This is part of the Sexplib
-          package described in <xref linkend="data-serialization-with-s-expressions"/>.</para>
+          <para>The eval function itself is fairly straightforward, dispatching to the appropriate
+        functions to respond to each type of query. Note that we use write <literal moreinfo="none"
+          >&lt;sexp_of&lt;string list&gt;&gt;</literal> to autogenerate a function for converting a
+        list of strings to an s-expression. This is part of the Sexplib package described in <xref
+          linkend="data-serialization-with-s-expressions"/>.</para>
 
-          <para>This function ends the definition of the
-          <literal moreinfo="none">Loader</literal> module.</para>
+          <para>This function ends the definition of the <literal moreinfo="none">Loader</literal>
+        module:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler_core.ml">fcm/query_handler_core.ml</ulink> (part 6)</para>
@@ -901,11 +875,10 @@
         Ok (&lt;:sexp_of&lt;string list&gt;&gt; (Hashtbl.keys t.active))
 end</programlisting>
 
-          <para>Finally, we can put this all together with the command line
-          interface. We first create an instance of the loader query handler,
-          and then add that instance to the loader's active table. We can then
-          just launch the command-line interface, passing it the active
-          table.</para>
+          <para>Finally, we can put this all together with the command-line interface. We first
+        create an instance of the loader query handler and then add that instance to the loader's
+        active table. We can then just launch the command-line interface, passing it the active
+        table:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler_loader.ml">fcm/query_handler_loader.ml</ulink> (part 1)</para>
@@ -922,8 +895,7 @@ end</programlisting>
     ~key:Loader.name ~data:loader_instance;
   cli loader.Loader.active</programlisting>
 
-          <para>Now link this into a command line interface to experiment with
-          it.</para>
+          <para>Now link this into a command-line interface to experiment with it:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/build_query_handler_loader.out">fcm/build_query_handler_loader.out</ulink></para>
@@ -931,11 +903,10 @@ end</programlisting>
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild query_handler_loader.byte</userinput>
 </programlisting>
 
-          <para>The resulting command line interface behaves much as you'd
-          expect, starting out with no query handlers available, but giving
-          you the ability to load and unload them. Here's an example of it in
-          action. As you can see, we start out with <literal moreinfo="none">loader</literal>
-          itself as the only active handler.</para>
+          <para>The resulting command line interface behaves much as you'd expect, starting out with
+        no query handlers available but giving you the ability to load and unload them. Here's an
+        example of it in action. As you can see, we start out with <literal moreinfo="none"
+          >loader</literal> itself as the only active handler:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/loader_cli1.out">fcm/loader_cli1.out</ulink></para>
@@ -946,7 +917,7 @@ end</programlisting>
 <computeroutput moreinfo="none">&gt;&gt;&gt; (loader active_services)</computeroutput>
 <computeroutput moreinfo="none">(loader)</computeroutput></programlisting>
 
-          <para>Any attempt to use an inactive query handler will fail.</para>
+          <para>Any attempt to use an inactive query handler will fail:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/loader_cli2.out">fcm/loader_cli2.out</ulink></para>
@@ -954,10 +925,9 @@ end</programlisting>
           <programlisting language="console" format="linespecific"><computeroutput moreinfo="none">&gt;&gt;&gt; (ls .)</computeroutput>
 <computeroutput moreinfo="none">Could not find matching handler: ls</computeroutput></programlisting>
 
-          <para>But, we can load the <literal moreinfo="none">ls</literal> handler with a
-          config of our choice, at which point, it will be available for use.
-          And once we unload it, it will be unavailable yet again, and could
-          be reloaded with a different config.</para>
+          <para>But, we can load the <literal moreinfo="none">ls</literal> handler with a config of
+        our choice, at which point it will be available for use. And once we unload it, it will be
+        unavailable yet again and could be reloaded with a different config:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/loader_cli3.out">fcm/loader_cli3.out</ulink></para>
@@ -972,8 +942,8 @@ end</programlisting>
 <computeroutput moreinfo="none">&gt;&gt;&gt; (ls /var)</computeroutput>
 <computeroutput moreinfo="none">Could not find matching handler: ls</computeroutput></programlisting>
 
-          <para>Notably, the loader can't be loaded (since it's not on the
-          list of known handlers), and can't be unloaded either.</para>
+          <para>Notably, the loader can't be loaded (since it's not on the list of known handlers)
+        and can't be unloaded either:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/loader_cli4.out">fcm/loader_cli4.out</ulink></para>
@@ -991,7 +961,7 @@ end</programlisting>
       </sect1>
 
       <sect1 id="living-without-first-class-modules">
-        <title>Living without first-class modules</title>
+        <title>Living Without First-Class Modules</title>
 
         <para>It's worth noting that most designs that can be done with
         first-class modules can be simulated without them, with some level of
@@ -1012,10 +982,9 @@ end</programlisting>
 <computeroutput moreinfo="none">}</computeroutput>
 <computeroutput moreinfo="none">type query_handler = Sexp.t -&gt; query_handler_instance</computeroutput></programlisting>
 
-        <para>The idea here is that we hide the true types of the objects in
-        question behind the functions stored in the closure. Thus, we could
-        put the <literal moreinfo="none">Unique</literal> query handler into this framework as
-        follows.</para>
+        <para>The idea here is that we hide the true types of the objects in question behind the
+      functions stored in the closure. Thus, we could put the <literal moreinfo="none"
+        >Unique</literal> query handler into this framework as follows:</para>
 
         <para role="sourcecode">OCaml Utop:
         <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink> (part 15)</para>
@@ -1029,11 +998,10 @@ end</programlisting>
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val unique_handler : Sexp.t -&gt; query_handler_instance = &lt;fun&gt;</computeroutput></programlisting>
 
-        <para>For an example on this scale, the above approach is completely
-        reasonable, and first-class modules are not really necessary. But the
-        more functionality you need to hide away behind a set of closures, and
-        the more complicated the relationships between the different types in
-        question, the more awkward this approach becomes, and the better it is
-        to use first-class modules.</para>
+        <para>For an example on this scale, the preceding approach is completely reasonable, and
+      first-class modules are not really necessary. But the more functionality you need to hide away
+      behind a set of closures, and the more complicated the relationships between the different
+      types in question, the more awkward this approach becomes, and the better it is to use
+      first-class modules.</para>
       </sect1>
     </chapter>
