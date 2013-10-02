@@ -427,7 +427,7 @@ let () =
         </sect2>
 
         <sect2 id="executing-bytecode">
-          <title>Executing bytecode</title>
+          <title>Executing Bytecode</title>
 
           <para>The bytecode runtime comprises three parts: the bytecode
           interpreter, garbage collector, and a set of C functions that
@@ -439,8 +439,8 @@ let () =
           that are referenced from other libraries that aren't loaded by
           default.</para>
 
-          <para>Information about these extra libraries can be specified while
-          linking a bytecode archive.</para>
+          <para>Information about these extra libraries can be specified while linking a bytecode
+        archive:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-embed/link_dllib.out">back-end-embed/link_dllib.out</ulink></para>
@@ -454,10 +454,9 @@ let () =
           interpreter dynamically load the external library symbols when it
           executes the bytecode.</para>
 
-          <para>You can also generate a complete standalone executable that
-          bundles the <command moreinfo="none">ocamlrun</command> interpreter with the
-          bytecode in a single binary. This is known as a <emphasis>custom
-          runtime</emphasis> mode and is built as follows.</para>
+          <para>You can also generate a complete standalone executable that bundles the <command
+          moreinfo="none">ocamlrun</command> interpreter with the bytecode in a single binary. This
+        is known as a <emphasis>custom runtime</emphasis> mode and is built as follows:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-embed/link_custom.out">back-end-embed/link_custom.out</ulink></para>
@@ -465,11 +464,10 @@ let () =
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc -a -o mylib.cma -custom a.cmo b.cmo -cclib -lmylib</userinput>
 </programlisting>
 
-          <para>OCamlbuild takes care of much of the details of this with its
-          built-in rules. The <literal moreinfo="none">%.byte</literal> rule that you've been
-          using throughout the book builds a bytecode executable and adding
-          the <literal moreinfo="none">custom</literal> tag will bundle the interpreter with
-          it too.</para>
+          <para>OCamlbuild takes care of much of the details of this with its built-in rules. The
+          <literal moreinfo="none">%.byte</literal> rule that you've been using throughout the book
+        builds a bytecode executable, and adding the <literal moreinfo="none">custom</literal> tag
+        will bundle the interpreter with it, too.</para>
 
           <para>The custom mode is the most similar mode to native code
           compilation, as both generate standalone executables. There are
@@ -479,7 +477,7 @@ let () =
         </sect2>
 
         <sect2 id="embedding-ocaml-bytecode-in-c">
-          <title>Embedding OCaml bytecode in C</title>
+          <title>Embedding OCaml Bytecode in C</title>
 
           <para>A consequence of using the bytecode compiler is that the final
           link phase must be performed by <command moreinfo="none">ocamlc</command>. However,
@@ -493,15 +491,13 @@ let () =
           of the OCaml modules are linked into this object file as bytecode,
           just as they would be for an executable.</para>
 
-          <para>This object file can then be linked with C code using the
-          standard C compiler, and only needs the bytecode runtime library
-          (which is installed as <literal moreinfo="none">libcamlrun.a</literal>). Creating an
-          executable just requires you to link the runtime library with the
-          bytecode object file. Here's an example to show how it all fits
-          together.</para>
+          <para>This object file can then be linked with C code using the standard C compiler and
+        only needs the bytecode runtime library (which is installed as <literal moreinfo="none"
+          >libcamlrun.a</literal>). Creating an executable just requires you to link the runtime
+        library with the bytecode object file. Here's an example to show how it all fits
+        together.</para>
 
-          <para>Create two OCaml source files that contain a single print
-          line.</para>
+          <para>Create two OCaml source files that contain a single print line:</para>
 
           <para role="sourcecode">OCaml:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-embed/embed_me1.ml">back-end-embed/embed_me1.ml</ulink></para>
@@ -513,8 +509,7 @@ let () =
 
           <programlisting language="ocaml" format="linespecific">let () = print_endline "hello embedded world 2"</programlisting>
 
-          <para>Next, create a C file which will be your main entry
-          point.</para>
+          <para>Next, create a C file which will be your main entry point:</para>
 
           <para role="sourcecode">C:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-embed/main.c">back-end-embed/main.c</ulink></para>
@@ -535,8 +530,7 @@ main (int argc, char **argv)
   return 0;
 }</programlisting>
 
-          <para>Now compile the OCaml files into a standalone object
-          file.</para>
+          <para>Now compile the OCaml files into a standalone object file:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-embed/build_embed.out">back-end-embed/build_embed.out</ulink></para>
@@ -544,10 +538,10 @@ main (int argc, char **argv)
           <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">rm -f embed_out.c</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc -output-obj -o embed_out.o embed_me1.ml embed_me2.ml</userinput></programlisting>
 
-          <para>After this point, you no longer need the OCaml compiler, as
-          <literal moreinfo="none">embed_out.o</literal> has all of the OCaml code compiled
-          and linked into a single object file. Compile an output binary using
-          <command moreinfo="none">gcc</command> to test this out.</para>
+          <para>After this point, you no longer need the OCaml compiler, as <literal moreinfo="none"
+          >embed_out.o</literal> has all of the OCaml code compiled and linked into a single object
+        file. Compile an output binary using <command moreinfo="none">gcc</command> to test this
+        out:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-embed/build_embed_binary.out">back-end-embed/build_embed_binary.out</ulink></para>
@@ -561,11 +555,11 @@ main (int argc, char **argv)
 <computeroutput moreinfo="none">After calling OCaml</computeroutput></programlisting>
 
           <para>You can inspect the commands that <command moreinfo="none">ocamlc</command> is
-          invoking by adding <literal moreinfo="none">-verbose</literal> to the command line
-          to help figure out the GCC command-line if you get stuck. You can
-          even obtain the C source code to the <literal moreinfo="none">-output-obj</literal>
-          result by specifying a <literal moreinfo="none">.c</literal> output file extension
-          instead of the <literal moreinfo="none">.o</literal> we used earlier.</para>
+        invoking by adding <literal moreinfo="none">-verbose</literal> to the command line to help
+        figure out the GCC command line if you get stuck. You can even obtain the C source code to
+        the <literal moreinfo="none">-output-obj</literal> result by specifying a <literal
+          moreinfo="none">.c</literal> output file extension instead of the <literal moreinfo="none"
+          >.o</literal> we used earlier:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-embed/build_embed_c.out">back-end-embed/build_embed_c.out</ulink></para>
@@ -583,7 +577,7 @@ main (int argc, char **argv)
       </sect1>
 
       <sect1 id="compiling-fast-native-code">
-        <title>Compiling fast native code</title>
+        <title>Compiling Fast Native Code</title>
 
         <para>The native code compiler is ultimately the tool that most
         production OCaml code goes through. It compiles the lambda form into
@@ -593,25 +587,24 @@ main (int argc, char **argv)
         runtime, so the same code should run identically when compiled with
         either toolchain.</para>
 
-        <para>The <command moreinfo="none">ocamlopt</command> command is the frontend to the
-        native code compiler, and has a very similar interface to
-        <command moreinfo="none">ocamlc</command>. It also accepts <literal moreinfo="none">ml</literal> and
-        <literal moreinfo="none">mli</literal> files, but compiles them to:</para>
+        <para>The <command moreinfo="none">ocamlopt</command> command is the frontend to the native
+      code compiler and has a very similar interface to <command moreinfo="none">ocamlc</command>.
+      It also accepts <literal moreinfo="none">ml</literal> and <literal moreinfo="none"
+        >mli</literal> files, but compiles them to:</para>
 
         <itemizedlist>
           <listitem>
-            <para>A <literal moreinfo="none">.o</literal> file containing native object
-            code.</para>
+            <para>A <literal moreinfo="none">.o</literal> file containing native object code</para>
           </listitem>
 
           <listitem>
-            <para>A <literal moreinfo="none">.cmx</literal> file containing extra information
-            for linking and cross-module optimization.</para>
+            <para>A <literal moreinfo="none">.cmx</literal> file containing extra information for
+          linking and cross-module optimization</para>
           </listitem>
 
           <listitem>
-            <para>A <literal moreinfo="none">.cmi</literal> compiled interface file that is
-            the same as the bytecode compiler.</para>
+            <para>A <literal moreinfo="none">.cmi</literal> compiled interface file that is the same
+          as the bytecode compiler</para>
           </listitem>
         </itemizedlist>
 
@@ -631,24 +624,21 @@ main (int argc, char **argv)
         important optimization and have slower binaries.</para>
 
         <sect2 id="inspecting-assembly-output">
-          <title>Inspecting assembly output</title>
+          <title>Inspecting Assembly Output</title>
 
-          <para>The native code compiler generates assembly language that is
-          then passed to the system assembler for compiling into object files.
-          You can get <command moreinfo="none">ocamlopt</command> to output the assembly by
-          passing the <literal moreinfo="none">-S</literal> flag to the compiler
-          command-line.</para>
+          <para>The native code compiler generates assembly language that is then passed to the
+        system assembler for compiling into object files. You can get <command moreinfo="none"
+          >ocamlopt</command> to output the assembly by passing the <literal moreinfo="none"
+          >-S</literal> flag to the compiler command line.</para>
 
-          <para>The assembly code is highly architecture specific, so the
-          discussion below assumes an Intel or AMD 64-bit platform. We've
-          generated the example code using <literal moreinfo="none">-inline 20</literal> and
-          <literal moreinfo="none">-nodynlink</literal> since it's best to generate assembly
-          code with the full optimizations that the compiler supports. Even
-          though these optimizations make the code a bit harder to read, it
-          will give you a more accurate picture of what executes on the CPU.
-          Don't forget that you can use the lambda code from earlier to get a
-          slightly higher level picture of the code if you get lost in the
-          more verbose assembly.</para>
+          <para>The assembly code is highly architecture specific, so the following discussion
+        assumes an Intel or AMD 64-bit platform. We've generated the example code using <literal
+          moreinfo="none">-inline 20</literal> and <literal moreinfo="none">-nodynlink</literal>
+        since it's best to generate assembly code with the full optimizations that the compiler
+        supports. Even though these optimizations make the code a bit harder to read, it will give
+        you a more accurate picture of what executes on the CPU. Don't forget that you can use the
+        lambda code from earlier to get a slightly higher level picture of the code if you get lost
+        in the more verbose assembly.</para>
 
           <sect3 id="the-impact-of-polymorphic-comparison">
             <title>The impact of polymorphic comparison</title>
@@ -658,9 +648,8 @@ main (int argc, char **argv)
             precisely what the difference is at the assembly language level
             now.</para>
 
-            <para>First create a comparison function where we've explicitly
-            annotated the types, so the compiler knows that only integers are
-            being compared.</para>
+            <para>First create a comparison function where we've explicitly annotated the types, so
+          the compiler knows that only integers are being compared:</para>
 
             <para role="sourcecode">OCaml:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/compare_mono.ml">back-end/compare_mono.ml</ulink></para>
@@ -668,9 +657,9 @@ main (int argc, char **argv)
             <programlisting language="ocaml" format="linespecific">let cmp (a:int) (b:int) =
   if a &gt; b then a else b</programlisting>
 
-            <para>Now compile this into assembly and read the resulting
-            <literal moreinfo="none">compare_mono.S</literal> file. This file extension may be
-            lowercase on some platforms such as Linux.</para>
+            <para>Now compile this into assembly and read the resulting <literal moreinfo="none"
+            >compare_mono.S</literal> file. This file extension may be lowercase on some platforms
+          such as Linux:</para>
 
             <para role="sourcecode">Terminal:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/asm_from_compare_mono.out">back-end/asm_from_compare_mono.out</ulink></para>
@@ -678,12 +667,11 @@ main (int argc, char **argv)
             <programlisting language="console" format="linespecific"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlopt -inline 20 -nodynlink -S compare_mono.ml</userinput>
 </programlisting>
 
-            <para>If you've never seen assembly language before then the
-            contents may be rather scary. While you'll need to learn x86
-            assembly to fully understand it, we'll try to give you some basic
-            instructions to spot patterns in this section. The excerpt of the
-            implementation of the <literal moreinfo="none">cmp</literal> function can be found
-            below.</para>
+            <para>If you've never seen assembly language before, then the contents may be rather
+          scary. While you'll need to learn x86 assembly to fully understand it, we'll try to give
+          you some basic instructions to spot patterns in this section. The excerpt of the
+          implementation of the <literal moreinfo="none">cmp</literal> function can be found
+          below:</para>
 
             <para role="sourcecode">Assembly:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/cmp.S">back-end/cmp.S</ulink></para>
@@ -708,13 +696,12 @@ main (int argc, char **argv)
             using <literal moreinfo="none">-dlambda</literal>, but in this case isn't
             necessary).</para>
 
-            <para>The arguments to <literal moreinfo="none">cmp</literal> are passed in the
-            <literal moreinfo="none">%rbx</literal> and <literal moreinfo="none">%rax</literal> registers, and
-            compared using the <literal moreinfo="none">jle</literal> "jump if less than or
-            equal" instruction. This requires both the arguments to be
-            immediate integers to work. Now let's see what happens if our
-            OCaml code omits the type annotations and is a polymorphic
-            comparison instead.</para>
+            <para>The arguments to <literal moreinfo="none">cmp</literal> are passed in the <literal
+            moreinfo="none">%rbx</literal> and <literal moreinfo="none">%rax</literal> registers,
+          and compared using the <literal moreinfo="none">jle</literal> "jump if less than or equal"
+          instruction. This requires both the arguments to be immediate integers to work. Now let's
+          see what happens if our OCaml code omits the type annotations and is a polymorphic
+          comparison instead:</para>
 
             <para role="sourcecode">OCaml:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/compare_poly.ml">back-end/compare_poly.ml</ulink></para>
@@ -723,8 +710,7 @@ main (int argc, char **argv)
   if a &gt; b then a else b</programlisting>
 
             <para>Compiling this code with <literal moreinfo="none">-S</literal> results in a
-            significantly more complex assembly output for the same
-            function.</para>
+          significantly more complex assembly output for the same function:</para>
 
             <para role="sourcecode">Assembly:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/compare_poly_asm.S">back-end/compare_poly_asm.S</ulink></para>
@@ -759,34 +745,31 @@ main (int argc, char **argv)
         .cfi_adjust_cfa_offset  24
         .cfi_endproc</programlisting>
 
-            <para>The <literal moreinfo="none">.cfi</literal> directives are assembler hints
-            that contain Call Frame Information that lets the GNU debugger
-            provide more sensible backtraces, and have no effect on runtime
-            performance. Notice that the rest of the implementation is no
-            longer a simple register comparison. Instead, the arguments are
-            pushed on the stack (the <literal moreinfo="none">%rsp</literal> register) and a C
-            function call is invoked by placing a pointer to
-            <literal moreinfo="none">caml_greaterthan</literal> in <literal moreinfo="none">%rax</literal> and
-            jumping to <literal moreinfo="none">caml_c_call</literal>.</para>
+            <para>The <literal moreinfo="none">.cfi</literal> directives are assembler hints that
+          contain Call Frame Information that lets the GNU debugger provide more sensible
+          backtraces, and have no effect on runtime performance. Notice that the rest of the
+          implementation is no longer a simple register comparison. Instead, the arguments are
+          pushed on the stack (the <literal moreinfo="none">%rsp</literal> register), and a C
+          function call is invoked by placing a pointer to <literal moreinfo="none"
+            >caml_greaterthan</literal> in <literal moreinfo="none">%rax</literal> and jumping to
+            <literal moreinfo="none">caml_c_call</literal>.</para>
 
-            <para>OCaml on x86_64 architectures caches the location of the
-            minor heap in the <literal moreinfo="none">%r15</literal> register since it's so
-            frequently referenced in OCaml functions. The minor heap pointer
-            can also be changed by the C code that's being called (e.g. when
-            it allocates OCaml values), and so <literal moreinfo="none">%r15</literal> is
-            restored after returning from the
-            <literal moreinfo="none">caml_greaterthan</literal> call. Finally the return value
-            of the comparison is popped from the stack and returned.</para>
+            <para>OCaml on x86_64 architectures caches the location of the minor heap in the
+            <literal moreinfo="none">%r15</literal> register since it's so frequently referenced in
+          OCaml functions. The minor heap pointer can also be changed by the C code that's being
+          called (e.g., when it allocates OCaml values), and so <literal moreinfo="none"
+            >%r15</literal> is restored after returning from the <literal moreinfo="none"
+            >caml_greaterthan</literal> call. Finally, the return value of the comparison is popped
+          from the stack and returned.</para>
           </sect3>
 
           <sect3 id="benchmarking-polymorphic-comparison">
             <title>Benchmarking polymorphic comparison</title>
 
-            <para>You don't have to fully understand the intricacies of
-            assembly language to see that this polymorphic comparison is much
-            heavier than the simple monomorphic integer comparison from
-            earlier. Let's confirm this hypothesis again by writing a quick
-            <literal moreinfo="none">Core_bench</literal> test with both functions.</para>
+            <para>You don't have to fully understand the intricacies of assembly language to see
+          that this polymorphic comparison is much heavier than the simple monomorphic integer
+          comparison from earlier. Let's confirm this hypothesis again by writing a quick <literal
+            moreinfo="none">Core_bench</literal> test with both functions:</para>
 
             <para role="sourcecode">OCaml:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-bench/bench_poly_and_mono.ml">back-end-bench/bench_poly_and_mono.ml</ulink></para>
@@ -816,8 +799,7 @@ let () =
   |&gt; Bench.make_command
   |&gt; Command.run</programlisting>
 
-            <para>Running this shows quite a significant runtime difference
-            between the two.</para>
+            <para>Running this shows quite a significant runtime difference between the two:</para>
 
             <para role="sourcecode">Terminal:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-bench/run_bench_poly_and_mono.out">back-end-bench/run_bench_poly_and_mono.out</ulink></para>
@@ -832,24 +814,21 @@ let () =
 <computeroutput moreinfo="none">  Monomorphic comparison         815       5.86  </computeroutput>
 <computeroutput moreinfo="none">                                                 </computeroutput></programlisting>
 
-            <para>We see that the polymorphic comparison is close to 20 times
-            slower! These results shouldn't be taken too seriously as this is
-            a very narrow test, which like all such microbenchmarks aren't
-            representative of more complex codebases. However, if you're
-            building numerical code that runs many iterations in a tight inner
-            loop, it's worth manually peering at the produced assembly code to
-            see if you can hand-optimize it.</para>
+            <para>We see that the polymorphic comparison is close to 20 times slower! These results
+          shouldn't be taken too seriously, as this is a very narrow test, which like all such
+          microbenchmarks aren't representative of more complex codebases. However, if you're
+          building numerical code that runs many iterations in a tight inner loop, it's worth
+          manually peering at the produced assembly code to see if you can hand-optimize it.</para>
           </sect3>
         </sect2>
 
         <sect2 id="debugging-native-code-binaries">
-          <title>Debugging native code binaries</title>
+          <title>Debugging Native Code Binaries</title>
 
-          <para>The native code compiler builds executables that can be
-          debugged using conventional system debuggers such as GNU
-          <command moreinfo="none">gdb</command> You need to compile your libraries with the
-          <literal moreinfo="none">-g</literal> option to add the debug information to the
-          output, just as you need to with C compilers.</para>
+          <para>The native code compiler builds executables that can be debugged using conventional
+        system debuggers such as GNU <command moreinfo="none">gdb</command>, You need to compile
+        your libraries with the <literal moreinfo="none">-g</literal> option to add the debug
+        information to the output, just as you need to with C compilers.</para>
 
           <para>Extra debugging information is inserted into the output
           assembly when the library is compiled in debug mode. These include
@@ -861,18 +840,16 @@ let () =
           <sect3 id="understanding-name-mangling">
             <title>Understanding name mangling</title>
 
-            <para>So how do you refer to OCaml functions in an interactive
-            debugger like <command moreinfo="none">gdb</command>? The first thing you need to
-            know is how function names compile down to C symbols; a procedure
-            generally called <emphasis>name mangling</emphasis>.</para>
+            <para>So how do you refer to OCaml functions in an interactive debugger like <command
+            moreinfo="none">gdb</command>? The first thing you need to know is how function names
+          compile down to C symbols, a procedure generally called <emphasis>name
+          mangling</emphasis>.</para>
 
-            <para>Each OCaml source file is compiled into a native object file
-            that must export a unique set of symbols to comply with the C
-            binary interface. This means that any OCaml values that may be
-            used by another compilation unit need to be mapped into a symbol
-            name. This mapping has to account for OCaml language features such
-            as nested modules, anonymous functions and variable names that
-            shadow each other.</para>
+            <para>Each OCaml source file is compiled into a native object file that must export a
+          unique set of symbols to comply with the C binary interface. This means that any OCaml
+          values that may be used by another compilation unit need to be mapped into a symbol name.
+          This mapping has to account for OCaml language features such as nested modules, anonymous
+          functions, and variable names that shadow one another.</para>
 
             <para>The conversion follows some straightforward rules for named
             variables and functions:</para>
@@ -899,10 +876,9 @@ let () =
               </listitem>
             </itemizedlist>
 
-            <para>Anonymous functions are hard to predict without inspecting
-            intermediate compiler output. If you need to debug them it's
-            usually easier to modify the source code to let-bind the anonymous
-            function to a variable name.</para>
+            <para>Anonymous functions are hard to predict without inspecting intermediate compiler
+          output. If you need to debug them, it's usually easier to modify the source code to
+          let-bind the anonymous function to a variable name.</para>
           </sect3>
 
           <sect3 id="interactive-breakpoints-with-the-gnu-debugger">
@@ -912,16 +888,14 @@ let () =
             debugging using GNU <command moreinfo="none">gdb</command>.</para>
 
             <caution>
-              <title>Beware gdb on MacOS X</title>
+              <title>Beware gdb on Mac OS X</title>
 
-              <para>The examples here assume that you are running
-              <command moreinfo="none">gdb</command> on either Linux or FreeBSD. MacOS X 10.8
-              does have <command moreinfo="none">gdb</command> installed, but it's a rather
-              quirky experience that doesn't reliably interpret the debugging
-              information contained in the native binaries. This can result in
-              function names showing up as raw symbols such as
-              <literal moreinfo="none">.L101</literal> instead of their more human-readable
-              form.</para>
+              <para>The examples here assume that you are running <command moreinfo="none"
+              >gdb</command> on either Linux or FreeBSD. Mac OS X 10.8 does have <command
+              moreinfo="none">gdb</command> installed, but it's a rather quirky experience that
+            doesn't reliably interpret the debugging information contained in the native binaries.
+            This can result in function names showing up as raw symbols such as <literal
+              moreinfo="none">.L101</literal> instead of their more human-readable form.</para>
 
               <para>For OCaml 4.1, we'd recommend you do native code debugging
               on an alternate platform such as Linux, or manually look at the
@@ -929,10 +903,9 @@ let () =
               OCaml functions.</para>
             </caution>
 
-            <para>Let's write a mutually recursive function that selects
-            alternating values from a list. This isn't tail recursive and so
-            our stack size will grow as we single-step through the
-            execution.</para>
+            <para>Let's write a mutually recursive function that selects alternating values from a
+          list. This isn't tail recursive, and so our stack size will grow as we single-step through
+          the execution:</para>
 
             <para role="sourcecode">OCaml:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/alternate_list.ml">back-end/alternate_list.ml</ulink></para>
@@ -964,8 +937,8 @@ let () =
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./alternate_list.native -ascii</userinput>
 <computeroutput moreinfo="none">1,3,5,7,9</computeroutput></programlisting>
 
-            <para>Now we can run this interactively within
-            <command moreinfo="none">gdb</command>.</para>
+            <para>Now we can run this interactively within <command moreinfo="none"
+          >gdb</command>:</para>
 
             <para role="sourcecode">Terminal:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/gdb_alternate0.out">back-end/gdb_alternate0.out</ulink></para>
@@ -983,9 +956,9 @@ let () =
 <computeroutput moreinfo="none">Reading symbols from /home/avsm/alternate_list.native...done.</computeroutput>
 <computeroutput moreinfo="none">(gdb)</computeroutput></programlisting>
 
-            <para>The <command moreinfo="none">gdb</command> prompt lets you enter debug
-            directives. Let's set the program to break just before the first
-            call to <literal moreinfo="none">take</literal>.</para>
+            <para>The <command moreinfo="none">gdb</command> prompt lets you enter debug directives.
+          Let's set the program to break just before the first call to <literal moreinfo="none"
+            >take</literal>:</para>
 
             <para role="sourcecode">Terminal:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/gdb_alternate1.out">back-end/gdb_alternate1.out</ulink></para>
@@ -999,8 +972,7 @@ let () =
             press the <literal moreinfo="none">&lt;tab&gt;</literal> key to see a list of
             possible completions.</para>
 
-            <para>Once you've set the breakpoint, start the program
-            executing.</para>
+            <para>Once you've set the breakpoint, start the program executing:</para>
 
             <para role="sourcecode">Terminal:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/gdb_alternate2.out">back-end/gdb_alternate2.out</ulink></para>
@@ -1013,10 +985,9 @@ let () =
 <computeroutput moreinfo="none">Breakpoint 1, camlAlternate_list__take_69242 () at alternate_list.ml:5</computeroutput>
 <computeroutput moreinfo="none">4         function</computeroutput></programlisting>
 
-            <para>The binary has run until the first take invocation and
-            stopped, waiting for further instructions. GDB has lots of
-            features, so let's continue the program and check the stacktrace
-            after a couple of recursions.</para>
+            <para>The binary has run until the first take invocation and stopped, waiting for
+          further instructions. GDB has lots of features, so let's continue the program and check
+          the stacktrace after a couple of recursions:</para>
 
             <para role="sourcecode">Terminal:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/gdb_alternate3.out">back-end/gdb_alternate3.out</ulink></para>
@@ -1047,13 +1018,13 @@ let () =
 <computeroutput moreinfo="none">1,3,5,7,9</computeroutput>
 <computeroutput moreinfo="none">[Inferior 1 (process 3546) exited normally]</computeroutput></programlisting>
 
-            <para>The <literal moreinfo="none">cont</literal> command resumes execution after
-            a breakpoint has paused it, <literal moreinfo="none">bt</literal> displays a stack
-            backtrace, and <literal moreinfo="none">clear</literal> deletes the breakpoint so
-            that the application can execute until completion. GDB has a host
-            of other features we won't cover here, but you can view more
-            guidelines via Mark Shinwell's talk on <ulink url="http://www.youtube.com/watch?v=NF2WpWnB-nk&lt;">"Real-world
-            debugging in OCaml"</ulink>.</para>
+            <para>The <literal moreinfo="none">cont</literal> command resumes execution after a
+          breakpoint has paused it, <literal moreinfo="none">bt</literal> displays a stack
+          backtrace, and <literal moreinfo="none">clear</literal> deletes the breakpoint so that the
+          application can execute until completion. GDB has a host of other features we won't cover
+          here, but you can view more guidelines via Mark Shinwell's talk on <ulink
+            url="http://www.youtube.com/watch?v=NF2WpWnB-nk&lt;">"Real-world debugging in
+            OCaml."</ulink></para>
 
             <para>One very useful feature of OCaml native code is that C and
             OCaml both share the same stack. This means that GDB backtraces
@@ -1065,7 +1036,7 @@ let () =
         </sect2>
 
         <sect2 id="profiling-native-code">
-          <title>Profiling native code</title>
+          <title>Profiling Native Code</title>
 
           <para>The recording and analysis of where your application spends
           its execution time is known as <emphasis>performance
@@ -1079,13 +1050,13 @@ let () =
 
           <itemizedlist>
             <listitem>
-              <para>GNU <command moreinfo="none">gprof</command> to measure execution time and
-              call graphs.</para>
+              <para>GNU <command moreinfo="none">gprof</command> to measure execution time and call
+            graphs</para>
             </listitem>
 
             <listitem>
-              <para>The <ulink url="https://perf.wiki.kernel.org/">Perf</ulink> profiling
-              framework in modern versions of Linux.</para>
+              <para>The <ulink url="https://perf.wiki.kernel.org/">Perf</ulink> profiling framework
+            in modern versions of Linux</para>
             </listitem>
           </itemizedlist>
 
@@ -1097,10 +1068,9 @@ let () =
           <sect3 id="gprof">
             <title>Gprof</title>
 
-            <para><command moreinfo="none">gprof</command> produces an execution profile of an
-            OCaml program by recording a call graph of which functions call
-            each other, and recording the time these calls take during the
-            program execution.</para>
+            <para><command moreinfo="none">gprof</command> produces an execution profile of an OCaml
+          program by recording a call graph of which functions call one another, and recording the
+          time these calls take during the program execution.</para>
 
             <para>Getting precise information out of <command moreinfo="none">gprof</command>
             requires passing the <literal moreinfo="none">-p</literal> flag to the native code
@@ -1120,9 +1090,9 @@ let () =
             information within the binary to record information
             accurately.</para>
 
-            <para>Run Perf on a compiled binary to record information first.
-            We'll use our write barrier benchmark from earlier which measures
-            memory allocation versus in-place modification.</para>
+            <para>Run Perf on a compiled binary to record information first. We'll use our write
+          barrier benchmark from earlier which measures memory allocation versus in-place
+          modification:</para>
 
             <para role="sourcecode">Terminal:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/perf_record.out">back-end/perf_record.out</ulink></para>
@@ -1148,8 +1118,7 @@ let () =
 <computeroutput moreinfo="none">[ perf record: Woken up 11 times to write data ]</computeroutput>
 <computeroutput moreinfo="none">[ perf record: Captured and wrote 2.722 MB perf.data (~118926 samples) ]</computeroutput></programlisting>
 
-            <para>When this completes, you can interactively explore the
-            results.</para>
+            <para>When this completes, you can interactively explore the results:</para>
 
             <para role="sourcecode">Terminal:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/perf_report.out">back-end/perf_report.out</ulink></para>
@@ -1171,8 +1140,7 @@ let () =
             read more on the <ulink url="http://perf.wiki.kernel.org">homepage</ulink>.</para>
 
             <sidebar>
-              <title>Using the frame-pointer to get more accurate
-              traces</title>
+              <title>Using the Frame Pointer to Get More Accurate Traces</title>
 
               <para>Although Perf doesn't require adding in explicit probes to
               the binary, it does need to understand how to unwind function
@@ -1192,8 +1160,8 @@ let () =
               optional feature that can be used to improve the resolution of
               Perf traces.</para>
 
-              <para>OPAM provides a compiler switch that compiles OCaml with
-              the frame pointer activated.</para>
+              <para>OPAM provides a compiler switch that compiles OCaml with the frame pointer
+            activated:</para>
 
               <para role="sourcecode">Terminal:
               <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/opam_switch.out">back-end/opam_switch.out</ulink></para>
@@ -1210,7 +1178,7 @@ let () =
         </sect2>
 
         <sect2 id="embedding-native-code-in-c">
-          <title>Embedding native code in C</title>
+          <title>Embedding Native Code in C</title>
 
           <para>The native code compiler normally links a complete executable,
           but can also output a standalone native object file just as the
@@ -1221,8 +1189,8 @@ let () =
           bytecode one and is installed as <literal moreinfo="none">libasmrun.a</literal> in
           the OCaml standard library directory.</para>
 
-          <para>Try this custom linking by using the same source files from
-          the bytecode embedding example earlier in this chapter.</para>
+          <para>Try this custom linking by using the same source files from the bytecode embedding
+        example earlier in this chapter:</para>
 
           <para role="sourcecode">Terminal:
           <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-embed/build_embed_native.out">back-end-embed/build_embed_native.out</ulink></para>
@@ -1236,15 +1204,14 @@ let () =
 <computeroutput moreinfo="none">hello embedded world 2</computeroutput>
 <computeroutput moreinfo="none">After calling OCaml</computeroutput></programlisting>
 
-          <para>The <literal moreinfo="none">embed_native.o</literal> is a standalone object
-          file that has no further references to OCaml code beyond the runtime
-          library, just as with the bytecode runtime. Do remember that the
-          link order of the libraries is significant on modern GNU toolchains
-          (especially as used in Ubuntu 11.10 upwards) that resolve symbols
-          from left-to-right in a single pass.</para>
+          <para>The <literal moreinfo="none">embed_native.o</literal> is a standalone object file
+        that has no further references to OCaml code beyond the runtime library, just as with the
+        bytecode runtime. Do remember that the link order of the libraries is significant on modern
+        GNU toolchains (especially as used in Ubuntu 11.10 upwards) that resolve symbols from left
+        to right in a single pass.</para>
 
           <tip>
-            <title>Activating the debug runtime</title>
+            <title>Activating the Debug Runtime</title>
 
             <para>Despite your best efforts, it is easy to introduce a bug
             into some components such as C bindings that causes heap
@@ -1255,8 +1222,8 @@ let () =
             Running these extra checks will abort the program nearer the point
             of corruption and help isolate the bug in the C code.</para>
 
-            <para>To use the debug library, just link your program with the
-            <literal moreinfo="none">-runtime-variant d</literal> flag.</para>
+            <para>To use the debug library, just link your program with the <literal moreinfo="none"
+            >-runtime-variant d</literal> flag:</para>
 
             <para role="sourcecode">Terminal:
             <ulink role="orm:hideurl:ital" url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-embed/run_debug_hello.out">back-end-embed/run_debug_hello.out</ulink></para>
@@ -1282,7 +1249,7 @@ let () =
       </sect1>
 
       <sect1 id="summarizing-the-file-extensions">
-        <title>Summarizing the file extensions</title>
+        <title>Summarizing the File Extensions</title>
 
         <para>We've seen how the compiler uses intermediate files to store
         various stages of the compilation toolchain. Here's a cheat sheet of
