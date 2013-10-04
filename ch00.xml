@@ -304,8 +304,6 @@
       instructions in <xref linkend="installation"/> carefully.<indexterm
           class="singular">
           <primary>installation instructions</primary>
-
-          <secondary>current development environment</secondary>
         </indexterm><indexterm class="singular">
           <primary>OCaml</primary>
 
