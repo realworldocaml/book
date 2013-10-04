@@ -470,7 +470,7 @@
       </indexterm><indexterm class="singular">
         <primary>List module</primary>
 
-        <secondary>example use of</secondary>
+        <secondary>creating tables with</secondary>
       </indexterm><indexterm class="startofrange" id="Llistmod">
         <primary>lists</primary>
 
@@ -667,7 +667,7 @@
       </indexterm><indexterm class="singular">
         <primary>List module</primary>
 
-        <secondary>String.concat and ^</secondary>
+        <secondary>String.concat and</secondary>
       </indexterm></para>
 
     <note>
@@ -792,9 +792,9 @@
 
             <secondary>List.reduce</secondary>
           </indexterm><indexterm class="singular">
-            <primary>List module</primary>
+            <primary>lists</primary>
 
-            <secondary>combining list elements with</secondary>
+            <secondary>combining elements in</secondary>
           </indexterm></para>
 
         <para>Here's the type signature:</para>
@@ -832,9 +832,9 @@
         attention to a subset of the values on your list. The <literal
         moreinfo="none">List.filter</literal> function is one way of doing
         that:<indexterm class="singular">
-            <primary>List module</primary>
+            <primary>lists</primary>
 
-            <secondary>filtering values with</secondary>
+            <secondary>filtering values in</secondary>
           </indexterm><indexterm class="singular">
             <primary>values</primary>
 
@@ -918,9 +918,9 @@
 
             <secondary>partitioning with List.partition_tf</secondary>
           </indexterm><indexterm class="singular">
-            <primary>List module</primary>
+            <primary>lists</primary>
 
-            <secondary>partitioning elements with</secondary>
+            <secondary>partitioning elements in</secondary>
           </indexterm><indexterm class="singular">
             <primary>List module</primary>
 

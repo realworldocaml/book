@@ -670,9 +670,7 @@
       <para>Where tuples let you combine a fixed number of items, potentially
       of different types, lists let you hold any number of items of the same
       type. Consider the following example:<indexterm class="startofrange"
-          id="lists">
-          <primary>lists</primary>
-        </indexterm><indexterm class="startofrange" id="DSlists">
+          id="DSlists">
           <primary>data structures</primary>
 
           <secondary>lists</secondary>
@@ -708,7 +706,7 @@
             class="singular">
             <primary>lists</primary>
 
-            <secondary>List module</secondary>
+            <seealso>List module</seealso>
           </indexterm> For example, this is how we compute the length of a
         list:</para>
 
@@ -1111,8 +1109,7 @@
         functions found in the <literal moreinfo="none">List</literal> module.
         But it's good to know how to use recursion when you need to do
         something new.<indexterm class="endofrange"
-        startref="DSlists"/><indexterm class="endofrange"
-        startref="lists"/></para>
+        startref="DSlists"/></para>
       </sect3>
     </sect2>
 
