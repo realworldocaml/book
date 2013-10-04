@@ -191,6 +191,8 @@
     <para>The <literal moreinfo="none">let</literal> syntax can also be used
     to define a function:<indexterm class="singular">
         <primary>let syntax</primary>
+
+        <secondary>function definition with</secondary>
       </indexterm><indexterm class="singular">
         <primary>functions</primary>
 
@@ -1192,6 +1194,8 @@
             <primary>nested let binding</primary>
           </indexterm><indexterm class="singular">
             <primary>let syntax</primary>
+
+            <secondary>nested let binding</secondary>
           </indexterm></para>
 
         <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
