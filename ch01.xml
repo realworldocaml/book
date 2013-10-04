@@ -769,6 +769,10 @@
         <para>In addition to constructing lists using brackets, we can use the
         operator <literal moreinfo="none">::</literal> for adding elements to
         the front of a list:<indexterm class="singular">
+            <primary>operators</primary>
+
+            <secondary>: : operator</secondary>
+          </indexterm><indexterm class="singular">
             <primary>lists</primary>
 
             <secondary>operator : :</secondary>
