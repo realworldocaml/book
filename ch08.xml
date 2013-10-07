@@ -644,7 +644,13 @@ let () = &lt;expr2&gt; in
     recursive functions. Nonetheless, explicit <literal
     moreinfo="none">for</literal> and <literal moreinfo="none">while</literal>
     loops are both more concise and more idiomatic when programming
-    imperatively.</para>
+    imperatively.<indexterm class="singular">
+        <primary>looping constructs</primary>
+      </indexterm><indexterm class="singular">
+        <primary>while loops</primary>
+      </indexterm><indexterm class="singular">
+        <primary>for loops</primary>
+      </indexterm></para>
 
     <para>The <literal moreinfo="none">for</literal> loop is the simpler of
     the two. Indeed, we've already seen the <literal
@@ -734,7 +740,17 @@ let () = &lt;expr2&gt; in
     be added and removed from the list in constant time. Core defines a
     doubly-linked list (the module is called <literal
     moreinfo="none">Doubly_linked</literal>), but we'll define our own linked
-    list library as an illustration.</para>
+    list library as an illustration.<indexterm class="singular">
+        <primary>lists</primary>
+
+        <secondary>doubly-linked lists</secondary>
+      </indexterm><indexterm class="singular">
+        <primary>doubly-linked lists</primary>
+      </indexterm><indexterm class="startofrange" id="IPdoublink">
+        <primary>imperative programming</primary>
+
+        <secondary>doubly-linked lists</secondary>
+      </indexterm></para>
 
     <para>Here's the <literal moreinfo="none">mli</literal> of the module
     we'll build:</para>
@@ -832,7 +848,16 @@ let prev elt = elt.prev</programlisting>
       is possible to follow a nontrivial sequence of pointers that closes in
       on itself. In general, building cyclic data structures requires the use
       of side effects. This is done by constructing the data elements first,
-      and then adding cycles using assignment afterward.</para>
+      and then adding cycles using assignment afterward.<indexterm
+          class="singular">
+          <primary>let rec</primary>
+        </indexterm><indexterm class="singular">
+          <primary>data structures</primary>
+
+          <secondary>cyclic</secondary>
+        </indexterm><indexterm class="singular">
+          <primary>cyclic data structures</primary>
+        </indexterm></para>
 
       <para>There is an exception to this, though: you can construct
       fixed-size cyclic data-structures using <literal moreinfo="none">let
@@ -868,7 +893,11 @@ let prev elt = elt.prev</programlisting>
 
       <para>Now, we'll start considering operations that mutate the list,
       starting with <literal moreinfo="none">insert_first</literal>, which
-      inserts an element at the front of the list:</para>
+      inserts an element at the front of the list:<indexterm class="singular">
+          <primary>elements</primary>
+
+          <secondary>inserting in lists</secondary>
+        </indexterm></para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dlist.ml">imperative-programming/dlist.ml</ulink>
@@ -893,7 +922,11 @@ let prev elt = elt.prev</programlisting>
       moreinfo="none">begin ... end</literal>. We could have used parentheses
       for the same purpose. Without some kind of bracketing, the final
       assignment would incorrectly become part of the <literal
-      moreinfo="none">None</literal> case.</para>
+      moreinfo="none">None</literal> case.<indexterm class="singular">
+          <primary>elements</primary>
+
+          <secondary>defining new</secondary>
+        </indexterm></para>
 
       <para>We can use <literal moreinfo="none">insert_after</literal> to
       insert elements later in the list. <literal
@@ -956,7 +989,18 @@ let prev elt = elt.prev</programlisting>
       modules like Core's <literal moreinfo="none">Doubly_linked</literal>.
       You should use imperative data structures from a well-designed library
       when you can. And when you can't, you should make sure to put great care
-      into your error handling.</para>
+      into your error handling.<indexterm class="singular">
+          <primary>imperative programming</primary>
+
+          <secondary>drawbacks of</secondary>
+        </indexterm><indexterm class="singular">
+          <primary>Doubly-linked module</primary>
+        </indexterm><indexterm class="singular">
+          <primary>error handling</primary>
+
+          <secondary sortas="imperative">and imperative data
+          structures</secondary>
+        </indexterm></para>
     </sect2>
 
     <sect2 id="iteration-functions">
@@ -967,7 +1011,13 @@ let prev elt = elt.prev</programlisting>
       <literal moreinfo="none">iter</literal>, <literal
       moreinfo="none">map</literal>, and <literal
       moreinfo="none">fold</literal>, which let you concisely express common
-      iteration patterns.</para>
+      iteration patterns.<indexterm class="singular">
+          <primary>functions</primary>
+
+          <secondary>iteration functions</secondary>
+        </indexterm><indexterm class="singular">
+          <primary>iteration functions</primary>
+        </indexterm></para>
 
       <para><literal moreinfo="none">Dlist</literal> has two such iterators:
       <literal moreinfo="none">iter</literal>, the goal of which is to call a
@@ -1009,7 +1059,8 @@ let find_el t ~f =
       a more complete interface and has more of the tricky corner cases worked
       out. Nonetheless, this example should serve to demonstrate some of the
       techniques you can use to build nontrivial imperative data structure in
-      OCaml, as well as some of the pitfalls.</para>
+      OCaml, as well as some of the pitfalls.<indexterm class="endofrange"
+      startref="IPdoublink"/></para>
     </sect2>
   </sect1>
 
@@ -1021,7 +1072,21 @@ let find_el t ~f =
     the performance of your code. Such side effects are sometimes called
     <emphasis>benign effects</emphasis>, and they are a useful way of
     leveraging OCaml's imperative features while still maintaining most of the
-    benefits of pure programming.</para>
+    benefits of pure programming.<indexterm class="singular">
+        <primary>lazy keyword</primary>
+      </indexterm><indexterm class="singular">
+        <primary>side effects</primary>
+      </indexterm><indexterm class="singular">
+        <primary>laziness</primary>
+      </indexterm><indexterm class="singular">
+        <primary>benign effects</primary>
+
+        <secondary>laziness</secondary>
+      </indexterm><indexterm class="singular">
+        <primary>imperative programming</primary>
+
+        <secondary>benign effects and</secondary>
+      </indexterm></para>
 
     <para>One of the simplest benign effects is <emphasis>laziness</emphasis>.
     A lazy value is one that is not computed until it is actually needed. In
@@ -1083,7 +1148,9 @@ let find_el t ~f =
 
     <para>We can create a lazy value from a thunk, i.e., a function that takes
     a unit argument. Wrapping an expression in a thunk is another way to
-    suspend the computation of an expression:</para>
+    suspend the computation of an expression:<indexterm class="singular">
+        <primary>thunks</primary>
+      </indexterm></para>
 
     <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/lazy.topscript">imperative-programming/lazy.topscript</ulink>
@@ -1145,7 +1212,15 @@ let find_el t ~f =
       <para>Another benign effect is <emphasis>memoization</emphasis>. A
       memoized function remembers the result of previous invocations of the
       function so that they can be returned without further computation when
-      the same arguments are presented again.</para>
+      the same arguments are presented again.<indexterm class="singular">
+          <primary>memoization</primary>
+
+          <secondary>function of</secondary>
+        </indexterm><indexterm class="startofrange" id="BEmem">
+          <primary>benign effects</primary>
+
+          <secondary>memoization</secondary>
+        </indexterm></para>
 
       <para>Here's a function that takes as an argument an arbitrary
       single-argument function and returns a memoized version of that
@@ -1181,7 +1256,11 @@ let find_el t ~f =
       result in <literal moreinfo="none">table</literal>. Note that <literal
       moreinfo="none">table</literal> doesn't go out of scope as long as the
       function returned by <literal moreinfo="none">memoize</literal> is in
-      scope.</para>
+      scope.<indexterm class="singular">
+          <primary>memoization</primary>
+
+          <secondary>benefits and drawbacks of</secondary>
+        </indexterm></para>
 
       <para>Memoization can be useful whenever you have a function that is
       expensive to recompute and you don't mind caching old values
@@ -1196,11 +1275,22 @@ let find_el t ~f =
       single-character changes (including letter switches, insertions and
       deletions) required to convert one string to the other. This kind of
       distance metric can be useful for a variety of approximate string
-      matching problems, like spell checkers.</para>
+      matching problems, like spell checkers.<indexterm class="singular">
+          <primary>string matching</primary>
+        </indexterm><indexterm class="singular">
+          <primary>Levenshtein distance</primary>
+        </indexterm><indexterm class="singular">
+          <primary>edit distance</primary>
+        </indexterm></para>
 
       <para>Consider the following code for computing the edit distance.
       Understanding the algorithm isn't important here, but you should pay
-      attention to the structure of the recursive calls:</para>
+      attention to the structure of the recursive calls:<indexterm
+          class="singular">
+          <primary>memoization</primary>
+
+          <secondary>example of</secondary>
+        </indexterm></para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/memo.topscript">imperative-programming/memo.topscript</ulink>
@@ -1302,7 +1392,13 @@ let find_el t ~f =
       The Fibonacci sequence by definition starts out with two <literal
       moreinfo="none">1</literal>'s, with every subsequent element being the
       sum of the previous two. The classic recursive definition of Fibonacci
-      is as follows:</para>
+      is as follows:<indexterm class="singular">
+          <primary>programming</primary>
+
+          <secondary>dynamic programming</secondary>
+        </indexterm><indexterm class="singular">
+          <primary>dynamic programming</primary>
+        </indexterm></para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">imperative-programming/fib.topscript</ulink>
@@ -1544,7 +1640,9 @@ let find_el t ~f =
         <literal moreinfo="none">memo_rec</literal> using <literal
         moreinfo="none">let rec</literal>, as we did for <literal
         moreinfo="none">make_rec</literal> earlier. Here's code that tries to
-        do just that:</para>
+        do just that:<indexterm class="singular">
+            <primary>let rec</primary>
+          </indexterm></para>
 
         <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/letrec.topscript">imperative-programming/letrec.topscript</ulink>
@@ -1632,7 +1730,7 @@ let find_el t ~f =
 
         <para>Laziness is more constrained than explicit mutation, and so in
         some cases can lead to code whose behavior is easier to think
-        about.</para>
+        about.<indexterm class="endofrange" startref="BEmem"/></para>
       </note>
     </sect2>
   </sect1>
@@ -1647,7 +1745,15 @@ let find_el t ~f =
     also operations that interact with the world outside of your program. An
     important example of this kind of interaction is I/O, i.e., operations for
     reading or writing data to things like files, terminal input and output,
-    and network sockets.</para>
+    and network sockets.<indexterm class="singular">
+        <primary>I/O (input/output) operations</primary>
+
+        <secondary>terminal I/O</secondary>
+      </indexterm><indexterm class="startofrange" id="IPinpout">
+        <primary>imperative programming</primary>
+
+        <secondary>input and output</secondary>
+      </indexterm></para>
 
     <para>There are multiple I/O libraries in OCaml. In this section we'll
     discuss OCaml's buffered I/O library that can be used through the <literal
@@ -1672,7 +1778,19 @@ let find_el t ~f =
       <literal moreinfo="none">Out_channel</literal> modules only have direct
       support for channels corresponding to files and terminals; other kinds
       of channels can be created through the <literal
-      moreinfo="none">Unix</literal> module.</para>
+      moreinfo="none">Unix</literal> module.<indexterm class="singular">
+          <primary>Out_channel module</primary>
+
+          <secondary>Out_channel.stderr</secondary>
+        </indexterm><indexterm class="singular">
+          <primary>Out_channel module</primary>
+
+          <secondary>Out_channel.stdout</secondary>
+        </indexterm><indexterm class="singular">
+          <primary>In_channel module</primary>
+
+          <secondary>In-channel.stdin</secondary>
+        </indexterm></para>
 
       <para>We'll start our discussion of I/O by focusing on the terminal.
       Following the UNIX model, communication with the terminal is organized
@@ -1800,7 +1918,21 @@ let () =
       <emphasis>format string</emphasis> that describe what to print and how
       to format it, as well as arguments to be printed, as determined by the
       formatting directives embedded in the format string. So, for example, we
-      can write:</para>
+      can write:<indexterm class="singular">
+          <primary>strings</primary>
+
+          <secondary>format strings</secondary>
+        </indexterm><indexterm class="singular">
+          <primary>format strings</primary>
+        </indexterm><indexterm class="singular">
+          <primary>printf</primary>
+
+          <secondary>function</secondary>
+        </indexterm><indexterm class="singular">
+          <primary>I/O (input/output) operations</primary>
+
+          <secondary>formatted output</secondary>
+        </indexterm></para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/printf.topscript">imperative-programming/printf.topscript</ulink>
@@ -1919,7 +2051,27 @@ let () =
 
       <para><literal moreinfo="none">printf</literal>'s formatting directives
       offer a significant amount of control, allowing you to specify things
-      like:</para>
+      like:<indexterm class="singular">
+          <primary>binary numbers</primary>
+
+          <secondary>formatting with printf</secondary>
+        </indexterm><indexterm class="singular">
+          <primary>hex numbers</primary>
+
+          <secondary>formating with printf</secondary>
+        </indexterm><indexterm class="singular">
+          <primary>decimals</primary>
+
+          <secondary>formating with printf</secondary>
+        </indexterm><indexterm class="singular">
+          <primary>padding</primary>
+
+          <secondary>formatting with printf</secondary>
+        </indexterm><indexterm class="singular">
+          <primary>alignment</primary>
+
+          <secondary>formatting with printf</secondary>
+        </indexterm></para>
 
       <itemizedlist>
         <listitem>
@@ -1942,7 +2094,13 @@ let () =
 
       <para>There are also <literal moreinfo="none">printf</literal>-style
       functions that target outputs other than <literal
-      moreinfo="none">stdout</literal>, including:</para>
+      moreinfo="none">stdout</literal>, including:<indexterm class="singular">
+          <primary>sprintf function</primary>
+        </indexterm><indexterm class="singular">
+          <primary>fprintf function</primary>
+        </indexterm><indexterm class="singular">
+          <primary>eprintf function</primary>
+        </indexterm></para>
 
       <itemizedlist>
         <listitem>
@@ -1974,7 +2132,15 @@ let () =
       moreinfo="none">out_channel</literal>s is for working with files. Here's
       a couple of functions, one that creates a file full of numbers, and the
       other that reads in such a file and returns the sum of those
-      numbers:</para>
+      numbers:<indexterm class="singular">
+          <primary>files</primary>
+
+          <secondary>file I/O</secondary>
+        </indexterm><indexterm class="singular">
+          <primary>I/O (input/output) operations</primary>
+
+          <secondary>filel I/O</secondary>
+        </indexterm></para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/file.topscript">imperative-programming/file.topscript</ulink>
@@ -2113,7 +2279,8 @@ let () =
       <para>This is just a taste of the functionality of <literal
       moreinfo="none">In_channel</literal> and <literal
       moreinfo="none">Out_channel</literal>. To get a fuller understanding,
-      you should review the API documentation for those modules.</para>
+      you should review the API documentation for those modules.<indexterm
+      class="endofrange" startref="IPinpout"/></para>
     </sect2>
   </sect1>
 
@@ -2127,7 +2294,22 @@ let () =
     strict language, when you bind an identifier to the result of some
     expression, the expression is evaluated before the variable is defined.
     Similarly, if you call a function on a set of arguments, those arguments
-    are evaluated before they are passed to the function.</para>
+    are evaluated before they are passed to the function.<indexterm
+        class="singular">
+        <primary>strict evaluation</primary>
+      </indexterm><indexterm class="singular">
+        <primary>expressions</primary>
+
+        <secondary>order of evaluation</secondary>
+      </indexterm><indexterm class="singular">
+        <primary>evaluation, order of</primary>
+      </indexterm><indexterm class="singular">
+        <primary>order of evaluation</primary>
+      </indexterm><indexterm class="singular">
+        <primary>imperative programming</primary>
+
+        <secondary>order of evaluation</secondary>
+      </indexterm></para>
 
     <para>Consider the following simple example. Here, we have a collection of
     angles and we want to determine if any of them have a negative <literal
@@ -2226,7 +2408,20 @@ let () =
   <sect1 id="side-effects-and-weak-polymorphism">
     <title>Side Effects and Weak Polymorphism</title>
 
-    <para>Consider the following simple, imperative function:</para>
+    <para>Consider the following simple, imperative function:<indexterm
+        class="singular">
+        <primary>polymorphism</primary>
+
+        <secondary>weak polymorphism</secondary>
+      </indexterm><indexterm class="singular">
+        <primary>weak polymorphism</primary>
+      </indexterm><indexterm class="singular">
+        <primary>side effects</primary>
+      </indexterm><indexterm class="startofrange" id="IPsideweak">
+        <primary>imperative programming</primary>
+
+        <secondary>side effects and weak polymorphism</secondary>
+      </indexterm></para>
 
     <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/weak.topscript">imperative-programming/weak.topscript</ulink>
@@ -2334,7 +2529,9 @@ let () =
       OCaml uses a rough rule to flag cases that don't introduce any
       persistent mutable cells, and to only infer polymorphic types in those
       cases. This rule is called <emphasis>the value
-      restriction</emphasis>.</para>
+      restriction</emphasis>.<indexterm class="singular">
+          <primary>value restriction</primary>
+        </indexterm></para>
 
       <para>The core of the value restriction is the observation that some
       kinds of expressions, which we'll refer to as <emphasis>simple
@@ -2443,7 +2640,9 @@ let () =
       applied functions. A partially applied function, like any function
       application, is not a simple value, and as such, functions created by
       partial application are sometimes less general than you might
-      expect.</para>
+      expect.<indexterm class="singular">
+          <primary>partiall application</primary>
+        </indexterm></para>
 
       <para>Consider the <literal moreinfo="none">List.init</literal>
       function, which is used for creating lists where each element is created
@@ -2610,7 +2809,12 @@ let () =
       marking the type variable in question as <emphasis>covariant</emphasis>.
       We'll learn more about covariance and contravariance in <xref
       linkend="objects"/>, but for now, you can think of it as an annotation
-      which can be put in the interface of a pure data structure.</para>
+      which can be put in the interface of a pure data structure.<indexterm
+          class="singular">
+          <primary>datatypes</primary>
+
+          <secondary>covariant</secondary>
+        </indexterm></para>
 
       <para>In particular, if we replace <literal moreinfo="none">type 'a
       t</literal> in the interface with <literal moreinfo="none">type +'a
@@ -2652,7 +2856,7 @@ let () =
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">imperative-programming/value_restriction.topscript</ulink>
-      (part 14)</para>
+      (part 14)<indexterm class="endofrange" startref="IPsideweak"/></para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
           moreinfo="none"># </prompt><userinput moreinfo="none">identity Concat_list.empty;;</userinput>
@@ -2663,7 +2867,12 @@ let () =
   <sect1 id="summary">
     <title>Summary</title>
 
-    <para>This chapter has covered quite a lot of ground, including:</para>
+    <para>This chapter has covered quite a lot of ground, including:<indexterm
+        class="singular">
+        <primary>imperative programming</primary>
+
+        <secondary>overview of</secondary>
+      </indexterm></para>
 
     <itemizedlist>
       <listitem>
