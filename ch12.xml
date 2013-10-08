@@ -1415,6 +1415,8 @@ end</programlisting>
       object composition instead. But regardless of who you talk to, you will
       rarely hear that multiple inheritance is great and that you should use
       it widely.<indexterm class="singular">
+          <primary>mixin patterns</primary>
+        </indexterm><indexterm class="singular">
           <primary>multiple inheritance</primary>
 
           <secondary>mixin pattern and</secondary>
@@ -1488,7 +1490,11 @@ end</programlisting>
       shape has a list of update functions to be called during animation. We
       create an <literal moreinfo="none">animated</literal> mixin to provide
       this update list and ensure that the functions in it are called regular
-      intervals when the shape is animated:</para>
+      intervals when the shape is animated:<indexterm class="singular">
+          <primary>animated shapes</primary>
+
+          <secondary>creating with mixins</secondary>
+        </indexterm></para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/shapes.ml">classes-async/shapes.ml</ulink>
@@ -1576,7 +1582,11 @@ end</programlisting>
       <para>Since the <literal moreinfo="none">linear</literal> and <literal
       moreinfo="none">harmonic</literal> mixins are only used for their side
       effects, they can be inherited multiple times within the same object to
-      produce a variety of different animations:</para>
+      produce a variety of different animations:<indexterm class="singular">
+          <primary>harmonic mixins</primary>
+        </indexterm><indexterm class="singular">
+          <primary>linear mixins</primary>
+        </indexterm></para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/shapes.ml">classes-async/shapes.ml</ulink>
