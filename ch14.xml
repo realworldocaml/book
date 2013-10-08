@@ -38,7 +38,7 @@
   declarations.<indexterm class="singular">
       <primary>command-line parsing</primary>
 
-      <secondary> Command library for</secondary>
+      <secondary>Command library for</secondary>
     </indexterm></para>
 
   <para>Command is simple to use for simple applications but also scales well
@@ -906,6 +906,8 @@ let () = Command.run command</programlisting>
     application. One way to solve this is by grouping common operations
     together and adding some hierarchy to the command-line
     interface.<indexterm class="singular">
+        <primary>subcommands, grouping of</primary>
+      </indexterm><indexterm class="singular">
         <primary>OPAM package manager</primary>
       </indexterm><indexterm class="singular">
         <primary>command-line parsing</primary>
@@ -931,7 +933,13 @@ let () = Command.run command</programlisting>
     moreinfo="none">install</literal> keywords form a logical grouping of
     commands that factor out a set of flags and arguments. This lets you
     prevent flags that are specific to a particular subcommand from leaking
-    into the general configuration space.</para>
+    into the general configuration space.<indexterm class="singular">
+        <primary>install keyword</primary>
+      </indexterm><indexterm class="singular">
+        <primary>remote keyword</primary>
+      </indexterm><indexterm class="singular">
+        <primary>config keyword</primary>
+      </indexterm></para>
 
     <para>This usually only becomes a concern when your application
     organically grows features. Luckily, it's simple to extend your
@@ -939,7 +947,9 @@ let () = Command.run command</programlisting>
     moreinfo="none">Command.basic</literal> for <literal
     moreinfo="none">Command.group</literal>, which takes an association list
     of specifications and handles the subcommand parsing and help output for
-    you:</para>
+    you:<indexterm class="singular">
+        <primary>Command.group</primary>
+      </indexterm></para>
 
     <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/group.topscript">command-line-parsing/group.topscript</ulink></para>
@@ -1070,7 +1080,15 @@ let () = Command.run command</programlisting>
     <para>The functions for generating a specification may seem like magic. In
     particular, even if you know how to use them, it's not entirely clear how
     they work, and in particular, why the types work out the way they
-    do.</para>
+    do.<indexterm class="singular">
+        <primary>specifications</primary>
+
+        <secondary>complexity of</secondary>
+      </indexterm><indexterm class="startofrange" id="CLPadv">
+        <primary>command-line parsing</primary>
+
+        <secondary>advanced control over</secondary>
+      </indexterm></para>
 
     <para>Understanding the details of how these specifications fit together
     becomes more useful as your command-line interfaces get more complex. In
@@ -1093,7 +1111,22 @@ let () = Command.run command</programlisting>
       program. In order to prevent any such mismatches, Command uses some
       interesting type machinery to guarantee they remain in sync. You don't
       have to understand this section to use the more advanced combinators,
-      but it'll help you debug type errors as you use Command more.</para>
+      but it'll help you debug type errors as you use Command more.<indexterm
+          class="singular">
+          <primary>callback function</primary>
+        </indexterm><indexterm class="singular">
+          <primary>specifications</primary>
+
+          <secondary>syncronization of</secondary>
+        </indexterm><indexterm class="singular">
+          <primary>debugging</primary>
+
+          <secondary>Command mode</secondary>
+        </indexterm><indexterm class="singular">
+          <primary>Command module</primary>
+
+          <secondary>Comand.Spec</secondary>
+        </indexterm></para>
 
       <para>The <literal moreinfo="none">Command.Spec.t</literal> type looks
       deceptively simple: <literal moreinfo="none">('a, 'b) t</literal>. You
@@ -1182,7 +1215,12 @@ let () = Command.run command</programlisting>
       <para>If you want to factor out common command-line operations, the
       <literal moreinfo="none">++</literal> operator will append two
       specifications together. Let's add some dummy verbosity and debug flags
-      to our calendar application to illustrate this.</para>
+      to our calendar application to illustrate this.<indexterm
+          class="singular">
+          <primary>specifications</primary>
+
+          <secondary>composing fragments together</secondary>
+        </indexterm></para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/cal_append.ml">command-line-parsing/cal_append.ml</ulink></para>
@@ -1242,7 +1280,9 @@ let diff ~common =
       callback functions. This makes code refactoring a breeze by using the
       compiler to spot places where you use commands. Just add a parameter to
       the common definition, run the compiler, and fix type errors until
-      everything works again.</para>
+      everything works again.<indexterm class="singular">
+          <primary>refactoring</primary>
+        </indexterm></para>
 
       <para>For example, if we remove the <literal
       moreinfo="none">verbose</literal> flag and recompile, we'll get this
@@ -1277,7 +1317,11 @@ let diff ~common =
       control the normal course of parsing by supplying a function that maps
       callback arguments to a new set of values. For instance, let's revisit
       our first calendar application that added a number of days onto a
-      supplied base date:</para>
+      supplied base date:<indexterm class="singular">
+          <primary>interactive input</primary>
+
+          <secondary>prompts for</secondary>
+        </indexterm></para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/cal_add_days.ml">command-line-parsing/cal_add_days.ml</ulink></para>
@@ -1404,7 +1448,15 @@ let () = Command.run add</programlisting>
       <para>The <literal moreinfo="none">step</literal> chaining lets you
       control the types of your callbacks very easily. This can help you match
       existing interfaces or make things more explicit by adding labeled
-      arguments:</para>
+      arguments:<indexterm class="singular">
+          <primary>callback function</primary>
+        </indexterm><indexterm class="singular">
+          <primary>arguments</primary>
+
+          <secondary>labeled arguments</secondary>
+        </indexterm><indexterm class="singular">
+          <primary>labeled arguments</primary>
+        </indexterm></para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/cal_add_labels.ml">command-line-parsing/cal_add_labels.ml</ulink></para>
@@ -1440,7 +1492,8 @@ let () = Command.run add</programlisting>
       errors with command-line arguments with similar types but different
       names and purposes. It's good form to use labels when you have a lot of
       otherwise anonymous <literal moreinfo="none">int</literal> and <literal
-      moreinfo="none">string</literal> arguments.</para>
+      moreinfo="none">string</literal> arguments.<indexterm class="endofrange"
+      startref="CLPadv"/></para>
     </sect2>
   </sect1>
 
@@ -1454,14 +1507,25 @@ let () = Command.run add</programlisting>
     middle of typing a command, and seeing the options that pop up. You've
     probably used this most often to find the files in the current directory,
     but it can actually be extended for other parts of the command,
-    too.</para>
+    too.<indexterm class="singular">
+        <primary>tab-autocompletion</primary>
+      </indexterm><indexterm class="singular">
+        <primary>autocompletion</primary>
+      </indexterm><indexterm class="singular">
+        <primary>command-line parsing</primary>
+
+        <secondary>autocompletion with bash</secondary>
+      </indexterm></para>
 
     <para>The precise mechanism for autocompletion varies depending on what
     shell you are using, but we'll assume you are using the most common one:
     <command moreinfo="none">bash</command>. This is the default interactive
     shell on most Linux distributions and Mac OS X, but you may need to switch
     to it on *BSD or Windows (when using Cygwin). The rest of this section
-    assumes that you're using <command moreinfo="none">bash</command>.</para>
+    assumes that you're using <command
+    moreinfo="none">bash</command>.<indexterm class="singular">
+        <primary>bash autocompletion</primary>
+      </indexterm></para>
 
     <para>Bash autocompletion isn't always installed by default, so check your
     OS package manager to see if you have it available.</para>
@@ -1586,7 +1650,9 @@ let () = Command.run add</programlisting>
       and is very useful when building larger command-line interfaces. Don't
       forget to install the shell fragment into your global <filename
       moreinfo="none">bash_completion.d</filename> directory if you want it to
-      be loaded in all of your login shells.</para>
+      be loaded in all of your login shells.<indexterm class="singular">
+          <primary>completion handlers</primary>
+        </indexterm></para>
 
       <note>
         <title>Installing a Generic Completion Handler</title>
@@ -1610,7 +1676,19 @@ let () = Command.run add</programlisting>
     <para>This rounds up our tour of the Command library. This isn't the only
     way to parse command-line arguments of course; there are several
     alternatives available on OPAM. Three of the most prominent ones
-    follow:</para>
+    follow:<indexterm class="singular">
+        <primary>Cmdliner</primary>
+      </indexterm><indexterm class="singular">
+        <primary>ocaml-getopt</primary>
+      </indexterm><indexterm class="singular">
+        <primary>Arg module</primary>
+      </indexterm><indexterm class="singular">
+        <primary>command-line parsing</primary>
+
+        <secondary>alternatives to Command library</secondary>
+      </indexterm><indexterm class="singular">
+        <primary>OPAM package manager</primary>
+      </indexterm></para>
 
     <variablelist>
       <varlistentry>
