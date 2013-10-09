@@ -1034,7 +1034,17 @@ let () =
       url="http://tools.ietf.org/html/rfc3986">RFC3986</ulink> and is rather
       complicated. Luckily, the <literal moreinfo="none">uri</literal> library
       provides a strongly-typed interface that takes care of much of the
-      hassle.</para>
+      hassle.<indexterm class="singular">
+          <primary>RCF3986</primary>
+        </indexterm><indexterm class="singular">
+          <primary>uniform resource locators (URLs)</primary>
+        </indexterm><indexterm class="singular">
+          <primary>Uniform Resource Identifiers (URIs)</primary>
+        </indexterm><indexterm class="singular">
+          <primary>DuckDuckGo search engine</primary>
+
+          <secondary>URI handling in</secondary>
+        </indexterm></para>
 
       <para>We'll need a function for generating the URIs that we're going to
       use to query the DuckDuckGo servers:</para>
@@ -1064,7 +1074,17 @@ let query_uri query =
       thankfully simple) format that is specified in <ulink
       url="http://www.ietf.org/rfc/rfc4627.txt">RFC4627</ulink>. We'll parse
       the JSON data using the Yojson library, which was introduced in <xref
-      linkend="handling-json-data"/>.</para>
+      linkend="handling-json-data"/>.<indexterm class="singular">
+          <primary>Yosjon library</primary>
+
+          <secondary>parsing JSON with</secondary>
+        </indexterm><indexterm class="singular">
+          <primary>DuckDuckGo search engine</primary>
+
+          <secondary>parsing JSON strings in</secondary>
+        </indexterm><indexterm class="singular">
+          <primary>RCF4627</primary>
+        </indexterm></para>
 
       <para>We expect the response from DuckDuckGo to come across as a JSON
       record, which is represented by the <literal
@@ -1098,7 +1118,21 @@ let get_definition_from_json json =
       <title>Executing an HTTP Client Query</title>
 
       <para>Now let's look at the code for dispatching the search queries over
-      HTTP, using the Cohttp library:</para>
+      HTTP, using the Cohttp library:<indexterm class="singular">
+          <primary>query-handlers</primary>
+
+          <secondary>executing an HTTP client query</secondary>
+        </indexterm><indexterm class="singular">
+          <primary>client queries</primary>
+        </indexterm><indexterm class="singular">
+          <primary>HTTP client queries</primary>
+        </indexterm><indexterm class="singular">
+          <primary>Cohttp library</primary>
+        </indexterm><indexterm class="singular">
+          <primary>DuckDuckGo search engine</primary>
+
+          <secondary>executing an HTTP client query in</secondary>
+        </indexterm></para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search.ml">async/search.ml</ulink>
@@ -1288,7 +1322,18 @@ let search_and_print words =
     these errors will show up explicitly in a function's return type, and some
     of them will show up as exceptions. We covered exception handling in OCaml
     in <xref linkend="exceptions"/>, but as we'll see, exception handling in a
-    concurrent program presents some new challenges.</para>
+    concurrent program presents some new challenges.<indexterm
+        class="singular">
+        <primary>exception handling</primary>
+
+        <secondary>challenges in concurrent programming</secondary>
+      </indexterm><indexterm class="singular">
+        <primary>concurrent programming</primary>
+      </indexterm><indexterm class="startofrange" id="ALexcept">
+        <primary>Async library</primary>
+
+        <secondary>exception handling in</secondary>
+      </indexterm></para>
 
     <para>Let's get a better sense of how exceptions work in Async by creating
     an asynchronous computation that (sometimes) fails with an exception. The
@@ -1364,7 +1409,12 @@ let search_and_print words =
     exception.</para>
 
     <para>We can capture this kind of asynchronous error use the <literal
-    moreinfo="none">try_with</literal> function provided by Async:</para>
+    moreinfo="none">try_with</literal> function provided by Async:<indexterm
+        class="singular">
+        <primary>exception handling</primary>
+
+        <secondary>asynchronous errors</secondary>
+      </indexterm></para>
 
     <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
@@ -1401,7 +1451,9 @@ let search_and_print words =
       system of <emphasis>monitors</emphasis>, which are inspired by the
       error-handling mechanism in Erlang of the same name. Monitors are fairly
       low-level and are only occasionally used directly, but it's nonetheless
-      worth understanding how they work.</para>
+      worth understanding how they work.<indexterm class="singular">
+          <primary>monitors</primary>
+        </indexterm></para>
 
       <para>In Async, a monitor is a context that determines what to do when
       there is an unhandled exception. Every Async job runs within the context
@@ -1570,7 +1622,15 @@ let search_and_print words =
       <para>Let's now go back and improve the exception handling of our
       DuckDuckGo client. In particular, we'll change it so that any individual
       queries that fail are reported as such, without preventing other queries
-      from succeeding.</para>
+      from succeeding.<indexterm class="singular">
+          <primary>exception handling</primary>
+
+          <secondary>search engine example</secondary>
+        </indexterm><indexterm class="singular">
+          <primary>DuckDuckGo search engine</primary>
+
+          <secondary>exception handling in</secondary>
+        </indexterm></para>
 
       <para>The search code as it is fails rarely, so let's make a change that
       allows us to trigger failures more predictably. We'll do this by making
@@ -1707,7 +1767,8 @@ let print_result (word,definition) =
       may want to use the <literal moreinfo="none">Monitor.protect</literal>
       call, which is analogous to the <literal
       moreinfo="none">protect</literal> call described in <xref
-      linkend="cleaning-up-in-the-presence-of-exceptions"/>.</para>
+      linkend="cleaning-up-in-the-presence-of-exceptions"/>.<indexterm
+      class="endofrange" startref="ALexcept"/></para>
     </sect2>
   </sect1>
 
@@ -1724,7 +1785,21 @@ let print_result (word,definition) =
     deferreds of different types have returned, returning both values as a
     tuple. Here, we use the function <literal moreinfo="none">sec</literal>,
     which is shorthand for creating a time-span equal to a given number of
-    seconds:</para>
+    seconds:<indexterm class="singular">
+        <primary>errors</primary>
+
+        <secondary>timeouts and cancellations</secondary>
+      </indexterm><indexterm class="singular">
+        <primary>Deferred.both</primary>
+      </indexterm><indexterm class="singular">
+        <primary>cancellations</primary>
+      </indexterm><indexterm class="singular">
+        <primary>timeouts</primary>
+      </indexterm><indexterm class="singular">
+        <primary>Async library</primary>
+
+        <secondary>timeouts and cancellations</secondary>
+      </indexterm></para>
 
     <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
@@ -1837,7 +1912,11 @@ let get_definition ~server ~interrupt word =
     the timeout has kicked in. In particular, the error message on a timeout
     will now be <literal moreinfo="none">"Unexpected failure"</literal> rather
     than <literal moreinfo="none">"Timed out"</literal>, which it was in our
-    previous implementation.</para>
+    previous implementation.<indexterm class="singular">
+        <primary>Timed out message</primary>
+      </indexterm><indexterm class="singular">
+        <primary>Unexpected failure message</primary>
+      </indexterm></para>
 
     <para>We can get more precise handling of timeouts using Async's <literal
     moreinfo="none">choose</literal> function. <literal
@@ -1922,7 +2001,24 @@ let get_definition ~server ~interrupt word =
     interleaving is controlled by the operating system. We discussed in the
     beginning of the chapter why Async is generally a better choice than
     system threads, but even if you mostly use Async, OCaml's system threads
-    are sometimes necessary, and it's worth understanding them.</para>
+    are sometimes necessary, and it's worth understanding them.<indexterm
+        class="singular">
+        <primary>parallelism</primary>
+      </indexterm><indexterm class="singular">
+        <primary>physical parallelism</primary>
+      </indexterm><indexterm class="singular">
+        <primary>kernel-level threads</primary>
+      </indexterm><indexterm class="singular">
+        <primary>threads</primary>
+
+        <secondary>kernel-level threads</secondary>
+      </indexterm><indexterm class="startofrange" id="systhrd">
+        <primary>system threads</primary>
+      </indexterm><indexterm class="startofrange" id="ALsysthr">
+        <primary>Async library</primary>
+
+        <secondary>system threads and</secondary>
+      </indexterm></para>
 
     <para>The most surprising aspect of OCaml's system threads is that they
     don't afford you any access to physical parallelism. That's because
@@ -1938,7 +2034,11 @@ let get_definition ~server ~interrupt word =
     blocking your entire program. For this reason, Async maintains a thread
     pool for running such calls. Most of the time, as a user of Async you
     don't need to think about this, but it is happening under the
-    covers.</para>
+    covers.<indexterm class="singular">
+        <primary>threads</primary>
+
+        <secondary>benefits of</secondary>
+      </indexterm></para>
 
     <para>Another reason to have multiple threads is to deal with non-OCaml
     libraries that have their own event loop or for another reason need their
@@ -1960,7 +2060,9 @@ let get_definition ~server ~interrupt word =
     question in a separate thread. Async's <literal
     moreinfo="none">In_thread</literal> module provides multiple facilities
     for doing just this, <literal moreinfo="none">In_thread.run</literal>
-    being the simplest. We can simply write:</para>
+    being the simplest. We can simply write:<indexterm class="singular">
+        <primary>In_thread module</primary>
+      </indexterm></para>
 
     <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
@@ -2100,7 +2202,19 @@ let get_definition ~server ~interrupt word =
       data between different systems threads. Even data structures that seem
       like they should be safe but are mutable under the covers, like lazy
       values, can have undefined behavior when accessed from multiple
-      threads.</para>
+      threads.<indexterm class="singular">
+          <primary>mutexes</primary>
+        </indexterm><indexterm class="singular">
+          <primary>segfaults</primary>
+        </indexterm><indexterm class="singular">
+          <primary>threads</primary>
+
+          <secondary>locking and</secondary>
+        </indexterm><indexterm class="singular">
+          <primary>threads</primary>
+
+          <secondary>thread-safety</secondary>
+        </indexterm></para>
 
       <para>There are two commonly available mutex packages for OCaml: the
       <literal moreinfo="none">Mutex</literal> module that's part of the
@@ -2134,7 +2248,9 @@ let get_definition ~server ~interrupt word =
       using calls from the <literal moreinfo="none">Thread_safe</literal>
       module in Async, and thereby run Async computations safely. This is a
       very flexible way of connecting threads to the Async world, but it's a
-      complex use case that is beyond the scope of this chapter.</para>
+      complex use case that is beyond the scope of this chapter.<indexterm
+      class="endofrange" startref="systhrd"/><indexterm class="endofrange"
+      startref="ALsysthr"/></para>
     </sect2>
   </sect1>
 </chapter>
