@@ -8,7 +8,11 @@
   are strings. They were first popularized by the Lisp programming language in
   the 1960s and have remained one of the simplest and most effective ways to
   encode structured data in a human-readable and editable form.<indexterm
-      class="singular">
+      class="startofrange" id="SERFORMsexp">
+      <primary>serialization formats</primary>
+
+      <secondary>s-expressions</secondary>
+    </indexterm><indexterm class="singular">
       <primary>s-expressions</primary>
 
       <secondary>uses for</secondary>
@@ -1130,7 +1134,7 @@ let () =
       useful for backwards compatibility: if you add a new field to your
       config record, but you make that field optional, then you should still
       be able to parse older version of your config.<indexterm
-          class="singular">
+      class="endofrange" startref="SERFORMsexp"/><indexterm class="singular">
           <primary>compatibility, backwards</primary>
         </indexterm><indexterm class="singular">
           <primary>backwards compatibility</primary>
