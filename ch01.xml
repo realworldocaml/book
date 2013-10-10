@@ -522,7 +522,9 @@
 
             <secondary>runtime vs. compile time</secondary>
           </indexterm><indexterm class="singular">
-            <primary>exceptions vs. type errors</primary>
+            <primary>exceptions</primary>
+
+            <secondary>vs. type errors</secondary>
           </indexterm><indexterm class="singular">
             <primary>type errors vs. exceptions</primary>
           </indexterm></para>
@@ -702,13 +704,8 @@
 
         <para>Core comes with a <literal moreinfo="none">List</literal> module
         that has a rich collection of functions for working with lists. We can
-        access values from within a module by using dot-notation.<indexterm
-            class="singular">
-            <primary>lists</primary>
-
-            <seealso>List module</seealso>
-          </indexterm> For example, this is how we compute the length of a
-        list:</para>
+        access values from within a module by using dot-notation. For example,
+        this is how we compute the length of a list:</para>
 
         <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
@@ -1192,7 +1189,9 @@
         moreinfo="none">in</literal> marks the beginning of the scope within
         which the new variable can be used. Thus, we could write:<indexterm
             class="singular">
-            <primary>nested let binding</primary>
+            <primary>let syntax</primary>
+
+            <secondary>nested let binding</secondary>
           </indexterm><indexterm class="singular">
             <primary>let syntax</primary>
 
@@ -1290,7 +1289,9 @@
     <emphasis>record</emphasis> type, which you can think of as a tuple where
     the individual fields are named, rather than being defined positionally.
     Record types are easy enough to construct:<indexterm class="singular">
-        <primary>record types</primary>
+        <primary>records</primary>
+
+        <secondary>record types</secondary>
       </indexterm><indexterm class="singular">
         <primary>datatypes</primary>
 
@@ -1328,7 +1329,9 @@
     of the variable it is bound to in the match coincide, we don't have to
     write them both down. Using this, our magnitude function can be rewritten
     as follows:<indexterm class="singular">
-        <primary>field punning</primary>
+        <primary>fields</primary>
+
+        <secondary>field punning</secondary>
       </indexterm></para>
 
     <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
@@ -1377,6 +1380,8 @@
         <secondary>variant types</secondary>
       </indexterm><indexterm class="singular">
         <primary>variant types</primary>
+
+        <secondary>combining multiple object types with</secondary>
       </indexterm></para>
 
     <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
@@ -1488,7 +1493,7 @@
         <primary>programming</primary>
 
         <secondary>immutable vs. imperative</secondary>
-      </indexterm><indexterm class="startofrange" id="imperprog">
+      </indexterm><indexterm class="singular">
         <primary>imperative programming</primary>
       </indexterm></para>
 
@@ -1512,6 +1517,8 @@
           <secondary>arrays</secondary>
         </indexterm><indexterm class="singular">
           <primary>arrays</primary>
+
+          <secondary>imperative programming and</secondary>
         </indexterm><indexterm class="singular">
           <primary>imperative programming</primary>
 
@@ -1675,9 +1682,9 @@
       library, but there's nothing really special about it. It's just a record
       type with a single mutable field called <literal
       moreinfo="none">contents</literal>:<indexterm class="singular">
-          <primary>record types</primary>
+          <primary>records</primary>
 
-          <secondary>refs</secondary>
+          <secondary>record types</secondary>
         </indexterm><indexterm class="singular">
           <primary>imperative programming</primary>
 
@@ -1742,8 +1749,6 @@
       moreinfo="none">:=</literal> are needed because these are operators,
       rather than ordinary functions.<indexterm class="singular">
           <primary>parametric polymorphism</primary>
-
-          <secondary>ref types</secondary>
         </indexterm></para>
 
       <para>Even though a <literal moreinfo="none">ref</literal> is just
@@ -1887,8 +1892,8 @@
 <computeroutput moreinfo="none">Exception: (Invalid_argument "index out of bounds").</computeroutput></programlisting>
 
       <para>The or operator, <literal moreinfo="none">||</literal>,
-      short-circuits in a<indexterm class="endofrange" startref="imperprog"/>
-      similar way to <literal moreinfo="none">&amp;&amp;</literal>.</para>
+      short-circuits in a similar way to <literal
+      moreinfo="none">&amp;&amp;</literal>.</para>
     </sect2>
   </sect1>
 
@@ -1954,7 +1959,7 @@ let () =
       OCaml compiler. The <command moreinfo="none">corebuild</command> script
       is installed along with Core, and its purpose is to pass in the flags
       required for building a program with Core:<indexterm class="singular">
-          <primary>corebuild script</primary>
+          <primary>corebuild</primary>
         </indexterm></para>
 
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"

@@ -1372,7 +1372,7 @@ let extended_color_to_int = function
       like?<indexterm class="singular">
           <primary>polymorphic variant types</primary>
 
-          <secondary>vs. ordinary variants</secondary>
+          <secondary sortas="ordinary">vs. ordinary variants</secondary>
         </indexterm><indexterm class="singular">
           <primary>polymorphic variant types</primary>
 

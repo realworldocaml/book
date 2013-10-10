@@ -37,8 +37,6 @@
         <primary>let syntax</primary>
 
         <secondary>top-level bindings</secondary>
-      </indexterm><indexterm class="startofrange" id="vrbl">
-        <primary>variables</primary>
       </indexterm></para>
 
     <para role="sourcecode">Syntax: <ulink role="orm:hideurl:ital"
@@ -663,8 +661,6 @@
       keyword, as shown in this function for finding the first
       sequentially-repeated element in a list:<indexterm class="singular">
           <primary>rec keyword</primary>
-
-          <secondary>defining recursive functions with</secondary>
         </indexterm></para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
@@ -1204,8 +1200,6 @@
           <secondary>defining</secondary>
         </indexterm><indexterm class="singular">
           <primary>function keyword</primary>
-
-          <secondary>declaring functions with</secondary>
         </indexterm><indexterm class="singular">
           <primary>functions</primary>
 
@@ -1441,9 +1435,7 @@
         matter in a higher-order context, e.g., when passing a function with
         labeled arguments to another function. Here's an example:<indexterm
             class="singular">
-            <primary>higher-order functions</primary>
-
-            <secondary sortas="labels">and labels</secondary>
+            <primary>higher-order functions, and labels</primary>
           </indexterm><indexterm class="singular">
             <primary>functions</primary>
 
@@ -1530,7 +1522,7 @@
         </indexterm><indexterm class="startofrange" id="ARGopt">
           <primary>arguments</primary>
 
-          <secondary>optional</secondary>
+          <secondary>optional arguments</secondary>
         </indexterm><indexterm class="startofrange" id="FNCopt">
           <primary>functions</primary>
 

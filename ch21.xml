@@ -27,7 +27,9 @@
 
       <secondary>allocation requests and</secondary>
     </indexterm><indexterm class="singular">
-      <primary>heap blocks</primary>
+      <primary>heaps</primary>
+
+      <secondary>heap blocks</secondary>
     </indexterm><indexterm class="singular">
       <primary>heaps</primary>
 
@@ -956,7 +958,9 @@ let () =
     moreinfo="none">Gc.add_finalizer</literal> function that schedules the
     finalizer safely with respect to all the other concurrent program
     threads.<indexterm class="singular">
-        <primary>Heap_block module</primary>
+        <primary>heaps</primary>
+
+        <secondary>Heap_block module</secondary>
       </indexterm></para>
 
     <para>Let's explore this with a small example that finalizes values of

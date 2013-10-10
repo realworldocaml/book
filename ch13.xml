@@ -163,9 +163,7 @@ let touch t s =
       <emphasis>comparator</emphasis> that can be used to create maps using
       the <literal moreinfo="none">Map</literal> module directly:<indexterm
           class="singular">
-          <primary>comparators</primary>
-
-          <secondary>creating maps with</secondary>
+          <primary>comparators, creating maps with</primary>
         </indexterm><indexterm class="singular">
           <primary>Map module</primary>
 
@@ -828,9 +826,11 @@ end
       service to become unresponsive due to high CPU load. Core's hash tables
       would be much less susceptible to such an attack because the amount of
       degradation would be far less.<indexterm class="singular">
-          <primary>denial-of-service attacks</primary>
+          <primary>security issues</primary>
 
-          <secondary>avoiding with hash tables</secondary>
+          <secondary>denial-of-service attacks</secondary>
+        </indexterm><indexterm class="singular">
+          <primary>denial-of-service attacks, avoiding</primary>
         </indexterm></para>
     </warning>
 

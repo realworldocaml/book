@@ -784,6 +784,8 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
       is a serialization format that is used commonly in Core. Here's an
       example:<indexterm class="singular">
           <primary>s-expressions</primary>
+
+          <secondary>example of</secondary>
         </indexterm><indexterm class="singular">
           <primary>serialization</primary>
         </indexterm><indexterm class="singular">
@@ -1214,7 +1216,9 @@ include Foldable.Extend(Fqueue)</programlisting>
       </indexterm><indexterm class="singular">
         <primary>Hashable.Make</primary>
       </indexterm><indexterm class="singular">
-        <primary>Comparable.Make</primary>
+        <primary>Comparable module</primary>
+
+        <secondary>Comparable.Make</secondary>
       </indexterm><indexterm class="singular">
         <primary>Container.Make</primary>
       </indexterm></para>

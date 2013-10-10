@@ -20,10 +20,6 @@
       <primary>values</primary>
 
       <secondary>memory representation of</secondary>
-    </indexterm><indexterm class="singular">
-      <primary>memory</primary>
-
-      <seealso>runtime memory representation</seealso>
     </indexterm></para>
 
   <para>However, knowledge of the OCaml internals is useful beyond just
@@ -80,7 +76,7 @@
     instance of the object and dispatch the method call. Those languages
     amortize some of the cost via "Just-in-Time" dynamic patching, but OCaml
     prefers runtime simplicity instead.<indexterm class="singular">
-        <primary>"Just-in-Time" dynamic patching</primary>
+        <primary sortas="Just">"Just-in-Time" dynamic patching</primary>
       </indexterm><indexterm class="singular">
         <primary>dynamic type checking</primary>
       </indexterm><indexterm class="singular">
@@ -148,7 +144,7 @@
 
         <secondary>values for</secondary>
       </indexterm><indexterm class="singular">
-        <primary>integer values</primary>
+        <primary>integers</primary>
       </indexterm><indexterm class="singular">
         <primary>values</primary>
 
@@ -312,8 +308,7 @@
     below.<indexterm class="singular">
         <primary>values</primary>
 
-        <secondary sortas="OCaml">memory representation of OCaml
-        types</secondary>
+        <secondary>memory representation of</secondary>
       </indexterm><indexterm class="endofrange" startref="blck"/></para>
 
     <informaltable>
@@ -469,7 +464,7 @@
 
         <secondary>memory representation of</secondary>
       </indexterm><indexterm class="singular">
-        <primary>tupples</primary>
+        <primary>tuples</primary>
       </indexterm><indexterm class="singular">
         <primary>runtime memory representation</primary>
 
@@ -898,8 +893,6 @@
     than <literal moreinfo="none">No_scan_tag</literal> and so isn't scanned
     by the garbage collector.<indexterm class="singular">
         <primary>custom heap blocks</primary>
-
-        <secondary>memory representation of</secondary>
       </indexterm><indexterm class="singular">
         <primary>runtime memory representation</primary>
 
@@ -970,7 +963,7 @@
 
           <secondary>managing external</secondary>
         </indexterm><indexterm class="singular">
-          <primary>Bigarray</primary>
+          <primary>bigarrays</primary>
         </indexterm></para>
 
       <para>Bigarray sees a lot of use beyond just scientific computing, and

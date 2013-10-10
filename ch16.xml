@@ -516,7 +516,7 @@ list_fields:
       <command moreinfo="none">ocamlyacc</command> to handle files with the
       <literal moreinfo="none">.mly</literal> suffix:<indexterm
           class="singular">
-          <primary>-use-menhir flag</primary>
+          <primary sortas="use">-use-menhir flag</primary>
         </indexterm><indexterm class="singular">
           <primary>Menhir parser generator</primary>
 
@@ -831,9 +831,7 @@ let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*</programlisting>
         </indexterm><indexterm class="singular">
           <primary>Camomile unicode parser</primary>
         </indexterm><indexterm class="singular">
-          <primary>Unicode</primary>
-
-          <secondary>parsing solutions</secondary>
+          <primary>Unicode, parsing solutions for</primary>
         </indexterm></para>
 
       <note>
@@ -908,7 +906,8 @@ let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*</programlisting>
         class="singular">
         <primary>errors</primary>
 
-        <secondary>"give up on first error" approach</secondary>
+        <secondary sortas="give up on first">"give up on first error"
+        approach</secondary>
       </indexterm></para>
 
     <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"

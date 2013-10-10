@@ -1491,7 +1491,7 @@ end</programlisting>
       create an <literal moreinfo="none">animated</literal> mixin to provide
       this update list and ensure that the functions in it are called regular
       intervals when the shape is animated:<indexterm class="singular">
-          <primary>animated shapes</primary>
+          <primary>animation</primary>
 
           <secondary>creating with mixins</secondary>
         </indexterm></para>

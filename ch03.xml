@@ -464,9 +464,7 @@
     better off using the <literal moreinfo="none">List</literal> module, which
     is full of reusable functions that abstract out common patterns for
     computing with lists.<indexterm class="singular">
-        <primary>tables</primary>
-
-        <secondary>creating with List module</secondary>
+        <primary>tables, creating with List module</primary>
       </indexterm><indexterm class="singular">
         <primary>List module</primary>
 
@@ -1223,7 +1221,9 @@
     which allows us to declare a name for the thing matched by a pattern or
     sub-pattern. While we're at it, we'll use the <literal
     moreinfo="none">function</literal> keyword to eliminate the need for an
-    explicit match:</para>
+    explicit match:<indexterm class="singular">
+        <primary>function keyword</primary>
+      </indexterm></para>
 
     <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>

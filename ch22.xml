@@ -1125,7 +1125,7 @@ let () = don't_wait_for (&lt;expr&gt;</programlisting>
       here, and not how to build your own. The full details of building new
       extensions are fairly daunting and could be the subject of an entirely
       new book.<indexterm class="singular">
-          <primary>syntax extensions</primary>
+          <primary>syntax extension</primary>
 
           <secondary>building new</secondary>
         </indexterm><indexterm class="singular">
@@ -1169,10 +1169,6 @@ let () = don't_wait_for (&lt;expr&gt;</programlisting>
     verify that the code obeys the rules of the OCaml type system. Code that
     is syntactically correct but misuses values is rejected with an
     explanation of the problem.<indexterm class="singular">
-        <primary>static type checking</primary>
-
-        <seealso>type checking</seealso>
-      </indexterm><indexterm class="singular">
         <primary>static type checking</primary>
 
         <secondary>steps of</secondary>
@@ -1398,6 +1394,8 @@ let v = Foo</programlisting>
           <primary>static type checking</primary>
 
           <secondary>type inference</secondary>
+
+          <seealso>type checking</seealso>
         </indexterm></para>
 
       <para>OCaml type inference is based on the Hindley-Milner algorithm,

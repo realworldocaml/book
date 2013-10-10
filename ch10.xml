@@ -521,6 +521,8 @@
     moreinfo="none">(this (is an) (s expression))</literal>.<indexterm
         class="singular">
         <primary>s-expressions</primary>
+
+        <secondary sortas="queries">in queries and responses</secondary>
       </indexterm></para>
 
     <para>In addition, we use the Sexplib syntax extension which extends OCaml

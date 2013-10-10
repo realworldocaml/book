@@ -1075,7 +1075,7 @@ let query_uri query =
       url="http://www.ietf.org/rfc/rfc4627.txt">RFC4627</ulink>. We'll parse
       the JSON data using the Yojson library, which was introduced in <xref
       linkend="handling-json-data"/>.<indexterm class="singular">
-          <primary>Yosjon library</primary>
+          <primary>Yojsonn library</primary>
 
           <secondary>parsing JSON with</secondary>
         </indexterm><indexterm class="singular">
@@ -1126,8 +1126,6 @@ let get_definition_from_json json =
           <primary>client queries</primary>
         </indexterm><indexterm class="singular">
           <primary>HTTP client queries</primary>
-        </indexterm><indexterm class="singular">
-          <primary>Cohttp library</primary>
         </indexterm><indexterm class="singular">
           <primary>DuckDuckGo search engine</primary>
 
@@ -1324,9 +1322,9 @@ let search_and_print words =
     in <xref linkend="exceptions"/>, but as we'll see, exception handling in a
     concurrent program presents some new challenges.<indexterm
         class="singular">
-        <primary>exception handling</primary>
+        <primary>exceptions</primary>
 
-        <secondary>challenges in concurrent programming</secondary>
+        <secondary>in concurrent programming</secondary>
       </indexterm><indexterm class="singular">
         <primary>concurrent programming</primary>
       </indexterm><indexterm class="startofrange" id="ALexcept">
@@ -1411,7 +1409,7 @@ let search_and_print words =
     <para>We can capture this kind of asynchronous error use the <literal
     moreinfo="none">try_with</literal> function provided by Async:<indexterm
         class="singular">
-        <primary>exception handling</primary>
+        <primary>exceptions</primary>
 
         <secondary>asynchronous errors</secondary>
       </indexterm></para>
@@ -1623,7 +1621,7 @@ let search_and_print words =
       DuckDuckGo client. In particular, we'll change it so that any individual
       queries that fail are reported as such, without preventing other queries
       from succeeding.<indexterm class="singular">
-          <primary>exception handling</primary>
+          <primary>exceptions</primary>
 
           <secondary>search engine example</secondary>
         </indexterm><indexterm class="singular">

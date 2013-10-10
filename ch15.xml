@@ -511,7 +511,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
       </indexterm><indexterm class="singular">
         <primary>functions</primary>
 
-        <secondary>member funtions</secondary>
+        <secondary>member functions</secondary>
       </indexterm><indexterm class="singular">
         <primary>member function</primary>
       </indexterm></para>
@@ -732,6 +732,8 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
         <primary>errors</primary>
 
         <secondary>type errors</secondary>
+
+        <seealso>error handling</seealso>
       </indexterm><indexterm class="singular">
         <primary>type checking</primary>
       </indexterm><indexterm class="singular">

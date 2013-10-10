@@ -224,6 +224,8 @@ end</programlisting>
       parenthetical expression where the leaves of the expressions are
       strings. Here's a simple example:<indexterm class="singular">
           <primary>s-expressions</primary>
+
+          <secondary>example of</secondary>
         </indexterm></para>
 
       <para role="sourcecode">Scheme: <ulink role="orm:hideurl:ital"
@@ -1007,7 +1009,7 @@ end</programlisting>
         </indexterm><indexterm class="singular">
           <primary>error handling</primary>
 
-          <secondary>exception backtraceing</secondary>
+          <secondary>exception backtracing</secondary>
         </indexterm></para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
@@ -1238,6 +1240,8 @@ let () =
         <primary>error handling</primary>
 
         <secondary>strategy choice</secondary>
+
+        <seealso>errors</seealso>
       </indexterm></para>
 
     <para>Exceptions are more concise because they allow you to defer the job
@@ -1246,8 +1250,6 @@ let () =
     too easy to ignore. Error-aware return types, on the other hand, are fully
     manifest in your type definitions, making the errors that your code might
     generate explicit and impossible to ignore.<indexterm class="singular">
-        <primary>error-aware return types</primary>
-      </indexterm><indexterm class="singular">
         <primary>exceptions</primary>
 
         <secondary>benefits and drawbacks of</secondary>

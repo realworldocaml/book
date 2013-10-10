@@ -533,6 +533,8 @@ val complex64 : Complex.t typ</programlisting>
         <primary>POSIX functions</primary>
       </indexterm><indexterm class="singular">
         <primary>arrays</primary>
+
+        <secondary>pointers and</secondary>
       </indexterm><indexterm class="singular">
         <primary>pointers</primary>
 
@@ -800,6 +802,8 @@ val char_ptr_of_string : string -&gt; char ptr</programlisting>
           <primary>memory</primary>
 
           <secondary>strings vs. C character buffers</secondary>
+
+          <seealso>runtime memory representation</seealso>
         </indexterm><indexterm class="singular">
           <primary>strings</primary>
 

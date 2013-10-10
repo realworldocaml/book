@@ -56,9 +56,7 @@
     implementation in particular in <xref
     linkend="maps-and-hash-tables"/>.<indexterm class="startofrange"
         id="DICTimper">
-        <primary>dictionaries</primary>
-
-        <secondary>imperative dictionaries</secondary>
+        <primary>dictionaries, imperative</primary>
       </indexterm><indexterm class="singular">
         <primary>Core standard library</primary>
 
@@ -460,6 +458,8 @@ let () = &lt;expr2&gt; in
             <primary>byte arrays</primary>
           </indexterm><indexterm class="singular">
             <primary>strings</primary>
+
+            <secondary>vs. Char.t arrays</secondary>
           </indexterm></para>
 
         <para>Strings also come with their own syntax for getting and setting
@@ -1788,8 +1788,6 @@ let find_el t ~f =
           <secondary>Out_channel.stdout</secondary>
         </indexterm><indexterm class="singular">
           <primary>In_channel module</primary>
-
-          <secondary>In-channel.stdin</secondary>
         </indexterm></para>
 
       <para>We'll start our discussion of I/O by focusing on the terminal.
@@ -2052,25 +2050,15 @@ let () =
       <para><literal moreinfo="none">printf</literal>'s formatting directives
       offer a significant amount of control, allowing you to specify things
       like:<indexterm class="singular">
-          <primary>binary numbers</primary>
-
-          <secondary>formatting with printf</secondary>
+          <primary>binary numbers, formatting with printf</primary>
         </indexterm><indexterm class="singular">
-          <primary>hex numbers</primary>
-
-          <secondary>formating with printf</secondary>
+          <primary>hex numbers, formating with printf</primary>
         </indexterm><indexterm class="singular">
-          <primary>decimals</primary>
-
-          <secondary>formating with printf</secondary>
+          <primary>decimals, formatting with printf</primary>
         </indexterm><indexterm class="singular">
-          <primary>padding</primary>
-
-          <secondary>formatting with printf</secondary>
+          <primary>padding, formatting with printf</primary>
         </indexterm><indexterm class="singular">
-          <primary>alignment</primary>
-
-          <secondary>formatting with printf</secondary>
+          <primary>alignment, formatting with printf</primary>
         </indexterm></para>
 
       <itemizedlist>
@@ -2139,7 +2127,7 @@ let () =
         </indexterm><indexterm class="singular">
           <primary>I/O (input/output) operations</primary>
 
-          <secondary>filel I/O</secondary>
+          <secondary>file I/O</secondary>
         </indexterm></para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
@@ -2298,9 +2286,7 @@ let () =
         class="singular">
         <primary>strict evaluation</primary>
       </indexterm><indexterm class="singular">
-        <primary>expressions</primary>
-
-        <secondary>order of evaluation</secondary>
+        <primary>expressions, order of evaluation</primary>
       </indexterm><indexterm class="singular">
         <primary>evaluation, order of</primary>
       </indexterm><indexterm class="singular">
@@ -2420,7 +2406,7 @@ let () =
       </indexterm><indexterm class="startofrange" id="IPsideweak">
         <primary>imperative programming</primary>
 
-        <secondary>side effects and weak polymorphism</secondary>
+        <secondary>side effects/weak polymorphism</secondary>
       </indexterm></para>
 
     <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
@@ -2641,7 +2627,7 @@ let () =
       application, is not a simple value, and as such, functions created by
       partial application are sometimes less general than you might
       expect.<indexterm class="singular">
-          <primary>partiall application</primary>
+          <primary>partial application</primary>
         </indexterm></para>
 
       <para>Consider the <literal moreinfo="none">List.init</literal>

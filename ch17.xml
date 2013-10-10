@@ -331,7 +331,7 @@ end</programlisting>
           </indexterm><indexterm class="singular">
             <primary>syntax extension</primary>
 
-            <secondary>in Camlp4</secondary>
+            <secondary sortas="Camlp4">in Camlp4</secondary>
           </indexterm></para>
 
         <para>Sexplib is part of a family of syntax extensions, including

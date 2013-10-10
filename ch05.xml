@@ -158,7 +158,7 @@
     patterns for types with a fixed structure, like records and tuples, are
     irrefutable, unlike types with variable structure like lists and
     variants.<indexterm class="singular">
-        <primary>irrefutable record patterns</primary>
+        <primary>irrefutable patterns</primary>
       </indexterm><indexterm class="singular">
         <primary>datatypes</primary>
 
@@ -306,7 +306,9 @@
     pattern in the following function binds all of the fields in question to
     variables of the same name. This is called <emphasis>field
     punning</emphasis>:<indexterm class="singular">
-        <primary>field punning</primary>
+        <primary>fields</primary>
+
+        <secondary>field punning</secondary>
       </indexterm><indexterm class="singular">
         <primary>records</primary>
 
@@ -408,9 +410,9 @@
     <para>Defining records with the same field names can be problematic. Let's
     consider a simple example: building types to represent the protocol used
     for a logging server.<indexterm class="startofrange" id="FNreus">
-        <primary>field names</primary>
+        <primary>fields</primary>
 
-        <secondary>reusing</secondary>
+        <secondary>reusing field names</secondary>
       </indexterm><indexterm class="startofrange" id="RECreusfn">
         <primary>records</primary>
 

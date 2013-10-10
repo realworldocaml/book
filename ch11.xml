@@ -432,7 +432,7 @@
     of ways to express program structure. In fact, many seasoned OCaml
     programmers rarely use classes and objects, if at all.<indexterm
         class="singular">
-        <primary>first-class moduels</primary>
+        <primary>first-class modules</primary>
 
         <secondary sortas="objects">vs. objects</secondary>
       </indexterm><indexterm class="singular">
@@ -462,7 +462,7 @@
       </indexterm><indexterm class="singular">
         <primary>open recursion</primary>
       </indexterm><indexterm class="singular">
-        <primary>class system</primary>
+        <primary>classes</primary>
 
         <secondary>benefits of</secondary>
       </indexterm></para>

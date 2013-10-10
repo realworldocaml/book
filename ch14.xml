@@ -548,13 +548,19 @@ let () =
       <para>A more realistic MD5 binary could also read from the standard
       input if a <literal moreinfo="none">filename</literal> isn't
       specified:<indexterm class="singular">
+          <primary>arguments</primary>
+
+          <secondary>default arguments</secondary>
+        </indexterm><indexterm class="singular">
           <primary>default arguments</primary>
         </indexterm><indexterm class="singular">
           <primary>optional arguments</primary>
+
+          <secondary sortas="default">and default arguments</secondary>
         </indexterm><indexterm class="singular">
           <primary>arguments</primary>
 
-          <secondary>optional and default</secondary>
+          <secondary>optional arguments</secondary>
         </indexterm></para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
@@ -1124,8 +1130,6 @@ let () = Command.run command</programlisting>
           <secondary>Command mode</secondary>
         </indexterm><indexterm class="singular">
           <primary>Command module</primary>
-
-          <secondary>Comand.Spec</secondary>
         </indexterm></para>
 
       <para>The <literal moreinfo="none">Command.Spec.t</literal> type looks

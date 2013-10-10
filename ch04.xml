@@ -189,11 +189,9 @@ let () =
     ocamlfind to link in the packages as is necessary for building an
     executable, while <literal moreinfo="none">-thread</literal> turns on
     threading support, which is required for Core.<indexterm class="singular">
-        <primary>threading</primary>
+        <primary>threads</primary>
 
         <secondary>turning on with -thread</secondary>
-      </indexterm><indexterm class="singular">
-        <primary sortas="thread">-thread</primary>
       </indexterm><indexterm class="singular">
         <primary sortas="linkpkg">-linkpkg</primary>
       </indexterm></para>
@@ -235,8 +233,12 @@ let () =
         <secondary>ocamlbuild</secondary>
       </indexterm><indexterm class="singular">
         <primary>native-code compiler</primary>
+
+        <secondary sortas="bytecode">vs. bytecode compiler</secondary>
       </indexterm><indexterm class="singular">
         <primary>bytecode compiler</primary>
+
+        <secondary sortas="native-code">vs. native-code compiler</secondary>
       </indexterm><indexterm class="singular">
         <primary>OCaml toolchain</primary>
 
@@ -419,6 +421,8 @@ let () =
         <secondary>abstract types</secondary>
       </indexterm><indexterm class="singular">
         <primary>interfaces</primary>
+
+        <secondary>hiding implementation details with</secondary>
       </indexterm><indexterm class="singular">
         <primary>modules</primary>
 
@@ -431,7 +435,11 @@ let () =
     <emphasis>module type</emphasis> are all used interchangeably.) A module
     defined by a file <literal moreinfo="none">filename.ml</literal> can be
     constrained by a signature placed in a file called <literal
-    moreinfo="none">filename.mli</literal>.</para>
+    moreinfo="none">filename.mli</literal>.<indexterm class="singular">
+        <primary>interfaces</primary>
+
+        <secondary>synonyms for</secondary>
+      </indexterm></para>
 
     <para>For <literal moreinfo="none">counter.mli</literal>, we'll start by
     writing down an interface that describes what's currently available in
@@ -1255,9 +1263,7 @@ type median = | Before_and_after of string * string
       linkend="recursive-functions"/>), you need to define them using <literal
       moreinfo="none">let rec</literal> rather than ordinary <literal
       moreinfo="none">let</literal>.<indexterm class="singular">
-          <primary>dependencies</primary>
-
-          <secondary>cyclic dependencies</secondary>
+          <primary>dependencies, cyclic</primary>
         </indexterm><indexterm class="singular">
           <primary>cyclic dependencies</primary>
         </indexterm><indexterm class="singular">
