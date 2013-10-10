@@ -1075,7 +1075,7 @@ let query_uri query =
       url="http://www.ietf.org/rfc/rfc4627.txt">RFC4627</ulink>. We'll parse
       the JSON data using the Yojson library, which was introduced in <xref
       linkend="handling-json-data"/>.<indexterm class="singular">
-          <primary>Yojsonn library</primary>
+          <primary>Yojson library</primary>
 
           <secondary>parsing JSON with</secondary>
         </indexterm><indexterm class="singular">

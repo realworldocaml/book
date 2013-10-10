@@ -488,7 +488,7 @@
             class="singular">
             <primary>memory</primary>
 
-            <secondary>reducing fragmenation of</secondary>
+            <secondary>reducing fragmentation of</secondary>
           </indexterm></para>
 
         <para>For some workloads that need more real-time behavior under load,
@@ -665,7 +665,7 @@
       require the heap to be grown unnecessarily.<indexterm class="singular">
           <primary>memory</primary>
 
-          <secondary>reducing fragmenation of</secondary>
+          <secondary>reducing fragmentation of</secondary>
         </indexterm><indexterm class="singular">
           <primary>compaction</primary>
         </indexterm><indexterm class="singular">

@@ -1923,9 +1923,7 @@ let () =
         </indexterm><indexterm class="singular">
           <primary>format strings</primary>
         </indexterm><indexterm class="singular">
-          <primary>printf</primary>
-
-          <secondary>function</secondary>
+          <primary>printf function</primary>
         </indexterm><indexterm class="singular">
           <primary>I/O (input/output) operations</primary>
 
@@ -2052,7 +2050,7 @@ let () =
       like:<indexterm class="singular">
           <primary>binary numbers, formatting with printf</primary>
         </indexterm><indexterm class="singular">
-          <primary>hex numbers, formating with printf</primary>
+          <primary>hex numbers, formatting with printf</primary>
         </indexterm><indexterm class="singular">
           <primary>decimals, formatting with printf</primary>
         </indexterm><indexterm class="singular">

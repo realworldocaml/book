@@ -42,10 +42,6 @@
       <primary>OCaml toolchain</primary>
 
       <secondary>ocamlopt</secondary>
-    </indexterm><indexterm class="singular">
-      <primary>ocamlopt</primary>
-    </indexterm><indexterm class="singular">
-      <primary>ocamlc</primary>
     </indexterm></para>
 
   <para>In this chapter, we'll cover the following topics:</para>
@@ -88,7 +84,7 @@
     compilation stages. The linker takes a collection of compiled units and
     produces a standalone executable or library archive that can be reused by
     other applications.<indexterm class="singular">
-        <primary>complilation units</primary>
+        <primary>compilation units</primary>
       </indexterm></para>
 
     <para>The overall compilation pipeline looks like this:<indexterm
@@ -512,8 +508,6 @@ let () =
 
           <secondary>ocamldoc</secondary>
         </indexterm><indexterm class="singular">
-          <primary>ocamldoc</primary>
-        </indexterm><indexterm class="singular">
           <primary>interfaces</primary>
 
           <secondary>generating documentation from</secondary>
@@ -589,7 +583,9 @@ let what_is_the_weather_in location =
         </indexterm><indexterm class="singular">
           <primary>Bibtex</primary>
         </indexterm><indexterm class="singular">
-          <primary>ocamldoc-generators</primary>
+          <primary>OCaml toolchaing</primary>
+
+          <secondary>ocamldoc-generators</secondary>
         </indexterm><indexterm class="singular">
           <primary>Argot HTML generator</primary>
         </indexterm><indexterm class="singular">
@@ -787,8 +783,7 @@ type t = {
     Instead, all the extra code is simply generated at compilation time via
     Camlp4, and type information can be discarded from the runtime
     image.<indexterm class="singular">
-        <primary sortas="Just-In-Time">"Just-in-Time" dynamic
-        patching</primary>
+        <primary sortas="Just">"Just-in-Time" dynamic patching</primary>
       </indexterm></para>
 
     <para>The syntax extensions accept an input AST and output a modified one.
@@ -1076,7 +1071,7 @@ let () = don't_wait_for (&lt;expr&gt;</programlisting>
       these all these transformations precisely.<indexterm class="singular">
           <primary>grammars</primary>
 
-          <secondary>avoidiing grammar clashes</secondary>
+          <secondary>avoiding grammar clashes</secondary>
         </indexterm><indexterm class="singular">
           <primary>macros</primary>
         </indexterm><indexterm class="singular">
@@ -1333,7 +1328,7 @@ let v = Foo</programlisting>
 
             <secondary>order of code</secondary>
 
-            <seealso>complilaton process</seealso>
+            <seealso>compilaton process</seealso>
           </indexterm><indexterm class="singular">
             <primary>mli files</primary>
           </indexterm><indexterm class="singular">
@@ -1750,7 +1745,7 @@ let f (x:s) =
       just one or two files, and the module system minimizes such
       recompilation while still encouraging code reuse.<indexterm
           class="singular">
-          <primary>complilation units</primary>
+          <primary>compilation units</primary>
         </indexterm></para>
 
       <sect3 id="the-mapping-between-files-and-modules">
@@ -1846,7 +1841,9 @@ end</programlisting>
 
             <secondary>cmi files</secondary>
           </indexterm><indexterm class="singular">
-            <primary>ocamlogjinfo</primary>
+            <primary>OCaml toolchain</primary>
+
+            <secondary>ocamlogjinfo</secondary>
           </indexterm></para>
 
         <sidebar>

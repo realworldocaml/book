@@ -356,10 +356,6 @@ let () =
 
         <secondary>ocamlc</secondary>
       </indexterm><indexterm class="singular">
-        <primary>ocamlrun</primary>
-      </indexterm><indexterm class="singular">
-        <primary>ocamlc</primary>
-      </indexterm><indexterm class="singular">
         <primary>bytecode compiler</primary>
 
         <secondary>tools used</secondary>
@@ -519,7 +515,7 @@ let () =
           class="singular">
           <primary>bytecode compiler</primary>
 
-          <secondary>compling and linking code</secondary>
+          <secondary>compiling and linking code</secondary>
         </indexterm></para>
 
       <para>A typical OCaml library consists of multiple source files, and

@@ -474,7 +474,7 @@ object_fields:
       (also with optional separators).<indexterm class="singular">
           <primary>Menhir parser generator</primary>
 
-          <secondary>bulit-in rules of</secondary>
+          <secondary>built-in rules of</secondary>
         </indexterm></para>
 
       <para>A version of the JSON grammar using these more succinct Menhir
@@ -545,7 +545,9 @@ list_fields:
 
         <secondary>specification of</secondary>
       </indexterm><indexterm class="singular">
-        <primary>ocamllex</primary>
+        <primary>OCaml toolchain</primary>
+
+        <secondary>ocamllex</secondary>
       </indexterm><indexterm class="singular">
         <primary>mll files</primary>
       </indexterm><indexterm class="singular">
@@ -825,7 +827,9 @@ let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*</programlisting>
         </indexterm><indexterm class="singular">
           <primary>Uutf Unicode codec</primary>
         </indexterm><indexterm class="singular">
-          <primary>ocamllex</primary>
+          <primary>OCaml toolchain</primary>
+
+          <secondary>ocamllex</secondary>
         </indexterm><indexterm class="singular">
           <primary>Ulex lexer generator</primary>
         </indexterm><indexterm class="singular">

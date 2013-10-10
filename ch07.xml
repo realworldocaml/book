@@ -609,7 +609,7 @@ end</programlisting>
       </indexterm><indexterm class="singular">
         <primary>exceptions</primary>
 
-        <secondary>textual representatin of</secondary>
+        <secondary>textual representation of</secondary>
       </indexterm></para>
 
     <note>
@@ -965,11 +965,7 @@ end</programlisting>
 <userinput moreinfo="none">    | Some data -&gt; compute_weight data ;;</userinput>
 <computeroutput moreinfo="none">val lookup_weight :</computeroutput>
 <computeroutput moreinfo="none">  compute_weight:('a -&gt; float) -&gt; ('b, 'a) List.Assoc.t -&gt; 'b -&gt; float =</computeroutput>
-<computeroutput moreinfo="none">  &lt;fun&gt;<indexterm class="singular">
-            <primary>exceptions</primary>
-
-            <secondary>stack bactraces for</secondary>
-          </indexterm></computeroutput></programlisting>
+<computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput></programlisting>
 
       <para>At which point, it makes sense to simply use the
       nonexception-throwing function, <literal

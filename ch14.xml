@@ -1683,7 +1683,9 @@ let () = Command.run add</programlisting>
     follow:<indexterm class="singular">
         <primary>Cmdliner</primary>
       </indexterm><indexterm class="singular">
-        <primary>ocaml-getopt</primary>
+        <primary>OCaml toolchain</primary>
+
+        <secondary>ocaml-getopt</secondary>
       </indexterm><indexterm class="singular">
         <primary>Arg module</primary>
       </indexterm><indexterm class="singular">
