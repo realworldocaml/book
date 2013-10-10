@@ -1283,8 +1283,6 @@ let () =
       OCaml native code binaries can be profiled just like any other C binary,
       by using the name mangling described earlier to map between OCaml
       variable names and the profiler output.<indexterm class="singular">
-          <primary>Perf profiling framework</primary>
-        </indexterm><indexterm class="singular">
           <primary>profiling</primary>
         </indexterm><indexterm class="singular">
           <primary>performance profiling</primary>

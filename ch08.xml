@@ -625,6 +625,8 @@ let () = &lt;expr2&gt; in
           <primary>LAPACK bindings</primary>
         </indexterm><indexterm class="singular">
           <primary>foreign function interface (FFI)</primary>
+
+          <secondary>imperative operations and</secondary>
         </indexterm><indexterm class="singular">
           <primary>primitive mutable data</primary>
 
@@ -2054,7 +2056,9 @@ let () =
         </indexterm><indexterm class="singular">
           <primary>decimals, formatting with printf</primary>
         </indexterm><indexterm class="singular">
-          <primary>padding, formatting with printf</primary>
+          <primary>padding</primary>
+
+          <secondary>formatting with printf</secondary>
         </indexterm><indexterm class="singular">
           <primary>alignment, formatting with printf</primary>
         </indexterm></para>

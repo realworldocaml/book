@@ -645,7 +645,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
         class="singular">
         <primary>values</primary>
 
-        <secondary>in JSON data</secondary>
+        <secondary sortas="JSON">in JSON data</secondary>
       </indexterm><indexterm class="singular">
         <primary>JSON data</primary>
 

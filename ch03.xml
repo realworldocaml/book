@@ -123,6 +123,8 @@
         <primary>match statements</primary>
       </indexterm><indexterm class="startofrange" id="PATMAT">
         <primary>pattern matching</primary>
+
+        <secondary>extracting data with</secondary>
       </indexterm><indexterm class="singular">
         <primary>lists</primary>
 
@@ -1183,8 +1185,12 @@
     linkend="recursive-list-functions"/>: the function <literal
     moreinfo="none">destutter</literal>, which removes sequential duplicates
     from a list. Here's the implementation that was described
-    earlier:<indexterm class="startofrange" id="PTTRNMAT">
+    earlier:<indexterm class="singular">
+        <primary>destutter function</primary>
+      </indexterm><indexterm class="startofrange" id="PTTRNMAT">
         <primary>pattern matching</primary>
+
+        <secondary>terser and faster patterns</secondary>
       </indexterm><indexterm class="singular">
         <primary>lists</primary>
 

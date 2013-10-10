@@ -881,6 +881,8 @@
         moreinfo="none">::</literal>. Here's a simple example:<indexterm
             class="singular">
             <primary>pattern matching</primary>
+
+            <secondary sortas="lists">in lists</secondary>
           </indexterm><indexterm class="singular">
             <primary>lists</primary>
 
@@ -1493,8 +1495,6 @@
         <primary>programming</primary>
 
         <secondary>immutable vs. imperative</secondary>
-      </indexterm><indexterm class="singular">
-        <primary>imperative programming</primary>
       </indexterm></para>
 
     <para>Functional code is the default in OCaml, with variable bindings and

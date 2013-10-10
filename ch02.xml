@@ -266,6 +266,8 @@
       moreinfo="none">List.unzip</literal>, a function for converting a list
       of pairs into a pair of lists:<indexterm class="singular">
           <primary>pattern matching</primary>
+
+          <secondary sortas="let">and let</secondary>
         </indexterm><indexterm class="singular">
           <primary>let syntax</primary>
 
@@ -1012,8 +1014,6 @@
           <primary>subtraction operators</primary>
         </indexterm><indexterm class="singular">
           <primary>negation operators</primary>
-        </indexterm><indexterm class="singular">
-          <primary>subtraction operators</primary>
         </indexterm></para>
 
       <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"

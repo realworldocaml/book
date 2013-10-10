@@ -130,6 +130,8 @@
     pattern match, as in the definition of <literal
     moreinfo="none">host_info_to_string</literal>:<indexterm class="singular">
         <primary>pattern matching</primary>
+
+        <secondary sortas="exhaustiveness">and exhaustiveness</secondary>
       </indexterm><indexterm class="singular">
         <primary>records</primary>
 
@@ -850,7 +852,11 @@
 
     <para>Consider the following function for extracting the usernames from a
     list of <literal moreinfo="none">Logon</literal> messages:<indexterm
-        class="startofrange" id="firstclass">
+        class="startofrange" id="Ffc">
+        <primary>fields</primary>
+
+        <secondary>first-class fields</secondary>
+      </indexterm><indexterm class="startofrange" id="firstclass">
         <primary>first-class fields</primary>
       </indexterm><indexterm class="startofrange" id="RECfirstclass">
         <primary>records</primary>
@@ -878,7 +884,7 @@
 
         <secondary>accessor functions</secondary>
       </indexterm><indexterm class="singular">
-        <primary>acessor functions</primary>
+        <primary>accessor functions</primary>
       </indexterm></para>
 
     <para>The <literal moreinfo="none">with fields</literal> annotation at the
@@ -1176,7 +1182,8 @@
     from building record validation functions to scaffolding the definition of
     a web form from a record type, and such applications can benefit from the
     guarantee that all fields of the record type in question have been
-    considered.<indexterm class="endofrange" startref="firstclass"/><indexterm
-    class="endofrange" startref="RECfirstclass"/></para>
+    considered.<indexterm class="endofrange" startref="Ffc"/><indexterm
+    class="endofrange" startref="firstclass"/><indexterm class="endofrange"
+    startref="RECfirstclass"/></para>
   </sect1>
 </chapter>
