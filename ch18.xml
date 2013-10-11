@@ -1035,7 +1035,7 @@ let () =
       complicated. Luckily, the <literal moreinfo="none">uri</literal> library
       provides a strongly-typed interface that takes care of much of the
       hassle.<indexterm class="singular">
-          <primary>RCF3986</primary>
+          <primary>RFC3986</primary>
         </indexterm><indexterm class="singular">
           <primary>uniform resource locators (URLs)</primary>
         </indexterm><indexterm class="singular">
@@ -1083,7 +1083,7 @@ let query_uri query =
 
           <secondary>parsing JSON strings in</secondary>
         </indexterm><indexterm class="singular">
-          <primary>RCF4627</primary>
+          <primary>RFC4627</primary>
         </indexterm></para>
 
       <para>We expect the response from DuckDuckGo to come across as a JSON

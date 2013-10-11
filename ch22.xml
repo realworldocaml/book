@@ -583,7 +583,7 @@ let what_is_the_weather_in location =
         </indexterm><indexterm class="singular">
           <primary>Bibtex</primary>
         </indexterm><indexterm class="singular">
-          <primary>OCaml toolchaing</primary>
+          <primary>OCaml toolchain</primary>
 
           <secondary>ocamldoc-generators</secondary>
         </indexterm><indexterm class="singular">
