@@ -15,7 +15,7 @@
   module signatures.</para>
 
   <sect1 id="single-file-programs">
-    <title>Single File Programs</title>
+    <title>Single-File Programs</title>
 
     <para>We'll start with an example: a utility that reads lines from
     <literal moreinfo="none">stdin</literal> and computes a frequency count of
@@ -105,10 +105,10 @@ let () =
     those lines an association list with the frequencies of each line. It does
     this by invoking <literal moreinfo="none">In_channel.fold_lines</literal>
     (similar to the function <literal moreinfo="none">List.fold</literal>
-    described in <xref linkend="lists-and-patterns"/>), which reads through
-    the lines one by one, calling the provided fold function for each line to
-    update the accumulator. That accumulator is initialized to the empty
-    list.</para>
+    described in <xref linkend="lists-and-patterns" />), which reads through
+    the lines one by one, calling the provided <literal>fold</literal>
+    function for each line to update the accumulator. That accumulator is
+    initialized to the empty list.</para>
 
     <para>With <literal moreinfo="none">build_counts</literal> defined, we
     then call the function to build the association list, sort that list by
@@ -116,7 +116,7 @@ let () =
     and then iterate over those 10 elements and print them to the screen.
     These operations are tied together using the <literal
     moreinfo="none">|&gt;</literal> operator described in <xref
-    linkend="variables-and-functions"/>:<indexterm class="singular">
+    linkend="variables-and-functions" />.<indexterm class="singular">
         <primary>let ( ) declaration</primary>
       </indexterm><indexterm class="singular">
         <primary>main function</primary>
@@ -138,8 +138,8 @@ let () =
       function.</para>
 
       <para>The idiom of writing <literal moreinfo="none">let () =</literal>
-      may seem a bit odd, but it has a purpose. The let binding here is a
-      pattern-match to a value of type <literal
+      may seem a bit odd, but it has a purpose. The <literal>let</literal>
+      binding here is a pattern-match to a value of type <literal
       moreinfo="none">unit</literal>, which is there to ensure that the
       expression on the righthand side returns <literal
       moreinfo="none">unit</literal>, as is common for functions that operate
@@ -185,10 +185,11 @@ let () =
     moreinfo="none">ocamlc</command>) with the appropriate flags to link in
     particular libraries and packages. Here, <literal moreinfo="none">-package
     core</literal> is asking <command moreinfo="none">ocamlfind</command> to
-    link in the Core library, <literal moreinfo="none">-linkpkg</literal> asks
+    link in the Core library; <literal moreinfo="none">-linkpkg</literal> asks
     ocamlfind to link in the packages as is necessary for building an
-    executable, while <literal moreinfo="none">-thread</literal> turns on
-    threading support, which is required for Core.<indexterm class="singular">
+    executable, while <literal moreinfo="none"
+    role="keep-together">-thread</literal> turns on threading support (which
+    is required for Core).<indexterm class="singular">
         <primary>threads</primary>
 
         <secondary>turning on with -thread</secondary>
@@ -201,7 +202,7 @@ let () =
     tool for this task is <command moreinfo="none">ocamlbuild</command>, which
     is shipped with the OCaml compiler. We'll talk more about <command
     moreinfo="none">ocamlbuild</command> in <xref
-    linkend="the-compiler-frontend-parsing-and-type-checking"/>, but for now,
+    linkend="the-compiler-frontend-parsing-and-type-checking" />, but for now,
     we'll just use a simple wrapper around <command
     moreinfo="none">ocamlbuild</command> called <command
     moreinfo="none">corebuild</command> that sets build parameters
@@ -252,8 +253,8 @@ let () =
 
         <secondary>bytecode vs. native code</secondary>
       </indexterm><indexterm class="endofrange"
-    startref="FILEsnglprog"/><indexterm class="endofrange"
-    startref="Psingfil"/></para>
+    startref="FILEsnglprog"></indexterm><indexterm class="endofrange"
+    startref="Psingfil"></indexterm></para>
 
     <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-obuild/test.out">files-modules-and-programs-freq-obuild/test.out</ulink></para>
@@ -304,7 +305,7 @@ let () =
       use bytecode for development builds. And, of course, bytecode makes
       sense when targeting a platform not supported by the native-code
       compiler. We'll cover both compilers in more detail in <xref
-      linkend="the-compiler-backend-byte-code-and-native-code"/>.</para>
+      linkend="the-compiler-backend-byte-code-and-native-code" />.</para>
     </note>
   </sect1>
 
@@ -313,8 +314,8 @@ let () =
 
     <para>Source files in OCaml are tied into the module system, with each
     file compiling down into a module whose name is derived from the name of
-    the file. We've encountered modules before, for example, when we used
-    functions like <literal moreinfo="none">find</literal> and <literal
+    the file. We've encountered modules before, such as when we used functions
+    like <literal moreinfo="none">find</literal> and <literal
     moreinfo="none">add</literal> from the <literal
     moreinfo="none">List.Assoc</literal> module. At its simplest, you can
     think of a module as a collection of definitions that are stored within a
@@ -469,14 +470,12 @@ val touch : (string * int) list -&gt; string -&gt; (string * int) list</programl
     automatically and include it in the build.</para>
 
     <note>
-      <title>Autogenerating <literal moreinfo="none">mli</literal>
-      Files</title>
+      <title>Autogenerating mli Files</title>
 
       <para>If you don't want to construct an <literal>mli</literal> entirely
       by hand, you can ask OCaml to autogenerate one for you from the source,
       which you can then adjust to fit your needs. Here's how you can do that
-      using <literal moreinfo="none">corebuild</literal>:<indexterm
-          class="singular">
+      using <emphasis>corebuild</emphasis>:<indexterm class="singular">
           <primary>mili files</primary>
         </indexterm><indexterm class="singular">
           <primary>files</primary>
@@ -496,11 +495,11 @@ val touch : (string * int) list -&gt; string -&gt; (string * int) list</programl
       <para>The generated code is basically equivalent to the <literal
       moreinfo="none">mli</literal> that we wrote by hand but is a bit uglier
       and more verbose and, of course, has no comments. In general,
-      autogenerated <literal moreinfo="none">mli</literal>'s are only useful
-      as a starting point. In OCaml, the <literal
-      moreinfo="none">mli</literal> is the key place where you present and
-      document your interface, and there's no replacement for careful human
-      editing and organization.</para>
+      autogenerated <literal moreinfo="none">mli</literal>s are only useful as
+      a starting point. In OCaml, the <literal moreinfo="none">mli</literal>
+      is the key place where you present and document your interface, and
+      there's no replacement for careful human editing and
+      organization.</para>
     </note>
 
     <para>To hide the fact that frequency counts are represented as
@@ -529,7 +528,7 @@ val to_list : t -&gt; (string * int) list</programlisting>
 
     <para>Note that we needed to add <literal moreinfo="none">empty</literal>
     and <literal moreinfo="none">to_list</literal> to <literal
-    moreinfo="none">Counter</literal>, since otherwise, there would be no way
+    moreinfo="none">Counter</literal>, since otherwise there would be no way
     to create a <literal moreinfo="none">Counter.t</literal> or get data out
     of one.</para>
 
@@ -540,7 +539,7 @@ val to_list : t -&gt; (string * int) list</programlisting>
     picked up by the <command moreinfo="none">ocamldoc</command> tool when
     generating API documentation. We'll discuss <command
     moreinfo="none">ocamldoc</command> more in <xref
-    linkend="the-compiler-frontend-parsing-and-type-checking"/>.</para>
+    linkend="the-compiler-frontend-parsing-and-type-checking" />.</para>
 
     <para>Here's a rewrite of <literal moreinfo="none">counter.ml</literal> to
     match the new <literal moreinfo="none">counter.mli</literal>:</para>
@@ -606,7 +605,7 @@ let () =
     <para>Now we can turn to optimizing the implementation of <literal
     moreinfo="none">Counter</literal>. Here's an alternate and far more
     efficient implementation, based on the <literal
-    moreinfo="none">Map</literal> datastructure in Core:</para>
+    moreinfo="none">Map</literal> data structure in Core:</para>
 
     <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-fast/counter.ml">files-modules-and-programs-freq-fast/counter.ml</ulink></para>
@@ -634,7 +633,7 @@ let touch t s =
     moreinfo="none">Map.t</literal>, you need access to type-specialized
     information, and for others, like looking something up in <literal
     moreinfo="none">Map.t</literal>, you don't. This is covered in more detail
-    in <xref linkend="maps-and-hash-tables"/>.</para>
+    in <xref linkend="maps-and-hash-tables" />.</para>
   </sect1>
 
   <sect1 id="concrete-types-in-signatures">
@@ -681,7 +680,7 @@ let median t =
     <para>In the preceding implementation, we use <literal
     moreinfo="none">failwith</literal> to throw an exception for the case of
     the empty list. We'll discuss exceptions more in <xref
-    linkend="error-handling"/>. Note also that the function <literal
+    linkend="error-handling" />. Note also that the function <literal
     moreinfo="none">fst</literal> simply returns the first element of any
     two-tuple.</para>
 
@@ -829,8 +828,8 @@ let sessions_have_same_user s1 s2 =
     <title>Opening Modules</title>
 
     <para>Most of the time, you refer to values and types within a module by
-    using the module name as an explicit qualifier. e.g., you write <literal
-    moreinfo="none">List.map</literal> to refer to the <literal
+    using the module name as an explicit qualifier. For example, you write
+    <literal moreinfo="none">List.map</literal> to refer to the <literal
     moreinfo="none">map</literal> function in the <literal
     moreinfo="none">List</literal> module. Sometimes, though, you want to be
     able to refer to the contents of a module without this explicit
@@ -867,13 +866,14 @@ let sessions_have_same_user s1 s2 =
 
     <para><literal moreinfo="none">open</literal> is essential when you want
     to modify your environment for a standard library like Core, but it's
-    generally good style to keep opening of modules to a minimum. Opening a
-    module is basically a tradeoff between terseness and explicitness—the more
-    modules you open, the fewer module qualifications you need, and the harder
-    it is to look at an identifier and figure out where it comes from.</para>
+    generally good style to keep the opening of modules to a minimum. Opening
+    a module is basically a trade-off between terseness and explicitness—the
+    more modules you open, the fewer module qualifications you need, and the
+    harder it is to look at an identifier and figure out where it comes
+    from.</para>
 
-    <para>Here's some general advice on how to deal with opens:<indexterm
-        class="singular">
+    <para>Here's some general advice on how to deal with
+    <literal>open</literal>s:<indexterm class="singular">
         <primary>local opens</primary>
       </indexterm></para>
 
@@ -905,8 +905,9 @@ let sessions_have_same_user s1 s2 =
         operators are the ones from the <literal
         moreinfo="none">Int64</literal> module.</para>
 
-        <para>There's another even more lightweight syntax for local opens,
-        which is particularly useful for small expressions:</para>
+        <para>There's another, even more lightweight syntax for local
+        <literal>open</literal>s, which is particularly useful for small
+        expressions:</para>
 
         <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/main.topscript">files-modules-and-programs/main.topscript</ulink>
@@ -919,9 +920,9 @@ let sessions_have_same_user s1 s2 =
       </listitem>
 
       <listitem>
-        <para>An alternative to local opens that makes your code terser
-        without giving up on explicitness is to locally rebind the name of a
-        module. So, when using the <literal
+        <para>An alternative to local <literal>open</literal>s that makes your
+        code terser without giving up on explicitness is to locally rebind the
+        name of a module. So, when using the <literal
         moreinfo="none">Counter.median</literal> type, instead of
         writing:</para>
 
@@ -981,7 +982,7 @@ let sessions_have_same_user s1 s2 =
         moreinfo="none"># </prompt><userinput moreinfo="none">module Interval = struct</userinput>
 <userinput moreinfo="none">    type t = | Interval of int * int</userinput>
 <userinput moreinfo="none">             | Empty</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    let create low high =</userinput>
 <userinput moreinfo="none">      if high &lt; low then Empty else Interval (low,high)</userinput>
 <userinput moreinfo="none">  end;;</userinput>
@@ -999,7 +1000,7 @@ let sessions_have_same_user s1 s2 =
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">module Extended_interval = struct</userinput>
 <userinput moreinfo="none">    include Interval</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    let contains t x =</userinput>
 <userinput moreinfo="none">      match t with</userinput>
 <userinput moreinfo="none">      | Empty -&gt; false</userinput>
@@ -1027,7 +1028,7 @@ let sessions_have_same_user s1 s2 =
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">module Extended_interval = struct</userinput>
 <userinput moreinfo="none">    open Interval</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    let contains t x =</userinput>
 <userinput moreinfo="none">      match t with</userinput>
 <userinput moreinfo="none">      | Empty -&gt; false</userinput>
@@ -1260,8 +1261,8 @@ type median = | Before_and_after of string * string
       example, when defining a set of mutually recursive values (like the
       definition of <literal moreinfo="none">is_even</literal> and <literal
       moreinfo="none">is_odd</literal> in <xref
-      linkend="recursive-functions"/>), you need to define them using <literal
-      moreinfo="none">let rec</literal> rather than ordinary <literal
+      linkend="recursive-functions" />), you need to define them using
+      <literal moreinfo="none">let rec</literal> rather than ordinary <literal
       moreinfo="none">let</literal>.<indexterm class="singular">
           <primary>dependencies, cyclic</primary>
         </indexterm><indexterm class="singular">

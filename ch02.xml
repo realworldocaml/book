@@ -15,7 +15,7 @@
   <para>Don't be discouraged if you find yourself overwhelmed by some of the
   details, especially toward the end of the chapter. The concepts here are
   important, but if they don't connect for you on your first read, you should
-  return to this chapter after you've gotten a better sense for the language
+  return to this chapter after you've gotten a better feel for the language
   and fill in your understanding.</para>
 
   <sect1 id="variables">
@@ -45,15 +45,15 @@
     <programlisting format="linespecific" language="">let &lt;variable&gt; = &lt;expr&gt;</programlisting>
 
     <para>As we'll see when we get to the module system in <xref
-    linkend="files-modules-and-programs"/>, this same syntax is used for let
-    bindings at the toplevel of a module.</para>
+    linkend="files-modules-and-programs" />, this same syntax is used for
+    <literal>let</literal> bindings at the toplevel of a module.</para>
 
     <para>Every variable binding has a <emphasis>scope</emphasis>, which is
     the portion of the code that can refer to that binding. When using
-    <command moreinfo="none">utop</command>, the scope of a top-level let
-    binding is everything that follows it in the session. When it shows up in
-    a module, the scope is the remainder of that module.<indexterm
-        class="singular">
+    <command moreinfo="none">utop</command>, the scope of a top-level
+    <literal>let</literal> binding is everything that follows it in the
+    session. When it shows up in a module, the scope is the remainder of that
+    module.<indexterm class="singular">
         <primary>variables</primary>
 
         <secondary>scope of</secondary>
@@ -123,10 +123,11 @@
 <computeroutput moreinfo="none">Characters -1-13:</computeroutput>
 <computeroutput moreinfo="none">Error: Unbound value language_list</computeroutput></programlisting>
 
-    <para>A let binding in an inner scope can <emphasis>shadow</emphasis>, or
-    hide, the definition from an outer scope. So, for example, we could have
-    written the <literal moreinfo="none">dashed_languages</literal> example as
-    follows:<indexterm class="singular">
+    <para>A <literal>let</literal> binding in an inner scope can
+    <emphasis>shadow</emphasis>, or hide, the definition from an outer scope.
+    So, for example, we could have written the <literal
+    moreinfo="none">dashed_languages</literal> example as follows:<indexterm
+        class="singular">
         <primary>variables</primary>
 
         <secondary>shadowing of</secondary>
@@ -188,10 +189,10 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">area_of_ring 1. 3.;;</userinput>
 <computeroutput moreinfo="none">- : float = 25.1327412287</computeroutput></programlisting>
 
-    <para>It's important not to confuse a sequence of let bindings with the
-    modification of a mutable variable. For example, consider how <literal
-    moreinfo="none">area_of_ring</literal> would work if we had instead
-    written this purposefully confusing bit of code:</para>
+    <para>It's important not to confuse a sequence of <literal>let</literal>
+    bindings with the modification of a mutable variable. For example,
+    consider how <literal moreinfo="none">area_of_ring</literal> would work if
+    we had instead written this purposefully confusing bit of code:</para>
 
     <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
@@ -224,9 +225,9 @@
     us that there is an unused definition of <literal
     moreinfo="none">pi</literal>.</para>
 
-    <para>In OCaml, let bindings are immutable. There are many kinds of
-    mutable values in OCaml, which we'll discuss in <xref
-    linkend="imperative-programming-1"/>, but there are no mutable
+    <para>In OCaml, <literal>let</literal> bindings are immutable. There are
+    many kinds of mutable values in OCaml, which we'll discuss in <xref
+    linkend="imperative-programming-1" />, but there are no mutable
     variables.</para>
 
     <note>
@@ -257,11 +258,10 @@
     </note>
 
     <sect2 id="pattern-matching-and-let">
-      <title>Pattern Matching and <literal
-      moreinfo="none">let</literal></title>
+      <title>Pattern Matching and let</title>
 
       <para>Another useful feature of <literal>let</literal> bindings is that
-      they support the use of <emphasis>patterns</emphasis> on the left-hand
+      they support the use of <emphasis>patterns</emphasis> on the lefthand
       side. Consider the following code, which uses <literal
       moreinfo="none">List.unzip</literal>, a function for converting a list
       of pairs into a pair of lists:<indexterm class="singular">
@@ -292,15 +292,16 @@
       values to both of the identifiers that show up in that pattern. A
       pattern is essentially a description of the shape of a data structure,
       where some components are identifiers to be bound. As we saw in <xref
-      linkend="tuples-lists-options-and-pattern-matching"/>, OCaml has
+      linkend="tuples-lists-options-and-pattern-matching" />, OCaml has
       patterns for a variety of different data types.</para>
 
-      <para>Using a pattern in a let binding makes the most sense for a
-      pattern that is <emphasis>irrefutable</emphasis>, i.e., where any value
-      of the type in question is guaranteed to match the pattern. Tuple and
-      record patterns are irrefutable, but list patterns are not. Consider the
-      following code that implements a function for upcasing the first element
-      of a comma-separated list:<indexterm class="singular">
+      <para>Using a pattern in a <literal>let</literal> binding makes the most
+      sense for a pattern that is <emphasis>irrefutable</emphasis>, i.e.,
+      where any value of the type in question is guaranteed to match the
+      pattern. Tuple and record patterns are irrefutable, but list patterns
+      are not. Consider the following code that implements a function for
+      upcasing the first element of a comma-separated list:<indexterm
+          class="singular">
           <primary>irrefutable patterns</primary>
         </indexterm></para>
 
@@ -322,8 +323,8 @@
       <para>This case can't really come up in practice, because <literal
       moreinfo="none">String.split</literal> always returns a list with at
       least one element. But the compiler doesn't know this, and so it emits
-      the warning. It's generally better to use a match statement to handle
-      such cases explicitly:</para>
+      the warning. It's generally better to use a <literal>match</literal>
+      statement to handle such cases explicitly:</para>
 
       <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
@@ -341,8 +342,7 @@
       moreinfo="none">assert</literal>, which is useful for marking cases that
       should be impossible. We'll discuss <literal
       moreinfo="none">assert</literal> in more detail in <xref
-      linkend="error-handling"/>.<indexterm class="endofrange"
-      startref="vrbl"/></para>
+      linkend="error-handling" />.</para>
     </sect2>
   </sect1>
 
@@ -362,7 +362,7 @@
       <para>We'll start by looking at the most basic style of function
       declaration in OCaml: the <emphasis>anonymous function</emphasis>. An
       anonymous function is a function value that is declared without being
-      named. They can be declared using the <literal
+      named. These can be declared using the <literal
       moreinfo="none">fun</literal> keyword, as shown here:<indexterm
           class="singular">
           <primary>fun keyword</primary>
@@ -436,7 +436,8 @@
       in OCaml, and you can do everything with them that you'd do with an
       ordinary value, including passing them to and returning them from other
       functions and storing them in data structures. We even name functions in
-      the same way that we name other values, by using a let binding:</para>
+      the same way that we name other values, by using a
+      <literal>let</literal> binding:</para>
 
       <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
@@ -466,13 +467,13 @@
       entirely equivalent.</para>
 
       <note>
-        <title><literal moreinfo="none">let</literal> and <literal
-        moreinfo="none">fun</literal></title>
+        <title>let and fun</title>
 
-        <para>Functions and let bindings have a lot to do with each other. In
-        some sense, you can think of the parameter of a function as a variable
-        being bound to the value passed by the caller. Indeed, the following
-        two expressions are nearly equivalent:<indexterm class="singular">
+        <para>Functions and <literal>let</literal> bindings have a lot to do
+        with each other. In some sense, you can think of the parameter of a
+        function as a variable being bound to the value passed by the caller.
+        Indeed, the following two expressions are nearly equivalent:<indexterm
+            class="singular">
             <primary>let syntax</primary>
 
             <secondary>functions and</secondary>
@@ -490,15 +491,15 @@
 
         <para>This connection is important, and will come up more when
         programming in a monadic style, as we'll see in <xref
-        linkend="concurrent-programming-with-async"/>.</para>
+        linkend="concurrent-programming-with-async" />.</para>
       </note>
     </sect2>
 
     <sect2 id="multi-argument-functions">
       <title>Multiargument functions</title>
 
-      <para>OCaml of course also supports multiargument functions, for
-      example:<indexterm class="singular">
+      <para>OCaml of course also supports multiargument functions, such
+      as:<indexterm class="singular">
           <primary>fun keyword</primary>
 
           <secondary>multi-argument functions</secondary>
@@ -632,7 +633,7 @@
       purpose of sending arguments to a tuple-style function. You can't,
       however, use partial application for this style of function.</para>
 
-      <para>There are small tradeoffs between these two approaches, but most
+      <para>There are small trade-offs between these two approaches, but most
       of the time, one should stick to currying, since it's the default style
       in the OCaml world.</para>
     </sect2>
@@ -643,9 +644,9 @@
       <para>A function is <emphasis>recursive</emphasis> if it refers to
       itself in its definition. Recursion is important in any programming
       language, but is particularly important in functional languages, because
-      it is the way in which you build looping constructs. (As will be
-      discussed in more detail in <xref linkend="imperative-programming-1"/>,
-      OCaml also supports imperative looping constructs like <literal
+      it is the way that you build looping constructs. (As will be discussed
+      in more detail in <xref linkend="imperative-programming-1" />, OCaml
+      also supports imperative looping constructs like <literal
       moreinfo="none">for</literal> and <literal
       moreinfo="none">while</literal>, but these are only useful when using
       OCaml's imperative features.)<indexterm class="singular">
@@ -658,10 +659,11 @@
           <secondary>recursive functions</secondary>
         </indexterm></para>
 
-      <para>In order to define a recursive function, you need to mark the let
-      binding as recursive with the <literal moreinfo="none">rec</literal>
-      keyword, as shown in this function for finding the first
-      sequentially-repeated element in a list:<indexterm class="singular">
+      <para>In order to define a recursive function, you need to mark the
+      <literal>let</literal> binding as recursive with the <literal
+      moreinfo="none">rec</literal> keyword, as shown in this function for
+      finding the first sequentially repeated element in a list:<indexterm
+          class="singular">
           <primary>rec keyword</primary>
         </indexterm></para>
 
@@ -684,11 +686,11 @@
       [_]</literal> is what's called an <emphasis>or-pattern</emphasis>, which
       is a disjunction of two patterns, meaning that it will be considered a
       match if either pattern matches. In this case, <literal
-      moreinfo="none">[]</literal>, matches the empty list, and <literal
-      moreinfo="none">[_]</literal>, matches any single element list. The
+      moreinfo="none">[]</literal> matches the empty list, and <literal
+      moreinfo="none">[_]</literal> matches any single element list. The
       <literal moreinfo="none">_</literal> is there so we don't have to put an
       explicit name on that single element.<indexterm class="singular">
-          <primary>or-patterns</primary>
+          <primary>or patterns</primary>
         </indexterm></para>
 
       <para>We can also define multiple mutually recursive values by using
@@ -729,8 +731,8 @@
       (and especially mutually recursive) definitions are harder to reason
       about than nonrecursive ones. It's therefore useful that, in the absence
       of an explicit <literal moreinfo="none">rec</literal>, you can assume
-      that a let binding is nonrecursive, and so can only build upon previous
-      bindings.</para>
+      that a <literal>let</literal> binding is nonrecursive, and so can only
+      build upon previous bindings.</para>
 
       <para>In addition, having a nonrecursive form makes it easier to create
       a new definition that extends and supersedes an existing one by
@@ -842,22 +844,24 @@
 <computeroutput moreinfo="none">val ( *** ) : float -&gt; float -&gt; float = &lt;fun&gt;</computeroutput></programlisting>
 
       <para>The syntactic role of an operator is typically determined by its
-      first character or two, though there are a few exceptions. This table
-      breaks the different operators and other syntactic forms into groups
-      from highest to lowest precedence, explaining how each behaves
-      syntactically. We write <literal moreinfo="none">!</literal>... to
-      indicate the class of operators beginning with <literal
+      first character or two, though there are a few exceptions. <xref
+      linkend="table2_1" /> breaks the different operators and other syntactic
+      forms into groups from highest to lowest precedence, explaining how each
+      behaves syntactically. We write <literal moreinfo="none">!</literal>...
+      to indicate the class of operators beginning with <literal
       moreinfo="none">!</literal>.<indexterm class="singular">
           <primary>operators</primary>
 
           <secondary>prefixes and usage</secondary>
         </indexterm></para>
 
-      <informaltable>
-        <tgroup cols="2">
-          <colspec align="left" colwidth="37*"/>
+      <table id="table2_1">
+        <title></title>
 
-          <colspec align="left" colwidth="23*"/>
+        <tgroup cols="2">
+          <colspec align="left" colwidth="37*" />
+
+          <colspec align="left" colwidth="23*" />
 
           <thead>
             <row>
@@ -881,7 +885,7 @@
               moreinfo="none">.(</literal>, <literal
               moreinfo="none">.[</literal></entry>
 
-              <entry/>
+              <entry></entry>
             </row>
 
             <row>
@@ -968,7 +972,7 @@
             <row>
               <entry><literal moreinfo="none">,</literal></entry>
 
-              <entry/>
+              <entry></entry>
             </row>
 
             <row>
@@ -981,7 +985,7 @@
             <row>
               <entry><literal moreinfo="none">if</literal></entry>
 
-              <entry/>
+              <entry></entry>
             </row>
 
             <row>
@@ -991,7 +995,7 @@
             </row>
           </tbody>
         </tgroup>
-      </informaltable>
+      </table>
 
       <para>There's one important special case: <literal
       moreinfo="none">-</literal> and <literal moreinfo="none">-.</literal>,
@@ -1058,11 +1062,12 @@
       <para>It's not quite obvious at first what the purpose of this operator
       is: it just takes a value and a function and applies the function to the
       value. Despite that bland-sounding description, it has the useful role
-      of a sequencing operator, similar in spirit to using pipe in the UNIX
-      shell. Consider, for example, the following code for printing out the
-      unique elements of your <literal moreinfo="none">PATH</literal>. Note
-      that <literal moreinfo="none">List.dedup</literal> that follows removes
-      duplicates from a list by sorting the list using the provided comparison
+      of a sequencing operator, similar in spirit to using the pipe character
+      in the UNIX shell. Consider, for example, the following code for
+      printing out the unique elements of your <literal
+      moreinfo="none">PATH</literal>. Note that <literal
+      moreinfo="none">List.dedup</literal> that follows removes duplicates
+      from a list by sorting the list using the provided comparison
       function:<indexterm class="singular">
           <primary>lists</primary>
 
@@ -1184,7 +1189,8 @@
 
       <para>The type error aside, this example highlights the importance of
       choosing the operator you use with care, particularly with respect to
-      associativity.<indexterm class="endofrange" startref="FNCprf"/></para>
+      associativity.<indexterm class="endofrange"
+      startref="FNCprf"></indexterm></para>
     </sect2>
 
     <sect2 id="declaring-functions-with-function">
@@ -1235,7 +1241,7 @@
 <computeroutput moreinfo="none">val some_or_zero : int option -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
       <para>We can also combine the different styles of function declaration
-      together, as in the following example where we declare a two argument
+      together, as in the following example, where we declare a two-argument
       (curried) function with a pattern match on the second argument:</para>
 
       <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
@@ -1270,7 +1276,7 @@
       encountered functions from Core like <literal
       moreinfo="none">List.map</literal> that use labeled arguments. Labeled
       arguments are marked by a leading tilde, and a label (followed by a
-      colon) are put in front of the variable to be labeled. Here's an
+      colon) is put in front of the variable to be labeled. Here's an
       example:<indexterm class="singular">
           <primary>labeled arguments</primary>
         </indexterm><indexterm class="singular">
@@ -1344,8 +1350,8 @@
         <listitem>
           <para>When the meaning of a particular argument is unclear from the
           type alone. Consider a function for creating a hash table whose
-          first argument is the initial size of the array backing the
-          hashtable, and the second is a boolean flag, which indicates whether
+          first argument is the initial size of the array backing the hash
+          table, and the second is a Boolean flag, which indicates whether
           that array will ever shrink when elements are removed:</para>
 
           <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
@@ -1363,9 +1369,9 @@
           <programlisting format="linespecific" language="ocaml">val create_hashtable :
   init_size:int -&gt; allow_shrinking:bool -&gt; ('a,'b) Hashtable.t</programlisting>
 
-          <para>Choosing label names well is especially important for boolean
+          <para>Choosing label names well is especially important for Boolean
           values, since it's often easy to get confused about whether a value
-          being true is meant ot enable or disable a given feature.</para>
+          being true is meant to enable or disable a given feature.</para>
         </listitem>
 
         <listitem>
@@ -1560,7 +1566,7 @@
       moreinfo="none">sep</literal> is not provided by the caller.</para>
 
       <para>The preceding example needed a bit of boilerplate to choose a
-      default separator when none was provided. This is a common-enough
+      default separator when none was provided. This is a common enough
       pattern that there's an explicit syntax for providing a default value,
       which allows us to write <literal moreinfo="none">concat</literal> more
       concisely:</para>
@@ -1592,7 +1598,7 @@
       functions internal to a module, i.e., functions that are not included in
       the module's interface, or <literal moreinfo="none">mli</literal> file.
       We'll learn more about <literal moreinfo="none">mli</literal>s in <xref
-      linkend="files-modules-and-programs"/>.</para>
+      linkend="files-modules-and-programs" />.</para>
 
       <sect3 id="explicit-passing-of-an-optional-argument">
         <title>Explicit passing of an optional argument</title>
@@ -1610,8 +1616,8 @@
         OCaml lets you do this by using <literal moreinfo="none">?</literal>
         instead of <literal moreinfo="none">~</literal> to mark the argument.
         Thus, the following two lines are equivalent ways of specifying the
-        <literal moreinfo="none">sep</literal> argument to concat:<indexterm
-            class="singular">
+        <literal moreinfo="none">sep</literal> argument to
+        <literal>concat</literal>:<indexterm class="singular">
             <primary>optional arguments</primary>
 
             <secondary>explicit passing of</secondary>
@@ -1697,11 +1703,11 @@
         The function takes an argument <literal
         moreinfo="none">delta</literal>, which determines the scale at which
         to compute the derivative; values <literal moreinfo="none">x</literal>
-        and <literal moreinfo="none">y</literal>, which determine which point
-        to compute the derivative at; and the function <literal
+        and <literal moreinfo="none">y</literal>, which determine at which
+        point to compute the derivative; and the function <literal
         moreinfo="none">f</literal>, whose derivative is being computed. The
         function <literal moreinfo="none">f</literal> itself takes two labeled
-        arguments <literal moreinfo="none">x</literal> and <literal
+        arguments, <literal moreinfo="none">x</literal> and <literal
         moreinfo="none">y</literal>. Note that you can use an apostrophe as
         part of a variable name, so <literal moreinfo="none">x'</literal> and
         <literal moreinfo="none">y'</literal> are just ordinary
@@ -1937,8 +1943,8 @@
         optional arguments are very effective tools for making your APIs both
         more convenient and safer, and it's worth the effort of learning how
         to use them effectively.<indexterm class="endofrange"
-        startref="ARGopt"/><indexterm class="endofrange"
-        startref="FNCopt"/></para>
+        startref="ARGopt"></indexterm><indexterm class="endofrange"
+        startref="FNCopt"></indexterm></para>
       </sect3>
     </sect2>
   </sect1>

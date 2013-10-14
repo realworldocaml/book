@@ -967,8 +967,8 @@
         <para>The preceding code also includes our first comment. OCaml
         comments are bounded by <literal moreinfo="none">(*</literal> and
         <literal moreinfo="none">*)</literal> and can be nested arbitrarily
-        and cover multiple lines. There's no equivalent of C++-style single
-        line comments that are prefixed by <literal
+        and cover multiple lines. There's no equivalent of C++-style
+        single-line comments that are prefixed by <literal
         moreinfo="none">//</literal>.</para>
 
         <para>The first pattern, <literal moreinfo="none">first ::
@@ -977,8 +977,8 @@
         every list except for the empty list can be written down with one or
         more <literal moreinfo="none">::</literal>'s. The second pattern,
         <literal moreinfo="none">[]</literal>, matches only the empty list.
-        These cases are exhaustive, since every list is either empty, or has
-        at least one element, a fact which is verified by the compiler.</para>
+        These cases are exhaustive, since every list is either empty or has at
+        least one element, a fact that is verified by the compiler.</para>
       </sect3>
 
       <sect3 id="recursive-list-functions">
@@ -1094,10 +1094,10 @@
         <para>Note that this code used another variant of the list pattern,
         <literal moreinfo="none">[hd]</literal>, to match a list with a single
         element. We can do this to match a list with any fixed number of
-        elements, e.g., <literal moreinfo="none">[x;y;z]</literal> will match
-        any list with exactly three elements and will bind those elements to
-        the variables <literal moreinfo="none">x</literal>, <literal
-        moreinfo="none">y</literal>, and <literal
+        elements; for example, <literal moreinfo="none">[x;y;z]</literal> will
+        match any list with exactly three elements and will bind those
+        elements to the variables <literal moreinfo="none">x</literal>,
+        <literal moreinfo="none">y</literal>, and <literal
         moreinfo="none">z</literal>.</para>
 
         <para>In the last few examples, our list processing code involved a
@@ -1133,14 +1133,14 @@
 <computeroutput moreinfo="none">val divide : int -&gt; int -&gt; int option = &lt;fun&gt;</computeroutput></programlisting>
 
       <para>The function <literal moreinfo="none">divide</literal> either
-      returns <literal moreinfo="none">None</literal>, if the divisor is zero;
-      or <literal moreinfo="none">Some</literal> of the result of the
-      division, otherwise. <literal moreinfo="none">Some</literal> and
-      <literal moreinfo="none">None</literal> are constructors, like <literal
+      returns <literal moreinfo="none">None</literal> if the divisor is zero,
+      or <literal moreinfo="none">Some</literal> of the result of the division
+      otherwise. <literal moreinfo="none">Some</literal> and <literal
+      moreinfo="none">None</literal> are constructors, like <literal
       moreinfo="none">::</literal> and <literal moreinfo="none">[]</literal>
       for lists, which let you build optional values. You can think of an
       option as a specialized list that can only have zero or one
-      element.</para>
+      elements.</para>
 
       <para>To examine the contents of an option, we use pattern matching, as
       we did with tuples and lists. Consider the following function for
@@ -1169,16 +1169,14 @@
 <computeroutput moreinfo="none">- : string = "2013-08-18 14:48:08 -- Up to the minute"</computeroutput></programlisting>
 
       <para>This example uses Core's <literal moreinfo="none">Time</literal>
-      module for dealing with time as well as the <literal
+      module for dealing with time, as well as the <literal
       moreinfo="none">^</literal> operator for concatenating strings. The
       concatenation operator is provided as part of the <literal
-      moreinfo="none">Pervasives</literal> module which is automatically
+      moreinfo="none">Pervasives</literal> module, which is automatically
       opened in every OCaml program.</para>
 
       <note>
-        <title>Nesting <literal moreinfo="none">let</literal>s with <literal
-        moreinfo="none">let</literal> and <literal
-        moreinfo="none">in</literal></title>
+        <title>Nesting lets with let and in</title>
 
         <para><literal moreinfo="none">log_entry</literal> was our first use
         of <literal moreinfo="none">let</literal> to define a new variable
@@ -1207,9 +1205,9 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">- : int = 14</computeroutput></programlisting>
 
-        <para>Note that the scope of the let binding is terminated by the
-        double-semicolon, so the value of <literal moreinfo="none">x</literal>
-        is no longer available:</para>
+        <para>Note that the scope of the <literal>let</literal> binding is
+        terminated by the double-semicolon, so the value of <literal
+        moreinfo="none">x</literal> is no longer available:</para>
 
         <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/local_let.topscript">guided-tour/local_let.topscript</ulink>
@@ -1220,8 +1218,9 @@
 <computeroutput moreinfo="none">Characters -1-1:</computeroutput>
 <computeroutput moreinfo="none">Error: Unbound value x</computeroutput></programlisting>
 
-        <para>We can also have multiple let statements in a row, each one
-        adding a new variable binding to what came before:</para>
+        <para>We can also have multiple <literal>let</literal> statements in a
+        row, each one adding a new variable binding to what came
+        before:</para>
 
         <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/local_let.topscript">guided-tour/local_let.topscript</ulink>
@@ -1234,17 +1233,17 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">- : int = 56</computeroutput></programlisting>
 
-        <para>This kind of nested let binding is a common way of building up a
-        complex expression, with each <literal moreinfo="none">let</literal>
-        naming some component, before combining them in one final
-        expression.</para>
+        <para>This kind of nested <literal>let</literal> binding is a common
+        way of building up a complex expression, with each <literal
+        moreinfo="none">let</literal> naming some component, before combining
+        them in one final expression.</para>
       </note>
 
       <para>Options are important because they are the standard way in OCaml
       to encode a value that might not be there; there's no such thing as a
       <literal moreinfo="none">NullPointerException</literal> in OCaml. This
       is different from most other languages, including Java and C#, where
-      most if not all datatypes are <emphasis>nullable</emphasis>, meaning
+      most if not all data types are <emphasis>nullable</emphasis>, meaning
       that, whatever their type is, any given value also contains the
       possibility of being a null value. In such languages, null is lurking
       everywhere.<indexterm class="singular">
@@ -1270,8 +1269,8 @@
 
     <para>So far, we've only looked at data structures that were predefined in
     the language, like lists and tuples. But OCaml also allows us to define
-    new datatypes. Here's a toy example of a datatype representing a point in
-    two-dimensional space:<indexterm class="singular">
+    new data types. Here's a toy example of a data type representing a point
+    in two-dimensional space:<indexterm class="singular">
         <primary>datatypes</primary>
 
         <secondary>defining new</secondary>
@@ -1342,7 +1341,7 @@
         moreinfo="none"># </prompt><userinput moreinfo="none">let magnitude { x; y } = sqrt (x ** 2. +. y ** 2.);;</userinput>
 <computeroutput moreinfo="none">val magnitude : point2d -&gt; float = &lt;fun&gt;</computeroutput></programlisting>
 
-    <para>We can also use dot-notation for accessing record fields:</para>
+    <para>We can also use dot notation for accessing record fields:</para>
 
     <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
@@ -1403,7 +1402,7 @@
     different cases of the variant (the first <literal
     moreinfo="none">|</literal> is optional), and each case has a capitalized
     tag, like <literal moreinfo="none">Circle</literal>, <literal
-    moreinfo="none">Rect</literal> and <literal
+    moreinfo="none">Rect</literal> or <literal
     moreinfo="none">Segment</literal>, to distinguish that case from the
     others.</para>
 
@@ -1498,8 +1497,8 @@
     <para>Functional code is the default in OCaml, with variable bindings and
     most data structures being immutable. But OCaml also has excellent support
     for imperative programming, including mutable data structures like arrays
-    and hash tables, and control-flow constructs like for and while
-    loops.</para>
+    and hash tables, and control-flow constructs like <literal>for</literal>
+    and <literal>while</literal> loops.</para>
 
     <sect2 id="arrays">
       <title>Arrays</title>
@@ -1538,8 +1537,9 @@
       <para>The <literal moreinfo="none">.(i)</literal> syntax is used to
       refer to an element of an array, and the <literal
       moreinfo="none">&lt;-</literal> syntax is for modification. Because the
-      elements of the array are counted starting at zero, element <literal
-      moreinfo="none">.(2)</literal> is the third element.</para>
+      elements of the array are counted starting at zero, element <phrase
+      role="keep-together"><literal moreinfo="none">.(2)</literal> is</phrase>
+      the third element.</para>
 
       <para>The <literal moreinfo="none">unit</literal> type that we see in
       the preceding code is interesting in that it has only one possible
@@ -1593,9 +1593,10 @@
       <para>The fields in <literal moreinfo="none">running_sum</literal> are
       designed to be easy to extend incrementally, and sufficient to compute
       means and standard deviations, as shown in the following example. Note
-      that there are two let-bindings in a row without a double semicolon
-      between them. That's because the double semicolon is required only to
-      tell utop to process the input, not to separate two declarations:</para>
+      that there are two <literal>let</literal> bindings in a row without a
+      double semicolon between them. That's because the double semicolon is
+      required only to tell <emphasis>utop</emphasis> to process the input,
+      not to separate two declarations:</para>
 
       <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
@@ -1666,9 +1667,10 @@
       <para>It's worth noting that the preceding algorithm is numerically
       naive and has poor precision in the presence of cancellation. You can
       look at this Wikipedia <ulink
-      url="http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance">article</ulink>
-      for more details, paying particular attention to the weighted
-      incremental and parallel algorithms.</para>
+      url="http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance">article
+      on algorithms for calculating variance</ulink> for more details, paying
+      particular attention to the weighted incremental and parallel
+      algorithms.</para>
     </sect2>
 
     <sect2 id="refs">
@@ -1779,11 +1781,12 @@
 
       <para>OCaml also supports traditional imperative control-flow constructs
       like <literal>for and while</literal> loops. Here, for example, is some
-      code for permuting an array that uses a for loop. We use the <literal
-      moreinfo="none">Random</literal> module as our source of randomness.
-      <literal moreinfo="none">Random</literal> starts with a default seed,
-      but you can call <literal moreinfo="none">Random.self_init</literal> to
-      choose a new seed at random:<indexterm class="singular">
+      code for permuting an array that uses a <literal>for</literal> loop. We
+      use the <literal moreinfo="none">Random</literal> module as our source
+      of randomness. <literal moreinfo="none">Random</literal> starts with a
+      default seed, but you can call <literal
+      moreinfo="none">Random.self_init</literal> to choose a new seed at
+      random:<indexterm class="singular">
           <primary>Random module</primary>
         </indexterm><indexterm class="singular">
           <primary>while loops</primary>
@@ -1814,9 +1817,10 @@
 <computeroutput moreinfo="none">val permute : 'a array -&gt; unit = &lt;fun&gt;</computeroutput></programlisting>
 
       <para>From a syntactic perspective, you should note the keywords that
-      distinguish a for loop: <literal moreinfo="none">for</literal>, <literal
-      moreinfo="none">to</literal>, <literal moreinfo="none">do</literal>, and
-      <literal moreinfo="none">done</literal>.</para>
+      distinguish a <literal>for</literal> loop: <literal
+      moreinfo="none">for</literal>, <literal moreinfo="none">to</literal>,
+      <literal moreinfo="none">do</literal>, and <literal
+      moreinfo="none">done</literal>.</para>
 
       <para>Here's an example run of this code:</para>
 
@@ -1834,10 +1838,10 @@
 <computeroutput moreinfo="none">- : int array =</computeroutput>
 <computeroutput moreinfo="none">[|1; 2; 4; 6; 11; 7; 14; 9; 10; 0; 13; 16; 19; 12; 17; 5; 3; 18; 8; 15|]</computeroutput></programlisting>
 
-      <para>OCaml also supports while loops, as shown in the following
-      function for finding the position of the first negative entry in an
-      array. Note that <literal moreinfo="none">while</literal> (like <literal
-      moreinfo="none">for</literal>) is also a keyword:</para>
+      <para>OCaml also supports <literal>while</literal> loops, as shown in
+      the following function for finding the position of the first negative
+      entry in an array. Note that <literal moreinfo="none">while</literal>
+      (like <literal moreinfo="none">for</literal>) is also a keyword:</para>
 
       <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
@@ -1858,7 +1862,7 @@
 <computeroutput moreinfo="none">- : int option = Some 1</computeroutput></programlisting>
 
       <para>As a side note, the preceding code takes advantage of the fact
-      that <literal moreinfo="none">&amp;&amp;</literal>, OCaml's and
+      that <literal moreinfo="none">&amp;&amp;</literal>, OCaml's And
       operator, short-circuits. In particular, in an expression of the form
       <emphasis><literal moreinfo="none">expr1</literal></emphasis> <literal
       moreinfo="none">&amp;&amp;</literal> <emphasis><literal
@@ -1889,7 +1893,7 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">find_first_negative_entry [|1;2;0;3|];;</userinput>
 <computeroutput moreinfo="none">Exception: (Invalid_argument "index out of bounds").</computeroutput></programlisting>
 
-      <para>The or operator, <literal moreinfo="none">||</literal>,
+      <para>The Or operator, <literal moreinfo="none">||</literal>,
       short-circuits in a similar way to <literal
       moreinfo="none">&amp;&amp;</literal>.</para>
     </sect2>
@@ -1953,7 +1957,7 @@ let () =
 
       <para>We'll compile our program using <command
       moreinfo="none">corebuild</command>, a small wrapper on top of <command
-      moreinfo="none">ocamlbuild</command>, a build-tool that ships with the
+      moreinfo="none">ocamlbuild</command>, a build tool that ships with the
       OCaml compiler. The <command moreinfo="none">corebuild</command> script
       is installed along with Core, and its purpose is to pass in the flags
       required for building a program with Core:<indexterm class="singular">
@@ -1973,8 +1977,8 @@ let () =
       completes, we can use the resulting program like any command-line
       utility. We can feed input to <literal
       moreinfo="none">build_sum.native</literal> by typing in a sequence of
-      numbers, one per line, hitting <literal
-      moreinfo="none">control-d</literal> when we're done:</para>
+      numbers, one per line, hitting <userinput>Ctrl-D</userinput> when we're
+      done:</para>
 
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/sum.out">guided-tour/sum.out</ulink></para>

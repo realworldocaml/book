@@ -6,7 +6,7 @@
 
   <para>One of OCaml's best features is its concise and expressive system for
   declaring new data types, and records are a key element of that system. We
-  discussed records briefly in <xref linkend="a-guided-tour"/>, but this
+  discussed records briefly in <xref linkend="a-guided-tour" />, but this
   chapter will go into more depth, covering the details of how records work,
   as well as advice on how to use them effectively in your software
   designs.</para>
@@ -87,7 +87,7 @@
   scope with the same field name.</para>
 
   <para>Once we have a record value in hand, we can extract elements from the
-  record field using dot-notation:</para>
+  record field using dot notation:</para>
 
   <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
   url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
@@ -151,15 +151,15 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">host_info_to_string my_host;;</userinput>
 <computeroutput moreinfo="none">- : string = "ocaml-www1 (Linux / unknown, on 2013-08-18 14:50:48)"</computeroutput></programlisting>
 
-    <para>Note that the pattern that we used had only a single case, rather
-    than using several cases separated by <literal
-    moreinfo="none">|</literal>'s. We needed only one pattern because record
-    patterns are <emphasis>irrefutable</emphasis>, meaning that a record
-    pattern match will never fail at runtime. This makes sense, because the
-    set of fields available in a record is always the same. In general,
-    patterns for types with a fixed structure, like records and tuples, are
-    irrefutable, unlike types with variable structure like lists and
-    variants.<indexterm class="singular">
+    <para>Note that the pattern we used had only a single case, rather than
+    using several cases separated by <literal moreinfo="none">|</literal>'s.
+    We needed only one pattern because record patterns are
+    <emphasis>irrefutable</emphasis>, meaning that a record pattern match will
+    never fail at runtime. This makes sense, because the set of fields
+    available in a record is always the same. In general, patterns for types
+    with a fixed structure, like records and tuples, are irrefutable, unlike
+    types with variable structures like lists and variants.<indexterm
+        class="singular">
         <primary>irrefutable patterns</primary>
       </indexterm><indexterm class="singular">
         <primary>datatypes</primary>
@@ -277,7 +277,7 @@
 <computeroutput moreinfo="none">  R Synonym for warning 9.</computeroutput></programlisting>
 
       <para>You should think of OCaml's warnings as a powerful set of optional
-      static analysis tools and should eagerly enable them in your build
+      static analysis tools, and you should eagerly enable them in your build
       environment. You don't typically enable all warnings, but the defaults
       that ship with the compiler are pretty good.</para>
 
@@ -402,7 +402,7 @@
 
     <para>Together, labeled arguments, field names, and field and label
     punning encourage a style where you propagate the same names throughout
-    your code-base. This is generally good practice, since it encourages
+    your codebase. This is generally good practice, since it encourages
     consistent naming, which makes it easier to navigate the source.</para>
   </sect1>
 
@@ -427,7 +427,7 @@
     moreinfo="none">logon</literal>. The <literal
     moreinfo="none">log_entry</literal> message is used to deliver a log entry
     to the server; the <literal moreinfo="none">logon</literal> message is
-    sent to initiate a connection, and includes the identity of the user
+    sent to initiate a connection and includes the identity of the user
     connecting and credentials used for authentication; and the <literal
     moreinfo="none">heartbeat</literal> message is periodically sent by the
     client to demonstrate to the server that the client is alive and
@@ -476,8 +476,8 @@
 <computeroutput moreinfo="none">}</computeroutput></programlisting>
 
     <para>Reusing field names can lead to some ambiguity. For example, if we
-    want to write a function to grab the session_id from a record, what type
-    will it have?</para>
+    want to write a function to grab the <literal>session_id</literal> from a
+    record, what type will it have?</para>
 
     <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
@@ -606,7 +606,7 @@
     <literal moreinfo="none">Log_entry</literal> module where the record was
     defined. OCaml only requires the module qualification for one record
     field, however, so we can write this more concisely. Note that we are
-    allowed to insert whitespace between the module-path and the field
+    allowed to insert whitespace between the module path and the field
     name:</para>
 
     <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
@@ -634,7 +634,7 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val message_to_string : Log_entry.t -&gt; string = &lt;fun&gt;</computeroutput></programlisting>
 
-    <para>When using dot-notation for accessing record fields, we can qualify
+    <para>When using dot notation for accessing record fields, we can qualify
     the field by the module directly:</para>
 
     <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
@@ -657,8 +657,8 @@
 
     <para>For functions defined within the module where a given record is
     defined, the module qualification goes away entirely.<indexterm
-    class="endofrange" startref="RECreusfn"/><indexterm class="endofrange"
-    startref="FNreus"/></para>
+    class="endofrange" startref="RECreusfn"></indexterm><indexterm
+    class="endofrange" startref="FNreus"></indexterm></para>
   </sect1>
 
   <sect1 id="functional-updates">
@@ -842,9 +842,9 @@
     the record is created.</para>
 
     <para>OCaml's policy of immutable-by-default is a good one, but imperative
-    programming is an important part of programming in OCaml. We'll discuss
-    more about how (and when) to use OCaml's imperative features in <xref
-    linkend="imperative-programming"/>.</para>
+    programming is an important part of programming in OCaml. We go into more
+    depth about how (and when) to use OCaml's imperative features in <xref
+    linkend="imperative-programming" />.</para>
   </sect1>
 
   <sect1 id="first-class-fields">
@@ -876,10 +876,9 @@
     <para>Here, we wrote a small function <literal moreinfo="none">(fun x
     -&gt; x.Logon.user)</literal> to access the <literal
     moreinfo="none">user</literal> field. This kind of accessor function is a
-    common-enough pattern that it would be convenient to generate them
+    common enough pattern that it would be convenient to generate it
     automatically. The <literal moreinfo="none">fieldslib</literal> syntax
-    extension that ships with <literal moreinfo="none">Core</literal> does
-    just that.<indexterm class="singular">
+    extension that ships with Core does just that.<indexterm class="singular">
         <primary>functions</primary>
 
         <secondary>accessor functions</secondary>
@@ -1179,11 +1178,12 @@
     to take this new argument into account.</para>
 
     <para>Field iterators are useful for a variety of record-related tasks,
-    from building record validation functions to scaffolding the definition of
-    a web form from a record type, and such applications can benefit from the
+    from building record-validation functions to scaffolding the definition of
+    a web form from a record type. Such applications can benefit from the
     guarantee that all fields of the record type in question have been
-    considered.<indexterm class="endofrange" startref="Ffc"/><indexterm
-    class="endofrange" startref="firstclass"/><indexterm class="endofrange"
-    startref="RECfirstclass"/></para>
+    considered.<indexterm class="endofrange"
+    startref="Ffc"></indexterm><indexterm class="endofrange"
+    startref="firstclass"></indexterm><indexterm class="endofrange"
+    startref="RECfirstclass"></indexterm></para>
   </sect1>
 </chapter>
