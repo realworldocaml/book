@@ -41,8 +41,9 @@
 
       <listitem>
         <para><emphasis>Parametric polymorphism</emphasis>, which enables the
-        construction of abstractions that work across different datatypes,
-        similar to generics in Java and C# and templates in C++.</para>
+        construction of abstractions that work across different data types,
+        similar to generics in Java and C# and templates in <phrase
+        role="keep-together">C++.</phrase></para>
       </listitem>
 
       <listitem>
@@ -57,12 +58,12 @@
         <para><emphasis>Automatic type inference</emphasis> to avoid having to
         laboriously define the type of every single variable in a program and
         instead have them inferred based on how a value is used. Available in
-        a limited form in C# with implicitly typed local variables and in
+        a limited form in C# with implicitly typed local variables, and in
         C++11 with its <literal moreinfo="none">auto</literal> keyword.</para>
       </listitem>
 
       <listitem>
-        <para><emphasis>Algebraic datatypes</emphasis> and <emphasis>pattern
+        <para><emphasis>Algebraic data types</emphasis> and <emphasis>pattern
         matching</emphasis> to define and manipulate complex data structures.
         Available in Scala and F#.</para>
       </listitem>
@@ -89,12 +90,13 @@
     manages to provide a great deal of power while remaining highly pragmatic.
     The compiler has a straightforward compilation strategy that produces
     performant code without requiring heavy optimization and without the
-    complexities of dynamic JIT compilation. This, along with OCaml's strict
-    evaluation model, makes runtime behavior easy to predict. The garbage
-    collector is <emphasis>incremental</emphasis>, letting you avoid large
-    GC-related pauses, and <emphasis>precise</emphasis>, meaning it will
-    collect all unreferenced data (unlike many reference-counting collectors),
-    and the runtime is simple and highly portable.</para>
+    complexities of dynamic just-in-time (JIT) compilation. This, along with
+    OCaml's strict evaluation model, makes runtime behavior easy to predict.
+    The garbage collector is <emphasis>incremental</emphasis>, letting you
+    avoid large garbage collection (GC)-related pauses, and
+    <emphasis>precise</emphasis>, meaning it will collect all unreferenced
+    data (unlike many reference-counting collectors), and the runtime is
+    simple and highly portable.</para>
 
     <para>All of this makes OCaml a great choice for programmers who want to
     step up to a better programming language, and at the same time get
@@ -113,13 +115,14 @@
         </indexterm></para>
 
       <para>ML was originally the <emphasis>meta language</emphasis> of the
-      LCF proof assistant released by Robin Milner in 1972 (at Stanford, and
-      later at Cambridge). ML was turned into a compiler in order to make it
-      easier to use LCF on different machines and gradually turned into a
-      fully fledged system of its own by the 1980s.</para>
+      LCF (Logic for Computable Functions) proof assistant released by Robin
+      Milner in 1972 (at Stanford, and later at Cambridge). ML was turned into
+      a compiler in order to make it easier to use LCF on different machines,
+      and it was gradually turned into a full-fledged system of its own by the
+      1980s.</para>
 
       <para>The first implementation of Caml appeared in 1987. It was created
-      by Ascander Saurez and later continued by Pierre Weis and Michel Mauny.
+      by Ascánder Suárez and later continued by Pierre Weis and Michel Mauny.
       In 1990, Xavier Leroy and Damien Doligez built a new implementation
       called Caml Light that was based on a bytecode interpreter with a fast,
       sequential garbage collector. Over the next few years useful libraries
@@ -136,15 +139,16 @@
 
       <para>The modern OCaml emerged in 1996, when a powerful and elegant
       object system was implemented by Didier Rémy and Jérôme Vouillon. This
-      object system was notable for supporting many common OO idioms in a
-      statically type-safe way, whereas the same idioms required runtime
-      checks in languages such as C++ or Java. In 2000, Jacques Garrigue
-      extended OCaml with several new features such as polymorphic methods,
-      variants, and labeled and optional arguments.</para>
+      object system was notable for supporting many common object-oriented
+      idioms in a statically type-safe way, whereas the same idioms required
+      runtime checks in languages such as C++ or Java. In 2000, Jacques
+      Garrigue extended OCaml with several new features such as polymorphic
+      methods, variants, and labeled and optional arguments.</para>
 
       <para>The last decade has seen OCaml attract a significant user base,
       and language improvements have been steadily added to support the
-      growing commercial and academic codebases. First-class modules,
+      growing commercial and academic <phrase
+      role="keep-together">codebases</phrase>. First-class modules,
       Generalized Algebraic Data Types (GADTs), and dynamic linking have
       improved the flexibility of the language. There is also fast native code
       support for x86_64, ARM, PowerPC, and Sparc, making OCaml a good choice
@@ -183,10 +187,10 @@
       Like the OCaml language itself, Core is engineered with correctness,
       reliability, and performance in mind.</para>
 
-      <para>Core is distributed with syntax extensions which provide useful
-      new functionality to OCaml, and there are additional libraries such as
-      the Async network communications library that extend the reach of Core
-      into building complex distributed systems. All of these libraries are
+      <para>Core is distributed with syntax extensions that provide useful new
+      functionality to OCaml, and there are additional libraries such as the
+      Async network communications library that extend the reach of Core into
+      building complex distributed systems. All of these libraries are
       distributed under a liberal Apache 2 license to permit free use in
       hobby, academic, and commercial settings.</para>
     </sect2>
@@ -196,10 +200,10 @@
 
       <para>Core is a comprehensive and effective standard library, but
       there's much more OCaml software out there. A large community of
-      programmers has been using OCaml since its first release in 1996 and has
-      generated many useful libraries and tools. We'll introduce some of these
-      libraries in the course of the examples presented in the book.<indexterm
-          class="singular">
+      programmers has been using OCaml since its first release in 1996, and
+      has generated many useful libraries and tools. We'll introduce some of
+      these libraries in the course of the examples presented in the
+      book.<indexterm class="singular">
           <primary>OCaml</primary>
 
           <secondary>third-party libraries for</secondary>
@@ -218,7 +222,7 @@
       completion, and other niceties that make it much more pleasant to work
       with the language. We'll be using <command
       moreinfo="none">utop</command> throughout the book to let you step
-      through worked examples interactively.</para>
+      through the examples interactively.</para>
     </sect2>
   </sect1>
 
@@ -235,7 +239,7 @@
 
     <para>If you already know OCaml, this book may surprise you. Core
     redefines most of the standard namespace to make better use of the OCaml
-    module system and expose a number of powerful, reusable datastructures by
+    module system and expose a number of powerful, reusable data structures by
     default. Older OCaml code will still interoperate with Core, but you may
     need to adapt it for maximal benefit. All the <emphasis>new</emphasis>
     code that we write uses Core, and we believe the Core model is worth
@@ -284,7 +288,7 @@
           <para>Part III discusses OCaml's runtime system and compiler
           toolchain. It is remarkably simple when compared to some other
           language implementations (such as Java's or .NET's CLR). Reading
-          this part will enable you to build very high-performance systems, or
+          this part will enable you to build very-high-performance systems, or
           to interface with C libraries. This is also where we talk about
           profiling and debugging techniques using tools such as GNU <command
           moreinfo="none">gdb</command>.</para>
@@ -301,7 +305,7 @@
       ensure that you have an up-to-date development environment (using the
       4.01 version of the compiler). We've automated everything you need to do
       via the OPAM package manager, so please do follow the installation
-      instructions in <xref linkend="installation"/> carefully.<indexterm
+      instructions in <xref linkend="installation" /> carefully.<indexterm
           class="singular">
           <primary>installation instructions</primary>
         </indexterm><indexterm class="singular">
@@ -310,11 +314,12 @@
           <secondary>installation instructions</secondary>
         </indexterm></para>
 
-      <para>As of publication, the Windows operating system is unsupported by
-      Core, and so only Mac OS X, Linux, FreeBSD, and OpenBSD can be expected
-      to work reliably. Please check the online installation instructions for
-      updates regarding Windows, or install a Linux virtual machine to work
-      through the book as it stands.<indexterm class="singular">
+      <para>As of publication time, the Windows operating system is
+      unsupported by Core, and so only Mac OS X, Linux, FreeBSD, and OpenBSD
+      can be expected to work reliably. Please check the online installation
+      instructions for updates regarding Windows, or install a Linux virtual
+      machine to work through the book as it stands.<indexterm
+          class="singular">
           <primary>OCaml</primary>
 
           <secondary>operating system support</secondary>
@@ -343,10 +348,10 @@
         </indexterm></para>
 
       <para>The code repository is available online at <ulink
-      url="https://github.com/realworldocaml/examples"/>. Every code snippet
-      in the book has a header which tells you the filename in that repository
-      to the find the source code, shell script, or ancillary data file that
-      the snippet was sourced from.</para>
+      url="https://github.com/realworldocaml/examples"></ulink>. Every code
+      snippet in the book has a header that tells you the filename in that
+      repository to the find the source code, shell script, or ancillary data
+      file that the snippet was sourced from.</para>
 
       <remark>PROD: The above was written by the authors, the below is the
       boilerplate. Probably want to edit the below as needed.—TOOLS</remark>
@@ -364,8 +369,9 @@
 
       <para>We appreciate, but do not require, attribution. An attribution
       usually includes the title, author, publisher, and ISBN. For example:
-      “<emphasis>Book Title</emphasis> by Some Author (O’Reilly). Copyright
-      2012 Some Copyright Holder, 978-0-596-xxxx-x.”</para>
+      “<emphasis>Real World Ocaml</emphasis> by Yaron Minsky, Anil
+      Madhavapeddy, and Jason Hickey (O'Reilly). Copyright 2014 Jason Hickey,
+      Anil Madhavapeddy, and Yaron Minsky, 978-1-449-32391-2.”</para>
 
       <para>If you feel your use of code examples falls outside fair use or
       the permission given above, feel free to contact us at
@@ -435,11 +441,8 @@
     and any additional information. You can access this page at:</para>
 
     <simplelist type="vert">
-      <member><remark>ULINK WITHOUT TEXT NODE.</remark><ulink
-      url="http://www.oreilly.com/catalog/&lt;catalog page&gt;"/></member>
+      <member><ulink url="http://oreil.ly/realworldOCaml"></ulink></member>
     </simplelist>
-
-    <remark>Don’t forget to update the &lt;url&gt; attribute, too.</remark>
 
     <para>To comment or ask technical questions about this book, send email
     to:</para>
@@ -450,113 +453,46 @@
 
     <para>For more information about our books, courses, conferences, and
     news, see our website at <remark>ULINK WITHOUT TEXT NODE.</remark><ulink
-    url="http://www.oreilly.com"/>.</para>
+    url="http://www.oreilly.com"></ulink>.</para>
 
     <para>Find us on Facebook: <remark>ULINK WITHOUT TEXT NODE.</remark><ulink
-    url="http://facebook.com/oreilly"/></para>
+    url="http://facebook.com/oreilly"></ulink></para>
 
     <para>Follow us on Twitter: <remark>ULINK WITHOUT TEXT
-    NODE.</remark><ulink url="http://twitter.com/oreillymedia"/></para>
+    NODE.</remark><ulink url="http://twitter.com/oreillymedia"></ulink></para>
 
     <para>Watch us on YouTube: <remark>ULINK WITHOUT TEXT NODE.</remark><ulink
-    url="http://www.youtube.com/oreillymedia"/></para>
+    url="http://www.youtube.com/oreillymedia"></ulink></para>
   </sect1>
 
-  <sect1 id="about-the-authors">
-    <title>About the Authors</title>
+  <sect1>
+    <title>Contributors</title>
 
-    <sect2 id="yaron-minsky">
-      <title>Yaron Minsky</title>
+    <para>We would especially like to thank the following individuals for
+    improving <emphasis>Real World OCaml</emphasis>:</para>
 
-      <para>Yaron Minsky heads the technology group at Jane Street, a
-      proprietary trading firm that is the largest industrial user of OCaml.
-      He was responsible for introducing OCaml to the company and for managing
-      the company's transition to using OCaml for all of its core
-      infrastructure. Today, billions of dollars worth of securities
-      transactions flow each day through those systems.</para>
+    <itemizedlist>
+      <listitem>
+        <para>Leo White contributed greatly to the content and examples in
+        <xref linkend="objects" /> and <xref linkend="classes" />.</para>
+      </listitem>
 
-      <para>Yaron obtained his PhD in computer science, from Cornell
-      University, where he studied distributed systems. Yaron has lectured,
-      blogged, and written about OCaml for years, with articles published in
-      <emphasis>Communications of the ACM</emphasis> and the <emphasis>Journal
-      of Functional Programming</emphasis>. He chairs the steering committee
-      of the Commercial Users of Functional Programming and is a member of the
-      steering committee for the International Conference on Functional
-      Programming.</para>
-    </sect2>
+      <listitem>
+        <para>Jeremy Yallop authored and documented the Ctypes library
+        described in <xref linkend="foreign-function-interface" />.</para>
+      </listitem>
 
-    <sect2 id="anil-madhavapeddy">
-      <title>Anil Madhavapeddy</title>
+      <listitem>
+        <para>Stephen Weeks is responsible for much of the modular
+        architecture behind Core, and his extensive notes formed the basis of
+        <xref linkend="memory-representation-of-values" /> and <xref
+        linkend="understanding-the-garbage-collector" />.</para>
+      </listitem>
 
-      <para>Anil Madhavapeddy is a senior research fellow at the University of
-      Cambridge, based in the Systems Research Group. He was on the original
-      team that developed the Xen hypervisor and helped develop an
-      industry-leading cloud management toolstack written entirely in OCaml.
-      This XenServer product has been deployed on millions of physical hosts
-      and drives critical infrastructure for many Fortune 500
-      companies.</para>
-
-      <para>Prior to obtaining his PhD in 2006 from the University of
-      Cambridge, Anil had a diverse background in industry at NetApp, NASA,
-      and Internet Vision. He is an active member of the open source
-      development community with the OpenBSD operating system, is on the
-      steering committee of the ACM Commercial Uses of Functional Programming
-      workshop, and serves on the boards of startup companies where OCaml is
-      extensively used. He has also developed the Mirage unikernel system that
-      is written entirely in OCaml from the device drivers up.</para>
-    </sect2>
-
-    <sect2 id="jason-hickey">
-      <title>Jason Hickey</title>
-
-      <para>Jason Hickey is a software engineer at Google Inc. in Mountain
-      View, California. He is part of the team that designs and develops the
-      global computing infrastructure used to support Google services,
-      including the software systems for managing and scheduling massively
-      distributed computing resources.</para>
-
-      <para>Prior to joining Google, Jason was an assistant professor of
-      computer science at Caltech, where he researched reliable and
-      fault-tolerant computing systems, including programming language design,
-      formal methods, compilers, and new models of distributed computation. He
-      obtained his PhD in computer science from Cornell University, where he
-      studied programming languages. He is the author of the MetaPRL system, a
-      logical framework for design and analysis of large software systems; and
-      OMake, an advanced build system for large software projects. He is the
-      author of the textbook, <emphasis>An Introduction to Objective
-      Caml</emphasis> (unpublished).</para>
-    </sect2>
-
-    <sect2 id="contributors">
-      <title>Contributors</title>
-
-      <para>We would especially like to thank the following individuals for
-      improving <emphasis>Real World OCaml</emphasis>:</para>
-
-      <itemizedlist>
-        <listitem>
-          <para>Leo White contributed greatly to the content and examples in
-          <xref linkend="objects"/> and <xref linkend="classes"/>.</para>
-        </listitem>
-
-        <listitem>
-          <para>Jeremy Yallop authored and documented the Ctypes library
-          described in <xref linkend="foreign-function-interface"/>.</para>
-        </listitem>
-
-        <listitem>
-          <para>Stephen Weeks is responsible for much of the modular
-          architecture behind Core, and his extensive notes formed the basis
-          of <xref linkend="memory-representation-of-values"/> and <xref
-          linkend="understanding-the-garbage-collector"/>.</para>
-        </listitem>
-
-        <listitem>
-          <para>Jeremie Diminio authored the <command>Utop</command>
-          interactive toplevel that is used throughout the book's code
-          snippets.</para>
-        </listitem>
-      </itemizedlist>
-    </sect2>
+      <listitem>
+        <para>Jeremie Diminio authored the <command>utop</command> interactive
+        toplevel that is used throughout the book's code snippets.</para>
+      </listitem>
+    </itemizedlist>
   </sect1>
 </preface>
