@@ -33,7 +33,7 @@
     moreinfo="none">find</literal> function in the <literal
     moreinfo="none">List</literal> module:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -43,7 +43,7 @@
     <para>The option in the return type indicates that the function may not
     succeed in finding a suitable element:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
     (part 1)</para>
 
@@ -65,7 +65,7 @@
     moreinfo="none">None</literal> when they encounter an empty list, are used
     to extract the largest and smallest element of the list:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
     (part 2)</para>
 
@@ -93,7 +93,7 @@
     one table than in the other. As such, the failure to find a key in one
     table isn't a failure of any sort:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
     (part 3)</para>
 
@@ -146,7 +146,7 @@ end</programlisting>
       moreinfo="none">Error</literal> are promoted to the toplevel by <literal
       moreinfo="none">Core.Std</literal>. As such, we can write:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
       (part 4)</para>
 
@@ -191,7 +191,7 @@ end</programlisting>
       time you never have to construct it at all. You can of course construct
       an error directly from a string:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
       (part 5)</para>
 
@@ -204,7 +204,7 @@ end</programlisting>
       i.e., a function that takes a single argument of type <literal
       moreinfo="none">unit</literal>:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
       (part 6)</para>
 
@@ -244,7 +244,7 @@ end</programlisting>
           <secondary>sexp converter</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
       (part 7)</para>
 
@@ -262,7 +262,7 @@ end</programlisting>
       with a language extension that can autogenerate sexp-converters for
       newly generated types:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
       (part 8)</para>
 
@@ -274,7 +274,7 @@ end</programlisting>
 
       <para>We can use this same idiom for generating an error:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
       (part 9)</para>
 
@@ -299,7 +299,7 @@ end</programlisting>
           <secondary>transformation of</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
       (part 10)</para>
 
@@ -334,7 +334,7 @@ end</programlisting>
           <primary>bind function</primary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
       (part 11)</para>
 
@@ -356,7 +356,7 @@ end</programlisting>
       <literal moreinfo="none">compute_bounds</literal> to use a nested series
       of <literal moreinfo="none">bind</literal>s:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
       (part 12)</para>
 
@@ -380,7 +380,7 @@ end</programlisting>
       moreinfo="none">Monad</literal>, which we'll see again in <xref
       linkend="concurrent-programming-with-async"/>:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
       (part 13)</para>
 
@@ -411,7 +411,7 @@ end</programlisting>
       moreinfo="none">Option.both</literal>, we can make <literal
       moreinfo="none">compute_bounds</literal> even shorter:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
       (part 14)</para>
 
@@ -454,7 +454,7 @@ end</programlisting>
     <para>You can trigger an exception by, for example, dividing an integer by
     zero:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
     (part 15)</para>
 
@@ -465,7 +465,7 @@ end</programlisting>
     <para>And an exception can terminate a computation even if it happens
     nested somewhere deep within it:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
     (part 16)</para>
 
@@ -478,7 +478,7 @@ end</programlisting>
     moreinfo="none">List.map</literal> is interrupted part way through its
     execution, never getting to the end of the list:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
     (part 17)</para>
 
@@ -493,7 +493,7 @@ end</programlisting>
     moreinfo="none">Divide_by_zero</literal>, OCaml lets you define your
     own:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
     (part 18)</para>
 
@@ -506,7 +506,7 @@ end</programlisting>
     <para>Exceptions are ordinary values and can be manipulated just like
     other OCaml values:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
     (part 19)</para>
 
@@ -540,7 +540,7 @@ end</programlisting>
     moreinfo="none">Key_not_found</literal> exception we defined above to
     signal an error:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
     (part 20)</para>
 
@@ -572,7 +572,7 @@ end</programlisting>
     throws the exception, thus terminating the computation. The type of raise
     is a bit surprising when you first see it:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
     (part 21)</para>
 
@@ -590,7 +590,7 @@ end</programlisting>
     exceptions. Here's another example of a function that doesn't return a
     value:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
     (part 22)</para>
 
@@ -619,7 +619,7 @@ end</programlisting>
       <para>OCaml can't always generate a useful textual representation of an
       exception. For example:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
       (part 23)</para>
 
@@ -633,7 +633,7 @@ end</programlisting>
       moreinfo="none">with sexp</literal> (and the constituent types have sexp
       converters), we'll get something with more information:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
       (part 24)</para>
 
@@ -672,7 +672,7 @@ end</programlisting>
           <secondary>exception helper functions</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
       (part 25)</para>
 
@@ -699,7 +699,7 @@ end</programlisting>
           <primary>assert directive</primary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
       (part 26)</para>
 
@@ -731,7 +731,7 @@ end</programlisting>
       call <literal moreinfo="none">loop</literal>. If we change the code so
       that we drop this test, then we can trigger the assert:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
       (part 27)</para>
 
@@ -817,7 +817,7 @@ end</programlisting>
           <secondary>exception clean up</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
       (part 28)</para>
 
@@ -854,7 +854,7 @@ end</programlisting>
       being a built-in primitive. Here's how it could be used to fix <literal
       moreinfo="none">load_reminders</literal>:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
       (part 29)</para>
 
@@ -870,7 +870,7 @@ end</programlisting>
       moreinfo="none">In_channel</literal> has a function called <literal
       moreinfo="none">with_file</literal> that automates this pattern:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
       (part 30)</para>
 
@@ -905,7 +905,7 @@ end</programlisting>
           <secondary>exception detection</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
       (part 31)</para>
 
@@ -935,7 +935,7 @@ end</programlisting>
       moreinfo="none">Not_found</literal>, then that's not what will
       happen:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
       (part 32)</para>
 
@@ -951,7 +951,7 @@ end</programlisting>
       is to narrow the scope of the exception handler, so that when it fires
       it's very clear what part of the code failed:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
       (part 33)</para>
 
@@ -971,7 +971,7 @@ end</programlisting>
       nonexception-throwing function, <literal
       moreinfo="none">List.Assoc.find</literal>, instead:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
       (part 34)</para>
 
@@ -1185,7 +1185,7 @@ let () =
           <secondary>combining exceptions and error-aware types</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
       (part 35)</para>
 
@@ -1202,7 +1202,7 @@ let () =
       moreinfo="none">Or_error</literal> have similar <literal
       moreinfo="none">try_with</literal> functions. So, we could write:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
       (part 36)</para>
 
@@ -1215,7 +1215,7 @@ let () =
 
       <para>And then we can re-raise that exception:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
       (part 37)</para>
 

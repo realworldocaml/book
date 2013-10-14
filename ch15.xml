@@ -138,7 +138,7 @@
       installed, you can open it in the <command
       moreinfo="none">utop</command> toplevel by:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/json/install.topscript">json/install.topscript</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -519,7 +519,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
     <para>Let's start with selecting a single <literal
     moreinfo="none">title</literal> field from the record:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/json/parse_book.topscript">json/parse_book.topscript</ulink>
     (part 1)</para>
 
@@ -538,7 +538,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
     moreinfo="none">|&gt;</literal> operator provides a convenient way to
     chain these operations together:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/json/parse_book.topscript">json/parse_book.topscript</ulink>
     (part 2)</para>
 
@@ -561,7 +561,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
     from the output of <literal
     moreinfo="none">filter_string</literal>:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/json/parse_book.topscript">json/parse_book.topscript</ulink>
     (part 3)</para>
 
@@ -581,7 +581,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
     moreinfo="none">is_translated</literal> will be <literal
     moreinfo="none">None</literal>:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/json/parse_book.topscript">json/parse_book.topscript</ulink>
     (part 4)</para>
 
@@ -606,7 +606,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
     can also be written more succinctly using the pipe-forward
     operator:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/json/parse_book.topscript">json/parse_book.topscript</ulink>
     (part 5)</para>
 
@@ -670,7 +670,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
     moreinfo="none">Yojson.Basic</literal> module to display JSON
     output:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/json/build_json.topscript">json/build_json.topscript</ulink>
     (part 1)</para>
 
@@ -693,7 +693,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
     yet (e.g. <literal moreinfo="none">Int</literal> or <literal
     moreinfo="none">Null</literal>):</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/json/build_json.topscript">json/build_json.topscript</ulink>
     (part 2)</para>
 
@@ -710,7 +710,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
     structure of the <literal moreinfo="none">json</literal> type to ensure
     that they're compatible:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/json/build_json.topscript">json/build_json.topscript</ulink>
     (part 3)</para>
 
@@ -754,7 +754,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
       build an <literal moreinfo="none">Assoc</literal> and mistakenly include
       a single value instead of a list of keys:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/json/build_json.topscript">json/build_json.topscript</ulink>
       (part 4)</para>
 
@@ -774,7 +774,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
       compiler to narrow down this error to a shorter form by adding explicit
       type annotations as a hint about your intentions:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/json/build_json.topscript">json/build_json.topscript</ulink>
       (part 5)</para>
 

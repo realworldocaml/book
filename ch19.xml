@@ -593,7 +593,7 @@ char *ctime(const time_t *timep);</programlisting>
     <para>We can now create a binding to <literal
     moreinfo="none">time</literal> directly from the toplevel.</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/posix.topscript">ffi/posix.topscript</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -618,7 +618,7 @@ char *ctime(const time_t *timep);</programlisting>
     pass a null pointer that has been coerced into becoming a null pointer to
     <literal moreinfo="none">time_t</literal>:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/posix.topscript">ffi/posix.topscript</ulink>
     (part 1)</para>
 
@@ -630,7 +630,7 @@ char *ctime(const time_t *timep);</programlisting>
     few times, let's create a wrapper function that passes the null pointer
     through:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/posix.topscript">ffi/posix.topscript</ulink>
     (part 2)</para>
 
@@ -645,7 +645,7 @@ char *ctime(const time_t *timep);</programlisting>
     moreinfo="none">difftime</literal>; the second C function in our prototype
     list:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/posix.topscript">ffi/posix.topscript</ulink>
     (part 3)</para>
 
@@ -681,7 +681,7 @@ char *ctime(const time_t *timep);</programlisting>
           <secondary>allocating typed memory for</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/posix.topscript">ffi/posix.topscript</ulink>
       (part 4)</para>
 
@@ -694,7 +694,7 @@ char *ctime(const time_t *timep);</programlisting>
       moreinfo="none">time</literal> to <literal
       moreinfo="none">ctime</literal>:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/posix.topscript">ffi/posix.topscript</ulink>
       (part 5)</para>
 
@@ -710,7 +710,7 @@ char *ctime(const time_t *timep);</programlisting>
       <literal moreinfo="none">time_t</literal> and obtain its memory
       address:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/posix.topscript">ffi/posix.topscript</ulink>
       (part 6)</para>
 
@@ -724,7 +724,7 @@ char *ctime(const time_t *timep);</programlisting>
       moreinfo="none">ctime</literal> passing the pointer as an
       argument:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/posix.topscript">ffi/posix.topscript</ulink>
       (part 7)</para>
 
@@ -881,7 +881,7 @@ int gettimeofday(struct timeval *, struct timezone *tv);</programlisting>
       <para>Using Ctypes, we can describe this type as follows in our
       toplevel, continuing on from the previous definitions:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/posix.topscript">ffi/posix.topscript</ulink>
       (part 8)</para>
 
@@ -921,7 +921,7 @@ int gettimeofday(struct timeval *, struct timezone *tv);</programlisting>
           <secondary>field addition</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/posix.topscript">ffi/posix.topscript</ulink>
       (part 9)</para>
 
@@ -960,7 +960,7 @@ int gettimeofday(struct timeval *, struct timezone *tv);</programlisting>
           <secondary>incomplete structure definitions</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/posix.topscript">ffi/posix.topscript</ulink>
       (part 10)</para>
 
@@ -980,7 +980,7 @@ int gettimeofday(struct timeval *, struct timezone *tv);</programlisting>
       <para>We're finally ready to bind to <literal
       moreinfo="none">gettimeofday</literal> now:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/posix.topscript">ffi/posix.topscript</ulink>
       (part 11)</para>
 
@@ -1007,7 +1007,7 @@ int gettimeofday(struct timeval *, struct timezone *tv);</programlisting>
       address of a structure value, and retrieve the value of a field from a
       structure:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/posix.topscript">ffi/posix.topscript</ulink>
       (part 12)</para>
 
@@ -1366,7 +1366,7 @@ void qsort(void *base, size_t nmemb, size_t size, compare_t *);</programlisting>
     moreinfo="none">typedef</literal> and end up with working OCaml bindings
     to <literal moreinfo="none">qsort</literal>:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/qsort.topscript">ffi/qsort.topscript</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt

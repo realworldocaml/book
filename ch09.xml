@@ -78,7 +78,7 @@
     <para>First, let's define a signature for a module that contains a single
     value of type <literal moreinfo="none">int</literal>:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -89,7 +89,7 @@
     moreinfo="none">X_int</literal> both to constrain the argument to the
     functor and to constrain the module returned by the functor:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
     (part 1)</para>
 
@@ -110,7 +110,7 @@
     <para>The following shows what happens when we omit the module type for
     the output of the functor:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
     (part 2)</para>
 
@@ -127,7 +127,7 @@
     <para>We can use <literal moreinfo="none">Increment</literal> to define
     new modules:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
     (part 3)</para>
 
@@ -150,7 +150,7 @@
     some information available in the module, either by dropping fields or by
     leaving some fields abstract. Here's an example:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
     (part 4)</para>
 
@@ -201,7 +201,7 @@
     things: a comparison function and the type of the values to be
     compared:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
     (part 5)</para>
 
@@ -239,7 +239,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
     the type, the functor contains implementations of a number of useful
     primitives for interacting with intervals:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
     (part 6)</para>
 
@@ -294,7 +294,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
     and then call the functor, we provide the functor input as an anonymous
     module:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
     (part 7)</para>
 
@@ -319,7 +319,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
     the <literal moreinfo="none">Int</literal> or <literal
     moreinfo="none">String</literal> modules provided by Core:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
     (part 8)</para>
 
@@ -358,7 +358,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
     moreinfo="none">Int_interval</literal> module like any ordinary
     module:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
     (part 9)</para>
 
@@ -379,7 +379,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
         <secondary>comparison function for</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
     (part 10)</para>
 
@@ -402,7 +402,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
     is of course different from <literal
     moreinfo="none">Int_interval</literal>:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
     (part 11)</para>
 
@@ -418,7 +418,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
     representation is the same. Indeed, the type system will prevent us from
     confusing them.</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
     (part 12)</para>
 
@@ -448,7 +448,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
           <secondary>abstract functor for</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
       (part 13)</para>
 
@@ -465,7 +465,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
       moreinfo="none">Make_interval</literal> with an interface. Here's an
       explicit interface that we can use for that purpose:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
       (part 14)</para>
 
@@ -496,7 +496,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
       implementation of the module to match <literal
       moreinfo="none">Interval_intf</literal>:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main-15.rawscript">functors/main-15.rawscript</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><userinput
@@ -525,7 +525,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
           <secondary>sharing constraints</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
       (part 16)</para>
 
@@ -576,7 +576,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
       <literal moreinfo="none">Interval_intf</literal> for integer
       intervals:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
       (part 17)</para>
 
@@ -604,7 +604,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
       <literal moreinfo="none">Endpoint</literal> that is the functor
       argument. We can do this as follows:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main-18.rawscript">functors/main-18.rawscript</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><userinput
@@ -637,7 +637,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
       moreinfo="none">endpoint</literal> be exposed, like constructing
       intervals:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
       (part 19)</para>
 
@@ -687,7 +687,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
       <para>The following shows how we could use this with <literal
       moreinfo="none">Make_interval</literal>:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
       (part 20)</para>
 
@@ -708,7 +708,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
       moreinfo="none">int</literal>. As with sharing constraints, we can also
       use this in the context of a functor:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main-21.rawscript">functors/main-21.rawscript</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><userinput
@@ -739,7 +739,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
       but not directly using the constructors and thereby violating the
       invariants of the module:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
       (part 22)</para>
 
@@ -794,7 +794,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
           <secondary>multiple interfaces and</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
       (part 23)</para>
 
@@ -810,7 +810,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
           <primary>sexp declaration</primary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
       (part 24)</para>
 
@@ -830,7 +830,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
       sexp</literal> declaration to the definition of <literal
       moreinfo="none">t</literal> within the functor:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main-25.rawscript">functors/main-25.rawscript</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><userinput
@@ -879,7 +879,7 @@ end</programlisting>
       distinct type <literal moreinfo="none">t</literal>'s clashing with each
       other:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
       (part 26)</para>
 
@@ -908,7 +908,7 @@ end</programlisting>
       interfaces, since it correctly reflects that all of the signatures are
       being handled equivalently:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
       (part 27)</para>
 
@@ -935,7 +935,7 @@ end</programlisting>
       invariants are still maintained when reading in from an
       s-expression:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
       (part 28)</para>
 
@@ -1009,7 +1009,7 @@ end</programlisting>
       <para>And now, we can use that sexp-converter in the ordinary
       way:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
       (part 29)<indexterm class="endofrange" startref="FUNCTinterv"/></para>
 

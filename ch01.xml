@@ -14,13 +14,13 @@
   moreinfo="none">utop</command>, a shell that lets you type in expressions
   and evaluate them interactively. <command moreinfo="none">utop</command> is
   an easier-to-use version of OCaml's standard toplevel (which you can start
-  by typing <literal moreinfo="none">ocaml</literal> at the command line).
-  These instructions will assume you're using <command
+  by typing <userinput>ocaml</userinput> at the command line). These
+  instructions will assume you're using <command
   moreinfo="none">utop</command> specifically.</para>
 
   <para>Before getting started, make sure you have a working OCaml
   installation so you can try out the examples as you read through the
-  chapter. Look at <xref linkend="installation"/> for details.</para>
+  chapter. Look at <xref linkend="installation" /> for details.</para>
 
   <sect1 id="ocaml-as-a-calculator">
     <title>OCaml as a Calculator</title>
@@ -38,7 +38,7 @@
         <secondary>opening</secondary>
       </indexterm> <literal moreinfo="none">Core.Std</literal>:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -50,7 +50,7 @@
 
     <para>Now let's try a few simple numerical calculations:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
     (part 1)</para>
 
@@ -67,8 +67,7 @@
 <computeroutput moreinfo="none">- : float = 3.</computeroutput></programlisting>
 
     <para>By and large, this is pretty similar to what you'd find in any
-    programming language, but there are a few things that jump right out at
-    you:</para>
+    programming language, but a few things jump right out at you:</para>
 
     <itemizedlist>
       <listitem>
@@ -89,7 +88,7 @@
       <listitem>
         <para>Function arguments are separated by spaces instead of by
         parentheses and commas, which is more like the UNIX shell than it is
-        like traditional programming languages like C or Java.</para>
+        like traditional programming languages such as C or Java.</para>
       </listitem>
 
       <listitem>
@@ -100,7 +99,7 @@
 
       <listitem>
         <para>OCaml carefully distinguishes between <literal
-        moreinfo="none">float</literal>, the type for floating point numbers,
+        moreinfo="none">float</literal>, the type for floating-point numbers,
         and <literal moreinfo="none">int</literal>, the type for integers. The
         types have different literals (<literal moreinfo="none">6.</literal>
         instead of <literal moreinfo="none">6</literal>) and different infix
@@ -122,7 +121,7 @@
     expression, using the <literal moreinfo="none">let</literal> keyword. This
     is known as a <emphasis>let binding</emphasis>:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
     (part 2)</para>
 
@@ -145,7 +144,7 @@
     variables must start with a lowercase letter or an underscore. Thus, these
     are legal:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
     (part 3)</para>
 
@@ -165,7 +164,7 @@
 
     <para>The following examples, however, are not legal:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
     (part 4)</para>
 
@@ -182,7 +181,7 @@
 <computeroutput moreinfo="none">Error: Parse error: [fun_binding] expected after [ipatt] (in [let_binding])</computeroutput></programlisting>
 
     <para>The error messages here are a little confusing, but they'll make
-    more sense as you learn more about the language:</para>
+    more sense as you learn more about the language.</para>
   </sect1>
 
   <sect1 id="functions-and-type-inference">
@@ -199,7 +198,7 @@
         <secondary>defining</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
     (part 5)</para>
 
@@ -236,7 +235,7 @@
         <secondary>with multiple arguments</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
     (part 6)</para>
 
@@ -259,7 +258,7 @@
     <para>The notation for the type-signature of a multiargument function may
     be a little surprising at first, but we'll explain where it comes from
     when we get to function currying in <xref
-    linkend="multi-argument-functions"/>. For the moment, think of the arrows
+    linkend="multi-argument-functions" />. For the moment, think of the arrows
     as separating different arguments of the function, with the type after the
     final arrow being the return value. Thus, <literal moreinfo="none">int
     -&gt; int -&gt; float</literal> describes a function that takes two
@@ -271,7 +270,7 @@
     function and two integer arguments. The function returns the sum of the
     integers that pass the test:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
     (part 7)</para>
 
@@ -287,7 +286,7 @@
     and that the remaining two arguments are integers. Here's an example of
     this function in action:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
     (part 8)</para>
 
@@ -303,10 +302,11 @@
     <para>Note that in the definition of <literal
     moreinfo="none">even</literal>, we used <literal
     moreinfo="none">=</literal> in two different ways: once as the part of the
-    let binding that separates the thing being defined from its definition;
-    and once as an equality test, when comparing <literal moreinfo="none">x
-    mod 2</literal> to <literal moreinfo="none">0</literal>. These are very
-    different operations despite the fact that they share some syntax.</para>
+    <literal>let</literal> binding that separates the thing being defined from
+    its definition; and once as an equality test, when comparing <literal
+    moreinfo="none">x mod 2</literal> to <literal moreinfo="none">0</literal>.
+    These are very different operations despite the fact that they share some
+    syntax.</para>
 
     <sect2 id="type-inference">
       <title>Type Inference</title>
@@ -322,7 +322,7 @@
       <para>OCaml determines the type of an expression using a technique
       called <emphasis>type inference</emphasis>, by which it infers the type
       of a given expression from the information it has about the types of
-      variables along with constraints that are implied by the structure of
+      variables, along with constraints that are implied by the structure of
       the expression.</para>
 
       <para>As an example, let's walk through the process of inferring the
@@ -382,7 +382,7 @@
       <para>Here's an annotated version of <literal
       moreinfo="none">sum_if_true</literal>:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
       (part 9)</para>
 
@@ -410,7 +410,7 @@
           <secondary>generic types</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
       (part 10)</para>
 
@@ -459,7 +459,7 @@
       <para>The generic type of <literal
       moreinfo="none">first_if_true</literal> allows us to write this:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
       (part 11)</para>
 
@@ -471,7 +471,7 @@
 
       <para>As well as this:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
       (part 12)</para>
 
@@ -489,7 +489,7 @@
       concrete types for <literal moreinfo="none">'a</literal> in the same use
       of <literal moreinfo="none">first_if_true</literal>:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
       (part 13)</para>
 
@@ -530,10 +530,10 @@
           </indexterm></para>
 
         <para>Working in the toplevel somewhat obscures the difference between
-        runtime and compile time errors, but that difference is still there.
-        Generally, type errors, like this one:</para>
+        runtime and compile-time errors, but that difference is still there.
+        Generally, type errors like this one:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
         (part 14)</para>
 
@@ -550,7 +550,7 @@
         can't be caught by the type system, like division by zero, lead to
         runtime exceptions:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
         (part 15)</para>
 
@@ -581,12 +581,12 @@
 
       <para>So far we've encountered a handful of basic types like <literal
       moreinfo="none">int</literal>, <literal moreinfo="none">float</literal>,
-      and <literal moreinfo="none">string</literal> as well as function types
+      and <literal moreinfo="none">string</literal>, as well as function types
       like <literal moreinfo="none">string -&gt; int</literal>. But we haven't
       yet talked about any data structures. We'll start by looking at a
       particularly simple data structure, the tuple. A tuple is an ordered
-      collection of values that can each be of different type. You can create
-      a tuple by joining values together with a comma:<indexterm
+      collection of values that can each be of a different type. You can
+      create a tuple by joining values together with a comma:<indexterm
           class="singular">
           <primary>tuples</primary>
         </indexterm><indexterm class="singular">
@@ -595,7 +595,7 @@
           <secondary>tuples</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
       (part 16)</para>
 
@@ -612,10 +612,10 @@
       moreinfo="none">t</literal> and the set of elements of type <literal
       moreinfo="none">s</literal>.)</para>
 
-      <para>You can extract the components of a tuple using OCaml's pattern
-      matching syntax, as shown below:</para>
+      <para>You can extract the components of a tuple using OCaml's
+      pattern-matching syntax, as shown below:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
       (part 17)</para>
 
@@ -631,7 +631,7 @@
       each bound to different components of the value being matched, which can
       now be used in subsequent expressions:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
       (part 18)</para>
 
@@ -645,10 +645,10 @@
       <para>Pattern matching can also show up in function arguments. Here's a
       function for computing the distance between two points on the plane,
       where each point is represented as a pair of <literal
-      moreinfo="none">float</literal>s. The pattern matching syntax lets us
+      moreinfo="none">float</literal>s. The pattern-matching syntax lets us
       get at the values we need with a minimum of fuss:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
       (part 19)</para>
 
@@ -678,7 +678,7 @@
           <secondary>lists</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
       (part 20)</para>
 
@@ -689,7 +689,7 @@
       <para>Note that you can't mix elements of different types in the same
       list, unlike tuples:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
       (part 21)</para>
 
@@ -700,14 +700,14 @@
 <computeroutput moreinfo="none">         int</computeroutput></programlisting>
 
       <sect3 id="the-list-module">
-        <title>The <literal moreinfo="none">List</literal> module</title>
+        <title>The List module</title>
 
         <para>Core comes with a <literal moreinfo="none">List</literal> module
         that has a rich collection of functions for working with lists. We can
-        access values from within a module by using dot-notation. For example,
+        access values from within a module by using dot notation. For example,
         this is how we compute the length of a list:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
         (part 22)</para>
 
@@ -718,7 +718,7 @@
         <para>Here's something a little more complicated. We can compute the
         list of the lengths of each language as follows:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
         (part 23)</para>
 
@@ -745,7 +745,7 @@
             <primary>labeled arguments</primary>
           </indexterm></para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
         (part 24)</para>
 
@@ -754,12 +754,11 @@
 <computeroutput moreinfo="none">- : int list = [5; 4; 1]</computeroutput></programlisting>
 
         <para>We'll learn more about labeled arguments and why they're
-        important in <xref linkend="variables-and-functions"/>.</para>
+        important in <xref linkend="variables-and-functions" />.</para>
       </sect3>
 
       <sect3 id="constructing-lists-with">
-        <title>Constructing lists with <literal
-        moreinfo="none">::</literal></title>
+        <title>Constructing lists with ::</title>
 
         <para>In addition to constructing lists using brackets, we can use the
         operator <literal moreinfo="none">::</literal> for adding elements to
@@ -773,7 +772,7 @@
             <secondary>operator : :</secondary>
           </indexterm></para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
         (part 25)</para>
 
@@ -785,7 +784,7 @@
         list we started with, as you can see in the following code
         snippet:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
         (part 26)</para>
 
@@ -794,19 +793,19 @@
 <computeroutput moreinfo="none">- : string list = ["OCaml"; "Perl"; "C"]</computeroutput></programlisting>
 
         <note>
-          <title>Semicolons vs. Versus Commas</title>
+          <title>Semicolons Versus Commas</title>
 
           <para>Unlike many other languages, OCaml uses semicolons to separate
           list elements in lists rather than commas. Commas, instead, are used
-          for separating elements in a tuple. If you try to use commas
-          instead, you'll see that your code compiles but doesn't do quite
-          what you might expect:<indexterm class="singular">
+          for separating elements in a tuple. If you try to use commas in a
+          list, you'll see that your code compiles but doesn't do quite what
+          you might expect:<indexterm class="singular">
               <primary>commas vs. semicolons</primary>
             </indexterm><indexterm class="singular">
               <primary>semicolons vs. commas</primary>
             </indexterm></para>
 
-          <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+          <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
           url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
           (part 27)</para>
 
@@ -820,7 +819,7 @@
           <para>This example uncovers the fact that commas create a tuple,
           even if there are no surrounding parens. So, we can write:</para>
 
-          <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+          <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
           url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
           (part 28)</para>
 
@@ -839,7 +838,7 @@
         that <literal moreinfo="none">::</literal> is
         right-associative:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
         (part 29)</para>
 
@@ -857,7 +856,7 @@
         There's also a list concatenation operator, <literal
         moreinfo="none">@</literal>, which can concatenate two lists:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
         (part 30)</para>
 
@@ -872,8 +871,7 @@
       </sect3>
 
       <sect3 id="list-patterns-using-match">
-        <title>List patterns using <literal
-        moreinfo="none">match</literal></title>
+        <title>List patterns using match</title>
 
         <para>The elements of a list can be accessed through pattern matching.
         List patterns are based on the two list constructors, <literal
@@ -889,7 +887,7 @@
             <secondary>pattern matching</secondary>
           </indexterm></para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
         (part 31)</para>
 
@@ -922,7 +920,7 @@
         we'll see that it works on nonempty list and fails on empty
         ones:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
         (part 32)</para>
 
@@ -937,10 +935,10 @@
         <literal moreinfo="none">match</literal> statement instead.</para>
 
         <para>A <literal moreinfo="none">match</literal> statement is a kind
-        of juiced-up version of the switch statement found in C and Java. It
-        essentially lets you list a sequence of patterns, separated by
-        <literal moreinfo="none">|</literal>'s. (The one before the first case
-        is optional.) The compiler then dispatches to the code following the
+        of juiced-up version of the <literal>switch</literal> statement found
+        in C and Java. It essentially lets you list a sequence of patterns,
+        separated by pipe characters (|). (The one before the first case is
+        optional.) The compiler then dispatches to the code following the
         first matching pattern. As we've already seen, the pattern can mint
         new variables that correspond to substructures of the value being
         matched.</para>
@@ -950,7 +948,7 @@
         moreinfo="none">match</literal> and doesn't trigger a compiler
         warning:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
         (part 33)</para>
 
@@ -1007,7 +1005,7 @@
         matching. Here's a simple example of a function that sums the elements
         of a list:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
         (part 34)</para>
 
@@ -1052,7 +1050,7 @@
         <para>We can introduce more complicated list patterns as well. Here's
         a function for removing sequential duplicates:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
         (part 35)</para>
 
@@ -1076,7 +1074,7 @@
         one-element lists. We can fix this warning by adding another case to
         the match:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
         (part 36)</para>
 
@@ -1108,7 +1106,7 @@
         functions found in the <literal moreinfo="none">List</literal> module.
         But it's good to know how to use recursion when you need to do
         something new.<indexterm class="endofrange"
-        startref="DSlists"/></para>
+        startref="DSlists"></indexterm></para>
       </sect3>
     </sect2>
 
@@ -1125,7 +1123,7 @@
           <secondary>options</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
       (part 37)</para>
 
@@ -1151,7 +1149,7 @@
       moreinfo="none">None</literal>), the current time is computed and used
       in its place:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
       (part 38)</para>
 
@@ -1200,7 +1198,7 @@
             <secondary>nested let binding</secondary>
           </indexterm></para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/local_let.topscript">guided-tour/local_let.topscript</ulink></para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1213,7 +1211,7 @@
         double-semicolon, so the value of <literal moreinfo="none">x</literal>
         is no longer available:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/local_let.topscript">guided-tour/local_let.topscript</ulink>
         (part 1)</para>
 
@@ -1225,7 +1223,7 @@
         <para>We can also have multiple let statements in a row, each one
         adding a new variable binding to what came before:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/local_let.topscript">guided-tour/local_let.topscript</ulink>
         (part 2)</para>
 
@@ -1261,7 +1259,7 @@
       moreinfo="none">string</literal>. If you want to allow, say, the first
       of those to be absent, then you need to change the type to <literal
       moreinfo="none">string option * string</literal>. As we'll see in <xref
-      linkend="error-handling"/>, this explicitness allows the compiler to
+      linkend="error-handling" />, this explicitness allows the compiler to
       provide a great deal of help in making sure you're correctly handing the
       possibility of missing data.</para>
     </sect2>
@@ -1279,7 +1277,7 @@
         <secondary>defining new</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
     (part 41)</para>
 
@@ -1300,7 +1298,7 @@
         <secondary>record types</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
     (part 42)</para>
 
@@ -1311,7 +1309,7 @@
     <para>And we can get access to the contents of these types using pattern
     matching:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
     (part 43)</para>
 
@@ -1336,7 +1334,7 @@
         <secondary>field punning</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
     (part 44)</para>
 
@@ -1346,7 +1344,7 @@
 
     <para>We can also use dot-notation for accessing record fields:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
     (part 45)</para>
 
@@ -1360,7 +1358,7 @@
     geometric objects that contain values of type <literal
     moreinfo="none">point2d</literal>:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
     (part 46)</para>
 
@@ -1386,7 +1384,7 @@
         <secondary>combining multiple object types with</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
     (part 47)</para>
 
@@ -1413,7 +1411,7 @@
     in the interior of some element of a list of <literal
     moreinfo="none">scene_element</literal>s:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
     (part 48)</para>
 
@@ -1525,7 +1523,7 @@
           <secondary>arrays</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
       (part 49)</para>
 
@@ -1575,7 +1573,7 @@
           <secondary>mutable record fields</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
       (part 50)</para>
 
@@ -1599,7 +1597,7 @@
       between them. That's because the double semicolon is required only to
       tell utop to process the input, not to separate two declarations:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
       (part 51)</para>
 
@@ -1619,7 +1617,7 @@
       <para>We also need functions to create and update <literal
       moreinfo="none">running_sum</literal>s:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
       (part 52)</para>
 
@@ -1651,7 +1649,7 @@
       function <literal moreinfo="none">~f</literal> on each element of the
       provided list:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
       (part 53)</para>
 
@@ -1691,7 +1689,7 @@
           <secondary>ref type</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
       (part 54)</para>
 
@@ -1707,7 +1705,7 @@
       <literal moreinfo="none">ref</literal>s to make them more convenient to
       work with:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
       (part 55)</para>
 
@@ -1725,13 +1723,13 @@
       completely reimplement the <literal moreinfo="none">ref</literal> type
       and all of these operators in just a few lines of code:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
       (part 56)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
           moreinfo="none"># </prompt><userinput moreinfo="none">type 'a ref = { mutable contents : 'a }</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">  let ref x = { contents = x }</userinput>
 <userinput moreinfo="none">  let (!) r = r.contents</userinput>
 <userinput moreinfo="none">  let (:=) r x = r.contents &lt;- x</userinput>
@@ -1759,7 +1757,7 @@
       call a simple function on every element of a list, using a
       <literal>ref</literal> to accumulate the results:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
       (part 57)</para>
 
@@ -1797,7 +1795,7 @@
           <secondary>for and while loops</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
       (part 58)</para>
 
@@ -1822,7 +1820,7 @@
 
       <para>Here's an example run of this code:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
       (part 59)</para>
 
@@ -1841,7 +1839,7 @@
       array. Note that <literal moreinfo="none">while</literal> (like <literal
       moreinfo="none">for</literal>) is also a keyword:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
       (part 60)</para>
 
@@ -1871,7 +1869,7 @@
       in an out-of-bounds error. Indeed, we can trigger that out-of-bounds
       error by rewriting the function to avoid the short-circuiting:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/guided-tour/main.topscript">guided-tour/main.topscript</ulink>
       (part 61)</para>
 
@@ -1971,7 +1969,7 @@ let () =
 
       <para>The <literal moreinfo="none">.native</literal> suffix indicates
       that we're building a native-code executable, which we'll discuss more
-      in <xref linkend="files-modules-and-programs"/>. Once the build
+      in <xref linkend="files-modules-and-programs" />. Once the build
       completes, we can use the resulting program like any command-line
       utility. We can feed input to <literal
       moreinfo="none">build_sum.native</literal> by typing in a sequence of
@@ -1992,7 +1990,7 @@ let () =
       <para>More work is needed to make a really usable command-line program,
       including a proper command-line parsing interface and better error
       handling, all of which is covered in <xref
-      linkend="command-line-parsing"/>.</para>
+      linkend="command-line-parsing" />.</para>
     </sect2>
   </sect1>
 

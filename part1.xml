@@ -1,44 +1,48 @@
-<?xml version="1.0"?>
-<!DOCTYPE part PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE part PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
+"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <part>
-    <title>Language Concepts</title>
+  <title>Language Concepts</title>
 
-    <partintro>
-      <para>Part I covers the basic language concepts you'll need to know when building OCaml
-      programs. You won't need to memorise all of this (objects, for example, are used rarely in
-      practice), but understanding the concepts and examples is important.</para>
+  <partintro>
+    <para>Part I covers the basic language concepts you'll need to know when
+    building OCaml programs. You won't need to memorize all of this (objects,
+    for example, are used rarely in practice), but understanding the concepts
+    and examples is important.</para>
 
-      <para>This part opens up with a guided tour to give you a quick overview of the language using
-      an interactive, command-line interface. It then moves onto covering language features such as
-      records, algebraic data types, and the module system.</para>
+    <para>This part opens up with a guided tour to give you a quick overview
+    of the language using an interactive, command-line interface. It then
+    moves onto covering language features such as records, algebraic data
+    types, and the module system.</para>
 
-      <para>The final portion covers more advanced features such as functors, objects, and
-      first-class modules, which may all take some time to digest. Persevere though; even though
-      these concepts may be difficult at first, they will put you in good stead even when switching
-      to other languages, many of which have drawn inspiration from ML.</para>
-    </partintro>
+    <para>The final portion covers more advanced features such as functors,
+    objects, and first-class modules, which may all take some time to digest.
+    Persevere though; even though these concepts may be difficult at first,
+    they will put you in good stead even when switching to other languages,
+    many of which have drawn inspiration from ML.</para>
+  </partintro>
 
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch01.xml"/>
+  <xi:include href="ch01.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch02.xml"/>
+  <xi:include href="ch02.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch03.xml"/>
+  <xi:include href="ch03.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch04.xml"/>
+  <xi:include href="ch04.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch05.xml"/>
+  <xi:include href="ch05.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch06.xml"/>
+  <xi:include href="ch06.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch07.xml"/>
+  <xi:include href="ch07.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch08.xml"/>
+  <xi:include href="ch08.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch09.xml"/>
+  <xi:include href="ch09.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch10.xml"/>
+  <xi:include href="ch10.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch11.xml"/>
+  <xi:include href="ch11.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch12.xml"/>
-  </part>
+  <xi:include href="ch12.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+</part>

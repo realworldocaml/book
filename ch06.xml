@@ -49,7 +49,7 @@
       <secondary>example of</secondary>
     </indexterm></para>
 
-  <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+  <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
   url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink></para>
 
   <programlisting format="linespecific" language="ocaml"><prompt
@@ -74,7 +74,7 @@
   exhaustiveness checking on pattern matches means that the compiler will warn
   us if we miss a color:</para>
 
-  <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+  <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
   url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink>
   (part 1)</para>
 
@@ -89,7 +89,7 @@
   <para>Using the preceding function, we can generate escape codes to change
   the color of a given string displayed in a terminal:</para>
 
-  <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+  <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
   url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main-2.rawscript">variants/main-2.rawscript</ulink></para>
 
   <programlisting format="linespecific" language="ocaml"><userinput
@@ -131,7 +131,7 @@
   data available in each case. Note that variants can have multiple arguments,
   which are separated by <literal moreinfo="none">*</literal>'s:</para>
 
-  <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+  <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
   url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink>
   (part 3)</para>
 
@@ -155,7 +155,7 @@
   separate out the different cases; it also allows us to extract the data
   associated with each tag:</para>
 
-  <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+  <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
   url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink>
   (part 4)</para>
 
@@ -170,7 +170,7 @@
 
   <para>Now, we can print text using the full set of available colors:</para>
 
-  <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+  <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
   url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main-5.rawscript">variants/main-5.rawscript</ulink></para>
 
   <programlisting format="linespecific" language="ocaml"><userinput
@@ -213,7 +213,7 @@
     <para>Consider what would happen if we were to change the definition of
     <literal moreinfo="none">color</literal> to the following:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/catch_all.topscript">variants/catch_all.topscript</ulink>
     (part 1)</para>
 
@@ -239,7 +239,7 @@
     expects the old structure of the variant, and if we try to compile that
     same code again, the compiler will notice the discrepancy:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/catch_all.topscript">variants/catch_all.topscript</ulink>
     (part 2)</para>
 
@@ -260,7 +260,7 @@
     problem, which is that we haven't handled the new <literal
     moreinfo="none">Bold</literal> tag:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/catch_all.topscript">variants/catch_all.topscript</ulink>
     (part 3)</para>
 
@@ -277,7 +277,7 @@
 
     <para>Fixing this now leads us to the correct implementation:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/catch_all.topscript">variants/catch_all.topscript</ulink>
     (part 4)</para>
 
@@ -306,7 +306,7 @@
         <primary>exhaustion checks</primary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/catch_all.topscript">variants/catch_all.topscript</ulink>
     (part 5)</para>
 
@@ -366,7 +366,7 @@
     of the definition of <literal
     moreinfo="none">Log_entry.t</literal>:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/logger.topscript">variants/logger.topscript</ulink>
     (part 1)</para>
 
@@ -400,7 +400,7 @@
     hand, are disjunctions, letting you represent multiple possibilities, as
     in the following example:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/logger.topscript">variants/logger.topscript</ulink>
     (part 2)</para>
 
@@ -446,7 +446,7 @@
 
     <para>Here's the concrete code:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/logger.topscript">variants/logger.topscript</ulink>
     (part 3)</para>
 
@@ -489,7 +489,7 @@
     first step is to cut down the definitions of each per-message record to
     contain just the information unique to that record:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/logger.topscript">variants/logger.topscript</ulink>
     (part 4)</para>
 
@@ -513,7 +513,7 @@
 
     <para>We can then define a variant type that combines these types:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/logger.topscript">variants/logger.topscript</ulink>
     (part 5)</para>
 
@@ -531,7 +531,7 @@
     <para>Separately, we need a record that contains the fields that are
     common across all messages:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/logger.topscript">variants/logger.topscript</ulink>
     (part 6)</para>
 
@@ -548,7 +548,7 @@
     moreinfo="none">details</literal>. Using this, we can rewrite our
     preceding example as follows:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/logger.topscript">variants/logger.topscript</ulink>
     (part 7)</para>
 
@@ -587,7 +587,7 @@
     for handling individual message types, we could write a dispatch function
     as follows:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/logger.topscript">variants/logger.topscript</ulink>
     (part 8)</para>
 
@@ -635,7 +635,7 @@
     <literal moreinfo="none">expr</literal>, with one tag for each kind of
     expression we want to support:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">variants/blang.topscript</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -677,7 +677,7 @@
     language for an email processor, your base predicates might specify the
     tests you would run against an email, as in the following example:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">variants/blang.topscript</ulink>
     (part 1)</para>
 
@@ -693,7 +693,7 @@
     <literal moreinfo="none">mail_predicate</literal> as its base
     predicate:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">variants/blang.topscript</ulink>
     (part 2)</para>
 
@@ -714,7 +714,7 @@
     <para>Being able to construct such expressions isn't enough; we also need
     to be able to evaluate them. Here's a function for doing just that:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">variants/blang.topscript</ulink>
     (part 3)</para>
 
@@ -743,7 +743,7 @@
     following is a set of simplifying construction functions that mirror the
     tags of an <literal moreinfo="none">expr</literal>:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">variants/blang.topscript</ulink>
     (part 4)</para>
 
@@ -775,7 +775,7 @@
     <para>We can now write a simplification routine that is based on the
     preceding functions.</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">variants/blang.topscript</ulink>
     (part 5)</para>
 
@@ -791,7 +791,7 @@
     <para>We can apply this to a boolean expression and see how good of a job
     it does at simplifying it:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">variants/blang.topscript</ulink>
     (part 6)</para>
 
@@ -810,7 +810,7 @@
     <para>There are some simplifications it misses, however. In particular,
     see what happens if we add a double negation in:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">variants/blang.topscript</ulink>
     (part 7)</para>
 
@@ -826,7 +826,7 @@
     if we make the code more explicit, we see that the missing of the double
     negation is more obvious:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">variants/blang.topscript</ulink>
     (part 8)</para>
 
@@ -840,7 +840,7 @@
     <para>We can of course fix this by handling simply adding an explicit case
     for double negation:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">variants/blang.topscript</ulink>
     (part 9)</para>
 
@@ -887,7 +887,7 @@
     polymorphic variants can be used without an explicit type
     declaration:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink>
     (part 6)</para>
 
@@ -917,7 +917,7 @@
     <para>The type system will complain, if it sees incompatible uses of the
     same tag:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink>
     (part 7)</para>
 
@@ -945,7 +945,7 @@
     moreinfo="none">&lt;</literal>, to indicate "these tags or less," as in
     the following example:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink>
     (part 8)</para>
 
@@ -967,7 +967,7 @@
     upper and a lower bound, we end up with an <emphasis>exact</emphasis>
     polymorphic variant type, which has neither marker. For example:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink>
     (part 9)</para>
 
@@ -986,7 +986,7 @@
         <secondary>upper/lower bounds of</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink>
     (part 10)</para>
 
@@ -1024,7 +1024,7 @@
           <secondary sortas="ordinary">vs. ordinary variants</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink>
       (part 11)</para>
 
@@ -1047,7 +1047,7 @@
       of colors, with new logic only for handling colors that include an alpha
       channel. One might try to write such a function as follows.</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink>
       (part 12)</para>
 
@@ -1073,7 +1073,7 @@
       <literal moreinfo="none">color_to_int</literal> using polymorphic
       variants. The translation here is pretty straightforward:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink>
       (part 13)</para>
 
@@ -1120,7 +1120,7 @@
       moreinfo="none">`Gray</literal>, and not <literal
       moreinfo="none">`RGBA</literal>:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink>
       (part 14)</para>
 
@@ -1150,7 +1150,7 @@
       explicit enumeration of the cases, the type is no longer narrowed, and
       so compilation fails:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink>
       (part 15)</para>
 
@@ -1197,7 +1197,7 @@
             cases</secondary>
           </indexterm></para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink>
         (part 16)</para>
 
@@ -1224,7 +1224,7 @@
         moreinfo="none">Floot</literal>, the erroneous code will compile
         without complaint:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">variants/main.topscript</ulink>
         (part 17)</para>
 

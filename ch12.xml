@@ -29,7 +29,7 @@
         <secondary>basic syntax for</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/istack.topscript">classes/istack.topscript</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -73,7 +73,7 @@
     <para>To produce an object, classes are instantiated with the keyword
     <literal moreinfo="none">new</literal>:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/istack.topscript">classes/istack.topscript</ulink>
     (part 1)</para>
 
@@ -97,7 +97,7 @@
     defines an object type <literal moreinfo="none">istack</literal> with the
     same methods as the class. This type definition is equivalent to:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/istack.topscript">classes/istack.topscript</ulink>
     (part 2)</para>
 
@@ -134,7 +134,7 @@
     a parameter <literal moreinfo="none">init</literal> for the initial
     contents of the stack:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/stack.topscript">classes/stack.topscript</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -170,7 +170,7 @@
     polymorphic": <literal moreinfo="none">init</literal> could have some type
     <literal moreinfo="none">'b list</literal>:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/stack.topscript">classes/stack.topscript</ulink>
     (part 1)</para>
 
@@ -277,7 +277,7 @@ class Iterator {
     moreinfo="none">iterator</literal> that specifies the methods in an
     iterator:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/iter.topscript">classes/iter.topscript</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -287,7 +287,7 @@ class Iterator {
     <para>Next, we'll define an actual iterator for lists. We can use this to
     iterate over the contents of our stack:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/iter.topscript">classes/iter.topscript</ulink>
     (part 1)</para>
 
@@ -322,7 +322,7 @@ class Iterator {
     moreinfo="none">list_iterator</literal> that refers to the current
     contents of the stack:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/iter.topscript">classes/iter.topscript</ulink>
     (part 2)</para>
 
@@ -355,7 +355,7 @@ class Iterator {
     <para>Now we can build a new stack, push some values to it, and iterate
     over them:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/iter.topscript">classes/iter.topscript</ulink>
     (part 3)</para>
 
@@ -390,7 +390,7 @@ class Iterator {
           <primary>functional iterators</primary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/iter.topscript">classes/iter.topscript</ulink>
       (part 4)</para>
 
@@ -433,7 +433,7 @@ class Iterator {
       polymorphic. To express a polymorphic method type like this, we must use
       a type quantifier, as shown in the following example:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/iter.topscript">classes/iter.topscript</ulink>
       (part 5)</para>
 
@@ -486,7 +486,7 @@ class Iterator {
         <secondary>inheritance in</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/stack.topscript">classes/stack.topscript</ulink>
     (part 2)</para>
 
@@ -510,7 +510,7 @@ class Iterator {
     this class creates stacks of integers that double the integers before they
     are pushed onto the stack:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/stack.topscript">classes/stack.topscript</ulink>
     (part 3)</para>
 
@@ -867,7 +867,7 @@ end</programlisting>
         <primary>binary methods</primary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/binary.topscript">classes/binary.topscript</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -903,7 +903,7 @@ end</programlisting>
     <para>We can now test different object instances for equality by using the
     <literal moreinfo="none">equals</literal> binary method:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/binary.topscript">classes/binary.topscript</ulink>
     (part 1)</para>
 
@@ -920,7 +920,7 @@ end</programlisting>
     common base class <literal moreinfo="none">shape</literal> that also
     includes an equality method:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/binary.topscript">classes/binary.topscript</ulink>
     (part 2)</para>
 
@@ -961,7 +961,7 @@ end</programlisting>
     However, the built-in polymorphic equality has very poor behavior when
     applied to objects:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/binary.topscript">classes/binary.topscript</ulink>
     (part 3)</para>
 
@@ -982,7 +982,7 @@ end</programlisting>
         <primary>representation types</primary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/binary.topscript">classes/binary.topscript</ulink>
     (part 4)</para>
 
@@ -1288,7 +1288,7 @@ end</programlisting>
         <secondary>initializers for</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/initializer.topscript">classes/initializer.topscript</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt

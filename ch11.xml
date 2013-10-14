@@ -124,7 +124,7 @@
     aren't required to use classes at all. Here's an example of a simple
     object:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/stack.topscript">objects/stack.topscript</ulink>
     (part 1)</para>
 
@@ -158,7 +158,7 @@
     through its methods. The syntax for a method invocation uses the <literal
     moreinfo="none">#</literal> character:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/stack.topscript">objects/stack.topscript</ulink>
     (part 2)</para>
 
@@ -181,7 +181,7 @@
     the initial value of the object, we can define a function that takes the
     value and returns an object:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/stack.topscript">objects/stack.topscript</ulink>
     (part 3)</para>
 
@@ -228,7 +228,7 @@
         <secondary>polymorphism of</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/polymorphism.topscript">objects/polymorphism.topscript</ulink>
     (part 1)</para>
 
@@ -247,7 +247,7 @@
     <para>The type system will complain if it sees incompatible uses of the
     same method:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/polymorphism.topscript">objects/polymorphism.topscript</ulink>
     (part 2)</para>
 
@@ -273,7 +273,7 @@
     <para>We can manually <emphasis>close</emphasis> an object type using a
     type annotation:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/polymorphism.topscript">objects/polymorphism.topscript</ulink>
     (part 3)</para>
 
@@ -308,7 +308,7 @@
           <primary>ellipses (..)</primary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/polymorphism.topscript">objects/polymorphism.topscript</ulink>
       (part 4)</para>
 
@@ -335,7 +335,7 @@
     implemented. When the method <literal moreinfo="none">#pop</literal> is
     invoked, the actual method that is run is determined by the object:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/stack.topscript">objects/stack.topscript</ulink>
     (part 4)</para>
 
@@ -370,7 +370,7 @@
     required. Let's define a function that creates immutable stack
     objects:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/immutable.topscript">objects/immutable.topscript</ulink>
     (part 1)</para>
 
@@ -399,7 +399,7 @@
     moreinfo="none">hd :: v</literal>. The original object is not
     modified:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/immutable.topscript">objects/immutable.topscript</ulink>
     (part 2)</para>
 
@@ -576,7 +576,7 @@ end</programlisting>
       moreinfo="none">shape</literal>, and it is. The coercion <literal
       moreinfo="none">:&gt;</literal> must be explicit:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
       (part 1)</para>
 
@@ -619,7 +619,7 @@ end</programlisting>
       <para>For example, we can create two objects with a <literal
       moreinfo="none">shape</literal> method:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
       (part 2)</para>
 
@@ -640,7 +640,7 @@ end</programlisting>
       the object type <literal moreinfo="none">&lt; shape : shape
       &gt;</literal>:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
       (part 3)<indexterm class="singular">
           <primary>polymorphic variant subtyping</primary>
@@ -661,7 +661,7 @@ end</programlisting>
         tags of <emphasis>A</emphasis> are a subset of the tags of
         <emphasis>B</emphasis>:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
         (part 4)</para>
 
@@ -693,7 +693,7 @@ end</programlisting>
           <secondary>variance and</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
       (part 5)</para>
 
@@ -709,7 +709,7 @@ end</programlisting>
       you to store nonsquare shapes into what should be an array of squares.
       OCaml recognizes this and does not allow the coercion:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
       (part 6)</para>
 
@@ -743,7 +743,7 @@ end</programlisting>
       <emphasis>can</emphasis> safely be used with type <literal
       moreinfo="none">square -&gt; string</literal>:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
       (part 7)</para>
 
@@ -771,7 +771,7 @@ end</programlisting>
         <para>OCaml works out the variance of a type using that type's
         definition:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
         (part 8)</para>
 
@@ -795,7 +795,7 @@ end</programlisting>
         <para>However, if the definition is hidden by a signature, then OCaml
         is forced to assume that the type is invariant:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
         (part 9)</para>
 
@@ -826,7 +826,7 @@ end</programlisting>
         <literal moreinfo="none">+</literal> for covariance or <literal
         moreinfo="none">-</literal> for contravariance:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
         (part 10)</para>
 
@@ -864,7 +864,7 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</programlisting>
       <para>If we wanted to write a function that took a list of such stacks
       and found the total area of their shapes, we might try:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
       (part 11)</para>
 
@@ -884,7 +884,7 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</programlisting>
       <para>However, when we try to apply this function to our objects, we get
       an error:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
       (part 12)</para>
 
@@ -924,7 +924,7 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</programlisting>
       moreinfo="none">readonly_stack</literal> and confirm that we can coerce
       the list of stacks to it:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
       (part 13)</para>
 
@@ -1105,7 +1105,7 @@ let is_barbell = function
           polymorphism</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/row_polymorphism.topscript">objects/row_polymorphism.topscript</ulink>
       (part 1)</para>
 
@@ -1118,7 +1118,7 @@ let is_barbell = function
       type of its argument, preserving any additional methods that it may
       have:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/row_polymorphism.topscript">objects/row_polymorphism.topscript</ulink>
       (part 2)</para>
 
@@ -1134,7 +1134,7 @@ let is_barbell = function
       returned object is only known to have an <literal
       moreinfo="none">area</literal> method:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/row_polymorphism.topscript">objects/row_polymorphism.topscript</ulink>
       (part 3)</para>
 
@@ -1150,7 +1150,7 @@ let is_barbell = function
       different types of object in the same container. For example, lists of
       heterogeneous elements cannot be created using row polymorphism:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/row_polymorphism.topscript">objects/row_polymorphism.topscript</ulink>
       (part 4)</para>
 
@@ -1164,7 +1164,7 @@ let is_barbell = function
       <para>Similarly, we cannot use row polymorphism to store different types
       of object in the same reference:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/row_polymorphism.topscript">objects/row_polymorphism.topscript</ulink>
       (part 5)</para>
 
@@ -1180,7 +1180,7 @@ let is_barbell = function
       <para>In both these cases we must use subtyping:<indexterm
       class="endofrange" startref="OBsub"/></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/row_polymorphism.topscript">objects/row_polymorphism.topscript</ulink>
       (part 6)</para>
 

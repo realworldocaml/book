@@ -67,7 +67,7 @@
 
     <para>Here's a simple example:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -95,7 +95,7 @@
     <emphasis><literal moreinfo="none">&lt;expr1&gt;</literal></emphasis>.
     Here's how it looks in practice:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
     (part 1)</para>
 
@@ -114,7 +114,7 @@
     available at the toplevel, as we can see if we try to access it
     now:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
     (part 2)</para>
 
@@ -134,7 +134,7 @@
         <primary>shadowing</primary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
     (part 3)</para>
 
@@ -155,7 +155,7 @@
     complete, the inner scope has closed and the original definition of
     languages reappears:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
     (part 4)</para>
 
@@ -174,7 +174,7 @@
         <primary>nested let binding</primary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
     (part 5)</para>
 
@@ -193,7 +193,7 @@
     moreinfo="none">area_of_ring</literal> would work if we had instead
     written this purposefully confusing bit of code:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
     (part 6)</para>
 
@@ -278,7 +278,7 @@
           <secondary>pattern matching in</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 7)</para>
 
@@ -304,7 +304,7 @@
           <primary>irrefutable patterns</primary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 8)</para>
 
@@ -325,7 +325,7 @@
       the warning. It's generally better to use a match statement to handle
       such cases explicitly:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 9)</para>
 
@@ -376,7 +376,7 @@
           <secondary>anonymous functions</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 10)</para>
 
@@ -388,7 +388,7 @@
       functions. For example, we can apply an anonymous function to an
       argument:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 11)</para>
 
@@ -400,7 +400,7 @@
       functions like <literal moreinfo="none">List.map</literal> is probably
       the most common use case for anonymous functions:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 12)</para>
 
@@ -410,7 +410,7 @@
 
       <para>You can even stuff them into a data structure:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 13)</para>
 
@@ -438,7 +438,7 @@
       functions and storing them in data structures. We even name functions in
       the same way that we name other values, by using a let binding:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 14)</para>
 
@@ -453,7 +453,7 @@
       moreinfo="none">plusone</literal> is equivalent to the previous
       definition:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 15)</para>
 
@@ -478,7 +478,7 @@
             <secondary>functions and</secondary>
           </indexterm></para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
         (part 16)</para>
 
@@ -510,7 +510,7 @@
           <secondary>multi-argument functions</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 17)</para>
 
@@ -526,7 +526,7 @@
       moreinfo="none">abs_diff</literal> in an equivalent form, using the
       <literal moreinfo="none">fun</literal> keyword:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 18)</para>
 
@@ -573,7 +573,7 @@
       <literal moreinfo="none">abs_diff</literal> that measures the distance
       of a given number from <literal moreinfo="none">3</literal>:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 19)</para>
 
@@ -600,7 +600,7 @@
           <secondary>currying syntax</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 20)</para>
 
@@ -617,7 +617,7 @@
       in OCaml. It's also possible to use the different parts of a tuple as
       different arguments. So, we could write:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 21)</para>
 
@@ -665,7 +665,7 @@
           <primary>rec keyword</primary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 22)</para>
 
@@ -696,7 +696,7 @@
       moreinfo="none">and</literal> keyword. Here's a (gratuitously
       inefficient) example:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 23)</para>
 
@@ -755,7 +755,7 @@
           <secondary>prefix and infix operators</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 24)</para>
 
@@ -771,7 +771,7 @@
       functions. In fact, if we put parentheses around an infix operator, you
       can use it as an ordinary prefix function:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 25)</para>
 
@@ -804,7 +804,7 @@
       example of a simple vector-addition operator on <literal>int</literal>
       pairs:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 26)</para>
 
@@ -818,7 +818,7 @@
       containing <literal moreinfo="none">*</literal>. Consider the following
       example:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 27)</para>
 
@@ -833,7 +833,7 @@
       this to work properly, we need to put spaces around any operator that
       begins or ends with <literal moreinfo="none">*</literal>:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 28)</para>
 
@@ -1016,7 +1016,7 @@
           <primary>negation operators</primary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 29)</para>
 
@@ -1031,7 +1031,7 @@
       <para>Here, OCaml is interpreting the second expression as equivalent
       to:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 30)</para>
 
@@ -1047,7 +1047,7 @@
       library whose behavior depends critically on the precedence rules
       described previously:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 31)</para>
 
@@ -1081,7 +1081,7 @@
           <secondary>sequencing operators</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 32)</para>
 
@@ -1102,7 +1102,7 @@
       moreinfo="none">|&gt;</literal>, but the result is a bit more
       verbose:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 33)</para>
 
@@ -1126,7 +1126,7 @@
           <primary>partial application</primary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 34)</para>
 
@@ -1139,7 +1139,7 @@
       <para>Or, we can pass it just the function argument, leaving us with a
       function for printing out a list of strings:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 35)</para>
 
@@ -1155,7 +1155,7 @@
       happens if we try using a right-associative operator, like
       (^&gt;):</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 36)</para>
 
@@ -1206,7 +1206,7 @@
           <secondary>declaring with function keyword</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 37)</para>
 
@@ -1222,7 +1222,7 @@
       <para>This is equivalent to combining an ordinary function definition
       with a <literal moreinfo="none">match</literal>:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 38)</para>
 
@@ -1238,7 +1238,7 @@
       together, as in the following example where we declare a two argument
       (curried) function with a pattern match on the second argument:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 39)</para>
 
@@ -1283,7 +1283,7 @@
           <secondary>labeled arguments</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 40)</para>
 
@@ -1294,7 +1294,7 @@
       <para>We can then provide a labeled argument using a similar convention.
       As you can see, the arguments can be provided in any order:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 41)</para>
 
@@ -1316,7 +1316,7 @@
           <primary>label punning</primary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 42)</para>
 
@@ -1404,7 +1404,7 @@
           moreinfo="none">List.iter</literal> by giving it just the function,
           as in the following example from earlier in the chapter:</para>
 
-          <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+          <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
           url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
           (part 43)</para>
 
@@ -1442,7 +1442,7 @@
             <secondary>higher-order and labels</secondary>
           </indexterm></para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
         (part 44)</para>
 
@@ -1458,7 +1458,7 @@
         defined <literal moreinfo="none">apply_to_tuple</literal> differently
         to change the order in which the labeled arguments were listed:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
         (part 45)</para>
 
@@ -1469,7 +1469,7 @@
         <para>It turns out this order matters. In particular, if we define a
         function that has a different order</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
         (part 46)</para>
 
@@ -1480,7 +1480,7 @@
         <para>we'll find that it can't be passed in to <literal
         moreinfo="none">apply_to_tuple_2</literal>.</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
         (part 47)</para>
 
@@ -1493,7 +1493,7 @@
         <para>But, it works smoothly with the original <literal
         moreinfo="none">apply_to_tuple</literal>:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
         (part 48)</para>
 
@@ -1534,7 +1534,7 @@
       moreinfo="none">^</literal> operator for pairwise string
       concatenation:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 49)</para>
 
@@ -1565,7 +1565,7 @@
       which allows us to write <literal moreinfo="none">concat</literal> more
       concisely:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 50)</para>
 
@@ -1617,7 +1617,7 @@
             <secondary>explicit passing of</secondary>
           </indexterm></para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
         (part 51)</para>
 
@@ -1631,7 +1631,7 @@
         <literal moreinfo="none">concat</literal> without specifying <literal
         moreinfo="none">sep</literal>:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
         (part 52)</para>
 
@@ -1649,7 +1649,7 @@
         the first string that it's passed to uppercase. We could write the
         function as follows:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
         (part 53)</para>
 
@@ -1672,7 +1672,7 @@
         optional argument to <literal moreinfo="none">concat</literal> using
         the <literal moreinfo="none">?</literal> syntax:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
         (part 54)</para>
 
@@ -1721,7 +1721,7 @@
             <secondary>inference of</secondary>
           </indexterm></para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
         (part 55)</para>
 
@@ -1769,7 +1769,7 @@
         <literal moreinfo="none">f</literal> list the arguments in different
         orders:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
         (part 56)</para>
 
@@ -1793,7 +1793,7 @@
         Thus, the following code compiles without error, due to the type
         annotation on <literal moreinfo="none">f</literal>:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
         (part 57)</para>
 
@@ -1819,7 +1819,7 @@
         of partial application. We can of course partially apply the optional
         argument itself:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
         (part 58)</para>
 
@@ -1832,7 +1832,7 @@
         <para>But what happens if we partially apply just the first
         argument?</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
         (part 59)</para>
 
@@ -1847,7 +1847,7 @@
         we try to pass in that optional argument now, it will be
         rejected:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
         (part 60)</para>
 
@@ -1867,7 +1867,7 @@
         <literal moreinfo="none">concat</literal> with the optional argument
         in the second position:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
         (part 61)</para>
 
@@ -1878,7 +1878,7 @@
         <para>then application of the first argument would not cause the
         optional argument to be erased.</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
         (part 62)</para>
 
@@ -1896,7 +1896,7 @@
         optional arguments anywhere on the argument list. Thus, we can
         write:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
         (part 63)</para>
 
@@ -1908,7 +1908,7 @@
         arguments can't be erased at all, which leads to a compiler
         warning:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
         (part 64)</para>
 
@@ -1923,7 +1923,7 @@
         returning a function that expects the <literal
         moreinfo="none">sep</literal> argument to be provided:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
         (part 65)</para>
 

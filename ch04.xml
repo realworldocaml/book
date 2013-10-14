@@ -58,7 +58,7 @@
         <secondary>finding key associations in</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/intro.topscript">files-modules-and-programs/intro.topscript</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -852,7 +852,7 @@ let sessions_have_same_user s1 s2 =
     the environment that the compiler looks at to find the definition of
     various identifiers. Here's an example:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/main.topscript">files-modules-and-programs/main.topscript</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -891,7 +891,7 @@ let sessions_have_same_user s1 s2 =
         <emphasis>local open</emphasis>. There are two syntaxes for local
         opens. For example, you can write:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/main.topscript">files-modules-and-programs/main.topscript</ulink>
         (part 1)</para>
 
@@ -908,7 +908,7 @@ let sessions_have_same_user s1 s2 =
         <para>There's another even more lightweight syntax for local opens,
         which is particularly useful for small expressions:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/main.topscript">files-modules-and-programs/main.topscript</ulink>
         (part 2)</para>
 
@@ -973,7 +973,7 @@ let sessions_have_same_user s1 s2 =
         <secondary>adding to modules</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/main.topscript">files-modules-and-programs/main.topscript</ulink>
     (part 3)</para>
 
@@ -992,7 +992,7 @@ let sessions_have_same_user s1 s2 =
     to create a new, extended version of the <literal
     moreinfo="none">Interval</literal> module:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/main.topscript">files-modules-and-programs/main.topscript</ulink>
     (part 4)</para>
 
@@ -1020,7 +1020,7 @@ let sessions_have_same_user s1 s2 =
     module. If we'd used <literal moreinfo="none">open</literal>, we'd have
     gotten a quite different result:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/main.topscript">files-modules-and-programs/main.topscript</ulink>
     (part 5)</para>
 

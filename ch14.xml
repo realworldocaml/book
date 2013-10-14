@@ -957,7 +957,7 @@ let () = Command.run command</programlisting>
         <primary>Command.group</primary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/group.topscript">command-line-parsing/group.topscript</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1165,7 +1165,7 @@ let () = Command.run command</programlisting>
       a value of type <literal moreinfo="none">'r</literal>. Let's look at
       some examples of specs, and their types:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/command_types.topscript">command-line-parsing/command_types.topscript</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1189,7 +1189,7 @@ let () = Command.run command</programlisting>
       <para>The type of <literal moreinfo="none">Command.basic</literal>
       should make more sense now:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/basic.topscript">command-line-parsing/basic.topscript</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1426,7 +1426,7 @@ let () = Command.run add</programlisting>
       explicitly represented in the type of the <literal
       moreinfo="none">step</literal> return value:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/step.topscript">command-line-parsing/step.topscript</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><prompt

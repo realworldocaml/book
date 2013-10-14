@@ -803,7 +803,7 @@ type t = {
       moreinfo="none">~/.ocamlinit</literal> file in your home directory (see
       <xref linkend="installation"/> for more information):</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/camlp4_toplevel.topscript">front-end/camlp4_toplevel.topscript</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -848,7 +848,7 @@ type t = {
       this problem by running it in <command
       moreinfo="none">utop</command>:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/front-end/camlp4_toplevel.topscript">front-end/camlp4_toplevel.topscript</ulink>
       (part 1)</para>
 

@@ -113,7 +113,7 @@
         <secondary>blocks and values in OCaml</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/simple_record.topscript">memory-repr/simple_record.topscript</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -475,7 +475,7 @@
     yourself using the <literal moreinfo="none">Obj</literal> module, which
     exposes the internal representation of values to OCaml code:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">memory-repr/reprs.topscript</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -501,7 +501,7 @@
           <primary>floating-point values</primary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">memory-repr/reprs.topscript</ulink>
       (part 1)</para>
 
@@ -534,7 +534,7 @@
       <para>First, let's check that float arrays do in fact have a different
       tag number from normal floating-point values:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">memory-repr/reprs.topscript</ulink>
       (part 2)</para>
 
@@ -551,7 +551,7 @@
       moreinfo="none">Obj.double_field</literal> to retrieve a float from
       within the block:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">memory-repr/reprs.topscript</ulink>
       (part 3)</para>
 
@@ -596,7 +596,7 @@
         <secondary>variants and lists</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">memory-repr/reprs.topscript</ulink>
     (part 4)</para>
 
@@ -622,7 +622,7 @@
     ascending from 0 (counting from leftmost variants with parameters). The
     parameters are stored as words in the block:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">memory-repr/reprs.topscript</ulink>
     (part 5)</para>
 
@@ -724,7 +724,7 @@
     moreinfo="none">type_conv</literal> library from Core provides an
     alternative implementation:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">memory-repr/reprs.topscript</ulink>
     (part 6)</para>
 

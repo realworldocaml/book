@@ -257,7 +257,7 @@
         after the program has started by calling the <literal
         moreinfo="none">Gc.set</literal> function:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">gc/tune.topscript</ulink></para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -403,7 +403,7 @@
         different regions of virtual memory that require more housekeeping in
         the OCaml runtime to keep track of them:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">gc/tune.topscript</ulink>
         (part 1)</para>
 
@@ -633,7 +633,7 @@
         returns this value so that you can modify it in future calls if
         necessary:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">gc/tune.topscript</ulink>
         (part 2)</para>
 
@@ -695,7 +695,7 @@
         you have unusual allocation patterns that are causing a
         higher-than-usual rate of compactions:</para>
 
-        <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">gc/tune.topscript</ulink>
         (part 3)</para>
 

@@ -80,7 +80,7 @@
         <secondary>basics of</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
     (part 1)</para>
 
@@ -109,7 +109,7 @@
         <primary>Deferred.t</primary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
     (part 3)</para>
 
@@ -136,7 +136,7 @@
         <primary>Deferred.peek</primary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
     (part 4)</para>
 
@@ -159,7 +159,7 @@
     running and block until the deferred is determined. Thus, we can
     write:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
     (part 5)</para>
 
@@ -170,7 +170,7 @@
     <para>If we peek again, we'll see that the value of <literal
     moreinfo="none">contents</literal> has been determined:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
     (part 6)</para>
 
@@ -183,7 +183,7 @@
     moreinfo="none">Deferred.bind</literal>. First, let's consider the
     type-signature of bind:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
     (part 7)</para>
 
@@ -214,7 +214,7 @@
     <para>Here's a simple use of bind for a function that replaces a file with
     an uppercase version of its contents:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
     (part 8)</para>
 
@@ -237,7 +237,7 @@
     rewrite <literal moreinfo="none">uppercase_file</literal> as
     follows:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
     (part 9)</para>
 
@@ -259,7 +259,7 @@
     <para>Now let's look at another potential use of bind. In this case, we'll
     write a function that counts the number of lines in a file:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
     (part 10)</para>
 
@@ -283,7 +283,7 @@
         <primary>return function</primary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
     (part 11)</para>
 
@@ -298,7 +298,7 @@
     <para>Using <literal moreinfo="none">return</literal>, we can make
     <literal moreinfo="none">count_lines</literal> compile:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
     (part 12)</para>
 
@@ -326,7 +326,7 @@
     moreinfo="none">Deferred.map</literal>, which has the following
     signature:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
     (part 13)</para>
 
@@ -338,7 +338,7 @@
     moreinfo="none">&gt;&gt;|</literal>. Using it, we can rewrite <literal
     moreinfo="none">count_lines</literal> again a bit more succinctly:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
     (part 14)</para>
 
@@ -384,7 +384,7 @@
       moreinfo="none">Ivar.fill</literal>. These operations are
       illustrated:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
       (part 15)</para>
 
@@ -411,7 +411,7 @@
       were scheduled in. Here's a reasonable signature that captures this
       idea:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
       (part 16)</para>
 
@@ -440,7 +440,7 @@
           <primary>thunks</primary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
       (part 17)</para>
 
@@ -462,7 +462,7 @@
       span and returns a deferred which becomes determined after that time
       span elapses:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
       (part 18)</para>
 
@@ -681,7 +681,7 @@ let () =
           <secondary>non-returning</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
       (part 19)</para>
 
@@ -695,7 +695,7 @@ let () =
       expecting it to return unit. The type-checker won't necessarily complain
       in such a case:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
       (part 20)</para>
 
@@ -715,7 +715,7 @@ let () =
       moreinfo="none">never_returns</literal>. Let's do the same trick with
       <literal moreinfo="none">loop_forever</literal>:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
       (part 21)</para>
 
@@ -731,7 +731,7 @@ let () =
       rewrite our <literal moreinfo="none">do_stuff</literal> function, we'll
       get a helpful type error:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
       (part 22)</para>
 
@@ -748,7 +748,7 @@ let () =
       <para>We can resolve the error by calling the function <literal
       moreinfo="none">never_returns</literal>:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
       (part 23)</para>
 
@@ -847,7 +847,7 @@ let () =
 
       <para>Pipes are created in connected read/write pairs:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
       (part 24)</para>
 
@@ -869,7 +869,7 @@ let () =
       out of the wait by hitting <literal
       moreinfo="none">Control-C</literal>:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/pipe_write_break.rawscript">async/pipe_write_break.rawscript</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><userinput
@@ -879,7 +879,7 @@ let () =
       <para>The deferred returned by write completes on its own once the value
       written into the pipe has been read out:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
       (part 25)</para>
 
@@ -902,7 +902,7 @@ let () =
       writer-pipe. Here's the type of <literal
       moreinfo="none">Pipe.transfer</literal>:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
       (part 26)</para>
 
@@ -932,7 +932,7 @@ let () =
       moreinfo="none">Command</literal> module with an extended version that
       contains the <literal moreinfo="none">async_basic</literal> call:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
       (part 27)</para>
 
@@ -1148,7 +1148,7 @@ let get_definition word =
       type for <literal moreinfo="none">Cohttp_async.Client.get</literal>,
       which we can do in <command moreinfo="none">utop</command>:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
       (part 28)</para>
 
@@ -1225,7 +1225,7 @@ let search_and_print words =
       results. Here's the type of <literal
       moreinfo="none">Deferred.all</literal>:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
       (part 29)</para>
 
@@ -1260,7 +1260,7 @@ let search_and_print words =
       when every deferred on the input list is determined. We can see the type
       of this function in <command moreinfo="none">utop</command>:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
       (part 30)</para>
 
@@ -1339,7 +1339,7 @@ let search_and_print words =
     second, and then either throws an exception or returns unit, alternating
     between the two behaviors on subsequent calls:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
     (part 31)</para>
 
@@ -1376,7 +1376,7 @@ let search_and_print words =
     moreinfo="none">try/with</literal> statement, but as you can see that
     doesn't quite do the trick:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
     (part 32)</para>
 
@@ -1414,7 +1414,7 @@ let search_and_print words =
         <secondary>asynchronous errors</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
     (part 33)</para>
 
@@ -1469,7 +1469,7 @@ let search_and_print words =
       moreinfo="none">within'</literal>, which takes a thunk that returns a
       deferred. Here's an example:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
       (part 34)</para>
 
@@ -1510,7 +1510,7 @@ let search_and_print words =
       of a function that captures and ignores errors in the processes it
       spawns:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main-35.rawscript">async/main-35.rawscript</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><userinput
@@ -1544,7 +1544,7 @@ let search_and_print words =
       the current monitor, which is the parent of the newly created
       monitor:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
       (part 36)</para>
 
@@ -1575,7 +1575,7 @@ let search_and_print words =
       <literal moreinfo="none">Not_found</literal>, then the exception will be
       passed to the parent monitor and delivered as usual:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
       (part 37)</para>
 
@@ -1596,7 +1596,7 @@ let search_and_print words =
       the exception will be ignored, and we again see that the deferred never
       returns, but the exception was caught and ignored:</para>
 
-      <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main-38.rawscript">async/main-38.rawscript</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><userinput
@@ -1799,7 +1799,7 @@ let print_result (word,definition) =
         <secondary>timeouts and cancellations</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
     (part 39)</para>
 
@@ -1818,7 +1818,7 @@ let print_result (word,definition) =
     returns a single deferred that will become determined once any of the
     values on the list is determined:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
     (part 40)</para>
 
@@ -1925,7 +1925,7 @@ let get_definition ~server ~interrupt word =
     Here's the type signature of <literal moreinfo="none">choice</literal> and
     <literal moreinfo="none">choose</literal>:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
     (part 41)</para>
 
@@ -2062,7 +2062,7 @@ let get_definition ~server ~interrupt word =
         <primary>In_thread module</primary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
     (part 42)</para>
 
@@ -2085,7 +2085,7 @@ let get_definition ~server ~interrupt word =
     returned deferred becomes determined, at which point it prints out one
     last timestamp:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
     (part 43)</para>
 
@@ -2105,7 +2105,7 @@ let get_definition ~server ~interrupt word =
     <para>If we feed this function a simple timeout deferred, it works as you
     might expect, waking up roughly every 100 milliseconds:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main-44.rawscript">async/main-44.rawscript</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><userinput
@@ -2116,7 +2116,7 @@ let get_definition ~server ~interrupt word =
     <para>Now see what happens if, instead of waiting on a clock event, we
     wait for a busy-loop to finish running:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main-45.rawscript">async/main-45.rawscript</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><userinput
@@ -2137,7 +2137,7 @@ let get_definition ~server ~interrupt word =
     moreinfo="none">In_thread.run</literal> to offload this to a different
     system thread, the behavior will be different:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main-46.rawscript">async/main-46.rawscript</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><userinput
@@ -2160,7 +2160,7 @@ let get_definition ~server ~interrupt word =
     behavior, so if we run a nonallocating loop in byte-code, our timer
     process will get to run:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main-47.rawscript">async/main-47.rawscript</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><userinput

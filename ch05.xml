@@ -36,7 +36,7 @@
   moreinfo="none">host_info</literal> record that summarizes information about
   a given computer:</para>
 
-  <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+  <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
   url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink></para>
 
   <programlisting format="linespecific" language="ocaml"><prompt
@@ -61,7 +61,7 @@
   uses the <literal moreinfo="none">Time.now</literal> call from Core's
   <literal moreinfo="none">Time</literal> module:</para>
 
-  <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+  <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
   url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
   (part 1)</para>
 
@@ -89,7 +89,7 @@
   <para>Once we have a record value in hand, we can extract elements from the
   record field using dot-notation:</para>
 
-  <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+  <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
   url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
   (part 2)</para>
 
@@ -102,7 +102,7 @@
   regard. So, for example, here's a type one might use to timestamp arbitrary
   items:</para>
 
-  <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+  <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
   url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
   (part 3)</para>
 
@@ -113,7 +113,7 @@
   <para>We can then write polymorphic functions that operate over this
   parameterized type:</para>
 
-  <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+  <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
   url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
   (part 4)</para>
 
@@ -138,7 +138,7 @@
         <secondary>patterns and exhaustiveness in</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 5)</para>
 
@@ -178,7 +178,7 @@
     <literal moreinfo="none">host_info</literal> record called <literal
     moreinfo="none">os_release</literal>:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 6)</para>
 
@@ -226,7 +226,7 @@
         <secondary>missing field warnings</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 7)</para>
 
@@ -246,7 +246,7 @@
     acknowledging that we are ignoring extra fields. This is done by adding an
     underscore to the pattern:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 8)</para>
 
@@ -317,7 +317,7 @@
         <secondary>field punning in</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 9)</para>
 
@@ -335,7 +335,7 @@
         <secondary>construction of</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 10)</para>
 
@@ -367,7 +367,7 @@
         <secondary>label punning in</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 11)</para>
 
@@ -383,7 +383,7 @@
     <para>This is considerably more concise than what you would get without
     punning:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 12)</para>
 
@@ -434,7 +434,7 @@
     connected. All of these messages include a session ID and the time the
     message was generated:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 13)</para>
 
@@ -479,7 +479,7 @@
     want to write a function to grab the session_id from a record, what type
     will it have?</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 14)</para>
 
@@ -492,7 +492,7 @@
     type (say, a <literal moreinfo="none">heartbeat</literal>) using a type
     annotation:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 15)</para>
 
@@ -504,7 +504,7 @@
     annotations, the ambiguity can be a bit confusing. Consider the following
     functions for grabbing the session ID and status from a heartbeat:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 16)</para>
 
@@ -535,7 +535,7 @@
     practice to name the type associated with the module <literal
     moreinfo="none">t</literal>. Using this style we would write:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 17)</para>
 
@@ -589,7 +589,7 @@
     <para>Now, our log-entry-creation function can be rendered as
     follows:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 18)</para>
 
@@ -609,7 +609,7 @@
     allowed to insert whitespace between the module-path and the field
     name:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 19)</para>
 
@@ -624,7 +624,7 @@
     <para>This is not restricted to constructing a record; we can use the same
     trick when pattern matching:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 20)</para>
 
@@ -637,7 +637,7 @@
     <para>When using dot-notation for accessing record fields, we can qualify
     the field by the module directly:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 21)</para>
 
@@ -678,7 +678,7 @@
         <secondary>functional updates to</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 22)</para>
 
@@ -726,7 +726,7 @@
     <para>Given this, we can rewrite <literal
     moreinfo="none">register_heartbeat</literal> more concisely:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 23)</para>
 
@@ -743,7 +743,7 @@
     fields. Consider what happens if we decided to add a field for the status
     message received on the last heartbeat:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 24)</para>
 
@@ -772,7 +772,7 @@
     compile as is, even though it incorrectly ignores the new field. The
     correct thing to do would be to update the code as follows:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 25)</para>
 
@@ -798,7 +798,7 @@
         <secondary>mutable fields in</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 26)</para>
 
@@ -825,7 +825,7 @@
     moreinfo="none">register_heartbeat</literal> would be written as
     follows:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 27)</para>
 
@@ -864,7 +864,7 @@
         <secondary>first-class fields in</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 28)</para>
 
@@ -892,7 +892,7 @@
     applied to a given type declaration. So, for example, we could have
     defined <literal moreinfo="none">Logon</literal> as follows:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main-29.rawscript">records/main-29.rawscript</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><userinput
@@ -945,7 +945,7 @@
     moreinfo="none">Logon.user</literal>, which we can use to extract the user
     field from a logon message:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 30)</para>
 
@@ -1028,7 +1028,7 @@
     extracting the <literal moreinfo="none">user</literal> field from a
     <literal moreinfo="none">Logon.t</literal>:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 31)</para>
 
@@ -1046,7 +1046,7 @@
     more complicated than you might naively expect from the preceding
     one:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 32)</para>
 
@@ -1063,7 +1063,7 @@
     <para>We can use first-class fields to do things like write a generic
     function for displaying a record field:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 33)</para>
 
@@ -1084,7 +1084,7 @@
     <para>Here's an example of <literal moreinfo="none">show_field</literal>
     in action:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 34)</para>
 
@@ -1116,7 +1116,7 @@
     moreinfo="none">Logon.t</literal>, the field iterator has the following
     type:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 35)</para>
 
@@ -1147,7 +1147,7 @@
     and <literal moreinfo="none">show_field</literal> to print out all the
     fields of a <literal moreinfo="none">Logon</literal> record:</para>
 
-    <para role="sourcecode">OCaml Utop: <ulink role="orm:hideurl:ital"
+    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
     (part 36)</para>
 
