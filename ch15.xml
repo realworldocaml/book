@@ -4,7 +4,7 @@
 <chapter id="handling-json-data">
   <title>Handling JSON Data</title>
 
-  <para>Data serialization, i.e. converting data to and from a sequence of
+  <para>Data serialization, i.e., converting data to and from a sequence of
   bytes that's suitable for writing to disk or sending across the network, is
   an important and common programming task. You often have to match someone
   else's data format (such as XML), sometimes you need a highly efficient
@@ -33,17 +33,17 @@
     <listitem>
       <para><emphasis>Polymorphic variants</emphasis> to write more extensible
       libraries and protocols (but still retain the ability to extend them if
-      needed).</para>
+      needed)</para>
     </listitem>
 
     <listitem>
       <para><emphasis>Functional combinators</emphasis> to compose common
-      operations over data structures in a type-safe way.</para>
+      operations over data structures in a type-safe way</para>
     </listitem>
 
     <listitem>
       <para>External tools to generate boilerplate OCaml modules and
-      signatures from external specification files.</para>
+      signatures from external specification files</para>
     </listitem>
   </itemizedlist>
 
@@ -62,7 +62,7 @@
 
     <para>JSON consists of two basic structures: an unordered collection of
     key/value pairs, and an ordered list of values. Values can be strings,
-    booleans, floats, integers, or null. Let's see what a JSON record for an
+    Booleans, floats, integers, or null. Let's see what a JSON record for an
     example book description looks like:<indexterm class="singular">
         <primary>values</primary>
 
@@ -130,12 +130,11 @@
 
       <para>There are several JSON libraries available for OCaml. For this
       chapter, we've picked the <ulink
-      url="http://mjambon.com/yojson.html"><literal
-      moreinfo="none">Yojson</literal></ulink> library by Martin Jambon. It's
-      easiest to install via OPAM by running <literal moreinfo="none">opam
-      install yojson</literal>. See <xref linkend="installation"/> for
-      installation instructions if you haven't already got OPAM. Once
-      installed, you can open it in the <command
+      url="http://mjambon.com/yojson.html">Yojson</ulink> library by Martin
+      Jambon. It's easiest to install via OPAM by running <literal
+      moreinfo="none">opam install yojson</literal>. See <xref
+      linkend="installation" /> for installation instructions if you haven't
+      already got OPAM. Once installed, you can open it in the <command
       moreinfo="none">utop</command> toplevel by:</para>
 
       <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
@@ -203,7 +202,7 @@
 
       <listitem>
         <para>The type definition uses polymorphic variants and not normal
-        variants. This will become significant later when we extend it with
+        variants. This will become significant later, when we extend it with
         custom extensions to the JSON format.<indexterm class="singular">
             <primary>polymorphic variant types</primary>
 
@@ -257,9 +256,9 @@ val from_channel : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt;
 val from_file    : string     -&gt; json
 val from_channel : in_channel -&gt; json</programlisting>
 
-    <para>The next example shows both the string and file functions in action,
-    assuming the JSON record is stored in a file called
-    <emphasis>book.json</emphasis>:</para>
+    <para>The next example shows both the <literal>string</literal> and
+    <literal>file</literal> functions in action, assuming the JSON record is
+    stored in a file called <emphasis>book.json</emphasis>:</para>
 
     <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/json/read_json.ml">json/read_json.ml</ulink></para>
@@ -292,9 +291,9 @@ let () =
     more common to use <literal moreinfo="none">from_string</literal> to
     construct JSON values though, since these strings come in via a network
     connection (we'll see more of this in <xref
-    linkend="concurrent-programming-with-async"/>) or a database. Finally, the
-    example checks that the two input mechanisms actually resulted in the same
-    OCaml data structure.</para>
+    linkend="concurrent-programming-with-async" />) or a database. Finally,
+    the example checks that the two input mechanisms actually resulted in the
+    same OCaml data structure.</para>
   </sect1>
 
   <sect1 id="selecting-values-from-json-structures">
@@ -361,7 +360,7 @@ let () =
     <para>This code introduces the <literal
     moreinfo="none">Yojson.Basic.Util</literal> module, which contains
     <emphasis>combinator</emphasis> functions that let you easily map a JSON
-    object into a more strongly-typed OCaml value.<indexterm class="singular">
+    object into a more strongly typed OCaml value.<indexterm class="singular">
         <primary>combinators</primary>
 
         <secondary>functional combinators</secondary>
@@ -411,8 +410,8 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
 
     <para><literal moreinfo="none">Yojson</literal> provides several
     combinators in the <literal moreinfo="none">Yojson.Basic.Util</literal>
-    module, some of which are listed in the following table.<indexterm
-        class="singular">
+    module, some of which are listed in <xref
+    linkend="table15_1" />.<indexterm class="singular">
         <primary>combinators</primary>
 
         <secondary sortas="Yojson">in Yojson library</secondary>
@@ -422,13 +421,15 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
         <secondary>combinators in</secondary>
       </indexterm></para>
 
-    <informaltable>
+    <table id="table15_1">
+      <title>Yojson combinators</title>
+
       <tgroup cols="3">
-        <colspec align="left"/>
+        <colspec align="left" />
 
-        <colspec align="left"/>
+        <colspec align="left" />
 
-        <colspec align="left"/>
+        <colspec align="left" />
 
         <thead>
           <row>
@@ -482,12 +483,12 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
           </row>
         </tbody>
       </tgroup>
-    </informaltable>
+    </table>
 
     <para>We'll go through each of these uses one by one now. The following
     examples also use the <literal moreinfo="none">|&gt;</literal>
     pipe-forward operator that we explained in <xref
-    linkend="variables-and-functions"/>. This lets us chain together multiple
+    linkend="variables-and-functions" />. This lets us chain together multiple
     JSON selection functions and feed the output from one into the next one,
     without having to create separate <literal moreinfo="none">let</literal>
     bindings for each one.<indexterm class="singular">
@@ -617,20 +618,20 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
 <computeroutput moreinfo="none">val names : string list =</computeroutput>
 <computeroutput moreinfo="none">  ["Jason Hickey"; "Anil Madhavapeddy"; "Yaron Minsky"]</computeroutput></programlisting>
 
-    <para>This style of programming that omits variable names and chains
-    functions together is known as <emphasis>point-free
+    <para>This style of programming, which omits variable names and chains
+    functions together, is known as <emphasis>point-free
     programming</emphasis>. It's a succinct style but shouldn't be overused
     due to the increased difficulty of debugging intermediate values. If an
     explicit name is assigned to each stage of the transformations, debuggers
-    in particular have an easier time making the program flow easier to
+    in particular have an easier time making the program flow simpler to
     represent to the programmer.</para>
 
     <para>This technique of using chained parsing functions is very powerful
     in combination with the OCaml type system. Many errors that don't make
     sense at runtime (for example, mixing up lists and objects) will be caught
     statically via a type error.<indexterm class="endofrange"
-    startref="JSONselval"/><indexterm class="endofrange"
-    startref="VALjson"/></para>
+    startref="JSONselval"></indexterm><indexterm class="endofrange"
+    startref="VALjson"></indexterm></para>
   </sect1>
 
   <sect1 id="constructing-json-values">
@@ -797,7 +798,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
 
       <para>We'll discuss more techniques like this that help you interpret
       type errors more easily in <xref
-      linkend="the-compiler-frontend-parsing-and-type-checking"/>.</para>
+      linkend="the-compiler-frontend-parsing-and-type-checking" />.</para>
     </sidebar>
   </sect1>
 
@@ -894,7 +895,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
 
     <para>The only purpose of these extensions is to have greater control over
     how OCaml values are represented in JSON (for instance, storing a
-    floating-pointer number as a JSON string). The output still obeys the same
+    floating-point number as a JSON string). The output still obeys the same
     standard format that can be easily exchanged with other languages.</para>
 
     <para>You can convert a <literal moreinfo="none">Safe.json</literal> to a
@@ -968,7 +969,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
       moreinfo="none">~/.opam</filename> directory and should already be on
       your <literal moreinfo="none">PATH</literal> from running <command
       moreinfo="none">opam config env</command>. See <xref
-      linkend="installation"/> if this isn't working.</para>
+      linkend="installation" /> if this isn't working.</para>
     </note>
 
     <sect2 id="atd-basics">
@@ -1029,10 +1030,10 @@ type authorization_response = {
 }</programlisting>
 
       <para>The ATD specification syntax is deliberately quite similar to
-      OCaml type definitions. Every JSON record is assigned a type name (e.g.
+      OCaml type definitions. Every JSON record is assigned a type name (e.g.,
       <literal moreinfo="none">app</literal> in the preceding example). You
-      can also define variants that are similar to OCaml's variant types (e.g.
-      <literal moreinfo="none">scope</literal> in the example).</para>
+      can also define variants that are similar to OCaml's variant types
+      (e.g., <literal moreinfo="none">scope</literal> in the example).</para>
     </sect2>
 
     <sect2 id="atd-annotations">
@@ -1080,7 +1081,7 @@ type authorization_response = {
       generate some new files in your current directory. <literal
       moreinfo="none">Github_t.ml</literal> and <literal
       moreinfo="none">Github_t.mli</literal> will contain an OCaml module with
-      types defines that correspond to the ATD file:</para>
+      types defined that correspond to the ATD file:</para>
 
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/json/build_github_atd.out">json/build_github_atd.out</ulink></para>
@@ -1388,16 +1389,16 @@ let () =
       url="http://github.com/avsm/ocaml-github"><literal
       moreinfo="none">ocaml-github</literal></ulink> repository online, which
       has lots of quirks typical in real-world web APIs.<indexterm
-      class="endofrange" startref="MAPjson"/><indexterm class="endofrange"
-      startref="JSONautomap"/><indexterm class="endofrange"
-      startref="SERjson"/><indexterm class="endofrange"
-      startref="DATjson"/></para>
+      class="endofrange" startref="MAPjson"></indexterm><indexterm
+      class="endofrange" startref="JSONautomap"></indexterm><indexterm
+      class="endofrange" startref="SERjson"></indexterm><indexterm
+      class="endofrange" startref="DATjson"></indexterm></para>
 
       <para>Our example shells out to <literal moreinfo="none">curl</literal>
       on the command line to obtain the JSON, which is rather inefficient.
       We'll explain how to integrate the HTTP fetch directly into your OCaml
       application in <xref
-      linkend="concurrent-programming-with-async"/>.</para>
+      linkend="concurrent-programming-with-async" />.</para>
     </sect2>
   </sect1>
 </chapter>

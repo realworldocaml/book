@@ -33,16 +33,17 @@
 
   <para>S-expressions play a major role in Core, effectively acting as the
   default serialization format. Indeed, we've encountered s-expressions
-  multiple times already, including in <xref linkend="error-handling"/>, <xref
-  linkend="functors"/>, and <xref linkend="first-class-modules"/>.</para>
+  multiple times already, including in <xref linkend="error-handling" />,
+  <xref linkend="functors" />, and <xref
+  linkend="first-class-modules" />.</para>
 
   <para>This chapter will go into s-expressions in more depth. In particular,
   we'll discuss:</para>
 
   <itemizedlist>
     <listitem>
-      <para>The details of the s-expression format, and we'll show how to
-      generate good error messages for debugging malformed inputs</para>
+      <para>The details of the s-expression format and how to generate good
+      error messages for debugging malformed inputs</para>
     </listitem>
 
     <listitem>
@@ -56,13 +57,13 @@
 
     <listitem>
       <para>How to integrate s-expressions into your interfaces, in particular
-      explaining how to add s-expression converters to a module without
-      breaking your abstraction boundaries</para>
+      how to add s-expression converters to a module without breaking your
+      abstraction boundaries</para>
     </listitem>
   </itemizedlist>
 
   <para>We will also tie this together at the end of the chapter with a simple
-  s-expression formatted configuration file for a web server</para>
+  s-expression formatted configuration file for a web server.</para>
 
   <sect1 id="basic-usage">
     <title>Basic Usage</title>
@@ -102,7 +103,7 @@ end</programlisting>
 <computeroutput moreinfo="none">- : Sexp.t = (this (is an) (s expression))</computeroutput></programlisting>
 
     <para>This prints out nicely because Core registers a pretty printer with
-    the toplevel. This pretty-printer is based on the functions in <literal
+    the toplevel. This pretty printer is based on the functions in <literal
     moreinfo="none">Sexp</literal> for converting s-expressions to and from
     strings:<indexterm class="singular">
         <primary>pretty printers</primary>
@@ -149,7 +150,7 @@ end</programlisting>
     <para>Notice that <literal moreinfo="none">List.sexp_of_t</literal> is
     polymorphic and takes as its first argument another conversion function to
     handle the elements of the list to be converted. Core uses this scheme
-    more generally for defining sexp-converters for polymorphic types.</para>
+    more generally for defining sexp converters for polymorphic types.</para>
 
     <para>The functions that reconstruct an OCaml value from an s-expression
     use essentially the same trick for handling polymorphic types, as shown in
@@ -270,7 +271,7 @@ end</programlisting>
 <computeroutput moreinfo="none">- : t = {foo = 3; bar = 35.}</computeroutput></programlisting>
 
       <para>The syntax extension can be used outside of type declarations as
-      well. As discussed in <xref linkend="error-handling"/>, <literal
+      well. As discussed in <xref linkend="error-handling" />, <literal
       moreinfo="none">with sexp</literal> can be attached to the declaration
       of an exception, which will improve the ability of Core to generate a
       useful string representation:</para>
@@ -308,9 +309,9 @@ end</programlisting>
 <computeroutput moreinfo="none">- : unit = ()</computeroutput></programlisting>
 
       <para>The declaration <literal moreinfo="none">&lt;:sexp_of&lt;int *
-      string&gt;&gt;</literal> simply gets expanded to the sexp-converter for
+      string&gt;&gt;</literal> simply gets expanded to the sexp converter for
       the type <literal moreinfo="none">int * string</literal>. This is useful
-      whenever you need a sexp-converter for an anonymous type.</para>
+      whenever you need a sexp converter for an anonymous type.</para>
 
       <para>The syntax extensions bundled with Core almost all have the same
       basic structure: they autogenerate code based on type definitions,
@@ -335,8 +336,8 @@ end</programlisting>
           </indexterm></para>
 
         <para>Sexplib is part of a family of syntax extensions, including
-        Comparelib, described in <xref linkend="maps-and-hash-tables"/>, and
-        Fieldslib, described in <xref linkend="records"/>, that generate code
+        Comparelib, described in <xref linkend="maps-and-hash-tables" />, and
+        Fieldslib, described in <xref linkend="records" />, that generate code
         based on type declarations and are all based on a common library
         called Type_conv. This library provides a common language for
         annotating types (e.g., using the <literal
@@ -481,7 +482,7 @@ end</programlisting>
     autogeneration of converters for new types. We've seen a bit of how this
     works already, but let's walk through a complete example. Here's the
     source for a simple library for representing integer intervals, very
-    similar to the one described in <xref linkend="functors"/>:<indexterm
+    similar to the one described in <xref linkend="functors" />:<indexterm
         class="singular">
         <primary>s-expressions</primary>
 
@@ -624,7 +625,7 @@ val contains : t -&gt; int -&gt; bool</programlisting>
       </indexterm></para>
 
     <para>We can fix this problem by overriding the autogenerated function and
-    writing a custom sexp-converter that wraps the autogenerated converter
+    writing a custom sexp converter that wraps the autogenerated converter
     with whatever invariant checks are necessary:</para>
 
     <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
@@ -735,9 +736,9 @@ let () =
 <computeroutput moreinfo="none">Called from file "read_foo.ml", line 11, characters 4-60</computeroutput>
 <computeroutput moreinfo="none">Called from file "lib/exn.ml", line 87, characters 6-10</computeroutput></programlisting>
 
-    <para>If all you have is the error message and the string; it's not
+    <para>If all you have is the error message and the string, it's not
     terribly informative. In particular, you know that the parsing errored out
-    on the atom "not-an-integer", but you don't know which one! In a large
+    on the atom "not-an-integer," but you don't know which one! In a large
     file, this kind of bad error message can be pure misery.</para>
 
     <para>But there's hope! We can make a small change to the code to improve
@@ -796,7 +797,7 @@ let () =
     <title>Sexp-Conversion Directives</title>
 
     <para>Sexplib supports a collection of directives for modifying the
-    default behavior of the autogenerated sexp-converters. These directives
+    default behavior of the autogenerated sexp converters. These directives
     allow you to customize the way in which types are represented as
     s-expressions without having to write a custom converter.<indexterm
         class="singular">
@@ -812,7 +813,7 @@ let () =
     these in your own Core code without any special effort.</para>
 
     <sect2 id="sexp_opaque">
-      <title><literal moreinfo="none">sexp_opaque</literal></title>
+      <title>sexp_opaque</title>
 
       <para>The most commonly used directive is <literal
       moreinfo="none">sexp_opaque</literal>, whose purpose is to mark a given
@@ -827,9 +828,9 @@ let () =
         </indexterm></para>
 
       <para>Note that the type of a component marked as opaque doesn't need to
-      have a sexp-converter defined. Here, if we define a type without a
-      sexp-converter and then try to use another type with a sexp-converter,
-      we'll error out:</para>
+      have a sexp converter defined. Here, if we define a type without a sexp
+      converter and then try to use another type with a sexp converter, we'll
+      error out:</para>
 
       <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/sexp_opaque.topscript">sexpr/sexp_opaque.topscript</ulink></para>
@@ -921,9 +922,9 @@ let () =
     </sect2>
 
     <sect2 id="sexp_list">
-      <title><literal moreinfo="none">sexp_list</literal></title>
+      <title>sexp_list</title>
 
-      <para>Sometimes, sexp-converters have more parentheses than one would
+      <para>Sometimes, sexp converters have more parentheses than one would
       ideally like. Consider, for example, the following variant
       type:<indexterm class="singular">
           <primary>Sexplib package</primary>
@@ -968,7 +969,7 @@ let () =
     </sect2>
 
     <sect2 id="sexp_option">
-      <title><literal moreinfo="none">sexp_option</literal></title>
+      <title>sexp_option</title>
 
       <para>Another common directive is <literal
       moreinfo="none">sexp_option</literal>, which is used to make a record
@@ -1029,8 +1030,8 @@ let () =
           <secondary>specifying defaults in</secondary>
         </indexterm></para>
 
-      <para>Consider the following type which represents the configuration of
-      a very simple web-server:</para>
+      <para>Consider the following type, which represents the configuration of
+      a very simple web server:</para>
 
       <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/sexp_default.topscript">sexpr/sexp_default.topscript</ulink></para>
@@ -1134,7 +1135,8 @@ let () =
       useful for backwards compatibility: if you add a new field to your
       config record, but you make that field optional, then you should still
       be able to parse older version of your config.<indexterm
-      class="endofrange" startref="SERFORMsexp"/><indexterm class="singular">
+      class="endofrange" startref="SERFORMsexp"></indexterm><indexterm
+          class="singular">
           <primary>compatibility, backwards</primary>
         </indexterm><indexterm class="singular">
           <primary>backwards compatibility</primary>

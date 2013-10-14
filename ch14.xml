@@ -31,7 +31,7 @@
     </listitem>
   </itemizedlist>
 
-  <para>It's tedious and error-prone to code all this manually for every
+  <para>It's tedious and error-prone to code all of this manually for every
   program you write. Core provides the Command library, which simplifies all
   of this by letting you declare all your command-line options in one place
   and by deriving all of the above functionality from these
@@ -58,14 +58,14 @@
 
     <listitem>
       <para>See examples that extend the cryptographic utility from <xref
-      linkend="classes"/> and build a simple equivalent to the <literal
+      linkend="classes" /> and build a simple equivalent to the <literal
       moreinfo="none">md5</literal> and <literal
       moreinfo="none">shasum</literal> utilities</para>
     </listitem>
 
     <listitem>
       <para>Demonstrate how <emphasis>functional combinators</emphasis> can be
-      used to declare complex command line interfaces in a type-safe and
+      used to declare complex command-line interfaces in a type-safe and
       elegant way</para>
     </listitem>
   </itemizedlist>
@@ -218,8 +218,7 @@ let do_hash file =
         </indexterm></para>
 
       <note>
-        <title>The Extra <literal moreinfo="none">unit</literal> Argument to
-        Callbacks</title>
+        <title>The Extra unit Argument to Callbacks</title>
 
         <para>The preceding callback needs an extra <literal
         moreinfo="none">unit</literal> argument after <literal
@@ -276,7 +275,7 @@ let do_hash file =
       <para>The versions that you see in the output were defined via the
       optional arguments to <literal moreinfo="none">Command.run</literal>.
       You can leave these blank in your own programs or get your build system
-      to generate them directly from your version control system (e.g. by
+      to generate them directly from your version control system (e.g., by
       running <literal moreinfo="none">hg id</literal> to generate a build
       revision number, in the case of Mercurial):</para>
 
@@ -354,8 +353,8 @@ let () =
 
     <para>You aren't just limited to parsing command lines as strings, of
     course. <literal moreinfo="none">Command.Spec</literal> defines several
-    other conversion functions that validate and parse input into various
-    types:<indexterm class="singular">
+    other conversion functions (shown in <xref linkend="table14_1" />) that
+    validate and parse input into various types.<indexterm class="singular">
         <primary>arguments</primary>
 
         <secondary>argument types</secondary>
@@ -365,13 +364,16 @@ let () =
         <secondary>argument types</secondary>
       </indexterm></para>
 
-    <informaltable>
+    <table id="table14_1">
+      <title>Conversion functions defined by
+      <literal>Command.spec</literal></title>
+
       <tgroup cols="3">
-        <colspec align="left"/>
+        <colspec align="left" />
 
-        <colspec align="left"/>
+        <colspec align="left" />
 
-        <colspec align="left"/>
+        <colspec align="left" />
 
         <thead>
           <row>
@@ -441,7 +443,7 @@ let () =
           </row>
         </tbody>
       </tgroup>
-    </informaltable>
+    </table>
 
     <para>We can tighten up the specification of the command to <literal
     moreinfo="none">file</literal> to reflect that the argument must be a
@@ -727,7 +729,7 @@ let command =
 let () =
   Command.run ~version:"1.0" ~build_info:"RWO" command</programlisting>
 
-      <para>The callback function is a little more complex now to handle the
+      <para>The callback function is a little more complex now, to handle the
       extra options. The <literal moreinfo="none">files</literal> are now a
       <literal moreinfo="none">string list</literal>, and an empty list
       reverts to using standard input, just as our previous <literal
@@ -755,8 +757,8 @@ let () =
 
     <para>Let's add two arguments to our <literal
     moreinfo="none">md5</literal> command that mimics the Mac OS X version. A
-    <literal moreinfo="none">-s</literal> flag specifies the string to be
-    hashed directly on the command line and <literal
+    <literal moreinfo="none" role="keep-together">-s</literal> flag specifies
+    the string to be hashed directly on the command line and <literal
     moreinfo="none">-t</literal> runs a self-test. The complete example
     follows:</para>
 
@@ -806,9 +808,10 @@ let () = Command.run command</programlisting>
     command-line arguments. The <literal moreinfo="none">doc</literal> string
     is formatted so that the first word is the short name that appears in the
     usage text, with the remainder being the full help text. Notice that the
-    <literal moreinfo="none">-t</literal> flag has no argument, and so we
-    prepend its <literal moreinfo="none">doc</literal> text with a blank
-    space. The help text for the preceding code looks like this:</para>
+    <literal moreinfo="none" role="keep-together">-t</literal> flag has no
+    argument, and so we prepend its <literal moreinfo="none">doc</literal>
+    text with a blank space. The help text for the preceding code looks like
+    this:</para>
 
     <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/run_basic_md5_flags_help.out">command-line-parsing/run_basic_md5_flags_help.out</ulink></para>
@@ -834,17 +837,20 @@ let () = Command.run command</programlisting>
     <para>The <literal moreinfo="none">-s</literal> flag in our specification
     requires a <literal moreinfo="none">string</literal> argument and isn't
     optional. The Command parser outputs an error message if the flag isn't
-    supplied, as with the anonymous arguments in earlier examples. Here's a
-    list of some of the functions that you can wrap flags in to control how
-    they are parsed.<indexterm class="singular">
+    supplied, as with the anonymous arguments in earlier examples. <xref
+    linkend="table14-2" /> contains a list of some of the functions that you
+    can wrap flags in to control how they are parsed.<indexterm
+        class="singular">
         <primary>flag functions</primary>
       </indexterm></para>
 
-    <informaltable>
-      <tgroup cols="2">
-        <colspec align="left"/>
+    <table id="table14-2">
+      <title>Flag functions</title>
 
-        <colspec align="left"/>
+      <tgroup cols="2">
+        <colspec align="left" />
+
+        <colspec align="left" />
 
         <thead>
           <row>
@@ -891,11 +897,11 @@ let () = Command.run command</programlisting>
             <entry><literal moreinfo="none">no_arg</literal></entry>
 
             <entry><literal moreinfo="none">bool</literal> that is true if
-            flag is present.</entry>
+            flag is present</entry>
           </row>
         </tbody>
       </tgroup>
-    </informaltable>
+    </table>
 
     <para>The flags affect the type of the callback function in exactly the
     same way as anonymous arguments do. This lets you change the specification
@@ -907,7 +913,7 @@ let () = Command.run command</programlisting>
     <title>Grouping Subcommands Together</title>
 
     <para>You can get pretty far by using flags and anonymous arguments to
-    assemble complex, command-line interfaces. After a while though, too many
+    assemble complex, command-line interfaces. After a while, though, too many
     options can make the program very confusing for newcomers to your
     application. One way to solve this is by grouping common operations
     together and adding some hierarchy to the command-line
@@ -1109,8 +1115,7 @@ let () = Command.run command</programlisting>
     let you use Command even more effectively.</para>
 
     <sect2 id="the-types-behind-command.spec">
-      <title>The Types Behind <literal
-      moreinfo="none">Command.Spec</literal></title>
+      <title>The Types Behind Command.Spec</title>
 
       <para>The Command module's safety relies on the specification's output
       values precisely matching the callback function which invokes the main
@@ -1174,8 +1179,8 @@ let () = Command.run command</programlisting>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Command.Spec.(empty +&gt; anon ("foo" %: int)) ;;</userinput>
 <computeroutput moreinfo="none">- : (int -&gt; '_a, '_a) Command.Spec.t = &lt;abstr&gt;</computeroutput></programlisting>
 
-      <para>The empty specification is simple as it doesn't add any parameters
-      to the callback type. The second example adds an <literal
+      <para>The empty specification is simple, as it doesn't add any
+      parameters to the callback type. The second example adds an <literal
       moreinfo="none">int</literal> anonymous parameter that is reflected in
       the inferred type. One forms a command by combining a spec of type
       <literal moreinfo="none">('main, unit) Spec.t</literal> with a function
@@ -1206,15 +1211,15 @@ let () = Command.run command</programlisting>
       <literal moreinfo="none">unit</literal> argument. This final <literal
       moreinfo="none">unit</literal> is there to make sure the callback is
       evaluated as a function, since if zero command-line arguments are
-      specified (<emphasis>i.e.</emphasis> <literal
-      moreinfo="none">Spec.empty</literal>), the callback would otherwise have
-      no arguments and be evaluated immediately. That's why you have to supply
-      an additional <literal moreinfo="none">()</literal> to the callback
-      function in all the previous examples.</para>
+      specified (i.e., <literal moreinfo="none">Spec.empty</literal>), the
+      callback would otherwise have no arguments and be evaluated immediately.
+      That's why you have to supply an additional <literal
+      moreinfo="none">()</literal> to the callback function in all the
+      previous examples.</para>
     </sect2>
 
     <sect2 id="composing-specification-fragments-together">
-      <title>Composing specification fragments together</title>
+      <title>Composing Specification Fragments Together</title>
 
       <para>If you want to factor out common command-line operations, the
       <literal moreinfo="none">++</literal> operator will append two
@@ -1394,7 +1399,7 @@ let () = Command.run add</programlisting>
       moreinfo="none">step</literal> combinator lets us perform this
       transformation by applying its supplied callback function first. In the
       example, the callback first checks if <literal
-      moreinfo="none">day</literal> is defined. If it's undefined, then it
+      moreinfo="none">days</literal> is defined. If it's undefined, then it
       interactively reads an integer from the standard input.</para>
 
       <para>The first <literal moreinfo="none">m</literal> argument to the
@@ -1492,26 +1497,24 @@ let () = Command.run add</programlisting>
       moreinfo="none">base</literal> and <literal
       moreinfo="none">days</literal> arguments into a labeled function.</para>
 
-      <para>Labelled arguments are more verbose but can also help prevent
+      <para>Labeled arguments are more verbose but can also help prevent
       errors with command-line arguments with similar types but different
       names and purposes. It's good form to use labels when you have a lot of
       otherwise anonymous <literal moreinfo="none">int</literal> and <literal
       moreinfo="none">string</literal> arguments.<indexterm class="endofrange"
-      startref="CLPadv"/></para>
+      startref="CLPadv"></indexterm></para>
     </sect2>
   </sect1>
 
   <sect1 id="command-line-auto-completion-with-bash">
-    <title>Command-Line Autocompletion with <command
-    moreinfo="none">bash</command></title>
+    <title>Command-Line Autocompletion with bash</title>
 
     <para>Modern UNIX shells usually have a tab-completion feature to
     interactively help you figure out how to build a command line. These work
-    by pressing the <literal moreinfo="none">&lt;tab&gt;</literal> key in the
-    middle of typing a command, and seeing the options that pop up. You've
-    probably used this most often to find the files in the current directory,
-    but it can actually be extended for other parts of the command,
-    too.<indexterm class="singular">
+    by pressing the Tab key in the middle of typing a command, and seeing the
+    options that pop up. You've probably used this most often to find the
+    files in the current directory, but it can actually be extended for other
+    parts of the command, too.<indexterm class="singular">
         <primary>tab-autocompletion</primary>
       </indexterm><indexterm class="singular">
         <primary>autocompletion</primary>
@@ -1536,11 +1539,11 @@ let () = Command.run add</programlisting>
 
     <informaltable>
       <tgroup cols="3">
-        <colspec align="left"/>
+        <colspec align="left" />
 
-        <colspec align="left"/>
+        <colspec align="left" />
 
-        <colspec align="left"/>
+        <colspec align="left" />
 
         <thead>
           <row>
@@ -1572,7 +1575,7 @@ let () = Command.run add</programlisting>
           <row>
             <entry>FreeBSD</entry>
 
-            <entry>Ports System</entry>
+            <entry>Ports system</entry>
 
             <entry><filename
             moreinfo="none">/usr/ports/shells/bash-completion</filename></entry>
@@ -1581,10 +1584,10 @@ let () = Command.run add</programlisting>
       </tgroup>
     </informaltable>
 
-    <para>Once bash completion is installed and configured, check that it
-    works by typing the <literal moreinfo="none">ssh</literal> command and
-    pressing <literal moreinfo="none">&lt;tab&gt;</literal>. This should show
-    you the list of known hosts from your
+    <para>Once <emphasis>bash</emphasis> completion is installed and
+    configured, check that it works by typing the <literal
+    moreinfo="none">ssh</literal> command and pressing the Tab key. This
+    should show you the list of known hosts from your
     <emphasis>~/.ssh/known_hosts</emphasis> file. If it lists some hosts that
     you've recently connected to, you can continue on. If it lists the files
     in your current directory instead, then check your OS documentation to
@@ -1628,9 +1631,8 @@ let () = Command.run add</programlisting>
 
       <para>Recall that we used the <literal
       moreinfo="none">Arg_type.file</literal> to specify the argument type.
-      This also supplies the completion logic so that you can just press
-      <literal moreinfo="none">&lt;tab&gt;</literal> to complete files in your
-      current directory.</para>
+      This also supplies the completion logic so that you can just press Tab
+      to complete files in your current directory.</para>
     </sect2>
 
     <sect2 id="installing-the-completion-fragment">
@@ -1663,13 +1665,13 @@ let () = Command.run add</programlisting>
 
         <para>Sadly, <command moreinfo="none">bash</command> doesn't support
         installing a generic handler for all Command-based applications. This
-        means that you have to install the completion script for every
-        application, but you should be able to automate this in the build and
-        packaging system for your application.</para>
+        means you have to install the completion script for every application,
+        but you should be able to automate this in the build and packaging
+        system for your application.</para>
 
-        <para>It will help to check out how other applications that install
-        tab-completion scripts and following their lead, as the details are
-        very OS-specific.</para>
+        <para>It will help to check out how other applications install
+        tab-completion scripts and follow their lead, as the details are very
+        OS-specific.</para>
       </note>
     </sect2>
   </sect1>
@@ -1722,9 +1724,10 @@ let () = Command.run add</programlisting>
         url="https://forge.ocamlcore.org/projects/ocaml-getopt/">ocaml-getopt</ulink></term>
 
         <listitem>
-          <para>ocaml-getopt provides the general command-line syntax of GNU
-          <literal moreinfo="none">getopt</literal> and <literal
-          moreinfo="none">getopt_long</literal>. The GNU conventions are
+          <para><literal>ocaml-getopt</literal> provides the general
+          command-line syntax of GNU <literal moreinfo="none">getopt</literal>
+          and <literal moreinfo="none"
+          role="keep-together">getopt_long</literal>. The GNU conventions are
           widely used in the open source world, and this library lets your
           OCaml programs obey the same rules.</para>
         </listitem>
@@ -1738,10 +1741,9 @@ let () = Command.run add</programlisting>
           <para>Cmdliner is a mix between the Command and Getopt libraries. It
           allows for the declarative definition of command-line interfaces but
           exposes a more <literal moreinfo="none">getopt</literal>-like
-          interface. It also automates the generation of UNIX <literal
-          moreinfo="none">man</literal> pages as part of the specification.
-          Cmdliner is the parser used by OPAM to manage its command
-          line.</para>
+          interface. It also automates the generation of UNIX man pages as
+          part of the specification. Cmdliner is the parser used by OPAM to
+          manage its command line.</para>
         </listitem>
       </varlistentry>
     </variablelist>
