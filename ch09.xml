@@ -31,7 +31,7 @@
       </varlistentry>
 
       <varlistentry>
-        <term>Auto-extension of modules</term>
+        <term>Autoextension of modules</term>
 
         <listitem>
           <para>Functors give you a way of extending existing modules with new
@@ -47,7 +47,7 @@
         <term>Instantiating modules with state</term>
 
         <listitem>
-          <para>Modules can contain mutable state, and that means that you'll
+          <para>Modules can contain mutable states, and that means that you'll
           occasionally want to have multiple instantiations of a particular
           module, each with its own separate and independent mutable state.
           Functors let you automate the construction of such modules.</para>
@@ -168,7 +168,7 @@
     determine whether an object satisfies a given interface. As in an
     object-oriented context, the extra information that doesn't match the
     signature you're looking for (in this case, the variable <literal
-    moreinfo="none">y</literal>), is simply ignored.</para>
+    moreinfo="none">y</literal>) is simply ignored.</para>
   </sect1>
 
   <sect1 id="a-bigger-example-computing-with-intervals">
@@ -177,7 +177,7 @@
     <para>Let's consider a more realistic example of how to use functors: a
     library for computing with intervals. Intervals are a common computational
     object, and they come up in different contexts and for different types.
-    You might need to work with intervals of floating point values or strings
+    You might need to work with intervals of floating-point values or strings
     or times, and in each of these cases, you want similar operations: testing
     for emptiness, checking for containment, intersecting intervals, and so
     on.</para>
@@ -245,21 +245,21 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
 
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">module Make_interval(Endpoint : Comparable) = struct</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    type t = | Interval of Endpoint.t * Endpoint.t</userinput>
 <userinput moreinfo="none">             | Empty</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    (** [create low high] creates a new interval from [low] to</userinput>
 <userinput moreinfo="none">        [high].  If [low &gt; high], then the interval is empty *)</userinput>
 <userinput moreinfo="none">    let create low high =</userinput>
 <userinput moreinfo="none">      if Endpoint.compare low high &gt; 0 then Empty</userinput>
 <userinput moreinfo="none">      else Interval (low,high)</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    (** Returns true iff the interval is empty *)</userinput>
 <userinput moreinfo="none">    let is_empty = function</userinput>
 <userinput moreinfo="none">      | Empty -&gt; true</userinput>
 <userinput moreinfo="none">      | Interval _ -&gt; false</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    (** [contains t x] returns true iff [x] is contained in the</userinput>
 <userinput moreinfo="none">        interval [t] *)</userinput>
 <userinput moreinfo="none">    let contains t x =</userinput>
@@ -267,7 +267,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
 <userinput moreinfo="none">      | Empty -&gt; false</userinput>
 <userinput moreinfo="none">      | Interval (l,h) -&gt;</userinput>
 <userinput moreinfo="none">        Endpoint.compare x l &gt;= 0 &amp;&amp; Endpoint.compare x h &lt;= 0</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    (** [intersect t1 t2] returns the intersection of the two input</userinput>
 <userinput moreinfo="none">        intervals *)</userinput>
 <userinput moreinfo="none">    let intersect t1 t2 =</userinput>
@@ -277,7 +277,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
 <userinput moreinfo="none">      | Empty, _ | _, Empty -&gt; Empty</userinput>
 <userinput moreinfo="none">      | Interval (l1,h1), Interval (l2,h2) -&gt;</userinput>
 <userinput moreinfo="none">        create (max l1 l2) (min h1 h2)</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">  end ;;</userinput>
 <computeroutput moreinfo="none">module Make_interval :</computeroutput>
 <computeroutput moreinfo="none">  functor (Endpoint : Comparable) -&gt;</computeroutput>
@@ -439,7 +439,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
       moreinfo="none">Make_interval</literal>. The code we wrote depends on
       the invariant that the upper bound of an interval is greater than its
       lower bound, but that invariant can be violated. The invariant is
-      enforced by the create function, but because <literal
+      enforced by the <literal>create</literal> function, but because <literal
       moreinfo="none">Interval.t</literal> is not abstract, we can bypass the
       <literal moreinfo="none">create</literal> function:<indexterm
           class="singular">
@@ -779,7 +779,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
       ability to <emphasis>serialize</emphasis>, i.e., to be able to read and
       write intervals as a stream of bytes. In this case, we'll do this by
       converting to and from s-expressions, which were mentioned already in
-      <xref linkend="error-handling"/>. To recall, an s-expression is
+      <xref linkend="error-handling" />. To recall, an s-expression is
       essentially a parenthesized expression whose atoms are strings, and it
       is a serialization format that is used commonly in Core. Here's an
       example:<indexterm class="singular">
@@ -825,7 +825,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
 <computeroutput moreinfo="none">- : int * string list = (44, ["five"; "six"])</computeroutput></programlisting>
 
       <para>We'll discuss s-expressions and Sexplib in more detail in <xref
-      linkend="data-serialization-with-s-expressions"/>, but for now, let's
+      linkend="data-serialization-with-s-expressions" />, but for now, let's
       see what happens if we attach the <literal moreinfo="none">with
       sexp</literal> declaration to the definition of <literal
       moreinfo="none">t</literal> within the functor:</para>
@@ -856,7 +856,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
       moreinfo="none">Comparable</literal> interface, which doesn't say
       anything about s-expressions.</para>
 
-      <para>Happily, Core comes with a built in interface for just this
+      <para>Happily, Core comes with a built-in interface for just this
       purpose called <literal moreinfo="none">Sexpable</literal>, which is
       defined as follows:</para>
 
@@ -873,8 +873,8 @@ end</programlisting>
       use the <literal moreinfo="none">Sexpable</literal> interface, for both
       its input and its output. First, let's create an extended version of the
       <literal moreinfo="none">Interval_intf</literal> interface that includes
-      the functions from the Sexpable interface. We can do this using
-      destructive substitution on the <literal
+      the functions from the <literal>Sexpable</literal> interface. We can do
+      this using destructive substitution on the <literal
       moreinfo="none">Sexpable</literal> interface, to avoid having multiple
       distinct type <literal moreinfo="none">t</literal>'s clashing with each
       other:</para>
@@ -931,7 +931,7 @@ end</programlisting>
 <computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
       <para>Now we can write the functor itself. We have been careful to
-      override the sexp-converter here to ensure that the data structure's
+      override the sexp converter here to ensure that the data structure's
       invariants are still maintained when reading in from an
       s-expression:</para>
 
@@ -947,29 +947,29 @@ end</programlisting>
 <userinput moreinfo="none">                       end)</userinput>
 <userinput moreinfo="none">    : (Interval_intf_with_sexp with type endpoint := Endpoint.t)</userinput>
 <userinput moreinfo="none">  = struct</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    type t = | Interval of Endpoint.t * Endpoint.t</userinput>
 <userinput moreinfo="none">             | Empty</userinput>
 <userinput moreinfo="none">    with sexp</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    (** [create low high] creates a new interval from [low] to</userinput>
 <userinput moreinfo="none">        [high].  If [low &gt; high], then the interval is empty *)</userinput>
 <userinput moreinfo="none">    let create low high =</userinput>
 <userinput moreinfo="none">      if Endpoint.compare low high &gt; 0 then Empty</userinput>
 <userinput moreinfo="none">      else Interval (low,high)</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    (* put a wrapper around the autogenerated [t_of_sexp] to enforce</userinput>
 <userinput moreinfo="none">       the invariants of the data structure *)</userinput>
 <userinput moreinfo="none">    let t_of_sexp sexp =</userinput>
 <userinput moreinfo="none">      match t_of_sexp sexp with</userinput>
 <userinput moreinfo="none">      | Empty -&gt; Empty</userinput>
 <userinput moreinfo="none">      | Interval (x,y) -&gt; create x y</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    (** Returns true iff the interval is empty *)</userinput>
 <userinput moreinfo="none">    let is_empty = function</userinput>
 <userinput moreinfo="none">      | Empty -&gt; true</userinput>
 <userinput moreinfo="none">      | Interval _ -&gt; false</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    (** [contains t x] returns true iff [x] is contained in the</userinput>
 <userinput moreinfo="none">        interval [t] *)</userinput>
 <userinput moreinfo="none">    let contains t x =</userinput>
@@ -977,7 +977,7 @@ end</programlisting>
 <userinput moreinfo="none">      | Empty -&gt; false</userinput>
 <userinput moreinfo="none">      | Interval (l,h) -&gt;</userinput>
 <userinput moreinfo="none">        Endpoint.compare x l &gt;= 0 &amp;&amp; Endpoint.compare x h &lt;= 0</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    (** [intersect t1 t2] returns the intersection of the two input</userinput>
 <userinput moreinfo="none">        intervals *)</userinput>
 <userinput moreinfo="none">    let intersect t1 t2 =</userinput>
@@ -1006,12 +1006,13 @@ end</programlisting>
 <computeroutput moreinfo="none">      val sexp_of_t : t -&gt; Sexp.t</computeroutput>
 <computeroutput moreinfo="none">    end</computeroutput></programlisting>
 
-      <para>And now, we can use that sexp-converter in the ordinary
+      <para>And now, we can use that sexp converter in the ordinary
       way:</para>
 
       <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
-      (part 29)<indexterm class="endofrange" startref="FUNCTinterv"/></para>
+      (part 29)<indexterm class="endofrange"
+      startref="FUNCTinterv"></indexterm></para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
           moreinfo="none"># </prompt><userinput moreinfo="none">module Int_interval = Make_interval(Int) ;;</userinput>
@@ -1075,21 +1076,21 @@ val fold : 'a t -&gt; init:'acc -&gt; f:('acc -&gt; 'a -&gt; 'acc) -&gt; 'acc</p
     <para>The preceding <literal moreinfo="none">Fqueue.fold</literal>
     function requires some explanation. It follows the same pattern as the
     <literal moreinfo="none">List.fold</literal> function we described in
-    <xref linkend="using-the-list-module-effectively"/>. Essentially, <literal
-    moreinfo="none">Fqueue.fold q ~init ~f</literal> walks over the elements
-    of <literal moreinfo="none">q</literal> from front to back, starting with
-    an accumulator of <literal moreinfo="none">init</literal> and using
-    <literal moreinfo="none">f</literal> to update the accumulator value as it
-    walks over the queue, returning the final value of the accumulator at the
-    end of the computation. Fold is a quite powerful operation, as we'll
-    see.</para>
+    <xref linkend="using-the-list-module-effectively" />. Essentially,
+    <literal moreinfo="none">Fqueue.fold q ~init ~f</literal> walks over the
+    elements of <literal moreinfo="none">q</literal> from front to back,
+    starting with an accumulator of <literal moreinfo="none">init</literal>
+    and using <literal moreinfo="none">f</literal> to update the accumulator
+    value as it walks over the queue, returning the final value of the
+    accumulator at the end of the computation. <literal>fold</literal> is a
+    quite powerful operation, as we'll see.</para>
 
     <para>We'll implement <literal moreinfo="none">Fqueue</literal> using a
     standard trick which is to maintain an input and an output list so that
-    one can efficiently <literal moreinfo="none">enqueue</literal> on the
-    input list and efficiently dequeue from the output list. If you attempt to
-    dequeue when the output list is empty, the input list is reversed and
-    becomes the new output list. Here's the implementation:</para>
+    one can efficiently enqueue on the input list and efficiently dequeue from
+    the output list. If you attempt to dequeue when the output list is empty,
+    the input list is reversed and becomes the new output list. Here's the
+    implementation:</para>
 
     <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/fqueue.ml">functors/fqueue.ml</ulink></para>
@@ -1127,18 +1128,18 @@ let fold (in_list, out_list) ~init ~f =
     implementing them over and over is a dull and repetitive affair.</para>
 
     <para>As it happens, many of these helper functions can be derived
-    mechanically from just the fold function we already implemented. Rather
-    than write all of these helper functions by hand for every new container
-    type, we can instead use a functor that will let us add this functionality
-    to any container that has a <literal moreinfo="none">fold</literal>
-    function.</para>
+    mechanically from just the <literal>fold</literal> function we already
+    implemented. Rather than write all of these helper functions by hand for
+    every new container type, we can instead use a functor that will let us
+    add this functionality to any container that has a <literal
+    moreinfo="none">fold</literal> function.</para>
 
     <para>We'll create a new module, <literal
-    moreinfo="none">Foldable</literal> that automates the process of adding
-    helper functions to a fold-supporting container. As you can see, <literal
-    moreinfo="none">Foldable</literal> contains a module signature <literal
-    moreinfo="none">S</literal> which defines the signature that is required
-    to support folding; and a functor <literal
+    moreinfo="none">Foldable</literal>, that automates the process of adding
+    helper functions to a <literal>fold</literal>-supporting container. As you
+    can see, <literal moreinfo="none">Foldable</literal> contains a module
+    signature <literal moreinfo="none">S</literal> which defines the signature
+    that is required to support folding; and a functor <literal
     moreinfo="none">Extend</literal> that allows one to extend any module that
     matches <literal moreinfo="none">Foldable.S</literal>:</para>
 
@@ -1256,9 +1257,9 @@ include Foldable.Extend(Fqueue)</programlisting>
         <term><literal moreinfo="none">Monad.Make</literal></term>
 
         <listitem>
-          <para>For so-called monadic libraries, like the ones discussed in
-          <xref linkend="error-handling"/> and <xref
-          linkend="concurrent-programming-with-async"/>. Here, the functor is
+          <para>For so-called monadic libraries, like those discussed in <xref
+          linkend="error-handling" /> and <xref
+          linkend="concurrent-programming-with-async" />. Here, the functor is
           used to provide a collection of standard helper functions based on
           the <literal moreinfo="none">bind</literal> and <literal
           moreinfo="none">return</literal> operators.</para>

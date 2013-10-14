@@ -35,14 +35,14 @@
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">class istack = object</userinput>
 <userinput moreinfo="none">    val mutable v = [0; 2]</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    method pop =</userinput>
 <userinput moreinfo="none">      match v with</userinput>
 <userinput moreinfo="none">      | hd :: tl -&gt;</userinput>
 <userinput moreinfo="none">          v &lt;- tl;</userinput>
 <userinput moreinfo="none">          Some hd</userinput>
 <userinput moreinfo="none">      | [] -&gt; None</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    method push hd =</userinput>
 <userinput moreinfo="none">      v &lt;- hd :: v</userinput>
 <userinput moreinfo="none">  end ;;</userinput>
@@ -54,8 +54,8 @@
 <computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
     <para>The <literal moreinfo="none">class istack : object ... end</literal>
-    result shows that we have created a class <literal
-    moreinfo="none">istack</literal> with <emphasis>class type</emphasis>
+    result shows that we have created a class <literal moreinfo="none"
+    role="keep-together">istack</literal> with <emphasis>class type</emphasis>
     <literal moreinfo="none">object ... end</literal>. Like module types,
     class types are completely separate from regular OCaml types (e.g.,
     <literal moreinfo="none">int</literal>, <literal
@@ -140,14 +140,14 @@
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">class ['a] stack init = object</userinput>
 <userinput moreinfo="none">    val mutable v : 'a list = init</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    method pop =</userinput>
 <userinput moreinfo="none">      match v with</userinput>
 <userinput moreinfo="none">      | hd :: tl -&gt;</userinput>
 <userinput moreinfo="none">        v &lt;- tl;</userinput>
 <userinput moreinfo="none">        Some hd</userinput>
 <userinput moreinfo="none">      | [] -&gt; None</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    method push hd =</userinput>
 <userinput moreinfo="none">      v &lt;- hd :: v</userinput>
 <userinput moreinfo="none">  end ;;</userinput>
@@ -184,7 +184,7 @@
 <userinput moreinfo="none">          v &lt;- tl;</userinput>
 <userinput moreinfo="none">          Some hd</userinput>
 <userinput moreinfo="none">        | [] -&gt; None</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">      method push hd = </userinput>
 <userinput moreinfo="none">        v &lt;- hd :: v</userinput>
 <userinput moreinfo="none">  end ;;</userinput>
@@ -294,14 +294,14 @@ class Iterator {
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">class ['a] list_iterator init = object</userinput>
 <userinput moreinfo="none">    val mutable current : 'a list = init</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    method has_value = current &lt;&gt; []</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    method get =</userinput>
 <userinput moreinfo="none">      match current with</userinput>
 <userinput moreinfo="none">      | hd :: tl -&gt; hd</userinput>
 <userinput moreinfo="none">      | [] -&gt; raise (Invalid_argument "no value")</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    method next =</userinput>
 <userinput moreinfo="none">      match current with</userinput>
 <userinput moreinfo="none">      | hd :: tl -&gt; current &lt;- tl</userinput>
@@ -329,17 +329,17 @@ class Iterator {
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">class ['a] stack init = object</userinput>
 <userinput moreinfo="none">    val mutable v : 'a list = init</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    method pop =</userinput>
 <userinput moreinfo="none">      match v with</userinput>
 <userinput moreinfo="none">      | hd :: tl -&gt;</userinput>
 <userinput moreinfo="none">        v &lt;- tl;</userinput>
 <userinput moreinfo="none">        Some hd</userinput>
 <userinput moreinfo="none">      | [] -&gt; None</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    method push hd =</userinput>
 <userinput moreinfo="none">      v &lt;- hd :: v</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    method iterator : 'a iterator =</userinput>
 <userinput moreinfo="none">      new list_iterator v</userinput>
 <userinput moreinfo="none">  end ;;</userinput>
@@ -382,11 +382,11 @@ class Iterator {
     <sect2 id="functional-iterators">
       <title>Functional Iterators</title>
 
-      <para>In practise, most OCaml programmers avoid iterator objects in
-      favor of functional-style techniques. For example, the alternative stack
-      class that follows takes a function <literal moreinfo="none">f</literal>
-      and applies it to each of the elements on the stack:<indexterm
-          class="singular">
+      <para>In practice, most OCaml programmers avoid iterator objects in
+      favor of functional-style techniques. For example, the alternative
+      <literal>stack</literal> class that follows takes a function <literal
+      moreinfo="none">f</literal> and applies it to each of the elements on
+      the stack:<indexterm class="singular">
           <primary>functional iterators</primary>
         </indexterm></para>
 
@@ -397,17 +397,17 @@ class Iterator {
       <programlisting format="linespecific" language="ocaml"><prompt
           moreinfo="none"># </prompt><userinput moreinfo="none">class ['a] stack init = object</userinput>
 <userinput moreinfo="none">    val mutable v : 'a list = init</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    method pop =</userinput>
 <userinput moreinfo="none">      match v with</userinput>
 <userinput moreinfo="none">      | hd :: tl -&gt;</userinput>
 <userinput moreinfo="none">        v &lt;- tl;</userinput>
 <userinput moreinfo="none">        Some hd</userinput>
 <userinput moreinfo="none">      | [] -&gt; None</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    method push hd =</userinput>
 <userinput moreinfo="none">      v &lt;- hd :: v</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">   method iter f = </userinput>
 <userinput moreinfo="none">     List.iter ~f v </userinput>
 <userinput moreinfo="none">  end ;;</userinput>
@@ -440,17 +440,17 @@ class Iterator {
       <programlisting format="linespecific" language="ocaml"><prompt
           moreinfo="none"># </prompt><userinput moreinfo="none">class ['a] stack init = object</userinput>
 <userinput moreinfo="none">    val mutable v : 'a list = init</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    method pop =</userinput>
 <userinput moreinfo="none">      match v with</userinput>
 <userinput moreinfo="none">      | hd :: tl -&gt;</userinput>
 <userinput moreinfo="none">        v &lt;- tl;</userinput>
 <userinput moreinfo="none">        Some hd</userinput>
 <userinput moreinfo="none">      | [] -&gt; None</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    method push hd =</userinput>
 <userinput moreinfo="none">      v &lt;- hd :: v</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    method fold : 'b. ('b -&gt; 'a -&gt; 'b) -&gt; 'b -&gt; 'b =</userinput>
 <userinput moreinfo="none">     (fun f init -&gt; List.fold ~f ~init v) </userinput>
 <userinput moreinfo="none">  end ;;</userinput>
@@ -464,7 +464,7 @@ class Iterator {
 <computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
       <para>The type quantifier <literal moreinfo="none">'b.</literal> can be
-      read as "for all <literal moreinfo="none">'b</literal>". Type
+      read as "for all <literal moreinfo="none">'b</literal>.” Type
       quantifiers can only be used <emphasis>directly after</emphasis> the
       method name, which means that method parameters must be expressed using
       a <literal moreinfo="none">fun</literal> or <literal
@@ -476,9 +476,10 @@ class Iterator {
     <title>Inheritance</title>
 
     <para>Inheritance uses an existing class to define a new one. For example,
-    the following class definition inherits from our stack class for strings
-    and adds a new method <literal moreinfo="none">print</literal> that prints
-    all the strings on the stack:<indexterm class="singular">
+    the following class definition inherits from our <literal>stack</literal>
+    class for strings and adds a new method <literal
+    moreinfo="none">print</literal> that prints all the strings on the
+    stack:<indexterm class="singular">
         <primary>inheritance</primary>
       </indexterm><indexterm class="singular">
         <primary>classes</primary>
@@ -493,7 +494,7 @@ class Iterator {
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">class sstack init = object</userinput>
 <userinput moreinfo="none">    inherit [string] stack init</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    method print =</userinput>
 <userinput moreinfo="none">      List.iter ~f:print_string v</userinput>
 <userinput moreinfo="none">  end ;;</userinput>
@@ -517,7 +518,7 @@ class Iterator {
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">class double_stack init = object</userinput>
 <userinput moreinfo="none">    inherit [int] stack init as super</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    method push hd =</userinput>
 <userinput moreinfo="none">      super#push (hd * 2)</userinput>
 <userinput moreinfo="none">  end ;;</userinput>
@@ -569,7 +570,7 @@ end</programlisting>
 
     <para>We have multiple choices in defining the module type, depending on
     how much of the implementation we want to expose. At one extreme, a
-    maximally-abstract signature would completely hide the class
+    maximally abstract signature would completely hide the class
     definitions:</para>
 
     <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
@@ -590,7 +591,7 @@ end = Stack</programlisting>
     <para>Class types do not appear in mainstream object-oriented programming
     languages, so you may not be familiar with them, but the concept is pretty
     simple. A class type specifies the type of each of the visible parts of
-    the class, including both fields and methods. Just like for module types,
+    the class, including both fields and methods. Just as with module types,
     you don't have to give a type for everything; anything you omit will be
     hidden:</para>
 
@@ -621,7 +622,7 @@ end = Stack</programlisting>
     <title>Open Recursion</title>
 
     <para>Open recursion allows an object's methods to invoke other methods on
-    the same object. These calls are looked up dynamically allowing a method
+    the same object. These calls are looked up dynamically, allowing a method
     in one class to call a method from another class, if both classes are
     inherited by the same object. This allows mutually recursive parts of an
     object to be defined separately.<indexterm class="singular">
@@ -638,7 +639,7 @@ end = Stack</programlisting>
 
     <para>This ability to define mutually recursive methods from separate
     components is a key feature of classes: achieving similar functionality
-    with datatypes or modules is much more cumbersome and verbose.</para>
+    with data types or modules is much more cumbersome and verbose.</para>
 
     <para>For example, consider writing recursive functions over a simple
     document format. This format is represented as a tree with three different
@@ -668,7 +669,7 @@ and 'a list_item =
     functions to avoid repetitive boilerplate?</para>
 
     <para>The simplest way is to use classes and open recursion. For example,
-    the following class defines objects which fold over the document
+    the following class defines objects that fold over the document
     data:</para>
 
     <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
@@ -697,10 +698,10 @@ end</programlisting>
     <para>The <literal moreinfo="none">object (self)</literal> syntax binds
     <literal moreinfo="none">self</literal> to the current object, allowing
     the <literal moreinfo="none">doc</literal>, <literal
-    moreinfo="none">list_item</literal> and <literal
+    moreinfo="none">list_item</literal>, and <literal
     moreinfo="none">text_item</literal> methods to call each other.</para>
 
-    <para>By inheriting from this class, we can create functions which fold
+    <para>By inheriting from this class, we can create functions that fold
     over the document data. For example, the <literal
     moreinfo="none">count_doc</literal> function counts the number of bold
     tags in the document that are not within a list:</para>
@@ -937,7 +938,7 @@ end</programlisting>
 
     <para>The problem is that a <literal moreinfo="none">square</literal>
     expects to be compared with a <literal moreinfo="none">square</literal>,
-    not an arbitrary shape; similarly for <literal
+    not an arbitrary shape; likewise for <literal
     moreinfo="none">circle</literal>. This problem is fundamental. Many
     languages solve it either with narrowing (with dynamic type checking), or
     by method overloading. Since OCaml has neither of these, what can we
@@ -1037,7 +1038,7 @@ end = struct
   ...
 end</programlisting>
 
-    <para>Note that this solution prevents us from adding new kinds of shape
+    <para>Note that this solution prevents us from adding new kinds of shapes
     without adding new constructors to the <literal
     moreinfo="none">shape_repr</literal> type, which is quite restrictive. The
     objects created by these classes are also in one-to-one correspondence
@@ -1100,9 +1101,9 @@ end</programlisting>
     interactive graphics. We will use the Async concurrency library and the
     <ulink
     url="http://github.com/lpw25/async_graphics/">Async_graphics</ulink>
-    library, which provides an asynchronous interface to OCaml's built in
+    library, which provides an asynchronous interface to OCaml's built-in
     Graphics library. Concurrent programming with Async will be explored later
-    in <xref linkend="concurrent-programming-with-async"/>; for now you can
+    in <xref linkend="concurrent-programming-with-async" />; for now you can
     safely ignore the details. You just need to run <literal
     moreinfo="none">opam install async_graphics</literal> to get the library
     installed on your system.</para>
@@ -1268,8 +1269,8 @@ class circle r x y = object
 end</programlisting>
 
       <para>One way to view a <literal moreinfo="none">virtual</literal> class
-      is that it is like a functor, where the "inputs" are the declared, but
-      not defined, virtual methods and fields. The functor application is
+      is that it is like a functor, where the "inputs" are the declared—but
+      not defined—virtual methods and fields. The functor application is
       implemented through inheritance, when virtual methods are given concrete
       implementations.</para>
     </sect2>
@@ -1333,7 +1334,7 @@ end</programlisting>
 
     <para>When a class inherits from more than one superclass, it is using
     <emphasis>multiple inheritance</emphasis>. Multiple inheritance extends
-    the variety of ways in which classes can be combined, and it can be quite
+    the variety of ways that classes can be combined, and it can be quite
     useful, particularly with virtual classes. However, it can be tricky to
     use, particularly when the inheritance hierarchy is a graph rather than a
     tree, so it should be used with care.<indexterm class="singular">
@@ -1435,7 +1436,7 @@ end</programlisting>
 
       <para>That's too abstract, so let's give some examples based on our
       interactive shapes. We may wish to allow a shape to be dragged by the
-      mouse. We can define this functionality for any object which has mutable
+      mouse. We can define this functionality for any object that has mutable
       <literal moreinfo="none">x</literal> and <literal
       moreinfo="none">y</literal> fields and an <literal
       moreinfo="none">on_mousedown</literal> method for adding event
@@ -1695,7 +1696,7 @@ let () = never_returns (Scheduler.go_main ~main ())</programlisting>
           url="http://lablgtk.forge.ocamlcore.org">Lablgtk</ulink></term>
 
           <listitem>
-            <para>A strongly-typed interface to the GTK widget library.</para>
+            <para>A strongly typed interface to the GTK widget library.</para>
           </listitem>
         </varlistentry>
 
@@ -1714,8 +1715,8 @@ let () = never_returns (Scheduler.go_main ~main ())</programlisting>
           url="http://ocsigen.org/js_of_ocaml/api/Js">js_of_ocaml</ulink></term>
 
           <listitem>
-            <para>Compiles OCaml code to JavaScript, and has bindings to
-            WebGL. This is the emerging standard for 3D rendering in web
+            <para>Compiles OCaml code to JavaScript and has bindings to WebGL.
+            This is the emerging standard for 3D rendering in web
             browsers.</para>
           </listitem>
         </varlistentry>
@@ -1724,8 +1725,9 @@ let () = never_returns (Scheduler.go_main ~main ())</programlisting>
       <note>
         <title>Production Note</title>
 
-        <para>This chapter contains significant external contributions from
-        Leo White.<indexterm class="endofrange" startref="inherit"/></para>
+        <para>This chapter contains significant contributions from Leo
+        White.<indexterm class="endofrange"
+        startref="inherit"></indexterm></para>
       </note>
     </sect2>
   </sect1>

@@ -8,7 +8,7 @@
   programs, particularly modules. In addition, OCaml also supports
   object-oriented programming. There are objects, classes, and their
   associated types. In this chapter, we'll introduce you to OCaml objects and
-  subtyping. In the next chapter, <xref linkend="classes"/>, we'll introduce
+  subtyping. In the next chapter, <xref linkend="classes" />, we'll introduce
   you to classes and inheritance.<indexterm class="singular">
       <primary>objects</primary>
 
@@ -44,7 +44,7 @@
 
         <listitem>
           <para>The details of the implementation are hidden in the object,
-          and the external interface is just the set of publicly-accessible
+          and the external interface is just the set of publicly accessible
           methods.</para>
         </listitem>
       </varlistentry>
@@ -105,14 +105,15 @@
     <title>OCaml Objects</title>
 
     <para>If you already know about object-oriented programming in a language
-    like Java or C++, the OCaml object system may come as a surprise. Foremost
-    is the complete separation of objects, and their types, from the class
-    system. In a language like Java, a class name is also used as the type of
-    objects created by instantiating it, and the relationships between these
-    object types correspond to inheritance. For example, if we implement a
-    class <literal moreinfo="none">Deque</literal> in Java by inheriting from
-    a class <literal moreinfo="none">Stack</literal>, we would be allowed to
-    pass a deque anywhere a stack is expected.<indexterm class="singular">
+    like Java or <phrase role="keep-together">C++,</phrase> the OCaml object
+    system may come as a surprise. Foremost is the complete separation of
+    objects and their types from the class system. In a language like Java, a
+    class name is also used as the type of objects created by instantiating
+    it, and the relationships between these object types correspond to
+    inheritance. For example, if we implement a class <literal
+    moreinfo="none">Deque</literal> in Java by inheriting from a class
+    <literal moreinfo="none">Stack</literal>, we would be allowed to pass a
+    deque anywhere a stack is expected.<indexterm class="singular">
         <primary>objects</primary>
 
         <secondary sortas="OCaml">in OCaml</secondary>
@@ -131,14 +132,14 @@
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">let s = object</userinput>
 <userinput moreinfo="none">    val mutable v = [0; 2]</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    method pop =</userinput>
 <userinput moreinfo="none">      match v with</userinput>
 <userinput moreinfo="none">      | hd :: tl -&gt; </userinput>
 <userinput moreinfo="none">        v &lt;- tl;</userinput>
 <userinput moreinfo="none">        Some hd</userinput>
 <userinput moreinfo="none">      | [] -&gt; None</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    method push hd = </userinput>
 <userinput moreinfo="none">      v &lt;- hd :: v</userinput>
 <userinput moreinfo="none">  end ;;</userinput>
@@ -188,14 +189,14 @@
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">let stack init = object</userinput>
 <userinput moreinfo="none">    val mutable v = init</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    method pop =</userinput>
 <userinput moreinfo="none">      match v with</userinput>
 <userinput moreinfo="none">      | hd :: tl -&gt; </userinput>
 <userinput moreinfo="none">        v &lt;- tl;</userinput>
 <userinput moreinfo="none">        Some hd</userinput>
 <userinput moreinfo="none">      | [] -&gt; None</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    method push hd = </userinput>
 <userinput moreinfo="none">      v &lt;- hd :: v</userinput>
 <userinput moreinfo="none">  end ;;</userinput>
@@ -366,7 +367,7 @@
         <secondary>immutability of</secondary>
       </indexterm></para>
 
-    <para>Indeed, in many programs, this makes sense, but it is by no means
+    <para>Indeed, in many programs this makes sense, but it is by no means
     required. Let's define a function that creates immutable stack
     objects:</para>
 
@@ -377,12 +378,12 @@
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">let imm_stack init = object</userinput>
 <userinput moreinfo="none">    val v = init</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    method pop =</userinput>
 <userinput moreinfo="none">      match v with</userinput>
 <userinput moreinfo="none">      | hd :: tl -&gt; Some (hd, {&lt; v = tl &gt;})</userinput>
 <userinput moreinfo="none">      | [] -&gt; None </userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    method push hd = </userinput>
 <userinput moreinfo="none">      {&lt; v = hd :: v &gt;}</userinput>
 <userinput moreinfo="none">  end ;;</userinput>
@@ -415,7 +416,7 @@
 <computeroutput moreinfo="none">- : (int * (&lt; pop : 'a; push : int -&gt; 'b &gt; as 'b)) option as 'a =</computeroutput>
 <computeroutput moreinfo="none">Some (4, &lt;obj&gt;)</computeroutput></programlisting>
 
-    <para>There are some restriction on the use of the expression <literal
+    <para>There are some restrictions on the use of the expression <literal
     moreinfo="none">{&lt; ... &gt;}</literal>. It can be used only within a
     method body, and only the values of fields may be updated. Method
     implementations are fixed at the time the object is created; they cannot
@@ -428,7 +429,7 @@
     <para>You might wonder when to use objects in OCaml, which has a multitude
     of alternative mechanisms to express the similar concepts. First-class
     modules are more expressive (a module can include types, while classes and
-    objects cannot). Modules, functors, and datatypes also offer a wide range
+    objects cannot). Modules, functors, and data types also offer a wide range
     of ways to express program structure. In fact, many seasoned OCaml
     programmers rarely use classes and objects, if at all.<indexterm
         class="singular">
@@ -505,7 +506,7 @@
       </indexterm></para>
 
     <para>We'll introduce you to classes, and examples using open recursion,
-    in <xref linkend="classes"/>.</para>
+    in <xref linkend="classes" />.</para>
   </sect1>
 
   <sect1 id="subtyping">
@@ -537,7 +538,7 @@
       geometric shapes. The generic type <literal
       moreinfo="none">shape</literal> has a method to compute the area, and
       <literal moreinfo="none">square</literal> and <literal
-      moreinfo="none">circle</literal> are specific kinds of shape:<indexterm
+      moreinfo="none">circle</literal> are specific kinds of shapes:<indexterm
           class="singular">
           <primary>geometric shapes</primary>
         </indexterm><indexterm class="singular">
@@ -607,7 +608,7 @@ end</programlisting>
       Depth subtyping allows us coerce an object if its individual methods
       could safely be coerced. So an object type <literal moreinfo="none">&lt;
       m: t1 &gt;</literal> is a subtype of <literal moreinfo="none">&lt; m: t2
-      &gt;</literal> iff <literal moreinfo="none">t1</literal> is a subtype of
+      &gt;</literal> if <literal moreinfo="none">t1</literal> is a subtype of
       <literal moreinfo="none">t2</literal>.<indexterm class="singular">
           <primary>depth subtyping</primary>
         </indexterm><indexterm class="singular">
@@ -725,7 +726,7 @@ end</programlisting>
 
       <para>We say that <literal moreinfo="none">'a list</literal> is
       <emphasis>covariant</emphasis> (in <literal
-      moreinfo="none">'a</literal>), whilst <literal moreinfo="none">'a
+      moreinfo="none">'a</literal>), while <literal moreinfo="none">'a
       array</literal> is <emphasis>invariant</emphasis>.<indexterm
           class="singular">
           <primary>invariance</primary>
@@ -920,9 +921,9 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</programlisting>
       should be fine, in principle. It doesn't call <literal
       moreinfo="none">push</literal>, so it isn't making that error. To make
       it work, we need to use a more precise type that indicates we are not
-      going to be using the set method. We define a type <literal
-      moreinfo="none">readonly_stack</literal> and confirm that we can coerce
-      the list of stacks to it:</para>
+      going to be using the <literal>set</literal> method. We define a type
+      <literal moreinfo="none">readonly_stack</literal> and confirm that we
+      can coerce the list of <literal>stack</literal>s to it:</para>
 
       <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
@@ -958,7 +959,8 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</programlisting>
       hatch that allows the program to fall back to dynamic typing. The
       situation in OCaml is much better: it works, it is statically checked,
       and the annotations are pretty simple.<indexterm class="endofrange"
-      startref="var"/><indexterm class="endofrange" startref="SUBvar"/></para>
+      startref="var"></indexterm><indexterm class="endofrange"
+      startref="SUBvar"></indexterm></para>
     </sect2>
 
     <sect2 id="narrowing">
@@ -1178,7 +1180,7 @@ let is_barbell = function
 <computeroutput moreinfo="none">       The second object type has no method radius</computeroutput></programlisting>
 
       <para>In both these cases we must use subtyping:<indexterm
-      class="endofrange" startref="OBsub"/></para>
+      class="endofrange" startref="OBsub"></indexterm></para>
 
       <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/row_polymorphism.topscript">objects/row_polymorphism.topscript</ulink>
@@ -1195,8 +1197,8 @@ let is_barbell = function
       <note>
         <title>Production Note</title>
 
-        <para>This chapter contains significant external contributions from
-        Leo White.</para>
+        <para>This chapter contains significant contributions from Leo
+        White.</para>
       </note>
     </sect2>
   </sect1>

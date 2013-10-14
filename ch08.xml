@@ -11,11 +11,10 @@
   pure function behaves like a mathematical function, always returning the
   same results when given the same inputs, and never affecting the world
   except insofar as it returns the value of its computation.
-  <emphasis>Imperative</emphasis> code, on the other hand, operates by
-  side-effects that modify a program's internal state or interact with the
-  outside world. An imperative function has a new effect, and potentially
-  returns different results, every time it's called.<indexterm
-      class="singular">
+  <emphasis>Imperative</emphasis> code, on the other hand, operates by side
+  effects that modify a program's internal state or interact with the outside
+  world. An imperative function has a new effect, and potentially returns
+  different results, every time it's called.<indexterm class="singular">
       <primary>imperative programming</primary>
 
       <secondary>benefits of</secondary>
@@ -33,7 +32,7 @@
 
   <para>Pure code is the default in OCaml, and for good reason—it's generally
   easier to reason about, less error prone and more composable. But imperative
-  code is of fundamental importance to any practical programming language
+  code is of fundamental importance to any practical programming language,
   because real-world tasks require that you interact with the outside world,
   which is by its nature imperative. Imperative programming can also be
   important for performance. While pure code is quite efficient in OCaml,
@@ -54,7 +53,7 @@
     imperative dictionaries, and for most real-world tasks, you should use one
     of those implementations. There's more advice on using Core's
     implementation in particular in <xref
-    linkend="maps-and-hash-tables"/>.<indexterm class="startofrange"
+    linkend="maps-and-hash-tables" />.<indexterm class="startofrange"
         id="DICTimper">
         <primary>dictionaries, imperative</primary>
       </indexterm><indexterm class="singular">
@@ -104,8 +103,9 @@ val remove : ('a, 'b) t -&gt; 'a -&gt; unit</programlisting>
     collection of helper functions whose purpose and behavior should be
     largely inferrable from their names and type signatures. Notice that a
     number of the functions, in particular, ones like <literal
-    moreinfo="none">add</literal> that modify the dictionary, return unit.
-    This is typical of functions that act by side effect.</para>
+    moreinfo="none">add</literal> that modify the dictionary, return
+    <literal>unit</literal>. This is typical of functions that act by side
+    effect.</para>
 
     <para>We'll now walk through the implementation (contained in the
     corresponding <literal moreinfo="none">ml</literal> file) piece by piece,
@@ -125,7 +125,7 @@ type ('a, 'b) t = { mutable length: int;
                     buckets: ('a * 'b) list array;
                   }</programlisting>
 
-    <para>The first field, <literal moreinfo="none">length</literal> is
+    <para>The first field, <literal moreinfo="none">length</literal>, is
     declared as mutable. In OCaml, records are immutable by default, but
     individual fields are mutable when marked as such. The second field,
     <literal moreinfo="none">buckets</literal>, is immutable but contains an
@@ -305,7 +305,7 @@ let remove t key =
 
     <para>We also use <literal moreinfo="none">;</literal>, the sequencing
     operator, to express a sequence of imperative actions. We could have done
-    the same using let bindings:</para>
+    the same using <literal>let</literal> bindings:</para>
 
     <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dictionary2.ml">imperative-programming/dictionary2.ml</ulink>
@@ -353,8 +353,8 @@ let () = &lt;expr2&gt; in
     very end of each function. This is good practice because it minimizes the
     chance that such operations will be interrupted with an exception, leaving
     the data structure in an inconsistent state.<indexterm class="endofrange"
-    startref="DICTimper"/><indexterm class="endofrange"
-    startref="IPimpdict"/></para>
+    startref="DICTimper"></indexterm><indexterm class="endofrange"
+    startref="IPimpdict"></indexterm></para>
   </sect1>
 
   <sect1 id="primitive-mutable-data">
@@ -384,7 +384,7 @@ let () = &lt;expr2&gt; in
       </indexterm></para>
 
     <sect2 id="array-like-data">
-      <title>Array-like Data</title>
+      <title>Array-Like Data</title>
 
       <para>OCaml supports a number of array-like data structures; i.e.,
       mutable integer-indexed containers that provide constant-time access to
@@ -394,7 +394,7 @@ let () = &lt;expr2&gt; in
         <title>Ordinary arrays</title>
 
         <para>The <literal moreinfo="none">array</literal> type is used for
-        general purpose polymorphic arrays. The <literal
+        general-purpose polymorphic arrays. The <literal
         moreinfo="none">Array</literal> module has a variety of utility
         functions for interacting with arrays, including a number of mutating
         operations. These include <literal
@@ -452,9 +452,9 @@ let () = &lt;expr2&gt; in
         moreinfo="none">string</literal> in place of a <literal
         moreinfo="none">Char.t array</literal> (a <literal
         moreinfo="none">Char.t</literal> is an 8-bit character) is that the
-        former is considerably more space efficient; an array uses one
-        word—eight bytes on a 64-bit machine—to store a single entry, whereas
-        strings use one byte per character.<indexterm class="singular">
+        former is considerably more space-efficient; an array uses one word—8
+        bytes on a 64-bit machine—to store a single entry, whereas strings use
+        1 byte per character.<indexterm class="singular">
             <primary>byte arrays</primary>
           </indexterm><indexterm class="singular">
             <primary>strings</primary>
@@ -482,7 +482,7 @@ let () = &lt;expr2&gt; in
         <para>A <literal moreinfo="none">Bigarray.t</literal> is a handle to a
         block of memory stored outside of the OCaml heap. These are mostly
         useful for interacting with C or Fortran libraries, and are discussed
-        in <xref linkend="memory-representation-of-values"/>. Bigarrays too
+        in <xref linkend="memory-representation-of-values" />. Bigarrays too
         have their own getting and setting syntax:<indexterm class="singular">
             <primary>bigarrays</primary>
           </indexterm></para>
@@ -508,9 +508,9 @@ let () = &lt;expr2&gt; in
           <secondary>mutability of</secondary>
         </indexterm></para>
 
-      <para>As we'll see in <xref linkend="objects"/>, fields of an object can
-      similarly be declared as mutable, and can then be modified in much the
-      same way as record fields.<indexterm class="singular">
+      <para>As we'll see in <xref linkend="objects" />, fields of an object
+      can similarly be declared as mutable, and can then be modified in much
+      the same way as record fields.<indexterm class="singular">
           <primary>primitive mutable data</primary>
 
           <secondary>record/object fields and ref cells</secondary>
@@ -529,7 +529,8 @@ let () = &lt;expr2&gt; in
             <primary>ref cells</primary>
           </indexterm></para>
 
-        <para>The definition for the ref type is as follows:</para>
+        <para>The definition for the <literal>ref</literal> type is as
+        follows:</para>
 
         <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/ref.topscript">imperative-programming/ref.topscript</ulink>
@@ -540,7 +541,7 @@ let () = &lt;expr2&gt; in
 <computeroutput moreinfo="none">type 'a ref = { mutable contents : 'a; }</computeroutput></programlisting>
 
         <para>The standard library defines the following operators for working
-        with refs.</para>
+        with <literal>ref</literal>s.</para>
 
         <variablelist>
           <varlistentry>
@@ -611,8 +612,8 @@ let () = &lt;expr2&gt; in
       function interface (FFI). The FFI opens OCaml up to imperative
       constructs that are exported by system calls or other external
       libraries. Many of these come built in, like access to the <literal
-      moreinfo="none">write</literal> system call, or to the <literal
-      moreinfo="none">clock</literal>; while others come from user libraries,
+      moreinfo="none">write</literal> system call or to the <literal
+      moreinfo="none">clock</literal>, while others come from user libraries,
       like LAPACK bindings.<indexterm class="singular">
           <primary>libraries</primary>
 
@@ -636,8 +637,7 @@ let () = &lt;expr2&gt; in
   </sect1>
 
   <sect1 id="for-and-while-loops-1">
-    <title><literal moreinfo="none">for</literal> and <literal
-    moreinfo="none">while</literal> Loops</title>
+    <title>for and while Loops</title>
 
     <para>OCaml provides support for traditional imperative looping
     constructs, in particular, <literal moreinfo="none">for</literal> and
@@ -735,12 +735,12 @@ let () = &lt;expr2&gt; in
   </sect1>
 
   <sect1 id="example-doubly-linked-lists">
-    <title>Example: Doubly-Linked Lists</title>
+    <title>Example: Doubly Linked Lists</title>
 
-    <para>Another common imperative data structure is the doubly-linked list.
-    Doubly-linked lists can be traversed in both directions, and elements can
-    be added and removed from the list in constant time. Core defines a
-    doubly-linked list (the module is called <literal
+    <para>Another common imperative data structure is the doubly linked list.
+    Doubly linked lists can be traversed in both directions, and elements can
+    be added and removed from the list in constant time. Core defines a doubly
+    linked list (the module is called <literal
     moreinfo="none">Doubly_linked</literal>), but we'll define our own linked
     list library as an illustration.<indexterm class="singular">
         <primary>lists</primary>
@@ -846,7 +846,7 @@ let prev elt = elt.prev</programlisting>
     <note>
       <title>Cyclic Data Structures</title>
 
-      <para>Doubly-linked lists are a cyclic data structure, meaning that it
+      <para>Doubly linked lists are a cyclic data structure, meaning that it
       is possible to follow a nontrivial sequence of pointers that closes in
       on itself. In general, building cyclic data structures requires the use
       of side effects. This is done by constructing the data elements first,
@@ -862,7 +862,7 @@ let prev elt = elt.prev</programlisting>
         </indexterm></para>
 
       <para>There is an exception to this, though: you can construct
-      fixed-size cyclic data-structures using <literal moreinfo="none">let
+      fixed-size cyclic data structures using <literal moreinfo="none">let
       rec</literal>:</para>
 
       <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
@@ -886,7 +886,7 @@ let prev elt = elt.prev</programlisting>
 <computeroutput moreinfo="none">   3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2;</computeroutput>
 <computeroutput moreinfo="none">   ...]</computeroutput></programlisting>
 
-      <para>This approach is quite limited, however. General purpose cyclic
+      <para>This approach is quite limited, however. General-purpose cyclic
       data structures require mutation.</para>
     </note>
 
@@ -1008,8 +1008,8 @@ let prev elt = elt.prev</programlisting>
     <sect2 id="iteration-functions">
       <title>Iteration Functions</title>
 
-      <para>When defining containers like lists, dictionaries and trees,
-      you'll typically want to define a set of iteration functions, like
+      <para>When defining containers like lists, dictionaries, and trees,
+      you'll typically want to define a set of iteration functions like
       <literal moreinfo="none">iter</literal>, <literal
       moreinfo="none">map</literal>, and <literal
       moreinfo="none">fold</literal>, which let you concisely express common
@@ -1023,7 +1023,7 @@ let prev elt = elt.prev</programlisting>
 
       <para><literal moreinfo="none">Dlist</literal> has two such iterators:
       <literal moreinfo="none">iter</literal>, the goal of which is to call a
-      <literal moreinfo="none">unit</literal> producing function on every
+      <literal moreinfo="none">unit</literal>-producing function on every
       element of the list, in order; and <literal
       moreinfo="none">find_el</literal>, which runs a provided test function
       on each values stored in the list, returning the first <literal
@@ -1055,14 +1055,14 @@ let find_el t ~f =
   loop !t</programlisting>
 
       <para>This completes our implementation, but there's still considerably
-      more work to be done to make a really usable doubly-linked list. As
+      more work to be done to make a really usable doubly linked list. As
       mentioned earlier, you're probably better off using something like
       Core's <literal moreinfo="none">Doubly_linked</literal> module that has
       a more complete interface and has more of the tricky corner cases worked
       out. Nonetheless, this example should serve to demonstrate some of the
       techniques you can use to build nontrivial imperative data structure in
       OCaml, as well as some of the pitfalls.<indexterm class="endofrange"
-      startref="IPdoublink"/></para>
+      startref="IPdoublink"></indexterm></para>
     </sect2>
   </sect1>
 
@@ -1112,8 +1112,8 @@ let find_el t ~f =
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Lazy.force v;;</userinput>
 <computeroutput moreinfo="none">- : float = 4.</computeroutput></programlisting>
 
-    <para>You can see from the print statement that the actual computation was
-    performed only once, and only after <literal
+    <para>You can see from the <literal>print</literal> statement that the
+    actual computation was performed only once, and only after <literal
     moreinfo="none">force</literal> had been called.</para>
 
     <para>To better understand how laziness works, let's walk through the
@@ -1204,9 +1204,9 @@ let find_el t ~f =
 
     <para>The main user-visible difference between our implementation of
     laziness and the built-in version is syntax. Rather than writing <literal
-    moreinfo="none">create_lazy (fun () -&gt; sqrt 16.)</literal>, we can with
-    the built-in <literal moreinfo="none">lazy</literal> just write <literal
-    moreinfo="none">lazy (sqrt 16.)</literal>.</para>
+    moreinfo="none">create_lazy (fun () -&gt; sqrt 16.)</literal>, we can
+    (with the built-in <literal moreinfo="none">lazy</literal>) just write
+    <literal moreinfo="none">lazy (sqrt 16.)</literal>.</para>
 
     <sect2 id="memoization-and-dynamic-programming">
       <title>Memoization and Dynamic Programming</title>
@@ -1274,10 +1274,10 @@ let find_el t ~f =
       recursive algorithms. One good example is the algorithm for computing
       the <emphasis>edit distance</emphasis> (also called the Levenshtein
       distance) between two strings. The edit distance is the number of
-      single-character changes (including letter switches, insertions and
+      single-character changes (including letter switches, insertions, and
       deletions) required to convert one string to the other. This kind of
-      distance metric can be useful for a variety of approximate string
-      matching problems, like spell checkers.<indexterm class="singular">
+      distance metric can be useful for a variety of approximate
+      string-matching problems, like spellcheckers.<indexterm class="singular">
           <primary>string matching</primary>
         </indexterm><indexterm class="singular">
           <primary>Levenshtein distance</primary>
@@ -1328,7 +1328,7 @@ let find_el t ~f =
       <informalfigure>
         <mediaobject>
           <imageobject role="web">
-            <imagedata fileref="images/rwoc_0801.png" format="PNG"/>
+            <imagedata fileref="images/rwoc_0801.png" format="PNG" />
           </imageobject>
         </mediaobject>
       </informalfigure>
@@ -1341,7 +1341,7 @@ let find_el t ~f =
       <informalfigure>
         <mediaobject>
           <imageobject role="web">
-            <imagedata fileref="images/rwoc_0802.png" format="PNG"/>
+            <imagedata fileref="images/rwoc_0802.png" format="PNG" />
           </imageobject>
         </mediaobject>
       </informalfigure>
@@ -1390,11 +1390,11 @@ let find_el t ~f =
       is sometimes referred to as <emphasis>dynamic programming</emphasis>. To
       see how to do this, let's step away from <literal
       moreinfo="none">edit_distance</literal> and instead consider a much
-      simpler example: computing the nth element of the Fibonacci sequence.
-      The Fibonacci sequence by definition starts out with two <literal
-      moreinfo="none">1</literal>'s, with every subsequent element being the
-      sum of the previous two. The classic recursive definition of Fibonacci
-      is as follows:<indexterm class="singular">
+      simpler example: computing the <emphasis>n</emphasis>th element of the
+      Fibonacci sequence. The Fibonacci sequence by definition starts out with
+      two <literal moreinfo="none">1</literal>s, with every subsequent element
+      being the sum of the previous two. The classic recursive definition of
+      Fibonacci is as follows:<indexterm class="singular">
           <primary>programming</primary>
 
           <secondary>dynamic programming</secondary>
@@ -1514,7 +1514,7 @@ let find_el t ~f =
 
       <para>This is clever enough, but all we've really done is find a new way
       to implement the same old slow Fibonacci function. To make it faster, we
-      need a variant on <literal moreinfo="none">make_rec</literal> that
+      need a variant of <literal moreinfo="none">make_rec</literal> that
       inserts memoization when it ties the recursive knot. We'll call that
       function <literal moreinfo="none">memo_rec</literal>:</para>
 
@@ -1635,8 +1635,7 @@ let find_el t ~f =
 <computeroutput moreinfo="none">- : int = 2</computeroutput></programlisting>
 
       <note>
-        <title>Limitations of <literal moreinfo="none">let
-        rec</literal></title>
+        <title>Limitations of let rec</title>
 
         <para>You might wonder why we didn't tie the recursive knot in
         <literal moreinfo="none">memo_rec</literal> using <literal
@@ -1659,7 +1658,7 @@ let find_el t ~f =
 <computeroutput moreinfo="none">Error: This kind of expression is not allowed as right-hand side of `let rec'</computeroutput></programlisting>
 
         <para>OCaml rejects the definition because OCaml, as a strict
-        language, has limits on what it can put on the right hand side of a
+        language, has limits on what it can put on the righthand side of a
         <literal moreinfo="none">let rec</literal>. In particular, imagine how
         the following code snippet would be compiled:</para>
 
@@ -1677,7 +1676,7 @@ let find_el t ~f =
         such, this construct is effectively impossible to compile.</para>
 
         <para>To avoid such impossible cases, the compiler only allows three
-        possible constructs to show up on the right-hand side of a <literal
+        possible constructs to show up on the righthand side of a <literal
         moreinfo="none">let rec</literal>: a function definition, a
         constructor, or the lazy keyword. This excludes some reasonable
         things, like our definition of <literal
@@ -1732,7 +1731,8 @@ let find_el t ~f =
 
         <para>Laziness is more constrained than explicit mutation, and so in
         some cases can lead to code whose behavior is easier to think
-        about.<indexterm class="endofrange" startref="BEmem"/></para>
+        about.<indexterm class="endofrange"
+        startref="BEmem"></indexterm></para>
       </note>
     </sect2>
   </sect1>
@@ -1764,7 +1764,7 @@ let find_el t ~f =
     primitives are also available through the <literal
     moreinfo="none">Unix</literal> module in Core as well as <literal
     moreinfo="none">Async</literal>, the asynchronous I/O library that is
-    covered in <xref linkend="concurrent-programming-with-async"/>. Most of
+    covered in <xref linkend="concurrent-programming-with-async" />. Most of
     the functionality in Core's <literal moreinfo="none">In_channel</literal>,
     <literal moreinfo="none">Out_channel</literal> (and in Core's <literal
     moreinfo="none">Unix</literal> module) derives from the standard library,
@@ -1837,11 +1837,11 @@ let find_el t ~f =
 
       <para>Let's see this in action in a simple interactive application. The
       following program, <literal moreinfo="none">time_converter</literal>,
-      prompts the user for a timezone, and then prints out the current time in
-      that timezone. Here, we use Core's <literal
-      moreinfo="none">Zone</literal> module for looking up a timezone, and the
-      <literal moreinfo="none">Time</literal> module for computing the current
-      time and printing it out in the timezone in question:</para>
+      prompts the user for a time zone, and then prints out the current time
+      in that time zone. Here, we use Core's <literal
+      moreinfo="none">Zone</literal> module for looking up a time zone, and
+      the <literal moreinfo="none">Time</literal> module for computing the
+      current time and printing it out in the time zone in question:</para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/time_converter.ml">imperative-programming/time_converter.ml</ulink></para>
@@ -1873,8 +1873,8 @@ let () =
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">./time_converter.byte</userinput>
 <computeroutput moreinfo="none">Pick a timezone:</computeroutput></programlisting>
 
-      <para>You can then type in the name of a timezone and hit Return, and it
-      will print out the current time in the timezone in question:</para>
+      <para>You can then type in the name of a time zone and hit Return, and
+      it will print out the current time in the time zone in question:</para>
 
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/time_converter2.out">imperative-programming/time_converter2.out</ulink></para>
@@ -1906,8 +1906,7 @@ let () =
     </sect2>
 
     <sect2 id="formatted-output-with-printf">
-      <title>Formatted Output with <literal
-      moreinfo="none">printf</literal></title>
+      <title>Formatted Output with printf</title>
 
       <para>Generating output with functions like <literal
       moreinfo="none">Out_channel.output_string</literal> is simple and easy
@@ -1915,7 +1914,7 @@ let () =
       output using the <literal moreinfo="none">printf</literal> function,
       which is modeled after <literal moreinfo="none">printf</literal> in the
       C standard library. <literal moreinfo="none">printf</literal> takes a
-      <emphasis>format string</emphasis> that describe what to print and how
+      <emphasis>format string</emphasis> that describes what to print and how
       to format it, as well as arguments to be printed, as determined by the
       formatting directives embedded in the format string. So, for example, we
       can write:<indexterm class="singular">
@@ -1991,7 +1990,7 @@ let () =
         <para>If OCaml infers that a given string literal is a format string,
         then it parses it at compile time as such, choosing its type in
         accordance with the formatting directives it finds. Thus, if we add a
-        type-annotation indicating that the string we're defining is actually
+        type annotation indicating that the string we're defining is actually
         a format string, it will be interpreted as such:</para>
 
         <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
@@ -2095,7 +2094,7 @@ let () =
       <itemizedlist>
         <listitem>
           <para><literal moreinfo="none">eprintf</literal>, which prints to
-          <literal moreinfo="none">stderr</literal>.</para>
+          <literal moreinfo="none">stderr</literal></para>
         </listitem>
 
         <listitem>
@@ -2119,9 +2118,9 @@ let () =
 
       <para>Another common use of <literal
       moreinfo="none">in_channel</literal>s and <literal
-      moreinfo="none">out_channel</literal>s is for working with files. Here's
-      a couple of functions, one that creates a file full of numbers, and the
-      other that reads in such a file and returns the sum of those
+      moreinfo="none">out_channel</literal>s is for working with files. Here
+      are a couple of functions—one that creates a file full of numbers, and
+      the other that reads in such a file and returns the sum of those
       numbers:<indexterm class="singular">
           <primary>files</primary>
 
@@ -2194,7 +2193,7 @@ let () =
       <para>To avoid this, we need to make sure that our code cleans up after
       itself. We can do this using the <literal
       moreinfo="none">protect</literal> function described in <xref
-      linkend="error-handling"/>, as follows:</para>
+      linkend="error-handling" />, as follows:</para>
 
       <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/file2.topscript">imperative-programming/file2.topscript</ulink>
@@ -2270,7 +2269,7 @@ let () =
       moreinfo="none">In_channel</literal> and <literal
       moreinfo="none">Out_channel</literal>. To get a fuller understanding,
       you should review the API documentation for those modules.<indexterm
-      class="endofrange" startref="IPinpout"/></para>
+      class="endofrange" startref="IPinpout"></indexterm></para>
     </sect2>
   </sect1>
 
@@ -2300,7 +2299,7 @@ let () =
       </indexterm></para>
 
     <para>Consider the following simple example. Here, we have a collection of
-    angles and we want to determine if any of them have a negative <literal
+    angles, and we want to determine if any of them have a negative <literal
     moreinfo="none">sin</literal>. The following snippet of code would answer
     that question:</para>
 
@@ -2362,12 +2361,13 @@ let () =
     the behavior of an imperative program.</para>
 
     <para>In a strict language, we know that expressions that are bound by a
-    sequence of let-bindings will be evaluated in the order that they're
-    defined. But what about the evaluation order within a single expression?
-    Officially, the answer is that evaluation order within an expression is
-    undefined. In practice, OCaml has only one compiler, and that behavior is
-    a kind of de facto standard. Unfortunately, the evaluation order in this
-    case is often the opposite of what one might expect.</para>
+    sequence of <literal>let</literal> bindings will be evaluated in the order
+    that they're defined. But what about the evaluation order within a single
+    expression? Officially, the answer is that evaluation order within an
+    expression is undefined. In practice, OCaml has only one compiler, and
+    that behavior is a kind of de facto standard. Unfortunately, the
+    evaluation order in this case is often the opposite of what one might
+    expect.</para>
 
     <para>Consider the following example:</para>
 
@@ -2615,7 +2615,8 @@ let () =
 <computeroutput moreinfo="none">val f : unit -&gt; 'a option ref = &lt;fun&gt;</computeroutput></programlisting>
 
       <para>But a function that has a mutable cache that persists across
-      calls, like memoize, can only be weakly polymorphic.</para>
+      calls, like <literal>memoize</literal>, can only be weakly
+      polymorphic.</para>
     </sect2>
 
     <sect2 id="partial-application-and-the-value-restriction">
@@ -2684,10 +2685,10 @@ let () =
       <title>Relaxing the Value Restriction</title>
 
       <para>OCaml is actually a little better at inferring polymorphic types
-      than is suggested previously. The value restriction as we described it
-      is basically a syntactic check: there are a few operations that you can
-      do that count as simple values, and anything that's a simple value can
-      be generalized.</para>
+      than was suggested previously. The value restriction as we described it
+      is basically a syntactic check: you can do a few operations that count
+      as simple values, and anything that's a simple value can be
+      generalized.</para>
 
       <para>But OCaml actually has a relaxed version of the value restriction
       that can make some use of type information to allow polymorphic types
@@ -2746,22 +2747,22 @@ let () =
 <userinput moreinfo="none">    val concat  : 'a t -&gt; 'a t -&gt; 'a t  (* constant time *)</userinput>
 <userinput moreinfo="none">    val to_list : 'a t -&gt; 'a list       (* linear time   *)</userinput>
 <userinput moreinfo="none">  end = struct</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    type 'a t = Empty | Singleton of 'a | Concat of 'a t * 'a t</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    let empty = Empty</userinput>
 <userinput moreinfo="none">    let singleton x = Singleton x</userinput>
 <userinput moreinfo="none">    let concat x y = Concat (x,y)</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    let rec to_list_with_tail t tail =</userinput>
 <userinput moreinfo="none">      match t with</userinput>
 <userinput moreinfo="none">      | Empty -&gt; tail</userinput>
 <userinput moreinfo="none">      | Singleton x -&gt; x :: tail</userinput>
 <userinput moreinfo="none">      | Concat (x,y) -&gt; to_list_with_tail x (to_list_with_tail y tail)</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    let to_list t =</userinput>
 <userinput moreinfo="none">      to_list_with_tail t []</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">  end;;</userinput>
 <computeroutput moreinfo="none">module Concat_list :</computeroutput>
 <computeroutput moreinfo="none">  sig</computeroutput>
@@ -2796,8 +2797,8 @@ let () =
       moreinfo="none">mli</literal>), which is often not desirable; or by
       marking the type variable in question as <emphasis>covariant</emphasis>.
       We'll learn more about covariance and contravariance in <xref
-      linkend="objects"/>, but for now, you can think of it as an annotation
-      which can be put in the interface of a pure data structure.<indexterm
+      linkend="objects" />, but for now, you can think of it as an annotation
+      that can be put in the interface of a pure data structure.<indexterm
           class="singular">
           <primary>datatypes</primary>
 
@@ -2844,7 +2845,8 @@ let () =
 
       <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">imperative-programming/value_restriction.topscript</ulink>
-      (part 14)<indexterm class="endofrange" startref="IPsideweak"/></para>
+      (part 14)<indexterm class="endofrange"
+      startref="IPsideweak"></indexterm></para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
           moreinfo="none"># </prompt><userinput moreinfo="none">identity Concat_list.empty;;</userinput>
@@ -2897,6 +2899,6 @@ let () =
     programming is a fundamental part of building any serious application, and
     that if you want to be an effective OCaml programmer, you need to
     understand OCaml's approach to imperative programming.<indexterm
-    class="endofrange" startref="PROGimper"/></para>
+    class="endofrange" startref="PROGimper"></indexterm></para>
   </sect1>
 </chapter>

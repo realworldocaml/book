@@ -136,8 +136,8 @@
       <title>Equality of First-Class Module Types</title>
 
       <para>The type of the first-class module, e.g., <literal
-      moreinfo="none">(module X_int)</literal>, is based on the
-      fully-qualified name of the signature that was used to construct it. A
+      moreinfo="none">(module X_int)</literal>, is based on the fully
+      qualified name of the signature that was used to construct it. A
       first-class module based on a signature with a different name, even if
       it is substantively the same signature, will result in a distinct
       type:</para>
@@ -174,14 +174,14 @@
       to improve readability and can happen both through an explicit
       declaration of a module type or implicitly through an <literal
       moreinfo="none">include</literal> declaration. In both cases, this has
-      the unintended side effect of making first-class modules built off of
-      the alias incompatible with those built off of the original module type.
-      To deal with this, one should be disciplined in how one refers to
-      signatures when constructing first-class modules.</para>
+      the unintended side effect of making first-class modules built off the
+      alias incompatible with those built off the original module type. To
+      deal with this, we should be disciplined in how we refer to signatures
+      when constructing first-class modules.</para>
     </sidebar>
 
-    <para>We can also write ordinary functions which consume and create first
-    class modules. The following shows the definition of two functions:
+    <para>We can also write ordinary functions which consume and create
+    first-class modules. The following shows the definition of two functions:
     <literal moreinfo="none">to_int</literal>, which converts a <literal
     moreinfo="none">(module X_int)</literal> into an <literal
     moreinfo="none">int</literal>; and <literal
@@ -310,9 +310,9 @@
 <computeroutput moreinfo="none">val float_bumper : (module Bumpable with type t = float) = &lt;module&gt;</computeroutput></programlisting>
 
     <para>The sharing constraints we've added above make the resulting
-    first-class modules polymorphic in the type <literal
-    moreinfo="none">t</literal>. As a result, we can now use these values on
-    values of the matching type:</para>
+    first-class modules <phrase role="keep-together">polymorphic</phrase> in
+    the type <literal moreinfo="none">t</literal>. As a result, we can now use
+    these values on values of the matching type:</para>
 
     <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink>
@@ -355,7 +355,7 @@
 
     <para>Here, we used a feature of OCaml that hasn't come up before: a
     <emphasis>locally abstract type</emphasis>. For any function, you can
-    declare a pseudo-parameter of the form <literal moreinfo="none">(type
+    declare a pseudoparameter of the form <literal moreinfo="none">(type
     a)</literal> for any type name <literal moreinfo="none">a</literal> which
     introduces a fresh type that acts like an abstract type within the context
     of the function. Here, we used that type as part of a sharing constraint
@@ -459,7 +459,8 @@
 
       <para>This technique is useful beyond first-class modules. For example,
       we can use the same approach to construct a local module to be fed to a
-      functor.<indexterm class="endofrange" startref="FCMwork"/></para>
+      functor.<indexterm class="endofrange"
+      startref="FCMwork"></indexterm></para>
     </note>
   </sect1>
 
@@ -484,20 +485,20 @@
 
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">module type Query_handler = sig</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    (** Configuration for a query handler.  Note that this can be</userinput>
 <userinput moreinfo="none">        converted to and from an s-expression *)</userinput>
 <userinput moreinfo="none">    type config with sexp</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    (** The name of the query-handling service *)</userinput>
 <userinput moreinfo="none">    val name : string</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    (** The state of the query handler *)</userinput>
 <userinput moreinfo="none">    type t</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    (** Creates a new query handler from a config *)</userinput>
 <userinput moreinfo="none">    val create : config -&gt; t</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    (** Evaluate a given query, where both input and output are</userinput>
 <userinput moreinfo="none">        s-expressions *)</userinput>
 <userinput moreinfo="none">    val eval : t -&gt; Sexp.t -&gt; Sexp.t Or_error.t</userinput>
@@ -513,7 +514,7 @@
 <computeroutput moreinfo="none">    val sexp_of_config : config -&gt; Sexp.t</computeroutput>
 <computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
-    <para>In the preceding example, we use s-expressions as the format for
+    <para>In the preceding example, we used s-expressions as the format for
     queries and responses, as well for the config. S-expressions are a simple,
     flexible, and human-readable serialization format commonly used in Core.
     For now, it's enough to think of them as balanced parenthetical
@@ -560,7 +561,7 @@
 <computeroutput moreinfo="none">- : u = {a = 43; b = 3.4}</computeroutput></programlisting>
 
     <para>This is all described in more detail in <xref
-    linkend="data-serialization-with-s-expressions"/>.</para>
+    linkend="data-serialization-with-s-expressions" />.</para>
 
     <sect2 id="implementing-a-query-handler">
       <title>Implementing a Query Handler</title>
@@ -585,10 +586,10 @@
           moreinfo="none"># </prompt><userinput moreinfo="none">module Unique = struct</userinput>
 <userinput moreinfo="none">    type config = int with sexp</userinput>
 <userinput moreinfo="none">    type t = { mutable next_id: int }</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    let name = "unique"</userinput>
 <userinput moreinfo="none">    let create start_at = { next_id = start_at }</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    let eval t sexp =</userinput>
 <userinput moreinfo="none">      match Or_error.try_with (fun () -&gt; unit_of_sexp sexp) with</userinput>
 <userinput moreinfo="none">      | Error _ as err -&gt; err</userinput>
@@ -636,14 +637,14 @@
           moreinfo="none"># </prompt><userinput moreinfo="none">module List_dir = struct</userinput>
 <userinput moreinfo="none">    type config = string with sexp</userinput>
 <userinput moreinfo="none">    type t = { cwd: string }</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    (** [is_abs p] Returns true if [p] is an absolute path  *)</userinput>
 <userinput moreinfo="none">    let is_abs p =</userinput>
 <userinput moreinfo="none">      String.length p &gt; 0 &amp;&amp; p.[0] = '/'</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    let name = "ls"</userinput>
 <userinput moreinfo="none">    let create cwd = { cwd }</userinput>
-<userinput moreinfo="none"/>
+<userinput moreinfo="none"></userinput>
 <userinput moreinfo="none">    let eval t sexp =</userinput>
 <userinput moreinfo="none">      match Or_error.try_with (fun () -&gt; string_of_sexp sexp) with</userinput>
 <userinput moreinfo="none">      | Error _ as err -&gt; err</userinput>
@@ -960,7 +961,7 @@
       <para>Now we'll start writing out the functions for manipulating the
       table of active query handlers. We'll start with the function for
       loading an instance. Note that it takes as an argument both the name of
-      the query handler, and the configuration for instantiating that handler,
+      the query handler and the configuration for instantiating that handler
       in the form of an s-expression. These are used for creating a
       first-class module of type <literal moreinfo="none">(module
       Query_handler_instance)</literal>, which is then added to the active
@@ -1024,13 +1025,13 @@
     | Active_services
   with sexp</programlisting>
 
-      <para>The eval function itself is fairly straightforward, dispatching to
-      the appropriate functions to respond to each type of query. Note that we
-      use write <literal moreinfo="none">&lt;sexp_of&lt;string
-      list&gt;&gt;</literal> to autogenerate a function for converting a list
-      of strings to an s-expression. This is part of the Sexplib package
-      described in <xref
-      linkend="data-serialization-with-s-expressions"/>.</para>
+      <para>The <literal>eval</literal> function itself is fairly
+      straightforward, dispatching to the appropriate functions to respond to
+      each type of query. Note that we use write <literal
+      moreinfo="none">&lt;sexp_of&lt;string list&gt;&gt;</literal> to
+      autogenerate a function for converting a list of strings to an
+      s-expression. This is part of the Sexplib package described in <xref
+      linkend="data-serialization-with-s-expressions" />.</para>
 
       <para>This function ends the definition of the <literal
       moreinfo="none">Loader</literal> module:</para>
@@ -1083,7 +1084,7 @@ end</programlisting>
           moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild query_handler_loader.byte</userinput>
 </programlisting>
 
-      <para>The resulting command line interface behaves much as you'd expect,
+      <para>The resulting command-line interface behaves much as you'd expect,
       starting out with no query handlers available but giving you the ability
       to load and unload them. Here's an example of it in action. As you can
       see, we start out with <literal moreinfo="none">loader</literal> itself
@@ -1141,9 +1142,9 @@ end</programlisting>
       <literal moreinfo="none">ocaml_plugin</literal>, which use OCaml's
       dynamic linking facilities to allow a program to compile and load an
       OCaml source file as a first-class module. Thus, one could extend
-      <literal moreinfo="none">Loader</literal> to loads entirely new query
+      <literal moreinfo="none">Loader</literal> to load entirely new query
       handlers from disk on demand.<indexterm class="endofrange"
-      startref="FCMquery"/></para>
+      startref="FCMquery"></indexterm></para>
     </sect2>
   </sect1>
 
@@ -1201,6 +1202,6 @@ end</programlisting>
     complicated the relationships between the different types in question, the
     more awkward this approach becomes, and the better it is to use
     first-class modules.<indexterm class="endofrange"
-    startref="MODfirst"/></para>
+    startref="MODfirst"></indexterm></para>
   </sect1>
 </chapter>
