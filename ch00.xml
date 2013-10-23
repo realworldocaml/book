@@ -6,20 +6,24 @@
 
   <sect1 id="why-ocaml">
     <title>Why OCaml?</title>
-
-    <para>The programming languages that you use affect the code you write.
-    They influence your software's reliability, security, and efficiency, as
-    well as how easy it is to read, refactor, and extend. The languages you
-    know can also deeply affect how you think about programming and software
-    design.<indexterm class="singular">
+    <para>Programming languages matter. They affect the reliability, security, and efficiency of the
+      code you write, as well as how easy it is to read, refactor, and extend. The languages you
+      know can also change how you think, influencing the way you design software even when you're
+      not using them. </para>
+    <para>We wrote this book because we believe in the importance of programming languages, and that
+      OCaml in particular is an important language to learn. The three of us have been using OCaml
+      in our academic and professional lives for over 15 years, and in that time we've come to see
+      it as a secret weapon for building complex software systems. This book aims to make this
+      secret weapon available to a wider audience, by providing a clear guide to what you need to
+      know to use OCaml effectively in the real world. </para>
+    <para>What makes OCaml special is that it occupies a sweet spot in the space of programming
+      language designs. It provides a combination of efficiency, expressiveness and practicality
+      that is matched by no other language. That is in large part because OCaml is an elegant
+      combination of a few key language features that have been developed over the last 40
+        years.<indexterm class="singular">
         <primary>OCaml</primary>
-
         <secondary>key features of</secondary>
-      </indexterm></para>
-
-    <para>But not all programming languages are created equal. Over the last
-    40 years, a few key language features have emerged that together form a
-    kind of sweet spot in language design. These features include:</para>
+      </indexterm> These include: </para>
 
     <itemizedlist>
       <listitem>
@@ -29,8 +33,8 @@
       </listitem>
 
       <listitem>
-        <para><emphasis>First-class functions</emphasis> that can be passed
-        around like ordinary values, as seen in JavaScript and C#.</para>
+        <para><emphasis>First-class functions</emphasis> that can be passed around like ordinary
+          values, as seen in JavaScript, Common Lisp, and C#.</para>
       </listitem>
 
       <listitem>
@@ -69,20 +73,17 @@
       </listitem>
     </itemizedlist>
 
-    <para>Some of you will know and love all of these features, and for others
-    they will be largely new, but most of you will have seen
-    <emphasis>some</emphasis> of them in other languages that you've used. As
-    we'll demonstrate over the course of this book, there is something
-    transformative about having them all together and able to interact in a
-    single language. Despite their importance, these ideas have made only
-    limited inroads into mainstream languages, and when they do arrive there,
-    like higher-order functions in C# or parametric polymorphism in Java, it's
-    typically in a limited and awkward form. The only languages that
-    completely embody these ideas are <emphasis>statically typed, functional
-    programming languages</emphasis> like OCaml, F#, Haskell, Scala, and
-    Standard ML.<indexterm class="singular">
+    <para>Some of you will know and love all of these features, and for others they will be largely
+      new, but most of you will have seen <emphasis>some</emphasis> of them in other languages that
+      you've used. As we'll demonstrate over the course of this book, there is something
+      transformative about having them all together and able to interact in a single language.
+      Despite their importance, these ideas have made only limited inroads into mainstream
+      languages, and when they do arrive there, like first-class functions in C# or parametric
+      polymorphism in Java, it's typically in a limited and awkward form. The only languages that
+      completely embody these ideas are <emphasis>statically typed, functional programming
+        languages</emphasis> like OCaml, F#, Haskell, Scala, and Standard ML.<indexterm
+        class="singular">
         <primary>OCaml</primary>
-
         <secondary>benefits of</secondary>
       </indexterm></para>
 
@@ -103,7 +104,7 @@
     practical work done.</para>
 
     <sect2 id="a-brief-history-from-the-1960s">
-      <title>A Brief History from the 1960s</title>
+      <title>A Brief History</title>
 
       <para>OCaml was written in 1996 by Xavier Leroy, Jérôme Vouillon, Damien
       Doligez, and Didier Rémy at INRIA in France. It was inspired by a long
@@ -237,15 +238,13 @@
     and immutable data types, as well as aspects of OCaml's powerful type and
     module systems.</para>
 
-    <para>If you already know OCaml, this book may surprise you. Core
-    redefines most of the standard namespace to make better use of the OCaml
-    module system and expose a number of powerful, reusable data structures by
-    default. Older OCaml code will still interoperate with Core, but you may
-    need to adapt it for maximal benefit. All the <emphasis>new</emphasis>
-    code that we write uses Core, and we believe the Core model is worth
-    learning; it's been successfully used on large, multimillion-line
-    codebases and removes a big barrier to building sophisticated applications
-    in OCaml.</para>
+    <para>If you already know OCaml, this book may surprise you. Core redefines most of the standard
+      namespace to make better use of the OCaml module system and expose a number of powerful,
+      reusable data structures by default. Older OCaml code will still interoperate with Core, but
+      you may need to adapt it for maximal benefit. All the new code that we write uses Core, and we
+      believe the Core model is worth learning; it's been successfully used on large,
+      multimillion-line codebases and removes a big barrier to building sophisticated applications
+      in OCaml.</para>
 
     <para>Code that uses only the traditional compiler standard library will
     always exist, but there are other online resources for learning how that
@@ -303,9 +302,8 @@
       developed while writing this book. Some of these resulted in
       improvements to the OCaml compiler, which means that you will need to
       ensure that you have an up-to-date development environment (using the
-      4.01 version of the compiler). We've automated everything you need to do
-      via the OPAM package manager, so please do follow the installation
-      instructions in <xref linkend="installation" /> carefully.<indexterm
+      4.01 version of the compiler). The installation process is largely automated through the OPAM package manager.
+      Instructions on how to it set up and what packages to install can be found at <ulink url="http://realworldocaml.org/install">this Real World OCaml page</ulink>.<indexterm
           class="singular">
           <primary>installation instructions</primary>
         </indexterm><indexterm class="singular">
@@ -348,10 +346,9 @@
         </indexterm></para>
 
       <para>The code repository is available online at <ulink
-      url="https://github.com/realworldocaml/examples"></ulink>. Every code
-      snippet in the book has a header that tells you the filename in that
-      repository to the find the source code, shell script, or ancillary data
-      file that the snippet was sourced from.</para>
+          url="https://github.com/realworldocaml/examples"/>. Every code snippet in the book has a
+        header that tells you the filename in that repository to find the source code, shell script,
+        or ancillary data file that the snippet was sourced from.</para>
 
       <remark>PROD: The above was written by the authors, the below is the
       boilerplate. Probably want to edit the below as needed.—TOOLS</remark>

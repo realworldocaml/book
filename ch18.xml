@@ -4,21 +4,18 @@
 <chapter id="concurrent-programming-with-async">
   <title>Concurrent Programming with Async</title>
 
-  <para>The logic of building programs that interact with the outside world is
-  often dominated by waiting: waiting for the click of a mouse, or for data to
-  be fetched from disk, or for space to be available on an outgoing network
-  buffer. Even mildly sophisticated interactive applications are typically
-  <emphasis>concurrent</emphasis>, needing to wait for multiple different
-  events at the same time, responding immediately to whatever event happens
-  first.<indexterm class="singular">
+  <para>The logic of building programs that interact with the outside world is often dominated by
+    waiting: waiting for the click of a mouse, or for data to be fetched from disk, or for space to
+    be available on an outgoing network buffer. Even mildly sophisticated interactive applications
+    are typically <emphasis>concurrent</emphasis>: needing to wait for multiple different events at
+    the same time, responding immediately to whatever event happens first.<indexterm
+      class="singular">
       <primary>interactive input</primary>
-
       <secondary>concurrent programming for</secondary>
     </indexterm><indexterm class="singular">
       <primary>concurrent programming</primary>
     </indexterm><indexterm class="singular">
       <primary>programming</primary>
-
       <secondary>concurrent programming with Async</secondary>
     </indexterm></para>
 
@@ -32,18 +29,16 @@
       <secondary>preemptive vs. single-threaded programs</secondary>
     </indexterm></para>
 
-  <para>Another approach is to have a single-threaded program where that
-  single thread runs an <emphasis>event loop</emphasis>, whose job is to react
-  to external events like timeouts or mouse clicks by invoking a callback
-  function that has been registered for that purpose. This approach shows up
-  in languages like JavaScript that have single-threaded runtimes as well as
-  in many GUI toolkits.<indexterm class="singular">
+  <para>Another approach is to have a single-threaded program, where that single thread runs an
+      <emphasis>event loop</emphasis> whose job is to react to external events like timeouts or
+    mouse clicks by invoking a callback function that has been registered for that purpose. This
+    approach shows up in languages like JavaScript that have single-threaded runtimes, as well as in
+    many GUI toolkits.<indexterm class="singular">
       <primary>event loops</primary>
     </indexterm><indexterm class="singular">
       <primary>single-threaded programs</primary>
     </indexterm><indexterm class="singular">
       <primary>system threads</primary>
-
       <seealso>threads</seealso>
     </indexterm></para>
 
@@ -146,18 +141,14 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Deferred.peek contents;;</userinput>
 <computeroutput moreinfo="none">- : string option = None</computeroutput></programlisting>
 
-    <para>The value in <literal moreinfo="none">contents</literal> isn't yet
-    determined in part because there's nothing running that could do the
-    necessary I/O. When using Async, processing of I/O and other events is
-    handled by the Async scheduler. When writing a standalone program, you
-    need to start the scheduler explicitly, but <command
-    moreinfo="none">utop</command> knows about Async and can start the
-    scheduler automatically. More than that, <command
-    moreinfo="none">utop</command> knows about deferred values, and when you
-    type in an expression of type <literal
-    moreinfo="none">Deferred.t</literal>, it will make sure the scheduler is
-    running and block until the deferred is determined. Thus, we can
-    write:</para>
+    <para>The value in <literal moreinfo="none">contents</literal> isn't yet determined partly
+      because nothing running could do the necessary I/O. When using Async, processing of I/O and
+      other events is handled by the Async scheduler. When writing a standalone program, you need to
+      start the scheduler explicitly, but <command moreinfo="none">utop</command> knows about Async
+      and can start the scheduler automatically. More than that, <command moreinfo="none"
+        >utop</command> knows about deferred values, and when you type in an expression of type
+        <literal moreinfo="none">Deferred.t</literal>, it will make sure the scheduler is running
+      and block until the deferred is determined. Thus, we can write:</para>
 
     <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
@@ -178,10 +169,9 @@
         moreinfo="none"># </prompt><userinput moreinfo="none">Deferred.peek contents;;</userinput>
 <computeroutput moreinfo="none">- : string option = Some "This is only a test."</computeroutput></programlisting>
 
-    <para>In order to do real work with deferreds, we need a way of waiting
-    for a deferred computation to finish, which we do using <literal
-    moreinfo="none">Deferred.bind</literal>. First, let's consider the
-    type-signature of bind:</para>
+    <para>In order to do real work with deferreds, we need a way of waiting for a deferred
+      computation to finish, which we do using <literal moreinfo="none">Deferred.bind</literal>.
+      First, let's consider the type-signature of <literal>bind</literal>:</para>
 
     <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
@@ -211,8 +201,8 @@
     for running <literal moreinfo="none">f</literal> once <literal
     moreinfo="none">d</literal> is determined.</para>
 
-    <para>Here's a simple use of bind for a function that replaces a file with
-    an uppercase version of its contents:</para>
+    <para>Here's a simple use of <literal>bind</literal> for a function that replaces a file with an
+      uppercase version of its contents:</para>
 
     <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
@@ -249,15 +239,15 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val uppercase_file : string -&gt; unit Deferred.t = &lt;fun&gt;</computeroutput></programlisting>
 
-    <para>In the preceding code, we've dropped the parentheses around the
-    function on the righthand side of the bind, and we didn't add a level of
-    indentation for the contents of that function. This is standard practice
-    for using the bind operator.<indexterm class="singular">
+    <para>In the preceding code, we've dropped the parentheses around the function on the righthand
+      side of the bind, and we didn't add a level of indentation for the contents of that function.
+      This is standard practice for using the <literal>bind</literal> operator.<indexterm
+        class="singular">
         <primary>bind function</primary>
       </indexterm></para>
 
-    <para>Now let's look at another potential use of bind. In this case, we'll
-    write a function that counts the number of lines in a file:</para>
+    <para>Now let's look at another potential use of <literal>bind</literal>. In this case, we'll
+      write a function that counts the number of lines in a file:</para>
 
     <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
@@ -273,13 +263,12 @@
 <computeroutput moreinfo="none">Error: This expression has type int but an expression was expected of type</computeroutput>
 <computeroutput moreinfo="none">         'a Deferred.t</computeroutput></programlisting>
 
-    <para>This looks reasonable enough, but as you can see, the compiler is
-    unhappy. The issue here is that bind expects a function that returns a
-    deferred, but we've provided it a function that returns the nondeferred
-    result directly. To make these signatures match, we need a function for
-    taking an ordinary value and wrapping it in a deferred. This function is a
-    standard part of Async and is called <literal
-    moreinfo="none">return</literal>:<indexterm class="singular">
+    <para>This looks reasonable enough, but as you can see, the compiler is unhappy. The issue here
+      is that <literal>bind</literal> expects a function that returns a deferred, but we've provided
+      it a function that returns the nondeferred result directly. To make these signatures match, we
+      need a function for taking an ordinary value and wrapping it in a deferred. This function is a
+      standard part of Async and is called <literal moreinfo="none">return</literal>:<indexterm
+        class="singular">
         <primary>return function</primary>
       </indexterm></para>
 
@@ -360,18 +349,15 @@
     <sect2 id="ivars-and-upon">
       <title>Ivars and Upon</title>
 
-      <para>Deferreds are usually built using combinations of <literal
-      moreinfo="none">bind</literal>, <literal moreinfo="none">map</literal>
-      and <literal moreinfo="none">return</literal>, but sometimes you want to
-      construct a deferred that you can determine explicitly with user-code.
-      This is done using an <emphasis>ivar</emphasis>. (The term ivar dates
-      back to a language called Concurrent ML that was developed by John Reppy
-      in the early '90s. The "i" in ivar stands for incremental.)<indexterm
-          class="singular">
+      <para>Deferreds are usually built using combinations of <literal moreinfo="none"
+          >bind</literal>, <literal moreinfo="none">map</literal> and <literal moreinfo="none"
+          >return</literal>, but sometimes you want to construct a deferred that you can determine
+        explicitly with usercode. This is done using an <emphasis>ivar</emphasis>. (The term ivar
+        dates back to a language called Concurrent ML that was developed by John Reppy in the early
+        '90s. The "i" in ivar stands for incremental.)<indexterm class="singular">
           <primary>ivars</primary>
         </indexterm><indexterm class="singular">
           <primary>Async library</primary>
-
           <secondary>ivars</secondary>
         </indexterm></para>
 
@@ -382,7 +368,7 @@
       moreinfo="none">Ivar.read</literal>; and you can fill an ivar, thus
       causing the corresponding deferred to become determined, using <literal
       moreinfo="none">Ivar.fill</literal>. These operations are
-      illustrated:</para>
+      illustrated below:</para>
 
       <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
@@ -400,10 +386,10 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Deferred.peek def;;</userinput>
 <computeroutput moreinfo="none">- : string option = Some "Hello"</computeroutput></programlisting>
 
-      <para>Ivars are something of a low-level feature; operators like map,
-      bind and return are typically easier to use and think about. But ivars
-      can be useful when you want to build a synchronization patterns that
-      isn't already well supported.</para>
+      <para>Ivars are something of a low-level feature; operators like <literal>map</literal>,
+          <literal>bind</literal> and <literal>return</literal> are typically easier to use and
+        think about. But ivars can be useful when you want to build a synchronization pattern that
+        isn't already well supported.</para>
 
       <para>As an example, imagine we wanted a way of scheduling a sequence of
       actions that would run after a fixed delay. In addition, we'd like to
@@ -511,18 +497,15 @@
         <secondary>echo server example</secondary>
       </indexterm></para>
 
-    <para>The first step is to create a function that can copy data from an
-    input to an output. Here, we'll use Async's <literal
-    moreinfo="none">Reader</literal> and <literal
-    moreinfo="none">Writer</literal> modules which provide a convenient
-    abstraction for working with input and output channels:<indexterm
-        class="singular">
+    <para>The first step is to create a function that can copy data from an input to an output.
+      Here, we'll use Async's <literal moreinfo="none">Reader</literal> and <literal moreinfo="none"
+        >Writer</literal> modules, which provide a convenient abstraction for working with input and
+      output channels:<indexterm class="singular">
         <primary>Writer module</primary>
       </indexterm><indexterm class="singular">
         <primary>Reader module</primary>
       </indexterm><indexterm class="singular">
         <primary>I/O (input/output) operations</primary>
-
         <secondary>copying data</secondary>
       </indexterm></para>
 
@@ -659,15 +642,13 @@ let () =
 <computeroutput moreinfo="none">It repeats whatever I write.</computeroutput></programlisting>
 
     <sidebar>
-      <title>Functions That Never Return</title>
+      <title>Functions that Never Return</title>
 
-      <para>You might wonder what's going on with the call to <literal
-      moreinfo="none">never_returns</literal>. <literal
-      moreinfo="none">never_returns</literal> is an idiom that comes from
-      <literal moreinfo="none">Core</literal> that is used to mark functions
-      that don't return. Typically, a function that doesn't return is inferred
-      as having return type <literal moreinfo="none">'a</literal>:<indexterm
-          class="singular">
+      <para>You might wonder what's going on with the call to <literal moreinfo="none"
+          >never_returns</literal>. <literal moreinfo="none">never_returns</literal> is an idiom
+        that comes from Core that is used to mark functions that don't return. Typically, a function
+        that doesn't return is inferred as having return type <literal moreinfo="none"
+          >'a</literal>:<indexterm class="singular">
           <primary>Scheduler.go</primary>
         </indexterm><indexterm class="singular">
           <primary>loop_forever</primary>
@@ -677,7 +658,6 @@ let () =
           <primary sortas="a">' a return type</primary>
         </indexterm><indexterm class="singular">
           <primary>functions</primary>
-
           <secondary>non-returning</secondary>
         </indexterm></para>
 
@@ -691,9 +671,9 @@ let () =
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let always_fail () = assert false;;</userinput>
 <computeroutput moreinfo="none">val always_fail : unit -&gt; 'a = &lt;fun&gt;</computeroutput></programlisting>
 
-      <para>This can be surprising when you call a function like this
-      expecting it to return unit. The type-checker won't necessarily complain
-      in such a case:</para>
+      <para>This can be surprising when you call a function like this expecting it to return
+          <literal>unit</literal>. The type-checker won't necessarily complain in such a
+        case:</para>
 
       <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
@@ -723,13 +703,11 @@ let () =
           moreinfo="none"># </prompt><userinput moreinfo="none">let rec loop_forever () : never_returns = loop_forever ();;</userinput>
 <computeroutput moreinfo="none">val loop_forever : unit -&gt; never_returns = &lt;fun&gt;</computeroutput></programlisting>
 
-      <para>The type <literal moreinfo="none">never_returns</literal> is
-      uninhabited, so a function can't return a value of type <literal
-      moreinfo="none">never_returns</literal>, which means only a function
-      that never return can have <literal
-      moreinfo="none">never_returns</literal> as its return type! Now, if we
-      rewrite our <literal moreinfo="none">do_stuff</literal> function, we'll
-      get a helpful type error:</para>
+      <para>The type <literal moreinfo="none">never_returns</literal> is uninhabited, so a function
+        can't return a value of type <literal moreinfo="none">never_returns</literal>, which means
+        only a function that never returns can have <literal moreinfo="none">never_returns</literal>
+        as its return type! Now, if we rewrite our <literal moreinfo="none">do_stuff</literal>
+        function, we'll get a helpful type error:</para>
 
       <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
@@ -856,18 +834,15 @@ let () =
 <computeroutput moreinfo="none">val r : '_a Pipe.Reader.t = &lt;abstr&gt;</computeroutput>
 <computeroutput moreinfo="none">val w : '_a Pipe.Writer.t = &lt;abstr&gt;</computeroutput></programlisting>
 
-      <para><literal moreinfo="none">r</literal> and <literal
-      moreinfo="none">w</literal> are really just read and write handles to
-      the same underlying object. Note that <literal
-      moreinfo="none">r</literal> and <literal moreinfo="none">w</literal>
-      have weakly polymorphic types, as discussed in <xref
-      linkend="imperative-programming"/>, and so can only contain values of a
-      single yet to be determined type.</para>
+      <para><literal moreinfo="none">r</literal> and <literal moreinfo="none">w</literal> are really
+        just read and write handles to the same underlying object. Note that <literal
+          moreinfo="none">r</literal> and <literal moreinfo="none">w</literal> have weakly
+        polymorphic types, as discussed in <xref linkend="imperative-programming"/>, and so can only
+        contain values of a single, yet-to-be-determined type.</para>
 
-      <para>If we just try and write to the writer, we'll see that we block
-      indefinitely in <command moreinfo="none">utop</command>. You can break
-      out of the wait by hitting <literal
-      moreinfo="none">Control-C</literal>:</para>
+      <para>If we just try and write to the writer, we'll see that we block indefinitely in <command
+          moreinfo="none">utop</command>. You can break out of the wait by hitting
+          <userinput>Control-C</userinput>:</para>
 
       <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/pipe_write_break.rawscript">async/pipe_write_break.rawscript</ulink></para>
@@ -925,12 +900,11 @@ let () =
       will shut down that client connection. So, when a client disconnects,
       the rest of the shutdown happens transparently.</para>
 
-      <para>The command-line parsing for this program is based on the <literal
-      moreinfo="none">Command</literal> library that we introduced in <xref
-      linkend="command-line-parsing"/>. Opening <literal
-      moreinfo="none">Async.Std</literal>, shadows the <literal
-      moreinfo="none">Command</literal> module with an extended version that
-      contains the <literal moreinfo="none">async_basic</literal> call:</para>
+      <para>The command-line parsing for this program is based on the Command library that we
+        introduced in <xref linkend="command-line-parsing"/>. Opening <literal moreinfo="none"
+          >Async.Std</literal>, shadows the <literal moreinfo="none">Command</literal> module with
+        an extended version that contains the <literal moreinfo="none">async_basic</literal>
+        call:</para>
 
       <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
@@ -943,15 +917,12 @@ let () =
 <computeroutput moreinfo="none">    ('a, unit -&gt; unit Deferred.t) Command.Spec.t -&gt; 'a -&gt; Command.t</computeroutput>
 <computeroutput moreinfo="none">= &lt;fun&gt;</computeroutput></programlisting>
 
-      <para>This differs from the ordinary <literal
-      moreinfo="none">Command.basic</literal> call in that the main function
-      must return a <literal moreinfo="none">Deferred.t</literal>, and that
-      the running of the command (using <literal
-      moreinfo="none">Command.run</literal>) automatically starts the async
-      scheduler, without requiring an explicit call to <literal
-      moreinfo="none">Scheduler.go</literal>.<indexterm class="endofrange"
-      startref="echo"/><indexterm class="endofrange"
-      startref="ALecho"/></para>
+      <para>This differs from the ordinary <literal moreinfo="none">Command.basic</literal> call in
+        that the main function must return a <literal moreinfo="none">Deferred.t</literal>, and that
+        the running of the command (using <literal moreinfo="none">Command.run</literal>)
+        automatically starts the Async scheduler, without requiring an explicit call to <literal
+          moreinfo="none">Scheduler.go</literal>.<indexterm class="endofrange" startref="echo"
+          /><indexterm class="endofrange" startref="ALecho"/></para>
     </sect2>
   </sect1>
 
@@ -976,7 +947,7 @@ let () =
       </indexterm></para>
 
     <para>Our code is going to rely on a number of other libraries, all of
-    which can be installed using OPAM. Refer to <xref linkend="installation"/>
+      which can be installed using OPAM. Refer to <ulink url="http://realworldocaml.org/install">this Real World OCaml page</ulink>
     if you need help on the installation. Here's the list of libraries we'll
     need:<indexterm class="startofrange" id="ALduckduck">
         <primary>Async library</primary>
@@ -998,8 +969,8 @@ let () =
         <term><literal moreinfo="none">uri</literal></term>
 
         <listitem>
-          <para>A library for handling URIs, or "Uniform Resource
-          Identifiers," of which HTTP URL's are an example.</para>
+          <para>A library for handling URIs, or "Uniform Resource Identifiers," of which HTTP URLs
+            are an example.</para>
         </listitem>
       </varlistentry>
 
@@ -1007,8 +978,8 @@ let () =
         <term><literal moreinfo="none">yojson</literal></term>
 
         <listitem>
-          <para>A JSON parsing library that was described in <xref
-          linkend="handling-json-data"/></para>
+          <para>A JSON parsing library that was described in <xref linkend="handling-json-data"
+            />.</para>
         </listitem>
       </varlistentry>
 
@@ -1028,13 +999,11 @@ let () =
     <sect2 id="uri-handling">
       <title>URI Handling</title>
 
-      <para>HTTP URLs, which identify endpoints across the Web, are actually
-      part of a more general family known as Uniform Resource Identifiers
-      (URIs). The full URI specification is defined in <ulink
-      url="http://tools.ietf.org/html/rfc3986">RFC3986</ulink> and is rather
-      complicated. Luckily, the <literal moreinfo="none">uri</literal> library
-      provides a strongly-typed interface that takes care of much of the
-      hassle.<indexterm class="singular">
+      <para>HTTP URLs, which identify endpoints across the Web, are actually part of a more general
+        family known as Uniform Resource Identifiers (URIs). The full URI specification is defined
+        in <ulink url="http://tools.ietf.org/html/rfc3986">RFC3986</ulink> and is rather
+        complicated. Luckily, the <literal moreinfo="none">uri</literal> library provides a strongly
+        typed interface that takes care of much of the hassle.<indexterm class="singular">
           <primary>RFC3986</primary>
         </indexterm><indexterm class="singular">
           <primary>uniform resource locators (URLs)</primary>
@@ -1042,7 +1011,6 @@ let () =
           <primary>Uniform Resource Identifiers (URIs)</primary>
         </indexterm><indexterm class="singular">
           <primary>DuckDuckGo search engine</primary>
-
           <secondary>URI handling in</secondary>
         </indexterm></para>
 
@@ -1233,13 +1201,11 @@ let search_and_print words =
           moreinfo="none"># </prompt><userinput moreinfo="none">Deferred.all;;</userinput>
 <computeroutput moreinfo="none">- : 'a Deferred.t list -&gt; 'a list Deferred.t = &lt;fun&gt;</computeroutput></programlisting>
 
-      <para>Note that the list returned by <literal
-      moreinfo="none">Deferred.all</literal> reflects the order of the
-      deferreds passed to it. As such, the definitions will be printed out in
-      the same order that the search words are passed in, no matter what
-      orders the queries return in. We could rewrite this code to print out
-      the results as they're received (and thus potentially out of order) as
-      follows:</para>
+      <para>Note that the list returned by <literal moreinfo="none">Deferred.all</literal> reflects
+        the order of the deferreds passed to it. As such, the definitions will be printed out in the
+        same order that the search words are passed in, no matter what order the queries return in.
+        We could rewrite this code to print out the results as they're received (and thus
+        potentially out of order) as follows:</para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search_out_of_order.ml">async/search_out_of_order.ml</ulink>
@@ -1268,8 +1234,8 @@ let search_and_print words =
           moreinfo="none"># </prompt><userinput moreinfo="none">Deferred.all_unit;;</userinput>
 <computeroutput moreinfo="none">- : unit Deferred.t list -&gt; unit Deferred.t = &lt;fun&gt;</computeroutput></programlisting>
 
-      <para>Finally, we create a command line interface using <literal
-      moreinfo="none">Command.async_basic</literal>:</para>
+      <para>Finally, we create a command-line interface using <literal moreinfo="none"
+          >Command.async_basic</literal>:</para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search.ml">async/search.ml</ulink>
@@ -1333,11 +1299,11 @@ let search_and_print words =
         <secondary>exception handling in</secondary>
       </indexterm></para>
 
-    <para>Let's get a better sense of how exceptions work in Async by creating
-    an asynchronous computation that (sometimes) fails with an exception. The
-    function <literal moreinfo="none">maybe_raise</literal>blocks for half a
-    second, and then either throws an exception or returns unit, alternating
-    between the two behaviors on subsequent calls:</para>
+    <para>Let's get a better sense of how exceptions work in Async by creating an asynchronous
+      computation that (sometimes) fails with an exception. The function <literal moreinfo="none"
+        >maybe_raise</literal> <phrase role="keep-together">blocks for half a second,</phrase> and then either throws an exception or
+      returns <literal>unit</literal>, alternating between the two behaviors on subsequent
+      calls:</para>
 
     <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
@@ -1406,11 +1372,9 @@ let search_and_print words =
     an Async job to run in the future, and it's that job that throws an
     exception.</para>
 
-    <para>We can capture this kind of asynchronous error use the <literal
-    moreinfo="none">try_with</literal> function provided by Async:<indexterm
-        class="singular">
+    <para>We can capture this kind of asynchronous error using the <literal moreinfo="none"
+        >try_with</literal> function provided by Async:<indexterm class="singular">
         <primary>exceptions</primary>
-
         <secondary>asynchronous errors</secondary>
       </indexterm></para>
 
@@ -1499,16 +1463,13 @@ let search_and_print words =
       come from <command moreinfo="none">utop</command>'s special handling of
       deferreds.</para>
 
-      <para>Monitors can do more than just augment the error-trace of an
-      exception. You can also use a monitor to explicitly handle errors
-      delivered to that monitor. The <literal
-      moreinfo="none">Monitor.errors</literal> call is a particularly
-      important one. It detaches the monitor from its parent, handing back the
-      stream of errors that would otherwise have been delivered to the parent
-      monitor. This allows one to do custom handling of errors, which may
-      include re-raising errors to the parent. Here is a very simple example
-      of a function that captures and ignores errors in the processes it
-      spawns:</para>
+      <para>Monitors can do more than just augment the error-trace of an exception. You can also use
+        a monitor to explicitly handle errors delivered to that monitor. The <literal
+          moreinfo="none">Monitor.errors</literal> call is a particularly important one. It detaches
+        the monitor from its parent, handing back the stream of errors that would otherwise have
+        been delivered to the parent monitor. This allows one to do custom handling of errors, which
+        may include reraising errors to the parent. Here is a very simple example of a function that
+        captures and ignores errors in the processes it spawns:</para>
 
       <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main-35.rawscript">async/main-35.rawscript</ulink></para>
@@ -1530,19 +1491,13 @@ let search_and_print words =
       returned by <literal moreinfo="none">swallow_error</literal> is never
       determined. This makes sense, since the calculation never actually
       completes, so there's no value to return. You can break out of this in
-      <command moreinfo="none">utop</command> by hitting <keycombo
-          moreinfo="none">
-          <keycap moreinfo="none">Control</keycap>
+      <command moreinfo="none">utop</command> by hitting <userinput>Control+C</userinput>
+        .</para>
 
-          <keycap moreinfo="none">C</keycap>
-        </keycombo>.</para>
-
-      <para>Here's an example of a monitor which passes some exceptions
-      through to the parent and handles others. Exceptions are sent to the
-      parent using <literal moreinfo="none">Monitor.send_exn</literal>, with
-      <literal moreinfo="none">Monitor.current</literal> being called to find
-      the current monitor, which is the parent of the newly created
-      monitor:</para>
+      <para>Here's an example of a monitor that passes some exceptions through to the parent and
+        handles others. Exceptions are sent to the parent using <literal moreinfo="none"
+          >Monitor.send_exn</literal>, with <literal moreinfo="none">Monitor.current</literal> being
+        called to find the current monitor, which is the parent of the newly created monitor:</para>
 
       <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
@@ -1592,9 +1547,7 @@ let search_and_print words =
 <computeroutput moreinfo="none">    ((name main) (here ()) (id 1) (has_seen_error false)</computeroutput>
 <computeroutput moreinfo="none">     (someone_is_listening false) (kill_index 0)))))).</computeroutput></programlisting>
 
-      <para>If instead we use <literal moreinfo="none">Ignore_me</literal>,
-      the exception will be ignored, and we again see that the deferred never
-      returns, but the exception was caught and ignored:</para>
+      <para>If instead we use <literal>Ignore_me</literal>, the exception will be ignorred, and the deferred never becomes determined:</para>
 
       <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main-38.rawscript">async/main-38.rawscript</ulink></para>
@@ -1603,30 +1556,26 @@ let search_and_print words =
           moreinfo="none"># swallow_some_errors Ignore_me;;</userinput>
 <computeroutput moreinfo="none">ignoring exn</computeroutput></programlisting>
 
-      <para>In practice, you should rarely use monitors directly; instead,
-      using functions like <literal moreinfo="none">try_with</literal> and
-      <literal moreinfo="none">Monitor.protect</literal> that are built on top
-      of monitors. One example of a library that uses monitors directly is
-      <literal moreinfo="none">Tcp.Server.create</literal>, which tracks both
-      exceptions thrown by the logic that handles the network connection and
-      by the callback for responding to an individual request, in either case
-      responding to an exception by closing the connection. It is for building
-      this kind of custom error handling that monitors can be helpful.</para>
+      <para>In practice, you should rarely use monitors directly, and instead use functions like
+          <literal moreinfo="none">try_with</literal> and <literal moreinfo="none"
+          >Monitor.protect</literal> that are built on top of monitors. One example of a library
+        that uses monitors directly is <literal moreinfo="none">Tcp.Server.create</literal>, which
+        tracks both exceptions thrown by the logic that handles the network connection and by the
+        callback for responding to an individual request, in either case responding to an exception
+        by closing the connection. It is for building this kind of custom error handling that
+        monitors can be helpful.</para>
     </sect2>
 
     <sect2 id="example-handling-exceptions-with-duckduckgo">
       <title>Example: Handling Exceptions with DuckDuckGo</title>
 
-      <para>Let's now go back and improve the exception handling of our
-      DuckDuckGo client. In particular, we'll change it so that any individual
-      queries that fail are reported as such, without preventing other queries
-      from succeeding.<indexterm class="singular">
+      <para>Let's now go back and improve the exception handling of our DuckDuckGo client. In
+        particular, we'll change it so that any query that fails is reported without preventing
+        other queries from completing.<indexterm class="singular">
           <primary>exceptions</primary>
-
           <secondary>search engine example</secondary>
         </indexterm><indexterm class="singular">
           <primary>DuckDuckGo search engine</primary>
-
           <secondary>exception handling in</secondary>
         </indexterm></para>
 
@@ -1651,11 +1600,10 @@ let query_uri ~server query =
   in
   Uri.add_query_param base_uri ("q", [query])</programlisting>
 
-      <para>and then making the appropriate changes to get the list of servers
-      on the command-line, and to distribute the search queries round-robin
-      over the list of servers. Now, let's see what happens if we rebuild the
-      application and run it giving it a list of servers, some of which won't
-      respond to the query:</para>
+      <para>In addition, we'll make the necessary changes to get the list of servers on the
+        command-line, and to distribute the search qeuries round-robin across the list of servers.
+        Now, let's see what happens if we rebuild the application and run it giving it a list of
+        servers, some of which won't respond to the query:</para>
 
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/run_search_with_configurable_server.out">async/run_search_with_configurable_server.out</ulink></para>
@@ -1670,7 +1618,8 @@ let query_uri ~server query =
 <computeroutput moreinfo="none"> ((lib/monitor.ml.Error_</computeroutput>
 <computeroutput moreinfo="none">   ((exn (Unix.Unix_error "Connection refused" connect 127.0.0.1:80))</computeroutput>
 <computeroutput moreinfo="none">    (backtrace</computeroutput>
-<computeroutput moreinfo="none">     ("Raised by primitive operation at file \"lib/unix_syscalls.ml\", line 797, characters 12-69"</computeroutput>
+<computeroutput moreinfo="none">     ("Raised by primitive operation at file \"lib/unix_syscalls.ml\", line 797,
+       characters 12-69"</computeroutput>
 <computeroutput moreinfo="none">      "Called from file \"lib/deferred.ml\", line 20, characters 62-65"</computeroutput>
 <computeroutput moreinfo="none">      "Called from file \"lib/scheduler.ml\", line 125, characters 6-17"</computeroutput>
 <computeroutput moreinfo="none">      "Called from file \"lib/jobs.ml\", line 65, characters 8-13" ""))</computeroutput>
@@ -1681,12 +1630,11 @@ let query_uri ~server query =
 <computeroutput moreinfo="none">       (someone_is_listening false) (kill_index 0))))))</computeroutput>
 <computeroutput moreinfo="none">  (Pid 15971)))</computeroutput></programlisting>
 
-      <para>As you can see, we got a "Connection refused" failure, which ends
-      the entire program, even though one of the two queries would have gone
-      through successfully. We can handle the failures of individual
-      connections separately by using the <literal
-      moreinfo="none">try_with</literal> function within each call to <literal
-      moreinfo="none">get_definition</literal>, as follows:</para>
+      <para>As you can see, we got a "Connection refused" failure, which ends the entire program,
+        even though one of the two queries would have gone through successfully on its own. We can
+        handle the failures of individual connections separately by using the <literal
+          moreinfo="none">try_with</literal> function within each call to <literal moreinfo="none"
+          >get_definition</literal>, as follows:</para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search_with_error_handling.ml">async/search_with_error_handling.ml</ulink>
@@ -1855,16 +1803,13 @@ let print_result (word,definition) =
     moreinfo="none">Deferred.any</literal> can choose between values of the
     same type.</para>
 
-    <para>A problem with this code is that the HTTP query kicked off by
-    <literal moreinfo="none">get_definition</literal> is not actually shut
-    down when the timeout fires. As such, <literal
-    moreinfo="none">get_definition_with_timeout</literal> essentially leaks an
-    open connection. Happily, Cohttp does provide a way of shutting down a
-    client. You can pass a deferred under the label <literal
-    moreinfo="none">interrupt</literal> to <literal
-    moreinfo="none">Cohttp_async.Client.get</literal>. Once <literal
-    moreinfo="none">interrupt</literal> is determined, the client connection
-    will terminated and the corresponding connections closed.</para>
+    <para>A problem with this code is that the HTTP query kicked off by <literal moreinfo="none"
+        >get_definition</literal> is not actually shut down when the timeout fires. As such,
+        <literal moreinfo="none">get_definition_with_timeout</literal> can leak an open connection.
+      Happily, Cohttp does provide a way of shutting down a client. You can pass a deferred under
+      the label <literal moreinfo="none">interrupt</literal> to <literal moreinfo="none"
+        >Cohttp_async.Client.get</literal>. Once <literal moreinfo="none">interrupt</literal> is
+      determined, the client connection will be shut down.</para>
 
     <para>The following code shows how you can change <literal
     moreinfo="none">get_definition</literal> and <literal
@@ -1916,14 +1861,12 @@ let get_definition ~server ~interrupt word =
         <primary>Unexpected failure message</primary>
       </indexterm></para>
 
-    <para>We can get more precise handling of timeouts using Async's <literal
-    moreinfo="none">choose</literal> function. <literal
-    moreinfo="none">choose</literal> lets you pick between a collection of
-    different deferreds, reacting to exactly one of them. Each deferred is
-    paired, using the function <literal moreinfo="none">choice</literal>, with
-    a function that is called if and only if that is deferred is chosen.
-    Here's the type signature of <literal moreinfo="none">choice</literal> and
-    <literal moreinfo="none">choose</literal>:</para>
+    <para>We can get more precise handling of timeouts using Async's <literal moreinfo="none"
+        >choose</literal> function. <literal moreinfo="none">choose</literal> lets you pick among a
+      collection of different deferreds, reacting to exactly one of them. Each deferred is paired,
+      using the function <literal moreinfo="none">choice</literal>, with a function that is called
+      if and only if that deferred is chosen. Here's the type signature of <literal moreinfo="none"
+        >choice</literal> and <literal moreinfo="none">choose</literal>:</para>
 
     <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
@@ -1942,10 +1885,9 @@ let get_definition ~server ~interrupt word =
     <literal moreinfo="none">choice</literal> will execute the attached
     function.</para>
 
-    <para>In the following example, we use <literal
-    moreinfo="none">choose</literal> to ensure that the <literal
-    moreinfo="none">interrupt</literal> deferred becomes determined if and
-    only if the timeout-deferred is chosen. Here's the code:</para>
+    <para>In the following example, we use <literal moreinfo="none">choose</literal> to ensure that
+      the <literal moreinfo="none">interrupt</literal> deferred becomes determined if and only if
+      the timeout deferred is chosen. Here's the code:</para>
 
     <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search_with_timeout_no_leak.ml">async/search_with_timeout_no_leak.ml</ulink>
@@ -2045,11 +1987,10 @@ let get_definition ~server ~interrupt word =
     OCaml's foreign function interface is discussed in more detail in <xref
     linkend="foreign-function-interface"/>.</para>
 
-    <para>Another occasional use for system threads is to better interoperate
-    with compute-intensive OCaml code. In Async, if you have a long-running
-    computation that never calls <literal moreinfo="none">bind</literal> or
-    <literal moreinfo="none">map</literal>, then that computation will block
-    out the async runtime until it completes.</para>
+    <para>Another occasional use for system threads is to better interoperate with compute-intensive
+      OCaml code. In Async, if you have a long-running computation that never calls <literal
+        moreinfo="none">bind</literal> or <literal moreinfo="none">map</literal>, then that
+      computation will block out the Async runtime until it completes.</para>
 
     <para>One way of dealing with this is to explicitly break up the
     calculation into smaller pieces that are separated by binds. But sometimes
@@ -2113,8 +2054,8 @@ let get_definition ~server ~interrupt word =
 <computeroutput moreinfo="none">0.154972ms, 102.126ms, 203.658ms, 305.73ms, 407.903ms, 501.563ms,
 - : unit = ()</computeroutput></programlisting>
 
-    <para>Now see what happens if, instead of waiting on a clock event, we
-    wait for a busy-loop to finish running:</para>
+    <para>Now see what happens if, instead of waiting on a clock event, we wait for a busy loop to
+      finish running:</para>
 
     <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main-45.rawscript">async/main-45.rawscript</ulink></para>
@@ -2145,20 +2086,17 @@ let get_definition ~server ~interrupt word =
 <computeroutput moreinfo="none">0.332117ms, 16.6319s, 18.8722s,
 - : unit = ()</computeroutput></programlisting>
 
-    <para>Now <literal moreinfo="none">log_delays</literal> does get a chance
-    to run, but not nearly as often as every 100 milliseconds. The reason for
-    this is that now that we're using system threads, we are at the mercy of
-    the operating system to decide when each thread gets scheduled. The
-    behavior of threads is very much dependent on the operating system and how
-    it is configured.</para>
+    <para>Now <literal moreinfo="none">log_delays</literal> does get a chance to run, but not nearly
+      as often as every 100 milliseconds. The reason is that now that we're using system threads, we
+      are at the mercy of the operating system to decide when each thread gets scheduled. The
+      behavior of threads is very much dependent on the operating system and how it is
+      configured.</para>
 
-    <para>Another tricky aspect of dealing with OCaml threads has to do with
-    allocation. When compiling to native code, OCaml's threads only get a
-    chance to give up the runtime lock when they interact with the allocator,
-    so if there's a piece of code that doesn't allocate at all, then it will
-    never allow another OCaml thread to run. Byte-code doesn't have this
-    behavior, so if we run a nonallocating loop in byte-code, our timer
-    process will get to run:</para>
+    <para>Another tricky aspect of dealing with OCaml threads has to do with allocation. When
+      compiling to native code, OCaml's threads only get a chance to give up the runtime lock when
+      they interact with the allocator, so if there's a piece of code that doesn't allocate at all,
+      then it will never allow another OCaml thread to run. Bytecode doesn't have this behavior, so
+      if we run a nonallocating loop in bytecode, our timer process will get to run:</para>
 
     <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main-47.rawscript">async/main-47.rawscript</ulink></para>
@@ -2172,8 +2110,8 @@ let get_definition ~server ~interrupt word =
 <computeroutput moreinfo="none">0.169039ms, 4.58345s, 4.77866s, 4.87957s, 12.4723s, 15.0134s,
 - : unit = ()</computeroutput></programlisting>
 
-    <para>But if we compile this to a native-code executable, then the
-    nonallocating busy-loop will block anything else from running:</para>
+    <para>But if we compile this to a native-code executable, then the nonallocating busy loop will
+      block anything else from running:</para>
 
     <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/async/run_native_code_log_delays.out">async/run_native_code_log_delays.out</ulink></para>
@@ -2225,19 +2163,17 @@ let get_definition ~server ~interrupt word =
       a <literal moreinfo="none">Mutex.t</literal>, and acquiring the mutex is
       about 40 percent faster.</para>
 
-      <para>Overall, combining Async and threads is quite tricky, but it can
-      be done safely if you follow the following hold:</para>
+      <para>Overall, combining Async and threads is quite tricky, but it can be done safely if the
+        following hold:</para>
 
       <itemizedlist>
         <listitem>
-          <para>There is no shared mutable state between the various threads
-          involved</para>
+          <para>There is no shared mutable state between the various threads involved.</para>
         </listitem>
 
         <listitem>
-          <para>The computations executed by <literal
-          moreinfo="none">In_thread.run</literal> do not make any calls to the
-          async library</para>
+          <para>The computations executed by <literal moreinfo="none">In_thread.run</literal> do not
+            make any calls to the Async library.</para>
         </listitem>
       </itemizedlist>
 

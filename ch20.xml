@@ -49,21 +49,18 @@
   <note>
     <title>Why Do OCaml Types Disappear at Runtime?</title>
 
-    <para>The OCaml compiler runs through several phases during the
-    compilation process. The first phase is syntax checking, during which
-    source files are parsed into Abstract Syntax Trees (ASTs). The next stage
-    is a <emphasis>type checking</emphasis> pass over the AST. In a validly
-    typed program, a function cannot be applied with an unexpected type. For
-    example, the <literal moreinfo="none">print_endline</literal> function
-    must receive a single <literal moreinfo="none">string</literal> argument,
-    and an <literal moreinfo="none">int</literal> will result in a type
-    error.<indexterm class="singular">
+    <para>The OCaml compiler runs through several phases during the compilation process. The first
+      phase is syntax checking, during which source files are parsed into abstract syntax trees
+      (ASTs). The next stage is a <emphasis>type checking</emphasis> pass over the AST. In a validly
+      typed program, a function cannot be applied with an unexpected type. For example, the <literal
+        moreinfo="none">print_endline</literal> function must receive a single <literal
+        moreinfo="none">string</literal> argument, and an <literal moreinfo="none">int</literal>
+      will result in a type error.<indexterm class="singular">
         <primary>type checking</primary>
       </indexterm><indexterm class="singular">
         <primary>AST (abstract syntax-tree)</primary>
       </indexterm><indexterm class="singular">
         <primary>compilation process</primary>
-
         <secondary>phases of</secondary>
       </indexterm></para>
 
@@ -152,22 +149,19 @@
       </indexterm></para>
 
     <sect2 id="distinguishing-integer-and-pointers-at-runtime">
-      <title>Distinguishing Integer and Pointers at Runtime</title>
+      <title>Distinguishing Integers and Pointers at Runtime</title>
 
-      <para>Wrapping primitives types (such as integers) inside another data
-      structure that records extra metadata about the value is known as
-      <emphasis>boxing</emphasis>. Values are boxed in order to make it easier
-      for the garbage collector to do its job, but at the expense of an extra
-      level of indirection to access the data within the boxed
-      value.<indexterm class="singular">
+      <para>Wrapping primitives types (such as integers) inside another data structure that records
+        extra metadata about the value is known as <emphasis>boxing</emphasis>. Values are boxed in
+        order to make it easier for the garbage collector (GC) to do its job, but at the expense of
+        an extra level of indirection to access the data within the boxed value.<indexterm
+          class="singular">
           <primary>garbage collection</primary>
-
           <secondary sortas="boxed">and boxed values</secondary>
         </indexterm><indexterm class="singular">
           <primary>boxing (of values)</primary>
         </indexterm><indexterm class="singular">
           <primary>values</primary>
-
           <secondary>boxing of</secondary>
         </indexterm></para>
 
@@ -192,10 +186,9 @@
       pointers are guaranteed to be word-aligned (with the bottom bits always
       being zero).</para>
 
-      <para>The only problem that remains with this memory representation is
-      distinguishing between pointers to OCaml values (which should be
-      followed by the garbage collector) and pointers into the system heap to
-      C values (which shouldn't be followed).</para>
+      <para>The only problem that remains with this memory representation is distinguishing between
+        pointers to OCaml values (which should be followed by the GC) and pointers into the system
+        heap to C values (which shouldn't be followed).</para>
 
       <para>The mechanism for this is simple, since the runtime system keeps
       track of the heap blocks it has allocated for OCaml values. If the
@@ -259,22 +252,21 @@
         <secondary>blocks and values</secondary>
       </indexterm></para>
 
-    <para>The garbage collector never inspects opaque bytes. If the tag
-    indicates an array of OCaml fields are present, their contents are all
-    treated as more valid OCaml values. The garbage collector always inspects
-    fields and follows them as part of the collection process described
-    earlier.<indexterm class="singular">
+    <para>The GC never inspects opaque bytes. If the tag indicates an array of OCaml fields are
+      present, their contents are all treated as more valid OCaml values. The GC always inspects fields and follows them as part of the
+      collection process described earlier.<indexterm class="singular">
         <primary>garbage collection</primary>
-
         <secondary>opaque bytes and</secondary>
       </indexterm><indexterm class="singular">
         <primary>opaque bytes</primary>
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/block.ascii">Diagram</ulink></para>
-
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/block.ascii"
+      >Diagram</ulink></para>
+    
     <informalfigure>
+     
       <mediaobject>
         <imageobject role="web">
           <imagedata fileref="images/rwoc_2001.png" format="PNG"/>
@@ -288,11 +280,10 @@
     you need bigger strings, either switch to a 64-bit host, or use the
     <literal moreinfo="none">Bigarray</literal> module.</para>
 
-    <para>The 2-bit <literal moreinfo="none">color</literal> field is used by
-    the garbage collector to keep track of its state during mark-and-sweep
-    collection. We'll come back to this field in <xref
-    linkend="understanding-the-garbage-collector"/>. This tag isn't exposed to
-    OCaml source code in any case.</para>
+    <para>The 2-bit <literal moreinfo="none">color</literal> field is used by the GC to keep track
+      of its state during mark-and-sweep collection. We'll come back to this field in <xref
+        linkend="understanding-the-garbage-collector"/>. This tag isn't exposed to OCaml source code
+      in any case.</para>
 
     <para>A block's tag byte is multipurpose, and indicates whether the data
     array represents opaque bytes or fields. If a block's tag is greater than
@@ -302,16 +293,14 @@
     moreinfo="none">string</literal> type, which we describe in more detail
     later in this chapter.</para>
 
-    <para>The exact representation of values inside a block depends on their
-    static OCaml type. All OCaml types are distilled down into <literal
-    moreinfo="none">values</literal>, and summarized in the table
-    below.<indexterm class="singular">
+    <para>The exact representation of values inside a block depends on their static OCaml type. All
+      OCaml types are distilled down into <literal moreinfo="none">values</literal>, and summarized
+      in <xref linkend="table20-1_ocaml"/>.<indexterm class="singular">
         <primary>values</primary>
-
         <secondary>memory representation of</secondary>
       </indexterm><indexterm class="endofrange" startref="blck"/></para>
 
-    <informaltable>
+    <table id="table20-1_ocaml"><title>Need title</title>
       <tgroup cols="2">
         <colspec align="left"/>
 
@@ -319,7 +308,7 @@
 
         <thead>
           <row>
-            <entry>OCaml Value</entry>
+            <entry>OCaml value</entry>
 
             <entry>Representation</entry>
           </row>
@@ -330,8 +319,8 @@
             <entry><literal moreinfo="none">int</literal> or <literal
             moreinfo="none">char</literal></entry>
 
-            <entry>directly as a value, shifted left by 1 bit, with the least
-            significant bit set to 1</entry>
+            <entry>Directly as a value, shifted left by 1 bit, with the least significant bit set to
+              1.</entry>
           </row>
 
           <row>
@@ -339,100 +328,93 @@
             moreinfo="none">[]</literal>, <literal
             moreinfo="none">false</literal></entry>
 
-            <entry>as OCaml <literal moreinfo="none">int</literal> 0.</entry>
+            <entry>As OCaml <literal moreinfo="none">int</literal> 0.</entry>
           </row>
 
           <row>
             <entry><literal moreinfo="none">true</literal></entry>
 
-            <entry>as OCaml <literal moreinfo="none">int</literal> 1.</entry>
+            <entry>As OCaml <literal moreinfo="none">int</literal> 1.</entry>
           </row>
 
           <row>
             <entry><literal moreinfo="none">Foo | Bar</literal></entry>
 
-            <entry>as ascending OCaml <literal moreinfo="none">int</literal>s,
-            starting from 0.</entry>
+            <entry>As ascending OCaml <literal moreinfo="none">int</literal>s, starting from
+              0.</entry>
           </row>
 
           <row>
             <entry><literal moreinfo="none">Foo | Bar of int</literal></entry>
 
-            <entry>variants with parameters are boxed, while variants with no
-            parameters are unboxed.</entry>
+            <entry>Variants with parameters are boxed, while variants with no parameters are
+              unboxed.</entry>
           </row>
 
           <row>
-            <entry>polymorphic variants</entry>
+            <entry>Polymorphic variants</entry>
 
-            <entry>variable space usage depending on the number of
-            parameters.</entry>
+            <entry>Variable space usage depending on the number of parameters.</entry>
           </row>
 
           <row>
-            <entry>floating-point number</entry>
+            <entry>Floating-point number</entry>
 
-            <entry>as a block with a single field containing the
-            double-precision float.</entry>
+            <entry>As a block with a single field containing the double-precision float.</entry>
           </row>
 
           <row>
-            <entry>string</entry>
+            <entry>String</entry>
 
-            <entry>word-aligned byte arrays with an explicit length.</entry>
+            <entry>Word-aligned byte arrays with an explicit length.</entry>
           </row>
 
           <row>
             <entry><literal moreinfo="none">[1; 2; 3]</literal></entry>
 
-            <entry>as <literal moreinfo="none">1::2::3::[]</literal> where
-            <literal moreinfo="none">[]</literal> is an int, and <literal
-            moreinfo="none">h::t</literal> a block with tag 0 and two
-            parameters.</entry>
+            <entry>As <literal moreinfo="none">1::2::3::[]</literal> where <literal moreinfo="none"
+                >[]</literal> is an int, and <literal moreinfo="none">h::t</literal> a block with
+              tag 0 and two parameters.</entry>
           </row>
 
           <row>
-            <entry>tuples, records and arrays</entry>
+            <entry>Tuples, records, and arrays</entry>
 
-            <entry>an array of values. Arrays can be variable size, but
-            structs and tuples are fixed size.</entry>
+            <entry>An array of values. Arrays can be variable size, but tuples and records are
+              fixed-size.</entry>
           </row>
 
           <row>
-            <entry>records or arrays, all float</entry>
+            <entry>Records or arrays, all float</entry>
 
-            <entry>special tag for unboxed arrays of floats, or records that
-            only have <literal moreinfo="none">float</literal> fields.</entry>
+            <entry>Special tag for unboxed arrays of floats, or records that only have <literal
+                moreinfo="none">float</literal> fields.</entry>
           </row>
         </tbody>
       </tgroup>
-    </informaltable>
+    </table>
 
     <sect2 id="integers-characters-and-other-basic-types">
-      <title>Integers, Characters and Other Basic Types</title>
+      <title>Integers, Characters, and Other Basic Types</title>
 
-      <para>Many basic types are efficiently stored as unboxed integers at
-      runtime. The native <literal moreinfo="none">int</literal> type is the
-      most obvious, although it drops a single bit of precision due to the tag
-      bit. Other atomic types such as <literal moreinfo="none">unit</literal>
-      and empty list <literal moreinfo="none">[]</literal> value are stored as
-      constant integers. Boolean values have a value of <literal
-      moreinfo="none">1</literal> and <literal moreinfo="none">0</literal> for
-      <literal moreinfo="none">true</literal> and <literal
-      moreinfo="none">false</literal>, respectively.<indexterm
-          class="singular">
+      <para>Many basic types are efficiently stored as unboxed integers at runtime. The native
+          <literal moreinfo="none">int</literal> type is the most obvious, although it drops a
+        single bit of precision due to the tag bit. Other atomic types such as <literal
+          moreinfo="none">unit</literal> and the empty list <literal moreinfo="none">[]</literal>
+        value are stored as constant integers. Boolean values have a value of <literal
+          moreinfo="none">1</literal> and <literal moreinfo="none">0</literal> for <literal
+          moreinfo="none">true</literal> and <literal moreinfo="none">false</literal>,
+          respectively.<indexterm class="singular">
           <primary>integers</primary>
         </indexterm><indexterm class="singular">
           <primary>unboxed integers</primary>
         </indexterm></para>
 
-      <para>These basic types such as empty lists and <literal
-      moreinfo="none">unit</literal> are very efficient to use since integers
-      are never allocated on the heap. They can be passed directly in
-      registers and not appear on the stack if you don't have too many
-      parameters to your functions. Modern architectures such as <literal
-      moreinfo="none">x86_64</literal> have a lot of spare registers to
-      further improve the efficiency of using unboxed integers.</para>
+      <para>These basic types such as empty lists and <literal moreinfo="none">unit</literal> are
+        very efficient to use, since integers are never allocated on the heap. They can be passed
+        directly in registers and not appear on the stack if you don't have too many parameters to
+        your functions. Modern architectures such as <literal moreinfo="none">x86_64</literal> have
+        a lot of spare registers to further improve the efficiency of using unboxed integers.</para>
     </sect2>
   </sect1>
 
@@ -440,7 +422,8 @@
     <title>Tuples, Records, and Arrays</title>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/tuple_layout.ascii">Diagram</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/tuple_layout.ascii">Diagram</ulink></para>
+    
 
     <informalfigure>
       <mediaobject>
@@ -490,13 +473,12 @@
     if the value is a block header or an unboxed integer.</para>
 
     <sect2 id="floating-point-numbers-and-arrays">
-      <title>Floating Point Numbers and Arrays</title>
+      <title>Floating-Point Numbers and Arrays</title>
 
-      <para>Floating point numbers in OCaml are always stored as full,
-      double-precision values. Individual floating-point values are stored as
-      a block with a single field that contains the number. This block has the
-      <literal moreinfo="none">Double_tag</literal> set, which signals to the
-      collector that the floating-point value is not to be scanned:<indexterm
+      <para>Floating-point numbers in OCaml are always stored as full, double-precision values.
+        Individual floating-point values are stored as a block with a single field that contains the
+        number. This block has the <literal moreinfo="none">Double_tag</literal> set, which signals
+        to the collector that the floating-point value is not to be scanned:<indexterm
           class="singular">
           <primary>floating-point values</primary>
         </indexterm></para>
@@ -511,17 +493,16 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Obj.double_tag ;;</userinput>
 <computeroutput moreinfo="none">- : int = 253</computeroutput></programlisting>
 
-      <para>Since each floating-point value is boxed in a separate memory
-      block, it can be inefficient to handle large arrays of floats in
-      comparison to unboxed integers. OCaml therefore special-cases records or
-      arrays that contain <emphasis>only</emphasis> <literal
-      moreinfo="none">float</literal> types. These are stored in a block that
-      contains the floats packed directly in the data section, with the
-      <literal moreinfo="none">Double_array_tag</literal> set to signal to the
-      collector that the contents are not OCaml values.</para>
+      <para>Since each floating-point value is boxed in a separate memory block, it can be
+        inefficient to handle large arrays of floats in comparison to unboxed integers. OCaml
+        therefore special-cases records or arrays that contain <emphasis>only</emphasis>
+        <literal moreinfo="none">float</literal> types. These are stored in a block that contains
+        the floats packed directly in the data section, with <literal moreinfo="none"
+          >Double_array_tag</literal> set to signal to the collector that the contents are not OCaml
+        values.</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/float_array_layout.ascii">Diagram</ulink></para>
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/float_array_layout.ascii">Diagram</ulink></para>
 
       <informalfigure>
         <mediaobject>
@@ -565,11 +546,10 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Obj.double_field (Obj.repr 1.234) 0 ;;</userinput>
 <computeroutput moreinfo="none">- : float = 1.234</computeroutput></programlisting>
 
-      <para>The first thing we tested was that a float array has the correct
-      unboxed float array tag value (254). However, the next line tests a
-      tuple of floating point values instead, which are
-      <emphasis>not</emphasis> optimized in the same way and have the normal
-      tuple tag value (0).</para>
+      <para>The first thing we tested was that a float array has the correct unboxed float array tag
+        value (254). However, the next line tests a tuple of floating-point values instead, which
+        are <emphasis>not</emphasis> optimized in the same way and have the normal tuple tag value
+        (0).</para>
 
       <para>Only records and arrays can have the float array optimization, and
       for records, every single field must be a float.</para>
@@ -640,19 +620,16 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">(Obj.magic (Obj.field (Obj.repr (Pear "xyz")) 0) : string) ;;</userinput>
 <computeroutput moreinfo="none">- : string = "xyz"</computeroutput></programlisting>
 
-    <para>In the preceding example, the <literal
-    moreinfo="none">Apple</literal> and <literal
-    moreinfo="none">Kiwi</literal> values are still stored as normal OCaml
-    integers with values <literal moreinfo="none">0</literal> and <literal
-    moreinfo="none">1</literal>, respectively. The <literal
-    moreinfo="none">Orange</literal> and <literal
-    moreinfo="none">Pear</literal> values both have parameters and are stored
-    as blocks whose tags ascend from <literal moreinfo="none">0</literal> (and
-    so <literal moreinfo="none">Pear</literal> has a tag of <literal
-    moreinfo="none">1</literal>, as the use of <literal
-    moreinfo="none">Obj.tag</literal> verifies). Finally, the parameters are
-    fields which contain OCaml values within the block, and <literal
-    moreinfo="none">Obj.field</literal> can be used to retrieve them.</para>
+    <para>In the preceding example, the <literal moreinfo="none">Apple</literal> and <literal
+        moreinfo="none">Kiwi</literal> values are still stored as normal OCaml integers with values
+        <literal moreinfo="none">0</literal> and <literal moreinfo="none">1</literal>, respectively.
+      The <literal moreinfo="none">Orange</literal> and <literal moreinfo="none">Pear</literal>
+      values both have parameters and are stored as blocks whose tags ascend from <literal
+        moreinfo="none">0</literal> (and so <literal moreinfo="none">Pear</literal> has a tag of
+        <literal moreinfo="none">1</literal>, as the use of <literal moreinfo="none"
+        >Obj.tag</literal> verifies). Finally, the parameters are fields that contain OCaml values
+      within the block, and <literal moreinfo="none">Obj.field</literal> can be used to retrieve
+      them.</para>
 
     <para>Lists are stored with a representation that is exactly the same as
     if the list was written as a variant type with <literal
@@ -674,23 +651,18 @@
       </indexterm></para>
 
     <warning>
-      <title><literal moreinfo="none">Obj</literal> Module Considered
-      Harmful</title>
+      <title>Obj Module Considered Harmful</title>
 
-      <para>The <literal moreinfo="none">Obj</literal> module is an
-      undocumented module that exposes the internals of the OCaml compiler and
-      runtime. It is very useful for examining and understanding how your code
-      will behave at runtime but should <emphasis>never</emphasis> be used for
-      production code unless you understand the implications. The module
-      bypasses the OCaml type system, making memory corruption and
-      segmentation faults possible.</para>
+      <para><literal moreinfo="none">Obj</literal> is an undocumented module that exposes the
+        internals of the OCaml compiler and runtime. It is very useful for examining and
+        understanding how your code will behave at runtime but should <emphasis>never</emphasis> be
+        used for production code unless you understand the implications. The module bypasses the
+        OCaml type system, making memory corruption and segmentation faults possible.</para>
 
-      <para>Some theorem provers such as Coq do output code which uses
-      <literal moreinfo="none">Obj</literal> internally, but the external
-      module signatures never expose it. Unless you too have a machine proof
-      of correctness to accompany your use of <literal
-      moreinfo="none">Obj</literal>, stay away from it except for
-      debugging!</para>
+      <para>Some theorem provers such as Coq do output code that uses <literal moreinfo="none"
+          >Obj</literal> internally, but the external module signatures never expose it. Unless you
+        too have a machine proof of correctness to accompany your use of <literal moreinfo="none"
+          >Obj</literal>, stay away from it except for debugging!</para>
     </warning>
 
     <para>Due to this encoding, there is a limit around 240 variants with
@@ -738,24 +710,20 @@
     64-bit architectures, so the memory representation is stable across
     different CPUs and host types.</para>
 
-    <para>Polymorphic variants use more memory space than normal variants when
-    parameters are included in the datatype constructors. Normal variants use
-    the tag byte to encode the variant value and save the fields for the
-    contents, but this single byte is insufficient to encode the hashed value
-    for polymorphic variants. They must allocate a new block (with tag
-    <literal moreinfo="none">0</literal>) and store the value in there
-    instead. Polymorphic variants with constructors thus use one word of
-    memory more than normal variant constructors.</para>
+    <para>Polymorphic variants use more memory space than normal variants when parameters are
+      included in the data type constructors. Normal variants use the tag byte to encode the variant
+      value and save the fields for the contents, but this single byte is insufficient to encode the
+      hashed value for polymorphic variants. They must allocate a new block (with tag <literal
+        moreinfo="none">0</literal>) and store the value in there instead. Polymorphic variants with
+      constructors thus use one word of memory more than normal variant constructors.</para>
 
-    <para>Another inefficiency over normal variants is when a polymorphic
-    variant constructor has more than one parameter. Normal variants hold
-    parameters as a single flat block with multiple fields for each entry, but
-    polymorphic variants must adopt a more flexible uniform memory
-    representation since they may be reused in a different context across
-    compilation units. They allocate a tuple block for the parameters that is
-    pointed to from the argument field of the variant. There are thus three
-    additional words for such variants, along with an extra memory indirection
-    due to the tuple.</para>
+    <para>Another inefficiency over normal variants is when a polymorphic variant constructor has
+      more than one parameter. Normal variants hold parameters as a single flat block with multiple
+      fields for each entry, but polymorphic variants must adopt a more flexible uniform memory
+      representation, since they may be reused in a different context across compilation units. They
+      allocate a tuple block for the parameters that is pointed to from the argument field of the
+      variant. There are thus three additional words for such variants, along with an extra memory
+      indirection due to the tuple.</para>
 
     <para>The extra space usage is generally not significant in a typical
     application, and polymorphic variants offer a great deal more flexibility
@@ -787,7 +755,7 @@
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/string_block.ascii">Diagram</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/string_block.ascii">Diagram</ulink></para>
 
     <informalfigure>
       <mediaobject>
@@ -797,16 +765,15 @@
       </mediaobject>
     </informalfigure>
 
-    <para>On a 32-bit machine, the padding is calculated based on the modulo
-    of the string length and word size to ensure the result is word-aligned. A
-    64-bit machine extends the potential padding up to seven bytes instead of
-    three.<indexterm class="singular">
+    <para>On a 32-bit machine, the padding is calculated based on the modulo of the string length
+      and word size to ensure the result is word-aligned. A 64-bit machine extends the potential
+      padding up to 7 bytes instead of 3 (see <xref linkend="chapter_20_table"/>).<indexterm class="singular">
         <primary>padding</primary>
-
         <secondary>32 vs. 64 bit potential for</secondary>
       </indexterm></para>
 
-    <informaltable>
+    <table id="chapter_20_table">
+      <title>Need title</title>
       <tgroup cols="2">
         <colspec align="left"/>
 
@@ -846,7 +813,7 @@
           </row>
         </tbody>
       </tgroup>
-    </informaltable>
+    </table>
 
     <para>This string representation is a clever way to ensure that the
     contents are always zero-terminated by the padding word and to still
@@ -854,7 +821,7 @@
     following formula is used:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/string_size_calc.ascii">Diagram</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/string_size_calc.ascii">Diagram</ulink></para>
 
     <informalfigure>
       <mediaobject>
@@ -864,45 +831,38 @@
       </mediaobject>
     </informalfigure>
 
-    <para>The guaranteed <literal moreinfo="none">NULL</literal>-termination
-    comes in handy when passing a string to C, but is not relied upon to
-    compute the length from OCaml code. OCaml strings can thus contain
-    <literal moreinfo="none">NULL</literal> bytes at any point within the
-    string.</para>
+    <para>The guaranteed <literal moreinfo="none">NULL</literal> termination comes in handy when
+      passing a string to C, but is not relied upon to compute the length from OCaml code. OCaml
+      strings can thus contain <literal moreinfo="none">NULL</literal> bytes at any point within the
+      string.</para>
 
-    <para>Care should be taken that any C library functions that receive these
-    buffers can also cope with arbitrary bytes within the buffer contents and
-    are not expecting C strings. For instance, the C <literal
-    moreinfo="none">memcopy</literal> or <literal
-    moreinfo="none">memmove</literal> standard library functions can operate
-    on arbitrary data, but <literal moreinfo="none">strlen</literal> or
-    <literal moreinfo="none">strcpy</literal> both require a <literal
-    moreinfo="none">NULL</literal> terminated buffer, and neither has a
-    mechanism for encoding a <literal moreinfo="none">NULL</literal> value
-    within its contents.</para>
+    <para>Care should be taken that any C library functions that receive these buffers can also cope
+      with arbitrary bytes within the buffer contents and are not expecting C strings. For instance,
+      the C <literal moreinfo="none">memcopy</literal> or <literal moreinfo="none">memmove</literal>
+      standard library functions can operate on arbitrary data, but <literal moreinfo="none"
+        >strlen</literal> or <literal moreinfo="none">strcpy</literal> both require a <literal
+        moreinfo="none">NULL</literal>-terminated buffer, and neither has a mechanism for encoding a
+        <literal moreinfo="none">NULL</literal> value within its contents.</para>
   </sect1>
 
   <sect1 id="custom-heap-blocks">
     <title>Custom Heap Blocks</title>
 
-    <para>OCaml supports <emphasis>custom</emphasis> heap blocks via a
-    <literal moreinfo="none">Custom_tag</literal> that let the runtime perform
-    user-defined operations over OCaml values. A custom block lives in the
-    OCaml heap like an ordinary block and can be of whatever size the user
-    desires. The <literal moreinfo="none">Custom_tag</literal> (255) is higher
-    than <literal moreinfo="none">No_scan_tag</literal> and so isn't scanned
-    by the garbage collector.<indexterm class="singular">
+    <para>OCaml supports <emphasis>custom</emphasis> heap blocks via a <literal moreinfo="none"
+        >Custom_tag</literal> that lets the runtime perform user-defined operations over OCaml
+      values. A custom block lives in the OCaml heap like an ordinary block and can be of whatever
+      size the user desires. The <literal moreinfo="none">Custom_tag</literal> (255) is higher than
+        <literal moreinfo="none">No_scan_tag</literal> and so isn't scanned by the GC.<indexterm
+        class="singular">
         <primary>custom heap blocks</primary>
       </indexterm><indexterm class="singular">
         <primary>runtime memory representation</primary>
-
         <secondary>custom heap blocks</secondary>
       </indexterm></para>
 
-    <para>The first word of the data within the custom block is a C pointer to
-    a <literal moreinfo="none">struct</literal> of custom operations. The
-    custom block cannot have pointers to OCaml blocks and is opaque to the
-    garbage collector:</para>
+    <para>The first word of the data within the custom block is a C pointer to a <literal
+        moreinfo="none">struct</literal> of custom operations. The custom block cannot have pointers
+      to OCaml blocks and is opaque to the GC:</para>
 
     <para role="sourcecode">C: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/custom_ops.c">memory-repr/custom_ops.c</ulink></para>
@@ -919,17 +879,14 @@
   int (*compare_ext)(value v1, value v2);
 };</programlisting>
 
-    <para>The custom operations specify how the runtime should perform
-    polymorphic comparison, hashing and binary marshalling. They also
-    optionally contain a <emphasis>finalizer</emphasis> that the runtime calls
-    just before the block is garbage collected. This finalizer has nothing to
-    do with ordinary OCaml finalizers (as created by <literal
-    moreinfo="none">Gc.finalize</literal> and explained in <xref
-    linkend="understanding-the-garbage-collector"/>). They are instead used to
-    call C cleanup functions such as <literal
-    moreinfo="none">free</literal>.<indexterm class="singular">
+    <para>The custom operations specify how the runtime should perform polymorphic comparison,
+      hashing and binary marshaling. They also optionally contain a <emphasis>finalizer</emphasis>
+      that the runtime calls just before the block is garbage-collected. This finalizer has nothing
+      to do with ordinary OCaml finalizers (as created by <literal moreinfo="none"
+        >Gc.finalize</literal> and explained in <xref linkend="understanding-the-garbage-collector"
+      />). They are instead used to call C cleanup functions such as <literal moreinfo="none"
+        >free</literal>.<indexterm class="singular">
         <primary>finalizers</primary>
-
         <secondary>for C cleanup functions</secondary>
       </indexterm></para>
 

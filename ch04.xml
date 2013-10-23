@@ -4,11 +4,11 @@
 <chapter id="files-modules-and-programs">
   <title>Files, Modules, and Programs</title>
 
-  <para>We've so far experienced OCaml largely through the toplevel. As you
-  move from exercises to real-world programs, you'll need to leave the
-  toplevel behind and start building programs from files. Files are more than
-  just a convenient way to store and manage your code; in OCaml, they also act
-  as boundaries that divide your program into conceptual units.</para>
+  <para>We've so far experienced OCaml largely through the toplevel. As you move from exercises to
+    real-world programs, you'll need to leave the toplevel behind and start building programs from
+    files. Files are more than just a convenient way to store and manage your code; in OCaml, they
+    also correspond to modules, which act as boundaries that divide your program into conceptual
+    units.</para>
 
   <para>In this chapter, we'll show you how to build an OCaml program from a
   collection of files, as well as the basics of working with modules and
@@ -17,19 +17,15 @@
   <sect1 id="single-file-programs">
     <title>Single-File Programs</title>
 
-    <para>We'll start with an example: a utility that reads lines from
-    <literal moreinfo="none">stdin</literal> and computes a frequency count of
-    the lines that have been read in. At the end, the 10 lines with the
-    highest frequency counts are written out. We'll start with a simple
-    implementation, which we'll save as the file
-    <emphasis>freq.ml</emphasis>.<indexterm class="startofrange"
+    <para>We'll start with an example: a utility that reads lines from <literal moreinfo="none"
+        >stdin</literal> and computes a frequency count of the lines. At the end, the 10 lines with
+      the highest frequency counts are written out. We'll start with a simple implementation, which
+      we'll save as the file <emphasis>freq.ml</emphasis>.<indexterm class="startofrange"
         id="FILEsnglprog">
         <primary>files</primary>
-
         <secondary>single-file programs</secondary>
       </indexterm><indexterm class="startofrange" id="Psingfil">
         <primary>programs</primary>
-
         <secondary>single-file programs</secondary>
       </indexterm></para>
 
@@ -76,8 +72,7 @@
     modify the original list, but instead allocates a new list with the
     requisite key/value pair added.</para>
 
-    <para>Now we can write down <literal
-    moreinfo="none">freq.ml</literal>:</para>
+    <para>Now we can write <literal moreinfo="none">freq.ml</literal>:</para>
 
     <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq/freq.ml">files-modules-and-programs-freq/freq.ml</ulink></para>
@@ -532,14 +527,12 @@ val to_list : t -&gt; (string * int) list</programlisting>
     to create a <literal moreinfo="none">Counter.t</literal> or get data out
     of one.</para>
 
-    <para>We also used this opportunity to document the module. The <literal
-    moreinfo="none">mli</literal> file is the place where you specify your
-    module's interface, and as such is a natural place to put documentation.
-    We also started our comments with a double asterisk to cause them to be
-    picked up by the <command moreinfo="none">ocamldoc</command> tool when
-    generating API documentation. We'll discuss <command
-    moreinfo="none">ocamldoc</command> more in <xref
-    linkend="the-compiler-frontend-parsing-and-type-checking" />.</para>
+    <para>We also used this opportunity to document the module. The <literal moreinfo="none"
+        >mli</literal> file is the place where you specify your module's interface, and as such is a
+      natural place to put documentation. We started our comments with a double asterisk to cause
+      them to be picked up by the <command moreinfo="none">ocamldoc</command> tool when generating
+      API documentation. We'll discuss <command moreinfo="none">ocamldoc</command> more in <xref
+        linkend="the-compiler-frontend-parsing-and-type-checking"/>.</para>
 
     <para>Here's a rewrite of <literal moreinfo="none">counter.ml</literal> to
     match the new <literal moreinfo="none">counter.mli</literal>:</para>
@@ -768,8 +761,8 @@ end</programlisting>
     <para role="sourcecode">Syntax: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/module.syntax">files-modules-and-programs/module.syntax</ulink></para>
 
-    <programlisting format="linespecific" language="">module &lt;name&gt; : &lt;signature&gt; = &lt;implementation&gt;</programlisting>
-
+    <programlisting format="linespecific" language="ocaml">module <emphasis>&lt;name&gt;</emphasis> : <emphasis>&lt;signature&gt;</emphasis> = <emphasis>&lt;implementation&gt;</emphasis></programlisting>
+    
     <para>We could have written this slightly differently, by giving the
     signature its own top-level <literal moreinfo="none">module type</literal>
     declaration, making it possible to create multiple distinct types with the
@@ -961,16 +954,14 @@ let sessions_have_same_user s1 s2 =
   <sect1 id="including-modules">
     <title>Including Modules</title>
 
-    <para>While opening a module affects the environment used to search for
-    identifiers, <emphasis>including</emphasis> a module is a way of actually
-    adding new identifiers to a module proper. Consider the following simple
-    module for representing a range of intervals:<indexterm class="singular">
+    <para>While opening a module affects the environment used to search for identifiers,
+        <emphasis>including</emphasis> a module is a way of actually adding new identifiers to a
+      module proper. Consider the following simple module for representing a range of integer
+        values:<indexterm class="singular">
         <primary>modules</primary>
-
         <secondary>including</secondary>
       </indexterm><indexterm class="singular">
         <primary>identifiers</primary>
-
         <secondary>adding to modules</secondary>
       </indexterm></para>
 
@@ -1119,20 +1110,17 @@ val intersperse : 'a list -&gt; 'a -&gt; 'a list</programlisting>
     <sect2 id="type-mismatches">
       <title>Type Mismatches</title>
 
-      <para>The simplest kind of error is where the type specified in the
-      signature does not match up with the type in the implementation of the
-      module. As an example, if we replace the <literal
-      moreinfo="none">val</literal> declaration in <literal
-      moreinfo="none">counter.mli</literal> by swapping the types of the first
-      two arguments:<indexterm class="singular">
+      <para>The simplest kind of error is where the type specified in the signature does not match
+        the type in the implementation of the module. As an example, if we replace the <literal
+          moreinfo="none">val</literal> declaration in <literal moreinfo="none"
+          >counter.mli</literal> by swapping the types of the first two arguments:<indexterm
+          class="singular">
           <primary>errors</primary>
-
           <secondary>module type mismatches</secondary>
         </indexterm><indexterm class="singular">
           <primary>type mismatches</primary>
         </indexterm><indexterm class="singular">
           <primary>modules</primary>
-
           <secondary>type mismatches in</secondary>
         </indexterm></para>
 
@@ -1328,6 +1316,106 @@ type median = | Before_and_after of string * string
 <computeroutput moreinfo="none">Circular dependencies: "freq.cmo" already seen in</computeroutput>
 <computeroutput moreinfo="none">  [ "counter.cmo"; "freq.cmo" ]</computeroutput>
 <computeroutput moreinfo="none"> </computeroutput></programlisting>
+    </sect2>
+  </sect1>
+  <sect1>
+    <title>Designing with Modules</title>
+    <para>The module system is a key part of how you structure your software. We'll close this
+      chapter with a discussion of some ideas about how to use modules to structure your code
+      effectively. </para>
+    <sect2>
+      <title>Expose Concrete Types Rarely</title>
+      <para>When designing an <literal>mli</literal>, one choice that you need to make is whether to
+        expose the concrete definition of your types or leave them abstract. Most of the time,
+        abstraction is the right choice, for two reasons: it enhances the flexibility of your
+        design, and it makes it possible to enforce invariants on the use of your module.</para>
+      <para>Abstraction enhances flexibility by restricting how users can interact with your types,
+        thus reducing the ways in which users can depend on the details of your implementation. If
+        you expose types explicitly, then users can depend on any and every detail of the types you
+        choose. If they're abstract, then only the specific operations you want to expose are
+        available. This means that you can freely change the implementation without affecting
+        clients, as long as you preserve the semantics of those operations.</para>
+      <para>In a similar way, abstraction allows you to enforce invariants on your types. If your
+        types are exposed, then users of the module can create new instances of that type (or if
+        mutable, modify existing instances) in any way allowed by the underlying type. That may
+        violate a desired invariant <emphasis>i.e.</emphasis>, a property about your type that is
+        always supposed to be true. Abstract types allow you to protect invariants by making sure
+        that you only expose functions that preserves your invariants. </para>
+      <para>Despite these benefits, there is a trade-off here. In particular, exposing types
+        concretely makes it possible to use pattern-matching with those types, which as we saw in
+        <xref linkend="lists-and-patterns"/> is a powerful and important tool. You should generally only
+        expose the concrete implementation of your types when there's significant value in the
+        ability to pattern match, and when the invariants that you care about are already enforced
+        by the data type itself.</para>
+    </sect2>
+    <sect2>
+      <title>Design for the Call Site</title>
+      <para>When writing an interface, you should think not just about how easy it is to understand
+        the interface for someone who reads your carefully documented <literal>mli</literal> file,
+        but more importantly, you want the call to be as obvious as possible for someone who is
+        reading it at the call site.</para>
+      <para>The reason for this is that most of the time, people interacting with your API will be
+        doing so by reading and modifying code that uses the API, not by reading the interface
+        definition. By making your API as obvious as possible from that perspective, you simplify
+        the lives of your users.</para>
+      <para>There are many ways of improving readability at the call site. One example is labeled
+        arguments (discussed in <xref linkend="labeled-arguments"/>), which act as documentation that is there at the call
+        site. </para>
+      <para>You can also improve readability simply by choosing good names for your functions,
+        variant tags and record fields. Good names aren't always long, to be clear. If you wanted to
+        write an anonymous function for doubling a number: <literal>(fun x -> x * 2)</literal>, a
+        short variable name like <literal>x</literal> is best. A good rule of thumb is that names
+        that have a small scope should be short, whereas names that have a large scope, like the
+        name of a function in an a module interface, should be longer and more explicit.</para>
+      <para>There is of course a tradeoff here, in that making your APIs more explicit tends to make
+        them more verbose as well. Another useful rule of thumb is that more rarely used names
+        should be longer and more explicit, since the cost of concision and the benefit of
+        explicitness become more important the more often a name is used.</para>
+    </sect2>
+    <sect2>
+      <title>Create Uniform Interfaces</title>
+      <para>Designing the interface of a module is a task that should not be thought of in
+        isolation. The interfaces that appear in your codebase should play together harmoniously.
+        Part of achieving that is standardizing aspects of those interfaces.</para>
+      <para>Core itself is a library that works hard to create uniform interfaces. Here are some of
+        the guidelines that are used in Core to this end.</para>
+      <itemizedlist>
+        <listitem>
+          <para><emphasis>A module for (almost) every type.</emphasis> You should mint a module for
+            almost every type in your program, and the primary type of a given module should be
+            called <literal>t</literal>.</para>
+        </listitem>
+        <listitem><para><emphasis>Put <literal>t</literal> first</emphasis>. If you have a module <literal>M</literal>
+            whose primary type is <literal>M.t</literal>, the functions in <literal>M</literal> that
+            take a value of <literal>M.t</literal> should take it as their first argument.</para></listitem>
+        <listitem><para>Functions that routinely throw an exception should end in <literal>_exn</literal>. Otherwise,
+            errors should be signaled by returning an <literal>option</literal> or an
+          <literal>Or_error.t</literal> (both of which are discussed in <xref linkend="error-handling"/> ).</para></listitem>
+       
+      </itemizedlist>
+      <para>There are also standards in Core about how specific functions should be implemented. For
+        example, the signature for <literal>map</literal> is always essentially the same, no matter
+        what the underlying type it is applied to. This kind of function-by-function API uniformity
+        is achieved through the use of <emphasis>signature includes</emphasis>, which allow for
+        different modules to share components of their interface. This approach is described in <xref linkend="using-multiple-interfaces"/>. </para>
+      <para>Core's standards may or may not fit your projects, but you can improve the usability of
+        your codebase by finding some consistent set of standards to apply.</para>
+    </sect2>
+    <sect2>
+      <title>Interfaces before implementations</title>
+      <para>OCaml's concise and flexible type language enables a type-oriented
+        approach to software design.  Such an approach involves thinking
+        through and writing out the types you're going to use before embarking
+        on the implementation itself.</para>
+      <para>This is a good approach both when working in the core language, where you would write
+        your type definitions before writing the logic of your computations, as well as at the
+        module level, where you would write a first draft of your <literal>mli</literal> before
+        working on the <literal>ml</literal>.</para>
+      <para>Of course, the design process goes in both directions. You'll often find yourself going
+        back and modifying your types in response to things you learn by working on the
+        implementation. But types and signatures provide a lightweight tool for constructing a
+        skeleton of your design in a way that helps clarify your goals and intent, before you spend
+        a lot of time and effort fleshing it out.</para>
     </sect2>
   </sect1>
 </chapter>

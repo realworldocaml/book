@@ -248,14 +248,13 @@ let find t key =
     moreinfo="none">iter</literal> function returns <literal
     moreinfo="none">unit</literal> as well.</para>
 
-    <para>The code for <literal moreinfo="none">iter</literal> uses two forms
-    of iteration: a <literal moreinfo="none">for</literal> loop to walk over
-    the array of buckets; and within that loop a call to <literal
-    moreinfo="none">List.iter</literal> to walk over the values in a given
-    bucket. We could have done the outer loop with a recursive function
-    instead of a <literal moreinfo="none">for</literal> loop, but <literal
-    moreinfo="none">for</literal> loops are syntactically convenient, and are
-    more familiar and idiomatic in the context of imperative code.</para>
+    <para>The code for <literal moreinfo="none">iter</literal> uses two forms of iteration: a
+        <literal moreinfo="none">for</literal> loop to walk over the array of buckets; and within
+      that loop a call to <literal moreinfo="none">List.iter</literal> to walk over the values in a
+      given bucket. We could have done the outer loop with a recursive function instead of a
+        <literal moreinfo="none">for</literal> loop, but <literal moreinfo="none">for</literal>
+      loops are syntactically convenient, and are more familiar and idiomatic in imperative
+      contexts.</para>
 
     <para>The following code is for adding and removing mappings from the
     dictionary:</para>
@@ -425,14 +424,14 @@ let () = &lt;expr2&gt; in
         <para role="sourcecode">Syntax: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/array-get.syntax">imperative-programming/array-get.syntax</ulink></para>
 
-        <programlisting format="linespecific" language="">&lt;array_expr&gt;.(&lt;index_expr&gt;)</programlisting>
+        <programlisting format="linespecific" language="ocaml"><emphasis>&lt;array_expr&gt;</emphasis>.(<emphasis>&lt;index_expr&gt;</emphasis>)</programlisting>
 
         <para>and for setting an element in an array:</para>
 
         <para role="sourcecode">Syntax: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/array-set.syntax">imperative-programming/array-set.syntax</ulink></para>
 
-        <programlisting format="linespecific" language="">&lt;array_expr&gt;.(&lt;index_expr&gt;) &lt;- &lt;value_expr&gt;</programlisting>
+        <programlisting format="linespecific" language="ocaml"><emphasis>&lt;array_expr&gt;</emphasis>.(<emphasis>&lt;index_expr&gt;</emphasis>) &lt;- <emphasis>&lt;value_expr&gt;</emphasis></programlisting>
 
         <para>Out-of-bounds accesses for arrays (and indeed for all the
         array-like data structures) will lead to an exception being
@@ -468,8 +467,8 @@ let () = &lt;expr2&gt; in
         <para role="sourcecode">Syntax: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/string.syntax">imperative-programming/string.syntax</ulink></para>
 
-        <programlisting format="linespecific" language="">&lt;string_expr&gt;.[&lt;index_expr&gt;]
-&lt;string_expr&gt;.[&lt;index_expr&gt;] &lt;- &lt;char_expr&gt;</programlisting>
+        <programlisting format="linespecific" language="ocaml"><emphasis>&lt;string_expr&gt;</emphasis>.[<emphasis>&lt;index_expr&gt;</emphasis>]
+          <emphasis>&lt;string_expr&gt;</emphasis>.[<emphasis>&lt;index_expr&gt;</emphasis>] &lt;- <emphasis>&lt;char_expr&gt;</emphasis></programlisting>
 
         <para>And string literals are bounded by quotes. There's also a module
         <literal moreinfo="none">String</literal> where you'll find useful
@@ -490,8 +489,8 @@ let () = &lt;expr2&gt; in
         <para role="sourcecode">Syntax: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/bigarray.syntax">imperative-programming/bigarray.syntax</ulink></para>
 
-        <programlisting format="linespecific" language="">&lt;bigarray_expr&gt;.{&lt;index_expr&gt;}
-&lt;bigarray_expr&gt;.{&lt;index_expr&gt;} &lt;- &lt;value_expr&gt;</programlisting>
+        <programlisting format="linespecific" language="ocaml"><emphasis>&lt;bigarray_expr&gt;</emphasis>.{<emphasis>&lt;index_expr&gt;</emphasis>}
+         <emphasis> &lt;bigarray_expr&gt;</emphasis>.{<emphasis>&lt;index_expr&gt;</emphasis>} &lt;- <emphasis>&lt;value_expr&gt;</emphasis></programlisting>
       </sect3>
     </sect2>
 
@@ -607,30 +606,25 @@ let () = &lt;expr2&gt; in
     <sect2 id="foreign-functions">
       <title>Foreign Functions</title>
 
-      <para>Another source of imperative operations in OCaml is resources that
-      come from interfacing with external libraries through OCaml's foreign
-      function interface (FFI). The FFI opens OCaml up to imperative
-      constructs that are exported by system calls or other external
-      libraries. Many of these come built in, like access to the <literal
-      moreinfo="none">write</literal> system call or to the <literal
-      moreinfo="none">clock</literal>, while others come from user libraries,
-      like LAPACK bindings.<indexterm class="singular">
+      <para>Another source of imperative operations in OCaml is resources that come from interfacing
+        with external libraries through OCaml's foreign function interface (FFI). The FFI opens
+        OCaml up to imperative constructs that are exported by system calls or other external
+        libraries. Many of these come built in, like access to the <literal moreinfo="none"
+          >write</literal> system call or to the <literal moreinfo="none">clock</literal>, while
+        others come from user libraries, like LAPACK bindings. OCaml's FFI is discussed in more
+        detail in <xref linkend="foreign-function-interface"/>.<indexterm class="singular">
           <primary>libraries</primary>
-
           <secondary>interfacing with external</secondary>
         </indexterm><indexterm class="singular">
           <primary>external libraries</primary>
-
           <secondary>interfacing with</secondary>
         </indexterm><indexterm class="singular">
           <primary>LAPACK bindings</primary>
         </indexterm><indexterm class="singular">
           <primary>foreign function interface (FFI)</primary>
-
           <secondary>imperative operations and</secondary>
         </indexterm><indexterm class="singular">
           <primary>primitive mutable data</primary>
-
           <secondary>foreign functions</secondary>
         </indexterm></para>
     </sect2>
@@ -869,21 +863,11 @@ let prev elt = elt.prev</programlisting>
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/examples.topscript">imperative-programming/examples.topscript</ulink>
       (part 2)</para>
 
-      <programlisting format="linespecific" language="ocaml"><prompt
-          moreinfo="none"># </prompt><userinput moreinfo="none">let rec endless_loop = 1 :: 2 :: 3 :: endless_loop;;</userinput>
+      <programlisting format="linespecific" language="ocaml"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec endless_loop = 1 :: 2 :: 3 :: endless_loop;;</userinput>
 <computeroutput moreinfo="none">val endless_loop : int list =</computeroutput>
-<computeroutput moreinfo="none">  [1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1;</computeroutput>
-<computeroutput moreinfo="none">   2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2;</computeroutput>
-<computeroutput moreinfo="none">   3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3;</computeroutput>
-<computeroutput moreinfo="none">   1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1;</computeroutput>
-<computeroutput moreinfo="none">   2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2;</computeroutput>
-<computeroutput moreinfo="none">   3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3;</computeroutput>
-<computeroutput moreinfo="none">   1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1;</computeroutput>
-<computeroutput moreinfo="none">   2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2;</computeroutput>
-<computeroutput moreinfo="none">   3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3;</computeroutput>
-<computeroutput moreinfo="none">   1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1;</computeroutput>
-<computeroutput moreinfo="none">   2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2;</computeroutput>
-<computeroutput moreinfo="none">   3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2; 3; 1; 2;</computeroutput>
+<computeroutput moreinfo="none">  [1; 2; 3; 1; 2; 3; 1; 2; 3;
+   1; 2; 3; 1; 2; 3; 1; 2; 3;
+   1; 2; 3; 1; 2; 3; 1; 2; 3;</computeroutput>
 <computeroutput moreinfo="none">   ...]</computeroutput></programlisting>
 
       <para>This approach is quite limited, however. General-purpose cyclic
@@ -1502,15 +1486,13 @@ let find_el t ~f =
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">fib 20;;</userinput>
 <computeroutput moreinfo="none">- : int = 6765</computeroutput></programlisting>
 
-      <para>This is a pretty strange piece of code, and it may take a few
-      minutes of thought to figure out what's going on. Like <literal
-      moreinfo="none">fib_norec</literal>, the function <literal
-      moreinfo="none">f_norec</literal> passed into <literal
-      moreinfo="none">make_rec</literal> is a function that isn't recursive
-      but takes as an argument a function that it will call. What <literal
-      moreinfo="none">make_rec</literal> does is to essentially feed <literal
-      moreinfo="none">f_norec</literal> to itself, thus making it a true
-      recursive function.</para>
+      <para>This is a pretty strange piece of code, and it may take a few moments of thought to
+        figure out what's going on. Like <literal moreinfo="none">fib_norec</literal>, the function
+          <literal moreinfo="none">f_norec</literal> passed into <literal moreinfo="none"
+          >make_rec</literal> is a function that isn't recursive but takes as an argument a function
+        that it will call. What <literal moreinfo="none">make_rec</literal> does is to essentially
+        feed <literal moreinfo="none">f_norec</literal> to itself, thus making it a true recursive
+        function.</para>
 
       <para>This is clever enough, but all we've really done is find a new way
       to implement the same old slow Fibonacci function. To make it faster, we
@@ -1634,7 +1616,7 @@ let find_el t ~f =
 <computeroutput moreinfo="none">Time: 0.500917ms</computeroutput>
 <computeroutput moreinfo="none">- : int = 2</computeroutput></programlisting>
 
-      <note>
+      <note role="allow_break">
         <title>Limitations of let rec</title>
 
         <para>You might wonder why we didn't tie the recursive knot in
@@ -1980,7 +1962,7 @@ let () =
         <programlisting format="linespecific" language="ocaml"><prompt
             moreinfo="none"># </prompt><userinput moreinfo="none">let fmt = "%i is an integer, %F is a float, \"%s\" is a string\n";;</userinput>
 <computeroutput moreinfo="none">val fmt : string = "%i is an integer, %F is a float, \"%s\" is a string\n"</computeroutput>
-<prompt moreinfo="none"># </prompt><userinput moreinfo="none">  printf fmt 3 4.5 "five";;</userinput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">printf fmt 3 4.5 "five";;</userinput>
 <computeroutput moreinfo="none">Characters 9-12:</computeroutput>
 <computeroutput moreinfo="none">Error: This expression has type string but an expression was expected of type</computeroutput>
 <computeroutput moreinfo="none">         ('a -&gt; 'b -&gt; 'c -&gt; 'd, out_channel, unit) format =</computeroutput>
@@ -2007,12 +1989,11 @@ let () =
 
         <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
         url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/printf.topscript">imperative-programming/printf.topscript</ulink>
-        (part 4)</para>
+        (part 5)</para>
 
-        <programlisting format="linespecific" language="ocaml"><prompt
-            moreinfo="none"># </prompt><userinput moreinfo="none">let fmt : ('a, 'b, 'c) format =</userinput>
-<userinput moreinfo="none">    "%i is an integer, %F is a float, \"%s\" is a string\n";;</userinput>
-<computeroutput moreinfo="none">val fmt : (int -&gt; float -&gt; string -&gt; 'c, 'b, 'c) format = &lt;abstr&gt;</computeroutput></programlisting>
+        <programlisting format="linespecific" language="ocaml"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">printf fmt 3 4.5 "five";;</userinput>
+<computeroutput moreinfo="none">3 is an integer, 4.5 is a float, "five" is a string - : unit = ()</computeroutput>
+        </programlisting>
 
         <para>If this looks different from everything else you've seen so far,
         that's because it is. This is really a special case in the type
@@ -2276,15 +2257,13 @@ let () =
   <sect1 id="order-of-evaluation">
     <title>Order of Evaluation</title>
 
-    <para>The order in which expressions are evaluated is an important part of
-    the definition of a programming language, and it is particularly important
-    when programming imperatively. Most programming languages you're likely to
-    have encountered are <emphasis>strict</emphasis>, and OCaml is, too. In a
-    strict language, when you bind an identifier to the result of some
-    expression, the expression is evaluated before the variable is defined.
-    Similarly, if you call a function on a set of arguments, those arguments
-    are evaluated before they are passed to the function.<indexterm
-        class="singular">
+    <para>The order in which expressions are evaluated is an important part of the definition of a
+      programming language, and it is particularly important when programming imperatively. Most
+      programming languages you're likely to have encountered are <emphasis>strict</emphasis>, and
+      OCaml is, too. In a strict language, when you bind an identifier to the result of some
+      expression, the expression is evaluated before the variable is bound. Similarly, if you call a
+      function on a set of arguments, those arguments are evaluated before they are passed to the
+        function.<indexterm class="singular">
         <primary>strict evaluation</primary>
       </indexterm><indexterm class="singular">
         <primary>expressions, order of evaluation</primary>
@@ -2294,7 +2273,6 @@ let () =
         <primary>order of evaluation</primary>
       </indexterm><indexterm class="singular">
         <primary>imperative programming</primary>
-
         <secondary>order of evaluation</secondary>
       </indexterm></para>
 
@@ -2463,12 +2441,10 @@ let () =
     moreinfo="none">identity</literal> lets it operate on values with
     different types.</para>
 
-    <para>This is not what happens with <literal
-    moreinfo="none">remember</literal>, though. As you can see from the
-    preceding <command moreinfo="none">utop</command>, the type that OCaml
-    infers for <literal moreinfo="none">remember</literal> looks almost, but
-    not quite, like the type of the identity function. Here it is
-    again:</para>
+    <para>This is not what happens with <literal moreinfo="none">remember</literal>, though. As you
+      can see from the above examples, the type that OCaml infers for <literal moreinfo="none"
+        >remember</literal> looks almost, but not quite, like the type of the identity function.
+      Here it is again:</para>
 
     <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/remember_type.ml">imperative-programming/remember_type.ml</ulink></para>
@@ -2690,9 +2666,8 @@ let () =
       as simple values, and anything that's a simple value can be
       generalized.</para>
 
-      <para>But OCaml actually has a relaxed version of the value restriction
-      that can make some use of type information to allow polymorphic types
-      for things that are not simple values.</para>
+      <para>But OCaml actually has a relaxed version of the value restriction that can make use of
+        type information to allow polymorphic types for things that are not simple values.</para>
 
       <para>For example, we saw that a function application, even a simple
       application of the identity function, is not a simple value and thus can
@@ -2816,9 +2791,8 @@ let () =
       <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction-13.rawscript">imperative-programming/value_restriction-13.rawscript</ulink></para>
 
-      <programlisting format="linespecific" language="ocaml"><userinput
-          moreinfo="none"># module Concat_list : sig
-    type 'a t
+      <programlisting format="linespecific" language="ocaml"><userinput moreinfo="none"># module Concat_list : sig
+    type +'a t
     val empty : 'a t
     val singleton : 'a -&gt; 'a t
     val concat  : 'a t -&gt; 'a t -&gt; 'a t  (* constant time *)
@@ -2832,7 +2806,7 @@ let () =
   end;;</userinput>
 <computeroutput moreinfo="none"> module Concat_list :
   sig
-    type 'a t
+    type '+a t
     val empty : 'a t
     val singleton : 'a -&gt; 'a t
     val concat : 'a t -&gt; 'a t -&gt; 'a t

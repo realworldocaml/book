@@ -4,11 +4,9 @@
 <colophon id="colophon">
   <title>Colophon</title>
 
-  <para>The animal on the cover of <emphasis>Real World OCaml</emphasis> is
-  FILL IN DESCRIPTION.</para>
+  <para>The animal on the cover of <emphasis>Real World OCaml</emphasis> is XX.</para>
 
-  <para>The cover image is from FILL IN CREDITS. The cover fonts are URW
-  Typewriter and Guardian Sans. The text font is Adobe Minion Pro; the heading
-  font is Adobe Myriad Condensed; and the code font is Dalton Maag's Ubuntu
-  Mono.</para>
+  <para>The cover image is from XX. The cover fonts are URW Typewriter and Guardian Sans. The text
+    font is Adobe Minion Pro; the heading font is Adobe Myriad Condensed; and the code font is
+    Dalton Maag's Ubuntu Mono.</para>
 </colophon>

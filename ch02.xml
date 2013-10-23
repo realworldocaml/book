@@ -4,19 +4,16 @@
 <chapter id="variables-and-functions">
   <title>Variables and Functions</title>
 
-  <para>Variables and functions are fundamental ideas that show up in
-  virtually all programming languages. OCaml has a different take on these
-  concepts than most languages you're liketly to have encountered, so this
-  chapter will cover OCaml's approach to variables and functions in some
-  detail, starting with the basics of how to define a variable, and ending
-  with the intricacies of functions with labeled and optional
-  arguments.</para>
+  <para>Variables and functions are fundamental ideas that show up in virtually all programming
+    languages. OCaml has a different take on these concepts than most languages you're likely to
+    have encountered, so this chapter will cover OCaml's approach to variables and functions in some
+    detail, starting with the basics of how to define a variable, and ending with the intricacies of
+    functions with labeled and optional arguments.</para>
 
-  <para>Don't be discouraged if you find yourself overwhelmed by some of the
-  details, especially toward the end of the chapter. The concepts here are
-  important, but if they don't connect for you on your first read, you should
-  return to this chapter after you've gotten a better feel for the language
-  and fill in your understanding.</para>
+  <para>Don't be discouraged if you find yourself overwhelmed by some of the details, especially
+    toward the end of the chapter. The concepts here are important, but if they don't connect for
+    you on your first read, you should return to this chapter after you've gotten a better sense for
+    the rest of the language.</para>
 
   <sect1 id="variables">
     <title>Variables</title>
@@ -42,11 +39,11 @@
     <para role="sourcecode">Syntax: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/let.syntax">variables-and-functions/let.syntax</ulink></para>
 
-    <programlisting format="linespecific" language="">let &lt;variable&gt; = &lt;expr&gt;</programlisting>
+    <programlisting format="linespecific" language="ocaml">let <emphasis>&lt;variable&gt;</emphasis> = <emphasis>&lt;expr&gt;</emphasis></programlisting>
 
     <para>As we'll see when we get to the module system in <xref
-    linkend="files-modules-and-programs" />, this same syntax is used for
-    <literal>let</literal> bindings at the toplevel of a module.</para>
+        linkend="files-modules-and-programs"/>, this same syntax is used for <literal>let</literal>
+      bindings at the top level of a module.</para>
 
     <para>Every variable binding has a <emphasis>scope</emphasis>, which is
     the portion of the code that can refer to that binding. When using
@@ -85,15 +82,13 @@
     <para role="sourcecode">Syntax: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/let_in.syntax">variables-and-functions/let_in.syntax</ulink></para>
 
-    <programlisting format="linespecific" language="">let &lt;variable&gt; = &lt;expr1&gt; in &lt;expr2&gt;</programlisting>
+    <programlisting format="linespecific" language="ocaml">let <emphasis>&lt;variable&gt;</emphasis> = <emphasis>&lt;expr1&gt;</emphasis> in <emphasis>&lt;expr2&gt;</emphasis></programlisting>
 
-    <para>This first evaluates <emphasis><literal
-    moreinfo="none">&lt;expr1&gt;</literal></emphasis> and then evaluates
-    <emphasis><literal moreinfo="none">&lt;expr2&gt;</literal></emphasis> with
-    <emphasis><literal moreinfo="none">&lt;variable&gt;</literal></emphasis>
-    bound to whatever value was produced by the evaluation of
-    <emphasis><literal moreinfo="none">&lt;expr1&gt;</literal></emphasis>.
-    Here's how it looks in practice:</para>
+    <para>This first evaluates <emphasis><literal moreinfo="none">expr1</literal></emphasis> and
+      then evaluates <emphasis><literal moreinfo="none">expr2</literal></emphasis> with
+          <emphasis><literal moreinfo="none">variable</literal></emphasis> bound to whatever value
+      was produced by the evaluation of <emphasis><literal moreinfo="none"
+        >expr1</literal></emphasis>. Here's how it looks in practice:</para>
 
     <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
@@ -209,21 +204,17 @@
 <computeroutput moreinfo="none">Warning 26: unused variable pi.</computeroutput>
 <computeroutput moreinfo="none">val area_of_ring : float -&gt; float -&gt; float = &lt;fun&gt;</computeroutput></programlisting>
 
-    <para>Here, we redefined <literal moreinfo="none">pi</literal> to be zero
-    after the definition of <literal moreinfo="none">area_of_circle</literal>.
-    You might think that this would mean that the result of the computation
-    would now be zero, but in fact, the behavior of the function is unchanged.
-    That's because the original definition of <literal
-    moreinfo="none">pi</literal> wasn't changed; it was just shadowed, which
-    means that any subsequent reference to <literal
-    moreinfo="none">pi</literal> would see the new definition of <literal
-    moreinfo="none">pi</literal> as zero, but earlier references would be
-    unchanged. But there is no later use of <literal
-    moreinfo="none">pi</literal>, so the binding of <literal
-    moreinfo="none">0.</literal> to <literal moreinfo="none">pi</literal> made
-    no difference. This explains the warning produced by the toplevel telling
-    us that there is an unused definition of <literal
-    moreinfo="none">pi</literal>.</para>
+    <para>Here, we redefined <literal moreinfo="none">pi</literal> to be zero after the definition
+      of <literal moreinfo="none">area_of_circle</literal>. You might think that this would mean
+      that the result of the computation would now be zero, but in fact, the behavior of the
+      function is unchanged. That's because the original definition of <literal moreinfo="none"
+        >pi</literal> wasn't changed; it was just shadowed, which means that any subsequent
+      reference to <literal moreinfo="none">pi</literal> would see the new definition of <literal
+        moreinfo="none">pi</literal> as <literal>0</literal>, but earlier references would be
+      unchanged. But there is no later use of <literal moreinfo="none">pi</literal>, so the binding
+      of <literal moreinfo="none">pi</literal> to <literal moreinfo="none">0.</literal> made no
+      difference. This explains the warning produced by the toplevel telling us that there is an
+      unused definition of <literal moreinfo="none">pi</literal>.</para>
 
     <para>In OCaml, <literal>let</literal> bindings are immutable. There are
     many kinds of mutable values in OCaml, which we'll discuss in <xref
@@ -242,15 +233,13 @@
           <secondary>immutability of</secondary>
         </indexterm></para>
 
-      <para>The answer to this is that variables in OCaml (and generally in
-      functional languages) are really more like variables in an equation than
-      a variable in an imperative language. If you think about the
-      mathematical equation <literal moreinfo="none">x(y + z) = xy +
-      xz</literal>, there's no notion of mutating the variables <literal
-      moreinfo="none">x</literal>, <literal moreinfo="none">y</literal>, and
-      <literal moreinfo="none">z</literal>. They vary in the sense that you
-      can instantiate this equation with different numbers for those
-      variables, and it still holds.</para>
+      <para>The answer to this is that variables in OCaml (and generally in functional languages)
+        are really more like variables in an equation than a variable in an imperative language. If
+        you think about the mathematical identity <literal moreinfo="none">x(y + z) = xy +
+          xz</literal>, there's no notion of mutating the variables <literal moreinfo="none"
+          >x</literal>, <literal moreinfo="none">y</literal>, and <literal moreinfo="none"
+          >z</literal>. They vary in the sense that you can instantiate this equation with different
+        numbers for those variables, and it still holds.</para>
 
       <para>The same is true in a functional language. A function can be
       applied to different inputs, and thus its variables will take on
@@ -295,12 +284,11 @@
       linkend="tuples-lists-options-and-pattern-matching" />, OCaml has
       patterns for a variety of different data types.</para>
 
-      <para>Using a pattern in a <literal>let</literal> binding makes the most
-      sense for a pattern that is <emphasis>irrefutable</emphasis>, i.e.,
-      where any value of the type in question is guaranteed to match the
-      pattern. Tuple and record patterns are irrefutable, but list patterns
-      are not. Consider the following code that implements a function for
-      upcasing the first element of a comma-separated list:<indexterm
+      <para>Using a pattern in a <literal>let</literal> binding makes the most sense for a pattern
+        that is <emphasis>irrefutable</emphasis>, <emphasis>i.e.</emphasis>, where any value of the
+        type in question is guaranteed to match the pattern. Tuple and record patterns are
+        irrefutable, but list patterns are not. Consider the following code that implements a
+        function for upper casing the first element of a comma-separated list:<indexterm
           class="singular">
           <primary>irrefutable patterns</primary>
         </indexterm></para>
@@ -359,20 +347,16 @@
     <sect2 id="anonymous-functions">
       <title>Anonymous Functions</title>
 
-      <para>We'll start by looking at the most basic style of function
-      declaration in OCaml: the <emphasis>anonymous function</emphasis>. An
-      anonymous function is a function value that is declared without being
-      named. These can be declared using the <literal
-      moreinfo="none">fun</literal> keyword, as shown here:<indexterm
-          class="singular">
+      <para>We'll start by looking at the most basic style of function declaration in OCaml: the
+          <emphasis>anonymous function</emphasis>. An anonymous function is a function that is
+        declared without being named. These can be declared using the <literal moreinfo="none"
+          >fun</literal> keyword, as shown here:<indexterm class="singular">
           <primary>fun keyword</primary>
-
           <secondary>anonymous functions</secondary>
         </indexterm><indexterm class="singular">
           <primary>anonymous functions</primary>
         </indexterm><indexterm class="singular">
           <primary>functions</primary>
-
           <secondary>anonymous functions</secondary>
         </indexterm></para>
 
@@ -420,17 +404,14 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">List.map ~f:(fun g -&gt; g 5) increments;;</userinput>
 <computeroutput moreinfo="none">- : int list = [6; 7]</computeroutput></programlisting>
 
-      <para>It's worth stopping for a moment to puzzle this example out, since
-      this kind of higher-order use of functions can be a bit obscure at
-      first. The first thing to understand is the function <literal
-      moreinfo="none">(fun g -&gt; g 5)</literal>, which takes a function as
-      its argument and applies that function to the number <literal
-      moreinfo="none">5</literal>. The invocation of <literal
-      moreinfo="none">List.map</literal> applies <literal moreinfo="none">(fun
-      g -&gt; g 5)</literal> to the elements of the <literal
-      moreinfo="none">increments</literal> list (which are themselves
-      functions) and returns the list containing the results of these function
-      applications.</para>
+      <para>It's worth stopping for a moment to puzzle this example out, since this kind of
+        higher-order use of functions can be a bit obscure at first. Notice that <literal
+          moreinfo="none">(fun g -&gt; g 5)</literal> is a function that takes a function as an
+        argument, and then applies that function to the number <literal moreinfo="none">5</literal>.
+        The invocation of <literal moreinfo="none">List.map</literal> applies <literal
+          moreinfo="none">(fun g -&gt; g 5)</literal> to the elements of the <literal
+          moreinfo="none">increments</literal> list (which are themselves functions) and returns the
+        list containing the results of these function applications.</para>
 
       <para>The key thing to understand is that functions are ordinary values
       in OCaml, and you can do everything with them that you'd do with an
@@ -462,9 +443,8 @@
           moreinfo="none"># </prompt><userinput moreinfo="none">let plusone x = x + 1;;</userinput>
 <computeroutput moreinfo="none">val plusone : int -&gt; int = &lt;fun&gt;</computeroutput></programlisting>
 
-      <para>This is the most common and convenient way to declare a function,
-      but syntactic niceties aside, the two styles of function definition are
-      entirely equivalent.</para>
+      <para>This is the most common and convenient way to declare a function, but syntactic niceties
+        aside, the two styles of function definition are equivalent.</para>
 
       <note>
         <title>let and fun</title>
@@ -925,8 +905,8 @@
             </row>
 
             <row>
-              <entry><literal moreinfo="none">+</literal>, <literal
-              moreinfo="none">-</literal></entry>
+              <entry><literal moreinfo="none">+...</literal>, <literal moreinfo="none"
+                  >-...</literal></entry>
 
               <entry>Left associative</entry>
             </row>
@@ -1090,10 +1070,9 @@
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 32)</para>
 
-      <programlisting format="linespecific" language="ocaml"><prompt
-          moreinfo="none"># </prompt><userinput moreinfo="none">let path = "/usr/bin:/usr/local/bin:/bin:/sbin";;</userinput>
+      <programlisting format="linespecific" language="ocaml"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let path = "/usr/bin:/usr/local/bin:/bin:/sbin";;</userinput>
 <computeroutput moreinfo="none">val path : string = "/usr/bin:/usr/local/bin:/bin:/sbin"</computeroutput>
-<prompt moreinfo="none"># </prompt><userinput moreinfo="none">  String.split ~on:':' path</userinput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">String.split ~on:':' path</userinput>
 <userinput moreinfo="none">  |&gt; List.dedup ~compare:String.compare</userinput>
 <userinput moreinfo="none">  |&gt; List.iter ~f:print_endline</userinput>
 <userinput moreinfo="none">  ;;</userinput>
@@ -1111,8 +1090,7 @@
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 33)</para>
 
-      <programlisting format="linespecific" language="ocaml"><prompt
-          moreinfo="none"># </prompt><userinput moreinfo="none">  let split_path = String.split ~on:':' path in</userinput>
+      <programlisting format="linespecific" language="ocaml"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let split_path = String.split ~on:':' path in</userinput>
 <userinput moreinfo="none">  let deduped_path = List.dedup ~compare:String.compare split_path in</userinput>
 <userinput moreinfo="none">  List.iter ~f:print_endline deduped_path</userinput>
 <userinput moreinfo="none">  ;;</userinput>
@@ -1155,10 +1133,9 @@
       <para>It is this later form that we're using in the preceding <literal
       moreinfo="none">|&gt;</literal> pipeline.</para>
 
-      <para>Note that <literal moreinfo="none">|&gt;</literal> only works in
-      the intended way because it is left-associative. Indeed, let's see what
-      happens if we try using a right-associative operator, like
-      (^&gt;):</para>
+      <para>But <literal moreinfo="none">|&gt;</literal> only works in the intended way because it
+        is left-associative. Let's see what happens if we try using a right-associative operator,
+        like (^&gt;):</para>
 
       <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
@@ -1269,23 +1246,19 @@
     <sect2 id="labeled-arguments">
       <title>Labeled Arguments</title>
 
-      <para>Up until now, the functions we've defined have specified their
-      arguments positionally, i.e., by the order in which the arguments are
-      passed to the function. OCaml also supports labeled arguments, which let
-      you identify a function argument by name. Indeed, we've already
-      encountered functions from Core like <literal
-      moreinfo="none">List.map</literal> that use labeled arguments. Labeled
-      arguments are marked by a leading tilde, and a label (followed by a
-      colon) is put in front of the variable to be labeled. Here's an
-      example:<indexterm class="singular">
+      <para>Up until now, the functions we've defined have specified their arguments positionally,
+          <emphasis>i.e.</emphasis>, by the order in which the arguments are passed to the function.
+        OCaml also supports labeled arguments, which let you identify a function argument by name.
+        Indeed, we've already encountered functions from Core like <literal moreinfo="none"
+          >List.map</literal> that use labeled arguments. Labeled arguments are marked by a leading
+        tilde, and a label (followed by a colon) is put in front of the variable to be labeled.
+        Here's an example:<indexterm class="singular">
           <primary>labeled arguments</primary>
         </indexterm><indexterm class="singular">
           <primary>arguments</primary>
-
           <secondary>labeled arguments</secondary>
         </indexterm><indexterm class="singular">
           <primary>functions</primary>
-
           <secondary>labeled arguments</secondary>
         </indexterm></para>
 
@@ -1326,10 +1299,9 @@
       url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
       (part 42)</para>
 
-      <programlisting format="linespecific" language="ocaml"><prompt
-          moreinfo="none"># </prompt><userinput moreinfo="none">let num = 3 in</userinput>
-<userinput moreinfo="none">let denom = 4 in</userinput>
-<userinput moreinfo="none">ratio ~num ~denom;;</userinput>
+      <programlisting format="linespecific" language="ocaml"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let num = 3 in</userinput>
+<userinput moreinfo="none">  let denom = 4 in</userinput>
+<userinput moreinfo="none">  ratio ~num ~denom;;</userinput>
 <computeroutput moreinfo="none">- : float = 0.75</computeroutput></programlisting>
 
       <para>Labeled arguments are useful in a few different cases:</para>
@@ -1385,10 +1357,9 @@
 
           <programlisting format="linespecific" language="ocaml">val substring: string -&gt; int -&gt; int -&gt; string</programlisting>
 
-          <para>Here, the two <literal>ints</literal> are the starting
-          position and length of the substring to extract, respectively. We
-          can can make this fact more obvious from the signature by adding
-          labels:</para>
+          <para>Here, the two <literal>ints</literal> are the starting position and length of the
+            substring to extract, respectively. We can make this fact more obvious from the
+            signature by adding labels:</para>
 
           <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
           url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/substring_sig2.ml">variables-and-functions/substring_sig2.ml</ulink></para>
@@ -1414,8 +1385,7 @@
           url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">variables-and-functions/main.topscript</ulink>
           (part 43)</para>
 
-          <programlisting format="linespecific" language="ocaml"><prompt
-              moreinfo="none"># </prompt><userinput moreinfo="none">  String.split ~on:':' path</userinput>
+          <programlisting format="linespecific" language="ocaml"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">String.split ~on:':' path</userinput>
 <userinput moreinfo="none">  |&gt; List.dedup ~compare:String.compare</userinput>
 <userinput moreinfo="none">  |&gt; List.iter ~f:print_endline</userinput>
 <userinput moreinfo="none">  ;;</userinput>
@@ -1436,15 +1406,13 @@
       <sect3 id="higher-order-functions-and-labels">
         <title>Higher-order functions and labels</title>
 
-        <para>One surprising gotcha with labeled arguments is that while order
-        doesn't matter when calling a function with labeled arguments, it does
-        matter in a higher-order context, e.g., when passing a function with
-        labeled arguments to another function. Here's an example:<indexterm
-            class="singular">
+        <para>One surprising gotcha with labeled arguments is that while order doesn't matter when
+          calling a function with labeled arguments, it does matter in a higher-order context,
+            <emphasis>e.g.</emphasis>, when passing a function with labeled arguments to another
+          function. Here's an example:<indexterm class="singular">
             <primary>higher-order functions, and labels</primary>
           </indexterm><indexterm class="singular">
             <primary>functions</primary>
-
             <secondary>higher-order and labels</secondary>
           </indexterm></para>
 
@@ -1579,13 +1547,11 @@
           moreinfo="none"># </prompt><userinput moreinfo="none">let concat ?(sep="") x y = x ^ sep ^ y ;;</userinput>
 <computeroutput moreinfo="none">val concat : ?sep:string -&gt; string -&gt; string -&gt; string = &lt;fun&gt;</computeroutput></programlisting>
 
-      <para>Optional arguments are very useful, but they're also easy to
-      abuse. The key advantage of optional arguments is that they let you
-      write functions with multiple arguments that users can ignore most of
-      the time, only worrying about them when they specifically want to invoke
-      those options. They also allow you to extend an API with new
-      functionality without changing existing code that calls that
-      function.</para>
+      <para>Optional arguments are very useful, but they're also easy to abuse. The key advantage of
+        optional arguments is that they let you write functions with multiple arguments that users
+        can ignore most of the time, only worrying about them when they specifically want to invoke
+        those options. They also allow you to extend an API with new functionality without changing
+        existing code.</para>
 
       <para>The downside is that the caller may be unaware that there is a
       choice to be made, and so may unknowingly (and wrongly) pick the default
@@ -1593,12 +1559,11 @@
       concision of omitting the argument outweighs the corresponding loss of
       explicitness.</para>
 
-      <para>This means that rarely used functions should not have optional
-      arguments. A good rule of thumb is to avoid optional arguments for
-      functions internal to a module, i.e., functions that are not included in
-      the module's interface, or <literal moreinfo="none">mli</literal> file.
-      We'll learn more about <literal moreinfo="none">mli</literal>s in <xref
-      linkend="files-modules-and-programs" />.</para>
+      <para>This means that rarely used functions should not have optional arguments. A good rule of
+        thumb is to avoid optional arguments for functions internal to a module,
+          <emphasis>i.e.</emphasis>, functions that are not included in the module's interface, or
+          <literal moreinfo="none">mli</literal> file. We'll learn more about <literal
+          moreinfo="none">mli</literal>s in <xref linkend="files-modules-and-programs"/>.</para>
 
       <sect3 id="explicit-passing-of-an-optional-argument">
         <title>Explicit passing of an optional argument</title>

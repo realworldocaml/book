@@ -57,10 +57,8 @@
     </listitem>
 
     <listitem>
-      <para>See examples that extend the cryptographic utility from <xref
-      linkend="classes" /> and build a simple equivalent to the <literal
-      moreinfo="none">md5</literal> and <literal
-      moreinfo="none">shasum</literal> utilities</para>
+      <para>We will build simple equivalents to the cryptographic <literal moreinfo="none"
+          >md5</literal> and <literal moreinfo="none">shasum</literal> utilities</para>
     </listitem>
 
     <listitem>

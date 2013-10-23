@@ -132,8 +132,7 @@
       chapter, we've picked the <ulink
       url="http://mjambon.com/yojson.html">Yojson</ulink> library by Martin
       Jambon. It's easiest to install via OPAM by running <literal
-      moreinfo="none">opam install yojson</literal>. See <xref
-      linkend="installation" /> for installation instructions if you haven't
+        moreinfo="none">opam install yojson</literal>. See <ulink url="http://realworldocaml.org/install">this Real World OCaml page</ulink> for installation instructions if you haven't
       already got OPAM. Once installed, you can open it in the <command
       moreinfo="none">utop</command> toplevel by:</para>
 
@@ -968,8 +967,7 @@ val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt
       <para>The command-line tool will be installed within your <filename
       moreinfo="none">~/.opam</filename> directory and should already be on
       your <literal moreinfo="none">PATH</literal> from running <command
-      moreinfo="none">opam config env</command>. See <xref
-      linkend="installation" /> if this isn't working.</para>
+        moreinfo="none">opam config env</command>. See <ulink url="http://realworldocaml.org/install">this Real World OCaml page</ulink> if this isn't working.</para>
     </note>
 
     <sect2 id="atd-basics">
@@ -1353,12 +1351,9 @@ let () =
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/json/build_github_org.out">json/build_github_org.out</ulink></para>
 
-      <programlisting format="linespecific" language="console"><prompt
-          moreinfo="none">$ </prompt><userinput moreinfo="none">atdgen -t github_org.atd</userinput>
+      <programlisting format="linespecific" language="console"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">atdgen -t github_org.atd</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">atdgen -j github_org.atd</userinput>
-<prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg core_extended,yojson,atdgen github_org_info.native</userinput>
-<computeroutput moreinfo="none">File "github_org_j.ml", line 19, characters 4-16:</computeroutput>
-<computeroutput moreinfo="none">Warning 32: unused value string_of__1.</computeroutput></programlisting>
+<prompt moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg core_extended,yojson,atdgen github_org_info.native</userinput></programlisting>
 
       <para>You can now run the command-line tool with a single argument to
       specify the name of the organization, and it will dynamically fetch the

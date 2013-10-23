@@ -89,15 +89,12 @@
       </mediaobject>
     </figure>
 
-    <para>Each <literal moreinfo="none">::</literal> essentially adds a new
-    block to the proceding picture. Such a block contains two things: a
-    reference to the data in that list element, and a reference to the
-    remainder of the list. This is why <literal moreinfo="none">::</literal>
-    can extend a list without modifying it; extension allocates a new list
-    element but doesn't need to change any of the existing ones, as you can
-    see:<indexterm class="singular">
+    <para>Each <literal moreinfo="none">::</literal> essentially adds a new block to the proceding
+      picture. Such a block contains two things: a reference to the data in that list element, and a
+      reference to the remainder of the list. This is why <literal moreinfo="none">::</literal> can
+      extend a list without modifying it; extension allocates a new list element but change any of
+      the existing ones, as you can see:<indexterm class="singular">
         <primary>lists</primary>
-
         <secondary>extension of</secondary>
       </indexterm></para>
 
@@ -564,17 +561,13 @@
         moreinfo="none"># </prompt><userinput moreinfo="none">List.map2_exn ~f:Int.max [1;2;3] [3;2;1;0];;</userinput>
 <computeroutput moreinfo="none">Exception: (Invalid_argument "length mismatch in rev_map2_exn: 3 &lt;&gt; 4 ").</computeroutput></programlisting>
 
-    <para><literal moreinfo="none">List.fold</literal> is the most complicated
-    of the three, taking three arguments: a list to process, an initial
-    accumulator value, and a function for updating the accumulator with the
-    information from a list element. <literal
-    moreinfo="none">List.fold</literal> walks over the list from left to
-    right, updating the accumulator at each step and returning the final value
-    of the accumulator when it's done. You can see some of this by looking at
-    the type-signature for <literal moreinfo="none">fold</literal>:<indexterm
-        class="singular">
+    <para><literal moreinfo="none">List.fold</literal> is the most complicated of the three, taking
+      three arguments: a list to process, an initial accumulator value, and a function for updating
+      the accumulator. <literal moreinfo="none">List.fold</literal> walks over the list from left to
+      right, updating the accumulator at each step and returning the final value of the accumulator
+      when it's done. You can see some of this by looking at the type-signature for <literal
+        moreinfo="none">fold</literal>:<indexterm class="singular">
         <primary>List module</primary>
-
         <secondary>List.fold</secondary>
       </indexterm></para>
 
@@ -830,20 +823,16 @@
       <sect3 id="filtering-with-list.filter-and-list.filter_map">
         <title>Filtering with List.filter and List.filter_map</title>
 
-        <para>Very often when processing lists, one wants to restrict your
-        attention to a subset of the values on your list. The <literal
-        moreinfo="none">List.filter</literal> function is one way of doing
-        that:<indexterm class="singular">
+        <para>Very often when processing lists, you wants to restrict your attention to a subset of
+          the values on your list. The <literal moreinfo="none">List.filter</literal> function is
+          one way of doing that:<indexterm class="singular">
             <primary>lists</primary>
-
             <secondary>filtering values in</secondary>
           </indexterm><indexterm class="singular">
             <primary>values</primary>
-
             <secondary>filtering with List.filter</secondary>
           </indexterm><indexterm class="singular">
             <primary>List module</primary>
-
             <secondary>List.filter</secondary>
           </indexterm></para>
 
@@ -1161,22 +1150,19 @@
         moreinfo="none"># </prompt><userinput moreinfo="none">length (make_list 10_000_000);;</userinput>
 <computeroutput moreinfo="none">- : int = 10000000</computeroutput></programlisting>
 
-    <para>So when is a call a tail call? Let's think about the situation of
-    one function (the <emphasis>caller</emphasis>) invokes another (the
-    <emphasis>callee</emphasis>). The invocation is considered a tail call
-    when the caller doesn't do anything with the value returned by the callee
-    except to return it. The tail-call optimization makes sense because, when
-    a caller makes a tail call, the caller's stack frame need never be used
-    again, and so you don't need to keep it around. Thus, instead of
-    allocating a new stack frame for the callee, the compiler is free to reuse
-    the caller's stack frame.</para>
+    <para>So when is a call a tail call? Let's think about the situation where one function (the
+        <emphasis>caller</emphasis>) invokes another (the <emphasis>callee</emphasis>). The
+      invocation is considered a tail call when the caller doesn't do anything with the value
+      returned by the callee except to return it. The tail-call optimization makes sense because,
+      when a caller makes a tail call, the caller's stack frame need never be used again, and so you
+      don't need to keep it around. Thus, instead of allocating a new stack frame for the callee,
+      the compiler is free to reuse the caller's stack frame.</para>
 
-    <para>Tail recursion is important for more than just lists. Ordinary
-    nontail recursive calls are reasonable when dealing with data structures
-    like binary trees, where the depth of the tree is logarithmic in the size
-    of your data. But when dealing with situations where the depth of the
-    sequence of nested calls is on the order of the size of your data, tail
-    recursion is usually the right approach.</para>
+    <para>Tail recursion is important for more than just lists. Ordinary nontail recursive calls are
+      reasonable when dealing with data structures like binary trees, where the depth of the tree is
+      logarithmic in the size of your data. But when dealing with situations where the depth of the
+      sequence of nested calls is on the order of the size of your data, tail recursion is usually
+      the right approach.</para>
   </sect1>
 
   <sect1 id="terser-and-faster-patterns">
@@ -1319,24 +1305,19 @@
           moreinfo="none"># </prompt><userinput moreinfo="none">(=);;</userinput>
 <computeroutput moreinfo="none">- : 'a -&gt; 'a -&gt; bool = &lt;fun&gt;</computeroutput></programlisting>
 
-      <para>OCaml actually comes with a whole family of polymorphic comparison
-      operators, including the standard infix comparators, <literal
-      moreinfo="none">&lt;</literal>, <literal
-      moreinfo="none">&gt;=</literal>, etc., as well as the function <literal
-      moreinfo="none">compare</literal> that returns <literal
-      moreinfo="none">-1</literal>, <literal moreinfo="none">0</literal>, or
-      <literal moreinfo="none">1</literal> to flag whether the first operand
-      is smaller than, equal to, or greater than the second,
-      respectively.</para>
+      <para>OCaml comes with a whole family of polymorphic comparison operators, including the
+        standard infix comparators, <literal moreinfo="none">&lt;</literal>, <literal
+          moreinfo="none">&gt;=</literal>, etc., as well as the function <literal moreinfo="none"
+          >compare</literal> that returns <literal moreinfo="none">-1</literal>, <literal
+          moreinfo="none">0</literal>, or <literal moreinfo="none">1</literal> to flag whether the
+        first operand is smaller than, equal to, or greater than the second, respectively.</para>
 
-      <para>You might wonder how you could build functions like these yourself
-      if OCaml didn't come with them built in. It turns out that you
-      <emphasis>can't</emphasis> build these functions on your own. OCaml's
-      polymorphic comparison functions are actually built into the runtime to
-      a low level. These comparisons are polymorphic on the basis of ignoring
-      almost everything about the types of the values that are being compared,
-      paying attention only to the structure of the values as they're laid out
-      in memory.</para>
+      <para>You might wonder how you could build functions like these yourself if OCaml didn't come
+        with them built in. It turns out that you <emphasis>can't</emphasis> build these functions
+        on your own. OCaml's polymorphic comparison functions are built into the runtime to a low
+        level. These comparisons are polymorphic on the basis of ignoring almost everything about
+        the types of the values that are being compared, paying attention only to the structure of
+        the values as they're laid out in memory.</para>
 
       <para>Polymorphic compare does have some limitations. For example, it
       will fail at runtime if it encounters a function value:</para>

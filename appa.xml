@@ -22,10 +22,9 @@
     </listitem>
 
     <listitem>
-      <para><ulink url="https://github.com/diml/utop">Utop</ulink> is a modern
-      interactive toplevel with command history, tab completion, and defaults
-      that are tuned to work with the examples in <emphasis>Real World
-      OCaml</emphasis>.</para>
+      <para><ulink url="https://github.com/diml/utop"><emphasis>utop</emphasis></ulink> is a modern
+        interactive toplevel with command history, tab completion, and defaults that are tuned to
+        work with the examples in <emphasis>Real World OCaml</emphasis>.</para>
     </listitem>
   </itemizedlist>
 
@@ -51,8 +50,8 @@
   <sect1 id="online-instructions">
     <title>Online Instructions</title>
 
-    <para>We've placed the installation instructions online to ensure they
-    remain uptodate. Please visit:</para>
+    <para>We've placed the installation instructions online to ensure they remain up-to-date. Please
+      visit:</para>
 
     <itemizedlist>
       <listitem>
@@ -67,10 +66,10 @@
       </listitem>
 
       <listitem>
-        <para><ulink url="https://realworldocaml.org/doc"/> contains the HTML
-        documentation for all the libraries used within the book. This is a
-        convenient reference for the Core interfaces, and also the other
-        third-party software we use such as Yojson or Menhir.</para>
+        <para><ulink url="https://realworldocaml.org/doc"/> contains the HTML documentation for all
+          the libraries used within the book. This is a convenient reference for the Core
+          interfaces, and also the other third-party software we use, such as Yojson or
+          Menhir.</para>
       </listitem>
     </itemizedlist>
   </sect1>

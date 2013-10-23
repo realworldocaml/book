@@ -12,8 +12,6 @@
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="part2.xml"/>
 
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="part3.xml"/>
-
-  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="appa.xml"/>
 <index/>
 <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="colo.xml"/>
 </book>

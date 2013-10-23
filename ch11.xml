@@ -171,12 +171,9 @@
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">s#pop ;;</userinput>
 <computeroutput moreinfo="none">- : int option = Some 4</computeroutput></programlisting>
 
-    <para>Note that unlike functions, methods can have zero parameters, since
-    the method call is routed to a concrete object instance. That's why the
-    <literal moreinfo="none">push</literal> and <literal
-    moreinfo="none">pop</literal> methods do not have a <literal
-    moreinfo="none">unit</literal> argument, as the equivalent functional
-    versions would.</para>
+    <para>Note that unlike functions, methods can have zero parameters, since the method call is
+      routed to a concrete object instance. That's why the <literal>pop</literal> method doesn't
+      have a <literal>unit</literal> argument, as the equivalent functional version would. </para>
 
     <para>Objects can also be constructed by functions. If we want to specify
     the initial value of the object, we can define a function that takes the
@@ -869,15 +866,14 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</programlisting>
       url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
       (part 11)</para>
 
-      <programlisting format="linespecific" language="ocaml"><prompt
-          moreinfo="none"># </prompt><userinput moreinfo="none">let total_area (shape_stacks: shape stack list) =</userinput>
+      <programlisting format="linespecific" language="ocaml"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let total_area (shape_stacks: shape stack list) =</userinput>
 <userinput moreinfo="none">    let stack_area acc st = </userinput>
 <userinput moreinfo="none">      let rec loop acc =</userinput>
 <userinput moreinfo="none">        match st#pop with</userinput>
 <userinput moreinfo="none">        | Some s -&gt; loop (acc +. s#area)</userinput>
 <userinput moreinfo="none">        | None -&gt; acc</userinput>
 <userinput moreinfo="none">      in</userinput>
-<userinput moreinfo="none">        loop acc</userinput>
+<userinput moreinfo="none">      loop acc</userinput>
 <userinput moreinfo="none">    in</userinput>
 <userinput moreinfo="none">      List.fold ~init:0.0 ~f:stack_area shape_stacks ;;</userinput>
 <computeroutput moreinfo="none">val total_area : shape stack list -&gt; float = &lt;fun&gt;</computeroutput></programlisting>
@@ -929,8 +925,7 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</programlisting>
       url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
       (part 13)</para>
 
-      <programlisting format="linespecific" language="ocaml"><prompt
-          moreinfo="none"># </prompt><userinput moreinfo="none">type 'a readonly_stack = &lt; pop : 'a option &gt; ;;</userinput>
+      <programlisting format="linespecific" language="ocaml"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type 'a readonly_stack = &lt; pop : 'a option &gt; ;;</userinput>
 <computeroutput moreinfo="none">type 'a readonly_stack = &lt; pop : 'a option &gt;</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">let total_area (shape_stacks: shape readonly_stack list) =</userinput>
 <userinput moreinfo="none">    let stack_area acc st = </userinput>
@@ -943,7 +938,8 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</programlisting>
 <userinput moreinfo="none">    in</userinput>
 <userinput moreinfo="none">      List.fold ~init:0.0 ~f:stack_area shape_stacks ;;</userinput>
 <computeroutput moreinfo="none">val total_area : shape readonly_stack list -&gt; float = &lt;fun&gt;</computeroutput>
-<prompt moreinfo="none"># </prompt><userinput moreinfo="none">total_area [(square_stack :&gt; shape readonly_stack); (circle_stack :&gt; shape readonly_stack)] ;;</userinput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">total_area [(square_stack :&gt; shape readonly_stack); (circle_stack :&gt; 
+    shape readonly_stack)] ;;</userinput>
 <computeroutput moreinfo="none">- : float = 7280.</computeroutput></programlisting>
 
       <para>Aspects of this section may seem fairly complicated, but it should

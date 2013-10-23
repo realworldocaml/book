@@ -12,6 +12,45 @@ p.sourcecode {
   page-break-after: avoid
 }
 
+
+table.warning td p.sourcecode, 
+table.caution td p.sourcecode,
+table.note td p.sourcecode,
+table.tip td p.sourcecode { 
+  text-align: right;
+  display: block;
+  hyphens: none;
+  margin-bottom: 0;
+  font-size: 8.3pt;
+  font-style: italic;
+  page-break-after: avoid
+}
+
+.sidebar p.sourcecode {
+  text-align: right;
+  display: block;
+  hyphens: none;
+  margin-bottom: 0;
+  font-size: 8.3pt;
+  font-style: italic;
+  page-break-after: avoid
+}
+
+table.warning.allow_break,
+table.caution.allow_break,
+table.note.allow_break,
+table.tip.allow_break {
+page-break-inside: auto;
+}
+
+table.warning.allow_break tbody tr td,
+table.caution.allow_break tbody tr td,
+table.note.allow_break tbody tr td,
+table.tip.allow_break tbody tr td {
+page-break-inside: auto;
+}
+
+
 /*----Uncomment to turn on automatic code wrapping
 
 pre.programlisting, pre.screen, pre.literallayout {

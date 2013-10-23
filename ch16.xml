@@ -22,27 +22,23 @@
   and XML. Parsing such formats accurately and efficiently while providing
   useful error messages is a complex task.</para>
 
-  <para>Often, you can find an existing parsing library that handles these
-  issues for you. But there are tools to help simplify the task when you do
-  need to write a parser, in the form of <emphasis>parser
-  generators</emphasis>. A parser generator creates a parser from a
-  specification of the data format that you want to parse, and uses that to
-  generate a parser.<indexterm class="singular">
+  <para>Often, you can find an existing parsing library that handles these issues for you. But there
+    are tools to simplify the task when you do need to write a parser, in the form of
+      <emphasis>parser generators</emphasis>. A parser generator creates a parser from a
+    specification of the data format that you want to parse, and uses that to generate a
+      parser.<indexterm class="singular">
       <primary>parsing</primary>
-
       <secondary>parser generators</secondary>
     </indexterm></para>
 
-  <para>Parser generators have a long history, including tools like <command
-  moreinfo="none">lex</command> and <command moreinfo="none">yacc</command>
-  that date back to the early 1970s. OCaml has its own alternatives, including
-  <command moreinfo="none">ocamllex</command>, which replaces <command
-  moreinfo="none">lex</command>, and <command
-  moreinfo="none">ocamlyacc</command> and <command
-  moreinfo="none">menhir</command>, which are replacements for <command
-  moreinfo="none">yacc</command>. We'll explore these tools in the course of
-  walking through the implementation of a parser for the JSON serialization
-  format that we discussed in <xref linkend="handling-json-data" />.</para>
+  <para>Parser generators have a long history, including tools like <command moreinfo="none"
+      >lex</command> and <command moreinfo="none">yacc</command> that date back to the early 1970s.
+    OCaml has its own alternatives, including <command moreinfo="none">ocamllex</command>, which
+    replaces <command moreinfo="none">lex</command>, and <command moreinfo="none"
+      >ocamlyacc</command> and <command moreinfo="none">menhir</command>, which replace <command
+      moreinfo="none">yacc</command>. We'll explore these tools in the course of walking through the
+    implementation of a parser for the JSON serialization format that we discussed in <xref
+      linkend="handling-json-data"/>.</para>
 
   <para>Parsing is a broad and often intricate topic, and our purpose here is
   not to teach all of the theoretical issues, but to provide a pragmatic
@@ -100,11 +96,10 @@
     AST; so from here on out, we'll use the term parsing to refer only to this
     second phase.</para>
 
-    <para>Let's consider lexing and parsing in the context of the JSON format.
-    Here's an example of a snippet of text that represents a JSON object
-    containing a string labeled <literal moreinfo="none">title</literal> and
-    an array containing two objects, each with a name and array of zip
-    codes:</para>
+    <para>Let's consider lexing and parsing in the context of the JSON format. Here's a snippet of
+      text that represents a JSON object containing a string labeled <literal moreinfo="none"
+        >title</literal> and an array containing two objects, each with a name and array of zip
+      codes:</para>
 
     <para role="sourcecode">JSON: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/example.json">parsing/example.json</ulink></para>
@@ -173,12 +168,10 @@
   | `String of string
 ]</programlisting>
 
-    <para>This representation is much richer than our token stream, capturing
-    the fact that JSON values can be nested inside each other and that JSON
-    has a variety of value types, including numbers, strings, arrays, and
-    objects. The job of the parser we'll write will be to convert a token
-    stream into a value of this AST type, as shown below for our earlier JSON
-    example:</para>
+    <para>This representation is much richer than our token stream, capturing the fact that JSON
+      values can be nested inside each other and that JSON has a variety of value types, including
+      numbers, strings, arrays, and objects. The parser we'll write will convert a token stream into
+      a value of this AST type, as shown below for our earlier JSON example:</para>
 
     <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/parsed_example.ml">parsing/parsed_example.ml</ulink></para>
@@ -193,20 +186,16 @@
   <sect1 id="defining-a-parser">
     <title>Defining a Parser</title>
 
-    <para>A parser-specification file has suffix <literal
-    moreinfo="none">.mly</literal> and contains several sections that are
-    broken up by separator lines consisting of the characters <literal
-    moreinfo="none">%%</literal> on a line by themselves. The first section of
-    the file is for declarations, including token and type specifications,
-    precedence directives, and other output directives; and the second section
-    is for specifying the grammar of the language to be parsed.<indexterm
-        class="singular">
+    <para>A parser-specification file has suffix <literal moreinfo="none">.mly</literal> and
+      contains two sections that are broken up by separator lines consisting of the characters
+        <literal moreinfo="none">%%</literal> on a line by themselves. The first section of the file
+      is for declarations, including token and type specifications, precedence directives, and other
+      output directives; and the second section is for specifying the grammar of the language to be
+        parsed.<indexterm class="singular">
         <primary>files</primary>
-
         <secondary>mly files</secondary>
       </indexterm><indexterm class="startofrange" id="PARSparsdef">
         <primary>parsing</primary>
-
         <secondary>parser definition</secondary>
       </indexterm></para>
 
@@ -256,21 +245,17 @@
     <sect2 id="describing-the-grammar">
       <title>Describing the Grammar</title>
 
-      <para>The next thing we need to do is to specify the grammar of a JSON
-      expression. <command moreinfo="none">menhir</command>, like many parser
-      generators, expresses grammars as <emphasis>context-free
-      grammars</emphasis>. (More precisely, <command
-      moreinfo="none">menhir</command> supports LR(1) grammars, but we will
-      ignore that technical distinction here.) You can think of a context-free
-      grammar as a set of abstract names, called <emphasis>non-terminal
-      symbols</emphasis>, along with a collection of rules for transforming a
-      nonterminal symbol into a sequence of tokens and nonterminal symbols. A
-      sequence of tokens is parsable by a grammar if you can apply the
-      grammar's rules to produce a series of transformations, starting at a
-      distinguished <emphasis>start symbol</emphasis> that produces the token
-      sequence in question.<indexterm class="singular">
+      <para>The next thing we need to do is to specify the grammar of a JSON expression. <command
+          moreinfo="none">menhir</command>, like many parser generators, expresses grammars as
+          <emphasis>context-free grammars</emphasis>. (More precisely, <command moreinfo="none"
+          >menhir</command> supports LR(1) grammars, but we will ignore that technical distinction
+        here.) You can think of a context-free grammar as a set of abstract names, called
+          <emphasis>non-terminal symbols</emphasis>, along with a collection of rules for
+        transforming a nonterminal symbol into a sequence of tokens and nonterminal symbols. A
+        sequence of tokens is parsable by a grammar if you can apply the grammar's rules to produce
+        a series of transformations, starting at a distinguished <emphasis>start symbol</emphasis>
+        that produces the token sequence in question.<indexterm class="singular">
           <primary>grammars</primary>
-
           <secondary>context-free</secondary>
         </indexterm><indexterm class="singular">
           <primary>LR(1) grammars</primary>
@@ -279,11 +264,10 @@
         </indexterm><indexterm class="singular">
           <primary>non-terminal symbols</primary>
         </indexterm><indexterm class="singular">
-          <primary>context free grammars</primary>
+          <primary>context-free grammars</primary>
         </indexterm><indexterm class="singular">
           <primary>Menhir parser generator</primary>
-
-          <secondary>context free grammars in</secondary>
+          <secondary>context-free grammars in</secondary>
         </indexterm></para>
 
       <para>We'll start describing the JSON grammar by declaring the start
@@ -301,11 +285,11 @@
       <programlisting format="linespecific" language="ocaml">%start &lt;Json.value option&gt; prog
 %%</programlisting>
 
-      <para>Once that's in place, we can start specifying the productions. In
-      <command moreinfo="none">menhir</command>, productions are organized
-      into <emphasis>rules</emphasis>, where each rule lists all the possible
-      productions for a given nonterminal. Here, for example, is the rule for
-      <literal moreinfo="none">prog</literal>:</para>
+      <para>Once that's in place, we can start specifying the productions. In <command
+          moreinfo="none">menhir</command>, productions are organized into
+          <emphasis>rules</emphasis>, where each rule lists all the possible productions for a given
+        nonterminal symbols. Here, for example, is the rule for <literal moreinfo="none"
+          >prog</literal>:</para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/parser.mly">parsing/parser.mly</ulink>
@@ -316,35 +300,30 @@
   | v = value { Some v }
   ;</programlisting>
 
-      <para>The syntax for this is reminiscent of an OCaml
-      <literal>match</literal> statement. The pipes separate the individual
-      productions, and the curly braces contain a <emphasis>semantic
-      action</emphasis>: OCaml code that generates the OCaml value
-      corresponding to the production in question. Semantic actions are
-      arbitrary OCaml expressions that are evaluated during parsing to produce
-      a value that is attached to the nonterminal in the rule.<indexterm
-          class="singular">
+      <para>The syntax for this is reminiscent of an OCaml <literal>match</literal> statement. The
+        pipes separate the individual productions, and the curly braces contain a <emphasis>semantic
+          action</emphasis>: OCaml code that generates the OCaml value corresponding to the
+        production in question. Semantic actions are arbitrary OCaml expressions that are evaluated
+        during parsing to produce values that are attached to the non-terminal in the
+          rule.<indexterm class="singular">
           <primary>semantic actions</primary>
         </indexterm><indexterm class="singular">
           <primary>curly braces ({ })</primary>
         </indexterm></para>
 
-      <para>In the case of <literal moreinfo="none">prog</literal>, we have
-      two cases: either there's an <literal moreinfo="none">EOF</literal>,
-      which means the text is empty, and so there's no JSON value to read, and
-      so we return the OCaml value <literal moreinfo="none">None</literal>; or
-      we have an instance of the <literal moreinfo="none">value</literal>
-      nonterminal, which corresponds to a well-formed JSON value, in which
-      case we wrap the corresponding <literal
-      moreinfo="none">Json.value</literal> in a <literal
-      moreinfo="none">Some</literal> tag. Note that in the <literal
-      moreinfo="none">value</literal> case, we wrote <literal
-      moreinfo="none">v = value</literal> to bind the OCaml value that
-      corresponds to the variable <literal moreinfo="none">v</literal>, which
-      we can then use within the curly braces for that production.</para>
+      <para>We have two cases for <literal>prog</literal>: either there's an <literal
+          moreinfo="none">EOF</literal>, which means the text is empty, and so there's no JSON value
+        to read, we return the OCaml value <literal moreinfo="none">None</literal>; or we have an
+        instance of the <literal moreinfo="none">value</literal> nonterminal, which corresponds to a
+        well-formed JSON value, and we wrap the corresponding <literal moreinfo="none"
+          >Json.value</literal> in a <literal moreinfo="none">Some</literal> tag. Note that in the
+          <literal moreinfo="none">value</literal> case, we wrote <literal moreinfo="none">v =
+          value</literal> to bind the OCaml value that corresponds to the variable <literal
+          moreinfo="none">v</literal>, which we can then use within the curly braces for that
+        production.</para>
 
-      <para>Now let's consider a more complicated example, the rule for the
-      <literal moreinfo="none">value</literal> symbol:</para>
+      <para>Now let's consider a more complex example, the rule for the <literal moreinfo="none"
+          >value</literal> symbol:</para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/parsing/parser.mly">parsing/parser.mly</ulink>
@@ -887,14 +866,11 @@ let id = ['a'-'z' 'A'-'Z' '_'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*</programlisting>
   <sect1 id="bringing-it-all-together">
     <title>Bringing It All Together</title>
 
-    <para>For the final part, we need to compose the lexer and parser. As we
-    saw in the type definition in <literal
-    moreinfo="none">parser.mli</literal>, the parsing function expects a lexer
-    of type <literal moreinfo="none">Lexing.lexbuf -&gt; token</literal>, and
-    it also expects a <literal moreinfo="none">lexbuf</literal>:<indexterm
-        class="singular">
+    <para>For the final part, we need to compose the lexer and parser. As we saw in the type
+      definition in <literal moreinfo="none">parser.mli</literal>, the parsing function expects a
+      lexer of type <literal moreinfo="none">Lexing.lexbuf -&gt; token</literal>, and a <literal
+        moreinfo="none">lexbuf</literal>:<indexterm class="singular">
         <primary>parsing</primary>
-
         <secondary>lexer and parser composition</secondary>
       </indexterm></para>
 

@@ -35,9 +35,8 @@
 <computeroutput moreinfo="none">  [(0, "zero"); (1, "one"); (2, "two"); (3, "three"); (4, "four");</computeroutput>
 <computeroutput moreinfo="none">   (5, "five"); (6, "six"); (7, "seven"); (8, "eight"); (9, "nine")]</computeroutput></programlisting>
 
-  <para>We can use functions from the <literal
-  moreinfo="none">List.Assoc</literal> module to manipulate such an
-  association list:</para>
+  <para>We can use functions from the <literal moreinfo="none">List.Assoc</literal> module to
+    manipulate this data:</para>
 
   <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
   url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">maps-and-hash-tables/main.topscript</ulink>
@@ -218,9 +217,8 @@ let touch t s =
       url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">maps-and-hash-tables/main.topscript</ulink>
       (part 5)</para>
 
-      <programlisting format="linespecific" language="ocaml"><prompt
-          moreinfo="none"># </prompt><userinput moreinfo="none">let left = String.Map.of_alist_exn ["foo",1; "bar",3; "snoo", 0]</userinput>
-<userinput moreinfo="none">  let right = String.Map.of_alist_exn ["foo",0; "snoo", 0]</userinput>
+      <programlisting format="linespecific" language="ocaml"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let left = String.Map.of_alist_exn ["foo",1; "bar",3; "snoo",0]</userinput>
+<userinput moreinfo="none">  let right = String.Map.of_alist_exn ["foo",0; "snoo",0]</userinput>
 <userinput moreinfo="none">  let diff = Map.symmetric_diff ~data_equal:Int.equal left right</userinput>
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val left : int String.Map.t = &lt;abstr&gt;</computeroutput>
@@ -471,14 +469,12 @@ let touch t s =
         runtime representation of OCaml values, walking the structure of the
         values in question without regard for their type.</para>
 
-        <para>This is convenient because it provides a comparison function
-        that works for most OCaml values and largely behaves as you would
-        expect. For example, on <literal moreinfo="none">int</literal>s and
-        <literal moreinfo="none">float</literal>s, it acts as you would expect
-        a numeric comparison function to act. For simple containers like
-        strings and lists and arrays, it operates as a lexicographic
-        comparison. And except for closures and values from outside of the
-        OCaml heap, it works on almost every OCaml type.</para>
+        <para>This is convenient because it provides a comparison function that works for most OCaml
+          values and largely behaves as you would expect. For example, on <literal moreinfo="none"
+            >int</literal>s and <literal moreinfo="none">float</literal>s, it acts as you would
+          expect a numeric comparison function to act. For simple containers like strings and lists
+          and arrays, it operates as a lexicographic comparison. And except for functions and values
+          from outside of the OCaml heap, it works on almost every OCaml type.</para>
 
         <para>But sometimes, a structural comparison is not what you want.
         Sets are a great example of this. Consider the following two
@@ -799,35 +795,28 @@ end
     <warning>
       <title>Time Complexity of Hash Tables</title>
 
-      <para>The statement that hash tables provide constant-time access hides
-      some complexities. First of all, any hash table implementation, OCaml's
-      included, needs to resize the table when it gets too full. A resize
-      requires allocating a new backing array for the hash table and copying
-      over all entries, and so it is quite an expensive operation. That means
-      adding a new element to the table is only <emphasis>amortized</emphasis>
-      constant, which is to say, it's constant on average over a long sequence
-      of additions, but some of the individual additions can be quite
-      expensive.</para>
+      <para>The statement that hash tables provide constant-time access hides some complexities.
+        First of all, any hash table implementation, OCaml's included, needs to resize the table
+        when it gets too full. A resize requires allocating a new backing array for the hash table
+        and copying over all entries, and so it is quite an expensive operation. That means adding a
+        new element to the table is only <emphasis>amortized</emphasis> constant, which is to say,
+        it's constant on average over a long sequence of operations, but some of the individual
+        operations can be quite expensive.</para>
 
-      <para>Another hidden cost of hash tables has to do with the hash
-      function you use. If you end up with a pathologically bad hash function
-      that hashes all of your data to the same number, then all of your
-      insertions will hash to the same underlying bucket, meaning you no
-      longer get constant-time access at all. Core's hash table implementation
-      uses binary trees for the hash-buckets, so this case only leads to
-      logarithmic time, rather than quadratic for a traditional hash
-      table.</para>
+      <para>Another hidden cost of hash tables has to do with the hash function you use. If you end
+        up with a pathologically bad hash function that hashes all of your data to the same number,
+        then all of your insertions will hash to the same underlying bucket, meaning you no longer
+        get constant-time access at all. Core's hash table implementation uses binary trees for the
+        hash-buckets, so this case only leads to logarithmic time, rather than linear for a
+        traditional hash table.</para>
 
-      <para>The logarithmic behavior of Core's hash tables in the presence of
-      hash collisions also helps protect against some denial-of-service
-      attacks. One well-known type of attack is to send queries to a service
-      with carefully chosen keys to cause many collisions. This, in
-      combination with the quadratic behavior of hash tables, can cause the
-      service to become unresponsive due to high CPU load. Core's hash tables
-      would be much less susceptible to such an attack because the amount of
-      degradation would be far less.<indexterm class="singular">
+      <para>The logarithmic behavior of Core's hash tables in the presence of hash collisions also
+        helps protect against some denial-of-service attacks. One well-known type of attack is to
+        send queries to a service with carefully chosen keys to cause many collisions. This, in
+        combination with the linear behavior of most hashtables, can cause the service to become
+        unresponsive due to high CPU load. Core's hash tables would be much less susceptible to such
+        an attack because the amount of degradation would be far less.<indexterm class="singular">
           <primary>security issues</primary>
-
           <secondary>denial-of-service attacks</secondary>
         </indexterm><indexterm class="singular">
           <primary>denial-of-service attacks, avoiding</primary>
@@ -914,13 +903,11 @@ end
           <secondary>polymorphic hash function</secondary>
         </indexterm></para>
 
-      <para>The bound on the traversal means that the hash function may ignore
-      part of the data structure, and this can lead to pathological <phrase
-      role="keep-together">cases</phrase> where every value you store has the
-      same hash value. By default, OCaml's hash function will stop after it
-      has found 10 nodes it can extract data from. We'll demonstrate this
-      below, using the function <literal moreinfo="none">List.range</literal>
-      to allocate lists of integers of different length:</para>
+      <para>The bound on the traversal means that the hash function may ignore part of the data
+        structure, and this can lead to pathological <phrase role="keep-together">cases</phrase>
+        where every value you store has the same hash value. We'll demonstrate this below, using the
+        function <literal moreinfo="none">List.range</literal> to allocate lists of integers of
+        different length:</para>
 
       <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">maps-and-hash-tables/main.topscript</ulink>
@@ -1029,10 +1016,9 @@ end</computeroutput></programlisting>
         <secondary sortas="maps">vs. maps</secondary>
       </indexterm></para>
 
-    <para>Programming idioms aside, there are significant performance
-    differences between maps and hash tables. For code that is dominated by
-    updates and lookups, hash tables are a clear performance win, and the win
-    is clearer the larger the size of the tables.</para>
+    <para>Programming idioms aside, there are significant performance differences between maps and
+      hash tables. For code that is dominated by updates and lookups, hash tables are a clear
+      performance win, and the win is clearer the larger the amount of data.</para>
 
     <para>The best way of answering a performance question is by running a
     benchmark, so let's do just that. The following benchmark uses the

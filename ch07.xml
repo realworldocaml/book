@@ -4,11 +4,10 @@
 <chapter id="error-handling">
   <title>Error Handling</title>
 
-  <para>Nobody likes dealing with errors. It's tedious, it's easy to get
-  wrong, and it's usually just not as fun as planning out how your program is
-  going to succeed. But error handling is important, and however much you
-  don't like thinking about it, having your software fail due to poor error
-  handling code is worse.</para>
+  <para>Nobody likes dealing with errors. It's tedious, it's easy to get wrong, and it's usually
+    just not as fun as planning out how your program is going to succeed. But error handling is
+    important, and however much you don't like thinking about it, having your software fail due to
+    poor error handling is worse.</para>
 
   <para>Thankfully, OCaml has powerful tools for handling errors reliably and
   with a minimum of pain. In this chapter we'll discuss some of the different
@@ -344,15 +343,13 @@ end</programlisting>
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val bind : 'a option -&gt; ('a -&gt; 'b option) -&gt; 'b option = &lt;fun&gt;</computeroutput></programlisting>
 
-      <para>As you can see, <literal moreinfo="none">bind None f</literal>
-      returns <literal moreinfo="none">None</literal> without calling <literal
-      moreinfo="none">f</literal>, and <literal moreinfo="none">bind (Some x)
-      f</literal> returns <literal moreinfo="none">f x</literal>. Perhaps
-      surprisingly, <literal moreinfo="none">bind</literal> can be used as a
-      way of sequencing together error-producing functions so that the first
-      one to produce an error terminates the computation. Here's a rewrite of
-      <literal moreinfo="none">compute_bounds</literal> to use a nested series
-      of <literal moreinfo="none">bind</literal>s:</para>
+      <para>As you can see, <literal moreinfo="none">bind None f</literal> returns <literal
+          moreinfo="none">None</literal> without calling <literal moreinfo="none">f</literal>, and
+          <literal moreinfo="none">bind (Some x) f</literal> returns <literal moreinfo="none">f
+          x</literal>.  <literal moreinfo="none">bind</literal> can be used as a way of sequencing
+        together error-producing functions so that the first one to produce an error terminates the
+        computation. Here's a rewrite of <literal moreinfo="none">compute_bounds</literal> to use a
+        nested series of <literal moreinfo="none">bind</literal>s:</para>
 
       <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">error-handling/main.topscript</ulink>
@@ -777,16 +774,15 @@ end</programlisting>
       <para role="sourcecode">Syntax: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/try_with.syntax">error-handling/try_with.syntax</ulink></para>
 
-      <programlisting format="linespecific" language="">try &lt;expr&gt; with
-| &lt;pat1&gt; -&gt; &lt;expr1&gt;
-| &lt;pat2&gt; -&gt; &lt;expr2&gt;
+      <programlisting format="linespecific" language="ocaml">try <emphasis>&lt;expr&gt;</emphasis> with
+| <emphasis>&lt;pat1&gt;</emphasis> -&gt; <emphasis>&lt;expr1&gt;</emphasis>
+| <emphasis>&lt;pat2&gt;</emphasis> -&gt; <emphasis>&lt;expr2&gt;</emphasis>
 ...</programlisting>
 
-      <para>A <literal moreinfo="none">try/with</literal> clause first
-      evaluates its body, <literal moreinfo="none">&lt;expr&gt;</literal>. If
-      no exception is thrown, then the result of evaluating the body is what
-      the entire <literal moreinfo="none">try/with</literal> clause evaluates
-      to.</para>
+      <para>A <literal moreinfo="none">try/with</literal> clause first evaluates its body,
+            <emphasis><literal moreinfo="none">expr</literal></emphasis>. If no exception is thrown,
+        then the result of evaluating the body is what the entire <literal moreinfo="none"
+          >try/with</literal> clause evaluates to.</para>
 
       <para>But if the evaluation of the body throws an exception, then the
       exception will be fed to the pattern-match statements following the
@@ -1138,10 +1134,9 @@ let () =
 <computeroutput moreinfo="none">  end with exn                      366         153     100.00  </computeroutput>
 <computeroutput moreinfo="none">                                                                </computeroutput></programlisting>
 
-      <para>Here, we see that we lose something like 20 cycles to adding an
-      exception handler, and 30 more to actually throwing and catching an
-      exception. If we turn backtraces off, then the results look like
-      this:</para>
+      <para>Here, we see that we lose something like 30 cycles to adding an exception handler, and
+        60 more to actually throwing and catching an exception. If we turn backtraces off, then the
+        results look like this:</para>
 
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/run_exn_cost_notrace.out">error-handling/run_exn_cost_notrace.out</ulink></para>
@@ -1157,11 +1152,10 @@ let () =
 <computeroutput moreinfo="none">  end with exn                      334         140     100.00  </computeroutput>
 <computeroutput moreinfo="none">                                                                </computeroutput></programlisting>
 
-      <para>Here, the handler costs about the same, at 20 cycles, but the
-      exception itself costs only 20, as opposed to 30 additional cycles. All
-      told, this should only matter if you're using exceptions routinely as
-      part of your flow control, which is in most cases a stylistic mistake
-      anyway.</para>
+      <para>Here, the handler costs about the same, but the exception itself costs only 25, as
+        opposed to 60 additional cycles. All told, this should only matter if you're using
+        exceptions routinely as part of your flow control, which is in most cases a stylistic
+        mistake anyway.</para>
     </sect2>
 
     <sect2 id="from-exceptions-to-error-aware-types-and-back-again">
@@ -1239,14 +1233,12 @@ let () =
         <seealso>errors</seealso>
       </indexterm></para>
 
-    <para>Exceptions are more concise because they allow you to defer the job
-    of error handling to some larger scope, and because they don't clutter up
-    your types. But this same concision comes at a cost: exceptions are all
-    too easy to ignore. Error-aware return types, on the other hand, are fully
-    manifest in your type definitions, making the errors that your code might
-    generate explicit and impossible to ignore.<indexterm class="singular">
+    <para>Exceptions are more concise because they allow you to defer the job of error handling to
+      some larger scope, and because they don't clutter up your types. But this concision comes at a
+      cost: exceptions are all too easy to ignore. Error-aware return types, on the other hand, are
+      fully manifest in your type definitions, making the errors that your code might generate
+      explicit and impossible to ignore.<indexterm class="singular">
         <primary>exceptions</primary>
-
         <secondary>benefits and drawbacks of</secondary>
       </indexterm></para>
 

@@ -29,15 +29,13 @@
   <para role="sourcecode">Syntax: <ulink role="orm:hideurl:ital"
   url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/variant.syntax">variants/variant.syntax</ulink></para>
 
-  <programlisting format="linespecific" language="">type &lt;variant&gt; =
-  | &lt;Tag&gt; [ of &lt;type&gt; [* &lt;type&gt;]... ]
-  | &lt;Tag&gt; [ of &lt;type&gt; [* &lt;type&gt;]... ]
+  <programlisting format="linespecific" language="ocaml">type <emphasis>&lt;variant&gt;</emphasis> =
+  | <emphasis>&lt;Tag&gt;</emphasis> [ of <emphasis>&lt;type&gt;</emphasis> [* <emphasis>&lt;type&gt;</emphasis>]... ]
+  | <emphasis>&lt;Tag&gt;</emphasis> [ of <emphasis>&lt;type&gt;</emphasis> [* <emphasis>&lt;type&gt;</emphasis>]... ]
   | ...</programlisting>
 
-  <para>Each row essentially represents a case of the variant. Each case has
-  an associated tag and may optionally have a sequence of fields, where each
-  field has a specified type. These fields specify the type of the data
-  associated with each case.</para>
+  <para>Each row essentially represents a case of the variant. Each case has an associated tag and
+    may optionally have a sequence of fields, where each field has a specified type.</para>
 
   <para>Let's consider a concrete example of how variants can be useful.
   Almost all terminals support a set of eight basic colors, and we can
@@ -598,9 +596,7 @@
 <userinput moreinfo="none">    | Log_entry m -&gt; handle_log_entry server_state (common,m)</userinput>
 <userinput moreinfo="none">    | Logon     m -&gt; handle_logon     server_state (common,m)</userinput>
 <userinput moreinfo="none">    | Heartbeat m -&gt; handle_heartbeat server_state (common,m)</userinput>
-<userinput moreinfo="none">  ;;</userinput>
-<computeroutput moreinfo="none">Characters 95-111:</computeroutput>
-<computeroutput moreinfo="none">Error: Unbound value handle_log_entry</computeroutput></programlisting>
+<userinput moreinfo="none">  ;;</userinput></programlisting>
 
     <para>And it's explicit at the type level that <literal
     moreinfo="none">handle_log_entry</literal> sees only <literal
@@ -721,8 +717,8 @@
 
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">let rec eval expr base_eval =</userinput>
-<userinput moreinfo="none">    (* a shortcut, so we don't need to repeatedly pass [base_eval]</userinput>
-<userinput moreinfo="none">       explicitly to [eval] *)</userinput>
+<userinput moreinfo="none">    (* a shortcut, so we don't need to repeatedly pass [base_eval]
+        explicitly to [eval] *)</userinput>
 <userinput moreinfo="none">    let eval' expr = eval expr base_eval in</userinput>
 <userinput moreinfo="none">    match expr with</userinput>
 <userinput moreinfo="none">    | Base  base   -&gt; base_eval base</userinput>

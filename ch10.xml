@@ -114,7 +114,7 @@
     <para role="sourcecode">Syntax: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/unpack.syntax">fcm/unpack.syntax</ulink></para>
 
-    <programlisting format="linespecific" language="">(val &lt;first_class_module&gt; : &lt;Module_type&gt;)</programlisting>
+    <programlisting format="linespecific" language="ocaml">(val <emphasis>&lt;first_class_module&gt;</emphasis> : <emphasis>&lt;Module_type&gt;</emphasis>)</programlisting>
 
     <para>And here's an example:</para>
 
@@ -279,12 +279,9 @@
         moreinfo="none"># </prompt><userinput moreinfo="none">let int_bumper = (module Int_bumper : Bumpable);;</userinput>
 <computeroutput moreinfo="none">val int_bumper : (module Bumpable) = &lt;module&gt;</computeroutput></programlisting>
 
-    <para>But you can't do much with <literal
-    moreinfo="none">int_bumper</literal>, since <literal
-    moreinfo="none">int_bumper</literal> is fully abstract, so that we can no
-    longer recover the fact that the type in question is <literal
-    moreinfo="none">int</literal>. This means you can't really do much with
-    it:</para>
+    <para>But you can't do much with <literal moreinfo="none">int_bumper</literal>, since <literal
+                moreinfo="none">int_bumper</literal> is fully abstract, so that we can no longer
+            recover the fact that the type in question is <literal moreinfo="none">int</literal>. </para>
 
     <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink>
@@ -353,22 +350,21 @@
 <computeroutput moreinfo="none">val bump_list : (module Bumpable with type t = 'a) -&gt; 'a list -&gt; 'a list =</computeroutput>
 <computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput></programlisting>
 
-    <para>Here, we used a feature of OCaml that hasn't come up before: a
-    <emphasis>locally abstract type</emphasis>. For any function, you can
-    declare a pseudoparameter of the form <literal moreinfo="none">(type
-    a)</literal> for any type name <literal moreinfo="none">a</literal> which
-    introduces a fresh type that acts like an abstract type within the context
-    of the function. Here, we used that type as part of a sharing constraint
-    that ties the type <literal moreinfo="none">B.t</literal> with the type of
-    the elements of the list passed in.<indexterm class="singular">
-        <primary>datatypes</primary>
-
-        <secondary>locally abstract types</secondary>
-      </indexterm><indexterm class="singular">
-        <primary>abstract types</primary>
-      </indexterm><indexterm class="singular">
-        <primary>locally abstract types</primary>
-      </indexterm></para>
+    <para>Here, we used a feature of OCaml that hasn't come up before: a <emphasis>locally abstract
+                type</emphasis>. For any function, you can declare a pseudoparameter of the form
+                <literal moreinfo="none">(type a)</literal> for any type name <literal
+                moreinfo="none">a</literal> which introduces a fresh type. This type acts like an
+            abstract type within the context of the function. In the example above, the locally
+            abstract type was used as part of a sharing constraint that ties the type <literal
+                moreinfo="none">B.t</literal> with the type of the elements of the list passed
+                in.<indexterm class="singular">
+                <primary>datatypes</primary>
+                <secondary>locally abstract types</secondary>
+            </indexterm><indexterm class="singular">
+                <primary>abstract types</primary>
+            </indexterm><indexterm class="singular">
+                <primary>locally abstract types</primary>
+            </indexterm></para>
 
     <para>The resulting function is polymorphic in both the type of the list
     element and the type <literal moreinfo="none">Bumpable.t</literal>. We can
@@ -422,8 +418,7 @@
       url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">fcm/main.topscript</ulink>
       (part 20)</para>
 
-      <programlisting format="linespecific" language="ocaml"><prompt
-          moreinfo="none"># </prompt><userinput moreinfo="none">let wrap_int_in_list (type a) (x:a) = x + x;;</userinput>
+      <programlisting format="linespecific" language="ocaml"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let double_int (type a) (x:a) = x + x;;</userinput>
 <computeroutput moreinfo="none">Characters 38-39:</computeroutput>
 <computeroutput moreinfo="none">Error: This expression has type a but an expression was expected of type int</computeroutput></programlisting>
 
@@ -467,18 +462,15 @@
   <sect1 id="example-a-query-handling-framework">
     <title>Example: A Query-Handling Framework</title>
 
-    <para>Now let's look at first-class modules in the context of a more
-    complete and realistic example. In particular, consider the following
-    signature for a module that implements a query handler:<indexterm
-        class="singular">
-        <primary>query-handlers</primary>
-
-        <secondary sortas="first-class">and first-class modules</secondary>
-      </indexterm><indexterm class="startofrange" id="FCMquery">
-        <primary>first-class modules</primary>
-
-        <secondary>query-handling framework</secondary>
-      </indexterm></para>
+    <para>Now let's look at first-class modules in the context of a more complete and realistic
+            example. In particular, consider the following signature for a module that implements a
+            system for responding to user-generated queries.<indexterm class="singular">
+                <primary>query-handlers</primary>
+                <secondary sortas="first-class">and first-class modules</secondary>
+            </indexterm><indexterm class="startofrange" id="FCMquery">
+                <primary>first-class modules</primary>
+                <secondary>query-handling framework</secondary>
+            </indexterm></para>
 
     <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">fcm/query_handler.topscript</ulink></para>
@@ -514,17 +506,15 @@
 <computeroutput moreinfo="none">    val sexp_of_config : config -&gt; Sexp.t</computeroutput>
 <computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
-    <para>In the preceding example, we used s-expressions as the format for
-    queries and responses, as well for the config. S-expressions are a simple,
-    flexible, and human-readable serialization format commonly used in Core.
-    For now, it's enough to think of them as balanced parenthetical
-    expressions whose atomic values are strings, e.g., <literal
-    moreinfo="none">(this (is an) (s expression))</literal>.<indexterm
-        class="singular">
-        <primary>s-expressions</primary>
-
-        <secondary sortas="queries">in queries and responses</secondary>
-      </indexterm></para>
+    <para>Here, we used s-expressions as the format for queries and responses, as well as the
+            configuration for the query handler. S-expressions are a simple, flexible, and
+            human-readable serialization format commonly used in Core. For now, it's enough to think
+            of them as balanced parenthetical expressions whose atomic values are strings, e.g.,
+                <literal moreinfo="none">(this (is an) (s expression))</literal>.<indexterm
+                class="singular">
+                <primary>s-expressions</primary>
+                <secondary sortas="queries">in queries and responses</secondary>
+            </indexterm></para>
 
     <para>In addition, we use the Sexplib syntax extension which extends OCaml
     by adding the <literal moreinfo="none">with sexp</literal> declaration.
@@ -772,7 +762,7 @@
       <para role="sourcecode">Scheme: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query-syntax.scm">fcm/query-syntax.scm</ulink></para>
 
-      <programlisting format="linespecific" language="scheme">(query-name query)</programlisting>
+      <programlisting format="linespecific" language="scheme">(<emphasis>query-name query</emphasis>)</programlisting>
 
       <para>where <emphasis><literal
       moreinfo="none">query-name</literal></emphasis> is the name used to
@@ -1025,13 +1015,11 @@
     | Active_services
   with sexp</programlisting>
 
-      <para>The <literal>eval</literal> function itself is fairly
-      straightforward, dispatching to the appropriate functions to respond to
-      each type of query. Note that we use write <literal
-      moreinfo="none">&lt;sexp_of&lt;string list&gt;&gt;</literal> to
-      autogenerate a function for converting a list of strings to an
-      s-expression. This is part of the Sexplib package described in <xref
-      linkend="data-serialization-with-s-expressions" />.</para>
+      <para>The <literal>eval</literal> function itself is fairly straightforward, dispatching to
+                the appropriate functions to respond to each type of query. Note that we write
+                    <literal moreinfo="none">&lt;:sexp_of&lt;string list&gt;&gt;</literal> to
+                autogenerate a function for converting a list of strings to an s-expression, as
+                described in <xref linkend="data-serialization-with-s-expressions"/>.</para>
 
       <para>This function ends the definition of the <literal
       moreinfo="none">Loader</literal> module:</para>
@@ -1074,8 +1062,7 @@ end</programlisting>
     ~key:Loader.name ~data:loader_instance;
   cli loader.Loader.active</programlisting>
 
-      <para>Now link this into a command-line interface to experiment with
-      it:</para>
+      <para>Now build this into a command-line interface to experiment with it:</para>
 
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/build_query_handler_loader.out">fcm/build_query_handler_loader.out</ulink></para>
@@ -1137,14 +1124,12 @@ end</programlisting>
       <programlisting format="linespecific" language="console"><computeroutput
           moreinfo="none">&gt;&gt;&gt; (loader (unload loader))</computeroutput>
 <computeroutput moreinfo="none">It's unwise to unload yourself</computeroutput></programlisting>
-
-      <para>We can push this dynamism yet further using libraries like
-      <literal moreinfo="none">ocaml_plugin</literal>, which use OCaml's
-      dynamic linking facilities to allow a program to compile and load an
-      OCaml source file as a first-class module. Thus, one could extend
-      <literal moreinfo="none">Loader</literal> to load entirely new query
-      handlers from disk on demand.<indexterm class="endofrange"
-      startref="FCMquery"></indexterm></para>
+            <para>Although we won't describe the details here, we can push this dynamism yet further
+                using OCaml's dynamic linking facilities, which allow you to compile and link in new
+                code to a running program. This can be automated using libraries like
+                    <literal>ocaml_plugin</literal>, which can be installed via OPAM, and which
+                automates much of the workflow around setting up dynamic linking. <indexterm class="endofrange"
+                    startref="FCMquery"></indexterm> </para>
     </sect2>
   </sect1>
 

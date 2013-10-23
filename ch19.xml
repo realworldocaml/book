@@ -4,26 +4,22 @@
 <chapter id="foreign-function-interface">
   <title>Foreign Function Interface</title>
 
-  <para>OCaml has several options available to interact with non-OCaml code.
-  The compiler can link with external system libraries via C code and also
-  produce standalone native object files that can be embedded within other
-  non-OCaml applications.<indexterm class="singular">
+  <para>OCaml has several options available to interact with non-OCaml code. The compiler can link
+    with external system libraries via C code and also can produce standalone native object files
+    that can be embedded within other non-OCaml applications.<indexterm class="singular">
       <primary>programming</primary>
-
       <secondary>language interfaces</secondary>
     </indexterm><indexterm class="singular">
       <primary>foreign function interface (FFI)</primary>
-
       <secondary>basics of</secondary>
     </indexterm><indexterm class="startofrange" id="INTERffi">
       <primary>interfaces</primary>
-
       <secondary>foreign function interface (FFI)</secondary>
     </indexterm></para>
 
-  <para>The mechanism by which code in one programming language can invoke
-  routines in another different programming language is called a
-  <emphasis>foreign function interface</emphasis>. This chapter will:</para>
+  <para>The mechanism by which code in one programming language can invoke routines in a different
+    programming language is called a <emphasis>foreign function interface</emphasis>. This chapter
+    will:</para>
 
   <itemizedlist>
     <listitem>
@@ -86,10 +82,9 @@
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">utop</userinput>
 <computeroutput moreinfo="none"># require "ctypes.foreign" ;;</computeroutput></programlisting>
 
-    <para>You'll also need the Ncurses library for the first example. This
-    comes pre-installed on many operating systems such as Mac OS X, and Debian
-    Linux provides it as the <literal moreinfo="none">ncurses-dev</literal>
-    package.</para>
+    <para>You'll also need the Ncurses library for the first example. This comes preinstalled on
+      many operating systems such as Mac OS X, and Debian Linux provides it as the <literal
+        moreinfo="none">libncurses5-dev</literal> package.</para>
   </note>
 
   <sect1 id="example-a-terminal-interface">
@@ -166,12 +161,11 @@ int     cbreak (void);</programlisting>
 type window = unit ptr
 let window : window typ = ptr void</programlisting>
 
-    <para>We don't know the internal representation of the window pointer, so
-    we treat it as a C void pointer. We'll improve on this later on in the
-    chapter, but that's good enough for now. The second statement defines an
-    OCaml value that represents the <literal moreinfo="none">WINDOW</literal>
-    C pointer. This value is used later in the Ctypes function
-    definitions:</para>
+    <para>We don't know the internal representation of the window pointer, so we treat it as a C
+      void pointer. We'll improve on this later on in the chapter, but it's good enough for now. The
+      second statement defines an OCaml value that represents the <literal moreinfo="none"
+        >WINDOW</literal> C pointer. This value is used later in the Ctypes function
+      definitions:</para>
 
     <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/ncurses.ml">ffi/ncurses.ml</ulink>
@@ -267,12 +261,11 @@ let cbreak =
         moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg ctypes.foreign ncurses.inferred.mli</userinput>
 <prompt moreinfo="none">$ </prompt><userinput moreinfo="none">cp _build/ncurses.inferred.mli .</userinput></programlisting>
 
-    <para>The <literal moreinfo="none">inferred.mli</literal> target instructs
-    the compiler to generate the default signature for a module file and
-    places it in the <literal moreinfo="none">_build</literal> directory as a
-    normal output. You should normally copy it out into your source directory
-    and customize it improve its safety for external callers by making some of
-    its internals more abstract.</para>
+    <para>The <literal moreinfo="none">inferred.mli</literal> target instructs the compiler to
+      generate the default signature for a module file and places it in the <literal moreinfo="none"
+        >_build</literal> directory as a normal output. You should normally copy it out into your
+      source directory and customize it to improve its safety for external callers by making some of
+      its internals more abstract.</para>
 
     <para>Here's the customized interface that we can safely use from other
     libraries:</para>
@@ -351,13 +344,13 @@ let () =
       moreinfo="none">gcc</command> or <command
       moreinfo="none">clang</command>). We first need to link to the <literal
       moreinfo="none">ncurses</literal> C library to make the symbols
-      available to Ctypes, and <literal
-      moreinfo="none">-cclib,-lncurses</literal> does that.</para>
-
+      available to Ctypes, and <phrase role="keep-together"><literal
+      moreinfo="none">-cclib,</literal></phrase><literal>-lncurses</literal> does that.</para>
+      
       <para>On some distributions such as Ubuntu 11.10 upwards, you'll also
       need to add <literal moreinfo="none">-cclib,-Xlinker,-cclib, and
-      --no-as-needed</literal> to the <literal
-      moreinfo="none">-lflags</literal> directive. <literal
+      --no-as-needed</literal> to the <phrase role="keep-together"><literal
+        moreinfo="none">-lflags</literal></phrase> directive. <literal
       moreinfo="none">-Xlinker</literal> is interpreted by the compiler as a
       directive for the system linker <command moreinfo="none">ld</command>,
       to which it passes <literal moreinfo="none">--no-as-needed</literal>.
@@ -414,7 +407,7 @@ let () =
       </listitem>
 
       <listitem>
-        <para>the corresponding OCaml type. The <literal
+        <para>The corresponding OCaml type. The <literal
         moreinfo="none">'a</literal> type parameter contains the OCaml type
         such that a value of type <literal moreinfo="none">t typ</literal> is
         used to read and write OCaml values of type <literal
@@ -494,8 +487,8 @@ val complex64 : Complex.t typ</programlisting>
         <para>Void values appear in OCaml as the <literal
         moreinfo="none">unit</literal> type. Using <literal
         moreinfo="none">void</literal> in an argument or result type
-        specification produces an OCaml function which accepts or returns
-        unit. Dereferencing a pointer to <literal
+        specification produces an OCaml function that accepts or returns
+        <literal>unit</literal>. Dereferencing a pointer to <literal
         moreinfo="none">void</literal> is an error, as in C, and will raise
         the <literal moreinfo="none">IncompleteType</literal>
         exception.</para>
@@ -565,7 +558,7 @@ char *ctime(const time_t *timep);</programlisting>
 
         <listitem>
           <para>The <literal moreinfo="none">Ctypes</literal> module provides
-          functions for describing C types in OCaml</para>
+          functions for describing C types in OCaml.</para>
         </listitem>
       </varlistentry>
 
@@ -614,7 +607,7 @@ char *ctime(const time_t *timep);</programlisting>
     moreinfo="none">time_t</literal>.</para>
 
     <para>We can now call <literal moreinfo="none">time</literal> immediately
-    in the same top-level. The argument is actually optional, so we'll just
+    in the same toplevel. The argument is actually optional, so we'll just
     pass a null pointer that has been coerced into becoming a null pointer to
     <literal moreinfo="none">time_t</literal>:</para>
 
@@ -720,7 +713,7 @@ char *ctime(const time_t *timep);</programlisting>
 
       <para>The <literal moreinfo="none">allocate</literal> function takes the
       type of the memory to be allocated and the initial value and it returns
-      a suitably-typed pointer. We can now call <literal
+      a suitably typed pointer. We can now call <literal
       moreinfo="none">ctime</literal> passing the pointer as an
       argument:</para>
 
@@ -1107,7 +1100,7 @@ let () =
         <sidebar>
           <title>Why Do We Need to Use returning?</title>
 
-          <para>The alert reader may be curious why all these function
+          <para>The alert reader may be curious about why all these function
           definitions have to be terminated by <literal
           moreinfo="none">returning</literal>:</para>
 
@@ -1132,7 +1125,7 @@ val difftime: time_t @-&gt; time_t @-&gt; double</programlisting>
 
           <para>The reason involves higher types and two differences between
           the way that functions are treated in OCaml and C. Functions are
-          first-class values in OCaml, but not in C. For example, in C, it is
+          first-class values in OCaml, but not in C. For example, in C it is
           possible to return a function pointer from a function, but not to
           return an actual function.</para>
 
@@ -1268,9 +1261,10 @@ end</programlisting>
 
         <para>Ctypes defines a number of operators that let you manipulate
         pointers and arrays just as you would in C. The Ctypes equivalents do
-        have the benefit of being more strongly typed, of course.</para>
+        have the benefit of being more strongly typed, of course (see <xref linkend="Table19sub1"/>).</para>
 
-        <informaltable>
+        <table id="Table19sub1">
+          <title>Operators for manipulating pointers and arrays</title>
           <tgroup cols="2">
             <colspec align="left"/>
 
@@ -1316,11 +1310,10 @@ end</programlisting>
               </row>
             </tbody>
           </tgroup>
-        </informaltable>
+        </table>
 
-        <para>There are also other useful nonoperator functions available (see
-        the Ctypes documentation), for example, for pointer differencing and
-        comparison.</para>
+        <para>There are also other useful nonoperator functions available (see the Ctypes
+          documentation), such as pointer differencing and comparison.</para>
       </sidebar>
     </sect2>
   </sect1>
@@ -1328,17 +1321,14 @@ end</programlisting>
   <sect1 id="passing-functions-to-c">
     <title>Passing Functions to C</title>
 
-    <para>It's also straightforward to pass OCaml function values to C. The C
-    standard library function <literal moreinfo="none">qsort</literal> sorts
-    arrays of elements using a comparison function passed in as a function
-    pointer. The signature for <literal moreinfo="none">qsort</literal> is as
-    follows:<indexterm class="singular">
+    <para>It's also straightforward to pass OCaml function values to C. The C standard library
+      function <literal moreinfo="none">qsort</literal> sorts arrays of elements using a comparison
+      function passed in as a function pointer. The signature for <literal moreinfo="none"
+        >qsort</literal> is:<indexterm class="singular">
         <primary>functions</primary>
-
         <secondary>passing to C</secondary>
       </indexterm><indexterm class="singular">
         <primary>foreign function interface (FFI)</primary>
-
         <secondary>passing functions to C</secondary>
       </indexterm></para>
 
@@ -1383,15 +1373,13 @@ void qsort(void *base, size_t nmemb, size_t size, compare_t *);</programlisting>
 <computeroutput moreinfo="none">  unit ptr -&gt; size_t -&gt; size_t -&gt; (unit ptr -&gt; unit ptr -&gt; int) -&gt; unit =</computeroutput>
 <computeroutput moreinfo="none">  &lt;fun&gt;</computeroutput></programlisting>
 
-    <para>We only use <literal moreinfo="none">compare_t</literal> once (in
-    the <literal moreinfo="none">qsort</literal> definition), so you can
-    choose to inline it in the OCaml code if you prefer. As the type shows,
-    the resulting <literal moreinfo="none">qsort</literal> value is a
-    higher-order function, since its the fourth argument is itself a function.
-    As before, let's define a wrapper function to make <literal
-    moreinfo="none">qsort</literal> easier to use. The second and third
-    arguments to <literal moreinfo="none">qsort</literal> specify the length
-    (number of elements) of the array and the element size.</para>
+    <para>We only use <literal moreinfo="none">compare_t</literal> once (in the <literal
+        moreinfo="none">qsort</literal> definition), so you can choose to inline it in the OCaml
+      code if you prefer. As the type shows, the resulting <literal moreinfo="none">qsort</literal>
+      value is a higher-order function, since the fourth argument is itself a function. As before,
+      let's define a wrapper function to make <literal moreinfo="none">qsort</literal> easier to
+      use. The second and third arguments to <literal moreinfo="none">qsort</literal> specify the
+      length (number of elements) of the array and the element size.</para>
 
     <para>Arrays created using Ctypes have a richer runtime structure than C
     arrays, so we don't need to pass size information around. Furthermore, we
@@ -1444,9 +1432,8 @@ let () =
     Command.Spec.empty sort_stdin
   |&gt; Command.run</programlisting>
 
-      <para>Compile it in the usual way with corebuild and test it against
-      some input data, and also build the inferred interface so we can examine
-      it more closely:</para>
+      <para>Compile it in the usual way with <emphasis>corebuild</emphasis> and test it against some
+        input data, and also build the inferred interface so we can examine it more closely:</para>
 
       <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/ffi/build_qsort.out">ffi/build_qsort.out</ulink></para>
@@ -1516,12 +1503,11 @@ val sort_stdin : unit -&gt; unit</programlisting>
       <sidebar>
         <title>Lifetime of Allocated Ctypes</title>
 
-        <para>Values allocated via Ctypes (i.e. using <literal
-        moreinfo="none">allocate</literal>, <literal
-        moreinfo="none">Array.make</literal> and so on) will not be
-        garbage-collected as long as they are reachable from OCaml values. The
-        system memory they occupy is freed when they do become unreachable,
-        via a finalizer function registered with the GC.</para>
+        <para>Values allocated via Ctypes (i.e., using <literal moreinfo="none">allocate</literal>,
+            <literal moreinfo="none">Array.make</literal>, and so on) will not be garbage-collected
+          as long as they are reachable from OCaml values. The system memory they occupy is freed
+          when they do become unreachable, via a finalizer function registered with the garbage
+          collector (GC).</para>
 
         <para>The definition of reachability for Ctypes values is a little
         different from conventional OCaml values, though. The allocation
@@ -1533,26 +1519,21 @@ val sort_stdin : unit -&gt; unit</programlisting>
         pointer via arithmetic, so a reachable reference to an array element
         or a structure field protects the whole object from collection.</para>
 
-        <para>A corollary of the preceding rule is that pointers written into
-        the C heap don't have any effect on reachability. For example, if you
-        have a C-managed array of pointers to structs then you'll need some
-        additional way of keeping the structs themselves around to protect
-        them from collection. You could achieve this via a global array of
-        values on the OCaml side that would keep them live until they're no
-        longer needed.</para>
+        <para>A corollary of the preceding rule is that pointers written into the C heap don't have
+          any effect on reachability. For example, if you have a C-managed array of pointers to
+          structs, then you'll need some additional way of keeping the structs themselves around to
+          protect them from collection. You could achieve this via a global array of values on the
+          OCaml side that would keep them live until they're no longer needed.</para>
 
-        <para>Functions passed to C have similar considerations regarding
-        lifetime. On the OCaml side, functions created at runtime may be
-        collected when they become unreachable. As we've seen, OCaml functions
-        passed to C are converted to function pointers, and function pointers
-        written into the C heap have no effect on the reachability of the
-        OCaml functions they reference. With <literal
-        moreinfo="none">qsort</literal> things are straightforward, since the
-        comparison function is only used during the call to <literal
-        moreinfo="none">qsort</literal> itself. However, other C libraries may
-        store function pointers in global variables or elsewhere, in which
-        case you'll need to take care that the OCaml functions you pass to
-        them aren't prematurely garbage collected.</para>
+        <para>Functions passed to C have similar considerations regarding lifetime. On the OCaml
+          side, functions created at runtime may be collected when they become unreachable. As we've
+          seen, OCaml functions passed to C are converted to function pointers, and function
+          pointers written into the C heap have no effect on the reachability of the OCaml functions
+          they reference. With <literal moreinfo="none">qsort</literal> things are straightforward,
+          since the comparison function is only used during the call to <literal moreinfo="none"
+            >qsort</literal> itself. However, other C libraries may store function pointers in
+          global variables or elsewhere, in which case you'll need to take care that the OCaml
+          functions you pass to them aren't prematurely garbage-collected.</para>
       </sidebar>
     </sect2>
   </sect1>
@@ -1586,12 +1567,11 @@ val sort_stdin : unit -&gt; unit</programlisting>
       </listitem>
     </itemizedlist>
 
-    <para>This chapter hasn't really needed you to understand the innards of
-    OCaml at all. Ctypes does its best to make function bindings easy, but the
-    rest of this part will also fill you in about how interactions with OCaml
-    memory layout in <xref linkend="memory-representation-of-values"/> and
-    automatic memory management in <xref
-    linkend="understanding-the-garbage-collector"/>.</para>
+    <para>This chapter hasn't really needed you to understand the innards of OCaml at all. Ctypes
+      does its best to make function bindings easy, but the rest of this part will also fill you in
+      about interactions with OCaml memory layout in <xref linkend="memory-representation-of-values"
+      /> and automatic memory management in <xref linkend="understanding-the-garbage-collector"
+      />.</para>
 
     <para>Ctypes gives OCaml programs access to the C representation of
     values, shielding you from the details of the OCaml value representation,
@@ -1605,19 +1585,18 @@ val sort_stdin : unit -&gt; unit</programlisting>
 
     <itemizedlist>
       <listitem>
-        <para>The standard OCaml foreign function interface allows you to glue
-        OCaml and C together from the other side of the boundary, by writing C
-        functions that operate on the OCaml representation of values. You can
-        find details of the standard interface in the <ulink
-        url="http://caml.inria.fr/pub/docs/manual-ocaml-4.00/manual033.html">OCaml
-        manual</ulink> and in the book <ulink
-        url="http://caml.inria.fr/pub/docs/oreilly-book/ocaml-ora-book.pdf">Developing
-        Applications with Objective Caml</ulink>.</para>
+        <para>The standard OCaml foreign function interface allows you to glue OCaml and C together
+          from the other side of the boundary, by writing C functions that operate on the OCaml
+          representation of values. You can find details of the standard interface in the <ulink
+            url="http://caml.inria.fr/pub/docs/manual-ocaml-4.00/manual033.html">OCaml
+            manual</ulink> and in the book <ulink
+            url="http://caml.inria.fr/pub/docs/oreilly-book/ocaml-ora-book.pdf"><emphasis>Developing
+              Applications with Objective Caml</emphasis></ulink>.</para>
       </listitem>
 
       <listitem>
         <para>Florent Monnier maintains an excellent online <ulink
-        url="http://www.linux-nantes.org/~fmonnier/ocaml/ocaml-wrapping-c.php">reference</ulink>
+          url="http://www.linux-nantes.org/~fmonnier/ocaml/ocaml-wrapping-c.html">reference</ulink>
         that provides examples of how to call OCaml functions from C. This
         covers a wide variety of OCaml data types and also more complex
         callbacks between C and OCaml.</para>

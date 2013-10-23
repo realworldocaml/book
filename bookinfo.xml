@@ -21,9 +21,9 @@
   </othercredit>
 
   <othercredit role="coverdesigner">
-    <firstname>Karen</firstname>
+    <firstname>Randy</firstname>
 
-    <surname>Montgomery</surname>
+    <surname>Comer</surname>
   </othercredit>
 
   <!-- All rights reserved. -->
@@ -60,7 +60,7 @@
   <legalnotice role="trademarks">
     <para>Nutshell Handbook, the Nutshell Handbook logo, and the O’Reilly logo
     are registered trademarks of O’Reilly Media, Inc. <emphasis>Real World
-    OCaml</emphasis>, the image of a !!FILL THIS IN!!, and related trade dress
+    OCaml</emphasis>, the image of a XX, and related trade dress
     are trademarks of O’Reilly Media, Inc.</para>
 
     <para>Many of the designations used by manufacturers and sellers to
@@ -170,7 +170,7 @@
   </copyright>
 
   <editor role="production">
-    <firstname>Chris</firstname>
+    <firstname>Christopher</firstname>
 
     <surname>Hearse</surname>
   </editor>

@@ -227,17 +227,15 @@ compare x y = 0     (* x = y *)
 compare x y &gt; 0     (* x &gt; y *)</programlisting>
 
     <para>(This idiom is a bit of a historical error. It would be better if
-    <literal>compare</literal> returned a variant with three cases for less
-    than, greater than, and equal. But it's well-established at this point and
-    unlikely to change.)</para>
+        <literal>compare</literal> returned a variant with three cases for less than, greater than,
+      and equal. But it's a well-established idiom at this point, and unlikely to change.)</para>
 
-    <para>The functor for creating the interval module follows. We represent
-    an interval with a variant type, which is either <literal
-    moreinfo="none">Empty</literal> or <literal moreinfo="none">Interval
-    (x,y)</literal>, where <literal moreinfo="none">x</literal> and <literal
-    moreinfo="none">y</literal> are the bounds of the interval. In addition to
-    the type, the functor contains implementations of a number of useful
-    primitives for interacting with intervals:</para>
+    <para>The functor for creating the interval module follows. We represent an interval with a
+      variant type, which is either <literal moreinfo="none">Empty</literal> or <literal
+        moreinfo="none">Interval (x,y)</literal>, where <literal moreinfo="none">x</literal> and
+        <literal moreinfo="none">y</literal> are the bounds of the interval. In addition to the
+      type, the body of the functor contains implementations of a number of useful primitives for
+      interacting with intervals:</para>
 
     <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
@@ -346,17 +344,14 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
 <computeroutput moreinfo="none">    val intersect : t -&gt; t -&gt; t</computeroutput>
 <computeroutput moreinfo="none">  end</computeroutput></programlisting>
 
-    <para>This works because many modules in Core, including <literal
-    moreinfo="none">Int</literal> and <literal
-    moreinfo="none">String</literal>, satisfy an extended version of the
-    <literal moreinfo="none">Comparable</literal> signature described
-    previously. Such standardized signatures are good practice, both because
-    they makes functors easier to use, and because they encourage
-    standardization that makes your codebase easier to navigate.</para>
+    <para>This works because many modules in Core, including <literal moreinfo="none">Int</literal>
+      and <literal moreinfo="none">String</literal>, satisfy an extended version of the <literal
+        moreinfo="none">Comparable</literal> signature described previously. Such standardized
+      signatures are good practice, both because they make functors easier to use, and because they
+      encourage standardization that makes your codebase easier to navigate.</para>
 
-    <para>Now we can use the newly defined <literal
-    moreinfo="none">Int_interval</literal> module like any ordinary
-    module:</para>
+    <para>We can use the newly defined <literal moreinfo="none">Int_interval</literal> module like
+      any ordinary module:</para>
 
     <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
@@ -558,19 +553,18 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
       <para role="sourcecode">Syntax: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/sharing_constraint.syntax">functors/sharing_constraint.syntax</ulink></para>
 
-      <programlisting format="linespecific" language="">&lt;Module_type&gt; with type &lt;type&gt; = &lt;type'&gt;</programlisting>
+      <programlisting format="linespecific" language="ocaml"><emphasis>&lt;Module_type&gt;</emphasis> with type <emphasis>&lt;type&gt;</emphasis> = <emphasis>&lt;type'&gt;</emphasis></programlisting>
 
-      <para>The result of this expression is a new signature that's been
-      modified so that it exposes the fact that <literal
-      moreinfo="none">&lt;type&gt;</literal> defined inside of the module type
-      is equal to <literal moreinfo="none">&lt;type'&gt;</literal> whose
-      definition is outside of it. One can also apply multiple sharing
-      constraints to the same signature:</para>
+      <para>The result of this expression is a new signature that's been modified so that it exposes
+        the fact that <emphasis><literal moreinfo="none">type</literal></emphasis> defined inside of
+        the module type is equal to <emphasis><literal moreinfo="none">type'</literal></emphasis>
+        whose definition is outside of it. One can also apply multiple sharing constraints to the
+        same signature:</para>
 
       <para role="sourcecode">Syntax: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/multi_sharing_constraint.syntax">functors/multi_sharing_constraint.syntax</ulink></para>
 
-      <programlisting format="linespecific" language="">&lt;Module_type&gt; with type &lt;type1&gt; = &lt;type1'&gt; and &lt;type2&gt; = &lt;type2'&gt;</programlisting>
+      <programlisting format="linespecific" language="ocaml"><emphasis>&lt;Module_type&gt;</emphasis> with type <emphasis>&lt;type1&gt;</emphasis> = <emphasis>&lt;type1'&gt;</emphasis> and <emphasis>&lt;type2&gt;</emphasis> = <emphasis>&lt;type2'&gt;</emphasis></programlisting>
 
       <para>We can use a sharing constraint to create a specialized version of
       <literal moreinfo="none">Interval_intf</literal> for integer
@@ -630,12 +624,10 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
       val intersect : t -&gt; t -&gt; t
     end</computeroutput></programlisting>
 
-      <para>So now, the interface is as it was, except that <literal
-      moreinfo="none">endpoint</literal> is now known to be equal to <literal
-      moreinfo="none">Endpoint.t</literal>. As a result of that type equality,
-      we can again do things that require that <literal
-      moreinfo="none">endpoint</literal> be exposed, like constructing
-      intervals:</para>
+      <para>So now, the interface is as it was, except that <literal moreinfo="none"
+          >endpoint</literal> is known to be equal to <literal moreinfo="none">Endpoint.t</literal>.
+        As a result of that type equality, we can again do things that require that <literal
+          moreinfo="none">endpoint</literal> be exposed, like constructing intervals:</para>
 
       <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/main.topscript">functors/main.topscript</ulink>
@@ -682,7 +674,7 @@ compare x y &gt; 0     (* x &gt; y *)</programlisting>
       <para role="sourcecode">Syntax: <ulink role="orm:hideurl:ital"
       url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/destructive_sub.syntax">functors/destructive_sub.syntax</ulink></para>
 
-      <programlisting format="linespecific" language="">&lt;Module_type&gt; with type &lt;type&gt; := &lt;type'&gt;</programlisting>
+      <programlisting format="linespecific" language="ocaml"><emphasis>&lt;Module_type&gt;</emphasis> with type <emphasis>&lt;type&gt;</emphasis> := <emphasis>&lt;type'&gt;</emphasis></programlisting>
 
       <para>The following shows how we could use this with <literal
       moreinfo="none">Make_interval</literal>:</para>
@@ -1063,7 +1055,7 @@ end</programlisting>
 
 val empty : 'a t
 
-(** [enqueue el q] adds [el] to the back of [q] *)
+(** [enqueue q el] adds [el] to the back of [q] *)
 val enqueue : 'a t -&gt; 'a -&gt; 'a t
 
 (** [dequeue q] returns None if the [q] is empty, otherwise returns
@@ -1085,12 +1077,11 @@ val fold : 'a t -&gt; init:'acc -&gt; f:('acc -&gt; 'a -&gt; 'acc) -&gt; 'acc</p
     accumulator at the end of the computation. <literal>fold</literal> is a
     quite powerful operation, as we'll see.</para>
 
-    <para>We'll implement <literal moreinfo="none">Fqueue</literal> using a
-    standard trick which is to maintain an input and an output list so that
-    one can efficiently enqueue on the input list and efficiently dequeue from
-    the output list. If you attempt to dequeue when the output list is empty,
-    the input list is reversed and becomes the new output list. Here's the
-    implementation:</para>
+    <para>We'll implement <literal moreinfo="none">Fqueue</literal> the well known trick of
+      maintaining an input and an output list so that one can efficiently enqueue on the input list
+      and efficiently dequeue from the output list. If you attempt to dequeue when the output list
+      is empty, the input list is reversed and becomes the new output list. Here's the
+      implementation:</para>
 
     <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/fqueue.ml">functors/fqueue.ml</ulink></para>
@@ -1127,12 +1118,11 @@ let fold (in_list, out_list) ~init ~f =
     helper functions come up for pretty much every container type, and
     implementing them over and over is a dull and repetitive affair.</para>
 
-    <para>As it happens, many of these helper functions can be derived
-    mechanically from just the <literal>fold</literal> function we already
-    implemented. Rather than write all of these helper functions by hand for
-    every new container type, we can instead use a functor that will let us
-    add this functionality to any container that has a <literal
-    moreinfo="none">fold</literal> function.</para>
+    <para>As it happens, many of these helper functions can be derived mechanically from the
+        <literal>fold</literal> function we already implemented. Rather than write all of these
+      helper functions by hand for every new container type, we can instead use a functor to add
+      this functionality to any container that has a <literal moreinfo="none">fold</literal>
+      function.</para>
 
     <para>We'll create a new module, <literal
     moreinfo="none">Foldable</literal>, that automates the process of adding
@@ -1188,9 +1178,8 @@ struct
     with Short_circuit -&gt; true
 end</programlisting>
 
-    <para>Now we can apply this to <literal moreinfo="none">Fqueue</literal>.
-    We can rewrite the interface of <literal moreinfo="none">Fqueue</literal>
-    as follows:</para>
+    <para>Now we can apply this to <literal moreinfo="none">Fqueue</literal>. We can create an
+      interface for an extended version of <literal moreinfo="none">Fqueue</literal> as follows: </para>
 
     <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/functors/extended_fqueue.mli">functors/extended_fqueue.mli</ulink></para>
@@ -1269,5 +1258,13 @@ include Foldable.Extend(Fqueue)</programlisting>
 
     <para>These functors come in handy when you want to add the same kind of
     functionality that is commonly available in Core to your own types.</para>
+    <para>We've really only covered some of the possible uses of functors. Functors are really a
+      quite powerful tool for modularizing your code. The cost is that functors are syntactically
+      heavyweight compared to the rest of the language, and that there are some tricky issues you
+      need to understand to use them effectively, with sharing constraints and destructive
+      substitution being high on that list. </para>
+    <para>All of this means that for small and simple programs, heavy use of functors is probably a
+      mistake. But as your programs get more complicated and you need more effective modular
+      architectures, functors become a highly valuable tool.</para>
   </sect1>
 </chapter>

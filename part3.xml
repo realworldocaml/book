@@ -8,9 +8,9 @@
       runtime system in OCaml. It's a remarkably simple system in comparison
       to other language runtimes (such as Java or the .NET CLR).</para>
 
-      <para>You'll need to read this to build very high performance systems that have to minimize
+      <para>You'll need to read this to build very-high-performance systems that have to minimize
       resource usage or interface to C libraries. This is also where we talk about profiling and
-      debugging techniques using tools such as GNU gdb.</para>
+      debugging techniques using tools such as GNU <emphasis>gdb</emphasis>.</para>
     </partintro>
 
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch19.xml"/>

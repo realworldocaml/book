@@ -23,11 +23,11 @@
   <para role="sourcecode">Syntax: <ulink role="orm:hideurl:ital"
   url="https://github.com/realworldocaml/examples/tree/beta3/code/records/record.syntax">records/record.syntax</ulink></para>
 
-  <programlisting format="linespecific" language="">type &lt;record-name&gt; =
-  { &lt;field&gt; : &lt;type&gt; ;
-    &lt;field&gt; : &lt;type&gt; ;
+  <programlisting format="linespecific" language="ocaml">type <emphasis>&lt;record-name&gt;</emphasis> =
+    {<emphasis> &lt;field&gt;</emphasis> : <emphasis>&lt;type&gt;</emphasis> ;
+    <emphasis>&lt;field&gt;</emphasis> : <emphasis>&lt;type&gt;</emphasis> ;
     ...
-  }</programlisting>
+    }</programlisting>
 
   <para>Note that record field names must start with a lowercase
   letter.</para>
@@ -715,9 +715,9 @@
     <para role="sourcecode">Syntax: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/functional_update.syntax">records/functional_update.syntax</ulink></para>
 
-    <programlisting format="linespecific" language="">{ &lt;record&gt; with &lt;field&gt; = &lt;value&gt;;
-                &lt;field&gt; = &lt;value&gt;;
-                ...
+    <programlisting format="linespecific" language="ocaml">{ <emphasis>&lt;record&gt;</emphasis> with <emphasis>&lt;field&gt;</emphasis> = <emphasis>&lt;value&gt;</emphasis>;
+      <emphasis>&lt;field&gt;</emphasis> = <emphasis>&lt;value&gt;</emphasis>;
+      ...
 }</programlisting>
 
     <para>The purpose of the functional update is to create a new record based
@@ -820,10 +820,9 @@
 <computeroutput moreinfo="none">  mutable last_heartbeat_status : string;</computeroutput>
 <computeroutput moreinfo="none">}</computeroutput></programlisting>
 
-    <para>The <literal moreinfo="none">&lt;-</literal> operator is used
-    setting a mutable field. The side-effecting version of <literal
-    moreinfo="none">register_heartbeat</literal> would be written as
-    follows:</para>
+    <para>The <literal moreinfo="none">&lt;-</literal> operator is used for setting a mutable field.
+      The side-effecting version of <literal moreinfo="none">register_heartbeat</literal> would be
+      written as follows:</para>
 
     <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
     url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">records/main.topscript</ulink>
@@ -1035,11 +1034,10 @@
         moreinfo="none"># </prompt><userinput moreinfo="none">Field.get Logon.Fields.user;;</userinput>
 <computeroutput moreinfo="none">- : Logon.t -&gt; string = &lt;fun&gt;</computeroutput></programlisting>
 
-    <para>Thus, first parameter of the <literal
-    moreinfo="none">Field.t</literal> corresponds to the record you pass to
-    <literal moreinfo="none">get</literal>, and the second argument
-    corresponds to the value contained in the field, which is also the return
-    type of <literal moreinfo="none">get</literal>.</para>
+    <para>Thus, the first parameter of the <literal moreinfo="none">Field.t</literal> corresponds to
+      the record you pass to <literal moreinfo="none">get</literal>, and the second parameter
+      corresponds to the value contained in the field, which is also the return type of <literal
+        moreinfo="none">get</literal>.</para>
 
     <para>The type of <literal moreinfo="none">Field.get</literal> is a little
     more complicated than you might naively expect from the preceding
