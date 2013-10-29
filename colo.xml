@@ -4,9 +4,22 @@
 <colophon id="colophon">
   <title>Colophon</title>
 
-  <para>The animal on the cover of <emphasis>Real World OCaml</emphasis> is XX.</para>
+  <para>The animal on the cover of <emphasis>Real World OCaml</emphasis> is the Bactrian camel
+      (<emphasis>Camelus bactrianus</emphasis>). The Bactrian camel, one of two species of camel, is
+    native to Central Asia and has been used domestically in the area for thousands of years. Even
+    though there are over two million domesticated Bactrian camels, only about a thousand are
+    considered wild.</para>
+  <para>The Bactrian camel is a large animal at 6 to 7.5 feet in height and 7.4 to 11.5 feet in
+    length. An adult will typically weigh between 660 and 2,200 pounds. The Bactrian camel is
+    distinctive for its two large humps on their back, hefty wooly coat, and dark brown color. It is
+    a herbivore that will eat all kinds of vegetation, though they have been known to feed on dead
+    animals. </para>
+  <para>One of the reasons humans have domesticated the Bactrian camel is for its great resiliency
+    to thrive in different conditions. For example, the Bactrian camel can live in habitats of both
+    extreme cold and heat. It can also go without water for months and when water is available it
+    can consume up to 55 litres.  </para>
 
-  <para>The cover image is from XX. The cover fonts are URW Typewriter and Guardian Sans. The text
-    font is Adobe Minion Pro; the heading font is Adobe Myriad Condensed; and the code font is
-    Dalton Maag's Ubuntu Mono.</para>
+  <para>The cover image is from <emphasis>Meyers Kleines Lexicon</emphasis>. The cover fonts are URW
+    Typewriter and Guardian Sans. The text font is Adobe Minion Pro; the heading font is Adobe
+    Myriad Condensed; and the code font is Dalton Maag's Ubuntu Mono.</para>
 </colophon>
