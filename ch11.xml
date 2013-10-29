@@ -125,8 +125,8 @@
     aren't required to use classes at all. Here's an example of a simple
     object:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/stack.topscript">objects/stack.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/stack.topscript">OCaml utop</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -159,8 +159,8 @@
     through its methods. The syntax for a method invocation uses the <literal
     moreinfo="none">#</literal> character:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/stack.topscript">objects/stack.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/stack.topscript">OCaml utop</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -179,8 +179,8 @@
     the initial value of the object, we can define a function that takes the
     value and returns an object:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/stack.topscript">objects/stack.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/stack.topscript">OCaml utop</ulink>
     (part 3)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -226,8 +226,8 @@
         <secondary>polymorphism of</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/polymorphism.topscript">objects/polymorphism.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/polymorphism.topscript">OCaml utop</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -245,8 +245,8 @@
     <para>The type system will complain if it sees incompatible uses of the
     same method:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/polymorphism.topscript">objects/polymorphism.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/polymorphism.topscript">OCaml utop</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -271,8 +271,8 @@
     <para>We can manually <emphasis>close</emphasis> an object type using a
     type annotation:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/polymorphism.topscript">objects/polymorphism.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/polymorphism.topscript">OCaml utop</ulink>
     (part 3)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -306,8 +306,8 @@
           <primary>ellipses (..)</primary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/polymorphism.topscript">objects/polymorphism.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/polymorphism.topscript">OCaml utop</ulink>
       (part 4)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -333,8 +333,8 @@
     implemented. When the method <literal moreinfo="none">#pop</literal> is
     invoked, the actual method that is run is determined by the object:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/stack.topscript">objects/stack.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/stack.topscript">OCaml utop</ulink>
     (part 4)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -368,8 +368,8 @@
     required. Let's define a function that creates immutable stack
     objects:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/immutable.topscript">objects/immutable.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/immutable.topscript">OCaml utop</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -397,8 +397,8 @@
     moreinfo="none">hd :: v</literal>. The original object is not
     modified:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/immutable.topscript">objects/immutable.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/immutable.topscript">OCaml utop</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -546,8 +546,8 @@
           <secondary>width subtyping</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.ml">objects/subtyping.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.ml">OCaml</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml">type shape = &lt; area : float &gt;
@@ -574,8 +574,8 @@ end</programlisting>
       moreinfo="none">shape</literal>, and it is. The coercion <literal
       moreinfo="none">:&gt;</literal> must be explicit:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">OCaml utop</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -617,8 +617,8 @@ end</programlisting>
       <para>For example, we can create two objects with a <literal
       moreinfo="none">shape</literal> method:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">OCaml utop</ulink>
       (part 2)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -638,8 +638,8 @@ end</programlisting>
       the object type <literal moreinfo="none">&lt; shape : shape
       &gt;</literal>:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">OCaml utop</ulink>
       (part 3)<indexterm class="singular">
           <primary>polymorphic variant subtyping</primary>
         </indexterm></para>
@@ -659,8 +659,8 @@ end</programlisting>
         tags of <emphasis>A</emphasis> are a subset of the tags of
         <emphasis>B</emphasis>:</para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">OCaml utop</ulink>
         (part 4)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -691,8 +691,8 @@ end</programlisting>
           <secondary>variance and</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">OCaml utop</ulink>
       (part 5)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -707,8 +707,8 @@ end</programlisting>
       you to store nonsquare shapes into what should be an array of squares.
       OCaml recognizes this and does not allow the coercion:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">OCaml utop</ulink>
       (part 6)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -741,8 +741,8 @@ end</programlisting>
       <emphasis>can</emphasis> safely be used with type <literal
       moreinfo="none">square -&gt; string</literal>:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">OCaml utop</ulink>
       (part 7)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -769,8 +769,8 @@ end</programlisting>
         <para>OCaml works out the variance of a type using that type's
         definition:</para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">OCaml utop</ulink>
         (part 8)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -793,8 +793,8 @@ end</programlisting>
         <para>However, if the definition is hidden by a signature, then OCaml
         is forced to assume that the type is invariant:</para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">OCaml utop</ulink>
         (part 9)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -824,8 +824,8 @@ end</programlisting>
         <literal moreinfo="none">+</literal> for covariance or <literal
         moreinfo="none">-</literal> for contravariance:</para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">OCaml utop</ulink>
         (part 10)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -849,8 +849,8 @@ end</programlisting>
       moreinfo="none">stack</literal> function to some squares and some
       circles:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.ml">objects/subtyping.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.ml">OCaml</ulink>
       (part 2)</para>
 
       <programlisting format="linespecific" language="ocaml">type 'a stack = &lt; pop: 'a option; push: 'a -&gt; unit &gt;
@@ -862,8 +862,8 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</programlisting>
       <para>If we wanted to write a function that took a list of such stacks
       and found the total area of their shapes, we might try:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">OCaml utop</ulink>
       (part 11)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let total_area (shape_stacks: shape stack list) =</userinput>
@@ -881,8 +881,8 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</programlisting>
       <para>However, when we try to apply this function to our objects, we get
       an error:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">OCaml utop</ulink>
       (part 12)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -921,8 +921,8 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</programlisting>
       <literal moreinfo="none">readonly_stack</literal> and confirm that we
       can coerce the list of <literal>stack</literal>s to it:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">objects/subtyping.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/subtyping.topscript">OCaml utop</ulink>
       (part 13)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">type 'a readonly_stack = &lt; pop : 'a option &gt; ;;</userinput>
@@ -1031,8 +1031,9 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</programlisting>
       <literal moreinfo="none">Line</literal>, where the circles have the same
       radius:</para>
 
-      <para role="sourcecode">Java: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/IsBarbell.java">objects/IsBarbell.java</ulink></para>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+          url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/IsBarbell.java"
+          >Java</ulink></para>
 
       <programlisting format="linespecific" language="java">boolean IsBarbell(Shape[] s) {
   return s.length == 3 &amp;&amp; (s[0] instanceof Circle) &amp;&amp;
@@ -1046,8 +1047,8 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</programlisting>
       well-suited for this situation. Pattern matching seems like a better
       fit:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/is_barbell.ml">objects/is_barbell.ml</ulink></para>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/is_barbell.ml">OCaml</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">let is_barbell = function
 | [Circle r1; Line _; Circle r2] when r1 = r2 -&gt; true
@@ -1058,8 +1059,8 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</programlisting>
       a method <literal moreinfo="none">variant</literal> that injects the
       actual object into a variant type:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/narrowing.ml">objects/narrowing.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/narrowing.ml">OCaml</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml">type shape = &lt; variant : repr; area : float&gt;
@@ -1103,8 +1104,8 @@ let is_barbell = function
           polymorphism</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/row_polymorphism.topscript">objects/row_polymorphism.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/row_polymorphism.topscript">OCaml utop</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1116,8 +1117,8 @@ let is_barbell = function
       type of its argument, preserving any additional methods that it may
       have:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/row_polymorphism.topscript">objects/row_polymorphism.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/row_polymorphism.topscript">OCaml utop</ulink>
       (part 2)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1132,8 +1133,8 @@ let is_barbell = function
       returned object is only known to have an <literal
       moreinfo="none">area</literal> method:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/row_polymorphism.topscript">objects/row_polymorphism.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/row_polymorphism.topscript">OCaml utop</ulink>
       (part 3)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1148,8 +1149,8 @@ let is_barbell = function
       different types of object in the same container. For example, lists of
       heterogeneous elements cannot be created using row polymorphism:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/row_polymorphism.topscript">objects/row_polymorphism.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/row_polymorphism.topscript">OCaml utop</ulink>
       (part 4)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1162,8 +1163,8 @@ let is_barbell = function
       <para>Similarly, we cannot use row polymorphism to store different types
       of object in the same reference:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/row_polymorphism.topscript">objects/row_polymorphism.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/row_polymorphism.topscript">OCaml utop</ulink>
       (part 5)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1178,8 +1179,8 @@ let is_barbell = function
       <para>In both these cases we must use subtyping:<indexterm
       class="endofrange" startref="OBsub"></indexterm></para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/row_polymorphism.topscript">objects/row_polymorphism.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/objects/row_polymorphism.topscript">OCaml utop</ulink>
       (part 6)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt

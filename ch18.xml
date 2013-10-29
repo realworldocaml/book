@@ -75,8 +75,8 @@
         <secondary>basics of</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -104,8 +104,8 @@
         <primary>Deferred.t</primary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
     (part 3)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -131,8 +131,8 @@
         <primary>Deferred.peek</primary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
     (part 4)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -150,8 +150,8 @@
         <literal moreinfo="none">Deferred.t</literal>, it will make sure the scheduler is running
       and block until the deferred is determined. Thus, we can write:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
     (part 5)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -161,8 +161,8 @@
     <para>If we peek again, we'll see that the value of <literal
     moreinfo="none">contents</literal> has been determined:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
     (part 6)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -173,8 +173,8 @@
       computation to finish, which we do using <literal moreinfo="none">Deferred.bind</literal>.
       First, let's consider the type-signature of <literal>bind</literal>:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
     (part 7)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -204,8 +204,8 @@
     <para>Here's a simple use of <literal>bind</literal> for a function that replaces a file with an
       uppercase version of its contents:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
     (part 8)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -227,8 +227,8 @@
     rewrite <literal moreinfo="none">uppercase_file</literal> as
     follows:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
     (part 9)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -249,8 +249,8 @@
     <para>Now let's look at another potential use of <literal>bind</literal>. In this case, we'll
       write a function that counts the number of lines in a file:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
     (part 10)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -272,8 +272,8 @@
         <primary>return function</primary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
     (part 11)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -287,8 +287,8 @@
     <para>Using <literal moreinfo="none">return</literal>, we can make
     <literal moreinfo="none">count_lines</literal> compile:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
     (part 12)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -315,8 +315,8 @@
     moreinfo="none">Deferred.map</literal>, which has the following
     signature:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
     (part 13)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -327,8 +327,8 @@
     moreinfo="none">&gt;&gt;|</literal>. Using it, we can rewrite <literal
     moreinfo="none">count_lines</literal> again a bit more succinctly:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
     (part 14)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -370,8 +370,8 @@
       moreinfo="none">Ivar.fill</literal>. These operations are
       illustrated below:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
       (part 15)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -397,8 +397,8 @@
       were scheduled in. Here's a reasonable signature that captures this
       idea:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
       (part 16)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -426,8 +426,8 @@
           <primary>thunks</primary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
       (part 17)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -448,8 +448,8 @@
       span and returns a deferred which becomes determined after that time
       span elapses:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
       (part 18)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -509,8 +509,8 @@
         <secondary>copying data</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/echo.ml">async/echo.ml</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/echo.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 open Async.Std
@@ -571,8 +571,8 @@ let rec copy_blocks buffer r w =
         <primary>TCP clients/servers</primary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/echo.ml">async/echo.ml</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/echo.ml">OCaml</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml">(** Starts a TCP server, which listens on the specified port, invoking
@@ -608,8 +608,8 @@ let run () =
     <para>Finally, we need to initiate the server and start the Async
     scheduler:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/echo.ml">async/echo.ml</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/echo.ml">OCaml</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml">(* Call [run], and then start the scheduler *)
@@ -630,8 +630,8 @@ let () =
     using the netcat tool, which is invoked as <literal
     moreinfo="none">nc</literal>:</para>
 
-    <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/run_echo.out">async/run_echo.out</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/run_echo.out">Terminal</ulink></para>
 
     <programlisting format="linespecific" language="console"><prompt
         moreinfo="none">$ </prompt><userinput moreinfo="none">./echo.native &amp;</userinput>
@@ -661,8 +661,8 @@ let () =
           <secondary>non-returning</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
       (part 19)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -675,8 +675,8 @@ let () =
           <literal>unit</literal>. The type-checker won't necessarily complain in such a
         case:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
       (part 20)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -695,8 +695,8 @@ let () =
       moreinfo="none">never_returns</literal>. Let's do the same trick with
       <literal moreinfo="none">loop_forever</literal>:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
       (part 21)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -709,8 +709,8 @@ let () =
         as its return type! Now, if we rewrite our <literal moreinfo="none">do_stuff</literal>
         function, we'll get a helpful type error:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
       (part 22)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -726,8 +726,8 @@ let () =
       <para>We can resolve the error by calling the function <literal
       moreinfo="none">never_returns</literal>:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
       (part 23)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -771,8 +771,8 @@ let () =
 
       <para>The following code does all of this:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/better_echo.ml">async/better_echo.ml</ulink></para>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/better_echo.ml">OCaml</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">open Core.Std
 open Async.Std
@@ -825,8 +825,8 @@ let () =
 
       <para>Pipes are created in connected read/write pairs:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
       (part 24)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -844,8 +844,8 @@ let () =
           moreinfo="none">utop</command>. You can break out of the wait by hitting
           <userinput>Control-C</userinput>:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/pipe_write_break.rawscript">async/pipe_write_break.rawscript</ulink></para>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/pipe_write_break.rawscript">OCaml utop</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><userinput
           moreinfo="none"># Pipe.write w "Hello World!";;</userinput>
@@ -854,8 +854,8 @@ let () =
       <para>The deferred returned by write completes on its own once the value
       written into the pipe has been read out:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
       (part 25)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -877,8 +877,8 @@ let () =
       writer-pipe. Here's the type of <literal
       moreinfo="none">Pipe.transfer</literal>:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
       (part 26)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -906,8 +906,8 @@ let () =
         an extended version that contains the <literal moreinfo="none">async_basic</literal>
         call:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
       (part 27)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1017,8 +1017,8 @@ let () =
       <para>We'll need a function for generating the URIs that we're going to
       use to query the DuckDuckGo servers:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search.ml">async/search.ml</ulink></para>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search.ml">OCaml</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">open Core.Std
 open Async.Std
@@ -1061,8 +1061,8 @@ let query_uri query =
       "Definition," and so the following code looks under both keys, returning
       the first one for which a nonempty value is defined:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search.ml">async/search.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search.ml">OCaml</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml">(* Extract the "Definition" or "Abstract" field from the DuckDuckGo results *)
@@ -1100,8 +1100,8 @@ let get_definition_from_json json =
           <secondary>executing an HTTP client query in</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search.ml">async/search.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search.ml">OCaml</ulink>
       (part 2)</para>
 
       <programlisting format="linespecific" language="ocaml">(* Execute the DuckDuckGo search *)
@@ -1116,8 +1116,8 @@ let get_definition word =
       type for <literal moreinfo="none">Cohttp_async.Client.get</literal>,
       which we can do in <command moreinfo="none">utop</command>:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
       (part 28)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1145,8 +1145,8 @@ let get_definition word =
       parallel. First, we need code for formatting and printing out the search
       result:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search.ml">async/search.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search.ml">OCaml</ulink>
       (part 3)</para>
 
       <programlisting format="linespecific" language="ocaml">(* Print out a word/definition pair *)
@@ -1176,8 +1176,8 @@ let print_result (word,definition) =
       <para>The next function dispatches the searches in parallel, waits for
       the results, and then prints:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search.ml">async/search.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search.ml">OCaml</ulink>
       (part 4)</para>
 
       <programlisting format="linespecific" language="ocaml">(* Run many searches in parallel, printing out the results after they're all
@@ -1193,8 +1193,8 @@ let search_and_print words =
       results. Here's the type of <literal
       moreinfo="none">Deferred.all</literal>:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
       (part 29)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1207,8 +1207,8 @@ let search_and_print words =
         We could rewrite this code to print out the results as they're received (and thus
         potentially out of order) as follows:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search_out_of_order.ml">async/search_out_of_order.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search_out_of_order.ml">OCaml</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml">(* Run many searches in parallel, printing out the results as you go *)
@@ -1226,8 +1226,8 @@ let search_and_print words =
       when every deferred on the input list is determined. We can see the type
       of this function in <command moreinfo="none">utop</command>:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
       (part 30)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1237,8 +1237,8 @@ let search_and_print words =
       <para>Finally, we create a command-line interface using <literal moreinfo="none"
           >Command.async_basic</literal>:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search.ml">async/search.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search.ml">OCaml</ulink>
       (part 5)</para>
 
       <programlisting format="linespecific" language="ocaml">let () =
@@ -1254,8 +1254,8 @@ let search_and_print words =
       <para>And that's all we need for a simple but usable definition
       searcher:<indexterm class="endofrange" startref="ALduckduck"/></para>
 
-      <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/run_search.out">async/run_search.out</ulink></para>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/run_search.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg cohttp.async,yojson,textwrap search.native</userinput>
@@ -1305,8 +1305,8 @@ let search_and_print words =
       returns <literal>unit</literal>, alternating between the two behaviors on subsequent
       calls:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
     (part 31)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1342,8 +1342,8 @@ let search_and_print words =
     moreinfo="none">try/with</literal> statement, but as you can see that
     doesn't quite do the trick:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
     (part 32)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1378,8 +1378,8 @@ let search_and_print words =
         <secondary>asynchronous errors</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
     (part 33)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1433,8 +1433,8 @@ let search_and_print words =
       moreinfo="none">within'</literal>, which takes a thunk that returns a
       deferred. Here's an example:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
       (part 34)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1471,8 +1471,8 @@ let search_and_print words =
         may include reraising errors to the parent. Here is a very simple example of a function that
         captures and ignores errors in the processes it spawns:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main-35.rawscript">async/main-35.rawscript</ulink></para>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main-35.rawscript">OCaml utop</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><userinput
           moreinfo="none"># let swallow_error () =
@@ -1499,8 +1499,8 @@ let search_and_print words =
           >Monitor.send_exn</literal>, with <literal moreinfo="none">Monitor.current</literal> being
         called to find the current monitor, which is the parent of the newly created monitor:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
       (part 36)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1530,8 +1530,8 @@ let search_and_print words =
       <literal moreinfo="none">Not_found</literal>, then the exception will be
       passed to the parent monitor and delivered as usual:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
       (part 37)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1549,8 +1549,8 @@ let search_and_print words =
 
       <para>If instead we use <literal>Ignore_me</literal>, the exception will be ignorred, and the deferred never becomes determined:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main-38.rawscript">async/main-38.rawscript</ulink></para>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main-38.rawscript">OCaml utop</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><userinput
           moreinfo="none"># swallow_some_errors Ignore_me;;</userinput>
@@ -1589,8 +1589,8 @@ let search_and_print words =
       moreinfo="none">query_uri</literal> to take an argument specifying the
       server to connect to:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search_with_configurable_server.ml">async/search_with_configurable_server.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search_with_configurable_server.ml">OCaml</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml">(* Generate a DuckDuckGo search URI from a query string *)
@@ -1605,8 +1605,8 @@ let query_uri ~server query =
         Now, let's see what happens if we rebuild the application and run it giving it a list of
         servers, some of which won't respond to the query:</para>
 
-      <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/run_search_with_configurable_server.out">async/run_search_with_configurable_server.out</ulink></para>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/run_search_with_configurable_server.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg cohttp.async,yojson,textwrap \</userinput>
@@ -1636,8 +1636,8 @@ let query_uri ~server query =
           moreinfo="none">try_with</literal> function within each call to <literal moreinfo="none"
           >get_definition</literal>, as follows:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search_with_error_handling.ml">async/search_with_error_handling.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search_with_error_handling.ml">OCaml</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml">(* Execute the DuckDuckGo search *)
@@ -1662,8 +1662,8 @@ let get_definition ~server word =
       moreinfo="none">print_result</literal> so that it can handle the new
       type:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search_with_error_handling.ml">async/search_with_error_handling.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search_with_error_handling.ml">OCaml</ulink>
       (part 2)</para>
 
       <programlisting format="linespecific" language="ocaml">(* Print out a word/definition pair *)
@@ -1681,8 +1681,8 @@ let print_result (word,definition) =
       <para>Now, if we run that same query, we'll get individualized handling
       of the connection failures:</para>
 
-      <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/run_search_with_error_handling.out">async/run_search_with_error_handling.out</ulink></para>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/async/run_search_with_error_handling.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg cohttp.async,yojson,textwrap \</userinput>
@@ -1747,8 +1747,8 @@ let print_result (word,definition) =
         <secondary>timeouts and cancellations</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
     (part 39)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1766,8 +1766,8 @@ let print_result (word,definition) =
     returns a single deferred that will become determined once any of the
     values on the list is determined:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
     (part 40)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1781,8 +1781,8 @@ let print_result (word,definition) =
     of a <literal moreinfo="none">Time.Span.t</literal>) and returns either
     the definition, or, if that takes too long, an error:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search_with_timeout.ml">async/search_with_timeout.ml</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search_with_timeout.ml">OCaml</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml">let get_definition_with_timeout ~server ~timeout word =
@@ -1816,8 +1816,8 @@ let print_result (word,definition) =
     moreinfo="none">get_definition_with_timeout</literal> to cancel the
     <literal moreinfo="none">get</literal> call if the timeout expires:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search_with_timeout_no_leak_simple.ml">async/search_with_timeout_no_leak_simple.ml</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search_with_timeout_no_leak_simple.ml">OCaml</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml">(* Execute the DuckDuckGo search *)
@@ -1837,8 +1837,8 @@ let get_definition ~server ~interrupt word =
     to pass in to <literal moreinfo="none">get_definition</literal>, which
     will become determined when our timeout expires:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search_with_timeout_no_leak_simple.ml">async/search_with_timeout_no_leak_simple.ml</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search_with_timeout_no_leak_simple.ml">OCaml</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml">let get_definition_with_timeout ~server ~timeout word =
@@ -1868,8 +1868,8 @@ let get_definition ~server ~interrupt word =
       if and only if that deferred is chosen. Here's the type signature of <literal moreinfo="none"
         >choice</literal> and <literal moreinfo="none">choose</literal>:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
     (part 41)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1889,8 +1889,8 @@ let get_definition ~server ~interrupt word =
       the <literal moreinfo="none">interrupt</literal> deferred becomes determined if and only if
       the timeout deferred is chosen. Here's the code:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search_with_timeout_no_leak.ml">async/search_with_timeout_no_leak.ml</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/search_with_timeout_no_leak.ml">OCaml</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml">let get_definition_with_timeout ~server ~timeout word =
@@ -1912,8 +1912,8 @@ let get_definition ~server ~interrupt word =
     <para>Now, if we run this with a suitably small timeout, we'll see that
     one query succeeds and the other fails reporting a timeout:</para>
 
-    <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/run_search_with_timeout_no_leak.out">async/run_search_with_timeout_no_leak.out</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/run_search_with_timeout_no_leak.out">Terminal</ulink></para>
 
     <programlisting format="linespecific" language="console"><prompt
         moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg cohttp.async,yojson,textwrap \</userinput>
@@ -2003,8 +2003,8 @@ let get_definition ~server ~interrupt word =
         <primary>In_thread module</primary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
     (part 42)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -2026,8 +2026,8 @@ let get_definition ~server ~interrupt word =
     returned deferred becomes determined, at which point it prints out one
     last timestamp:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">async/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main.topscript">OCaml utop</ulink>
     (part 43)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -2046,8 +2046,8 @@ let get_definition ~server ~interrupt word =
     <para>If we feed this function a simple timeout deferred, it works as you
     might expect, waking up roughly every 100 milliseconds:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main-44.rawscript">async/main-44.rawscript</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main-44.rawscript">OCaml utop</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><userinput
         moreinfo="none"># log_delays (fun () -&gt; after (sec 0.5));;</userinput>
@@ -2057,15 +2057,14 @@ let get_definition ~server ~interrupt word =
     <para>Now see what happens if, instead of waiting on a clock event, we wait for a busy loop to
       finish running:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main-45.rawscript">async/main-45.rawscript</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main-45.rawscript">OCaml utop</ulink></para>
 
-    <programlisting format="linespecific" language="ocaml"><userinput
-        moreinfo="none"># let busy_loop n =
+    <programlisting format="linespecific" language="ocaml"><userinput moreinfo="none"># let busy_loop () =
     let x = ref None in
     for i = 1 to 100_000_000 do x := Some i done
   ;;</userinput>
-<computeroutput moreinfo="none">val busy_loop : 'a -&gt; unit = &lt;fun&gt;</computeroutput>
+<computeroutput moreinfo="none">val busy_loop : unit -&gt; unit = &lt;fun&gt;</computeroutput>
 <userinput moreinfo="none"># log_delays (fun () -&gt; return (busy_loop ()));;</userinput>
 <computeroutput moreinfo="none">19.2185s,
 - : unit = ()</computeroutput></programlisting>
@@ -2078,8 +2077,8 @@ let get_definition ~server ~interrupt word =
     moreinfo="none">In_thread.run</literal> to offload this to a different
     system thread, the behavior will be different:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main-46.rawscript">async/main-46.rawscript</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main-46.rawscript">OCaml utop</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><userinput
         moreinfo="none"># log_delays (fun () -&gt; In_thread.run busy_loop);;</userinput>
@@ -2098,8 +2097,8 @@ let get_definition ~server ~interrupt word =
       then it will never allow another OCaml thread to run. Bytecode doesn't have this behavior, so
       if we run a nonallocating loop in bytecode, our timer process will get to run:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main-47.rawscript">async/main-47.rawscript</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/main-47.rawscript">OCaml utop</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><userinput
         moreinfo="none"># let noalloc_busy_loop () =
@@ -2113,8 +2112,8 @@ let get_definition ~server ~interrupt word =
     <para>But if we compile this to a native-code executable, then the nonallocating busy loop will
       block anything else from running:</para>
 
-    <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/run_native_code_log_delays.out">async/run_native_code_log_delays.out</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/async/run_native_code_log_delays.out">Terminal</ulink></para>
 
     <programlisting format="linespecific" language="console"><prompt
         moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg async native_code_log_delays.native</userinput>

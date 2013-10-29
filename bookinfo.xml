@@ -60,7 +60,7 @@
   <legalnotice role="trademarks">
     <para>Nutshell Handbook, the Nutshell Handbook logo, and the O’Reilly logo
     are registered trademarks of O’Reilly Media, Inc. <emphasis>Real World
-    OCaml</emphasis>, the image of a XX, and related trade dress
+      OCaml</emphasis>, the image of a Bactrian camel, and related trade dress
     are trademarks of O’Reilly Media, Inc.</para>
 
     <para>Many of the designations used by manufacturers and sellers to
@@ -166,7 +166,7 @@
   <copyright>
     <year>2014</year>
 
-    <holder>Jason Hickey, Anil Madhavapeddy, Yaron Minsky</holder>
+    <holder>Yaron Minsky, Anil Madhavapeddy, Jason Hickey</holder>
   </copyright>
 
   <editor role="production">

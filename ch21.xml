@@ -236,8 +236,8 @@
             moreinfo="none">OCAMLRUNPARAM</literal>. You can change it after the program has started
           by calling the <literal moreinfo="none">Gc.set</literal> function:</para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">gc/tune.topscript</ulink></para>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">OCaml utop</ulink></para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
             moreinfo="none"># </prompt><userinput moreinfo="none">let c = Gc.get () ;;</userinput>
@@ -377,8 +377,8 @@
           virtual memory that require more housekeeping in the OCaml runtime to keep track of
           them:</para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">gc/tune.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">OCaml utop</ulink>
         (part 1)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -500,7 +500,7 @@
           <secondary>marking and scanning</secondary>
         </indexterm></para>
 
-      <table><title>Need title</title>
+      <table><title>Tag color statuses</title>
         <tgroup cols="2">
           <colspec align="left"/>
 
@@ -604,8 +604,8 @@
         returns this value so that you can modify it in future calls if
         necessary:</para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">gc/tune.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">OCaml utop</ulink>
         (part 2)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -665,8 +665,8 @@
         you have unusual allocation patterns that are causing a
         higher-than-usual rate of compactions:</para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">gc/tune.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">OCaml utop</ulink>
         (part 3)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -727,8 +727,8 @@
         moreinfo="none">opam install core_bench</literal> before you compile
         this code:</para>
 
-        <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/barrier_bench.ml">gc/barrier_bench.ml</ulink></para>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/barrier_bench.ml">OCaml</ulink></para>
 
         <programlisting format="linespecific" language="ocaml">open Core.Std
 open Core_bench.Std
@@ -769,8 +769,8 @@ let () =
         execute this with some extra options to show the amount of garbage
         collection occurring:</para>
 
-        <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/run_barrier_bench.out">gc/run_barrier_bench.out</ulink></para>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/run_barrier_bench.out">Terminal</ulink></para>
 
         <programlisting format="linespecific" language="console"><prompt
             moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg core_bench barrier_bench.native</userinput>
@@ -795,8 +795,8 @@ let () =
           The command-line benchmark binaries have a number of useful options that affect garbage
           collection behavior:</para>
 
-        <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/show_barrier_bench_help.out">gc/show_barrier_bench_help.out</ulink></para>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/show_barrier_bench_help.out">Terminal</ulink></para>
 
         <programlisting format="linespecific" language="console"><prompt
             moreinfo="none">$ </prompt><userinput moreinfo="none">./barrier_bench.native -help</userinput>
@@ -922,8 +922,8 @@ let () =
     different types, some of which are heap-allocated and others which are
     compile-time constants:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/finalizer.ml">gc/finalizer.ml</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/finalizer.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 open Async.Std
@@ -961,8 +961,8 @@ let () =
 
     <para>Building and running this should show the following output:</para>
 
-    <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/run_finalizer.out">gc/run_finalizer.out</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/run_finalizer.out">Terminal</ulink></para>
 
     <programlisting format="linespecific" language="console"><prompt
         moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg async finalizer.native</userinput>
@@ -997,12 +997,5 @@ let () =
     <para>The finalizer can use all features of OCaml, including assignments that make the value
       reachable again and thus prevent it from being garbage-collected. It can also loop forever,
       which will cause other finalizers to be interleaved with it.</para>
-
-    <note>
-      <title>Production Note</title>
-
-      <para>This chapter contains significant contributions from Stephen
-      Weeks.</para>
-    </note>
   </sect1>
 </chapter>

@@ -5,21 +5,19 @@
   <title>Language Concepts</title>
 
   <partintro>
-    <para>Part I covers the basic language concepts you'll need to know when
-    building OCaml programs. You won't need to memorize all of this (objects,
-    for example, are used rarely in practice), but understanding the concepts
-    and examples is important.</para>
+    <para>Part I covers the basic language concepts you'll need to know when building OCaml
+      programs. It opens up with a guided tour to give you a quick overview of the language using an
+      interactive command-line interface. The subsequent chapters cover the material that is touched
+      upon by the tour in much more detail, including detailed coverage of OCaml's approach to
+      imperative programming.</para>
 
-    <para>This part opens up with a guided tour to give you a quick overview
-    of the language using an interactive, command-line interface. It then
-    moves onto covering language features such as records, algebraic data
-    types, and the module system.</para>
-
-    <para>The final portion covers more advanced features such as functors,
-    objects, and first-class modules, which may all take some time to digest.
-    Persevere though; even though these concepts may be difficult at first,
-    they will put you in good stead even when switching to other languages,
-    many of which have drawn inspiration from ML.</para>
+    <para>The last few chapters introduce OCaml's powerful abstraction facilities. We start by using
+      functors to build a library for programming with intervals, and then use first-class modules
+      to build a type-safe plugin system. OCaml also supports object-oriented programming, and we
+      close Part I with two chapters that cover the object system; the first showing how to use
+      OCaml's objects directly, and the second showing how to use the class system to add more
+      advanced features like inheritance. This description comes together in the design of a simple
+      object-oriented graphics library.</para>
   </partintro>
 
   <xi:include href="ch01.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />

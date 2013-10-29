@@ -4,13 +4,24 @@
     <title>The Runtime System</title>
 
     <partintro>
-      <para>Part III is all about understanding the compiler toolchain and
-      runtime system in OCaml. It's a remarkably simple system in comparison
-      to other language runtimes (such as Java or the .NET CLR).</para>
+      <para>Writing good OCaml code is only one half of the typical software engineering workflow --
+      you also need to understand how OCaml executes this code, and how to debug and profile your
+      production applications. Part III is thus all about understanding the compiler toolchain and
+      runtime system in OCaml. It is a remarkably simple system in comparison to other language
+      runtimes such as Java or the .NET CLR, so this chapter should be accessible to even the casual
+      OCaml programmer.</para>
 
-      <para>You'll need to read this to build very-high-performance systems that have to minimize
-      resource usage or interface to C libraries. This is also where we talk about profiling and
-      debugging techniques using tools such as GNU <emphasis>gdb</emphasis>.</para>
+      <para>We open by a guided tour through the Ctypes library for binding your OCaml code to
+      foreign C libraries. We use a terminal interface and POSIX functions of increasing complexity
+      to show the more advanced features of the library.</para>
+    <para>OCaml has a very predictable memory representation of values, which we explain in the next
+      chapter by walking through the various datatypes. We then illustrate how the memory regions in
+      OCaml are automatically managed by a garbage collector to ensure no memory leaks occur.</para>
+    <para>The part closes with two bigger chapters that explain the tools that comprise the OCaml
+      compiler, breaking it up into two logical pieces. The first part covers the parser and type
+      checker and highlights various tips to help you solve common problems in your source code. The
+      second part covers code generation into bytecode and native code, and also explains how to
+      debug and profile production binaries.</para>
     </partintro>
 
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch19.xml"/>

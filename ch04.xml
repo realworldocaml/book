@@ -54,8 +54,8 @@
         <secondary>finding key associations in</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/intro.topscript">files-modules-and-programs/intro.topscript</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/intro.topscript">OCaml utop</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">let assoc = [("one", 1); ("two",2); ("three",3)] ;;</userinput>
@@ -74,8 +74,8 @@
 
     <para>Now we can write <literal moreinfo="none">freq.ml</literal>:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq/freq.ml">files-modules-and-programs-freq/freq.ml</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq/freq.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -117,7 +117,7 @@ let () =
         <primary>main function</primary>
       </indexterm></para>
 
-    <note>
+    <note role="allow_break">
       <title>Where Is the Main Function?</title>
 
       <para>Unlike C, programs in OCaml do not have a unique <literal
@@ -144,8 +144,8 @@ let () =
     <para>If we weren't using Core or any other external libraries, we could
     build the executable like this:</para>
 
-    <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq/simple_build_fail.out">files-modules-and-programs-freq/simple_build_fail.out</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq/simple_build_fail.out">Terminal</ulink></para>
 
     <programlisting format="linespecific" language="console"><prompt
         moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc freq.ml -o freq.byte</userinput>
@@ -168,8 +168,8 @@ let () =
         <secondary>finding with ocamlfind</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq/simple_build.out">files-modules-and-programs-freq/simple_build.out</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq/simple_build.out">Terminal</ulink></para>
 
     <programlisting format="linespecific" language="console"><prompt
         moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlfind ocamlc -linkpkg -thread -package core freq.ml -o freq.byte</userinput>
@@ -206,8 +206,8 @@ let () =
         <primary>corebuild</primary>
       </indexterm></para>
 
-    <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-obuild/build.out">files-modules-and-programs-freq-obuild/build.out</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-obuild/build.out">Terminal</ulink></para>
 
     <programlisting format="linespecific" language="console"><prompt
         moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild freq.byte</userinput>
@@ -251,8 +251,8 @@ let () =
     startref="FILEsnglprog"></indexterm><indexterm class="endofrange"
     startref="Psingfil"></indexterm></para>
 
-    <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-obuild/test.out">files-modules-and-programs-freq-obuild/test.out</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-obuild/test.out">Terminal</ulink></para>
 
     <programlisting format="linespecific" language="console"><prompt
         moreinfo="none">$ </prompt><userinput moreinfo="none">strings `which ocamlopt` | ./freq.byte</userinput>
@@ -348,8 +348,8 @@ let () =
     The key function, called <literal moreinfo="none">touch</literal>, bumps
     the frequency count of a given line by one:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-counter/counter.ml">files-modules-and-programs-freq-with-counter/counter.ml</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-counter/counter.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -377,8 +377,8 @@ let touch t s =
     which will discover dependencies and realize that <literal
     moreinfo="none">counter.ml</literal> needs to be compiled:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-counter/freq.ml">files-modules-and-programs-freq-with-counter/freq.ml</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-counter/freq.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -444,16 +444,16 @@ let () =
     values in a signature. The syntax of a <literal
     moreinfo="none">val</literal> declaration is as follows:</para>
 
-    <para role="sourcecode">Syntax: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/val.syntax">files-modules-and-programs/val.syntax</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/val.syntax">Syntax</ulink></para>
 
     <programlisting format="linespecific" language="">val &lt;identifier&gt; : &lt;type&gt;</programlisting>
 
     <para>Using this syntax, we can write the signature of <literal
     moreinfo="none">counter.ml</literal> as follows:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-sig/counter.mli">files-modules-and-programs-freq-with-sig/counter.mli</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-sig/counter.mli">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -478,8 +478,8 @@ val touch : (string * int) list -&gt; string -&gt; (string * int) list</programl
           <secondary>mli files</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-counter/infer_mli.out">files-modules-and-programs-freq-with-counter/infer_mli.out</ulink></para>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-counter/infer_mli.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild counter.inferred.mli</userinput>
@@ -503,8 +503,8 @@ val touch : (string * int) list -&gt; string -&gt; (string * int) list</programl
     in the interface, but its definition is not. Here's an abstract interface
     for <literal moreinfo="none">Counter</literal>:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-sig-abstract/counter.mli">files-modules-and-programs-freq-with-sig-abstract/counter.mli</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-sig-abstract/counter.mli">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -537,8 +537,8 @@ val to_list : t -&gt; (string * int) list</programlisting>
     <para>Here's a rewrite of <literal moreinfo="none">counter.ml</literal> to
     match the new <literal moreinfo="none">counter.mli</literal>:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-sig-abstract/counter.ml">files-modules-and-programs-freq-with-sig-abstract/counter.ml</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-sig-abstract/counter.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -559,8 +559,8 @@ let touch t s =
     <para>If we now try to compile <literal moreinfo="none">freq.ml</literal>,
     we'll get the following error:</para>
 
-    <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-sig-abstract/build.out">files-modules-and-programs-freq-with-sig-abstract/build.out</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-sig-abstract/build.out">Terminal</ulink></para>
 
     <programlisting format="linespecific" language="console"><prompt
         moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild freq.byte</userinput>
@@ -580,8 +580,8 @@ let touch t s =
     at the end for processing and printing. The resulting implementation is
     shown below:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-sig-abstract-fixed/freq.ml">files-modules-and-programs-freq-with-sig-abstract-fixed/freq.ml</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-sig-abstract-fixed/freq.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -600,8 +600,8 @@ let () =
     efficient implementation, based on the <literal
     moreinfo="none">Map</literal> data structure in Core:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-fast/counter.ml">files-modules-and-programs-freq-fast/counter.ml</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-fast/counter.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -652,8 +652,8 @@ let touch t s =
     median instead. We'll use a custom type to represent the fact that there
     are two possible return values. Here's a possible implementation:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-median/counter.ml">files-modules-and-programs-freq-median/counter.ml</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-median/counter.ml">OCaml</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml">type median = | Median of string
@@ -684,8 +684,8 @@ let median t =
     the following two lines added to <literal
     moreinfo="none">counter.mli</literal> does the trick:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-median/counter.mli">files-modules-and-programs-freq-median/counter.mli</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-median/counter.mli">OCaml</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml">(** Represents the median computed from a set of strings.  In the case where
@@ -735,8 +735,8 @@ val median : t -&gt; median</programlisting>
         <primary>abstract types</primary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/abstract_username.ml">files-modules-and-programs/abstract_username.ml</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/abstract_username.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -758,8 +758,8 @@ end</programlisting>
 
     <para>The basic structure of a module declaration like this is:</para>
 
-    <para role="sourcecode">Syntax: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/module.syntax">files-modules-and-programs/module.syntax</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/module.syntax">Syntax</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">module <emphasis>&lt;name&gt;</emphasis> : <emphasis>&lt;signature&gt;</emphasis> = <emphasis>&lt;implementation&gt;</emphasis></programlisting>
     
@@ -768,8 +768,8 @@ end</programlisting>
     declaration, making it possible to create multiple distinct types with the
     same underlying implementation in a lightweight way:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/session_info.ml">files-modules-and-programs/session_info.ml</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/session_info.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -801,8 +801,8 @@ let sessions_have_same_user s1 s2 =
     usernames in both cases. Because of how we defined our types, however, the
     compiler will flag this bug for us:</para>
 
-    <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/build_session_info.out">files-modules-and-programs/build_session_info.out</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/build_session_info.out">Terminal</ulink></para>
 
     <programlisting format="linespecific" language="console"><prompt
         moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild session_info.native</userinput>
@@ -844,8 +844,8 @@ let sessions_have_same_user s1 s2 =
     the environment that the compiler looks at to find the definition of
     various identifiers. Here's an example:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/main.topscript">files-modules-and-programs/main.topscript</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/main.topscript">OCaml utop</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">module M = struct let foo = 3 end;;</userinput>
@@ -884,8 +884,8 @@ let sessions_have_same_user s1 s2 =
         <emphasis>local open</emphasis>. There are two syntaxes for local
         opens. For example, you can write:</para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/main.topscript">files-modules-and-programs/main.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/main.topscript">OCaml utop</ulink>
         (part 1)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -902,8 +902,8 @@ let sessions_have_same_user s1 s2 =
         <literal>open</literal>s, which is particularly useful for small
         expressions:</para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/main.topscript">files-modules-and-programs/main.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/main.topscript">OCaml utop</ulink>
         (part 2)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -919,8 +919,8 @@ let sessions_have_same_user s1 s2 =
         moreinfo="none">Counter.median</literal> type, instead of
         writing:</para>
 
-        <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-median/use_median_1.ml">files-modules-and-programs-freq-median/use_median_1.ml</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-median/use_median_1.ml">OCaml</ulink>
         (part 1)</para>
 
         <programlisting format="linespecific" language="ocaml">let print_median m =
@@ -931,8 +931,8 @@ let sessions_have_same_user s1 s2 =
 
         <para>you could write:</para>
 
-        <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-median/use_median_2.ml">files-modules-and-programs-freq-median/use_median_2.ml</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-median/use_median_2.ml">OCaml</ulink>
         (part 1)</para>
 
         <programlisting format="linespecific" language="ocaml">let print_median m =
@@ -965,8 +965,8 @@ let sessions_have_same_user s1 s2 =
         <secondary>adding to modules</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/main.topscript">files-modules-and-programs/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/main.topscript">OCaml utop</ulink>
     (part 3)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -984,8 +984,8 @@ let sessions_have_same_user s1 s2 =
     to create a new, extended version of the <literal
     moreinfo="none">Interval</literal> module:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/main.topscript">files-modules-and-programs/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/main.topscript">OCaml utop</ulink>
     (part 4)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1012,8 +1012,8 @@ let sessions_have_same_user s1 s2 =
     module. If we'd used <literal moreinfo="none">open</literal>, we'd have
     gotten a quite different result:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/main.topscript">files-modules-and-programs/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/main.topscript">OCaml utop</ulink>
     (part 5)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1037,8 +1037,8 @@ let sessions_have_same_user s1 s2 =
     distributed in Core. <literal moreinfo="none">include</literal> allows us
     to do just that:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/ext_list.ml">files-modules-and-programs/ext_list.ml</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/ext_list.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -1059,8 +1059,8 @@ include List</programlisting>
     module. This can be done using <literal moreinfo="none">module type
     of</literal>, which computes a signature from a module:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/ext_list.mli">files-modules-and-programs/ext_list.mli</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/ext_list.mli">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -1086,8 +1086,8 @@ val intersperse : 'a list -&gt; 'a -&gt; 'a list</programlisting>
     moreinfo="none">List</literal> in our project, we can create a file of
     common definitions:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/common.ml">files-modules-and-programs/common.ml</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs/common.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">module List = Ext_list</programlisting>
 
@@ -1124,8 +1124,8 @@ val intersperse : 'a list -&gt; 'a -&gt; 'a list</programlisting>
           <secondary>type mismatches in</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-sig-mismatch/counter.mli">files-modules-and-programs-freq-with-sig-mismatch/counter.mli</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-sig-mismatch/counter.mli">OCaml</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml">(** Bump the frequency count for the given string. *)
@@ -1133,8 +1133,8 @@ val touch : string -&gt; t -&gt; t</programlisting>
 
       <para>and we try to compile, we'll get the following error:</para>
 
-      <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-sig-mismatch/build.out">files-modules-and-programs-freq-with-sig-mismatch/build.out</ulink></para>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-sig-mismatch/build.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild freq.byte</userinput>
@@ -1162,8 +1162,8 @@ val touch : string -&gt; t -&gt; t</programlisting>
           <secondary>missing definitions in</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-missing-def/counter.mli">files-modules-and-programs-freq-with-missing-def/counter.mli</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-missing-def/counter.mli">OCaml</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml">val count : t -&gt; string -&gt; int</programlisting>
@@ -1171,8 +1171,8 @@ val touch : string -&gt; t -&gt; t</programlisting>
       <para>Now, if we try to compile without actually adding the
       implementation, we'll get this error:</para>
 
-      <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-missing-def/build.out">files-modules-and-programs-freq-with-missing-def/build.out</ulink></para>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-missing-def/build.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild freq.byte</userinput>
@@ -1207,8 +1207,8 @@ val touch : string -&gt; t -&gt; t</programlisting>
           <secondary>type definition mismatches</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-type-mismatch/counter.mli">files-modules-and-programs-freq-with-type-mismatch/counter.mli</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-type-mismatch/counter.mli">OCaml</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml">(** Represents the median computed from a set of strings.  In the case where
@@ -1219,8 +1219,8 @@ type median = | Before_and_after of string * string
 
       <para>will lead to a compilation error:</para>
 
-      <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-type-mismatch/build.out">files-modules-and-programs-freq-with-type-mismatch/build.out</ulink></para>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-with-type-mismatch/build.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild freq.byte</userinput>
@@ -1275,16 +1275,16 @@ type median = | Before_and_after of string * string
       <literal moreinfo="none">Counter</literal> from within <literal
       moreinfo="none">counter.ml</literal>:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-cyclic1/counter.ml">files-modules-and-programs-freq-cyclic1/counter.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-cyclic1/counter.ml">OCaml</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml">let singleton l = Counter.touch Counter.empty</programlisting>
 
       <para>we'll see this error when we try to build:</para>
 
-      <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-cyclic1/build.out">files-modules-and-programs-freq-cyclic1/build.out</ulink></para>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-cyclic1/build.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild freq.byte</userinput>
@@ -1298,8 +1298,8 @@ type median = | Before_and_after of string * string
       moreinfo="none">counter.ml</literal>, e.g., by adding the following
       line:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-cyclic2/counter.ml">files-modules-and-programs-freq-cyclic2/counter.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-cyclic2/counter.ml">OCaml</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml">let _build_counts = Freq.build_counts</programlisting>
@@ -1308,8 +1308,8 @@ type median = | Before_and_after of string * string
       is invoked by the <command moreinfo="none">corebuild</command> script)
       will notice the error and complain explicitly about the cycle:</para>
 
-      <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-cyclic2/build.out">files-modules-and-programs-freq-cyclic2/build.out</ulink></para>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-cyclic2/build.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild freq.byte</userinput>
@@ -1320,9 +1320,9 @@ type median = | Before_and_after of string * string
   </sect1>
   <sect1>
     <title>Designing with Modules</title>
-    <para>The module system is a key part of how you structure your software. We'll close this
-      chapter with a discussion of some ideas about how to use modules to structure your code
-      effectively. </para>
+    <para>The module system is a key part of how an OCaml program is structured. As such, we'll
+      close this chapter with some advice on how to think about designing that structure
+      effectively.</para>
     <sect2>
       <title>Expose Concrete Types Rarely</title>
       <para>When designing an <literal>mli</literal>, one choice that you need to make is whether to
@@ -1359,8 +1359,8 @@ type median = | Before_and_after of string * string
         definition. By making your API as obvious as possible from that perspective, you simplify
         the lives of your users.</para>
       <para>There are many ways of improving readability at the call site. One example is labeled
-        arguments (discussed in <xref linkend="labeled-arguments"/>), which act as documentation that is there at the call
-        site. </para>
+        arguments (discussed in <xref linkend="labeled-arguments"/>), which act as documentation
+        that is available at the call site. </para>
       <para>You can also improve readability simply by choosing good names for your functions,
         variant tags and record fields. Good names aren't always long, to be clear. If you wanted to
         write an anonymous function for doubling a number: <literal>(fun x -> x * 2)</literal>, a
@@ -1378,7 +1378,7 @@ type median = | Before_and_after of string * string
         isolation. The interfaces that appear in your codebase should play together harmoniously.
         Part of achieving that is standardizing aspects of those interfaces.</para>
       <para>Core itself is a library that works hard to create uniform interfaces. Here are some of
-        the guidelines that are used in Core to this end.</para>
+        the guidelines that are used in Core.</para>
       <itemizedlist>
         <listitem>
           <para><emphasis>A module for (almost) every type.</emphasis> You should mint a module for
@@ -1393,11 +1393,12 @@ type median = | Before_and_after of string * string
           <literal>Or_error.t</literal> (both of which are discussed in <xref linkend="error-handling"/> ).</para></listitem>
        
       </itemizedlist>
-      <para>There are also standards in Core about how specific functions should be implemented. For
-        example, the signature for <literal>map</literal> is always essentially the same, no matter
-        what the underlying type it is applied to. This kind of function-by-function API uniformity
-        is achieved through the use of <emphasis>signature includes</emphasis>, which allow for
-        different modules to share components of their interface. This approach is described in <xref linkend="using-multiple-interfaces"/>. </para>
+      <para>There are also standards in Core about what the type signature for specific functions
+        should be. For example, the signature for <literal>map</literal> is always essentially the
+        same, no matter what the underlying type it is applied to. This kind of function-by-function
+        API uniformity is achieved through the use of <emphasis>signature includes</emphasis>, which
+        allow for different modules to share components of their interface. This approach is
+        described in <xref linkend="using-multiple-interfaces"/>. </para>
       <para>Core's standards may or may not fit your projects, but you can improve the usability of
         your codebase by finding some consistent set of standards to apply.</para>
     </sect2>

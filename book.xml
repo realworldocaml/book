@@ -2,8 +2,11 @@
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <book role="animal">
   <title>Real World OCaml</title>
-
+ 
+  
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="bookinfo.xml"/>
+  
+  <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="dedication.xml"/>
 
   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch00.xml"/>
 

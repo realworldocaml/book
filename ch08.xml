@@ -83,8 +83,8 @@
     moreinfo="none">'a</literal> and data of type <literal
     moreinfo="none">'b</literal>:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dictionary.mli">imperative-programming/dictionary.mli</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dictionary.mli">OCaml</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml">(* file: dictionary.mli *)
@@ -114,8 +114,8 @@ val remove : ('a, 'b) t -&gt; 'a -&gt; unit</programlisting>
     <para>Our first step is to define the type of a dictionary as a record
     with two fields:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dictionary.ml">imperative-programming/dictionary.ml</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dictionary.ml">OCaml</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml">(* file: dictionary.ml *)
@@ -139,8 +139,8 @@ type ('a, 'b) t = { mutable length: int;
     <para>Now we'll start putting together the basic functions for
     manipulating a dictionary:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dictionary.ml">imperative-programming/dictionary.ml</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dictionary.ml">OCaml</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml">let num_buckets = 17
@@ -209,8 +209,8 @@ let find t key =
     moreinfo="none">List.find_map</literal>, which you can see the type of by
     typing it into the toplevel:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/examples.topscript">imperative-programming/examples.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/examples.topscript">OCaml utop</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -228,8 +228,8 @@ let find t key =
     <para>Now let's look at the implementation of <literal
     moreinfo="none">iter</literal>:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dictionary.ml">imperative-programming/dictionary.ml</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dictionary.ml">OCaml</ulink>
     (part 3)</para>
 
     <programlisting format="linespecific" language="ocaml">let iter t ~f =
@@ -259,8 +259,8 @@ let find t key =
     <para>The following code is for adding and removing mappings from the
     dictionary:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dictionary.ml">imperative-programming/dictionary.ml</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dictionary.ml">OCaml</ulink>
     (part 4)</para>
 
     <programlisting format="linespecific" language="ocaml">let bucket_has_key t i key =
@@ -306,8 +306,8 @@ let remove t key =
     operator, to express a sequence of imperative actions. We could have done
     the same using <literal>let</literal> bindings:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dictionary2.ml">imperative-programming/dictionary2.ml</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dictionary2.ml">OCaml</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml">let () = t.buckets.(i) &lt;- (key, data) :: filtered_bucket in
@@ -316,8 +316,8 @@ let remove t key =
     <para>but <literal moreinfo="none">;</literal> is more concise and
     idiomatic. More generally,</para>
 
-    <para role="sourcecode">Syntax: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/semicolon.syntax">imperative-programming/semicolon.syntax</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/semicolon.syntax">Syntax</ulink></para>
 
     <programlisting format="linespecific" language="">&lt;expr1&gt;;
 &lt;expr2&gt;;
@@ -326,8 +326,8 @@ let remove t key =
 
     <para>is equivalent to</para>
 
-    <para role="sourcecode">Syntax: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/let-unit.syntax">imperative-programming/let-unit.syntax</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/let-unit.syntax">Syntax</ulink></para>
 
     <programlisting format="linespecific" language="">let () = &lt;expr1&gt; in
 let () = &lt;expr2&gt; in
@@ -421,15 +421,15 @@ let () = &lt;expr2&gt; in
         <para>Arrays also come with special syntax for retrieving an element
         from an array:</para>
 
-        <para role="sourcecode">Syntax: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/array-get.syntax">imperative-programming/array-get.syntax</ulink></para>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/array-get.syntax">Syntax</ulink></para>
 
         <programlisting format="linespecific" language="ocaml"><emphasis>&lt;array_expr&gt;</emphasis>.(<emphasis>&lt;index_expr&gt;</emphasis>)</programlisting>
 
         <para>and for setting an element in an array:</para>
 
-        <para role="sourcecode">Syntax: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/array-set.syntax">imperative-programming/array-set.syntax</ulink></para>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/array-set.syntax">Syntax</ulink></para>
 
         <programlisting format="linespecific" language="ocaml"><emphasis>&lt;array_expr&gt;</emphasis>.(<emphasis>&lt;index_expr&gt;</emphasis>) &lt;- <emphasis>&lt;value_expr&gt;</emphasis></programlisting>
 
@@ -464,8 +464,8 @@ let () = &lt;expr2&gt; in
         <para>Strings also come with their own syntax for getting and setting
         values:</para>
 
-        <para role="sourcecode">Syntax: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/string.syntax">imperative-programming/string.syntax</ulink></para>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/string.syntax">Syntax</ulink></para>
 
         <programlisting format="linespecific" language="ocaml"><emphasis>&lt;string_expr&gt;</emphasis>.[<emphasis>&lt;index_expr&gt;</emphasis>]
           <emphasis>&lt;string_expr&gt;</emphasis>.[<emphasis>&lt;index_expr&gt;</emphasis>] &lt;- <emphasis>&lt;char_expr&gt;</emphasis></programlisting>
@@ -486,8 +486,8 @@ let () = &lt;expr2&gt; in
             <primary>bigarrays</primary>
           </indexterm></para>
 
-        <para role="sourcecode">Syntax: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/bigarray.syntax">imperative-programming/bigarray.syntax</ulink></para>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/bigarray.syntax">Syntax</ulink></para>
 
         <programlisting format="linespecific" language="ocaml"><emphasis>&lt;bigarray_expr&gt;</emphasis>.{<emphasis>&lt;index_expr&gt;</emphasis>}
          <emphasis> &lt;bigarray_expr&gt;</emphasis>.{<emphasis>&lt;index_expr&gt;</emphasis>} &lt;- <emphasis>&lt;value_expr&gt;</emphasis></programlisting>
@@ -531,8 +531,8 @@ let () = &lt;expr2&gt; in
         <para>The definition for the <literal>ref</literal> type is as
         follows:</para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/ref.topscript">imperative-programming/ref.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/ref.topscript">OCaml utop</ulink>
         (part 1)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -572,8 +572,8 @@ let () = &lt;expr2&gt; in
 
         <para>You can see these in action:</para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/ref.topscript">imperative-programming/ref.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/ref.topscript">OCaml utop</ulink>
         (part 3)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -589,8 +589,8 @@ let () = &lt;expr2&gt; in
         <para>The preceding are just ordinary OCaml functions, which could be
         defined as follows:</para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/ref.topscript">imperative-programming/ref.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/ref.topscript">OCaml utop</ulink>
         (part 2)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -655,8 +655,8 @@ let () = &lt;expr2&gt; in
     moreinfo="none">Dictionary</literal> is built using it. Here's a simple
     example of <literal moreinfo="none">for</literal>:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/for.topscript">imperative-programming/for.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/for.topscript">OCaml utop</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -671,8 +671,8 @@ let () = &lt;expr2&gt; in
     also use <literal moreinfo="none">downto</literal> to iterate in the other
     direction:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/for.topscript">imperative-programming/for.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/for.topscript">OCaml utop</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -694,8 +694,8 @@ let () = &lt;expr2&gt; in
     starts the loop again. Here's a simple example of a function for reversing
     an array in place:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/for.topscript">imperative-programming/for.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/for.topscript">OCaml utop</ulink>
     (part 3)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -751,8 +751,8 @@ let () = &lt;expr2&gt; in
     <para>Here's the <literal moreinfo="none">mli</literal> of the module
     we'll build:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dlist.mli">imperative-programming/dlist.mli</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dlist.mli">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">(* file: dlist.mli *)
 open Core.Std
@@ -789,8 +789,8 @@ val remove : 'a t -&gt; 'a element -&gt; unit</programlisting>
     <literal moreinfo="none">'a element</literal> and <literal
     moreinfo="none">'a t</literal>:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dlist.ml">imperative-programming/dlist.ml</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dlist.ml">OCaml</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml">(* file: dlist.ml *)
@@ -821,8 +821,8 @@ type 'a t = 'a element option ref</programlisting>
     <para>Now we can define a few basic functions that operate on lists and
     elements:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dlist.ml">imperative-programming/dlist.ml</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dlist.ml">OCaml</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml">let create () = ref None
@@ -859,8 +859,8 @@ let prev elt = elt.prev</programlisting>
       fixed-size cyclic data structures using <literal moreinfo="none">let
       rec</literal>:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/examples.topscript">imperative-programming/examples.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/examples.topscript">OCaml utop</ulink>
       (part 2)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let rec endless_loop = 1 :: 2 :: 3 :: endless_loop;;</userinput>
@@ -885,8 +885,8 @@ let prev elt = elt.prev</programlisting>
           <secondary>inserting in lists</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dlist.ml">imperative-programming/dlist.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dlist.ml">OCaml</ulink>
       (part 3)</para>
 
       <programlisting format="linespecific" language="ocaml">let insert_first t value =
@@ -920,8 +920,8 @@ let prev elt = elt.prev</programlisting>
       <literal moreinfo="none">element</literal> after which to insert the new
       node and a value to insert:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dlist.ml">imperative-programming/dlist.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dlist.ml">OCaml</ulink>
       (part 4)</para>
 
       <programlisting format="linespecific" language="ocaml">let insert_after elt value =
@@ -936,8 +936,8 @@ let prev elt = elt.prev</programlisting>
       <para>Finally, we need a <literal moreinfo="none">remove</literal>
       function:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dlist.ml">imperative-programming/dlist.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dlist.ml">OCaml</ulink>
       (part 5)</para>
 
       <programlisting format="linespecific" language="ocaml">let remove t elt =
@@ -1018,8 +1018,8 @@ let prev elt = elt.prev</programlisting>
       element to element and <literal moreinfo="none">value</literal> to
       extract the element from a given node:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dlist.ml">imperative-programming/dlist.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/dlist.ml">OCaml</ulink>
       (part 6)</para>
 
       <programlisting format="linespecific" language="ocaml">let iter t ~f =
@@ -1083,8 +1083,8 @@ let find_el t ~f =
     that expression is delayed until forced with <literal
     moreinfo="none">Lazy.force</literal>:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/lazy.topscript">imperative-programming/lazy.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/lazy.topscript">OCaml utop</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1104,8 +1104,8 @@ let find_el t ~f =
     implementation of our own lazy type. We'll start by declaring types to
     represent a lazy value:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/lazy.topscript">imperative-programming/lazy.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/lazy.topscript">OCaml utop</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1138,8 +1138,8 @@ let find_el t ~f =
         <primary>thunks</primary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/lazy.topscript">imperative-programming/lazy.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/lazy.topscript">OCaml utop</ulink>
     (part 3)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1152,8 +1152,8 @@ let find_el t ~f =
     <para>Now we just need a way to force a lazy value. The following function
     does just that:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/lazy.topscript">imperative-programming/lazy.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/lazy.topscript">OCaml utop</ulink>
     (part 4)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1175,8 +1175,8 @@ let find_el t ~f =
     <para>Which we can use in the same way we used <literal
     moreinfo="none">Lazy.force</literal>:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/lazy.topscript">imperative-programming/lazy.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/lazy.topscript">OCaml utop</ulink>
     (part 5)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1214,8 +1214,8 @@ let find_el t ~f =
       moreinfo="none">Hashtbl</literal> module, rather than our toy <literal
       moreinfo="none">Dictionary</literal>:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/memo.topscript">imperative-programming/memo.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/memo.topscript">OCaml utop</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1278,8 +1278,8 @@ let find_el t ~f =
           <secondary>example of</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/memo.topscript">imperative-programming/memo.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/memo.topscript">OCaml utop</ulink>
       (part 2)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1338,8 +1338,8 @@ let find_el t ~f =
       brutally slow for large strings. We can see this by writing a small
       timing function:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/memo.topscript">imperative-programming/memo.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/memo.topscript">OCaml utop</ulink>
       (part 3)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1353,8 +1353,8 @@ let find_el t ~f =
 
       <para>And now we can use this to try out some examples:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/memo.topscript">imperative-programming/memo.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/memo.topscript">OCaml utop</ulink>
       (part 4)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1386,8 +1386,8 @@ let find_el t ~f =
           <primary>dynamic programming</primary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">imperative-programming/fib.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">OCaml utop</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1400,8 +1400,8 @@ let find_el t ~f =
       making many redundant calls to <literal moreinfo="none">fib</literal>.
       It shows up quite dramatically in the performance:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">imperative-programming/fib.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">OCaml utop</ulink>
       (part 2)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1423,8 +1423,8 @@ let find_el t ~f =
       it after the fact and expect the first call to <literal
       moreinfo="none">fib</literal> to be improved:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">imperative-programming/fib.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">OCaml utop</ulink>
       (part 3)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1444,8 +1444,8 @@ let find_el t ~f =
       moreinfo="none">fib</literal>) that will be called in lieu of the usual
       recursive call:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">imperative-programming/fib.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">OCaml utop</ulink>
       (part 4)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1457,8 +1457,8 @@ let find_el t ~f =
       <para>We can now turn this back into an ordinary Fibonacci function by
       tying the recursive knot:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">imperative-programming/fib.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">OCaml utop</ulink>
       (part 5)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1471,8 +1471,8 @@ let find_el t ~f =
       moreinfo="none">make_rec</literal> that can tie the recursive knot for
       any function of this form:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">imperative-programming/fib.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">OCaml utop</ulink>
       (part 6)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1500,8 +1500,8 @@ let find_el t ~f =
       inserts memoization when it ties the recursive knot. We'll call that
       function <literal moreinfo="none">memo_rec</literal>:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">imperative-programming/fib.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">OCaml utop</ulink>
       (part 7)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1524,8 +1524,8 @@ let find_el t ~f =
       build an efficient version of <literal
       moreinfo="none">fib</literal>:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">imperative-programming/fib.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">OCaml utop</ulink>
       (part 8)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1555,8 +1555,8 @@ let find_el t ~f =
       a single declaration that makes this look like it's little more than a
       special form of <literal moreinfo="none">let rec</literal>:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">imperative-programming/fib.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/fib.topscript">OCaml utop</ulink>
       (part 9)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1581,8 +1581,8 @@ let find_el t ~f =
       moreinfo="none">memo_rec</literal> call, we can get a memoized version
       of <literal moreinfo="none">edit_distance</literal>:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/memo.topscript">imperative-programming/memo.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/memo.topscript">OCaml utop</ulink>
       (part 6)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1607,8 +1607,8 @@ let find_el t ~f =
       one we started with; the following call is many thousands of times
       faster than it was without memoization:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/memo.topscript">imperative-programming/memo.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/memo.topscript">OCaml utop</ulink>
       (part 7)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1627,8 +1627,8 @@ let find_el t ~f =
             <primary>let rec</primary>
           </indexterm></para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/letrec.topscript">imperative-programming/letrec.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/letrec.topscript">OCaml utop</ulink>
         (part 1)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1644,8 +1644,8 @@ let find_el t ~f =
         <literal moreinfo="none">let rec</literal>. In particular, imagine how
         the following code snippet would be compiled:</para>
 
-        <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/let_rec.ml">imperative-programming/let_rec.ml</ulink></para>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/let_rec.ml">OCaml</ulink></para>
 
         <programlisting format="linespecific" language="ocaml">let rec x = x + 1</programlisting>
 
@@ -1671,8 +1671,8 @@ let find_el t ~f =
         definition of <literal moreinfo="none">x</literal> work if we use
         OCaml's laziness:</para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/letrec.topscript">imperative-programming/letrec.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/letrec.topscript">OCaml utop</ulink>
         (part 2)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1683,8 +1683,8 @@ let find_el t ~f =
         <literal moreinfo="none">lazy</literal> throws an exception when a
         lazy value tries to force itself as part of its own evaluation.</para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/letrec.topscript">imperative-programming/letrec.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/letrec.topscript">OCaml utop</ulink>
         (part 3)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1697,8 +1697,8 @@ let find_el t ~f =
         moreinfo="none">memo_rec</literal> work without explicit
         mutation:</para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/letrec.topscript">imperative-programming/letrec.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/letrec.topscript">OCaml utop</ulink>
         (part 5)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1739,18 +1739,15 @@ let find_el t ~f =
         <secondary>input and output</secondary>
       </indexterm></para>
 
-    <para>There are multiple I/O libraries in OCaml. In this section we'll
-    discuss OCaml's buffered I/O library that can be used through the <literal
-    moreinfo="none">In_channel</literal> and <literal
-    moreinfo="none">Out_channel</literal> modules in Core. Other I/O
-    primitives are also available through the <literal
-    moreinfo="none">Unix</literal> module in Core as well as <literal
-    moreinfo="none">Async</literal>, the asynchronous I/O library that is
-    covered in <xref linkend="concurrent-programming-with-async" />. Most of
-    the functionality in Core's <literal moreinfo="none">In_channel</literal>,
-    <literal moreinfo="none">Out_channel</literal> (and in Core's <literal
-    moreinfo="none">Unix</literal> module) derives from the standard library,
-    but we'll use Core's interfaces here.</para>
+    <para>There are multiple I/O libraries in OCaml. In this section we'll discuss OCaml's buffered
+      I/O library that can be used through the <literal moreinfo="none">In_channel</literal> and
+        <literal moreinfo="none">Out_channel</literal> modules in Core. Other I/O primitives are
+      also available through the <literal moreinfo="none">Unix</literal> module in Core as well as
+        <literal moreinfo="none">Async</literal>, the asynchronous I/O library that is covered in
+        <xref linkend="concurrent-programming-with-async"/>. Most of the functionality in Core's
+        <literal moreinfo="none">In_channel</literal> and <literal moreinfo="none"
+        >Out_channel</literal> (and in Core's <literal moreinfo="none">Unix</literal> module)
+      derives from the standard library, but we'll use Core's interfaces here.</para>
 
     <sect2 id="terminal-io">
       <title>Terminal I/O</title>
@@ -1825,8 +1822,8 @@ let find_el t ~f =
       the <literal moreinfo="none">Time</literal> module for computing the
       current time and printing it out in the time zone in question:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/time_converter.ml">imperative-programming/time_converter.ml</ulink></para>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/time_converter.ml">OCaml</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -1847,8 +1844,8 @@ let () =
       moreinfo="none">corebuild</command> and run it. You'll see that it
       prompts you for input, as follows:</para>
 
-      <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/time_converter.out">imperative-programming/time_converter.out</ulink></para>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/time_converter.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild time_converter.byte</userinput>
@@ -1858,8 +1855,8 @@ let () =
       <para>You can then type in the name of a time zone and hit Return, and
       it will print out the current time in the time zone in question:</para>
 
-      <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/time_converter2.out">imperative-programming/time_converter2.out</ulink></para>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/time_converter2.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><computeroutput
           moreinfo="none">Pick a timezone: Europe/London</computeroutput>
@@ -1913,8 +1910,8 @@ let () =
           <secondary>formatted output</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/printf.topscript">imperative-programming/printf.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/printf.topscript">OCaml utop</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1928,8 +1925,8 @@ let () =
       if we provide an argument whose type doesn't match what's presented in
       the format string, we'll get a type error:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/printf.topscript">imperative-programming/printf.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/printf.topscript">OCaml utop</ulink>
       (part 2)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1955,8 +1952,8 @@ let () =
         pass an ordinary string to <literal moreinfo="none">printf</literal>,
         the compiler will complain:</para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/printf.topscript">imperative-programming/printf.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/printf.topscript">OCaml utop</ulink>
         (part 3)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1975,8 +1972,8 @@ let () =
         type annotation indicating that the string we're defining is actually
         a format string, it will be interpreted as such:</para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/printf.topscript">imperative-programming/printf.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/printf.topscript">OCaml utop</ulink>
         (part 4)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1987,8 +1984,8 @@ let () =
         <para>And accordingly, we can pass it to <literal
         moreinfo="none">printf</literal>:</para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/printf.topscript">imperative-programming/printf.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/printf.topscript">OCaml utop</ulink>
         (part 5)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">printf fmt 3 4.5 "five";;</userinput>
@@ -2008,8 +2005,8 @@ let () =
       a little more concise using <literal
       moreinfo="none">printf</literal>:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/time_converter2.ml">imperative-programming/time_converter2.ml</ulink></para>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/time_converter2.ml">OCaml</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -2112,8 +2109,8 @@ let () =
           <secondary>file I/O</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/file.topscript">imperative-programming/file.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/file.topscript">OCaml utop</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -2147,8 +2144,8 @@ let () =
       If we try to read a file that doesn't actually contain numbers, we'll
       see such an error:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/file.topscript">imperative-programming/file.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/file.topscript">OCaml utop</ulink>
       (part 2)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -2158,8 +2155,8 @@ let () =
       <para>And if we do this over and over in a loop, we'll eventually run
       out of file descriptors:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/file.topscript">imperative-programming/file.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/file.topscript">OCaml utop</ulink>
       (part 3)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -2176,8 +2173,8 @@ let () =
       moreinfo="none">protect</literal> function described in <xref
       linkend="error-handling" />, as follows:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/file2.topscript">imperative-programming/file2.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/file2.topscript">OCaml utop</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -2192,8 +2189,8 @@ let () =
 
       <para>And now, the file descriptor leak is gone:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/file2.topscript">imperative-programming/file2.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/file2.topscript">OCaml utop</ulink>
       (part 2)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -2215,8 +2212,8 @@ let () =
       moreinfo="none">sum_file</literal> using this function, as shown
       here:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/file2.topscript">imperative-programming/file2.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/file2.topscript">OCaml utop</ulink>
       (part 3)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -2234,8 +2231,8 @@ let () =
       moreinfo="none">In_channel.fold_lines</literal> function to do just
       that:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/file2.topscript">imperative-programming/file2.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/file2.topscript">OCaml utop</ulink>
       (part 4)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -2281,8 +2278,8 @@ let () =
     moreinfo="none">sin</literal>. The following snippet of code would answer
     that question:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/order.topscript">imperative-programming/order.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/order.topscript">OCaml utop</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -2303,8 +2300,8 @@ let () =
     computation so that <literal moreinfo="none">sin 128.</literal> won't ever
     be computed:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/order.topscript">imperative-programming/order.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/order.topscript">OCaml utop</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -2318,8 +2315,8 @@ let () =
     <para>We can confirm that fact by a few well-placed <literal
     moreinfo="none">printf</literal>s:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/order.topscript">imperative-programming/order.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/order.topscript">OCaml utop</ulink>
     (part 3)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -2349,8 +2346,8 @@ let () =
 
     <para>Consider the following example:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/order.topscript">imperative-programming/order.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/order.topscript">OCaml utop</ulink>
     (part 4)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -2389,8 +2386,8 @@ let () =
         <secondary>side effects/weak polymorphism</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/weak.topscript">imperative-programming/weak.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/weak.topscript">OCaml utop</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -2425,8 +2422,8 @@ let () =
     polymorphic types in the first place. The identity function, as an
     example, gets a polymorphic type in this way:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/weak.topscript">imperative-programming/weak.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/weak.topscript">OCaml utop</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -2446,8 +2443,8 @@ let () =
         >remember</literal> looks almost, but not quite, like the type of the identity function.
       Here it is again:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/remember_type.ml">imperative-programming/remember_type.ml</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/remember_type.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">val remember : '_a -&gt; '_a = &lt;fun&gt;</programlisting>
 
@@ -2464,8 +2461,8 @@ let () =
     as soon as it gets a clue as to what concrete type it is to be used
     as:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/weak.topscript">imperative-programming/weak.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/weak.topscript">OCaml utop</ulink>
     (part 3)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -2537,8 +2534,8 @@ let () =
       the types of values contained within it are allowed to be
       polymorphic:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">imperative-programming/value_restriction.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">OCaml utop</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -2550,8 +2547,8 @@ let () =
       consider what happens if we try to memoize the function defined
       previously.</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">imperative-programming/value_restriction.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">OCaml utop</ulink>
       (part 2)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -2564,8 +2561,8 @@ let () =
       But OCaml would make the same determination even if the function in
       question did no such thing. Consider this example:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">imperative-programming/value_restriction.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">OCaml utop</ulink>
       (part 3)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -2582,8 +2579,8 @@ let () =
       function that produces a fresh reference every time it's called can have
       a fully polymorphic type:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">imperative-programming/value_restriction.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">OCaml utop</ulink>
       (part 4)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -2613,8 +2610,8 @@ let () =
       function, which is used for creating lists where each element is created
       by calling a function on the index of that element:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">imperative-programming/value_restriction.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">OCaml utop</ulink>
       (part 5)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -2627,8 +2624,8 @@ let () =
       moreinfo="none">List.init</literal> that always created lists of length
       10. We could do that using partial application, as follows:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">imperative-programming/value_restriction.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">OCaml utop</ulink>
       (part 6)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -2644,8 +2641,8 @@ let () =
       possibility, and at the same time get the compiler to infer a
       polymorphic type, by avoiding partial application:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">imperative-programming/value_restriction.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">OCaml utop</ulink>
       (part 7)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -2673,8 +2670,8 @@ let () =
       application of the identity function, is not a simple value and thus can
       turn a polymorphic value into a weakly polymorphic one:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">imperative-programming/value_restriction.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">OCaml utop</ulink>
       (part 8)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -2685,8 +2682,8 @@ let () =
       value is immutable, then OCaml can typically infer a fully polymorphic
       type:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">imperative-programming/value_restriction.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">OCaml utop</ulink>
       (part 9)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -2696,8 +2693,8 @@ let () =
       <para>On the other hand, if the returned type is potentially mutable,
       then the result will be weakly polymorphic:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">imperative-programming/value_restriction.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">OCaml utop</ulink>
       (part 10)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -2710,8 +2707,8 @@ let () =
       data types. Consider the following simple data structure for an
       immutable list type that supports constant-time concatenation:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">imperative-programming/value_restriction.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">OCaml utop</ulink>
       (part 11)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -2754,8 +2751,8 @@ let () =
       value. However, when it comes to the value restriction, OCaml treats it
       as if it were mutable:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">imperative-programming/value_restriction.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">OCaml utop</ulink>
       (part 12)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -2788,8 +2785,8 @@ let () =
       polymorphic types for expressions of this type that are not simple
       values:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction-13.rawscript">imperative-programming/value_restriction-13.rawscript</ulink></para>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction-13.rawscript">OCaml utop</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><userinput moreinfo="none"># module Concat_list : sig
     type +'a t
@@ -2817,8 +2814,8 @@ let () =
       moreinfo="none">Concat_list.empty</literal> without without losing any
       polymorphism:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">imperative-programming/value_restriction.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/imperative-programming/value_restriction.topscript">OCaml utop</ulink>
       (part 14)<indexterm class="endofrange"
       startref="IPsideweak"></indexterm></para>
 

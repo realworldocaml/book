@@ -210,12 +210,11 @@
           <secondary>third-party libraries for</secondary>
         </indexterm></para>
 
-      <para>The installation and management of these third-party libraries is
-      made much easier via a package management tool known as OPAM. We'll
-      explain more about OPAM as the book unfolds, but it forms the basis of
-      the Platform, which is a set of tools and libraries that, along with the
-      OCaml compiler, lets you build real-world applications quickly and
-      effectively.</para>
+      <para>The installation and management of these third-party libraries is made much easier via a
+        package management tool known as <ulink url="http://opam.ocaml.org/">OPAM</ulink>. We'll explain more about OPAM
+        as the book unfolds, but it forms the basis of the Platform, which is a set of tools and
+        libraries that, along with the OCaml compiler, lets you build real-world applications
+        quickly and effectively.</para>
 
       <para>We'll also use OPAM for installing the <command
       moreinfo="none">utop</command> command-line interface. This is a modern
@@ -346,29 +345,12 @@
         </indexterm></para>
 
       <para>The code repository is available online at <ulink
-          url="https://github.com/realworldocaml/examples"/>. Every code snippet in the book has a
+          url="https://github.com/realworldocaml/examples"/>. Every code snippet in the book has a clickable
         header that tells you the filename in that repository to find the source code, shell script,
         or ancillary data file that the snippet was sourced from.</para>
 
       <remark>PROD: The above was written by the authors, the below is the
       boilerplate. Probably want to edit the below as needed.—TOOLS</remark>
-
-      <para>This book is here to help you get your job done. In general, if
-      example code is offered with this book, you may use it in your programs
-      and documentation. You do not need to contact us for permission unless
-      you’re reproducing a significant portion of the code. For example,
-      writing a program that uses several chunks of code from this book does
-      not require permission. Selling or distributing a CD-ROM of examples
-      from O’Reilly books does require permission. Answering a question by
-      citing this book and quoting example code does not require permission.
-      Incorporating a significant amount of example code from this book into
-      your product’s documentation does require permission.</para>
-
-      <para>We appreciate, but do not require, attribution. An attribution
-      usually includes the title, author, publisher, and ISBN. For example:
-      “<emphasis>Real World Ocaml</emphasis> by Yaron Minsky, Anil
-      Madhavapeddy, and Jason Hickey (O'Reilly). Copyright 2014 Jason Hickey,
-      Anil Madhavapeddy, and Yaron Minsky, 978-1-449-32391-2.”</para>
 
       <para>If you feel your use of code examples falls outside fair use or
       the permission given above, feel free to contact us at
@@ -484,11 +466,6 @@
         architecture behind Core, and his extensive notes formed the basis of
         <xref linkend="memory-representation-of-values" /> and <xref
         linkend="understanding-the-garbage-collector" />.</para>
-      </listitem>
-
-      <listitem>
-        <para>Jeremie Diminio authored the <command>utop</command> interactive
-        toplevel that is used throughout the book's code snippets.</para>
       </listitem>
     </itemizedlist>
   </sect1>

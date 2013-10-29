@@ -110,8 +110,8 @@
         <secondary>blocks and values in OCaml</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/simple_record.topscript">memory-repr/simple_record.topscript</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/simple_record.topscript">OCaml utop</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">type t = { foo: int; bar: int } ;;</userinput>
@@ -300,7 +300,7 @@
         <secondary>memory representation of</secondary>
       </indexterm><indexterm class="endofrange" startref="blck"/></para>
 
-    <table id="table20-1_ocaml"><title>Need title</title>
+    <table id="table20-1_ocaml"><title>OCaml values</title>
       <tgroup cols="2">
         <colspec align="left"/>
 
@@ -458,8 +458,8 @@
     yourself using the <literal moreinfo="none">Obj</literal> module, which
     exposes the internal representation of values to OCaml code:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">memory-repr/reprs.topscript</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">OCaml utop</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">Obj.is_block (Obj.repr (1,2,3)) ;;</userinput>
@@ -483,8 +483,8 @@
           <primary>floating-point values</primary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">memory-repr/reprs.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">OCaml utop</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -515,8 +515,8 @@
       <para>First, let's check that float arrays do in fact have a different
       tag number from normal floating-point values:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">memory-repr/reprs.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">OCaml utop</ulink>
       (part 2)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -532,8 +532,8 @@
       moreinfo="none">Obj.double_field</literal> to retrieve a float from
       within the block:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">memory-repr/reprs.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">OCaml utop</ulink>
       (part 3)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -576,8 +576,8 @@
         <secondary>variants and lists</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">memory-repr/reprs.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">OCaml utop</ulink>
     (part 4)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -602,8 +602,8 @@
     ascending from 0 (counting from leftmost variants with parameters). The
     parameters are stored as words in the block:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">memory-repr/reprs.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">OCaml utop</ulink>
     (part 5)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -631,20 +631,16 @@
       within the block, and <literal moreinfo="none">Obj.field</literal> can be used to retrieve
       them.</para>
 
-    <para>Lists are stored with a representation that is exactly the same as
-    if the list was written as a variant type with <literal
-    moreinfo="none">Head</literal> and <literal
-    moreinfo="none">Cons</literal>. The empty list <literal
-    moreinfo="none">[]</literal> is an integer <literal
-    moreinfo="none">0</literal>, and subsequent blocks have tag <literal
-    moreinfo="none">0</literal> and two parameters: a block with the current
-    value, and a pointer to the rest of the list.<indexterm class="singular">
+    <para>Lists are stored with a representation that is exactly the same as if the list was written
+      as a variant type with <literal moreinfo="none">Nil</literal> and <literal moreinfo="none"
+        >Cons</literal>. The empty list <literal moreinfo="none">[]</literal> is an integer <literal
+        moreinfo="none">0</literal>, and subsequent blocks have tag <literal moreinfo="none"
+        >0</literal> and two parameters: a block with the current value, and a pointer to the rest
+      of the list.<indexterm class="singular">
         <primary>debugging</primary>
-
         <secondary>Obj module warning</secondary>
       </indexterm><indexterm class="singular">
         <primary>security issues</primary>
-
         <secondary>Obj module warning</secondary>
       </indexterm><indexterm class="singular">
         <primary>Obj module</primary>
@@ -696,8 +692,8 @@
     moreinfo="none">type_conv</literal> library from Core provides an
     alternative implementation:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">memory-repr/reprs.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">OCaml utop</ulink>
     (part 6)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -773,7 +769,7 @@
       </indexterm></para>
 
     <table id="chapter_20_table">
-      <title>Need title</title>
+      <title>String length and padding</title>
       <tgroup cols="2">
         <colspec align="left"/>
 
@@ -864,8 +860,9 @@
         moreinfo="none">struct</literal> of custom operations. The custom block cannot have pointers
       to OCaml blocks and is opaque to the GC:</para>
 
-    <para role="sourcecode">C: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/custom_ops.c">memory-repr/custom_ops.c</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/custom_ops.c"
+        >C</ulink></para>
 
     <programlisting format="linespecific" language="c">struct custom_operations {
   char *identifier;
@@ -955,7 +952,7 @@
       </variablelist>
 
       <para>The <ulink
-      url="https://bitbucket.org/mmottl/lacaml">Lacaml</ulink> library isn't
+      url="https://bitbucket.org/mmottl/lacaml">OCaml</ulink> library isn't
       part of Core but provides the recommended interfaces to the widely used
       BLAS and LAPACK mathematical Fortran libraries. These allow developers
       to write high-performance numerical code for applications that require

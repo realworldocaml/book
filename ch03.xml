@@ -20,8 +20,8 @@
         <secondary>generation of</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">[1;2;3];;</userinput>
@@ -38,8 +38,8 @@
         <secondary>operator : :</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -54,8 +54,8 @@
     to terminate a list. Note that the empty list is polymorphic, meaning it
     can be used with elements of any type, as you can see here:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -68,7 +68,7 @@
 
     <para>The way in which the <literal moreinfo="none">::</literal> operator
     attaches elements to the front of a list reflects the fact that OCaml's
-    lists are in fact singly linked lists. <xref linkend="fig3-1" /> is a
+    lists are in fact singly linked lists. The figure below is a
     rough graphical representation of how the list <literal moreinfo="none">1
     :: 2 :: 3 :: []</literal> is laid out as a data structure. The final arrow
     (from the box containing <literal moreinfo="none">3</literal>) points to
@@ -77,17 +77,17 @@
 
         <secondary>data structure of</secondary>
       </indexterm></para>
-
-    <figure id="fig3-1">
-      <title>List <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/lists_layout.ascii">diagram</ulink></title>
-
+    
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/lists_layout.ascii">Diagram</ulink></para>
+    
+    <informalfigure>
       <mediaobject>
         <imageobject role="web">
           <imagedata fileref="images/rwoc_0301.png" format="PNG" />
         </imageobject>
       </mediaobject>
-    </figure>
+    </informalfigure>
 
     <para>Each <literal moreinfo="none">::</literal> essentially adds a new block to the proceding
       picture. Such a block contains two things: a reference to the data in that list element, and a
@@ -98,8 +98,8 @@
         <secondary>extension of</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 3)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -128,8 +128,8 @@
         <secondary>extracting data from</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 4)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -167,8 +167,8 @@
     follows, but when you do, the compiler will immediately warn you that
     something is wrong:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 5)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -186,8 +186,8 @@
     all elements of the list rather than just those equal to the provided
     value, as you can see here:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 6)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -212,8 +212,8 @@
     moreinfo="none">to_drop</literal>, but to instead use an ordinary
     <literal>if</literal> statement:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 7)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -233,8 +233,8 @@
     our original implementation of <literal
     moreinfo="none">drop_value</literal>:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 8)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -287,8 +287,8 @@
       <literal>match</literal> statement, and the second with a sequence of
       <literal>if</literal> statements:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
       (part 9)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -320,8 +320,8 @@
       library, which can be installed by running <literal moreinfo="none">opam
       install core_bench</literal> from the command line:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
       (part 10)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -359,8 +359,8 @@
       moreinfo="none">List</literal> module to deconstruct the list, allowing
       us to implement the entire function without pattern matching:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
       (part 11)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -372,8 +372,8 @@
 
       <para>Again, we can benchmark these to see the difference:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
       (part 12)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -434,8 +434,8 @@
       we've missed a case, along with an example of an unmatched
       pattern:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
       (part 13)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -485,8 +485,8 @@
     given a list of column headers and a list of rows, prints them out in a
     well-formatted text table, as follows:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 69)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -525,8 +525,8 @@
         <secondary>List.map</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 14)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -542,8 +542,8 @@
         <secondary>List.map2_exn</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 15)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -553,8 +553,8 @@
     <para>The <literal moreinfo="none">_exn</literal> is there because the
     function throws an exception if the lists are of mismatched length:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 16)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -571,8 +571,8 @@
         <secondary>List.fold</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 17)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -582,8 +582,8 @@
     <para>We can use <literal moreinfo="none">List.fold</literal> for
     something as simple as summing up a list:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 18)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -596,8 +596,8 @@
     example use <literal moreinfo="none">fold</literal> to reverse a list, in
     which case the accumulator is itself a list:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 19)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -607,8 +607,8 @@
     <para>Let's bring our three functions together to compute the maximum
     column widths:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 20)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -640,8 +640,8 @@
     moreinfo="none">^</literal>, which is a pairwise string concatenation
     function, to add the delimiters on the outside:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 21)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -680,8 +680,8 @@
       it allocates a new string every time it runs. Thus, the following
       code</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
       (part 22)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -691,8 +691,8 @@
       <para>will allocate strings of length 2, 3, 4, 5, 6 and 7, whereas this
       code</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
       (part 23)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -704,17 +704,15 @@
       assembling large strings, it can be a serious performance issue.</para>
     </note>
 
-    <para>Now we need code for rendering a row with data in it. We'll first
-    write a function called <literal moreinfo="none">pad</literal>, for
-    padding out a string to a specified length plus one blank space on either
-    side:<indexterm class="singular">
+    <para>Now we need code for rendering a row with data in it. We'll first write a function called
+        <literal moreinfo="none">pad</literal>, for padding out a string to a specified length plus
+      one blank space on both sides:<indexterm class="singular">
         <primary>strings</primary>
-
         <secondary>padding of</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 24)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -729,8 +727,8 @@
     Again, we'll use <literal moreinfo="none">List.map2_exn</literal> for
     combining the list of data in the row with the list of widths:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 25)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -745,8 +743,8 @@
     <para>Now we can bring this all together in a single function that renders
     the table:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 26)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -795,8 +793,8 @@
 
         <para>Here's the type signature:</para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
         (part 27)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -809,8 +807,8 @@
 
         <para>Now we can see <literal>reduce</literal> in action:</para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
         (part 28)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -836,8 +834,8 @@
             <secondary>List.filter</secondary>
           </indexterm></para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
         (part 29)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -871,8 +869,8 @@
             <primary>duplicates, removing</primary>
           </indexterm></para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
         (part 30)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -917,8 +915,8 @@
             <secondary>List.partition_tf</secondary>
           </indexterm></para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
         (part 31)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -950,8 +948,8 @@
             <secondary>List.append</secondary>
           </indexterm></para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
         (part 32)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -961,8 +959,8 @@
         <para>There's also <literal moreinfo="none">@</literal>, an operator
         equivalent of <literal moreinfo="none">List.append</literal>:</para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
         (part 33)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -973,8 +971,8 @@
         moreinfo="none">List.concat</literal>, for concatenating a list of
         lists:</para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
         (part 34)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -986,8 +984,8 @@
         moreinfo="none">List.map</literal> to compute a recursive listing of a
         directory tree:</para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
         (part 35)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1012,8 +1010,8 @@
         function <literal moreinfo="none">List.concat_map</literal> that
         combines these into one, more efficient operation:</para>
 
-        <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
         (part 36)<indexterm class="endofrange"
         startref="Llistmod"></indexterm></para>
 
@@ -1048,8 +1046,8 @@
         <primary>tail recursion</primary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 37)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1065,8 +1063,8 @@
     implementation runs into problems on very large lists, as we'll show in
     the following code:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 38)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1103,8 +1101,8 @@
     around this problem. Consider the following alternative
     implementation:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 39)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1142,8 +1140,8 @@
         <primary>tail calls</primary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 40)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1187,8 +1185,8 @@
         <primary>duplicates, removing</primary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 41)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1219,8 +1217,8 @@
         <primary>function keyword</primary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 42)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1236,8 +1234,8 @@
     <para>We can further collapse this by combining the first two cases into
     one, using an Or pattern:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 43)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1256,8 +1254,8 @@
     this case, we can use it to include the check on whether the first two
     elements are equal:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 44)<indexterm class="singular">
         <primary>operators</primary>
 
@@ -1282,8 +1280,8 @@
       between values of any type, using the <literal
       moreinfo="none">=</literal> operator. Thus, we can write:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
       (part 45)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1297,8 +1295,8 @@
       <para>Indeed, if we look at the type of the equality operator, we'll see
       that it is polymorphic:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
       (part 46)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1322,8 +1320,8 @@
       <para>Polymorphic compare does have some limitations. For example, it
       will fail at runtime if it encounters a function value:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
       (part 47)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1360,8 +1358,8 @@
     moreinfo="none">when</literal> clauses, the compiler can't tell that the
     code is exhaustive:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 48)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1380,8 +1378,8 @@
 
     <para>Despite the warning, the function does work fine:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 49)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1393,8 +1391,8 @@
     about exhaustiveness and won't produce a warning about the
     redundancy.</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 50)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1410,8 +1408,8 @@
     <para>Probably a better approach is to simply drop the second <literal
     moreinfo="none">when</literal> clause:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 51)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1427,8 +1425,8 @@
     pattern-matching solution, where the meaning of each pattern is clearer on
     its own:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 52)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1450,8 +1448,8 @@
     <literal moreinfo="none">List.count</literal> function from <literal
     moreinfo="none">Core</literal>:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">lists-and-patterns/main.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/lists-and-patterns/main.topscript">OCaml utop</ulink>
     (part 53)<indexterm class="endofrange"
     startref="PTTRNMAT"></indexterm></para>
 

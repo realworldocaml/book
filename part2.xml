@@ -4,15 +4,24 @@
     <title>Tools and Techniques</title>
 
     <partintro>
-      <para>Part II builds on the basics by working through higher-level tools
-      and techniques for using OCaml effectively. Here you'll learn about
-      useful libraries for building command-line interfaces and networked
-      applications, as well as functional design patterns that help combine
-      different features of the language to good effect.</para>
+      <para>Part II builds on the basics by demonstrating more advanced tools and techniques that
+      are useful for building real world programs. Here you'll learn about useful libraries for
+      building practical applications, as well as design patterns that help combine different
+      features of the language to good effect.</para>
 
-      <para>The focus throughout this section is on networked systems, and
-      among other examples we'll build a simple tool that will perform
-      Internet queries using the DuckDuckGo search engine.</para>
+      <para>This part begins by introducing two of the most common datastructures used in OCaml:
+      maps and hashtables. We then change gears and explain how to build expressive command-line
+      interfaces, which is a good example of a sophisticated use of the type system to create a user
+      friendly library.</para>
+    <para>Some of the examples in this part use the JSON interchange format, and so we first show
+      how to use third-party tools to parse and generate JSON, as well as how to build a parser from
+      scratch. Another interchange format used throughout OCaml are s-expressions, and this chapter
+      shows how to turn any OCaml value into an s-expression by using the powerful camlp4 syntax
+      preprocessor.</para>
+    <para>We close with a tour of the Async communications library, which lets you build scalable,
+      high-performance networked applications in OCaml. By the end of the chapter, you will be able
+      to run web queries against the DuckDuckGo engine by using Async, JSON and a HTTP library all
+      written in OCaml.</para>
     </partintro>
 
     <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch13.xml"/>

@@ -29,8 +29,8 @@
         <secondary>basic syntax for</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/istack.topscript">classes/istack.topscript</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/istack.topscript">OCaml utop</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">class istack = object</userinput>
@@ -73,8 +73,8 @@
     <para>To produce an object, classes are instantiated with the keyword
     <literal moreinfo="none">new</literal>:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/istack.topscript">classes/istack.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/istack.topscript">OCaml utop</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -97,8 +97,8 @@
     defines an object type <literal moreinfo="none">istack</literal> with the
     same methods as the class. This type definition is equivalent to:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/istack.topscript">classes/istack.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/istack.topscript">OCaml utop</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -134,8 +134,8 @@
     a parameter <literal moreinfo="none">init</literal> for the initial
     contents of the stack:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/stack.topscript">classes/stack.topscript</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/stack.topscript">OCaml utop</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">class ['a] stack init = object</userinput>
@@ -170,8 +170,8 @@
     polymorphic": <literal moreinfo="none">init</literal> could have some type
     <literal moreinfo="none">'b list</literal>:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/stack.topscript">classes/stack.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/stack.topscript">OCaml utop</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -239,8 +239,9 @@
     this. In Java, an iterator would normally be specified with an interface,
     which specifies a set of method types:</para>
 
-    <para role="sourcecode">Java: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/Iterator.java">classes/Iterator.java</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/Iterator.java"
+        >Java</ulink></para>
 
     <programlisting format="linespecific" language="java">// Java-style iterator, specified as an interface.
 interface &lt;T&gt; iterator {
@@ -254,8 +255,9 @@ interface &lt;T&gt; iterator {
     without implementing them (C++ uses the "= 0" definition to mean "not
     implemented"):</para>
 
-    <para role="sourcecode">C: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/citerator.cpp">classes/citerator.cpp</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+        url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/citerator.cpp"
+        >C</ulink></para>
 
     <programlisting format="linespecific" language="c">// Abstract class definition in C++.
 template&lt;typename T&gt;
@@ -277,8 +279,8 @@ class Iterator {
     moreinfo="none">iterator</literal> that specifies the methods in an
     iterator:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/iter.topscript">classes/iter.topscript</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/iter.topscript">OCaml utop</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">type 'a iterator = &lt; get : 'a; has_value : bool; next : unit &gt; ;;</userinput>
@@ -287,8 +289,8 @@ class Iterator {
     <para>Next, we'll define an actual iterator for lists. We can use this to
     iterate over the contents of our stack:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/iter.topscript">classes/iter.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/iter.topscript">OCaml utop</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -322,8 +324,8 @@ class Iterator {
     moreinfo="none">list_iterator</literal> that refers to the current
     contents of the stack:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/iter.topscript">classes/iter.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/iter.topscript">OCaml utop</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -355,8 +357,8 @@ class Iterator {
     <para>Now we can build a new stack, push some values to it, and iterate
     over them:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/iter.topscript">classes/iter.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/iter.topscript">OCaml utop</ulink>
     (part 3)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -390,8 +392,8 @@ class Iterator {
           <primary>functional iterators</primary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/iter.topscript">classes/iter.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/iter.topscript">OCaml utop</ulink>
       (part 4)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -433,8 +435,8 @@ class Iterator {
       polymorphic. To express a polymorphic method type like this, we must use
       a type quantifier, as shown in the following example:</para>
 
-      <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/iter.topscript">classes/iter.topscript</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/iter.topscript">OCaml utop</ulink>
       (part 5)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -487,8 +489,8 @@ class Iterator {
         <secondary>inheritance in</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/stack.topscript">classes/stack.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/stack.topscript">OCaml utop</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -511,8 +513,8 @@ class Iterator {
     this class creates stacks of integers that double the integers before they
     are pushed onto the stack:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/stack.topscript">classes/stack.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/stack.topscript">OCaml utop</ulink>
     (part 3)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -555,8 +557,8 @@ class Iterator {
     the usual style for modules, we define a type <literal moreinfo="none">'a
     t</literal> to represent the type of our stacks:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/class_types_stack.ml">classes/class_types_stack.ml</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/class_types_stack.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">module Stack = struct
   class ['a] stack init = object
@@ -573,8 +575,8 @@ end</programlisting>
     maximally abstract signature would completely hide the class
     definitions:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/class_types_stack.ml">classes/class_types_stack.ml</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/class_types_stack.ml">OCaml</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml">module AbstractStack : sig
@@ -595,8 +597,8 @@ end = Stack</programlisting>
     you don't have to give a type for everything; anything you omit will be
     hidden:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/class_types_stack.ml">classes/class_types_stack.ml</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/class_types_stack.ml">OCaml</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml">module VisibleStack : sig
@@ -645,8 +647,8 @@ end = Stack</programlisting>
     document format. This format is represented as a tree with three different
     types of node:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/doc.ml">classes/doc.ml</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/doc.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">type doc =
   | Heading of string
@@ -672,8 +674,8 @@ and 'a list_item =
     the following class defines objects that fold over the document
     data:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/doc.ml">classes/doc.ml</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/doc.ml">OCaml</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
@@ -706,8 +708,8 @@ end</programlisting>
     moreinfo="none">count_doc</literal> function counts the number of bold
     tags in the document that are not within a list:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/doc.ml">classes/doc.ml</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/doc.ml">OCaml</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml">class counter = object
@@ -758,8 +760,8 @@ let count_doc = (new counter)#doc</programlisting>
     subclasses of <literal moreinfo="none">folder</literal> to expose these
     methods, as they probably shouldn't be called directly:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/doc.ml">classes/doc.ml</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/doc.ml">OCaml</ulink>
     (part 3)</para>
 
     <programlisting format="linespecific" language="ocaml">class ['a] folder2 = object(self)
@@ -809,8 +811,8 @@ let f :
     to subclasses: we can use them to simplify our <literal
     moreinfo="none">counter</literal> class:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/doc.ml">classes/doc.ml</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/doc.ml">OCaml</ulink>
     (part 4)</para>
 
     <programlisting format="linespecific" language="ocaml">class counter_with_private_method = object
@@ -832,8 +834,8 @@ end</programlisting>
     can't be invoked in subclasses of <literal
     moreinfo="none">counter_with_sig</literal>:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/doc.ml">classes/doc.ml</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/doc.ml">OCaml</ulink>
     (part 5)</para>
 
     <programlisting format="linespecific" language="ocaml">class counter_with_sig : object
@@ -868,8 +870,8 @@ end</programlisting>
         <primary>binary methods</primary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/binary.topscript">classes/binary.topscript</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/binary.topscript">OCaml utop</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">class square w = object(self : 'self) </userinput>
@@ -904,8 +906,8 @@ end</programlisting>
     <para>We can now test different object instances for equality by using the
     <literal moreinfo="none">equals</literal> binary method:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/binary.topscript">classes/binary.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/binary.topscript">OCaml utop</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -921,8 +923,8 @@ end</programlisting>
     common base class <literal moreinfo="none">shape</literal> that also
     includes an equality method:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/binary.topscript">classes/binary.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/binary.topscript">OCaml utop</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -962,8 +964,8 @@ end</programlisting>
     However, the built-in polymorphic equality has very poor behavior when
     applied to objects:</para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/binary.topscript">classes/binary.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/binary.topscript">OCaml utop</ulink>
     (part 3)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -983,8 +985,8 @@ end</programlisting>
         <primary>representation types</primary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/binary.topscript">classes/binary.topscript</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/binary.topscript">OCaml utop</ulink>
     (part 4)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1016,8 +1018,8 @@ end</programlisting>
     not be able to hide the <literal moreinfo="none">repr</literal> method,
     but you can hide the type definition using the module system:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/binary_module.ml">classes/binary_module.ml</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/binary_module.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">module Shapes : sig
   type shape_repr
@@ -1050,8 +1052,8 @@ end</programlisting>
     binary methods need only partial information about the object. For
     instance, a method that compares shapes by their sizes:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/binary_larger.ml">classes/binary_larger.ml</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/binary_larger.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">class square w = object(self) 
   method width = w
@@ -1112,8 +1114,8 @@ end</programlisting>
     method that describes how to draw the shape on the <literal
     moreinfo="none">Async_graphics</literal> display:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/shapes.ml">classes-async/shapes.ml</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/shapes.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 open Async.Std
@@ -1130,8 +1132,8 @@ type drawable = &lt; draw: unit &gt;</programlisting>
           <primary>geometric shapes</primary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/verbose_shapes.ml">classes-async/verbose_shapes.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/verbose_shapes.ml">OCaml</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml">class square w x y = object(self)
@@ -1161,8 +1163,8 @@ end</programlisting>
       straightforward, and the <literal moreinfo="none">circle</literal> class
       below also looks very similar:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/verbose_shapes.ml">classes-async/verbose_shapes.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/verbose_shapes.ml">OCaml</ulink>
       (part 2)</para>
 
       <programlisting format="linespecific" language="ocaml">class circle r x y = object(self)
@@ -1206,8 +1208,8 @@ end</programlisting>
       moreinfo="none">on_click</literal> and <literal
       moreinfo="none">on_mousedown</literal>:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/shapes.ml">classes-async/shapes.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/shapes.ml">OCaml</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml">class virtual shape x y = object(self)
@@ -1236,8 +1238,8 @@ end</programlisting>
       <literal moreinfo="none">circle</literal> by inheriting from <literal
       moreinfo="none">shape</literal>:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/shapes.ml">classes-async/shapes.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/shapes.ml">OCaml</ulink>
       (part 2)</para>
 
       <programlisting format="linespecific" language="ocaml">class square w x y = object
@@ -1289,8 +1291,8 @@ end</programlisting>
         <secondary>initializers for</secondary>
       </indexterm></para>
 
-    <para role="sourcecode">OCaml utop: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/initializer.topscript">classes/initializer.topscript</ulink></para>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes/initializer.topscript">OCaml utop</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">class obj x = </userinput>
@@ -1317,8 +1319,8 @@ end</programlisting>
     moreinfo="none">on_click</literal> to add a handler for click
     events:</para>
 
-    <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/shapes.ml">classes-async/shapes.ml</ulink>
+    <para role="sourcecode"><ulink role="orm:hideurl:ital"
+    url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/shapes.ml">OCaml</ulink>
     (part 3)</para>
 
     <programlisting format="linespecific" language="ocaml">class growing_circle r x y = object(self)
@@ -1366,8 +1368,8 @@ end</programlisting>
       moreinfo="none">draw_rect</literal> instead of <literal
       moreinfo="none">fill_rect</literal> to draw the square:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/multiple_inheritance.ml">classes-async/multiple_inheritance.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/multiple_inheritance.ml">OCaml</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml">class square_outline w x y = object
@@ -1382,8 +1384,8 @@ end</programlisting>
       what if we had defined <literal moreinfo="none">square_outline</literal>
       as follows?</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/multiple_inheritance_wrong.ml">classes-async/multiple_inheritance_wrong.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/multiple_inheritance_wrong.ml">OCaml</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml">class square_outline w x y = object
@@ -1442,8 +1444,8 @@ end</programlisting>
       moreinfo="none">on_mousedown</literal> method for adding event
       handlers:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/shapes.ml">classes-async/shapes.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/shapes.ml">OCaml</ulink>
       (part 4)</para>
 
       <programlisting format="linespecific" language="ocaml">class virtual draggable = object(self)
@@ -1478,8 +1480,8 @@ end</programlisting>
       <para>This allows us to create draggable shapes using multiple
       inheritance:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/shapes.ml">classes-async/shapes.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/shapes.ml">OCaml</ulink>
       (part 5)</para>
 
       <programlisting format="linespecific" language="ocaml">class small_square = object
@@ -1497,8 +1499,8 @@ end</programlisting>
           <secondary>creating with mixins</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/shapes.ml">classes-async/shapes.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/shapes.ml">OCaml</ulink>
       (part 6)</para>
 
       <programlisting format="linespecific" language="ocaml">class virtual animated span = object(self)
@@ -1533,8 +1535,8 @@ end</programlisting>
       example, this class will produce circles that move to the right for a
       second when clicked:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/shapes.ml">classes-async/shapes.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/shapes.ml">OCaml</ulink>
       (part 7)</para>
 
       <programlisting format="linespecific" language="ocaml">class my_circle = object
@@ -1545,8 +1547,8 @@ end</programlisting>
 
       <para>These initializers can also be added using mixins:</para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/shapes.ml">classes-async/shapes.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/shapes.ml">OCaml</ulink>
       (part 8)</para>
 
       <programlisting format="linespecific" language="ocaml">class virtual linear x' y' = object
@@ -1589,8 +1591,8 @@ end</programlisting>
           <primary>linear mixins</primary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/shapes.ml">classes-async/shapes.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/shapes.ml">OCaml</ulink>
       (part 9)</para>
 
       <programlisting format="linespecific" language="ocaml">class my_square x y = object
@@ -1625,8 +1627,8 @@ end</programlisting>
           <secondary>displaying animated shapes with</secondary>
         </indexterm></para>
 
-      <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/shapes.ml">classes-async/shapes.ml</ulink>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/shapes.ml">OCaml</ulink>
       (part 10)</para>
 
       <programlisting format="linespecific" language="ocaml">let main () =
@@ -1657,8 +1659,8 @@ let () = never_returns (Scheduler.go_main ~main ())</programlisting>
       moreinfo="none">async_graphics</literal> package, which will pull in all
       the other dependencies:</para>
 
-      <para role="sourcecode">Terminal: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/build_shapes.out">classes-async/build_shapes.out</ulink></para>
+      <para role="sourcecode"><ulink role="orm:hideurl:ital"
+      url="https://github.com/realworldocaml/examples/tree/beta3/code/classes-async/build_shapes.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg async_graphics shapes.native</userinput>
@@ -1722,13 +1724,7 @@ let () = never_returns (Scheduler.go_main ~main ())</programlisting>
         </varlistentry>
       </variablelist>
 
-      <note>
-        <title>Production Note</title>
-
-        <para>This chapter contains significant contributions from Leo
-        White.<indexterm class="endofrange"
-        startref="inherit"></indexterm></para>
-      </note>
+      
     </sect2>
   </sect1>
 </chapter>
