@@ -173,7 +173,7 @@
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/minor_heap.ascii">Diagram</ulink></para>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/gc/minor_heap.ascii">Diagram</ulink></para>
       
 
       <informalfigure> 
@@ -237,7 +237,7 @@
           by calling the <literal moreinfo="none">Gc.set</literal> function:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">OCaml utop</ulink></para>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/gc/tune.topscript">OCaml utop</ulink></para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
             moreinfo="none"># </prompt><userinput moreinfo="none">let c = Gc.get () ;;</userinput>
@@ -303,21 +303,19 @@
       </listitem>
 
       <listitem>
-        <para>The <emphasis>compact</emphasis> phase relocates live blocks
-        into a freshly allocated heap to eliminate gaps in the free list. This
-        prevents the fragmentation of heap blocks in long-running programs and
-        normally occurs much less frequently than the mark and sweep
-        phases.</para>
+        <para>The <emphasis>compact</emphasis> phase relocates live blocks into a freshly allocated
+          heap to eliminate gaps in the free list. This prevents the fragmentation of heap blocks in
+          long-running programs and normally occurs much less frequently than the mark and sweep
+            <phrase role="keep-together">phases</phrase>.</para>
       </listitem>
     </itemizedlist>
 
-    <para>A major garbage collection must also stop the world to ensure that
-    blocks can be moved around without this being observed by the live
-    application. The mark-and-sweep phases run incrementally over slices of
-    the heap to avoid pausing the application for long periods of time, and
-    also precede each slice with a fast minor collection. Only the compaction
-    phase touches all the memory in one go, and is a relatively rare
-    operation.</para>
+    <para>A major garbage collection must also stop the world to ensure that blocks can be moved
+      around without this being observed by the live application. The mark-and-sweep phases run
+      incrementally over slices of the heap to avoid pausing the application for long <phrase
+        role="keep-together">periods</phrase> of time, and also precede each slice with a fast minor
+      collection. Only the compaction phase touches all the memory in one go, and is a relatively
+      rare operation.</para>
 
     <sect2 id="allocating-on-the-major-heap">
       <title>Allocating on the Major Heap</title>
@@ -378,7 +376,7 @@
           them:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/gc/tune.topscript">OCaml utop</ulink>
         (part 1)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -493,8 +491,6 @@
       <emphasis>color</emphasis> field in its header that is used to store
       information about whether the value has been marked so that the GC can
       resume easily between slices.<indexterm class="singular">
-          <primary>slices</primary>
-        </indexterm><indexterm class="singular">
           <primary>major heaps</primary>
 
           <secondary>marking and scanning</secondary>
@@ -605,7 +601,7 @@
         necessary:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/gc/tune.topscript">OCaml utop</ulink>
         (part 2)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -666,7 +662,7 @@
         higher-than-usual rate of compactions:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/tune.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/gc/tune.topscript">OCaml utop</ulink>
         (part 3)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -728,7 +724,7 @@
         this code:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/barrier_bench.ml">OCaml</ulink></para>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/gc/barrier_bench.ml">OCaml</ulink></para>
 
         <programlisting format="linespecific" language="ocaml">open Core.Std
 open Core_bench.Std
@@ -770,7 +766,7 @@ let () =
         collection occurring:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/run_barrier_bench.out">Terminal</ulink></para>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/gc/run_barrier_bench.out">Terminal</ulink></para>
 
         <programlisting format="linespecific" language="console"><prompt
             moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg core_bench barrier_bench.native</userinput>
@@ -796,7 +792,7 @@ let () =
           collection behavior:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/show_barrier_bench_help.out">Terminal</ulink></para>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/gc/show_barrier_bench_help.out">Terminal</ulink></para>
 
         <programlisting format="linespecific" language="console"><prompt
             moreinfo="none">$ </prompt><userinput moreinfo="none">./barrier_bench.native -help</userinput>
@@ -890,14 +886,12 @@ let () =
           moreinfo="none">Heap_block</literal> module to explicitly check before attaching the
         finalizer.</para>
 
-      <para>Some constant values can be heap-allocated but never deallocated
-      during the lifetime of the program, for example, a list of integer
-      constants. <literal moreinfo="none">Heap_block</literal> explicitly
-      checks to see if the value is in the major or minor heap, and rejects
-      most constant values. Compiler optimizations may also duplicate some
-      immutable values such as floating-point values in arrays. These may be
-      finalized while another duplicate copy is being used by the
-      program.</para>
+      <para>Some constant values can be heap-allocated but never deallocated during the lifetime of
+        the program, for example, a list of integer constants. <literal moreinfo="none"
+          >Heap_block</literal> explicitly checks to see if the value is in the major or minor heap,
+        and rejects most constant values. Compiler optimizations may also duplicate some immutable
+        values such as floating-point values in arrays. These may be finalized while another <phrase
+          role="keep-together">duplicate</phrase> copy is being used by the program.</para>
 
       <para>For this reason, attach finalizers only to values that you are explicitly sure are
         heap-allocated and aren't immutable. A common use is to attach them to file descriptors to
@@ -923,7 +917,7 @@ let () =
     compile-time constants:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/finalizer.ml">OCaml</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/gc/finalizer.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 open Async.Std
@@ -962,7 +956,7 @@ let () =
     <para>Building and running this should show the following output:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/gc/run_finalizer.out">Terminal</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/gc/run_finalizer.out">Terminal</ulink></para>
 
     <programlisting format="linespecific" language="console"><prompt
         moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg async finalizer.native</userinput>

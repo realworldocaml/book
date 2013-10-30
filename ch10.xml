@@ -25,11 +25,11 @@
       <secondary>working with</secondary>
     </indexterm></para>
 
-  <para>First-class modules are a sophisticated technique, and you'll need to
-  get comfortable with some advanced aspects of the language to use them
-  effectively. But it's worth learning, because letting modules into the core
-  language is quite powerful, increasing the range of what you can express and
-  making it easier to build flexible and modular systems.</para>
+  <para>First-class modules are a sophisticated technique, and you'll need to get comfortable with
+        some advanced aspects of the language to use them effectively. But it's worth learning,
+        because letting modules into the core language is quite powerful, increasing the range of
+        what you can express and making it easier to build flexible and modular <phrase
+            role="keep-together">systems</phrase>.</para>
 
   <sect1 id="working-with-first-class-modules">
     <title>Working with First-Class Modules</title>
@@ -42,7 +42,7 @@
     single integer variable:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">OCaml utop</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/main.topscript">OCaml utop</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">module type X_int = sig val x : int end;;</userinput>
@@ -51,7 +51,7 @@
     <para>We can also create a module that matches this signature:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/main.topscript">OCaml utop</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -68,15 +68,15 @@
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/pack.syntax">Syntax</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/pack.syntax">Syntax</ulink></para>
 
-    <programlisting format="linespecific" language="">(module &lt;Module&gt; : &lt;Module_type&gt;)</programlisting>
+    <programlisting format="linespecific">(module &lt;Module&gt; : &lt;Module_type&gt;)</programlisting>
 
     <para>So, we can convert <literal moreinfo="none">Three</literal> into a
     first-class module as follows:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/main.topscript">OCaml utop</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -87,7 +87,7 @@
     first-class module if it can be inferred. Thus, we can write:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/main.topscript">OCaml utop</ulink>
     (part 3)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -100,7 +100,7 @@
     module:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/main.topscript">OCaml utop</ulink>
     (part 4)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -112,14 +112,14 @@
     moreinfo="none">val</literal> keyword, using this syntax:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/unpack.syntax">Syntax</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/unpack.syntax">Syntax</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">(val <emphasis>&lt;first_class_module&gt;</emphasis> : <emphasis>&lt;Module_type&gt;</emphasis>)</programlisting>
 
     <para>And here's an example:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/main.topscript">OCaml utop</ulink>
     (part 5)<indexterm class="singular">
         <primary>first-class modules</primary>
 
@@ -131,7 +131,7 @@
 <computeroutput moreinfo="none">module New_three : X_int</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">New_three.x;;</userinput>
 <computeroutput moreinfo="none">- : int = 3</computeroutput></programlisting>
-
+<?hard-pagebreak?>
     <sidebar>
       <title>Equality of First-Class Module Types</title>
 
@@ -143,7 +143,7 @@
       type:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/main.topscript">OCaml utop</ulink>
       (part 6)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -161,23 +161,22 @@
       unify the types by unpacking and repacking the module:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/main.topscript">OCaml utop</ulink>
       (part 7)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
           moreinfo="none"># </prompt><userinput moreinfo="none">[three; (module (val five))];;</userinput>
 <computeroutput moreinfo="none">- : (module X_int) list = [&lt;module&gt;; &lt;module&gt;]</computeroutput></programlisting>
 
-      <para>The way in which type equality for first-class modules is
-      determined can be confusing. One common and problematic case is that of
-      creating an alias of a module type defined elsewhere. This is often done
-      to improve readability and can happen both through an explicit
-      declaration of a module type or implicitly through an <literal
-      moreinfo="none">include</literal> declaration. In both cases, this has
-      the unintended side effect of making first-class modules built off the
-      alias incompatible with those built off the original module type. To
-      deal with this, we should be disciplined in how we refer to signatures
-      when constructing first-class modules.</para>
+      <para>The way in which type equality for first-class modules is determined can be confusing.
+                One common and problematic case is that of creating an alias of a module type
+                defined elsewhere. This is often done to improve readability and can happen both
+                through an explicit declaration of a module type or implicitly through an <literal
+                    moreinfo="none">include</literal> declaration. In both cases, this has the
+                unintended side effect of making first-class modules built off the alias
+                incompatible with those built off the original module type. To deal with this, we
+                should be disciplined in how we refer to signatures when constructing first-class
+                    <phrase role="keep-together">modules</phrase>.</para>
     </sidebar>
 
     <para>We can also write ordinary functions which consume and create
@@ -189,7 +188,7 @@
     moreinfo="none">(module X_int)</literal>:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/main.topscript">OCaml utop</ulink>
     (part 8)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -205,13 +204,12 @@
 <userinput moreinfo="none">  ;;</userinput>
 <computeroutput moreinfo="none">val plus : (module X_int) -&gt; (module X_int) -&gt; (module X_int) = &lt;fun&gt;</computeroutput></programlisting>
 
-    <para>With these functions in hand, we can now work with values of type
-    <literal moreinfo="none">(module X_int)</literal> in a more natural style,
-    taking advantage of the concision and simplicity of the core
-    language:</para>
+    <para>With these functions in hand, we can now work with values of type <literal moreinfo="none"
+                >(module X_int)</literal> in a more natural style, taking advantage of the concision
+            and simplicity of the core <phrase role="keep-together">language</phrase>:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/main.topscript">OCaml utop</ulink>
     (part 9)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -226,7 +224,7 @@
     <literal moreinfo="none">to_int</literal> function as follows:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/main.topscript">OCaml utop</ulink>
     (part 10)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -240,7 +238,7 @@
     and produces a new one:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/main.topscript">OCaml utop</ulink>
     (part 11)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -254,7 +252,7 @@
     underlying types:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/main.topscript">OCaml utop</ulink>
     (part 12)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -272,7 +270,7 @@
     <para>And we can convert these to first-class modules:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/main.topscript">OCaml utop</ulink>
     (part 13)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -284,7 +282,7 @@
             recover the fact that the type in question is <literal moreinfo="none">int</literal>. </para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/main.topscript">OCaml utop</ulink>
     (part 14)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -297,7 +295,7 @@
     need to expose the type, which we can do as follows:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/main.topscript">OCaml utop</ulink>
     (part 15)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -312,7 +310,7 @@
     these values on values of the matching type:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/main.topscript">OCaml utop</ulink>
     (part 16)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -336,7 +334,7 @@
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/main.topscript">OCaml utop</ulink>
     (part 17)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -371,7 +369,7 @@
     see this function in action:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/main.topscript">OCaml utop</ulink>
     (part 18)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -397,7 +395,7 @@
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/main.topscript">OCaml utop</ulink>
       (part 19)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -415,7 +413,7 @@
       complain:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/main.topscript">OCaml utop</ulink>
       (part 20)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let double_int (type a) (x:a) = x + x;;</userinput>
@@ -427,7 +425,7 @@
       this to create a new first-class module:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/main.topscript">OCaml utop</ulink>
       (part 21)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -473,7 +471,7 @@
             </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">OCaml utop</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/query_handler.topscript">OCaml utop</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">module type Query_handler = sig</userinput>
 <userinput moreinfo="none"/>
@@ -524,7 +522,7 @@
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/query_handler.topscript">OCaml utop</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -536,7 +534,7 @@
     implementation of those functions. Thus, we can write:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/query_handler.topscript">OCaml utop</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -568,7 +566,7 @@
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/query_handler.topscript">OCaml utop</ulink>
       (part 3)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -603,7 +601,7 @@
       directly:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/query_handler.topscript">OCaml utop</ulink>
       (part 4)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -619,7 +617,7 @@
       are interpreted within:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/query_handler.topscript">OCaml utop</ulink>
       (part 5)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -660,7 +658,7 @@
       interact with it directly:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/query_handler.topscript">OCaml utop</ulink>
       (part 6)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -689,7 +687,7 @@
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/query_handler.topscript">OCaml utop</ulink>
       (part 7)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -707,7 +705,7 @@
       <para>We can create an instance as follows:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/query_handler.topscript">OCaml utop</ulink>
       (part 8)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -723,7 +721,7 @@
       are again making use of a locally abstract type:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/query_handler.topscript">OCaml utop</ulink>
       (part 9)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -745,7 +743,7 @@
       constructing a new instance becomes a one-liner:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/query_handler.topscript">OCaml utop</ulink>
       (part 10)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -759,7 +757,7 @@
       is as follows:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-                    url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query-syntax"
+                    url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/query-syntax"
                     >Scheme</ulink></para>
 
       <programlisting format="linespecific" language="scheme">(<emphasis>query-name query</emphasis>)</programlisting>
@@ -774,7 +772,7 @@
       query handler instances and constructs a dispatch table from it:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/query_handler.topscript">OCaml utop</ulink>
       (part 11)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -793,7 +791,7 @@
       dispatch table:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/query_handler.topscript">OCaml utop</ulink>
       (part 12)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -834,7 +832,7 @@
       command-line interface:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/query_handler.topscript">OCaml utop</ulink>
       (part 13)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -866,7 +864,7 @@
       along with following command to launch the interface:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.ml">OCaml</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/query_handler.ml">OCaml</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml">let () =
@@ -875,7 +873,7 @@
       <para>Here's an example of a session with this program:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_example.rawscript">OCaml utop</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/query_example.rawscript">OCaml utop</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><computeroutput
           moreinfo="none">$ ./query_handler.byte 
@@ -911,7 +909,7 @@
       Here are the basic types:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler_core.ml">OCaml</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/query_handler_core.ml">OCaml</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml">module Loader = struct
@@ -937,7 +935,7 @@
       starts out as empty:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler_core.ml">OCaml</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/query_handler_core.ml">OCaml</ulink>
       (part 2)</para>
 
       <programlisting format="linespecific" language="ocaml">let create known_list =
@@ -958,7 +956,7 @@
       table:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler_core.ml">OCaml</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/query_handler_core.ml">OCaml</ulink>
       (part 3)</para>
 
       <programlisting format="linespecific" language="ocaml">let load t handler_name config =
@@ -985,7 +983,7 @@
       handler explicitly refuses to unload itself:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler_core.ml">OCaml</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/query_handler_core.ml">OCaml</ulink>
       (part 4)</para>
 
       <programlisting format="linespecific" language="ocaml">let unload t handler_name =
@@ -998,14 +996,14 @@
       Ok Sexp.unit
     )</programlisting>
 
-      <para>Finally, we need to implement the <literal
-      moreinfo="none">eval</literal> function, which will determine the query
-      interface presented to the user. We'll do this by creating a variant
-      type, and using the s-expression converter generated for that type to
-      parse the query from the user:</para>
+      <para>Finally, we need to implement the <literal moreinfo="none">eval</literal> function,
+                which will determine the query <phrase role="keep-together">interface</phrase>
+                presented to the user. We'll do this by creating a variant type, and using the
+                s-expression converter generated for that type to parse the query from the
+                user:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler_core.ml">OCaml</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/query_handler_core.ml">OCaml</ulink>
       (part 5)</para>
 
       <programlisting format="linespecific" language="ocaml">type request =
@@ -1025,7 +1023,7 @@
       moreinfo="none">Loader</literal> module:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler_core.ml">OCaml</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/query_handler_core.ml">OCaml</ulink>
       (part 6)</para>
 
       <programlisting format="linespecific" language="ocaml">let eval t sexp =
@@ -1047,7 +1045,7 @@ end</programlisting>
       launch the command-line interface, passing it the active table:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler_loader.ml">OCaml</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/query_handler_loader.ml">OCaml</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml">let () =
@@ -1065,7 +1063,7 @@ end</programlisting>
       <para>Now build this into a command-line interface to experiment with it:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/build_query_handler_loader.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/build_query_handler_loader.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild query_handler_loader.byte</userinput>
@@ -1078,7 +1076,7 @@ end</programlisting>
       as the only active handler:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/loader_cli1.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/loader_cli1.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">./query_handler_loader.byte</userinput>
@@ -1090,7 +1088,7 @@ end</programlisting>
       <para>Any attempt to use an inactive query handler will fail:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/loader_cli2.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/loader_cli2.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><computeroutput
           moreinfo="none">&gt;&gt;&gt; (ls .)</computeroutput>
@@ -1102,7 +1100,7 @@ end</programlisting>
       be reloaded with a different config:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/loader_cli3.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/loader_cli3.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><computeroutput
           moreinfo="none">&gt;&gt;&gt; (loader (load ls /var))</computeroutput>
@@ -1119,7 +1117,7 @@ end</programlisting>
       known handlers) and can't be unloaded either:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/loader_cli4.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/loader_cli4.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><computeroutput
           moreinfo="none">&gt;&gt;&gt; (loader (unload loader))</computeroutput>
@@ -1147,7 +1145,7 @@ end</programlisting>
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/query_handler.topscript">OCaml utop</ulink>
     (part 14)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1168,7 +1166,7 @@ end</programlisting>
     framework as follows:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/fcm/query_handler.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/fcm/query_handler.topscript">OCaml utop</ulink>
     (part 15)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt

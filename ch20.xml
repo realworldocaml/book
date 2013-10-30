@@ -104,14 +104,10 @@
     memory when such a value is created:<indexterm class="startofrange"
         id="blck">
         <primary>blocks (of memory)</primary>
-      </indexterm><indexterm class="singular">
-        <primary>runtime memory representation</primary>
-
-        <secondary>blocks and values in OCaml</secondary>
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/simple_record.topscript">OCaml utop</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/simple_record.topscript">OCaml utop</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">type t = { foo: int; bar: int } ;;</userinput>
@@ -262,7 +258,7 @@
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/block.ascii"
+      url="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/block.ascii"
       >Diagram</ulink></para>
     
     <informalfigure>
@@ -295,10 +291,7 @@
 
     <para>The exact representation of values inside a block depends on their static OCaml type. All
       OCaml types are distilled down into <literal moreinfo="none">values</literal>, and summarized
-      in <xref linkend="table20-1_ocaml"/>.<indexterm class="singular">
-        <primary>values</primary>
-        <secondary>memory representation of</secondary>
-      </indexterm><indexterm class="endofrange" startref="blck"/></para>
+      in <xref linkend="table20-1_ocaml"/>.<indexterm class="endofrange" startref="blck"/></para>
 
     <table id="table20-1_ocaml"><title>OCaml values</title>
       <tgroup cols="2">
@@ -422,7 +415,7 @@
     <title>Tuples, Records, and Arrays</title>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/tuple_layout.ascii">Diagram</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/tuple_layout.ascii">Diagram</ulink></para>
     
 
     <informalfigure>
@@ -459,7 +452,7 @@
     exposes the internal representation of values to OCaml code:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">OCaml utop</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/reprs.topscript">OCaml utop</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">Obj.is_block (Obj.repr (1,2,3)) ;;</userinput>
@@ -484,7 +477,7 @@
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/reprs.topscript">OCaml utop</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -502,7 +495,7 @@
         values.</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/float_array_layout.ascii">Diagram</ulink></para>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/float_array_layout.ascii">Diagram</ulink></para>
 
       <informalfigure>
         <mediaobject>
@@ -516,7 +509,7 @@
       tag number from normal floating-point values:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/reprs.topscript">OCaml utop</ulink>
       (part 2)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -533,7 +526,7 @@
       within the block:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/reprs.topscript">OCaml utop</ulink>
       (part 3)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -577,7 +570,7 @@
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/reprs.topscript">OCaml utop</ulink>
     (part 4)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -603,7 +596,7 @@
     parameters are stored as words in the block:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/reprs.topscript">OCaml utop</ulink>
     (part 5)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -693,7 +686,7 @@
     alternative implementation:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/reprs.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/reprs.topscript">OCaml utop</ulink>
     (part 6)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -751,7 +744,7 @@
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/string_block.ascii">Diagram</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/string_block.ascii">Diagram</ulink></para>
 
     <informalfigure>
       <mediaobject>
@@ -763,10 +756,7 @@
 
     <para>On a 32-bit machine, the padding is calculated based on the modulo of the string length
       and word size to ensure the result is word-aligned. A 64-bit machine extends the potential
-      padding up to 7 bytes instead of 3 (see <xref linkend="chapter_20_table"/>).<indexterm class="singular">
-        <primary>padding</primary>
-        <secondary>32 vs. 64 bit potential for</secondary>
-      </indexterm></para>
+      padding up to 7 bytes instead of 3 (see <xref linkend="chapter_20_table"/>).</para>
 
     <table id="chapter_20_table">
       <title>String length and padding</title>
@@ -817,7 +807,7 @@
     following formula is used:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/string_size_calc.ascii">Diagram</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/string_size_calc.ascii">Diagram</ulink></para>
 
     <informalfigure>
       <mediaobject>
@@ -861,7 +851,7 @@
       to OCaml blocks and is opaque to the GC:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/memory-repr/custom_ops.c"
+        url="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/custom_ops.c"
         >C</ulink></para>
 
     <programlisting format="linespecific" language="c">struct custom_operations {

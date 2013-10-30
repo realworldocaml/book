@@ -27,7 +27,7 @@
     </indexterm></para>
 
   <para role="sourcecode"><ulink role="orm:hideurl:ital"
-  url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/variant.syntax">Syntax</ulink></para>
+  url="https://github.com/realworldocaml/examples/tree/v1/code/variants/variant.syntax">Syntax</ulink></para>
 
   <programlisting format="linespecific" language="ocaml">type <emphasis>&lt;variant&gt;</emphasis> =
   | <emphasis>&lt;Tag&gt;</emphasis> [ of <emphasis>&lt;type&gt;</emphasis> [* <emphasis>&lt;type&gt;</emphasis>]... ]
@@ -41,14 +41,10 @@
   Almost all terminals support a set of eight basic colors, and we can
   represent those colors using a variant. Each color is declared as a simple
   tag, with pipes used to separate the different cases. Note that variant tags
-  must be capitalized:<indexterm class="singular">
-      <primary>variant types</primary>
-
-      <secondary>example of</secondary>
-    </indexterm></para>
+  must be capitalized:</para>
 
   <para role="sourcecode"><ulink role="orm:hideurl:ital"
-  url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">OCaml utop</ulink></para>
+  url="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript">OCaml utop</ulink></para>
 
   <programlisting format="linespecific" language="ocaml"><prompt
       moreinfo="none"># </prompt><userinput moreinfo="none">type basic_color =</userinput>
@@ -73,7 +69,7 @@
   us if we miss a color:</para>
 
   <para role="sourcecode"><ulink role="orm:hideurl:ital"
-  url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">OCaml utop</ulink>
+  url="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript">OCaml utop</ulink>
   (part 1)</para>
 
   <programlisting format="linespecific" language="ocaml"><prompt
@@ -88,7 +84,7 @@
   the color of a given string displayed in a terminal:</para>
 
   <para role="sourcecode"><ulink role="orm:hideurl:ital"
-  url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main-2.rawscript">OCaml utop</ulink></para>
+  url="https://github.com/realworldocaml/examples/tree/v1/code/variants/main-2.rawscript">OCaml utop</ulink></para>
 
   <programlisting format="linespecific" language="ocaml"><userinput
       moreinfo="none"># let color_by_number number text =
@@ -130,7 +126,7 @@
   which are separated by <literal moreinfo="none">*</literal>s:</para>
 
   <para role="sourcecode"><ulink role="orm:hideurl:ital"
-  url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">OCaml utop</ulink>
+  url="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript">OCaml utop</ulink>
   (part 3)</para>
 
   <programlisting format="linespecific" language="ocaml"><prompt
@@ -154,7 +150,7 @@
   associated with each tag:</para>
 
   <para role="sourcecode"><ulink role="orm:hideurl:ital"
-  url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">OCaml utop</ulink>
+  url="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript">OCaml utop</ulink>
   (part 4)</para>
 
   <programlisting format="linespecific" language="ocaml"><prompt
@@ -169,7 +165,7 @@
   <para>Now, we can print text using the full set of available colors:</para>
 
   <para role="sourcecode"><ulink role="orm:hideurl:ital"
-  url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main-5.rawscript">OCaml utop</ulink></para>
+  url="https://github.com/realworldocaml/examples/tree/v1/code/variants/main-5.rawscript">OCaml utop</ulink></para>
 
   <programlisting format="linespecific" language="ocaml"><userinput
       moreinfo="none"># let color_print color s =
@@ -185,12 +181,7 @@
 
     <para>OCaml's type system can act as a refactoring tool, warning you of
     places where your code needs to be updated to match an interface change.
-    This is particularly valuable in the context of variants.<indexterm
-        class="singular">
-        <primary>type system</primary>
-
-        <secondary sortas="refactoring tool">as refactoring tool</secondary>
-      </indexterm><indexterm class="singular">
+    This is particularly valuable in the context of variants.<indexterm class="singular">
         <primary>errors</primary>
 
         <secondary>catch-all cases and refactoring</secondary>
@@ -212,7 +203,7 @@
     <literal moreinfo="none">color</literal> to the following:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/catch_all.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/catch_all.topscript">OCaml utop</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -238,7 +229,7 @@
     same code again, the compiler will notice the discrepancy:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/catch_all.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/catch_all.topscript">OCaml utop</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -259,7 +250,7 @@
     moreinfo="none">Bold</literal> tag:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/catch_all.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/catch_all.topscript">OCaml utop</ulink>
     (part 3)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -276,7 +267,7 @@
     <para>Fixing this now leads us to the correct implementation:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/catch_all.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/catch_all.topscript">OCaml utop</ulink>
     (part 4)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -305,7 +296,7 @@
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/catch_all.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/catch_all.topscript">OCaml utop</ulink>
     (part 5)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -366,7 +357,7 @@
     moreinfo="none">Log_entry.t</literal>:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/logger.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/logger.topscript">OCaml utop</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -399,7 +390,7 @@
       letting you represent multiple possibilities, as in the following example:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/logger.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/logger.topscript">OCaml utop</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -445,7 +436,7 @@
     <para>Here's the concrete code:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/logger.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/logger.topscript">OCaml utop</ulink>
     (part 3)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -488,7 +479,7 @@
     contain just the information unique to that record:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/logger.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/logger.topscript">OCaml utop</ulink>
     (part 4)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -512,7 +503,7 @@
     <para>We can then define a variant type that combines these types:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/logger.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/logger.topscript">OCaml utop</ulink>
     (part 5)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -530,7 +521,7 @@
     common across all messages:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/logger.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/logger.topscript">OCaml utop</ulink>
     (part 6)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -547,7 +538,7 @@
     preceding example as follows:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/logger.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/logger.topscript">OCaml utop</ulink>
     (part 7)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -586,7 +577,7 @@
     as follows:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/logger.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/logger.topscript">OCaml utop</ulink>
     (part 8)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -632,7 +623,7 @@
     expression we want to support:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">OCaml utop</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/blang.topscript">OCaml utop</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">type 'a expr =</userinput>
@@ -674,7 +665,7 @@
     tests you would run against an email, as in the following example:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/blang.topscript">OCaml utop</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -690,7 +681,7 @@
     predicate:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/blang.topscript">OCaml utop</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -711,7 +702,7 @@
     to be able to evaluate them. Here's a function for doing just that:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/blang.topscript">OCaml utop</ulink>
     (part 3)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -740,7 +731,7 @@
     tags of an <literal moreinfo="none">expr</literal>:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/blang.topscript">OCaml utop</ulink>
     (part 4)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -772,7 +763,7 @@
     preceding functions.</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/blang.topscript">OCaml utop</ulink>
     (part 5)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -788,7 +779,7 @@
     does at simplifying it:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/blang.topscript">OCaml utop</ulink>
     (part 6)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -807,7 +798,7 @@
     see what happens if we add a double negation in:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/blang.topscript">OCaml utop</ulink>
     (part 7)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -823,7 +814,7 @@
     negation is more obvious:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/blang.topscript">OCaml utop</ulink>
     (part 8)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -837,7 +828,7 @@
     double negation:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/blang.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/blang.topscript">OCaml utop</ulink>
     (part 9)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -884,7 +875,7 @@
     declaration:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript">OCaml utop</ulink>
     (part 6)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -914,7 +905,7 @@
     same tag:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript">OCaml utop</ulink>
     (part 7)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -942,7 +933,7 @@
     the following example:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript">OCaml utop</ulink>
     (part 8)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -964,7 +955,7 @@
     polymorphic variant type, which has neither marker. For example:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript">OCaml utop</ulink>
     (part 9)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -983,7 +974,7 @@
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript">OCaml utop</ulink>
     (part 10)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1021,7 +1012,7 @@
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript">OCaml utop</ulink>
       (part 11)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1044,7 +1035,7 @@
       channel. One might try to write such a function as follows.</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript">OCaml utop</ulink>
       (part 12)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1070,7 +1061,7 @@
       variants. The translation here is pretty straightforward:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript">OCaml utop</ulink>
       (part 13)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1117,7 +1108,7 @@
       moreinfo="none">`RGBA</literal>:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript">OCaml utop</ulink>
       (part 14)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1147,7 +1138,7 @@
       so compilation fails:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript">OCaml utop</ulink>
       (part 15)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1195,7 +1186,7 @@
           </indexterm></para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript">OCaml utop</ulink>
         (part 16)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1222,7 +1213,7 @@
         without complaint:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/variants/main.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript">OCaml utop</ulink>
         (part 17)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1241,7 +1232,7 @@
       with the <literal moreinfo="none">mli</literal>:</para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variants-termcol/terminal_color.mli">OCaml</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variants-termcol/terminal_color.mli">OCaml</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -1267,7 +1258,7 @@ val extended_color_to_int : extended_color -&gt; int</programlisting>
       can implement this library as follows:</para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variants-termcol/terminal_color.ml">OCaml</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variants-termcol/terminal_color.ml">OCaml</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -1319,7 +1310,7 @@ let extended_color_to_int = function
       compiler has enough information to warn us:</para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variants-termcol-annotated/terminal_color.ml">OCaml</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variants-termcol-annotated/terminal_color.ml">OCaml</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml">let extended_color_to_int : extended_color -&gt; int = function
@@ -1331,7 +1322,7 @@ let extended_color_to_int = function
       moreinfo="none">`Grey</literal> case is unused:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variants-termcol-annotated/build.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variants-termcol-annotated/build.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild terminal_color.native</userinput>
@@ -1340,7 +1331,7 @@ let extended_color_to_int = function
 <computeroutput moreinfo="none">       but a pattern was expected which matches values of type extended_color</computeroutput>
 <computeroutput moreinfo="none">       The second variant type does not allow tag(s) `Grey</computeroutput>
 <computeroutput moreinfo="none">Command exited with code 2.</computeroutput></programlisting>
-
+<?hard-pagebreak?>
       <para>Once we have type definitions at our disposal, we can revisit the
       question of how we write the pattern match that narrows the type. In
       particular, we can explicitly use the type name as part of the pattern
@@ -1348,7 +1339,7 @@ let extended_color_to_int = function
       moreinfo="none">#</literal>:</para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variants-termcol-fixed/terminal_color.ml">OCaml</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variants-termcol-fixed/terminal_color.ml">OCaml</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml">let extended_color_to_int : extended_color -&gt; int = function
@@ -1430,7 +1421,7 @@ let extended_color_to_int = function
       are very useful here, and as long as there are type annotations that
       constrain these to have explicit, exact types, this tends to work
       well.</para>
-
+<?hard-pagebreak?>
       <para>Variants are most problematic exactly where you take full
       advantage of their power; in particular, when you take advantage of the
       ability of polymorphic variant types to overlap in the tags they

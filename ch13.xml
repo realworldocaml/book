@@ -23,7 +23,7 @@
     </indexterm></para>
 
   <para role="sourcecode"><ulink role="orm:hideurl:ital"
-  url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
+  url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
   (part 1)</para>
 
   <programlisting format="linespecific" language="ocaml"><prompt
@@ -39,7 +39,7 @@
     manipulate this data:</para>
 
   <para role="sourcecode"><ulink role="orm:hideurl:ital"
-  url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
+  url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
   (part 2)</para>
 
   <programlisting format="linespecific" language="ocaml"><prompt
@@ -82,7 +82,7 @@
     strings. Here's the interface:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-fast/counter.mli">OCaml</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/files-modules-and-programs-freq-fast/counter.mli">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -110,7 +110,7 @@ val to_list : t -&gt; (string * int) list</programlisting>
     <para>Here's the implementation:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/files-modules-and-programs-freq-fast/counter.ml">OCaml</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/files-modules-and-programs-freq-fast/counter.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -174,7 +174,7 @@ let touch t s =
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
       (part 3)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -194,7 +194,7 @@ let touch t s =
       comparator of the map they start with:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
       (part 4)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -214,7 +214,7 @@ let touch t s =
       summary of the differences between two maps:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
       (part 5)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let left = String.Map.of_alist_exn ["foo",1; "bar",3; "snoo",0]</userinput>
@@ -233,7 +233,7 @@ let touch t s =
       of a comparator identifies the comparator uniquely:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
       (part 6)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -261,7 +261,7 @@ let touch t s =
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
       (part 7)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -287,7 +287,7 @@ let touch t s =
       with a key type of <literal moreinfo="none">string</literal>:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
       (part 8)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -303,7 +303,7 @@ let touch t s =
       maps do indeed use different comparison functions:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
       (part 9)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -317,7 +317,7 @@ let touch t s =
       get a compile-time error:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
       (part 10)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -348,7 +348,7 @@ let touch t s =
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
       (part 11)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -368,7 +368,7 @@ let touch t s =
       shown below:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
       (part 12)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -382,7 +382,7 @@ let touch t s =
       example, using the wrong comparator will lead to a type error:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
       (part 13)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -413,7 +413,7 @@ let touch t s =
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
       (part 14)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -423,7 +423,7 @@ let touch t s =
       <para>Or, equivalently:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
       (part 15)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -436,7 +436,7 @@ let touch t s =
       following:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
       (part 16)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -481,7 +481,7 @@ let touch t s =
         sets:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
         (part 18)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -495,7 +495,7 @@ let touch t s =
         on them:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
         (part 19)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -513,7 +513,7 @@ let touch t s =
         comparators stored within the sets contain function values:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
         (part 20)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -525,7 +525,7 @@ let touch t s =
         without the attached comparator:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
         (part 21)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -554,14 +554,10 @@ let touch t s =
       tuned to working with sets and a lower memory footprint. Here's a simple
       example:<indexterm class="singular">
           <primary>set types</primary>
-        </indexterm><indexterm class="singular">
-          <primary>maps</primary>
-
-          <secondary>set type for</secondary>
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
       (part 17)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -620,7 +616,7 @@ let touch t s =
       as an input any module that satisfies the following interface:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/comparable.ml">OCaml</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/comparable.ml">OCaml</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">module type Comparable = sig
   type t
@@ -645,7 +641,7 @@ end</programlisting>
       linkend="extending-modules" />:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main-22.rawscript">OCaml utop</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main-22.rawscript">OCaml utop</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><userinput
           moreinfo="none"># module Foo_and_bar : sig
@@ -680,10 +676,10 @@ end</computeroutput></programlisting>
       but this isn't strictly necessary. Core ships with a syntax extension
       called <literal moreinfo="none">comparelib</literal>, which will create
       a comparison function from a type definition. Using it, we can rewrite
-      the above example as follows:</para>
+      the previous example as follows:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main-23.rawscript">OCaml utop</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main-23.rawscript">OCaml utop</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><userinput
           moreinfo="none"># module Foo_and_bar : sig
@@ -726,7 +722,7 @@ end</computeroutput></programlisting>
       compare:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main-24.rawscript">OCaml utop</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main-24.rawscript">OCaml utop</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><userinput
           moreinfo="none"># module Foo_and_bar : sig
@@ -753,7 +749,72 @@ end
 
       <para>That said, for reasons we discussed earlier, polymorphic compare
       should be used sparingly.</para>
+      <sidebar>
+        <title>=, ==, and phys_equal</title>
+        
+        <para>If you come from a C/C++ background, you'll probably reflexively
+          use <literal moreinfo="none">==</literal> to test two values for
+          equality. In OCaml, the <literal moreinfo="none">==</literal> operator
+          tests for <emphasis>physical</emphasis> equality, while the <literal
+            moreinfo="none">=</literal> operator tests for
+          <emphasis>structural</emphasis> equality.</para>
+        
+        <para>The physical equality test will match if two data structures have
+          precisely the same pointer in memory. Two data structures that have
+          identical contents but are constructed separately will not match using
+          <literal moreinfo="none">==</literal>.</para>
+        
+        <para>The <literal moreinfo="none">=</literal> structural equality
+          operator recursively inspects each field in the two values and tests
+          them individually for equality. Crucially, if your data structure is
+          cyclical (that is, a value recursively points back to another field
+          within the same structure), the <literal moreinfo="none">=</literal>
+          operator will never terminate, and your program will hang! You therefore
+          must use the physical equality operator or write a custom comparison
+          function when comparing cyclic values.</para>
+        
+        <para>It's quite easy to mix up the use of <literal
+          moreinfo="none">=</literal> and <literal moreinfo="none">==</literal>,
+          so Core disables the <literal moreinfo="none">==</literal> operator and
+          provides the more explicit <literal moreinfo="none">phys_equal</literal>
+          function instead. You'll see a type error if you use <literal
+            moreinfo="none">==</literal> anywhere in code that opens <literal
+              moreinfo="none">Core.Std</literal>:</para>
+        
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+          url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/core_phys_equal.topscript">OCaml utop</ulink></para>
+        
+        <programlisting format="linespecific" language="ocaml"><prompt
+          moreinfo="none"># </prompt><userinput moreinfo="none">open Core.Std ;;</userinput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">1 == 2 ;;</userinput>
+<computeroutput moreinfo="none">Characters -1-1:</computeroutput>
+<computeroutput moreinfo="none">Error: This expression has type int but an expression was expected of type</computeroutput>
+<computeroutput moreinfo="none">         [ `Consider_using_phys_equal ]</computeroutput>
+<prompt moreinfo="none"># </prompt><userinput moreinfo="none">phys_equal 1 2 ;;</userinput>
+<computeroutput moreinfo="none">- : bool = false</computeroutput></programlisting>
+        
+        <para>If you feel like hanging your OCaml interpreter, you can verify
+          what happens with recursive values and structural equality for
+          yourself:</para>
+        
+        <para role="sourcecode"><ulink role="orm:hideurl:ital"
+          url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/phys_equal.rawscript">OCaml utop</ulink></para>
+        
+        <programlisting format="linespecific" language="ocaml"><userinput
+          moreinfo="none"># type t1 = { foo1:int; bar1:t2 } and t2 = { foo2:int; bar2:t1 } ;;</userinput>
+<computeroutput moreinfo="none">type t1 = { foo1 : int; bar1 : t2; }
+and t2 = { foo2 : int; bar2 : t1; }</computeroutput>
+<userinput moreinfo="none"># let rec v1 = { foo1=1; bar1=v2 } and v2 = { foo2=2; bar2=v1 } ;;</userinput>
+<computeroutput moreinfo="none">&lt;lots of text&gt;</computeroutput>
+<userinput moreinfo="none"># v1 == v1;;</userinput>
+<computeroutput moreinfo="none">- : bool = true</computeroutput>
+<userinput moreinfo="none"># phys_equal v1 v1;;</userinput>
+<computeroutput moreinfo="none">- : bool = true</computeroutput>
+<userinput moreinfo="none"># v1 = v1 ;;</userinput>
+<computeroutput moreinfo="none">&lt;press ^Z and kill the process now&gt;</computeroutput></programlisting>
+      </sidebar>
     </sect2>
+    
   </sect1>
 
   <sect1 id="hash-tables">
@@ -829,7 +890,7 @@ end
     used for creating maps:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
     (part 25)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -848,7 +909,7 @@ end
     creation functions:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
     (part 26)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -861,7 +922,7 @@ end
     have a hash function for your specific type:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
     (part 27)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -871,7 +932,7 @@ end
     <para>Or, equivalently:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
     (part 28)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -910,7 +971,7 @@ end
         different length:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript">OCaml utop</ulink>
       (part 29)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -957,7 +1018,7 @@ end
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/main-30.rawscript">OCaml utop</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main-30.rawscript">OCaml utop</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><userinput
           moreinfo="none"># module Foo_and_bar : sig
@@ -1031,7 +1092,7 @@ end</computeroutput></programlisting>
     respective data structures:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/map_vs_hash.ml">OCaml</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/map_vs_hash.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 open Core_bench.Std
@@ -1072,7 +1133,7 @@ let () =
     faster than the map version:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/run_map_vs_hash.out">Terminal</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/run_map_vs_hash.out">Terminal</ulink></para>
 
     <programlisting format="linespecific" language="console"><prompt
         moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg core_bench map_vs_hash.native</userinput>
@@ -1110,7 +1171,7 @@ let () =
     table:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/map_vs_hash2.ml">OCaml</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/map_vs_hash2.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 open Core_bench.Std
@@ -1155,7 +1216,7 @@ let () =
     benchmark, in this case by more than a factor of 10:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/run_map_vs_hash2.out">Terminal</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/run_map_vs_hash2.out">Terminal</ulink></para>
 
     <programlisting format="linespecific" language="console"><prompt
         moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg core_bench map_vs_hash2.native</userinput>
@@ -1187,70 +1248,5 @@ let () =
       </indexterm><indexterm class="singular">
         <primary>equality, tests of</primary>
       </indexterm></para>
-
-    <sidebar>
-      <title>=, ==, and phys_equal</title>
-
-      <para>If you come from a C/C++ background, you'll probably reflexively
-      use <literal moreinfo="none">==</literal> to test two values for
-      equality. In OCaml, the <literal moreinfo="none">==</literal> operator
-      tests for <emphasis>physical</emphasis> equality, while the <literal
-      moreinfo="none">=</literal> operator tests for
-      <emphasis>structural</emphasis> equality.</para>
-
-      <para>The physical equality test will match if two data structures have
-      precisely the same pointer in memory. Two data structures that have
-      identical contents but are constructed separately will not match using
-      <literal moreinfo="none">==</literal>.</para>
-
-      <para>The <literal moreinfo="none">=</literal> structural equality
-      operator recursively inspects each field in the two values and tests
-      them individually for equality. Crucially, if your data structure is
-      cyclical (that is, a value recursively points back to another field
-      within the same structure), the <literal moreinfo="none">=</literal>
-      operator will never terminate, and your program will hang! You therefore
-      must use the physical equality operator or write a custom comparison
-      function when comparing cyclic values.</para>
-
-      <para>It's quite easy to mix up the use of <literal
-      moreinfo="none">=</literal> and <literal moreinfo="none">==</literal>,
-      so Core disables the <literal moreinfo="none">==</literal> operator and
-      provides the more explicit <literal moreinfo="none">phys_equal</literal>
-      function instead. You'll see a type error if you use <literal
-      moreinfo="none">==</literal> anywhere in code that opens <literal
-      moreinfo="none">Core.Std</literal>:</para>
-
-      <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/core_phys_equal.topscript">OCaml utop</ulink></para>
-
-      <programlisting format="linespecific" language="ocaml"><prompt
-          moreinfo="none"># </prompt><userinput moreinfo="none">open Core.Std ;;</userinput>
-<prompt moreinfo="none"># </prompt><userinput moreinfo="none">1 == 2 ;;</userinput>
-<computeroutput moreinfo="none">Characters -1-1:</computeroutput>
-<computeroutput moreinfo="none">Error: This expression has type int but an expression was expected of type</computeroutput>
-<computeroutput moreinfo="none">         [ `Consider_using_phys_equal ]</computeroutput>
-<prompt moreinfo="none"># </prompt><userinput moreinfo="none">phys_equal 1 2 ;;</userinput>
-<computeroutput moreinfo="none">- : bool = false</computeroutput></programlisting>
-
-      <para>If you feel like hanging your OCaml interpreter, you can verify
-      what happens with recursive values and structural equality for
-      yourself:</para>
-
-      <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/maps-and-hash-tables/phys_equal.rawscript">OCaml utop</ulink></para>
-
-      <programlisting format="linespecific" language="ocaml"><userinput
-          moreinfo="none"># type t1 = { foo1:int; bar1:t2 } and t2 = { foo2:int; bar2:t1 } ;;</userinput>
-<computeroutput moreinfo="none">type t1 = { foo1 : int; bar1 : t2; }
-and t2 = { foo2 : int; bar2 : t1; }</computeroutput>
-<userinput moreinfo="none"># let rec v1 = { foo1=1; bar1=v2 } and v2 = { foo2=2; bar2=v1 } ;;</userinput>
-<computeroutput moreinfo="none">&lt;lots of text&gt;</computeroutput>
-<userinput moreinfo="none"># v1 == v1;;</userinput>
-<computeroutput moreinfo="none">- : bool = true</computeroutput>
-<userinput moreinfo="none"># phys_equal v1 v1;;</userinput>
-<computeroutput moreinfo="none">- : bool = true</computeroutput>
-<userinput moreinfo="none"># v1 = v1 ;;</userinput>
-<computeroutput moreinfo="none">&lt;press ^Z and kill the process now&gt;</computeroutput></programlisting>
-    </sidebar>
   </sect1>
 </chapter>

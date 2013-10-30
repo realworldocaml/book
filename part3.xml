@@ -4,12 +4,12 @@
     <title>The Runtime System</title>
 
     <partintro>
-      <para>Writing good OCaml code is only one half of the typical software engineering workflow --
-      you also need to understand how OCaml executes this code, and how to debug and profile your
-      production applications. Part III is thus all about understanding the compiler toolchain and
-      runtime system in OCaml. It is a remarkably simple system in comparison to other language
-      runtimes such as Java or the .NET CLR, so this chapter should be accessible to even the casual
-      OCaml programmer.</para>
+      <para>Writing good OCaml code is only one half of the typical software engineering
+      workflow—you also need to understand how OCaml executes this code, and how to debug and
+      profile your production applications. Part III is thus all about understanding the compiler
+      toolchain and runtime system in OCaml. It is a remarkably simple system in comparison to other
+      language runtimes such as Java or the .NET CLR, so this chapter should be accessible to even
+      the casual OCaml programmer.</para>
 
       <para>We open by a guided tour through the Ctypes library for binding your OCaml code to
       foreign C libraries. We use a terminal interface and POSIX functions of increasing complexity

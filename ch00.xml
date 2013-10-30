@@ -51,11 +51,10 @@
       </listitem>
 
       <listitem>
-        <para>Good support for <emphasis>immutable programming</emphasis>,
-        i.e., programming without making destructive updates to data
-        structures. This is present in traditional functional languages like
-        Scheme, and is also found in distributed, big-data frameworks like
-        Hadoop.</para>
+        <para>Good support for <emphasis>immutable programming</emphasis>, i.e., programming without
+          making destructive updates to data structures. This is present in traditional functional
+            <phrase role="keep-together">languages</phrase> like Scheme, and is also found in
+          distributed, big-data frameworks like Hadoop.</para>
       </listitem>
 
       <listitem>
@@ -274,12 +273,12 @@
         </listitem>
 
         <listitem>
-          <para>Part II builds on the basics by working through useful tools
-          and techniques for addressing common practical applications, from
-          command-line parsing to asynchronous network programming. Along the
-          way, you'll see how some of the concepts from Part I are glued
-          together into real libraries and tools that combine different
-          features of the language to good effect.</para>
+          <para>Part II builds on the basics by working through useful tools and techniques for
+            addressing common practical applications, from command-line parsing to asynchronous
+            network programming. Along the way, you'll see how some of the <phrase
+              role="keep-together">concepts</phrase> from Part I are glued together into real
+            libraries and tools that combine different features of the language to good
+            effect.</para>
         </listitem>
 
         <listitem>
@@ -395,7 +394,7 @@
     role="orm:hideurl"
     url="http://www.safaribooksonline.com/">online</ulink>.</para>
   </sect1>
-
+<?hard-pagebreak?>
   <sect1>
     <title>How to Contact Us</title>
 
@@ -462,10 +461,19 @@
       </listitem>
 
       <listitem>
-        <para>Stephen Weeks is responsible for much of the modular
-        architecture behind Core, and his extensive notes formed the basis of
-        <xref linkend="memory-representation-of-values" /> and <xref
-        linkend="understanding-the-garbage-collector" />.</para>
+        <para>Stephen Weeks is responsible for much of the modular architecture behind Core, and his
+          extensive notes formed the basis of <xref linkend="memory-representation-of-values"/> and
+            <xref linkend="understanding-the-garbage-collector"/>.</para>
+      </listitem>
+      <listitem>
+        <para>Jeremie Dimino, the author of <emphasis>utop</emphasis>, the interactive command-line
+          interface that is used throughout this book. We're particularly grateful for the changes
+          that he pushed through to make <emphasis>utop</emphasis> work better in the context of the
+          book. </para>
+      </listitem>
+      <listitem>
+        <para>The many people who collectively submitted over 2400 comments to online drafts of this
+          book, through whose efforts countless errors were found and fixed.</para>
       </listitem>
     </itemizedlist>
   </sect1>

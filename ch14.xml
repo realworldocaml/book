@@ -6,11 +6,7 @@
 
   <para>Many of the OCaml programs that you'll write will end up as binaries
   that need to be run from a command prompt. Any nontrivial command line
-  should support a collection of basic features:<indexterm class="singular">
-      <primary>command-line parsing</primary>
-
-      <secondary>features needed</secondary>
-    </indexterm></para>
+  should support a collection of basic features:</para>
 
   <itemizedlist>
     <listitem>
@@ -64,7 +60,11 @@
     <listitem>
       <para>Demonstrate how <emphasis>functional combinators</emphasis> can be
       used to declare complex command-line interfaces in a type-safe and
-      elegant way</para>
+      elegant way<indexterm class="singular">
+        <primary>combinators</primary>
+        
+        <secondary>functional combinators</secondary>
+      </indexterm></para>
     </listitem>
   </itemizedlist>
 
@@ -83,7 +83,7 @@
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/basic_md5.ml">OCaml</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/basic_md5.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -120,7 +120,7 @@ let do_hash file =
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/basic_md5.ml">OCaml</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/basic_md5.ml">OCaml</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml">let spec =
@@ -157,7 +157,7 @@ let do_hash file =
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/basic_md5.ml">OCaml</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/basic_md5.ml">OCaml</ulink>
       (part 2)</para>
 
       <programlisting format="linespecific" language="ocaml">let command =
@@ -235,7 +235,7 @@ let do_hash file =
       function call away:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/basic_md5.ml">OCaml</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/basic_md5.ml">OCaml</ulink>
       (part 3)</para>
 
       <programlisting format="linespecific" language="ocaml">let () =
@@ -249,7 +249,7 @@ let do_hash file =
       compile the binary:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/build_basic_md5.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/build_basic_md5.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg cryptokit basic_md5.native</userinput>
@@ -259,7 +259,7 @@ let do_hash file =
       compiled:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/get_basic_md5_version.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/get_basic_md5_version.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">./basic_md5.native -version</userinput>
@@ -275,7 +275,7 @@ let do_hash file =
       revision number, in the case of Mercurial):</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/get_basic_md5_help.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/get_basic_md5_help.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">./basic_md5.native</userinput>
@@ -305,7 +305,7 @@ let do_hash file =
       output:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/run_basic_md5.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/run_basic_md5.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">./basic_md5.native ./basic_md5.native</userinput>
@@ -316,7 +316,7 @@ let do_hash file =
       more succinct by removing intermediate variables:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/basic_md5_succinct.ml">OCaml</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/basic_md5_succinct.ml">OCaml</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -445,7 +445,7 @@ let () =
     valid filename, and not just any string:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/basic_md5_as_filename.ml">OCaml</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/basic_md5_as_filename.ml">OCaml</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml">let command =
@@ -464,7 +464,7 @@ let () =
     in the chapter):</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/run_basic_md5_as_filename.out">Terminal</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/run_basic_md5_as_filename.out">Terminal</ulink></para>
 
     <programlisting format="linespecific" language="console"><prompt
         moreinfo="none">$ </prompt><userinput moreinfo="none">./basic_md5_as_filename.native nonexistent</userinput>
@@ -490,7 +490,7 @@ let () =
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/basic_md5_with_custom_arg.ml">OCaml</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/basic_md5_with_custom_arg.ml">OCaml</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -530,7 +530,7 @@ let () =
       <literal moreinfo="none">/dev/null</literal>:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/run_basic_md5_with_custom_arg.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/run_basic_md5_with_custom_arg.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">./basic_md5_with_custom_arg.native /etc/passwd</userinput>
@@ -561,7 +561,7 @@ let () =
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/basic_md5_with_optional_file_broken.ml">OCaml</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/basic_md5_with_optional_file_broken.ml">OCaml</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml">let command =
@@ -580,7 +580,7 @@ let () =
       results in a compile-time error:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/build_basic_md5_with_optional_file_broken.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/build_basic_md5_with_optional_file_broken.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg cryptokit basic_md5_with_optional_file_broken.native</userinput>
@@ -598,7 +598,7 @@ let () =
       standard input if no file is specified:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/basic_md5_with_optional_file.ml">OCaml</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/basic_md5_with_optional_file.ml">OCaml</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -643,7 +643,7 @@ let () =
       <literal moreinfo="none">maybe_with_default</literal>:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/basic_md5_with_default_file.ml">OCaml</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/basic_md5_with_default_file.ml">OCaml</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -675,7 +675,7 @@ let () =
       have the same behavior:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/run_basic_and_default_md5.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/run_basic_and_default_md5.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">cat /etc/passwd | ./basic_md5_with_optional_file.native</userinput>
@@ -697,7 +697,7 @@ let () =
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/basic_md5_sequence.ml">OCaml</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/basic_md5_sequence.ml">OCaml</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -758,7 +758,7 @@ let () =
     follows:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/basic_md5_with_flags.ml">OCaml</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/basic_md5_with_flags.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 open Cryptokit
@@ -809,7 +809,7 @@ let () = Command.run command</programlisting>
     this:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/run_basic_md5_flags_help.out">Terminal</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/run_basic_md5_flags_help.out">Terminal</ulink></para>
 
     <programlisting format="linespecific" language="console"><prompt
         moreinfo="none">$ </prompt><userinput moreinfo="none">./basic_md5_with_flags.native -help</userinput>
@@ -927,7 +927,7 @@ let () = Command.run command</programlisting>
     commands). OPAM exposes commands in this form:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/opam.out">Terminal</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/opam.out">Terminal</ulink></para>
 
     <programlisting format="linespecific" language="console"><prompt
         moreinfo="none">$ </prompt><userinput moreinfo="none">opam config env</userinput>
@@ -944,8 +944,6 @@ let () = Command.run command</programlisting>
         <primary>install keyword</primary>
       </indexterm><indexterm class="singular">
         <primary>remote keyword</primary>
-      </indexterm><indexterm class="singular">
-        <primary>config keyword</primary>
       </indexterm></para>
 
     <para>This usually only becomes a concern when your application
@@ -959,7 +957,7 @@ let () = Command.run command</programlisting>
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/group.topscript">OCaml utop</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/group.topscript">OCaml utop</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">Command.basic ;;</userinput>
@@ -984,7 +982,7 @@ let () = Command.run command</programlisting>
     date:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/cal_add_days.ml">OCaml</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/cal_add_days.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -1011,7 +1009,7 @@ let () = Command.run add</programlisting>
     moreinfo="none">Command.group</literal>:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/cal_add_sub_days.ml">OCaml</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/cal_add_sub_days.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -1051,7 +1049,7 @@ let () = Command.run command</programlisting>
     which now reflects the subcommands we just added.</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/build_cal_add_sub_days.out">Terminal</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/build_cal_add_sub_days.out">Terminal</ulink></para>
 
     <programlisting format="linespecific" language="console"><prompt
         moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild cal_add_sub_days.native</userinput>
@@ -1072,7 +1070,7 @@ let () = Command.run command</programlisting>
     work and see the date parsing in action:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/run_cal_add_sub_days.out">Terminal</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/run_cal_add_sub_days.out">Terminal</ulink></para>
 
     <programlisting format="linespecific" language="console"><prompt
         moreinfo="none">$ </prompt><userinput moreinfo="none">./cal_add_sub_days.native add 2012-12-25 40</userinput>
@@ -1087,11 +1085,7 @@ let () = Command.run command</programlisting>
     <para>The functions for generating a specification may seem like magic. In
     particular, even if you know how to use them, it's not entirely clear how
     they work, and in particular, why the types work out the way they
-    do.<indexterm class="singular">
-        <primary>specifications</primary>
-
-        <secondary>complexity of</secondary>
-      </indexterm><indexterm class="startofrange" id="CLPadv">
+    do.<indexterm class="startofrange" id="CLPadv">
         <primary>command-line parsing</primary>
 
         <secondary>advanced control over</secondary>
@@ -1120,10 +1114,6 @@ let () = Command.run command</programlisting>
       but it'll help you debug type errors as you use Command more.<indexterm
           class="singular">
           <primary>callback function</primary>
-        </indexterm><indexterm class="singular">
-          <primary>specifications</primary>
-
-          <secondary>syncronization of</secondary>
         </indexterm><indexterm class="singular">
           <primary>debugging</primary>
 
@@ -1166,7 +1156,7 @@ let () = Command.run command</programlisting>
       some examples of specs, and their types:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/command_types.topscript">OCaml utop</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/command_types.topscript">OCaml utop</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
           moreinfo="none"># </prompt><userinput moreinfo="none">Command.Spec.empty ;;</userinput>
@@ -1190,7 +1180,7 @@ let () = Command.run command</programlisting>
       should make more sense now:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/basic.topscript">OCaml utop</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/basic.topscript">OCaml utop</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
           moreinfo="none"># </prompt><userinput moreinfo="none">Command.basic ;;</userinput>
@@ -1216,15 +1206,10 @@ let () = Command.run command</programlisting>
       <para>If you want to factor out common command-line operations, the
       <literal moreinfo="none">++</literal> operator will append two
       specifications together. Let's add some dummy verbosity and debug flags
-      to our calendar application to illustrate this.<indexterm
-          class="singular">
-          <primary>specifications</primary>
-
-          <secondary>composing fragments together</secondary>
-        </indexterm></para>
+      to our calendar application to illustrate this.</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/cal_append.ml">OCaml</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/cal_append.ml">OCaml</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -1261,7 +1246,7 @@ let diff ~common =
       can supply these flags when defining the groups.</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/cal_append.ml">OCaml</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/cal_append.ml">OCaml</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml">let () =
@@ -1290,7 +1275,7 @@ let diff ~common =
       impressively long type error:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/build_cal_append_broken.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/build_cal_append_broken.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild cal_append_broken.native</userinput>
@@ -1325,7 +1310,7 @@ let diff ~common =
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/cal_add_days.ml">OCaml</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/cal_add_days.ml">OCaml</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -1354,7 +1339,7 @@ let () = Command.run add</programlisting>
       is supplied:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/cal_add_interactive.ml">OCaml</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/cal_add_interactive.ml">OCaml</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -1404,7 +1389,7 @@ let () = Command.run add</programlisting>
       type:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/build_and_run_cal_add_interactive.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/build_and_run_cal_add_interactive.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlbuild -use-ocamlfind -tag thread -pkg core cal_add_interactive.native</userinput>
@@ -1424,7 +1409,7 @@ let () = Command.run add</programlisting>
       moreinfo="none">step</literal> return value:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/step.topscript">OCaml utop</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/step.topscript">OCaml utop</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
           moreinfo="none"># </prompt><userinput moreinfo="none">open Command.Spec ;;</userinput>
@@ -1460,7 +1445,7 @@ let () = Command.run add</programlisting>
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/cal_add_labels.ml">OCaml</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/cal_add_labels.ml">OCaml</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -1481,13 +1466,13 @@ let add =
 
 let () = Command.run add</programlisting>
 
-      <para>This <literal moreinfo="none">cal_add_labels</literal> example
-      goes back to our noninteractive calendar addition program, but the
-      <literal moreinfo="none">add_days</literal> main function now expects
-      labeled arguments. The <literal moreinfo="none">step</literal> function
-      in the specification simply converts the default <literal
-      moreinfo="none">base</literal> and <literal
-      moreinfo="none">days</literal> arguments into a labeled function.</para>
+      <para>This <literal moreinfo="none">cal_add_labels</literal> example goes back to our
+        noninteractive calendar addition program, but the <literal moreinfo="none"
+          >add_days</literal> main function now expects labeled arguments. The <literal
+          moreinfo="none">step</literal>
+        <phrase role="keep-together">function</phrase> in the specification simply converts the
+        default <literal moreinfo="none">base</literal> and <literal moreinfo="none">days</literal>
+        arguments into a labeled function.</para>
 
       <para>Labeled arguments are more verbose but can also help prevent
       errors with command-line arguments with similar types but different
@@ -1610,7 +1595,7 @@ let () = Command.run add</programlisting>
       directory:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/md5_completion.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/md5_completion.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">env COMMAND_OUTPUT_INSTALLATION_BASH=1 ./basic_md5_with_flags.native</userinput>
@@ -1636,7 +1621,7 @@ let () = Command.run add</programlisting>
       your current directory and source it into your current shell:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/command-line-parsing/cal_completion.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/cal_completion.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">env COMMAND_OUTPUT_INSTALLATION_BASH=1 ./cal_add_sub_days.native &gt; cal.cmd</userinput>

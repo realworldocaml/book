@@ -70,7 +70,7 @@
       using four normal variants:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/pattern_monomorphic_large.ml">OCaml</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/back-end/pattern_monomorphic_large.ml">OCaml</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">type t = | Alice | Bob | Charlie | David
 
@@ -84,7 +84,7 @@ let test v =
       <para>The lambda output for this code looks like this:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/lambda_for_pattern_monomorphic_large.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/back-end/lambda_for_pattern_monomorphic_large.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc -dlambda -c pattern_monomorphic_large.ml 2&gt;&amp;1</userinput>
@@ -137,7 +137,7 @@ let test v =
       need for the complexity of computing this table:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/pattern_monomorphic_small.ml">OCaml</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/back-end/pattern_monomorphic_small.ml">OCaml</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">type t = | Alice | Bob 
 
@@ -149,7 +149,7 @@ let test v =
       <para>The lambda output for this code is now quite different:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/lambda_for_pattern_monomorphic_small.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/back-end/lambda_for_pattern_monomorphic_small.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc -dlambda -c pattern_monomorphic_small.ml 2&gt;&amp;1</userinput>
@@ -163,7 +163,7 @@ let test v =
       but with polymorphic variants instead of normal variants:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/pattern_polymorphic.ml">OCaml</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/back-end/pattern_polymorphic.ml">OCaml</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">let test v =
   match v with
@@ -177,7 +177,7 @@ let test v =
       of polymorphic variants:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/lambda_for_pattern_polymorphic.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/back-end/lambda_for_pattern_polymorphic.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc -dlambda -c pattern_polymorphic.ml 2&gt;&amp;1</userinput>
@@ -199,9 +199,6 @@ let test v =
         as possible.<indexterm class="singular">
           <primary>pattern matching</primary>
           <secondary>fundamental algorithms in</secondary>
-        </indexterm><indexterm class="singular">
-          <primary>polymorphic variant types</primary>
-          <secondary sortas="pattern matching">vs. pattern matching</secondary>
         </indexterm></para>
 
       <note>
@@ -241,7 +238,7 @@ let test v =
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-bench/bench_patterns.ml">OCaml</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/back-end-bench/bench_patterns.ml">OCaml</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">open Core.Std
 open Core_bench.Std
@@ -297,7 +294,7 @@ let () =
       table:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-bench/run_bench_patterns.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/back-end-bench/run_bench_patterns.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg core_bench bench_patterns.native</userinput>
@@ -422,7 +419,7 @@ let () =
         >-dinstr</literal>. Try this on one of our earlier pattern-matching examples:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/instr_for_pattern_monomorphic_small.out">Terminal</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/back-end/instr_for_pattern_monomorphic_small.out">Terminal</ulink></para>
 
     <programlisting format="linespecific" language="console"><prompt
         moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc -dinstr pattern_monomorphic_small.ml 2&gt;&amp;1</userinput>
@@ -536,7 +533,7 @@ let () =
       linking a bytecode archive:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-embed/link_dllib.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/back-end-embed/link_dllib.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc -a -o mylib.cma a.cmo b.cmo -dllib -lmylib</userinput>
@@ -557,7 +554,7 @@ let () =
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-embed/link_custom.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/back-end-embed/link_custom.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc -a -o mylib.cma -custom a.cmo b.cmo -cclib -lmylib</userinput>
@@ -604,19 +601,19 @@ let () =
       line:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-embed/embed_me1.ml">OCaml</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/back-end-embed/embed_me1.ml">OCaml</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">let () = print_endline "hello embedded world 1"</programlisting>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-embed/embed_me2.ml">OCaml</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/back-end-embed/embed_me2.ml">OCaml</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">let () = print_endline "hello embedded world 2"</programlisting>
 
       <para>Next, create a C file to be your main entry point:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-          url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-embed/main.c"
+          url="https://github.com/realworldocaml/examples/tree/v1/code/back-end-embed/main.c"
           >C</ulink></para>
 
       <programlisting format="linespecific" language="c">#include &lt;stdio.h&gt;
@@ -638,7 +635,7 @@ main (int argc, char **argv)
       <para>Now compile the OCaml files into a standalone object file:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-embed/build_embed.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/back-end-embed/build_embed.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">rm -f embed_out.c</userinput>
@@ -650,7 +647,7 @@ main (int argc, char **argv)
       using <command moreinfo="none">gcc</command> to test this out:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-embed/build_embed_binary.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/back-end-embed/build_embed_binary.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">gcc -fPIC -Wall -I`ocamlc -where` -L`ocamlc -where` -ltermcap -lm -ldl \</userinput>
@@ -671,7 +668,7 @@ main (int argc, char **argv)
       earlier:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-embed/build_embed_c.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/back-end-embed/build_embed_c.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlc -output-obj -o embed_out.c embed_me1.ml embed_me2.ml</userinput>
@@ -803,7 +800,7 @@ main (int argc, char **argv)
           so the compiler knows that only integers are being compared:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/compare_mono.ml">OCaml</ulink></para>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/back-end/compare_mono.ml">OCaml</ulink></para>
 
         <programlisting format="linespecific" language="ocaml">let cmp (a:int) (b:int) =
   if a &gt; b then a else b</programlisting>
@@ -813,7 +810,7 @@ main (int argc, char **argv)
         be lowercase on some platforms such as Linux:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/asm_from_compare_mono.out">Terminal</ulink></para>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/back-end/asm_from_compare_mono.out">Terminal</ulink></para>
 
         <programlisting format="linespecific" language="console"><prompt
             moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlopt -inline 20 -nodynlink -S compare_mono.ml</userinput>
@@ -827,7 +824,7 @@ main (int argc, char **argv)
         below:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-            url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/cmp.S"
+            url="https://github.com/realworldocaml/examples/tree/v1/code/back-end/cmp.S"
             >Assembly</ulink></para>
 
         <programlisting format="linespecific" language="gas">_camlCompare_mono__cmp_1008:
@@ -860,7 +857,7 @@ main (int argc, char **argv)
         annotations and is a polymorphic comparison instead:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/compare_poly.ml">OCaml</ulink></para>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/back-end/compare_poly.ml">OCaml</ulink></para>
 
         <programlisting format="linespecific" language="ocaml">let cmp a b =
   if a &gt; b then a else b</programlisting>
@@ -870,7 +867,7 @@ main (int argc, char **argv)
         function:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-            url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/compare_poly_asm.S"
+            url="https://github.com/realworldocaml/examples/tree/v1/code/back-end/compare_poly_asm.S"
             >Assembly</ulink></para>
 
         <programlisting format="linespecific" language="gas">_camlCompare_poly__cmp_1008:
@@ -935,7 +932,7 @@ main (int argc, char **argv)
         moreinfo="none">Core_bench</literal> test with both functions:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-bench/bench_poly_and_mono.ml">OCaml</ulink></para>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/back-end-bench/bench_poly_and_mono.ml">OCaml</ulink></para>
 
         <programlisting format="linespecific" language="ocaml">open Core.Std
 open Core_bench.Std
@@ -966,7 +963,7 @@ let () =
         between the two:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-bench/run_bench_poly_and_mono.out">Terminal</ulink></para>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/back-end-bench/run_bench_poly_and_mono.out">Terminal</ulink></para>
 
         <programlisting format="linespecific" language="console"><prompt
             moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg core_bench bench_poly_and_mono.native</userinput>
@@ -1099,7 +1096,7 @@ let () =
           execution:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/alternate_list.ml">OCaml</ulink></para>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/back-end/alternate_list.ml">OCaml</ulink></para>
 
         <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -1122,7 +1119,7 @@ let () =
         following output:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-bench/run_alternate_list.out">Terminal</ulink></para>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/back-end-bench/run_alternate_list.out">Terminal</ulink></para>
 
         <programlisting format="linespecific" language="console"><prompt
             moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -tag debug alternate_list.native</userinput>
@@ -1133,7 +1130,7 @@ let () =
         moreinfo="none">gdb</command>:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/gdb_alternate0.out">Terminal</ulink></para>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/back-end/gdb_alternate0.out">Terminal</ulink></para>
 
         <programlisting format="linespecific" language="console"><prompt
             moreinfo="none">$ </prompt><userinput moreinfo="none">gdb ./alternate_list.native</userinput>
@@ -1154,7 +1151,7 @@ let () =
         call to <literal moreinfo="none">take</literal>:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/gdb_alternate1.out">Terminal</ulink></para>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/back-end/gdb_alternate1.out">Terminal</ulink></para>
 
         <programlisting format="linespecific" language="console"><computeroutput
             moreinfo="none">(gdb) break camlAlternate_list__take_69242 </computeroutput>
@@ -1168,7 +1165,7 @@ let () =
         executing:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/gdb_alternate2.out">Terminal</ulink></para>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/back-end/gdb_alternate2.out">Terminal</ulink></para>
 
         <programlisting format="linespecific" language="console"><computeroutput
             moreinfo="none">(gdb) run</computeroutput>
@@ -1185,7 +1182,7 @@ let () =
         recursions:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/gdb_alternate3.out">Terminal</ulink></para>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/back-end/gdb_alternate3.out">Terminal</ulink></para>
 
         <programlisting format="linespecific" language="console"><computeroutput
             moreinfo="none">(gdb) cont</computeroutput>
@@ -1299,7 +1296,7 @@ let () =
           modification:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/perf_record.out">Terminal</ulink></para>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/back-end/perf_record.out">Terminal</ulink></para>
 
         <programlisting format="linespecific" language="console"><prompt
             moreinfo="none">$ </prompt><userinput moreinfo="none">perf record -g ./barrier_bench.native</userinput>
@@ -1327,7 +1324,7 @@ let () =
         results:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/perf_report.out">Terminal</ulink></para>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/back-end/perf_report.out">Terminal</ulink></para>
 
         <programlisting format="linespecific" language="console"><prompt
             moreinfo="none">$ </prompt><userinput moreinfo="none">perf report -g</userinput>
@@ -1372,7 +1369,7 @@ let () =
           frame pointer activated:</para>
 
           <para role="sourcecode"><ulink role="orm:hideurl:ital"
-          url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end/opam_switch.out">Terminal</ulink></para>
+          url="https://github.com/realworldocaml/examples/tree/v1/code/back-end/opam_switch.out">Terminal</ulink></para>
 
           <programlisting format="linespecific" language="console"><prompt moreinfo="none">$ </prompt><userinput moreinfo="none">opam switch 4.01.0+fp</userinput>
 </programlisting>
@@ -1380,7 +1377,7 @@ let () =
           <para>Using the frame pointer changes the OCaml calling convention,
           but OPAM takes care of recompiling all your libraries with the new
           interface. You can read more about this on the OCamlPro <ulink
-          url="http://www.ocamlpro.com/blog/2012/08/08/profile-native-code.html">OCaml</ulink>.</para>
+          url="http://www.ocamlpro.com/blog/2012/08/08/profile-native-code.html">blog</ulink>.</para>
         </sidebar>
       </sect3>
     </sect2>
@@ -1407,7 +1404,7 @@ let () =
       bytecode embedding example earlier in this chapter:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-embed/build_embed_native.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/back-end-embed/build_embed_native.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlopt -output-obj -o embed_native.o embed_me1.ml embed_me2.ml</userinput>
@@ -1442,7 +1439,7 @@ let () =
         <literal moreinfo="none">-runtime-variant d</literal> flag:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/back-end-embed/run_debug_hello.out">Terminal</ulink></para>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/back-end-embed/run_debug_hello.out">Terminal</ulink></para>
 
         <programlisting format="linespecific" language="console"><prompt
             moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlopt -runtime-variant d -verbose -o hello.native hello.ml</userinput>

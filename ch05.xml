@@ -21,7 +21,7 @@
     </indexterm></para>
 
   <para role="sourcecode"><ulink role="orm:hideurl:ital"
-  url="https://github.com/realworldocaml/examples/tree/beta3/code/records/record.syntax">Syntax</ulink></para>
+  url="https://github.com/realworldocaml/examples/tree/v1/code/records/record.syntax">Syntax</ulink></para>
 
   <programlisting format="linespecific" language="ocaml">type <emphasis>&lt;record-name&gt;</emphasis> =
     {<emphasis> &lt;field&gt;</emphasis> : <emphasis>&lt;type&gt;</emphasis> ;
@@ -37,7 +37,7 @@
   a given computer:</para>
 
   <para role="sourcecode"><ulink role="orm:hideurl:ital"
-  url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink></para>
+  url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink></para>
 
   <programlisting format="linespecific" language="ocaml"><prompt
       moreinfo="none"># </prompt><userinput moreinfo="none">type host_info =</userinput>
@@ -62,7 +62,7 @@
   <literal moreinfo="none">Time</literal> module:</para>
 
   <para role="sourcecode"><ulink role="orm:hideurl:ital"
-  url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+  url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
   (part 1)</para>
 
   <programlisting format="linespecific" language="ocaml"><prompt
@@ -90,7 +90,7 @@
   record field using dot notation:</para>
 
   <para role="sourcecode"><ulink role="orm:hideurl:ital"
-  url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+  url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
   (part 2)</para>
 
   <programlisting format="linespecific" language="ocaml"><prompt
@@ -103,7 +103,7 @@
   items:</para>
 
   <para role="sourcecode"><ulink role="orm:hideurl:ital"
-  url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+  url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
   (part 3)</para>
 
   <programlisting format="linespecific" language="ocaml"><prompt
@@ -114,7 +114,7 @@
   parameterized type:</para>
 
   <para role="sourcecode"><ulink role="orm:hideurl:ital"
-  url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+  url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
   (part 4)</para>
 
   <programlisting format="linespecific" language="ocaml"><prompt
@@ -139,7 +139,7 @@
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 5)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -179,7 +179,7 @@
     moreinfo="none">os_release</literal>:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 6)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -227,7 +227,7 @@
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 7)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -247,7 +247,7 @@
     underscore to the pattern:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 8)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -269,7 +269,7 @@
       itself, so we could have found out about warning 9 as follows:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/records/warn_help.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/records/warn_help.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">ocaml -warn-help | egrep '\b9\b'</userinput>
@@ -318,7 +318,7 @@
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 9)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -336,7 +336,7 @@
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 10)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -368,7 +368,7 @@
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 11)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -384,7 +384,7 @@
     punning:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 12)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -435,7 +435,7 @@
     message was generated:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 13)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -480,7 +480,7 @@
     record, what type will it have?</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 14)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -493,7 +493,7 @@
     annotation:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 15)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -505,7 +505,7 @@
     functions for grabbing the session ID and status from a heartbeat:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 16)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -536,7 +536,7 @@
     moreinfo="none">t</literal>. Using this style we would write:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 17)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -590,7 +590,7 @@
     follows:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 18)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -610,7 +610,7 @@
     name:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 19)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -625,7 +625,7 @@
     trick when pattern matching:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 20)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -638,7 +638,7 @@
     the field by the module directly:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 21)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -679,7 +679,7 @@
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 22)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -713,7 +713,7 @@
     syntax of a functional update is as follows:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/functional_update.syntax">Syntax</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/functional_update.syntax">Syntax</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">{ <emphasis>&lt;record&gt;</emphasis> with <emphasis>&lt;field&gt;</emphasis> = <emphasis>&lt;value&gt;</emphasis>;
       <emphasis>&lt;field&gt;</emphasis> = <emphasis>&lt;value&gt;</emphasis>;
@@ -727,7 +727,7 @@
     moreinfo="none">register_heartbeat</literal> more concisely:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 23)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -744,7 +744,7 @@
     message received on the last heartbeat:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 24)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -773,7 +773,7 @@
     correct thing to do would be to update the code as follows:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 25)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -799,7 +799,7 @@
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 26)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -825,7 +825,7 @@
       written as follows:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 27)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -864,7 +864,7 @@
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 28)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -878,11 +878,7 @@
     common enough pattern that it would be convenient to generate it
     automatically. The <literal moreinfo="none">fieldslib</literal> syntax
     extension that ships with Core does just that.<indexterm class="singular">
-        <primary>functions</primary>
-
-        <secondary>accessor functions</secondary>
-      </indexterm><indexterm class="singular">
-        <primary>accessor functions</primary>
+        <primary>record field accessor functions</primary>
       </indexterm></para>
 
     <para>The <literal moreinfo="none">with fields</literal> annotation at the
@@ -891,7 +887,7 @@
     defined <literal moreinfo="none">Logon</literal> as follows:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main-29.rawscript">OCaml utop</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main-29.rawscript">OCaml utop</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><userinput
         moreinfo="none"># module Logon = struct
@@ -944,7 +940,7 @@
     field from a logon message:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 30)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1027,7 +1023,7 @@
     <literal moreinfo="none">Logon.t</literal>:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 31)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1044,7 +1040,7 @@
     one:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 32)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1061,7 +1057,7 @@
     function for displaying a record field:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 33)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1082,7 +1078,7 @@
     in action:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 34)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1114,7 +1110,7 @@
     type:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 35)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -1145,7 +1141,7 @@
     fields of a <literal moreinfo="none">Logon</literal> record:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/records/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript">OCaml utop</ulink>
     (part 36)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt

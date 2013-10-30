@@ -27,7 +27,7 @@
   s-expression might look like this:</para>
 
   <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/basic.scm"
+      url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/basic.scm"
       >Scheme</ulink></para>
 
   <programlisting format="linespecific" language="scheme">(this (is an) (s expression))</programlisting>
@@ -76,7 +76,7 @@
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/sexp.mli">OCaml</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp.mli">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">module Sexp : sig
   type t =
@@ -92,7 +92,7 @@ end</programlisting>
     in terms of this type:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/print_sexp.topscript">OCaml utop</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/print_sexp.topscript">OCaml utop</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">Sexp.List [</userinput>
@@ -110,7 +110,7 @@ end</programlisting>
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/sexp_printer.topscript">OCaml utop</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_printer.topscript">OCaml utop</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">Sexp.to_string (Sexp.List [Sexp.Atom "1"; Sexp.Atom "2"]) ;;</userinput>
@@ -124,7 +124,7 @@ end</programlisting>
     the respective modules for integers, strings, and exceptions:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/to_from_sexp.topscript">OCaml utop</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/to_from_sexp.topscript">OCaml utop</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">Int.sexp_of_t 3;;</userinput>
@@ -138,7 +138,7 @@ end</programlisting>
     arrays that are polymorphic across the types that they can contain:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/to_from_sexp.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/to_from_sexp.topscript">OCaml utop</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -159,7 +159,7 @@ end</programlisting>
       type in question.</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/to_from_sexp.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/to_from_sexp.topscript">OCaml utop</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -190,7 +190,7 @@ end</programlisting>
       <literal moreinfo="none">top</literal>:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/list_top_packages.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/list_top_packages.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">ocamlfind list | grep top</userinput>
@@ -221,7 +221,7 @@ end</programlisting>
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/manually_making_sexp.topscript">OCaml utop</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/manually_making_sexp.topscript">OCaml utop</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
           moreinfo="none"># </prompt><userinput moreinfo="none">type t = { foo: int; bar: float } ;;</userinput>
@@ -255,7 +255,7 @@ end</programlisting>
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/auto_making_sexp.topscript">OCaml utop</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/auto_making_sexp.topscript">OCaml utop</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
           moreinfo="none"># </prompt><userinput moreinfo="none">type t = { foo: int; bar: float } with sexp ;;</userinput>
@@ -272,7 +272,7 @@ end</programlisting>
       useful string representation:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/auto_making_sexp.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/auto_making_sexp.topscript">OCaml utop</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -284,13 +284,13 @@ end</programlisting>
 <computeroutput moreinfo="none">exception Good_message of string list</computeroutput>
 <prompt moreinfo="none"># </prompt><userinput moreinfo="none">Exn.to_string (Good_message ["1";"2";"3"]) ;;</userinput>
 <computeroutput moreinfo="none">- : string = "(//toplevel//.Good_message (1 2 3))"</computeroutput></programlisting>
-
+<?hard-pagebreak?>
       <para>You don't always have to declare a named type to create an
       s-expression converter. The following syntax lets you create one inline,
       as part of a larger expression:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/inline_sexp.topscript">OCaml utop</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/inline_sexp.topscript">OCaml utop</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
           moreinfo="none"># </prompt><userinput moreinfo="none">let l = [(1,"one"); (2,"two")] ;;</userinput>
@@ -364,9 +364,11 @@ end</programlisting>
 
         <secondary>format of</secondary>
       </indexterm></para>
+    
+    <?hard-pagebreak?>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/example.scm"
+        url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/example.scm"
         >Scheme</ulink></para>
 
     <programlisting format="linespecific" language="scheme">;; example.scm
@@ -378,7 +380,7 @@ end</programlisting>
     not part of the resulting s-expression:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/example_load.topscript">OCaml utop</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/example_load.topscript">OCaml utop</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">Sexp.load_sexp "example.scm" ;;</userinput>
@@ -421,7 +423,7 @@ end</programlisting>
     <para>The following example shows all of these in action:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/comment_heavy.scm"
+        url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/comment_heavy.scm"
         >Scheme</ulink></para>
 
     <programlisting format="linespecific" >;; comment_heavy_example.scm
@@ -440,7 +442,7 @@ end</programlisting>
     comments:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/example_load.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/example_load.topscript">OCaml utop</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -454,7 +456,7 @@ end</programlisting>
     error:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/example_load.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/example_load.topscript">OCaml utop</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -489,7 +491,7 @@ end</programlisting>
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/int_interval.ml">OCaml</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/int_interval.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">(* Module for representing closed integer intervals *)
 open Core.Std
@@ -519,7 +521,7 @@ let contains i x =
     <para>We can now use this module as follows:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/test_interval.ml">OCaml</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/test_interval.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -545,7 +547,7 @@ let () =
     interface that doesn't export the s-expression functions:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/int_interval_nosexp.mli">OCaml</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/int_interval_nosexp.mli">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">type t
 
@@ -556,7 +558,7 @@ val contains : t -&gt; int -&gt; bool</programlisting>
     <para>Building this will give us the following error:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/build_test_interval_nosexp.out">Terminal</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/build_test_interval_nosexp.out">Terminal</ulink></para>
 
     <programlisting format="linespecific" language="console"><prompt
         moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild test_interval_nosexp.native</userinput>
@@ -568,7 +570,7 @@ val contains : t -&gt; int -&gt; bool</programlisting>
     signatures for the extra functions generated by Sexplib:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/int_interval_manual_sexp.mli">OCaml</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/int_interval_manual_sexp.mli">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -589,7 +591,7 @@ val contains : t -&gt; int -&gt; bool</programlisting>
     signature that does just this:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/int_interval.mli">OCaml</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/int_interval.mli">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">type t with sexp
 
@@ -602,7 +604,7 @@ val contains : t -&gt; int -&gt; bool</programlisting>
     output:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/build_test_interval.out">Terminal</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/build_test_interval.out">Terminal</ulink></para>
 
     <programlisting format="linespecific" language="console"><prompt
         moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild test_interval.native</userinput>
@@ -628,7 +630,7 @@ val contains : t -&gt; int -&gt; bool</programlisting>
     with whatever invariant checks are necessary:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/sexp_override.ml">OCaml</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_override.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">type t =
   | Range of int * int
@@ -684,7 +686,7 @@ let t_of_sexp sexp =
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/read_foo.ml">OCaml</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/read_foo.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -708,7 +710,7 @@ let () =
     one:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/foo_broken_example.scm"
+        url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/foo_broken_example.scm"
         >Scheme</ulink></para>
 
     <programlisting format="linespecific" language="scheme">((a "not-an-integer")
@@ -718,7 +720,7 @@ let () =
     <para>you'll get the following error:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/build_read_foo.out">Terminal</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/build_read_foo.out">Terminal</ulink></para>
 
     <programlisting format="linespecific" language="console"><prompt
         moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild read_foo.native</userinput>
@@ -745,7 +747,7 @@ let () =
     the error message greatly:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/read_foo_better_errors.ml">OCaml</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/read_foo_better_errors.ml">OCaml</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">open Core.Std
 
@@ -765,7 +767,7 @@ let () =
     <para>If we run it again, we'll see a much more specific error:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/build_read_foo_better_errors.out">Terminal</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/build_read_foo_better_errors.out">Terminal</ulink></para>
 
     <programlisting format="linespecific" language="console"><prompt
         moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild read_foo_better_errors.native</userinput>
@@ -833,7 +835,7 @@ let () =
       error out:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/sexp_opaque.topscript">OCaml utop</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_opaque.topscript">OCaml utop</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
           moreinfo="none"># </prompt><userinput moreinfo="none">type no_converter = int * int ;;</userinput>
@@ -847,7 +849,7 @@ let () =
       within the other data structure without an error.</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/sexp_opaque.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_opaque.topscript">OCaml utop</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -861,7 +863,7 @@ let () =
       marked as opaque:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/sexp_opaque.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_opaque.topscript">OCaml utop</ulink>
       (part 2)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -873,7 +875,7 @@ let () =
       is used:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/sexp_opaque.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_opaque.topscript">OCaml utop</ulink>
       (part 3)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -891,7 +893,7 @@ let () =
       succeed when the list is empty:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/sexp_opaque.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_opaque.topscript">OCaml utop</ulink>
       (part 4)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -909,7 +911,7 @@ let () =
       sexp</literal>:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/sexp_opaque.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_opaque.topscript">OCaml utop</ulink>
       (part 5)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -933,7 +935,7 @@ let () =
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/sexp_list.topscript">OCaml utop</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_list.topscript">OCaml utop</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
           moreinfo="none"># </prompt><userinput moreinfo="none">type compatible_versions =</userinput>
@@ -953,7 +955,7 @@ let () =
       alternate syntax:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/sexp_list.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_list.topscript">OCaml utop</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -985,7 +987,7 @@ let () =
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/sexp_option.topscript">OCaml utop</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_option.topscript">OCaml utop</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
           moreinfo="none"># </prompt><userinput moreinfo="none">type t = { a: int option; b: string } with sexp ;;</userinput>
@@ -1002,7 +1004,7 @@ let () =
       with <literal moreinfo="none">sexp_option</literal>:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/sexp_option.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_option.topscript">OCaml utop</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1034,7 +1036,7 @@ let () =
       a very simple web server:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/sexp_default.topscript">OCaml utop</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_default.topscript">OCaml utop</ulink></para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
           moreinfo="none"># </prompt><userinput moreinfo="none">type http_server_config = {</userinput>
@@ -1051,7 +1053,7 @@ let () =
       and to listen as localhost. We can do this as follows:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/sexp_default.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_default.topscript">OCaml utop</ulink>
       (part 1)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1069,7 +1071,7 @@ let () =
       values are filled in with the desired defaults:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/sexp_default.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_default.topscript">OCaml utop</ulink>
       (part 2)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1083,7 +1085,7 @@ let () =
       not strictly necessary:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/sexp_default.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_default.topscript">OCaml utop</ulink>
       (part 3)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1095,7 +1097,7 @@ let () =
       moreinfo="none">sexp_drop_default</literal> directive:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/sexp_default.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_default.topscript">OCaml utop</ulink>
       (part 4)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1120,7 +1122,7 @@ let () =
       s-expression:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/sexpr/sexp_default.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_default.topscript">OCaml utop</ulink>
       (part 5)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1135,12 +1137,7 @@ let () =
       useful for backwards compatibility: if you add a new field to your
       config record, but you make that field optional, then you should still
       be able to parse older version of your config.<indexterm
-      class="endofrange" startref="SERFORMsexp"></indexterm><indexterm
-          class="singular">
-          <primary>compatibility, backwards</primary>
-        </indexterm><indexterm class="singular">
-          <primary>backwards compatibility</primary>
-        </indexterm><indexterm class="singular">
+      class="endofrange" startref="SERFORMsexp"></indexterm><indexterm class="singular">
           <primary>files</primary>
 
           <secondary>config files</secondary>

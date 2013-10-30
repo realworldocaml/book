@@ -33,7 +33,7 @@
     moreinfo="none">List</literal> module:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">List.find;;</userinput>
@@ -43,7 +43,7 @@
     succeed in finding a suitable element:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -65,7 +65,7 @@
     to extract the largest and smallest element of the list:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -93,7 +93,7 @@
     table isn't a failure of any sort:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
     (part 3)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -129,7 +129,7 @@
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-          url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/result.mli"
+          url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/result.mli"
           >OCaml</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">module Result : sig
@@ -146,7 +146,7 @@ end</programlisting>
       moreinfo="none">Core.Std</literal>. As such, we can write:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
       (part 4)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -190,7 +190,7 @@ end</programlisting>
       an error directly from a string:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
       (part 5)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -200,10 +200,12 @@ end</programlisting>
       <para>But you can also construct an <literal
       moreinfo="none">Error.t</literal> from a <emphasis>thunk</emphasis>,
       i.e., a function that takes a single argument of type <literal
-      moreinfo="none">unit</literal>:</para>
+        moreinfo="none">unit</literal>:<indexterm class="singular">
+          <primary>thunks</primary>
+        </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
       (part 6)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -227,7 +229,7 @@ end</programlisting>
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-          url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/sexpr.scm"
+          url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/sexpr.scm"
           >Scheme</ulink></para>
 
       <programlisting format="linespecific" language="scheme">(This (is an) (s expression))</programlisting>
@@ -244,7 +246,7 @@ end</programlisting>
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
       (part 7)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -262,7 +264,7 @@ end</programlisting>
       newly generated types:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
       (part 8)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -274,7 +276,7 @@ end</programlisting>
       <para>We can use this same idiom for generating an error:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
       (part 9)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -299,7 +301,7 @@ end</programlisting>
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
       (part 10)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -334,7 +336,7 @@ end</programlisting>
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
       (part 11)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -354,7 +356,7 @@ end</programlisting>
         nested series of <literal moreinfo="none">bind</literal>s:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
       (part 12)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -378,7 +380,7 @@ end</programlisting>
       linkend="concurrent-programming-with-async" />:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
       (part 13)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -409,7 +411,7 @@ end</programlisting>
       moreinfo="none">compute_bounds</literal> even shorter:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
       (part 14)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -452,7 +454,7 @@ end</programlisting>
     zero:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
     (part 15)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -463,7 +465,7 @@ end</programlisting>
     nested somewhere deep within it:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
     (part 16)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -476,7 +478,7 @@ end</programlisting>
     execution, never getting to the end of the list:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
     (part 17)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -491,7 +493,7 @@ end</programlisting>
     own:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
     (part 18)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -504,7 +506,7 @@ end</programlisting>
     other OCaml values:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
     (part 19)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -528,10 +530,6 @@ end</programlisting>
     moreinfo="none">exn</literal>, since the full set of possible exceptions
     is not known.<indexterm class="singular">
         <primary>exn type</primary>
-      </indexterm><indexterm class="singular">
-        <primary>type system</primary>
-
-        <secondary>open types</secondary>
       </indexterm></para>
 
     <para>The following function uses the <literal
@@ -539,7 +537,7 @@ end</programlisting>
     signal an error:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
     (part 20)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -571,7 +569,7 @@ end</programlisting>
     is a bit surprising when you first see it:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
     (part 21)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -589,7 +587,7 @@ end</programlisting>
     value:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
     (part 22)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -617,7 +615,7 @@ end</programlisting>
       exception. For example:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
       (part 23)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -631,7 +629,7 @@ end</programlisting>
       converters), we'll get something with more information:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
       (part 24)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -670,7 +668,7 @@ end</programlisting>
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
       (part 25)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -680,12 +678,7 @@ end</programlisting>
       <para>There are several other useful functions for raising exceptions,
       which can be found in the API documentation for the <literal
       moreinfo="none">Common</literal> and <literal
-      moreinfo="none">Exn</literal> modules in Core.<indexterm
-          class="singular">
-          <primary>Exn module</primary>
-
-          <secondary>raising exceptions with</secondary>
-        </indexterm></para>
+      moreinfo="none">Exn</literal> modules in Core.</para>
 
       <para>Another important way of throwing an exception is the <literal
       moreinfo="none">assert</literal> directive. <literal
@@ -697,7 +690,7 @@ end</programlisting>
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
       (part 26)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -730,7 +723,7 @@ end</programlisting>
       <literal>assert</literal>:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
       (part 27)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -774,7 +767,7 @@ end</programlisting>
       statement. Here's the basic syntax.</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/try_with.syntax">Syntax</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/try_with.syntax">Syntax</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">try <emphasis>&lt;expr&gt;</emphasis> with
 | <emphasis>&lt;pat1&gt;</emphasis> -&gt; <emphasis>&lt;expr1&gt;</emphasis>
@@ -815,7 +808,7 @@ end</programlisting>
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
       (part 28)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -852,7 +845,7 @@ end</programlisting>
       moreinfo="none">load_reminders</literal>:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
       (part 29)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -868,7 +861,7 @@ end</programlisting>
       moreinfo="none">with_file</literal> that automates this pattern:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
       (part 30)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -903,7 +896,7 @@ end</programlisting>
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
       (part 31)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -933,7 +926,7 @@ end</programlisting>
       happen:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
       (part 32)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -949,7 +942,7 @@ end</programlisting>
       it's very clear what part of the code failed:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
       (part 33)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -969,7 +962,7 @@ end</programlisting>
       moreinfo="none">List.Assoc.find</literal>, instead:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
       (part 34)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1006,7 +999,7 @@ end</programlisting>
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-          url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/blow_up.ml"
+          url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/blow_up.ml"
           >OCaml</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">open Core.Std
@@ -1026,7 +1019,7 @@ let () =
       error:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/build_blow_up.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/build_blow_up.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild blow_up.byte</userinput>
@@ -1059,7 +1052,7 @@ let () =
       empty:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/build_blow_up_notrace.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/build_blow_up_notrace.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild blow_up.byte</userinput>
@@ -1082,7 +1075,7 @@ let () =
       using the <literal moreinfo="none">core_bench</literal> package:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-          url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/exn_cost.ml"
+          url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/exn_cost.ml"
           >OCaml</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">open Core.Std
@@ -1119,12 +1112,10 @@ let () =
       to do the control flow back to the caller.</para>
 
       <para>If we run this with stacktraces on, the benchmark results look
-      like this:<indexterm class="singular">
-          <primary>stacktraces</primary>
-        </indexterm></para>
+      like this:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/run_exn_cost.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/run_exn_cost.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">corebuild -pkg core_bench exn_cost.native</userinput>
@@ -1143,7 +1134,7 @@ let () =
         results look like this:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/run_exn_cost_notrace.out">Terminal</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/run_exn_cost_notrace.out">Terminal</ulink></para>
 
       <programlisting format="linespecific" language="console"><prompt
           moreinfo="none">$ </prompt><userinput moreinfo="none">OCAMLRUNPARAM= ./exn_cost.native -ascii cycles</userinput>
@@ -1183,7 +1174,7 @@ let () =
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
       (part 35)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1200,7 +1191,7 @@ let () =
       moreinfo="none">try_with</literal> functions. So, we could write:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
       (part 36)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1213,7 +1204,7 @@ let () =
       <para>And then we can reraise that exception:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/error-handling/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/error-handling/main.topscript">OCaml utop</ulink>
       (part 37)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt

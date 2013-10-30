@@ -38,7 +38,7 @@
 
     <para role="sourcecode">
       <ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/let.syntax"
+        url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/let.syntax"
         >Syntax</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">let <emphasis>&lt;variable&gt;</emphasis> = <emphasis>&lt;expr&gt;</emphasis></programlisting>
@@ -67,7 +67,7 @@
     <para>Here's a simple example:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink></para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
         moreinfo="none"># </prompt><userinput moreinfo="none">let x = 3;;</userinput>
@@ -82,7 +82,7 @@
     the following syntax:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/let_in.syntax">Syntax</ulink></para>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/let_in.syntax">Syntax</ulink></para>
 
     <programlisting format="linespecific" language="ocaml">let <emphasis>&lt;variable&gt;</emphasis> = <emphasis>&lt;expr1&gt;</emphasis> in <emphasis>&lt;expr2&gt;</emphasis></programlisting>
 
@@ -93,7 +93,7 @@
         >expr1</literal></emphasis>. Here's how it looks in practice:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
     (part 1)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -112,7 +112,7 @@
     now:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
     (part 2)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -133,7 +133,7 @@
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
     (part 3)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -154,7 +154,7 @@
     languages reappears:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
     (part 4)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -173,7 +173,7 @@
       </indexterm></para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
     (part 5)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -192,7 +192,7 @@
     we had instead written this purposefully confusing bit of code:</para>
 
     <para role="sourcecode"><ulink role="orm:hideurl:ital"
-    url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+    url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
     (part 6)</para>
 
     <programlisting format="linespecific" language="ocaml"><prompt
@@ -270,7 +270,7 @@
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 7)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -296,7 +296,7 @@
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 8)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -317,7 +317,7 @@
       statement to handle such cases explicitly:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 9)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -363,7 +363,7 @@
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 10)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -375,7 +375,7 @@
       argument:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 11)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -387,7 +387,7 @@
       the most common use case for anonymous functions:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 12)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -397,7 +397,7 @@
       <para>You can even stuff them into a data structure:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 13)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -423,7 +423,7 @@
       <literal>let</literal> binding:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 14)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -438,7 +438,7 @@
       definition:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 15)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -462,7 +462,7 @@
           </indexterm></para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
         (part 16)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -494,7 +494,7 @@
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 17)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -510,7 +510,7 @@
       <literal moreinfo="none">fun</literal> keyword:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 18)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -543,7 +543,7 @@
         </indexterm></para>
 
       <para role="sourcecode">OCaml: <ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/abs_diff.mli">variables-and-functions/abs_diff.mli</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/abs_diff.mli">variables-and-functions/abs_diff.mli</ulink></para>
 
       <programlisting format="linespecific" language="ocaml">val abs_diff : int -&gt; (int -&gt; int)</programlisting>
 
@@ -557,7 +557,7 @@
       of a given number from <literal moreinfo="none">3</literal>:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 19)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -584,7 +584,7 @@
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 20)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -601,7 +601,7 @@
       different arguments. So, we could write:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 21)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -650,7 +650,7 @@
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 22)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -681,7 +681,7 @@
       inefficient) example:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 23)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -740,7 +740,7 @@
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 24)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -756,7 +756,7 @@
       can use it as an ordinary prefix function:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 25)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -775,9 +775,9 @@
       following set:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/operators.syntax">Syntax</ulink></para>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/operators.syntax">Syntax</ulink></para>
 
-      <programlisting format="linespecific" language="">! $ % &amp; * + - . / : &lt; = &gt; ? @ ^ | ~</programlisting>
+      <programlisting format="linespecific">! $ % &amp; * + - . / : &lt; = &gt; ? @ ^ | ~</programlisting>
 
       <para><literal>or</literal> is one of a handful of predetermined
       strings, including <literal moreinfo="none">mod</literal>, the modulus
@@ -789,7 +789,7 @@
       pairs:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 26)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -803,7 +803,7 @@
       example:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 27)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -818,7 +818,7 @@
       begins or ends with <literal moreinfo="none">*</literal>:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 28)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -831,11 +831,7 @@
       forms into groups from highest to lowest precedence, explaining how each
       behaves syntactically. We write <literal moreinfo="none">!</literal>...
       to indicate the class of operators beginning with <literal
-      moreinfo="none">!</literal>.<indexterm class="singular">
-          <primary>operators</primary>
-
-          <secondary>prefixes and usage</secondary>
-        </indexterm></para>
+      moreinfo="none">!</literal>.</para>
 
       <table id="table2_1">
         <title>Precedence and associativity</title>
@@ -1003,7 +999,7 @@
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 29)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1018,7 +1014,7 @@
       to:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 30)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1034,7 +1030,7 @@
       described previously:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 31)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1057,11 +1053,7 @@
         </indexterm><indexterm class="singular">
           <primary>duplicates, removing</primary>
         </indexterm><indexterm class="singular">
-          <primary>list.dedup</primary>
-        </indexterm><indexterm class="singular">
-          <primary>operators</primary>
-
-          <secondary>sequencing operators</secondary>
+          <primary>List.dedup</primary>
         </indexterm><indexterm class="singular">
           <primary>operators</primary>
 
@@ -1069,7 +1061,7 @@
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 32)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let path = "/usr/bin:/usr/local/bin:/bin:/sbin";;</userinput>
@@ -1089,7 +1081,7 @@
       verbose:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 33)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let split_path = String.split ~on:':' path in</userinput>
@@ -1112,7 +1104,7 @@
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 34)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1125,7 +1117,7 @@
       function for printing out a list of strings:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 35)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1140,7 +1132,7 @@
         like (^&gt;):</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 36)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1192,7 +1184,7 @@
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 37)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1208,7 +1200,7 @@
       with a <literal moreinfo="none">match</literal>:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 38)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1224,7 +1216,7 @@
       (curried) function with a pattern match on the second argument:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 39)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1265,7 +1257,7 @@
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 40)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1276,7 +1268,7 @@
       As you can see, the arguments can be provided in any order:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 41)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1298,7 +1290,7 @@
         </indexterm></para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 42)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">let num = 3 in</userinput>
@@ -1329,7 +1321,7 @@
           that array will ever shrink when elements are removed:</para>
 
           <para role="sourcecode"><ulink role="orm:hideurl:ital"
-              url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/htable_sig1.ml"
+              url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/htable_sig1.ml"
               >OCaml</ulink></para>
 
           <programlisting format="linespecific" language="ocaml">val create_hashtable : int -&gt; bool -&gt; ('a,'b) Hashtable.t</programlisting>
@@ -1339,7 +1331,7 @@
           immediately clear:</para>
 
           <para role="sourcecode"><ulink role="orm:hideurl:ital"
-              url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/htable_sig2.ml"
+              url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/htable_sig2.ml"
               >OCaml</ulink></para>
 
           <programlisting format="linespecific" language="ocaml">val create_hashtable :
@@ -1357,17 +1349,17 @@
           for a function that extracts a substring:</para>
 
           <para role="sourcecode"><ulink role="orm:hideurl:ital"
-              url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/substring_sig1.ml"
+              url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/substring_sig1.ml"
               >OCaml</ulink></para>
 
           <programlisting format="linespecific" language="ocaml">val substring: string -&gt; int -&gt; int -&gt; string</programlisting>
 
           <para>Here, the two <literal>ints</literal> are the starting position and length of the
             substring to extract, respectively. We can make this fact more obvious from the
-            signature by adding labels:</para>
+            signature by adding labeled:</para>
 
           <para role="sourcecode"><ulink role="orm:hideurl:ital"
-              url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/substring_sig2.ml"
+              url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/substring_sig2.ml"
               >OCaml</ulink></para>
 
           <programlisting format="linespecific" language="ocaml">val substring: string -&gt; pos:int -&gt; len:int -&gt; string</programlisting>
@@ -1388,7 +1380,7 @@
           as in the following example from earlier in the chapter:</para>
 
           <para role="sourcecode"><ulink role="orm:hideurl:ital"
-          url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+          url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
           (part 43)</para>
 
           <programlisting format="linespecific" language="ocaml"><prompt moreinfo="none"># </prompt><userinput moreinfo="none">String.split ~on:':' path</userinput>
@@ -1423,7 +1415,7 @@
           </indexterm></para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
         (part 44)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1439,7 +1431,7 @@
         to change the order in which the labeled arguments were listed:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
         (part 45)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1450,7 +1442,7 @@
         function that has a different order</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
         (part 46)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1461,7 +1453,7 @@
         moreinfo="none">apply_to_tuple_2</literal>.</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
         (part 47)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1474,7 +1466,7 @@
         moreinfo="none">apply_to_tuple</literal>:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
         (part 48)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1495,11 +1487,7 @@
       <para>An optional argument is like a labeled argument that the caller
       can choose whether or not to provide. Optional arguments are passed in
       using the same syntax as labeled arguments, and, like labeled arguments,
-      can be provided in any order.<indexterm class="singular">
-          <primary>optional arguments</primary>
-
-          <secondary>separators for</secondary>
-        </indexterm><indexterm class="startofrange" id="ARGopt">
+      can be provided in any order.<indexterm class="startofrange" id="ARGopt">
           <primary>arguments</primary>
 
           <secondary>optional arguments</secondary>
@@ -1515,7 +1503,7 @@
       concatenation:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 49)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1546,7 +1534,7 @@
       concisely:</para>
 
       <para role="sourcecode"><ulink role="orm:hideurl:ital"
-      url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+      url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
       (part 50)</para>
 
       <programlisting format="linespecific" language="ocaml"><prompt
@@ -1595,7 +1583,7 @@
           </indexterm></para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
         (part 51)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1609,7 +1597,7 @@
         moreinfo="none">sep</literal>:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
         (part 52)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1627,7 +1615,7 @@
         function as follows:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
         (part 53)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1650,7 +1638,7 @@
         the <literal moreinfo="none">?</literal> syntax:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
         (part 54)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1699,7 +1687,7 @@
           </indexterm></para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
         (part 55)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1729,7 +1717,7 @@
         moreinfo="none">numeric_deriv</literal>:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-            url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/numerical_deriv_alt_sig.mli"
+            url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/numerical_deriv_alt_sig.mli"
             >OCaml</ulink></para>
 
         <programlisting format="linespecific" language="ocaml">val numeric_deriv :
@@ -1748,7 +1736,7 @@
         orders:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
         (part 56)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1769,10 +1757,12 @@
         the fact that <literal moreinfo="none">f</literal> is used with
         different argument orders if we provide explicit type information.
         Thus, the following code compiles without error, due to the type
-        annotation on <literal moreinfo="none">f</literal>:</para>
+        annotation on <literal moreinfo="none">f</literal>:<indexterm class="singular">
+          <primary>type annotations</primary>
+        </indexterm></para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
         (part 57)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1798,7 +1788,7 @@
         argument itself:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
         (part 58)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1811,7 +1801,7 @@
         argument?</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
         (part 59)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1826,7 +1816,7 @@
         rejected:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
         (part 60)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1846,7 +1836,7 @@
         in the second position:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
         (part 61)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1857,7 +1847,7 @@
         optional argument to be erased.</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
         (part 62)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1875,7 +1865,7 @@
         write:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
         (part 63)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1887,7 +1877,7 @@
         warning:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
         (part 64)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
@@ -1902,7 +1892,7 @@
         moreinfo="none">sep</literal> argument to be provided:</para>
 
         <para role="sourcecode"><ulink role="orm:hideurl:ital"
-        url="https://github.com/realworldocaml/examples/tree/beta3/code/variables-and-functions/main.topscript">OCaml utop</ulink>
+        url="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript">OCaml utop</ulink>
         (part 65)</para>
 
         <programlisting format="linespecific" language="ocaml"><prompt
