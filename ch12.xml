@@ -1339,7 +1339,7 @@ end</programlisting>
         <primary>multiple inheritance</primary>
 
         <secondary>name resolution in</secondary>
-      </indexterm><indexterm class="startofrange" id="inherit">
+      </indexterm><indexterm class="startofrange">
         <primary>inheritance</primary>
       </indexterm><indexterm class="singular">
         <primary>classes</primary>
