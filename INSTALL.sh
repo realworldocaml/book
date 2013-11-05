@@ -14,7 +14,9 @@ opam install --yes \
   menhir \
   utop \
   cmdliner \
-  cow 
+  cow \
+  ocp-indent \
+  ctypes
 
 echo You also need Pygments installed.
 echo This is python-pygments in Debian
