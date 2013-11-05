@@ -37,7 +37,7 @@ body {
 /* Navigation. */
 
 .navigation {
-    margin-top: 73px;
+    margin-top: 125px;
 }
 
 .navigation ul {
@@ -46,8 +46,8 @@ body {
 }
 
 .navigation > ul > li {
-    font-size: 15px;
-    line-height: 22px;
+    font-size: 14px;
+    line-height: 21px;
     margin-bottom: 0;
 }
 
@@ -58,7 +58,7 @@ body {
 .navigation > ul > li:first-child > a,
 .navigation > ul > li:first-child > a.here,
 .navigation > ul > li:first-child > a:hover {
-    font-size: 17px;
+    font-size: 15px;
     border-bottom: 1px #8E8880 solid;
     color: #000000;
     display: table;
