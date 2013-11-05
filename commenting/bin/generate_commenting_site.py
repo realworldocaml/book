@@ -76,12 +76,12 @@ def parse_args():
     )
     parser.add_argument("--github-user",
         dest = "github_user",
-        default = "ocamllabs",  # TODO: Make the public repo owner default.
+        default = "realworldocaml",  # TODO: Make the public repo owner default.
         help = "The user that owns the GitHub repo to use for issues.",
     )
     parser.add_argument("--github-repo",
         dest = "github_repo",
-        default = "rwo-comments",
+        default = "book",
         help = "The name of the GitHub repo to use for issues.",
     )
     parser.add_argument("--github-milestone",

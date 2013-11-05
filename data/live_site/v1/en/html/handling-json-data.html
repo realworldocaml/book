@@ -15,8 +15,8 @@
             require.config({
                 config: {
                     gitHub: {
-                        user: 'ocamllabs',
-                        repo: 'rwo\u002Dcomments',
+                        user: 'realworldocaml',
+                        repo: 'book',
                         milestone: 'v1',
                         page: 'handling\u002Djson\u002Ddata.html'
                     }
@@ -112,27 +112,27 @@
                 
                 
 
-    <p id="idm259602605152">Data serialization, i.e., converting data to and from a sequence of
+    <p id="idm449009464560">Data serialization, i.e., converting data to and from a sequence of
   bytes that's suitable for writing to disk or sending across the network, is
   an important and common programming task. You often have to match someone
   else's data format (such as XML), sometimes you need a highly efficient
   format, and other times you want something that is easy for humans to edit.
   To this end, OCaml libraries provide several techniques for data
-  serialization depending on what your problem is.<a name="idm259602604400"></a><a name="SERjson"></a><a name="DATjson"></a></p><p id="idm259602599872">We'll start by using the popular and simple JSON data format and then
+  serialization depending on what your problem is.<a name="idm449009463808"></a><a name="SERjson"></a><a name="DATjson"></a></p><p id="idm449009459280">We'll start by using the popular and simple JSON data format and then
   look at other serialization formats later in the book. This chapter
   introduces you to a couple of new techniques that glue together the basic
-  ideas from Part I of the book by using:</p><ul><li><p id="idm259602598704"><span><em>Polymorphic variants</em></span> to write more extensible
+  ideas from Part I of the book by using:</p><ul><li><p id="idm449009458112"><span><em>Polymorphic variants</em></span> to write more extensible
       libraries and protocols (but still retain the ability to extend them if
-      needed)</p></li><li><p id="idm259602597520"><span><em>Functional combinators</em></span> to compose common
-      operations over data structures in a type-safe way</p></li><li><p id="idm259602596384">External tools to generate boilerplate OCaml modules and
-      signatures from external specification files</p></li></ul><section id="json-basics"><h1>JSON Basics</h1><p id="idm259602594736">JSON is a lightweight data-interchange format often used in web
+      needed)</p></li><li><p id="idm449009456928"><span><em>Functional combinators</em></span> to compose common
+      operations over data structures in a type-safe way</p></li><li><p id="idm449009455792">External tools to generate boilerplate OCaml modules and
+      signatures from external specification files</p></li></ul><section id="json-basics"><h1>JSON Basics</h1><p id="idm449009454144">JSON is a lightweight data-interchange format often used in web
     services and browsers. It's described in <a href="http://www.ietf.org/rfc/rfc4627.txt" target="_top">RFC4627</a> and is easier to
     parse and generate than alternatives such as XML. You'll run into JSON
     very often when working with modern web APIs, so we'll cover several
-    different ways to manipulate it in this chapter.<a name="idm259602593472"></a></p><p id="idm259602592448">JSON consists of two basic structures: an unordered collection of
+    different ways to manipulate it in this chapter.<a name="idm449009452880"></a></p><p id="idm449009451856">JSON consists of two basic structures: an unordered collection of
     key/value pairs, and an ordered list of values. Values can be strings,
     Booleans, floats, integers, or null. Let's see what a JSON record for an
-    example book description looks like:<a name="idm259602591920"></a><a name="idm259602590384"></a></p><div class="rwocode"><pre><code><div class="highlight"><span class="p">{</span>
+    example book description looks like:<a name="idm449009451328"></a><a name="idm449009449792"></a></p><div class="rwocode"><pre><code><div class="highlight"><span class="p">{</span>
   <span class="nt">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Real World OCaml&quot;</span><span class="p">,</span>
   <span class="nt">&quot;tags&quot;</span> <span class="p">:</span> <span class="p">[</span> <span class="s2">&quot;functional programming&quot;</span><span class="p">,</span> <span class="s2">&quot;ocaml&quot;</span><span class="p">,</span> <span class="s2">&quot;algorithms&quot;</span> <span class="p">],</span>
   <span class="nt">&quot;pages&quot;</span><span class="p">:</span> <span class="mi">450</span><span class="p">,</span>
@@ -143,27 +143,27 @@
   <span class="p">],</span>
   <span class="nt">&quot;is_online&quot;</span><span class="p">:</span> <span class="kc">true</span>
 <span class="p">}</span>
-</div></code></pre><div class="rwocodeinfo">JSON ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/book.json">json/book.json</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602586832">The outermost JSON value is usually a record (delimited by the curly
+</div></code></pre><div class="rwocodeinfo">JSON ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/book.json">json/book.json</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009446240">The outermost JSON value is usually a record (delimited by the curly
     braces) and contains an unordered set of key/value pairs. The keys must be
     strings, but values can be any JSON type. In the preceding example,
     <code>tags</code> is a string list, while the
     <code>authors</code> field contains a list of
     records. Unlike OCaml lists, JSON lists can contain multiple different
-    JSON types within a single list.</p><p id="idm259602584736">This free-form nature of JSON types is both a blessing and a curse.
+    JSON types within a single list.</p><p id="idm449009444144">This free-form nature of JSON types is both a blessing and a curse.
     It's very easy to generate JSON values, but code that parses them also has
     to handle subtle variations in how the values are represented. For
     example, what if the preceding <code>pages</code>
-    value is actually represented as a string value of &quot;<code>450</code>&quot; instead of an integer?<a name="idm259602582864"></a></p><p id="idm259602581424">Our first task is to parse the JSON into a more structured OCaml
+    value is actually represented as a string value of &quot;<code>450</code>&quot; instead of an integer?<a name="idm449009442272"></a></p><p id="idm449009440832">Our first task is to parse the JSON into a more structured OCaml
     type so that we can use static typing more effectively. When manipulating
     JSON in Python or Ruby, you might write unit tests to check that you have
     handled unusual inputs. The OCaml model prefers compile-time static
     checking as well as unit tests. For example, using pattern matching can
     warn you if you've not checked that a value can be <code>Null</code> as well as contain an actual
-    value.<a name="idm259602580048"></a><a name="idm259602578752"></a><a name="idm259602577856"></a><a name="idm259602576944"></a></p><aside class="note"><h1>Installing the Yojson Library</h1><p id="idm259602575248">There are several JSON libraries available for OCaml. For this
+    value.<a name="idm449009439456"></a><a name="idm449009438160"></a><a name="idm449009437264"></a><a name="idm449009436352"></a></p><aside class="note"><h1>Installing the Yojson Library</h1><p id="idm449009434656">There are several JSON libraries available for OCaml. For this
       chapter, we've picked the <a href="http://mjambon.com/yojson.html" target="_top">OCaml</a> library by Martin
       Jambon. It's easiest to install via OPAM by running <code>opam install yojson</code>. See <a href="http://realworldocaml.org/install" target="_top">this Real World OCaml page</a> for installation instructions if you haven't
-      already got OPAM. Once installed, you can open it in the <span><strong>utop</strong></span> toplevel by:</p><div class="rwocode"><pre><code># <span class="keyword7">#require</span> <span class="keyword7">&quot;yojson&quot;</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"> </div># <span class="keyword1">open</span> <span class="keyword6">Yojson </span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"> </div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/install.topscript">json/install.topscript</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></aside></section><section id="parsing-json-with-yojson"><h1>Parsing JSON with Yojson</h1><p id="idm259602566496">The JSON specification has very few data types, and the <code>Yojson.Basic.json</code> type that follows is
-    sufficient to express any valid JSON structure:<a name="idm259602565440"></a><a name="idm259602564128"></a></p><div class="rwocode"><pre><code><span class="keyword4">type</span> json <span class="keyword2">=</span> <span class="keyword2">[</span>
+      already got OPAM. Once installed, you can open it in the <span><strong>utop</strong></span> toplevel by:</p><div class="rwocode"><pre><code># <span class="keyword7">#require</span> <span class="keyword7">&quot;yojson&quot;</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"> </div># <span class="keyword1">open</span> <span class="keyword6">Yojson </span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"> </div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/install.topscript">json/install.topscript</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></aside></section><section id="parsing-json-with-yojson"><h1>Parsing JSON with Yojson</h1><p id="idm449009425904">The JSON specification has very few data types, and the <code>Yojson.Basic.json</code> type that follows is
+    sufficient to express any valid JSON structure:<a name="idm449009424848"></a><a name="idm449009423536"></a></p><div class="rwocode"><pre><code><span class="keyword4">type</span> json <span class="keyword2">=</span> <span class="keyword2">[</span>
   <span class="keyword2">|</span> <span class="keyword6">`Assoc </span><span class="keyword2">of</span> <span class="keyword2">(</span><span class="keyword3">string</span> <span class="keyword2">*</span> json<span class="keyword2">)</span> <span class="keyword3">list</span>
   <span class="keyword2">|</span> <span class="keyword6">`Bool </span><span class="keyword2">of</span> bool
   <span class="keyword2">|</span> <span class="keyword6">`Float </span><span class="keyword2">of</span> <span class="keyword3">float</span>
@@ -171,18 +171,18 @@
   <span class="keyword2">|</span> <span class="keyword6">`List </span><span class="keyword2">of</span> json <span class="keyword3">list</span>
   <span class="keyword2">|</span> <span class="keyword6">`Null
 </span>  <span class="keyword2">|</span> <span class="keyword6">`String </span><span class="keyword2">of</span> <span class="keyword3">string</span>
-<span class="keyword2">]</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/yojson_basic.mli">json/yojson_basic.mli</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602560336">Some interesting properties should leap out at you after reading
-    this definition:</p><ul><li><p id="idm259602559344">The <code>json</code> type is
+<span class="keyword2">]</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/yojson_basic.mli">json/yojson_basic.mli</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009419744">Some interesting properties should leap out at you after reading
+    this definition:</p><ul><li><p id="idm449009418752">The <code>json</code> type is
         <span><em>recursive</em></span>, which is to say that some of the tags
         refer back to the overall <code>json</code>
         type. In particular, <code>Assoc</code> and
         <code>List</code> types can contain references
         to further JSON values of different types. This is unlike the OCaml
-        lists, whose contents must be of a uniform type.<a name="idm259602555776"></a></p></li><li><p id="idm259602553728">The definition specifically includes a <code>Null</code> variant for empty fields. OCaml doesn't
+        lists, whose contents must be of a uniform type.<a name="idm449009415184"></a></p></li><li><p id="idm449009413136">The definition specifically includes a <code>Null</code> variant for empty fields. OCaml doesn't
         allow null values by default, so this must be encoded
-        explicitly.</p></li><li><p id="idm259602552144">The type definition uses polymorphic variants and not normal
+        explicitly.</p></li><li><p id="idm449009411552">The type definition uses polymorphic variants and not normal
         variants. This will become significant later, when we extend it with
-        custom extensions to the JSON format.<a name="idm259602551696"></a></p></li></ul><p id="idm259602549760">Let's parse the earlier JSON example into this type now. The first
+        custom extensions to the JSON format.<a name="idm449009411104"></a></p></li></ul><p id="idm449009409168">Let's parse the earlier JSON example into this type now. The first
     stop is the <code>Yojson.Basic</code> documentation,
     where we find these helpful functions:</p><div class="rwocode"><pre><code><span class="keyword4">val</span> from_string <span class="keyword2">:</span> ?buf<span class="keyword2">:</span><span class="keyword5">Bi_outbuf.</span>t -<span class="keyword2">&gt;</span> ?fname<span class="keyword2">:</span><span class="keyword3">string</span> -<span class="keyword2">&gt;</span> ?lnum<span class="keyword2">:</span><span class="keyword3">int</span> -<span class="keyword2">&gt;</span>
    <span class="keyword3">string</span> -<span class="keyword2">&gt;</span> json
@@ -201,16 +201,16 @@
 <span class="keyword4">val</span> from_channel <span class="keyword2">:</span> ?buf<span class="keyword2">:</span><span class="keyword5">Bi_outbuf.</span>t -<span class="keyword2">&gt;</span> ?fname<span class="keyword2">:</span><span class="keyword3">string</span> -<span class="keyword2">&gt;</span> ?lnum<span class="keyword2">:</span><span class="keyword3">int</span> -<span class="keyword2">&gt;</span>
   in_channel -<span class="keyword2">&gt;</span> json
   <span class="comments">(** Read a JSON value from a channel.
-      See [from_string] for the meaning of the optional arguments. *)</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/yojson_basic.mli">json/yojson_basic.mli</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602546064">When first reading these interfaces, you can generally ignore the
+      See [from_string] for the meaning of the optional arguments. *)</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/yojson_basic.mli">json/yojson_basic.mli</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009405472">When first reading these interfaces, you can generally ignore the
     optional arguments (which have the question marks in the type signature),
     since they should have sensible defaults. In the preceding signature, the
     optional arguments offer finer control over the memory buffer allocation
-    and error messages from parsing incorrect JSON.</p><p id="idm259602545328">The type signature for these functions with the optional elements
+    and error messages from parsing incorrect JSON.</p><p id="idm449009404736">The type signature for these functions with the optional elements
     removed makes their purpose much clearer. The three ways of parsing JSON
     are either directly from a string, from a file on a filesystem, or via a
     buffered input channel:</p><div class="rwocode"><pre><code><span class="keyword4">val</span> from_string  <span class="keyword2">:</span> <span class="keyword3">string</span>     -<span class="keyword2">&gt;</span> json
 <span class="keyword4">val</span> from_file    <span class="keyword2">:</span> <span class="keyword3">string</span>     -<span class="keyword2">&gt;</span> json
-<span class="keyword4">val</span> from_channel <span class="keyword2">:</span> in_channel -<span class="keyword2">&gt;</span> json</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/yojson_basic_simple.mli">json/yojson_basic_simple.mli</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602542288">The next example shows both the <code>string</code> and
+<span class="keyword4">val</span> from_channel <span class="keyword2">:</span> in_channel -<span class="keyword2">&gt;</span> json</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/yojson_basic_simple.mli">json/yojson_basic_simple.mli</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009401696">The next example shows both the <code>string</code> and
     <code>file</code> functions in action, assuming the JSON record is
     stored in a file called <span><em>book.json</em></span>:</p><div class="rwocode"><pre><code><span class="keyword1">open</span> <span class="keyword5">Core.Std
 </span>
@@ -222,15 +222,15 @@
   <span class="comments">(* Use the file JSON constructor *)</span>
   <span class="keyword4">let</span> json2 <span class="keyword2">=</span> <span class="keyword5">Yojson.</span><span class="keyword5">Basic.</span>from_file <span class="keyword7">&quot;book.json&quot;</span> <span class="keyword4">in</span>
   <span class="comments">(* Test that the two values are the same *)</span>
-  print_endline <span class="keyword2">(</span><span class="keyword1">if</span> json1 <span class="keyword2">=</span> json2 <span class="keyword1">then</span> <span class="keyword7">&quot;OK&quot;</span> <span class="keyword1">else</span> <span class="keyword7">&quot;FAIL&quot;</span><span class="keyword2">)</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/read_json.ml">json/read_json.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602538128">You can build this by running <span><strong>corebuild</strong></span>:</p><div class="rwocode"><pre><code><div class="highlight"><span class="gp">$</span> corebuild -pkg yojson read_json.native
+  print_endline <span class="keyword2">(</span><span class="keyword1">if</span> json1 <span class="keyword2">=</span> json2 <span class="keyword1">then</span> <span class="keyword7">&quot;OK&quot;</span> <span class="keyword1">else</span> <span class="keyword7">&quot;FAIL&quot;</span><span class="keyword2">)</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/read_json.ml">json/read_json.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009397536">You can build this by running <span><strong>corebuild</strong></span>:</p><div class="rwocode"><pre><code><div class="highlight"><span class="gp">$</span> corebuild -pkg yojson read_json.native
 </div><div class="highlight"><span class="gp">$</span> ./read_json.native
-</div><div class="rwocodeout">OK</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/run_read_json.out">json/run_read_json.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602532192">The <code>from_file</code> function accepts an
+</div><div class="rwocodeout">OK</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/run_read_json.out">json/run_read_json.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009391600">The <code>from_file</code> function accepts an
     input filename and takes care of opening and closing it for you. It's far
     more common to use <code>from_string</code> to
     construct JSON values though, since these strings come in via a network
     connection (we'll see more of this in <a href="concurrent-programming-with-async.html">Chapter 18, <i>Concurrent Programming with Async</i></a>) or a database. Finally,
     the example checks that the two input mechanisms actually resulted in the
-    same OCaml data structure.</p></section><section id="selecting-values-from-json-structures"><h1>Selecting Values from JSON Structures</h1><p id="idm259602528496">Now that we've figured out how to parse the example JSON into an
+    same OCaml data structure.</p></section><section id="selecting-values-from-json-structures"><h1>Selecting Values from JSON Structures</h1><p id="idm449009387904">Now that we've figured out how to parse the example JSON into an
     OCaml value, let's manipulate it from OCaml code and extract specific
     fields:<a name="VALjson"></a><a name="JSONselval"></a></p><div class="rwocode"><pre><code><span class="keyword1">open</span> <span class="keyword5">Core.Std
 </span>
@@ -258,46 +258,46 @@
     <span class="keyword2">|</span> <span class="keyword6">Some </span>true -<span class="keyword2">&gt;</span> <span class="keyword7">&quot;yes&quot;</span>
     <span class="keyword2">|</span> <span class="keyword6">Some </span>false -<span class="keyword2">&gt;</span> <span class="keyword7">&quot;no&quot;</span> <span class="keyword4">in</span>
   printf <span class="keyword7">&quot;Online: %s\n&quot;</span> <span class="keyword2">(</span>string_of_bool_option is_online<span class="keyword2">)</span><span class="keyword2">;</span>
-  printf <span class="keyword7">&quot;Translated: %s\n&quot;</span> <span class="keyword2">(</span>string_of_bool_option is_translated<span class="keyword2">)</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/parse_book.ml">json/parse_book.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602522432">Now build and run this in the same way as the previous
+  printf <span class="keyword7">&quot;Translated: %s\n&quot;</span> <span class="keyword2">(</span>string_of_bool_option is_translated<span class="keyword2">)</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/parse_book.ml">json/parse_book.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009381840">Now build and run this in the same way as the previous
     example:</p><div class="rwocode"><pre><code><div class="highlight"><span class="gp">$</span> corebuild -pkg yojson parse_book.native
 </div><div class="highlight"><span class="gp">$</span> ./parse_book.native
-</div><div class="rwocodeout">Title: Real World OCaml (450)</div><div class="rwocodeout">Authors: Jason Hickey, Anil Madhavapeddy, Yaron Minsky</div><div class="rwocodeout">Tags: functional programming, ocaml, algorithms</div><div class="rwocodeout">Online: yes</div><div class="rwocodeout">Translated: &lt;unknown&gt;</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/run_parse_book.out">json/run_parse_book.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602514512">This code introduces the <code>Yojson.Basic.Util</code> module, which contains
+</div><div class="rwocodeout">Title: Real World OCaml (450)</div><div class="rwocodeout">Authors: Jason Hickey, Anil Madhavapeddy, Yaron Minsky</div><div class="rwocodeout">Tags: functional programming, ocaml, algorithms</div><div class="rwocodeout">Online: yes</div><div class="rwocodeout">Translated: &lt;unknown&gt;</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/run_parse_book.out">json/run_parse_book.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009373920">This code introduces the <code>Yojson.Basic.Util</code> module, which contains
     <span><em>combinator</em></span> functions that let you easily map a JSON
-    object into a more strongly typed OCaml value.<a name="idm259602513152"></a><a name="idm259602511840"></a></p><section><h1><b>Functional Combinators</b></h1><p id="idm259602510128">Combinators are a design pattern that crops up quite often in
+    object into a more strongly typed OCaml value.<a name="idm449009372560"></a><a name="idm449009371248"></a></p><section><h1><b>Functional Combinators</b></h1><p id="idm449009369536">Combinators are a design pattern that crops up quite often in
       functional programming. John Hughes defines them as &quot;a function which
       builds program fragments from program fragments.&quot; In a functional
       language, this generally means higher-order functions that combine other
-      functions to apply useful transformations over values.</p><p id="idm259602509392">You've already run across several of these in the <code>List</code> module:</p><div class="rwocode"><pre><code><span class="keyword4">val</span> map  <span class="keyword2">:</span> 'a <span class="keyword3">list</span> -<span class="keyword2">&gt;</span> f<span class="keyword2">:</span><span class="keyword2">(</span>'a -<span class="keyword2">&gt;</span> 'b<span class="keyword2">)</span>   -<span class="keyword2">&gt;</span> 'b <span class="keyword3">list</span>
-<span class="keyword4">val</span> fold <span class="keyword2">:</span> 'a <span class="keyword3">list</span> -<span class="keyword2">&gt;</span> init<span class="keyword2">:</span>'accum -<span class="keyword2">&gt;</span> f<span class="keyword2">:</span><span class="keyword2">(</span>'accum -<span class="keyword2">&gt;</span> 'a -<span class="keyword2">&gt;</span> 'accum<span class="keyword2">)</span> -<span class="keyword2">&gt;</span> 'accum</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/list_excerpt.mli">json/list_excerpt.mli</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602505856"><code>map</code> and <code>fold</code> are extremely common combinators that
+      functions to apply useful transformations over values.</p><p id="idm449009368800">You've already run across several of these in the <code>List</code> module:</p><div class="rwocode"><pre><code><span class="keyword4">val</span> map  <span class="keyword2">:</span> 'a <span class="keyword3">list</span> -<span class="keyword2">&gt;</span> f<span class="keyword2">:</span><span class="keyword2">(</span>'a -<span class="keyword2">&gt;</span> 'b<span class="keyword2">)</span>   -<span class="keyword2">&gt;</span> 'b <span class="keyword3">list</span>
+<span class="keyword4">val</span> fold <span class="keyword2">:</span> 'a <span class="keyword3">list</span> -<span class="keyword2">&gt;</span> init<span class="keyword2">:</span>'accum -<span class="keyword2">&gt;</span> f<span class="keyword2">:</span><span class="keyword2">(</span>'accum -<span class="keyword2">&gt;</span> 'a -<span class="keyword2">&gt;</span> 'accum<span class="keyword2">)</span> -<span class="keyword2">&gt;</span> 'accum</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/list_excerpt.mli">json/list_excerpt.mli</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009365264"><code>map</code> and <code>fold</code> are extremely common combinators that
       transform an input list by applying a function to each value of the
       list. The <code>map</code> combinator is simplest,
       with the resulting list being output directly. <code>fold</code> applies each value in the input list to a
       function that accumulates a single result, and returns that
-      instead:</p><div class="rwocode"><pre><code><span class="keyword4">val</span> iter <span class="keyword2">:</span> 'a <span class="keyword3">list</span> -<span class="keyword2">&gt;</span> f<span class="keyword2">:</span><span class="keyword2">(</span>'a -<span class="keyword2">&gt;</span> unit<span class="keyword2">)</span> -<span class="keyword2">&gt;</span> unit</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/list_excerpt.mli">json/list_excerpt.mli</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602500256"><code>iter</code> is a more specialized
+      instead:</p><div class="rwocode"><pre><code><span class="keyword4">val</span> iter <span class="keyword2">:</span> 'a <span class="keyword3">list</span> -<span class="keyword2">&gt;</span> f<span class="keyword2">:</span><span class="keyword2">(</span>'a -<span class="keyword2">&gt;</span> unit<span class="keyword2">)</span> -<span class="keyword2">&gt;</span> unit</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/list_excerpt.mli">json/list_excerpt.mli</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009359664"><code>iter</code> is a more specialized
       combinator that is only useful when writing imperative code. The input
       function is applied to every value, but no result is supplied. The
       function must instead apply some side effect such as changing a mutable
-      record field or printing to the standard output.</p></section><p id="idm259602498944"><code>Yojson</code> provides several
+      record field or printing to the standard output.</p></section><p id="idm449009358352"><code>Yojson</code> provides several
     combinators in the <code>Yojson.Basic.Util</code>
-    module, some of which are listed in <a href="handling-json-data.html#table15_1">Table 15.1, “Yojson combinators”</a>.<a name="idm259602496976"></a><a name="idm259602495424"></a></p><div id="table15_1"><p><b>Table 15.1. Yojson combinators</b></p><div><table summary="Yojson combinators"><thead><tr><th>Function</th><th>Type</th><th>Purpose</th></tr></thead><tbody><tr><td>member</td><td><code>string -&gt; json -&gt;
+    module, some of which are listed in <a href="handling-json-data.html#table15_1">Table 15.1, “Yojson combinators”</a>.<a name="idm449009356384"></a><a name="idm449009354832"></a></p><div id="table15_1"><p><b>Table 15.1. Yojson combinators</b></p><div><table summary="Yojson combinators"><thead><tr><th>Function</th><th>Type</th><th>Purpose</th></tr></thead><tbody><tr><td>member</td><td><code>string -&gt; json -&gt;
             json</code></td><td>Select a named field from a JSON record.</td></tr><tr><td>to_string</td><td><code>json -&gt;
             string</code></td><td>Convert a JSON value into an OCaml <code>string</code>. Raises an exception if this is
             impossible.</td></tr><tr><td>to_int</td><td><code>json -&gt; int</code></td><td>Convert a JSON value into an OCaml <code>int</code>. Raises an exception if this is
             impossible.</td></tr><tr><td>filter_string</td><td><code>json list -&gt; string
             list</code></td><td>Filter valid strings from a list of JSON fields, and return
-            them as an OCaml list of strings.</td></tr></tbody></table></div></div><br><p id="idm259602478848">We'll go through each of these uses one by one now. The following
+            them as an OCaml list of strings.</td></tr></tbody></table></div></div><br><p id="idm449009338256">We'll go through each of these uses one by one now. The following
     examples also use the <code>|&gt;</code>
     pipe-forward operator that we explained in <a href="variables-and-functions.html">Chapter 2, <i>Variables and Functions</i></a>. This lets us chain together multiple
     JSON selection functions and feed the output from one into the next one,
     without having to create separate <code>let</code>
-    bindings for each one.<a name="idm259602476512"></a><a name="idm259602475600"></a><a name="idm259602474688"></a><a name="idm259602473376"></a><a name="idm259602472464"></a><a name="idm259602471152"></a><a name="idm259602469840"></a></p><p id="idm259602468816">Let's start with selecting a single <code>title</code> field from the record:</p><div class="rwocode"><pre><code># <span class="keyword1">open</span> <span class="keyword5">Yojson.Basic.Util </span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"> </div># <span class="keyword4">let</span> title <span class="keyword2">=</span> json <span class="keyword2">|</span><span class="keyword2">&gt;</span> member <span class="keyword7">&quot;title&quot;</span> <span class="keyword2">|</span><span class="keyword2">&gt;</span> to_string <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val title : string = &quot;Real World OCaml&quot;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/parse_book.topscript">json/parse_book.topscript</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602462544">The <code>member</code> function accepts a JSON object and named key
+    bindings for each one.<a name="idm449009335920"></a><a name="idm449009335008"></a><a name="idm449009334096"></a><a name="idm449009332784"></a><a name="idm449009331872"></a><a name="idm449009330560"></a><a name="idm449009329248"></a></p><p id="idm449009328224">Let's start with selecting a single <code>title</code> field from the record:</p><div class="rwocode"><pre><code># <span class="keyword1">open</span> <span class="keyword5">Yojson.Basic.Util </span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"> </div># <span class="keyword4">let</span> title <span class="keyword2">=</span> json <span class="keyword2">|</span><span class="keyword2">&gt;</span> member <span class="keyword7">&quot;title&quot;</span> <span class="keyword2">|</span><span class="keyword2">&gt;</span> to_string <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val title : string = &quot;Real World OCaml&quot;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/parse_book.topscript">json/parse_book.topscript</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009321952">The <code>member</code> function accepts a JSON object and named key
       and returns the JSON field associated with that key, or <code>Null</code>. Since we know that the <code>title</code> value is
       always a string in our example schema, we want to convert it to an OCaml string. The <code>to_string</code> function performs this conversion and raises an
       exception if there is an unexpected JSON type. The <code>|&gt;</code>
       operator provides a convenient way to chain these operations <span>together</span>:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> tags <span class="keyword2">=</span> json <span class="keyword2">|</span><span class="keyword2">&gt;</span> member <span class="keyword7">&quot;tags&quot;</span> <span class="keyword2">|</span><span class="keyword2">&gt;</span> to_list <span class="keyword2">|</span><span class="keyword2">&gt;</span> filter_string <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val tags : string list = [&quot;functional programming&quot;; &quot;ocaml&quot;; &quot;algorithms&quot;]
 </div># <span class="keyword4">let</span> pages <span class="keyword2">=</span> json <span class="keyword2">|</span><span class="keyword2">&gt;</span> member <span class="keyword7">&quot;pages&quot;</span> <span class="keyword2">|</span><span class="keyword2">&gt;</span> to_int <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val pages : int = 450
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/parse_book.topscript">json/parse_book.topscript</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602451904">The <code>tags</code> field is similar to
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/parse_book.topscript">json/parse_book.topscript</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009311312">The <code>tags</code> field is similar to
     <code>title</code>, but the field is a list of
     strings instead of a single one. Converting this to an OCaml <code>string list</code> is a two-stage process. First, we
     convert the JSON <code>List</code> to an OCaml list
@@ -306,7 +306,7 @@
     converted to a <code>string</code> will be skipped
     from the output of <code>filter_string</code>:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> is_online <span class="keyword2">=</span> json <span class="keyword2">|</span><span class="keyword2">&gt;</span> member <span class="keyword7">&quot;is_online&quot;</span> <span class="keyword2">|</span><span class="keyword2">&gt;</span> to_bool_option <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val is_online : bool option = Some true
 </div># <span class="keyword4">let</span> is_translated <span class="keyword2">=</span> json <span class="keyword2">|</span><span class="keyword2">&gt;</span> member <span class="keyword7">&quot;is_translated&quot;</span> <span class="keyword2">|</span><span class="keyword2">&gt;</span> to_bool_option <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val is_translated : bool option = None
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/parse_book.topscript">json/parse_book.topscript</a> , continued (part 3) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602439920">The <code>is_online</code> and <code>is_translated</code> fields are optional in our JSON
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/parse_book.topscript">json/parse_book.topscript</a> , continued (part 3) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009299328">The <code>is_online</code> and <code>is_translated</code> fields are optional in our JSON
     schema, so no error should be raised if they are not present. The OCaml
     type is a <code>bool option</code> to reflect this
     and can be extracted via <code>to_bool_option</code>. In our example JSON, only
@@ -319,7 +319,7 @@
    `Assoc
      [(&quot;name&quot;, `String &quot;Yaron Minsky&quot;);
       (&quot;affiliation&quot;, `String &quot;Jane Street&quot;)]]
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/parse_book.topscript">json/parse_book.topscript</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602425520">The final use of JSON combinators is to extract all the <code>name</code> fields from the list of authors. We first
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/parse_book.topscript">json/parse_book.topscript</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009284928">The final use of JSON combinators is to extract all the <code>name</code> fields from the list of authors. We first
     construct the <code>author list</code>, and then
     <code>map</code> it into a <code>string list</code>. Notice that the example explicitly
     binds <code>authors</code> to a variable name. It
@@ -328,18 +328,18 @@
   json <span class="keyword2">|</span><span class="keyword2">&gt;</span> member <span class="keyword7">&quot;authors&quot;</span> <span class="keyword2">|</span><span class="keyword2">&gt;</span> to_list 
   <span class="keyword2">|</span><span class="keyword2">&gt;</span> <span class="keyword5">List.</span>map ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> json -<span class="keyword2">&gt;</span> member <span class="keyword7">&quot;name&quot;</span> json <span class="keyword2">|</span><span class="keyword2">&gt;</span> to_string<span class="keyword2">)</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val names : string list =
   [&quot;Jason Hickey&quot;; &quot;Anil Madhavapeddy&quot;; &quot;Yaron Minsky&quot;]
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/parse_book.topscript">json/parse_book.topscript</a> , continued (part 5) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602415648">This style of programming, which omits variable names and chains functions together, is
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/parse_book.topscript">json/parse_book.topscript</a> , continued (part 5) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009275056">This style of programming, which omits variable names and chains functions together, is
       known as <span><em>point-free programming</em></span>. It's a succinct style but shouldn't be
       overused due to the increased difficulty of debugging intermediate values. If an explicit
         <span>name</span> is assigned to each stage of the transformations,
       debuggers in particular have an easier time making the program flow simpler to represent to
-      the programmer.</p><p id="idm259602413760">This technique of using statically typed parsing functions is very powerful in combination
+      the programmer.</p><p id="idm449009273168">This technique of using statically typed parsing functions is very powerful in combination
       with the OCaml type system. Many errors that don't make sense at runtime (for example, mixing
-      up lists and objects) will be caught statically via a type error.<a name="idm259602413232"></a><a name="idm259602412624"></a></p></br></section><section id="constructing-json-values"><h1>Constructing JSON Values</h1><p id="idm259602410832">Building and printing JSON values is pretty straightforward given
+      up lists and objects) will be caught statically via a type error.<a name="idm449009272640"></a><a name="idm449009272032"></a></p></br></section><section id="constructing-json-values"><h1>Constructing JSON Values</h1><p id="idm449009270240">Building and printing JSON values is pretty straightforward given
     the <code>Yojson.Basic.json</code> type. You can
     just construct values of type <code>json</code> and
     call the <code>to_string</code> function on them.
-    Let's remind ourselves of the <code>Yojson.Basic.json</code> type again:<a name="idm259602407728"></a><a name="idm259602406192"></a></p><div class="rwocode"><pre><code><span class="keyword4">type</span> json <span class="keyword2">=</span> <span class="keyword2">[</span>
+    Let's remind ourselves of the <code>Yojson.Basic.json</code> type again:<a name="idm449009267136"></a><a name="idm449009265600"></a></p><div class="rwocode"><pre><code><span class="keyword4">type</span> json <span class="keyword2">=</span> <span class="keyword2">[</span>
   <span class="keyword2">|</span> <span class="keyword6">`Assoc </span><span class="keyword2">of</span> <span class="keyword2">(</span><span class="keyword3">string</span> <span class="keyword2">*</span> json<span class="keyword2">)</span> <span class="keyword3">list</span>
   <span class="keyword2">|</span> <span class="keyword6">`Bool </span><span class="keyword2">of</span> bool
   <span class="keyword2">|</span> <span class="keyword6">`Float </span><span class="keyword2">of</span> <span class="keyword3">float</span>
@@ -347,30 +347,30 @@
   <span class="keyword2">|</span> <span class="keyword6">`List </span><span class="keyword2">of</span> json <span class="keyword3">list</span>
   <span class="keyword2">|</span> <span class="keyword6">`Null
 </span>  <span class="keyword2">|</span> <span class="keyword6">`String </span><span class="keyword2">of</span> <span class="keyword3">string</span>
-<span class="keyword2">]</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/yojson_basic.mli">json/yojson_basic.mli</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602402400">We can directly build a JSON value against this type and use the
+<span class="keyword2">]</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/yojson_basic.mli">json/yojson_basic.mli</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009261808">We can directly build a JSON value against this type and use the
     pretty-printing functions in the <code>Yojson.Basic</code> module to display JSON
     output:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> person <span class="keyword2">=</span> <span class="keyword6">`Assoc </span><span class="keyword2">[</span> <span class="keyword2">(</span><span class="keyword7">&quot;name&quot;</span>, <span class="keyword6">`String </span><span class="keyword7">&quot;Anil&quot;</span><span class="keyword2">)</span> <span class="keyword2">]</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val person : [&gt; `Assoc of (string * [&gt; `String of string ]) list ] =
   `Assoc [(&quot;name&quot;, `String &quot;Anil&quot;)]
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/build_json.topscript">json/build_json.topscript</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602396496">In the preceding example, we've constructed a simple JSON object
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/build_json.topscript">json/build_json.topscript</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009255904">In the preceding example, we've constructed a simple JSON object
     that represents a single person. We haven't actually defined the type of
     <code>person</code> explicitly, as we're relying on
-    the magic of polymorphic variants to make this all work.</p><p id="idm259602395216">The OCaml type system infers a type for <code>person</code> based on how you construct its value. In
+    the magic of polymorphic variants to make this all work.</p><p id="idm449009254624">The OCaml type system infers a type for <code>person</code> based on how you construct its value. In
     this case, only the <code>Assoc</code> and <code>String</code> variants are used to define the record,
     and so the inferred type only contains these fields without knowledge of
     the other possible allowed variants in JSON records that you haven't used
     yet (e.g. <code>Int</code> or <code>Null</code>):</p><div class="rwocode"><pre><code># <span class="keyword5">Yojson.</span><span class="keyword5">Basic.</span>pretty_to_string <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : ?std:bool -&gt; Yojson.Basic.json -&gt; string = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/build_json.topscript">json/build_json.topscript</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602387232">The <code>pretty_to_string</code> function has
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/build_json.topscript">json/build_json.topscript</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009246640">The <code>pretty_to_string</code> function has
     a more explicit signature that requires an argument of type <code>Yojson.Basic.json</code>. When <code>person</code> is applied to <code>pretty_to_string</code>, the inferred type of <code>person</code> is statically checked against the
     structure of the <code>json</code> type to ensure
     that they're compatible:</p><div class="rwocode"><pre><code># <span class="keyword5">Yojson.</span><span class="keyword5">Basic.</span>pretty_to_string person <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot;{ \&quot;name\&quot;: \&quot;Anil\&quot; }&quot;
 </div># <span class="keyword5">Yojson.</span><span class="keyword5">Basic.</span>pretty_to_channel stdout person <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"><br></br>{ &quot;name&quot;: &quot;Anil&quot; }- : unit = ()
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/build_json.topscript">json/build_json.topscript</a> , continued (part 3) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602376352">In this case, there are no problems. Our <code>person</code> value has an inferred type that is a
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/build_json.topscript">json/build_json.topscript</a> , continued (part 3) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009235760">In this case, there are no problems. Our <code>person</code> value has an inferred type that is a
     valid subtype of <code>json</code>, and so the
     conversion to a string just works without us ever having to explicitly
     specify a type for <code>person</code>. Type
     inference lets you write more succinct code without sacrificing runtime
     reliability, as all the uses of polymorphic variants are still checked at
-    compile time.<a name="idm259602373760"></a><a name="idm259602372064"></a><a name="idm259602371168"></a><a name="idm259602369840"></a></p><section><h1><b>Polymorphic Variants and Easier Type Checking</b></h1><p id="idm259602367728">One difficulty you will encounter is that type errors involving
+    compile time.<a name="idm449009233168"></a><a name="idm449009231472"></a><a name="idm449009230576"></a><a name="idm449009229248"></a></p><section><h1><b>Polymorphic Variants and Easier Type Checking</b></h1><p id="idm449009227136">One difficulty you will encounter is that type errors involving
       polymorphic variants can be quite verbose. For example, suppose you
       build an <code>Assoc</code> and mistakenly include
       a single value instead of a list of keys:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> person <span class="keyword2">=</span> <span class="keyword6">`Assoc </span><span class="keyword2">(</span><span class="keyword7">&quot;name&quot;</span>, <span class="keyword6">`String </span><span class="keyword7">&quot;Anil&quot;</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val person : [&gt; `Assoc of string * [&gt; `String of string ] ] =
@@ -380,7 +380,7 @@ Error: This expression has type
          [&gt; `Assoc of string * [&gt; `String of string ] ]
        but an expression was expected of type Yojson.Basic.json
        Types for tag `Assoc are incompatible
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/build_json.topscript">json/build_json.topscript</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602357200">The type error is more verbose than it needs to be, which can be
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/build_json.topscript">json/build_json.topscript</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009216608">The type error is more verbose than it needs to be, which can be
       inconvenient to wade through for larger values. You can help the
       compiler to narrow down this error to a shorter form by adding explicit
       type annotations as a hint about your intentions:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword2">(</span>person <span class="keyword2">:</span> <span class="keyword5">Yojson.</span><span class="keyword5">Basic.</span>json<span class="keyword2">)</span> <span class="keyword2">=</span>
@@ -388,21 +388,21 @@ Error: This expression has type
 Error: This expression has type 'a * 'b
        but an expression was expected of type
          (string * Yojson.Basic.json) list
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/build_json.topscript">json/build_json.topscript</a> , continued (part 5) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602349968">We've annotated <code>person</code> as being
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/build_json.topscript">json/build_json.topscript</a> , continued (part 5) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009209376">We've annotated <code>person</code> as being
       of type <code>Yojson.Basic.json</code>, and as a
       result, the compiler spots that the argument to the <code>Assoc</code> variant has the incorrect type. This
       illustrates the strengths and weaknesses of polymorphic variants:
       they're lightweight and flexible, but the error messages can be quite
       confusing. However, a bit of careful manual type annotation makes
-      tracking down such issues much easier.</p><p id="idm259602347200">We'll discuss more techniques like this that help you interpret
+      tracking down such issues much easier.</p><p id="idm449009206608">We'll discuss more techniques like this that help you interpret
       type errors more easily in <a href="the-compiler-frontend-parsing-and-type-checking.html">Chapter 22, <i>The Compiler Frontend: Parsing and <span>Type
-    Checking</span></i></a>.</p></section></section><section id="using-non-standard-json-extensions"><h1>Using Nonstandard JSON Extensions</h1><p id="idm259602344960">The standard JSON types are <span><em>really</em></span> basic, and
+    Checking</span></i></a>.</p></section></section><section id="using-non-standard-json-extensions"><h1>Using Nonstandard JSON Extensions</h1><p id="idm449009204368">The standard JSON types are <span><em>really</em></span> basic, and
     OCaml types are far more expressive. Yojson supports an extended JSON
     format for those times when you're not interoperating with external
     systems and just want a convenient human-readable, local format. The
     <code>Yojson.Safe.json</code> type is a superset of
     the <code>Basic</code> polymorphic variant and looks
-    like this:<a name="idm259602342656"></a><a name="idm259602341344"></a></p><div class="rwocode"><pre><code><span class="keyword4">type</span> json <span class="keyword2">=</span> <span class="keyword2">[</span>
+    like this:<a name="idm449009202064"></a><a name="idm449009200752"></a></p><div class="rwocode"><pre><code><span class="keyword4">type</span> json <span class="keyword2">=</span> <span class="keyword2">[</span>
   <span class="keyword2">|</span> <span class="keyword6">`Assoc </span><span class="keyword2">of</span> <span class="keyword2">(</span><span class="keyword3">string</span> <span class="keyword2">*</span> json<span class="keyword2">)</span> <span class="keyword3">list</span>
   <span class="keyword2">|</span> <span class="keyword6">`Bool </span><span class="keyword2">of</span> bool
   <span class="keyword2">|</span> <span class="keyword6">`Float </span><span class="keyword2">of</span> <span class="keyword3">float</span>
@@ -415,7 +415,7 @@ Error: This expression has type 'a * 'b
   <span class="keyword2">|</span> <span class="keyword6">`Stringlit </span><span class="keyword2">of</span> <span class="keyword3">string</span>
   <span class="keyword2">|</span> <span class="keyword6">`Tuple </span><span class="keyword2">of</span> json <span class="keyword3">list</span>
   <span class="keyword2">|</span> <span class="keyword6">`Variant </span><span class="keyword2">of</span> <span class="keyword3">string</span> <span class="keyword2">*</span> json option
-<span class="keyword2">]</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/yojson_safe.mli">json/yojson_safe.mli</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602337408">The <code>Safe.json</code> type includes all
+<span class="keyword2">]</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/yojson_safe.mli">json/yojson_safe.mli</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009196816">The <code>Safe.json</code> type includes all
     of the variants from <code>Basic.json</code> and
     extends it with a few more useful ones. A standard JSON type such as a
     <code>String</code> will type-check against both the
@@ -423,15 +423,15 @@ Error: This expression has type 'a * 'b
     <code>Safe</code> module. If you use the extended
     values with the <code>Basic</code> module, however,
     the compiler will reject your code until you make it compliant with the
-    portable subset of JSON.</p><p id="idm259602332736">Yojson supports the following JSON extensions:<a name="idm259602332432"></a><a name="idm259602331120"></a><a name="idm259602330224"></a></p><div><dl><dt><span>The <code>lit</code> suffix</span></dt><dd><p id="idm259602327392">Denotes that the value is stored as a JSON string. For
+    portable subset of JSON.</p><p id="idm449009192144">Yojson supports the following JSON extensions:<a name="idm449009191840"></a><a name="idm449009190528"></a><a name="idm449009189632"></a></p><div><dl><dt><span>The <code>lit</code> suffix</span></dt><dd><p id="idm449009186800">Denotes that the value is stored as a JSON string. For
           example, a <code>Floatlit</code> will be
           stored as <code>&quot;1.234&quot;</code> instead of
-          <code>1.234</code>.</p></dd><dt><span>The <code>Tuple</code> type</span></dt><dd><p id="idm259602323120">Stored as <code>(&quot;abc&quot;, 123)</code>
-          instead of a list.</p></dd><dt><span>The <code>Variant</code> type</span></dt><dd><p id="idm259602320224">Encodes OCaml variants more explicitly, as <code>&lt;&quot;Foo&quot;&gt;</code> or <code>&lt;&quot;Bar&quot;:123&gt;</code> for a variant with
-          parameters.</p></dd></dl></div><p id="idm259602318032">The only purpose of these extensions is to have greater control over
+          <code>1.234</code>.</p></dd><dt><span>The <code>Tuple</code> type</span></dt><dd><p id="idm449009182528">Stored as <code>(&quot;abc&quot;, 123)</code>
+          instead of a list.</p></dd><dt><span>The <code>Variant</code> type</span></dt><dd><p id="idm449009179632">Encodes OCaml variants more explicitly, as <code>&lt;&quot;Foo&quot;&gt;</code> or <code>&lt;&quot;Bar&quot;:123&gt;</code> for a variant with
+          parameters.</p></dd></dl></div><p id="idm449009177440">The only purpose of these extensions is to have greater control over
     how OCaml values are represented in JSON (for instance, storing a
     floating-point number as a JSON string). The output still obeys the same
-    standard format that can be easily exchanged with other languages.</p><p id="idm259602317360">You can convert a <code>Safe.json</code> to a
+    standard format that can be easily exchanged with other languages.</p><p id="idm449009176768">You can convert a <code>Safe.json</code> to a
     <code>Basic.json</code> type by using the <code>to_basic</code> function as follows:</p><div class="rwocode"><pre><code><span class="keyword4">val</span> to_basic <span class="keyword2">:</span> json -<span class="keyword2">&gt;</span> <span class="keyword5">Yojson.</span><span class="keyword5">Basic.</span>json
 <span class="comments">(** Tuples are converted to JSON arrays, Variants are converted to
     JSON strings or arrays of a string (constructor) and a json value
@@ -442,27 +442,27 @@ Error: This expression has type 'a * 'b
     `Variant (&quot;A&quot;, None)            -&gt;    `String &quot;A&quot;
     `Variant (&quot;B&quot;, Some x)          -&gt;    `List [ `String &quot;B&quot;, x ]
     `Intlit &quot;12345678901234567890&quot;  -&gt;    `String &quot;12345678901234567890&quot;
- *)</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/yojson_safe.mli">json/yojson_safe.mli</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></section><section id="automatically-mapping-json-to-ocaml-types"><h1>Automatically Mapping JSON to OCaml Types</h1><p id="idm259602310864">The combinators described previously make it easy to write functions
+ *)</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/yojson_safe.mli">json/yojson_safe.mli</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></section><section id="automatically-mapping-json-to-ocaml-types"><h1>Automatically Mapping JSON to OCaml Types</h1><p id="idm449009170272">The combinators described previously make it easy to write functions
     that extract fields from JSON records, but the process is still pretty
     manual. When you implement larger specifications, it's much easier to
     generate the mappings from JSON schemas to OCaml values more mechanically
-    than writing conversion functions individually.<a name="MAPjson"></a><a name="JSONautomap"></a></p><p id="idm259602306816">We'll cover an alternative JSON processing method that is better for
+    than writing conversion functions individually.<a name="MAPjson"></a><a name="JSONautomap"></a></p><p id="idm449009166224">We'll cover an alternative JSON processing method that is better for
     larger-scale JSON handling now, using the <a href="http://mjambon.com/atd-biniou-intro.html" target="_top">OCaml</a> tool. This will
     introduce our first <span><em>Domain Specific Language</em></span> that
     compiles JSON specifications into OCaml modules, which are then used
-    throughout your application.<a name="idm259602305184"></a><a name="idm259602303888"></a></p><aside class="note"><h1>Installing the ATDgen Library and Tool</h1><p id="idm259602302160">ATDgen installs some OCaml libraries that interface with Yojson,
+    throughout your application.<a name="idm449009164592"></a><a name="idm449009163296"></a></p><aside class="note"><h1>Installing the ATDgen Library and Tool</h1><p id="idm449009161568">ATDgen installs some OCaml libraries that interface with Yojson,
       and also a command-line tool that generates code. It can all be
       installed via OPAM:</p><div class="rwocode"><pre><code><div class="highlight"><span class="gp">$</span> opam install atdgen
 </div><div class="highlight"><span class="gp">$</span> atdgen -version
-</div><div class="rwocodeout">1.2.3</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/install_atdgen.out">json/install_atdgen.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602296736">The command-line tool will be installed within your <code>~/.opam</code> directory and should already be on
-      your <code>PATH</code> from running <span><strong>opam config env</strong></span>. See <a href="http://realworldocaml.org/install" target="_top">this Real World OCaml page</a> if this isn't working.</p></aside><section id="atd-basics"><h1>ATD Basics</h1><p id="idm259602292544">The idea behind ATD is to specify the format of the JSON in a
+</div><div class="rwocodeout">1.2.3</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/install_atdgen.out">json/install_atdgen.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009156144">The command-line tool will be installed within your <code>~/.opam</code> directory and should already be on
+      your <code>PATH</code> from running <span><strong>opam config env</strong></span>. See <a href="http://realworldocaml.org/install" target="_top">this Real World OCaml page</a> if this isn't working.</p></aside><section id="atd-basics"><h1>ATD Basics</h1><p id="idm449009151952">The idea behind ATD is to specify the format of the JSON in a
       separate file and then run a compiler (<span><strong>atdgen</strong></span>) that outputs OCaml code to construct
       and parse JSON values. This means that you don't need to write any OCaml
-      parsing code at all, as it will all be autogenerated for you.<a name="idm259602291344"></a></p><p id="idm259602289920">Let's go straight into looking at an example of how this works, by
+      parsing code at all, as it will all be autogenerated for you.<a name="idm449009150752"></a></p><p id="idm449009149328">Let's go straight into looking at an example of how this works, by
       using a small portion of the GitHub API. GitHub is a popular code
       hosting and sharing website that provides a JSON-based web <a href="http://developer.github.com" target="_top">API</a>. The following ATD code
       fragment describes the GitHub authorization API (which is based on a
-      pseudostandard web protocol known as OAuth):<a name="idm259602288624"></a><a name="idm259602287728"></a></p><div class="rwocode"><pre><code><span class="keyword4">type</span> scope <span class="keyword2">=</span> <span class="keyword2">[</span>
+      pseudostandard web protocol known as OAuth):<a name="idm449009148032"></a><a name="idm449009147136"></a></p><div class="rwocode"><pre><code><span class="keyword4">type</span> scope <span class="keyword2">=</span> <span class="keyword2">[</span>
     <span class="keyword6">User </span><span class="keyword2">&lt;</span>json name<span class="keyword2">=</span><span class="keyword7">&quot;user&quot;</span><span class="keyword2">&gt;</span>
   <span class="keyword2">|</span> <span class="keyword6">Public_repo </span><span class="keyword2">&lt;</span>json name<span class="keyword2">=</span><span class="keyword7">&quot;public_repo&quot;</span><span class="keyword2">&gt;</span>
   <span class="keyword2">|</span> <span class="keyword6">Repo </span><span class="keyword2">&lt;</span>json name<span class="keyword2">=</span><span class="keyword7">&quot;repo&quot;</span><span class="keyword2">&gt;</span>
@@ -489,36 +489,36 @@ Error: This expression has type 'a * 'b
   id<span class="keyword2">:</span> <span class="keyword3">int</span><span class="keyword2">;</span>
   ?note<span class="keyword2">:</span> <span class="keyword3">string</span> option<span class="keyword2">;</span>
   ?note_url<span class="keyword2">:</span> <span class="keyword3">string</span> option<span class="keyword2">;</span>
-<span class="keyword2">}</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/github.atd">json/github.atd</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602284256">The ATD specification syntax is deliberately quite similar to
+<span class="keyword2">}</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/github.atd">json/github.atd</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009143664">The ATD specification syntax is deliberately quite similar to
       OCaml type definitions. Every JSON record is assigned a type name (e.g.,
       <code>app</code> in the preceding example). You
       can also define variants that are similar to OCaml's variant types
-      (e.g., <code>scope</code> in the example).</p></section><section id="atd-annotations"><h1>ATD Annotations</h1><p id="idm259602280528">ATD does deviate from OCaml syntax due to its support for annotations within the
+      (e.g., <code>scope</code> in the example).</p></section><section id="atd-annotations"><h1>ATD Annotations</h1><p id="idm449009139936">ATD does deviate from OCaml syntax due to its support for annotations within the
         specification. The annotations can customize the code that is generated for a particular
-        target (of which the OCaml backend is of most interest to us).<a name="idm259602280016"></a></p><p id="idm259602278592">For example, the preceding GitHub <code>scope</code> field is defined as a variant type, with
+        target (of which the OCaml backend is of most interest to us).<a name="idm449009139424"></a></p><p id="idm449009138000">For example, the preceding GitHub <code>scope</code> field is defined as a variant type, with
       each option starting with an uppercase letter as is conventional for
       OCaml variants. However, the JSON values that come back from GitHub are
       actually lowercase and so aren't exactly the same as the option
-      name.</p><p id="idm259602277232">The annotation <code>&lt;json
+      name.</p><p id="idm449009136640">The annotation <code>&lt;json
       name=&quot;user&quot;&gt;</code> signals that the JSON value of the field is
       <code>user</code>, but that the variable name of
       the parsed variant in OCaml should be <code>User</code>. These annotations are often useful to
-      map JSON values to reserved keywords in OCaml (e.g., <code>type</code>).</p></section><section id="compiling-atd-specifications-to-ocaml"><h1>Compiling ATD Specifications to OCaml</h1><p id="idm259602273040">The ATD specification we defined can be compiled to OCaml code
+      map JSON values to reserved keywords in OCaml (e.g., <code>type</code>).</p></section><section id="compiling-atd-specifications-to-ocaml"><h1>Compiling ATD Specifications to OCaml</h1><p id="idm449009132448">The ATD specification we defined can be compiled to OCaml code
       using the <span><strong>atdgen</strong></span> command-line tool.
       Let's run the compiler twice to generate some OCaml type definitions and
       a JSON serializing module that converts between input data and those
-      type definitions.<a name="idm259602271856"></a></p><p id="idm259602270400">The <span><strong>atdgen</strong></span> command will generate some new files in
+      type definitions.<a name="idm449009131264"></a></p><p id="idm449009129808">The <span><strong>atdgen</strong></span> command will generate some new files in
         your current directory. <code>github_t.ml</code> and <code>github_t.mli</code> will contain an OCaml module with types defined
         that correspond to the ATD file:</p><div class="rwocode"><pre><code><div class="highlight"><span class="gp">$</span> atdgen -t github.atd
 </div><div class="highlight"><span class="gp">$</span> atdgen -j github.atd
 </div><div class="highlight"><span class="gp">$</span> ocamlfind ocamlc -package atd -i github_t.mli
-</div><div class="rwocodeout">type scope =</div><div class="rwocodeout">    [ `Delete_repo | `Gist | `Public_repo | `Repo | `Repo_status | `User ]</div><div class="rwocodeout">type app = { app_name : string; app_url : string; }</div><div class="rwocodeout">type authorization_request = {</div><div class="rwocodeout">  auth_req_scopes : scope list;</div><div class="rwocodeout">  auth_req_note : string;</div><div class="rwocodeout">}</div><div class="rwocodeout">type authorization_response = {</div><div class="rwocodeout">  scopes : scope list;</div><div class="rwocodeout">  token : string;</div><div class="rwocodeout">  app : app;</div><div class="rwocodeout">  url : string;</div><div class="rwocodeout">  id : int;</div><div class="rwocodeout">  note : string option;</div><div class="rwocodeout">  note_url : string option;</div><div class="rwocodeout">}</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/build_github_atd.out">json/build_github_atd.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602252016">There is an obvious correspondence to the ATD definition. Note
+</div><div class="rwocodeout">type scope =</div><div class="rwocodeout">    [ `Delete_repo | `Gist | `Public_repo | `Repo | `Repo_status | `User ]</div><div class="rwocodeout">type app = { app_name : string; app_url : string; }</div><div class="rwocodeout">type authorization_request = {</div><div class="rwocodeout">  auth_req_scopes : scope list;</div><div class="rwocodeout">  auth_req_note : string;</div><div class="rwocodeout">}</div><div class="rwocodeout">type authorization_response = {</div><div class="rwocodeout">  scopes : scope list;</div><div class="rwocodeout">  token : string;</div><div class="rwocodeout">  app : app;</div><div class="rwocodeout">  url : string;</div><div class="rwocodeout">  id : int;</div><div class="rwocodeout">  note : string option;</div><div class="rwocodeout">  note_url : string option;</div><div class="rwocodeout">}</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/build_github_atd.out">json/build_github_atd.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009111424">There is an obvious correspondence to the ATD definition. Note
       that field names in OCaml records in the same module cannot shadow one
       another, and so we instruct ATDgen to prefix every field with a name
       that distinguishes it from other records in the same module. For
       example, <code>&lt;ocaml
       field_prefix=&quot;auth_req_&quot;&gt;</code> in the ATD spec prefixes every
-      field name in the generated <code>authorization_request</code> record with <code>auth_req</code>.</p><p id="idm259602249232">The <code>Github_t</code> module only
+      field name in the generated <code>authorization_request</code> record with <code>auth_req</code>.</p><p id="idm449009108640">The <code>Github_t</code> module only
       contains the type definitions, while <code>Github_j</code> provides serialization functions to
       and from JSON. You can read the <code>github_j.mli</code> to see the full interface, but
       the important functions for most uses are the conversion functions to
@@ -536,29 +536,29 @@ Error: This expression has type 'a * 'b
       into a JSON string.
       @param len specifies the initial length
                  of the buffer used internally.
-                 Default: 1024. *)</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/github_j_excerpt.mli">json/github_j_excerpt.mli</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602243440">This is pretty convenient! We've now written a single ATD file,
+                 Default: 1024. *)</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/github_j_excerpt.mli">json/github_j_excerpt.mli</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009102848">This is pretty convenient! We've now written a single ATD file,
       and all the OCaml boilerplate to convert between JSON and a strongly
       typed record has been generated for us. You can control various aspects
       of the serializer by passing flags to <span><strong>atdgen</strong></span>. The important ones for JSON
-      are:<a name="idm259602242256"></a><a name="idm259602241152"></a><a name="idm259602240000"></a><a name="idm259602238864"></a></p><div><dl><dt><span><code>-j-std</code></span></dt><dd><p id="idm259602236304">Converts tuples and variants into standard JSON and refuse
+      are:<a name="idm449009101664"></a><a name="idm449009100560"></a><a name="idm449009099408"></a><a name="idm449009098272"></a></p><div><dl><dt><span><code>-j-std</code></span></dt><dd><p id="idm449009095712">Converts tuples and variants into standard JSON and refuse
             to print NaN and infinities. You should specify this if you intend
             to interoperate with services that aren't using ATD.</p></dd><dt><span><code>-j-custom-fields
-          FUNCTION</code></span></dt><dd><p id="idm259602234144">Calls a custom function for every unknown field encountered,
-            instead of raising a parsing exception.</p></dd><dt><span><code>-j-defaults</code></span></dt><dd><p id="idm259602232096">Always explicitly outputs a JSON value if possible. This
+          FUNCTION</code></span></dt><dd><p id="idm449009093552">Calls a custom function for every unknown field encountered,
+            instead of raising a parsing exception.</p></dd><dt><span><code>-j-defaults</code></span></dt><dd><p id="idm449009091504">Always explicitly outputs a JSON value if possible. This
             requires the default value for that field to be defined in the ATD
-            specification.</p></dd></dl></div><p id="idm259602231152">The full <a href="http://mjambon.com/atdgen/atdgen-manual.html" target="_top">ATD
+            specification.</p></dd></dl></div><p id="idm449009090560">The full <a href="http://mjambon.com/atdgen/atdgen-manual.html" target="_top">ATD
       specification</a> is quite sophisticated and documented online. The
       ATD compiler can also target formats other than JSON and outputs code
       for other languages (such as Java) if you need more
-      interoperability.</p><p id="idm259602229840">There are also several similar projects that automate the code
+      interoperability.</p><p id="idm449009089248">There are also several similar projects that automate the code
       generation process. <a href="http://piqi.org" target="_top">Piqi</a> supports
       conversions between XML, JSON, and the Google protobuf format; and
       <a href="http://thrift.apache.org" target="_top">Thrift</a> supports many other
-      programming languages and includes OCaml bindings.</p></section><section id="example-querying-github-organization-information"><h1>Example: Querying GitHub Organization Information</h1><p id="idm259602226768">Let's finish up with an example of some live JSON parsing from
+      programming languages and includes OCaml bindings.</p></section><section id="example-querying-github-organization-information"><h1>Example: Querying GitHub Organization Information</h1><p id="idm449009086176">Let's finish up with an example of some live JSON parsing from
       GitHub and build a tool to query organization information via their API.
       Start by looking at the online <a href="http://developer.github.com/v3/orgs/" target="_top">API documentation</a> for
       GitHub to see what the JSON schema for retrieving the organization
-      information looks like.<a name="idm259602225632"></a><a name="idm259602224736"></a></p><p id="idm259602223312">Now create an ATD file that covers the fields we need. Any extra
+      information looks like.<a name="idm449009085040"></a><a name="idm449009084144"></a></p><p id="idm449009082720">Now create an ATD file that covers the fields we need. Any extra
       fields present in the response will be ignored by the ATD parser, so we
       don't need a completely exhaustive specification of every field that
       GitHub might send back:</p><div class="rwocode"><pre><code><span class="keyword4">type</span> org <span class="keyword2">=</span> <span class="keyword2">{</span>
@@ -569,20 +569,20 @@ Error: This expression has type 'a * 'b
   ?blog<span class="keyword2">:</span> <span class="keyword3">string</span> option<span class="keyword2">;</span>
   ?email<span class="keyword2">:</span> <span class="keyword3">string</span> option<span class="keyword2">;</span>
   public_repos<span class="keyword2">:</span> <span class="keyword3">int</span>
-<span class="keyword2">}</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/github_org.atd">json/github_org.atd</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602220320">Let's build the OCaml type declaration first by calling <code>atdgen -t</code> on the specification file:</p><div class="rwocode"><pre><code><div class="highlight"><span class="gp">$</span> atdgen -t github_org.atd
+<span class="keyword2">}</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/github_org.atd">json/github_org.atd</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009079728">Let's build the OCaml type declaration first by calling <code>atdgen -t</code> on the specification file:</p><div class="rwocode"><pre><code><div class="highlight"><span class="gp">$</span> atdgen -t github_org.atd
 </div><div class="highlight"><span class="gp">$</span> cat github_org_t.mli
-</div><div class="rwocodeout">(* Auto-generated from &quot;github_org.atd&quot; *)</div><div class="rwocodeout"> </div><div class="rwocodeout"> </div><div class="rwocodeout">type org = {</div><div class="rwocodeout">  login: string;</div><div class="rwocodeout">  id: int;</div><div class="rwocodeout">  url: string;</div><div class="rwocodeout">  name: string option;</div><div class="rwocodeout">  blog: string option;</div><div class="rwocodeout">  email: string option;</div><div class="rwocodeout">  public_repos: int</div><div class="rwocodeout">}</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/generate_github_org_types.out">json/generate_github_org_types.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602207200">The OCaml type has an obvious mapping to the ATD spec, but we
+</div><div class="rwocodeout">(* Auto-generated from &quot;github_org.atd&quot; *)</div><div class="rwocodeout"> </div><div class="rwocodeout"> </div><div class="rwocodeout">type org = {</div><div class="rwocodeout">  login: string;</div><div class="rwocodeout">  id: int;</div><div class="rwocodeout">  url: string;</div><div class="rwocodeout">  name: string option;</div><div class="rwocodeout">  blog: string option;</div><div class="rwocodeout">  email: string option;</div><div class="rwocodeout">  public_repos: int</div><div class="rwocodeout">}</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/generate_github_org_types.out">json/generate_github_org_types.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009066608">The OCaml type has an obvious mapping to the ATD spec, but we
       still need the logic to convert JSON buffers to and from this type.
       Calling <code>atdgen -j</code> will generate this
       serialization code for us in a new file called <code>github_org_j.ml</code>:</p><div class="rwocode"><pre><code><div class="highlight"><span class="gp">$</span> atdgen -j github_org.atd
 </div><div class="highlight"><span class="gp">$</span> cat github_org_j.mli
-</div><div class="rwocodeout">(* Auto-generated from &quot;github_org.atd&quot; *)</div><div class="rwocodeout"> </div><div class="rwocodeout"> </div><div class="rwocodeout">type org = Github_org_t.org = {</div><div class="rwocodeout">  login: string;</div><div class="rwocodeout">  id: int;</div><div class="rwocodeout">  url: string;</div><div class="rwocodeout">  name: string option;</div><div class="rwocodeout">  blog: string option;</div><div class="rwocodeout">  email: string option;</div><div class="rwocodeout">  public_repos: int</div><div class="rwocodeout">}</div><div class="rwocodeout"> </div><div class="rwocodeout">val write_org :</div><div class="rwocodeout">  Bi_outbuf.t -&gt; org -&gt; unit</div><div class="rwocodeout">  (** Output a JSON value of type {!org}. *)</div><div class="rwocodeout"> </div><div class="rwocodeout">val string_of_org :</div><div class="rwocodeout">  ?len:int -&gt; org -&gt; string</div><div class="rwocodeout">  (** Serialize a value of type {!org}</div><div class="rwocodeout">      into a JSON string.</div><div class="rwocodeout">      @param len specifies the initial length</div><div class="rwocodeout">                 of the buffer used internally.</div><div class="rwocodeout">                 Default: 1024. *)</div><div class="rwocodeout"> </div><div class="rwocodeout">val read_org :</div><div class="rwocodeout">  Yojson.Safe.lexer_state -&gt; Lexing.lexbuf -&gt; org</div><div class="rwocodeout">  (** Input JSON data of type {!org}. *)</div><div class="rwocodeout"> </div><div class="rwocodeout">val org_of_string :</div><div class="rwocodeout">  string -&gt; org</div><div class="rwocodeout">  (** Deserialize JSON data of type {!org}. *)</div><div class="rwocodeout"> </div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/generate_github_org_json.out">json/generate_github_org_json.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602179536">The <code>Github_org_j</code> serializer
+</div><div class="rwocodeout">(* Auto-generated from &quot;github_org.atd&quot; *)</div><div class="rwocodeout"> </div><div class="rwocodeout"> </div><div class="rwocodeout">type org = Github_org_t.org = {</div><div class="rwocodeout">  login: string;</div><div class="rwocodeout">  id: int;</div><div class="rwocodeout">  url: string;</div><div class="rwocodeout">  name: string option;</div><div class="rwocodeout">  blog: string option;</div><div class="rwocodeout">  email: string option;</div><div class="rwocodeout">  public_repos: int</div><div class="rwocodeout">}</div><div class="rwocodeout"> </div><div class="rwocodeout">val write_org :</div><div class="rwocodeout">  Bi_outbuf.t -&gt; org -&gt; unit</div><div class="rwocodeout">  (** Output a JSON value of type {!org}. *)</div><div class="rwocodeout"> </div><div class="rwocodeout">val string_of_org :</div><div class="rwocodeout">  ?len:int -&gt; org -&gt; string</div><div class="rwocodeout">  (** Serialize a value of type {!org}</div><div class="rwocodeout">      into a JSON string.</div><div class="rwocodeout">      @param len specifies the initial length</div><div class="rwocodeout">                 of the buffer used internally.</div><div class="rwocodeout">                 Default: 1024. *)</div><div class="rwocodeout"> </div><div class="rwocodeout">val read_org :</div><div class="rwocodeout">  Yojson.Safe.lexer_state -&gt; Lexing.lexbuf -&gt; org</div><div class="rwocodeout">  (** Input JSON data of type {!org}. *)</div><div class="rwocodeout"> </div><div class="rwocodeout">val org_of_string :</div><div class="rwocodeout">  string -&gt; org</div><div class="rwocodeout">  (** Deserialize JSON data of type {!org}. *)</div><div class="rwocodeout"> </div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/generate_github_org_json.out">json/generate_github_org_json.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009038944">The <code>Github_org_j</code> serializer
       interface contains everything we need to map to and from the OCaml types
       and JSON. The easiest way to use this interface is by using the <code>string_of_org</code> and <code>org_of_string</code> functions, but there are also
       more advanced low-level buffer functions available if you need higher
-      performance (but we won't go into that in this tutorial).</p><p id="idm259602176848">All we need to complete our example is an OCaml program that
+      performance (but we won't go into that in this tutorial).</p><p id="idm449009036256">All we need to complete our example is an OCaml program that
       fetches the JSON and uses these modules to output a one-line summary.
-      Our following example does just that.</p><p id="idm259602176272">The following code calls the cURL command-line utility by using
+      Our following example does just that.</p><p id="idm449009035680">The following code calls the cURL command-line utility by using
       the <code>Core_extended.Shell</code> interface to
       run an external command and capture its output. You'll need to ensure
       that you have cURL installed on your system before running the example.
@@ -603,25 +603,25 @@ Error: This expression has type 'a * 'b
   <span class="keyword5">Command.</span>basic ~summary<span class="keyword2">:</span><span class="keyword7">&quot;Print Github organization information&quot;</span>
     <span class="keyword5">Command.</span><span class="keyword5">Spec.</span><span class="keyword2">(</span>empty <span class="keyword2">+</span><span class="keyword2">&gt;</span> anon <span class="keyword2">(</span><span class="keyword7">&quot;organization&quot;</span> %<span class="keyword2">:</span> <span class="keyword3">string</span><span class="keyword2">)</span><span class="keyword2">)</span>
     print_org
-  <span class="keyword2">|</span><span class="keyword2">&gt;</span> <span class="keyword5">Command.</span>run</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/github_org_info.ml">json/github_org_info.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602171872">The following is a short shell script that generates all of the
+  <span class="keyword2">|</span><span class="keyword2">&gt;</span> <span class="keyword5">Command.</span>run</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/github_org_info.ml">json/github_org_info.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009014992">The following is a short shell script that generates all of the
       OCaml code and also builds the final executable:</p><div class="rwocode"><pre><code><div class="highlight"><span class="gp">$</span> atdgen -t github_org.atd
 </div><div class="highlight"><span class="gp">$</span> atdgen -j github_org.atd
 </div><div class="highlight"><span class="gp">$</span> corebuild -pkg core_extended,yojson,atdgen github_org_info.native
-</div><div class="rwocodeout">File &quot;github_org_j.ml&quot;, line 19, characters 4-16:</div><div class="rwocodeout">Warning 32: unused value string_of__1.</div><div class="rwocodeout">ld: warning: directory not found for option '-Llib'</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/build_github_org.out">json/build_github_org.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602165904">You can now run the command-line tool with a single argument to
+</div><div class="rwocodeout">File &quot;github_org_j.ml&quot;, line 19, characters 4-16:</div><div class="rwocodeout">Warning 32: unused value string_of__1.</div><div class="rwocodeout">ld: warning: directory not found for option '-Llib'</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/build_github_org.out">json/build_github_org.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009009056">You can now run the command-line tool with a single argument to
       specify the name of the organization, and it will dynamically fetch the
       JSON from the web, parse it, and render the summary to your
       console:</p><div class="rwocode"><pre><code><div class="highlight"><span class="gp">$</span> ./github_org_info.native mirage
 </div><div class="rwocodeout">Mirage account (131943) with 39 public repos</div><div class="highlight"><span class="gp">$</span> ./github_org_info.native janestreet
-</div><div class="rwocodeout">??? (3384712) with 35 public repos</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/run_github_org.out">json/run_github_org.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259602159696">The JSON returned from the <code>janestreet</code> query is missing an organization
+</div><div class="rwocodeout">??? (3384712) with 35 public repos</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/json/run_github_org.out">json/run_github_org.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449009002848">The JSON returned from the <code>janestreet</code> query is missing an organization
       name, but this is explicitly reflected in the OCaml type, since the ATD
       spec marked <code>name</code> as an optional
       field. Our OCaml code explicitly handles this case and doesn't have to
       worry about null-pointer exceptions. Similarly, the JSON integer for the
       <code>id</code> is mapped into a native OCaml
-      integer via the ATD conversion.</p><p id="idm259602156960">While this tool is obviously quite simple, the ability to specify
+      integer via the ATD conversion.</p><p id="idm449009000112">While this tool is obviously quite simple, the ability to specify
       optional and default fields is very powerful. Take a look at the full
       ATD specification for the GitHub API in the <a href="http://github.com/avsm/ocaml-github" target="_top"><code>ocaml-github</code></a> repository online, which
-      has lots of quirks typical in real-world web APIs.<a name="idm259602155360"></a><a name="idm259602154752"></a><a name="idm259602154144"></a><a name="idm259602153536"></a></p><p id="idm259602152800">Our example shells out to <code>curl</code>
+      has lots of quirks typical in real-world web APIs.<a name="idm449008998512"></a><a name="idm449008997904"></a><a name="idm449008997296"></a><a name="idm449008996688"></a></p><p id="idm449008995952">Our example shells out to <code>curl</code>
       on the command line to obtain the JSON, which is rather inefficient.
       We'll explain how to integrate the HTTP fetch directly into your OCaml
       application in <a href="concurrent-programming-with-async.html">Chapter 18, <i>Concurrent Programming with Async</i></a>.</p></section></section>
