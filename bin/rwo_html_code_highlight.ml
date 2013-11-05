@@ -38,6 +38,6 @@ let () =
        let fname = String.chop_prefix_exn ~prefix:"https://github.com/realworldocaml/examples/tree/v1/code/" (get_attr "href" attr) in
        let orig_node = [make_tag "p" (attrs, nodes)] in
        get_code_frag fname part
-    with _ -> nodes   
+    with _ -> [make_tag "p" (attrs,nodes)]
   )
   |> fun d -> print_endline (Cow.Html.to_string d)
