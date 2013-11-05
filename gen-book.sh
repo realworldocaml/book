@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -ex
 
 function usage {
   echo "Usage: $0 [-m <milestone>] [-l <lingua>] [-c <chapters>]"
@@ -15,6 +15,7 @@ OS=$(uname -s)
 case "${OS}" in
 Darwin)
   DOCBOOK_XSL_PATH=$(brew --prefix)/Cellar/docbook/5.0/docbook/xsl/1.76.1
+  DOCBOOK_XSL_PATH=$(brew --prefix)/Cellar/docbook-xsl/1.78.1/docbook-xsl
   ;;
 Linux)
   DOCBOOK_XSL_PATH=/usr/share/xml/docbook/stylesheet/docbook-xsl
@@ -72,7 +73,6 @@ echo Inserting code fragments in Markdown
 mkdir -p build/${LINGUA}/md-ora
 mkdir -p build/${LINGUA}/md-web
 for i in ${SRCS}; do
-#  ./scripts/_build/transform_markdown.native < ${LINGUA}/${i} > build/${LINGUA}/md-ora/${i}
   cp ${LINGUA}/${i} build/${LINGUA}/md-ora/${i}
   cp ${LINGUA}/${i} build/${LINGUA}/md-web/${i}
   SRCS_WEB="${SRCS_WEB} build/${LINGUA}/md-web/${i}"
@@ -84,14 +84,8 @@ cp ${LINGUA}/installing-ocaml-online.md build/${LINGUA}/md-web/installing-ocaml.
 
 ln -nfs ${DOCBOOK_XSL_PATH} stylesheets/system-xsl
 set -x
-pandoc -f markdown -t docbook --chapters --template rwo.docbook -o build/${LINGUA}/source/rwo-pre.xml ${SRCS_WEB}
-pandoc -f markdown -t docbook --chapters --template rwo-oreilly.docbook -o build/${LINGUA}/source/rwo-pre-oreilly.xml ${SRCS_ORA}
-TRANSFORM_DOCBOOK=./scripts/_build/transform_pandocbook.native
-${TRANSFORM_DOCBOOK} ${PUBLIC} ${CHAPTERS} build/${LINGUA}/source/rwo-pre.xml > build/${LINGUA}/source/rwo.xml
-${TRANSFORM_DOCBOOK} --subst ${PUBLIC} ${CHAPTERS} build/${LINGUA}/source/rwo-pre-oreilly.xml > build/${LINGUA}/source/rwo-oreilly.xml
+cp ed1.xml build/${LINGUA}/source/rwo.xml
 xsltproc --nonet --output build/${LINGUA}/html/ stylesheets/${LINGUA}/web.xsl build/${LINGUA}/source/rwo.xml
-mkdir -p build${LINGUA}/html-ora
-xsltproc --nonet --output build/${LINGUA}/html-ora/ stylesheets/${LINGUA}/web.xsl build/${LINGUA}/source/rwo-oreilly.xml
 
 echo The raw HTML is in build/${LINGUA}/html.
 echo "The Docbook is in build/${LINGUA}/source/rwo[-oreilly].xml"
@@ -110,7 +104,7 @@ python commenting/bin/generate_commenting_site.py --github-milestone ${MILESTONE
 # syntax highlight the commenting HTML
 mkdir -p commenting-build/${LINGUA}/${MILESTONE}
 for i in commenting-build/${LINGUA}/html/*.html; do
-  ./scripts/_build/html_code_highlight.native < $i > commenting-build/${LINGUA}/${MILESTONE}/`basename $i`
+  ~/src/git/realworldocaml/scripts/_build/bin/rwo_html_code_highlight.native ~/src/git/realworldocaml/examples/code/_build < $i > commenting-build/${LINGUA}/${MILESTONE}/`basename $i`
 done
 
 # now parse the HTML and generate a sexp dump of the paragraph fragments
