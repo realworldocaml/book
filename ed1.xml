@@ -626,14 +626,13 @@
     </simplelist>
 
     <para>For more information about our books, courses, conferences, and
-    news, see our website at <remark>ULINK WITHOUT TEXT NODE.</remark><ulink url="http://www.oreilly.com"/>.</para>
+    news, see our website at <ulink url="http://www.oreilly.com"/>.</para>
 
-    <para>Find us on Facebook: <remark>ULINK WITHOUT TEXT NODE.</remark><ulink url="http://facebook.com/oreilly"/></para>
+    <para>Find us on Facebook: <ulink url="http://facebook.com/oreilly"/></para>
 
-    <para>Follow us on Twitter: <remark>ULINK WITHOUT TEXT
-    NODE.</remark><ulink url="http://twitter.com/oreillymedia"/></para>
+    <para>Follow us on Twitter: <ulink url="http://twitter.com/oreillymedia"/></para>
 
-    <para>Watch us on YouTube: <remark>ULINK WITHOUT TEXT NODE.</remark><ulink url="http://www.youtube.com/oreillymedia"/></para>
+    <para>Watch us on YouTube: <ulink url="http://www.youtube.com/oreillymedia"/></para>
   </sect1>
 
   <sect1>
