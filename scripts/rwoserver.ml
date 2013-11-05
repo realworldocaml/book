@@ -29,7 +29,7 @@ let user = "realworldocaml"
 let repo = "book"
 
 let doc_uri = Uri.of_string "https://ocaml.janestreet.com/ocaml-core/latest/doc/"
-let install_uri = Uri.of_string "https://ocaml.janestreet.com/ocaml-core/latest/doc/"
+let install_uri = Uri.of_string "https://github.com/realworldocaml/book/wiki/Installation-Instructions"
 
 let jar  = Lwt_main.run (Github_cookie_jar.init ())
 
@@ -239,12 +239,8 @@ let dispatch ~milestone req =
   let code = Uri.get_query_param uri "code" in
   match access_token, code with
   (* Have access token and no code, so serve file *)
-  |Some access_token, None -> begin 
+  |_, None -> begin 
     (* Check that the user is allowed to access this page *)
-    lwt login = Auth.lookup access_token in
-    match Auth.check ~milestone ~login with
-    |false -> Server.respond_string ~status:`Forbidden ~body:(Auth.denied ~login) ()
-    |true -> begin
       let uri = Request.uri req in
       let fname = Server.resolve_file ~docroot ~uri in
       let path = Uri.path uri in
@@ -257,15 +253,7 @@ let dispatch ~milestone req =
         Server.respond_redirect ~headers ~uri:(Uri.with_path uri (path ^ "/")) ()
       |path ->
         Server.respond_file ~headers ~fname ()
-    end
   end
-  (* No access token and no code, so redirect to Github oAuth login *)
-  |None, None ->
-    let redirect_uri = Uri.(with_path (of_string "https://realworldocaml.org") (Uri.path uri)) in
-    let uri = Github.URI.authorize ~scopes:[`Public_repo] ~redirect_uri 
-      ~client_id:Config.client_id () in
-    printf "Redirect for auth to %s\n%!" (Uri.to_string uri);
-    Server.respond_redirect ~headers ~uri ()
   (* Have a code parameter, signifying a Github redirect *)
   |_, Some code -> begin 
     (* talk to Github and get a client id and set the cookie *)
