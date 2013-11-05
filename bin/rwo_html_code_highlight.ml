@@ -19,7 +19,6 @@ open Core.Std
 
 let get_code_frag fname part =
   let fname = sprintf "%s/%s.%d.html" Sys.argv.(1) fname part in
-  prerr_endline fname;
   Ezxmlm.from_channel (open_in fname)
   |> fun (dtd,xml) ->
   xml
@@ -28,6 +27,8 @@ let () =
   let open Ezxmlm in
   let dtd,xml = from_channel stdin in
   filter_map ~tag:"pre" ~f:(fun attrs nodes -> []) xml
+  |> filter_map ~tag:"img" ~f:(fun attrs nodes ->
+    if String.is_prefix ~prefix:"images/" (get_attr "src" attrs) then [] else [make_tag "img" (attrs,nodes)] ) 
   |> filter_map ~tag:"p" ~f:(fun attrs nodes ->
     (* Hunt for a <p> with a href to github *)
     try
@@ -35,7 +36,8 @@ let () =
        let part = try
          Scanf.sscanf (String.lstrip (data_to_string nodes)) "(part %d)" (fun d -> d)
         with _ -> 0 in
-       let fname = String.chop_prefix_exn ~prefix:"https://github.com/realworldocaml/examples/tree/v1/code/" (get_attr "href" attr) in
+       let fname = String.chop_prefix_exn
+          ~prefix:"https://github.com/realworldocaml/examples/tree/v1/code/" (get_attr "href" attr) in
        let orig_node = [make_tag "p" (attrs, nodes)] in
        get_code_frag fname part
     with _ -> [make_tag "p" (attrs,nodes)]
