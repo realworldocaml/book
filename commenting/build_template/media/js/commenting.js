@@ -83,7 +83,7 @@ define([
         $("<h2/>", {
             text: "Write a comment"
         }).appendTo(container);
-        $("<p>Every entry here make will create a new issue in our <a href=\"http://github.com/ocamllabs/rwo-comments/issues\">comment repository</a>.  If you just wish to add something to another comment in the list above, please follow the link marked <tt>(github)</tt> beside that comment and add your feedback directly via Github's issue tracker. This helps us keep the number of issues under control.</p>").appendTo(container);
+        $("<p>Every entry here make will create a new issue in our <a href=\"http://github.com/realworldocaml/book/issues\">comment repository</a>.  If you just wish to add something to another comment in the list above, please follow the link marked <tt>(github)</tt> beside that comment and add your feedback directly via Github's issue tracker. This helps us keep the number of issues under control.</p>").appendTo(container);
         var area = $("<textarea/>").appendTo(container);
         var submit = $("<input/>", {
             value: "Submit",
