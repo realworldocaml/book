@@ -25,7 +25,7 @@
                 <p><b>Documentation</b> is available at <a href="https://realworldocaml.org/doc">https://realworldocaml.org/doc</a> for the libraries used in the book.</p>
 
                 <a name="milestones"></a>
-                <h2>Milestones</h2>
+                <h2>Releases</h2>
                   <p><ul>@MILESTONES@
                   </ul></p>
 
@@ -52,7 +52,7 @@
 
                 <p>Once authenticated, every paragraph in the book will now have a <tt>(comments)</tt> link just beside it.  Clicking on this link
                    will show you all the comments that other reviewers have made.  You can enter your own feedback in there, which will result in an
-                   issue being created on the <a href="http://github.com/ocamllabs/rwo-comments/issues">RWO comments repository</a>.  This issue will
+                   issue being created on the <a href="http://github.com/realworldocaml/rwo-comments/issues">RWO comments repository</a>.  This issue will
                    be created using your own Github account, and makes it easier for Anil, Yaron and Jason to follow up with questions.</p>
                 <p>You will receive e-mail notifications from Github whenever the issue is updated (either with a followup, or just a notification that we've
                    fixed your problem in the next revision of the book).</p>
