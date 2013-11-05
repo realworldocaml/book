@@ -1,8 +1,8 @@
 # OASIS_START
-# DO NOT EDIT (digest: 33c8cb98c82ef01be949487cec6891c3)
+# DO NOT EDIT (digest: 2bac6747c041ecac35568bae950f890e)
 version = "1.0.0"
 description = "Real World OCaml build scripts"
-requires = "uri xmlm cmdliner str cow core threads"
+requires = "uri xmlm cmdliner str cow core threads ezxmlm"
 archive(byte) = "rwo.cma"
 archive(byte, plugin) = "rwo.cma"
 archive(native) = "rwo.cmxa"
