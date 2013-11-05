@@ -9,8 +9,8 @@ let ctime    = foreign "ctime" (ptr time_t @-> returning string)
 
 type timeval
 let timeval : timeval structure typ = structure "timeval"
-let tv_sec   = field timeval "tv_sec" long
-let tv_usec  = field timeval "tv_usec" long
+let tv_sec   = timeval *:* long
+let tv_usec  = timeval *:* long
 let ()       = seal timeval
 
 type timezone
