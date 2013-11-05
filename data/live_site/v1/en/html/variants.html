@@ -1,0 +1,890 @@
+<html>
+
+    <head>
+    
+        <meta charset="utf-8"></meta>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
+        <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW"></meta>
+        
+        <title>Chapter 6. Variants / Real World OCaml</title>
+        
+        <link rel="stylesheet" href="../../media/css/main.css"></link>
+        
+        <script src="../../media/js/require.js" data-main="../../media/js/main.js"> </script>
+        <script>
+            require.config({
+                config: {
+                    gitHub: {
+                        user: 'ocamllabs',
+                        repo: 'rwo\u002Dcomments',
+                        milestone: 'v1',
+                        page: 'variants.html'
+                    }
+                }
+            });
+        </script>
+        
+    
+    </head>
+    
+    <body>
+    
+        <div class="body">
+        
+            <header class="header">
+                <i>Available in <a href="http://www.amazon.com/Real-World-OCaml-Functional-programming/dp/144932391X/">print</a> and <a href="http://oreil.ly/realworldOCaml">eBook!</a></i>
+                <h1><a href="http://oreil.ly/realworldOCaml"><img src="../../media/img/cover-cut.png" width="245" alt="Real World OCaml, by Yaron Minsky, Anil Madhavapeddy and Jason Hickey"></img></a></h1>
+            </header>
+    
+            <nav class="navigation">
+                <ul>
+                    <li>
+                        <a href="index.html">Table of Contents</a>
+                    </li>
+                    
+                        <li>
+                            <a href="prologue.html">Prologue</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt01.html">I. Language Concepts</a>
+                            
+                                 
+                                    <ul>
+                                        
+                                            <li>
+                                                <a href="a-guided-tour.html">1. A Guided Tour</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="variables-and-functions.html">2. Variables and Functions</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="lists-and-patterns.html">3. Lists and Patterns</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="files-modules-and-programs.html">4. Files, Modules, and Programs</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="records.html">5. Records</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="variants.html" class="here">6. Variants</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="error-handling.html">7. Error Handling</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="imperative-programming-1.html">8. Imperative Programming</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="functors.html">9. Functors</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="first-class-modules.html">10. First-Class Modules</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="objects.html">11. Objects</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="classes.html">12. Classes</a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt02.html">II. Tools and Techniques</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt03.html">III. The Runtime System</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="ix01.html">Index</a>
+                            
+                        </li>
+                    
+                </ul>
+            </nav>
+        
+            <article class="page">
+        
+                <h1>Chapter 6. Variants</h1>
+                
+                
+
+    <p id="idm259607852832">Variant types are one of the most useful features of OCaml and also
+  one of the most unusual. They let you represent data that may take on
+  multiple different forms, where each form is marked by an explicit tag. As
+  we'll see, when combined with pattern matching, variants give you a powerful
+  way of representing complex data and of organizing the case-analysis on that
+  information.<a name="idm259607852176"></a><a name="DTvar"></a></p><p id="idm259607849216">The basic syntax of a variant type declaration is as
+  follows:<a name="idm259607848896"></a></p><div class="rwocode"><pre><code><pre>type &lt;variant&gt; =
+  | &lt;Tag&gt; [ of &lt;type&gt; [* &lt;type&gt;]... ]
+  | &lt;Tag&gt; [ of &lt;type&gt; [* &lt;type&gt;]... ]
+  | ...
+</pre></code></pre><div class="rwocodeinfo">Syntax ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/variant.syntax">variants/variant.syntax</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607842336">Each row essentially represents a case of the variant. Each case has an associated tag and
+    may optionally have a sequence of fields, where each field has a specified type.</p><p id="idm259607841776">Let's consider a concrete example of how variants can be useful.
+  Almost all terminals support a set of eight basic colors, and we can
+  represent those colors using a variant. Each color is declared as a simple
+  tag, with pipes used to separate the different cases. Note that variant tags
+  must be capitalized:</p><div class="rwocode"><pre><code># <span class="keyword4">type</span> basic_color <span class="keyword2">=</span>
+   <span class="keyword2">|</span> <span class="keyword6">Black </span><span class="keyword2">|</span> <span class="keyword6">Red </span><span class="keyword2">|</span> <span class="keyword6">Green </span><span class="keyword2">|</span> <span class="keyword6">Yellow </span><span class="keyword2">|</span> <span class="keyword6">Blue </span><span class="keyword2">|</span> <span class="keyword6">Magenta </span><span class="keyword2">|</span> <span class="keyword6">Cyan </span><span class="keyword2">|</span> <span class="keyword6">White </span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">type basic_color =
+    Black
+  | Red
+  | Green
+  | Yellow
+  | Blue
+  | Magenta
+  | Cyan
+  | White
+</div># <span class="keyword6">Cyan </span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : basic_color = Cyan
+</div># <span class="keyword2">[</span>Blue<span class="keyword2">;</span> Magenta<span class="keyword2">;</span> Red<span class="keyword2">]</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : basic_color list = [Blue; Magenta; Red]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/main.topscript">variants/main.topscript</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607827888">The following function uses pattern matching to convert a <code>basic_color</code> to a corresponding integer. The
+  exhaustiveness checking on pattern matches means that the compiler will warn
+  us if we miss a color:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> basic_color_to_int <span class="keyword2">=</span> <span class="keyword1">function</span>
+  <span class="keyword2">|</span> <span class="keyword6">Black </span>-<span class="keyword2">&gt;</span> <span class="keyword8">0</span> <span class="keyword2">|</span> <span class="keyword6">Red </span>    -<span class="keyword2">&gt;</span> <span class="keyword8">1</span> <span class="keyword2">|</span> <span class="keyword6">Green </span>-<span class="keyword2">&gt;</span> <span class="keyword8">2</span> <span class="keyword2">|</span> <span class="keyword6">Yellow </span>-<span class="keyword2">&gt;</span> <span class="keyword8">3</span>
+  <span class="keyword2">|</span> <span class="keyword6">Blue </span> -<span class="keyword2">&gt;</span> <span class="keyword8">4</span> <span class="keyword2">|</span> <span class="keyword6">Magenta </span>-<span class="keyword2">&gt;</span> <span class="keyword8">5</span> <span class="keyword2">|</span> <span class="keyword6">Cyan </span> -<span class="keyword2">&gt;</span> <span class="keyword8">6</span> <span class="keyword2">|</span> <span class="keyword6">White </span> -<span class="keyword2">&gt;</span> <span class="keyword8">7</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val basic_color_to_int : basic_color -&gt; int = &lt;fun&gt;
+</div># <span class="keyword5">List.</span>map ~f<span class="keyword2">:</span>basic_color_to_int <span class="keyword2">[</span>Blue<span class="keyword2">;</span>Red<span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = [4; 1]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/main.topscript">variants/main.topscript</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607819472">Using the preceding function, we can generate escape codes to change
+  the color of a given string displayed in a terminal:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> color_by_number number text <span class="keyword2">=</span>
+    sprintf <span class="keyword7">&quot;\027[38;5;%dm%s\027[0m&quot;</span> number text<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val color_by_number : int -&gt; string -&gt; string = &lt;fun&gt;</div># <span class="keyword4">let</span> blue <span class="keyword2">=</span> color_by_number <span class="keyword2">(</span>basic_color_to_int Blue<span class="keyword2">)</span> <span class="keyword7">&quot;Blue&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val blue : string = &quot;\027[38;5;4mBlue\027[0m&quot;</div># printf <span class="keyword7">&quot;Hello %s World!\n&quot;</span> blue<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Hello Blue World!</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/main-2.rawscript">variants/main-2.rawscript</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607812912">On most terminals, that word &quot;Blue&quot; will be rendered in blue.</p><p id="idm259607812464">In this example, the cases of the variant are simple tags with no
+  associated data. This is substantively the same as the enumerations found in
+  languages like C and Java. But as we'll see, variants can do considerably
+  more than represent a simple enumeration. As it happens, an enumeration
+  isn't enough to effectively describe the full set of colors that a modern
+  terminal can display. Many terminals, including the venerable <code>xterm</code>, support 256 different colors, broken up
+  into the following groups:</p><ul><li><p id="idm259607810400">The eight basic colors, in regular and bold versions</p></li><li><p id="idm259607809568">A 6 × 6 × 6 RGB color cube</p></li><li><p id="idm259607808704">A 24-level grayscale ramp</p></li></ul><p id="idm259607808032">We'll also represent this more complicated color space as a variant,
+  but this time, the different tags will have arguments that describe the data
+  available in each case. Note that variants can have multiple arguments,
+  which are separated by <code>*</code>s:</p><div class="rwocode"><pre><code># <span class="keyword4">type</span> weight <span class="keyword2">=</span> <span class="keyword6">Regular </span><span class="keyword2">|</span> <span class="keyword6">Bold
+</span>  <span class="keyword4">type</span> color <span class="keyword2">=</span>
+  <span class="keyword2">|</span> <span class="keyword6">Basic </span><span class="keyword2">of</span> basic_color <span class="keyword2">*</span> weight <span class="comments">(* basic colors, regular and bold *)</span>
+  <span class="keyword2">|</span> <span class="keyword6">RGB </span>  <span class="keyword2">of</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span>       <span class="comments">(* 6x6x6 color cube *)</span>
+  <span class="keyword2">|</span> <span class="keyword6">Gray </span> <span class="keyword2">of</span> <span class="keyword3">int</span>                   <span class="comments">(* 24 grayscale levels *)</span>
+<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">type weight = Regular | Bold
+type color =
+    Basic of basic_color * weight
+  | RGB of int * int * int
+  | Gray of int
+</div># <span class="keyword2">[</span><span class="keyword6">RGB </span><span class="keyword2">(</span><span class="keyword8">250</span>,<span class="keyword8">70</span>,<span class="keyword8">70</span><span class="keyword2">)</span><span class="keyword2">;</span> <span class="keyword6">Basic </span><span class="keyword2">(</span>Green, Regular<span class="keyword2">)</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : color list = [RGB (250, 70, 70); Basic (Green, Regular)]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/main.topscript">variants/main.topscript</a> , continued (part 3) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607795088">Once again, we'll use pattern matching to convert a color to a
+  corresponding integer. But in this case, the pattern matching does more than
+  separate out the different cases; it also allows us to extract the data
+  associated with each tag:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> color_to_int <span class="keyword2">=</span> <span class="keyword1">function</span>
+    <span class="keyword2">|</span> <span class="keyword6">Basic </span><span class="keyword2">(</span>basic_color,weight<span class="keyword2">)</span> -<span class="keyword2">&gt;</span>
+      <span class="keyword4">let</span> base <span class="keyword2">=</span> <span class="keyword1">match</span> weight <span class="keyword1">with</span> <span class="keyword6">Bold </span>-<span class="keyword2">&gt;</span> <span class="keyword8">8</span> <span class="keyword2">|</span> <span class="keyword6">Regular </span>-<span class="keyword2">&gt;</span> <span class="keyword8">0</span> <span class="keyword4">in</span>
+      base <span class="keyword2">+</span> basic_color_to_int basic_color
+    <span class="keyword2">|</span> <span class="keyword6">RGB </span><span class="keyword2">(</span>r,g,b<span class="keyword2">)</span> -<span class="keyword2">&gt;</span> <span class="keyword8">16</span> <span class="keyword2">+</span> b <span class="keyword2">+</span> g <span class="keyword2">*</span> <span class="keyword8">6</span> <span class="keyword2">+</span> r <span class="keyword2">*</span> <span class="keyword8">36</span>
+    <span class="keyword2">|</span> <span class="keyword6">Gray </span>i -<span class="keyword2">&gt;</span> <span class="keyword8">232</span> <span class="keyword2">+</span> i <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val color_to_int : color -&gt; int = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/main.topscript">variants/main.topscript</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607786960">Now, we can print text using the full set of available colors:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> color_print color s <span class="keyword2">=</span>
+     printf <span class="keyword7">&quot;%s\n&quot;</span> <span class="keyword2">(</span>color_by_number <span class="keyword2">(</span>color_to_int color<span class="keyword2">)</span> s<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val color_print : color -&gt; string -&gt; unit = &lt;fun&gt;</div># color_print <span class="keyword2">(</span><span class="keyword6">Basic </span><span class="keyword2">(</span>Red,Bold<span class="keyword2">)</span><span class="keyword2">)</span> <span class="keyword7">&quot;A bold red!&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">A bold red!</div># color_print <span class="keyword2">(</span><span class="keyword6">Gray </span><span class="keyword8">4</span><span class="keyword2">)</span> <span class="keyword7">&quot;A muted gray...&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">A muted gray...</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/main-5.rawscript">variants/main-5.rawscript</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><section id="catch-all-cases-and-refactoring"><h1>Catch-All Cases and Refactoring</h1><p id="idm259607779632">OCaml's type system can act as a refactoring tool, warning you of
+    places where your code needs to be updated to match an interface change.
+    This is particularly valuable in the context of variants.<a name="idm259607779168"></a><a name="idm259607777856"></a><a name="idm259607776544"></a><a name="idm259607775632"></a><a name="idm259607774736"></a></p><p id="idm259607773296">Consider what would happen if we were to change the definition of
+    <code>color</code> to the following:</p><div class="rwocode"><pre><code># <span class="keyword4">type</span> color <span class="keyword2">=</span>
+  <span class="keyword2">|</span> <span class="keyword6">Basic </span><span class="keyword2">of</span> basic_color     <span class="comments">(* basic colors *)</span>
+  <span class="keyword2">|</span> <span class="keyword6">Bold </span> <span class="keyword2">of</span> basic_color     <span class="comments">(* bold basic colors *)</span>
+  <span class="keyword2">|</span> <span class="keyword6">RGB </span>  <span class="keyword2">of</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span> <span class="comments">(* 6x6x6 color cube *)</span>
+  <span class="keyword2">|</span> <span class="keyword6">Gray </span> <span class="keyword2">of</span> <span class="keyword3">int</span>             <span class="comments">(* 24 grayscale levels *)</span>
+<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">type color =
+    Basic of basic_color
+  | Bold of basic_color
+  | RGB of int * int * int
+  | Gray of int
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/catch_all.topscript">variants/catch_all.topscript</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607762320">We've essentially broken out the <code>Basic</code> case into two cases, <code>Basic</code> and <code>Bold</code>, and <code>Basic</code> has changed from having two arguments to
+    one. <code>color_to_int</code> as we wrote it still
+    expects the old structure of the variant, and if we try to compile that
+    same code again, the compiler will notice the discrepancy:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> color_to_int <span class="keyword2">=</span> <span class="keyword1">function</span>
+    <span class="keyword2">|</span> <span class="keyword6">Basic </span><span class="keyword2">(</span>basic_color,weight<span class="keyword2">)</span> -<span class="keyword2">&gt;</span>
+      <span class="keyword4">let</span> base <span class="keyword2">=</span> <span class="keyword1">match</span> weight <span class="keyword1">with</span> <span class="keyword6">Bold </span>-<span class="keyword2">&gt;</span> <span class="keyword8">8</span> <span class="keyword2">|</span> <span class="keyword6">Regular </span>-<span class="keyword2">&gt;</span> <span class="keyword8">0</span> <span class="keyword4">in</span>
+      base <span class="keyword2">+</span> basic_color_to_int basic_color
+    <span class="keyword2">|</span> <span class="keyword6">RGB </span><span class="keyword2">(</span>r,g,b<span class="keyword2">)</span> -<span class="keyword2">&gt;</span> <span class="keyword8">16</span> <span class="keyword2">+</span> b <span class="keyword2">+</span> g <span class="keyword2">*</span> <span class="keyword8">6</span> <span class="keyword2">+</span> r <span class="keyword2">*</span> <span class="keyword8">36</span>
+    <span class="keyword2">|</span> <span class="keyword6">Gray </span>i -<span class="keyword2">&gt;</span> <span class="keyword8">232</span> <span class="keyword2">+</span> i <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 34-60:
+Error: This pattern matches values of type 'a * 'b
+       but a pattern was expected which matches values of type basic_color
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/catch_all.topscript">variants/catch_all.topscript</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607749568">Here, the compiler is complaining that the <code>Basic</code> tag is used with the wrong number of
+    arguments. If we fix that, however, the compiler flag will flag a second
+    problem, which is that we haven't handled the new <code>Bold</code> tag:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> color_to_int <span class="keyword2">=</span> <span class="keyword1">function</span>
+    <span class="keyword2">|</span> <span class="keyword6">Basic </span>basic_color -<span class="keyword2">&gt;</span> basic_color_to_int basic_color
+    <span class="keyword2">|</span> <span class="keyword6">RGB </span><span class="keyword2">(</span>r,g,b<span class="keyword2">)</span> -<span class="keyword2">&gt;</span> <span class="keyword8">16</span> <span class="keyword2">+</span> b <span class="keyword2">+</span> g <span class="keyword2">*</span> <span class="keyword8">6</span> <span class="keyword2">+</span> r <span class="keyword2">*</span> <span class="keyword8">36</span>
+    <span class="keyword2">|</span> <span class="keyword6">Gray </span>i -<span class="keyword2">&gt;</span> <span class="keyword8">232</span> <span class="keyword2">+</span> i <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"><br></br>Characters 19-154:
+Warning 8: this pattern-matching is not exhaustive.
+Here is an example of a value that is not matched:
+Bold _val color_to_int : color -&gt; int = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/catch_all.topscript">variants/catch_all.topscript</a> , continued (part 3) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607738800">Fixing this now leads us to the correct implementation:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> color_to_int <span class="keyword2">=</span> <span class="keyword1">function</span>
+    <span class="keyword2">|</span> <span class="keyword6">Basic </span>basic_color -<span class="keyword2">&gt;</span> basic_color_to_int basic_color
+    <span class="keyword2">|</span> <span class="keyword6">Bold </span> basic_color -<span class="keyword2">&gt;</span> <span class="keyword8">8</span> <span class="keyword2">+</span> basic_color_to_int basic_color
+    <span class="keyword2">|</span> <span class="keyword6">RGB </span><span class="keyword2">(</span>r,g,b<span class="keyword2">)</span> -<span class="keyword2">&gt;</span> <span class="keyword8">16</span> <span class="keyword2">+</span> b <span class="keyword2">+</span> g <span class="keyword2">*</span> <span class="keyword8">6</span> <span class="keyword2">+</span> r <span class="keyword2">*</span> <span class="keyword8">36</span>
+    <span class="keyword2">|</span> <span class="keyword6">Gray </span>i -<span class="keyword2">&gt;</span> <span class="keyword8">232</span> <span class="keyword2">+</span> i <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val color_to_int : color -&gt; int = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/catch_all.topscript">variants/catch_all.topscript</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607731328">As we've seen, the type errors identified the things that needed to
+    be fixed to complete the refactoring of the code. This is fantastically
+    useful, but for it to work well and reliably, you need to write your code
+    in a way that maximizes the compiler's chances of helping you find the
+    bugs. To this end, a useful rule of thumb is to avoid catch-all cases in
+    pattern matches.</p><p id="idm259607730544">Here's an example that illustrates how catch-all cases interact with
+    exhaustion checks. Imagine we wanted a version of <code>color_to_int</code> that works on older terminals by
+    rendering the first 16 colors (the eight <code>basic_color</code>s in regular and bold) in the normal
+    way, but renders everything else as white. We might have written the
+    function as follows:<a name="idm259607728704"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> oldschool_color_to_int <span class="keyword2">=</span> <span class="keyword1">function</span>
+    <span class="keyword2">|</span> <span class="keyword6">Basic </span><span class="keyword2">(</span>basic_color,weight<span class="keyword2">)</span> -<span class="keyword2">&gt;</span>
+      <span class="keyword4">let</span> base <span class="keyword2">=</span> <span class="keyword1">match</span> weight <span class="keyword1">with</span> <span class="keyword6">Bold </span>-<span class="keyword2">&gt;</span> <span class="keyword8">8</span> <span class="keyword2">|</span> <span class="keyword6">Regular </span>-<span class="keyword2">&gt;</span> <span class="keyword8">0</span> <span class="keyword4">in</span>
+      base <span class="keyword2">+</span> basic_color_to_int basic_color
+    <span class="keyword2">|</span> <span class="keyword8">_</span> -<span class="keyword2">&gt;</span> basic_color_to_int White<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 44-70:
+Error: This pattern matches values of type 'a * 'b
+       but a pattern was expected which matches values of type basic_color
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/catch_all.topscript">variants/catch_all.topscript</a> , continued (part 5) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607719552">But because the catch-all case encompasses all possibilities, the
+    type system will no longer warn us that we have missed the new <code>Bold</code> case when we change the type to include it.
+    We can get this check back by avoiding the catch-all case, and instead
+    being explicit about the tags that are ignored.</p></section><section id="combining-records-and-variants"><h1>Combining Records and Variants</h1><p id="idm259607717152">The term <span><em>algebraic data types</em></span> is often used to
+    describe a collection of types that includes variants, records, and
+    tuples. Algebraic data types act as a peculiarly useful and powerful
+    language for describing data. At the heart of their utility is the fact
+    that they combine two different kinds of types: <span><em>product
+    types</em></span>, like tuples and records, which combine multiple
+    different types together and are mathematically similar to Cartesian
+    products; and <span><em>sum types</em></span>, like variants, which let you
+    combine multiple different possibilities into one type, and are
+    mathematically similar to disjoint unions.<a name="RECvartyp"></a><a name="idm259607713248"></a><a name="idm259607712352"></a><a name="idm259607711456"></a><a name="idm259607710160"></a><a name="VARTYPrec"></a></p><p id="idm259607707344">Algebraic data types gain much of their power from the ability to
+    construct layered combinations of sums and products. Let's see what we can
+    achieve with this by revisiting the logging server types that were
+    described in <a href="records.html">Chapter 5, <i>Records</i></a>. We'll start by reminding
+    ourselves of the definition of <code>Log_entry.t</code>:</p><div class="rwocode"><pre><code># <span class="keyword4">module</span> <span class="keyword6">Log_entry </span><span class="keyword2">=</span> <span class="keyword4">struct</span>
+    <span class="keyword4">type</span> t <span class="keyword2">=</span>
+      <span class="keyword2">{</span> session_id<span class="keyword2">:</span> <span class="keyword3">string</span><span class="keyword2">;</span>
+        time<span class="keyword2">:</span> <span class="keyword5">Time.</span>t<span class="keyword2">;</span>
+        important<span class="keyword2">:</span> bool<span class="keyword2">;</span>
+        message<span class="keyword2">:</span> <span class="keyword3">string</span><span class="keyword2">;</span>
+      <span class="keyword2">}</span>
+  <span class="keyword4">end</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module Log_entry :
+  sig
+    type t = {
+      session_id : string;
+      time : Time.t;
+      important : bool;
+      message : string;
+    }
+  end
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/logger.topscript">variants/logger.topscript</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607691248">This record type combines multiple pieces of data into one value. In particular, a single
+        <code>Log_entry.t</code> has a <code>session_id</code>
+<span><em>and</em></span> a <code>time</code>
+<span><em>and</em></span> an <code>important</code> flag
+        <span><em>and</em></span> a <code>message</code>. More generally, you
+      can think of record types as conjunctions. Variants, on the other hand, are disjunctions,
+      letting you represent multiple possibilities, as in the following example:</p><div class="rwocode"><pre><code># <span class="keyword4">type</span> client_message <span class="keyword2">=</span> <span class="keyword2">|</span> <span class="keyword6">Logon </span><span class="keyword2">of</span> <span class="keyword5">Logon.</span>t
+                        <span class="keyword2">|</span> <span class="keyword6">Heartbeat </span><span class="keyword2">of</span> <span class="keyword5">Heartbeat.</span>t
+                        <span class="keyword2">|</span> <span class="keyword6">Log_entry </span><span class="keyword2">of</span> <span class="keyword5">Log_entry.</span>t
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">type client_message =
+    Logon of Logon.t
+  | Heartbeat of Heartbeat.t
+  | Log_entry of Log_entry.t
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/logger.topscript">variants/logger.topscript</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607678240">A <code>client_message</code> is a <code>Logon</code> <span><em>or</em></span> a <code>Heartbeat</code> <span><em>or</em></span> a <code>Log_entry</code>. If we want to write code that
+    processes messages generically, rather than code specialized to a fixed
+    message type, we need something like <code>client_message</code> to act as one overarching type
+    for the different possible messages. We can then match on the <code>client_message</code> to determine the type of the
+    particular message being dealt with.</p><p id="idm259607672880">You can increase the precision of your types by using variants to
+    represent differences between types, and records to represent shared
+    structure. Consider the following function that takes a list of <code>client_message</code>s and returns all messages
+    generated by a given user. The code in question is implemented by folding
+    over the list of messages, where the accumulator is a pair of:</p><ul><li><p id="idm259607670960">The set of session identifiers for the user that have been seen
+        thus far</p></li><li><p id="idm259607670096">The set of messages so far that are associated with the
+        user</p></li></ul><p id="idm259607669376">Here's the concrete code:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> messages_for_user user messages <span class="keyword2">=</span>
+    <span class="keyword4">let</span> <span class="keyword2">(</span>user_messages,<span class="keyword8">_</span><span class="keyword2">)</span> <span class="keyword2">=</span>
+      <span class="keyword5">List.</span>fold messages ~init<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword2">[</span><span class="keyword2">]</span>,<span class="keyword5">String.</span><span class="keyword5">Set.</span>empty<span class="keyword2">)</span>
+        ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> <span class="keyword2">(</span><span class="keyword2">(</span>messages,user_sessions<span class="keyword2">)</span> <span class="keyword1">as</span> acc<span class="keyword2">)</span> message -<span class="keyword2">&gt;</span>
+          <span class="keyword1">match</span> message <span class="keyword1">with</span>
+          <span class="keyword2">|</span> <span class="keyword6">Logon </span>m -<span class="keyword2">&gt;</span>
+            <span class="keyword1">if</span> m.<span class="keyword5">Logon.</span>user <span class="keyword2">=</span> user <span class="keyword1">then</span>
+              <span class="keyword2">(</span>message<span class="keyword2">:</span><span class="keyword2">:</span>messages, <span class="keyword5">Set.</span>add user_sessions m.<span class="keyword5">Logon.</span>session_id<span class="keyword2">)</span>
+            <span class="keyword1">else</span> acc
+          <span class="keyword2">|</span> <span class="keyword6">Heartbeat </span><span class="keyword8">_</span> <span class="keyword2">|</span> <span class="keyword6">Log_entry </span><span class="keyword8">_</span> -<span class="keyword2">&gt;</span>
+            <span class="keyword4">let</span> session_id <span class="keyword2">=</span> <span class="keyword1">match</span> message <span class="keyword1">with</span>
+              <span class="keyword2">|</span> <span class="keyword6">Logon </span>    m -<span class="keyword2">&gt;</span> m.<span class="keyword5">Logon.</span>session_id
+              <span class="keyword2">|</span> <span class="keyword6">Heartbeat </span>m -<span class="keyword2">&gt;</span> m.<span class="keyword5">Heartbeat.</span>session_id
+              <span class="keyword2">|</span> <span class="keyword6">Log_entry </span>m -<span class="keyword2">&gt;</span> m.<span class="keyword5">Log_entry.</span>session_id
+            <span class="keyword4">in</span>
+            <span class="keyword1">if</span> <span class="keyword5">Set.</span>mem user_sessions session_id <span class="keyword1">then</span>
+              <span class="keyword2">(</span>message<span class="keyword2">:</span><span class="keyword2">:</span>messages,user_sessions<span class="keyword2">)</span>
+            <span class="keyword1">else</span> acc
+        <span class="keyword2">)</span>
+    <span class="keyword4">in</span>
+    <span class="keyword5">List.</span>rev user_messages
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val messages_for_user : string -&gt; client_message list -&gt; client_message list =
+  &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/logger.topscript">variants/logger.topscript</a> , continued (part 3) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607650000">There's one awkward part of the preceding code, which is the logic
+    that determines the session ID. The code is somewhat repetitive,
+    contemplating each of the possible message types (including the <code>Logon</code> case, which isn't actually possible at
+    that point in the code) and extracting the session ID in each case. This
+    per-message-type handling seems unnecessary, since the session ID works
+    the same way for all of the message types.</p><p id="idm259607648544">We can improve the code by refactoring our types to explicitly
+    reflect the information that's shared between the different messages. The
+    first step is to cut down the definitions of each per-message record to
+    contain just the information unique to that record:</p><div class="rwocode"><pre><code># <span class="keyword4">module</span> <span class="keyword6">Log_entry </span><span class="keyword2">=</span> <span class="keyword4">struct</span>
+    <span class="keyword4">type</span> t <span class="keyword2">=</span> <span class="keyword2">{</span> important<span class="keyword2">:</span> bool<span class="keyword2">;</span>
+               message<span class="keyword2">:</span> <span class="keyword3">string</span><span class="keyword2">;</span>
+             <span class="keyword2">}</span>
+  <span class="keyword4">end</span>
+  <span class="keyword4">module</span> <span class="keyword6">Heartbeat </span><span class="keyword2">=</span> <span class="keyword4">struct</span>
+    <span class="keyword4">type</span> t <span class="keyword2">=</span> <span class="keyword2">{</span> status_message<span class="keyword2">:</span> <span class="keyword3">string</span><span class="keyword2">;</span> <span class="keyword2">}</span>
+  <span class="keyword4">end</span>
+  <span class="keyword4">module</span> <span class="keyword6">Logon </span><span class="keyword2">=</span> <span class="keyword4">struct</span>
+    <span class="keyword4">type</span> t <span class="keyword2">=</span> <span class="keyword2">{</span> user<span class="keyword2">:</span> <span class="keyword3">string</span><span class="keyword2">;</span>
+               credentials<span class="keyword2">:</span> <span class="keyword3">string</span><span class="keyword2">;</span>
+             <span class="keyword2">}</span>
+  <span class="keyword4">end</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module Log_entry : sig type t = { important : bool; message : string; } end
+module Heartbeat : sig type t = { status_message : string; } end
+module Logon : sig type t = { user : string; credentials : string; } end
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/logger.topscript">variants/logger.topscript</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607634768">We can then define a variant type that combines these types:</p><div class="rwocode"><pre><code># <span class="keyword4">type</span> details <span class="keyword2">=</span>
+    <span class="keyword2">|</span> <span class="keyword6">Logon </span><span class="keyword2">of</span> <span class="keyword5">Logon.</span>t
+    <span class="keyword2">|</span> <span class="keyword6">Heartbeat </span><span class="keyword2">of</span> <span class="keyword5">Heartbeat.</span>t
+    <span class="keyword2">|</span> <span class="keyword6">Log_entry </span><span class="keyword2">of</span> <span class="keyword5">Log_entry.</span>t
+ <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">type details =
+    Logon of Logon.t
+  | Heartbeat of Heartbeat.t
+  | Log_entry of Log_entry.t
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/logger.topscript">variants/logger.topscript</a> , continued (part 5) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607625888">Separately, we need a record that contains the fields that are
+    common across all messages:</p><div class="rwocode"><pre><code># <span class="keyword4">module</span> <span class="keyword6">Common </span><span class="keyword2">=</span> <span class="keyword4">struct</span>
+    <span class="keyword4">type</span> t <span class="keyword2">=</span> <span class="keyword2">{</span> session_id<span class="keyword2">:</span> <span class="keyword3">string</span><span class="keyword2">;</span>
+               time<span class="keyword2">:</span> <span class="keyword5">Time.</span>t<span class="keyword2">;</span>
+             <span class="keyword2">}</span>
+  <span class="keyword4">end</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module Common : sig type t = { session_id : string; time : Time.t; } end
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/logger.topscript">variants/logger.topscript</a> , continued (part 6) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607618848">A full message can then be represented as a pair of a <code>Common.t</code> and a <code>details</code>. Using this, we can rewrite our
+    preceding example as follows:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> messages_for_user user messages <span class="keyword2">=</span>
+    <span class="keyword4">let</span> <span class="keyword2">(</span>user_messages,<span class="keyword8">_</span><span class="keyword2">)</span> <span class="keyword2">=</span>
+      <span class="keyword5">List.</span>fold messages ~init<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword2">[</span><span class="keyword2">]</span>,<span class="keyword5">String.</span><span class="keyword5">Set.</span>empty<span class="keyword2">)</span>
+        ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> <span class="keyword2">(</span><span class="keyword2">(</span>messages,user_sessions<span class="keyword2">)</span> <span class="keyword1">as</span> acc<span class="keyword2">)</span> <span class="keyword2">(</span><span class="keyword2">(</span>common,details<span class="keyword2">)</span> <span class="keyword1">as</span> message<span class="keyword2">)</span> -<span class="keyword2">&gt;</span>
+          <span class="keyword4">let</span> session_id <span class="keyword2">=</span> common.<span class="keyword5">Common.</span>session_id <span class="keyword4">in</span>
+          <span class="keyword1">match</span> details <span class="keyword1">with</span>
+          <span class="keyword2">|</span> <span class="keyword6">Logon </span>m -<span class="keyword2">&gt;</span>
+            <span class="keyword1">if</span> m.<span class="keyword5">Logon.</span>user <span class="keyword2">=</span> user <span class="keyword1">then</span>
+              <span class="keyword2">(</span>message<span class="keyword2">:</span><span class="keyword2">:</span>messages, <span class="keyword5">Set.</span>add user_sessions session_id<span class="keyword2">)</span>
+            <span class="keyword1">else</span> acc
+          <span class="keyword2">|</span> <span class="keyword6">Heartbeat </span><span class="keyword8">_</span> <span class="keyword2">|</span> <span class="keyword6">Log_entry </span><span class="keyword8">_</span> -<span class="keyword2">&gt;</span>
+            <span class="keyword1">if</span> <span class="keyword5">Set.</span>mem user_sessions session_id <span class="keyword1">then</span>
+              <span class="keyword2">(</span>message<span class="keyword2">:</span><span class="keyword2">:</span>messages,user_sessions<span class="keyword2">)</span>
+            <span class="keyword1">else</span> acc
+        <span class="keyword2">)</span>
+    <span class="keyword4">in</span>
+    <span class="keyword5">List.</span>rev user_messages
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val messages_for_user :
+  string -&gt; (Common.t * details) list -&gt; (Common.t * details) list = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/logger.topscript">variants/logger.topscript</a> , continued (part 7) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607600816">As you can see, the code for extracting the session ID has been
+    replaced with the simple expression <code>common.Common.session_id</code>.</p><p id="idm259607599712">In addition, this design allows us to essentially downcast to the
+    specific message type once we know what it is and then dispatch code to
+    handle just that message type. In particular, while we use the type
+    <code>Common.t * details</code> to represent an
+    arbitrary message, we can use <code>Common.t *
+    Logon.t</code> to represent a logon message. Thus, if we had functions
+    for handling individual message types, we could write a dispatch function
+    as follows:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> handle_message server_state <span class="keyword2">(</span>common,details<span class="keyword2">)</span> <span class="keyword2">=</span>
+    <span class="keyword1">match</span> details <span class="keyword1">with</span>
+    <span class="keyword2">|</span> <span class="keyword6">Log_entry </span>m -<span class="keyword2">&gt;</span> handle_log_entry server_state <span class="keyword2">(</span>common,m<span class="keyword2">)</span>
+    <span class="keyword2">|</span> <span class="keyword6">Logon </span>    m -<span class="keyword2">&gt;</span> handle_logon     server_state <span class="keyword2">(</span>common,m<span class="keyword2">)</span>
+    <span class="keyword2">|</span> <span class="keyword6">Heartbeat </span>m -<span class="keyword2">&gt;</span> handle_heartbeat server_state <span class="keyword2">(</span>common,m<span class="keyword2">)</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 95-111:
+Error: Unbound value handle_log_entry
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/logger.topscript">variants/logger.topscript</a> , continued (part 8) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607590544">And it's explicit at the type level that <code>handle_log_entry</code> sees only <code>Log_entry</code> messages, <code>handle_logon</code> sees only <code>Logon</code> messages, etc.<a name="idm259607587648"></a><a name="idm259607587040"></a></p></section><section id="variants-and-recursive-data-structures"><h1>Variants and Recursive Data Structures</h1><p id="idm259607585216">Another common application of variants is to represent tree-like
+    recursive data structures. We'll show how this can be done by walking
+    through the design of a simple Boolean expression language. Such a
+    language can be useful anywhere you need to specify filters, which are
+    used in everything from packet analyzers to mail clients.<a name="idm259607584608"></a><a name="idm259607583696"></a><a name="idm259607582400"></a></p><p id="idm259607580704">An expression in this language will be defined by the variant
+    <code>expr</code>, with one tag for each kind of
+    expression we want to support:</p><div class="rwocode"><pre><code># <span class="keyword4">type</span> 'a expr <span class="keyword2">=</span>
+    <span class="keyword2">|</span> <span class="keyword6">Base </span> <span class="keyword2">of</span> 'a
+    <span class="keyword2">|</span> <span class="keyword6">Const </span><span class="keyword2">of</span> bool
+    <span class="keyword2">|</span> <span class="keyword6">And </span>  <span class="keyword2">of</span> 'a expr <span class="keyword3">list</span>
+    <span class="keyword2">|</span> <span class="keyword6">Or </span>   <span class="keyword2">of</span> 'a expr <span class="keyword3">list</span>
+    <span class="keyword2">|</span> <span class="keyword6">Not </span>  <span class="keyword2">of</span> 'a expr
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">type 'a expr =
+    Base of 'a
+  | Const of bool
+  | And of 'a expr list
+  | Or of 'a expr list
+  | Not of 'a expr
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/blang.topscript">variants/blang.topscript</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607568608">Note that the definition of the type <code>expr</code> is recursive, meaning that a <code>expr</code> may contain other <code>expr</code>s. Also, <code>expr</code> is parameterized by a polymorphic type
+    <code>'a</code> which is used for specifying the
+    type of the value that goes under the <code>Base</code> tag.</p><p id="idm259607564128">The purpose of each tag is pretty straightforward. <code>And</code>, <code>Or</code>, and
+    <code>Not</code> are the basic operators for
+    building up Boolean expressions, and <code>Const</code> lets you enter the constants <code>true</code> and <code>false</code>.</p><p id="idm259607559744">The <code>Base</code> tag is what allows you
+    to tie the <code>expr</code> to your application, by
+    letting you specify an element of some base predicate type, whose truth or
+    falsehood is determined by your application. If you were writing a filter
+    language for an email processor, your base predicates might specify the
+    tests you would run against an email, as in the following example:</p><div class="rwocode"><pre><code># <span class="keyword4">type</span> mail_field <span class="keyword2">=</span> <span class="keyword6">To </span><span class="keyword2">|</span> <span class="keyword6">From </span><span class="keyword2">|</span> <span class="keyword6">CC </span><span class="keyword2">|</span> <span class="keyword6">Date </span><span class="keyword2">|</span> <span class="keyword6">Subject
+</span>  <span class="keyword4">type</span> mail_predicate <span class="keyword2">=</span> <span class="keyword2">{</span> field<span class="keyword2">:</span> mail_field<span class="keyword2">;</span>
+                          contains<span class="keyword2">:</span> <span class="keyword3">string</span> <span class="keyword2">}</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">type mail_field = To | From | CC | Date | Subject
+type mail_predicate = { field : mail_field; contains : string; }
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/blang.topscript">variants/blang.topscript</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607551024">Using the preceding code, we can construct a simple expression with
+    <code>mail_predicate</code> as its base
+    predicate:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> test field contains <span class="keyword2">=</span> <span class="keyword6">Base </span><span class="keyword2">{</span> field<span class="keyword2">;</span> contains <span class="keyword2">}</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val test : mail_field -&gt; string -&gt; mail_predicate expr = &lt;fun&gt;
+</div># <span class="keyword6">And </span><span class="keyword2">[</span> <span class="keyword6">Or </span><span class="keyword2">[</span> test <span class="keyword6">To </span><span class="keyword7">&quot;doligez&quot;</span><span class="keyword2">;</span> test <span class="keyword6">CC </span><span class="keyword7">&quot;doligez&quot;</span> <span class="keyword2">]</span><span class="keyword2">;</span>
+        test <span class="keyword6">Subject </span><span class="keyword7">&quot;runtime&quot;</span><span class="keyword2">;</span>
+      <span class="keyword2">]</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : mail_predicate expr =
+And
+ [Or
+   [Base {field = To; contains = &quot;doligez&quot;};
+    Base {field = CC; contains = &quot;doligez&quot;}];
+  Base {field = Subject; contains = &quot;runtime&quot;}]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/blang.topscript">variants/blang.topscript</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607538768">Being able to construct such expressions isn't enough; we also need
+    to be able to evaluate them. Here's a function for doing just that:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword4">rec</span> eval expr base_eval <span class="keyword2">=</span>
+    <span class="comments">(* a shortcut, so we don't need to repeatedly pass [base_eval]
+       explicitly to [eval] *)</span>
+    <span class="keyword4">let</span> eval' expr <span class="keyword2">=</span> eval expr base_eval <span class="keyword4">in</span>
+    <span class="keyword1">match</span> expr <span class="keyword1">with</span>
+    <span class="keyword2">|</span> <span class="keyword6">Base </span> base   -<span class="keyword2">&gt;</span> base_eval base
+    <span class="keyword2">|</span> <span class="keyword6">Const </span>bool   -<span class="keyword2">&gt;</span> bool
+    <span class="keyword2">|</span> <span class="keyword6">And </span>  exprs -<span class="keyword2">&gt;</span> <span class="keyword5">List.</span>for_all exprs ~f<span class="keyword2">:</span>eval'
+    <span class="keyword2">|</span> <span class="keyword6">Or </span>   exprs -<span class="keyword2">&gt;</span> <span class="keyword5">List.</span>exists  exprs ~f<span class="keyword2">:</span>eval'
+    <span class="keyword2">|</span> <span class="keyword6">Not </span>  expr  -<span class="keyword2">&gt;</span> not <span class="keyword2">(</span>eval' expr<span class="keyword2">)</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val eval : 'a expr -&gt; ('a -&gt; bool) -&gt; bool = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/blang.topscript">variants/blang.topscript</a> , continued (part 3) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607527920">The structure of the code is pretty straightforward—we're just
+    pattern matching over the structure of the data, doing the appropriate
+    calculation based on which tag we see. To use this evaluator on a concrete
+    example, we just need to write the <code>base_eval</code> function, which is capable of
+    evaluating a base predicate.</p><p id="idm259607526336">Another useful operation on expressions is simplification. The
+    following is a set of simplifying construction functions that mirror the
+    tags of an <code>expr</code>:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> and_ l <span class="keyword2">=</span>
+    <span class="keyword1">if</span> <span class="keyword5">List.</span>mem l <span class="keyword2">(</span><span class="keyword6">Const </span>false<span class="keyword2">)</span> <span class="keyword1">then</span> <span class="keyword6">Const </span>false
+    <span class="keyword1">else</span>
+      <span class="keyword1">match</span> <span class="keyword5">List.</span>filter l ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword2">(</span><span class="keyword2">&lt;</span><span class="keyword2">&gt;</span><span class="keyword2">)</span> <span class="keyword2">(</span><span class="keyword6">Const </span>true<span class="keyword2">)</span><span class="keyword2">)</span> <span class="keyword1">with</span>
+      <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span> -<span class="keyword2">&gt;</span> <span class="keyword6">Const </span>true
+      <span class="keyword2">|</span> <span class="keyword2">[</span> x <span class="keyword2">]</span> -<span class="keyword2">&gt;</span> x
+      <span class="keyword2">|</span> l -<span class="keyword2">&gt;</span> <span class="keyword6">And </span>l
+
+  <span class="keyword4">let</span> or_ l <span class="keyword2">=</span>
+    <span class="keyword1">if</span> <span class="keyword5">List.</span>mem l <span class="keyword2">(</span><span class="keyword6">Const </span>true<span class="keyword2">)</span> <span class="keyword1">then</span> <span class="keyword6">Const </span>true
+    <span class="keyword1">else</span>
+      <span class="keyword1">match</span> <span class="keyword5">List.</span>filter l ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword2">(</span><span class="keyword2">&lt;</span><span class="keyword2">&gt;</span><span class="keyword2">)</span> <span class="keyword2">(</span><span class="keyword6">Const </span>false<span class="keyword2">)</span><span class="keyword2">)</span> <span class="keyword1">with</span>
+      <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span> -<span class="keyword2">&gt;</span> <span class="keyword6">Const </span>false
+      <span class="keyword2">|</span> <span class="keyword2">[</span>x<span class="keyword2">]</span> -<span class="keyword2">&gt;</span> x
+      <span class="keyword2">|</span> l -<span class="keyword2">&gt;</span> <span class="keyword6">Or </span>l
+
+  <span class="keyword4">let</span> not_ <span class="keyword2">=</span> <span class="keyword1">function</span>
+    <span class="keyword2">|</span> <span class="keyword6">Const </span>b -<span class="keyword2">&gt;</span> <span class="keyword6">Const </span><span class="keyword2">(</span>not b<span class="keyword2">)</span>
+    <span class="keyword2">|</span> e -<span class="keyword2">&gt;</span> <span class="keyword6">Not </span>e
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val and_ : 'a expr list -&gt; 'a expr = &lt;fun&gt;
+val or_ : 'a expr list -&gt; 'a expr = &lt;fun&gt;
+val not_ : 'a expr -&gt; 'a expr = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/blang.topscript">variants/blang.topscript</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607507632">We can now write a simplification routine that is based on the
+    preceding functions.</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword4">rec</span> simplify <span class="keyword2">=</span> <span class="keyword1">function</span>
+    <span class="keyword2">|</span> <span class="keyword6">Base </span><span class="keyword8">_</span> <span class="keyword2">|</span> <span class="keyword6">Const </span><span class="keyword8">_</span> <span class="keyword1">as</span> x -<span class="keyword2">&gt;</span> x
+    <span class="keyword2">|</span> <span class="keyword6">And </span>l -<span class="keyword2">&gt;</span> and_ <span class="keyword2">(</span><span class="keyword5">List.</span>map ~f<span class="keyword2">:</span>simplify l<span class="keyword2">)</span>
+    <span class="keyword2">|</span> <span class="keyword6">Or </span>l  -<span class="keyword2">&gt;</span> or_  <span class="keyword2">(</span><span class="keyword5">List.</span>map ~f<span class="keyword2">:</span>simplify l<span class="keyword2">)</span>
+    <span class="keyword2">|</span> <span class="keyword6">Not </span>e -<span class="keyword2">&gt;</span> not_ <span class="keyword2">(</span>simplify e<span class="keyword2">)</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val simplify : 'a expr -&gt; 'a expr = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/blang.topscript">variants/blang.topscript</a> , continued (part 5) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607499664">We can apply this to a Boolean expression and see how good a job it
+    does at simplifying it:</p><div class="rwocode"><pre><code># simplify <span class="keyword2">(</span><span class="keyword6">Not </span><span class="keyword2">(</span><span class="keyword6">And </span><span class="keyword2">[</span> <span class="keyword6">Or </span><span class="keyword2">[</span><span class="keyword6">Base </span><span class="keyword7">&quot;it's snowing&quot;</span><span class="keyword2">;</span> <span class="keyword6">Const </span>true<span class="keyword2">]</span><span class="keyword2">;</span>
+                       <span class="keyword6">Base </span><span class="keyword7">&quot;it's raining&quot;</span><span class="keyword2">]</span><span class="keyword2">)</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string expr = Not (Base &quot;it's raining&quot;)
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/blang.topscript">variants/blang.topscript</a> , continued (part 6) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607494592">Here, it correctly converted the <code>Or</code> branch to <code>Const
+    true</code> and then eliminated the <code>And</code> entirely, since the <code>And</code> then had only one nontrivial
+    component.</p><p id="idm259607491520">There are some simplifications it misses, however. In particular,
+    see what happens if we add a double negation in:</p><div class="rwocode"><pre><code># simplify <span class="keyword2">(</span><span class="keyword6">Not </span><span class="keyword2">(</span><span class="keyword6">And </span><span class="keyword2">[</span> <span class="keyword6">Or </span><span class="keyword2">[</span><span class="keyword6">Base </span><span class="keyword7">&quot;it's snowing&quot;</span><span class="keyword2">;</span> <span class="keyword6">Const </span>true<span class="keyword2">]</span><span class="keyword2">;</span>
+                       <span class="keyword6">Not </span><span class="keyword2">(</span><span class="keyword6">Not </span><span class="keyword2">(</span><span class="keyword6">Base </span><span class="keyword7">&quot;it's raining&quot;</span><span class="keyword2">)</span><span class="keyword2">)</span><span class="keyword2">]</span><span class="keyword2">)</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string expr = Not (Not (Not (Base &quot;it's raining&quot;)))
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/blang.topscript">variants/blang.topscript</a> , continued (part 7) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607486352">It fails to remove the double negation, and it's easy to see why.
+    The <code>not_</code> function has a catch-all case,
+    so it ignores everything but the one case it explicitly considers, that of
+    the negation of a constant. Catch-all cases are generally a bad idea, and
+    if we make the code more explicit, we see that the missing of the double
+    negation is more obvious:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> not_ <span class="keyword2">=</span> <span class="keyword1">function</span>
+    <span class="keyword2">|</span> <span class="keyword6">Const </span>b -<span class="keyword2">&gt;</span> <span class="keyword6">Const </span><span class="keyword2">(</span>not b<span class="keyword2">)</span>
+    <span class="keyword2">|</span> <span class="keyword2">(</span><span class="keyword6">Base </span><span class="keyword8">_</span> <span class="keyword2">|</span> <span class="keyword6">And </span><span class="keyword8">_</span> <span class="keyword2">|</span> <span class="keyword6">Or </span><span class="keyword8">_</span> <span class="keyword2">|</span> <span class="keyword6">Not </span><span class="keyword8">_</span><span class="keyword2">)</span> <span class="keyword1">as</span> e -<span class="keyword2">&gt;</span> <span class="keyword6">Not </span>e
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val not_ : 'a expr -&gt; 'a expr = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/blang.topscript">variants/blang.topscript</a> , continued (part 8) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607478960">We can of course fix this by simply adding an explicit case for
+    double negation:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> not_ <span class="keyword2">=</span> <span class="keyword1">function</span>
+    <span class="keyword2">|</span> <span class="keyword6">Const </span>b -<span class="keyword2">&gt;</span> <span class="keyword6">Const </span><span class="keyword2">(</span>not b<span class="keyword2">)</span>
+    <span class="keyword2">|</span> <span class="keyword6">Not </span>e -<span class="keyword2">&gt;</span> e
+    <span class="keyword2">|</span> <span class="keyword2">(</span><span class="keyword6">Base </span><span class="keyword8">_</span> <span class="keyword2">|</span> <span class="keyword6">And </span><span class="keyword8">_</span> <span class="keyword2">|</span> <span class="keyword6">Or </span><span class="keyword8">_</span> <span class="keyword2">)</span> <span class="keyword1">as</span> e -<span class="keyword2">&gt;</span> <span class="keyword6">Not </span>e
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val not_ : 'a expr -&gt; 'a expr = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/blang.topscript">variants/blang.topscript</a> , continued (part 9) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607471888">The example of a Boolean expression language is more than a toy.
+    There's a module very much in this spirit in Core called <code>Blang</code> (short for &quot;Boolean language&quot;), and it
+    gets a lot of practical use in a variety of applications. The
+    simplification algorithm in particular is useful when you want to use it
+    to specialize the evaluation of expressions for which the evaluation of
+    some of the base predicates is already known.</p><p id="idm259607470416">More generally, using variants to build recursive data structures is
+    a common technique, and shows up everywhere from designing little
+    languages to building complex data structures.</p></section><section id="polymorphic-variants"><h1>Polymorphic Variants</h1><p id="idm259607468816">In addition to the ordinary variants we've seen so far, OCaml also
+    supports so-called <span><em>polymorphic variants</em></span>. As we'll
+    see, polymorphic variants are more flexible and syntactically more
+    lightweight than ordinary variants, but that extra power comes at a
+    cost.<a name="idm259607467872"></a><a name="VARTYPpoly"></a></p><p id="idm259607464896">Syntactically, polymorphic variants are distinguished from ordinary
+    variants by the leading backtick. And unlike ordinary variants,
+    polymorphic variants can be used without an explicit type
+    declaration:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> three <span class="keyword2">=</span> <span class="keyword6">`Int </span><span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val three : [&gt; `Int of int ] = `Int 3
+</div># <span class="keyword4">let</span> four <span class="keyword2">=</span> <span class="keyword6">`Float </span><span class="keyword8">4</span>.<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val four : [&gt; `Float of float ] = `Float 4.
+</div># <span class="keyword4">let</span> nan <span class="keyword2">=</span> `Not_a_number<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val nan : [&gt; `Not_a_number ] = `Not_a_number
+</div># <span class="keyword2">[</span>three<span class="keyword2">;</span> four<span class="keyword2">;</span> nan<span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : [&gt; `Float of float | `Int of int | `Not_a_number ] list =
+[`Int 3; `Float 4.; `Not_a_number]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/main.topscript">variants/main.topscript</a> , continued (part 6) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607453920">As you can see, polymorphic variant types are inferred
+    automatically, and when we combine variants with different tags, the
+    compiler infers a new type that knows about all of those tags. Note that
+    in the preceding example, the tag name (e.g., <code>`Int</code>) matches the type name (<code>int</code>). This is a common convention in
+    OCaml.<a name="idm259607452064"></a></p><p id="idm259607450608">The type system will complain if it sees incompatible uses of the
+    same tag:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> five <span class="keyword2">=</span> <span class="keyword6">`Int </span><span class="keyword7">&quot;five&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val five : [&gt; `Int of string ] = `Int &quot;five&quot;
+</div># <span class="keyword2">[</span>three<span class="keyword2">;</span> four<span class="keyword2">;</span> five<span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 14-18:
+Error: This expression has type [&gt; `Int of string ]
+       but an expression was expected of type
+         [&gt; `Float of float | `Int of int ]
+       Types for tag `Int are incompatible
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/main.topscript">variants/main.topscript</a> , continued (part 7) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607441536">The <code>&gt;</code> at the beginning of the
+    variant types above is critical because it marks the types as being open
+    to combination with other variant types. We can read the type <code>[&gt; `Int of string | `Float of float]</code> as
+    describing a variant whose tags include <code>`Int of
+    string</code> and <code>`Float of float</code>,
+    but may include more tags as well. In other words, you can roughly
+    translate <code>&gt;</code> to mean: &quot;these tags or
+    more.&quot;</p><p id="idm259607437488">OCaml will in some cases infer a variant type with <code>&lt;</code>, to indicate &quot;these tags or less,&quot; as in
+    the following example:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> is_positive <span class="keyword2">=</span> <span class="keyword1">function</span>
+     <span class="keyword2">|</span> <span class="keyword6">`Int </span>  x -<span class="keyword2">&gt;</span> x <span class="keyword2">&gt;</span> <span class="keyword8">0</span>
+     <span class="keyword2">|</span> <span class="keyword6">`Float </span>x -<span class="keyword2">&gt;</span> x <span class="keyword2">&gt;</span> <span class="keyword8">0</span>.
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val is_positive : [&lt; `Float of float | `Int of int ] -&gt; bool = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/main.topscript">variants/main.topscript</a> , continued (part 8) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607430240">The <code>&lt;</code> is there because
+    <code>is_positive</code> has no way of dealing with
+    values that have tags other than <code>`Float of
+    float</code> or <code>`Int of int</code>.</p><p id="idm259607427168">We can think of these <code>&lt;</code> and
+    <code>&gt;</code> markers as indications of upper
+    and lower bounds on the tags involved. If the same set of tags are both an
+    upper and a lower bound, we end up with an <span><em>exact</em></span>
+    polymorphic variant type, which has neither marker. For example:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> exact <span class="keyword2">=</span> <span class="keyword5">List.</span>filter ~f<span class="keyword2">:</span>is_positive <span class="keyword2">[</span>three<span class="keyword2">;</span>four<span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val exact : [ `Float of float | `Int of int ] list = [`Int 3; `Float 4.]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/main.topscript">variants/main.topscript</a> , continued (part 9) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607420848">Perhaps surprisingly, we can also create polymorphic variant types
+    that have different upper and lower bounds. Note that <code>Ok</code> and <code>Error</code>
+    in the following example come from the <code>Result.t</code> type from Core:<a name="idm259607418512"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> is_positive <span class="keyword2">=</span> <span class="keyword1">function</span>
+     <span class="keyword2">|</span> <span class="keyword6">`Int </span>  x -<span class="keyword2">&gt;</span> <span class="keyword6">Ok </span><span class="keyword2">(</span>x <span class="keyword2">&gt;</span> <span class="keyword8">0</span><span class="keyword2">)</span>
+     <span class="keyword2">|</span> <span class="keyword6">`Float </span>x -<span class="keyword2">&gt;</span> <span class="keyword6">Ok </span><span class="keyword2">(</span>x <span class="keyword2">&gt;</span> <span class="keyword8">0</span>.<span class="keyword2">)</span>
+     <span class="keyword2">|</span> <span class="keyword6">`Not_a_number </span>-<span class="keyword2">&gt;</span> <span class="keyword6">Error </span><span class="keyword7">&quot;not a number&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val is_positive :
+  [&lt; `Float of float | `Int of int | `Not_a_number ] -&gt;
+  (bool, string) Result.t = &lt;fun&gt;
+</div># <span class="keyword5">List.</span>filter <span class="keyword2">[</span>three<span class="keyword2">;</span> four<span class="keyword2">]</span> ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> x -<span class="keyword2">&gt;</span>
+     <span class="keyword1">match</span> is_positive x <span class="keyword1">with</span> <span class="keyword6">Error </span><span class="keyword8">_</span> -<span class="keyword2">&gt;</span> false <span class="keyword2">|</span> <span class="keyword6">Ok </span>b -<span class="keyword2">&gt;</span> b<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : [&lt; `Float of float | `Int of int | `Not_a_number &gt; `Float `Int ] list =
+[`Int 3; `Float 4.]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/main.topscript">variants/main.topscript</a> , continued (part 10) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607406368">Here, the inferred type states that the tags can be no more than
+    <code>`Float</code>, <code>`Int</code>, and <code>`Not_a_number</code>, and must contain at least
+    <code>`Float</code> and <code>`Int</code>. As you can already start to see,
+    polymorphic variants can lead to fairly complex inferred types.</p><section id="example-terminal-colors-redux"><h1>Example: Terminal Colors Redux</h1><p id="idm259607401600">To see how to use polymorphic variants in practice, we'll return
+      to terminal colors. Imagine that we have a new terminal type that adds
+      yet more colors, say, by adding an alpha channel so you can specify
+      translucent colors. We could model this extended set of colors as
+      follows, using an ordinary variant:<a name="idm259607401008"></a></p><div class="rwocode"><pre><code># <span class="keyword4">type</span> extended_color <span class="keyword2">=</span>
+    <span class="keyword2">|</span> <span class="keyword6">Basic </span><span class="keyword2">of</span> basic_color <span class="keyword2">*</span> weight  <span class="comments">(* basic colors, regular and bold *)</span>
+    <span class="keyword2">|</span> <span class="keyword6">RGB </span>  <span class="keyword2">of</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span>       <span class="comments">(* 6x6x6 color space *)</span>
+    <span class="keyword2">|</span> <span class="keyword6">Gray </span> <span class="keyword2">of</span> <span class="keyword3">int</span>                   <span class="comments">(* 24 grayscale levels *)</span>
+    <span class="keyword2">|</span> <span class="keyword6">RGBA </span> <span class="keyword2">of</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span> <span class="comments">(* 6x6x6x6 color space *)</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">type extended_color =
+    Basic of basic_color * weight
+  | RGB of int * int * int
+  | Gray of int
+  | RGBA of int * int * int * int
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/main.topscript">variants/main.topscript</a> , continued (part 11) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607389360">We want to write a function <code>extended_color_to_int</code>, that works like
+      <code>color_to_int</code> for all of the old kinds
+      of colors, with new logic only for handling colors that include an alpha
+      channel. One might try to write such a function as follows.</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> extended_color_to_int <span class="keyword2">=</span> <span class="keyword1">function</span>
+    <span class="keyword2">|</span> <span class="keyword6">RGBA </span><span class="keyword2">(</span>r,g,b,a<span class="keyword2">)</span> -<span class="keyword2">&gt;</span> <span class="keyword8">256</span> <span class="keyword2">+</span> a <span class="keyword2">+</span> b <span class="keyword2">*</span> <span class="keyword8">6</span> <span class="keyword2">+</span> g <span class="keyword2">*</span> <span class="keyword8">36</span> <span class="keyword2">+</span> r <span class="keyword2">*</span> <span class="keyword8">216</span>
+    <span class="keyword2">|</span> <span class="keyword2">(</span><span class="keyword6">Basic </span><span class="keyword8">_</span> <span class="keyword2">|</span> <span class="keyword6">RGB </span><span class="keyword8">_</span> <span class="keyword2">|</span> <span class="keyword6">Gray </span><span class="keyword8">_</span><span class="keyword2">)</span> <span class="keyword1">as</span> color -<span class="keyword2">&gt;</span> color_to_int color
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 154-159:
+Error: This expression has type extended_color
+       but an expression was expected of type color
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/main.topscript">variants/main.topscript</a> , continued (part 12) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607380000">The code looks reasonable enough, but it leads to a type error
+      because <code>extended_color</code> and <code>color</code> are in the compiler's view distinct and
+      unrelated types. The compiler doesn't, for example, recognize any
+      equality between the <code>Basic</code> tag in the
+      two types.</p><p id="idm259607377424">What we want to do is to share tags between two different variant
+      types, and polymorphic variants let us do this in a natural way. First,
+      let's rewrite <code>basic_color_to_int</code> and
+      <code>color_to_int</code> using polymorphic
+      variants. The translation here is pretty straightforward:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> basic_color_to_int <span class="keyword2">=</span> <span class="keyword1">function</span>
+    <span class="keyword2">|</span> <span class="keyword6">`Black </span>-<span class="keyword2">&gt;</span> <span class="keyword8">0</span> <span class="keyword2">|</span> <span class="keyword6">`Red </span>    -<span class="keyword2">&gt;</span> <span class="keyword8">1</span> <span class="keyword2">|</span> <span class="keyword6">`Green </span>-<span class="keyword2">&gt;</span> <span class="keyword8">2</span> <span class="keyword2">|</span> <span class="keyword6">`Yellow </span>-<span class="keyword2">&gt;</span> <span class="keyword8">3</span>
+    <span class="keyword2">|</span> <span class="keyword6">`Blue </span> -<span class="keyword2">&gt;</span> <span class="keyword8">4</span> <span class="keyword2">|</span> <span class="keyword6">`Magenta </span>-<span class="keyword2">&gt;</span> <span class="keyword8">5</span> <span class="keyword2">|</span> <span class="keyword6">`Cyan </span> -<span class="keyword2">&gt;</span> <span class="keyword8">6</span> <span class="keyword2">|</span> <span class="keyword6">`White </span> -<span class="keyword2">&gt;</span> <span class="keyword8">7</span>
+
+  <span class="keyword4">let</span> color_to_int <span class="keyword2">=</span> <span class="keyword1">function</span>
+    <span class="keyword2">|</span> <span class="keyword6">`Basic </span><span class="keyword2">(</span>basic_color,weight<span class="keyword2">)</span> -<span class="keyword2">&gt;</span>
+      <span class="keyword4">let</span> base <span class="keyword2">=</span> <span class="keyword1">match</span> weight <span class="keyword1">with</span> <span class="keyword6">`Bold </span>-<span class="keyword2">&gt;</span> <span class="keyword8">8</span> <span class="keyword2">|</span> <span class="keyword6">`Regular </span>-<span class="keyword2">&gt;</span> <span class="keyword8">0</span> <span class="keyword4">in</span>
+      base <span class="keyword2">+</span> basic_color_to_int basic_color
+    <span class="keyword2">|</span> <span class="keyword6">`RGB </span><span class="keyword2">(</span>r,g,b<span class="keyword2">)</span> -<span class="keyword2">&gt;</span> <span class="keyword8">16</span> <span class="keyword2">+</span> b <span class="keyword2">+</span> g <span class="keyword2">*</span> <span class="keyword8">6</span> <span class="keyword2">+</span> r <span class="keyword2">*</span> <span class="keyword8">36</span>
+    <span class="keyword2">|</span> <span class="keyword6">`Gray </span>i -<span class="keyword2">&gt;</span> <span class="keyword8">232</span> <span class="keyword2">+</span> i
+ <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val basic_color_to_int :
+  [&lt; `Black | `Blue | `Cyan | `Green | `Magenta | `Red | `White | `Yellow ] -&gt;
+  int = &lt;fun&gt;
+val color_to_int :
+  [&lt; `Basic of
+       [&lt; `Black
+        | `Blue
+        | `Cyan
+        | `Green
+        | `Magenta
+        | `Red
+        | `White
+        | `Yellow ] *
+       [&lt; `Bold | `Regular ]
+   | `Gray of int
+   | `RGB of int * int * int ] -&gt;
+  int = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/main.topscript">variants/main.topscript</a> , continued (part 13) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607354016">Now we can try writing <code>extended_color_to_int</code>. The key issue with this
+      code is that <code>extended_color_to_int</code>
+      needs to invoke <code>color_to_int</code> with a
+      narrower type, i.e., one that includes fewer tags. Written properly,
+      this narrowing can be done via a pattern match. In particular, in the
+      following code, the type of the variable <code>color</code> includes only the tags <code>`Basic</code>, <code>`RGB</code>, and <code>`Gray</code>, and not <code>`RGBA</code>:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> extended_color_to_int <span class="keyword2">=</span> <span class="keyword1">function</span>
+    <span class="keyword2">|</span> <span class="keyword6">`RGBA </span><span class="keyword2">(</span>r,g,b,a<span class="keyword2">)</span> -<span class="keyword2">&gt;</span> <span class="keyword8">256</span> <span class="keyword2">+</span> a <span class="keyword2">+</span> b <span class="keyword2">*</span> <span class="keyword8">6</span> <span class="keyword2">+</span> g <span class="keyword2">*</span> <span class="keyword8">36</span> <span class="keyword2">+</span> r <span class="keyword2">*</span> <span class="keyword8">216</span>
+    <span class="keyword2">|</span> <span class="keyword2">(</span><span class="keyword6">`Basic </span><span class="keyword8">_</span> <span class="keyword2">|</span> <span class="keyword6">`RGB </span><span class="keyword8">_</span> <span class="keyword2">|</span> <span class="keyword6">`Gray </span><span class="keyword8">_</span><span class="keyword2">)</span> <span class="keyword1">as</span> color -<span class="keyword2">&gt;</span> color_to_int color
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val extended_color_to_int :
+  [&lt; `Basic of
+       [&lt; `Black
+        | `Blue
+        | `Cyan
+        | `Green
+        | `Magenta
+        | `Red
+        | `White
+        | `Yellow ] *
+       [&lt; `Bold | `Regular ]
+   | `Gray of int
+   | `RGB of int * int * int
+   | `RGBA of int * int * int * int ] -&gt;
+  int = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/main.topscript">variants/main.topscript</a> , continued (part 14) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607332752">The preceding code is more delicately balanced than one might
+      imagine. In particular, if we use a catch-all case instead of an
+      explicit enumeration of the cases, the type is no longer narrowed, and
+      so compilation fails:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> extended_color_to_int <span class="keyword2">=</span> <span class="keyword1">function</span>
+    <span class="keyword2">|</span> <span class="keyword6">`RGBA </span><span class="keyword2">(</span>r,g,b,a<span class="keyword2">)</span> -<span class="keyword2">&gt;</span> <span class="keyword8">256</span> <span class="keyword2">+</span> a <span class="keyword2">+</span> b <span class="keyword2">*</span> <span class="keyword8">6</span> <span class="keyword2">+</span> g <span class="keyword2">*</span> <span class="keyword8">36</span> <span class="keyword2">+</span> r <span class="keyword2">*</span> <span class="keyword8">216</span>
+    <span class="keyword2">|</span> color -<span class="keyword2">&gt;</span> color_to_int color
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 125-130:
+Error: This expression has type [&gt; `RGBA of int * int * int * int ]
+       but an expression was expected of type
+         [&lt; `Basic of
+              [&lt; `Black
+               | `Blue
+               | `Cyan
+               | `Green
+               | `Magenta
+               | `Red
+               | `White
+               | `Yellow ] *
+              [&lt; `Bold | `Regular ]
+          | `Gray of int
+          | `RGB of int * int * int ]
+       The second variant type does not allow tag(s) `RGBA
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/main.topscript">variants/main.topscript</a> , continued (part 15) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><aside class="note"><h1>Polymorphic Variants and Catch-all Cases</h1><p id="idm259607315120">As we saw with the definition of <code>is_positive</code>, a <code>match</code>
+        statement can lead to the inference of an upper bound on a variant
+        type, limiting the possible tags to those that can be handled by the
+        match. If we add a catch-all case to our <code>match</code>
+        statement, we end up with a type with a lower bound:<a name="idm259607313088"></a><a name="idm259607311776"></a><a name="idm259607310880"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> is_positive_permissive <span class="keyword2">=</span> <span class="keyword1">function</span>
+     <span class="keyword2">|</span> <span class="keyword6">`Int </span>  x -<span class="keyword2">&gt;</span> <span class="keyword6">Ok </span><span class="keyword2">(</span>x <span class="keyword2">&gt;</span> <span class="keyword8">0</span><span class="keyword2">)</span>
+     <span class="keyword2">|</span> <span class="keyword6">`Float </span>x -<span class="keyword2">&gt;</span> <span class="keyword6">Ok </span><span class="keyword2">(</span>x <span class="keyword2">&gt;</span> <span class="keyword8">0</span>.<span class="keyword2">)</span>
+     <span class="keyword2">|</span> <span class="keyword8">_</span> -<span class="keyword2">&gt;</span> <span class="keyword6">Error </span><span class="keyword7">&quot;Unknown number type&quot;</span>
+  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val is_positive_permissive :
+  [&gt; `Float of float | `Int of int ] -&gt; (bool, string) Result.t = &lt;fun&gt;
+</div># is_positive_permissive <span class="keyword2">(</span><span class="keyword6">`Int </span><span class="keyword8">0</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : (bool, string) Result.t = Ok false
+</div># is_positive_permissive <span class="keyword2">(</span><span class="keyword6">`Ratio </span><span class="keyword2">(</span><span class="keyword8">3</span>,<span class="keyword8">4</span><span class="keyword2">)</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : (bool, string) Result.t = Error &quot;Unknown number type&quot;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/main.topscript">variants/main.topscript</a> , continued (part 16) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607298128">Catch-all cases are error-prone even with ordinary variants, but
+        they are especially so with polymorphic variants. That's because you
+        have no way of bounding what tags your function might have to deal
+        with. Such code is particularly vulnerable to typos. For instance, if
+        code that uses <code>is_positive_permissive</code> passes in <code>Float</code> misspelled as <code>Floot</code>, the erroneous code will compile
+        without complaint:</p><div class="rwocode"><pre><code># is_positive_permissive <span class="keyword2">(</span><span class="keyword6">`Floot </span><span class="keyword8">3</span>.<span class="keyword8">5</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : (bool, string) Result.t = Error &quot;Unknown number type&quot;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants/main.topscript">variants/main.topscript</a> , continued (part 17) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607291440">With ordinary variants, such a typo would have been caught as an
+        unknown tag. As a general matter, one should be wary about mixing
+        catch-all cases and polymorphic variants.</p></aside><p id="idm259607290736">Let's consider how we might turn our code into a proper library
+      with an implementation in an <code>ml</code> file
+      and an interface in a separate <code>mli</code>,
+      as we saw in <a href="files-modules-and-programs.html">Chapter 4, <i>Files, Modules, and Programs</i></a>. Let's start
+      with the <code>mli</code>:</p><div class="rwocode"><pre><code><span class="keyword1">open</span> <span class="keyword5">Core.Std
+</span>
+<span class="keyword4">type</span> basic_color <span class="keyword2">=</span>
+  <span class="keyword2">[</span> <span class="keyword6">`Black </span>  <span class="keyword2">|</span> <span class="keyword6">`Blue </span><span class="keyword2">|</span> <span class="keyword6">`Cyan </span> <span class="keyword2">|</span> <span class="keyword6">`Green
+</span>  <span class="keyword2">|</span> <span class="keyword6">`Magenta </span><span class="keyword2">|</span> <span class="keyword6">`Red </span> <span class="keyword2">|</span> <span class="keyword6">`White </span><span class="keyword2">|</span> <span class="keyword6">`Yellow </span><span class="keyword2">]</span>
+
+<span class="keyword4">type</span> color <span class="keyword2">=</span>
+  <span class="keyword2">[</span> <span class="keyword6">`Basic </span><span class="keyword2">of</span> basic_color <span class="keyword2">*</span> <span class="keyword2">[</span> <span class="keyword6">`Bold </span><span class="keyword2">|</span> <span class="keyword6">`Regular </span><span class="keyword2">]</span>
+  <span class="keyword2">|</span> <span class="keyword6">`Gray </span><span class="keyword2">of</span> <span class="keyword3">int</span>
+  <span class="keyword2">|</span> <span class="keyword6">`RGB </span> <span class="keyword2">of</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span> <span class="keyword2">]</span>
+
+<span class="keyword4">type</span> extended_color <span class="keyword2">=</span>
+  <span class="keyword2">[</span> color
+  <span class="keyword2">|</span> <span class="keyword6">`RGBA </span><span class="keyword2">of</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span> <span class="keyword2">]</span>
+
+<span class="keyword4">val</span> color_to_int          <span class="keyword2">:</span> color -<span class="keyword2">&gt;</span> <span class="keyword3">int</span>
+<span class="keyword4">val</span> extended_color_to_int <span class="keyword2">:</span> extended_color -<span class="keyword2">&gt;</span> <span class="keyword3">int</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants-termcol/terminal_color.mli">variants-termcol/terminal_color.mli</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607285392">Here, <code>extended_color</code> is defined
+      as an explicit extension of <code>color</code>.
+      Also, notice that we defined all of these types as exact variants. We
+      can implement this library as follows:</p><div class="rwocode"><pre><code><span class="keyword1">open</span> <span class="keyword5">Core.Std
+</span>
+<span class="keyword4">type</span> basic_color <span class="keyword2">=</span>
+  <span class="keyword2">[</span> <span class="keyword6">`Black </span>  <span class="keyword2">|</span> <span class="keyword6">`Blue </span><span class="keyword2">|</span> <span class="keyword6">`Cyan </span> <span class="keyword2">|</span> <span class="keyword6">`Green
+</span>  <span class="keyword2">|</span> <span class="keyword6">`Magenta </span><span class="keyword2">|</span> <span class="keyword6">`Red </span> <span class="keyword2">|</span> <span class="keyword6">`White </span><span class="keyword2">|</span> <span class="keyword6">`Yellow </span><span class="keyword2">]</span>
+
+<span class="keyword4">type</span> color <span class="keyword2">=</span>
+  <span class="keyword2">[</span> <span class="keyword6">`Basic </span><span class="keyword2">of</span> basic_color <span class="keyword2">*</span> <span class="keyword2">[</span> <span class="keyword6">`Bold </span><span class="keyword2">|</span> <span class="keyword6">`Regular </span><span class="keyword2">]</span>
+  <span class="keyword2">|</span> <span class="keyword6">`Gray </span><span class="keyword2">of</span> <span class="keyword3">int</span>
+  <span class="keyword2">|</span> <span class="keyword6">`RGB </span> <span class="keyword2">of</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span> <span class="keyword2">]</span>
+
+<span class="keyword4">type</span> extended_color <span class="keyword2">=</span>
+  <span class="keyword2">[</span> color
+  <span class="keyword2">|</span> <span class="keyword6">`RGBA </span><span class="keyword2">of</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span> <span class="keyword2">]</span>
+
+<span class="keyword4">let</span> basic_color_to_int <span class="keyword2">=</span> <span class="keyword1">function</span>
+  <span class="keyword2">|</span> <span class="keyword6">`Black </span>-<span class="keyword2">&gt;</span> <span class="keyword8">0</span> <span class="keyword2">|</span> <span class="keyword6">`Red </span>    -<span class="keyword2">&gt;</span> <span class="keyword8">1</span> <span class="keyword2">|</span> <span class="keyword6">`Green </span>-<span class="keyword2">&gt;</span> <span class="keyword8">2</span> <span class="keyword2">|</span> <span class="keyword6">`Yellow </span>-<span class="keyword2">&gt;</span> <span class="keyword8">3</span>
+  <span class="keyword2">|</span> <span class="keyword6">`Blue </span> -<span class="keyword2">&gt;</span> <span class="keyword8">4</span> <span class="keyword2">|</span> <span class="keyword6">`Magenta </span>-<span class="keyword2">&gt;</span> <span class="keyword8">5</span> <span class="keyword2">|</span> <span class="keyword6">`Cyan </span> -<span class="keyword2">&gt;</span> <span class="keyword8">6</span> <span class="keyword2">|</span> <span class="keyword6">`White </span> -<span class="keyword2">&gt;</span> <span class="keyword8">7</span>
+
+<span class="keyword4">let</span> color_to_int <span class="keyword2">=</span> <span class="keyword1">function</span>
+  <span class="keyword2">|</span> <span class="keyword6">`Basic </span><span class="keyword2">(</span>basic_color,weight<span class="keyword2">)</span> -<span class="keyword2">&gt;</span>
+    <span class="keyword4">let</span> base <span class="keyword2">=</span> <span class="keyword1">match</span> weight <span class="keyword1">with</span> <span class="keyword6">`Bold </span>-<span class="keyword2">&gt;</span> <span class="keyword8">8</span> <span class="keyword2">|</span> <span class="keyword6">`Regular </span>-<span class="keyword2">&gt;</span> <span class="keyword8">0</span> <span class="keyword4">in</span>
+    base <span class="keyword2">+</span> basic_color_to_int basic_color
+  <span class="keyword2">|</span> <span class="keyword6">`RGB </span><span class="keyword2">(</span>r,g,b<span class="keyword2">)</span> -<span class="keyword2">&gt;</span> <span class="keyword8">16</span> <span class="keyword2">+</span> b <span class="keyword2">+</span> g <span class="keyword2">*</span> <span class="keyword8">6</span> <span class="keyword2">+</span> r <span class="keyword2">*</span> <span class="keyword8">36</span>
+  <span class="keyword2">|</span> <span class="keyword6">`Gray </span>i -<span class="keyword2">&gt;</span> <span class="keyword8">232</span> <span class="keyword2">+</span> i
+
+<span class="keyword4">let</span> extended_color_to_int <span class="keyword2">=</span> <span class="keyword1">function</span>
+  <span class="keyword2">|</span> <span class="keyword6">`RGBA </span><span class="keyword2">(</span>r,g,b,a<span class="keyword2">)</span> -<span class="keyword2">&gt;</span> <span class="keyword8">256</span> <span class="keyword2">+</span> a <span class="keyword2">+</span> b <span class="keyword2">*</span> <span class="keyword8">6</span> <span class="keyword2">+</span> g <span class="keyword2">*</span> <span class="keyword8">36</span> <span class="keyword2">+</span> r <span class="keyword2">*</span> <span class="keyword8">216</span>
+  <span class="keyword2">|</span> <span class="keyword6">`Grey </span>x -<span class="keyword2">&gt;</span> <span class="keyword8">2000</span> <span class="keyword2">+</span> x
+  <span class="keyword2">|</span> <span class="keyword2">(</span><span class="keyword6">`Basic </span><span class="keyword8">_</span> <span class="keyword2">|</span> <span class="keyword6">`RGB </span><span class="keyword8">_</span> <span class="keyword2">|</span> <span class="keyword6">`Gray </span><span class="keyword8">_</span><span class="keyword2">)</span> <span class="keyword1">as</span> color -<span class="keyword2">&gt;</span> color_to_int color</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants-termcol/terminal_color.ml">variants-termcol/terminal_color.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607280512">In the preceding code, we did something funny to the definition of
+      <code>extended_color_to_int</code> that underlines
+      some of the downsides of polymorphic variants. In particular, we added
+      some special-case handling for the color gray, rather than using
+      <code>color_to_int</code>. Unfortunately, we
+      misspelled <code>Gray</code> as <code>Grey</code>. This is exactly the kind of error that
+      the compiler would catch with ordinary variants, but with polymorphic
+      variants, this compiles without issue. All that happened was that the
+      compiler inferred a wider type for <code>extended_color_to_int</code>, which happens to be
+      compatible with the narrower type that was listed in the <code>mli</code>.</p><p id="idm259607275616">If we add an explicit type annotation to the code itself (rather
+      than just in the <code>mli</code>), then the
+      compiler has enough information to warn us:</p><div class="rwocode"><pre><code><span class="keyword1">open</span> <span class="keyword5">Core.Std
+</span>
+<span class="keyword4">type</span> basic_color <span class="keyword2">=</span>
+  <span class="keyword2">[</span> <span class="keyword6">`Black </span>  <span class="keyword2">|</span> <span class="keyword6">`Blue </span><span class="keyword2">|</span> <span class="keyword6">`Cyan </span> <span class="keyword2">|</span> <span class="keyword6">`Green
+</span>  <span class="keyword2">|</span> <span class="keyword6">`Magenta </span><span class="keyword2">|</span> <span class="keyword6">`Red </span> <span class="keyword2">|</span> <span class="keyword6">`White </span><span class="keyword2">|</span> <span class="keyword6">`Yellow </span><span class="keyword2">]</span>
+
+<span class="keyword4">type</span> color <span class="keyword2">=</span>
+  <span class="keyword2">[</span> <span class="keyword6">`Basic </span><span class="keyword2">of</span> basic_color <span class="keyword2">*</span> <span class="keyword2">[</span> <span class="keyword6">`Bold </span><span class="keyword2">|</span> <span class="keyword6">`Regular </span><span class="keyword2">]</span>
+  <span class="keyword2">|</span> <span class="keyword6">`Gray </span><span class="keyword2">of</span> <span class="keyword3">int</span>
+  <span class="keyword2">|</span> <span class="keyword6">`RGB </span> <span class="keyword2">of</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span> <span class="keyword2">]</span>
+
+<span class="keyword4">type</span> extended_color <span class="keyword2">=</span>
+  <span class="keyword2">[</span> color
+  <span class="keyword2">|</span> <span class="keyword6">`RGBA </span><span class="keyword2">of</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span> <span class="keyword2">]</span>
+
+<span class="keyword4">let</span> basic_color_to_int <span class="keyword2">=</span> <span class="keyword1">function</span>
+  <span class="keyword2">|</span> <span class="keyword6">`Black </span>-<span class="keyword2">&gt;</span> <span class="keyword8">0</span> <span class="keyword2">|</span> <span class="keyword6">`Red </span>    -<span class="keyword2">&gt;</span> <span class="keyword8">1</span> <span class="keyword2">|</span> <span class="keyword6">`Green </span>-<span class="keyword2">&gt;</span> <span class="keyword8">2</span> <span class="keyword2">|</span> <span class="keyword6">`Yellow </span>-<span class="keyword2">&gt;</span> <span class="keyword8">3</span>
+  <span class="keyword2">|</span> <span class="keyword6">`Blue </span> -<span class="keyword2">&gt;</span> <span class="keyword8">4</span> <span class="keyword2">|</span> <span class="keyword6">`Magenta </span>-<span class="keyword2">&gt;</span> <span class="keyword8">5</span> <span class="keyword2">|</span> <span class="keyword6">`Cyan </span> -<span class="keyword2">&gt;</span> <span class="keyword8">6</span> <span class="keyword2">|</span> <span class="keyword6">`White </span> -<span class="keyword2">&gt;</span> <span class="keyword8">7</span>
+
+<span class="keyword4">let</span> color_to_int <span class="keyword2">=</span> <span class="keyword1">function</span>
+  <span class="keyword2">|</span> <span class="keyword6">`Basic </span><span class="keyword2">(</span>basic_color,weight<span class="keyword2">)</span> -<span class="keyword2">&gt;</span>
+    <span class="keyword4">let</span> base <span class="keyword2">=</span> <span class="keyword1">match</span> weight <span class="keyword1">with</span> <span class="keyword6">`Bold </span>-<span class="keyword2">&gt;</span> <span class="keyword8">8</span> <span class="keyword2">|</span> <span class="keyword6">`Regular </span>-<span class="keyword2">&gt;</span> <span class="keyword8">0</span> <span class="keyword4">in</span>
+    base <span class="keyword2">+</span> basic_color_to_int basic_color
+  <span class="keyword2">|</span> <span class="keyword6">`RGB </span><span class="keyword2">(</span>r,g,b<span class="keyword2">)</span> -<span class="keyword2">&gt;</span> <span class="keyword8">16</span> <span class="keyword2">+</span> b <span class="keyword2">+</span> g <span class="keyword2">*</span> <span class="keyword8">6</span> <span class="keyword2">+</span> r <span class="keyword2">*</span> <span class="keyword8">36</span>
+  <span class="keyword2">|</span> <span class="keyword6">`Gray </span>i -<span class="keyword2">&gt;</span> <span class="keyword8">232</span> <span class="keyword2">+</span> i</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants-termcol-annotated/terminal_color.ml">variants-termcol-annotated/terminal_color.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607271504">In particular, the compiler will complain that the <code>`Grey</code> case is unused:</p><div class="rwocode"><pre><code><div class="highlight"><span class="gp">$</span> corebuild terminal_color.native
+</div><div class="rwocodeout">File &quot;terminal_color.ml&quot;, line 30, characters 4-11:</div><div class="rwocodeout">Error: This pattern matches values of type [? `Grey of 'a ]</div><div class="rwocodeout">       but a pattern was expected which matches values of type extended_color</div><div class="rwocodeout">       The second variant type does not allow tag(s) `Grey</div><div class="rwocodeout">Command exited with code 2.</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants-termcol-annotated/build.out">variants-termcol-annotated/build.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607263744">Once we have type definitions at our disposal, we can revisit the
+      question of how we write the pattern match that narrows the type. In
+      particular, we can explicitly use the type name as part of the pattern
+      match, by prefixing it with a <code>#</code>:</p><div class="rwocode"><pre><code><span class="keyword1">open</span> <span class="keyword5">Core.Std
+</span>
+<span class="keyword4">type</span> basic_color <span class="keyword2">=</span>
+  <span class="keyword2">[</span> <span class="keyword6">`Black </span>  <span class="keyword2">|</span> <span class="keyword6">`Blue </span><span class="keyword2">|</span> <span class="keyword6">`Cyan </span> <span class="keyword2">|</span> <span class="keyword6">`Green
+</span>  <span class="keyword2">|</span> <span class="keyword6">`Magenta </span><span class="keyword2">|</span> <span class="keyword6">`Red </span> <span class="keyword2">|</span> <span class="keyword6">`White </span><span class="keyword2">|</span> <span class="keyword6">`Yellow </span><span class="keyword2">]</span>
+
+<span class="keyword4">type</span> color <span class="keyword2">=</span>
+  <span class="keyword2">[</span> <span class="keyword6">`Basic </span><span class="keyword2">of</span> basic_color <span class="keyword2">*</span> <span class="keyword2">[</span> <span class="keyword6">`Bold </span><span class="keyword2">|</span> <span class="keyword6">`Regular </span><span class="keyword2">]</span>
+  <span class="keyword2">|</span> <span class="keyword6">`Gray </span><span class="keyword2">of</span> <span class="keyword3">int</span>
+  <span class="keyword2">|</span> <span class="keyword6">`RGB </span> <span class="keyword2">of</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span> <span class="keyword2">]</span>
+
+<span class="keyword4">type</span> extended_color <span class="keyword2">=</span>
+  <span class="keyword2">[</span> color
+  <span class="keyword2">|</span> <span class="keyword6">`RGBA </span><span class="keyword2">of</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">int</span> <span class="keyword2">]</span>
+
+<span class="keyword4">let</span> basic_color_to_int <span class="keyword2">=</span> <span class="keyword1">function</span>
+  <span class="keyword2">|</span> <span class="keyword6">`Black </span>-<span class="keyword2">&gt;</span> <span class="keyword8">0</span> <span class="keyword2">|</span> <span class="keyword6">`Red </span>    -<span class="keyword2">&gt;</span> <span class="keyword8">1</span> <span class="keyword2">|</span> <span class="keyword6">`Green </span>-<span class="keyword2">&gt;</span> <span class="keyword8">2</span> <span class="keyword2">|</span> <span class="keyword6">`Yellow </span>-<span class="keyword2">&gt;</span> <span class="keyword8">3</span>
+  <span class="keyword2">|</span> <span class="keyword6">`Blue </span> -<span class="keyword2">&gt;</span> <span class="keyword8">4</span> <span class="keyword2">|</span> <span class="keyword6">`Magenta </span>-<span class="keyword2">&gt;</span> <span class="keyword8">5</span> <span class="keyword2">|</span> <span class="keyword6">`Cyan </span> -<span class="keyword2">&gt;</span> <span class="keyword8">6</span> <span class="keyword2">|</span> <span class="keyword6">`White </span> -<span class="keyword2">&gt;</span> <span class="keyword8">7</span>
+
+<span class="keyword4">let</span> color_to_int <span class="keyword2">=</span> <span class="keyword1">function</span>
+  <span class="keyword2">|</span> <span class="keyword6">`Basic </span><span class="keyword2">(</span>basic_color,weight<span class="keyword2">)</span> -<span class="keyword2">&gt;</span>
+    <span class="keyword4">let</span> base <span class="keyword2">=</span> <span class="keyword1">match</span> weight <span class="keyword1">with</span> <span class="keyword6">`Bold </span>-<span class="keyword2">&gt;</span> <span class="keyword8">8</span> <span class="keyword2">|</span> <span class="keyword6">`Regular </span>-<span class="keyword2">&gt;</span> <span class="keyword8">0</span> <span class="keyword4">in</span>
+    base <span class="keyword2">+</span> basic_color_to_int basic_color
+  <span class="keyword2">|</span> <span class="keyword6">`RGB </span><span class="keyword2">(</span>r,g,b<span class="keyword2">)</span> -<span class="keyword2">&gt;</span> <span class="keyword8">16</span> <span class="keyword2">+</span> b <span class="keyword2">+</span> g <span class="keyword2">*</span> <span class="keyword8">6</span> <span class="keyword2">+</span> r <span class="keyword2">*</span> <span class="keyword8">36</span>
+  <span class="keyword2">|</span> <span class="keyword6">`Gray </span>i -<span class="keyword2">&gt;</span> <span class="keyword8">232</span> <span class="keyword2">+</span> i</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/variants-termcol-fixed/terminal_color.ml">variants-termcol-fixed/terminal_color.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259607259488">This is useful when you want to narrow down to a type whose
+      definition is long, and you don't want the verbosity of writing the tags
+      down explicitly in the match.</p></section><section id="when-to-use-polymorphic-variants"><h1>When to Use Polymorphic Variants</h1><p id="idm259607257984">At first glance, polymorphic variants look like a strict
+      improvement over ordinary variants. You can do everything that ordinary
+      variants can do, plus it's more flexible and more concise. What's not to
+      like?<a name="idm259607257488"></a><a name="idm259607255920"></a></p><p id="idm259607254480">In reality, regular variants are the more pragmatic choice most of
+      the time. That's because the flexibility of polymorphic variants comes
+      at a price. Here are some of the downsides:</p><div><dl><dt><span>Complexity</span></dt><dd><p id="idm259607252720">As we've seen, the typing rules for polymorphic variants are
+            a lot more complicated than they are for regular variants. This
+            means that heavy use of polymorphic variants can leave you
+            scratching your head trying to figure out why a given piece of
+            code did or didn't compile. It can also lead to absurdly long and
+            hard to decode error messages. Indeed, concision at the value
+            level is often balanced out by more verbosity at the type
+            level.</p></dd><dt><span>Error-finding</span></dt><dd><p id="idm259607250640">Polymorphic variants are type-safe, but the typing
+            discipline that they impose is, by dint of its flexibility, less
+            likely to catch bugs in your program.</p></dd><dt><span>Efficiency</span></dt><dd><p id="idm259607248896">This isn't a huge effect, but polymorphic variants are
+            somewhat heavier than regular variants, and OCaml can't generate
+            code for matching on polymorphic variants that is quite as
+            efficient as what it generated for regular variants.</p></dd></dl></div><p id="idm259607247856">All that said, polymorphic variants are still a useful and
+      powerful feature, but it's worth understanding their limitations and how
+      to use them sensibly and modestly.</p><p id="idm259607247280">Probably the safest and most common use case for polymorphic
+      variants is where ordinary variants would be sufficient but are
+      syntactically too heavyweight. For example, you often want to create a
+      variant type for encoding the inputs or outputs to a function, where
+      it's not worth declaring a separate type for it. Polymorphic variants
+      are very useful here, and as long as there are type annotations that
+      constrain these to have explicit, exact types, this tends to work
+      well.</p><p id="idm259607246112">Variants are most problematic exactly where you take full
+      advantage of their power; in particular, when you take advantage of the
+      ability of polymorphic variant types to overlap in the tags they
+      support. This ties into OCaml's support for subtyping. As we'll discuss
+      further when we cover objects in <a href="objects.html">Chapter 11, <i>Objects</i></a>, subtyping
+      brings in a lot of complexity, and most of the time, that's complexity
+      you want to avoid.<a name="idm259607244896"></a><a name="idm259607244288"></a></p></section></section>
+
+
+                
+            </article>
+            
+            
+    
+                <nav class="pagination">
+                    
+                        <a rel="previous" href="records.html">
+                            &lt; Previous
+                        </a>
+                    
+                    
+                        <a rel="next" href="error-handling.html">
+                            Next &gt;
+                        </a>
+                    
+                </nav>
+            
+            
+            
+            <footer class="footer">
+                <p>Copyright 2012-2013, Jason Hickey, Anil Madhavapeddy and Yaron Minsky. Licensed under <a href="http://creativecommons.org/licenses/by-nc-nd/3.0/us/">CC BY-NC-ND 3.0 US</a>.</p>
+            </footer>
+            
+        </div>
+    
+    </body>
+
+</html>

@@ -1,0 +1,830 @@
+<html>
+
+    <head>
+    
+        <meta charset="utf-8"></meta>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
+        <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW"></meta>
+        
+        <title>Chapter 9. Functors / Real World OCaml</title>
+        
+        <link rel="stylesheet" href="../../media/css/main.css"></link>
+        
+        <script src="../../media/js/require.js" data-main="../../media/js/main.js"> </script>
+        <script>
+            require.config({
+                config: {
+                    gitHub: {
+                        user: 'ocamllabs',
+                        repo: 'rwo\u002Dcomments',
+                        milestone: 'v1',
+                        page: 'functors.html'
+                    }
+                }
+            });
+        </script>
+        
+    
+    </head>
+    
+    <body>
+    
+        <div class="body">
+        
+            <header class="header">
+                <i>Available in <a href="http://www.amazon.com/Real-World-OCaml-Functional-programming/dp/144932391X/">print</a> and <a href="http://oreil.ly/realworldOCaml">eBook!</a></i>
+                <h1><a href="http://oreil.ly/realworldOCaml"><img src="../../media/img/cover-cut.png" width="245" alt="Real World OCaml, by Yaron Minsky, Anil Madhavapeddy and Jason Hickey"></img></a></h1>
+            </header>
+    
+            <nav class="navigation">
+                <ul>
+                    <li>
+                        <a href="index.html">Table of Contents</a>
+                    </li>
+                    
+                        <li>
+                            <a href="prologue.html">Prologue</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt01.html">I. Language Concepts</a>
+                            
+                                 
+                                    <ul>
+                                        
+                                            <li>
+                                                <a href="a-guided-tour.html">1. A Guided Tour</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="variables-and-functions.html">2. Variables and Functions</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="lists-and-patterns.html">3. Lists and Patterns</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="files-modules-and-programs.html">4. Files, Modules, and Programs</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="records.html">5. Records</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="variants.html">6. Variants</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="error-handling.html">7. Error Handling</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="imperative-programming-1.html">8. Imperative Programming</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="functors.html" class="here">9. Functors</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="first-class-modules.html">10. First-Class Modules</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="objects.html">11. Objects</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="classes.html">12. Classes</a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt02.html">II. Tools and Techniques</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt03.html">III. The Runtime System</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="ix01.html">Index</a>
+                            
+                        </li>
+                    
+                </ul>
+            </nav>
+        
+            <article class="page">
+        
+                <h1>Chapter 9. Functors</h1>
+                
+                
+
+    <p id="idm259605633680">Up until now, we've seen OCaml's modules play an important but limited
+  role. In particular, we've seen them as a mechanism for organizing code into
+  units with specified interfaces. But OCaml's module system can do much more
+  than that, serving as a powerful tool for building generic code and
+  structuring large-scale systems. Much of that power comes from
+  functors.<a name="idm259605633040"></a></p><p id="idm259605631616">Functors are, roughly speaking, functions from modules to modules, and
+  they can be used to solve a variety of code-structuring problems,
+  including:</p><p id="idm259605631072"></p><div><dl><dt><span>Dependency injection</span></dt><dd><p id="idm259605629760">Makes the implementations of some components of a system
+          swappable. This is particularly useful when you want to mock up
+          parts of your system for testing and simulation purposes.</p></dd><dt><span>Autoextension of modules</span></dt><dd><p id="idm259605627984">Functors give you a way of extending existing modules with new
+          functionality in a standardized way. For example, you might want to
+          add a slew of comparison operators derived from a base comparison
+          function. To do this by hand would require a lot of repetitive code
+          for each type, but functors let you write this logic just once and
+          apply it to many different types.</p></dd><dt><span>Instantiating modules with state</span></dt><dd><p id="idm259605625984">Modules can contain mutable states, and that means that you'll
+          occasionally want to have multiple instantiations of a particular
+          module, each with its own separate and independent mutable state.
+          Functors let you automate the construction of such modules.</p></dd></dl></div><p id="idm259605624928">These are really just some of the uses that you can put functors to.
+  We'll make no attempt to provide examples of all of the uses of functors
+  here. Instead, this chapter will try to provide examples that illuminate the
+  language features and design patterns that you need to master in order to
+  use functors effectively.</p><section id="a-trivial-example"><h1>A Trivial Example</h1><p id="idm259605623280">Let's create a functor that takes a module containing a single
+    integer variable <code>x</code> and returns a new
+    module with <code>x</code> incremented by one. This
+    is intended to serve as a way to walk through the basic mechanics of
+    functors, even though it's not something you'd want to do in
+    practice.<a name="idm259605621440"></a></p><p id="idm259605620000">First, let's define a signature for a module that contains a single
+    value of type <code>int</code>:</p><div class="rwocode"><pre><code># <span class="keyword4">module</span> <span class="keyword4">type</span> <span class="keyword6">X_int </span><span class="keyword2">=</span> <span class="keyword4">sig</span> <span class="keyword4">val</span> x <span class="keyword2">:</span> <span class="keyword3">int</span> <span class="keyword4">end</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module type X_int = sig val x : int end
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main.topscript">functors/main.topscript</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605615120">Now we can define our functor. We'll use <code>X_int</code> both to constrain the argument to the
+    functor and to constrain the module returned by the functor:</p><div class="rwocode"><pre><code># <span class="keyword4">module</span> <span class="keyword6">Increment </span><span class="keyword2">(</span><span class="keyword6">M </span><span class="keyword2">:</span> X_int<span class="keyword2">)</span> <span class="keyword2">:</span> <span class="keyword6">X_int </span><span class="keyword2">=</span> <span class="keyword4">struct</span>
+    <span class="keyword4">let</span> x <span class="keyword2">=</span> <span class="keyword5">M.</span>x <span class="keyword2">+</span> <span class="keyword8">1</span>
+  <span class="keyword4">end</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module Increment : functor (M : X_int) -&gt; X_int
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main.topscript">functors/main.topscript</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605608624">One thing that immediately jumps out is that functors are more
+    syntactically heavyweight than ordinary functions. For one thing, functors
+    require explicit (module) type annotations, which ordinary functions do
+    not. Technically, only the type on the input is mandatory, although in
+    practice, you should usually constrain the module returned by the functor,
+    just as you should use an <code>mli</code>, even
+    though it's not mandatory.</p><p id="idm259605607200">The following shows what happens when we omit the module type for
+    the output of the functor:</p><div class="rwocode"><pre><code># <span class="keyword4">module</span> <span class="keyword6">Increment </span><span class="keyword2">(</span><span class="keyword6">M </span><span class="keyword2">:</span> X_int<span class="keyword2">)</span> <span class="keyword2">=</span> <span class="keyword4">struct</span>
+    <span class="keyword4">let</span> x <span class="keyword2">=</span> <span class="keyword5">M.</span>x <span class="keyword2">+</span> <span class="keyword8">1</span>
+  <span class="keyword4">end</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module Increment : functor (M : X_int) -&gt; sig val x : int end
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main.topscript">functors/main.topscript</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605601392">We can see that the inferred module type of the output is now
+    written out explicitly, rather than being a reference to the named
+    signature <code>X_int</code>.</p><p id="idm259605600208">We can use <code>Increment</code> to define
+    new modules:</p><div class="rwocode"><pre><code># <span class="keyword4">module</span> <span class="keyword6">Three </span><span class="keyword2">=</span> <span class="keyword4">struct</span> <span class="keyword4">let</span> x <span class="keyword2">=</span> <span class="keyword8">3</span> <span class="keyword4">end</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module Three : sig val x : int end
+</div># <span class="keyword4">module</span> <span class="keyword6">Four </span><span class="keyword2">=</span> Increment<span class="keyword2">(</span>Three<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module Four : sig val x : int end
+</div># <span class="keyword5">Four.</span>x - <span class="keyword5">Three.</span>x<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 1
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main.topscript">functors/main.topscript</a> , continued (part 3) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605591632">In this case, we applied <code>Increment</code> to a module whose signature is exactly
+    equal to <code>X_int</code>. But we can apply
+    <code>Increment</code> to any module that
+    <span><em>satisfies</em></span> the interface <code>X_int</code>, in the same way that the contents of an
+    <code>ml</code> file must satisfy the <code>mli</code>. That means that the module type can omit
+    some information available in the module, either by dropping fields or by
+    leaving some fields abstract. Here's an example:</p><div class="rwocode"><pre><code># <span class="keyword4">module</span> <span class="keyword6">Three_and_more </span><span class="keyword2">=</span> <span class="keyword4">struct</span>
+    <span class="keyword4">let</span> x <span class="keyword2">=</span> <span class="keyword8">3</span>
+    <span class="keyword4">let</span> y <span class="keyword2">=</span> <span class="keyword7">&quot;three&quot;</span>
+  <span class="keyword4">end</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module Three_and_more : sig val x : int val y : string end
+</div># <span class="keyword4">module</span> <span class="keyword6">Four </span><span class="keyword2">=</span> Increment<span class="keyword2">(</span>Three_and_more<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module Four : sig val x : int end
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main.topscript">functors/main.topscript</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605578912">The rules for determining whether a module matches a given signature
+    are similar in spirit to the rules in an object-oriented language that
+    determine whether an object satisfies a given interface. As in an
+    object-oriented context, the extra information that doesn't match the
+    signature you're looking for (in this case, the variable <code>y</code>) is simply ignored.</p></section><section id="a-bigger-example-computing-with-intervals"><h1>A Bigger Example: Computing with Intervals</h1><p id="idm259605576432">Let's consider a more realistic example of how to use functors: a
+    library for computing with intervals. Intervals are a common computational
+    object, and they come up in different contexts and for different types.
+    You might need to work with intervals of floating-point values or strings
+    or times, and in each of these cases, you want similar operations: testing
+    for emptiness, checking for containment, intersecting intervals, and so
+    on.</p><p id="idm259605575584">Let's see how to use functors to build a generic interval library
+    that can be used with any type that supports a total ordering on the
+    underlying set over which you want to build intervals.<a name="idm259605575120"></a><a name="FUNCTinterv"></a></p><p id="idm259605572112">First we'll define a module type that captures the information we'll
+    need about the endpoints of the intervals. This interface, which we'll
+    call <code>Comparable</code>, contains just two
+    things: a comparison function and the type of the values to be
+    compared:</p><div class="rwocode"><pre><code># <span class="keyword4">module</span> <span class="keyword4">type</span> <span class="keyword6">Comparable </span><span class="keyword2">=</span> <span class="keyword4">sig</span>
+    <span class="keyword4">type</span> t
+    <span class="keyword4">val</span> compare <span class="keyword2">:</span> t -<span class="keyword2">&gt;</span> t -<span class="keyword2">&gt;</span> <span class="keyword3">int</span>
+  <span class="keyword4">end</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module type Comparable = sig type t val compare : t -&gt; t -&gt; int end
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main.topscript">functors/main.topscript</a> , continued (part 5) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605564800">The comparison function follows the standard OCaml idiom for such
+    functions, returning <code>0</code> if the two
+    elements are equal, a positive number if the first element is larger than
+    the second, and a negative number if the first element is smaller than the
+    second. Thus, we could rewrite the standard comparison functions on top of
+    <code>compare</code>.</p><div class="rwocode"><pre><code>compare x y <span class="keyword2">&lt;</span> <span class="keyword8">0</span>     <span class="comments">(* x &lt; y *)</span>
+compare x y <span class="keyword2">=</span> <span class="keyword8">0</span>     <span class="comments">(* x = y *)</span>
+compare x y <span class="keyword2">&gt;</span> <span class="keyword8">0</span>     <span class="comments">(* x &gt; y *)</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/compare_example.ml">functors/compare_example.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605560416">(This idiom is a bit of a historical error. It would be better if
+        <code>compare</code> returned a variant with three cases for less than, greater than,
+      and equal. But it's a well-established idiom at this point, and unlikely to change.)</p><p id="idm259605559408">The functor for creating the interval module follows. We represent an interval with a
+      variant type, which is either <code>Empty</code> or <code>Interval (x,y)</code>, where <code>x</code> and
+        <code>y</code> are the bounds of the interval. In addition to the
+      type, the body of the functor contains implementations of a number of useful primitives for
+      interacting with intervals:</p><div class="rwocode"><pre><code># <span class="keyword4">module</span> Make_interval<span class="keyword2">(</span><span class="keyword6">Endpoint </span><span class="keyword2">:</span> Comparable<span class="keyword2">)</span> <span class="keyword2">=</span> <span class="keyword4">struct</span>
+
+    <span class="keyword4">type</span> t <span class="keyword2">=</span> <span class="keyword2">|</span> <span class="keyword6">Interval </span><span class="keyword2">of</span> <span class="keyword5">Endpoint.</span>t <span class="keyword2">*</span> <span class="keyword5">Endpoint.</span>t
+             <span class="keyword2">|</span> <span class="keyword6">Empty
+</span>
+    <span class="comments">(** [create low high] creates a new interval from [low] to
+        [high].  If [low &gt; high], then the interval is empty *)</span>
+    <span class="keyword4">let</span> create low high <span class="keyword2">=</span>
+      <span class="keyword1">if</span> <span class="keyword5">Endpoint.</span>compare low high <span class="keyword2">&gt;</span> <span class="keyword8">0</span> <span class="keyword1">then</span> <span class="keyword6">Empty
+</span>      <span class="keyword1">else</span> <span class="keyword6">Interval </span><span class="keyword2">(</span>low,high<span class="keyword2">)</span>
+
+    <span class="comments">(** Returns true iff the interval is empty *)</span>
+    <span class="keyword4">let</span> is_empty <span class="keyword2">=</span> <span class="keyword1">function</span>
+      <span class="keyword2">|</span> <span class="keyword6">Empty </span>-<span class="keyword2">&gt;</span> true
+      <span class="keyword2">|</span> <span class="keyword6">Interval </span><span class="keyword8">_</span> -<span class="keyword2">&gt;</span> false
+
+    <span class="comments">(** [contains t x] returns true iff [x] is contained in the
+        interval [t] *)</span>
+    <span class="keyword4">let</span> contains t x <span class="keyword2">=</span>
+      <span class="keyword1">match</span> t <span class="keyword1">with</span>
+      <span class="keyword2">|</span> <span class="keyword6">Empty </span>-<span class="keyword2">&gt;</span> false
+      <span class="keyword2">|</span> <span class="keyword6">Interval </span><span class="keyword2">(</span>l,h<span class="keyword2">)</span> -<span class="keyword2">&gt;</span>
+        <span class="keyword5">Endpoint.</span>compare x l <span class="keyword2">&gt;</span><span class="keyword2">=</span> <span class="keyword8">0</span> <span class="keyword2">&amp;&amp;</span> <span class="keyword5">Endpoint.</span>compare x h <span class="keyword2">&lt;</span><span class="keyword2">=</span> <span class="keyword8">0</span>
+
+    <span class="comments">(** [intersect t1 t2] returns the intersection of the two input
+        intervals *)</span>
+    <span class="keyword4">let</span> intersect t1 t2 <span class="keyword2">=</span>
+      <span class="keyword4">let</span> min x y <span class="keyword2">=</span> <span class="keyword1">if</span> <span class="keyword5">Endpoint.</span>compare x y <span class="keyword2">&lt;</span><span class="keyword2">=</span> <span class="keyword8">0</span> <span class="keyword1">then</span> x <span class="keyword1">else</span> y <span class="keyword4">in</span>
+      <span class="keyword4">let</span> max x y <span class="keyword2">=</span> <span class="keyword1">if</span> <span class="keyword5">Endpoint.</span>compare x y <span class="keyword2">&gt;</span><span class="keyword2">=</span> <span class="keyword8">0</span> <span class="keyword1">then</span> x <span class="keyword1">else</span> y <span class="keyword4">in</span>
+      <span class="keyword1">match</span> t1,t2 <span class="keyword1">with</span>
+      <span class="keyword2">|</span> Empty, <span class="keyword8">_</span> <span class="keyword2">|</span> <span class="keyword8">_</span>, <span class="keyword6">Empty </span>-<span class="keyword2">&gt;</span> <span class="keyword6">Empty
+</span>      <span class="keyword2">|</span> <span class="keyword6">Interval </span><span class="keyword2">(</span>l1,h1<span class="keyword2">)</span>, <span class="keyword6">Interval </span><span class="keyword2">(</span>l2,h2<span class="keyword2">)</span> -<span class="keyword2">&gt;</span>
+        create <span class="keyword2">(</span>max l1 l2<span class="keyword2">)</span> <span class="keyword2">(</span>min h1 h2<span class="keyword2">)</span>
+
+  <span class="keyword4">end</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module Make_interval :
+  functor (Endpoint : Comparable) -&gt;
+    sig
+      type t = Interval of Endpoint.t * Endpoint.t | Empty
+      val create : Endpoint.t -&gt; Endpoint.t -&gt; t
+      val is_empty : t -&gt; bool
+      val contains : t -&gt; Endpoint.t -&gt; bool
+      val intersect : t -&gt; t -&gt; t
+    end
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main.topscript">functors/main.topscript</a> , continued (part 6) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605524688">We can instantiate the functor by applying it to a module with the
+    right signature. In the following code, rather than name the module first
+    and then call the functor, we provide the functor input as an anonymous
+    module:</p><div class="rwocode"><pre><code># <span class="keyword4">module</span> <span class="keyword6">Int_interval </span><span class="keyword2">=</span>
+    Make_interval<span class="keyword2">(</span><span class="keyword4">struct</span>
+      <span class="keyword4">type</span> t <span class="keyword2">=</span> <span class="keyword3">int</span>
+      <span class="keyword4">let</span> compare <span class="keyword2">=</span> <span class="keyword5">Int.</span>compare
+    <span class="keyword4">end</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module Int_interval :
+  sig
+    type t = Interval of int * int | Empty
+    val create : int -&gt; int -&gt; t
+    val is_empty : t -&gt; bool
+    val contains : t -&gt; int -&gt; bool
+    val intersect : t -&gt; t -&gt; t
+  end
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main.topscript">functors/main.topscript</a> , continued (part 7) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605512912">If the input interface for your functor is aligned with the
+    standards of the libraries you use, then you don't need to construct a
+    custom module to feed to the functor. In this case, we can directly use
+    the <code>Int</code> or <code>String</code> modules provided by Core:</p><div class="rwocode"><pre><code># <span class="keyword4">module</span> <span class="keyword6">Int_interval </span><span class="keyword2">=</span> Make_interval<span class="keyword2">(</span>Int<span class="keyword2">)</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module Int_interval :
+  sig
+    type t = Make_interval(Core.Std.Int).t = Interval of int * int | Empty
+    val create : int -&gt; int -&gt; t
+    val is_empty : t -&gt; bool
+    val contains : t -&gt; int -&gt; bool
+    val intersect : t -&gt; t -&gt; t
+  end
+</div># <span class="keyword4">module</span> <span class="keyword6">String_interval </span><span class="keyword2">=</span> Make_interval<span class="keyword2">(</span>String<span class="keyword2">)</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module String_interval :
+  sig
+    type t =
+      Make_interval(Core.Std.String).t =
+        Interval of string * string
+      | Empty
+    val create : string -&gt; string -&gt; t
+    val is_empty : t -&gt; bool
+    val contains : t -&gt; string -&gt; bool
+    val intersect : t -&gt; t -&gt; t
+  end
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main.topscript">functors/main.topscript</a> , continued (part 8) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605493936">This works because many modules in Core, including <code>Int</code>
+      and <code>String</code>, satisfy an extended version of the <code>Comparable</code> signature described previously. Such standardized
+      signatures are good practice, both because they make functors easier to use, and because they
+      encourage standardization that makes your codebase easier to navigate.</p><p id="idm259605491280">We can use the newly defined <code>Int_interval</code> module like
+      any ordinary module:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> i1 <span class="keyword2">=</span> <span class="keyword5">Int_interval.</span>create <span class="keyword8">3</span> <span class="keyword8">8</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val i1 : Int_interval.t = Int_interval.Interval (3, 8)
+</div># <span class="keyword4">let</span> i2 <span class="keyword2">=</span> <span class="keyword5">Int_interval.</span>create <span class="keyword8">4</span> <span class="keyword8">10</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val i2 : Int_interval.t = Int_interval.Interval (4, 10)
+</div># <span class="keyword5">Int_interval.</span>intersect i1 i2<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : Int_interval.t = Int_interval.Interval (4, 8)
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main.topscript">functors/main.topscript</a> , continued (part 9) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605482576">This design gives us the freedom to use any comparison function we
+    want for comparing the endpoints. We could, for example, create a type of
+    integer interval with the order of the comparison reversed, as
+    follows:<a name="idm259605482080"></a></p><div class="rwocode"><pre><code># <span class="keyword4">module</span> <span class="keyword6">Rev_int_interval </span><span class="keyword2">=</span>
+    Make_interval<span class="keyword2">(</span><span class="keyword4">struct</span>
+      <span class="keyword4">type</span> t <span class="keyword2">=</span> <span class="keyword3">int</span>
+      <span class="keyword4">let</span> compare x y <span class="keyword2">=</span> <span class="keyword5">Int.</span>compare y x
+    <span class="keyword4">end</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module Rev_int_interval :
+  sig
+    type t = Interval of int * int | Empty
+    val create : int -&gt; int -&gt; t
+    val is_empty : t -&gt; bool
+    val contains : t -&gt; int -&gt; bool
+    val intersect : t -&gt; t -&gt; t
+  end
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main.topscript">functors/main.topscript</a> , continued (part 10) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605469424">The behavior of <code>Rev_int_interval</code>
+    is of course different from <code>Int_interval</code>:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> interval <span class="keyword2">=</span> <span class="keyword5">Int_interval.</span>create <span class="keyword8">4</span> <span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val interval : Int_interval.t = Int_interval.Empty
+</div># <span class="keyword4">let</span> rev_interval <span class="keyword2">=</span> <span class="keyword5">Rev_int_interval.</span>create <span class="keyword8">4</span> <span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val rev_interval : Rev_int_interval.t = Rev_int_interval.Interval (4, 3)
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main.topscript">functors/main.topscript</a> , continued (part 11) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605461872">Importantly, <code>Rev_int_interval.t</code>
+    is a different type than <code>Int_interval.t</code>, even though its physical
+    representation is the same. Indeed, the type system will prevent us from
+    confusing them.</p><div class="rwocode"><pre><code># <span class="keyword5">Int_interval.</span>contains rev_interval <span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 22-34:
+Error: This expression has type Rev_int_interval.t
+       but an expression was expected of type Int_interval.t
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main.topscript">functors/main.topscript</a> , continued (part 12) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605454736">This is important, because confusing the two kinds of intervals
+    would be a semantic error, and it's an easy one to make. The ability of
+    functors to mint new types is a useful trick that comes up a lot.</p><section id="making-the-functor-abstract"><h1>Making the Functor Abstract</h1><p id="idm259605453200">There's a problem with <code>Make_interval</code>. The code we wrote depends on
+      the invariant that the upper bound of an interval is greater than its
+      lower bound, but that invariant can be violated. The invariant is
+      enforced by the <code>create</code> function, but because <code>Interval.t</code> is not abstract, we can bypass the
+      <code>create</code> function:<a name="idm259605450288"></a></p><div class="rwocode"><pre><code># <span class="keyword5">Int_interval.</span>is_empty <span class="comments">(* going through create *)</span>
+    <span class="keyword2">(</span><span class="keyword5">Int_interval.</span>create <span class="keyword8">4</span> <span class="keyword8">3</span><span class="keyword2">)</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : bool = true
+</div># <span class="keyword5">Int_interval.</span>is_empty <span class="comments">(* bypassing create *)</span>
+    <span class="keyword2">(</span><span class="keyword5">Int_interval.Interval </span><span class="keyword2">(</span><span class="keyword8">4</span>,<span class="keyword8">3</span><span class="keyword2">)</span><span class="keyword2">)</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : bool = false
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main.topscript">functors/main.topscript</a> , continued (part 13) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605441744">To make <code>Int_interval.t</code>
+      abstract, we need to restrict the output of <code>Make_interval</code> with an interface. Here's an
+      explicit interface that we can use for that purpose:</p><div class="rwocode"><pre><code># <span class="keyword4">module</span> <span class="keyword4">type</span> <span class="keyword6">Interval_intf </span><span class="keyword2">=</span> <span class="keyword4">sig</span>
+   <span class="keyword4">type</span> t
+   <span class="keyword4">type</span> endpoint
+   <span class="keyword4">val</span> create <span class="keyword2">:</span> endpoint -<span class="keyword2">&gt;</span> endpoint -<span class="keyword2">&gt;</span> t
+   <span class="keyword4">val</span> is_empty <span class="keyword2">:</span> t -<span class="keyword2">&gt;</span> bool
+   <span class="keyword4">val</span> contains <span class="keyword2">:</span> t -<span class="keyword2">&gt;</span> endpoint -<span class="keyword2">&gt;</span> bool
+   <span class="keyword4">val</span> intersect <span class="keyword2">:</span> t -<span class="keyword2">&gt;</span> t -<span class="keyword2">&gt;</span> t
+  <span class="keyword4">end</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module type Interval_intf =
+  sig
+    type t
+    type endpoint
+    val create : endpoint -&gt; endpoint -&gt; t
+    val is_empty : t -&gt; bool
+    val contains : t -&gt; endpoint -&gt; bool
+    val intersect : t -&gt; t -&gt; t
+  end
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main.topscript">functors/main.topscript</a> , continued (part 14) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605426032">This interface includes the type <code>endpoint</code> to give us a way of referring to the
+      endpoint type. Given this interface, we can redo our definition of
+      <code>Make_interval</code>. Notice that we added
+      the type <code>endpoint</code> to the
+      implementation of the module to match <code>Interval_intf</code>:</p><div class="rwocode"><pre><code># <span class="keyword4">module</span> Make_interval<span class="keyword2">(</span><span class="keyword6">Endpoint </span><span class="keyword2">:</span> Comparable<span class="keyword2">)</span> <span class="keyword2">:</span> <span class="keyword6">Interval_intf </span><span class="keyword2">=</span> <span class="keyword4">struct</span>
+    <span class="keyword4">type</span> endpoint <span class="keyword2">=</span> <span class="keyword5">Endpoint.</span>t
+    <span class="keyword4">type</span> t <span class="keyword2">=</span> <span class="keyword2">|</span> <span class="keyword6">Interval </span><span class="keyword2">of</span> <span class="keyword5">Endpoint.</span>t <span class="keyword2">*</span> <span class="keyword5">Endpoint.</span>t
+             <span class="keyword2">|</span> <span class="keyword6">Empty
+</span>
+    ...
+
+  <span class="keyword4">end</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">  module Make_interval : functor (Endpoint : Comparable) -&gt; Interval_intf</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main-15.rawscript">functors/main-15.rawscript</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></section><section id="sharing-constraints"><h1>Sharing Constraints</h1><p id="idm259605418176">The resulting module is abstract, but it's unfortunately too
+      abstract. In particular, we haven't exposed the type <code>endpoint</code>, which means that we can't even
+      construct an interval anymore:<a name="idm259605417072"></a><a name="idm259605416160"></a></p><div class="rwocode"><pre><code># <span class="keyword4">module</span> <span class="keyword6">Int_interval </span><span class="keyword2">=</span> Make_interval<span class="keyword2">(</span>Int<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module Int_interval :
+  sig
+    type t = Make_interval(Core.Std.Int).t
+    type endpoint = Make_interval(Core.Std.Int).endpoint
+    val create : endpoint -&gt; endpoint -&gt; t
+    val is_empty : t -&gt; bool
+    val contains : t -&gt; endpoint -&gt; bool
+    val intersect : t -&gt; t -&gt; t
+  end
+</div># <span class="keyword5">Int_interval.</span>create <span class="keyword8">3</span> <span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 20-21:
+Error: This expression has type int but an expression was expected of type
+         Int_interval.endpoint
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main.topscript">functors/main.topscript</a> , continued (part 16) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605402320">To fix this, we need to expose the fact that <code>endpoint</code> is equal to <code>Int.t</code> (or more generally, <code>Endpoint.t</code>, where <code>Endpoint</code> is the argument to the functor). One
+      way of doing this is through a <span><em>sharing constraint</em></span>,
+      which allows you to tell the compiler to expose the fact that a given
+      type is equal to some other type. The syntax for a simple sharing
+      constraint is as follows:</p><div class="rwocode"><pre><code><pre>&lt;Module_type&gt; with type &lt;type&gt; = &lt;type'&gt;
+</pre></code></pre><div class="rwocodeinfo">Syntax ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/sharing_constraint.syntax">functors/sharing_constraint.syntax</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605395392">The result of this expression is a new signature that's been modified so that it exposes
+        the fact that <span><em><code>type</code></em></span> defined inside of
+        the module type is equal to <span><em><code>type'</code></em></span>
+        whose definition is outside of it. One can also apply multiple sharing constraints to the
+        same signature:</p><div class="rwocode"><pre><code><pre>&lt;Module_type&gt; with type &lt;type1&gt; = &lt;type1'&gt; and &lt;type2&gt; = &lt;type2'&gt;
+</pre></code></pre><div class="rwocodeinfo">Syntax ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/multi_sharing_constraint.syntax">functors/multi_sharing_constraint.syntax</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605389152">We can use a sharing constraint to create a specialized version of
+      <code>Interval_intf</code> for integer
+      intervals:</p><div class="rwocode"><pre><code># <span class="keyword4">module</span> <span class="keyword4">type</span> <span class="keyword6">Int_interval_intf </span><span class="keyword2">=</span>
+    <span class="keyword6">Interval_intf </span><span class="keyword1">with</span> <span class="keyword4">type</span> endpoint <span class="keyword2">=</span> <span class="keyword3">int</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module type Int_interval_intf =
+  sig
+    type t
+    type endpoint = int
+    val create : endpoint -&gt; endpoint -&gt; t
+    val is_empty : t -&gt; bool
+    val contains : t -&gt; endpoint -&gt; bool
+    val intersect : t -&gt; t -&gt; t
+  end
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main.topscript">functors/main.topscript</a> , continued (part 17) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605378112">We can also use sharing constraints in the context of a functor.
+      The most common use case is where you want to expose that some of the
+      types of the module being generated by the functor are related to the
+      types in the module fed to the functor.</p><p id="idm259605377456">In this case, we'd like to expose an equality between the type
+      <code>endpoint</code> in the new module and the
+      type <code>Endpoint.t</code>, from the module
+      <code>Endpoint</code> that is the functor
+      argument. We can do this as follows:</p><div class="rwocode"><pre><code># <span class="keyword4">module</span> Make_interval<span class="keyword2">(</span><span class="keyword6">Endpoint </span><span class="keyword2">:</span> Comparable<span class="keyword2">)</span>
+      <span class="keyword2">:</span> <span class="keyword2">(</span><span class="keyword6">Interval_intf </span><span class="keyword1">with</span> <span class="keyword4">type</span> endpoint <span class="keyword2">=</span> <span class="keyword5">Endpoint.</span>t<span class="keyword2">)</span>
+  <span class="keyword2">=</span> <span class="keyword4">struct</span>
+
+    <span class="keyword4">type</span> endpoint <span class="keyword2">=</span> <span class="keyword5">Endpoint.</span>t
+    <span class="keyword4">type</span> t <span class="keyword2">=</span> <span class="keyword2">|</span> <span class="keyword6">Interval </span><span class="keyword2">of</span> <span class="keyword5">Endpoint.</span>t <span class="keyword2">*</span> <span class="keyword5">Endpoint.</span>t
+             <span class="keyword2">|</span> <span class="keyword6">Empty
+</span>
+    ...
+
+  <span class="keyword4">end</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module Make_interval :
+  functor (Endpoint : Comparable) -&gt;
+    sig
+      type t
+      type endpoint = Endpoint.t
+      val create : endpoint -&gt; endpoint -&gt; t
+      val is_empty : t -&gt; bool
+      val contains : t -&gt; endpoint -&gt; bool
+      val intersect : t -&gt; t -&gt; t
+    end</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main-18.rawscript">functors/main-18.rawscript</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605371040">So now, the interface is as it was, except that <code>endpoint</code> is known to be equal to <code>Endpoint.t</code>.
+        As a result of that type equality, we can again do things that require that <code>endpoint</code> be exposed, like constructing intervals:</p><div class="rwocode"><pre><code># <span class="keyword4">module</span> <span class="keyword6">Int_interval </span><span class="keyword2">=</span> Make_interval<span class="keyword2">(</span>Int<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module Int_interval :
+  sig
+    type t = Make_interval(Core.Std.Int).t
+    type endpoint = int
+    val create : endpoint -&gt; endpoint -&gt; t
+    val is_empty : t -&gt; bool
+    val contains : t -&gt; endpoint -&gt; bool
+    val intersect : t -&gt; t -&gt; t
+  end
+</div># <span class="keyword4">let</span> i <span class="keyword2">=</span> <span class="keyword5">Int_interval.</span>create <span class="keyword8">3</span> <span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val i : Int_interval.t = &lt;abstr&gt;
+</div># <span class="keyword5">Int_interval.</span>contains i <span class="keyword8">5</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : bool = false
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main.topscript">functors/main.topscript</a> , continued (part 19) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></section><section id="destructive-substitution"><h1>Destructive Substitution</h1><p id="idm259605354592">Sharing constraints basically do the job, but they have some
+      downsides. In particular, we've now been stuck with the useless type
+      declaration of <code>endpoint</code> that clutters
+      up both the interface and the implementation. A better solution would be
+      to modify the <code>Interval_intf</code> signature
+      by replacing <code>endpoint</code> with <code>Endpoint.t</code> everywhere it shows up, and
+      deleting the definition of <code>endpoint</code>
+      from the signature. We can do just this using what's called
+      <span><em>destructive substitution</em></span>. Here's the basic
+      syntax:<a name="idm259605350192"></a><a name="idm259605349280"></a></p><div class="rwocode"><pre><code><pre>&lt;Module_type&gt; with type &lt;type&gt; := &lt;type'&gt;
+</pre></code></pre><div class="rwocodeinfo">Syntax ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/destructive_sub.syntax">functors/destructive_sub.syntax</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605344624">The following shows how we could use this with <code>Make_interval</code>:</p><div class="rwocode"><pre><code># <span class="keyword4">module</span> <span class="keyword4">type</span> <span class="keyword6">Int_interval_intf </span><span class="keyword2">=</span>
+    <span class="keyword6">Interval_intf </span><span class="keyword1">with</span> <span class="keyword4">type</span> endpoint <span class="keyword2">:</span><span class="keyword2">=</span> <span class="keyword3">int</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module type Int_interval_intf =
+  sig
+    type t
+    val create : int -&gt; int -&gt; t
+    val is_empty : t -&gt; bool
+    val contains : t -&gt; int -&gt; bool
+    val intersect : t -&gt; t -&gt; t
+  end
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main.topscript">functors/main.topscript</a> , continued (part 20) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605334320">There's now no <code>endpoint</code> type:
+      all of its occurrences of have been replaced by <code>int</code>. As with sharing constraints, we can also
+      use this in the context of a functor:</p><div class="rwocode"><pre><code># <span class="keyword4">module</span> Make_interval<span class="keyword2">(</span><span class="keyword6">Endpoint </span><span class="keyword2">:</span> Comparable<span class="keyword2">)</span>
+    <span class="keyword2">:</span> <span class="keyword6">Interval_intf </span><span class="keyword1">with</span> <span class="keyword4">type</span> endpoint <span class="keyword2">:</span><span class="keyword2">=</span> <span class="keyword5">Endpoint.</span>t <span class="keyword2">=</span>
+  <span class="keyword4">struct</span>
+
+    <span class="keyword4">type</span> t <span class="keyword2">=</span> <span class="keyword2">|</span> <span class="keyword6">Interval </span><span class="keyword2">of</span> <span class="keyword5">Endpoint.</span>t <span class="keyword2">*</span> <span class="keyword5">Endpoint.</span>t
+             <span class="keyword2">|</span> <span class="keyword6">Empty
+</span>
+    ...
+
+  <span class="keyword4">end</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">  module Make_interval :
+    functor (Endpoint : Comparable) -&gt;
+    sig
+      type t
+      val create : Endpoint.t -&gt; Endpoint.t -&gt; t
+      val is_empty : t -&gt; bool
+      val contains : t -&gt; Endpoint.t -&gt; bool
+      val intersect : t -&gt; t -&gt; t
+    end</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main-21.rawscript">functors/main-21.rawscript</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605328768">The interface is precisely what we want: the type <code>t</code> is abstract, and the type of the endpoint is
+      exposed; so we can create values of type <code>Int_interval.t</code> using the creation function,
+      but not directly using the constructors and thereby violating the
+      invariants of the module:</p><div class="rwocode"><pre><code># <span class="keyword4">module</span> <span class="keyword6">Int_interval </span><span class="keyword2">=</span> Make_interval<span class="keyword2">(</span>Int<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module Int_interval :
+  sig
+    type t = Make_interval(Core.Std.Int).t
+    val create : int -&gt; int -&gt; t
+    val is_empty : t -&gt; bool
+    val contains : t -&gt; int -&gt; bool
+    val intersect : t -&gt; t -&gt; t
+  end
+</div># <span class="keyword5">Int_interval.</span>is_empty
+    <span class="keyword2">(</span><span class="keyword5">Int_interval.</span>create <span class="keyword8">3</span> <span class="keyword8">4</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : bool = false
+</div># <span class="keyword5">Int_interval.</span>is_empty
+    <span class="keyword2">(</span><span class="keyword5">Int_interval.Interval </span><span class="keyword2">(</span><span class="keyword8">4</span>,<span class="keyword8">3</span><span class="keyword2">)</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 40-48:
+Error: Unbound constructor Int_interval.Interval
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main.topscript">functors/main.topscript</a> , continued (part 22) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605312672">In addition, the <code>endpoint</code> type
+      is gone from the interface, meaning we no longer need to define the
+      <code>endpoint</code> type alias in the body of
+      the module.</p><p id="idm259605310832">It's worth noting that the name is somewhat misleading, in that
+      there's nothing destructive about destructive substitution; it's really
+      just a way of creating a new signature by transforming an existing
+      one.</p></section><section id="using-multiple-interfaces"><h1>Using Multiple Interfaces</h1><p id="idm259605309152">Another feature that we might want for our interval module is the
+      ability to <span><em>serialize</em></span>, i.e., to be able to read and
+      write intervals as a stream of bytes. In this case, we'll do this by
+      converting to and from s-expressions, which were mentioned already in
+      <a href="error-handling.html">Chapter 7, <i>Error Handling</i></a>. To recall, an s-expression is
+      essentially a parenthesized expression whose atoms are strings, and it
+      is a serialization format that is used commonly in Core. Here's an
+      example:<a name="idm259605307504"></a><a name="idm259605306208"></a></p><div class="rwocode"><pre><code># <span class="keyword5">Sexp.</span>of_string <span class="keyword7">&quot;(This is (an s-expression))&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : Sexp.t = (This is (an s-expression))
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main.topscript">functors/main.topscript</a> , continued (part 23) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605300816">Core comes with a syntax extension called Sexplib which can
+      autogenerate s-expression conversion functions from a type declaration.
+      Attaching <code>with sexp</code> to a type
+      definition signals to the extension to generate the converters. Thus, we
+      can write:<a name="idm259605299648"></a></p><div class="rwocode"><pre><code># <span class="keyword4">type</span> some_type <span class="keyword2">=</span> <span class="keyword3">int</span> <span class="keyword2">*</span> <span class="keyword3">string</span> <span class="keyword3">list</span> <span class="keyword1">with</span> sexp<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">type some_type = int * string list
+val some_type_of_sexp : Sexp.t -&gt; int * string list = &lt;fun&gt;
+val sexp_of_some_type : int * string list -&gt; Sexp.t = &lt;fun&gt;
+</div># sexp_of_some_type <span class="keyword2">(</span><span class="keyword8">33</span>, <span class="keyword2">[</span><span class="keyword7">&quot;one&quot;</span><span class="keyword2">;</span> <span class="keyword7">&quot;two&quot;</span><span class="keyword2">]</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : Sexp.t = (33 (one two))
+</div># <span class="keyword5">Sexp.</span>of_string <span class="keyword7">&quot;(44 (five six))&quot;</span> <span class="keyword2">|</span><span class="keyword2">&gt;</span> some_type_of_sexp<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int * string list = (44, [&quot;five&quot;; &quot;six&quot;])
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main.topscript">functors/main.topscript</a> , continued (part 24) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605289552">We'll discuss s-expressions and Sexplib in more detail in <a href="data-serialization-with-s-expressions.html">Chapter 17, <i>Data Serialization with S-Expressions</i></a>, but for now, let's
+      see what happens if we attach the <code>with
+      sexp</code> declaration to the definition of <code>t</code> within the functor:</p><div class="rwocode"><pre><code># <span class="keyword4">module</span> Make_interval<span class="keyword2">(</span><span class="keyword6">Endpoint </span><span class="keyword2">:</span> Comparable<span class="keyword2">)</span>
+    <span class="keyword2">:</span> <span class="keyword2">(</span><span class="keyword6">Interval_intf </span><span class="keyword1">with</span> <span class="keyword4">type</span> endpoint <span class="keyword2">:</span><span class="keyword2">=</span> <span class="keyword5">Endpoint.</span>t<span class="keyword2">)</span> <span class="keyword2">=</span> <span class="keyword4">struct</span>
+
+    <span class="keyword4">type</span> t <span class="keyword2">=</span> <span class="keyword2">|</span> <span class="keyword6">Interval </span><span class="keyword2">of</span> <span class="keyword5">Endpoint.</span>t <span class="keyword2">*</span> <span class="keyword5">Endpoint.</span>t
+             <span class="keyword2">|</span> <span class="keyword6">Empty
+</span>    <span class="keyword1">with</span> sexp
+
+    ...
+
+  <span class="keyword4">end</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">  Characters 136-146:
+    Error: Unbound value Endpoint.t_of_sexp</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main-25.rawscript">functors/main-25.rawscript</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605283664">The problem is that <code>with sexp</code>
+      adds code for defining the s-expression converters, and that code
+      assumes that <code>Endpoint</code> has the
+      appropriate sexp-conversion functions for <code>Endpoint.t</code>. But all we know about <code>Endpoint</code> is that it satisfies the <code>Comparable</code> interface, which doesn't say
+      anything about s-expressions.</p><p id="idm259605279744">Happily, Core comes with a built-in interface for just this
+      purpose called <code>Sexpable</code>, which is
+      defined as follows:</p><div class="rwocode"><pre><code><span class="keyword4">module</span> <span class="keyword4">type</span> <span class="keyword6">Sexpable </span><span class="keyword2">=</span> <span class="keyword4">sig</span>
+  <span class="keyword4">type</span> t
+  <span class="keyword4">val</span> sexp_of_t <span class="keyword2">:</span> t -<span class="keyword2">&gt;</span> <span class="keyword5">Sexp.</span>t
+  <span class="keyword4">val</span> t_of_sexp <span class="keyword2">:</span> <span class="keyword5">Sexp.</span>t -<span class="keyword2">&gt;</span> t
+<span class="keyword4">end</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/sexpable.ml">functors/sexpable.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605276192">We can modify <code>Make_interval</code> to
+      use the <code>Sexpable</code> interface, for both
+      its input and its output. First, let's create an extended version of the
+      <code>Interval_intf</code> interface that includes
+      the functions from the <code>Sexpable</code> interface. We can do
+      this using destructive substitution on the <code>Sexpable</code> interface, to avoid having multiple
+      distinct type <code>t</code>'s clashing with each
+      other:</p><div class="rwocode"><pre><code># <span class="keyword4">module</span> <span class="keyword4">type</span> <span class="keyword6">Interval_intf_with_sexp </span><span class="keyword2">=</span> <span class="keyword4">sig</span>
+   <span class="keyword4">include</span> <span class="keyword6">Interval_intf
+</span>   <span class="keyword4">include</span> <span class="keyword6">Sexpable </span><span class="keyword1">with</span> <span class="keyword4">type</span> t <span class="keyword2">:</span><span class="keyword2">=</span> t
+  <span class="keyword4">end</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module type Interval_intf_with_sexp =
+  sig
+    type t
+    type endpoint
+    val create : endpoint -&gt; endpoint -&gt; t
+    val is_empty : t -&gt; bool
+    val contains : t -&gt; endpoint -&gt; bool
+    val intersect : t -&gt; t -&gt; t
+    val t_of_sexp : Sexp.t -&gt; t
+    val sexp_of_t : t -&gt; Sexp.t
+  end
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main.topscript">functors/main.topscript</a> , continued (part 26) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605259264">Equivalently, we can define a type <code>t</code> within our new module, and apply destructive
+      substitutions to all of the included interfaces, <code>Interval_intf</code> included, as shown in the
+      following example. This is somewhat cleaner when combining multiple
+      interfaces, since it correctly reflects that all of the signatures are
+      being handled equivalently:</p><div class="rwocode"><pre><code># <span class="keyword4">module</span> <span class="keyword4">type</span> <span class="keyword6">Interval_intf_with_sexp </span><span class="keyword2">=</span> <span class="keyword4">sig</span>
+   <span class="keyword4">type</span> t
+   <span class="keyword4">include</span> <span class="keyword6">Interval_intf </span><span class="keyword1">with</span> <span class="keyword4">type</span> t <span class="keyword2">:</span><span class="keyword2">=</span> t
+   <span class="keyword4">include</span> <span class="keyword6">Sexpable </span>     <span class="keyword1">with</span> <span class="keyword4">type</span> t <span class="keyword2">:</span><span class="keyword2">=</span> t
+  <span class="keyword4">end</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module type Interval_intf_with_sexp =
+  sig
+    type t
+    type endpoint
+    val create : endpoint -&gt; endpoint -&gt; t
+    val is_empty : t -&gt; bool
+    val contains : t -&gt; endpoint -&gt; bool
+    val intersect : t -&gt; t -&gt; t
+    val t_of_sexp : Sexp.t -&gt; t
+    val sexp_of_t : t -&gt; Sexp.t
+  end
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main.topscript">functors/main.topscript</a> , continued (part 27) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605244000">Now we can write the functor itself. We have been careful to
+      override the sexp converter here to ensure that the data structure's
+      invariants are still maintained when reading in from an
+      s-expression:</p><div class="rwocode"><pre><code># <span class="keyword4">module</span> Make_interval<span class="keyword2">(</span><span class="keyword6">Endpoint </span><span class="keyword2">:</span> <span class="keyword4">sig</span>
+                         <span class="keyword4">type</span> t
+                         <span class="keyword4">include</span> <span class="keyword6">Comparable </span><span class="keyword1">with</span> <span class="keyword4">type</span> t <span class="keyword2">:</span><span class="keyword2">=</span> t
+                         <span class="keyword4">include</span> <span class="keyword6">Sexpable </span>  <span class="keyword1">with</span> <span class="keyword4">type</span> t <span class="keyword2">:</span><span class="keyword2">=</span> t
+                       <span class="keyword4">end</span><span class="keyword2">)</span>
+    <span class="keyword2">:</span> <span class="keyword2">(</span><span class="keyword6">Interval_intf_with_sexp </span><span class="keyword1">with</span> <span class="keyword4">type</span> endpoint <span class="keyword2">:</span><span class="keyword2">=</span> <span class="keyword5">Endpoint.</span>t<span class="keyword2">)</span>
+  <span class="keyword2">=</span> <span class="keyword4">struct</span>
+
+    <span class="keyword4">type</span> t <span class="keyword2">=</span> <span class="keyword2">|</span> <span class="keyword6">Interval </span><span class="keyword2">of</span> <span class="keyword5">Endpoint.</span>t <span class="keyword2">*</span> <span class="keyword5">Endpoint.</span>t
+             <span class="keyword2">|</span> <span class="keyword6">Empty
+</span>    <span class="keyword1">with</span> sexp
+
+    <span class="comments">(** [create low high] creates a new interval from [low] to
+        [high].  If [low &gt; high], then the interval is empty *)</span>
+    <span class="keyword4">let</span> create low high <span class="keyword2">=</span>
+      <span class="keyword1">if</span> <span class="keyword5">Endpoint.</span>compare low high <span class="keyword2">&gt;</span> <span class="keyword8">0</span> <span class="keyword1">then</span> <span class="keyword6">Empty
+</span>      <span class="keyword1">else</span> <span class="keyword6">Interval </span><span class="keyword2">(</span>low,high<span class="keyword2">)</span>
+
+    <span class="comments">(* put a wrapper around the autogenerated [t_of_sexp] to enforce
+       the invariants of the data structure *)</span>
+    <span class="keyword4">let</span> t_of_sexp sexp <span class="keyword2">=</span>
+      <span class="keyword1">match</span> t_of_sexp sexp <span class="keyword1">with</span>
+      <span class="keyword2">|</span> <span class="keyword6">Empty </span>-<span class="keyword2">&gt;</span> <span class="keyword6">Empty
+</span>      <span class="keyword2">|</span> <span class="keyword6">Interval </span><span class="keyword2">(</span>x,y<span class="keyword2">)</span> -<span class="keyword2">&gt;</span> create x y
+
+    <span class="comments">(** Returns true iff the interval is empty *)</span>
+    <span class="keyword4">let</span> is_empty <span class="keyword2">=</span> <span class="keyword1">function</span>
+      <span class="keyword2">|</span> <span class="keyword6">Empty </span>-<span class="keyword2">&gt;</span> true
+      <span class="keyword2">|</span> <span class="keyword6">Interval </span><span class="keyword8">_</span> -<span class="keyword2">&gt;</span> false
+
+    <span class="comments">(** [contains t x] returns true iff [x] is contained in the
+        interval [t] *)</span>
+    <span class="keyword4">let</span> contains t x <span class="keyword2">=</span>
+      <span class="keyword1">match</span> t <span class="keyword1">with</span>
+      <span class="keyword2">|</span> <span class="keyword6">Empty </span>-<span class="keyword2">&gt;</span> false
+      <span class="keyword2">|</span> <span class="keyword6">Interval </span><span class="keyword2">(</span>l,h<span class="keyword2">)</span> -<span class="keyword2">&gt;</span>
+        <span class="keyword5">Endpoint.</span>compare x l <span class="keyword2">&gt;</span><span class="keyword2">=</span> <span class="keyword8">0</span> <span class="keyword2">&amp;&amp;</span> <span class="keyword5">Endpoint.</span>compare x h <span class="keyword2">&lt;</span><span class="keyword2">=</span> <span class="keyword8">0</span>
+
+    <span class="comments">(** [intersect t1 t2] returns the intersection of the two input
+        intervals *)</span>
+    <span class="keyword4">let</span> intersect t1 t2 <span class="keyword2">=</span>
+      <span class="keyword4">let</span> min x y <span class="keyword2">=</span> <span class="keyword1">if</span> <span class="keyword5">Endpoint.</span>compare x y <span class="keyword2">&lt;</span><span class="keyword2">=</span> <span class="keyword8">0</span> <span class="keyword1">then</span> x <span class="keyword1">else</span> y <span class="keyword4">in</span>
+      <span class="keyword4">let</span> max x y <span class="keyword2">=</span> <span class="keyword1">if</span> <span class="keyword5">Endpoint.</span>compare x y <span class="keyword2">&gt;</span><span class="keyword2">=</span> <span class="keyword8">0</span> <span class="keyword1">then</span> x <span class="keyword1">else</span> y <span class="keyword4">in</span>
+      <span class="keyword1">match</span> t1,t2 <span class="keyword1">with</span>
+      <span class="keyword2">|</span> Empty, <span class="keyword8">_</span> <span class="keyword2">|</span> <span class="keyword8">_</span>, <span class="keyword6">Empty </span>-<span class="keyword2">&gt;</span> <span class="keyword6">Empty
+</span>      <span class="keyword2">|</span> <span class="keyword6">Interval </span><span class="keyword2">(</span>l1,h1<span class="keyword2">)</span>, <span class="keyword6">Interval </span><span class="keyword2">(</span>l2,h2<span class="keyword2">)</span> -<span class="keyword2">&gt;</span>
+        create <span class="keyword2">(</span>max l1 l2<span class="keyword2">)</span> <span class="keyword2">(</span>min h1 h2<span class="keyword2">)</span>
+  <span class="keyword4">end</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module Make_interval :
+  functor
+    (Endpoint : sig
+                  type t
+                  val compare : t -&gt; t -&gt; int
+                  val t_of_sexp : Sexp.t -&gt; t
+                  val sexp_of_t : t -&gt; Sexp.t
+                end) -&gt;
+    sig
+      type t
+      val create : Endpoint.t -&gt; Endpoint.t -&gt; t
+      val is_empty : t -&gt; bool
+      val contains : t -&gt; Endpoint.t -&gt; bool
+      val intersect : t -&gt; t -&gt; t
+      val t_of_sexp : Sexp.t -&gt; t
+      val sexp_of_t : t -&gt; Sexp.t
+    end
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main.topscript">functors/main.topscript</a> , continued (part 28) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605197792">And now, we can use that sexp converter in the ordinary
+      way:</p><div class="rwocode"><pre><code># <span class="keyword4">module</span> <span class="keyword6">Int_interval </span><span class="keyword2">=</span> Make_interval<span class="keyword2">(</span>Int<span class="keyword2">)</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">module Int_interval :
+  sig
+    type t = Make_interval(Core.Std.Int).t
+    val create : int -&gt; int -&gt; t
+    val is_empty : t -&gt; bool
+    val contains : t -&gt; int -&gt; bool
+    val intersect : t -&gt; t -&gt; t
+    val t_of_sexp : Sexp.t -&gt; t
+    val sexp_of_t : t -&gt; Sexp.t
+  end
+</div># <span class="keyword5">Int_interval.</span>sexp_of_t <span class="keyword2">(</span><span class="keyword5">Int_interval.</span>create <span class="keyword8">3</span> <span class="keyword8">4</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : Sexp.t = (Interval 3 4)
+</div># <span class="keyword5">Int_interval.</span>sexp_of_t <span class="keyword2">(</span><span class="keyword5">Int_interval.</span>create <span class="keyword8">4</span> <span class="keyword8">3</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : Sexp.t = Empty
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/main.topscript">functors/main.topscript</a> , continued (part 29) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></section></section><section id="extending-modules"><h1>Extending Modules</h1><p id="idm259605181936">Another common use of functors is to generate type-specific
+    functionality for a given module in a standardized way. Let's see how this
+    works in the context of a functional queue, which is just a functional
+    version of a FIFO (first-in, first-out) queue. Being functional,
+    operations on the queue return new queues, rather than modifying the
+    queues that were passed in.<a name="idm259605181280"></a><a name="idm259605179968"></a><a name="idm259605179040"></a></p><p id="idm259605177600">Here's a reasonable <code>mli</code> for such
+    a module:</p><div class="rwocode"><pre><code><span class="keyword4">type</span> 'a t
+
+<span class="keyword4">val</span> empty <span class="keyword2">:</span> 'a t
+
+<span class="comments">(** [enqueue el q] adds [el] to the back of [q] *)</span>
+<span class="keyword4">val</span> enqueue <span class="keyword2">:</span> 'a t -<span class="keyword2">&gt;</span> 'a -<span class="keyword2">&gt;</span> 'a t
+
+<span class="comments">(** [dequeue q] returns None if the [q] is empty, otherwise returns
+    the first element of the queue and the remainder of the queue *)</span>
+<span class="keyword4">val</span> dequeue <span class="keyword2">:</span> 'a t -<span class="keyword2">&gt;</span> <span class="keyword2">(</span>'a <span class="keyword2">*</span> 'a t<span class="keyword2">)</span> option
+
+<span class="comments">(** Folds over the queue, from front to back *)</span>
+<span class="keyword4">val</span> fold <span class="keyword2">:</span> 'a t -<span class="keyword2">&gt;</span> init<span class="keyword2">:</span>'acc -<span class="keyword2">&gt;</span> f<span class="keyword2">:</span><span class="keyword2">(</span>'acc -<span class="keyword2">&gt;</span> 'a -<span class="keyword2">&gt;</span> 'acc<span class="keyword2">)</span> -<span class="keyword2">&gt;</span> 'acc</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/fqueue.mli">functors/fqueue.mli</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605173280">The preceding <code>Fqueue.fold</code>
+    function requires some explanation. It follows the same pattern as the
+    <code>List.fold</code> function we described in
+    <a href="lists-and-patterns.html#using-the-list-module-effectively">the section called “Using the List Module Effectively”</a>. Essentially,
+    <code>Fqueue.fold q ~init ~f</code> walks over the
+    elements of <code>q</code> from front to back,
+    starting with an accumulator of <code>init</code>
+    and using <code>f</code> to update the accumulator
+    value as it walks over the queue, returning the final value of the
+    accumulator at the end of the computation. <code>fold</code> is a
+    quite powerful operation, as we'll see.</p><p id="idm259605167696">We'll implement <code>Fqueue</code> the well known trick of
+      maintaining an input and an output list so that one can efficiently enqueue on the input list
+      and efficiently dequeue from the output list. If you attempt to dequeue when the output list
+      is empty, the input list is reversed and becomes the new output list. Here's the
+      implementation:</p><div class="rwocode"><pre><code><span class="keyword1">open</span> <span class="keyword5">Core.Std
+</span>
+<span class="keyword4">type</span> 'a t <span class="keyword2">=</span> 'a <span class="keyword3">list</span> <span class="keyword2">*</span> 'a <span class="keyword3">list</span>
+
+<span class="keyword4">let</span> empty <span class="keyword2">=</span> <span class="keyword2">(</span><span class="keyword2">[</span><span class="keyword2">]</span>,<span class="keyword2">[</span><span class="keyword2">]</span><span class="keyword2">)</span>
+
+<span class="keyword4">let</span> enqueue <span class="keyword2">(</span>in_list, out_list<span class="keyword2">)</span> x <span class="keyword2">=</span>
+  <span class="keyword2">(</span>x <span class="keyword2">:</span><span class="keyword2">:</span> in_list,out_list<span class="keyword2">)</span>
+
+<span class="keyword4">let</span> dequeue <span class="keyword2">(</span>in_list, out_list<span class="keyword2">)</span> <span class="keyword2">=</span>
+  <span class="keyword1">match</span> out_list <span class="keyword1">with</span>
+  <span class="keyword2">|</span> hd <span class="keyword2">:</span><span class="keyword2">:</span> tl -<span class="keyword2">&gt;</span> <span class="keyword6">Some </span><span class="keyword2">(</span>hd, <span class="keyword2">(</span>in_list, tl<span class="keyword2">)</span><span class="keyword2">)</span>
+  <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span> -<span class="keyword2">&gt;</span>
+    <span class="keyword1">match</span> <span class="keyword5">List.</span>rev in_list <span class="keyword1">with</span>
+    <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span> -<span class="keyword2">&gt;</span> <span class="keyword6">None
+</span>    <span class="keyword2">|</span> hd <span class="keyword2">:</span><span class="keyword2">:</span> tl -<span class="keyword2">&gt;</span> <span class="keyword6">Some </span><span class="keyword2">(</span>hd, <span class="keyword2">(</span><span class="keyword2">[</span><span class="keyword2">]</span>, tl<span class="keyword2">)</span><span class="keyword2">)</span>
+
+<span class="keyword4">let</span> fold <span class="keyword2">(</span>in_list, out_list<span class="keyword2">)</span> ~init ~f <span class="keyword2">=</span>
+  <span class="keyword4">let</span> after_out <span class="keyword2">=</span> <span class="keyword5">List.</span>fold ~init ~f out_list <span class="keyword4">in</span>
+  <span class="keyword5">List.</span>fold_right ~init<span class="keyword2">:</span>after_out ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> x acc -<span class="keyword2">&gt;</span> f acc x<span class="keyword2">)</span> in_list</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/fqueue.ml">functors/fqueue.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605164112">One problem with <code>Fqueue</code> is that
+    the interface is quite skeletal. There are lots of useful helper functions
+    that one might want that aren't there. The <code>List</code> module, by way of contrast, has functions
+    like <code>List.iter</code>, which runs a function
+    on each element; and <code>List.for_all</code>,
+    which returns true if and only if the given predicate evaluates to
+    <code>true</code> on every element of the list. Such
+    helper functions come up for pretty much every container type, and
+    implementing them over and over is a dull and repetitive affair.</p><p id="idm259605159968">As it happens, many of these helper functions can be derived mechanically from the
+        <code>fold</code> function we already implemented. Rather than write all of these
+      helper functions by hand for every new container type, we can instead use a functor to add
+      this functionality to any container that has a <code>fold</code>
+      function.</p><p id="idm259605158192">We'll create a new module, <code>Foldable</code>, that automates the process of adding
+    helper functions to a <code>fold</code>-supporting container. As you
+    can see, <code>Foldable</code> contains a module
+    signature <code>S</code> which defines the signature
+    that is required to support folding; and a functor <code>Extend</code> that allows one to extend any module that
+    matches <code>Foldable.S</code>:</p><div class="rwocode"><pre><code><span class="keyword1">open</span> <span class="keyword5">Core.Std
+</span>
+<span class="keyword4">module</span> <span class="keyword4">type</span> <span class="keyword6">S </span><span class="keyword2">=</span> <span class="keyword4">sig</span>
+  <span class="keyword4">type</span> 'a t
+  <span class="keyword4">val</span> fold <span class="keyword2">:</span> 'a t -<span class="keyword2">&gt;</span> init<span class="keyword2">:</span>'acc -<span class="keyword2">&gt;</span> f<span class="keyword2">:</span><span class="keyword2">(</span>'acc -<span class="keyword2">&gt;</span> 'a -<span class="keyword2">&gt;</span> 'acc<span class="keyword2">)</span> -<span class="keyword2">&gt;</span> 'acc
+<span class="keyword4">end</span>
+
+<span class="keyword4">module</span> <span class="keyword4">type</span> <span class="keyword6">Extension </span><span class="keyword2">=</span> <span class="keyword4">sig</span>
+  <span class="keyword4">type</span> 'a t
+  <span class="keyword4">val</span> iter    <span class="keyword2">:</span> 'a t -<span class="keyword2">&gt;</span> f<span class="keyword2">:</span><span class="keyword2">(</span>'a -<span class="keyword2">&gt;</span> unit<span class="keyword2">)</span> -<span class="keyword2">&gt;</span> unit
+  <span class="keyword4">val</span> length  <span class="keyword2">:</span> 'a t -<span class="keyword2">&gt;</span> <span class="keyword3">int</span>
+  <span class="keyword4">val</span> count   <span class="keyword2">:</span> 'a t -<span class="keyword2">&gt;</span> f<span class="keyword2">:</span><span class="keyword2">(</span>'a -<span class="keyword2">&gt;</span> bool<span class="keyword2">)</span> -<span class="keyword2">&gt;</span> <span class="keyword3">int</span>
+  <span class="keyword4">val</span> for_all <span class="keyword2">:</span> 'a t -<span class="keyword2">&gt;</span> f<span class="keyword2">:</span><span class="keyword2">(</span>'a -<span class="keyword2">&gt;</span> bool<span class="keyword2">)</span> -<span class="keyword2">&gt;</span> bool
+  <span class="keyword4">val</span> exists  <span class="keyword2">:</span> 'a t -<span class="keyword2">&gt;</span> f<span class="keyword2">:</span><span class="keyword2">(</span>'a -<span class="keyword2">&gt;</span> bool<span class="keyword2">)</span> -<span class="keyword2">&gt;</span> bool
+<span class="keyword4">end</span>
+
+<span class="comments">(* For extending a Foldable module *)</span>
+<span class="keyword4">module</span> Extend<span class="keyword2">(</span><span class="keyword6">Arg </span><span class="keyword2">:</span> S<span class="keyword2">)</span>
+  <span class="keyword2">:</span> <span class="keyword2">(</span><span class="keyword6">Extension </span><span class="keyword1">with</span> <span class="keyword4">type</span> 'a t <span class="keyword2">:</span><span class="keyword2">=</span> 'a <span class="keyword5">Arg.</span>t<span class="keyword2">)</span> <span class="keyword2">=</span>
+<span class="keyword4">struct</span>
+  <span class="keyword1">open</span> <span class="keyword6">Arg
+</span>
+  <span class="keyword4">let</span> iter t ~f <span class="keyword2">=</span>
+    fold t ~init<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword2">)</span> ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> <span class="keyword2">(</span><span class="keyword2">)</span> a -<span class="keyword2">&gt;</span> f a<span class="keyword2">)</span>
+
+  <span class="keyword4">let</span> length t <span class="keyword2">=</span>
+    fold t ~init<span class="keyword2">:</span><span class="keyword8">0</span>  ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> acc <span class="keyword8">_</span> -<span class="keyword2">&gt;</span> acc <span class="keyword2">+</span> <span class="keyword8">1</span><span class="keyword2">)</span>
+
+  <span class="keyword4">let</span> count t ~f <span class="keyword2">=</span>
+    fold t ~init<span class="keyword2">:</span><span class="keyword8">0</span>  ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> count x -<span class="keyword2">&gt;</span> count <span class="keyword2">+</span> <span class="keyword1">if</span> f x <span class="keyword1">then</span> <span class="keyword8">1</span> <span class="keyword1">else</span> <span class="keyword8">0</span><span class="keyword2">)</span>
+
+  <span class="keyword1">exception</span> <span class="keyword6">Short_circuit
+</span>
+  <span class="keyword4">let</span> for_all c ~f <span class="keyword2">=</span>
+    <span class="keyword1">try</span> iter c ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> x -<span class="keyword2">&gt;</span> <span class="keyword1">if</span> not <span class="keyword2">(</span>f x<span class="keyword2">)</span> <span class="keyword1">then</span> <span class="keyword1">raise</span> Short_circuit<span class="keyword2">)</span><span class="keyword2">;</span> true
+    <span class="keyword1">with</span> <span class="keyword6">Short_circuit </span>-<span class="keyword2">&gt;</span> false
+
+  <span class="keyword4">let</span> exists c ~f <span class="keyword2">=</span>
+    <span class="keyword1">try</span> iter c ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> x -<span class="keyword2">&gt;</span> <span class="keyword1">if</span> f x <span class="keyword1">then</span> <span class="keyword1">raise</span> Short_circuit<span class="keyword2">)</span><span class="keyword2">;</span> false
+    <span class="keyword1">with</span> <span class="keyword6">Short_circuit </span>-<span class="keyword2">&gt;</span> true
+<span class="keyword4">end</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/foldable.ml">functors/foldable.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605151568">Now we can apply this to <code>Fqueue</code>. We can create an
+      interface for an extended version of <code>Fqueue</code> as follows: </p><div class="rwocode"><pre><code><span class="keyword4">type</span> 'a t
+<span class="keyword4">include</span> <span class="keyword2">(</span><span class="keyword4">module</span> <span class="keyword4">type</span> <span class="keyword2">of</span> Fqueue<span class="keyword2">)</span> <span class="keyword1">with</span> <span class="keyword4">type</span> 'a t <span class="keyword2">:</span><span class="keyword2">=</span> 'a t
+<span class="keyword4">include</span> <span class="keyword5">Foldable.Extension </span><span class="keyword1">with</span> <span class="keyword4">type</span> 'a t <span class="keyword2">:</span><span class="keyword2">=</span> 'a t</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/extended_fqueue.mli">functors/extended_fqueue.mli</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605147616">In order to apply the functor, we'll put the definition of <code>Fqueue</code> in a submodule called <code>T</code>, and then call <code>Foldable.Extend</code> on <code>T</code>:</p><div class="rwocode"><pre><code><span class="keyword4">include</span> <span class="keyword6">Fqueue
+</span><span class="keyword4">include</span> <span class="keyword5">Foldable.</span>Extend<span class="keyword2">(</span>Fqueue<span class="keyword2">)</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/functors/extended_fqueue.ml">functors/extended_fqueue.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm259605142304">Core comes with a number of functors for extending modules that
+    follow this same basic pattern, including:<a name="idm259605141936"></a><a name="idm259605141040"></a><a name="idm259605140144"></a><a name="idm259605138832"></a></p><div><dl><dt><span><code>Container.Make</code></span></dt><dd><p id="idm259605136272">Very similar to <code>Foldable.Extend</code>.</p></dd><dt><span><code>Comparable.Make</code></span></dt><dd><p id="idm259605133680">Adds support for functionality that depends on the presence of
+          a comparison function, including support for containers like maps
+          and sets.</p></dd><dt><span><code>Hashable.Make</code></span></dt><dd><p id="idm259605131600">Adds support for hashing-based data structures including hash
+          tables, hash sets, and hash heaps.</p></dd><dt><span><code>Monad.Make</code></span></dt><dd><p id="idm259605129568">For so-called monadic libraries, like those discussed in Chapters <a href="error-handling.html">7</a> and <a href="concurrent-programming-with-async.html">18</a>. Here, the functor is
+          used to provide a collection of standard helper functions based on
+          the <code>bind</code> and <code>return</code> operators.</p></dd></dl></div><p id="idm259605125728">These functors come in handy when you want to add the same kind of
+    functionality that is commonly available in Core to your own types.</p><p id="idm259605125344">We've really only covered some of the possible uses of functors. Functors are really a
+      quite powerful tool for modularizing your code. The cost is that functors are syntactically
+      heavyweight compared to the rest of the language, and that there are some tricky issues you
+      need to understand to use them effectively, with sharing constraints and destructive
+      substitution being high on that list. </p><p id="idm259605124528">All of this means that for small and simple programs, heavy use of functors is probably a
+      mistake. But as your programs get more complicated and you need more effective modular
+      architectures, functors become a highly valuable tool.</p></section>
+
+
+                
+            </article>
+            
+            
+    
+                <nav class="pagination">
+                    
+                        <a rel="previous" href="imperative-programming-1.html">
+                            &lt; Previous
+                        </a>
+                    
+                    
+                        <a rel="next" href="first-class-modules.html">
+                            Next &gt;
+                        </a>
+                    
+                </nav>
+            
+            
+            
+            <footer class="footer">
+                <p>Copyright 2012-2013, Jason Hickey, Anil Madhavapeddy and Yaron Minsky. Licensed under <a href="http://creativecommons.org/licenses/by-nc-nd/3.0/us/">CC BY-NC-ND 3.0 US</a>.</p>
+            </footer>
+            
+        </div>
+    
+    </body>
+
+</html>

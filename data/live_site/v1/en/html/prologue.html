@@ -1,0 +1,342 @@
+<html>
+
+    <head>
+    
+        <meta charset="utf-8"></meta>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
+        <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW"></meta>
+        
+        <title>Prologue / Real World OCaml</title>
+        
+        <link rel="stylesheet" href="../../media/css/main.css"></link>
+        
+        <script src="../../media/js/require.js" data-main="../../media/js/main.js"> </script>
+        <script>
+            require.config({
+                config: {
+                    gitHub: {
+                        user: 'ocamllabs',
+                        repo: 'rwo\u002Dcomments',
+                        milestone: 'v1',
+                        page: 'prologue.html'
+                    }
+                }
+            });
+        </script>
+        
+    
+    </head>
+    
+    <body>
+    
+        <div class="body">
+        
+            <header class="header">
+                <i>Available in <a href="http://www.amazon.com/Real-World-OCaml-Functional-programming/dp/144932391X/">print</a> and <a href="http://oreil.ly/realworldOCaml">eBook!</a></i>
+                <h1><a href="http://oreil.ly/realworldOCaml"><img src="../../media/img/cover-cut.png" width="245" alt="Real World OCaml, by Yaron Minsky, Anil Madhavapeddy and Jason Hickey"></img></a></h1>
+            </header>
+    
+            <nav class="navigation">
+                <ul>
+                    <li>
+                        <a href="index.html">Table of Contents</a>
+                    </li>
+                    
+                        <li>
+                            <a href="prologue.html" class="here">Prologue</a>
+                            
+                                 
+                                    <ul>
+                                        
+                                            <li>
+                                                <a href="prologue.html#why-ocaml">Why OCaml?</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="prologue.html#about-this-book">About This Book</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="prologue.html#idm259611157200">Safari® Books Online</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="prologue.html#idm259611146320">How to Contact Us</a>
+                                            </li>
+                                        
+                                            <li>
+                                                <a href="prologue.html#idm259611135648">Contributors</a>
+                                            </li>
+                                        
+                                    </ul>
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt01.html">I. Language Concepts</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt02.html">II. Tools and Techniques</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="pt03.html">III. The Runtime System</a>
+                            
+                                
+                            
+                        </li>
+                    
+                        <li>
+                            <a href="ix01.html">Index</a>
+                            
+                        </li>
+                    
+                </ul>
+            </nav>
+        
+            <article class="page">
+        
+                <h1>Prologue</h1>
+                
+                
+
+    <section id="why-ocaml"><h1>Why OCaml?</h1><p id="idm259611224816">Programming languages matter. They affect the reliability, security, and efficiency of the
+      code you write, as well as how easy it is to read, refactor, and extend. The languages you
+      know can also change how you think, influencing the way you design software even when you're
+      not using them. </p><p id="idm259611224112">We wrote this book because we believe in the importance of programming languages, and that
+      OCaml in particular is an important language to learn. The three of us have been using OCaml
+      in our academic and professional lives for over 15 years, and in that time we've come to see
+      it as a secret weapon for building complex software systems. This book aims to make this
+      secret weapon available to a wider audience, by providing a clear guide to what you need to
+      know to use OCaml effectively in the real world. </p><p id="idm259611223184">What makes OCaml special is that it occupies a sweet spot in the space of programming
+      language designs. It provides a combination of efficiency, expressiveness and practicality
+      that is matched by no other language. That is in large part because OCaml is an elegant
+      combination of a few key language features that have been developed over the last 40
+        years.<a name="idm259611222544"></a> These include: </p><ul><li><p id="idm259611220528"><span><em>Garbage collection</em></span> for automatic memory
+        management, now a feature of almost every modern, high-level
+        language.</p></li><li><p id="idm259611219392"><span><em>First-class functions</em></span> that can be passed around like ordinary
+          values, as seen in JavaScript, Common Lisp, and C#.</p></li><li><p id="idm259611218256"><span><em>Static type-checking</em></span> to increase
+        performance and reduce the number of runtime errors, as found in Java
+        and C#.</p></li><li><p id="idm259611217120"><span><em>Parametric polymorphism</em></span>, which enables the
+        construction of abstractions that work across different data types,
+        similar to generics in Java and C# and templates in <span>C++.</span></p></li><li><p id="idm259611215456">Good support for <span><em>immutable programming</em></span>, i.e., programming without
+          making destructive updates to data structures. This is present in traditional functional
+            <span>languages</span> like Scheme, and is also found in
+          distributed, big-data frameworks like Hadoop.</p></li><li><p id="idm259611213456"><span><em>Automatic type inference</em></span> to avoid having to
+        laboriously define the type of every single variable in a program and
+        instead have them inferred based on how a value is used. Available in
+        a limited form in C# with implicitly typed local variables, and in
+        C++11 with its <code>auto</code> keyword.</p></li><li><p id="idm259611211536"><span><em>Algebraic data types</em></span> and <span><em>pattern
+        matching</em></span> to define and manipulate complex data structures.
+        Available in Scala and F#.</p></li></ul><p id="idm259611210160">Some of you will know and love all of these features, and for others they will be largely
+      new, but most of you will have seen <span><em>some</em></span> of them in other languages that
+      you've used. As we'll demonstrate over the course of this book, there is something
+      transformative about having them all together and able to interact in a single language.
+      Despite their importance, these ideas have made only limited inroads into mainstream
+      languages, and when they do arrive there, like first-class functions in C# or parametric
+      polymorphism in Java, it's typically in a limited and awkward form. The only languages that
+      completely embody these ideas are <span><em>statically typed, functional programming
+        languages</em></span> like OCaml, F#, Haskell, Scala, and Standard ML.<a name="idm259611208448"></a></p><p id="idm259611207072">Among this worthy set of languages, OCaml stands apart because it
+    manages to provide a great deal of power while remaining highly pragmatic.
+    The compiler has a straightforward compilation strategy that produces
+    performant code without requiring heavy optimization and without the
+    complexities of dynamic just-in-time (JIT) compilation. This, along with
+    OCaml's strict evaluation model, makes runtime behavior easy to predict.
+    The garbage collector is <span><em>incremental</em></span>, letting you
+    avoid large garbage collection (GC)-related pauses, and
+    <span><em>precise</em></span>, meaning it will collect all unreferenced
+    data (unlike many reference-counting collectors), and the runtime is
+    simple and highly portable.</p><p id="idm259611205280">All of this makes OCaml a great choice for programmers who want to
+    step up to a better programming language, and at the same time get
+    practical work done.</p><section id="a-brief-history-from-the-1960s"><h1>A Brief History</h1><p id="idm259611203856">OCaml was written in 1996 by Xavier Leroy, Jérôme Vouillon, Damien
+      Doligez, and Didier Rémy at INRIA in France. It was inspired by a long
+      line of research into ML starting in the 1960s, and continues to have
+      deep links to the academic community.<a name="idm259611203056"></a></p><p id="idm259611201680">ML was originally the <span><em>meta language</em></span> of the
+      LCF (Logic for Computable Functions) proof assistant released by Robin
+      Milner in 1972 (at Stanford, and later at Cambridge). ML was turned into
+      a compiler in order to make it easier to use LCF on different machines,
+      and it was gradually turned into a full-fledged system of its own by the
+      1980s.</p><p id="idm259611200576">The first implementation of Caml appeared in 1987. It was created
+      by Ascánder Suárez and later continued by Pierre Weis and Michel Mauny.
+      In 1990, Xavier Leroy and Damien Doligez built a new implementation
+      called Caml Light that was based on a bytecode interpreter with a fast,
+      sequential garbage collector. Over the next few years useful libraries
+      appeared, such as Michel Mauny's syntax manipulation tools, and this
+      helped promote the use of Caml in education and research teams.</p><p id="idm259611199344">Xavier Leroy continued extending Caml Light with new features,
+      which resulted in the 1995 release of Caml Special Light. This improved
+      the executable efficiency significantly by adding a fast native code
+      compiler that made Caml's performance competitive with mainstream
+      languages such as C++. A module system inspired by Standard ML also
+      provided powerful facilities for abstraction and made larger-scale
+      programs easier to construct.</p><p id="idm259611198480">The modern OCaml emerged in 1996, when a powerful and elegant
+      object system was implemented by Didier Rémy and Jérôme Vouillon. This
+      object system was notable for supporting many common object-oriented
+      idioms in a statically type-safe way, whereas the same idioms required
+      runtime checks in languages such as C++ or Java. In 2000, Jacques
+      Garrigue extended OCaml with several new features such as polymorphic
+      methods, variants, and labeled and optional arguments.</p><p id="idm259611197152">The last decade has seen OCaml attract a significant user base,
+      and language improvements have been steadily added to support the
+      growing commercial and academic <span>codebases</span>. First-class modules,
+      Generalized Algebraic Data Types (GADTs), and dynamic linking have
+      improved the flexibility of the language. There is also fast native code
+      support for x86_64, ARM, PowerPC, and Sparc, making OCaml a good choice
+      for systems where resource usage, predictability, and performance all
+      matter.</p></section><section id="the-core-standard-library"><h1>The Core Standard Library</h1><p id="idm259611194640">A language on its own isn't enough. You also need a rich set of
+      libraries to base your applications on. A common source of frustration
+      for those learning OCaml is that the standard library that ships with
+      the compiler is limited, covering only a small subset of the
+      functionality you would expect from a general-purpose standard library.
+      That's because the standard library isn't a general-purpose tool; it was
+      developed for use in bootstrapping the compiler and is purposefully kept
+      small and simple.<a name="idm259611193840"></a><a name="idm259611192592"></a></p><p id="idm259611191216">Happily, in the world of open source software, nothing stops
+      alternative libraries from being written to supplement the
+      compiler-supplied standard library, and this is exactly what the Core
+      distribution is.</p><p id="idm259611190592">Jane Street, a company that has been using OCaml for more than a
+      decade, developed Core for its own internal use, but designed it from
+      the start with an eye toward being a general-purpose standard library.
+      Like the OCaml language itself, Core is engineered with correctness,
+      reliability, and performance in mind.</p><p id="idm259611189856">Core is distributed with syntax extensions that provide useful new
+      functionality to OCaml, and there are additional libraries such as the
+      Async network communications library that extend the reach of Core into
+      building complex distributed systems. All of these libraries are
+      distributed under a liberal Apache 2 license to permit free use in
+      hobby, academic, and commercial settings.</p></section><section id="the-ocaml-platform"><h1>The OCaml Platform</h1><p id="idm259611188064">Core is a comprehensive and effective standard library, but
+      there's much more OCaml software out there. A large community of
+      programmers has been using OCaml since its first release in 1996, and
+      has generated many useful libraries and tools. We'll introduce some of
+      these libraries in the course of the examples presented in the
+      book.<a name="idm259611187440"></a></p><p id="idm259611186064">The installation and management of these third-party libraries is made much easier via a
+        package management tool known as <a href="http://opam.ocaml.org/" target="_top">OPAM</a>. We'll explain more about OPAM
+        as the book unfolds, but it forms the basis of the Platform, which is a set of tools and
+        libraries that, along with the OCaml compiler, lets you build real-world applications
+        quickly and effectively.</p><p id="idm259611184672">We'll also use OPAM for installing the <span><strong>utop</strong></span> command-line interface. This is a modern
+      interactive tool that supports command history, macro expansion, module
+      completion, and other niceties that make it much more pleasant to work
+      with the language. We'll be using <span><strong>utop</strong></span> throughout the book to let you step
+      through the examples interactively.</p></section></section><section id="about-this-book"><h1>About This Book</h1><p id="idm259611181712"><span><em>Real World OCaml</em></span> is aimed at programmers who
+    have some experience with conventional programming languages, but not
+    specifically with statically typed functional programming. Depending on
+    your background, many of the concepts we cover will be new, including
+    traditional functional-programming techniques like higher-order functions
+    and immutable data types, as well as aspects of OCaml's powerful type and
+    module systems.</p><p id="idm259611180640">If you already know OCaml, this book may surprise you. Core redefines most of the standard
+      namespace to make better use of the OCaml module system and expose a number of powerful,
+      reusable data structures by default. Older OCaml code will still interoperate with Core, but
+      you may need to adapt it for maximal benefit. All the new code that we write uses Core, and we
+      believe the Core model is worth learning; it's been successfully used on large,
+      multimillion-line codebases and removes a big barrier to building sophisticated applications
+      in OCaml.</p><p id="idm259611179664">Code that uses only the traditional compiler standard library will
+    always exist, but there are other online resources for learning how that
+    works. <span><em>Real World OCaml</em></span> focuses on the techniques the
+    authors have used in their personal experience to construct scalable,
+    robust software systems.</p><section id="what-to-expect"><h1>What to Expect</h1><p id="idm259611177728"><span><em>Real World OCaml</em></span> is split into three
+      parts:</p><ul><li><p id="idm259611176576">Part I covers the language itself, opening with a guided tour
+          designed to provide a quick sketch of the language. Don't expect to
+          understand everything in the tour; it's meant to give you a taste of
+          many different aspects of the language, but the ideas covered there
+          will be explained in more depth in the chapters that follow.</p><p id="idm259611175824">After covering the core language, Part I then moves onto more
+          advanced features like modules, functors, and objects, which may
+          take some time to digest. Understanding these concepts is important,
+          though. These ideas will put you in good stead even beyond OCaml
+          when switching to other modern languages, many of which have drawn
+          inspiration from ML.</p></li><li><p id="idm259611174656">Part II builds on the basics by working through useful tools and techniques for
+            addressing common practical applications, from command-line parsing to asynchronous
+            network programming. Along the way, you'll see how some of the <span>concepts</span> from Part I are glued together into real
+            libraries and tools that combine different features of the language to good
+            effect.</p></li><li><p id="idm259611172864">Part III discusses OCaml's runtime system and compiler
+          toolchain. It is remarkably simple when compared to some other
+          language implementations (such as Java's or .NET's CLR). Reading
+          this part will enable you to build very-high-performance systems, or
+          to interface with C libraries. This is also where we talk about
+          profiling and debugging techniques using tools such as GNU <span><strong>gdb</strong></span>.</p></li></ul></section><section id="installation-instructions"><h1>Installation Instructions</h1><p id="idm259611170192"><span><em>Real World OCaml</em></span> uses some tools that we've
+      developed while writing this book. Some of these resulted in
+      improvements to the OCaml compiler, which means that you will need to
+      ensure that you have an up-to-date development environment (using the
+      4.01 version of the compiler). The installation process is largely automated through the OPAM package manager.
+      Instructions on how to it set up and what packages to install can be found at <a href="http://realworldocaml.org/install" target="_top">this Real World OCaml page</a>.<a name="idm259611168608"></a><a name="idm259611167744"></a></p><p id="idm259611166368">As of publication time, the Windows operating system is
+      unsupported by Core, and so only Mac OS X, Linux, FreeBSD, and OpenBSD
+      can be expected to work reliably. Please check the online installation
+      instructions for updates regarding Windows, or install a Linux virtual
+      machine to work through the book as it stands.<a name="idm259611165760"></a></p><p id="idm259611164384">This book is not intended as a reference manual. We aim to teach
+      you about the language and about libraries tools and techniques that
+      will help you be a more effective OCaml programmer. But it's no
+      replacement for API documentation or the OCaml manual and man pages. You
+      can find documentation for all of the libraries and tools referenced in
+      the book <a href="https://realworldocaml.org/doc" target="_top">online</a>.</p></section><section id="code-examples"><h1>Code Examples</h1><p id="idm259611162016">All of the code examples in this book are available freely online
+      under a public-domain-like license. You are most welcome to copy and use
+      any of the snippets as you see fit in your own code, without any
+      attribution or other restrictions on their use.<a name="idm259611161488"></a></p><p id="idm259611160112">The code repository is available online at <a href="https://github.com/realworldocaml/examples" target="_top">https://github.com/realworldocaml/examples</a>. Every code snippet in the book has a clickable
+        header that tells you the filename in that repository to find the source code, shell script,
+        or ancillary data file that the snippet was sourced from.</p><p><em><span>PROD: The above was written by the authors, the below is the
+      boilerplate. Probably want to edit the below as needed.—TOOLS</span></em></p><p id="idm259611158368">If you feel your use of code examples falls outside fair use or
+      the permission given above, feel free to contact us at
+      <code>&lt;<a href="mailto:permissions@oreilly.com">permissions@oreilly.com</a>&gt;</code>.</p></section></section><section id="idm259611157200"><h1>Safari® Books Online</h1><aside class="note"><h1>Note</h1><p id="idm259611156176">Safari Books Online (<a href="http://my.safaribooksonline.com/?portal=oreilly" target="_top">www.safaribooksonline.com</a>)
+      is an on-demand digital library that delivers expert <a href="http://www.safaribooksonline.com/content" target="_top">content</a> in both
+      book and video form from the world’s leading authors in technology and
+      business. Technology professionals, software developers, web designers,
+      and business and creative professionals use Safari Books Online as their
+      primary resource for research, problem solving, learning, and
+      certification training.</p></aside><p id="idm259611153184">Safari Books Online offers a range of <a href="http://www.safaribooksonline.com/subscriptions" target="_top">product mixes</a>
+    and pricing programs for <a href="http://www.safaribooksonline.com/organizations-teams" target="_top">organizations</a>,
+    <a href="http://www.safaribooksonline.com/government" target="_top">government
+    agencies</a>, and <a href="http://www.safaribooksonline.com/individuals" target="_top">individuals</a>.
+    Subscribers have access to thousands of books, training videos, and
+    prepublication manuscripts in one fully searchable database from
+    publishers like O’Reilly Media, Prentice Hall Professional, Addison-Wesley
+    Professional, Microsoft Press, Sams, Que, Peachpit Press, Focal Press,
+    Cisco Press, John Wiley &amp; Sons, Syngress, Morgan Kaufmann, IBM
+    Redbooks, Packt, Adobe Press, FT Press, Apress, Manning, New Riders,
+    McGraw-Hill, Jones &amp; Bartlett, Course Technology, and dozens <a href="http://www.safaribooksonline.com/publishers" target="_top">more</a>. For more
+    information about Safari Books Online, please visit us <a href="http://www.safaribooksonline.com/" target="_top">online</a>.</p></section><section id="idm259611146320"><h1>How to Contact Us</h1><p id="idm259611145680">Please address comments and questions concerning this book to the
+    publisher:</p><table summary="Simple list"><tr><td>O’Reilly Media, Inc.</td></tr><tr><td>1005 Gravenstein Highway North</td></tr><tr><td>Sebastopol, CA 95472</td></tr><tr><td>800-998-9938 (in the United States or Canada)</td></tr><tr><td>707-829-0515 (international or local)</td></tr><tr><td>707-829-0104 (fax)</td></tr></table><p id="idm259611142320">We have a web page for this book, where we list errata, examples,
+    and any additional information. You can access this page at:</p><table summary="Simple list"><tr><td><a href="http://oreil.ly/realworldOCaml" target="_top">http://oreil.ly/realworldOCaml</a></td></tr></table><p id="idm259611140576">To comment or ask technical questions about this book, send email
+    to:</p><table summary="Simple list"><tr><td><code>&lt;<a href="mailto:bookquestions@oreilly.com">bookquestions@oreilly.com</a>&gt;</code></td></tr></table><p id="idm259611138992">For more information about our books, courses, conferences, and
+    news, see our website at <a href="http://www.oreilly.com" target="_top">http://www.oreilly.com</a>.</p><p id="idm259611138032">Find us on Facebook: <a href="http://facebook.com/oreilly" target="_top">http://facebook.com/oreilly</a></p><p id="idm259611137296">Follow us on Twitter: <a href="http://twitter.com/oreillymedia" target="_top">http://twitter.com/oreillymedia</a></p><p id="idm259611136560">Watch us on YouTube: <a href="http://www.youtube.com/oreillymedia" target="_top">http://www.youtube.com/oreillymedia</a></p></section><section id="idm259611135648"><h1>Contributors</h1><p id="idm259611135008">We would especially like to thank the following individuals for
+    improving <span><em>Real World OCaml</em></span>:</p><ul><li><p id="idm259611133648">Leo White contributed greatly to the content and examples in
+        <a href="objects.html">Chapter 11, <i>Objects</i></a> and <a href="classes.html">Chapter 12, <i>Classes</i></a>.</p></li><li><p id="idm259611131840">Jeremy Yallop authored and documented the Ctypes library
+        described in <a href="foreign-function-interface.html">Chapter 19, <i>Foreign Function Interface</i></a>.</p></li><li><p id="idm259611130512">Stephen Weeks is responsible for much of the modular architecture behind Core, and his
+          extensive notes formed the basis of <a href="memory-representation-of-values.html">Chapter 20, <i>Memory Representation of Values</i></a> and
+            <a href="understanding-the-garbage-collector.html">Chapter 21, <i>Understanding the Garbage Collector</i></a>.</p></li><li><p id="idm259611128592">Jeremie Dimino, the author of <span><em>utop</em></span>, the interactive command-line
+          interface that is used throughout this book. We're particularly grateful for the changes
+          that he pushed through to make <span><em>utop</em></span> work better in the context of the
+          book. </p></li><li><p id="idm259611126816">The many people who collectively submitted over 2400 comments to online drafts of this
+          book, through whose efforts countless errors were found and fixed.</p></li></ul></section>
+
+
+                
+            </article>
+            
+            
+    
+                <nav class="pagination">
+                    
+                        <a rel="previous" href="index.html">
+                            &lt; Previous
+                        </a>
+                    
+                    
+                        <a rel="next" href="pt01.html">
+                            Next &gt;
+                        </a>
+                    
+                </nav>
+            
+            
+            
+            <footer class="footer">
+                <p>Copyright 2012-2013, Jason Hickey, Anil Madhavapeddy and Yaron Minsky. Licensed under <a href="http://creativecommons.org/licenses/by-nc-nd/3.0/us/">CC BY-NC-ND 3.0 US</a>.</p>
+            </footer>
+            
+        </div>
+    
+    </body>
+
+</html>
