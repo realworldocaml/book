@@ -17,13 +17,17 @@
             <article class="page">
                 <h1>Welcome</h1>
             
-                <p>Welcome to the online version of the Real World OCaml website.  This site provides a
-                   freely available copy of the book.  Read the <a href="/v1/en/html/index.html">First Edition HTML</a> here and if you enjoy it, consider purchasing a
+                <p>This site provides a freely available copy of Real World OCaml, available as <a href="/v1/en/html/index.html">First Edition HTML</a> here. If you enjoy it, consider purchasing a
                     <a href="http://www.amazon.com/Real-World-OCaml-Functional-programming/dp/144932391X/">print</a> or <a href="http://oreil.ly/realworldOCaml">eBook</a> copy to support it.
 
                 <p><b>Installation Instructions</b> are available at <a href="https://realworldocaml.org/install">https://realworldocaml.org/install</a>.  Please let us know of any problems there on the <a href="https://github.com/realworldocaml/book/issues">issue tracker</a> or simply submit a fix to the wiki.</p>
 
-                <p><b>Documentation</b> for the libraries used in this book are available at <a href="https://realworldocaml.org/doc">https://realworldocaml.org/doc</a>.</p>
+                <p><b>Documentation</b> is available at <a href="https://realworldocaml.org/doc">https://realworldocaml.org/doc</a> for the libraries used in the book.</p>
+
+                <a name="milestones"></a>
+                <h2>Milestones</h2>
+                  <p><ul>@MILESTONES@
+                  </ul></p>
 
                 <h2>News</h2>
                 <ul>
@@ -35,11 +39,6 @@
                  <li><i>17th June 2013:</i> Blog (Anil): <a href="http://anil.recoil.org/2013/06/17/real-world-ocaml-beta-available.html">Real World OCaml beta available</a>.</li>
                  <li><i>17th June 2013:</i> Public beta1 milestone released. (<a href="https://news.ycombinator.com/item?id=3641355">HN#1</a>, <a href="https://news.ycombinator.com/item?id=5893168">HN#2</a>, <a href="http://www.reddit.com/r/programming/comments/1gipea/first_public_beta_of_real_world_ocaml_book/">reddit#1</a>, <a href="http://www.reddit.com/r/ocaml/comments/1gil84/public_beta_of_real_world_ocaml/">reddit#2</a>).</li>
                 </ul>
-
-                <a name="milestones"></a>
-                <h2>Milestones</h2>
-                  <p><ul>@MILESTONES@
-                  </ul></p>
 
                 <a name="faq"></a>
                 <h1>FAQ</h1>
