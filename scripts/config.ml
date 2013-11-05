@@ -162,6 +162,7 @@ let external_reviewers =
    @ js_interns
 
 let is_public = function
+  | "v1" -> true
   | "beta3" -> true
   | _ -> false
 

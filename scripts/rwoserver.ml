@@ -25,8 +25,11 @@ let dataroot = "./fragments"
 
 let github_access_token_cookie = "github_access_token_ssl"
 
-let user = "ocamllabs"
-let repo = "rwo-comments"
+let user = "realworldocaml"
+let repo = "book"
+
+let doc_uri = Uri.of_string "https://ocaml.janestreet.com/ocaml-core/latest/doc/"
+let install_uri = Uri.of_string "https://ocaml.janestreet.com/ocaml-core/latest/doc/"
 
 let jar  = Lwt_main.run (Github_cookie_jar.init ())
 
@@ -86,14 +89,18 @@ module Comment = struct
       match a.milestone_title, b.milestone_title with
       |"trunk",_ -> -1
       |_,"trunk" -> 1
+      |"v1",_ -> 1
+      |_,"v1" -> -1
       |_ -> Pervasives.compare a.milestone_due_on b.milestone_due_on
     ) ms in
     print_endline "Known milestones\n";
     List.fold_left (fun acc m ->
       let open Github_t in
-      printf " %d: %s (%s)\n%!" m.milestone_number m.milestone_title m.milestone_description;
-      let access = Auth.who_has_access ~milestone:m.milestone_title in
-      (m.milestone_number,(m.milestone_title, m.milestone_description, access))::acc
+      if Config.is_public m.milestone_title then begin
+        printf " %d: %s (%s)\n%!" m.milestone_number m.milestone_title m.milestone_description;
+        let access = Auth.who_has_access ~milestone:m.milestone_title in
+        (m.milestone_number,(m.milestone_title, m.milestone_description, access))::acc
+      end else acc
     ) [] ms
 
   let all_milestones =
@@ -295,8 +302,10 @@ let callback con_id ?body req =
       let bits = Re_str.(split (regexp_string "/") path) in
       match bits with
       |[] -> Server.respond_string ~status:`OK ~body:Comment.index ()
-      |"media"::_ -> dispatch_static req (* No auth required for support files *)
-      |_::"media"::_ -> dispatch_static req (* No auth required for support files *)
+      | "install"::_ -> Server.respond_redirect ~uri:install_uri ()
+      | "doc"::_ -> Server.respond_redirect ~uri:doc_uri ()
+      | "media"::_ -> dispatch_static req (* No auth required for support files *)
+      | _::"media"::_ -> dispatch_static req (* No auth required for support files *)
       |milestone::_ when List.mem milestone Comment.all_milestones ->
         dispatch ~milestone req
       |_ -> Server.respond_not_found ()
@@ -305,9 +314,15 @@ let callback con_id ?body req =
   end
   |Some _ | None -> (* redirect to realworldocaml.org *)
     print_endline "redirecting to realworldocaml.org";
-    let uri = Uri.with_host (Request.uri req) (Some "realworldocaml.org") in
-    let uri = Uri.with_port uri (Some 443) in
-    Server.respond_redirect ~uri ()
+    let path = Uri.path (Request.uri req) in
+    let bits = Re_str.(split (regexp_string "/") path) in
+    match bits with
+    | "install"::_ -> Server.respond_redirect ~uri:install_uri ()
+    | "doc"::_ -> Server.respond_redirect ~uri:doc_uri ()
+    | _ ->
+      let uri = Uri.with_host (Request.uri req) (Some "realworldocaml.org") in
+      let uri = Uri.with_port uri (Some 443) in
+      Server.respond_redirect ~uri ()
 
 let _ =
   Sys.set_signal Sys.sigpipe Sys.Signal_ignore;
