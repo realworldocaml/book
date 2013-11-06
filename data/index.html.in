@@ -12,7 +12,14 @@
             <header class="header">
                 <h1><img src="media/img/cover.png" width="260" alt="OReilly" /></h1>
                 <p><b>Available in <a href="http://www.amazon.com/Real-World-OCaml-Functional-programming/dp/144932391X/">print</a> and <a href="http://oreil.ly/realworldOCaml">eBook!</a></b></p>
-                <p><a href="http://twitter.com/realworldocaml">@realworldocaml</a><br /><a href="http://twitter.com/avsm">@avsm</a><br /><a href="http://twitter.com/yminsky">@yminsky</a><br /><a href="https://plus.google.com/111219778721183890368">@hickey</a></p>
+                <p>
+              <img src="media/img/webicon-twitter-s.png" /> <a href="http://twitter.com/realworldocaml">@realworldocaml</a><br />
+              <img src="media/img/webicon-twitter-s.png" /> <a href="http://twitter.com/avsm">@avsm</a><br />
+              <img src="media/img/webicon-twitter-s.png" /> <a href="http://twitter.com/yminsky">@yminsky</a><br />
+              <img src="media/img/webicon-googleplus-s.png" /><a href="https://plus.google.com/111219778721183890368">@hickey</a>
+              <img src="media/img/webicon-github-s.png" /><a href="https://github.com/realworldocaml">sourcecode</a>
+              </p>
+     
             </header>
             <article class="page">
                 <h1>Welcome</h1>
