@@ -163,7 +163,6 @@ let external_reviewers =
 
 let is_public = function
   | "v1" -> true
-  | "beta3" -> true
   | _ -> false
 
 let allowed_users ~milestone = 
