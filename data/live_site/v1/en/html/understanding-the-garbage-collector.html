@@ -98,7 +98,7 @@
                 </ul>
             </nav>
             <header class="header">
-                <h1><a href="http://oreil.ly/realworldOCaml"><img src="../../media/img/cover.png" width="120" alt="Real World OCaml, by Yaron Minsky, Anil Madhavapeddy and Jason Hickey"></img></a></h1>
+                <h1><a href="http://oreil.ly/realworldOCaml"><img src="../../media/img/coversmall.png" width="120" alt="Real World OCaml, by Yaron Minsky, Anil Madhavapeddy and Jason Hickey"></img></a></h1>
                 <p><i>Buy in <a href="http://www.amazon.com/Real-World-OCaml-Functional-programming/dp/144932391X/">print</a> and <a href="http://oreil.ly/realworldOCaml">eBook.</a></i></p>
             </header>
         
@@ -108,77 +108,77 @@
                 
                 
 
-    <p id="idm146286891504">We've described the runtime format of individual OCaml variables earlier, in <a href="memory-representation-of-values.html">Chapter 20, <i>Memory Representation of Values</i></a>. When you execute your program, OCaml manages the
+    <p id="idm322806514672">We've described the runtime format of individual OCaml variables earlier, in <a href="memory-representation-of-values.html">Chapter 20, <i>Memory Representation of Values</i></a>. When you execute your program, OCaml manages the
     lifecycle of these variables by regularly scanning allocated values and freeing them when
     they're no longer needed. This in turn means that your applications don't need to manually
     implement memory management, and it greatly reduces the likelihood of memory leaks creeping into
-    your code.<a name="idm146286890288"></a></p><p id="idm146286888848">The OCaml runtime is a C library that provides routines that can be
+    your code.<a name="idm322806513456"></a></p><p id="idm322806512016">The OCaml runtime is a C library that provides routines that can be
   called from running OCaml programs. The runtime manages a
   <span><em>heap</em></span>, which is a collection of memory regions that it
   obtains from the operating system. The runtime uses this memory to hold
   <span><em>heap blocks</em></span> that it fills up with OCaml values in
-  response to allocation requests by the OCaml program.<a name="idm146286887424"></a><a name="idm146286886112"></a><a name="idm146286884816"></a></p><section id="mark-and-sweep-garbage-collection"><h1>Mark and Sweep Garbage Collection</h1><p id="idm146286882432">When there isn't enough memory available to satisfy an allocation request from the pool of
+  response to allocation requests by the OCaml program.<a name="idm322806510592"></a><a name="idm322806509280"></a><a name="idm322806507984"></a></p><section id="mark-and-sweep-garbage-collection"><h1>Mark and Sweep Garbage Collection</h1><p id="idm322806505600">When there isn't enough memory available to satisfy an allocation request from the pool of
       allocated heap blocks, the runtime system invokes the garbage collector (GC). An OCaml program
       can't explicitly free a value when it is done with it. Instead, the GC regularly determines
       which values are <span><em>live</em></span> and which values are <span><em>dead</em></span>,
       i.e., no longer in use. Dead values are collected and their memory made available for reuse by
-      the application.<a name="idm146286880896"></a><a name="idm146286879968"></a></p><p id="idm146286878512">The GC doesn't keep constant track of values as they are allocated and used. Instead, it
+      the application.<a name="idm322806504064"></a><a name="idm322806503136"></a></p><p id="idm322806501680">The GC doesn't keep constant track of values as they are allocated and used. Instead, it
       regularly scans them by starting from a set of <span><em>root</em></span> values that the
       application always has access to (such as the stack). The GC maintains a directed graph in
-      which heap blocks are nodes, and there is an edge from heap block <code>b1</code> to heap block <code>b2</code> if some field of <code>b1</code> is a pointer to <code>b2</code>.</p><p id="idm146286874752">All blocks reachable from the roots by following edges in the graph
+      which heap blocks are nodes, and there is an edge from heap block <code>b1</code> to heap block <code>b2</code> if some field of <code>b1</code> is a pointer to <code>b2</code>.</p><p id="idm322806497920">All blocks reachable from the roots by following edges in the graph
     must be retained, and unreachable blocks can be reused by the application.
     The algorithm used by OCaml to perform this heap traversal is commonly
     known as <span><em>mark and sweep</em></span> garbage collection, and we'll
-    explain it further now.</p></section><section id="generational-garbage-collection"><h1>Generational Garbage Collection</h1><p id="idm146286872608">The usual OCaml programming style involves allocating many small variables that are used
+    explain it further now.</p></section><section id="generational-garbage-collection"><h1>Generational Garbage Collection</h1><p id="idm322806495776">The usual OCaml programming style involves allocating many small variables that are used
       for a short period of time and then never accessed again. OCaml takes advantage of this fact
-      to improve performance by using a <span><em>generational</em></span> GC.<a name="idm146286871696"></a><a name="idm146286870784"></a></p><p id="idm146286869328">A generational GC maintains separate memory regions to hold blocks based on how long the
-      blocks have been live. OCaml's heap is split into two such regions:<a name="idm146286868896"></a></p><ul><li><p id="idm146286866960">A small, fixed-size <span><em>minor heap</em></span> where most
-        blocks are initially allocated</p></li><li><p id="idm146286865696">A larger, variable-size <span><em>major heap</em></span> for blocks that have been live
-          longer</p></li></ul><p id="idm146286864560">A typical functional programming style means that young blocks tend
+      to improve performance by using a <span><em>generational</em></span> GC.<a name="idm322806494864"></a><a name="idm322806493952"></a></p><p id="idm322806492496">A generational GC maintains separate memory regions to hold blocks based on how long the
+      blocks have been live. OCaml's heap is split into two such regions:<a name="idm322806492064"></a></p><ul><li><p id="idm322806490128">A small, fixed-size <span><em>minor heap</em></span> where most
+        blocks are initially allocated</p></li><li><p id="idm322806488864">A larger, variable-size <span><em>major heap</em></span> for blocks that have been live
+          longer</p></li></ul><p id="idm322806487728">A typical functional programming style means that young blocks tend
     to die young and old blocks tend to stay around for longer than young
     ones. This is often referred to as the <span><em>generational
-    hypothesis</em></span>.<a name="idm146286863696"></a></p><p id="idm146286862656">OCaml uses different memory layouts and garbage-collection algorithms for the major and
+    hypothesis</em></span>.<a name="idm322806486864"></a></p><p id="idm322806485824">OCaml uses different memory layouts and garbage-collection algorithms for the major and
       minor heaps to account for this generational difference. We'll explain how they differ in more
-      detail next.<a name="idm146286862192"></a><a name="idm146286861296"></a></p><section><h1><b>The Gc Module and OCAMLRUNPARAM</b></h1><p id="idm146286859184">OCaml provides several mechanisms to query and alter the behavior
+      detail next.<a name="idm322806485360"></a><a name="idm322806484464"></a></p><section><h1><b>The Gc Module and OCAMLRUNPARAM</b></h1><p id="idm322806482352">OCaml provides several mechanisms to query and alter the behavior
       of the runtime system. The <code>Gc</code> module
       provides this functionality from within OCaml code, and we'll frequently
       refer to it in the rest of the chapter. As with several other standard
       library modules, Core alters the <code>Gc</code>
       interface from the standard OCaml library. We'll assume that you've
       opened <code>Core.Std</code> in our
-      explanations.</p><p id="idm146286856432">You can also control the behavior of OCaml programs by setting the <code>OCAMLRUNPARAM</code> environment variable before launching your
+      explanations.</p><p id="idm322806479600">You can also control the behavior of OCaml programs by setting the <code>OCAMLRUNPARAM</code> environment variable before launching your
         application. This lets you set GC parameters without recompiling, for example to benchmark
         the effects of different settings. The format of <code>OCAMLRUNPARAM</code> is documented in the <a href="http://caml.inria.fr/pub/docs/manual-ocaml/manual024.html" target="_top">OCaml
-        manual</a>.</p></section></section><section id="the-fast-minor-heap"><h1>The Fast Minor Heap</h1><p id="idm146286852560">The minor heap is where most of your short-lived values are held. It
+        manual</a>.</p></section></section><section id="the-fast-minor-heap"><h1>The Fast Minor Heap</h1><p id="idm322806475728">The minor heap is where most of your short-lived values are held. It
     consists of one contiguous chunk of virtual memory containing a sequence
     of OCaml blocks. If there is space, allocating a new block is a fast,
     constant-time operation that requires just a couple of CPU
-    instructions.<a name="idm146286852000"></a><a name="idm146286850704"></a><a name="idm146286849392"></a><a name="idm146286848480"></a></p><p id="idm146286846784">To garbage-collect the minor heap, OCaml uses <span><em>copying collection</em></span> to
+    instructions.<a name="idm322806475168"></a><a name="idm322806473872"></a><a name="idm322806472560"></a><a name="idm322806471648"></a></p><p id="idm322806469952">To garbage-collect the minor heap, OCaml uses <span><em>copying collection</em></span> to
       move all live blocks in the minor heap to the major heap. This takes work proportional to the
       number of live blocks in the minor heap, which is typically small according to the
       generational hypothesis. The minor collection <span><em>stops the world</em></span> (that it,
       halts the application) while it runs, which is why it's so important that it complete quickly
-      to let the application resume running with minimal interruption.</p><section id="allocating-on-the-minor-heap"><h1>Allocating on the Minor Heap</h1><p id="idm146286844160">The minor heap is a contiguous chunk of virtual memory that is usually a few megabytes
-        in size so that it can be scanned quickly.<a name="idm146286843760"></a></p><div class="rwocode"><pre><code><pre>                &lt;---- size ----&gt;
+      to let the application resume running with minimal interruption.</p><section id="allocating-on-the-minor-heap"><h1>Allocating on the Minor Heap</h1><p id="idm322806467328">The minor heap is a contiguous chunk of virtual memory that is usually a few megabytes
+        in size so that it can be scanned quickly.<a name="idm322806466928"></a></p><div class="rwocode"><pre><code><pre>                &lt;---- size ----&gt;
  base --- start ---------------- end
           limit      ptr &lt;------
                           blocks
-</pre></code></pre><div class="rwocodeinfo">Diagram ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/gc/minor_heap.ascii">gc/minor_heap.ascii</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><div><div></div></div><p id="idm146286838896">The runtime stores the boundaries of the minor heap in two
+</pre></code></pre><div class="rwocodeinfo">Diagram ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/gc/minor_heap.ascii">gc/minor_heap.ascii</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><div><div></div></div><p id="idm322806462064">The runtime stores the boundaries of the minor heap in two
       pointers that delimit the start and end of the heap region (<code>caml_young_start</code> and <code>caml_young_end</code>, but we will drop the <code>caml_young</code> prefix for brevity). The <code>base</code> is the memory address returned by the
       system <code>malloc</code>, and <code>start</code> is aligned against the next nearest word
       boundary from <code>base</code> to make it easier
-      to store OCaml values.</p><p id="idm146286833616">In a fresh minor heap, the <code>limit</code> equals the <code>start</code>, and the current <code>ptr</code> will equal the <code>end</code>. <code>ptr</code>
+      to store OCaml values.</p><p id="idm322806456784">In a fresh minor heap, the <code>limit</code> equals the <code>start</code>, and the current <code>ptr</code> will equal the <code>end</code>. <code>ptr</code>
       decreases as blocks are allocated until it reaches <code>limit</code>, at which point a minor garbage
-      collection is triggered.</p><p id="idm146286829168">Allocating a block in the minor heap just requires <code>ptr</code> to be decremented by the size of the block (including the header) and a
+      collection is triggered.</p><p id="idm322806452336">Allocating a block in the minor heap just requires <code>ptr</code> to be decremented by the size of the block (including the header) and a
         check that it's not less than <code>limit</code>. If there isn't
         enough space left for the block without decrementing past <code>limit</code>, a minor garbage collection is triggered. This is a very fast check (with
-        no branching) on most CPU architectures.</p><p id="idm146286826480">You may wonder why <code>limit</code> is
+        no branching) on most CPU architectures.</p><p id="idm322806449648">You may wonder why <code>limit</code> is
       required at all, since it always seems to equal <code>start</code>. It's because the easiest way for the
       runtime to schedule a minor heap collection is by setting <code>limit</code> to equal <code>end</code>. The next allocation will never have
       enough space after this is done and will always trigger a garbage
       collection. There are various internal reasons for such early
       collections, such as handling pending UNIX signals, and they don't
-      ordinarily matter for application code.<a name="idm146286823152"></a></p><aside class="note"><h1>Setting the Size of the Minor Heap</h1><p id="idm146286821040">The default minor heap size in OCaml is normally 2 MB on 64-bit platforms, but this is
+      ordinarily matter for application code.<a name="idm322806446320"></a></p><aside class="note"><h1>Setting the Size of the Minor Heap</h1><p id="idm322806444208">The default minor heap size in OCaml is normally 2 MB on 64-bit platforms, but this is
           increased to 8 MB if you use Core (which generally prefers default settings that improve
           performance, but at the cost of a bigger memory profile). This setting can be overridden
           via the <code>s=&lt;words&gt;</code> argument to <code>OCAMLRUNPARAM</code>. You can change it after the program has started
@@ -187,96 +187,96 @@
    major_heap_increment = 1000448; space_overhead = 100; verbose = 0;
    max_overhead = 500; stack_limit = 1048576; allocation_policy = 0}
 </div># <span class="keyword5">Gc.</span>tune ~minor_heap_size<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword8">262144</span> <span class="keyword2">*</span> <span class="keyword8">2</span><span class="keyword2">)</span> <span class="keyword2">(</span><span class="keyword2">)</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : unit = ()
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/gc/tune.topscript">gc/tune.topscript</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146286810656">Changing the GC size dynamically will trigger an immediate minor
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/gc/tune.topscript">gc/tune.topscript</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322806433824">Changing the GC size dynamically will trigger an immediate minor
         heap collection. Note that Core increases the default minor heap size
         from the standard OCaml installation quite significantly, and you'll
         want to reduce this if running in very memory-constrained
-        environments.</p></aside></section></section><section id="the-long-lived-major-heap"><h1>The Long-Lived Major Heap</h1><p id="idm146286808640">The major heap is where the bulk of the longer-lived and larger
+        environments.</p></aside></section></section><section id="the-long-lived-major-heap"><h1>The Long-Lived Major Heap</h1><p id="idm322806431808">The major heap is where the bulk of the longer-lived and larger
     values in your program are stored. It consists of any number of
     noncontiguous chunks of virtual memory, each containing live blocks
     interspersed with regions of free memory. The runtime system maintains a
     free-list data structure that indexes all the free memory that it has
     allocated, and uses it to satisfy allocation requests for OCaml
-    blocks.<a name="idm146286807936"></a><a name="idm146286806608"></a><a name="idm146286805680"></a><a name="Hmh"></a><a name="idm146286802848"></a></p><p id="idm146286801152">The major heap is typically much larger than the minor heap and can
+    blocks.<a name="idm322806431104"></a><a name="idm322806429776"></a><a name="idm322806428848"></a><a name="Hmh"></a><a name="idm322806426016"></a></p><p id="idm322806424320">The major heap is typically much larger than the minor heap and can
     scale to gigabytes in size. It is cleaned via a mark-and-sweep garbage
-    collection algorithm that operates in several phases:</p><ul><li><p id="idm146286800048">The <span><em>mark</em></span> phase scans the block graph and
+    collection algorithm that operates in several phases:</p><ul><li><p id="idm322806423216">The <span><em>mark</em></span> phase scans the block graph and
         marks all live blocks by setting a bit in the tag of the block header
-        (known as the <span><em>color</em></span> tag).</p></li><li><p id="idm146286798304">The <span><em>sweep</em></span> phase sequentially scans the heap
-        chunks and identifies dead blocks that weren't marked earlier.</p></li><li><p id="idm146286797008">The <span><em>compact</em></span> phase relocates live blocks into a freshly allocated
+        (known as the <span><em>color</em></span> tag).</p></li><li><p id="idm322806421472">The <span><em>sweep</em></span> phase sequentially scans the heap
+        chunks and identifies dead blocks that weren't marked earlier.</p></li><li><p id="idm322806420176">The <span><em>compact</em></span> phase relocates live blocks into a freshly allocated
           heap to eliminate gaps in the free list. This prevents the fragmentation of heap blocks in
           long-running programs and normally occurs much less frequently than the mark and sweep
-            <span>phases</span>.</p></li></ul><p id="idm146286795040">A major garbage collection must also stop the world to ensure that blocks can be moved
+            <span>phases</span>.</p></li></ul><p id="idm322806418208">A major garbage collection must also stop the world to ensure that blocks can be moved
       around without this being observed by the live application. The mark-and-sweep phases run
       incrementally over slices of the heap to avoid pausing the application for long <span>periods</span> of time, and also precede each slice with a fast minor
       collection. Only the compaction phase touches all the memory in one go, and is a relatively
-      rare operation.</p><section id="allocating-on-the-major-heap"><h1>Allocating on the Major Heap</h1><p id="idm146286792640">The major heap consists of a singly linked list of contiguous memory chunks sorted in
+      rare operation.</p><section id="allocating-on-the-major-heap"><h1>Allocating on the Major Heap</h1><p id="idm322806415808">The major heap consists of a singly linked list of contiguous memory chunks sorted in
         increasing order of virtual address. Each chunk is a single memory region allocated via
           <span><em>malloc(3)</em></span> and consists of a header and data area which contains OCaml
-        heap chunks. A heap chunk header contains:<a name="idm146286791664"></a><a name="idm146286790768"></a></p><ul><li><p id="idm146286788832">The <span><em>malloc</em></span>ed virtual address of the memory region containing
-            the chunk</p></li><li><p id="idm146286787568">The size in bytes of the data area</p></li><li><p id="idm146286786752">An allocation size in bytes used during heap compaction to
-          merge small blocks to defragment the heap</p></li><li><p id="idm146286785872">A link to the next heap chunk in the list</p></li></ul><p id="idm146286785184">Each chunk's data area starts on a page boundary, and its size is a multiple of the page
+        heap chunks. A heap chunk header contains:<a name="idm322806414832"></a><a name="idm322806413936"></a></p><ul><li><p id="idm322806412000">The <span><em>malloc</em></span>ed virtual address of the memory region containing
+            the chunk</p></li><li><p id="idm322806410736">The size in bytes of the data area</p></li><li><p id="idm322806409920">An allocation size in bytes used during heap compaction to
+          merge small blocks to defragment the heap</p></li><li><p id="idm322806409040">A link to the next heap chunk in the list</p></li></ul><p id="idm322806408352">Each chunk's data area starts on a page boundary, and its size is a multiple of the page
         size (4 KB). It contains a contiguous sequence of heap blocks that can be as small as one or
         two 4 KB pages, but are usually allocated in 1 MB chunks (or 512 KB on 32-bit
-          architectures).<a name="idm146286784624"></a></p><aside class="note"><h1>Controlling Major Heap Growth</h1><p id="idm146286782512">The <code>Gc</code> module uses the
+          architectures).<a name="idm322806407792"></a></p><aside class="note"><h1>Controlling Major Heap Growth</h1><p id="idm322806405680">The <code>Gc</code> module uses the
         <code>major_heap_increment</code> value to
         control the major heap growth. This defines the number of words to add
         to the major heap per expansion and is the only memory allocation
         operation that the operating system observes from the OCaml runtime
-        after initial startup (since the minor is fixed in size).</p><p id="idm146286780480">If you anticipate allocating some large OCaml values or many small values in one go,
+        after initial startup (since the minor is fixed in size).</p><p id="idm322806403648">If you anticipate allocating some large OCaml values or many small values in one go,
           then setting the heap increment to a larger value will improve performance by reducing the
           amount of heap resizing required in order to satisfy the allocation requests. A small
           increment may result in lots of smaller heap chunks spread across different regions of
           virtual memory that require more housekeeping in the OCaml runtime to keep track of
           them:</p><div class="rwocode"><pre><code># <span class="keyword5">Gc.</span>tune ~major_heap_increment<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword8">1000448</span> <span class="keyword2">*</span> <span class="keyword8">4</span><span class="keyword2">)</span> <span class="keyword2">(</span><span class="keyword2">)</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : unit = ()
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/gc/tune.topscript">gc/tune.topscript</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></aside><p id="idm146286775552">Allocating an OCaml value on the major heap first checks the free
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/gc/tune.topscript">gc/tune.topscript</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></aside><p id="idm322806398720">Allocating an OCaml value on the major heap first checks the free
       list of blocks for a suitable region to place it. If there isn't enough
       room on the free list, the runtime expands the major heap by allocating
       a fresh heap chunk that will be large enough. That chunk is then added
       to the free list, and the free list is checked again (and this time will
-      definitely succeed).</p><p id="idm146286774752">Remember that most allocations to the major heap will go via the
+      definitely succeed).</p><p id="idm322806397920">Remember that most allocations to the major heap will go via the
       minor heap and only be promoted if they are still used by the program
       after a minor collection. The one exception to this is for values larger
       than 256 words (that is, 2 KB on 64-bit platforms). These will be
       allocated directly on the major heap, since an allocation on the minor
       heap would likely trigger an immediate collection and copy it to the
-      major heap anyway.</p></section><section id="memory-allocation-strategies"><h1>Memory Allocation Strategies</h1><p id="idm146286772832">The major heap does its best to manage memory allocation as
+      major heap anyway.</p></section><section id="memory-allocation-strategies"><h1>Memory Allocation Strategies</h1><p id="idm322806396000">The major heap does its best to manage memory allocation as
       efficiently as possible and relies on heap compaction to ensure that
       memory stays contiguous and unfragmented. The default allocation policy
       normally works fine for most applications, but it's worth bearing in
-      mind that there are other options, too.<a name="idm146286772240"></a><a name="idm146286770912"></a></p><p id="idm146286769472">The free list of blocks is always checked first when allocating a
+      mind that there are other options, too.<a name="idm322806395408"></a><a name="idm322806394080"></a></p><p id="idm322806392640">The free list of blocks is always checked first when allocating a
       new block in the major heap. The default free list search is called
       <span><em>next-fit allocation</em></span>, with an alternative
-      <span><em>first-fit</em></span> algorithm also available.<a name="idm146286768176"></a><a name="idm146286767264"></a></p><section id="next-fit-allocation"><h1>Next-fit allocation</h1><p id="idm146286765296">Next-fit allocation keeps a pointer to the block in the free list that was most
+      <span><em>first-fit</em></span> algorithm also available.<a name="idm322806391344"></a><a name="idm322806390432"></a></p><section id="next-fit-allocation"><h1>Next-fit allocation</h1><p id="idm322806388464">Next-fit allocation keeps a pointer to the block in the free list that was most
           recently used to satisfy a request. When a new request comes in, the allocator searches
           from the next block to the end of the free list, and then from the beginning of the free
-          list up to that block.</p><p id="idm146286764592">Next-fit allocation is the default allocation strategy. It's
+          list up to that block.</p><p id="idm322806387760">Next-fit allocation is the default allocation strategy. It's
         quite a cheap allocation mechanism, since the same heap chunk can be
         reused across allocation requests until it runs out. This in turn
         means that there is good memory locality to use CPU caches
-        better.</p></section><section id="first-fit-allocation"><h1>First-fit allocation</h1><p id="idm146286762848">If your program allocates values of many varied sizes, you may sometimes find that
+        better.</p></section><section id="first-fit-allocation"><h1>First-fit allocation</h1><p id="idm322806386016">If your program allocates values of many varied sizes, you may sometimes find that
           your free list becomes fragmented. In this situation, the GC is forced to perform an
           expensive compaction despite there being free chunks, since none of the chunks alone are
-          big enough to satisfy the request.</p><p id="idm146286762128">First-fit allocation focuses on reducing memory fragmentation
+          big enough to satisfy the request.</p><p id="idm322806385296">First-fit allocation focuses on reducing memory fragmentation
         (and hence the number of compactions), but at the expense of slower
         memory allocation. Every allocation scans the free list from the
         beginning for a suitable free chunk, instead of reusing the most
-        recent heap chunk as the next-fit allocator does.<a name="idm146286761520"></a></p><p id="idm146286760080">For some workloads that need more real-time behavior under load, the reduction in the
-          frequency of heap compaction will outweigh the extra allocation cost.</p><aside class="note"><h1>Controlling the Heap Allocation Policy</h1><p id="idm146286758832">You can set the heap allocation policy via the <code>Gc.allocation_policy</code> field. A value of
+        recent heap chunk as the next-fit allocator does.<a name="idm322806384688"></a></p><p id="idm322806383248">For some workloads that need more real-time behavior under load, the reduction in the
+          frequency of heap compaction will outweigh the extra allocation cost.</p><aside class="note"><h1>Controlling the Heap Allocation Policy</h1><p id="idm322806382000">You can set the heap allocation policy via the <code>Gc.allocation_policy</code> field. A value of
           <code>0</code> (the default) sets it to
           next-fit, and <code>1</code> to the first-fit
-          allocator.</p><p id="idm146286756352">The same behavior can be controlled at runtime by setting
-          <code>a=0</code> or <code>a=1</code> in <code>OCAMLRUNPARAM</code>.</p></aside></section></section><section id="marking-and-scanning-the-heap"><h1>Marking and Scanning the Heap</h1><p id="idm146286752592">The marking process can take a long time to run over the complete
+          allocator.</p><p id="idm322806379520">The same behavior can be controlled at runtime by setting
+          <code>a=0</code> or <code>a=1</code> in <code>OCAMLRUNPARAM</code>.</p></aside></section></section><section id="marking-and-scanning-the-heap"><h1>Marking and Scanning the Heap</h1><p id="idm322806375760">The marking process can take a long time to run over the complete
       major heap and has to pause the main application while it's active. It
       therefore runs incrementally by marking the heap in
       <span><em>slices</em></span>. Each value in the heap has a 2-bit
       <span><em>color</em></span> field in its header that is used to store
       information about whether the value has been marked so that the GC can
-      resume easily between slices.<a name="idm146286751120"></a></p><div id="idm146286749680"><p><b>Table 21.1. Tag color statuses</b></p><div><table summary="Tag color statuses"><thead><tr><th>Tag color</th><th>Block status</th></tr></thead><tbody><tr><td>Blue</td><td>On the free list and not currently in use</td></tr><tr><td>White (during marking)</td><td>Not reached yet, but possibly reachable</td></tr><tr><td>White (during sweeping)</td><td>Unreachable and can be freed</td></tr><tr><td>Gray</td><td>Reachable, but its fields have not been scanned</td></tr><tr><td>Black</td><td>Reachable, and its fields have been scanned</td></tr></tbody></table></div></div><br><p id="idm146286739360">The color tags in the value headers store most of the state of the
+      resume easily between slices.<a name="idm322806374288"></a></p><div id="idm322806372848"><p><b>Table 21.1. Tag color statuses</b></p><div><table summary="Tag color statuses"><thead><tr><th>Tag color</th><th>Block status</th></tr></thead><tbody><tr><td>Blue</td><td>On the free list and not currently in use</td></tr><tr><td>White (during marking)</td><td>Not reached yet, but possibly reachable</td></tr><tr><td>White (during sweeping)</td><td>Unreachable and can be freed</td></tr><tr><td>Gray</td><td>Reachable, but its fields have not been scanned</td></tr><tr><td>Black</td><td>Reachable, and its fields have been scanned</td></tr></tbody></table></div></div><br><p id="idm322806362528">The color tags in the value headers store most of the state of the
       marking process, allowing it to be paused and resumed later. The GC and
       application alternate between marking a slice of the major heap and
       actually getting on with executing the program logic. The OCaml runtime
       calculates a sensible value for the size of each major heap slice based
-      on the rate of allocation and available memory.</p><p id="idm146286738544">The marking process starts with a set of <span><em>root</em></span>
+      on the rate of allocation and available memory.</p><p id="idm322806361712">The marking process starts with a set of <span><em>root</em></span>
       values that are always live (such as the application stack). All values
       on the heap are initially marked as white values that are possibly
       reachable but haven't been scanned yet. It recursively follows all the
@@ -284,67 +284,67 @@
       encountered white blocks onto an intermediate stack of <span><em>gray
       values</em></span> while it follows their fields. When a gray value's
       fields have all been followed, it is popped off the stack and colored
-      black.<a name="idm146286736912"></a><a name="idm146286736016"></a></p><p id="idm146286734992">This process is repeated until the gray value stack is empty and
+      black.<a name="idm322806360080"></a><a name="idm322806359184"></a></p><p id="idm322806358160">This process is repeated until the gray value stack is empty and
       there are no further values to mark. There's one important edge case in
       this process, though. The gray value stack can only grow to a certain
       size, after which the GC can no longer recurse into intermediate values
       since it has nowhere to store them while it follows their fields. If
       this happens, the heap is marked as <span><em>impure</em></span> and a
       more expensive check is initiated once the existing gray values have
-      been processed.<a name="idm146286733808"></a></p><p id="idm146286732784">To mark an impure heap, the GC first marks it as pure and walks
+      been processed.<a name="idm322806356976"></a></p><p id="idm322806355952">To mark an impure heap, the GC first marks it as pure and walks
       through the entire heap block-by-block in increasing order of memory
       address. If it finds a gray block, it adds it to the gray list and
       recursively marks it using the usual strategy for a pure heap. Once the
       scan of the complete heap is finished, the mark phase checks again
       whether the heap has again become impure and repeats the scan until it
       is pure again. These full-heap scans will continue until a successful
-      scan completes without overflowing the gray list.<a name="idm146286731952"></a></p><aside class="note"><h1>Controlling Major Heap Collections</h1><p id="idm146286729824">You can trigger a single slice of the major GC via the <code>major_slice</code> call. This performs a minor
+      scan completes without overflowing the gray list.<a name="idm322806355120"></a></p><aside class="note"><h1>Controlling Major Heap Collections</h1><p id="idm322806352992">You can trigger a single slice of the major GC via the <code>major_slice</code> call. This performs a minor
         collection first, and then a single slice. The size of the slice is
         normally automatically computed by the GC to an appropriate value and
         returns this value so that you can modify it in future calls if
         necessary:</p><div class="rwocode"><pre><code># <span class="keyword5">Gc.</span>major_slice <span class="keyword8">0</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 280015
 </div># <span class="keyword5">Gc.</span>full_major <span class="keyword2">(</span><span class="keyword2">)</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : unit = ()
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/gc/tune.topscript">gc/tune.topscript</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146286722752">The <code>space_overhead</code> setting
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/gc/tune.topscript">gc/tune.topscript</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322806345920">The <code>space_overhead</code> setting
         controls how aggressive the GC is about setting the slice size to a
         large size. This represents the proportion of memory used for live
         data that will be &quot;wasted&quot; because the GC doesn't immediately collect
         unreachable blocks. Core defaults this to <code>100</code> to reflect a typical system that isn't
         overly memory-constrained. Set this even higher if you have lots of
         memory, or lower to cause the GC to work harder and collect blocks
-        faster at the expense of using more CPU time.</p></aside></br></section><section id="heap-compaction"><h1>Heap Compaction</h1><p id="idm146286719376">After a certain number of major GC cycles have completed, the heap
+        faster at the expense of using more CPU time.</p></aside></br></section><section id="heap-compaction"><h1>Heap Compaction</h1><p id="idm322806342544">After a certain number of major GC cycles have completed, the heap
       may begin to be fragmented due to values being deallocated out of order
       from how they were allocated. This makes it harder for the GC to find a
       contiguous block of memory for fresh allocations, which in turn would
-      require the heap to be grown unnecessarily.<a name="idm146286718768"></a><a name="idm146286717456"></a><a name="idm146286716560"></a></p><p id="idm146286715136">The heap compaction cycle avoids this by relocating all the values in the major heap
+      require the heap to be grown unnecessarily.<a name="idm322806341936"></a><a name="idm322806340624"></a><a name="idm322806339728"></a></p><p id="idm322806338304">The heap compaction cycle avoids this by relocating all the values in the major heap
         into a fresh heap that places them all contiguously in memory again. A naive implementation
         of the algorithm would require extra memory to store the new heap, but OCaml performs the
-        compaction in place within the existing heap.</p><aside class="note"><h1>Controlling Frequency of Compactions</h1><p id="idm146286713712">The <code>max_overhead</code> setting in
+        compaction in place within the existing heap.</p><aside class="note"><h1>Controlling Frequency of Compactions</h1><p id="idm322806336880">The <code>max_overhead</code> setting in
         the <code>Gc</code> module defines the
         connection between free memory and allocated memory after which
-        compaction is activated.</p><p id="idm146286711888">A value of <code>0</code> triggers a
+        compaction is activated.</p><p id="idm322806335056">A value of <code>0</code> triggers a
         compaction after every major garbage collection cycle, whereas the
         maximum value of <code>1000000</code> disables
         heap compaction completely. The default settings should be fine unless
         you have unusual allocation patterns that are causing a
         higher-than-usual rate of compactions:</p><div class="rwocode"><pre><code># <span class="keyword5">Gc.</span>tune ~max_overhead<span class="keyword2">:</span><span class="keyword8">0</span> <span class="keyword2">(</span><span class="keyword2">)</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : unit = ()
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/gc/tune.topscript">gc/tune.topscript</a> , continued (part 3) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></aside></section><section id="inter-generational-pointers"><h1>Intergenerational Pointers</h1><p id="idm146286704816">One complexity of generational collection arises from the fact
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/gc/tune.topscript">gc/tune.topscript</a> , continued (part 3) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></aside></section><section id="inter-generational-pointers"><h1>Intergenerational Pointers</h1><p id="idm322806327984">One complexity of generational collection arises from the fact
       that minor heap sweeps are much more frequent than major heap
       collections. In order to know which blocks in the minor heap are live,
       the collector must track which minor-heap blocks are directly pointed to
       by major-heap blocks. Without this information, each minor collection
-      would also require scanning the much larger major heap.<a name="idm146286704128"></a><a name="idm146286702816"></a><a name="idm146286701904"></a></p><p id="idm146286700464">OCaml maintains a set of such <span><em>intergenerational
+      would also require scanning the much larger major heap.<a name="idm322806327296"></a><a name="idm322806325984"></a><a name="idm322806325072"></a></p><p id="idm322806323632">OCaml maintains a set of such <span><em>intergenerational
       pointers</em></span> to avoid this dependency between a major and minor
       heap collection. The compiler introduces a write barrier to update this
       so-called <span><em>remembered set</em></span> whenever a major-heap
-      block is modified to point at a minor-heap block.<a name="idm146286699104"></a><a name="idm146286698208"></a></p><section id="the-mutable-write-barrier"><h1>The mutable write barrier</h1><p id="idm146286696256">The write barrier can have profound implications for the
+      block is modified to point at a minor-heap block.<a name="idm322806322272"></a><a name="idm322806321376"></a></p><section id="the-mutable-write-barrier"><h1>The mutable write barrier</h1><p id="idm322806319424">The write barrier can have profound implications for the
         structure of your code. It's one of the reasons using immutable data
         structures and allocating a fresh copy with changes can sometimes be
-        faster than mutating a record in place.</p><p id="idm146286695600">The OCaml compiler keeps track of any mutable types and adds a call to the runtime
+        faster than mutating a record in place.</p><p id="idm322806318768">The OCaml compiler keeps track of any mutable types and adds a call to the runtime
             <code>caml_modify</code> function before making the change. This
           checks the location of the target write and the value it's being changed to, and ensures
           that the remembered set is consistent. Although the write barrier is reasonably efficient,
           it can sometimes be slower than simply allocating a fresh value on the fast minor heap and
-          doing some extra minor collections.</p><p id="idm146286694080">Let's see this for ourselves with a simple test program. You'll
+          doing some extra minor collections.</p><p id="idm322806317248">Let's see this for ourselves with a simple test program. You'll
         need to install the Core benchmarking suite via <code>opam install core_bench</code> before you compile
         this code:</p><div class="rwocode"><pre><code><span class="keyword1">open</span> <span class="keyword5">Core.Std
 </span><span class="keyword1">open</span> <span class="keyword5">Core_bench.Std
@@ -376,43 +376,43 @@
     <span class="keyword5">Bench.</span><span class="keyword5">Test.</span>create ~name<span class="keyword2">:</span><span class="keyword7">&quot;immutable&quot;</span>
       <span class="keyword2">(</span><span class="keyword1">fun</span> <span class="keyword2">(</span><span class="keyword2">)</span> -<span class="keyword2">&gt;</span> test_immutable <span class="keyword2">{</span> iters2<span class="keyword2">=</span>iters<span class="keyword2">;</span> count2<span class="keyword2">=</span><span class="keyword8">0</span>.<span class="keyword8">0</span> <span class="keyword2">}</span><span class="keyword2">)</span>
   <span class="keyword2">]</span> <span class="keyword4">in</span>
-  <span class="keyword5">Bench.</span>make_command tests <span class="keyword2">|</span><span class="keyword2">&gt;</span> <span class="keyword5">Command.</span>run</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/gc/barrier_bench.ml">gc/barrier_bench.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146286690480">This program defines a type <code>t1</code> that is mutable and <code>t2</code> that is immutable. The benchmark loop
+  <span class="keyword5">Bench.</span>make_command tests <span class="keyword2">|</span><span class="keyword2">&gt;</span> <span class="keyword5">Command.</span>run</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/gc/barrier_bench.ml">gc/barrier_bench.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322806313648">This program defines a type <code>t1</code> that is mutable and <code>t2</code> that is immutable. The benchmark loop
         iterates over both fields and increments a counter. Compile and
         execute this with some extra options to show the amount of garbage
         collection occurring:</p><div class="rwocode"><pre><code><div class="highlight"><span class="gp">$</span> corebuild -pkg core_bench barrier_bench.native
 </div><div class="highlight"><span class="gp">$</span> ./barrier_bench.native -ascii name alloc
-</div><div class="rwocodeout">Estimated testing time 20s (change using -quota SECS).</div><div class="rwocodeout">                                                                   </div><div class="rwocodeout">  Name         Time/Run       Minor   Major   Promoted   % of max  </div><div class="rwocodeout"> ----------- ----------- ----------- ------- ---------- ---------- </div><div class="rwocodeout">  mutable     4_862_333   2_000_005    9.58       9.58     100.00  </div><div class="rwocodeout">  immutable   4_558_309   5_000_006    0.56       0.56      93.75  </div><div class="rwocodeout">                                                                   </div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/gc/run_barrier_bench.out">gc/run_barrier_bench.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146286679360">There is a stark space/time trade-off here. The mutable version takes significantly
+</div><div class="rwocodeout">Estimated testing time 20s (change using -quota SECS).</div><div class="rwocodeout">                                                                   </div><div class="rwocodeout">  Name         Time/Run       Minor   Major   Promoted   % of max  </div><div class="rwocodeout"> ----------- ----------- ----------- ------- ---------- ---------- </div><div class="rwocodeout">  mutable     4_862_333   2_000_005    9.58       9.58     100.00  </div><div class="rwocodeout">  immutable   4_558_309   5_000_006    0.56       0.56      93.75  </div><div class="rwocodeout">                                                                   </div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/gc/run_barrier_bench.out">gc/run_barrier_bench.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322806302528">There is a stark space/time trade-off here. The mutable version takes significantly
           longer to complete than the immutable one but allocates many fewer minor-heap words than
           the immutable version. Minor allocation in OCaml is very fast, and so it is often better
           to use immutable data structures in preference to the more conventional mutable versions.
           On the other hand, if you only rarely mutate a value, it can be faster to take the
-          write-barrier hit and not allocate at all.</p><p id="idm146286678448">The only way to know for sure is to benchmark your program under real-world scenarios
+          write-barrier hit and not allocate at all.</p><p id="idm322806301616">The only way to know for sure is to benchmark your program under real-world scenarios
           using <code>Core_bench</code> and experiment with the trade-offs.
           The command-line benchmark binaries have a number of useful options that affect garbage
           collection behavior:</p><div class="rwocode"><pre><code><div class="highlight"><span class="gp">$</span> ./barrier_bench.native -help
-</div><div class="rwocodeout">Benchmark for mutable, immutable</div><div class="rwocodeout"> </div><div class="rwocodeout">  barrier_bench.native [COLUMN ...]</div><div class="rwocodeout"> </div><div class="rwocodeout">Columns that can be specified are:</div><div class="rwocodeout">	name       - Name of the test.</div><div class="rwocodeout">	cycles     - Number of CPU cycles (RDTSC) taken.</div><div class="rwocodeout">	time       - Number of nano secs taken.</div><div class="rwocodeout">	confidence - 95% confidence interval and R^2 error for predictors.</div><div class="rwocodeout">	alloc      - Allocation of major, minor and promoted words.</div><div class="rwocodeout">	gc         - Show major and minor collections per 1000 runs.</div><div class="rwocodeout">	percentage - Relative execution time as a percentage.</div><div class="rwocodeout">	speedup    - Relative execution cost as a speedup.</div><div class="rwocodeout">	samples    - Number of samples collected for profiling.</div><div class="rwocodeout"> </div><div class="rwocodeout">R^2 is the fraction of the variance of the responder (such as runtime)</div><div class="rwocodeout">that is accounted for by the predictors (such as number of runs).</div><div class="rwocodeout">More informally, it describes how good a fit we're getting, with</div><div class="rwocodeout">R^2 = 1 indicating a perfect fit and R^2 = 0 indicating a horrible</div><div class="rwocodeout">fit.  Because we expect runtime to be very highly correlated with our</div><div class="rwocodeout">predictors, values very close to 1 are typical; a value less than 0.99</div><div class="rwocodeout">should cause some suspicion, and a value less than 0.9 probably</div><div class="rwocodeout">indicates either a shortage of data or that the data is erroneous or</div><div class="rwocodeout">peculiar in some way.</div><div class="rwocodeout">Also see: http://en.wikipedia.org/wiki/Coefficient_of_determination</div><div class="rwocodeout"> </div><div class="rwocodeout">GC stats indicate how many collections or compactions happen per 1000</div><div class="rwocodeout">runs of the benchmarked function.</div><div class="rwocodeout"> </div><div class="rwocodeout">The following columns will be displayed by default:</div><div class="rwocodeout">	name time +percentage</div><div class="rwocodeout"> </div><div class="rwocodeout">By default, columns that have no values are suppressed. To force</div><div class="rwocodeout">displaying empty columns, prefix the column name with a '+'.</div><div class="rwocodeout"> </div><div class="rwocodeout">Experimental feature: Internally, the library does a linear</div><div class="rwocodeout">regression between the time taken as the predicted value and the</div><div class="rwocodeout">number of runs as the predictor.  This can be changed to include</div><div class="rwocodeout">one or more of the additional predictors below, using the</div><div class="rwocodeout">flag called &quot;-predictors&quot;:</div><div class="rwocodeout">  m : the number of minor collections</div><div class="rwocodeout">  c : the number of compactions</div><div class="rwocodeout"> </div><div class="rwocodeout"> </div><div class="rwocodeout">=== flags ===</div><div class="rwocodeout"> </div><div class="rwocodeout">  [-ascii]             Display data in simple ascii based tables.</div><div class="rwocodeout">  [-ci-absolute]       Display 95% confidence interval in absolute numbers</div><div class="rwocodeout">  [-clear-columns]     Don't display default columns. Only show user specified</div><div class="rwocodeout">                       ones.</div><div class="rwocodeout">  [-display STYLE]     Table style (short, tall, line, blank or column). Default</div><div class="rwocodeout">                       short.</div><div class="rwocodeout">  [-fork]              Fork and run each benchmark in separate child-process</div><div class="rwocodeout">  [-geometric SCALE]   Use geometric sampling. (default 1.01)</div><div class="rwocodeout">  [-linear INCREMENT]  Use linear sampling to explore number of runs, example 1.</div><div class="rwocodeout">  [-load FILE]         Analyze previously saved data files and</div><div class="rwocodeout">                       don't run tests. [-load] can be specified multiple times.</div><div class="rwocodeout">  [-no-compactions]    Disable GC compactions.</div><div class="rwocodeout">  [-predictors m,c]    Include additional predictors in regression (see help).</div><div class="rwocodeout">  [-quota SECS]        Time quota allowed per test (default 10s).</div><div class="rwocodeout">  [-save]              Save benchmark data to &lt;test name&gt;.txt files.</div><div class="rwocodeout">  [-stabilize-gc]      Stabilize GC between each sample capture.</div><div class="rwocodeout">  [-v]                 High verbosity level.</div><div class="rwocodeout">  [-width WIDTH]       width limit on column display (default 170).</div><div class="rwocodeout">  [-build-info]        print info about this build and exit</div><div class="rwocodeout">  [-version]           print the version of this build and exit</div><div class="rwocodeout">  [-help]              print this help text and exit</div><div class="rwocodeout">                       (alias: -?)</div><div class="rwocodeout"> </div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/gc/show_barrier_bench_help.out">gc/show_barrier_bench_help.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146286639088">The <code>-no-compactions</code> and <code>-stabilize-gc</code> options can help force a situation where your application has
+</div><div class="rwocodeout">Benchmark for mutable, immutable</div><div class="rwocodeout"> </div><div class="rwocodeout">  barrier_bench.native [COLUMN ...]</div><div class="rwocodeout"> </div><div class="rwocodeout">Columns that can be specified are:</div><div class="rwocodeout">	name       - Name of the test.</div><div class="rwocodeout">	cycles     - Number of CPU cycles (RDTSC) taken.</div><div class="rwocodeout">	time       - Number of nano secs taken.</div><div class="rwocodeout">	confidence - 95% confidence interval and R^2 error for predictors.</div><div class="rwocodeout">	alloc      - Allocation of major, minor and promoted words.</div><div class="rwocodeout">	gc         - Show major and minor collections per 1000 runs.</div><div class="rwocodeout">	percentage - Relative execution time as a percentage.</div><div class="rwocodeout">	speedup    - Relative execution cost as a speedup.</div><div class="rwocodeout">	samples    - Number of samples collected for profiling.</div><div class="rwocodeout"> </div><div class="rwocodeout">R^2 is the fraction of the variance of the responder (such as runtime)</div><div class="rwocodeout">that is accounted for by the predictors (such as number of runs).</div><div class="rwocodeout">More informally, it describes how good a fit we're getting, with</div><div class="rwocodeout">R^2 = 1 indicating a perfect fit and R^2 = 0 indicating a horrible</div><div class="rwocodeout">fit.  Because we expect runtime to be very highly correlated with our</div><div class="rwocodeout">predictors, values very close to 1 are typical; a value less than 0.99</div><div class="rwocodeout">should cause some suspicion, and a value less than 0.9 probably</div><div class="rwocodeout">indicates either a shortage of data or that the data is erroneous or</div><div class="rwocodeout">peculiar in some way.</div><div class="rwocodeout">Also see: http://en.wikipedia.org/wiki/Coefficient_of_determination</div><div class="rwocodeout"> </div><div class="rwocodeout">GC stats indicate how many collections or compactions happen per 1000</div><div class="rwocodeout">runs of the benchmarked function.</div><div class="rwocodeout"> </div><div class="rwocodeout">The following columns will be displayed by default:</div><div class="rwocodeout">	name time +percentage</div><div class="rwocodeout"> </div><div class="rwocodeout">By default, columns that have no values are suppressed. To force</div><div class="rwocodeout">displaying empty columns, prefix the column name with a '+'.</div><div class="rwocodeout"> </div><div class="rwocodeout">Experimental feature: Internally, the library does a linear</div><div class="rwocodeout">regression between the time taken as the predicted value and the</div><div class="rwocodeout">number of runs as the predictor.  This can be changed to include</div><div class="rwocodeout">one or more of the additional predictors below, using the</div><div class="rwocodeout">flag called &quot;-predictors&quot;:</div><div class="rwocodeout">  m : the number of minor collections</div><div class="rwocodeout">  c : the number of compactions</div><div class="rwocodeout"> </div><div class="rwocodeout"> </div><div class="rwocodeout">=== flags ===</div><div class="rwocodeout"> </div><div class="rwocodeout">  [-ascii]             Display data in simple ascii based tables.</div><div class="rwocodeout">  [-ci-absolute]       Display 95% confidence interval in absolute numbers</div><div class="rwocodeout">  [-clear-columns]     Don't display default columns. Only show user specified</div><div class="rwocodeout">                       ones.</div><div class="rwocodeout">  [-display STYLE]     Table style (short, tall, line, blank or column). Default</div><div class="rwocodeout">                       short.</div><div class="rwocodeout">  [-fork]              Fork and run each benchmark in separate child-process</div><div class="rwocodeout">  [-geometric SCALE]   Use geometric sampling. (default 1.01)</div><div class="rwocodeout">  [-linear INCREMENT]  Use linear sampling to explore number of runs, example 1.</div><div class="rwocodeout">  [-load FILE]         Analyze previously saved data files and</div><div class="rwocodeout">                       don't run tests. [-load] can be specified multiple times.</div><div class="rwocodeout">  [-no-compactions]    Disable GC compactions.</div><div class="rwocodeout">  [-predictors m,c]    Include additional predictors in regression (see help).</div><div class="rwocodeout">  [-quota SECS]        Time quota allowed per test (default 10s).</div><div class="rwocodeout">  [-save]              Save benchmark data to &lt;test name&gt;.txt files.</div><div class="rwocodeout">  [-stabilize-gc]      Stabilize GC between each sample capture.</div><div class="rwocodeout">  [-v]                 High verbosity level.</div><div class="rwocodeout">  [-width WIDTH]       width limit on column display (default 170).</div><div class="rwocodeout">  [-build-info]        print info about this build and exit</div><div class="rwocodeout">  [-version]           print the version of this build and exit</div><div class="rwocodeout">  [-help]              print this help text and exit</div><div class="rwocodeout">                       (alias: -?)</div><div class="rwocodeout"> </div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/gc/show_barrier_bench_help.out">gc/show_barrier_bench_help.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322806262256">The <code>-no-compactions</code> and <code>-stabilize-gc</code> options can help force a situation where your application has
           fragmented memory. This can simulate the behavior of a long-running application without
           you having to actually wait that long to re-create the behavior in a performance unit
-            test.<a name="idm146286637232"></a></p></section></section></section><section id="attaching-finalizer-functions-to-values"><h1>Attaching Finalizer Functions to Values</h1><p id="idm146286635168">OCaml's automatic memory management guarantees that a value will eventually be freed when
+            test.<a name="idm322806260400"></a></p></section></section></section><section id="attaching-finalizer-functions-to-values"><h1>Attaching Finalizer Functions to Values</h1><p id="idm322806258336">OCaml's automatic memory management guarantees that a value will eventually be freed when
       it's no longer in use, either via the GC sweeping it or the program terminating. It's
       sometimes useful to run extra code just before a value is freed by the GC, for example, to
-      check that a file descriptor has been closed, or that a log message is recorded.<a name="idm146286634544"></a><a name="idm146286633232"></a><a name="idm146286631664"></a></p><aside class="note"><h1>What Values Can Be Finalized?</h1><p id="idm146286629536">Various values cannot have finalizers attached since they aren't heap-allocated. Some
+      check that a file descriptor has been closed, or that a log message is recorded.<a name="idm322806257712"></a><a name="idm322806256400"></a><a name="idm322806254832"></a></p><aside class="note"><h1>What Values Can Be Finalized?</h1><p id="idm322806252704">Various values cannot have finalizers attached since they aren't heap-allocated. Some
         examples of values that are not heap-allocated are integers, constant constructors,
         Booleans, the empty array, the empty list, and the unit value. The exact list of what is
         heap-allocated or not is implementation-dependent, which is why Core provides the <code>Heap_block</code> module to explicitly check before attaching the
-        finalizer.</p><p id="idm146286628064">Some constant values can be heap-allocated but never deallocated during the lifetime of
+        finalizer.</p><p id="idm322806251232">Some constant values can be heap-allocated but never deallocated during the lifetime of
         the program, for example, a list of integer constants. <code>Heap_block</code> explicitly checks to see if the value is in the major or minor heap,
         and rejects most constant values. Compiler optimizations may also duplicate some immutable
-        values such as floating-point values in arrays. These may be finalized while another <span>duplicate</span> copy is being used by the program.</p><p id="idm146286625920">For this reason, attach finalizers only to values that you are explicitly sure are
+        values such as floating-point values in arrays. These may be finalized while another <span>duplicate</span> copy is being used by the program.</p><p id="idm322806249088">For this reason, attach finalizers only to values that you are explicitly sure are
         heap-allocated and aren't immutable. A common use is to attach them to file descriptors to
         ensure they are closed. However, the finalizer normally shouldn't be the primary way of
         closing the file descriptor, since it depends on the GC running in order to collect the
         value. For a busy system, you can easily run out of a scarce resource such as file
-        descriptors before the GC catches up.</p></aside><p id="idm146286624896">Core provides a <code>Heap_block</code> module
+        descriptors before the GC catches up.</p></aside><p id="idm322806248064">Core provides a <code>Heap_block</code> module
     that dynamically checks if a given value is suitable for finalizing. This
     block is then passed to Async's <code>Gc.add_finalizer</code> function that schedules the
     finalizer safely with respect to all the other concurrent program
-    threads.<a name="idm146286623072"></a></p><p id="idm146286621632">Let's explore this with a small example that finalizes values of
+    threads.<a name="idm322806246240"></a></p><p id="idm322806244800">Let's explore this with a small example that finalizes values of
     different types, some of which are heap-allocated and others which are
     compile-time constants:</p><div class="rwocode"><pre><code><span class="keyword1">open</span> <span class="keyword5">Core.Std
 </span><span class="keyword1">open</span> <span class="keyword5">Async.Std
@@ -446,18 +446,18 @@
 <span class="keyword4">let</span> <span class="keyword2">(</span><span class="keyword2">)</span> <span class="keyword2">=</span>
   <span class="keyword5">Command.</span>async_basic ~summary<span class="keyword2">:</span><span class="keyword7">&quot;Testing finalizers&quot;</span>
     <span class="keyword5">Command.</span><span class="keyword5">Spec.</span>empty main
-  <span class="keyword2">|</span><span class="keyword2">&gt;</span> <span class="keyword5">Command.</span>run</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/gc/finalizer.ml">gc/finalizer.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146286618560">Building and running this should show the following output:</p><div class="rwocode"><pre><code><div class="highlight"><span class="gp">$</span> corebuild -pkg async finalizer.native
+  <span class="keyword2">|</span><span class="keyword2">&gt;</span> <span class="keyword5">Command.</span>run</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/gc/finalizer.ml">gc/finalizer.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322806241728">Building and running this should show the following output:</p><div class="rwocode"><pre><code><div class="highlight"><span class="gp">$</span> corebuild -pkg async finalizer.native
 </div><div class="highlight"><span class="gp">$</span> ./finalizer.native
-</div><div class="rwocodeout">       immediate int: FAIL</div><div class="rwocodeout">     immediate float: FAIL</div><div class="rwocodeout">   immediate variant: FAIL</div><div class="rwocodeout">    immediate string: FAIL</div><div class="rwocodeout">    immediate record: FAIL</div><div class="rwocodeout">      allocated bool: FAIL</div><div class="rwocodeout">    allocated record: OK</div><div class="rwocodeout">    allocated string: OK</div><div class="rwocodeout">   allocated variant: OK</div><div class="rwocodeout">     allocated float: OK</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/gc/run_finalizer.out">gc/run_finalizer.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146286607408">The GC calls the finalization functions in the order of the deallocation. If several
+</div><div class="rwocodeout">       immediate int: FAIL</div><div class="rwocodeout">     immediate float: FAIL</div><div class="rwocodeout">   immediate variant: FAIL</div><div class="rwocodeout">    immediate string: FAIL</div><div class="rwocodeout">    immediate record: FAIL</div><div class="rwocodeout">      allocated bool: FAIL</div><div class="rwocodeout">    allocated record: OK</div><div class="rwocodeout">    allocated string: OK</div><div class="rwocodeout">   allocated variant: OK</div><div class="rwocodeout">     allocated float: OK</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/gc/run_finalizer.out">gc/run_finalizer.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322806230576">The GC calls the finalization functions in the order of the deallocation. If several
       values become unreachable during the same GC cycle, the finalization functions will be called
       in the reverse order of the corresponding calls to <code>add_finalizer</code>. Each call to <code>add_finalizer</code> adds
       to the set of functions, which are run when the value becomes unreachable. You can have many
-      finalizers all pointing to the same heap block if you wish.</p><p id="idm146286605296">After a garbage collection determines that a heap block <code>b</code> is unreachable, it removes from the set of
+      finalizers all pointing to the same heap block if you wish.</p><p id="idm322806228464">After a garbage collection determines that a heap block <code>b</code> is unreachable, it removes from the set of
     finalizers all the functions associated with <code>b</code>, and serially applies each of those functions
     to <code>b</code>. Thus, every finalizer function
     attached to <code>b</code> will run at most once.
     However, program termination will not cause all the finalizers to be run
-    before the runtime exits.</p><p id="idm146286601984">The finalizer can use all features of OCaml, including assignments that make the value
+    before the runtime exits.</p><p id="idm322806225152">The finalizer can use all features of OCaml, including assignments that make the value
       reachable again and thus prevent it from being garbage-collected. It can also loop forever,
       which will cause other finalizers to be interleaved with it.</p></section>
 
