@@ -31,11 +31,6 @@
     
         <div class="body">
         
-            <header class="header">
-                <i>Available in <a href="http://www.amazon.com/Real-World-OCaml-Functional-programming/dp/144932391X/">print</a> and <a href="http://oreil.ly/realworldOCaml">eBook!</a></i>
-                <h1><a href="http://oreil.ly/realworldOCaml"><img src="../../media/img/cover-cut.png" width="245" alt="Real World OCaml, by Yaron Minsky, Anil Madhavapeddy and Jason Hickey"></img></a></h1>
-            </header>
-    
             <nav class="navigation">
                 <ul>
                     <li>
@@ -129,6 +124,10 @@
                     
                 </ul>
             </nav>
+            <header class="header">
+                <h1><a href="http://oreil.ly/realworldOCaml"><img src="../../media/img/cover.png" width="120" alt="Real World OCaml, by Yaron Minsky, Anil Madhavapeddy and Jason Hickey"></img></a></h1>
+                <p><i>Buy in <a href="http://www.amazon.com/Real-World-OCaml-Functional-programming/dp/144932391X/">print</a> and <a href="http://oreil.ly/realworldOCaml">eBook.</a></i></p>
+            </header>
         
             <article class="page">
         
@@ -136,20 +135,20 @@
                 
                 
 
-    <p id="idm449015213504">One of OCaml's best features is its concise and expressive system for
+    <p id="idm146295516608">One of OCaml's best features is its concise and expressive system for
   declaring new data types, and records are a key element of that system. We
   discussed records briefly in <a href="a-guided-tour.html">Chapter 1, <i>A Guided Tour</i></a>, but this
   chapter will go into more depth, covering the details of how records work,
   as well as advice on how to use them effectively in your software
-  designs.</p><p id="idm449015212256">A record represents a collection of values stored together as one,
+  designs.</p><p id="idm146295515360">A record represents a collection of values stored together as one,
   where each component is identified by a different field name. The basic
-  syntax for a record type declaration is as follows:<a name="idm449015211792"></a></p><div class="rwocode"><pre><code><pre>type &lt;record-name&gt; =
+  syntax for a record type declaration is as follows:<a name="idm146295514896"></a></p><div class="rwocode"><pre><code><pre>type &lt;record-name&gt; =
   { &lt;field&gt; : &lt;type&gt; ;
     &lt;field&gt; : &lt;type&gt; ;
     ...
   }
-</pre></code></pre><div class="rwocodeinfo">Syntax ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/record.syntax">records/record.syntax</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449015206048">Note that record field names must start with a lowercase
-  letter.</p><p id="idm449015205584">Here's a simple example, a <code>host_info</code> record that summarizes information about
+</pre></code></pre><div class="rwocodeinfo">Syntax ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/record.syntax">records/record.syntax</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295509152">Note that record field names must start with a lowercase
+  letter.</p><p id="idm146295508688">Here's a simple example, a <code>host_info</code> record that summarizes information about
   a given computer:</p><div class="rwocode"><pre><code># <span class="keyword4">type</span> host_info <span class="keyword2">=</span>
     <span class="keyword2">{</span> hostname   <span class="keyword2">:</span> <span class="keyword3">string</span><span class="keyword2">;</span>
       os_name    <span class="keyword2">:</span> <span class="keyword3">string</span><span class="keyword2">;</span>
@@ -161,7 +160,7 @@
   cpu_arch : string;
   timestamp : Time.t;
 }
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449015194208">We can construct a <code>host_info</code> just
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295497312">We can construct a <code>host_info</code> just
   as easily. The following code uses the <code>Shell</code> module from <code>Core_extended</code> to dispatch commands to the shell to
   extract the information we need about the computer we're running on. It also
   uses the <code>Time.now</code> call from Core's
@@ -174,38 +173,38 @@
     <span class="keyword2">}</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val my_host : host_info =
   {hostname = &quot;flick.local&quot;; os_name = &quot;Darwin&quot;; cpu_arch = &quot;i386&quot;;
    timestamp = 2013-11-05 08:49:38.850439-05:00}
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449015178784">You might wonder how the compiler inferred that <code>my_host</code> is of type <code>host_info</code>. The hook that the compiler uses in this
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295481888">You might wonder how the compiler inferred that <code>my_host</code> is of type <code>host_info</code>. The hook that the compiler uses in this
   case to figure out the type is the record field name. Later in the chapter,
   we'll talk about what happens when there is more than one record type in
-  scope with the same field name.</p><p id="idm449015176800">Once we have a record value in hand, we can extract elements from the
+  scope with the same field name.</p><p id="idm146295479904">Once we have a record value in hand, we can extract elements from the
   record field using dot notation:</p><div class="rwocode"><pre><code># my_host.cpu_arch<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot;i386&quot;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449015172416">When declaring an OCaml type, you always have the option of
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295475520">When declaring an OCaml type, you always have the option of
   parameterizing it by a polymorphic type. Records are no different in this
   regard. So, for example, here's a type one might use to timestamp arbitrary
   items:</p><div class="rwocode"><pre><code># <span class="keyword4">type</span> 'a timestamped <span class="keyword2">=</span> <span class="keyword2">{</span> item<span class="keyword2">:</span> 'a<span class="keyword2">;</span> time<span class="keyword2">:</span> <span class="keyword5">Time.</span>t <span class="keyword2">}</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">type 'a timestamped = { item : 'a; time : Time.t; }
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 3) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449015167856">We can then write polymorphic functions that operate over this
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 3) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295470960">We can then write polymorphic functions that operate over this
   parameterized type:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> first_timestamped <span class="keyword3">list</span> <span class="keyword2">=</span>
     <span class="keyword5">List.</span>reduce <span class="keyword3">list</span> ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> a b -<span class="keyword2">&gt;</span> <span class="keyword1">if</span> a.time <span class="keyword2">&lt;</span> b.time <span class="keyword1">then</span> a <span class="keyword1">else</span> b<span class="keyword2">)</span>
   <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val first_timestamped : 'a timestamped list -&gt; 'a timestamped option = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><section id="patterns-and-exhaustiveness"><h1>Patterns and Exhaustiveness</h1><p id="idm449015161104">Another way of getting information out of a record is by using a
-    pattern match, as in the definition of <code>host_info_to_string</code>:<a name="idm449015160080"></a><a name="idm449015158512"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> host_info_to_string <span class="keyword2">{</span> hostname <span class="keyword2">=</span> h<span class="keyword2">;</span> os_name <span class="keyword2">=</span> os<span class="keyword2">;</span>
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><section id="patterns-and-exhaustiveness"><h1>Patterns and Exhaustiveness</h1><p id="idm146295464208">Another way of getting information out of a record is by using a
+    pattern match, as in the definition of <code>host_info_to_string</code>:<a name="idm146295463184"></a><a name="idm146295461616"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> host_info_to_string <span class="keyword2">{</span> hostname <span class="keyword2">=</span> h<span class="keyword2">;</span> os_name <span class="keyword2">=</span> os<span class="keyword2">;</span>
                             cpu_arch <span class="keyword2">=</span> c<span class="keyword2">;</span> timestamp <span class="keyword2">=</span> ts<span class="keyword2">;</span>
                           <span class="keyword2">}</span> <span class="keyword2">=</span>
        sprintf <span class="keyword7">&quot;%s (%s / %s, on %s)&quot;</span> h os c <span class="keyword2">(</span><span class="keyword5">Time.</span>to_sec_string ts<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
 </div># host_info_to_string my_host<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot;flick.local (Darwin / i386, on 2013-11-05 08:49:38)&quot;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 5) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449015149200">Note that the pattern we used had only a single case, rather than
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 5) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295452304">Note that the pattern we used had only a single case, rather than
     using several cases separated by <code>|</code>'s.
     We needed only one pattern because record patterns are
     <span><em>irrefutable</em></span>, meaning that a record pattern match will
     never fail at runtime. This makes sense, because the set of fields
     available in a record is always the same. In general, patterns for types
     with a fixed structure, like records and tuples, are irrefutable, unlike
-    types with variable structures like lists and variants.<a name="idm449015147392"></a><a name="idm449015146480"></a></p><p id="idm449015145040">Another important characteristic of record patterns is that they
+    types with variable structures like lists and variants.<a name="idm146295450496"></a><a name="idm146295449584"></a></p><p id="idm146295448144">Another important characteristic of record patterns is that they
     don't need to be complete; a pattern can mention only a subset of the
     fields in the record. This can be convenient, but it can also be error
     prone. In particular, this means that when new fields are added to the
     record, code that should be updated to react to the presence of those new
-    fields will not be flagged by the compiler.</p><p id="idm449015144240">As an example, imagine that we wanted to add a new field to our
+    fields will not be flagged by the compiler.</p><p id="idm146295447344">As an example, imagine that we wanted to add a new field to our
     <code>host_info</code> record called <code>os_release</code>:</p><div class="rwocode"><pre><code># <span class="keyword4">type</span> host_info <span class="keyword2">=</span>
     <span class="keyword2">{</span> hostname   <span class="keyword2">:</span> <span class="keyword3">string</span><span class="keyword2">;</span>
       os_name    <span class="keyword2">:</span> <span class="keyword3">string</span><span class="keyword2">;</span>
@@ -219,52 +218,52 @@
   os_release : string;
   timestamp : Time.t;
 }
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 6) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449015130768">The code for <code>host_info_to_string</code>
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 6) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295433872">The code for <code>host_info_to_string</code>
     would continue to compile without change. In this particular case, it's
     pretty clear that you might want to update <code>host_info_to_string</code> in order to include <code>os_release</code>, and it would be nice if the type
-    system would give you a warning about the change.</p><p id="idm449015128160">Happily, OCaml does offer an optional warning for missing fields in
+    system would give you a warning about the change.</p><p id="idm146295431264">Happily, OCaml does offer an optional warning for missing fields in
     a record pattern. With that warning turned on (which you can do in the
     toplevel by typing <code>#warnings &quot;+9&quot;</code>), the
-    compiler will warn about the missing field:<a name="idm449015127024"></a><a name="idm449015125712"></a><a name="idm449015124400"></a><a name="idm449015123088"></a></p><div class="rwocode"><pre><code># <span class="keyword7">#warnings</span> <span class="keyword7">&quot;+9&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"> </div># <span class="keyword4">let</span> host_info_to_string <span class="keyword2">{</span> hostname <span class="keyword2">=</span> h<span class="keyword2">;</span> os_name <span class="keyword2">=</span> os<span class="keyword2">;</span>
+    compiler will warn about the missing field:<a name="idm146295430128"></a><a name="idm146295428816"></a><a name="idm146295427504"></a><a name="idm146295426192"></a></p><div class="rwocode"><pre><code># <span class="keyword7">#warnings</span> <span class="keyword7">&quot;+9&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"> </div># <span class="keyword4">let</span> host_info_to_string <span class="keyword2">{</span> hostname <span class="keyword2">=</span> h<span class="keyword2">;</span> os_name <span class="keyword2">=</span> os<span class="keyword2">;</span>
                             cpu_arch <span class="keyword2">=</span> c<span class="keyword2">;</span> timestamp <span class="keyword2">=</span> ts<span class="keyword2">;</span>
                           <span class="keyword2">}</span> <span class="keyword2">=</span>
     sprintf <span class="keyword7">&quot;%s (%s / %s, on %s)&quot;</span> h os c <span class="keyword2">(</span><span class="keyword5">Time.</span>to_sec_string ts<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"><br></br>Characters 24-139:
 Warning 9: the following labels are not bound in this record pattern:
 os_release
 Either bind these labels explicitly or add '; _' to the pattern.val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 7) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449015111776">We can disable the warning for a given pattern by explicitly
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 7) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295414880">We can disable the warning for a given pattern by explicitly
     acknowledging that we are ignoring extra fields. This is done by adding an
     underscore to the pattern:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> host_info_to_string <span class="keyword2">{</span> hostname <span class="keyword2">=</span> h<span class="keyword2">;</span> os_name <span class="keyword2">=</span> os<span class="keyword2">;</span>
                             cpu_arch <span class="keyword2">=</span> c<span class="keyword2">;</span> timestamp <span class="keyword2">=</span> ts<span class="keyword2">;</span> <span class="keyword8">_</span>
                           <span class="keyword2">}</span> <span class="keyword2">=</span>
     sprintf <span class="keyword7">&quot;%s (%s / %s, on %s)&quot;</span> h os c <span class="keyword2">(</span><span class="keyword5">Time.</span>to_sec_string ts<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 8) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449015105200">It's a good idea to enable the warning for incomplete record matches
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 8) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295408304">It's a good idea to enable the warning for incomplete record matches
     and to explicitly disable it with an <code>_</code>
-    where necessary.</p><aside class="note"><h1>Compiler Warnings</h1><p id="idm449015103136">The OCaml compiler is packed full of useful warnings that can be
+    where necessary.</p><aside class="note"><h1>Compiler Warnings</h1><p id="idm146295406240">The OCaml compiler is packed full of useful warnings that can be
       enabled and disabled separately. These are documented in the compiler
       itself, so we could have found out about warning 9 as follows:</p><div class="rwocode"><pre><code><div class="highlight"><span class="gp">$</span> ocaml -warn-help | egrep <span class="s1">'\b9\b'</span>
-</div><div class="rwocodeout">  9 Missing fields in a record pattern.</div><div class="rwocodeout">  R Synonym for warning 9.</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/warn_help.out">records/warn_help.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449015098144">You should think of OCaml's warnings as a powerful set of optional
+</div><div class="rwocodeout">  9 Missing fields in a record pattern.</div><div class="rwocodeout">  R Synonym for warning 9.</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/warn_help.out">records/warn_help.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295401248">You should think of OCaml's warnings as a powerful set of optional
       static analysis tools, and you should eagerly enable them in your build
       environment. You don't typically enable all warnings, but the defaults
-      that ship with the compiler are pretty good.</p><p id="idm449015097472">The warnings used for building the examples in this book are
+      that ship with the compiler are pretty good.</p><p id="idm146295400576">The warnings used for building the examples in this book are
       specified with the following flag: <code>-w
-      @A-4-33-41-42-43-34-44</code>.</p><p id="idm449015096320">The syntax of this can be found by running <code>ocaml -help</code>, but this particular invocation
+      @A-4-33-41-42-43-34-44</code>.</p><p id="idm146295399424">The syntax of this can be found by running <code>ocaml -help</code>, but this particular invocation
       turns on all warnings as errors, disabling only the numbers listed
-      explicitly after the <code>A</code>.</p><p id="idm449015094480">Treating warnings as errors (i.e., making OCaml fail to compile
+      explicitly after the <code>A</code>.</p><p id="idm146295397584">Treating warnings as errors (i.e., making OCaml fail to compile
       any code that triggers a warning) is good practice, since without it,
       warnings are too often ignored during development. When preparing a
       package for distribution, however, this is a bad idea, since the list of
       warnings may grow from one release of the compiler to another, and so
       this may lead your package to fail to compile on newer compiler
-      releases.</p></aside></section><section id="field-punning"><h1>Field Punning</h1><p id="idm449015092480">When the name of a variable coincides with the name of a record
+      releases.</p></aside></section><section id="field-punning"><h1>Field Punning</h1><p id="idm146295395584">When the name of a variable coincides with the name of a record
     field, OCaml provides some handy syntactic shortcuts. For example, the
     pattern in the following function binds all of the fields in question to
     variables of the same name. This is called <span><em>field
-    punning</em></span>:<a name="idm449015091536"></a><a name="idm449015090240"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> host_info_to_string <span class="keyword2">{</span> hostname<span class="keyword2">;</span> os_name<span class="keyword2">;</span> cpu_arch<span class="keyword2">;</span> timestamp<span class="keyword2">;</span> <span class="keyword8">_</span> <span class="keyword2">}</span> <span class="keyword2">=</span>
+    punning</em></span>:<a name="idm146295394640"></a><a name="idm146295393344"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> host_info_to_string <span class="keyword2">{</span> hostname<span class="keyword2">;</span> os_name<span class="keyword2">;</span> cpu_arch<span class="keyword2">;</span> timestamp<span class="keyword2">;</span> <span class="keyword8">_</span> <span class="keyword2">}</span> <span class="keyword2">=</span>
      sprintf <span class="keyword7">&quot;%s (%s / %s) &lt;%s&gt;&quot;</span> hostname os_name cpu_arch
        <span class="keyword2">(</span><span class="keyword5">Time.</span>to_string timestamp<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val host_info_to_string : host_info -&gt; string = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 9) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449015083232">Field punning can also be used to construct a record. Consider the
-    following code for generating a <code>host_info</code> record:<a name="idm449015082256"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> my_host <span class="keyword2">=</span>
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 9) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295386336">Field punning can also be used to construct a record. Consider the
+    following code for generating a <code>host_info</code> record:<a name="idm146295385360"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> my_host <span class="keyword2">=</span>
     <span class="keyword4">let</span> sh cmd <span class="keyword2">=</span> <span class="keyword5">Shell.</span>sh_one_exn cmd <span class="keyword4">in</span>
     <span class="keyword4">let</span> hostname   <span class="keyword2">=</span> sh <span class="keyword7">&quot;hostname&quot;</span> <span class="keyword4">in</span>
     <span class="keyword4">let</span> os_name    <span class="keyword2">=</span> sh <span class="keyword7">&quot;uname -s&quot;</span> <span class="keyword4">in</span>
@@ -274,17 +273,17 @@ Either bind these labels explicitly or add '; _' to the pattern.val host_info_to
     <span class="keyword2">{</span> hostname<span class="keyword2">;</span> os_name<span class="keyword2">;</span> cpu_arch<span class="keyword2">;</span> os_release<span class="keyword2">;</span> timestamp <span class="keyword2">}</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val my_host : host_info =
   {hostname = &quot;flick.local&quot;; os_name = &quot;Darwin&quot;; cpu_arch = &quot;i386&quot;;
    os_release = &quot;13.0.0&quot;; timestamp = 2013-11-05 08:49:41.499579-05:00}
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 10) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449015070240">In the preceding code, we defined variables corresponding to the
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 10) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295373344">In the preceding code, we defined variables corresponding to the
     record fields first, and then the record declaration itself simply listed
-    the fields that needed to be included.</p><p id="idm449015069664">You can take advantage of both field punning and label punning when
+    the fields that needed to be included.</p><p id="idm146295372768">You can take advantage of both field punning and label punning when
     writing a function for constructing a record from labeled
-    arguments:<a name="idm449015069248"></a><a name="idm449015068352"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> create_host_info ~hostname ~os_name ~cpu_arch ~os_release <span class="keyword2">=</span>
+    arguments:<a name="idm146295372352"></a><a name="idm146295371456"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> create_host_info ~hostname ~os_name ~cpu_arch ~os_release <span class="keyword2">=</span>
     <span class="keyword2">{</span> os_name<span class="keyword2">;</span> cpu_arch<span class="keyword2">;</span> os_release<span class="keyword2">;</span>
       hostname <span class="keyword2">=</span> <span class="keyword5">String.</span>lowercase hostname<span class="keyword2">;</span>
       timestamp <span class="keyword2">=</span> <span class="keyword5">Time.</span>now <span class="keyword2">(</span><span class="keyword2">)</span> <span class="keyword2">}</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val create_host_info :
   hostname:string -&gt;
   os_name:string -&gt; cpu_arch:string -&gt; os_release:string -&gt; host_info = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 11) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449015059472">This is considerably more concise than what you would get without
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 11) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295362576">This is considerably more concise than what you would get without
     punning:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> create_host_info
     ~hostname<span class="keyword2">:</span>hostname ~os_name<span class="keyword2">:</span>os_name
     ~cpu_arch<span class="keyword2">:</span>cpu_arch ~os_release<span class="keyword2">:</span>os_release <span class="keyword2">=</span>
@@ -295,12 +294,12 @@ Either bind these labels explicitly or add '; _' to the pattern.val host_info_to
       timestamp <span class="keyword2">=</span> <span class="keyword5">Time.</span>now <span class="keyword2">(</span><span class="keyword2">)</span> <span class="keyword2">}</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val create_host_info :
   hostname:string -&gt;
   os_name:string -&gt; cpu_arch:string -&gt; os_release:string -&gt; host_info = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 12) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449015049040">Together, labeled arguments, field names, and field and label
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 12) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295352144">Together, labeled arguments, field names, and field and label
     punning encourage a style where you propagate the same names throughout
     your codebase. This is generally good practice, since it encourages
-    consistent naming, which makes it easier to navigate the source.</p></section><section id="reusing-field-names"><h1>Reusing Field Names</h1><p id="idm449015047344">Defining records with the same field names can be problematic. Let's
+    consistent naming, which makes it easier to navigate the source.</p></section><section id="reusing-field-names"><h1>Reusing Field Names</h1><p id="idm146295350448">Defining records with the same field names can be problematic. Let's
     consider a simple example: building types to represent the protocol used
-    for a logging server.<a name="FNreus"></a><a name="RECreusfn"></a></p><p id="idm449015043680">We'll describe three message types: <code>log_entry</code>, <code>heartbeat</code>, and <code>logon</code>. The <code>log_entry</code> message is used to deliver a log entry
+    for a logging server.<a name="FNreus"></a><a name="RECreusfn"></a></p><p id="idm146295346784">We'll describe three message types: <code>log_entry</code>, <code>heartbeat</code>, and <code>logon</code>. The <code>log_entry</code> message is used to deliver a log entry
     to the server; the <code>logon</code> message is
     sent to initiate a connection and includes the identity of the user
     connecting and credentials used for authentication; and the <code>heartbeat</code> message is periodically sent by the
@@ -340,26 +339,26 @@ type logon = {
   user : string;
   credentials : string;
 }
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 13) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449015013664">Reusing field names can lead to some ambiguity. For example, if we
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 13) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295316768">Reusing field names can lead to some ambiguity. For example, if we
     want to write a function to grab the <code>session_id</code> from a
     record, what type will it have?</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> get_session_id t <span class="keyword2">=</span> t.session_id<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val get_session_id : logon -&gt; string = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 14) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449015008752">In this case, OCaml just picks the most recent definition of that
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 14) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295311856">In this case, OCaml just picks the most recent definition of that
     record field. We can force OCaml to assume we're dealing with a different
     type (say, a <code>heartbeat</code>) using a type
     annotation:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> get_heartbeat_session_id <span class="keyword2">(</span>t<span class="keyword2">:</span>heartbeat<span class="keyword2">)</span> <span class="keyword2">=</span> t.session_id<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val get_heartbeat_session_id : heartbeat -&gt; string = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 15) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449015003520">While it's possible to resolve ambiguous field names using type
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 15) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295306624">While it's possible to resolve ambiguous field names using type
     annotations, the ambiguity can be a bit confusing. Consider the following
     functions for grabbing the session ID and status from a heartbeat:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> status_and_session t <span class="keyword2">=</span> <span class="keyword2">(</span>t.status_message, t.session_id<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val status_and_session : heartbeat -&gt; string * string = &lt;fun&gt;
 </div># <span class="keyword4">let</span> session_and_status t <span class="keyword2">=</span> <span class="keyword2">(</span>t.session_id, t.status_message<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 44-58:
 Error: The record type logon has no field status_message
 </div># <span class="keyword4">let</span> session_and_status <span class="keyword2">(</span>t<span class="keyword2">:</span>heartbeat<span class="keyword2">)</span> <span class="keyword2">=</span> <span class="keyword2">(</span>t.session_id, t.status_message<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val session_and_status : heartbeat -&gt; string * string = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 16) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449014994512">Why did the first definition succeed without a type annotation and
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 16) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295297616">Why did the first definition succeed without a type annotation and
     the second one fail? The difference is that in the first case, the
     type-checker considered the <code>status_message</code> field first and thus concluded
     that the record was a <code>heartbeat</code>. When
     the order was switched, the <code>session_id</code>
     field was considered first, and so that drove the type to be considered to
-    be a <code>logon</code>, at which point <code>t.status_message</code> no longer made sense.</p><p id="idm449014990512">We can avoid this ambiguity altogether, either by using
+    be a <code>logon</code>, at which point <code>t.status_message</code> no longer made sense.</p><p id="idm146295293616">We can avoid this ambiguity altogether, either by using
     nonoverlapping field names or, more generally, by minting a module for
     each type. Packing types into modules is a broadly useful idiom (and one
     used quite extensively by Core), providing for each type a namespace
@@ -408,13 +407,13 @@ module Logon :
       credentials : string;
     }
   end
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 17) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449014957200">Now, our log-entry-creation function can be rendered as
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 17) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295260304">Now, our log-entry-creation function can be rendered as
     follows:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> create_log_entry ~session_id ~important message <span class="keyword2">=</span>
      <span class="keyword2">{</span> <span class="keyword5">Log_entry.</span>time <span class="keyword2">=</span> <span class="keyword5">Time.</span>now <span class="keyword2">(</span><span class="keyword2">)</span><span class="keyword2">;</span> <span class="keyword5">Log_entry.</span>session_id<span class="keyword2">;</span>
        <span class="keyword5">Log_entry.</span>important<span class="keyword2">;</span> <span class="keyword5">Log_entry.</span>message <span class="keyword2">}</span>
   <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val create_log_entry :
   session_id:string -&gt; important:bool -&gt; string -&gt; Log_entry.t = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 18) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449014950000">The module name <code>Log_entry</code> is
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 18) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295253104">The module name <code>Log_entry</code> is
     required to qualify the fields, because this function is outside of the
     <code>Log_entry</code> module where the record was
     defined. OCaml only requires the module qualification for one record
@@ -425,25 +424,25 @@ module Logon :
        time <span class="keyword2">=</span> <span class="keyword5">Time.</span>now <span class="keyword2">(</span><span class="keyword2">)</span><span class="keyword2">;</span> session_id<span class="keyword2">;</span> important<span class="keyword2">;</span> message <span class="keyword2">}</span>
   <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val create_log_entry :
   session_id:string -&gt; important:bool -&gt; string -&gt; Log_entry.t = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 19) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449014941296">This is not restricted to constructing a record; we can use the same
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 19) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295244400">This is not restricted to constructing a record; we can use the same
     trick when pattern matching:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> message_to_string <span class="keyword2">{</span> <span class="keyword5">Log_entry.</span>important<span class="keyword2">;</span> message<span class="keyword2">;</span> <span class="keyword8">_</span> <span class="keyword2">}</span> <span class="keyword2">=</span>
     <span class="keyword1">if</span> important <span class="keyword1">then</span> <span class="keyword5">String.</span>uppercase message <span class="keyword1">else</span> message
   <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val message_to_string : Log_entry.t -&gt; string = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 20) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449014935536">When using dot notation for accessing record fields, we can qualify
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 20) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295238640">When using dot notation for accessing record fields, we can qualify
     the field by the module directly:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> is_important t <span class="keyword2">=</span> t.<span class="keyword5">Log_entry.</span>important<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val is_important : Log_entry.t -&gt; bool = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 21) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449014931088">The syntax here is a little surprising when you first encounter it.
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 21) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295234192">The syntax here is a little surprising when you first encounter it.
     The thing to keep in mind is that the dot is being used in two ways: the
     first dot is a record field access, with everything to the right of the
     dot being interpreted as a field name; the second dot is accessing the
     contents of a module, referring to the record field <code>important</code> from within the module <code>Log_entry</code>. The fact that <code>Log_entry</code> is capitalized and so can't be a field
-    name is what disambiguates the two uses.</p><p id="idm449014928256">For functions defined within the module where a given record is
-    defined, the module qualification goes away entirely.<a name="idm449014927872"></a><a name="idm449014927264"></a></p></section><section id="functional-updates"><h1>Functional Updates</h1><p id="idm449014925472">Fairly often, you will find yourself wanting to create a new record
+    name is what disambiguates the two uses.</p><p id="idm146295231360">For functions defined within the module where a given record is
+    defined, the module qualification goes away entirely.<a name="idm146295230976"></a><a name="idm146295230368"></a></p></section><section id="functional-updates"><h1>Functional Updates</h1><p id="idm146295228576">Fairly often, you will find yourself wanting to create a new record
     that differs from an existing record in only a subset of the fields. For
     example, imagine our logging server had a record type for representing the
     state of a given client, including when the last heartbeat was received
     from that client. The following defines a type for representing this
     information, as well as a function for updating the client information
-    when a new heartbeat arrives:<a name="idm449014924720"></a><a name="idm449014923808"></a></p><div class="rwocode"><pre><code># <span class="keyword4">type</span> client_info <span class="keyword2">=</span>
+    when a new heartbeat arrives:<a name="idm146295227824"></a><a name="idm146295226912"></a></p><div class="rwocode"><pre><code># <span class="keyword4">type</span> client_info <span class="keyword2">=</span>
    <span class="keyword2">{</span> addr<span class="keyword2">:</span> <span class="keyword5">Unix.</span><span class="keyword5">Inet_addr.</span>t<span class="keyword2">;</span>
      port<span class="keyword2">:</span> <span class="keyword3">int</span><span class="keyword2">;</span>
      user<span class="keyword2">:</span> <span class="keyword3">string</span><span class="keyword2">;</span>
@@ -463,7 +462,7 @@ module Logon :
         credentials <span class="keyword2">=</span> t.credentials<span class="keyword2">;</span>
         last_heartbeat_time <span class="keyword2">=</span> hb.<span class="keyword5">Heartbeat.</span>time<span class="keyword2">;</span>
       <span class="keyword2">}</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 22) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449014904848">This is fairly verbose, given that there's only one field that we
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 22) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295207952">This is fairly verbose, given that there's only one field that we
     actually want to change, and all the others are just being copied over
     from <code>t</code>. We can use OCaml's
     <span><em>functional update</em></span> syntax to do this more tersely. The
@@ -471,10 +470,10 @@ module Logon :
                 &lt;field&gt; = &lt;value&gt;;
                 ...
 }
-</pre></code></pre><div class="rwocodeinfo">Syntax ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/functional_update.syntax">records/functional_update.syntax</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449014898848">The purpose of the functional update is to create a new record based
-    on an existing one, with a set of field changes layered on top.</p><p id="idm449014898320">Given this, we can rewrite <code>register_heartbeat</code> more concisely:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> register_heartbeat t hb <span class="keyword2">=</span>
+</pre></code></pre><div class="rwocodeinfo">Syntax ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/functional_update.syntax">records/functional_update.syntax</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295201952">The purpose of the functional update is to create a new record based
+    on an existing one, with a set of field changes layered on top.</p><p id="idm146295201424">Given this, we can rewrite <code>register_heartbeat</code> more concisely:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> register_heartbeat t hb <span class="keyword2">=</span>
     <span class="keyword2">{</span> t <span class="keyword1">with</span> last_heartbeat_time <span class="keyword2">=</span> hb.<span class="keyword5">Heartbeat.</span>time <span class="keyword2">}</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 23) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449014892592">Functional updates make your code independent of the identity of the
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 23) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295195696">Functional updates make your code independent of the identity of the
     fields in the record that are not changing. This is often what you want,
     but it has downsides as well. In particular, if you change the definition
     of your record to have more fields, the type system will not prompt you to
@@ -495,7 +494,7 @@ module Logon :
   last_heartbeat_time : Time.t;
   last_heartbeat_status : string;
 }
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 24) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449014878704">The original implementation of <code>register_heartbeat</code> would now be invalid, and
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 24) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295181808">The original implementation of <code>register_heartbeat</code> would now be invalid, and
     thus the compiler would effectively warn us to think about how to handle
     this new field. But the version using a functional update continues to
     compile as is, even though it incorrectly ignores the new field. The
@@ -503,9 +502,9 @@ module Logon :
     <span class="keyword2">{</span> t <span class="keyword1">with</span> last_heartbeat_time   <span class="keyword2">=</span> hb.<span class="keyword5">Heartbeat.</span>time<span class="keyword2">;</span>
              last_heartbeat_status <span class="keyword2">=</span> hb.<span class="keyword5">Heartbeat.</span>status_message<span class="keyword2">;</span>
     <span class="keyword2">}</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 25) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></section><section id="mutable-fields"><h1>Mutable Fields</h1><p id="idm449014870272">Like most OCaml values, records are immutable by default. You can,
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 25) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></section><section id="mutable-fields"><h1>Mutable Fields</h1><p id="idm146295173376">Like most OCaml values, records are immutable by default. You can,
     however, declare individual record fields as mutable. In the following
-    code, we've made the last two fields of <code>client_info</code> mutable:<a name="idm449014869168"></a><a name="idm449014868256"></a></p><div class="rwocode"><pre><code># <span class="keyword4">type</span> client_info <span class="keyword2">=</span>
+    code, we've made the last two fields of <code>client_info</code> mutable:<a name="idm146295172272"></a><a name="idm146295171360"></a></p><div class="rwocode"><pre><code># <span class="keyword4">type</span> client_info <span class="keyword2">=</span>
    <span class="keyword2">{</span> addr<span class="keyword2">:</span> <span class="keyword5">Unix.</span><span class="keyword5">Inet_addr.</span>t<span class="keyword2">;</span>
      port<span class="keyword2">:</span> <span class="keyword3">int</span><span class="keyword2">;</span>
      user<span class="keyword2">:</span> <span class="keyword3">string</span><span class="keyword2">;</span>
@@ -520,24 +519,24 @@ module Logon :
   mutable last_heartbeat_time : Time.t;
   mutable last_heartbeat_status : string;
 }
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 26) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449014853808">The <code>&lt;-</code> operator is used for setting a mutable field.
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 26) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295156912">The <code>&lt;-</code> operator is used for setting a mutable field.
       The side-effecting version of <code>register_heartbeat</code> would be
       written as follows:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> register_heartbeat t hb <span class="keyword2">=</span>
     t.last_heartbeat_time   <span class="keyword2">&lt;</span>- hb.<span class="keyword5">Heartbeat.</span>time<span class="keyword2">;</span>
     t.last_heartbeat_status <span class="keyword2">&lt;</span>- hb.<span class="keyword5">Heartbeat.</span>status_message
   <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; unit = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 27) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449014845936">Note that mutable assignment, and thus the <code>&lt;-</code> operator, is not needed for initialization
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 27) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295149040">Note that mutable assignment, and thus the <code>&lt;-</code> operator, is not needed for initialization
     because all fields of a record, including mutable ones, are specified when
-    the record is created.</p><p id="idm449014844784">OCaml's policy of immutable-by-default is a good one, but imperative
+    the record is created.</p><p id="idm146295147888">OCaml's policy of immutable-by-default is a good one, but imperative
     programming is an important part of programming in OCaml. We go into more
-    depth about how (and when) to use OCaml's imperative features in <a href="a-guided-tour.html#imperative-programming">the section called “Imperative Programming”</a>.</p></section><section id="first-class-fields"><h1>First-Class Fields</h1><p id="idm449014842608">Consider the following function for extracting the usernames from a
+    depth about how (and when) to use OCaml's imperative features in <a href="a-guided-tour.html#imperative-programming">the section called “Imperative Programming”</a>.</p></section><section id="first-class-fields"><h1>First-Class Fields</h1><p id="idm146295145712">Consider the following function for extracting the usernames from a
     list of <code>Logon</code> messages:<a name="Ffc"></a><a name="firstclass"></a><a name="RECfirstclass"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> get_users logons <span class="keyword2">=</span>
      <span class="keyword5">List.</span>dedup <span class="keyword2">(</span><span class="keyword5">List.</span>map logons ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> x -<span class="keyword2">&gt;</span> x.<span class="keyword5">Logon.</span>user<span class="keyword2">)</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val get_users : Logon.t list -&gt; string list = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 28) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449014832480">Here, we wrote a small function <code>(fun x
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 28) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295135584">Here, we wrote a small function <code>(fun x
     -&gt; x.Logon.user)</code> to access the <code>user</code> field. This kind of accessor function is a
     common enough pattern that it would be convenient to generate it
     automatically. The <code>fieldslib</code> syntax
-    extension that ships with Core does just that.<a name="idm449014830096"></a></p><p id="idm449014829056">The <code>with fields</code> annotation at the
+    extension that ships with Core does just that.<a name="idm146295133200"></a></p><p id="idm146295132160">The <code>with fields</code> annotation at the
     end of the declaration of a record type will cause the extension to be
     applied to a given type declaration. So, for example, we could have
     defined <code>Logon</code> as follows:</p><div class="rwocode"><pre><code># <span class="keyword4">module</span> <span class="keyword6">Logon </span><span class="keyword2">=</span> <span class="keyword4">struct</span>
@@ -575,44 +574,44 @@ module Logon :
         [ ... many definitions omitted ... ]
 
       end
-  end</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main-29.rawscript">records/main-29.rawscript</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449014823616">Note that this will generate <span><em>a lot</em></span> of output
+  end</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main-29.rawscript">records/main-29.rawscript</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295126720">Note that this will generate <span><em>a lot</em></span> of output
     because <code>fieldslib</code> generates a large
     collection of helper functions for working with record fields. We'll only
     discuss a few of these; you can learn about the remainder from the
-    documentation that comes with <code>fieldslib</code>.</p><p id="idm449014820400">One of the functions we obtain is <code>Logon.user</code>, which we can use to extract the user
+    documentation that comes with <code>fieldslib</code>.</p><p id="idm146295123504">One of the functions we obtain is <code>Logon.user</code>, which we can use to extract the user
     field from a logon message:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> get_users logons <span class="keyword2">=</span> <span class="keyword5">List.</span>dedup <span class="keyword2">(</span><span class="keyword5">List.</span>map logons ~f<span class="keyword2">:</span><span class="keyword5">Logon.</span>user<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val get_users : Logon.t list -&gt; string list = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 30) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449014815376">In addition to generating field accessor functions, <code>fieldslib</code> also creates a submodule called
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 30) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295118480">In addition to generating field accessor functions, <code>fieldslib</code> also creates a submodule called
     <code>Fields</code> that contains a first-class
     representative of each field, in the form of a value of type <code>Field.t</code>. The <code>Field</code> module provides the following
-    functions:<a name="idm449014812336"></a><a name="idm449014811040"></a><a name="idm449014809744"></a><a name="idm449014808448"></a><a name="idm449014807152"></a></p><div><dl><dt><span><code>Field.name</code></span></dt><dd><p id="idm449014804592">Returns the name of a field</p></dd><dt><span><code>Field.get</code></span></dt><dd><p id="idm449014802672">Returns the content of a field</p></dd><dt><span><code>Field.fset</code></span></dt><dd><p id="idm449014800720">Does a functional update of a field</p></dd><dt><span><code>Field.setter</code></span></dt><dd><p id="idm449014798752">Returns <code>None</code> if the field
+    functions:<a name="idm146295115440"></a><a name="idm146295114144"></a><a name="idm146295112848"></a><a name="idm146295111552"></a><a name="idm146295110256"></a></p><div><dl><dt><span><code>Field.name</code></span></dt><dd><p id="idm146295107696">Returns the name of a field</p></dd><dt><span><code>Field.get</code></span></dt><dd><p id="idm146295105776">Returns the content of a field</p></dd><dt><span><code>Field.fset</code></span></dt><dd><p id="idm146295103824">Does a functional update of a field</p></dd><dt><span><code>Field.setter</code></span></dt><dd><p id="idm146295101856">Returns <code>None</code> if the field
           is not mutable or <code>Some f</code> if it
           is, where <code>f</code> is a function for
-          mutating that field</p></dd></dl></div><p id="idm449014795920">A <code>Field.t</code> has two type
+          mutating that field</p></dd></dl></div><p id="idm146295099024">A <code>Field.t</code> has two type
     parameters: the first for the type of the record, and the second for the
     type of the field in question. Thus, the type of <code>Logon.Fields.session_id</code> is <code>(Logon.t, string) Field.t</code>, whereas the type of
     <code>Logon.Fields.time</code> is <code>(Logon.t, Time.t) Field.t</code>. Thus, if you call
     <code>Field.get</code> on <code>Logon.Fields.user</code>, you'll get a function for
     extracting the <code>user</code> field from a
     <code>Logon.t</code>:</p><div class="rwocode"><pre><code># <span class="keyword5">Field.</span>get <span class="keyword5">Logon.</span><span class="keyword5">Fields.</span>user<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : Logon.t -&gt; string = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 31) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449014785440">Thus, the first parameter of the <code>Field.t</code> corresponds to
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 31) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295088544">Thus, the first parameter of the <code>Field.t</code> corresponds to
       the record you pass to <code>get</code>, and the second parameter
-      corresponds to the value contained in the field, which is also the return type of <code>get</code>.</p><p id="idm449014782928">The type of <code>Field.get</code> is a little
+      corresponds to the value contained in the field, which is also the return type of <code>get</code>.</p><p id="idm146295086032">The type of <code>Field.get</code> is a little
     more complicated than you might naively expect from the preceding
     one:</p><div class="rwocode"><pre><code># <span class="keyword5">Field.</span>get<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : ('b, 'r, 'a) Field.t_with_perm -&gt; 'r -&gt; 'a = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 32) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449014777824">The type is <code>Field.t_with_perm</code>
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 32) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295080928">The type is <code>Field.t_with_perm</code>
     rather than <code>Field.t</code> because fields have
     a notion of access control that comes up in some special cases where we
     expose the ability to read a field from a record, but not the ability to
-    create new records, and so we can't expose functional updates.</p><p id="idm449014775840">We can use first-class fields to do things like write a generic
+    create new records, and so we can't expose functional updates.</p><p id="idm146295078944">We can use first-class fields to do things like write a generic
     function for displaying a record field:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> show_field field to_string record <span class="keyword2">=</span>
     <span class="keyword4">let</span> name <span class="keyword2">=</span> <span class="keyword5">Field.</span>name field <span class="keyword4">in</span>
     <span class="keyword4">let</span> field_string <span class="keyword2">=</span> to_string <span class="keyword2">(</span><span class="keyword5">Field.</span>get field record<span class="keyword2">)</span> <span class="keyword4">in</span>
     name <span class="keyword2">^</span> <span class="keyword7">&quot;: &quot;</span> <span class="keyword2">^</span> field_string
   <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val show_field :
   ('a, 'b, 'c) Field.t_with_perm -&gt; ('c -&gt; string) -&gt; 'b -&gt; string = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 33) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449014767920">This takes three arguments: the <code>Field.t</code>, a function for converting the contents
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 33) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295071024">This takes three arguments: the <code>Field.t</code>, a function for converting the contents
     of the field in question to a string, and a record from which the field
-    can be grabbed.</p><p id="idm449014766752">Here's an example of <code>show_field</code>
+    can be grabbed.</p><p id="idm146295069856">Here's an example of <code>show_field</code>
     in action:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> logon <span class="keyword2">=</span> <span class="keyword2">{</span> <span class="keyword5">Logon.</span>
                 session_id <span class="keyword2">=</span> <span class="keyword7">&quot;26685&quot;</span><span class="keyword2">;</span>
                 time <span class="keyword2">=</span> <span class="keyword5">Time.</span>now <span class="keyword2">(</span><span class="keyword2">)</span><span class="keyword2">;</span>
@@ -623,10 +622,10 @@ module Logon :
    user = &quot;yminsky&quot;; credentials = &quot;Xy2d9W&quot;}
 </div># show_field <span class="keyword5">Logon.</span><span class="keyword5">Fields.</span>user <span class="keyword5">Fn.</span>id logon<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot;user: yminsky&quot;
 </div># show_field <span class="keyword5">Logon.</span><span class="keyword5">Fields.</span>time <span class="keyword5">Time.</span>to_string logon<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot;time: 2013-11-05 08:49:43.946365-05:00&quot;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 34) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449014753472">As a side note, the preceding example is our first use of the
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 34) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295056576">As a side note, the preceding example is our first use of the
     <code>Fn</code> module (short for &quot;function&quot;), which
     provides a collection of useful primitives for dealing with functions.
-    <code>Fn.id</code> is the identity function.</p><p id="idm449014751584"><code>fieldslib</code> also provides
+    <code>Fn.id</code> is the identity function.</p><p id="idm146295054688"><code>fieldslib</code> also provides
     higher-level operators, like <code>Fields.fold</code> and <code>Fields.iter</code>, which let you walk over the fields
     of a record. So, for example, in the case of <code>Logon.t</code>, the field iterator has the following
     type:</p><div class="rwocode"><pre><code># <span class="keyword5">Logon.</span><span class="keyword5">Fields.</span>iter<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : session_id:(([&lt; `Read | `Set_and_create ], Logon.t, string)
@@ -639,13 +638,13 @@ module Logon :
                  Field.t_with_perm -&gt; 'd) -&gt;
     'd
 = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 35) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449014737984">This is a bit daunting to look at, largely because of the access
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 35) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295041088">This is a bit daunting to look at, largely because of the access
     control markers, but the structure is actually pretty simple. Each labeled
     argument is a function that takes a first-class field of the necessary
     type as an argument. Note that <code>iter</code>
     passes each of these callbacks the <code>Field.t</code>, not the contents of the specific record
     field. The contents of the field, though, can be looked up using the
-    combination of the record and the <code>Field.t</code>.</p><p id="idm449014735264">Now, let's use <code>Logon.Fields.iter</code>
+    combination of the record and the <code>Field.t</code>.</p><p id="idm146295038368">Now, let's use <code>Logon.Fields.iter</code>
     and <code>show_field</code> to print out all the
     fields of a <code>Logon</code> record:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> print_logon logon <span class="keyword2">=</span>
     <span class="keyword4">let</span> print to_string field <span class="keyword2">=</span>
@@ -662,15 +661,15 @@ time: 2013-11-05 08:49:43.946365-05:00
 user: yminsky
 credentials: Xy2d9W
 - : unit = ()
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 36) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449014718576">One nice side effect of this approach is that it helps you adapt
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/records/main.topscript">records/main.topscript</a> , continued (part 36) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146295021680">One nice side effect of this approach is that it helps you adapt
     your code when the fields of a record change. If you were to add a field
     to <code>Logon.t</code>, the type of <code>Logon.Fields.iter</code> would change along with it,
     acquiring a new argument. Any code using <code>Logon.Fields.iter</code> won't compile until it's fixed
-    to take this new argument into account.</p><p id="idm449014715904">Field iterators are useful for a variety of record-related tasks,
+    to take this new argument into account.</p><p id="idm146295019008">Field iterators are useful for a variety of record-related tasks,
     from building record-validation functions to scaffolding the definition of
     a web form from a record type. Such applications can benefit from the
     guarantee that all fields of the record type in question have been
-    considered.<a name="idm449014715328"></a><a name="idm449014714736"></a><a name="idm449014714128"></a></p></section>
+    considered.<a name="idm146295018432"></a><a name="idm146295017840"></a><a name="idm146295017232"></a></p></section>
 
 
                 

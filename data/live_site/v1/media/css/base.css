@@ -33,11 +33,11 @@ body {
     width: 214px;
 }
 
-
 /* Navigation. */
 
 .navigation {
-    margin-top: 125px;
+  font-family: "Verdana";
+  margin-top: 190px;
 }
 
 .navigation ul {
@@ -47,7 +47,6 @@ body {
 
 .navigation > ul > li {
     font-size: 14px;
-    line-height: 21px;
     margin-bottom: 0;
 }
 
@@ -58,7 +57,7 @@ body {
 .navigation > ul > li:first-child > a,
 .navigation > ul > li:first-child > a.here,
 .navigation > ul > li:first-child > a:hover {
-    font-size: 15px;
+    font-size: 14px;
     border-bottom: 1px #8E8880 solid;
     color: #000000;
     display: table;
@@ -66,15 +65,13 @@ body {
 }
 
 .navigation > ul > li > ul > li {
-    margin-left: 12px;
-    font-size: 14px;
-    line-height: 22px;
+    margin-left: 10px;
+    font-size: 12px;
     margin-bottom: 0;
 }
 
 .navigation a {
     color: #000000;
-    font-weight: bold;
     display: block;
 }
 

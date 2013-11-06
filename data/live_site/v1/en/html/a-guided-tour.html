@@ -31,11 +31,6 @@
     
         <div class="body">
         
-            <header class="header">
-                <i>Available in <a href="http://www.amazon.com/Real-World-OCaml-Functional-programming/dp/144932391X/">print</a> and <a href="http://oreil.ly/realworldOCaml">eBook!</a></i>
-                <h1><a href="http://oreil.ly/realworldOCaml"><img src="../../media/img/cover-cut.png" width="245" alt="Real World OCaml, by Yaron Minsky, Anil Madhavapeddy and Jason Hickey"></img></a></h1>
-            </header>
-    
             <nav class="navigation">
                 <ul>
                     <li>
@@ -129,6 +124,10 @@
                     
                 </ul>
             </nav>
+            <header class="header">
+                <h1><a href="http://oreil.ly/realworldOCaml"><img src="../../media/img/cover.png" width="120" alt="Real World OCaml, by Yaron Minsky, Anil Madhavapeddy and Jason Hickey"></img></a></h1>
+                <p><i>Buy in <a href="http://www.amazon.com/Real-World-OCaml-Functional-programming/dp/144932391X/">print</a> and <a href="http://oreil.ly/realworldOCaml">eBook.</a></i></p>
+            </header>
         
             <article class="page">
         
@@ -136,32 +135,32 @@
                 
                 
 
-    <p id="idm449017959056">This chapter gives an overview of OCaml by walking through a series of
+    <p id="idm146298262160">This chapter gives an overview of OCaml by walking through a series of
   small examples that cover most of the major features of the language. This
   should provide a sense of what OCaml can do, without getting too deep into
-  any one topic.</p><p id="idm449017958416">Throughout the book we're going to use Core, a more full-featured and capable replacement
+  any one topic.</p><p id="idm146298261520">Throughout the book we're going to use Core, a more full-featured and capable replacement
     for OCaml's standard library. We'll also use <span><strong>utop</strong></span>, a shell
     that lets you type in expressions and evaluate them interactively. <span><strong>utop</strong></span> is an easier-to-use version of OCaml's standard toplevel (which you can start
     by typing <span><em>ocaml</em></span> at the command line). These instructions will assume you're
-    using <span><strong>utop</strong></span> specifically.</p><p id="idm449017955408">Before getting started, make sure you have a working OCaml installation so you can try out
-    the examples as you read through the chapter. </p><section id="ocaml-as-a-calculator"><h1>OCaml as a Calculator</h1><p id="idm449017954016">The first thing you need to do when using Core is to open<a name="idm449017953696"></a><a name="idm449017952448"></a><a name="idm449017951584"></a> <code>Core.Std</code>:</p><div class="rwocode"><pre><code># <span class="keyword1">open</span> <span class="keyword5">Core.</span>Std<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"> </div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017946272">This makes the definitions in Core available and is required for
-    many of the examples in the tour and in the remainder of the book.</p><p id="idm449017945744">Now let's try a few simple numerical calculations:</p><div class="rwocode"><pre><code># <span class="keyword8">3</span> <span class="keyword2">+</span> <span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 7
+    using <span><strong>utop</strong></span> specifically.</p><p id="idm146298258512">Before getting started, make sure you have a working OCaml installation so you can try out
+    the examples as you read through the chapter. </p><section id="ocaml-as-a-calculator"><h1>OCaml as a Calculator</h1><p id="idm146298257120">The first thing you need to do when using Core is to open<a name="idm146298256800"></a><a name="idm146298255552"></a><a name="idm146298254688"></a> <code>Core.Std</code>:</p><div class="rwocode"><pre><code># <span class="keyword1">open</span> <span class="keyword5">Core.</span>Std<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"> </div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146298249376">This makes the definitions in Core available and is required for
+    many of the examples in the tour and in the remainder of the book.</p><p id="idm146298248848">Now let's try a few simple numerical calculations:</p><div class="rwocode"><pre><code># <span class="keyword8">3</span> <span class="keyword2">+</span> <span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 7
 </div># <span class="keyword8">8</span> / <span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 2
 </div># <span class="keyword8">3</span>.<span class="keyword8">5</span> <span class="keyword2">+</span>. <span class="keyword8">6</span>.<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : float = 9.5
 </div># <span class="keyword8">30_000_000</span> / <span class="keyword8">300_000</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 100
 </div># sqrt <span class="keyword8">9</span>.<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : float = 3.
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017934832">By and large, this is pretty similar to what you'd find in any
-    programming language, but a few things jump right out at you:</p><ul><li><p id="idm449017933792">We needed to type <code>;;</code> in order
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146298237936">By and large, this is pretty similar to what you'd find in any
+    programming language, but a few things jump right out at you:</p><ul><li><p id="idm146298236896">We needed to type <code>;;</code> in order
         to tell the toplevel that it should evaluate an expression. This is a
         peculiarity of the toplevel that is not required in standalone
         programs (though it is sometimes helpful to include <code>;;</code> to improve OCaml's error reporting, by
         making it more explicit where a given top-level declaration was
-        intended to end).</p></li><li><p id="idm449017931440">After evaluating an expression, the toplevel first prints the type of the result, and
-          then prints the result itself.</p></li><li><p id="idm449017930544">Function arguments are separated by spaces instead of by
+        intended to end).</p></li><li><p id="idm146298234544">After evaluating an expression, the toplevel first prints the type of the result, and
+          then prints the result itself.</p></li><li><p id="idm146298233648">Function arguments are separated by spaces instead of by
         parentheses and commas, which is more like the UNIX shell than it is
-        like traditional programming languages such as C or Java.</p></li><li><p id="idm449017929568">OCaml allows you to place underscores in the middle of numeric literals to improve
+        like traditional programming languages such as C or Java.</p></li><li><p id="idm146298232672">OCaml allows you to place underscores in the middle of numeric literals to improve
           readability. Note that underscores can be placed anywhere within a number, not just every
-          three digits.</p></li><li><p id="idm449017928592">OCaml carefully distinguishes between <code>float</code>, the
+          three digits.</p></li><li><p id="idm146298231696">OCaml carefully distinguishes between <code>float</code>, the
           type for floating-point numbers, and <code>int</code>, the type for
           integers. The types have different literals (<code>6.</code> instead
           of <code>6</code>) and different infix operators (<code>+.</code> instead of <code>+</code>), and OCaml
@@ -169,31 +168,31 @@
           has its benefits, since it prevents some kinds of bugs that arise in other languages due
           to unexpected differences between the behavior of <code>int</code>
           and <code>float</code>. For example, in many languages, <code>1 / 3</code> is zero, but <code>1 / 3.0</code>
-          is a third. OCaml requires you to be explicit about which operation you're doing.</p></li></ul><p id="idm449017921216">We can also create a variable to name the value of a given
+          is a third. OCaml requires you to be explicit about which operation you're doing.</p></li></ul><p id="idm146298224320">We can also create a variable to name the value of a given
     expression, using the <code>let</code> keyword. This
     is known as a <span><em>let binding</em></span>:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> x <span class="keyword2">=</span> <span class="keyword8">3</span> <span class="keyword2">+</span> <span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val x : int = 7
 </div># <span class="keyword4">let</span> y <span class="keyword2">=</span> x <span class="keyword2">+</span> x<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val y : int = 14
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017914320">After a new variable is created, the toplevel tells us the name of
-    the variable (<code>x</code> or <code>y</code>), in addition to its type (<code>int</code>) and value (<code>7</code> or <code>14</code>).</p><p id="idm449017910800">Note that there are some constraints on what identifiers can be used
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146298217424">After a new variable is created, the toplevel tells us the name of
+    the variable (<code>x</code> or <code>y</code>), in addition to its type (<code>int</code>) and value (<code>7</code> or <code>14</code>).</p><p id="idm146298213904">Note that there are some constraints on what identifiers can be used
     for variable names. Punctuation is excluded, except for <code>_</code> and <code>'</code>, and
     variables must start with a lowercase letter or an underscore. Thus, these
     are legal:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> x7 <span class="keyword2">=</span> <span class="keyword8">3</span> <span class="keyword2">+</span> <span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val x7 : int = 7
 </div># <span class="keyword4">let</span> x_plus_y <span class="keyword2">=</span> x <span class="keyword2">+</span> y<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val x_plus_y : int = 21
 </div># <span class="keyword4">let</span> x' <span class="keyword2">=</span> x <span class="keyword2">+</span> <span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val x' : int = 8
 </div># <span class="keyword4">let</span> _x' <span class="keyword2">=</span> x' <span class="keyword2">+</span> x'<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"> </div># _x'<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 16
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 3) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017899088">Note that by default, <span><strong>utop</strong></span>
-    doesn't bother to print out variables starting with an underscore.</p><p id="idm449017898016">The following examples, however, are not legal:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword6">Seven </span><span class="keyword2">=</span> <span class="keyword8">3</span> <span class="keyword2">+</span> <span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 4-9:
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 3) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146298202192">Note that by default, <span><strong>utop</strong></span>
+    doesn't bother to print out variables starting with an underscore.</p><p id="idm146298201120">The following examples, however, are not legal:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword6">Seven </span><span class="keyword2">=</span> <span class="keyword8">3</span> <span class="keyword2">+</span> <span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 4-9:
 Error: Unbound constructor Seven
 </div># <span class="keyword4">let</span> <span class="keyword8">7</span>x <span class="keyword2">=</span> <span class="keyword8">7</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 5-10:
 Error: This expression should not be a function, the expected type is
 int
 </div># <span class="keyword4">let</span> x-plus-y <span class="keyword2">=</span> x <span class="keyword2">+</span> y<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"><br></br>Characters 4-5:
-Error: Parse error: [fun_binding] expected after [ipatt] (in [let_binding]) </div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017887872">The error messages here are a little confusing, but they'll make
-    more sense as you learn more about the language.</p></section><section id="functions-and-type-inference"><h1>Functions and Type Inference</h1><p id="idm449017886368">The <code>let</code> syntax can also be used
-    to define a function:<a name="idm449017885440"></a><a name="idm449017884192"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> square x <span class="keyword2">=</span> x <span class="keyword2">*</span> x <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val square : int -&gt; int = &lt;fun&gt;
+Error: Parse error: [fun_binding] expected after [ipatt] (in [let_binding]) </div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146298190976">The error messages here are a little confusing, but they'll make
+    more sense as you learn more about the language.</p></section><section id="functions-and-type-inference"><h1>Functions and Type Inference</h1><p id="idm146298189472">The <code>let</code> syntax can also be used
+    to define a function:<a name="idm146298188544"></a><a name="idm146298187296"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> square x <span class="keyword2">=</span> x <span class="keyword2">*</span> x <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val square : int -&gt; int = &lt;fun&gt;
 </div># square <span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 4
 </div># square <span class="keyword2">(</span>square <span class="keyword8">2</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 16
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 5) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017875696">Functions in OCaml are values like any other, which is why we use
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 5) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146298178800">Functions in OCaml are values like any other, which is why we use
     the <code>let</code> keyword to bind a function to a
     variable name, just as we use <code>let</code> to
     bind a simple value like an integer to a variable name. When using
@@ -201,83 +200,83 @@ Error: Parse error: [fun_binding] expected after [ipatt] (in [let_binding]) </di
     identifier after the <code>let</code> is the
     function name, and each subsequent identifier is a different argument to
     the function. Thus, <code>square</code> is a
-    function with a single argument.</p><p id="idm449017871808">Now that we're creating more interesting values like functions, the
+    function with a single argument.</p><p id="idm146298174912">Now that we're creating more interesting values like functions, the
     types have gotten more interesting too. <code>int -&gt;
     int</code> is a function type, in this case indicating a function that
     takes an <code>int</code> and returns an <code>int</code>. We can also write functions that take
     multiple arguments. (Note that the following example will not work if you
     haven't opened <code>Core.Std</code> as was
-    suggested earlier.)<a name="idm449017868720"></a><a name="idm449017867856"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> ratio x y <span class="keyword2">=</span>
+    suggested earlier.)<a name="idm146298171824"></a><a name="idm146298170960"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> ratio x y <span class="keyword2">=</span>
      <span class="keyword5">Float.</span>of_int x /. <span class="keyword5">Float.</span>of_int y
   <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val ratio : int -&gt; int -&gt; float = &lt;fun&gt;
 </div># ratio <span class="keyword8">4</span> <span class="keyword8">7</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : float = 0.571428571429
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 6) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017859696">The preceding example also happens to be our first use of modules.
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 6) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146298162800">The preceding example also happens to be our first use of modules.
     Here, <code>Float.of_int</code> refers to the
     <code>of_int</code> function contained in the
     <code>Float</code> module. This is different from
     what you might expect from an object-oriented language, where dot-notation
     is typically used for accessing a method of an object. Note that module
-    names always start with a capital letter.</p><p id="idm449017857168">The notation for the type-signature of a multiargument function may
+    names always start with a capital letter.</p><p id="idm146298160272">The notation for the type-signature of a multiargument function may
     be a little surprising at first, but we'll explain where it comes from
     when we get to function currying in <a href="variables-and-functions.html#multi-argument-functions">the section called “Multiargument functions”</a>. For the moment, think of the arrows
     as separating different arguments of the function, with the type after the
     final arrow being the return value. Thus, <code>int
     -&gt; int -&gt; float</code> describes a function that takes two
-    <code>int</code> arguments and returns a <code>float</code>.</p><p id="idm449017854048">We can also write functions that take other functions as arguments.
+    <code>int</code> arguments and returns a <code>float</code>.</p><p id="idm146298157152">We can also write functions that take other functions as arguments.
     Here's an example of a function that takes three arguments: a test
     function and two integer arguments. The function returns the sum of the
     integers that pass the test:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> sum_if_true test first second <span class="keyword2">=</span>
     <span class="keyword2">(</span><span class="keyword1">if</span> test first <span class="keyword1">then</span> first <span class="keyword1">else</span> <span class="keyword8">0</span><span class="keyword2">)</span>
     <span class="keyword2">+</span> <span class="keyword2">(</span><span class="keyword1">if</span> test second <span class="keyword1">then</span> second <span class="keyword1">else</span> <span class="keyword8">0</span><span class="keyword2">)</span>
   <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val sum_if_true : (int -&gt; bool) -&gt; int -&gt; int -&gt; int = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 7) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017847568">If we look at the inferred type signature in detail, we see that the
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 7) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146298150672">If we look at the inferred type signature in detail, we see that the
     first argument is a function that takes an integer and returns a boolean,
     and that the remaining two arguments are integers. Here's an example of
     this function in action:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> even x <span class="keyword2">=</span>
     x <span class="keyword2">mod</span> <span class="keyword8">2</span> <span class="keyword2">=</span> <span class="keyword8">0</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val even : int -&gt; bool = &lt;fun&gt;
 </div># sum_if_true even <span class="keyword8">3</span> <span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 4
 </div># sum_if_true even <span class="keyword8">2</span> <span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 6
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 8) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017839200">Note that in the definition of <code>even</code>, we used <code>=</code> in two different ways: once as the part of the
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 8) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146298142304">Note that in the definition of <code>even</code>, we used <code>=</code> in two different ways: once as the part of the
     <code>let</code> binding that separates the thing being defined from
     its definition; and once as an equality test, when comparing <code>x mod 2</code> to <code>0</code>.
     These are very different operations despite the fact that they share some
-    syntax.</p><section id="type-inference"><h1>Type Inference</h1><p id="idm449017834912">As the types we encounter get more complicated, you might ask
+    syntax.</p><section id="type-inference"><h1>Type Inference</h1><p id="idm146298138016">As the types we encounter get more complicated, you might ask
       yourself how OCaml is able to figure them out, given that we didn't
-      write down any explicit type information.<a name="idm449017834464"></a></p><p id="idm449017833088">OCaml determines the type of an expression using a technique called <span><em>type
+      write down any explicit type information.<a name="idm146298137568"></a></p><p id="idm146298136192">OCaml determines the type of an expression using a technique called <span><em>type
           inference</em></span>, by which the type of an expression is inferred from the available
-        type information about the components of that expression.</p><p id="idm449017832096">As an example, let's walk through the process of inferring the
-      type of <code>sum_if_true</code>:</p><div><ol><li><p id="idm449017830512">OCaml requires that both branches of an <code>if</code> statement have the same type, so the
+        type information about the components of that expression.</p><p id="idm146298135200">As an example, let's walk through the process of inferring the
+      type of <code>sum_if_true</code>:</p><div><ol><li><p id="idm146298133616">OCaml requires that both branches of an <code>if</code> statement have the same type, so the
           expression <code>if test first then first else
           0</code> requires that <code>first</code>
           must be the same type as <code>0</code>, and
           so <code>first</code> must be of type <code>int</code>. Similarly, from <code>if test second then second else 0</code> we can
           infer that <code>second</code> has type
-          <code>int</code>.</p></li><li><p id="idm449017824016"><code>test</code> is passed <code>first</code> as an argument. Since <code>first</code> has type <code>int</code>, the input type of <code>test</code> must be <code>int</code>.</p></li><li><p id="idm449017819728"><code>test first</code> is used as the
+          <code>int</code>.</p></li><li><p id="idm146298127120"><code>test</code> is passed <code>first</code> as an argument. Since <code>first</code> has type <code>int</code>, the input type of <code>test</code> must be <code>int</code>.</p></li><li><p id="idm146298122832"><code>test first</code> is used as the
           condition in an <code>if</code> statement, so
           the return type of <code>test</code> must be
-          <code>bool</code>.</p></li><li><p id="idm449017816560">The fact that <code>+</code> returns
+          <code>bool</code>.</p></li><li><p id="idm146298119664">The fact that <code>+</code> returns
           <code>int</code> implies that the return value
           of <code>sum_if_true</code> must be
-          int.</p></li></ol></div><p id="idm449017814048">Together, that nails down the types of all the variables, which
-      determines the overall type of <code>sum_if_true</code>.</p><p id="idm449017812944">Over time, you'll build a rough intuition for how the OCaml
+          int.</p></li></ol></div><p id="idm146298117152">Together, that nails down the types of all the variables, which
+      determines the overall type of <code>sum_if_true</code>.</p><p id="idm146298116048">Over time, you'll build a rough intuition for how the OCaml
       inference engine works, which makes it easier to reason through your
       programs. You can make it easier to understand the types of a given
       expression by adding explicit type annotations. These annotations don't
       change the behavior of an OCaml program, but they can serve as useful
       documentation, as well as catch unintended type changes. They can also
       be helpful in figuring out why a given piece of code fails to
-      compile.</p><p id="idm449017812032">Here's an annotated version of <code>sum_if_true</code>:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> sum_if_true <span class="keyword2">(</span>test <span class="keyword2">:</span> <span class="keyword3">int</span> -<span class="keyword2">&gt;</span> bool<span class="keyword2">)</span> <span class="keyword2">(</span>x <span class="keyword2">:</span> <span class="keyword3">int</span><span class="keyword2">)</span> <span class="keyword2">(</span>y <span class="keyword2">:</span> <span class="keyword3">int</span><span class="keyword2">)</span> <span class="keyword2">:</span> <span class="keyword3">int</span> <span class="keyword2">=</span>
+      compile.</p><p id="idm146298115136">Here's an annotated version of <code>sum_if_true</code>:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> sum_if_true <span class="keyword2">(</span>test <span class="keyword2">:</span> <span class="keyword3">int</span> -<span class="keyword2">&gt;</span> bool<span class="keyword2">)</span> <span class="keyword2">(</span>x <span class="keyword2">:</span> <span class="keyword3">int</span><span class="keyword2">)</span> <span class="keyword2">(</span>y <span class="keyword2">:</span> <span class="keyword3">int</span><span class="keyword2">)</span> <span class="keyword2">:</span> <span class="keyword3">int</span> <span class="keyword2">=</span>
      <span class="keyword2">(</span><span class="keyword1">if</span> test x <span class="keyword1">then</span> x <span class="keyword1">else</span> <span class="keyword8">0</span><span class="keyword2">)</span>
      <span class="keyword2">+</span> <span class="keyword2">(</span><span class="keyword1">if</span> test y <span class="keyword1">then</span> y <span class="keyword1">else</span> <span class="keyword8">0</span><span class="keyword2">)</span>
   <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val sum_if_true : (int -&gt; bool) -&gt; int -&gt; int -&gt; int = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 9) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017805104">In the above, we've marked every argument to the function with its
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 9) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146298108208">In the above, we've marked every argument to the function with its
       type, with the final annotation indicating the type of the return value.
       Such type annotations can be placed on any expression in an OCaml
-      program:</p></section><section id="inferring-generic-types"><h1>Inferring Generic Types</h1><p id="idm449017803488">Sometimes, there isn't enough information to fully determine the
-      concrete type of a given value. Consider this function.<a name="idm449017803104"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> first_if_true test x y <span class="keyword2">=</span>
+      program:</p></section><section id="inferring-generic-types"><h1>Inferring Generic Types</h1><p id="idm146298106592">Sometimes, there isn't enough information to fully determine the
+      concrete type of a given value. Consider this function.<a name="idm146298106208"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> first_if_true test x y <span class="keyword2">=</span>
     <span class="keyword1">if</span> test x <span class="keyword1">then</span> x <span class="keyword1">else</span> y
   <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val first_if_true : ('a -&gt; bool) -&gt; 'a -&gt; 'a -&gt; 'a = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 10) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017796720"><code>first_if_true</code> takes as its
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 10) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146298099824"><code>first_if_true</code> takes as its
       arguments a function <code>test</code>, and two
       values, <code>x</code> and <code>y</code>, where <code>x</code>
       is to be returned if <code>test x</code> evaluates
@@ -285,7 +284,7 @@ Error: Parse error: [fun_binding] expected after [ipatt] (in [let_binding]) </di
       as arithmetic operators or literals to tell you what the type of
       <code>x</code> and <code>y</code> are. That makes it seem like one could use
       <code>first_if_true</code> on values of any
-      type.</p><p id="idm449017788960">Indeed, if we look at the type returned by the toplevel, we see that rather than choose
+      type.</p><p id="idm146298092064">Indeed, if we look at the type returned by the toplevel, we see that rather than choose
         a single concrete type, OCaml has introduced a <span><em>type variable</em></span>
 <code>'a</code> to express that the type is generic. (You can tell
         it's a type variable by the leading single quote mark.) In particular, the type of the
@@ -297,11 +296,11 @@ Error: Parse error: [fun_binding] expected after [ipatt] (in [let_binding]) </di
         other two arguments, <code>x</code> and <code>y</code>, and of the return value of <code>first_if_true</code>.
         This kind of genericity is called <span><em>parametric polymorphism</em></span> because it
         works by parameterizing the type in question with a type variable. It is very similar to
-        generics in C# and Java.<a name="idm449017781088"></a><a name="idm449017780224"></a></p><p id="idm449017779232">The generic type of <code>first_if_true</code> allows us to write this:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> long_string s <span class="keyword2">=</span> <span class="keyword5">String.</span>length s <span class="keyword2">&gt;</span> <span class="keyword8">6</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val long_string : string -&gt; bool = &lt;fun&gt;
+        generics in C# and Java.<a name="idm146298084192"></a><a name="idm146298083328"></a></p><p id="idm146298082336">The generic type of <code>first_if_true</code> allows us to write this:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> long_string s <span class="keyword2">=</span> <span class="keyword5">String.</span>length s <span class="keyword2">&gt;</span> <span class="keyword8">6</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val long_string : string -&gt; bool = &lt;fun&gt;
 </div># first_if_true long_string <span class="keyword7">&quot;short&quot;</span> <span class="keyword7">&quot;loooooong&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot;loooooong&quot;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 11) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017772672">As well as this:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> big_number x <span class="keyword2">=</span> x <span class="keyword2">&gt;</span> <span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val big_number : int -&gt; bool = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 11) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146298075776">As well as this:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> big_number x <span class="keyword2">=</span> x <span class="keyword2">&gt;</span> <span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val big_number : int -&gt; bool = &lt;fun&gt;
 </div># first_if_true big_number <span class="keyword8">4</span> <span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 4
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 12) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017766816">Both <code>long_string</code> and <code>big_number</code> are functions, and each is passed
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 12) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146298069920">Both <code>long_string</code> and <code>big_number</code> are functions, and each is passed
       to <code>first_if_true</code> with two other
       arguments of the appropriate type (strings in the first example, and
       integers in the second). But we can't mix and match two different
@@ -309,120 +308,120 @@ Error: Parse error: [fun_binding] expected after [ipatt] (in [let_binding]) </di
       of <code>first_if_true</code>:</p><div class="rwocode"><pre><code># first_if_true big_number <span class="keyword7">&quot;short&quot;</span> <span class="keyword7">&quot;loooooong&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 25-32:
 Error: This expression has type string but an expression was expected of type
          int
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 13) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017758128">In this example, <code>big_number</code>
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 13) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146298061232">In this example, <code>big_number</code>
       requires that <code>'a</code> be instantiated as
       <code>int</code>, whereas <code>&quot;short&quot;</code> and <code>&quot;loooooong&quot;</code> require that <code>'a</code> be instantiated as <code>string</code>, and they can't both be right at the
-      same time.</p><aside class="note"><h1>Type Errors Versus Exceptions</h1><p id="idm449017752784">There's a big difference in OCaml (and really in any compiled
+      same time.</p><aside class="note"><h1>Type Errors Versus Exceptions</h1><p id="idm146298055888">There's a big difference in OCaml (and really in any compiled
         language) between errors that are caught at compile time and those
         that are caught at runtime. It's better to catch errors as early as
         possible in the development process, and compilation time is best of
-        all.<a name="idm449017752224"></a><a name="idm449017751312"></a><a name="idm449017750064"></a><a name="idm449017748816"></a></p><p id="idm449017747824">Working in the toplevel somewhat obscures the difference between
+        all.<a name="idm146298055328"></a><a name="idm146298054416"></a><a name="idm146298053168"></a><a name="idm146298051920"></a></p><p id="idm146298050928">Working in the toplevel somewhat obscures the difference between
         runtime and compile-time errors, but that difference is still there.
         Generally, type errors like this one:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> add_potato x <span class="keyword2">=</span>
      x <span class="keyword2">+</span> <span class="keyword7">&quot;potato&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 28-36:
 Error: This expression has type string but an expression was expected of type
          int
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 14) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017741664">are compile-time errors (because <code>+</code> requires that both its arguments be of
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 14) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146298044768">are compile-time errors (because <code>+</code> requires that both its arguments be of
         type <code>int</code>), whereas errors that
         can't be caught by the type system, like division by zero, lead to
         runtime exceptions:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> is_a_multiple x y <span class="keyword2">=</span>
      x <span class="keyword2">mod</span> y <span class="keyword2">=</span> <span class="keyword8">0</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val is_a_multiple : int -&gt; int -&gt; bool = &lt;fun&gt;
 </div># is_a_multiple <span class="keyword8">8</span> <span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : bool = true
 </div># is_a_multiple <span class="keyword8">8</span> <span class="keyword8">0</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Exception: Division_by_zero.
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 15) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017732080">The distinction here is that type errors will stop you whether
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 15) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146298035184">The distinction here is that type errors will stop you whether
         or not the offending code is ever actually executed. Merely defining
         <code>add_potato</code> is an error, whereas
         <code>is_a_multiple</code> only fails when it's
         called, and then, only when it's called with an input that triggers
-        the exception.</p></aside></section></section><section id="tuples-lists-options-and-pattern-matching"><h1>Tuples, Lists, Options, and Pattern Matching</h1><section id="tuples"><h1>Tuples</h1><p id="idm449017727984">So far we've encountered a handful of basic types like <code>int</code>, <code>float</code>,
+        the exception.</p></aside></section></section><section id="tuples-lists-options-and-pattern-matching"><h1>Tuples, Lists, Options, and Pattern Matching</h1><section id="tuples"><h1>Tuples</h1><p id="idm146298031088">So far we've encountered a handful of basic types like <code>int</code>, <code>float</code>,
       and <code>string</code>, as well as function types
       like <code>string -&gt; int</code>. But we haven't
       yet talked about any data structures. We'll start by looking at a
       particularly simple data structure, the tuple. A tuple is an ordered
       collection of values that can each be of a different type. You can
-      create a tuple by joining values together with a comma:<a name="idm449017724880"></a><a name="idm449017724016"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> a_tuple <span class="keyword2">=</span> <span class="keyword2">(</span><span class="keyword8">3</span>,<span class="keyword7">&quot;three&quot;</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val a_tuple : int * string = (3, &quot;three&quot;)
+      create a tuple by joining values together with a comma:<a name="idm146298027984"></a><a name="idm146298027120"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> a_tuple <span class="keyword2">=</span> <span class="keyword2">(</span><span class="keyword8">3</span>,<span class="keyword7">&quot;three&quot;</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val a_tuple : int * string = (3, &quot;three&quot;)
 </div># <span class="keyword4">let</span> another_tuple <span class="keyword2">=</span> <span class="keyword2">(</span><span class="keyword8">3</span>,<span class="keyword7">&quot;four&quot;</span>,<span class="keyword8">5</span>.<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val another_tuple : int * string * float = (3, &quot;four&quot;, 5.)
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 16) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017717104">(For the mathematically inclined, the <code>*</code> character is used because the set of all
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 16) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146298020208">(For the mathematically inclined, the <code>*</code> character is used because the set of all
       pairs of type <code>t * s</code> corresponds to
-      the Cartesian product of the set of elements of type <code>t</code> and the set of elements of type <code>s</code>.)</p><p id="idm449017714048">You can extract the components of a tuple using OCaml's
+      the Cartesian product of the set of elements of type <code>t</code> and the set of elements of type <code>s</code>.)</p><p id="idm146298017152">You can extract the components of a tuple using OCaml's
       pattern-matching syntax, as shown below:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword2">(</span>x,y<span class="keyword2">)</span> <span class="keyword2">=</span> a_tuple<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val x : int = 3
 val y : string = &quot;three&quot;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 17) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017709264">Here, the <code>(x,y)</code> on the lefthand side of the <code>let</code> binding is the pattern. This pattern lets us mint the new
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 17) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146298012368">Here, the <code>(x,y)</code> on the lefthand side of the <code>let</code> binding is the pattern. This pattern lets us mint the new
         variables <code>x</code> and <code>y</code>,
         each bound to different components of the value being matched. These can now be used in
         subsequent expressions:</p><div class="rwocode"><pre><code># x <span class="keyword2">+</span> <span class="keyword5">String.</span>length y<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 8
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 18) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017702544">Note that the same syntax is used both for constructing and for
-      pattern matching on tuples.</p><p id="idm449017702048">Pattern matching can also show up in function arguments. Here's a
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 18) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146298005648">Note that the same syntax is used both for constructing and for
+      pattern matching on tuples.</p><p id="idm146298005152">Pattern matching can also show up in function arguments. Here's a
       function for computing the distance between two points on the plane,
       where each point is represented as a pair of <code>float</code>s. The pattern-matching syntax lets us
       get at the values we need with a minimum of fuss:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> distance <span class="keyword2">(</span>x1,y1<span class="keyword2">)</span> <span class="keyword2">(</span>x2,y2<span class="keyword2">)</span> <span class="keyword2">=</span>
     sqrt <span class="keyword2">(</span><span class="keyword2">(</span>x1 -. x2<span class="keyword2">)</span> <span class="keyword2">*</span><span class="keyword2">*</span> <span class="keyword8">2</span>. <span class="keyword2">+</span>. <span class="keyword2">(</span>y1 -. y2<span class="keyword2">)</span> <span class="keyword2">*</span><span class="keyword2">*</span> <span class="keyword8">2</span>.<span class="keyword2">)</span>
   <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val distance : float * float -&gt; float * float -&gt; float = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 19) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017695744">The <code>**</code> operator used above is
-      for raising a floating-point number to a power.</p><p id="idm449017694672">This is just a first taste of pattern matching. Pattern matching
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 19) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297998848">The <code>**</code> operator used above is
+      for raising a floating-point number to a power.</p><p id="idm146297997776">This is just a first taste of pattern matching. Pattern matching
       is a pervasive tool in OCaml, and as you'll see, it has surprising
-      power.</p></section><section id="lists"><h1>Lists</h1><p id="idm449017693136">Where tuples let you combine a fixed number of items, potentially
+      power.</p></section><section id="lists"><h1>Lists</h1><p id="idm146297996240">Where tuples let you combine a fixed number of items, potentially
       of different types, lists let you hold any number of items of the same
       type. Consider the following example:<a name="DSlists"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> languages <span class="keyword2">=</span> <span class="keyword2">[</span><span class="keyword7">&quot;OCaml&quot;</span><span class="keyword2">;</span><span class="keyword7">&quot;Perl&quot;</span><span class="keyword2">;</span><span class="keyword7">&quot;C&quot;</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val languages : string list = [&quot;OCaml&quot;; &quot;Perl&quot;; &quot;C&quot;]
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 20) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017687296">Note that you can't mix elements of different types in the same
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 20) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297990400">Note that you can't mix elements of different types in the same
       list, unlike tuples:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> numbers <span class="keyword2">=</span> <span class="keyword2">[</span><span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword7">&quot;four&quot;</span><span class="keyword2">;</span><span class="keyword8">5</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters 17-23:
 Error: This expression has type string but an expression was expected of type
          int
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 21) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><section id="the-list-module"><h1>The List module</h1><p id="idm449017680976">Core comes with a <code>List</code> module
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 21) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><section id="the-list-module"><h1>The List module</h1><p id="idm146297984080">Core comes with a <code>List</code> module
         that has a rich collection of functions for working with lists. We can
         access values from within a module by using dot notation. For example,
         this is how we compute the length of a list:</p><div class="rwocode"><pre><code># <span class="keyword5">List.</span>length languages<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 3
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 22) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017676080">Here's something a little more complicated. We can compute the
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 22) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297979184">Here's something a little more complicated. We can compute the
         list of the lengths of each language as follows:</p><div class="rwocode"><pre><code># <span class="keyword5">List.</span>map languages ~f<span class="keyword2">:</span><span class="keyword5">String.</span>length<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = [5; 4; 1]
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 23) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017671840"><code>List.map</code> takes two arguments:
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 23) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297974944"><code>List.map</code> takes two arguments:
         a list and a function for transforming the elements of that list. It
         returns a new list with the transformed elements and does not modify
-        the original list.</p><p id="idm449017670768">Notably, the function passed to <code>List.map</code> is passed under a <span><em>labeled
+        the original list.</p><p id="idm146297973872">Notably, the function passed to <code>List.map</code> is passed under a <span><em>labeled
         argument</em></span> <code>~f</code>. Labeled
         arguments are specified by name rather than by position, and thus
         allow you to change the order in which arguments are presented to a
-        function without changing its behavior, as you can see here:<a name="idm449017668624"></a><a name="idm449017667376"></a></p><div class="rwocode"><pre><code># <span class="keyword5">List.</span>map ~f<span class="keyword2">:</span><span class="keyword5">String.</span>length languages<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = [5; 4; 1]
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 24) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017662656">We'll learn more about labeled arguments and why they're
-        important in <a href="variables-and-functions.html">Chapter 2, <i>Variables and Functions</i></a>.</p></section><section id="constructing-lists-with"><h1>Constructing lists with ::</h1><p id="idm449017660720">In addition to constructing lists using brackets, we can use the
+        function without changing its behavior, as you can see here:<a name="idm146297971728"></a><a name="idm146297970480"></a></p><div class="rwocode"><pre><code># <span class="keyword5">List.</span>map ~f<span class="keyword2">:</span><span class="keyword5">String.</span>length languages<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = [5; 4; 1]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 24) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297965760">We'll learn more about labeled arguments and why they're
+        important in <a href="variables-and-functions.html">Chapter 2, <i>Variables and Functions</i></a>.</p></section><section id="constructing-lists-with"><h1>Constructing lists with ::</h1><p id="idm146297963824">In addition to constructing lists using brackets, we can use the
         operator <code>::</code> for adding elements to
-        the front of a list:<a name="idm449017659696"></a><a name="idm449017658448"></a></p><div class="rwocode"><pre><code># <span class="keyword7">&quot;French&quot;</span> <span class="keyword2">:</span><span class="keyword2">:</span> <span class="keyword7">&quot;Spanish&quot;</span> <span class="keyword2">:</span><span class="keyword2">:</span> languages<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string list = [&quot;French&quot;; &quot;Spanish&quot;; &quot;OCaml&quot;; &quot;Perl&quot;; &quot;C&quot;]
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 25) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017653280">Here, we're creating a new and extended list, not changing the list we started with,
+        the front of a list:<a name="idm146297962800"></a><a name="idm146297961552"></a></p><div class="rwocode"><pre><code># <span class="keyword7">&quot;French&quot;</span> <span class="keyword2">:</span><span class="keyword2">:</span> <span class="keyword7">&quot;Spanish&quot;</span> <span class="keyword2">:</span><span class="keyword2">:</span> languages<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string list = [&quot;French&quot;; &quot;Spanish&quot;; &quot;OCaml&quot;; &quot;Perl&quot;; &quot;C&quot;]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 25) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297956384">Here, we're creating a new and extended list, not changing the list we started with,
           as you can see below:</p><div class="rwocode"><pre><code># languages<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string list = [&quot;OCaml&quot;; &quot;Perl&quot;; &quot;C&quot;]
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 26) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><aside class="note"><h1>Semicolons Versus Commas</h1><p id="idm449017648400">Unlike many other languages, OCaml uses semicolons to separate
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 26) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><aside class="note"><h1>Semicolons Versus Commas</h1><p id="idm146297951504">Unlike many other languages, OCaml uses semicolons to separate
           list elements in lists rather than commas. Commas, instead, are used
           for separating elements in a tuple. If you try to use commas in a
           list, you'll see that your code compiles but doesn't do quite what
-          you might expect:<a name="idm449017647808"></a><a name="idm449017646864"></a></p><div class="rwocode"><pre><code># <span class="keyword2">[</span><span class="keyword7">&quot;OCaml&quot;</span>, <span class="keyword7">&quot;Perl&quot;</span>, <span class="keyword7">&quot;C&quot;</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : (string * string * string) list = [(&quot;OCaml&quot;, &quot;Perl&quot;, &quot;C&quot;)]
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 27) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017642128">In particular, rather than a list of three strings, what we
-          have is a singleton list containing a three-tuple of strings.</p><p id="idm449017641600">This example uncovers the fact that commas create a tuple,
+          you might expect:<a name="idm146297950912"></a><a name="idm146297949968"></a></p><div class="rwocode"><pre><code># <span class="keyword2">[</span><span class="keyword7">&quot;OCaml&quot;</span>, <span class="keyword7">&quot;Perl&quot;</span>, <span class="keyword7">&quot;C&quot;</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : (string * string * string) list = [(&quot;OCaml&quot;, &quot;Perl&quot;, &quot;C&quot;)]
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 27) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297945232">In particular, rather than a list of three strings, what we
+          have is a singleton list containing a three-tuple of strings.</p><p id="idm146297944704">This example uncovers the fact that commas create a tuple,
           even if there are no surrounding parens. So, we can write:</p><div class="rwocode"><pre><code># <span class="keyword8">1</span>,<span class="keyword8">2</span>,<span class="keyword8">3</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int * int * int = (1, 2, 3)
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 28) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017637408">to allocate a tuple of integers. This is generally considered
-          poor style and should be avoided.</p></aside><p id="idm449017636784">The bracket notation for lists is really just syntactic sugar
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 28) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297940512">to allocate a tuple of integers. This is generally considered
+          poor style and should be avoided.</p></aside><p id="idm146297939888">The bracket notation for lists is really just syntactic sugar
         for <code>::</code>. Thus, the following
         declarations are all equivalent. Note that <code>[]</code> is used to represent the empty list and
         that <code>::</code> is
         right-associative:</p><div class="rwocode"><pre><code># <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span> <span class="keyword8">2</span><span class="keyword2">;</span> <span class="keyword8">3</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = [1; 2; 3]
 </div># <span class="keyword8">1</span> <span class="keyword2">:</span><span class="keyword2">:</span> <span class="keyword2">(</span><span class="keyword8">2</span> <span class="keyword2">:</span><span class="keyword2">:</span> <span class="keyword2">(</span><span class="keyword8">3</span> <span class="keyword2">:</span><span class="keyword2">:</span> <span class="keyword2">[</span><span class="keyword2">]</span><span class="keyword2">)</span><span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = [1; 2; 3]
 </div># <span class="keyword8">1</span> <span class="keyword2">:</span><span class="keyword2">:</span> <span class="keyword8">2</span> <span class="keyword2">:</span><span class="keyword2">:</span> <span class="keyword8">3</span> <span class="keyword2">:</span><span class="keyword2">:</span> <span class="keyword2">[</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = [1; 2; 3]
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 29) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017627280">The <code>::</code> operator can only be
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 29) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297930384">The <code>::</code> operator can only be
         used for adding one element to the front of the list, with the list
         terminating at <code>[]</code>, the empty list.
         There's also a list concatenation operator, <code>@</code>, which can concatenate two lists:</p><div class="rwocode"><pre><code># <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">]</span> <span class="keyword2">@</span> <span class="keyword2">[</span><span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword8">5</span><span class="keyword2">;</span><span class="keyword8">6</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int list = [1; 2; 3; 4; 5; 6]
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 30) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017621136">It's important to remember that, unlike <code>::</code>, this is not a constant-time operation.
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 30) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297924240">It's important to remember that, unlike <code>::</code>, this is not a constant-time operation.
         Concatenating two lists takes time proportional to the length of the
-        first list.</p></section><section id="list-patterns-using-match"><h1>List patterns using match</h1><p id="idm449017618960">The elements of a list can be accessed through pattern matching.
-        List patterns are based on the two list constructors, <code>[]</code> and <code>::</code>. Here's a simple example:<a name="idm449017617360"></a><a name="idm449017615888"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> my_favorite_language <span class="keyword2">(</span>my_favorite <span class="keyword2">:</span><span class="keyword2">:</span> the_rest<span class="keyword2">)</span> <span class="keyword2">=</span>
+        first list.</p></section><section id="list-patterns-using-match"><h1>List patterns using match</h1><p id="idm146297922064">The elements of a list can be accessed through pattern matching.
+        List patterns are based on the two list constructors, <code>[]</code> and <code>::</code>. Here's a simple example:<a name="idm146297920464"></a><a name="idm146297918992"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> my_favorite_language <span class="keyword2">(</span>my_favorite <span class="keyword2">:</span><span class="keyword2">:</span> the_rest<span class="keyword2">)</span> <span class="keyword2">=</span>
      my_favorite
   <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout"><br></br>Characters 25-69:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a value that is not matched:
 []val my_favorite_language : 'a list -&gt; 'a = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 31) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017606864">By pattern matching using <code>::</code>,
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 31) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297909968">By pattern matching using <code>::</code>,
         we've isolated and named the first element of the list (<code>my_favorite</code>) and the remainder of the list
         (<code>the_rest</code>). If you know Lisp or
         Scheme, what we've done is the equivalent of using the functions
         <code>car</code> and <code>cdr</code> to isolate the first element of a list
-        and the remainder of that list.</p><p id="idm449017603168">As you can see, however, the toplevel did not like this
+        and the remainder of that list.</p><p id="idm146297906272">As you can see, however, the toplevel did not like this
         definition and spit out a warning indicating that the pattern is not
         exhaustive. This means that there are values of the type in question
         that won't be captured by the pattern. The warning even gives an
@@ -432,16 +431,16 @@ Here is an example of a value that is not matched:
         we'll see that it works on nonempty list and fails on empty
         ones:</p><div class="rwocode"><pre><code># my_favorite_language <span class="keyword2">[</span><span class="keyword7">&quot;English&quot;</span><span class="keyword2">;</span><span class="keyword7">&quot;Spanish&quot;</span><span class="keyword2">;</span><span class="keyword7">&quot;French&quot;</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot;English&quot;
 </div># my_favorite_language <span class="keyword2">[</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Exception: (Match_failure //toplevel// 0 25).
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 32) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017595552">You can avoid these warnings, and more importantly make sure
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 32) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297898656">You can avoid these warnings, and more importantly make sure
         that your code actually handles all of the possible cases, by using a
-        <code>match</code> statement instead.</p><p id="idm449017594400">A <code>match</code> statement is a kind
+        <code>match</code> statement instead.</p><p id="idm146297897504">A <code>match</code> statement is a kind
         of juiced-up version of the <code>switch</code> statement found
         in C and Java. It essentially lets you list a sequence of patterns,
         separated by pipe characters (|). (The one before the first case is
         optional.) The compiler then dispatches to the code following the
         first matching pattern. As we've already seen, the pattern can mint
         new variables that correspond to substructures of the value being
-        matched.</p><p id="idm449017592544">Here's a new version of <code>my_favorite_language</code> that uses <code>match</code> and doesn't trigger a compiler
+        matched.</p><p id="idm146297895648">Here's a new version of <code>my_favorite_language</code> that uses <code>match</code> and doesn't trigger a compiler
         warning:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> my_favorite_language languages <span class="keyword2">=</span>
     <span class="keyword1">match</span> languages <span class="keyword1">with</span>
     <span class="keyword2">|</span> first <span class="keyword2">:</span><span class="keyword2">:</span> the_rest -<span class="keyword2">&gt;</span> first
@@ -449,23 +448,23 @@ Here is an example of a value that is not matched:
  <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val my_favorite_language : string list -&gt; string = &lt;fun&gt;
 </div># my_favorite_language <span class="keyword2">[</span><span class="keyword7">&quot;English&quot;</span><span class="keyword2">;</span><span class="keyword7">&quot;Spanish&quot;</span><span class="keyword2">;</span><span class="keyword7">&quot;French&quot;</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot;English&quot;
 </div># my_favorite_language <span class="keyword2">[</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot;OCaml&quot;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 33) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017580944">The preceding code also includes our first comment. OCaml
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 33) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297884048">The preceding code also includes our first comment. OCaml
         comments are bounded by <code>(*</code> and
         <code>*)</code> and can be nested arbitrarily
         and cover multiple lines. There's no equivalent of C++-style
-        single-line comments that are prefixed by <code>//</code>.</p><p id="idm449017578480">The first pattern, <code>first ::
+        single-line comments that are prefixed by <code>//</code>.</p><p id="idm146297881584">The first pattern, <code>first ::
         the_rest</code>, covers the case where <code>languages</code> has at least one element, since
         every list except for the empty list can be written down with one or
         more <code>::</code>'s. The second pattern,
         <code>[]</code>, matches only the empty list.
         These cases are exhaustive, since every list is either empty or has at
-        least one element, a fact that is verified by the compiler.</p></section><section id="recursive-list-functions"><h1>Recursive list functions</h1><p id="idm449017574352">Recursive functions, or functions that call themselves, are an
+        least one element, a fact that is verified by the compiler.</p></section><section id="recursive-list-functions"><h1>Recursive list functions</h1><p id="idm146297877456">Recursive functions, or functions that call themselves, are an
         important technique in OCaml and in any functional language. The
         typical approach to designing a recursive function is to separate the
         logic into a set of <span><em>base cases</em></span> that can be solved
         directly and a set of <span><em>inductive cases</em></span>, where the
         function breaks the problem down into smaller pieces and then calls
-        itself to solve those smaller problems.<a name="idm449017572864"></a><a name="idm449017571616"></a></p><p id="idm449017570240">When writing recursive list functions, this separation between
+        itself to solve those smaller problems.<a name="idm146297875968"></a><a name="idm146297874720"></a></p><p id="idm146297873344">When writing recursive list functions, this separation between
         the base cases and the inductive cases is often done using pattern
         matching. Here's a simple example of a function that sums the elements
         of a list:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword4">rec</span> sum l <span class="keyword2">=</span>
@@ -474,12 +473,12 @@ Here is an example of a value that is not matched:
     <span class="keyword2">|</span> hd <span class="keyword2">:</span><span class="keyword2">:</span> tl -<span class="keyword2">&gt;</span> hd <span class="keyword2">+</span> sum tl   <span class="comments">(* inductive case *)</span>
   <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val sum : int list -&gt; int = &lt;fun&gt;
 </div># sum <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 6
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 34) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017561488">Following the common OCaml idiom, we use <code>hd</code> to refer to the head of the list and
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 34) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297864592">Following the common OCaml idiom, we use <code>hd</code> to refer to the head of the list and
         <code>tl</code> to refer to the tail. Note that
         we had to use the <code>rec</code> keyword to
         allow <code>sum</code> to refer to itself. As
         you might imagine, the base case and inductive case are different arms
-        of the match.</p><p id="idm449017558384">Logically, you can think of the evaluation of a simple recursive
+        of the match.</p><p id="idm146297861488">Logically, you can think of the evaluation of a simple recursive
         function like <code>sum</code> almost as if it
         were a mathematical equation whose meaning you were unfolding step by
         step:</p><div class="rwocode"><pre><code>sum <span class="keyword2">[</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">]</span>
@@ -489,8 +488,8 @@ Here is an example of a value that is not matched:
 <span class="keyword2">=</span> <span class="keyword8">1</span> <span class="keyword2">+</span> <span class="keyword2">(</span><span class="keyword8">2</span> <span class="keyword2">+</span> <span class="keyword2">(</span><span class="keyword8">3</span> <span class="keyword2">+</span> <span class="keyword8">0</span><span class="keyword2">)</span><span class="keyword2">)</span>
 <span class="keyword2">=</span> <span class="keyword8">1</span> <span class="keyword2">+</span> <span class="keyword2">(</span><span class="keyword8">2</span> <span class="keyword2">+</span> <span class="keyword8">3</span><span class="keyword2">)</span>
 <span class="keyword2">=</span> <span class="keyword8">1</span> <span class="keyword2">+</span> <span class="keyword8">5</span>
-<span class="keyword2">=</span> <span class="keyword8">6</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/recursion.ml">guided-tour/recursion.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017554816">This suggests a reasonable mental model for what OCaml is
-        actually doing to evaluate a recursive function.</p><p id="idm449017554304">We can introduce more complicated list patterns as well. Here's
+<span class="keyword2">=</span> <span class="keyword8">6</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/recursion.ml">guided-tour/recursion.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297857920">This suggests a reasonable mental model for what OCaml is
+        actually doing to evaluate a recursive function.</p><p id="idm146297857408">We can introduce more complicated list patterns as well. Here's
         a function for removing sequential duplicates:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> <span class="keyword4">rec</span> destutter <span class="keyword3">list</span> <span class="keyword2">=</span>
     <span class="keyword1">match</span> <span class="keyword3">list</span> <span class="keyword1">with</span>
     <span class="keyword2">|</span> <span class="keyword2">[</span><span class="keyword2">]</span> -<span class="keyword2">&gt;</span> <span class="keyword2">[</span><span class="keyword2">]</span>
@@ -501,7 +500,7 @@ Here is an example of a value that is not matched:
 Warning 8: this pattern-matching is not exhaustive.
 Here is an example of a value that is not matched:
 _::[]val destutter : 'a list -&gt; 'a list = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 35) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017543680">Again, the first arm of the match is the base case, and the
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 35) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297846784">Again, the first arm of the match is the base case, and the
         second is the inductive. Unfortunately, this code has a problem, as is
         indicated by the warning message. In particular, we don't handle
         one-element lists. We can fix this warning by adding another case to
@@ -514,25 +513,25 @@ _::[]val destutter : 'a list -&gt; 'a list = &lt;fun&gt;
       <span class="keyword1">else</span> hd1 <span class="keyword2">:</span><span class="keyword2">:</span> destutter <span class="keyword2">(</span>hd2 <span class="keyword2">:</span><span class="keyword2">:</span> tl<span class="keyword2">)</span>
   <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val destutter : 'a list -&gt; 'a list = &lt;fun&gt;
 </div># destutter <span class="keyword2">[</span><span class="keyword7">&quot;hey&quot;</span><span class="keyword2">;</span><span class="keyword7">&quot;hey&quot;</span><span class="keyword2">;</span><span class="keyword7">&quot;hey&quot;</span><span class="keyword2">;</span><span class="keyword7">&quot;man!&quot;</span><span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string list = [&quot;hey&quot;; &quot;man!&quot;]
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 36) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017533024">Note that this code used another variant of the list pattern,
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 36) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297836128">Note that this code used another variant of the list pattern,
         <code>[hd]</code>, to match a list with a single
         element. We can do this to match a list with any fixed number of
         elements; for example, <code>[x;y;z]</code> will
         match any list with exactly three elements and will bind those
         elements to the variables <code>x</code>,
-        <code>y</code>, and <code>z</code>.</p><p id="idm449017529264">In the last few examples, our list processing code involved a
+        <code>y</code>, and <code>z</code>.</p><p id="idm146297832368">In the last few examples, our list processing code involved a
         lot of recursive functions. In practice, this isn't usually necessary.
         Most of the time, you'll find yourself happy to use the iteration
         functions found in the <code>List</code> module.
         But it's good to know how to use recursion when you need to do
-        something new.<a name="idm449017528032"></a></p></section></section><section id="options"><h1>Options</h1><p id="idm449017526208">Another common data structure in OCaml is the option. An option is
+        something new.<a name="idm146297831136"></a></p></section></section><section id="options"><h1>Options</h1><p id="idm146297829312">Another common data structure in OCaml is the option. An option is
       used to express that a value might or might not be present. For
-      example:<a name="idm449017525792"></a><a name="idm449017524928"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> divide x y <span class="keyword2">=</span>
+      example:<a name="idm146297828896"></a><a name="idm146297828032"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> divide x y <span class="keyword2">=</span>
     <span class="keyword1">if</span> y <span class="keyword2">=</span> <span class="keyword8">0</span> <span class="keyword1">then</span> <span class="keyword6">None </span><span class="keyword1">else</span> <span class="keyword6">Some </span><span class="keyword2">(</span>x/y<span class="keyword2">)</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val divide : int -&gt; int -&gt; int option = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 37) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017519056">The function <code>divide</code> either returns <code>None</code> if the divisor is zero, or <code>Some</code> of the result of the division otherwise. <code>Some</code> and
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 37) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297822160">The function <code>divide</code> either returns <code>None</code> if the divisor is zero, or <code>Some</code> of the result of the division otherwise. <code>Some</code> and
           <code>None</code> are constructors that let you build optional values, just as
           <code>::</code> and <code>[]</code> let you build lists. You can think of an
-        option as a specialized list that can only have zero or one elements.</p><p id="idm449017515104">To examine the contents of an option, we use pattern matching, as
+        option as a specialized list that can only have zero or one elements.</p><p id="idm146297818208">To examine the contents of an option, we use pattern matching, as
       we did with tuples and lists. Consider the following function for
       creating a log entry string given an optional time and a message. If no
       time is provided (i.e., if the time is <code>None</code>), the current time is computed and used
@@ -546,65 +545,65 @@ _::[]val destutter : 'a list -&gt; 'a list = &lt;fun&gt;
   <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val log_entry : Time.t option -&gt; string -&gt; string = &lt;fun&gt;
 </div># log_entry <span class="keyword2">(</span><span class="keyword6">Some </span><span class="keyword5">Time.</span>epoch<span class="keyword2">)</span> <span class="keyword7">&quot;A long long time ago&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot;1969-12-31 19:00:00 -- A long long time ago&quot;
 </div># log_entry <span class="keyword6">None </span><span class="keyword7">&quot;Up to the minute&quot;</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : string = &quot;2013-11-05 08:47:56 -- Up to the minute&quot;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 38) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017501984">This example uses Core's <code>Time</code>
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 38) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297805088">This example uses Core's <code>Time</code>
       module for dealing with time, as well as the <code>^</code> operator for concatenating strings. The
       concatenation operator is provided as part of the <code>Pervasives</code> module, which is automatically
-      opened in every OCaml program.</p><aside class="note"><h1>Nesting lets with let and in</h1><p id="idm449017498880"><code>log_entry</code> was our first use of <code>let</code> to define a new variable within the body of a function. A
+      opened in every OCaml program.</p><aside class="note"><h1>Nesting lets with let and in</h1><p id="idm146297801984"><code>log_entry</code> was our first use of <code>let</code> to define a new variable within the body of a function. A
             <code>let</code> paired with an <code>in</code> can be used to introduce a new binding within any local scope, including a
           function body. The <code>in</code> marks the beginning of the scope
-          within which the new variable can be used. Thus, we could write:<a name="idm449017495408"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> x <span class="keyword2">=</span> <span class="keyword8">7</span> <span class="keyword4">in</span>
+          within which the new variable can be used. Thus, we could write:<a name="idm146297798512"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> x <span class="keyword2">=</span> <span class="keyword8">7</span> <span class="keyword4">in</span>
   x <span class="keyword2">+</span> x
   <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 14
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/local_let.topscript">guided-tour/local_let.topscript</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017489264">Note that the scope of the <code>let</code> binding is
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/local_let.topscript">guided-tour/local_let.topscript</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297792368">Note that the scope of the <code>let</code> binding is
         terminated by the double-semicolon, so the value of <code>x</code> is no longer available:</p><div class="rwocode"><pre><code># x<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Characters -1-1:
 Error: Unbound value x
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/local_let.topscript">guided-tour/local_let.topscript</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017483520">We can also have multiple <code>let</code> statements in a
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/local_let.topscript">guided-tour/local_let.topscript</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297786624">We can also have multiple <code>let</code> statements in a
         row, each one adding a new variable binding to what came
         before:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> x <span class="keyword2">=</span> <span class="keyword8">7</span> <span class="keyword4">in</span>
   <span class="keyword4">let</span> y <span class="keyword2">=</span> x <span class="keyword2">*</span> x <span class="keyword4">in</span>
   x <span class="keyword2">+</span> y
   <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 56
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/local_let.topscript">guided-tour/local_let.topscript</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017477136">This kind of nested <code>let</code> binding is a common
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/local_let.topscript">guided-tour/local_let.topscript</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297780240">This kind of nested <code>let</code> binding is a common
         way of building up a complex expression, with each <code>let</code> naming some component, before combining
-        them in one final expression.</p></aside><p id="idm449017475456">Options are important because they are the standard way in OCaml
+        them in one final expression.</p></aside><p id="idm146297778560">Options are important because they are the standard way in OCaml
       to encode a value that might not be there; there's no such thing as a
       <code>NullPointerException</code> in OCaml. This
       is different from most other languages, including Java and C#, where
       most if not all data types are <span><em>nullable</em></span>, meaning
       that, whatever their type is, any given value also contains the
       possibility of being a null value. In such languages, null is lurking
-      everywhere.<a name="idm449017473728"></a></p><p id="idm449017472352">In OCaml, however, missing values are explicit. A value of type <code>string * string</code> always contains two well-defined values of type <code>string</code>. If you want to allow, say, the first of those to be
+      everywhere.<a name="idm146297776832"></a></p><p id="idm146297775456">In OCaml, however, missing values are explicit. A value of type <code>string * string</code> always contains two well-defined values of type <code>string</code>. If you want to allow, say, the first of those to be
         absent, then you need to change the type to <code>string option *
           string</code>. As we'll see in <a href="error-handling.html">Chapter 7, <i>Error Handling</i></a>, this explicitness
         allows the compiler to provide a great deal of help in making sure you're correctly handling
-        the possibility of missing data.</p></section></section><section id="records-and-variants"><h1>Records and Variants</h1><p id="idm449017468064">So far, we've only looked at data structures that were predefined in
+        the possibility of missing data.</p></section></section><section id="records-and-variants"><h1>Records and Variants</h1><p id="idm146297771168">So far, we've only looked at data structures that were predefined in
     the language, like lists and tuples. But OCaml also allows us to define
     new data types. Here's a toy example of a data type representing a point
-    in two-dimensional space:<a name="idm449017467552"></a></p><div class="rwocode"><pre><code># <span class="keyword4">type</span> point2d <span class="keyword2">=</span> <span class="keyword2">{</span> x <span class="keyword2">:</span> <span class="keyword3">float</span><span class="keyword2">;</span> y <span class="keyword2">:</span> <span class="keyword3">float</span> <span class="keyword2">}</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">type point2d = { x : float; y : float; }
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 41) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017462400"><code>point2d</code> is a
+    in two-dimensional space:<a name="idm146297770656"></a></p><div class="rwocode"><pre><code># <span class="keyword4">type</span> point2d <span class="keyword2">=</span> <span class="keyword2">{</span> x <span class="keyword2">:</span> <span class="keyword3">float</span><span class="keyword2">;</span> y <span class="keyword2">:</span> <span class="keyword3">float</span> <span class="keyword2">}</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">type point2d = { x : float; y : float; }
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 41) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297765504"><code>point2d</code> is a
     <span><em>record</em></span> type, which you can think of as a tuple where
     the individual fields are named, rather than being defined positionally.
-    Record types are easy enough to construct:<a name="idm449017461104"></a><a name="idm449017459856"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> p <span class="keyword2">=</span> <span class="keyword2">{</span> x <span class="keyword2">=</span> <span class="keyword8">3</span>.<span class="keyword2">;</span> y <span class="keyword2">=</span> <span class="keyword8">-4</span>. <span class="keyword2">}</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val p : point2d = {x = 3.; y = -4.}
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 42) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017454752">And we can get access to the contents of these types using pattern
+    Record types are easy enough to construct:<a name="idm146297764208"></a><a name="idm146297762960"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> p <span class="keyword2">=</span> <span class="keyword2">{</span> x <span class="keyword2">=</span> <span class="keyword8">3</span>.<span class="keyword2">;</span> y <span class="keyword2">=</span> <span class="keyword8">-4</span>. <span class="keyword2">}</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val p : point2d = {x = 3.; y = -4.}
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 42) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297757856">And we can get access to the contents of these types using pattern
     matching:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> magnitude <span class="keyword2">{</span> x <span class="keyword2">=</span> x_pos<span class="keyword2">;</span> y <span class="keyword2">=</span> y_pos <span class="keyword2">}</span> <span class="keyword2">=</span>
     sqrt <span class="keyword2">(</span>x_pos <span class="keyword2">*</span><span class="keyword2">*</span> <span class="keyword8">2</span>. <span class="keyword2">+</span>. y_pos <span class="keyword2">*</span><span class="keyword2">*</span> <span class="keyword8">2</span>.<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val magnitude : point2d -&gt; float = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 43) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017449824">The pattern match here binds the variable <code>x_pos</code> to the value contained in the <code>x</code> field, and the variable <code>y_pos</code> to the value in the <code>y</code> field.</p><p id="idm449017446960">We can write this more tersely using what's called <span><em>field punning</em></span>. In
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 43) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297752928">The pattern match here binds the variable <code>x_pos</code> to the value contained in the <code>x</code> field, and the variable <code>y_pos</code> to the value in the <code>y</code> field.</p><p id="idm146297750064">We can write this more tersely using what's called <span><em>field punning</em></span>. In
       particular, when the name of the field and the name of the variable it is bound to coincide,
       we don't have to write them both down. Using this, our magnitude function can be rewritten as
-        follows:<a name="idm449017446032"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> magnitude <span class="keyword2">{</span> x<span class="keyword2">;</span> y <span class="keyword2">}</span> <span class="keyword2">=</span> sqrt <span class="keyword2">(</span>x <span class="keyword2">*</span><span class="keyword2">*</span> <span class="keyword8">2</span>. <span class="keyword2">+</span>. y <span class="keyword2">*</span><span class="keyword2">*</span> <span class="keyword8">2</span>.<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val magnitude : point2d -&gt; float = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 44) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017440848">Alternatively, we can use dot notation for accessing record fields:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> distance v1 v2 <span class="keyword2">=</span>
+        follows:<a name="idm146297749136"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> magnitude <span class="keyword2">{</span> x<span class="keyword2">;</span> y <span class="keyword2">}</span> <span class="keyword2">=</span> sqrt <span class="keyword2">(</span>x <span class="keyword2">*</span><span class="keyword2">*</span> <span class="keyword8">2</span>. <span class="keyword2">+</span>. y <span class="keyword2">*</span><span class="keyword2">*</span> <span class="keyword8">2</span>.<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val magnitude : point2d -&gt; float = &lt;fun&gt;
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 44) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297743952">Alternatively, we can use dot notation for accessing record fields:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> distance v1 v2 <span class="keyword2">=</span>
      magnitude <span class="keyword2">{</span> x <span class="keyword2">=</span> v1.x -. v2.x<span class="keyword2">;</span> y <span class="keyword2">=</span> v1.y -. v2.y <span class="keyword2">}</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val distance : point2d -&gt; point2d -&gt; float = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 45) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017435968">And we can of course include our newly defined types as components
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 45) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297739072">And we can of course include our newly defined types as components
     in larger types. Here, for example, are some types for modeling different
     geometric objects that contain values of type <code>point2d</code>:</p><div class="rwocode"><pre><code># <span class="keyword4">type</span> circle_desc  <span class="keyword2">=</span> <span class="keyword2">{</span> center<span class="keyword2">:</span> point2d<span class="keyword2">;</span> radius<span class="keyword2">:</span> <span class="keyword3">float</span> <span class="keyword2">}</span>
   <span class="keyword4">type</span> rect_desc    <span class="keyword2">=</span> <span class="keyword2">{</span> lower_left<span class="keyword2">:</span> point2d<span class="keyword2">;</span> width<span class="keyword2">:</span> <span class="keyword3">float</span><span class="keyword2">;</span> height<span class="keyword2">:</span> <span class="keyword3">float</span> <span class="keyword2">}</span>
   <span class="keyword4">type</span> segment_desc <span class="keyword2">=</span> <span class="keyword2">{</span> endpoint1<span class="keyword2">:</span> point2d<span class="keyword2">;</span> endpoint2<span class="keyword2">:</span> point2d <span class="keyword2">}</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">type circle_desc = { center : point2d; radius : float; }
 type rect_desc = { lower_left : point2d; width : float; height : float; }
 type segment_desc = { endpoint1 : point2d; endpoint2 : point2d; }
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 46) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017428208">Now, imagine that you want to combine multiple objects of these
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 46) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297731312">Now, imagine that you want to combine multiple objects of these
     types together as a description of a multiobject scene. You need some
     unified way of representing these objects together in a single type. One
-    way of doing this is using a <span><em>variant</em></span> type:<a name="idm449017427312"></a><a name="idm449017426064"></a></p><div class="rwocode"><pre><code># <span class="keyword4">type</span> scene_element <span class="keyword2">=</span>
+    way of doing this is using a <span><em>variant</em></span> type:<a name="idm146297730416"></a><a name="idm146297729168"></a></p><div class="rwocode"><pre><code># <span class="keyword4">type</span> scene_element <span class="keyword2">=</span>
     <span class="keyword2">|</span> <span class="keyword6">Circle </span> <span class="keyword2">of</span> circle_desc
     <span class="keyword2">|</span> <span class="keyword6">Rect </span>   <span class="keyword2">of</span> rect_desc
     <span class="keyword2">|</span> <span class="keyword6">Segment </span><span class="keyword2">of</span> segment_desc
@@ -612,10 +611,10 @@ type segment_desc = { endpoint1 : point2d; endpoint2 : point2d; }
     Circle of circle_desc
   | Rect of rect_desc
   | Segment of segment_desc
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 47) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017400432">The <code>|</code> character separates the
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 47) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297703536">The <code>|</code> character separates the
     different cases of the variant (the first <code>|</code> is optional), and each case has a capitalized
     tag, like <code>Circle</code>, <code>Rect</code> or <code>Segment</code>, to distinguish that case from the
-    others.</p><p id="idm449017396816">Here's how we might write a function for testing whether a point is
+    others.</p><p id="idm146297699920">Here's how we might write a function for testing whether a point is
     in the interior of some element of a list of <code>scene_element</code>s:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> is_inside_scene_element point scene_element <span class="keyword2">=</span>
      <span class="keyword1">match</span> scene_element <span class="keyword1">with</span>
      <span class="keyword2">|</span> <span class="keyword6">Circle </span><span class="keyword2">{</span> center<span class="keyword2">;</span> radius <span class="keyword2">}</span> -<span class="keyword2">&gt;</span>
@@ -633,18 +632,18 @@ type segment_desc = { endpoint1 : point2d; endpoint2 : point2d; }
     <span class="keyword2">[</span> <span class="keyword6">Circle </span><span class="keyword2">{</span>center <span class="keyword2">=</span> <span class="keyword2">{</span>x<span class="keyword2">=</span><span class="keyword8">4</span>.<span class="keyword2">;</span>y<span class="keyword2">=</span> <span class="keyword8">4</span>.<span class="keyword2">}</span><span class="keyword2">;</span> radius <span class="keyword2">=</span> <span class="keyword8">0</span>.<span class="keyword8">5</span> <span class="keyword2">}</span> <span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : bool = false
 </div># is_inside_scene <span class="keyword2">{</span>x<span class="keyword2">=</span><span class="keyword8">3</span>.<span class="keyword2">;</span>y<span class="keyword2">=</span><span class="keyword8">7</span>.<span class="keyword2">}</span>
     <span class="keyword2">[</span> <span class="keyword6">Circle </span><span class="keyword2">{</span>center <span class="keyword2">=</span> <span class="keyword2">{</span>x<span class="keyword2">=</span><span class="keyword8">4</span>.<span class="keyword2">;</span>y<span class="keyword2">=</span> <span class="keyword8">4</span>.<span class="keyword2">}</span><span class="keyword2">;</span> radius <span class="keyword2">=</span> <span class="keyword8">5</span>.<span class="keyword8">0</span> <span class="keyword2">}</span> <span class="keyword2">]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : bool = true
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 48) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017377632">You might at this point notice that the use of <code>match</code> here is reminiscent of how we used
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 48) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297680736">You might at this point notice that the use of <code>match</code> here is reminiscent of how we used
     <code>match</code> with <code>option</code> and <code>list</code>. This is no accident: <code>option</code> and <code>list</code> are really just examples of variant types
     that happen to be important enough to be defined in the standard library
-    (and in the case of lists, to have some special syntax).</p><p id="idm449017373360">We also made our first use of an <span><em>anonymous
+    (and in the case of lists, to have some special syntax).</p><p id="idm146297676464">We also made our first use of an <span><em>anonymous
     function</em></span> in the call to <code>List.exists</code>. Anonymous functions are declared
     using the <code>fun</code> keyword, and don't need
     to be explicitly named. Such functions are common in OCaml, particularly
-    when using iteration functions like <code>List.exists</code>.<a name="idm449017370640"></a><a name="idm449017369776"></a></p><p id="idm449017368400">The purpose of <code>List.exists</code> is to
+    when using iteration functions like <code>List.exists</code>.<a name="idm146297673744"></a><a name="idm146297672880"></a></p><p id="idm146297671504">The purpose of <code>List.exists</code> is to
     check if there are any elements of the list in question on which the
     provided function evaluates to <code>true</code>. In
     this case, we're using <code>List.exists</code> to
-    check if there is a scene element within which our point resides.</p></section><section id="imperative-programming"><h1>Imperative Programming</h1><p id="idm449017365024">The code we've written so far has been almost entirely
+    check if there is a scene element within which our point resides.</p></section><section id="imperative-programming"><h1>Imperative Programming</h1><p id="idm146297668128">The code we've written so far has been almost entirely
     <span><em>pure</em></span> or <span><em>functional</em></span>, which
     roughly speaking means that the code in question doesn't modify variables
     or values as part of its execution. Indeed, almost all of the data
@@ -652,31 +651,31 @@ type segment_desc = { endpoint1 : point2d; endpoint2 : point2d; }
     there's no way in the language to modify them at all. This is a quite
     different style from <span><em>imperative</em></span> programming, where
     computations are structured as sequences of instructions that operate by
-    making modifications to the state of the program.<a name="idm449017362688"></a><a name="idm449017361824"></a><a name="idm449017360960"></a><a name="idm449017359712"></a></p><p id="idm449017358336">Functional code is the default in OCaml, with variable bindings and
+    making modifications to the state of the program.<a name="idm146297665792"></a><a name="idm146297664928"></a><a name="idm146297664064"></a><a name="idm146297662816"></a></p><p id="idm146297661440">Functional code is the default in OCaml, with variable bindings and
     most data structures being immutable. But OCaml also has excellent support
     for imperative programming, including mutable data structures like arrays
     and hash tables, and control-flow constructs like <code>for</code>
-    and <code>while</code> loops.</p><section id="arrays"><h1>Arrays</h1><p id="idm449017356032">Perhaps the simplest mutable data structure in OCaml is the array.
+    and <code>while</code> loops.</p><section id="arrays"><h1>Arrays</h1><p id="idm146297659136">Perhaps the simplest mutable data structure in OCaml is the array.
       Arrays in OCaml are very similar to arrays in other languages like C:
       indexing starts at 0, and accessing or modifying an array element is a
       constant-time operation. Arrays are more compact in terms of memory
       utilization than most other data structures in OCaml, including lists.
-      Here's an example:<a name="idm449017355376"></a><a name="idm449017354128"></a><a name="idm449017352880"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> numbers <span class="keyword2">=</span> <span class="keyword2">[|</span> <span class="keyword8">1</span><span class="keyword2">;</span> <span class="keyword8">2</span><span class="keyword2">;</span> <span class="keyword8">3</span><span class="keyword2">;</span> <span class="keyword8">4</span> <span class="keyword2">|]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val numbers : int array = [|1; 2; 3; 4|]
+      Here's an example:<a name="idm146297658480"></a><a name="idm146297657232"></a><a name="idm146297655984"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> numbers <span class="keyword2">=</span> <span class="keyword2">[|</span> <span class="keyword8">1</span><span class="keyword2">;</span> <span class="keyword8">2</span><span class="keyword2">;</span> <span class="keyword8">3</span><span class="keyword2">;</span> <span class="keyword8">4</span> <span class="keyword2">|]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val numbers : int array = [|1; 2; 3; 4|]
 </div># numbers.<span class="keyword2">(</span><span class="keyword8">2</span><span class="keyword2">)</span> <span class="keyword2">&lt;</span>- <span class="keyword8">4</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : unit = ()
 </div># numbers<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int array = [|1; 2; 4; 4|]
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 49) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017344336">The <code>.(i)</code> syntax is used to
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 49) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297647440">The <code>.(i)</code> syntax is used to
       refer to an element of an array, and the <code>&lt;-</code> syntax is for modification. Because the
       elements of the array are counted starting at zero, element <span><code>.(2)</code> is</span>
-      the third element.</p><p id="idm449017341456">The <code>unit</code> type that we see in the preceding code is
+      the third element.</p><p id="idm146297644560">The <code>unit</code> type that we see in the preceding code is
         interesting in that it has only one possible value, written <code>()</code>. This means that a value of type <code>unit</code>
         doesn't convey any information, and so is generally used as a placeholder. Thus, we use
           <code>unit</code> for the return value of an operation like setting
         a mutable field that communicates by side effect rather than by returning a value. It's also
         used as the argument to functions that don't require an input value. This is similar to the
-        role that <code>void</code> plays in languages like C and Java.</p></section><section id="mutable-record-fields"><h1>Mutable Record Fields</h1><p id="idm449017336448">The array is an important mutable data structure, but it's not the only one. Records,
+        role that <code>void</code> plays in languages like C and Java.</p></section><section id="mutable-record-fields"><h1>Mutable Record Fields</h1><p id="idm146297639552">The array is an important mutable data structure, but it's not the only one. Records,
         which are immutable by default, can have some of their fields explicitly declared as
         mutable. Here's a small example of a data structure for storing a running statistical
-        summary of a collection of numbers. <a name="idm449017335872"></a><a name="idm449017334624"></a><a name="idm449017333760"></a></p><div class="rwocode"><pre><code># <span class="keyword4">type</span> running_sum <span class="keyword2">=</span>
+        summary of a collection of numbers. <a name="idm146297638976"></a><a name="idm146297637728"></a><a name="idm146297636864"></a></p><div class="rwocode"><pre><code># <span class="keyword4">type</span> running_sum <span class="keyword2">=</span>
    <span class="keyword2">{</span> <span class="keyword1">mutable</span> sum<span class="keyword2">:</span> <span class="keyword3">float</span><span class="keyword2">;</span>
      <span class="keyword1">mutable</span> sum_sq<span class="keyword2">:</span> <span class="keyword3">float</span><span class="keyword2">;</span> <span class="comments">(* sum of squares *)</span>
      <span class="keyword1">mutable</span> samples<span class="keyword2">:</span> <span class="keyword3">int</span><span class="keyword2">;</span>
@@ -686,7 +685,7 @@ type segment_desc = { endpoint1 : point2d; endpoint2 : point2d; }
   mutable sum_sq : float;
   mutable samples : int;
 }
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 50) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017323168">The fields in <code>running_sum</code> are
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 50) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297626272">The fields in <code>running_sum</code> are
       designed to be easy to extend incrementally, and sufficient to compute
       means and standard deviations, as shown in the following example. Note
       that there are two <code>let</code> bindings in a row without a
@@ -697,21 +696,21 @@ type segment_desc = { endpoint1 : point2d; endpoint2 : point2d; }
      sqrt <span class="keyword2">(</span>rsum.sum_sq /. <span class="keyword3">float</span> rsum.samples
            -. <span class="keyword2">(</span>rsum.sum /. <span class="keyword3">float</span> rsum.samples<span class="keyword2">)</span> <span class="keyword2">*</span><span class="keyword2">*</span> <span class="keyword8">2</span>.<span class="keyword2">)</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val mean : running_sum -&gt; float = &lt;fun&gt;
 val stdev : running_sum -&gt; float = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 51) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017314608">We use the function <code>float</code> above, which is a
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 51) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297617712">We use the function <code>float</code> above, which is a
         convenient equivalent of <code>Float.of_int</code> provided by the
-          <code>Pervasives</code> library.</p><p id="idm449017312336">We also need functions to create and update <code>running_sum</code>s:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> create <span class="keyword2">(</span><span class="keyword2">)</span> <span class="keyword2">=</span> <span class="keyword2">{</span> sum <span class="keyword2">=</span> <span class="keyword8">0</span>.<span class="keyword2">;</span> sum_sq <span class="keyword2">=</span> <span class="keyword8">0</span>.<span class="keyword2">;</span> samples <span class="keyword2">=</span> <span class="keyword8">0</span> <span class="keyword2">}</span>
+          <code>Pervasives</code> library.</p><p id="idm146297615440">We also need functions to create and update <code>running_sum</code>s:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> create <span class="keyword2">(</span><span class="keyword2">)</span> <span class="keyword2">=</span> <span class="keyword2">{</span> sum <span class="keyword2">=</span> <span class="keyword8">0</span>.<span class="keyword2">;</span> sum_sq <span class="keyword2">=</span> <span class="keyword8">0</span>.<span class="keyword2">;</span> samples <span class="keyword2">=</span> <span class="keyword8">0</span> <span class="keyword2">}</span>
   <span class="keyword4">let</span> update rsum x <span class="keyword2">=</span>
      rsum.samples <span class="keyword2">&lt;</span>- rsum.samples <span class="keyword2">+</span> <span class="keyword8">1</span><span class="keyword2">;</span>
      rsum.sum     <span class="keyword2">&lt;</span>- rsum.sum     <span class="keyword2">+</span>. x<span class="keyword2">;</span>
      rsum.sum_sq  <span class="keyword2">&lt;</span>- rsum.sum_sq  <span class="keyword2">+</span>. x <span class="keyword2">*</span>. x
   <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val create : unit -&gt; running_sum = &lt;fun&gt;
 val update : running_sum -&gt; float -&gt; unit = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 52) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017303568"><code>create</code> returns a <code>running_sum</code> corresponding to the empty set, and <code>update
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 52) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297606672"><code>create</code> returns a <code>running_sum</code> corresponding to the empty set, and <code>update
           rsum x</code> changes <code>rsum</code> to reflect the addition
         of <code>x</code> to its set of samples by updating the number of
-        samples, the sum, and the sum of squares.</p><p id="idm449017300064">Note the use of single semicolons to sequence operations. When we were working purely
+        samples, the sum, and the sum of squares.</p><p id="idm146297603168">Note the use of single semicolons to sequence operations. When we were working purely
         functionally, this wasn't necessary, but you start needing it when you're writing imperative
-        code.</p><p id="idm449017299472">Here's an example of <code>create</code> and
+        code.</p><p id="idm146297602576">Here's an example of <code>create</code> and
       <code>update</code> in action. Note that this code
       uses <code>List.iter</code>, which calls the
       function <code>~f</code> on each element of the
@@ -719,23 +718,23 @@ val update : running_sum -&gt; float -&gt; unit = &lt;fun&gt;
 </div># <span class="keyword5">List.</span>iter <span class="keyword2">[</span><span class="keyword8">1</span>.<span class="keyword2">;</span><span class="keyword8">3</span>.<span class="keyword2">;</span><span class="keyword8">2</span>.<span class="keyword2">;</span><span class="keyword8">-7</span>.<span class="keyword2">;</span><span class="keyword8">4</span>.<span class="keyword2">;</span><span class="keyword8">5</span>.<span class="keyword2">]</span> ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> x -<span class="keyword2">&gt;</span> update rsum x<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : unit = ()
 </div># mean rsum<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : float = 1.33333333333
 </div># stdev rsum<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : float = 3.94405318873
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 53) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017287536">It's worth noting that the preceding algorithm is numerically
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 53) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297590640">It's worth noting that the preceding algorithm is numerically
       naive and has poor precision in the presence of cancellation. You can
       look at this Wikipedia <a href="http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance" target="_top">article
       on algorithms for calculating variance</a> for more details, paying
       particular attention to the weighted incremental and parallel
-      algorithms.</p></section><section id="refs"><h1>Refs</h1><p id="idm449017285120">We can create a single mutable value by using a <code>ref</code>. The <code>ref</code> type comes predefined in the standard
+      algorithms.</p></section><section id="refs"><h1>Refs</h1><p id="idm146297588224">We can create a single mutable value by using a <code>ref</code>. The <code>ref</code> type comes predefined in the standard
       library, but there's nothing really special about it. It's just a record
-      type with a single mutable field called <code>contents</code>:<a name="idm449017282800"></a><a name="idm449017281552"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> x <span class="keyword2">=</span> <span class="keyword2">{</span> contents <span class="keyword2">=</span> <span class="keyword8">0</span> <span class="keyword2">}</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val x : int ref = {contents = 0}
+      type with a single mutable field called <code>contents</code>:<a name="idm146297585904"></a><a name="idm146297584656"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> x <span class="keyword2">=</span> <span class="keyword2">{</span> contents <span class="keyword2">=</span> <span class="keyword8">0</span> <span class="keyword2">}</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val x : int ref = {contents = 0}
 </div># x.contents <span class="keyword2">&lt;</span>- x.contents <span class="keyword2">+</span> <span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : unit = ()
 </div># x<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int ref = {contents = 1}
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 54) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017273008">There are a handful of useful functions and operators defined for
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 54) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297576112">There are a handful of useful functions and operators defined for
       <code>ref</code>s to make them more convenient to
       work with:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> x <span class="keyword2">=</span> ref <span class="keyword8">0</span>  <span class="comments">(* create a ref, i.e., { contents = 0 } *)</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val x : int ref = {contents = 0}
 </div># <span class="keyword2">!</span>x             <span class="comments">(* get the contents of a ref, i.e., x.contents *)</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 0
 </div># x <span class="keyword2">:</span><span class="keyword2">=</span> <span class="keyword2">!</span>x <span class="keyword2">+</span> <span class="keyword8">1</span>    <span class="comments">(* assignment, i.e., x.contents &lt;- ... *)</span> <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : unit = ()
 </div># <span class="keyword2">!</span>x <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int = 1
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 55) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017262752">There's nothing magical with these operators either. You can
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 55) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297565856">There's nothing magical with these operators either. You can
       completely reimplement the <code>ref</code> type
       and all of these operators in just a few lines of code:</p><div class="rwocode"><pre><code># <span class="keyword4">type</span> 'a ref <span class="keyword2">=</span> <span class="keyword2">{</span> <span class="keyword1">mutable</span> contents <span class="keyword2">:</span> 'a <span class="keyword2">}</span>
 
@@ -746,11 +745,11 @@ val update : running_sum -&gt; float -&gt; unit = &lt;fun&gt;
 val ref : 'a -&gt; 'a ref = &lt;fun&gt;
 val ( ! ) : 'a ref -&gt; 'a = &lt;fun&gt;
 val ( := ) : 'a ref -&gt; 'a -&gt; unit = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 56) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017252960">The <code>'a</code> before the
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 56) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297556064">The <code>'a</code> before the
       <code>ref</code> indicates that the <code>ref</code> type is polymorphic, in the same way that
       lists are polymorphic, meaning it can contain values of any type. The
       parentheses around <code>!</code> and <code>:=</code> are needed because these are operators,
-      rather than ordinary functions.<a name="idm449017249648"></a></p><p id="idm449017248656">Even though a <code>ref</code> is just
+      rather than ordinary functions.<a name="idm146297552752"></a></p><p id="idm146297551760">Even though a <code>ref</code> is just
       another record type, it's important because it is the standard way of
       simulating the traditional mutable variables you'll find in most
       languages. For example, we can sum over the elements of a list
@@ -761,14 +760,14 @@ val ( := ) : 'a ref -&gt; 'a -&gt; unit = &lt;fun&gt;
     <span class="keyword5">List.</span>iter <span class="keyword3">list</span> ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> x -<span class="keyword2">&gt;</span> sum <span class="keyword2">:</span><span class="keyword2">=</span> <span class="keyword2">!</span>sum <span class="keyword2">+</span> x<span class="keyword2">)</span><span class="keyword2">;</span>
     <span class="keyword2">!</span>sum
   <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val sum : int list -&gt; int = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 57) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017240112">This isn't the most idiomatic way to sum up a list, but it shows how you can use a
-          <code>ref</code> in place of a mutable variable.</p></section><section id="for-and-while-loops"><h1>For and While Loops</h1><p id="idm449017238208">OCaml also supports traditional imperative control-flow constructs
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 57) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297543216">This isn't the most idiomatic way to sum up a list, but it shows how you can use a
+          <code>ref</code> in place of a mutable variable.</p></section><section id="for-and-while-loops"><h1>For and While Loops</h1><p id="idm146297541312">OCaml also supports traditional imperative control-flow constructs
       like <code>for and while</code> loops. Here, for example, is some
       code for permuting an array that uses a <code>for</code> loop. We
       use the <code>Random</code> module as our source
       of randomness. <code>Random</code> starts with a
       default seed, but you can call <code>Random.self_init</code> to choose a new seed at
-      random:<a name="idm449017235024"></a><a name="idm449017234160"></a><a name="idm449017233296"></a><a name="idm449017232432"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> permute <span class="keyword3">array</span> <span class="keyword2">=</span>
+      random:<a name="idm146297538128"></a><a name="idm146297537264"></a><a name="idm146297536400"></a><a name="idm146297535536"></a></p><div class="rwocode"><pre><code># <span class="keyword4">let</span> permute <span class="keyword3">array</span> <span class="keyword2">=</span>
     <span class="keyword4">let</span> length <span class="keyword2">=</span> <span class="keyword5">Array.</span>length <span class="keyword3">array</span> <span class="keyword4">in</span>
     <span class="keyword1">for</span> i <span class="keyword2">=</span> <span class="keyword8">0</span> <span class="keyword1">to</span> length - <span class="keyword8">2</span> <span class="keyword1">do</span>
        <span class="comments">(* pick a j that is after i and before the end of the array *)</span>
@@ -779,14 +778,14 @@ val ( := ) : 'a ref -&gt; 'a -&gt; unit = &lt;fun&gt;
        <span class="keyword3">array</span>.<span class="keyword2">(</span>j<span class="keyword2">)</span> <span class="keyword2">&lt;</span>- tmp
     <span class="keyword1">done</span>
   <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val permute : 'a array -&gt; unit = &lt;fun&gt;
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 58) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017220560">From a syntactic perspective, you should note the keywords that
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 58) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297523664">From a syntactic perspective, you should note the keywords that
       distinguish a <code>for</code> loop: <code>for</code>, <code>to</code>,
-      <code>do</code>, and <code>done</code>.</p><p id="idm449017217136">Here's an example run of this code:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> ar <span class="keyword2">=</span> <span class="keyword5">Array.</span>init <span class="keyword8">20</span> ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> i -<span class="keyword2">&gt;</span> i<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val ar : int array =
+      <code>do</code>, and <code>done</code>.</p><p id="idm146297520240">Here's an example run of this code:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> ar <span class="keyword2">=</span> <span class="keyword5">Array.</span>init <span class="keyword8">20</span> ~f<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword1">fun</span> i -<span class="keyword2">&gt;</span> i<span class="keyword2">)</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val ar : int array =
   [|0; 1; 2; 3; 4; 5; 6; 7; 8; 9; 10; 11; 12; 13; 14; 15; 16; 17; 18; 19|]
 </div># permute ar<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : unit = ()
 </div># ar<span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int array =
 [|1; 2; 4; 6; 11; 7; 14; 9; 10; 0; 13; 16; 19; 12; 17; 5; 3; 18; 8; 15|]
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 59) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017207760">OCaml also supports <code>while</code> loops, as shown in
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 59) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297510864">OCaml also supports <code>while</code> loops, as shown in
       the following function for finding the position of the first negative
       entry in an array. Note that <code>while</code>
       (like <code>for</code>) is also a keyword:</p><div class="rwocode"><pre><code># <span class="keyword4">let</span> find_first_negative_entry <span class="keyword3">array</span> <span class="keyword2">=</span>
@@ -798,7 +797,7 @@ val ( := ) : 'a ref -&gt; 'a -&gt; unit = &lt;fun&gt;
   <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val find_first_negative_entry : int array -&gt; int option = &lt;fun&gt;
 </div># find_first_negative_entry <span class="keyword2">[|</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">0</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">|]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int option = None
 </div># find_first_negative_entry <span class="keyword2">[|</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">-2</span><span class="keyword2">;</span><span class="keyword8">0</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">|]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">- : int option = Some 1
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 60) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017193872">As a side note, the preceding code takes advantage of the fact
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 60) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297496976">As a side note, the preceding code takes advantage of the fact
       that <code>&amp;&amp;</code>, OCaml's And
       operator, short-circuits. In particular, in an expression of the form
       <span><em><code>expr1</code></em></span> <code>&amp;&amp;</code> <span><em><code>expr2</code></em></span>, <span><em><code>expr2</code></em></span> will only be evaluated if
@@ -817,11 +816,11 @@ val ( := ) : 'a ref -&gt; 'a -&gt; unit = &lt;fun&gt;
      <span class="keyword1">if</span> <span class="keyword2">!</span>pos <span class="keyword2">=</span> <span class="keyword5">Array.</span>length <span class="keyword3">array</span> <span class="keyword1">then</span> <span class="keyword6">None </span><span class="keyword1">else</span> <span class="keyword6">Some </span><span class="keyword2">!</span>pos
   <span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">val find_first_negative_entry : int array -&gt; int option = &lt;fun&gt;
 </div># find_first_negative_entry <span class="keyword2">[|</span><span class="keyword8">1</span><span class="keyword2">;</span><span class="keyword8">2</span><span class="keyword2">;</span><span class="keyword8">0</span><span class="keyword2">;</span><span class="keyword8">3</span><span class="keyword2">|]</span><span class="keyword2">;</span><span class="keyword2">;</span><div class="rwocodeout">Exception: (Invalid_argument &quot;index out of bounds&quot;).
-</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 61) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017176048">The Or operator, <code>||</code>,
-      short-circuits in a similar way to <code>&amp;&amp;</code>.</p></section></section><section id="a-complete-program"><h1>A Complete Program</h1><p id="idm449017173104">So far, we've played with the basic features of the language via
+</div></code></pre><div class="rwocodeinfo">OCaml Utop ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/main.topscript">guided-tour/main.topscript</a> , continued (part 61) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297479152">The Or operator, <code>||</code>,
+      short-circuits in a similar way to <code>&amp;&amp;</code>.</p></section></section><section id="a-complete-program"><h1>A Complete Program</h1><p id="idm146297476208">So far, we've played with the basic features of the language via
     <span><strong>utop</strong></span>. Now we'll show how to create a
     simple standalone program. In particular, we'll create a program that sums
-    up a list of numbers read in from the standard input.<a name="idm449017171952"></a></p><p id="idm449017170512">Here's the code, which you can save in a file called
+    up a list of numbers read in from the standard input.<a name="idm146297475056"></a></p><p id="idm146297473616">Here's the code, which you can save in a file called
     <code>sum.ml</code>. Note that we don't terminate expressions with
     <code>;;</code> here, since it's not required
     outside the toplevel:</p><div class="rwocode"><pre><code><span class="keyword1">open</span> <span class="keyword5">Core.Std
@@ -833,30 +832,30 @@ val ( := ) : 'a ref -&gt; 'a -&gt; unit = &lt;fun&gt;
   <span class="keyword2">|</span> <span class="keyword6">Some </span>x -<span class="keyword2">&gt;</span> read_and_accumulate <span class="keyword2">(</span>accum <span class="keyword2">+</span>. <span class="keyword5">Float.</span>of_string x<span class="keyword2">)</span>
 
 <span class="keyword4">let</span> <span class="keyword2">(</span><span class="keyword2">)</span> <span class="keyword2">=</span>
-  printf <span class="keyword7">&quot;Total: %F\n&quot;</span> <span class="keyword2">(</span>read_and_accumulate <span class="keyword8">0</span>.<span class="keyword2">)</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/sum.ml">guided-tour/sum.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017166304">This is our first use of OCaml's input and output routines. The
+  printf <span class="keyword7">&quot;Total: %F\n&quot;</span> <span class="keyword2">(</span>read_and_accumulate <span class="keyword8">0</span>.<span class="keyword2">)</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/sum.ml">guided-tour/sum.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297469408">This is our first use of OCaml's input and output routines. The
     function <code>read_and_accumulate</code> is a
     recursive function that uses <code>In_channel.input_line</code> to read in lines one by
     one from the standard input, invoking itself at each iteration with its
     updated accumulated sum. Note that <code>input_line</code> returns an optional value, with
     <code>None</code> indicating the end of the input
-    stream.</p><p id="idm449017163104">After <code>read_and_accumulate</code>
+    stream.</p><p id="idm146297466208">After <code>read_and_accumulate</code>
     returns, the total needs to be printed. This is done using the <code>printf</code> command, which provides support for
     type-safe format strings, similar to what you'll find in a variety of
     languages. The format string is parsed by the compiler and used to
     determine the number and type of the remaining arguments that are
     <span>required</span>. In this case, there is a single formatting directive, <code>%F</code>, so <code>printf</code>
-    expects one additional argument of type <code>float</code>.</p><section id="compiling-and-running"><h1>Compiling and Running</h1><p id="idm449017157424">We'll compile our program using <span><strong>corebuild</strong></span>, a small
+    expects one additional argument of type <code>float</code>.</p><section id="compiling-and-running"><h1>Compiling and Running</h1><p id="idm146297460528">We'll compile our program using <span><strong>corebuild</strong></span>, a small
         wrapper on top of <span><strong>ocamlbuild</strong></span>, a build tool that ships
         with the OCaml compiler. The <span><strong>corebuild</strong></span> script is
         installed along with Core, and its purpose is to pass in the flags required for building a
-        program with Core.<a name="idm449017154944"></a></p><div class="rwocode"><pre><code><div class="highlight"><span class="gp">$</span> corebuild sum.native
-</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/build_sum.out">guided-tour/build_sum.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017150688">The <code>.native</code> suffix indicates that we're building a
+        program with Core.<a name="idm146297458048"></a></p><div class="rwocode"><pre><code><div class="highlight"><span class="gp">$</span> corebuild sum.native
+</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/build_sum.out">guided-tour/build_sum.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297453792">The <code>.native</code> suffix indicates that we're building a
         native-code executable, which we'll discuss more in <a href="files-modules-and-programs.html">Chapter 4, <i>Files, Modules, and Programs</i></a>. Once the build completes, we can use the resulting
         program like any command-line utility. We can feed input to <code>sum.native</code> by typing in a sequence of numbers, one per line, hitting
           <strong><code>Ctrl-D</code></strong> when we're done:</p><div class="rwocode"><pre><code><div class="highlight"><span class="gp">$</span> ./sum.native
-</div><div class="rwocodeout">1</div><div class="rwocodeout">2</div><div class="rwocodeout">3</div><div class="rwocodeout">94.5</div><div class="rwocodeout">Total: 100.5</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/sum.out">guided-tour/sum.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm449017141520">More work is needed to make a really usable command-line program,
+</div><div class="rwocodeout">1</div><div class="rwocodeout">2</div><div class="rwocodeout">3</div><div class="rwocodeout">94.5</div><div class="rwocodeout">Total: 100.5</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/guided-tour/sum.out">guided-tour/sum.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm146297444624">More work is needed to make a really usable command-line program,
       including a proper command-line parsing interface and better error
-      handling, all of which is covered in <a href="command-line-parsing.html">Chapter 14, <i>Command-Line Parsing</i></a>.</p></section></section><section id="where-to-go-from-here"><h1>Where to Go from Here</h1><p id="idm449017139248">That's it for the guided tour! There are plenty of features left and
+      handling, all of which is covered in <a href="command-line-parsing.html">Chapter 14, <i>Command-Line Parsing</i></a>.</p></section></section><section id="where-to-go-from-here"><h1>Where to Go from Here</h1><p id="idm146297442352">That's it for the guided tour! There are plenty of features left and
     lots of details to explain, but we hope that you now have a sense of what
     to expect from OCaml, and that you'll be more comfortable reading the rest
     of the book as a result.</p></section>
