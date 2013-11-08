@@ -10,7 +10,7 @@
     <body>
         <div class="body">
             <header class="header">
-                <h1><img src="media/img/cover.png" width="260" alt="OReilly" /></h1>
+                <h1><img src="media/img/coversmall.png" width="260" alt="OReilly" /></h1>
                 <p><b>Available in <a href="http://www.amazon.com/Real-World-OCaml-Functional-programming/dp/144932391X/">print</a> and <a href="http://oreil.ly/realworldOCaml">eBook!</a></b></p>
                 <p>
               <img src="media/img/webicon-twitter-s.png" /> <a href="http://twitter.com/realworldocaml">@realworldocaml</a><br />
@@ -28,9 +28,8 @@
                 <p>This site provides a freely available copy of Real World OCaml, available as <a href="/v1/en/html/index.html">First Edition HTML</a> here. If you enjoy it, consider purchasing a
                     <a href="http://www.amazon.com/Real-World-OCaml-Functional-programming/dp/144932391X/">print</a> or <a href="http://oreil.ly/realworldOCaml">eBook</a> copy to support it.
 
-                <p><b>Installation Instructions</b> are available at <a href="https://realworldocaml.org/install">https://realworldocaml.org/install</a>.  Please let us know of any problems there on the <a href="https://github.com/realworldocaml/book/issues">issue tracker</a> or simply submit a fix to the wiki.</p>
-
-                <p><b>Documentation</b> is available at <a href="https://realworldocaml.org/doc">https://realworldocaml.org/doc</a> for the libraries used in the book.</p>
+                <p><b>Installation Instructions</b> are available at <a href="https://realworldocaml.org/install">https://realworldocaml.org/install</a>.  Please let us know of any problems there on the <a href="https://github.com/realworldocaml/book/issues">issue tracker</a> or simply submit a fix to the wiki.
+                <b>Documentation</b> is available at <a href="https://realworldocaml.org/doc">https://realworldocaml.org/doc</a> for the libraries used in the book.</p>
 
                 <a name="milestones"></a>
                 <h2>Releases</h2>
