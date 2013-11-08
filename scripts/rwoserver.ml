@@ -297,7 +297,7 @@ let callback con_id ?body req =
       | _::"media"::_ -> dispatch_static req (* No auth required for support files *)
       |milestone::_ when List.mem milestone Comment.all_milestones ->
         dispatch ~milestone req
-      |_ -> Server.respond_not_found ()
+      |_ -> Server.respond_redirect ~uri:(Uri.of_string "https://realworldocaml.org/") ()
     end
     |_ -> Server.respond_not_found ()
   end
