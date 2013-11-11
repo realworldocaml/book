@@ -5,6 +5,19 @@
         <meta charset="utf-8"></meta>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
         <meta name="robots" content="NOINDEX, NOARCHIVE, NOFOLLOW"></meta>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-29546208-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
         
         <title>Chapter 16. Parsing with OCamllex and Menhir / Real World OCaml</title>
         
@@ -111,45 +124,45 @@
                 
                 
 
-    <p id="idm322808669744">Many programming tasks start with the interpretion of some form of
+    <p id="idm181612277152">Many programming tasks start with the interpretion of some form of
   structured textual data. <span><em>Parsing</em></span> is the process of
   converting such data into data structures that are easy to program against.
   For simple formats, it's often enough to parse the data in an ad hoc way,
   say, by breaking up the data into lines, and then using regular expressions
-  for breaking those lines down into their component pieces.</p><p id="idm322808668544">But this simplistic approach tends to fall down when parsing more
+  for breaking those lines down into their component pieces.</p><p id="idm181612275952">But this simplistic approach tends to fall down when parsing more
   complicated data, particularly data with the kind of recursive structure you
   find in full-blown programming languages or flexible data formats like JSON
   and XML. Parsing such formats accurately and efficiently while providing
-  useful error messages is a complex task.</p><p id="idm322808667808">Often, you can find an existing parsing library that handles these issues for you. But there
+  useful error messages is a complex task.</p><p id="idm181612275216">Often, you can find an existing parsing library that handles these issues for you. But there
     are tools to simplify the task when you do need to write a parser, in the form of
       <span><em>parser generators</em></span>. A parser generator creates a parser from a
     specification of the data format that you want to parse, and uses that to generate a
-      parser.<a name="idm322808666944"></a></p><p id="idm322808665504">Parser generators have a long history, including tools like <span><strong>lex</strong></span> and <span><strong>yacc</strong></span> that date back to the early 1970s.
+      parser.<a name="idm181612274352"></a></p><p id="idm181612272912">Parser generators have a long history, including tools like <span><strong>lex</strong></span> and <span><strong>yacc</strong></span> that date back to the early 1970s.
     OCaml has its own alternatives, including <span><strong>ocamllex</strong></span>, which
     replaces <span><strong>lex</strong></span>, and <span><strong>ocamlyacc</strong></span> and <span><strong>menhir</strong></span>, which replace <span><strong>yacc</strong></span>. We'll explore these tools in the course of walking through the
-    implementation of a parser for the JSON serialization format that we discussed in <a href="handling-json-data.html">Chapter 15, <i>Handling JSON Data</i></a>.</p><p id="idm322808659696">Parsing is a broad and often intricate topic, and our purpose here is
+    implementation of a parser for the JSON serialization format that we discussed in <a href="handling-json-data.html">Chapter 15, <i>Handling JSON Data</i></a>.</p><p id="idm181612267104">Parsing is a broad and often intricate topic, and our purpose here is
   not to teach all of the theoretical issues, but to provide a pragmatic
-  introduction of how to build a parser in OCaml.<a name="idm322808659232"></a><a name="idm322808658320"></a></p><aside class="note"><h1>Menhir Versus ocamlyacc</h1><p id="idm322808655968">Menhir is an alternative parser generator that is generally superior
+  introduction of how to build a parser in OCaml.<a name="idm181612266640"></a><a name="idm181612265728"></a></p><aside class="note"><h1>Menhir Versus ocamlyacc</h1><p id="idm181612263376">Menhir is an alternative parser generator that is generally superior
     to the venerable <span><strong>ocamlyacc</strong></span>, which dates
     back quite a few years. Menhir is mostly compatible with <span><strong>ocamlyacc</strong></span> grammars, and so you can usually just
     switch to Menhir and expect older code to work (with some minor
-    differences described in the Menhir manual).</p><p id="idm322808653968">The biggest advantage of Menhir is that its error messages are
+    differences described in the Menhir manual).</p><p id="idm181612261376">The biggest advantage of Menhir is that its error messages are
     generally more human-comprehensible, and the parsers that it generates are
     fully reentrant and can be parameterized in OCaml modules more easily. We
     recommend that any new code you develop should use Menhir instead of
-    <span><strong>ocamlyacc</strong></span>.</p><p id="idm322808652640">Menhir isn't distributed directly with OCaml but is available
+    <span><strong>ocamlyacc</strong></span>.</p><p id="idm181612260048">Menhir isn't distributed directly with OCaml but is available
     through OPAM by running <code>opam install
-    menhir</code>.</p></aside><section id="lexing-and-parsing"><h1>Lexing and Parsing</h1><p id="idm322808650448">Parsing is traditionally broken down into two parts:
+    menhir</code>.</p></aside><section id="lexing-and-parsing"><h1>Lexing and Parsing</h1><p id="idm181612257856">Parsing is traditionally broken down into two parts:
     <span><em>lexical analysis</em></span>, which is a kind of simplified
     parsing phase that converts a stream of characters into a stream of
     logical tokens; and full-on parsing, which involves converting a stream of
     tokens into the final representation, which is often in the form of a
     tree-like data structure called an <span><em>abstract syntax
-    tree</em></span>, or AST.<a name="idm322808648976"></a><a name="idm322808648064"></a></p><p id="idm322808647024">It's confusing that the term parsing is applied to both the overall
+    tree</em></span>, or AST.<a name="idm181612256384"></a><a name="idm181612255472"></a></p><p id="idm181612254432">It's confusing that the term parsing is applied to both the overall
     process of converting textual data to structured data, and also more
     specifically to the second phase of converting a stream of tokens to an
     AST; so from here on out, we'll use the term parsing to refer only to this
-    second phase.</p><p id="idm322808646320">Let's consider lexing and parsing in the context of the JSON format. Here's a snippet of
+    second phase.</p><p id="idm181612253728">Let's consider lexing and parsing in the context of the JSON format. Here's a snippet of
       text that represents a JSON object containing a string labeled <code>title</code> and an array containing two objects, each with a name and array of zip
       codes:</p><div class="rwocode"><pre><code><div class="highlight"><span class="p">{</span>
   <span class="nt">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Cities&quot;</span><span class="p">,</span>
@@ -158,7 +171,7 @@
     <span class="p">{</span> <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;New York&quot;</span><span class="p">,</span> <span class="nt">&quot;zips&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">10004</span><span class="p">]</span> <span class="p">}</span> 
   <span class="p">]</span>
 <span class="p">}</span>
-</div></code></pre><div class="rwocodeinfo">JSON ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/example.json">parsing/example.json</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322808642704">At a syntactic level, we can think of a JSON file as a series of
+</div></code></pre><div class="rwocodeinfo">JSON ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/example.json">parsing/example.json</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181612250112">At a syntactic level, we can think of a JSON file as a series of
     simple logical units, like curly braces, square brackets, commas, colons,
     identifiers, numbers, and quoted strings. Thus, we could represent our
     JSON text as a sequence of tokens of the following type:</p><div class="rwocode"><pre><code><span class="keyword4">type</span> token <span class="keyword2">=</span>
@@ -175,11 +188,11 @@
 </span>  <span class="keyword2">|</span> <span class="keyword6">RIGHT_BRACE
 </span>  <span class="keyword2">|</span> <span class="keyword6">COMMA
 </span>  <span class="keyword2">|</span> <span class="keyword6">COLON
-</span>  <span class="keyword2">|</span> EOF</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/manual_token_type.ml">parsing/manual_token_type.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322808639616">Note that this representation loses some information about the
+</span>  <span class="keyword2">|</span> EOF</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/manual_token_type.ml">parsing/manual_token_type.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181612247024">Note that this representation loses some information about the
     original text. For example, whitespace is not represented. It's common,
     and indeed useful, for the token stream to forget some details of the
-    original text that are not required for understanding its meaning.</p><p id="idm322808638944">If we converted the preceding example into a list of these tokens,
-    it would look something like this:</p><div class="rwocode"><pre><code><span class="keyword2">[</span> LEFT_BRACE<span class="keyword2">;</span> ID<span class="keyword2">(</span><span class="keyword7">&quot;title&quot;</span><span class="keyword2">)</span><span class="keyword2">;</span> COLON<span class="keyword2">;</span> STRING<span class="keyword2">(</span><span class="keyword7">&quot;Cities&quot;</span><span class="keyword2">)</span><span class="keyword2">;</span> COMMA<span class="keyword2">;</span> ID<span class="keyword2">(</span><span class="keyword7">&quot;cities&quot;</span><span class="keyword2">)</span><span class="keyword2">;</span> ...</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/tokens.ml">parsing/tokens.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322808636176">This kind of representation is easier to work with than the original
+    original text that are not required for understanding its meaning.</p><p id="idm181612246352">If we converted the preceding example into a list of these tokens,
+    it would look something like this:</p><div class="rwocode"><pre><code><span class="keyword2">[</span> LEFT_BRACE<span class="keyword2">;</span> ID<span class="keyword2">(</span><span class="keyword7">&quot;title&quot;</span><span class="keyword2">)</span><span class="keyword2">;</span> COLON<span class="keyword2">;</span> STRING<span class="keyword2">(</span><span class="keyword7">&quot;Cities&quot;</span><span class="keyword2">)</span><span class="keyword2">;</span> COMMA<span class="keyword2">;</span> ID<span class="keyword2">(</span><span class="keyword7">&quot;cities&quot;</span><span class="keyword2">)</span><span class="keyword2">;</span> ...</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/tokens.ml">parsing/tokens.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181612243584">This kind of representation is easier to work with than the original
     text, since it gets rid of some unimportant syntactic details and adds
     useful structure. But it's still a good deal more low-level than the
     simple AST we used for representing JSON data in <a href="handling-json-data.html">Chapter 15, <i>Handling JSON Data</i></a>:</p><div class="rwocode"><pre><code><span class="keyword4">type</span> value <span class="keyword2">=</span> <span class="keyword2">[</span>
@@ -190,24 +203,24 @@
   <span class="keyword2">|</span> <span class="keyword6">`List </span><span class="keyword2">of</span> value <span class="keyword3">list</span>
   <span class="keyword2">|</span> <span class="keyword6">`Null
 </span>  <span class="keyword2">|</span> <span class="keyword6">`String </span><span class="keyword2">of</span> <span class="keyword3">string</span>
-<span class="keyword2">]</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/json.ml">parsing/json.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322808632640">This representation is much richer than our token stream, capturing the fact that JSON
+<span class="keyword2">]</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/json.ml">parsing/json.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181612240048">This representation is much richer than our token stream, capturing the fact that JSON
       values can be nested inside each other and that JSON has a variety of value types, including
       numbers, strings, arrays, and objects. The parser we'll write will convert a token stream into
       a value of this AST type, as shown below for our earlier JSON example:</p><div class="rwocode"><pre><code><span class="keyword6">`Assoc
 </span>  <span class="keyword2">[</span><span class="keyword7">&quot;title&quot;</span>, <span class="keyword6">`String </span><span class="keyword7">&quot;Cities&quot;</span><span class="keyword2">;</span>
    <span class="keyword7">&quot;cities&quot;</span>, <span class="keyword6">`List
 </span>     <span class="keyword2">[</span><span class="keyword6">`Assoc </span><span class="keyword2">[</span><span class="keyword7">&quot;name&quot;</span>, <span class="keyword6">`String </span><span class="keyword7">&quot;Chicago&quot;</span><span class="keyword2">;</span> <span class="keyword7">&quot;zips&quot;</span>, <span class="keyword6">`List </span><span class="keyword2">[</span><span class="keyword6">`Int </span><span class="keyword8">60601</span><span class="keyword2">]</span><span class="keyword2">]</span><span class="keyword2">;</span>
-      <span class="keyword6">`Assoc </span><span class="keyword2">[</span><span class="keyword7">&quot;name&quot;</span>, <span class="keyword6">`String </span><span class="keyword7">&quot;New York&quot;</span><span class="keyword2">;</span> <span class="keyword7">&quot;zips&quot;</span>, <span class="keyword6">`List </span><span class="keyword2">[</span><span class="keyword6">`Int </span><span class="keyword8">10004</span><span class="keyword2">]</span><span class="keyword2">]</span><span class="keyword2">]</span><span class="keyword2">]</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/parsed_example.ml">parsing/parsed_example.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></section><section id="defining-a-parser"><h1>Defining a Parser</h1><p id="idm322808628416">A parser-specification file has suffix <code>.mly</code> and
+      <span class="keyword6">`Assoc </span><span class="keyword2">[</span><span class="keyword7">&quot;name&quot;</span>, <span class="keyword6">`String </span><span class="keyword7">&quot;New York&quot;</span><span class="keyword2">;</span> <span class="keyword7">&quot;zips&quot;</span>, <span class="keyword6">`List </span><span class="keyword2">[</span><span class="keyword6">`Int </span><span class="keyword8">10004</span><span class="keyword2">]</span><span class="keyword2">]</span><span class="keyword2">]</span><span class="keyword2">]</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/parsed_example.ml">parsing/parsed_example.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></section><section id="defining-a-parser"><h1>Defining a Parser</h1><p id="idm181612235824">A parser-specification file has suffix <code>.mly</code> and
       contains two sections that are broken up by separator lines consisting of the characters
         <code>%%</code> on a line by themselves. The first section of the file
       is for declarations, including token and type specifications, precedence directives, and other
       output directives; and the second section is for specifying the grammar of the language to be
-        parsed.<a name="idm322808626448"></a><a name="PARSparsdef"></a></p><p id="idm322808623472">We'll start by declaring the list of tokens. A token is declared
+        parsed.<a name="idm181612233856"></a><a name="PARSparsdef"></a></p><p id="idm181612230880">We'll start by declaring the list of tokens. A token is declared
     using the syntax <code>%token
     &lt;</code><em><code>type</code></em><code>&gt;</code> <em><code>uid</code></em>, where the
     <em><code>&lt;type&gt;</code></em> is optional and
     <em><code>uid</code></em> is a capitalized identifier. For JSON, we
-    need tokens for numbers, strings, identifiers, and punctuation:<a name="idm322808620336"></a></p><div class="rwocode"><pre><code>%token <span class="keyword2">&lt;</span><span class="keyword3">int</span><span class="keyword2">&gt;</span> <span class="keyword6">INT
+    need tokens for numbers, strings, identifiers, and punctuation:<a name="idm181612227744"></a></p><div class="rwocode"><pre><code>%token <span class="keyword2">&lt;</span><span class="keyword3">int</span><span class="keyword2">&gt;</span> <span class="keyword6">INT
 </span>%token <span class="keyword2">&lt;</span><span class="keyword3">float</span><span class="keyword2">&gt;</span> <span class="keyword6">FLOAT
 </span>%token <span class="keyword2">&lt;</span><span class="keyword3">string</span><span class="keyword2">&gt;</span> <span class="keyword6">ID
 </span>%token <span class="keyword2">&lt;</span><span class="keyword3">string</span><span class="keyword2">&gt;</span> <span class="keyword6">STRING
@@ -220,40 +233,40 @@
 </span>%token <span class="keyword6">RIGHT_BRACK
 </span>%token <span class="keyword6">COLON
 </span>%token <span class="keyword6">COMMA
-</span>%token EOF</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/parser.mly">parsing/parser.mly</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322808616240">The <code>&lt;</code><em><code>type</code></em><code>&gt;</code> specifications mean that a token carries a
+</span>%token EOF</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/parser.mly">parsing/parser.mly</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181612223648">The <code>&lt;</code><em><code>type</code></em><code>&gt;</code> specifications mean that a token carries a
     value. The <code>INT</code> token carries an integer
     value with it, <code>FLOAT</code> has a <code>float</code> value, and <code>STRING</code> carries a <code>string</code> value. The remaining tokens, such as
     <code>TRUE</code>, <code>FALSE</code>, or the punctuation, aren't associated
-    with any value, and so we can omit the <code>&lt;</code><em><code>type</code></em><code>&gt;</code> specification.</p><section id="describing-the-grammar"><h1>Describing the Grammar</h1><p id="idm322808607392">The next thing we need to do is to specify the grammar of a JSON expression. <span><strong>menhir</strong></span>, like many parser generators, expresses grammars as
+    with any value, and so we can omit the <code>&lt;</code><em><code>type</code></em><code>&gt;</code> specification.</p><section id="describing-the-grammar"><h1>Describing the Grammar</h1><p id="idm181612214800">The next thing we need to do is to specify the grammar of a JSON expression. <span><strong>menhir</strong></span>, like many parser generators, expresses grammars as
           <span><em>context-free grammars</em></span>. (More precisely, <span><strong>menhir</strong></span> supports LR(1) grammars, but we will ignore that technical distinction
         here.) You can think of a context-free grammar as a set of abstract names, called
           <span><em>non-terminal symbols</em></span>, along with a collection of rules for
         transforming a nonterminal symbol into a sequence of tokens and nonterminal symbols. A
         sequence of tokens is parsable by a grammar if you can apply the grammar's rules to produce
         a series of transformations, starting at a distinguished <span><em>start symbol</em></span>
-        that produces the token sequence in <span>question</span>.<a name="idm322808603280"></a><a name="idm322808601984"></a><a name="idm322808601088"></a><a name="idm322808600192"></a><a name="idm322808599280"></a><a name="idm322808598368"></a></p><p id="idm322808596912">We'll start describing the JSON grammar by declaring the start
+        that produces the token sequence in <span>question</span>.<a name="idm181612210688"></a><a name="idm181612209392"></a><a name="idm181612208496"></a><a name="idm181612207600"></a><a name="idm181612206688"></a><a name="idm181612205776"></a></p><p id="idm181612204320">We'll start describing the JSON grammar by declaring the start
       symbol to be the non-terminal symbol <code>prog</code>, and by declaring that when parsed, a
       <code>prog</code> value should be converted into
       an OCaml value of type <code>Json.value
       option</code>. We then end the declaration section of the parser with
       a <code>%%</code>:</p><div class="rwocode"><pre><code>%start <span class="keyword2">&lt;</span><span class="keyword5">Json.</span>value option<span class="keyword2">&gt;</span> prog
-%%</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/parser.mly">parsing/parser.mly</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322808591280">Once that's in place, we can start specifying the productions. In <span><strong>menhir</strong></span>, productions are organized into
+%%</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/parser.mly">parsing/parser.mly</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181612198688">Once that's in place, we can start specifying the productions. In <span><strong>menhir</strong></span>, productions are organized into
           <span><em>rules</em></span>, where each rule lists all the possible productions for a given
         nonterminal symbols. Here, for example, is the rule for <code>prog</code>:</p><div class="rwocode"><pre><code>prog<span class="keyword2">:</span>
   <span class="keyword2">|</span> <span class="keyword6">EOF </span>      <span class="keyword2">{</span> <span class="keyword6">None </span><span class="keyword2">}</span>
   <span class="keyword2">|</span> v <span class="keyword2">=</span> value <span class="keyword2">{</span> <span class="keyword6">Some </span>v <span class="keyword2">}</span>
-  <span class="keyword2">;</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/parser.mly">parsing/parser.mly</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322808586656">The syntax for this is reminiscent of an OCaml <code>match</code> statement. The
+  <span class="keyword2">;</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/parser.mly">parsing/parser.mly</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181612194064">The syntax for this is reminiscent of an OCaml <code>match</code> statement. The
         pipes separate the individual productions, and the curly braces contain a <span><em>semantic
           action</em></span>: OCaml code that generates the OCaml value corresponding to the
         production in question. Semantic actions are arbitrary OCaml expressions that are evaluated
         during parsing to produce values that are attached to the non-terminal in the
-          rule.<a name="idm322808585152"></a><a name="idm322808584240"></a></p><p id="idm322808583200">We have two cases for <code>prog</code>: either there's an <code>EOF</code>, which means the text is empty, and so there's no JSON value
+          rule.<a name="idm181612192560"></a><a name="idm181612191648"></a></p><p id="idm181612190608">We have two cases for <code>prog</code>: either there's an <code>EOF</code>, which means the text is empty, and so there's no JSON value
         to read, we return the OCaml value <code>None</code>; or we have an
         instance of the <code>value</code> nonterminal, which corresponds to a
         well-formed JSON value, and we wrap the corresponding <code>Json.value</code> in a <code>Some</code> tag. Note that in the
           <code>value</code> case, we wrote <code>v =
           value</code> to bind the OCaml value that corresponds to the variable <code>v</code>, which we can then use within the curly braces for that
-        production.</p><p id="idm322808576704">Now let's consider a more complex example, the rule for the <code>value</code> symbol:</p><div class="rwocode"><pre><code>value<span class="keyword2">:</span>
+        production.</p><p id="idm181612184112">Now let's consider a more complex example, the rule for the <code>value</code> symbol:</p><div class="rwocode"><pre><code>value<span class="keyword2">:</span>
   <span class="keyword2">|</span> LEFT_BRACE<span class="keyword2">;</span> obj <span class="keyword2">=</span> object_fields<span class="keyword2">;</span> <span class="keyword6">RIGHT_BRACE
 </span>    <span class="keyword2">{</span> <span class="keyword6">`Assoc </span>obj <span class="keyword2">}</span>
   <span class="keyword2">|</span> LEFT_BRACK<span class="keyword2">;</span> vl <span class="keyword2">=</span> array_values<span class="keyword2">;</span> <span class="keyword6">RIGHT_BRACK
@@ -270,31 +283,31 @@
 </span>    <span class="keyword2">{</span> <span class="keyword6">`Bool </span>false <span class="keyword2">}</span>
   <span class="keyword2">|</span> <span class="keyword6">NULL
 </span>    <span class="keyword2">{</span> <span class="keyword6">`Null </span><span class="keyword2">}</span>
-  <span class="keyword2">;</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/parser.mly">parsing/parser.mly</a> , continued (part 3) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322808572944">According to these rules, a JSON <code>value</code> is either:<a name="idm322808571984"></a></p><ul><li><p id="idm322808569808">An object bracketed by curly braces</p></li><li><p id="idm322808568992">An array bracketed by square braces</p></li><li><p id="idm322808568176">A string, integer, float, bool, or null value</p></li></ul><p id="idm322808567488">In each of the productions, the OCaml code in curly braces shows
+  <span class="keyword2">;</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/parser.mly">parsing/parser.mly</a> , continued (part 3) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181612180352">According to these rules, a JSON <code>value</code> is either:<a name="idm181612179392"></a></p><ul><li><p id="idm181612177216">An object bracketed by curly braces</p></li><li><p id="idm181612176400">An array bracketed by square braces</p></li><li><p id="idm181612175584">A string, integer, float, bool, or null value</p></li></ul><p id="idm181612174896">In each of the productions, the OCaml code in curly braces shows
       what to transform the object in question to. Note that we still have two
       nonterminals whose definitions we depend on here but have not yet
       defined: <code>object_fields</code> and <code>array_values</code>. We'll look at how these are
-      parsed next.</p></section><section id="parsing-sequences"><h1>Parsing Sequences</h1><p id="idm322808564448">The rule for <code>object_fields</code>
+      parsed next.</p></section><section id="parsing-sequences"><h1>Parsing Sequences</h1><p id="idm181612171856">The rule for <code>object_fields</code>
       follows, and is really just a thin wrapper that reverses the list
       returned by the following rule for <code>rev_object_fields</code>. Note that the first
       production in <code>rev_object_fields</code> has
       an empty lefthand side, because what we're matching on in this case is
       an empty sequence of tokens. The comment <code>(*
-      empty *)</code> is used to make this clear:<a name="idm322808561216"></a><a name="idm322808560304"></a></p><div class="rwocode"><pre><code>object_fields<span class="keyword2">:</span> obj <span class="keyword2">=</span> rev_object_fields <span class="keyword2">{</span> <span class="keyword5">List.</span>rev obj <span class="keyword2">}</span><span class="keyword2">;</span>
+      empty *)</code> is used to make this clear:<a name="idm181612168624"></a><a name="idm181612167712"></a></p><div class="rwocode"><pre><code>object_fields<span class="keyword2">:</span> obj <span class="keyword2">=</span> rev_object_fields <span class="keyword2">{</span> <span class="keyword5">List.</span>rev obj <span class="keyword2">}</span><span class="keyword2">;</span>
 
 rev_object_fields<span class="keyword2">:</span>
   <span class="keyword2">|</span> <span class="comments">(* empty *)</span> <span class="keyword2">{</span> <span class="keyword2">[</span><span class="keyword2">]</span> <span class="keyword2">}</span>
   <span class="keyword2">|</span> obj <span class="keyword2">=</span> rev_object_fields<span class="keyword2">;</span> COMMA<span class="keyword2">;</span> k <span class="keyword2">=</span> ID<span class="keyword2">;</span> COLON<span class="keyword2">;</span> v <span class="keyword2">=</span> value
     <span class="keyword2">{</span> <span class="keyword2">(</span>k, v<span class="keyword2">)</span> <span class="keyword2">:</span><span class="keyword2">:</span> obj <span class="keyword2">}</span>
-  <span class="keyword2">;</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/parser.mly">parsing/parser.mly</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322808556752">The rules are structured as they are because <span><strong>menhir</strong></span> generates left-recursive parsers, which
+  <span class="keyword2">;</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/parser.mly">parsing/parser.mly</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181612164160">The rules are structured as they are because <span><strong>menhir</strong></span> generates left-recursive parsers, which
       means that the constructed pushdown automaton uses less stack space with
       left-recursive definitions. The following right-recursive rule accepts
       the same input, but during parsing, it requires linear stack space to
-      read object field definitions:<a name="idm322808555488"></a></p><div class="rwocode"><pre><code><span class="comments">(* Inefficient right-recursive rule *)</span>
+      read object field definitions:<a name="idm181612162896"></a></p><div class="rwocode"><pre><code><span class="comments">(* Inefficient right-recursive rule *)</span>
 object_fields<span class="keyword2">:</span>
   <span class="keyword2">|</span> <span class="comments">(* empty *)</span> <span class="keyword2">{</span> <span class="keyword2">[</span><span class="keyword2">]</span> <span class="keyword2">}</span>
   <span class="keyword2">|</span> k <span class="keyword2">=</span> ID<span class="keyword2">;</span> COLON<span class="keyword2">;</span> v <span class="keyword2">=</span> value<span class="keyword2">;</span> COMMA<span class="keyword2">;</span> obj <span class="keyword2">=</span> object_fields
-    <span class="keyword2">{</span> <span class="keyword2">(</span>k, v<span class="keyword2">)</span> <span class="keyword2">:</span><span class="keyword2">:</span> obj <span class="keyword2">}</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/right_rec_rule.mly">parsing/right_rec_rule.mly</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322808551520">Alternatively, we could keep the left-recursive definition and
+    <span class="keyword2">{</span> <span class="keyword2">(</span>k, v<span class="keyword2">)</span> <span class="keyword2">:</span><span class="keyword2">:</span> obj <span class="keyword2">}</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/right_rec_rule.mly">parsing/right_rec_rule.mly</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181612158928">Alternatively, we could keep the left-recursive definition and
       simply construct the returned value in left-to-right order. This is even
       less efficient, since the complexity of building the list incrementally
       in this way is quadratic in the length of the list:</p><div class="rwocode"><pre><code><span class="comments">(* Quadratic left-recursive rule *)</span>
@@ -302,13 +315,13 @@ object_fields<span class="keyword2">:</span>
   <span class="keyword2">|</span> <span class="comments">(* empty *)</span> <span class="keyword2">{</span> <span class="keyword2">[</span><span class="keyword2">]</span> <span class="keyword2">}</span>
   <span class="keyword2">|</span> obj <span class="keyword2">=</span> object_fields<span class="keyword2">;</span> COMMA<span class="keyword2">;</span> k <span class="keyword2">=</span> ID<span class="keyword2">;</span> COLON<span class="keyword2">;</span> v <span class="keyword2">=</span> value
     <span class="keyword2">{</span> obj <span class="keyword2">@</span> <span class="keyword2">[</span>k, v<span class="keyword2">]</span> <span class="keyword2">}</span>
-  <span class="keyword2">;</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/quadratic_rule.mly">parsing/quadratic_rule.mly</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322808548336">Assembling lists like this is a pretty common requirement in most
+  <span class="keyword2">;</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/quadratic_rule.mly">parsing/quadratic_rule.mly</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181612155744">Assembling lists like this is a pretty common requirement in most
       realistic grammars, and the preceding rules (while useful for
       illustrating how parsing works) are rather verbose. Menhir features an
       extended standard library of built-in rules to simplify this handling.
       These rules are detailed in the Menhir manual and include optional
       values, pairs of values with optional separators, and lists of elements
-      (also with optional separators).<a name="idm322808547600"></a></p><p id="idm322808546144">A version of the JSON grammar using these more succinct Menhir
+      (also with optional separators).<a name="idm181612155008"></a></p><p id="idm181612153552">A version of the JSON grammar using these more succinct Menhir
       rules follows. Notice the use of <code>separated_list</code> to parse both JSON objects and
       lists with one rule:</p><div class="rwocode"><pre><code>prog<span class="keyword2">:</span>
   <span class="keyword2">|</span> v <span class="keyword2">=</span> value <span class="keyword2">{</span> <span class="keyword6">Some </span>v <span class="keyword2">}</span>
@@ -331,16 +344,16 @@ obj_field<span class="keyword2">:</span>
     k <span class="keyword2">=</span> STRING<span class="keyword2">;</span> COLON<span class="keyword2">;</span> v <span class="keyword2">=</span> value              <span class="keyword2">{</span> <span class="keyword2">(</span>k, v<span class="keyword2">)</span> <span class="keyword2">}</span> <span class="keyword2">;</span>
 
 list_fields<span class="keyword2">:</span>
-    vl <span class="keyword2">=</span> separated_list<span class="keyword2">(</span>COMMA, value<span class="keyword2">)</span>         <span class="keyword2">{</span> vl <span class="keyword2">}</span> <span class="keyword2">;</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/short_parser.mly">parsing/short_parser.mly</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322808541808">We can invoke <span><strong>menhir</strong></span> by using
+    vl <span class="keyword2">=</span> separated_list<span class="keyword2">(</span>COMMA, value<span class="keyword2">)</span>         <span class="keyword2">{</span> vl <span class="keyword2">}</span> <span class="keyword2">;</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/short_parser.mly">parsing/short_parser.mly</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181612149216">We can invoke <span><strong>menhir</strong></span> by using
       <span><strong>corebuild</strong></span> with the <code>-use-menhir</code> flag. This tells the build system
       to switch to using <span><strong>menhir</strong></span> instead of
       <span><strong>ocamlyacc</strong></span> to handle files with the
-      <code>.mly</code> suffix:<a name="idm322808537488"></a><a name="idm322808536352"></a><a name="idm322808535040"></a></p><div class="rwocode"><pre><code><div class="highlight"><span class="gp">$</span> corebuild -use-menhir short_parser.mli
-</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/build_short_parser.out">parsing/build_short_parser.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></section></section><section id="defining-a-lexer"><h1>Defining a Lexer</h1><p id="idm322808529872">Now we can define a lexer, using <span><strong>ocamllex</strong></span>, to convert our input text into a
+      <code>.mly</code> suffix:<a name="idm181612144896"></a><a name="idm181612143760"></a><a name="idm181612142448"></a></p><div class="rwocode"><pre><code><div class="highlight"><span class="gp">$</span> corebuild -use-menhir short_parser.mli
+</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/build_short_parser.out">parsing/build_short_parser.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div></section></section><section id="defining-a-lexer"><h1>Defining a Lexer</h1><p id="idm181612137280">Now we can define a lexer, using <span><strong>ocamllex</strong></span>, to convert our input text into a
     stream of tokens. The specification of the lexer is placed in a file with
-    an <code>.mll</code> suffix.<a name="idm322808528144"></a><a name="idm322808526832"></a><a name="idm322808525536"></a><a name="idm322808524640"></a><a name="PARlex"></a></p><section id="ocaml-prelude"><h1>OCaml Prelude</h1><p id="idm322808520768">Let's walk through the definition of a lexer section by section.
+    an <code>.mll</code> suffix.<a name="idm181612135552"></a><a name="idm181612134240"></a><a name="idm181612132944"></a><a name="idm181612132048"></a><a name="PARlex"></a></p><section id="ocaml-prelude"><h1>OCaml Prelude</h1><p id="idm181612128176">Let's walk through the definition of a lexer section by section.
       The first section is on optional chunk of OCaml code that is bounded by
-      a pair of curly braces:<a name="idm322808520336"></a></p><div class="rwocode"><pre><code><span class="keyword2">{</span>
+      a pair of curly braces:<a name="idm181612127744"></a></p><div class="rwocode"><pre><code><span class="keyword2">{</span>
 <span class="keyword1">open</span> <span class="keyword6">Lexing
 </span><span class="keyword1">open</span> <span class="keyword6">Parser
 </span>
@@ -352,41 +365,41 @@ list_fields<span class="keyword2">:</span>
     <span class="keyword2">{</span> pos <span class="keyword1">with</span> pos_bol <span class="keyword2">=</span> lexbuf.lex_curr_pos<span class="keyword2">;</span>
                pos_lnum <span class="keyword2">=</span> pos.pos_lnum <span class="keyword2">+</span> <span class="keyword8">1</span>
     <span class="keyword2">}</span>
-<span class="keyword2">}</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/lexer.mll">parsing/lexer.mll</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322808516272">This code is there to define utility functions used by later
+<span class="keyword2">}</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/lexer.mll">parsing/lexer.mll</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181612123680">This code is there to define utility functions used by later
       snippets of OCaml code and to set up the environment by opening useful
-      modules and define an exception, <code>SyntaxError</code>.</p><p id="idm322808515056">We also define a utility function <code>next_line</code> for tracking the location of tokens
+      modules and define an exception, <code>SyntaxError</code>.</p><p id="idm181612122464">We also define a utility function <code>next_line</code> for tracking the location of tokens
       across line breaks. The <code>Lexing</code> module
       defines a <code>lexbuf</code> structure that holds
       the state of the lexer, including the current location within the source
       file. The <code>next_line</code> function simply
       accesses the <code>lex_curr_p</code> field that
-      holds the current location and updates its line number.</p></section><section id="regular-expressions"><h1>Regular Expressions</h1><p id="idm322808510000">The next section of the lexing file is a collection of named
+      holds the current location and updates its line number.</p></section><section id="regular-expressions"><h1>Regular Expressions</h1><p id="idm181612117408">The next section of the lexing file is a collection of named
       regular expressions. These look syntactically like ordinary OCaml
       <code>let</code> bindings, but really this is a
       specialized syntax for declaring regular expressions. Here's an
-      example:<a name="idm322808508992"></a><a name="idm322808508080"></a></p><div class="rwocode"><pre><code><span class="keyword4">let</span> <span class="keyword3">int</span> <span class="keyword2">=</span> '-'? <span class="keyword2">[</span>'<span class="keyword8">0</span>'-'<span class="keyword8">9</span>'<span class="keyword2">]</span> <span class="keyword2">[</span>'<span class="keyword8">0</span>'-'<span class="keyword8">9</span>'<span class="keyword2">]</span><span class="keyword2">*</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/lexer.mll">parsing/lexer.mll</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322808504256">The syntax here is something of a hybrid between OCaml syntax and
+      example:<a name="idm181612116400"></a><a name="idm181612115488"></a></p><div class="rwocode"><pre><code><span class="keyword4">let</span> <span class="keyword3">int</span> <span class="keyword2">=</span> '-'? <span class="keyword2">[</span>'<span class="keyword8">0</span>'-'<span class="keyword8">9</span>'<span class="keyword2">]</span> <span class="keyword2">[</span>'<span class="keyword8">0</span>'-'<span class="keyword8">9</span>'<span class="keyword2">]</span><span class="keyword2">*</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/lexer.mll">parsing/lexer.mll</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181612111664">The syntax here is something of a hybrid between OCaml syntax and
       traditional regular expression syntax. The <code>int</code> regular expression specifies an optional
       leading <code>-</code>, followed by a digit from
       <code>0</code> to <code>9</code>, followed by some number of digits from
       <code>0</code> to <code>9</code>. The question mark is used to indicate an
       optional component of a regular expression; the square brackets are used
       to specify ranges; and the <code>*</code> operator
-      is used to indicate a (possibly empty) repetition.</p><p id="idm322808498912">Floating-point numbers are specified similarly, but we deal with
+      is used to indicate a (possibly empty) repetition.</p><p id="idm181612106320">Floating-point numbers are specified similarly, but we deal with
       decimal points and exponents. We make the expression easier to read by
       building up a sequence of named regular expressions, rather than
       creating one big and impenetrable expression:</p><div class="rwocode"><pre><code><span class="keyword4">let</span> digit <span class="keyword2">=</span> <span class="keyword2">[</span>'<span class="keyword8">0</span>'-'<span class="keyword8">9</span>'<span class="keyword2">]</span>
 <span class="keyword4">let</span> frac <span class="keyword2">=</span> '.' digit<span class="keyword2">*</span>
 <span class="keyword4">let</span> exp <span class="keyword2">=</span> <span class="keyword2">[</span>'e' 'E'<span class="keyword2">]</span> <span class="keyword2">[</span>'-' '<span class="keyword2">+</span>'<span class="keyword2">]</span>? digit<span class="keyword2">+</span>
-<span class="keyword4">let</span> <span class="keyword3">float</span> <span class="keyword2">=</span> digit<span class="keyword2">*</span> frac? exp?</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/lexer.mll">parsing/lexer.mll</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322808495808">Finally, we define whitespace, newlines, and identifiers:</p><div class="rwocode"><pre><code><span class="keyword4">let</span> white <span class="keyword2">=</span> <span class="keyword2">[</span>' ' '\t'<span class="keyword2">]</span><span class="keyword2">+</span>
+<span class="keyword4">let</span> <span class="keyword3">float</span> <span class="keyword2">=</span> digit<span class="keyword2">*</span> frac? exp?</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/lexer.mll">parsing/lexer.mll</a> , continued (part 2) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181612103216">Finally, we define whitespace, newlines, and identifiers:</p><div class="rwocode"><pre><code><span class="keyword4">let</span> white <span class="keyword2">=</span> <span class="keyword2">[</span>' ' '\t'<span class="keyword2">]</span><span class="keyword2">+</span>
 <span class="keyword4">let</span> newline <span class="keyword2">=</span> '\r' <span class="keyword2">|</span> '\n' <span class="keyword2">|</span> <span class="keyword7">&quot;\r\n&quot;</span>
-<span class="keyword4">let</span> id <span class="keyword2">=</span> <span class="keyword2">[</span>'a'-'z' 'A'-'<span class="keyword6">Z' </span>'_'<span class="keyword2">]</span> <span class="keyword2">[</span>'a'-'z' 'A'-'<span class="keyword6">Z' </span>'<span class="keyword8">0</span>'-'<span class="keyword8">9</span>' '_'<span class="keyword2">]</span><span class="keyword2">*</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/lexer.mll">parsing/lexer.mll</a> , continued (part 3) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322808492704">The <code>newline</code> introduces the
+<span class="keyword4">let</span> id <span class="keyword2">=</span> <span class="keyword2">[</span>'a'-'z' 'A'-'<span class="keyword6">Z' </span>'_'<span class="keyword2">]</span> <span class="keyword2">[</span>'a'-'z' 'A'-'<span class="keyword6">Z' </span>'<span class="keyword8">0</span>'-'<span class="keyword8">9</span>' '_'<span class="keyword2">]</span><span class="keyword2">*</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/lexer.mll">parsing/lexer.mll</a> , continued (part 3) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181612100112">The <code>newline</code> introduces the
       <code>|</code> operator, which lets one of several
       alternative regular expressions match (in this case, the various
-      carriage-return combinations of CR, LF, or CRLF).</p></section><section id="lexing-rules"><h1>Lexing Rules</h1><p id="idm322808489808">The lexing rules are essentially functions that consume the data,
+      carriage-return combinations of CR, LF, or CRLF).</p></section><section id="lexing-rules"><h1>Lexing Rules</h1><p id="idm181612097216">The lexing rules are essentially functions that consume the data,
       producing OCaml expressions that evaluate to tokens. These OCaml
       expressions can be quite complicated, using side effects and invoking
       other rules as part of the body of the rule. Let's look at the <code>read</code> rule for parsing a JSON
-      expression:<a name="idm322808488576"></a></p><div class="rwocode"><pre><code>rule read <span class="keyword2">=</span>
+      expression:<a name="idm181612095984"></a></p><div class="rwocode"><pre><code>rule read <span class="keyword2">=</span>
   parse
   <span class="keyword2">|</span> white    <span class="keyword2">{</span> read lexbuf <span class="keyword2">}</span>
   <span class="keyword2">|</span> newline  <span class="keyword2">{</span> next_line lexbuf<span class="keyword2">;</span> read lexbuf <span class="keyword2">}</span>
@@ -403,41 +416,41 @@ list_fields<span class="keyword2">:</span>
   | ':'      { COLON }
   | ','      { COMMA }
   | _ { raise (SyntaxError (&quot;</span><span class="keyword6">Unexpected </span>char<span class="keyword2">:</span> &quot; <span class="keyword2">^</span> <span class="keyword5">Lexing.</span>lexeme lexbuf<span class="keyword2">)</span><span class="keyword2">)</span> <span class="keyword2">}</span>
-  <span class="keyword2">|</span> eof      <span class="keyword2">{</span> <span class="keyword6">EOF </span><span class="keyword2">}</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/lexer.mll">parsing/lexer.mll</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322808484208">The rules are structured very similarly to pattern matches, except
+  <span class="keyword2">|</span> eof      <span class="keyword2">{</span> <span class="keyword6">EOF </span><span class="keyword2">}</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/lexer.mll">parsing/lexer.mll</a> , continued (part 4) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181612091616">The rules are structured very similarly to pattern matches, except
       that the variants are replaced by regular expressions on the lefthand
       side. The righthand-side clause is the parsed OCaml return value of that
       rule. The OCaml code for the rules has a parameter called <code>lexbuf</code> that defines the input, including the
       position in the input file, as well as the text that was matched by the
-      regular expression.<a name="idm322808482880"></a></p><p id="idm322808481424">The first <code>white { read lexbuf }</code>
+      regular expression.<a name="idm181612090288"></a></p><p id="idm181612088832">The first <code>white { read lexbuf }</code>
       calls the lexer recursively. That is, it skips the input whitespace and
       returns the following token. The action <code>newline
       { next_line lexbuf; read lexbuf }</code> is similar, but we use it to
       advance the line number for the lexer using the utility function that we
-      defined at the top of the file. Let's skip to the third action:</p><div class="rwocode"><pre><code><span class="keyword2">|</span> <span class="keyword3">int</span> <span class="keyword2">{</span> <span class="keyword6">INT </span><span class="keyword2">(</span>int_of_string <span class="keyword2">(</span><span class="keyword5">Lexing.</span>lexeme lexbuf<span class="keyword2">)</span><span class="keyword2">)</span> <span class="keyword2">}</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/lexer_int_fragment.mll">parsing/lexer_int_fragment.mll</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322808477168">This action specifies that when the input matches the <code>int</code> regular expression, then the lexer should
+      defined at the top of the file. Let's skip to the third action:</p><div class="rwocode"><pre><code><span class="keyword2">|</span> <span class="keyword3">int</span> <span class="keyword2">{</span> <span class="keyword6">INT </span><span class="keyword2">(</span>int_of_string <span class="keyword2">(</span><span class="keyword5">Lexing.</span>lexeme lexbuf<span class="keyword2">)</span><span class="keyword2">)</span> <span class="keyword2">}</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/lexer_int_fragment.mll">parsing/lexer_int_fragment.mll</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181612084576">This action specifies that when the input matches the <code>int</code> regular expression, then the lexer should
       return the expression <code>INT (int_of_string
       (Lexing.lexeme lexbuf))</code>. The expression <code>Lexing.lexeme lexbuf</code> returns the complete
       string matched by the regular expression. In this case, the string
       represents a number, so we use the <code>int_of_string</code> function to convert it to a
-      number.</p><p id="idm322808473808">There are actions for each different kind of token. The string
+      number.</p><p id="idm181612081216">There are actions for each different kind of token. The string
       expressions like <code>&quot;true&quot; { TRUE }</code> are
       used for keywords, and the special characters have actions, too, like
-      <code>'{' { LEFT_BRACE }</code>.</p><p id="idm322808471936">Some of these patterns overlap. For example, the regular
+      <code>'{' { LEFT_BRACE }</code>.</p><p id="idm181612079344">Some of these patterns overlap. For example, the regular
       expression <code>&quot;true&quot;</code> is also matched by
       the <code>id</code> pattern. <span><strong>ocamllex</strong></span> used the following disambiguation
-      when a prefix of the input is matched by more than one pattern:</p><ul><li><p id="idm322808468896">The longest match always wins. For example, the first input
+      when a prefix of the input is matched by more than one pattern:</p><ul><li><p id="idm181612076304">The longest match always wins. For example, the first input
           <code>trueX: 167</code> matches the regular
           expression <code>&quot;true&quot;</code> for four
           characters, and it matches <code>id</code> for
           five characters. The longer match wins, and the return value is
-          <code>ID &quot;trueX&quot;</code>.</p></li><li><p id="idm322808465312">If all matches have the same length, then the first action
+          <code>ID &quot;trueX&quot;</code>.</p></li><li><p id="idm181612072720">If all matches have the same length, then the first action
           wins. If the input were <code>true:
           167</code>, then both <code>&quot;true&quot;</code>
           and <code>id</code> match the first four
           characters; <code>&quot;true&quot;</code> is first, so
-          the return value is <code>TRUE</code>.</p></li></ul></section><section id="recursive-rules"><h1>Recursive Rules</h1><p id="idm322808460224">Unlike many other lexer generators, <span><strong>ocamllex</strong></span> allows the definition of multiple
+          the return value is <code>TRUE</code>.</p></li></ul></section><section id="recursive-rules"><h1>Recursive Rules</h1><p id="idm181612067632">Unlike many other lexer generators, <span><strong>ocamllex</strong></span> allows the definition of multiple
       lexers in the same file, and the definitions can be recursive. In this
       case, we use recursion to match string literals using the following rule
-      definition:<a name="idm322808459056"></a><a name="idm322808457760"></a></p><div class="rwocode"><pre><code><span class="keyword4">and</span> read_string buf <span class="keyword2">=</span>
+      definition:<a name="idm181612066464"></a><a name="idm181612065168"></a></p><div class="rwocode"><pre><code><span class="keyword4">and</span> read_string buf <span class="keyword2">=</span>
   parse
   <span class="keyword2">|</span> '<span class="keyword7">&quot;'       { STRING (Buffer.contents buf) }
   | '\\' '/'  { Buffer.add_char buf '/'; read_string buf lexbuf }
@@ -452,36 +465,36 @@ list_fields<span class="keyword2">:</span>
       read_string buf lexbuf
     <span class="keyword2">}</span>
   <span class="keyword2">|</span> <span class="keyword8">_</span> <span class="keyword2">{</span> <span class="keyword1">raise</span> <span class="keyword2">(</span><span class="keyword6">SyntaxError </span><span class="keyword2">(</span><span class="keyword7">&quot;Illegal string character: &quot;</span> <span class="keyword2">^</span> <span class="keyword5">Lexing.</span>lexeme lexbuf<span class="keyword2">)</span><span class="keyword2">)</span> <span class="keyword2">}</span>
-  <span class="keyword2">|</span> eof <span class="keyword2">{</span> <span class="keyword1">raise</span> <span class="keyword2">(</span><span class="keyword6">SyntaxError </span><span class="keyword2">(</span><span class="keyword7">&quot;String is not terminated&quot;</span><span class="keyword2">)</span><span class="keyword2">)</span> <span class="keyword2">}</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/lexer.mll">parsing/lexer.mll</a> , continued (part 5) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322808453200">This rule takes a <code>buf :
+  <span class="keyword2">|</span> eof <span class="keyword2">{</span> <span class="keyword1">raise</span> <span class="keyword2">(</span><span class="keyword6">SyntaxError </span><span class="keyword2">(</span><span class="keyword7">&quot;String is not terminated&quot;</span><span class="keyword2">)</span><span class="keyword2">)</span> <span class="keyword2">}</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/lexer.mll">parsing/lexer.mll</a> , continued (part 5) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181612060608">This rule takes a <code>buf :
       Buffer.t</code> as an argument. If we reach the terminating double
       quote <code>&quot;</code>, then we return the contents
-      of the buffer as a <code>STRING</code>.</p><p id="idm322808450720">The other cases are for handling the string contents. The action
+      of the buffer as a <code>STRING</code>.</p><p id="idm181612058128">The other cases are for handling the string contents. The action
       <code>[^ '&quot;' '\\']+ { ... }</code> matches normal
       input that does not contain a double quote or backslash. The actions
       beginning with a backslash <code>\</code> define
       what to do for escape sequences. In each of these cases, the final step
-      includes a recursive call to the lexer.</p><p id="idm322808448704">That covers the lexer. Next, we need to combine the lexer with the
-      parser to bring it all together.<a name="idm322808448336"></a><a name="idm322808447040"></a><a name="idm322808446128"></a><a name="idm322808444832"></a><a name="idm322808443920"></a><a name="idm322808443008"></a></p><aside class="note"><h1>Handling Unicode</h1><p id="idm322808441296">We've glossed over an important detail here: parsing Unicode
+      includes a recursive call to the lexer.</p><p id="idm181612056112">That covers the lexer. Next, we need to combine the lexer with the
+      parser to bring it all together.<a name="idm181612055744"></a><a name="idm181612054448"></a><a name="idm181612053536"></a><a name="idm181612052240"></a><a name="idm181612051328"></a><a name="idm181612050416"></a></p><aside class="note"><h1>Handling Unicode</h1><p id="idm181612048704">We've glossed over an important detail here: parsing Unicode
         characters to handle the full spectrum of the world's writing systems.
         OCaml has several third-party solutions to handling Unicode, with
-        varying degrees of flexibility and complexity:</p><ul><li><p id="idm322808440128"><a href="http://camomile.sourceforge.net" target="_top">Camomile</a> supports
+        varying degrees of flexibility and complexity:</p><ul><li><p id="idm181612047536"><a href="http://camomile.sourceforge.net" target="_top">Camomile</a> supports
             the full spectrum of Unicode character types, conversion from
             around 200 encodings, and collation and locale-sensitive case
-            mappings.</p></li><li><p id="idm322808438640"><a href="http://www.cduce.org/ulex" target="_top">Ulex</a> is a
+            mappings.</p></li><li><p id="idm181612046048"><a href="http://www.cduce.org/ulex" target="_top">Ulex</a> is a
             lexer generator for Unicode that can serve as a Unicode-aware
-            replacement for <span><strong>ocamllex</strong></span>.</p></li><li><p id="idm322808436592"><a href="http://erratique.ch/software/uutf" target="_top">Uutf</a>
+            replacement for <span><strong>ocamllex</strong></span>.</p></li><li><p id="idm181612044000"><a href="http://erratique.ch/software/uutf" target="_top">Uutf</a>
             is a nonblocking streaming Unicode codec for OCaml, available as a
             standalone library. It is accompanied by the <a href="http://erratique.ch/software/uunf" target="_top">Uunf</a> text
             normalization and <a href="http://erratique.ch/software/uucd" target="_top">Uucd</a> Unicode
             character database libraries. There is also a robust parser for
             <a href="http://erratique.ch/software/jsonm" target="_top">JSON</a>
             available that illustrates the use of Uutf in your own
-            libraries.</p></li></ul><p id="idm322808432992">All of these libraries are available via OPAM under their
-        respective names.<a name="idm322808432640"></a></p></aside></section></section><section id="bringing-it-all-together"><h1>Bringing It All Together</h1><p id="idm322808430592">For the final part, we need to compose the lexer and parser. As we saw in the type
+            libraries.</p></li></ul><p id="idm181612040400">All of these libraries are available via OPAM under their
+        respective names.<a name="idm181612040048"></a></p></aside></section></section><section id="bringing-it-all-together"><h1>Bringing It All Together</h1><p id="idm181612038000">For the final part, we need to compose the lexer and parser. As we saw in the type
       definition in <code>parser.mli</code>, the parsing function expects a
-      lexer of type <code>Lexing.lexbuf -&gt; token</code>, and a <code>lexbuf</code>:<a name="idm322808428192"></a></p><div class="rwocode"><pre><code><span class="keyword4">val</span> prog<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword5">Lexing.</span>lexbuf -<span class="keyword2">&gt;</span> token<span class="keyword2">)</span> -<span class="keyword2">&gt;</span> <span class="keyword5">Lexing.</span>lexbuf -<span class="keyword2">&gt;</span> <span class="keyword5">Json.</span>value option</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/prog.mli">parsing/prog.mli</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322808424320">Before we start with the lexing, let's first define some functions
+      lexer of type <code>Lexing.lexbuf -&gt; token</code>, and a <code>lexbuf</code>:<a name="idm181612035600"></a></p><div class="rwocode"><pre><code><span class="keyword4">val</span> prog<span class="keyword2">:</span><span class="keyword2">(</span><span class="keyword5">Lexing.</span>lexbuf -<span class="keyword2">&gt;</span> token<span class="keyword2">)</span> -<span class="keyword2">&gt;</span> <span class="keyword5">Lexing.</span>lexbuf -<span class="keyword2">&gt;</span> <span class="keyword5">Json.</span>value option</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing/prog.mli">parsing/prog.mli</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181612031728">Before we start with the lexing, let's first define some functions
     to handle parsing errors. There are currently two errors: <code>Parser.Error</code> and <code>Lexer.SyntaxError</code>. A simple solution when
-    encountering an error is to print the error and give up:<a name="idm322808422544"></a></p><div class="rwocode"><pre><code><span class="keyword1">open</span> <span class="keyword5">Core.Std
+    encountering an error is to print the error and give up:<a name="idm181612029952"></a></p><div class="rwocode"><pre><code><span class="keyword1">open</span> <span class="keyword5">Core.Std
 </span><span class="keyword1">open</span> <span class="keyword6">Lexer
 </span><span class="keyword1">open</span> <span class="keyword6">Lexing
 </span>
@@ -497,11 +510,11 @@ list_fields<span class="keyword2">:</span>
     <span class="keyword6">None
 </span>  <span class="keyword2">|</span> <span class="keyword5">Parser.Error </span>-<span class="keyword2">&gt;</span>
     fprintf stderr <span class="keyword7">&quot;%a: syntax error\n&quot;</span> print_position lexbuf<span class="keyword2">;</span>
-    exit <span class="keyword2">(</span><span class="keyword8">-1</span><span class="keyword2">)</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing-test/test.ml">parsing-test/test.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322808418640">The &quot;give up on the first error&quot; approach is easy to implement but
+    exit <span class="keyword2">(</span><span class="keyword8">-1</span><span class="keyword2">)</span></code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing-test/test.ml">parsing-test/test.ml</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181612026048">The &quot;give up on the first error&quot; approach is easy to implement but
     isn't very friendly. In general, error handling can be pretty intricate,
     and we won't discuss it here. However, the Menhir parser defines
     additional mechanisms you can use to try and recover from errors. These
-    are described in detail in its reference <a href="http://gallium.inria.fr/~fpottier/menhir/" target="_top">manual</a>.<a name="idm322808416768"></a></p><p id="idm322808415328">The standard lexing library <code>Lexing</code> provides a function <code>from_channel</code> to read the input from a channel.
+    are described in detail in its reference <a href="http://gallium.inria.fr/~fpottier/menhir/" target="_top">manual</a>.<a name="idm181612024176"></a></p><p id="idm181612022736">The standard lexing library <code>Lexing</code> provides a function <code>from_channel</code> to read the input from a channel.
     The following function describes the structure, where the <code>Lexing.from_channel</code> function is used to
     construct a <code>lexbuf</code>, which is passed
     with the lexing function <code>Lexer.read</code> to
@@ -519,7 +532,7 @@ list_fields<span class="keyword2">:</span>
   <span class="keyword4">let</span> lexbuf <span class="keyword2">=</span> <span class="keyword5">Lexing.</span>from_channel inx <span class="keyword4">in</span>
   lexbuf.lex_curr_p <span class="keyword2">&lt;</span>- <span class="keyword2">{</span> lexbuf.lex_curr_p <span class="keyword1">with</span> pos_fname <span class="keyword2">=</span> filename <span class="keyword2">}</span><span class="keyword2">;</span>
   parse_and_print lexbuf<span class="keyword2">;</span>
-  <span class="keyword5">In_channel.</span>close inx</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing-test/test.ml">parsing-test/test.ml</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322808404912">Here's a test input file we can use to test the code we just
+  <span class="keyword5">In_channel.</span>close inx</code></pre><div class="rwocodeinfo">OCaml ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing-test/test.ml">parsing-test/test.ml</a> , continued (part 1) ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181612012320">Here's a test input file we can use to test the code we just
     wrote:</p><div class="rwocode"><pre><code><div class="highlight"><span class="kc">true</span>
 <span class="kc">false</span>
 <span class="kc">null</span>
@@ -530,13 +543,13 @@ list_fields<span class="keyword2">:</span>
   <span class="nt">&quot;field3&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
   <span class="nt">&quot;field4&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="nt">&quot;fieldA&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nt">&quot;fieldB&quot;</span><span class="p">:</span> <span class="s2">&quot;Hello&quot;</span> <span class="p">}</span>
 <span class="p">}</span>
-</div></code></pre><div class="rwocodeinfo">JSON ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing-test/test1.json">parsing-test/test1.json</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322808402352">Now build and run the example using this file, and you can see the
+</div></code></pre><div class="rwocodeinfo">JSON ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing-test/test1.json">parsing-test/test1.json</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181612009760">Now build and run the example using this file, and you can see the
     full parser in action:</p><div class="rwocode"><pre><code><div class="highlight"><span class="gp">$</span> ocamlbuild -use-menhir -tag thread -use-ocamlfind -quiet -pkg core test.native
 </div><div class="highlight"><span class="gp">$</span> ./test.native test1.json
-</div><div class="rwocodeout">true</div><div class="rwocodeout">false</div><div class="rwocodeout">null</div><div class="rwocodeout">[1, 2, 3.000000, 4.000000, 0.500000, 550000.000000, 6.300000]</div><div class="rwocodeout">&quot;Hello World&quot;</div><div class="rwocodeout">{ &quot;field1&quot;: &quot;Hello&quot;,</div><div class="rwocodeout">  &quot;field2&quot;: 170000000000000.000000,</div><div class="rwocodeout">  &quot;field3&quot;: [1, 2, 3],</div><div class="rwocodeout">  &quot;field4&quot;: { &quot;fieldA&quot;: 1,</div><div class="rwocodeout">  &quot;fieldB&quot;: &quot;Hello&quot; } }</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing-test/build_test.out">parsing-test/build_test.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322808391024">With our simple error handling scheme, errors are fatal and cause
+</div><div class="rwocodeout">true</div><div class="rwocodeout">false</div><div class="rwocodeout">null</div><div class="rwocodeout">[1, 2, 3.000000, 4.000000, 0.500000, 550000.000000, 6.300000]</div><div class="rwocodeout">&quot;Hello World&quot;</div><div class="rwocodeout">{ &quot;field1&quot;: &quot;Hello&quot;,</div><div class="rwocodeout">  &quot;field2&quot;: 170000000000000.000000,</div><div class="rwocodeout">  &quot;field3&quot;: [1, 2, 3],</div><div class="rwocodeout">  &quot;field4&quot;: { &quot;fieldA&quot;: 1,</div><div class="rwocodeout">  &quot;fieldB&quot;: &quot;Hello&quot; } }</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing-test/build_test.out">parsing-test/build_test.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181611998432">With our simple error handling scheme, errors are fatal and cause
     the program to terminate with a nonzero exit code:</p><div class="rwocode"><pre><code><div class="highlight"><span class="gp">$</span> cat test2.json
 </div><div class="rwocodeout">{ &quot;name&quot;: &quot;Chicago&quot;,</div><div class="rwocodeout">  &quot;zips&quot;: [12345,</div><div class="rwocodeout">}</div><div class="rwocodeout">{ &quot;name&quot;: &quot;New York&quot;,</div><div class="rwocodeout">  &quot;zips&quot;: [10004]</div><div class="rwocodeout">}</div><div class="highlight"><span class="gp">$</span> ./test.native test2.json
-</div><div class="rwocodeout">test2.json:3:2: syntax error</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing-test/run_broken_test.out">parsing-test/run_broken_test.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm322808381744">That wraps up our parsing tutorial. As an aside, notice that the
+</div><div class="rwocodeout">test2.json:3:2: syntax error</div></code></pre><div class="rwocodeinfo">Terminal ∗ <a href="http://github.com/realworldocaml/examples/blob/master/code/parsing-test/run_broken_test.out">parsing-test/run_broken_test.out</a>  ∗ <a href="http://github.com/realworldocaml/examples/">all code</a></div></div><p id="idm181611989152">That wraps up our parsing tutorial. As an aside, notice that the
     JSON polymorphic variant type that we defined in this chapter is actually
     structurally compatible with the Yojson representation explained in <a href="handling-json-data.html">Chapter 15, <i>Handling JSON Data</i></a>. That means that you can take this parser
     and use it with the helper functions in Yojson to build more sophisticated
