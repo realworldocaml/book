@@ -33,6 +33,8 @@ let install_uri = Uri.of_string "https://github.com/realworldocaml/book/wiki/Ins
 
 let jar  = Lwt_main.run (Github_cookie_jar.init ())
 
+let robots_txt = "User-agent: *\nDisallow:\n"
+
 let our_token =
   Lwt_main.run (
     match_lwt Github_cookie_jar.get jar "rwo" with
@@ -293,6 +295,7 @@ let callback con_id ?body req =
       |[] -> Server.respond_string ~status:`OK ~body:Comment.index ()
       | "install"::_ -> Server.respond_redirect ~uri:install_uri ()
       | "doc"::_ -> Server.respond_redirect ~uri:doc_uri ()
+      | ["robots.txt"] -> Server.respond_string ~status:`OK ~body:robots_txt ()
       | "media"::_ -> dispatch_static req (* No auth required for support files *)
       | _::"media"::_ -> dispatch_static req (* No auth required for support files *)
       |milestone::_ when List.mem milestone Comment.all_milestones ->
