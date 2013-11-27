@@ -45,22 +45,22 @@
 
 		<ul>
                   <li> The
-                  full <a href="/v1/en/html/index.html">text</a> of
+                  full <b><a href="/v1/en/html/index.html">HTML text</a></b> of
                   the book.
-		  <li> <a href="https://realworldocaml.org/install">Installation
-		  instructions</a> for the key software that Real
+		  <li> <b><a href="https://realworldocaml.org/install">Installation
+		  instructions</a></b> for the key software that Real
 		  World OCaml depends on.
-		  <li> <a href="https://realworldocaml.org/doc">API
-		  documentation</a> for many of the libraries that are
+		  <li> <b><a href="https://realworldocaml.org/doc">API
+		  documentation</a></b> for many of the libraries that are
 		  introduced in the text.
 		</ul>
 
 		If you enjoy the book, please consider purchasing it
 		in
-                <a href="http://www.amazon.com/Real-World-OCaml-Functional-programming/dp/144932391X/">print</a>
-                or <a href="http://oreil.ly/realworldOCaml">ebook</a>
+                <b><a href="http://www.amazon.com/Real-World-OCaml-Functional-programming/dp/144932391X/">print</a></b>
+                or <b><a href="http://oreil.ly/realworldOCaml">ebook</a></b>
                 form!
-
+              </p>
                 <a name="faq"></a>
                 <h1>FAQ</h1>
                 
