@@ -296,6 +296,7 @@ let callback con_id ?body req =
       | "install"::_ -> Server.respond_redirect ~uri:install_uri ()
       | "doc"::_ -> Server.respond_redirect ~uri:doc_uri ()
       | ["robots.txt"] -> Server.respond_string ~status:`OK ~body:robots_txt ()
+      | ["googled11900591fe397c2.html"] -> Server.respond_string ~status:`OK ~body:"google-site-verification: googled11900591fe397c2.html" ()
       | "media"::_ -> dispatch_static req (* No auth required for support files *)
       | _::"media"::_ -> dispatch_static req (* No auth required for support files *)
       |milestone::_ when List.mem milestone Comment.all_milestones ->
