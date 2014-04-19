@@ -28,7 +28,7 @@ let get_definition_from_json json =
 let get_definition word =
   Cohttp_async.Client.get (query_uri word)
   >>= fun (_, body) ->
-  Pipe.to_list body
+  Pipe.to_list (Cohttp_async.Body.to_pipe body)
   >>| fun strings ->
   (word, get_definition_from_json (String.concat strings))
 
