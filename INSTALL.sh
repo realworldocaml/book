@@ -1,6 +1,6 @@
 #!/bin/sh
 
-opam install --yes \
+opam install -j 4 --yes \
   core \
   core_extended \
   cryptokit \
@@ -16,7 +16,8 @@ opam install --yes \
   cmdliner \
   cow \
   ocp-indent \
-  ctypes
+  ctypes \
+  ocp-index
 
 echo You also need Pygments installed.
 echo This is python-pygments in Debian
