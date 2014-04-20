@@ -29,7 +29,7 @@ let get_definition ~server ~interrupt word =
   try_with (fun () ->
     Cohttp_async.Client.get ~interrupt (query_uri ~server word)
     >>= fun  (_, body) ->
-    Pipe.to_list body
+    Pipe.to_list (Cohttp_async.Body.to_pipe body)
     >>| fun strings ->
     (word, get_definition_from_json (String.concat strings)))
   >>| function
