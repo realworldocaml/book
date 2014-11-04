@@ -38,7 +38,7 @@
   "formats": {
     "pdf": {
       "version": "web",
-      "index": true,
+      "index": false,
       "toc": true,
       "syntaxhighlighting": false,
       "show_comments": false,
@@ -46,7 +46,7 @@
     },
     "epub": {
       "index": false,
-      "toc": false,
+      "toc": true,
       "epubcheck": false,
       "syntaxhighlighting": false,
       "show_comments": false
