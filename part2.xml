@@ -24,4 +24,15 @@
       written in OCaml.</para>
     </partintro>
 
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch13.xml"/>
+
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch14.xml"/>
+
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch15.xml"/>
+
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch16.xml"/>
+
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch17.xml"/>
+
+    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch18.xml"/>
   </part>
