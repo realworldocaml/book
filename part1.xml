@@ -20,27 +20,5 @@
       object-oriented graphics library.</para>
   </partintro>
 
-  <xi:include href="ch01.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 
-  <xi:include href="ch02.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-
-  <xi:include href="ch03.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-
-  <xi:include href="ch04.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-
-  <xi:include href="ch05.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-
-  <xi:include href="ch06.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-
-  <xi:include href="ch07.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-
-  <xi:include href="ch08.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-
-  <xi:include href="ch09.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-
-  <xi:include href="ch10.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-
-  <xi:include href="ch11.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-
-  <xi:include href="ch12.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 </part>

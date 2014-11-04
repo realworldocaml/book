@@ -24,13 +24,5 @@
       debug and profile production binaries.</para>
     </partintro>
 
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch19.xml"/>
 
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch20.xml"/>
-
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch21.xml"/>
-
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch22.xml"/>
-
-    <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="ch23.xml"/>
   </part>
