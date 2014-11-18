@@ -1,0 +1,582 @@
+<section xmlns="http://www.w3.org/1999/xhtml" id="records" data-type="chapter"><h1>Records</h1><p>One of OCaml's best features is its concise and expressive system for
+  declaring new data types, and records are a key element of that system. We
+  discussed records briefly in <a href="#a-guided-tour" data-type="xref"/>, but this
+  chapter will go into more depth, covering the details of how records work,
+  as well as advice on how to use them effectively in your software
+  designs.</p><p>A record represents a collection of values stored together as one,
+  where each component is identified by a different field name. The basic
+  syntax for a record type declaration is as follows:<a data-type="indexterm" data-primary="records" data-secondary="basic syntax for"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/record.syntax" class="orm:hideurl:ital"><em class="hyperlink">Syntax</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type <em>&lt;record-name&gt;</em> =
+    {<em> &lt;field&gt;</em> : <em>&lt;type&gt;</em> ;
+    <em>&lt;field&gt;</em> : <em>&lt;type&gt;</em> ;
+    ...
+    }</pre><p>Note that record field names must start with a lowercase
+  letter.</p><p>Here's a simple example, a <code>host_info</code> record that summarizes information about
+  a given computer:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type host_info =</code></strong>
+<strong><code>    { hostname   : string;</code></strong>
+<strong><code>      os_name    : string;</code></strong>
+<strong><code>      cpu_arch   : string;</code></strong>
+<strong><code>      timestamp  : Time.t;</code></strong>
+<strong><code>    };;</code></strong>
+<code class="computeroutput">type host_info = {</code>
+<code class="computeroutput">  hostname : string;</code>
+<code class="computeroutput">  os_name : string;</code>
+<code class="computeroutput">  cpu_arch : string;</code>
+<code class="computeroutput">  timestamp : Time.t;</code>
+<code class="computeroutput">}</code></pre><p>We can construct a <code>host_info</code> just
+  as easily. The following code uses the <code>Shell</code> module from <code>Core_extended</code> to dispatch commands to the shell to
+  extract the information we need about the computer we're running on. It also
+  uses the <code>Time.now</code> call from Core's
+  <code>Time</code> module:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+  (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>#require "core_extended";;</code></strong>
+<code class="prompt"># </code><strong><code>open Core_extended.Std;;</code></strong>
+<code class="prompt"># </code><strong><code>let my_host =</code></strong>
+<strong><code>    let sh = Shell.sh_one_exn in</code></strong>
+<strong><code>    { hostname   = sh "hostname";</code></strong>
+<strong><code>      os_name    = sh "uname -s";</code></strong>
+<strong><code>      cpu_arch   = sh "uname -p";</code></strong>
+<strong><code>      timestamp  = Time.now ();</code></strong>
+<strong><code>    };;</code></strong>
+<code class="computeroutput">val my_host : host_info =</code>
+<code class="computeroutput">  {hostname = "ocaml-www1"; os_name = "Linux"; cpu_arch = "unknown";</code>
+<code class="computeroutput">   timestamp = 2013-08-18 14:50:48.986085+01:00}</code></pre><p>You might wonder how the compiler inferred that <code>my_host</code> is of type <code>host_info</code>. The hook that the compiler uses in this
+  case to figure out the type is the record field name. Later in the chapter,
+  we'll talk about what happens when there is more than one record type in
+  scope with the same field name.</p><p>Once we have a record value in hand, we can extract elements from the
+  record field using dot notation:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+  (part 2)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>my_host.cpu_arch;;</code></strong>
+<code class="computeroutput">- : string = "unknown"</code></pre><p>When declaring an OCaml type, you always have the option of
+  parameterizing it by a polymorphic type. Records are no different in this
+  regard. So, for example, here's a type one might use to timestamp arbitrary
+  items:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+  (part 3)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type 'a timestamped = { item: 'a; time: Time.t };;</code></strong>
+<code class="computeroutput">type 'a timestamped = { item : 'a; time : Time.t; }</code></pre><p>We can then write polymorphic functions that operate over this
+  parameterized type:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+  (part 4)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let first_timestamped list =</code></strong>
+<strong><code>    List.reduce list ~f:(fun a b -&gt; if a.time &lt; b.time then a else b)</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">val first_timestamped : 'a timestamped list -&gt; 'a timestamped option = &lt;fun&gt;</code></pre><section id="patterns-and-exhaustiveness" data-type="sect1"><h1>Patterns and Exhaustiveness</h1><p>Another way of getting information out of a record is by using a
+    pattern match, as in the definition of <code>host_info_to_string</code>:<a data-type="indexterm" data-primary="pattern matching" data-secondary="and exhaustiveness"/><a data-type="indexterm" data-primary="records" data-secondary="patterns and exhaustiveness in"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 5)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let host_info_to_string { hostname = h; os_name = os;</code></strong>
+<strong><code>                            cpu_arch = c; timestamp = ts;</code></strong>
+<strong><code>                          } =</code></strong>
+<strong><code>       sprintf "%s (%s / %s, on %s)" h os c (Time.to_sec_string ts);;</code></strong>
+<code class="computeroutput">val host_info_to_string : host_info -&gt; string = &lt;fun&gt;</code>
+<code class="prompt"># </code><strong><code>host_info_to_string my_host;;</code></strong>
+<code class="computeroutput">- : string = "ocaml-www1 (Linux / unknown, on 2013-08-18 14:50:48)"</code></pre><p>Note that the pattern we used had only a single case, rather than
+    using several cases separated by <code>|</code>'s.
+    We needed only one pattern because record patterns are
+    <em>irrefutable</em>, meaning that a record pattern match will
+    never fail at runtime. This makes sense, because the set of fields
+    available in a record is always the same. In general, patterns for types
+    with a fixed structure, like records and tuples, are irrefutable, unlike
+    types with variable structures like lists and variants.<a data-type="indexterm" data-primary="irrefutable patterns"/><a data-type="indexterm" data-primary="datatypes" data-secondary="fixed vs. variable structure of"/></p><p>Another important characteristic of record patterns is that they
+    don't need to be complete; a pattern can mention only a subset of the
+    fields in the record. This can be convenient, but it can also be error
+    prone. In particular, this means that when new fields are added to the
+    record, code that should be updated to react to the presence of those new
+    fields will not be flagged by the compiler.</p><p>As an example, imagine that we wanted to add a new field to our
+    <code>host_info</code> record called <code>os_release</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 6)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type host_info =</code></strong>
+<strong><code>    { hostname   : string;</code></strong>
+<strong><code>      os_name    : string;</code></strong>
+<strong><code>      cpu_arch   : string;</code></strong>
+<strong><code>      os_release : string;</code></strong>
+<strong><code>      timestamp  : Time.t;</code></strong>
+<strong><code>    } ;;</code></strong>
+<code class="computeroutput">type host_info = {</code>
+<code class="computeroutput">  hostname : string;</code>
+<code class="computeroutput">  os_name : string;</code>
+<code class="computeroutput">  cpu_arch : string;</code>
+<code class="computeroutput">  os_release : string;</code>
+<code class="computeroutput">  timestamp : Time.t;</code>
+<code class="computeroutput">}</code></pre><p>The code for <code>host_info_to_string</code>
+    would continue to compile without change. In this particular case, it's
+    pretty clear that you might want to update <code>host_info_to_string</code> in order to include <code>os_release</code>, and it would be nice if the type
+    system would give you a warning about the change.</p><p>Happily, OCaml does offer an optional warning for missing fields in
+    a record pattern. With that warning turned on (which you can do in the
+    toplevel by typing <code>#warnings "+9"</code>), the
+    compiler will warn about the missing field:<a data-type="indexterm" data-primary="errors" data-secondary="compiler warnings"/><a data-type="indexterm" data-primary="code compilers" data-secondary="warning enable/disable"/><a data-type="indexterm" data-primary="errors" data-secondary="missing field warnings"/><a data-type="indexterm" data-primary="records" data-secondary="missing field warnings"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 7)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>#warnings "+9";;</code></strong>
+<code class="prompt"># </code><strong><code>let host_info_to_string { hostname = h; os_name = os;</code></strong>
+<strong><code>                            cpu_arch = c; timestamp = ts;</code></strong>
+<strong><code>                          } =</code></strong>
+<strong><code>    sprintf "%s (%s / %s, on %s)" h os c (Time.to_sec_string ts);;</code></strong>
+<code class="computeroutput">Characters 24-139:</code>
+<code class="computeroutput">Warning 9: the following labels are not bound in this record pattern:</code>
+<code class="computeroutput">os_release</code>
+<code class="computeroutput">Either bind these labels explicitly or add '; _' to the pattern.</code>
+<code class="computeroutput">val host_info_to_string : host_info -&gt; string = &lt;fun&gt;</code></pre><p>We can disable the warning for a given pattern by explicitly
+    acknowledging that we are ignoring extra fields. This is done by adding an
+    underscore to the pattern:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 8)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let host_info_to_string { hostname = h; os_name = os;</code></strong>
+<strong><code>                            cpu_arch = c; timestamp = ts; _</code></strong>
+<strong><code>                          } =</code></strong>
+<strong><code>    sprintf "%s (%s / %s, on %s)" h os c (Time.to_sec_string ts);;</code></strong>
+<code class="computeroutput">val host_info_to_string : host_info -&gt; string = &lt;fun&gt;</code></pre><p>It's a good idea to enable the warning for incomplete record matches
+    and to explicitly disable it with an <code>_</code>
+    where necessary.</p><div class="allow_break" data-type="note"><h1>Compiler Warnings</h1><p>The OCaml compiler is packed full of useful warnings that can be
+      enabled and disabled separately. These are documented in the compiler
+      itself, so we could have found out about warning 9 as follows:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/warn_help.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocaml -warn-help | egrep '\b9\b'</code></strong>
+<code class="computeroutput">  9 Missing fields in a record pattern.</code>
+<code class="computeroutput">  R Synonym for warning 9.</code></pre><p>You should think of OCaml's warnings as a powerful set of optional
+      static analysis tools, and you should eagerly enable them in your build
+      environment. You don't typically enable all warnings, but the defaults
+      that ship with the compiler are pretty good.</p><p>The warnings used for building the examples in this book are
+      specified with the following flag: <code>-w
+      @A-4-33-41-42-43-34-44</code>.</p><p>The syntax of this can be found by running <code>ocaml -help</code>, but this particular invocation
+      turns on all warnings as errors, disabling only the numbers listed
+      explicitly after the <code>A</code>.</p><p>Treating warnings as errors (i.e., making OCaml fail to compile
+      any code that triggers a warning) is good practice, since without it,
+      warnings are too often ignored during development. When preparing a
+      package for distribution, however, this is a bad idea, since the list of
+      warnings may grow from one release of the compiler to another, and so
+      this may lead your package to fail to compile on newer compiler
+      releases.</p></div></section><section id="field-punning" data-type="sect1"><h1>Field Punning</h1><p>When the name of a variable coincides with the name of a record
+    field, OCaml provides some handy syntactic shortcuts. For example, the
+    pattern in the following function binds all of the fields in question to
+    variables of the same name. This is called <em>field
+    punning</em>:<a data-type="indexterm" data-primary="fields" data-secondary="field punning"/><a data-type="indexterm" data-primary="records" data-secondary="field punning in"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 9)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let host_info_to_string { hostname; os_name; cpu_arch; timestamp; _ } =</code></strong>
+<strong><code>     sprintf "%s (%s / %s) &lt;%s&gt;" hostname os_name cpu_arch</code></strong>
+<strong><code>       (Time.to_string timestamp);;</code></strong>
+<code class="computeroutput">val host_info_to_string : host_info -&gt; string = &lt;fun&gt;</code></pre><p>Field punning can also be used to construct a record. Consider the
+    following code for generating a <code>host_info</code> record:<a data-type="indexterm" data-primary="records" data-secondary="construction of"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 10)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let my_host =</code></strong>
+<strong><code>    let sh cmd = Shell.sh_one_exn cmd in</code></strong>
+<strong><code>    let hostname   = sh "hostname" in</code></strong>
+<strong><code>    let os_name    = sh "uname -s" in</code></strong>
+<strong><code>    let cpu_arch   = sh "uname -p" in</code></strong>
+<strong><code>    let os_release = sh "uname -r" in</code></strong>
+<strong><code>    let timestamp  = Time.now () in</code></strong>
+<strong><code>    { hostname; os_name; cpu_arch; os_release; timestamp };;</code></strong>
+<code class="computeroutput">val my_host : host_info =</code>
+<code class="computeroutput">  {hostname = "ocaml-www1"; os_name = "Linux"; cpu_arch = "unknown";</code>
+<code class="computeroutput">   os_release = "3.2.0-1-amd64";</code>
+<code class="computeroutput">   timestamp = 2013-08-18 14:50:55.287342+01:00}</code></pre><p>In the preceding code, we defined variables corresponding to the
+    record fields first, and then the record declaration itself simply listed
+    the fields that needed to be included.</p><p>You can take advantage of both field punning and label punning when
+    writing a function for constructing a record from labeled
+    arguments:<a data-type="indexterm" data-primary="label punning"/><a data-type="indexterm" data-primary="records" data-secondary="label punning in"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 11)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let create_host_info ~hostname ~os_name ~cpu_arch ~os_release =</code></strong>
+<strong><code>    { os_name; cpu_arch; os_release;</code></strong>
+<strong><code>      hostname = String.lowercase hostname;</code></strong>
+<strong><code>      timestamp = Time.now () };;</code></strong>
+<code class="computeroutput">val create_host_info :</code>
+<code class="computeroutput">  hostname:string -&gt;</code>
+<code class="computeroutput">  os_name:string -&gt; cpu_arch:string -&gt; os_release:string -&gt; host_info = &lt;fun&gt;</code></pre><p>This is considerably more concise than what you would get without
+    punning:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 12)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let create_host_info</code></strong>
+<strong><code>    ~hostname:hostname ~os_name:os_name</code></strong>
+<strong><code>    ~cpu_arch:cpu_arch ~os_release:os_release =</code></strong>
+<strong><code>    { os_name = os_name;</code></strong>
+<strong><code>      cpu_arch = cpu_arch;</code></strong>
+<strong><code>      os_release = os_release;</code></strong>
+<strong><code>      hostname = String.lowercase hostname;</code></strong>
+<strong><code>      timestamp = Time.now () };;</code></strong>
+<code class="computeroutput">val create_host_info :</code>
+<code class="computeroutput">  hostname:string -&gt;</code>
+<code class="computeroutput">  os_name:string -&gt; cpu_arch:string -&gt; os_release:string -&gt; host_info = &lt;fun&gt;</code></pre><p>Together, labeled arguments, field names, and field and label
+    punning encourage a style where you propagate the same names throughout
+    your codebase. This is generally good practice, since it encourages
+    consistent naming, which makes it easier to navigate the source.</p></section><section id="reusing-field-names" data-type="sect1"><h1>Reusing Field Names</h1><p>Defining records with the same field names can be problematic. Let's
+    consider a simple example: building types to represent the protocol used
+    for a logging server.<a data-type="indexterm" id="FNreus" data-primary="fields" data-secondary="reusing field names"/><a data-type="indexterm" id="RECreusfn" data-primary="records" data-secondary="reusing field names"/></p><p>We'll describe three message types: <code>log_entry</code>, <code>heartbeat</code>, and <code>logon</code>. The <code>log_entry</code> message is used to deliver a log entry
+    to the server; the <code>logon</code> message is
+    sent to initiate a connection and includes the identity of the user
+    connecting and credentials used for authentication; and the <code>heartbeat</code> message is periodically sent by the
+    client to demonstrate to the server that the client is alive and
+    connected. All of these messages include a session ID and the time the
+    message was generated:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 13)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type log_entry =</code></strong>
+<strong><code>    { session_id: string;</code></strong>
+<strong><code>      time: Time.t;</code></strong>
+<strong><code>      important: bool;</code></strong>
+<strong><code>      message: string;</code></strong>
+<strong><code>    }</code></strong>
+<strong><code>  type heartbeat =</code></strong>
+<strong><code>    { session_id: string;</code></strong>
+<strong><code>      time: Time.t;</code></strong>
+<strong><code>      status_message: string;</code></strong>
+<strong><code>    }</code></strong>
+<strong><code>  type logon =</code></strong>
+<strong><code>    { session_id: string;</code></strong>
+<strong><code>      time: Time.t;</code></strong>
+<strong><code>      user: string;</code></strong>
+<strong><code>      credentials: string;</code></strong>
+<strong><code>    }</code></strong>
+<strong><code>;;</code></strong>
+<code class="computeroutput">type log_entry = {</code>
+<code class="computeroutput">  session_id : string;</code>
+<code class="computeroutput">  time : Time.t;</code>
+<code class="computeroutput">  important : bool;</code>
+<code class="computeroutput">  message : string;</code>
+<code class="computeroutput">}</code>
+<code class="computeroutput">type heartbeat = {</code>
+<code class="computeroutput">  session_id : string;</code>
+<code class="computeroutput">  time : Time.t;</code>
+<code class="computeroutput">  status_message : string;</code>
+<code class="computeroutput">}</code>
+<code class="computeroutput">type logon = {</code>
+<code class="computeroutput">  session_id : string;</code>
+<code class="computeroutput">  time : Time.t;</code>
+<code class="computeroutput">  user : string;</code>
+<code class="computeroutput">  credentials : string;</code>
+<code class="computeroutput">}</code></pre><p>Reusing field names can lead to some ambiguity. For example, if we
+    want to write a function to grab the <code>session_id</code> from a
+    record, what type will it have?</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 14)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let get_session_id t = t.session_id;;</code></strong>
+<code class="computeroutput">val get_session_id : logon -&gt; string = &lt;fun&gt;</code></pre><p>In this case, OCaml just picks the most recent definition of that
+    record field. We can force OCaml to assume we're dealing with a different
+    type (say, a <code>heartbeat</code>) using a type
+    annotation:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 15)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let get_heartbeat_session_id (t:heartbeat) = t.session_id;;</code></strong>
+<code class="computeroutput">val get_heartbeat_session_id : heartbeat -&gt; string = &lt;fun&gt;</code></pre><p>While it's possible to resolve ambiguous field names using type
+    annotations, the ambiguity can be a bit confusing. Consider the following
+    functions for grabbing the session ID and status from a heartbeat:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 16)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let status_and_session t = (t.status_message, t.session_id);;</code></strong>
+<code class="computeroutput">val status_and_session : heartbeat -&gt; string * string = &lt;fun&gt;</code>
+<code class="prompt"># </code><strong><code>let session_and_status t = (t.session_id, t.status_message);;</code></strong>
+<code class="computeroutput">Characters 44-58:</code>
+<code class="computeroutput">Error: The record type logon has no field status_message</code>
+<code class="prompt"># </code><strong><code>let session_and_status (t:heartbeat) = (t.session_id, t.status_message);;</code></strong>
+<code class="computeroutput">val session_and_status : heartbeat -&gt; string * string = &lt;fun&gt;</code></pre><p>Why did the first definition succeed without a type annotation and
+    the second one fail? The difference is that in the first case, the
+    type-checker considered the <code>status_message</code> field first and thus concluded
+    that the record was a <code>heartbeat</code>. When
+    the order was switched, the <code>session_id</code>
+    field was considered first, and so that drove the type to be considered to
+    be a <code>logon</code>, at which point <code>t.status_message</code> no longer made sense.</p><p>We can avoid this ambiguity altogether, either by using
+    nonoverlapping field names or, more generally, by minting a module for
+    each type. Packing types into modules is a broadly useful idiom (and one
+    used quite extensively by Core), providing for each type a namespace
+    within which to put related values. When using this style, it is standard
+    practice to name the type associated with the module <code>t</code>. Using this style we would write:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 17)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>module Log_entry = struct</code></strong>
+<strong><code>    type t =</code></strong>
+<strong><code>      { session_id: string;</code></strong>
+<strong><code>        time: Time.t;</code></strong>
+<strong><code>        important: bool;</code></strong>
+<strong><code>        message: string;</code></strong>
+<strong><code>      }</code></strong>
+<strong><code>  end</code></strong>
+<strong><code>  module Heartbeat = struct</code></strong>
+<strong><code>    type t =</code></strong>
+<strong><code>      { session_id: string;</code></strong>
+<strong><code>        time: Time.t;</code></strong>
+<strong><code>        status_message: string;</code></strong>
+<strong><code>      }</code></strong>
+<strong><code>  end</code></strong>
+<strong><code>  module Logon = struct</code></strong>
+<strong><code>    type t =</code></strong>
+<strong><code>      { session_id: string;</code></strong>
+<strong><code>        time: Time.t;</code></strong>
+<strong><code>        user: string;</code></strong>
+<strong><code>        credentials: string;</code></strong>
+<strong><code>      }</code></strong>
+<strong><code>  end;;</code></strong>
+<code class="computeroutput">module Log_entry :</code>
+<code class="computeroutput">  sig</code>
+<code class="computeroutput">    type t = {</code>
+<code class="computeroutput">      session_id : string;</code>
+<code class="computeroutput">      time : Time.t;</code>
+<code class="computeroutput">      important : bool;</code>
+<code class="computeroutput">      message : string;</code>
+<code class="computeroutput">    }</code>
+<code class="computeroutput">  end</code>
+<code class="computeroutput">module Heartbeat :</code>
+<code class="computeroutput">  sig</code>
+<code class="computeroutput">    type t = { session_id : string; time : Time.t; status_message : string; }</code>
+<code class="computeroutput">  end</code>
+<code class="computeroutput">module Logon :</code>
+<code class="computeroutput">  sig</code>
+<code class="computeroutput">    type t = {</code>
+<code class="computeroutput">      session_id : string;</code>
+<code class="computeroutput">      time : Time.t;</code>
+<code class="computeroutput">      user : string;</code>
+<code class="computeroutput">      credentials : string;</code>
+<code class="computeroutput">    }</code>
+<code class="computeroutput">  end</code></pre><p>Now, our log-entry-creation function can be rendered as
+    follows:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 18)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let create_log_entry ~session_id ~important message =</code></strong>
+<strong><code>     { Log_entry.time = Time.now (); Log_entry.session_id;</code></strong>
+<strong><code>       Log_entry.important; Log_entry.message }</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">val create_log_entry :</code>
+<code class="computeroutput">  session_id:string -&gt; important:bool -&gt; string -&gt; Log_entry.t = &lt;fun&gt;</code></pre><p>The module name <code>Log_entry</code> is
+    required to qualify the fields, because this function is outside of the
+    <code>Log_entry</code> module where the record was
+    defined. OCaml only requires the module qualification for one record
+    field, however, so we can write this more concisely. Note that we are
+    allowed to insert whitespace between the module path and the field
+    name:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 19)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let create_log_entry ~session_id ~important message =</code></strong>
+<strong><code>     { Log_entry.</code></strong>
+<strong><code>       time = Time.now (); session_id; important; message }</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">val create_log_entry :</code>
+<code class="computeroutput">  session_id:string -&gt; important:bool -&gt; string -&gt; Log_entry.t = &lt;fun&gt;</code></pre><p>This is not restricted to constructing a record; we can use the same
+    trick when pattern matching:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 20)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let message_to_string { Log_entry.important; message; _ } =</code></strong>
+<strong><code>    if important then String.uppercase message else message</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">val message_to_string : Log_entry.t -&gt; string = &lt;fun&gt;</code></pre><p>When using dot notation for accessing record fields, we can qualify
+    the field by the module directly:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 21)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let is_important t = t.Log_entry.important;;</code></strong>
+<code class="computeroutput">val is_important : Log_entry.t -&gt; bool = &lt;fun&gt;</code></pre><p>The syntax here is a little surprising when you first encounter it.
+    The thing to keep in mind is that the dot is being used in two ways: the
+    first dot is a record field access, with everything to the right of the
+    dot being interpreted as a field name; the second dot is accessing the
+    contents of a module, referring to the record field <code>important</code> from within the module <code>Log_entry</code>. The fact that <code>Log_entry</code> is capitalized and so can't be a field
+    name is what disambiguates the two uses.</p><p>For functions defined within the module where a given record is
+    defined, the module qualification goes away entirely.<a data-type="indexterm" data-startref="RECreusfn"/><a data-type="indexterm" data-startref="FNreus"/></p></section><section id="functional-updates" data-type="sect1"><h1>Functional Updates</h1><p>Fairly often, you will find yourself wanting to create a new record
+    that differs from an existing record in only a subset of the fields. For
+    example, imagine our logging server had a record type for representing the
+    state of a given client, including when the last heartbeat was received
+    from that client. The following defines a type for representing this
+    information, as well as a function for updating the client information
+    when a new heartbeat arrives:<a data-type="indexterm" data-primary="functional updates"/><a data-type="indexterm" data-primary="records" data-secondary="functional updates to"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 22)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type client_info =</code></strong>
+<strong><code>   { addr: Unix.Inet_addr.t;</code></strong>
+<strong><code>     port: int;</code></strong>
+<strong><code>     user: string;</code></strong>
+<strong><code>     credentials: string;</code></strong>
+<strong><code>     last_heartbeat_time: Time.t;</code></strong>
+<strong><code>   };;</code></strong>
+<code class="computeroutput">type client_info = {</code>
+<code class="computeroutput">  addr : UnixLabels.inet_addr;</code>
+<code class="computeroutput">  port : int;</code>
+<code class="computeroutput">  user : string;</code>
+<code class="computeroutput">  credentials : string;</code>
+<code class="computeroutput">  last_heartbeat_time : Time.t;</code>
+<code class="computeroutput">}</code>
+<code class="prompt"># </code><strong><code>let register_heartbeat t hb =</code></strong>
+<strong><code>      { addr = t.addr;</code></strong>
+<strong><code>        port = t.port;</code></strong>
+<strong><code>        user = t.user;</code></strong>
+<strong><code>        credentials = t.credentials;</code></strong>
+<strong><code>        last_heartbeat_time = hb.Heartbeat.time;</code></strong>
+<strong><code>      };;</code></strong>
+<code class="computeroutput">val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;fun&gt;</code></pre><p>This is fairly verbose, given that there's only one field that we
+    actually want to change, and all the others are just being copied over
+    from <code>t</code>. We can use OCaml's
+    <em>functional update</em> syntax to do this more tersely. The
+    syntax of a functional update is as follows:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/functional_update.syntax" class="orm:hideurl:ital"><em class="hyperlink">Syntax</em></a></p><pre data-type="programlisting" data-code-language="ocaml">{ <em>&lt;record&gt;</em> with <em>&lt;field&gt;</em> = <em>&lt;value&gt;</em>;
+      <em>&lt;field&gt;</em> = <em>&lt;value&gt;</em>;
+      ...
+}</pre><p>The purpose of the functional update is to create a new record based
+    on an existing one, with a set of field changes layered on top.</p><p>Given this, we can rewrite <code>register_heartbeat</code> more concisely:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 23)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let register_heartbeat t hb =</code></strong>
+<strong><code>    { t with last_heartbeat_time = hb.Heartbeat.time };;</code></strong>
+<code class="computeroutput">val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;fun&gt;</code></pre><p>Functional updates make your code independent of the identity of the
+    fields in the record that are not changing. This is often what you want,
+    but it has downsides as well. In particular, if you change the definition
+    of your record to have more fields, the type system will not prompt you to
+    reconsider whether your code needs to change to accommodate the new
+    fields. Consider what happens if we decided to add a field for the status
+    message received on the last heartbeat:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 24)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type client_info =</code></strong>
+<strong><code>   { addr: Unix.Inet_addr.t;</code></strong>
+<strong><code>     port: int;</code></strong>
+<strong><code>     user: string;</code></strong>
+<strong><code>     credentials: string;</code></strong>
+<strong><code>     last_heartbeat_time: Time.t;</code></strong>
+<strong><code>     last_heartbeat_status: string;</code></strong>
+<strong><code>   };;</code></strong>
+<code class="computeroutput">type client_info = {</code>
+<code class="computeroutput">  addr : UnixLabels.inet_addr;</code>
+<code class="computeroutput">  port : int;</code>
+<code class="computeroutput">  user : string;</code>
+<code class="computeroutput">  credentials : string;</code>
+<code class="computeroutput">  last_heartbeat_time : Time.t;</code>
+<code class="computeroutput">  last_heartbeat_status : string;</code>
+<code class="computeroutput">}</code></pre><p>The original implementation of <code>register_heartbeat</code> would now be invalid, and
+    thus the compiler would effectively warn us to think about how to handle
+    this new field. But the version using a functional update continues to
+    compile as is, even though it incorrectly ignores the new field. The
+    correct thing to do would be to update the code as follows:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 25)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let register_heartbeat t hb =</code></strong>
+<strong><code>    { t with last_heartbeat_time   = hb.Heartbeat.time;</code></strong>
+<strong><code>             last_heartbeat_status = hb.Heartbeat.status_message;</code></strong>
+<strong><code>    };;</code></strong>
+<code class="computeroutput">val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;fun&gt;</code></pre></section><section id="mutable-fields" data-type="sect1"><h1>Mutable Fields</h1><p>Like most OCaml values, records are immutable by default. You can,
+    however, declare individual record fields as mutable. In the following
+    code, we've made the last two fields of <code>client_info</code> mutable:<a data-type="indexterm" data-primary="mutable record fields"/><a data-type="indexterm" data-primary="records" data-secondary="mutable fields in"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 26)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type client_info =</code></strong>
+<strong><code>   { addr: Unix.Inet_addr.t;</code></strong>
+<strong><code>     port: int;</code></strong>
+<strong><code>     user: string;</code></strong>
+<strong><code>     credentials: string;</code></strong>
+<strong><code>     mutable last_heartbeat_time: Time.t;</code></strong>
+<strong><code>     mutable last_heartbeat_status: string;</code></strong>
+<strong><code>   };;</code></strong>
+<code class="computeroutput">type client_info = {</code>
+<code class="computeroutput">  addr : UnixLabels.inet_addr;</code>
+<code class="computeroutput">  port : int;</code>
+<code class="computeroutput">  user : string;</code>
+<code class="computeroutput">  credentials : string;</code>
+<code class="computeroutput">  mutable last_heartbeat_time : Time.t;</code>
+<code class="computeroutput">  mutable last_heartbeat_status : string;</code>
+<code class="computeroutput">}</code></pre><p>The <code>&lt;-</code> operator is used for setting a mutable field.
+      The side-effecting version of <code>register_heartbeat</code> would be
+      written as follows:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 27)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let register_heartbeat t hb =</code></strong>
+<strong><code>    t.last_heartbeat_time   &lt;- hb.Heartbeat.time;</code></strong>
+<strong><code>    t.last_heartbeat_status &lt;- hb.Heartbeat.status_message</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; unit = &lt;fun&gt;</code></pre><p>Note that mutable assignment, and thus the <code>&lt;-</code> operator, is not needed for initialization
+    because all fields of a record, including mutable ones, are specified when
+    the record is created.</p><p>OCaml's policy of immutable-by-default is a good one, but imperative
+    programming is an important part of programming in OCaml. We go into more
+    depth about how (and when) to use OCaml's imperative features in <a href="#imperative-programming" data-type="xref"/>.</p></section><section id="first-class-fields" data-type="sect1"><h1>First-Class Fields</h1><p>Consider the following function for extracting the usernames from a
+    list of <code>Logon</code> messages:<a data-type="indexterm" id="Ffc" data-primary="fields" data-secondary="first-class fields"/><a data-type="indexterm" id="firstclass" data-primary="first-class fields"/><a data-type="indexterm" id="RECfirstclass" data-primary="records" data-secondary="first-class fields in"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 28)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let get_users logons =</code></strong>
+<strong><code>     List.dedup (List.map logons ~f:(fun x -&gt; x.Logon.user));;</code></strong>
+<code class="computeroutput">val get_users : Logon.t list -&gt; string list = &lt;fun&gt;</code></pre><p>Here, we wrote a small function <code>(fun x
+    -&gt; x.Logon.user)</code> to access the <code>user</code> field. This kind of accessor function is a
+    common enough pattern that it would be convenient to generate it
+    automatically. The <code>fieldslib</code> syntax
+    extension that ships with Core does just that.<a data-type="indexterm" data-primary="record field accessor functions"/></p><p>The <code>with fields</code> annotation at the
+    end of the declaration of a record type will cause the extension to be
+    applied to a given type declaration. So, for example, we could have
+    defined <code>Logon</code> as follows:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main-29.rawscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><strong><code># module Logon = struct
+    type t =
+      { session_id: string;
+        time: Time.t;
+        user: string;
+        credentials: string;
+      }
+    with fields
+  end;;</code></strong>
+<code class="computeroutput">module Logon :
+  sig
+    type t = {
+      session_id : string;
+      time : Time.t;
+      user : string;
+      credentials : string;
+    }
+    val credentials : t -&gt; string
+    val user : t -&gt; string
+    val time : t -&gt; Time.t
+    val session_id : t -&gt; string
+    module Fields :
+      sig
+        val names : string list
+        val credentials :
+          ([&lt; `Read | `Set_and_create ], t, string) Field.t_with_perm
+        val user :
+          ([&lt; `Read | `Set_and_create ], t, string) Field.t_with_perm
+        val time :
+          ([&lt; `Read | `Set_and_create ], t, Time.t) Field.t_with_perm
+        val session_id :
+          ([&lt; `Read | `Set_and_create ], t, string) Field.t_with_perm
+
+        [ ... many definitions omitted ... ]
+
+      end
+  end</code></pre><p>Note that this will generate <em>a lot</em> of output
+    because <code>fieldslib</code> generates a large
+    collection of helper functions for working with record fields. We'll only
+    discuss a few of these; you can learn about the remainder from the
+    documentation that comes with <code>fieldslib</code>.</p><p>One of the functions we obtain is <code>Logon.user</code>, which we can use to extract the user
+    field from a logon message:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 30)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let get_users logons = List.dedup (List.map logons ~f:Logon.user);;</code></strong>
+<code class="computeroutput">val get_users : Logon.t list -&gt; string list = &lt;fun&gt;</code></pre><p>In addition to generating field accessor functions, <code>fieldslib</code> also creates a submodule called
+    <code>Fields</code> that contains a first-class
+    representative of each field, in the form of a value of type <code>Field.t</code>. The <code>Field</code> module provides the following
+    functions:<a data-type="indexterm" data-primary="Field module" data-secondary="Field.setter"/><a data-type="indexterm" data-primary="Field module" data-secondary="Field.fset"/><a data-type="indexterm" data-primary="Field module" data-secondary="Field.get"/><a data-type="indexterm" data-primary="Field module" data-secondary="Field.name"/><a data-type="indexterm" data-primary="fieldslib"/></p><dl><dt><code>Field.name</code></dt><dd><p>Returns the name of a field</p></dd><dt><code>Field.get</code></dt><dd><p>Returns the content of a field</p></dd><dt><code>Field.fset</code></dt><dd><p>Does a functional update of a field</p></dd><dt><code>Field.setter</code></dt><dd><p>Returns <code>None</code> if the field
+          is not mutable or <code>Some f</code> if it
+          is, where <code>f</code> is a function for
+          mutating that field</p></dd></dl><p>A <code>Field.t</code> has two type
+    parameters: the first for the type of the record, and the second for the
+    type of the field in question. Thus, the type of <code>Logon.Fields.session_id</code> is <code>(Logon.t, string) Field.t</code>, whereas the type of
+    <code>Logon.Fields.time</code> is <code>(Logon.t, Time.t) Field.t</code>. Thus, if you call
+    <code>Field.get</code> on <code>Logon.Fields.user</code>, you'll get a function for
+    extracting the <code>user</code> field from a
+    <code>Logon.t</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 31)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Field.get Logon.Fields.user;;</code></strong>
+<code class="computeroutput">- : Logon.t -&gt; string = &lt;fun&gt;</code></pre><p>Thus, the first parameter of the <code>Field.t</code> corresponds to
+      the record you pass to <code>get</code>, and the second parameter
+      corresponds to the value contained in the field, which is also the return type of <code>get</code>.</p><p>The type of <code>Field.get</code> is a little
+    more complicated than you might naively expect from the preceding
+    one:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 32)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Field.get;;</code></strong>
+<code class="computeroutput">- : ('b, 'r, 'a) Field.t_with_perm -&gt; 'r -&gt; 'a = &lt;fun&gt;</code></pre><p>The type is <code>Field.t_with_perm</code>
+    rather than <code>Field.t</code> because fields have
+    a notion of access control that comes up in some special cases where we
+    expose the ability to read a field from a record, but not the ability to
+    create new records, and so we can't expose functional updates.</p><p>We can use first-class fields to do things like write a generic
+    function for displaying a record field:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 33)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let show_field field to_string record =</code></strong>
+<strong><code>    let name = Field.name field in</code></strong>
+<strong><code>    let field_string = to_string (Field.get field record) in</code></strong>
+<strong><code>    name ^ ": " ^ field_string</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">val show_field :</code>
+<code class="computeroutput">  ('a, 'b, 'c) Field.t_with_perm -&gt; ('c -&gt; string) -&gt; 'b -&gt; string = &lt;fun&gt;</code></pre><p>This takes three arguments: the <code>Field.t</code>, a function for converting the contents
+    of the field in question to a string, and a record from which the field
+    can be grabbed.</p><p>Here's an example of <code>show_field</code>
+    in action:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 34)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let logon = { Logon.</code></strong>
+<strong><code>                session_id = "26685";</code></strong>
+<strong><code>                time = Time.now ();</code></strong>
+<strong><code>                user = "yminsky";</code></strong>
+<strong><code>                credentials = "Xy2d9W"; }</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">val logon : Logon.t =</code>
+<code class="computeroutput">  {Logon.session_id = "26685"; time = 2013-08-18 14:51:00.509463+01:00;</code>
+<code class="computeroutput">   user = "yminsky"; credentials = "Xy2d9W"}</code>
+<code class="prompt"># </code><strong><code>show_field Logon.Fields.user Fn.id logon;;</code></strong>
+<code class="computeroutput">- : string = "user: yminsky"</code>
+<code class="prompt"># </code><strong><code>show_field Logon.Fields.time Time.to_string logon;;</code></strong>
+<code class="computeroutput">- : string = "time: 2013-08-18 14:51:00.509463+01:00"</code></pre><p>As a side note, the preceding example is our first use of the
+    <code>Fn</code> module (short for "function"), which
+    provides a collection of useful primitives for dealing with functions.
+    <code>Fn.id</code> is the identity function.</p><p><code>fieldslib</code> also provides
+    higher-level operators, like <code>Fields.fold</code> and <code>Fields.iter</code>, which let you walk over the fields
+    of a record. So, for example, in the case of <code>Logon.t</code>, the field iterator has the following
+    type:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 35)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Logon.Fields.iter;;</code></strong>
+<code class="computeroutput">- : session_id:(([&lt; `Read | `Set_and_create ], Logon.t, string)</code>
+<code class="computeroutput">                Field.t_with_perm -&gt; 'a) -&gt;</code>
+<code class="computeroutput">    time:(([&lt; `Read | `Set_and_create ], Logon.t, Time.t) Field.t_with_perm -&gt;</code>
+<code class="computeroutput">          'b) -&gt;</code>
+<code class="computeroutput">    user:(([&lt; `Read | `Set_and_create ], Logon.t, string) Field.t_with_perm -&gt;</code>
+<code class="computeroutput">          'c) -&gt;</code>
+<code class="computeroutput">    credentials:(([&lt; `Read | `Set_and_create ], Logon.t, string)</code>
+<code class="computeroutput">                 Field.t_with_perm -&gt; 'd) -&gt;</code>
+<code class="computeroutput">    'd</code>
+<code class="computeroutput">= &lt;fun&gt;</code></pre><p>This is a bit daunting to look at, largely because of the access
+    control markers, but the structure is actually pretty simple. Each labeled
+    argument is a function that takes a first-class field of the necessary
+    type as an argument. Note that <code>iter</code>
+    passes each of these callbacks the <code>Field.t</code>, not the contents of the specific record
+    field. The contents of the field, though, can be looked up using the
+    combination of the record and the <code>Field.t</code>.</p><p>Now, let's use <code>Logon.Fields.iter</code>
+    and <code>show_field</code> to print out all the
+    fields of a <code>Logon</code> record:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 36)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let print_logon logon =</code></strong>
+<strong><code>    let print to_string field =</code></strong>
+<strong><code>      printf "%s\n" (show_field field to_string logon)</code></strong>
+<strong><code>    in</code></strong>
+<strong><code>    Logon.Fields.iter</code></strong>
+<strong><code>      ~session_id:(print Fn.id)</code></strong>
+<strong><code>      ~time:(print Time.to_string)</code></strong>
+<strong><code>      ~user:(print Fn.id)</code></strong>
+<strong><code>      ~credentials:(print Fn.id)</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">val print_logon : Logon.t -&gt; unit = &lt;fun&gt;</code>
+<code class="prompt"># </code><strong><code>print_logon logon;;</code></strong>
+<code class="computeroutput">session_id: 26685</code>
+<code class="computeroutput">time: 2013-08-18 14:51:00.509463+01:00</code>
+<code class="computeroutput">user: yminsky</code>
+<code class="computeroutput">credentials: Xy2d9W</code>
+<code class="computeroutput">- : unit = ()</code></pre><p>One nice side effect of this approach is that it helps you adapt
+    your code when the fields of a record change. If you were to add a field
+    to <code>Logon.t</code>, the type of <code>Logon.Fields.iter</code> would change along with it,
+    acquiring a new argument. Any code using <code>Logon.Fields.iter</code> won't compile until it's fixed
+    to take this new argument into account.</p><p>Field iterators are useful for a variety of record-related tasks,
+    from building record-validation functions to scaffolding the definition of
+    a web form from a record type. Such applications can benefit from the
+    guarantee that all fields of the record type in question have been
+    considered.<a data-type="indexterm" data-startref="Ffc"/><a data-type="indexterm" data-startref="firstclass"/><a data-type="indexterm" data-startref="RECfirstclass"/></p></section></section>
