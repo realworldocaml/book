@@ -47,7 +47,7 @@
     "epub": {
       "index": false,
       "toc": true,
-      "epubcheck": false,
+      "epubcheck": true,
       "syntaxhighlighting": false,
       "show_comments": false
     },
