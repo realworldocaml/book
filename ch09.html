@@ -1,0 +1,704 @@
+<section xmlns="http://www.w3.org/1999/xhtml" id="functors" data-type="chapter"><h1>Functors</h1><p>Up until now, we've seen OCaml's modules play an important but limited
+  role. In particular, we've seen them as a mechanism for organizing code into
+  units with specified interfaces. But OCaml's module system can do much more
+  than that, serving as a powerful tool for building generic code and
+  structuring large-scale systems. Much of that power comes from
+  functors.<a data-type="indexterm" data-primary="functors" data-secondary="benefits of">&#xa0;</a></p><p>Functors are, roughly speaking, functions from modules to modules, and
+  they can be used to solve a variety of code-structuring problems,
+  including:</p><dl><dt>Dependency injection</dt><dd><p>Makes the implementations of some components of a system
+          swappable. This is particularly useful when you want to mock up
+          parts of your system for testing and simulation purposes.</p></dd><dt>Autoextension of modules</dt><dd><p>Functors give you a way of extending existing modules with new
+          functionality in a standardized way. For example, you might want to
+          add a slew of comparison operators derived from a base comparison
+          function. To do this by hand would require a lot of repetitive code
+          for each type, but functors let you write this logic just once and
+          apply it to many different types.</p></dd><dt>Instantiating modules with state</dt><dd><p>Modules can contain mutable states, and that means that you'll
+          occasionally want to have multiple instantiations of a particular
+          module, each with its own separate and independent mutable state.
+          Functors let you automate the construction of such modules.</p></dd></dl><p>These are really just some of the uses that you can put functors to.
+  We'll make no attempt to provide examples of all of the uses of functors
+  here. Instead, this chapter will try to provide examples that illuminate the
+  language features and design patterns that you need to master in order to
+  use functors effectively.</p><section id="a-trivial-example" data-type="sect1"><h1>A Trivial Example</h1><p>Let's create a functor that takes a module containing a single
+    integer variable <code>x</code> and returns a new
+    module with <code>x</code> incremented by one. This
+    is intended to serve as a way to walk through the basic mechanics of
+    functors, even though it's not something you'd want to do in
+    practice.<a data-type="indexterm" data-primary="functors" data-secondary="basic mechanics of">&#xa0;</a></p><p>First, let's define a signature for a module that contains a single
+    value of type <code>int</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>module type X_int = sig val x : int end;;</code></strong>
+<code class="computeroutput">module type X_int = sig val x : int end</code></pre><p>Now we can define our functor. We'll use <code>X_int</code> both to constrain the argument to the
+    functor and to constrain the module returned by the functor:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>module Increment (M : X_int) : X_int = struct</code></strong>
+<strong><code>    let x = M.x + 1</code></strong>
+<strong><code>  end;;</code></strong>
+<code class="computeroutput">module Increment : functor (M : X_int) -&gt; X_int</code></pre><p>One thing that immediately jumps out is that functors are more
+    syntactically heavyweight than ordinary functions. For one thing, functors
+    require explicit (module) type annotations, which ordinary functions do
+    not. Technically, only the type on the input is mandatory, although in
+    practice, you should usually constrain the module returned by the functor,
+    just as you should use an <code>mli</code>, even
+    though it's not mandatory.</p><p>The following shows what happens when we omit the module type for
+    the output of the functor:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 2)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>module Increment (M : X_int) = struct</code></strong>
+<strong><code>    let x = M.x + 1</code></strong>
+<strong><code>  end;;</code></strong>
+<code class="computeroutput">module Increment : functor (M : X_int) -&gt; sig val x : int end</code></pre><p>We can see that the inferred module type of the output is now
+    written out explicitly, rather than being a reference to the named
+    signature <code>X_int</code>.</p><p>We can use <code>Increment</code> to define
+    new modules:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 3)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>module Three = struct let x = 3 end;;</code></strong>
+<code class="computeroutput">module Three : sig val x : int end</code>
+<code class="prompt"># </code><strong><code>module Four = Increment(Three);;</code></strong>
+<code class="computeroutput">module Four : sig val x : int end</code>
+<code class="prompt"># </code><strong><code>Four.x - Three.x;;</code></strong>
+<code class="computeroutput">- : int = 1</code></pre><p>In this case, we applied <code>Increment</code> to a module whose signature is exactly
+    equal to <code>X_int</code>. But we can apply
+    <code>Increment</code> to any module that
+    <em>satisfies</em> the interface <code>X_int</code>, in the same way that the contents of an
+    <code>ml</code> file must satisfy the <code>mli</code>. That means that the module type can omit
+    some information available in the module, either by dropping fields or by
+    leaving some fields abstract. Here's an example:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 4)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>module Three_and_more = struct</code></strong>
+<strong><code>    let x = 3</code></strong>
+<strong><code>    let y = "three"</code></strong>
+<strong><code>  end;;</code></strong>
+<code class="computeroutput">module Three_and_more : sig val x : int val y : string end</code>
+<code class="prompt"># </code><strong><code>module Four = Increment(Three_and_more);;</code></strong>
+<code class="computeroutput">module Four : sig val x : int end</code></pre><p>The rules for determining whether a module matches a given signature
+    are similar in spirit to the rules in an object-oriented language that
+    determine whether an object satisfies a given interface. As in an
+    object-oriented context, the extra information that doesn't match the
+    signature you're looking for (in this case, the variable <code>y</code>) is simply ignored.</p></section><section id="a-bigger-example-computing-with-intervals" data-type="sect1"><h1>A Bigger Example: Computing with Intervals</h1><p>Let's consider a more realistic example of how to use functors: a
+    library for computing with intervals. Intervals are a common computational
+    object, and they come up in different contexts and for different types.
+    You might need to work with intervals of floating-point values or strings
+    or times, and in each of these cases, you want similar operations: testing
+    for emptiness, checking for containment, intersecting intervals, and so
+    on.</p><p>Let's see how to use functors to build a generic interval library
+    that can be used with any type that supports a total ordering on the
+    underlying set over which you want to build intervals.<a data-type="indexterm" data-primary="interval computation" data-secondary="generic library for">&#xa0;</a><a data-type="indexterm" id="FUNCTinterv" data-primary="functors" data-secondary="interval computation with">&#xa0;</a></p><p>First we'll define a module type that captures the information we'll
+    need about the endpoints of the intervals. This interface, which we'll
+    call <code>Comparable</code>, contains just two
+    things: a comparison function and the type of the values to be
+    compared:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 5)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>module type Comparable = sig</code></strong>
+<strong><code>    type t</code></strong>
+<strong><code>    val compare : t -&gt; t -&gt; int</code></strong>
+<strong><code>  end ;;</code></strong>
+<code class="computeroutput">module type Comparable = sig type t val compare : t -&gt; t -&gt; int end</code></pre><p>The comparison function follows the standard OCaml idiom for such
+    functions, returning <code>0</code> if the two
+    elements are equal, a positive number if the first element is larger than
+    the second, and a negative number if the first element is smaller than the
+    second. Thus, we could rewrite the standard comparison functions on top of
+    <code>compare</code>.</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/compare_example.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">compare x y &lt; 0     (* x &lt; y *)
+compare x y = 0     (* x = y *)
+compare x y &gt; 0     (* x &gt; y *)</pre><p>(This idiom is a bit of a historical error. It would be better if
+        <code>compare</code> returned a variant with three cases for less than, greater than,
+      and equal. But it's a well-established idiom at this point, and unlikely to change.)</p><p>The functor for creating the interval module follows. We represent an interval with a
+      variant type, which is either <code>Empty</code> or <code>Interval (x,y)</code>, where <code>x</code> and
+        <code>y</code> are the bounds of the interval. In addition to the
+      type, the body of the functor contains implementations of a number of useful primitives for
+      interacting with intervals:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 6)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>module Make_interval(Endpoint : Comparable) = struct</code></strong>
+<strong><code/></strong>
+<strong><code>    type t = | Interval of Endpoint.t * Endpoint.t</code></strong>
+<strong><code>             | Empty</code></strong>
+<strong><code/></strong>
+<strong><code>    (** [create low high] creates a new interval from [low] to</code></strong>
+<strong><code>        [high].  If [low &gt; high], then the interval is empty *)</code></strong>
+<strong><code>    let create low high =</code></strong>
+<strong><code>      if Endpoint.compare low high &gt; 0 then Empty</code></strong>
+<strong><code>      else Interval (low,high)</code></strong>
+<strong><code/></strong>
+<strong><code>    (** Returns true iff the interval is empty *)</code></strong>
+<strong><code>    let is_empty = function</code></strong>
+<strong><code>      | Empty -&gt; true</code></strong>
+<strong><code>      | Interval _ -&gt; false</code></strong>
+<strong><code/></strong>
+<strong><code>    (** [contains t x] returns true iff [x] is contained in the</code></strong>
+<strong><code>        interval [t] *)</code></strong>
+<strong><code>    let contains t x =</code></strong>
+<strong><code>      match t with</code></strong>
+<strong><code>      | Empty -&gt; false</code></strong>
+<strong><code>      | Interval (l,h) -&gt;</code></strong>
+<strong><code>        Endpoint.compare x l &gt;= 0 &amp;&amp; Endpoint.compare x h &lt;= 0</code></strong>
+<strong><code/></strong>
+<strong><code>    (** [intersect t1 t2] returns the intersection of the two input</code></strong>
+<strong><code>        intervals *)</code></strong>
+<strong><code>    let intersect t1 t2 =</code></strong>
+<strong><code>      let min x y = if Endpoint.compare x y &lt;= 0 then x else y in</code></strong>
+<strong><code>      let max x y = if Endpoint.compare x y &gt;= 0 then x else y in</code></strong>
+<strong><code>      match t1,t2 with</code></strong>
+<strong><code>      | Empty, _ | _, Empty -&gt; Empty</code></strong>
+<strong><code>      | Interval (l1,h1), Interval (l2,h2) -&gt;</code></strong>
+<strong><code>        create (max l1 l2) (min h1 h2)</code></strong>
+<strong><code/></strong>
+<strong><code>  end ;;</code></strong>
+<code class="computeroutput">module Make_interval :</code>
+<code class="computeroutput">  functor (Endpoint : Comparable) -&gt;</code>
+<code class="computeroutput">    sig</code>
+<code class="computeroutput">      type t = Interval of Endpoint.t * Endpoint.t | Empty</code>
+<code class="computeroutput">      val create : Endpoint.t -&gt; Endpoint.t -&gt; t</code>
+<code class="computeroutput">      val is_empty : t -&gt; bool</code>
+<code class="computeroutput">      val contains : t -&gt; Endpoint.t -&gt; bool</code>
+<code class="computeroutput">      val intersect : t -&gt; t -&gt; t</code>
+<code class="computeroutput">    end</code></pre><p>We can instantiate the functor by applying it to a module with the
+    right signature. In the following code, rather than name the module first
+    and then call the functor, we provide the functor input as an anonymous
+    module:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 7)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>module Int_interval =</code></strong>
+<strong><code>    Make_interval(struct</code></strong>
+<strong><code>      type t = int</code></strong>
+<strong><code>      let compare = Int.compare</code></strong>
+<strong><code>    end);;</code></strong>
+<code class="computeroutput">module Int_interval :</code>
+<code class="computeroutput">  sig</code>
+<code class="computeroutput">    type t = Interval of int * int | Empty</code>
+<code class="computeroutput">    val create : int -&gt; int -&gt; t</code>
+<code class="computeroutput">    val is_empty : t -&gt; bool</code>
+<code class="computeroutput">    val contains : t -&gt; int -&gt; bool</code>
+<code class="computeroutput">    val intersect : t -&gt; t -&gt; t</code>
+<code class="computeroutput">  end</code></pre><p>If the input interface for your functor is aligned with the
+    standards of the libraries you use, then you don't need to construct a
+    custom module to feed to the functor. In this case, we can directly use
+    the <code>Int</code> or <code>String</code> modules provided by Core:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 8)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>module Int_interval = Make_interval(Int) ;;</code></strong>
+<code class="computeroutput">module Int_interval :</code>
+<code class="computeroutput">  sig</code>
+<code class="computeroutput">    type t = Make_interval(Core.Std.Int).t = Interval of int * int | Empty</code>
+<code class="computeroutput">    val create : int -&gt; int -&gt; t</code>
+<code class="computeroutput">    val is_empty : t -&gt; bool</code>
+<code class="computeroutput">    val contains : t -&gt; int -&gt; bool</code>
+<code class="computeroutput">    val intersect : t -&gt; t -&gt; t</code>
+<code class="computeroutput">  end</code>
+<code class="prompt"># </code><strong><code>module String_interval = Make_interval(String) ;;</code></strong>
+<code class="computeroutput">module String_interval :</code>
+<code class="computeroutput">  sig</code>
+<code class="computeroutput">    type t =</code>
+<code class="computeroutput">      Make_interval(Core.Std.String).t =</code>
+<code class="computeroutput">        Interval of string * string</code>
+<code class="computeroutput">      | Empty</code>
+<code class="computeroutput">    val create : string -&gt; string -&gt; t</code>
+<code class="computeroutput">    val is_empty : t -&gt; bool</code>
+<code class="computeroutput">    val contains : t -&gt; string -&gt; bool</code>
+<code class="computeroutput">    val intersect : t -&gt; t -&gt; t</code>
+<code class="computeroutput">  end</code></pre><p>This works because many modules in Core, including <code>Int</code>
+      and <code>String</code>, satisfy an extended version of the <code>Comparable</code> signature described previously. Such standardized
+      signatures are good practice, both because they make functors easier to use, and because they
+      encourage standardization that makes your codebase easier to navigate.</p><p>We can use the newly defined <code>Int_interval</code> module like
+      any ordinary module:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 9)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let i1 = Int_interval.create 3 8;;</code></strong>
+<code class="computeroutput">val i1 : Int_interval.t = Int_interval.Interval (3, 8)</code>
+<code class="prompt"># </code><strong><code>let i2 = Int_interval.create 4 10;;</code></strong>
+<code class="computeroutput">val i2 : Int_interval.t = Int_interval.Interval (4, 10)</code>
+<code class="prompt"># </code><strong><code>Int_interval.intersect i1 i2;;</code></strong>
+<code class="computeroutput">- : Int_interval.t = Int_interval.Interval (4, 8)</code></pre><p>This design gives us the freedom to use any comparison function we
+    want for comparing the endpoints. We could, for example, create a type of
+    integer interval with the order of the comparison reversed, as
+    follows:<a data-type="indexterm" data-primary="interval computation" data-secondary="comparison function for">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 10)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>module Rev_int_interval =</code></strong>
+<strong><code>    Make_interval(struct</code></strong>
+<strong><code>      type t = int</code></strong>
+<strong><code>      let compare x y = Int.compare y x</code></strong>
+<strong><code>    end);;</code></strong>
+<code class="computeroutput">module Rev_int_interval :</code>
+<code class="computeroutput">  sig</code>
+<code class="computeroutput">    type t = Interval of int * int | Empty</code>
+<code class="computeroutput">    val create : int -&gt; int -&gt; t</code>
+<code class="computeroutput">    val is_empty : t -&gt; bool</code>
+<code class="computeroutput">    val contains : t -&gt; int -&gt; bool</code>
+<code class="computeroutput">    val intersect : t -&gt; t -&gt; t</code>
+<code class="computeroutput">  end</code></pre><p>The behavior of <code>Rev_int_interval</code>
+    is of course different from <code>Int_interval</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 11)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let interval = Int_interval.create 4 3;;</code></strong>
+<code class="computeroutput">val interval : Int_interval.t = Int_interval.Empty</code>
+<code class="prompt"># </code><strong><code>let rev_interval = Rev_int_interval.create 4 3;;</code></strong>
+<code class="computeroutput">val rev_interval : Rev_int_interval.t = Rev_int_interval.Interval (4, 3)</code></pre><p>Importantly, <code>Rev_int_interval.t</code>
+    is a different type than <code>Int_interval.t</code>, even though its physical
+    representation is the same. Indeed, the type system will prevent us from
+    confusing them.</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 12)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Int_interval.contains rev_interval 3;;</code></strong>
+<code class="computeroutput">Characters 22-34:</code>
+<code class="computeroutput">Error: This expression has type Rev_int_interval.t</code>
+<code class="computeroutput">       but an expression was expected of type Int_interval.t</code></pre><p>This is important, because confusing the two kinds of intervals
+    would be a semantic error, and it's an easy one to make. The ability of
+    functors to mint new types is a useful trick that comes up a lot.</p><section id="making-the-functor-abstract" data-type="sect2"><h2>Making the Functor Abstract</h2><p>There's a problem with <code>Make_interval</code>. The code we wrote depends on
+      the invariant that the upper bound of an interval is greater than its
+      lower bound, but that invariant can be violated. The invariant is
+      enforced by the <code>create</code> function, but because <code>Interval.t</code> is not abstract, we can bypass the
+      <code>create</code> function:<a data-type="indexterm" data-primary="interval computation" data-secondary="abstract functor for">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 13)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Int_interval.is_empty (* going through create *)</code></strong>
+<strong><code>    (Int_interval.create 4 3) ;;</code></strong>
+<code class="computeroutput">- : bool = true</code>
+<code class="prompt"># </code><strong><code>Int_interval.is_empty (* bypassing create *)</code></strong>
+<strong><code>    (Int_interval.Interval (4,3)) ;;</code></strong>
+<code class="computeroutput">- : bool = false</code></pre><p>To make <code>Int_interval.t</code>
+      abstract, we need to restrict the output of <code>Make_interval</code> with an interface. Here's an
+      explicit interface that we can use for that purpose:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 14)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>module type Interval_intf = sig</code></strong>
+<strong><code>   type t</code></strong>
+<strong><code>   type endpoint</code></strong>
+<strong><code>   val create : endpoint -&gt; endpoint -&gt; t</code></strong>
+<strong><code>   val is_empty : t -&gt; bool</code></strong>
+<strong><code>   val contains : t -&gt; endpoint -&gt; bool</code></strong>
+<strong><code>   val intersect : t -&gt; t -&gt; t</code></strong>
+<strong><code>  end;;</code></strong>
+<code class="computeroutput">module type Interval_intf =</code>
+<code class="computeroutput">  sig</code>
+<code class="computeroutput">    type t</code>
+<code class="computeroutput">    type endpoint</code>
+<code class="computeroutput">    val create : endpoint -&gt; endpoint -&gt; t</code>
+<code class="computeroutput">    val is_empty : t -&gt; bool</code>
+<code class="computeroutput">    val contains : t -&gt; endpoint -&gt; bool</code>
+<code class="computeroutput">    val intersect : t -&gt; t -&gt; t</code>
+<code class="computeroutput">  end</code></pre><p>This interface includes the type <code>endpoint</code> to give us a way of referring to the
+      endpoint type. Given this interface, we can redo our definition of
+      <code>Make_interval</code>. Notice that we added
+      the type <code>endpoint</code> to the
+      implementation of the module to match <code>Interval_intf</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main-15.rawscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><strong><code># module Make_interval(Endpoint : Comparable) : Interval_intf = struct
+    type endpoint = Endpoint.t
+    type t = | Interval of Endpoint.t * Endpoint.t
+             | Empty
+
+    ...
+
+  end ;;</code></strong>
+<code class="computeroutput">  module Make_interval : functor (Endpoint : Comparable) -&gt; Interval_intf</code></pre></section><section id="sharing-constraints" data-type="sect2"><h2>Sharing Constraints</h2><p>The resulting module is abstract, but it's unfortunately too
+      abstract. In particular, we haven't exposed the type <code>endpoint</code>, which means that we can't even
+      construct an interval anymore:<a data-type="indexterm" data-primary="sharing constraint">&#xa0;</a><a data-type="indexterm" data-primary="interval computation" data-secondary="sharing constraints">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 16)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>module Int_interval = Make_interval(Int);;</code></strong>
+<code class="computeroutput">module Int_interval :</code>
+<code class="computeroutput">  sig</code>
+<code class="computeroutput">    type t = Make_interval(Core.Std.Int).t</code>
+<code class="computeroutput">    type endpoint = Make_interval(Core.Std.Int).endpoint</code>
+<code class="computeroutput">    val create : endpoint -&gt; endpoint -&gt; t</code>
+<code class="computeroutput">    val is_empty : t -&gt; bool</code>
+<code class="computeroutput">    val contains : t -&gt; endpoint -&gt; bool</code>
+<code class="computeroutput">    val intersect : t -&gt; t -&gt; t</code>
+<code class="computeroutput">  end</code>
+<code class="prompt"># </code><strong><code>Int_interval.create 3 4;;</code></strong>
+<code class="computeroutput">Characters 20-21:</code>
+<code class="computeroutput">Error: This expression has type int but an expression was expected of type</code>
+<code class="computeroutput">         Int_interval.endpoint</code></pre><p>To fix this, we need to expose the fact that <code>endpoint</code> is equal to <code>Int.t</code> (or more generally, <code>Endpoint.t</code>, where <code>Endpoint</code> is the argument to the functor). One
+      way of doing this is through a <em>sharing constraint</em>,
+      which allows you to tell the compiler to expose the fact that a given
+      type is equal to some other type. The syntax for a simple sharing
+      constraint is as follows:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/sharing_constraint.syntax" class="orm:hideurl:ital"><em class="hyperlink">Syntax</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><em>&lt;Module_type&gt;</em> with type <em>&lt;type&gt;</em> = <em>&lt;type'&gt;</em></pre><p>The result of this expression is a new signature that's been modified so that it exposes
+        the fact that <em><code>type</code></em> defined inside of
+        the module type is equal to <em><code>type'</code></em>
+        whose definition is outside of it. One can also apply multiple sharing constraints to the
+        same signature:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/multi_sharing_constraint.syntax" class="orm:hideurl:ital"><em class="hyperlink">Syntax</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><em>&lt;Module_type&gt;</em> with type <em>&lt;type1&gt;</em> = <em>&lt;type1'&gt;</em> and <em>&lt;type2&gt;</em> = <em>&lt;type2'&gt;</em></pre><p>We can use a sharing constraint to create a specialized version of
+      <code>Interval_intf</code> for integer
+      intervals:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 17)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>module type Int_interval_intf =</code></strong>
+<strong><code>    Interval_intf with type endpoint = int;;</code></strong>
+<code class="computeroutput">module type Int_interval_intf =</code>
+<code class="computeroutput">  sig</code>
+<code class="computeroutput">    type t</code>
+<code class="computeroutput">    type endpoint = int</code>
+<code class="computeroutput">    val create : endpoint -&gt; endpoint -&gt; t</code>
+<code class="computeroutput">    val is_empty : t -&gt; bool</code>
+<code class="computeroutput">    val contains : t -&gt; endpoint -&gt; bool</code>
+<code class="computeroutput">    val intersect : t -&gt; t -&gt; t</code>
+<code class="computeroutput">  end</code></pre><p>We can also use sharing constraints in the context of a functor.
+      The most common use case is where you want to expose that some of the
+      types of the module being generated by the functor are related to the
+      types in the module fed to the functor.</p><p>In this case, we'd like to expose an equality between the type
+      <code>endpoint</code> in the new module and the
+      type <code>Endpoint.t</code>, from the module
+      <code>Endpoint</code> that is the functor
+      argument. We can do this as follows:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main-18.rawscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><strong><code># module Make_interval(Endpoint : Comparable)
+      : (Interval_intf with type endpoint = Endpoint.t)
+  = struct
+
+    type endpoint = Endpoint.t
+    type t = | Interval of Endpoint.t * Endpoint.t
+             | Empty
+
+    ...
+
+  end ;;</code></strong>
+<code class="computeroutput">module Make_interval :
+  functor (Endpoint : Comparable) -&gt;
+    sig
+      type t
+      type endpoint = Endpoint.t
+      val create : endpoint -&gt; endpoint -&gt; t
+      val is_empty : t -&gt; bool
+      val contains : t -&gt; endpoint -&gt; bool
+      val intersect : t -&gt; t -&gt; t
+    end</code></pre><p>So now, the interface is as it was, except that <code>endpoint</code> is known to be equal to <code>Endpoint.t</code>.
+        As a result of that type equality, we can again do things that require that <code>endpoint</code> be exposed, like constructing intervals:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 19)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>module Int_interval = Make_interval(Int);;</code></strong>
+<code class="computeroutput">module Int_interval :</code>
+<code class="computeroutput">  sig</code>
+<code class="computeroutput">    type t = Make_interval(Core.Std.Int).t</code>
+<code class="computeroutput">    type endpoint = int</code>
+<code class="computeroutput">    val create : endpoint -&gt; endpoint -&gt; t</code>
+<code class="computeroutput">    val is_empty : t -&gt; bool</code>
+<code class="computeroutput">    val contains : t -&gt; endpoint -&gt; bool</code>
+<code class="computeroutput">    val intersect : t -&gt; t -&gt; t</code>
+<code class="computeroutput">  end</code>
+<code class="prompt"># </code><strong><code>let i = Int_interval.create 3 4;;</code></strong>
+<code class="computeroutput">val i : Int_interval.t = &lt;abstr&gt;</code>
+<code class="prompt"># </code><strong><code>Int_interval.contains i 5;;</code></strong>
+<code class="computeroutput">- : bool = false</code></pre></section><section id="destructive-substitution" data-type="sect2"><h2>Destructive Substitution</h2><p>Sharing constraints basically do the job, but they have some
+      downsides. In particular, we've now been stuck with the useless type
+      declaration of <code>endpoint</code> that clutters
+      up both the interface and the implementation. A better solution would be
+      to modify the <code>Interval_intf</code> signature
+      by replacing <code>endpoint</code> with <code>Endpoint.t</code> everywhere it shows up, and
+      deleting the definition of <code>endpoint</code>
+      from the signature. We can do just this using what's called
+      <em>destructive substitution</em>. Here's the basic
+      syntax:<a data-type="indexterm" data-primary="destructive substitution">&#xa0;</a><a data-type="indexterm" data-primary="interval computation" data-secondary="destructive substitution">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/destructive_sub.syntax" class="orm:hideurl:ital"><em class="hyperlink">Syntax</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><em>&lt;Module_type&gt;</em> with type <em>&lt;type&gt;</em> := <em>&lt;type'&gt;</em></pre><p>The following shows how we could use this with <code>Make_interval</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 20)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>module type Int_interval_intf =</code></strong>
+<strong><code>    Interval_intf with type endpoint := int;;</code></strong>
+<code class="computeroutput">module type Int_interval_intf =</code>
+<code class="computeroutput">  sig</code>
+<code class="computeroutput">    type t</code>
+<code class="computeroutput">    val create : int -&gt; int -&gt; t</code>
+<code class="computeroutput">    val is_empty : t -&gt; bool</code>
+<code class="computeroutput">    val contains : t -&gt; int -&gt; bool</code>
+<code class="computeroutput">    val intersect : t -&gt; t -&gt; t</code>
+<code class="computeroutput">  end</code></pre><p>There's now no <code>endpoint</code> type:
+      all of its occurrences of have been replaced by <code>int</code>. As with sharing constraints, we can also
+      use this in the context of a functor:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main-21.rawscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><strong><code># module Make_interval(Endpoint : Comparable)
+    : Interval_intf with type endpoint := Endpoint.t =
+  struct
+
+    type t = | Interval of Endpoint.t * Endpoint.t
+             | Empty
+
+    ...
+
+  end ;;</code></strong>
+<code class="computeroutput">  module Make_interval :
+    functor (Endpoint : Comparable) -&gt;
+    sig
+      type t
+      val create : Endpoint.t -&gt; Endpoint.t -&gt; t
+      val is_empty : t -&gt; bool
+      val contains : t -&gt; Endpoint.t -&gt; bool
+      val intersect : t -&gt; t -&gt; t
+    end</code></pre><p>The interface is precisely what we want: the type <code>t</code> is abstract, and the type of the endpoint is
+      exposed; so we can create values of type <code>Int_interval.t</code> using the creation function,
+      but not directly using the constructors and thereby violating the
+      invariants of the module:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 22)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>module Int_interval = Make_interval(Int);;</code></strong>
+<code class="computeroutput">module Int_interval :</code>
+<code class="computeroutput">  sig</code>
+<code class="computeroutput">    type t = Make_interval(Core.Std.Int).t</code>
+<code class="computeroutput">    val create : int -&gt; int -&gt; t</code>
+<code class="computeroutput">    val is_empty : t -&gt; bool</code>
+<code class="computeroutput">    val contains : t -&gt; int -&gt; bool</code>
+<code class="computeroutput">    val intersect : t -&gt; t -&gt; t</code>
+<code class="computeroutput">  end</code>
+<code class="prompt"># </code><strong><code>Int_interval.is_empty</code></strong>
+<strong><code>    (Int_interval.create 3 4);;</code></strong>
+<code class="computeroutput">- : bool = false</code>
+<code class="prompt"># </code><strong><code>Int_interval.is_empty</code></strong>
+<strong><code>    (Int_interval.Interval (4,3));;</code></strong>
+<code class="computeroutput">Characters 40-48:</code>
+<code class="computeroutput">Error: Unbound constructor Int_interval.Interval</code></pre><p>In addition, the <code>endpoint</code> type
+      is gone from the interface, meaning we no longer need to define the
+      <code>endpoint</code> type alias in the body of
+      the module.</p><p>It's worth noting that the name is somewhat misleading, in that
+      there's nothing destructive about destructive substitution; it's really
+      just a way of creating a new signature by transforming an existing
+      one.</p></section><section id="using-multiple-interfaces" data-type="sect2"><h2>Using Multiple Interfaces</h2><p>Another feature that we might want for our interval module is the
+      ability to <em>serialize</em>, i.e., to be able to read and
+      write intervals as a stream of bytes. In this case, we'll do this by
+      converting to and from s-expressions, which were mentioned already in
+      <a href="#error-handling" data-type="xref">#error-handling</a>. To recall, an s-expression is
+      essentially a parenthesized expression whose atoms are strings, and it
+      is a serialization format that is used commonly in Core. Here's an
+      example:<a data-type="indexterm" data-primary="s-expressions" data-secondary="example of">&#xa0;</a><a data-type="indexterm" data-primary="interval computation" data-secondary="multiple interfaces and">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 23)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Sexp.of_string "(This is (an s-expression))";;</code></strong>
+<code class="computeroutput">- : Sexp.t = (This is (an s-expression))</code></pre><p>Core comes with a syntax extension called Sexplib which can
+      autogenerate s-expression conversion functions from a type declaration.
+      Attaching <code>with sexp</code> to a type
+      definition signals to the extension to generate the converters. Thus, we
+      can write:<a data-type="indexterm" data-primary="sexp declaration">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 24)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type some_type = int * string list with sexp;;</code></strong>
+<code class="computeroutput">type some_type = int * string list</code>
+<code class="computeroutput">val some_type_of_sexp : Sexp.t -&gt; int * string list = &lt;fun&gt;</code>
+<code class="computeroutput">val sexp_of_some_type : int * string list -&gt; Sexp.t = &lt;fun&gt;</code>
+<code class="prompt"># </code><strong><code>sexp_of_some_type (33, ["one"; "two"]);;</code></strong>
+<code class="computeroutput">- : Sexp.t = (33 (one two))</code>
+<code class="prompt"># </code><strong><code>Sexp.of_string "(44 (five six))" |&gt; some_type_of_sexp;;</code></strong>
+<code class="computeroutput">- : int * string list = (44, ["five"; "six"])</code></pre><p>We'll discuss s-expressions and Sexplib in more detail in <a href="#data-serialization-with-s-expressions" data-type="xref">#data-serialization-with-s-expressions</a>, but for now, let's
+      see what happens if we attach the <code>with
+      sexp</code> declaration to the definition of <code>t</code> within the functor:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main-25.rawscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><strong><code># module Make_interval(Endpoint : Comparable)
+    : (Interval_intf with type endpoint := Endpoint.t) = struct
+
+    type t = | Interval of Endpoint.t * Endpoint.t
+             | Empty
+    with sexp
+
+    ...
+
+  end ;;</code></strong>
+<code class="computeroutput">  Characters 136-146:
+    Error: Unbound value Endpoint.t_of_sexp</code></pre><p>The problem is that <code>with sexp</code>
+      adds code for defining the s-expression converters, and that code
+      assumes that <code>Endpoint</code> has the
+      appropriate sexp-conversion functions for <code>Endpoint.t</code>. But all we know about <code>Endpoint</code> is that it satisfies the <code>Comparable</code> interface, which doesn't say
+      anything about s-expressions.</p><p>Happily, Core comes with a built-in interface for just this
+      purpose called <code>Sexpable</code>, which is
+      defined as follows:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/sexpable.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">module type Sexpable = sig
+  type t
+  val sexp_of_t : t -&gt; Sexp.t
+  val t_of_sexp : Sexp.t -&gt; t
+end</pre><p>We can modify <code>Make_interval</code> to
+      use the <code>Sexpable</code> interface, for both
+      its input and its output. First, let's create an extended version of the
+      <code>Interval_intf</code> interface that includes
+      the functions from the <code>Sexpable</code> interface. We can do
+      this using destructive substitution on the <code>Sexpable</code> interface, to avoid having multiple
+      distinct type <code>t</code>'s clashing with each
+      other:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 26)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>module type Interval_intf_with_sexp = sig</code></strong>
+<strong><code>   include Interval_intf</code></strong>
+<strong><code>   include Sexpable with type t := t</code></strong>
+<strong><code>  end;;</code></strong>
+<code class="computeroutput">module type Interval_intf_with_sexp =</code>
+<code class="computeroutput">  sig</code>
+<code class="computeroutput">    type t</code>
+<code class="computeroutput">    type endpoint</code>
+<code class="computeroutput">    val create : endpoint -&gt; endpoint -&gt; t</code>
+<code class="computeroutput">    val is_empty : t -&gt; bool</code>
+<code class="computeroutput">    val contains : t -&gt; endpoint -&gt; bool</code>
+<code class="computeroutput">    val intersect : t -&gt; t -&gt; t</code>
+<code class="computeroutput">    val t_of_sexp : Sexp.t -&gt; t</code>
+<code class="computeroutput">    val sexp_of_t : t -&gt; Sexp.t</code>
+<code class="computeroutput">  end</code></pre><p>Equivalently, we can define a type <code>t</code> within our new module, and apply destructive
+      substitutions to all of the included interfaces, <code>Interval_intf</code> included, as shown in the
+      following example. This is somewhat cleaner when combining multiple
+      interfaces, since it correctly reflects that all of the signatures are
+      being handled equivalently:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 27)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>module type Interval_intf_with_sexp = sig</code></strong>
+<strong><code>   type t</code></strong>
+<strong><code>   include Interval_intf with type t := t</code></strong>
+<strong><code>   include Sexpable      with type t := t</code></strong>
+<strong><code>  end;;</code></strong>
+<code class="computeroutput">module type Interval_intf_with_sexp =</code>
+<code class="computeroutput">  sig</code>
+<code class="computeroutput">    type t</code>
+<code class="computeroutput">    type endpoint</code>
+<code class="computeroutput">    val create : endpoint -&gt; endpoint -&gt; t</code>
+<code class="computeroutput">    val is_empty : t -&gt; bool</code>
+<code class="computeroutput">    val contains : t -&gt; endpoint -&gt; bool</code>
+<code class="computeroutput">    val intersect : t -&gt; t -&gt; t</code>
+<code class="computeroutput">    val t_of_sexp : Sexp.t -&gt; t</code>
+<code class="computeroutput">    val sexp_of_t : t -&gt; Sexp.t</code>
+<code class="computeroutput">  end</code></pre><p>Now we can write the functor itself. We have been careful to
+      override the sexp converter here to ensure that the data structure's
+      invariants are still maintained when reading in from an
+      s-expression:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 28)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>module Make_interval(Endpoint : sig</code></strong>
+<strong><code>                         type t</code></strong>
+<strong><code>                         include Comparable with type t := t</code></strong>
+<strong><code>                         include Sexpable   with type t := t</code></strong>
+<strong><code>                       end)</code></strong>
+<strong><code>    : (Interval_intf_with_sexp with type endpoint := Endpoint.t)</code></strong>
+<strong><code>  = struct</code></strong>
+<strong><code/></strong>
+<strong><code>    type t = | Interval of Endpoint.t * Endpoint.t</code></strong>
+<strong><code>             | Empty</code></strong>
+<strong><code>    with sexp</code></strong>
+<strong><code/></strong>
+<strong><code>    (** [create low high] creates a new interval from [low] to</code></strong>
+<strong><code>        [high].  If [low &gt; high], then the interval is empty *)</code></strong>
+<strong><code>    let create low high =</code></strong>
+<strong><code>      if Endpoint.compare low high &gt; 0 then Empty</code></strong>
+<strong><code>      else Interval (low,high)</code></strong>
+<strong><code/></strong>
+<strong><code>    (* put a wrapper around the autogenerated [t_of_sexp] to enforce</code></strong>
+<strong><code>       the invariants of the data structure *)</code></strong>
+<strong><code>    let t_of_sexp sexp =</code></strong>
+<strong><code>      match t_of_sexp sexp with</code></strong>
+<strong><code>      | Empty -&gt; Empty</code></strong>
+<strong><code>      | Interval (x,y) -&gt; create x y</code></strong>
+<strong><code/></strong>
+<strong><code>    (** Returns true iff the interval is empty *)</code></strong>
+<strong><code>    let is_empty = function</code></strong>
+<strong><code>      | Empty -&gt; true</code></strong>
+<strong><code>      | Interval _ -&gt; false</code></strong>
+<strong><code/></strong>
+<strong><code>    (** [contains t x] returns true iff [x] is contained in the</code></strong>
+<strong><code>        interval [t] *)</code></strong>
+<strong><code>    let contains t x =</code></strong>
+<strong><code>      match t with</code></strong>
+<strong><code>      | Empty -&gt; false</code></strong>
+<strong><code>      | Interval (l,h) -&gt;</code></strong>
+<strong><code>        Endpoint.compare x l &gt;= 0 &amp;&amp; Endpoint.compare x h &lt;= 0</code></strong>
+<strong><code/></strong>
+<strong><code>    (** [intersect t1 t2] returns the intersection of the two input</code></strong>
+<strong><code>        intervals *)</code></strong>
+<strong><code>    let intersect t1 t2 =</code></strong>
+<strong><code>      let min x y = if Endpoint.compare x y &lt;= 0 then x else y in</code></strong>
+<strong><code>      let max x y = if Endpoint.compare x y &gt;= 0 then x else y in</code></strong>
+<strong><code>      match t1,t2 with</code></strong>
+<strong><code>      | Empty, _ | _, Empty -&gt; Empty</code></strong>
+<strong><code>      | Interval (l1,h1), Interval (l2,h2) -&gt;</code></strong>
+<strong><code>        create (max l1 l2) (min h1 h2)</code></strong>
+<strong><code>  end;;</code></strong>
+<code class="computeroutput">module Make_interval :</code>
+<code class="computeroutput">  functor</code>
+<code class="computeroutput">    (Endpoint : sig</code>
+<code class="computeroutput">                  type t</code>
+<code class="computeroutput">                  val compare : t -&gt; t -&gt; int</code>
+<code class="computeroutput">                  val t_of_sexp : Sexp.t -&gt; t</code>
+<code class="computeroutput">                  val sexp_of_t : t -&gt; Sexp.t</code>
+<code class="computeroutput">                end) -&gt;</code>
+<code class="computeroutput">    sig</code>
+<code class="computeroutput">      type t</code>
+<code class="computeroutput">      val create : Endpoint.t -&gt; Endpoint.t -&gt; t</code>
+<code class="computeroutput">      val is_empty : t -&gt; bool</code>
+<code class="computeroutput">      val contains : t -&gt; Endpoint.t -&gt; bool</code>
+<code class="computeroutput">      val intersect : t -&gt; t -&gt; t</code>
+<code class="computeroutput">      val t_of_sexp : Sexp.t -&gt; t</code>
+<code class="computeroutput">      val sexp_of_t : t -&gt; Sexp.t</code>
+<code class="computeroutput">    end</code></pre><p>And now, we can use that sexp converter in the ordinary
+      way:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 29)<a data-type="indexterm" data-startref="FUNCTinterv">&#xa0;</a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>module Int_interval = Make_interval(Int) ;;</code></strong>
+<code class="computeroutput">module Int_interval :</code>
+<code class="computeroutput">  sig</code>
+<code class="computeroutput">    type t = Make_interval(Core.Std.Int).t</code>
+<code class="computeroutput">    val create : int -&gt; int -&gt; t</code>
+<code class="computeroutput">    val is_empty : t -&gt; bool</code>
+<code class="computeroutput">    val contains : t -&gt; int -&gt; bool</code>
+<code class="computeroutput">    val intersect : t -&gt; t -&gt; t</code>
+<code class="computeroutput">    val t_of_sexp : Sexp.t -&gt; t</code>
+<code class="computeroutput">    val sexp_of_t : t -&gt; Sexp.t</code>
+<code class="computeroutput">  end</code>
+<code class="prompt"># </code><strong><code>Int_interval.sexp_of_t (Int_interval.create 3 4);;</code></strong>
+<code class="computeroutput">- : Sexp.t = (Interval 3 4)</code>
+<code class="prompt"># </code><strong><code>Int_interval.sexp_of_t (Int_interval.create 4 3);;</code></strong>
+<code class="computeroutput">- : Sexp.t = Empty</code></pre></section></section><section id="extending-modules" data-type="sect1"><h1>Extending Modules</h1><p>Another common use of functors is to generate type-specific
+    functionality for a given module in a standardized way. Let's see how this
+    works in the context of a functional queue, which is just a functional
+    version of a FIFO (first-in, first-out) queue. Being functional,
+    operations on the queue return new queues, rather than modifying the
+    queues that were passed in.<a data-type="indexterm" data-primary="modules" data-secondary="type-specific functionality in">&#xa0;</a><a data-type="indexterm" data-primary="FIFO (first-in, first-out) queue">&#xa0;</a><a data-type="indexterm" data-primary="functors" data-secondary="module extension with">&#xa0;</a></p><p>Here's a reasonable <code>mli</code> for such
+    a module:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/fqueue.mli" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type 'a t
+
+val empty : 'a t
+
+(** [enqueue q el] adds [el] to the back of [q] *)
+val enqueue : 'a t -&gt; 'a -&gt; 'a t
+
+(** [dequeue q] returns None if the [q] is empty, otherwise returns
+    the first element of the queue and the remainder of the queue *)
+val dequeue : 'a t -&gt; ('a * 'a t) option
+
+(** Folds over the queue, from front to back *)
+val fold : 'a t -&gt; init:'acc -&gt; f:('acc -&gt; 'a -&gt; 'acc) -&gt; 'acc</pre><p>The preceding <code>Fqueue.fold</code>
+    function requires some explanation. It follows the same pattern as the
+    <code>List.fold</code> function we described in
+    <a href="#using-the-list-module-effectively" data-type="xref">#using-the-list-module-effectively</a>. Essentially,
+    <code>Fqueue.fold q ~init ~f</code> walks over the
+    elements of <code>q</code> from front to back,
+    starting with an accumulator of <code>init</code>
+    and using <code>f</code> to update the accumulator
+    value as it walks over the queue, returning the final value of the
+    accumulator at the end of the computation. <code>fold</code> is a
+    quite powerful operation, as we'll see.</p><p>We'll implement <code>Fqueue</code> the well known trick of
+      maintaining an input and an output list so that one can efficiently enqueue on the input list
+      and efficiently dequeue from the output list. If you attempt to dequeue when the output list
+      is empty, the input list is reversed and becomes the new output list. Here's the
+      implementation:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/fqueue.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
+
+type 'a t = 'a list * 'a list
+
+let empty = ([],[])
+
+let enqueue (in_list, out_list) x =
+  (x :: in_list,out_list)
+
+let dequeue (in_list, out_list) =
+  match out_list with
+  | hd :: tl -&gt; Some (hd, (in_list, tl))
+  | [] -&gt;
+    match List.rev in_list with
+    | [] -&gt; None
+    | hd :: tl -&gt; Some (hd, ([], tl))
+
+let fold (in_list, out_list) ~init ~f =
+  let after_out = List.fold ~init ~f out_list in
+  List.fold_right ~init:after_out ~f:(fun x acc -&gt; f acc x) in_list</pre><p>One problem with <code>Fqueue</code> is that
+    the interface is quite skeletal. There are lots of useful helper functions
+    that one might want that aren't there. The <code>List</code> module, by way of contrast, has functions
+    like <code>List.iter</code>, which runs a function
+    on each element; and <code>List.for_all</code>,
+    which returns true if and only if the given predicate evaluates to
+    <code>true</code> on every element of the list. Such
+    helper functions come up for pretty much every container type, and
+    implementing them over and over is a dull and repetitive affair.</p><p>As it happens, many of these helper functions can be derived mechanically from the
+        <code>fold</code> function we already implemented. Rather than write all of these
+      helper functions by hand for every new container type, we can instead use a functor to add
+      this functionality to any container that has a <code>fold</code>
+      function.</p><p>We'll create a new module, <code>Foldable</code>, that automates the process of adding
+    helper functions to a <code>fold</code>-supporting container. As you
+    can see, <code>Foldable</code> contains a module
+    signature <code>S</code> which defines the signature
+    that is required to support folding; and a functor <code>Extend</code> that allows one to extend any module that
+    matches <code>Foldable.S</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/foldable.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
+
+module type S = sig
+  type 'a t
+  val fold : 'a t -&gt; init:'acc -&gt; f:('acc -&gt; 'a -&gt; 'acc) -&gt; 'acc
+end
+
+module type Extension = sig
+  type 'a t
+  val iter    : 'a t -&gt; f:('a -&gt; unit) -&gt; unit
+  val length  : 'a t -&gt; int
+  val count   : 'a t -&gt; f:('a -&gt; bool) -&gt; int
+  val for_all : 'a t -&gt; f:('a -&gt; bool) -&gt; bool
+  val exists  : 'a t -&gt; f:('a -&gt; bool) -&gt; bool
+end
+
+(* For extending a Foldable module *)
+module Extend(Arg : S)
+  : (Extension with type 'a t := 'a Arg.t) =
+struct
+  open Arg
+
+  let iter t ~f =
+    fold t ~init:() ~f:(fun () a -&gt; f a)
+
+  let length t =
+    fold t ~init:0  ~f:(fun acc _ -&gt; acc + 1)
+
+  let count t ~f =
+    fold t ~init:0  ~f:(fun count x -&gt; count + if f x then 1 else 0)
+
+  exception Short_circuit
+
+  let for_all c ~f =
+    try iter c ~f:(fun x -&gt; if not (f x) then raise Short_circuit); true
+    with Short_circuit -&gt; false
+
+  let exists c ~f =
+    try iter c ~f:(fun x -&gt; if f x then raise Short_circuit); false
+    with Short_circuit -&gt; true
+end</pre><p>Now we can apply this to <code>Fqueue</code>. We can create an
+      interface for an extended version of <code>Fqueue</code> as follows: </p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/extended_fqueue.mli" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type 'a t
+include (module type of Fqueue) with type 'a t := 'a t
+include Foldable.Extension with type 'a t := 'a t</pre><p>In order to apply the functor, we'll put the definition of <code>Fqueue</code> in a submodule called <code>T</code>, and then call <code>Foldable.Extend</code> on <code>T</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/functors/extended_fqueue.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">include Fqueue
+include Foldable.Extend(Fqueue)</pre><p>Core comes with a number of functors for extending modules that
+    follow this same basic pattern, including:<a data-type="indexterm" data-primary="Monad.Make">&#xa0;</a><a data-type="indexterm" data-primary="Hashable.Make">&#xa0;</a><a data-type="indexterm" data-primary="Comparable module" data-secondary="Comparable.Make">&#xa0;</a><a data-type="indexterm" data-primary="Container.Make">&#xa0;</a></p><dl><dt><code>Container.Make</code></dt><dd><p>Very similar to <code>Foldable.Extend</code>.</p></dd><dt><code>Comparable.Make</code></dt><dd><p>Adds support for functionality that depends on the presence of
+          a comparison function, including support for containers like maps
+          and sets.</p></dd><dt><code>Hashable.Make</code></dt><dd><p>Adds support for hashing-based data structures including hash
+          tables, hash sets, and hash heaps.</p></dd><dt><code>Monad.Make</code></dt><dd><p>For so-called monadic libraries, like those discussed in Chapters <a href="#error-handling" data-type="xref" data-xrefstyle="select: labelnumber">#error-handling</a> and <a href="#concurrent-programming-with-async" data-type="xref" data-xrefstyle="select: labelnumber">#concurrent-programming-with-async</a>. Here, the functor is
+          used to provide a collection of standard helper functions based on
+          the <code>bind</code> and <code>return</code> operators.</p></dd></dl><p>These functors come in handy when you want to add the same kind of
+    functionality that is commonly available in Core to your own types.</p><p>We've really only covered some of the possible uses of functors. Functors are really a
+      quite powerful tool for modularizing your code. The cost is that functors are syntactically
+      heavyweight compared to the rest of the language, and that there are some tricky issues you
+      need to understand to use them effectively, with sharing constraints and destructive
+      substitution being high on that list. </p><p>All of this means that for small and simple programs, heavy use of functors is probably a
+      mistake. But as your programs get more complicated and you need more effective modular
+      architectures, functors become a highly valuable tool.</p></section></section>

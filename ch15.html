@@ -1,0 +1,593 @@
+<section xmlns="http://www.w3.org/1999/xhtml" id="handling-json-data" data-type="chapter"><h1>Handling JSON Data</h1><p>Data serialization, i.e., converting data to and from a sequence of
+  bytes that's suitable for writing to disk or sending across the network, is
+  an important and common programming task. You often have to match someone
+  else's data format (such as XML), sometimes you need a highly efficient
+  format, and other times you want something that is easy for humans to edit.
+  To this end, OCaml libraries provide several techniques for data
+  serialization depending on what your problem is.<a data-type="indexterm" data-primary="JSON data" data-secondary="basics of">&#xa0;</a><a data-type="indexterm" id="SERjson" data-primary="serialization formats" data-secondary="JSON">&#xa0;</a><a data-type="indexterm" id="DATjson" data-primary="data serialization" data-secondary="with JSON">&#xa0;</a></p><p>We'll start by using the popular and simple JSON data format and then
+  look at other serialization formats later in the book. This chapter
+  introduces you to a couple of new techniques that glue together the basic
+  ideas from Part I of the book by using:</p><ul><li><p><em>Polymorphic variants</em> to write more extensible
+      libraries and protocols (but still retain the ability to extend them if
+      needed)</p></li><li><p><em>Functional combinators</em> to compose common
+      operations over data structures in a type-safe way</p></li><li><p>External tools to generate boilerplate OCaml modules and
+      signatures from external specification files</p></li></ul><section id="json-basics" data-type="sect1"><h1>JSON Basics</h1><p>JSON is a lightweight data-interchange format often used in web
+    services and browsers. It's described in <a href="http://www.ietf.org/rfc/rfc4627.txt">RFC4627</a> and is easier to
+    parse and generate than alternatives such as XML. You'll run into JSON
+    very often when working with modern web APIs, so we'll cover several
+    different ways to manipulate it in this chapter.<a data-type="indexterm" data-primary="RFC4627">&#xa0;</a></p><p>JSON consists of two basic structures: an unordered collection of
+    key/value pairs, and an ordered list of values. Values can be strings,
+    Booleans, floats, integers, or null. Let's see what a JSON record for an
+    example book description looks like:<a data-type="indexterm" data-primary="values" data-secondary="in JSON data">&#xa0;</a><a data-type="indexterm" data-primary="key/value pairs">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/book.json" class="orm:hideurl:ital"><em class="hyperlink">JSON</em></a></p><pre data-type="programlisting" data-code-language="json">{
+  "title": "Real World OCaml",
+  "tags" : [ "functional programming", "ocaml", "algorithms" ],
+  "pages": 450,
+  "authors": [
+    { "name": "Jason Hickey", "affiliation": "Google" },
+    { "name": "Anil Madhavapeddy", "affiliation": "Cambridge"},
+    { "name": "Yaron Minsky", "affiliation": "Jane Street"}
+  ],
+  "is_online": true
+}</pre><p>The outermost JSON value is usually a record (delimited by the curly
+    braces) and contains an unordered set of key/value pairs. The keys must be
+    strings, but values can be any JSON type. In the preceding example,
+    <code>tags</code> is a string list, while the
+    <code>authors</code> field contains a list of
+    records. Unlike OCaml lists, JSON lists can contain multiple different
+    JSON types within a single list.</p><p>This free-form nature of JSON types is both a blessing and a curse.
+    It's very easy to generate JSON values, but code that parses them also has
+    to handle subtle variations in how the values are represented. For
+    example, what if the preceding <code>pages</code>
+    value is actually represented as a string value of "<code>450</code>" instead of an integer?<a data-type="indexterm" data-primary="JSON data" data-secondary="benefits and drawbacks of">&#xa0;</a></p><p>Our first task is to parse the JSON into a more structured OCaml
+    type so that we can use static typing more effectively. When manipulating
+    JSON in Python or Ruby, you might write unit tests to check that you have
+    handled unusual inputs. The OCaml model prefers compile-time static
+    checking as well as unit tests. For example, using pattern matching can
+    warn you if you've not checked that a value can be <code>Null</code> as well as contain an actual
+    value.<a data-type="indexterm" data-primary="Yojson library" data-secondary="installation of">&#xa0;</a><a data-type="indexterm" data-primary="static checking">&#xa0;</a><a data-type="indexterm" data-primary="compile-time static checking">&#xa0;</a><a data-type="indexterm" data-primary="unit tests">&#xa0;</a></p><div data-type="note"><h1>Installing the Yojson Library</h1><p>There are several JSON libraries available for OCaml. For this
+      chapter, we've picked the <a href="http://mjambon.com/yojson.html">OCaml</a> library by Martin
+      Jambon. It's easiest to install via OPAM by running <code>opam install yojson</code>. See <a href="http://realworldocaml.org/install">this Real World OCaml page</a> for installation instructions if you haven't
+      already got OPAM. Once installed, you can open it in the <span class="command"><em>utop</em></span> toplevel by:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/install.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>#require "yojson" ;;</code></strong>
+<code class="prompt"># </code><strong><code>open Yojson ;;</code></strong></pre></div></section><section id="parsing-json-with-yojson" data-type="sect1"><h1>Parsing JSON with Yojson</h1><p>The JSON specification has very few data types, and the <code>Yojson.Basic.json</code> type that follows is
+    sufficient to express any valid JSON structure:<a data-type="indexterm" data-primary="JSON data" data-secondary="parsing with Yojson">&#xa0;</a><a data-type="indexterm" data-primary="Yojson library" data-secondary="parsing JSON with">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/yojson_basic.mli" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type json = [
+  | `Assoc of (string * json) list
+  | `Bool of bool
+  | `Float of float
+  | `Int of int
+  | `List of json list
+  | `Null
+  | `String of string
+]</pre><p>Some interesting properties should leap out at you after reading
+    this definition:</p><ul><li><p>The <code>json</code> type is
+        <em>recursive</em>, which is to say that some of the tags
+        refer back to the overall <code>json</code>
+        type. In particular, <code>Assoc</code> and
+        <code>List</code> types can contain references
+        to further JSON values of different types. This is unlike the OCaml
+        lists, whose contents must be of a uniform type.<a data-type="indexterm" data-primary="recursion" data-secondary="in json types">&#xa0;</a></p></li><li><p>The definition specifically includes a <code>Null</code> variant for empty fields. OCaml doesn't
+        allow null values by default, so this must be encoded
+        explicitly.</p></li><li><p>The type definition uses polymorphic variants and not normal
+        variants. This will become significant later, when we extend it with
+        custom extensions to the JSON format.<a data-type="indexterm" data-primary="polymorphic variant types" data-secondary="in JSON data">&#xa0;</a></p></li></ul><p>Let's parse the earlier JSON example into this type now. The first
+    stop is the <code>Yojson.Basic</code> documentation,
+    where we find these helpful functions:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/yojson_basic.mli" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a>
+    (part 1)</p><pre data-type="programlisting" data-code-language="ocaml">val from_string : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt;
+   string -&gt; json
+(* Read a JSON value from a string.
+   [buf]   : use this buffer at will during parsing instead of
+             creating a new one. 
+   [fname] : data file name to be used in error messages. It does not 
+             have to be a real file. 
+   [lnum]  : number of the first line of input. Default is 1. *)
+
+val from_file : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt; 
+   string -&gt; json
+(* Read a JSON value from a file. See [from_string] for the meaning of the optional
+   arguments. *)
+
+val from_channel : ?buf:Bi_outbuf.t -&gt; ?fname:string -&gt; ?lnum:int -&gt;
+  in_channel -&gt; json
+  (** Read a JSON value from a channel.
+      See [from_string] for the meaning of the optional arguments. *)</pre><p>When first reading these interfaces, you can generally ignore the
+    optional arguments (which have the question marks in the type signature),
+    since they should have sensible defaults. In the preceding signature, the
+    optional arguments offer finer control over the memory buffer allocation
+    and error messages from parsing incorrect JSON.</p><p>The type signature for these functions with the optional elements
+    removed makes their purpose much clearer. The three ways of parsing JSON
+    are either directly from a string, from a file on a filesystem, or via a
+    buffered input channel:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/yojson_basic_simple.mli" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">val from_string  : string     -&gt; json
+val from_file    : string     -&gt; json
+val from_channel : in_channel -&gt; json</pre><p>The next example shows both the <code>string</code> and
+    <code>file</code> functions in action, assuming the JSON record is
+    stored in a file called <em>book.json</em>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/read_json.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
+
+let () =
+  (* Read JSON file into an OCaml string *)
+  let buf = In_channel.read_all "book.json" in
+  (* Use the string JSON constructor *)
+  let json1 = Yojson.Basic.from_string buf in
+  (* Use the file JSON constructor *)
+  let json2 = Yojson.Basic.from_file "book.json" in
+  (* Test that the two values are the same *)
+  print_endline (if json1 = json2 then "OK" else "FAIL")</pre><p>You can build this by running <span class="command"><em>corebuild</em></span>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/run_read_json.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>corebuild -pkg yojson read_json.native</code></strong>
+<code class="prompt">$ </code><strong><code>./read_json.native</code></strong>
+<code class="computeroutput">OK</code></pre><p>The <code>from_file</code> function accepts an
+    input filename and takes care of opening and closing it for you. It's far
+    more common to use <code>from_string</code> to
+    construct JSON values though, since these strings come in via a network
+    connection (we'll see more of this in <a href="#concurrent-programming-with-async" data-type="xref">#concurrent-programming-with-async</a>) or a database. Finally,
+    the example checks that the two input mechanisms actually resulted in the
+    same OCaml data structure.</p></section><section id="selecting-values-from-json-structures" data-type="sect1"><h1>Selecting Values from JSON Structures</h1><p>Now that we've figured out how to parse the example JSON into an
+    OCaml value, let's manipulate it from OCaml code and extract specific
+    fields:<a data-type="indexterm" id="VALjson" data-primary="values" data-secondary="selecting from JSON structures">&#xa0;</a><a data-type="indexterm" id="JSONselval" data-primary="JSON data" data-secondary="selecting values from">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/parse_book.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
+
+let () =
+  (* Read the JSON file *)
+  let json = Yojson.Basic.from_file "book.json" in
+
+  (* Locally open the JSON manipulation functions *)
+  let open Yojson.Basic.Util in
+  let title = json |&gt; member "title" |&gt; to_string in
+  let tags = json |&gt; member "tags" |&gt; to_list |&gt; filter_string in
+  let pages = json |&gt; member "pages" |&gt; to_int in
+  let is_online = json |&gt; member "is_online" |&gt; to_bool_option in
+  let is_translated = json |&gt; member "is_translated" |&gt; to_bool_option in
+  let authors = json |&gt; member "authors" |&gt; to_list in
+  let names = List.map authors ~f:(fun json -&gt; member "name" json |&gt; to_string) in
+
+  (* Print the results of the parsing *)
+  printf "Title: %s (%d)\n" title pages;
+  printf "Authors: %s\n" (String.concat ~sep:", " names);
+  printf "Tags: %s\n" (String.concat ~sep:", " tags);
+  let string_of_bool_option =
+    function
+    | None -&gt; "&lt;unknown&gt;"
+    | Some true -&gt; "yes"
+    | Some false -&gt; "no" in
+  printf "Online: %s\n" (string_of_bool_option is_online);
+  printf "Translated: %s\n" (string_of_bool_option is_translated)</pre><p>Now build and run this in the same way as the previous
+    example:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/run_parse_book.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>corebuild -pkg yojson parse_book.native</code></strong>
+<code class="prompt">$ </code><strong><code>./parse_book.native</code></strong>
+<code class="computeroutput">Title: Real World OCaml (450)</code>
+<code class="computeroutput">Authors: Jason Hickey, Anil Madhavapeddy, Yaron Minsky</code>
+<code class="computeroutput">Tags: functional programming, ocaml, algorithms</code>
+<code class="computeroutput">Online: yes</code>
+<code class="computeroutput">Translated: &lt;unknown&gt;</code></pre><p>This code introduces the <code>Yojson.Basic.Util</code> module, which contains
+    <em>combinator</em> functions that let you easily map a JSON
+    object into a more strongly typed OCaml value.<a data-type="indexterm" data-primary="combinators" data-secondary="functional combinators">&#xa0;</a><a data-type="indexterm" data-primary="functional combinators">&#xa0;</a></p><aside data-type="sidebar"><h5>Functional Combinators</h5><p>Combinators are a design pattern that crops up quite often in
+      functional programming. John Hughes defines them as "a function which
+      builds program fragments from program fragments." In a functional
+      language, this generally means higher-order functions that combine other
+      functions to apply useful transformations over values.</p><p>You've already run across several of these in the <code>List</code> module:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/list_excerpt.mli" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">val map  : 'a list -&gt; f:('a -&gt; 'b)   -&gt; 'b list
+val fold : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt; 'accum</pre><p><code>map</code> and <code>fold</code> are extremely common combinators that
+      transform an input list by applying a function to each value of the
+      list. The <code>map</code> combinator is simplest,
+      with the resulting list being output directly. <code>fold</code> applies each value in the input list to a
+      function that accumulates a single result, and returns that
+      instead:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/list_excerpt.mli" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a>
+      (part 1)</p><pre data-type="programlisting" data-code-language="ocaml">val iter : 'a list -&gt; f:('a -&gt; unit) -&gt; unit</pre><p><code>iter</code> is a more specialized
+      combinator that is only useful when writing imperative code. The input
+      function is applied to every value, but no result is supplied. The
+      function must instead apply some side effect such as changing a mutable
+      record field or printing to the standard output.</p></aside><p><code>Yojson</code> provides several
+    combinators in the <code>Yojson.Basic.Util</code>
+    module, some of which are listed in <a href="#table15_1" data-type="xref">#table15_1</a>.<a data-type="indexterm" data-primary="combinators" data-secondary="in Yojson library">&#xa0;</a><a data-type="indexterm" data-primary="Yojson library" data-secondary="combinators in">&#xa0;</a></p><table id="table15_1"><caption>Yojson combinators</caption><thead><tr><th>Function</th><th>Type</th><th>Purpose</th></tr></thead><tbody><tr><td>member</td><td><code>string -&gt; json -&gt;
+            json</code></td><td>Select a named field from a JSON record.</td></tr><tr><td>to_string</td><td><code>json -&gt;
+            string</code></td><td>Convert a JSON value into an OCaml <code>string</code>. Raises an exception if this is
+            impossible.</td></tr><tr><td>to_int</td><td><code>json -&gt; int</code></td><td>Convert a JSON value into an OCaml <code>int</code>. Raises an exception if this is
+            impossible.</td></tr><tr><td>filter_string</td><td><code>json list -&gt; string
+            list</code></td><td>Filter valid strings from a list of JSON fields, and return
+            them as an OCaml list of strings.</td></tr></tbody></table><p>We'll go through each of these uses one by one now. The following
+    examples also use the <code>|&gt;</code>
+    pipe-forward operator that we explained in <a href="#variables-and-functions" data-type="xref">#variables-and-functions</a>. This lets us chain together multiple
+    JSON selection functions and feed the output from one into the next one,
+    without having to create separate <code>let</code>
+    bindings for each one.<a data-type="indexterm" data-primary="filter_string function">&#xa0;</a><a data-type="indexterm" data-primary="to_init function">&#xa0;</a><a data-type="indexterm" data-primary="functions" data-secondary="to_init function">&#xa0;</a><a data-type="indexterm" data-primary="to_string function">&#xa0;</a><a data-type="indexterm" data-primary="functions" data-secondary="to_string function">&#xa0;</a><a data-type="indexterm" data-primary="functions" data-secondary="member functions">&#xa0;</a><a data-type="indexterm" data-primary="member function">&#xa0;</a></p><p>Let's start with selecting a single <code>title</code> field from the record:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/parse_book.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>open Yojson.Basic.Util ;;</code></strong>
+<code class="prompt"># </code><strong><code>let title = json |&gt; member "title" |&gt; to_string ;;</code></strong>
+<code class="computeroutput">val title : string = "Real World OCaml"</code></pre><p>The <code>member</code> function accepts a JSON object and named key
+      and returns the JSON field associated with that key, or <code>Null</code>. Since we know that the <code>title</code> value is
+      always a string in our example schema, we want to convert it to an OCaml string. The <code>to_string</code> function performs this conversion and raises an
+      exception if there is an unexpected JSON type. The <code>|&gt;</code>
+      operator provides a convenient way to chain these operations <span class="keep-together">together</span>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/parse_book.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 2)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let tags = json |&gt; member "tags" |&gt; to_list |&gt; filter_string ;;</code></strong>
+<code class="computeroutput">val tags : string list = ["functional programming"; "ocaml"; "algorithms"]</code>
+<code class="prompt"># </code><strong><code>let pages = json |&gt; member "pages" |&gt; to_int ;;</code></strong>
+<code class="computeroutput">val pages : int = 450</code></pre><p>The <code>tags</code> field is similar to
+    <code>title</code>, but the field is a list of
+    strings instead of a single one. Converting this to an OCaml <code>string list</code> is a two-stage process. First, we
+    convert the JSON <code>List</code> to an OCaml list
+    of JSON values and then filter out the <code>String</code> values as an OCaml <code>string list</code>. Remember that OCaml lists must
+    contain values of the same type, so any JSON values that cannot be
+    converted to a <code>string</code> will be skipped
+    from the output of <code>filter_string</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/parse_book.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 3)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let is_online = json |&gt; member "is_online" |&gt; to_bool_option ;;</code></strong>
+<code class="computeroutput">val is_online : bool option = Some true</code>
+<code class="prompt"># </code><strong><code>let is_translated = json |&gt; member "is_translated" |&gt; to_bool_option ;;</code></strong>
+<code class="computeroutput">val is_translated : bool option = None</code></pre><p>The <code>is_online</code> and <code>is_translated</code> fields are optional in our JSON
+    schema, so no error should be raised if they are not present. The OCaml
+    type is a <code>bool option</code> to reflect this
+    and can be extracted via <code>to_bool_option</code>. In our example JSON, only
+    <code>is_online</code> is present and <code>is_translated</code> will be <code>None</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/parse_book.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 4)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let authors = json |&gt; member "authors" |&gt; to_list ;;</code></strong>
+<code class="computeroutput">val authors : Yojson.Basic.json list =</code>
+<code class="computeroutput">  [`Assoc</code>
+<code class="computeroutput">     [("name", `String "Jason Hickey"); ("affiliation", `String "Google")];</code>
+<code class="computeroutput">   `Assoc</code>
+<code class="computeroutput">     [("name", `String "Anil Madhavapeddy");</code>
+<code class="computeroutput">      ("affiliation", `String "Cambridge")];</code>
+<code class="computeroutput">   `Assoc</code>
+<code class="computeroutput">     [("name", `String "Yaron Minsky");</code>
+<code class="computeroutput">      ("affiliation", `String "Jane Street")]]</code></pre><p>The final use of JSON combinators is to extract all the <code>name</code> fields from the list of authors. We first
+    construct the <code>author list</code>, and then
+    <code>map</code> it into a <code>string list</code>. Notice that the example explicitly
+    binds <code>authors</code> to a variable name. It
+    can also be written more succinctly using the pipe-forward
+    operator:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/parse_book.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 5)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let names =</code></strong>
+<strong><code>  json |&gt; member "authors" |&gt; to_list </code></strong>
+<strong><code>  |&gt; List.map ~f:(fun json -&gt; member "name" json |&gt; to_string) ;;</code></strong>
+<code class="computeroutput">val names : string list =</code>
+<code class="computeroutput">  ["Jason Hickey"; "Anil Madhavapeddy"; "Yaron Minsky"]</code></pre><p>This style of programming, which omits variable names and chains functions together, is
+      known as <em>point-free programming</em>. It's a succinct style but shouldn't be
+      overused due to the increased difficulty of debugging intermediate values. If an explicit
+        <span class="keep-together">name</span> is assigned to each stage of the transformations,
+      debuggers in particular have an easier time making the program flow simpler to represent to
+      the programmer.</p><p>This technique of using statically typed parsing functions is very powerful in combination
+      with the OCaml type system. Many errors that don't make sense at runtime (for example, mixing
+      up lists and objects) will be caught statically via a type error.<a data-type="indexterm" data-startref="JSONselval">&#xa0;</a><a data-type="indexterm" data-startref="VALjson">&#xa0;</a></p></section><section id="constructing-json-values" data-type="sect1"><h1>Constructing JSON Values</h1><p>Building and printing JSON values is pretty straightforward given
+    the <code>Yojson.Basic.json</code> type. You can
+    just construct values of type <code>json</code> and
+    call the <code>to_string</code> function on them.
+    Let's remind ourselves of the <code>Yojson.Basic.json</code> type again:<a data-type="indexterm" data-primary="values" data-secondary="in JSON data">&#xa0;</a><a data-type="indexterm" data-primary="JSON data" data-secondary="constructing values">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/yojson_basic.mli" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type json = [
+  | `Assoc of (string * json) list
+  | `Bool of bool
+  | `Float of float
+  | `Int of int
+  | `List of json list
+  | `Null
+  | `String of string
+]</pre><p>We can directly build a JSON value against this type and use the
+    pretty-printing functions in the <code>Yojson.Basic</code> module to display JSON
+    output:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/build_json.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let person = `Assoc [ ("name", `String "Anil") ] ;;</code></strong>
+<code class="computeroutput">val person : [&gt; `Assoc of (string * [&gt; `String of string ]) list ] =</code>
+<code class="computeroutput">  `Assoc [("name", `String "Anil")]</code></pre><p>In the preceding example, we've constructed a simple JSON object
+    that represents a single person. We haven't actually defined the type of
+    <code>person</code> explicitly, as we're relying on
+    the magic of polymorphic variants to make this all work.</p><p>The OCaml type system infers a type for <code>person</code> based on how you construct its value. In
+    this case, only the <code>Assoc</code> and <code>String</code> variants are used to define the record,
+    and so the inferred type only contains these fields without knowledge of
+    the other possible allowed variants in JSON records that you haven't used
+    yet (e.g. <code>Int</code> or <code>Null</code>):</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/build_json.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 2)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Yojson.Basic.pretty_to_string ;;</code></strong>
+<code class="computeroutput">- : ?std:bool -&gt; Yojson.Basic.json -&gt; string = &lt;fun&gt;</code></pre><p>The <code>pretty_to_string</code> function has
+    a more explicit signature that requires an argument of type <code>Yojson.Basic.json</code>. When <code>person</code> is applied to <code>pretty_to_string</code>, the inferred type of <code>person</code> is statically checked against the
+    structure of the <code>json</code> type to ensure
+    that they're compatible:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/build_json.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 3)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Yojson.Basic.pretty_to_string person ;;</code></strong>
+<code class="computeroutput">- : string = "{ \"name\": \"Anil\" }"</code>
+<code class="prompt"># </code><strong><code>Yojson.Basic.pretty_to_channel stdout person ;;</code></strong>
+<code class="computeroutput">{ "name": "Anil" }</code>
+<code class="computeroutput">- : unit = ()</code></pre><p>In this case, there are no problems. Our <code>person</code> value has an inferred type that is a
+    valid subtype of <code>json</code>, and so the
+    conversion to a string just works without us ever having to explicitly
+    specify a type for <code>person</code>. Type
+    inference lets you write more succinct code without sacrificing runtime
+    reliability, as all the uses of polymorphic variants are still checked at
+    compile time.<a data-type="indexterm" data-primary="errors" data-secondary="type errors" data-seealso="error handling">&#xa0;</a><a data-type="indexterm" data-primary="type checking">&#xa0;</a><a data-type="indexterm" data-primary="polymorphic variant types" data-secondary="type checking and">&#xa0;</a><a data-type="indexterm" data-primary="type inference" data-secondary="benefits of">&#xa0;</a></p><aside data-type="sidebar"><h5>Polymorphic Variants and Easier Type Checking</h5><p>One difficulty you will encounter is that type errors involving
+      polymorphic variants can be quite verbose. For example, suppose you
+      build an <code>Assoc</code> and mistakenly include
+      a single value instead of a list of keys:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/build_json.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 4)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let person = `Assoc ("name", `String "Anil");;</code></strong>
+<code class="computeroutput">val person : [&gt; `Assoc of string * [&gt; `String of string ] ] =</code>
+<code class="computeroutput">  `Assoc ("name", `String "Anil")</code>
+<code class="prompt"># </code><strong><code>Yojson.Basic.pretty_to_string person ;;</code></strong>
+<code class="computeroutput">Characters 30-36:</code>
+<code class="computeroutput">Error: This expression has type</code>
+<code class="computeroutput">         [&gt; `Assoc of string * [&gt; `String of string ] ]</code>
+<code class="computeroutput">       but an expression was expected of type Yojson.Basic.json</code>
+<code class="computeroutput">       Types for tag `Assoc are incompatible</code></pre><p>The type error is more verbose than it needs to be, which can be
+      inconvenient to wade through for larger values. You can help the
+      compiler to narrow down this error to a shorter form by adding explicit
+      type annotations as a hint about your intentions:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/build_json.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 5)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let (person : Yojson.Basic.json) =</code></strong>
+<strong><code>  `Assoc ("name", `String "Anil");;</code></strong>
+<code class="computeroutput">Characters 37-68:</code>
+<code class="computeroutput">Error: This expression has type 'a * 'b</code>
+<code class="computeroutput">       but an expression was expected of type</code>
+<code class="computeroutput">         (string * Yojson.Basic.json) list</code></pre><p>We've annotated <code>person</code> as being
+      of type <code>Yojson.Basic.json</code>, and as a
+      result, the compiler spots that the argument to the <code>Assoc</code> variant has the incorrect type. This
+      illustrates the strengths and weaknesses of polymorphic variants:
+      they're lightweight and flexible, but the error messages can be quite
+      confusing. However, a bit of careful manual type annotation makes
+      tracking down such issues much easier.</p><p>We'll discuss more techniques like this that help you interpret
+      type errors more easily in <a href="#the-compiler-frontend-parsing-and-type-checking" data-type="xref">#the-compiler-frontend-parsing-and-type-checking</a>.</p></aside></section><section id="using-non-standard-json-extensions" data-type="sect1"><h1>Using Nonstandard JSON Extensions</h1><p>The standard JSON types are <em>really</em> basic, and
+    OCaml types are far more expressive. Yojson supports an extended JSON
+    format for those times when you're not interoperating with external
+    systems and just want a convenient human-readable, local format. The
+    <code>Yojson.Safe.json</code> type is a superset of
+    the <code>Basic</code> polymorphic variant and looks
+    like this:<a data-type="indexterm" data-primary="Yojson library" data-secondary="extended JSON format support">&#xa0;</a><a data-type="indexterm" data-primary="JSON data" data-secondary="nonstandard extensions for">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/yojson_safe.mli" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type json = [
+  | `Assoc of (string * json) list
+  | `Bool of bool
+  | `Float of float
+  | `Floatlit of string
+  | `Int of int
+  | `Intlit of string
+  | `List of json list
+  | `Null
+  | `String of string
+  | `Stringlit of string
+  | `Tuple of json list
+  | `Variant of string * json option
+]</pre><p>The <code>Safe.json</code> type includes all
+    of the variants from <code>Basic.json</code> and
+    extends it with a few more useful ones. A standard JSON type such as a
+    <code>String</code> will type-check against both the
+    <code>Basic</code> module and also the nonstandard
+    <code>Safe</code> module. If you use the extended
+    values with the <code>Basic</code> module, however,
+    the compiler will reject your code until you make it compliant with the
+    portable subset of JSON.</p><p>Yojson supports the following JSON extensions:<a data-type="indexterm" data-primary="variant types" data-secondary="Yojson support for">&#xa0;</a><a data-type="indexterm" data-primary="tuples">&#xa0;</a><a data-type="indexterm" data-primary="lit suffix">&#xa0;</a></p><dl><dt>The <code>lit</code> suffix</dt><dd><p>Denotes that the value is stored as a JSON string. For
+          example, a <code>Floatlit</code> will be
+          stored as <code>"1.234"</code> instead of
+          <code>1.234</code>.</p></dd><dt>The <code>Tuple</code> type</dt><dd><p>Stored as <code>("abc", 123)</code>
+          instead of a list.</p></dd><dt>The <code>Variant</code> type</dt><dd><p>Encodes OCaml variants more explicitly, as <code>&lt;"Foo"&gt;</code> or <code>&lt;"Bar":123&gt;</code> for a variant with
+          parameters.</p></dd></dl><p>The only purpose of these extensions is to have greater control over
+    how OCaml values are represented in JSON (for instance, storing a
+    floating-point number as a JSON string). The output still obeys the same
+    standard format that can be easily exchanged with other languages.</p><p>You can convert a <code>Safe.json</code> to a
+    <code>Basic.json</code> type by using the <code>to_basic</code> function as follows:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/yojson_safe.mli" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a>
+    (part 1)</p><pre data-type="programlisting" data-code-language="ocaml">val to_basic : json -&gt; Yojson.Basic.json
+(** Tuples are converted to JSON arrays, Variants are converted to
+    JSON strings or arrays of a string (constructor) and a json value
+    (argument). Long integers are converted to JSON strings.
+    Examples:
+
+    `Tuple [ `Int 1; `Float 2.3 ]   -&gt;    `List [ `Int 1; `Float 2.3 ]
+    `Variant ("A", None)            -&gt;    `String "A"
+    `Variant ("B", Some x)          -&gt;    `List [ `String "B", x ]
+    `Intlit "12345678901234567890"  -&gt;    `String "12345678901234567890"
+ *)</pre></section><section id="automatically-mapping-json-to-ocaml-types" data-type="sect1"><h1>Automatically Mapping JSON to OCaml Types</h1><p>The combinators described previously make it easy to write functions
+    that extract fields from JSON records, but the process is still pretty
+    manual. When you implement larger specifications, it's much easier to
+    generate the mappings from JSON schemas to OCaml values more mechanically
+    than writing conversion functions individually.<a data-type="indexterm" id="MAPjson" data-primary="mapping" data-secondary="of JSON to OCaml types">&#xa0;</a><a data-type="indexterm" id="JSONautomap" data-primary="JSON data" data-secondary="automatic mapping of">&#xa0;</a></p><p>We'll cover an alternative JSON processing method that is better for
+    larger-scale JSON handling now, using the <a href="http://mjambon.com/atd-biniou-intro.html">OCaml</a> tool. This will
+    introduce our first <em>Domain Specific Language</em> that
+    compiles JSON specifications into OCaml modules, which are then used
+    throughout your application.<a data-type="indexterm" data-primary="ATDgen Library" data-secondary="installation of">&#xa0;</a><a data-type="indexterm" data-primary="Domain Specific Language">&#xa0;</a></p><div data-type="note"><h1>Installing the ATDgen Library and Tool</h1><p>ATDgen installs some OCaml libraries that interface with Yojson,
+      and also a command-line tool that generates code. It can all be
+      installed via OPAM:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/install_atdgen.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>opam install atdgen</code></strong>
+<code class="prompt">$ </code><strong><code>atdgen -version</code></strong>
+<code class="computeroutput">1.2.3</code></pre><p>The command-line tool will be installed within your <em class="filename">~/.opam</em> directory and should already be on
+      your <code>PATH</code> from running <span class="command"><em>opam config env</em></span>. See <a href="http://realworldocaml.org/install">this Real World OCaml page</a> if this isn't working.</p></div><section id="atd-basics" data-type="sect2"><h2>ATD Basics</h2><p>The idea behind ATD is to specify the format of the JSON in a
+      separate file and then run a compiler (<span class="command"><em>atdgen</em></span>) that outputs OCaml code to construct
+      and parse JSON values. This means that you don't need to write any OCaml
+      parsing code at all, as it will all be autogenerated for you.<a data-type="indexterm" data-primary="ATDgen Library" data-secondary="basics of">&#xa0;</a></p><p>Let's go straight into looking at an example of how this works, by
+      using a small portion of the GitHub API. GitHub is a popular code
+      hosting and sharing website that provides a JSON-based web <a href="http://developer.github.com">API</a>. The following ATD code
+      fragment describes the GitHub authorization API (which is based on a
+      pseudostandard web protocol known as OAuth):<a data-type="indexterm" data-primary="GitHub API">&#xa0;</a><a data-type="indexterm" data-primary="OAuth web protocol">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/github.atd" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type scope = [
+    User &lt;json name="user"&gt;
+  | Public_repo &lt;json name="public_repo"&gt;
+  | Repo &lt;json name="repo"&gt;
+  | Repo_status &lt;json name="repo_status"&gt;
+  | Delete_repo &lt;json name="delete_repo"&gt;
+  | Gist &lt;json name="gist"&gt;
+]
+
+type app = {
+  name: string;
+  url: string;
+}  &lt;ocaml field_prefix="app_"&gt;
+
+type authorization_request = {
+  scopes: scope list;
+  note: string;
+} &lt;ocaml field_prefix="auth_req_"&gt;
+
+type authorization_response = {
+  scopes: scope list;
+  token: string;
+  app: app;
+  url: string;
+  id: int;
+  ?note: string option;
+  ?note_url: string option;
+}</pre><p>The ATD specification syntax is deliberately quite similar to
+      OCaml type definitions. Every JSON record is assigned a type name (e.g.,
+      <code>app</code> in the preceding example). You
+      can also define variants that are similar to OCaml's variant types
+      (e.g., <code>scope</code> in the example).</p></section><section id="atd-annotations" data-type="sect2"><h2>ATD Annotations</h2><p>ATD does deviate from OCaml syntax due to its support for annotations within the
+        specification. The annotations can customize the code that is generated for a particular
+        target (of which the OCaml backend is of most interest to us).<a data-type="indexterm" data-primary="ATDgen Library" data-secondary="annotations in">&#xa0;</a></p><p>For example, the preceding GitHub <code>scope</code> field is defined as a variant type, with
+      each option starting with an uppercase letter as is conventional for
+      OCaml variants. However, the JSON values that come back from GitHub are
+      actually lowercase and so aren't exactly the same as the option
+      name.</p><p>The annotation <code>&lt;json
+      name="user"&gt;</code> signals that the JSON value of the field is
+      <code>user</code>, but that the variable name of
+      the parsed variant in OCaml should be <code>User</code>. These annotations are often useful to
+      map JSON values to reserved keywords in OCaml (e.g., <code>type</code>).</p></section><section id="compiling-atd-specifications-to-ocaml" data-type="sect2"><h2>Compiling ATD Specifications to OCaml</h2><p>The ATD specification we defined can be compiled to OCaml code
+      using the <span class="command"><em>atdgen</em></span> command-line tool.
+      Let's run the compiler twice to generate some OCaml type definitions and
+      a JSON serializing module that converts between input data and those
+      type definitions.<a data-type="indexterm" data-primary="ATDgen Library" data-secondary="compiling specifications to OCaml">&#xa0;</a></p><p>The <span class="command"><em>atdgen</em></span> command will generate some new files in
+        your current directory. <code>github_t.ml</code> and <code>github_t.mli</code> will contain an OCaml module with types defined
+        that correspond to the ATD file:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/build_github_atd.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>atdgen -t github.atd</code></strong>
+<code class="prompt">$ </code><strong><code>atdgen -j github.atd</code></strong>
+<code class="prompt">$ </code><strong><code>ocamlfind ocamlc -package atd -i github_t.mli</code></strong>
+<code class="computeroutput">type scope =</code>
+<code class="computeroutput">    [ `Delete_repo | `Gist | `Public_repo | `Repo | `Repo_status | `User ]</code>
+<code class="computeroutput">type app = { app_name : string; app_url : string; }</code>
+<code class="computeroutput">type authorization_request = {</code>
+<code class="computeroutput">  auth_req_scopes : scope list;</code>
+<code class="computeroutput">  auth_req_note : string;</code>
+<code class="computeroutput">}</code>
+<code class="computeroutput">type authorization_response = {</code>
+<code class="computeroutput">  scopes : scope list;</code>
+<code class="computeroutput">  token : string;</code>
+<code class="computeroutput">  app : app;</code>
+<code class="computeroutput">  url : string;</code>
+<code class="computeroutput">  id : int;</code>
+<code class="computeroutput">  note : string option;</code>
+<code class="computeroutput">  note_url : string option;</code>
+<code class="computeroutput">}</code></pre><p>There is an obvious correspondence to the ATD definition. Note
+      that field names in OCaml records in the same module cannot shadow one
+      another, and so we instruct ATDgen to prefix every field with a name
+      that distinguishes it from other records in the same module. For
+      example, <code>&lt;ocaml
+      field_prefix="auth_req_"&gt;</code> in the ATD spec prefixes every
+      field name in the generated <code>authorization_request</code> record with <code>auth_req</code>.</p><p>The <code>Github_t</code> module only
+      contains the type definitions, while <code>Github_j</code> provides serialization functions to
+      and from JSON. You can read the <code>github_j.mli</code> to see the full interface, but
+      the important functions for most uses are the conversion functions to
+      and from a string. For our preceding example, this looks like:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/github_j_excerpt.mli" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">val string_of_authorization_request :
+  ?len:int -&gt; authorization_request -&gt; string
+  (** Serialize a value of type {!authorization_request}
+      into a JSON string.
+      @param len specifies the initial length
+                 of the buffer used internally.
+                 Default: 1024. *)
+
+val string_of_authorization_response :
+  ?len:int -&gt; authorization_response -&gt; string
+  (** Serialize a value of type {!authorization_response}
+      into a JSON string.
+      @param len specifies the initial length
+                 of the buffer used internally.
+                 Default: 1024. *)</pre><p>This is pretty convenient! We've now written a single ATD file,
+      and all the OCaml boilerplate to convert between JSON and a strongly
+      typed record has been generated for us. You can control various aspects
+      of the serializer by passing flags to <span class="command"><em>atdgen</em></span>. The important ones for JSON
+      are:<a data-type="indexterm" data-primary="-j-defaults" data-primary-sortas="j-defaults">&#xa0;</a><a data-type="indexterm" data-primary="-j-custom-fields FUNCTION" data-primary-sortas="j-custom">&#xa0;</a><a data-type="indexterm" data-primary="-j-std flag" data-primary-sortas="j-std">&#xa0;</a><a data-type="indexterm" data-primary="flags">&#xa0;</a></p><dl><dt><code>-j-std</code></dt><dd><p>Converts tuples and variants into standard JSON and refuse
+            to print NaN and infinities. You should specify this if you intend
+            to interoperate with services that aren't using ATD.</p></dd><dt><code>-j-custom-fields
+          FUNCTION</code></dt><dd><p>Calls a custom function for every unknown field encountered,
+            instead of raising a parsing exception.</p></dd><dt><code>-j-defaults</code></dt><dd><p>Always explicitly outputs a JSON value if possible. This
+            requires the default value for that field to be defined in the ATD
+            specification.</p></dd></dl><p>The full <a href="http://mjambon.com/atdgen/atdgen-manual.html">ATD
+      specification</a> is quite sophisticated and documented online. The
+      ATD compiler can also target formats other than JSON and outputs code
+      for other languages (such as Java) if you need more
+      interoperability.</p><p>There are also several similar projects that automate the code
+      generation process. <a href="http://piqi.org">Piqi</a> supports
+      conversions between XML, JSON, and the Google protobuf format; and
+      <a href="http://thrift.apache.org">Thrift</a> supports many other
+      programming languages and includes OCaml bindings.</p></section><section id="example-querying-github-organization-information" data-type="sect2"><h2>Example: Querying GitHub Organization Information</h2><p>Let's finish up with an example of some live JSON parsing from
+      GitHub and build a tool to query organization information via their API.
+      Start by looking at the online <a href="http://developer.github.com/v3/orgs/">API documentation</a> for
+      GitHub to see what the JSON schema for retrieving the organization
+      information looks like.<a data-type="indexterm" data-primary="GitHub API">&#xa0;</a><a data-type="indexterm" data-primary="ATDgen Library" data-secondary="example of">&#xa0;</a></p><p>Now create an ATD file that covers the fields we need. Any extra
+      fields present in the response will be ignored by the ATD parser, so we
+      don't need a completely exhaustive specification of every field that
+      GitHub might send back:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/github_org.atd" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type org = {
+  login: string;
+  id: int;
+  url: string;
+  ?name: string option;
+  ?blog: string option;
+  ?email: string option;
+  public_repos: int
+}</pre><p>Let's build the OCaml type declaration first by calling <code>atdgen -t</code> on the specification file:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/generate_github_org_types.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>atdgen -t github_org.atd</code></strong>
+<code class="prompt">$ </code><strong><code>cat github_org_t.mli</code></strong>
+<code class="computeroutput">(* Auto-generated from "github_org.atd" *)</code>
+<code class="computeroutput"> </code>
+<code class="computeroutput"> </code>
+<code class="computeroutput">type org = {</code>
+<code class="computeroutput">  login: string;</code>
+<code class="computeroutput">  id: int;</code>
+<code class="computeroutput">  url: string;</code>
+<code class="computeroutput">  name: string option;</code>
+<code class="computeroutput">  blog: string option;</code>
+<code class="computeroutput">  email: string option;</code>
+<code class="computeroutput">  public_repos: int</code>
+<code class="computeroutput">}</code></pre><p>The OCaml type has an obvious mapping to the ATD spec, but we
+      still need the logic to convert JSON buffers to and from this type.
+      Calling <code>atdgen -j</code> will generate this
+      serialization code for us in a new file called <code>github_org_j.ml</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/generate_github_org_json.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>atdgen -j github_org.atd</code></strong>
+<code class="prompt">$ </code><strong><code>cat github_org_j.mli</code></strong>
+<code class="computeroutput">(* Auto-generated from "github_org.atd" *)</code>
+<code class="computeroutput"> </code>
+<code class="computeroutput"> </code>
+<code class="computeroutput">type org = Github_org_t.org = {</code>
+<code class="computeroutput">  login: string;</code>
+<code class="computeroutput">  id: int;</code>
+<code class="computeroutput">  url: string;</code>
+<code class="computeroutput">  name: string option;</code>
+<code class="computeroutput">  blog: string option;</code>
+<code class="computeroutput">  email: string option;</code>
+<code class="computeroutput">  public_repos: int</code>
+<code class="computeroutput">}</code>
+<code class="computeroutput"> </code>
+<code class="computeroutput">val write_org :</code>
+<code class="computeroutput">  Bi_outbuf.t -&gt; org -&gt; unit</code>
+<code class="computeroutput">  (** Output a JSON value of type {!org}. *)</code>
+<code class="computeroutput"> </code>
+<code class="computeroutput">val string_of_org :</code>
+<code class="computeroutput">  ?len:int -&gt; org -&gt; string</code>
+<code class="computeroutput">  (** Serialize a value of type {!org}</code>
+<code class="computeroutput">      into a JSON string.</code>
+<code class="computeroutput">      @param len specifies the initial length</code>
+<code class="computeroutput">                 of the buffer used internally.</code>
+<code class="computeroutput">                 Default: 1024. *)</code>
+<code class="computeroutput"> </code>
+<code class="computeroutput">val read_org :</code>
+<code class="computeroutput">  Yojson.Safe.lexer_state -&gt; Lexing.lexbuf -&gt; org</code>
+<code class="computeroutput">  (** Input JSON data of type {!org}. *)</code>
+<code class="computeroutput"> </code>
+<code class="computeroutput">val org_of_string :</code>
+<code class="computeroutput">  string -&gt; org</code>
+<code class="computeroutput">  (** Deserialize JSON data of type {!org}. *)</code>
+<code class="computeroutput"> </code></pre><p>The <code>Github_org_j</code> serializer
+      interface contains everything we need to map to and from the OCaml types
+      and JSON. The easiest way to use this interface is by using the <code>string_of_org</code> and <code>org_of_string</code> functions, but there are also
+      more advanced low-level buffer functions available if you need higher
+      performance (but we won't go into that in this tutorial).</p><p>All we need to complete our example is an OCaml program that
+      fetches the JSON and uses these modules to output a one-line summary.
+      Our following example does just that.</p><p>The following code calls the cURL command-line utility by using
+      the <code>Core_extended.Shell</code> interface to
+      run an external command and capture its output. You'll need to ensure
+      that you have cURL installed on your system before running the example.
+      You might also need to <code>opam install
+      core_extended</code> if you haven't installed it previously:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/github_org_info.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
+
+let print_org file () =
+  let url = sprintf "https://api.github.com/orgs/%s" file in
+  Core_extended.Shell.run_full "curl" [url]
+  |&gt; Github_org_j.org_of_string
+  |&gt; fun org -&gt;
+  let open Github_org_t in
+  let name = Option.value ~default:"???" org.name in
+  printf "%s (%d) with %d public repos\n"
+    name org.id org.public_repos
+
+let () =
+  Command.basic ~summary:"Print Github organization information"
+    Command.Spec.(empty +&gt; anon ("organization" %: string))
+    print_org
+  |&gt; Command.run</pre><p>The following is a short shell script that generates all of the
+      OCaml code and also builds the final executable:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/build_github_org.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>atdgen -t github_org.atd</code></strong>
+<code class="prompt">$ </code><strong><code>atdgen -j github_org.atd</code></strong>
+<code class="prompt">$ </code><strong><code>corebuild -pkg core_extended,yojson,atdgen github_org_info.native</code></strong></pre><p>You can now run the command-line tool with a single argument to
+      specify the name of the organization, and it will dynamically fetch the
+      JSON from the web, parse it, and render the summary to your
+      console:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/json/run_github_org.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>./github_org_info.native mirage</code></strong>
+<code class="computeroutput">Mirage account (131943) with 37 public repos</code>
+<code class="prompt">$ </code><strong><code>./github_org_info.native janestreet</code></strong>
+<code class="computeroutput">??? (3384712) with 34 public repos</code></pre><p>The JSON returned from the <code>janestreet</code> query is missing an organization
+      name, but this is explicitly reflected in the OCaml type, since the ATD
+      spec marked <code>name</code> as an optional
+      field. Our OCaml code explicitly handles this case and doesn't have to
+      worry about null-pointer exceptions. Similarly, the JSON integer for the
+      <code>id</code> is mapped into a native OCaml
+      integer via the ATD conversion.</p><p>While this tool is obviously quite simple, the ability to specify
+      optional and default fields is very powerful. Take a look at the full
+      ATD specification for the GitHub API in the <a href="http://github.com/avsm/ocaml-github"><code>ocaml-github</code></a> repository online, which
+      has lots of quirks typical in real-world web APIs.<a data-type="indexterm" data-startref="MAPjson">&#xa0;</a><a data-type="indexterm" data-startref="JSONautomap">&#xa0;</a><a data-type="indexterm" data-startref="SERjson">&#xa0;</a><a data-type="indexterm" data-startref="DATjson">&#xa0;</a></p><p>Our example shells out to <code>curl</code>
+      on the command line to obtain the JSON, which is rather inefficient.
+      We'll explain how to integrate the HTTP fetch directly into your OCaml
+      application in <a href="#concurrent-programming-with-async" data-type="xref">#concurrent-programming-with-async</a>.</p></section></section></section>

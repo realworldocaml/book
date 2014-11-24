@@ -1,0 +1,741 @@
+<section xmlns="http://www.w3.org/1999/xhtml" id="variants" data-type="chapter"><h1>Variants</h1><p>Variant types are one of the most useful features of OCaml and also
+  one of the most unusual. They let you represent data that may take on
+  multiple different forms, where each form is marked by an explicit tag. As
+  we'll see, when combined with pattern matching, variants give you a powerful
+  way of representing complex data and of organizing the case-analysis on that
+  information.<a data-type="indexterm" data-primary="variant types" data-secondary="usefulness of">&#xa0;</a><a data-type="indexterm" id="DTvar" data-primary="datatypes" data-secondary="variant types">&#xa0;</a></p><p>The basic syntax of a variant type declaration is as
+  follows:<a data-type="indexterm" data-primary="variant types" data-secondary="basic syntax of">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/variant.syntax" class="orm:hideurl:ital"><em class="hyperlink">Syntax</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type <em>&lt;variant&gt;</em> =
+  | <em>&lt;Tag&gt;</em> [ of <em>&lt;type&gt;</em> [* <em>&lt;type&gt;</em>]... ]
+  | <em>&lt;Tag&gt;</em> [ of <em>&lt;type&gt;</em> [* <em>&lt;type&gt;</em>]... ]
+  | ...</pre><p>Each row essentially represents a case of the variant. Each case has an associated tag and
+    may optionally have a sequence of fields, where each field has a specified type.</p><p>Let's consider a concrete example of how variants can be useful.
+  Almost all terminals support a set of eight basic colors, and we can
+  represent those colors using a variant. Each color is declared as a simple
+  tag, with pipes used to separate the different cases. Note that variant tags
+  must be capitalized:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type basic_color =</code></strong>
+<strong><code>   | Black | Red | Green | Yellow | Blue | Magenta | Cyan | White ;;</code></strong>
+<code class="computeroutput">type basic_color =</code>
+<code class="computeroutput">    Black</code>
+<code class="computeroutput">  | Red</code>
+<code class="computeroutput">  | Green</code>
+<code class="computeroutput">  | Yellow</code>
+<code class="computeroutput">  | Blue</code>
+<code class="computeroutput">  | Magenta</code>
+<code class="computeroutput">  | Cyan</code>
+<code class="computeroutput">  | White</code>
+<code class="prompt"># </code><strong><code>Cyan ;;</code></strong>
+<code class="computeroutput">- : basic_color = Cyan</code>
+<code class="prompt"># </code><strong><code>[Blue; Magenta; Red] ;;</code></strong>
+<code class="computeroutput">- : basic_color list = [Blue; Magenta; Red]</code></pre><p>The following function uses pattern matching to convert a <code>basic_color</code> to a corresponding integer. The
+  exhaustiveness checking on pattern matches means that the compiler will warn
+  us if we miss a color:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+  (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let basic_color_to_int = function</code></strong>
+<strong><code>  | Black -&gt; 0 | Red     -&gt; 1 | Green -&gt; 2 | Yellow -&gt; 3</code></strong>
+<strong><code>  | Blue  -&gt; 4 | Magenta -&gt; 5 | Cyan  -&gt; 6 | White  -&gt; 7 ;;</code></strong>
+<code class="computeroutput">val basic_color_to_int : basic_color -&gt; int = &lt;fun&gt;</code>
+<code class="prompt"># </code><strong><code>List.map ~f:basic_color_to_int [Blue;Red];;</code></strong>
+<code class="computeroutput">- : int list = [4; 1]</code></pre><p>Using the preceding function, we can generate escape codes to change
+  the color of a given string displayed in a terminal:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/main-2.rawscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><strong><code># let color_by_number number text =
+    sprintf "\027[38;5;%dm%s\027[0m" number text;;</code></strong>
+<code class="computeroutput">val color_by_number : int -&gt; string -&gt; string = &lt;fun&gt;</code>
+<strong><code># let blue = color_by_number (basic_color_to_int Blue) "Blue";;</code></strong>
+<code class="computeroutput">val blue : string = "\027[38;5;4mBlue\027[0m"</code>
+<strong><code># printf "Hello %s World!\n" blue;;</code></strong>
+<code class="computeroutput">Hello Blue World!</code></pre><p>On most terminals, that word "Blue" will be rendered in blue.</p><p>In this example, the cases of the variant are simple tags with no
+  associated data. This is substantively the same as the enumerations found in
+  languages like C and Java. But as we'll see, variants can do considerably
+  more than represent a simple enumeration. As it happens, an enumeration
+  isn't enough to effectively describe the full set of colors that a modern
+  terminal can display. Many terminals, including the venerable <code>xterm</code>, support 256 different colors, broken up
+  into the following groups:</p><ul><li><p>The eight basic colors, in regular and bold versions</p></li><li><p>A 6 × 6 × 6 RGB color cube</p></li><li><p>A 24-level grayscale ramp</p></li></ul><p>We'll also represent this more complicated color space as a variant,
+  but this time, the different tags will have arguments that describe the data
+  available in each case. Note that variants can have multiple arguments,
+  which are separated by <code>*</code>s:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+  (part 3)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type weight = Regular | Bold</code></strong>
+<strong><code>  type color =</code></strong>
+<strong><code>  | Basic of basic_color * weight (* basic colors, regular and bold *)</code></strong>
+<strong><code>  | RGB   of int * int * int       (* 6x6x6 color cube *)</code></strong>
+<strong><code>  | Gray  of int                   (* 24 grayscale levels *)</code></strong>
+<strong><code>;;</code></strong>
+<code class="computeroutput">type weight = Regular | Bold</code>
+<code class="computeroutput">type color =</code>
+<code class="computeroutput">    Basic of basic_color * weight</code>
+<code class="computeroutput">  | RGB of int * int * int</code>
+<code class="computeroutput">  | Gray of int</code>
+<code class="prompt"># </code><strong><code>[RGB (250,70,70); Basic (Green, Regular)];;</code></strong>
+<code class="computeroutput">- : color list = [RGB (250, 70, 70); Basic (Green, Regular)]</code></pre><p>Once again, we'll use pattern matching to convert a color to a
+  corresponding integer. But in this case, the pattern matching does more than
+  separate out the different cases; it also allows us to extract the data
+  associated with each tag:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+  (part 4)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let color_to_int = function</code></strong>
+<strong><code>    | Basic (basic_color,weight) -&gt;</code></strong>
+<strong><code>      let base = match weight with Bold -&gt; 8 | Regular -&gt; 0 in</code></strong>
+<strong><code>      base + basic_color_to_int basic_color</code></strong>
+<strong><code>    | RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36</code></strong>
+<strong><code>    | Gray i -&gt; 232 + i ;;</code></strong>
+<code class="computeroutput">val color_to_int : color -&gt; int = &lt;fun&gt;</code></pre><p>Now, we can print text using the full set of available colors:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/main-5.rawscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><strong><code># let color_print color s =
+     printf "%s\n" (color_by_number (color_to_int color) s);;</code></strong>
+<code class="computeroutput">val color_print : color -&gt; string -&gt; unit = &lt;fun&gt;</code>
+<strong><code># color_print (Basic (Red,Bold)) "A bold red!";;</code></strong>
+<code class="computeroutput">A bold red!</code>
+<strong><code># color_print (Gray 4) "A muted gray...";;</code></strong>
+<code class="computeroutput">A muted gray...</code></pre><section id="catch-all-cases-and-refactoring" data-type="sect1"><h1>Catch-All Cases and Refactoring</h1><p>OCaml's type system can act as a refactoring tool, warning you of
+    places where your code needs to be updated to match an interface change.
+    This is particularly valuable in the context of variants.<a data-type="indexterm" data-primary="errors" data-secondary="catch-all cases and refactoring">&#xa0;</a><a data-type="indexterm" data-primary="pattern matching" data-secondary="catch-all cases">&#xa0;</a><a data-type="indexterm" data-primary="functional updates">&#xa0;</a><a data-type="indexterm" data-primary="refactoring">&#xa0;</a><a data-type="indexterm" data-primary="variant types" data-secondary="catch-all cases and refactoring">&#xa0;</a></p><p>Consider what would happen if we were to change the definition of
+    <code>color</code> to the following:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/catch_all.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type color =</code></strong>
+<strong><code>  | Basic of basic_color     (* basic colors *)</code></strong>
+<strong><code>  | Bold  of basic_color     (* bold basic colors *)</code></strong>
+<strong><code>  | RGB   of int * int * int (* 6x6x6 color cube *)</code></strong>
+<strong><code>  | Gray  of int             (* 24 grayscale levels *)</code></strong>
+<strong><code>;;</code></strong>
+<code class="computeroutput">type color =</code>
+<code class="computeroutput">    Basic of basic_color</code>
+<code class="computeroutput">  | Bold of basic_color</code>
+<code class="computeroutput">  | RGB of int * int * int</code>
+<code class="computeroutput">  | Gray of int</code></pre><p>We've essentially broken out the <code>Basic</code> case into two cases, <code>Basic</code> and <code>Bold</code>, and <code>Basic</code> has changed from having two arguments to
+    one. <code>color_to_int</code> as we wrote it still
+    expects the old structure of the variant, and if we try to compile that
+    same code again, the compiler will notice the discrepancy:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/catch_all.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 2)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let color_to_int = function</code></strong>
+<strong><code>    | Basic (basic_color,weight) -&gt;</code></strong>
+<strong><code>      let base = match weight with Bold -&gt; 8 | Regular -&gt; 0 in</code></strong>
+<strong><code>      base + basic_color_to_int basic_color</code></strong>
+<strong><code>    | RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36</code></strong>
+<strong><code>    | Gray i -&gt; 232 + i ;;</code></strong>
+<code class="computeroutput">Characters 34-60:</code>
+<code class="computeroutput">Error: This pattern matches values of type 'a * 'b</code>
+<code class="computeroutput">       but a pattern was expected which matches values of type basic_color</code></pre><p>Here, the compiler is complaining that the <code>Basic</code> tag is used with the wrong number of
+    arguments. If we fix that, however, the compiler flag will flag a second
+    problem, which is that we haven't handled the new <code>Bold</code> tag:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/catch_all.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 3)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let color_to_int = function</code></strong>
+<strong><code>    | Basic basic_color -&gt; basic_color_to_int basic_color</code></strong>
+<strong><code>    | RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36</code></strong>
+<strong><code>    | Gray i -&gt; 232 + i ;;</code></strong>
+<code class="computeroutput">Characters 19-154:</code>
+<code class="computeroutput">Warning 8: this pattern-matching is not exhaustive.</code>
+<code class="computeroutput">Here is an example of a value that is not matched:</code>
+<code class="computeroutput">Bold _</code>
+<code class="computeroutput">val color_to_int : color -&gt; int = &lt;fun&gt;</code></pre><p>Fixing this now leads us to the correct implementation:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/catch_all.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 4)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let color_to_int = function</code></strong>
+<strong><code>    | Basic basic_color -&gt; basic_color_to_int basic_color</code></strong>
+<strong><code>    | Bold  basic_color -&gt; 8 + basic_color_to_int basic_color</code></strong>
+<strong><code>    | RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36</code></strong>
+<strong><code>    | Gray i -&gt; 232 + i ;;</code></strong>
+<code class="computeroutput">val color_to_int : color -&gt; int = &lt;fun&gt;</code></pre><p>As we've seen, the type errors identified the things that needed to
+    be fixed to complete the refactoring of the code. This is fantastically
+    useful, but for it to work well and reliably, you need to write your code
+    in a way that maximizes the compiler's chances of helping you find the
+    bugs. To this end, a useful rule of thumb is to avoid catch-all cases in
+    pattern matches.</p><p>Here's an example that illustrates how catch-all cases interact with
+    exhaustion checks. Imagine we wanted a version of <code>color_to_int</code> that works on older terminals by
+    rendering the first 16 colors (the eight <code>basic_color</code>s in regular and bold) in the normal
+    way, but renders everything else as white. We might have written the
+    function as follows:<a data-type="indexterm" data-primary="exhaustion checks">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/catch_all.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 5)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let oldschool_color_to_int = function</code></strong>
+<strong><code>    | Basic (basic_color,weight) -&gt;</code></strong>
+<strong><code>      let base = match weight with Bold -&gt; 8 | Regular -&gt; 0 in</code></strong>
+<strong><code>      base + basic_color_to_int basic_color</code></strong>
+<strong><code>    | _ -&gt; basic_color_to_int White;;</code></strong>
+<code class="computeroutput">Characters 44-70:</code>
+<code class="computeroutput">Error: This pattern matches values of type 'a * 'b</code>
+<code class="computeroutput">       but a pattern was expected which matches values of type basic_color</code></pre><p>But because the catch-all case encompasses all possibilities, the
+    type system will no longer warn us that we have missed the new <code>Bold</code> case when we change the type to include it.
+    We can get this check back by avoiding the catch-all case, and instead
+    being explicit about the tags that are ignored.</p></section><section id="combining-records-and-variants" data-type="sect1"><h1>Combining Records and Variants</h1><p>The term <em>algebraic data types</em> is often used to
+    describe a collection of types that includes variants, records, and
+    tuples. Algebraic data types act as a peculiarly useful and powerful
+    language for describing data. At the heart of their utility is the fact
+    that they combine two different kinds of types: <em>product
+    types</em>, like tuples and records, which combine multiple
+    different types together and are mathematically similar to Cartesian
+    products; and <em>sum types</em>, like variants, which let you
+    combine multiple different possibilities into one type, and are
+    mathematically similar to disjoint unions.<a data-type="indexterm" id="RECvartyp" data-primary="records" data-secondary="and variant types">&#xa0;</a><a data-type="indexterm" data-primary="sum types">&#xa0;</a><a data-type="indexterm" data-primary="product types">&#xa0;</a><a data-type="indexterm" data-primary="datatypes" data-secondary="algebraic types">&#xa0;</a><a data-type="indexterm" data-primary="algebraic data types">&#xa0;</a><a data-type="indexterm" id="VARTYPrec" data-primary="variant types" data-secondary="and records">&#xa0;</a></p><p>Algebraic data types gain much of their power from the ability to
+    construct layered combinations of sums and products. Let's see what we can
+    achieve with this by revisiting the logging server types that were
+    described in <a href="#records" data-type="xref">#records</a>. We'll start by reminding
+    ourselves of the definition of <code>Log_entry.t</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/logger.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>module Log_entry = struct</code></strong>
+<strong><code>    type t =</code></strong>
+<strong><code>      { session_id: string;</code></strong>
+<strong><code>        time: Time.t;</code></strong>
+<strong><code>        important: bool;</code></strong>
+<strong><code>        message: string;</code></strong>
+<strong><code>      }</code></strong>
+<strong><code>  end</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">module Log_entry :</code>
+<code class="computeroutput">  sig</code>
+<code class="computeroutput">    type t = {</code>
+<code class="computeroutput">      session_id : string;</code>
+<code class="computeroutput">      time : Time.t;</code>
+<code class="computeroutput">      important : bool;</code>
+<code class="computeroutput">      message : string;</code>
+<code class="computeroutput">    }</code>
+<code class="computeroutput">  end</code></pre><p>This record type combines multiple pieces of data into one value. In particular, a single
+        <code>Log_entry.t</code> has a <code>session_id</code>
+      <em>and</em> a <code>time</code>
+      <em>and</em> an <code>important</code> flag
+        <em>and</em> a <code>message</code>. More generally, you
+      can think of record types as conjunctions. Variants, on the other hand, are disjunctions,
+      letting you represent multiple possibilities, as in the following example:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/logger.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 2)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type client_message = | Logon of Logon.t</code></strong>
+<strong><code>                        | Heartbeat of Heartbeat.t</code></strong>
+<strong><code>                        | Log_entry of Log_entry.t</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">type client_message =</code>
+<code class="computeroutput">    Logon of Logon.t</code>
+<code class="computeroutput">  | Heartbeat of Heartbeat.t</code>
+<code class="computeroutput">  | Log_entry of Log_entry.t</code></pre><p>A <code>client_message</code> is a <code>Logon</code> <em>or</em> a <code>Heartbeat</code> <em>or</em> a <code>Log_entry</code>. If we want to write code that
+    processes messages generically, rather than code specialized to a fixed
+    message type, we need something like <code>client_message</code> to act as one overarching type
+    for the different possible messages. We can then match on the <code>client_message</code> to determine the type of the
+    particular message being dealt with.</p><p>You can increase the precision of your types by using variants to
+    represent differences between types, and records to represent shared
+    structure. Consider the following function that takes a list of <code>client_message</code>s and returns all messages
+    generated by a given user. The code in question is implemented by folding
+    over the list of messages, where the accumulator is a pair of:</p><ul><li><p>The set of session identifiers for the user that have been seen
+        thus far</p></li><li><p>The set of messages so far that are associated with the
+        user</p></li></ul><p>Here's the concrete code:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/logger.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 3)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let messages_for_user user messages =</code></strong>
+<strong><code>    let (user_messages,_) =</code></strong>
+<strong><code>      List.fold messages ~init:([],String.Set.empty)</code></strong>
+<strong><code>        ~f:(fun ((messages,user_sessions) as acc) message -&gt;</code></strong>
+<strong><code>          match message with</code></strong>
+<strong><code>          | Logon m -&gt;</code></strong>
+<strong><code>            if m.Logon.user = user then</code></strong>
+<strong><code>              (message::messages, Set.add user_sessions m.Logon.session_id)</code></strong>
+<strong><code>            else acc</code></strong>
+<strong><code>          | Heartbeat _ | Log_entry _ -&gt;</code></strong>
+<strong><code>            let session_id = match message with</code></strong>
+<strong><code>              | Logon     m -&gt; m.Logon.session_id</code></strong>
+<strong><code>              | Heartbeat m -&gt; m.Heartbeat.session_id</code></strong>
+<strong><code>              | Log_entry m -&gt; m.Log_entry.session_id</code></strong>
+<strong><code>            in</code></strong>
+<strong><code>            if Set.mem user_sessions session_id then</code></strong>
+<strong><code>              (message::messages,user_sessions)</code></strong>
+<strong><code>            else acc</code></strong>
+<strong><code>        )</code></strong>
+<strong><code>    in</code></strong>
+<strong><code>    List.rev user_messages</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">val messages_for_user : string -&gt; client_message list -&gt; client_message list =</code>
+<code class="computeroutput">  &lt;fun&gt;</code></pre><p>There's one awkward part of the preceding code, which is the logic
+    that determines the session ID. The code is somewhat repetitive,
+    contemplating each of the possible message types (including the <code>Logon</code> case, which isn't actually possible at
+    that point in the code) and extracting the session ID in each case. This
+    per-message-type handling seems unnecessary, since the session ID works
+    the same way for all of the message types.</p><p>We can improve the code by refactoring our types to explicitly
+    reflect the information that's shared between the different messages. The
+    first step is to cut down the definitions of each per-message record to
+    contain just the information unique to that record:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/logger.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 4)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>module Log_entry = struct</code></strong>
+<strong><code>    type t = { important: bool;</code></strong>
+<strong><code>               message: string;</code></strong>
+<strong><code>             }</code></strong>
+<strong><code>  end</code></strong>
+<strong><code>  module Heartbeat = struct</code></strong>
+<strong><code>    type t = { status_message: string; }</code></strong>
+<strong><code>  end</code></strong>
+<strong><code>  module Logon = struct</code></strong>
+<strong><code>    type t = { user: string;</code></strong>
+<strong><code>               credentials: string;</code></strong>
+<strong><code>             }</code></strong>
+<strong><code>  end ;;</code></strong>
+<code class="computeroutput">module Log_entry : sig type t = { important : bool; message : string; } end</code>
+<code class="computeroutput">module Heartbeat : sig type t = { status_message : string; } end</code>
+<code class="computeroutput">module Logon : sig type t = { user : string; credentials : string; } end</code></pre><p>We can then define a variant type that combines these types:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/logger.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 5)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type details =</code></strong>
+<strong><code>    | Logon of Logon.t</code></strong>
+<strong><code>    | Heartbeat of Heartbeat.t</code></strong>
+<strong><code>    | Log_entry of Log_entry.t</code></strong>
+<strong><code> ;;</code></strong>
+<code class="computeroutput">type details =</code>
+<code class="computeroutput">    Logon of Logon.t</code>
+<code class="computeroutput">  | Heartbeat of Heartbeat.t</code>
+<code class="computeroutput">  | Log_entry of Log_entry.t</code></pre><p>Separately, we need a record that contains the fields that are
+    common across all messages:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/logger.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 6)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>module Common = struct</code></strong>
+<strong><code>    type t = { session_id: string;</code></strong>
+<strong><code>               time: Time.t;</code></strong>
+<strong><code>             }</code></strong>
+<strong><code>  end ;;</code></strong>
+<code class="computeroutput">module Common : sig type t = { session_id : string; time : Time.t; } end</code></pre><p>A full message can then be represented as a pair of a <code>Common.t</code> and a <code>details</code>. Using this, we can rewrite our
+    preceding example as follows:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/logger.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 7)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let messages_for_user user messages =</code></strong>
+<strong><code>    let (user_messages,_) =</code></strong>
+<strong><code>      List.fold messages ~init:([],String.Set.empty)</code></strong>
+<strong><code>        ~f:(fun ((messages,user_sessions) as acc) ((common,details) as message) -&gt;</code></strong>
+<strong><code>          let session_id = common.Common.session_id in</code></strong>
+<strong><code>          match details with</code></strong>
+<strong><code>          | Logon m -&gt;</code></strong>
+<strong><code>            if m.Logon.user = user then</code></strong>
+<strong><code>              (message::messages, Set.add user_sessions session_id)</code></strong>
+<strong><code>            else acc</code></strong>
+<strong><code>          | Heartbeat _ | Log_entry _ -&gt;</code></strong>
+<strong><code>            if Set.mem user_sessions session_id then</code></strong>
+<strong><code>              (message::messages,user_sessions)</code></strong>
+<strong><code>            else acc</code></strong>
+<strong><code>        )</code></strong>
+<strong><code>    in</code></strong>
+<strong><code>    List.rev user_messages</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">val messages_for_user :</code>
+<code class="computeroutput">  string -&gt; (Common.t * details) list -&gt; (Common.t * details) list = &lt;fun&gt;</code></pre><p>As you can see, the code for extracting the session ID has been
+    replaced with the simple expression <code>common.Common.session_id</code>.</p><p>In addition, this design allows us to essentially downcast to the
+    specific message type once we know what it is and then dispatch code to
+    handle just that message type. In particular, while we use the type
+    <code>Common.t * details</code> to represent an
+    arbitrary message, we can use <code>Common.t *
+    Logon.t</code> to represent a logon message. Thus, if we had functions
+    for handling individual message types, we could write a dispatch function
+    as follows:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/logger.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 8)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let handle_message server_state (common,details) =</code></strong>
+<strong><code>    match details with</code></strong>
+<strong><code>    | Log_entry m -&gt; handle_log_entry server_state (common,m)</code></strong>
+<strong><code>    | Logon     m -&gt; handle_logon     server_state (common,m)</code></strong>
+<strong><code>    | Heartbeat m -&gt; handle_heartbeat server_state (common,m)</code></strong>
+<strong><code>  ;;</code></strong></pre><p>And it's explicit at the type level that <code>handle_log_entry</code> sees only <code>Log_entry</code> messages, <code>handle_logon</code> sees only <code>Logon</code> messages, etc.<a data-type="indexterm" data-startref="RECvartyp">&#xa0;</a><a data-type="indexterm" data-startref="VARTYPrec">&#xa0;</a></p></section><section id="variants-and-recursive-data-structures" data-type="sect1"><h1>Variants and Recursive Data Structures</h1><p>Another common application of variants is to represent tree-like
+    recursive data structures. We'll show how this can be done by walking
+    through the design of a simple Boolean expression language. Such a
+    language can be useful anywhere you need to specify filters, which are
+    used in everything from packet analyzers to mail clients.<a data-type="indexterm" data-primary="recursive data structures">&#xa0;</a><a data-type="indexterm" data-primary="data structures" data-secondary="recursive">&#xa0;</a><a data-type="indexterm" data-primary="variant types" data-secondary="and recursive data&#10;        structures">&#xa0;</a></p><p>An expression in this language will be defined by the variant
+    <code>expr</code>, with one tag for each kind of
+    expression we want to support:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/blang.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type 'a expr =</code></strong>
+<strong><code>    | Base  of 'a</code></strong>
+<strong><code>    | Const of bool</code></strong>
+<strong><code>    | And   of 'a expr list</code></strong>
+<strong><code>    | Or    of 'a expr list</code></strong>
+<strong><code>    | Not   of 'a expr</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">type 'a expr =</code>
+<code class="computeroutput">    Base of 'a</code>
+<code class="computeroutput">  | Const of bool</code>
+<code class="computeroutput">  | And of 'a expr list</code>
+<code class="computeroutput">  | Or of 'a expr list</code>
+<code class="computeroutput">  | Not of 'a expr</code></pre><p>Note that the definition of the type <code>expr</code> is recursive, meaning that a <code>expr</code> may contain other <code>expr</code>s. Also, <code>expr</code> is parameterized by a polymorphic type
+    <code>'a</code> which is used for specifying the
+    type of the value that goes under the <code>Base</code> tag.</p><p>The purpose of each tag is pretty straightforward. <code>And</code>, <code>Or</code>, and
+    <code>Not</code> are the basic operators for
+    building up Boolean expressions, and <code>Const</code> lets you enter the constants <code>true</code> and <code>false</code>.</p><p>The <code>Base</code> tag is what allows you
+    to tie the <code>expr</code> to your application, by
+    letting you specify an element of some base predicate type, whose truth or
+    falsehood is determined by your application. If you were writing a filter
+    language for an email processor, your base predicates might specify the
+    tests you would run against an email, as in the following example:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/blang.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type mail_field = To | From | CC | Date | Subject</code></strong>
+<strong><code>  type mail_predicate = { field: mail_field;</code></strong>
+<strong><code>                          contains: string }</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">type mail_field = To | From | CC | Date | Subject</code>
+<code class="computeroutput">type mail_predicate = { field : mail_field; contains : string; }</code></pre><p>Using the preceding code, we can construct a simple expression with
+    <code>mail_predicate</code> as its base
+    predicate:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/blang.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 2)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let test field contains = Base { field; contains };;</code></strong>
+<code class="computeroutput">val test : mail_field -&gt; string -&gt; mail_predicate expr = &lt;fun&gt;</code>
+<code class="prompt"># </code><strong><code>And [ Or [ test To "doligez"; test CC "doligez" ];</code></strong>
+<strong><code>        test Subject "runtime";</code></strong>
+<strong><code>      ]</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">- : mail_predicate expr =</code>
+<code class="computeroutput">And</code>
+<code class="computeroutput"> [Or</code>
+<code class="computeroutput">   [Base {field = To; contains = "doligez"};</code>
+<code class="computeroutput">    Base {field = CC; contains = "doligez"}];</code>
+<code class="computeroutput">  Base {field = Subject; contains = "runtime"}]</code></pre><p>Being able to construct such expressions isn't enough; we also need
+    to be able to evaluate them. Here's a function for doing just that:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/blang.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 3)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let rec eval expr base_eval =</code></strong>
+<strong><code>    (* a shortcut, so we don't need to repeatedly pass [base_eval]
+        explicitly to [eval] *)</code></strong>
+<strong><code>    let eval' expr = eval expr base_eval in</code></strong>
+<strong><code>    match expr with</code></strong>
+<strong><code>    | Base  base   -&gt; base_eval base</code></strong>
+<strong><code>    | Const bool   -&gt; bool</code></strong>
+<strong><code>    | And   exprs -&gt; List.for_all exprs ~f:eval'</code></strong>
+<strong><code>    | Or    exprs -&gt; List.exists  exprs ~f:eval'</code></strong>
+<strong><code>    | Not   expr  -&gt; not (eval' expr)</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">val eval : 'a expr -&gt; ('a -&gt; bool) -&gt; bool = &lt;fun&gt;</code></pre><p>The structure of the code is pretty straightforward—we're just
+    pattern matching over the structure of the data, doing the appropriate
+    calculation based on which tag we see. To use this evaluator on a concrete
+    example, we just need to write the <code>base_eval</code> function, which is capable of
+    evaluating a base predicate.</p><p>Another useful operation on expressions is simplification. The
+    following is a set of simplifying construction functions that mirror the
+    tags of an <code>expr</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/blang.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 4)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let and_ l =</code></strong>
+<strong><code>    if List.mem l (Const false) then Const false</code></strong>
+<strong><code>    else</code></strong>
+<strong><code>      match List.filter l ~f:((&lt;&gt;) (Const true)) with</code></strong>
+<strong><code>      | [] -&gt; Const true</code></strong>
+<strong><code>      | [ x ] -&gt; x</code></strong>
+<strong><code>      | l -&gt; And l</code></strong>
+<strong><code/></strong>
+<strong><code>  let or_ l =</code></strong>
+<strong><code>    if List.mem l (Const true) then Const true</code></strong>
+<strong><code>    else</code></strong>
+<strong><code>      match List.filter l ~f:((&lt;&gt;) (Const false)) with</code></strong>
+<strong><code>      | [] -&gt; Const false</code></strong>
+<strong><code>      | [x] -&gt; x</code></strong>
+<strong><code>      | l -&gt; Or l</code></strong>
+<strong><code/></strong>
+<strong><code>  let not_ = function</code></strong>
+<strong><code>    | Const b -&gt; Const (not b)</code></strong>
+<strong><code>    | e -&gt; Not e</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">val and_ : 'a expr list -&gt; 'a expr = &lt;fun&gt;</code>
+<code class="computeroutput">val or_ : 'a expr list -&gt; 'a expr = &lt;fun&gt;</code>
+<code class="computeroutput">val not_ : 'a expr -&gt; 'a expr = &lt;fun&gt;</code></pre><p>We can now write a simplification routine that is based on the
+    preceding functions.</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/blang.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 5)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let rec simplify = function</code></strong>
+<strong><code>    | Base _ | Const _ as x -&gt; x</code></strong>
+<strong><code>    | And l -&gt; and_ (List.map ~f:simplify l)</code></strong>
+<strong><code>    | Or l  -&gt; or_  (List.map ~f:simplify l)</code></strong>
+<strong><code>    | Not e -&gt; not_ (simplify e)</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">val simplify : 'a expr -&gt; 'a expr = &lt;fun&gt;</code></pre><p>We can apply this to a Boolean expression and see how good a job it
+    does at simplifying it:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/blang.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 6)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>simplify (Not (And [ Or [Base "it's snowing"; Const true];</code></strong>
+<strong><code>                       Base "it's raining"]));;</code></strong>
+<code class="computeroutput">- : string expr = Not (Base "it's raining")</code></pre><p>Here, it correctly converted the <code>Or</code> branch to <code>Const
+    true</code> and then eliminated the <code>And</code> entirely, since the <code>And</code> then had only one nontrivial
+    component.</p><p>There are some simplifications it misses, however. In particular,
+    see what happens if we add a double negation in:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/blang.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 7)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>simplify (Not (And [ Or [Base "it's snowing"; Const true];</code></strong>
+<strong><code>                       Not (Not (Base "it's raining"))]));;</code></strong>
+<code class="computeroutput">- : string expr = Not (Not (Not (Base "it's raining")))</code></pre><p>It fails to remove the double negation, and it's easy to see why.
+    The <code>not_</code> function has a catch-all case,
+    so it ignores everything but the one case it explicitly considers, that of
+    the negation of a constant. Catch-all cases are generally a bad idea, and
+    if we make the code more explicit, we see that the missing of the double
+    negation is more obvious:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/blang.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 8)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let not_ = function</code></strong>
+<strong><code>    | Const b -&gt; Const (not b)</code></strong>
+<strong><code>    | (Base _ | And _ | Or _ | Not _) as e -&gt; Not e</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">val not_ : 'a expr -&gt; 'a expr = &lt;fun&gt;</code></pre><p>We can of course fix this by simply adding an explicit case for
+    double negation:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/blang.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 9)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let not_ = function</code></strong>
+<strong><code>    | Const b -&gt; Const (not b)</code></strong>
+<strong><code>    | Not e -&gt; e</code></strong>
+<strong><code>    | (Base _ | And _ | Or _ ) as e -&gt; Not e</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">val not_ : 'a expr -&gt; 'a expr = &lt;fun&gt;</code></pre><p>The example of a Boolean expression language is more than a toy.
+    There's a module very much in this spirit in Core called <code>Blang</code> (short for "Boolean language"), and it
+    gets a lot of practical use in a variety of applications. The
+    simplification algorithm in particular is useful when you want to use it
+    to specialize the evaluation of expressions for which the evaluation of
+    some of the base predicates is already known.</p><p>More generally, using variants to build recursive data structures is
+    a common technique, and shows up everywhere from designing little
+    languages to building complex data structures.</p></section><section id="polymorphic-variants" data-type="sect1"><h1>Polymorphic Variants</h1><p>In addition to the ordinary variants we've seen so far, OCaml also
+    supports so-called <em>polymorphic variants</em>. As we'll
+    see, polymorphic variants are more flexible and syntactically more
+    lightweight than ordinary variants, but that extra power comes at a
+    cost.<a data-type="indexterm" data-primary="polymorphic variant types" data-secondary="basic syntax of">&#xa0;</a><a data-type="indexterm" id="VARTYPpoly" data-primary="variant types" data-secondary="polymorphic">&#xa0;</a></p><p>Syntactically, polymorphic variants are distinguished from ordinary
+    variants by the leading backtick. And unlike ordinary variants,
+    polymorphic variants can be used without an explicit type
+    declaration:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 6)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let three = `Int 3;;</code></strong>
+<code class="computeroutput">val three : [&gt; `Int of int ] = `Int 3</code>
+<code class="prompt"># </code><strong><code>let four = `Float 4.;;</code></strong>
+<code class="computeroutput">val four : [&gt; `Float of float ] = `Float 4.</code>
+<code class="prompt"># </code><strong><code>let nan = `Not_a_number;;</code></strong>
+<code class="computeroutput">val nan : [&gt; `Not_a_number ] = `Not_a_number</code>
+<code class="prompt"># </code><strong><code>[three; four; nan];;</code></strong>
+<code class="computeroutput">- : [&gt; `Float of float | `Int of int | `Not_a_number ] list =</code>
+<code class="computeroutput">[`Int 3; `Float 4.; `Not_a_number]</code></pre><p>As you can see, polymorphic variant types are inferred
+    automatically, and when we combine variants with different tags, the
+    compiler infers a new type that knows about all of those tags. Note that
+    in the preceding example, the tag name (e.g., <code>`Int</code>) matches the type name (<code>int</code>). This is a common convention in
+    OCaml.<a data-type="indexterm" data-primary="polymorphic variant types" data-secondary="automatic inference of">&#xa0;</a></p><p>The type system will complain if it sees incompatible uses of the
+    same tag:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 7)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let five = `Int "five";;</code></strong>
+<code class="computeroutput">val five : [&gt; `Int of string ] = `Int "five"</code>
+<code class="prompt"># </code><strong><code>[three; four; five];;</code></strong>
+<code class="computeroutput">Characters 14-18:</code>
+<code class="computeroutput">Error: This expression has type [&gt; `Int of string ]</code>
+<code class="computeroutput">       but an expression was expected of type</code>
+<code class="computeroutput">         [&gt; `Float of float | `Int of int ]</code>
+<code class="computeroutput">       Types for tag `Int are incompatible</code></pre><p>The <code>&gt;</code> at the beginning of the
+    variant types above is critical because it marks the types as being open
+    to combination with other variant types. We can read the type <code>[&gt; `Int of string | `Float of float]</code> as
+    describing a variant whose tags include <code>`Int of
+    string</code> and <code>`Float of float</code>,
+    but may include more tags as well. In other words, you can roughly
+    translate <code>&gt;</code> to mean: "these tags or
+    more."</p><p>OCaml will in some cases infer a variant type with <code>&lt;</code>, to indicate "these tags or less," as in
+    the following example:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 8)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let is_positive = function</code></strong>
+<strong><code>     | `Int   x -&gt; x &gt; 0</code></strong>
+<strong><code>     | `Float x -&gt; x &gt; 0.</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">val is_positive : [&lt; `Float of float | `Int of int ] -&gt; bool = &lt;fun&gt;</code></pre><p>The <code>&lt;</code> is there because
+    <code>is_positive</code> has no way of dealing with
+    values that have tags other than <code>`Float of
+    float</code> or <code>`Int of int</code>.</p><p>We can think of these <code>&lt;</code> and
+    <code>&gt;</code> markers as indications of upper
+    and lower bounds on the tags involved. If the same set of tags are both an
+    upper and a lower bound, we end up with an <em>exact</em>
+    polymorphic variant type, which has neither marker. For example:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 9)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let exact = List.filter ~f:is_positive [three;four];;</code></strong>
+<code class="computeroutput">val exact : [ `Float of float | `Int of int ] list = [`Int 3; `Float 4.]</code></pre><p>Perhaps surprisingly, we can also create polymorphic variant types
+    that have different upper and lower bounds. Note that <code>Ok</code> and <code>Error</code>
+    in the following example come from the <code>Result.t</code> type from Core:<a data-type="indexterm" data-primary="polymorphic variant types" data-secondary="upper/lower bounds of">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 10)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let is_positive = function</code></strong>
+<strong><code>     | `Int   x -&gt; Ok (x &gt; 0)</code></strong>
+<strong><code>     | `Float x -&gt; Ok (x &gt; 0.)</code></strong>
+<strong><code>     | `Not_a_number -&gt; Error "not a number";;</code></strong>
+<code class="computeroutput">val is_positive :</code>
+<code class="computeroutput">  [&lt; `Float of float | `Int of int | `Not_a_number ] -&gt;</code>
+<code class="computeroutput">  (bool, string) Result.t = &lt;fun&gt;</code>
+<code class="prompt"># </code><strong><code>List.filter [three; four] ~f:(fun x -&gt;</code></strong>
+<strong><code>     match is_positive x with Error _ -&gt; false | Ok b -&gt; b);;</code></strong>
+<code class="computeroutput">- : [&lt; `Float of float | `Int of int | `Not_a_number &gt; `Float `Int ] list =</code>
+<code class="computeroutput">[`Int 3; `Float 4.]</code></pre><p>Here, the inferred type states that the tags can be no more than
+    <code>`Float</code>, <code>`Int</code>, and <code>`Not_a_number</code>, and must contain at least
+    <code>`Float</code> and <code>`Int</code>. As you can already start to see,
+    polymorphic variants can lead to fairly complex inferred types.</p><section id="example-terminal-colors-redux" data-type="sect2"><h2>Example: Terminal Colors Redux</h2><p>To see how to use polymorphic variants in practice, we'll return
+      to terminal colors. Imagine that we have a new terminal type that adds
+      yet more colors, say, by adding an alpha channel so you can specify
+      translucent colors. We could model this extended set of colors as
+      follows, using an ordinary variant:<a data-type="indexterm" data-primary="polymorphic variant types" data-secondary="vs. ordinary variants">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 11)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type extended_color =</code></strong>
+<strong><code>    | Basic of basic_color * weight  (* basic colors, regular and bold *)</code></strong>
+<strong><code>    | RGB   of int * int * int       (* 6x6x6 color space *)</code></strong>
+<strong><code>    | Gray  of int                   (* 24 grayscale levels *)</code></strong>
+<strong><code>    | RGBA  of int * int * int * int (* 6x6x6x6 color space *)</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">type extended_color =</code>
+<code class="computeroutput">    Basic of basic_color * weight</code>
+<code class="computeroutput">  | RGB of int * int * int</code>
+<code class="computeroutput">  | Gray of int</code>
+<code class="computeroutput">  | RGBA of int * int * int * int</code></pre><p>We want to write a function <code>extended_color_to_int</code>, that works like
+      <code>color_to_int</code> for all of the old kinds
+      of colors, with new logic only for handling colors that include an alpha
+      channel. One might try to write such a function as follows.</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 12)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let extended_color_to_int = function</code></strong>
+<strong><code>    | RGBA (r,g,b,a) -&gt; 256 + a + b * 6 + g * 36 + r * 216</code></strong>
+<strong><code>    | (Basic _ | RGB _ | Gray _) as color -&gt; color_to_int color</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">Characters 154-159:</code>
+<code class="computeroutput">Error: This expression has type extended_color</code>
+<code class="computeroutput">       but an expression was expected of type color</code></pre><p>The code looks reasonable enough, but it leads to a type error
+      because <code>extended_color</code> and <code>color</code> are in the compiler's view distinct and
+      unrelated types. The compiler doesn't, for example, recognize any
+      equality between the <code>Basic</code> tag in the
+      two types.</p><p>What we want to do is to share tags between two different variant
+      types, and polymorphic variants let us do this in a natural way. First,
+      let's rewrite <code>basic_color_to_int</code> and
+      <code>color_to_int</code> using polymorphic
+      variants. The translation here is pretty straightforward:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 13)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let basic_color_to_int = function</code></strong>
+<strong><code>    | `Black -&gt; 0 | `Red     -&gt; 1 | `Green -&gt; 2 | `Yellow -&gt; 3</code></strong>
+<strong><code>    | `Blue  -&gt; 4 | `Magenta -&gt; 5 | `Cyan  -&gt; 6 | `White  -&gt; 7</code></strong>
+<strong><code/></strong>
+<strong><code>  let color_to_int = function</code></strong>
+<strong><code>    | `Basic (basic_color,weight) -&gt;</code></strong>
+<strong><code>      let base = match weight with `Bold -&gt; 8 | `Regular -&gt; 0 in</code></strong>
+<strong><code>      base + basic_color_to_int basic_color</code></strong>
+<strong><code>    | `RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36</code></strong>
+<strong><code>    | `Gray i -&gt; 232 + i</code></strong>
+<strong><code> ;;</code></strong>
+<code class="computeroutput">val basic_color_to_int :</code>
+<code class="computeroutput">  [&lt; `Black | `Blue | `Cyan | `Green | `Magenta | `Red | `White | `Yellow ] -&gt;</code>
+<code class="computeroutput">  int = &lt;fun&gt;</code>
+<code class="computeroutput">val color_to_int :</code>
+<code class="computeroutput">  [&lt; `Basic of</code>
+<code class="computeroutput">       [&lt; `Black</code>
+<code class="computeroutput">        | `Blue</code>
+<code class="computeroutput">        | `Cyan</code>
+<code class="computeroutput">        | `Green</code>
+<code class="computeroutput">        | `Magenta</code>
+<code class="computeroutput">        | `Red</code>
+<code class="computeroutput">        | `White</code>
+<code class="computeroutput">        | `Yellow ] *</code>
+<code class="computeroutput">       [&lt; `Bold | `Regular ]</code>
+<code class="computeroutput">   | `Gray of int</code>
+<code class="computeroutput">   | `RGB of int * int * int ] -&gt;</code>
+<code class="computeroutput">  int = &lt;fun&gt;</code></pre><p>Now we can try writing <code>extended_color_to_int</code>. The key issue with this
+      code is that <code>extended_color_to_int</code>
+      needs to invoke <code>color_to_int</code> with a
+      narrower type, i.e., one that includes fewer tags. Written properly,
+      this narrowing can be done via a pattern match. In particular, in the
+      following code, the type of the variable <code>color</code> includes only the tags <code>`Basic</code>, <code>`RGB</code>, and <code>`Gray</code>, and not <code>`RGBA</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 14)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let extended_color_to_int = function</code></strong>
+<strong><code>    | `RGBA (r,g,b,a) -&gt; 256 + a + b * 6 + g * 36 + r * 216</code></strong>
+<strong><code>    | (`Basic _ | `RGB _ | `Gray _) as color -&gt; color_to_int color</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">val extended_color_to_int :</code>
+<code class="computeroutput">  [&lt; `Basic of</code>
+<code class="computeroutput">       [&lt; `Black</code>
+<code class="computeroutput">        | `Blue</code>
+<code class="computeroutput">        | `Cyan</code>
+<code class="computeroutput">        | `Green</code>
+<code class="computeroutput">        | `Magenta</code>
+<code class="computeroutput">        | `Red</code>
+<code class="computeroutput">        | `White</code>
+<code class="computeroutput">        | `Yellow ] *</code>
+<code class="computeroutput">       [&lt; `Bold | `Regular ]</code>
+<code class="computeroutput">   | `Gray of int</code>
+<code class="computeroutput">   | `RGB of int * int * int</code>
+<code class="computeroutput">   | `RGBA of int * int * int * int ] -&gt;</code>
+<code class="computeroutput">  int = &lt;fun&gt;</code></pre><p>The preceding code is more delicately balanced than one might
+      imagine. In particular, if we use a catch-all case instead of an
+      explicit enumeration of the cases, the type is no longer narrowed, and
+      so compilation fails:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 15)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let extended_color_to_int = function</code></strong>
+<strong><code>    | `RGBA (r,g,b,a) -&gt; 256 + a + b * 6 + g * 36 + r * 216</code></strong>
+<strong><code>    | color -&gt; color_to_int color</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">Characters 125-130:</code>
+<code class="computeroutput">Error: This expression has type [&gt; `RGBA of int * int * int * int ]</code>
+<code class="computeroutput">       but an expression was expected of type</code>
+<code class="computeroutput">         [&lt; `Basic of</code>
+<code class="computeroutput">              [&lt; `Black</code>
+<code class="computeroutput">               | `Blue</code>
+<code class="computeroutput">               | `Cyan</code>
+<code class="computeroutput">               | `Green</code>
+<code class="computeroutput">               | `Magenta</code>
+<code class="computeroutput">               | `Red</code>
+<code class="computeroutput">               | `White</code>
+<code class="computeroutput">               | `Yellow ] *</code>
+<code class="computeroutput">              [&lt; `Bold | `Regular ]</code>
+<code class="computeroutput">          | `Gray of int</code>
+<code class="computeroutput">          | `RGB of int * int * int ]</code>
+<code class="computeroutput">       The second variant type does not allow tag(s) `RGBA</code></pre><div class="allow_break" data-type="note"><h1>Polymorphic Variants and Catch-all Cases</h1><p>As we saw with the definition of <code>is_positive</code>, a <code>match</code>
+        statement can lead to the inference of an upper bound on a variant
+        type, limiting the possible tags to those that can be handled by the
+        match. If we add a catch-all case to our <code>match</code>
+        statement, we end up with a type with a lower bound:<a data-type="indexterm" data-primary="pattern matching" data-secondary="catch-all cases">&#xa0;</a><a data-type="indexterm" data-primary="catch-all cases">&#xa0;</a><a data-type="indexterm" data-primary="polymorphic variant types" data-secondary="and catch-all&#10;            cases">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+        (part 16)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let is_positive_permissive = function</code></strong>
+<strong><code>     | `Int   x -&gt; Ok (x &gt; 0)</code></strong>
+<strong><code>     | `Float x -&gt; Ok (x &gt; 0.)</code></strong>
+<strong><code>     | _ -&gt; Error "Unknown number type"</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">val is_positive_permissive :</code>
+<code class="computeroutput">  [&gt; `Float of float | `Int of int ] -&gt; (bool, string) Result.t = &lt;fun&gt;</code>
+<code class="prompt"># </code><strong><code>is_positive_permissive (`Int 0);;</code></strong>
+<code class="computeroutput">- : (bool, string) Result.t = Ok false</code>
+<code class="prompt"># </code><strong><code>is_positive_permissive (`Ratio (3,4));;</code></strong>
+<code class="computeroutput">- : (bool, string) Result.t = Error "Unknown number type"</code></pre><p>Catch-all cases are error-prone even with ordinary variants, but
+        they are especially so with polymorphic variants. That's because you
+        have no way of bounding what tags your function might have to deal
+        with. Such code is particularly vulnerable to typos. For instance, if
+        code that uses <code>is_positive_permissive</code> passes in <code>Float</code> misspelled as <code>Floot</code>, the erroneous code will compile
+        without complaint:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+        (part 17)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>is_positive_permissive (`Floot 3.5);;</code></strong>
+<code class="computeroutput">- : (bool, string) Result.t = Error "Unknown number type"</code></pre><p>With ordinary variants, such a typo would have been caught as an
+        unknown tag. As a general matter, one should be wary about mixing
+        catch-all cases and polymorphic variants.</p></div><p>Let's consider how we might turn our code into a proper library
+      with an implementation in an <code>ml</code> file
+      and an interface in a separate <code>mli</code>,
+      as we saw in <a href="#files-modules-and-programs" data-type="xref">#files-modules-and-programs</a>. Let's start
+      with the <code>mli</code>:</p><p>OCaml: <a href="https://github.com/realworldocaml/examples/tree/v1/code/variants-termcol/terminal_color.mli" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
+
+type basic_color =
+  [ `Black   | `Blue | `Cyan  | `Green
+  | `Magenta | `Red  | `White | `Yellow ]
+
+type color =
+  [ `Basic of basic_color * [ `Bold | `Regular ]
+  | `Gray of int
+  | `RGB  of int * int * int ]
+
+type extended_color =
+  [ color
+  | `RGBA of int * int * int * int ]
+
+val color_to_int          : color -&gt; int
+val extended_color_to_int : extended_color -&gt; int</pre><p>Here, <code>extended_color</code> is defined
+      as an explicit extension of <code>color</code>.
+      Also, notice that we defined all of these types as exact variants. We
+      can implement this library as follows:</p><p>OCaml: <a href="https://github.com/realworldocaml/examples/tree/v1/code/variants-termcol/terminal_color.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
+
+type basic_color =
+  [ `Black   | `Blue | `Cyan  | `Green
+  | `Magenta | `Red  | `White | `Yellow ]
+
+type color =
+  [ `Basic of basic_color * [ `Bold | `Regular ]
+  | `Gray of int
+  | `RGB  of int * int * int ]
+
+type extended_color =
+  [ color
+  | `RGBA of int * int * int * int ]
+
+let basic_color_to_int = function
+  | `Black -&gt; 0 | `Red     -&gt; 1 | `Green -&gt; 2 | `Yellow -&gt; 3
+  | `Blue  -&gt; 4 | `Magenta -&gt; 5 | `Cyan  -&gt; 6 | `White  -&gt; 7
+
+let color_to_int = function
+  | `Basic (basic_color,weight) -&gt;
+    let base = match weight with `Bold -&gt; 8 | `Regular -&gt; 0 in
+    base + basic_color_to_int basic_color
+  | `RGB (r,g,b) -&gt; 16 + b + g * 6 + r * 36
+  | `Gray i -&gt; 232 + i
+
+let extended_color_to_int = function
+  | `RGBA (r,g,b,a) -&gt; 256 + a + b * 6 + g * 36 + r * 216
+  | `Grey x -&gt; 2000 + x
+  | (`Basic _ | `RGB _ | `Gray _) as color -&gt; color_to_int color</pre><p>In the preceding code, we did something funny to the definition of
+      <code>extended_color_to_int</code> that underlines
+      some of the downsides of polymorphic variants. In particular, we added
+      some special-case handling for the color gray, rather than using
+      <code>color_to_int</code>. Unfortunately, we
+      misspelled <code>Gray</code> as <code>Grey</code>. This is exactly the kind of error that
+      the compiler would catch with ordinary variants, but with polymorphic
+      variants, this compiles without issue. All that happened was that the
+      compiler inferred a wider type for <code>extended_color_to_int</code>, which happens to be
+      compatible with the narrower type that was listed in the <code>mli</code>.</p><p>If we add an explicit type annotation to the code itself (rather
+      than just in the <code>mli</code>), then the
+      compiler has enough information to warn us:</p><p>OCaml: <a href="https://github.com/realworldocaml/examples/tree/v1/code/variants-termcol-annotated/terminal_color.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a>
+      (part 1)</p><pre data-type="programlisting" data-code-language="ocaml">let extended_color_to_int : extended_color -&gt; int = function
+  | `RGBA (r,g,b,a) -&gt; 256 + a + b * 6 + g * 36 + r * 216
+  | `Grey x -&gt; 2000 + x
+  | (`Basic _ | `RGB _ | `Gray _) as color -&gt; color_to_int color</pre><p>In particular, the compiler will complain that the <code>`Grey</code> case is unused:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants-termcol-annotated/build.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>corebuild terminal_color.native</code></strong>
+<code class="computeroutput">File "terminal_color.ml", line 30, characters 4-11:</code>
+<code class="computeroutput">Error: This pattern matches values of type [? `Grey of 'a ]</code>
+<code class="computeroutput">       but a pattern was expected which matches values of type extended_color</code>
+<code class="computeroutput">       The second variant type does not allow tag(s) `Grey</code>
+<code class="computeroutput">Command exited with code 2.</code></pre><?hard-pagebreak?><p>Once we have type definitions at our disposal, we can revisit the
+      question of how we write the pattern match that narrows the type. In
+      particular, we can explicitly use the type name as part of the pattern
+      match, by prefixing it with a <code>#</code>:</p><p>OCaml: <a href="https://github.com/realworldocaml/examples/tree/v1/code/variants-termcol-fixed/terminal_color.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a>
+      (part 1)</p><pre data-type="programlisting" data-code-language="ocaml">let extended_color_to_int : extended_color -&gt; int = function
+  | `RGBA (r,g,b,a) -&gt; 256 + a + b * 6 + g * 36 + r * 216
+  | #color as color -&gt; color_to_int color</pre><p>This is useful when you want to narrow down to a type whose
+      definition is long, and you don't want the verbosity of writing the tags
+      down explicitly in the match.</p></section><section id="when-to-use-polymorphic-variants" data-type="sect2"><h2>When to Use Polymorphic Variants</h2><p>At first glance, polymorphic variants look like a strict
+      improvement over ordinary variants. You can do everything that ordinary
+      variants can do, plus it's more flexible and more concise. What's not to
+      like?<a data-type="indexterm" data-primary="polymorphic variant types" data-secondary="vs. ordinary variants">&#xa0;</a><a data-type="indexterm" data-primary="polymorphic variant types" data-secondary="drawbacks of">&#xa0;</a></p><p>In reality, regular variants are the more pragmatic choice most of
+      the time. That's because the flexibility of polymorphic variants comes
+      at a price. Here are some of the downsides:</p><dl><dt>Complexity</dt><dd><p>As we've seen, the typing rules for polymorphic variants are
+            a lot more complicated than they are for regular variants. This
+            means that heavy use of polymorphic variants can leave you
+            scratching your head trying to figure out why a given piece of
+            code did or didn't compile. It can also lead to absurdly long and
+            hard to decode error messages. Indeed, concision at the value
+            level is often balanced out by more verbosity at the type
+            level.</p></dd><dt>Error-finding</dt><dd><p>Polymorphic variants are type-safe, but the typing
+            discipline that they impose is, by dint of its flexibility, less
+            likely to catch bugs in your program.</p></dd><dt>Efficiency</dt><dd><p>This isn't a huge effect, but polymorphic variants are
+            somewhat heavier than regular variants, and OCaml can't generate
+            code for matching on polymorphic variants that is quite as
+            efficient as what it generated for regular variants.</p></dd></dl><p>All that said, polymorphic variants are still a useful and
+      powerful feature, but it's worth understanding their limitations and how
+      to use them sensibly and modestly.</p><p>Probably the safest and most common use case for polymorphic
+      variants is where ordinary variants would be sufficient but are
+      syntactically too heavyweight. For example, you often want to create a
+      variant type for encoding the inputs or outputs to a function, where
+      it's not worth declaring a separate type for it. Polymorphic variants
+      are very useful here, and as long as there are type annotations that
+      constrain these to have explicit, exact types, this tends to work
+      well.</p><?hard-pagebreak?><p>Variants are most problematic exactly where you take full
+      advantage of their power; in particular, when you take advantage of the
+      ability of polymorphic variant types to overlap in the tags they
+      support. This ties into OCaml's support for subtyping. As we'll discuss
+      further when we cover objects in <a href="#objects" data-type="xref">#objects</a>, subtyping
+      brings in a lot of complexity, and most of the time, that's complexity
+      you want to avoid.<a data-type="indexterm" data-startref="VARTYPpoly">&#xa0;</a><a data-type="indexterm" data-startref="DTvar">&#xa0;</a></p></section></section></section>

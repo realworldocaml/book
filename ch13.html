@@ -1,0 +1,625 @@
+<section xmlns="http://www.w3.org/1999/xhtml" id="maps-and-hash-tables" data-type="chapter"><h1>Maps and Hash Tables</h1><p>Lots of programming problems require dealing with data organized as
+  key/value pairs. Maybe the simplest way of representing such data in OCaml
+  is an <em>association list</em>, which is simply a list of pairs
+  of keys and values. For example, you could represent a mapping between the
+  10 digits and their English names as follows:<a data-type="indexterm" data-primary="key/value pairs">&#xa0;</a><a data-type="indexterm" data-primary="data structures" data-secondary="key/value pairs">&#xa0;</a><a data-type="indexterm" data-primary="lists" data-secondary="association lists">&#xa0;</a><a data-type="indexterm" data-primary="association lists">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+  (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let digit_alist =</code></strong>
+<strong><code>    [ 0, "zero"; 1, "one"; 2, "two"  ; 3, "three"; 4, "four"</code></strong>
+<strong><code>    ; 5, "five"; 6, "six"; 7, "seven"; 8, "eight"; 9, "nine" ]</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">val digit_alist : (int * string) list =</code>
+<code class="computeroutput">  [(0, "zero"); (1, "one"); (2, "two"); (3, "three"); (4, "four");</code>
+<code class="computeroutput">   (5, "five"); (6, "six"); (7, "seven"); (8, "eight"); (9, "nine")]</code></pre><p>We can use functions from the <code>List.Assoc</code> module to
+    manipulate this data:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+  (part 2)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>List.Assoc.find digit_alist 6;;</code></strong>
+<code class="computeroutput">- : string option = Some "six"</code>
+<code class="prompt"># </code><strong><code>List.Assoc.find digit_alist 22;;</code></strong>
+<code class="computeroutput">- : string option = None</code>
+<code class="prompt"># </code><strong><code>List.Assoc.add digit_alist 0 "zilch";;</code></strong>
+<code class="computeroutput">- : (int, string) List.Assoc.t =</code>
+<code class="computeroutput">[(0, "zilch"); (1, "one"); (2, "two"); (3, "three"); (4, "four");</code>
+<code class="computeroutput"> (5, "five"); (6, "six"); (7, "seven"); (8, "eight"); (9, "nine")]</code></pre><p>Association lists are simple and easy to use, but their performance is
+  not ideal, since almost every nontrivial operation on an association list
+  requires a linear-time scan of the list.</p><p>In this chapter, we'll talk about two more efficient alternatives to
+  association lists: <em>maps</em> and <em>hash
+  tables</em>. A map is an immutable tree-based data structure where
+  most operations take time logarithmic in the size of the map, whereas a hash
+  table is a mutable data structure where most operations have constant time
+  complexity. We'll describe both of these data structures in detail and
+  provide some advice as to how to choose between them.<a data-type="indexterm" data-primary="hash tables" data-secondary="basics of">&#xa0;</a><a data-type="indexterm" data-primary="maps" data-secondary="basics of">&#xa0;</a></p><section id="maps" data-type="sect1"><h1>Maps</h1><p>Let's consider an example of how one might use a map in practice. In
+    <a href="#files-modules-and-programs" data-type="xref">#files-modules-and-programs</a>, we showed a module <code>Counter</code> for keeping frequency counts on a set of
+    strings. Here's the interface:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/files-modules-and-programs-freq-fast/counter.mli" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
+
+(** A collection of string frequency counts *)
+type t
+
+(** The empty set of frequency counts  *)
+val empty : t
+
+(** Bump the frequency count for the given string. *)
+val touch : t -&gt; string -&gt; t
+
+(* Converts the set of frequency counts to an association list.  Every string
+   in the list will show up at most once, and the integers will be at least
+   1. *)
+val to_list : t -&gt; (string * int) list</pre><p>The intended behavior here is straightforward. <code>Counter.empty</code> represents an empty collection of
+    frequency counts; <code>touch</code> increments the
+    frequency count of the specified string by 1; and <code>to_list</code> returns the list of nonzero
+    frequencies.</p><p>Here's the implementation:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/files-modules-and-programs-freq-fast/counter.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
+
+type t = int String.Map.t
+
+let empty = String.Map.empty
+
+let to_list t = Map.to_alist t
+
+let touch t s =
+  let count =
+    match Map.find t s with
+    | None -&gt; 0
+    | Some x -&gt; x
+  in
+  Map.add t ~key:s ~data:(count + 1)</pre><p>Note that in some places the preceding code refers to <code>String.Map.t</code>, and in others <code>Map.t</code>. This has to do with the fact that maps
+    are implemented as ordered binary trees, and as such, need a way of
+    comparing keys.</p><p>To deal with this, a map, once created, stores the necessary
+    comparison function within the data structure. Thus, operations like
+    <code>Map.find</code> or <code>Map.add</code> that access the contents of a map or
+    create a new map from an existing one, do so by using the comparison
+    function embedded within the map.</p><p>But in order to get a map in the first place, you need to get your
+    hands on the comparison function somehow. For this reason, modules like
+    <code>String</code> contain a <code>Map</code> submodule that has values like <code>String.Map.empty</code> and <code>String.Map.of_alist</code> that are specialized to
+    strings, and thus have access to a string comparison function. Such a
+    <code>Map</code> submodule is included in every
+    module that satisfies the <code>Comparable.S</code>
+    interface from Core.</p><section id="creating-maps-with-comparators" data-type="sect2"><h2>Creating Maps with Comparators</h2><p>The specialized <code>Map</code> submodule
+      is convenient, but it's not the only way of creating a <code>Map.t</code>. The information required to compare
+      values of a given type is wrapped up in a value called a
+      <em>comparator</em> that can be used to create maps using
+      the <code>Map</code> module directly:<a data-type="indexterm" data-primary="comparators, creating maps with">&#xa0;</a><a data-type="indexterm" data-primary="Map module" data-secondary="Map.of_alist_exn">&#xa0;</a><a data-type="indexterm" data-primary="maps" data-secondary="creating with comparators">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 3)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let digit_map = Map.of_alist_exn digit_alist</code></strong>
+<strong><code>                     ~comparator:Int.comparator;;</code></strong>
+<code class="computeroutput">val digit_map : (int, string, Int.comparator) Map.t = &lt;abstr&gt;</code>
+<code class="prompt"># </code><strong><code>Map.find digit_map 3;;</code></strong>
+<code class="computeroutput">- : string option = Some "three"</code></pre><p>The preceding code uses <code>Map.of_alist_exn</code>, which creates a map from an
+      association list, throwing an exception if there are duplicate keys in
+      the list.</p><p>The comparator is only required for operations that create maps
+      from scratch. Operations that update an existing map simply inherit the
+      comparator of the map they start with:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 4)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let zilch_map = Map.add digit_map ~key:0 ~data:"zilch";;</code></strong>
+<code class="computeroutput">val zilch_map : (int, string, Int.comparator) Map.t = &lt;abstr&gt;</code></pre><p>The type <code>Map.t</code> has three type
+      parameters: one for the key, one for the value, and one to identify the
+      comparator. Indeed, the type <code>'a
+      Int.Map.t</code> is just a type alias for <code>(int,'a,Int.comparator) Map.t</code>.</p><p>Including the comparator in the type is important because
+      operations that work on multiple maps at the same time often require
+      that the maps share their comparison function. Consider, for example,
+      <code>Map.symmetric_diff</code>, which computes a
+      summary of the differences between two maps:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 5)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let left = String.Map.of_alist_exn ["foo",1; "bar",3; "snoo",0]</code></strong>
+<strong><code>  let right = String.Map.of_alist_exn ["foo",0; "snoo",0]</code></strong>
+<strong><code>  let diff = Map.symmetric_diff ~data_equal:Int.equal left right</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">val left : int String.Map.t = &lt;abstr&gt;</code>
+<code class="computeroutput">val right : int String.Map.t = &lt;abstr&gt;</code>
+<code class="computeroutput">val diff :</code>
+<code class="computeroutput">  (string * [ `Left of int | `Right of int | `Unequal of int * int ]) list =</code>
+<code class="computeroutput">  [("foo", `Unequal (1, 0)); ("bar", `Left 3)]</code></pre><p>The type of <code>Map.symmetric_diff</code>,
+      which follows, requires that the two maps it compares have the same
+      comparator type. Each comparator has a fresh abstract type, so the type
+      of a comparator identifies the comparator uniquely:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 6)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Map.symmetric_diff;;</code></strong>
+<code class="computeroutput">- : ('k, 'v, 'cmp) Map.t -&gt;</code>
+<code class="computeroutput">    ('k, 'v, 'cmp) Map.t -&gt;</code>
+<code class="computeroutput">    data_equal:('v -&gt; 'v -&gt; bool) -&gt;</code>
+<code class="computeroutput">    ('k * [ `Left of 'v | `Right of 'v | `Unequal of 'v * 'v ]) list</code>
+<code class="computeroutput">= &lt;fun&gt;</code></pre><p>This constraint is important because the algorithm that <code>Map.symmetric_diff</code> uses depends for its
+      correctness on the fact that both maps have the same comparator.</p><p>We can create a new comparator using the <code>Comparator.Make</code> functor, which takes as its
+      input a module containing the type of the object to be compared, sexp
+      converter functions, and a comparison function. The sexp converters are
+      included in the comparator to make it possible for users of the
+      comparator to generate better error messages. Here's an
+      example:<a data-type="indexterm" data-primary="Sexplib package" data-secondary="sexp converter">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 7)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>module Reverse = Comparator.Make(struct</code></strong>
+<strong><code>    type t = string</code></strong>
+<strong><code>    let sexp_of_t = String.sexp_of_t</code></strong>
+<strong><code>    let t_of_sexp = String.t_of_sexp</code></strong>
+<strong><code>    let compare x y = String.compare y x</code></strong>
+<strong><code>  end);;</code></strong>
+<code class="computeroutput">module Reverse :</code>
+<code class="computeroutput">  sig</code>
+<code class="computeroutput">    type t = string</code>
+<code class="computeroutput">    val compare : t -&gt; t -&gt; int</code>
+<code class="computeroutput">    val t_of_sexp : Sexp.t -&gt; t</code>
+<code class="computeroutput">    val sexp_of_t : t -&gt; Sexp.t</code>
+<code class="computeroutput">    type comparator</code>
+<code class="computeroutput">    val comparator : (t, comparator) Comparator.t_</code>
+<code class="computeroutput">  end</code></pre><p>As you can see in the following code, both <code>Reverse.comparator</code> and <code>String.comparator</code> can be used to create maps
+      with a key type of <code>string</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 8)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let alist = ["foo", 0; "snoo", 3];;</code></strong>
+<code class="computeroutput">val alist : (string * int) list = [("foo", 0); ("snoo", 3)]</code>
+<code class="prompt"># </code><strong><code>let ord_map = Map.of_alist_exn ~comparator:String.comparator alist;;</code></strong>
+<code class="computeroutput">val ord_map : (string, int, String.comparator) Map.t = &lt;abstr&gt;</code>
+<code class="prompt"># </code><strong><code>let rev_map = Map.of_alist_exn ~comparator:Reverse.comparator alist;;</code></strong>
+<code class="computeroutput">val rev_map : (string, int, Reverse.comparator) Map.t = &lt;abstr&gt;</code></pre><p><code>Map.min_elt</code> returns the key and
+      value for the smallest key in the map, which lets us see that these two
+      maps do indeed use different comparison functions:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 9)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Map.min_elt ord_map;;</code></strong>
+<code class="computeroutput">- : (string * int) option = Some ("foo", 0)</code>
+<code class="prompt"># </code><strong><code>Map.min_elt rev_map;;</code></strong>
+<code class="computeroutput">- : (string * int) option = Some ("snoo", 3)</code></pre><p>Accordingly, if we try to use <code>Map.symmetric_diff</code> on these two maps, we'll
+      get a compile-time error:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 10)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Map.symmetric_diff ord_map rev_map;;</code></strong>
+<code class="computeroutput">Characters 27-34:</code>
+<code class="computeroutput">Error: This expression has type (string, int, Reverse.comparator) Map.t</code>
+<code class="computeroutput">       but an expression was expected of type</code>
+<code class="computeroutput">         (string, int, String.comparator) Map.t</code>
+<code class="computeroutput">       Type Reverse.comparator is not compatible with type String.comparator </code></pre></section><section id="trees" data-type="sect2"><h2>Trees</h2><p>As we've discussed, maps carry within them the comparator that
+      they were created with. Sometimes, often for space efficiency reasons,
+      you want a version of the map data structure that doesn't include the
+      comparator. You can get such a representation with <code>Map.to_tree</code>, which returns just the tree
+      underlying the map, without the comparator:<a data-type="indexterm" data-primary="Map module" data-secondary="Map.to_tree">&#xa0;</a><a data-type="indexterm" data-primary="maps" data-secondary="tree structure">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 11)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let ord_tree = Map.to_tree ord_map;;</code></strong>
+<code class="computeroutput">val ord_tree : (string, int, String.comparator) Map.Tree.t = &lt;abstr&gt;</code></pre><p>Even though a <code>Map.Tree.t</code>
+      doesn't physically include a comparator, it does include the comparator
+      in its type. This is what is known as a <em>phantom
+      type</em>, because it reflects something about the logic of the
+      value in question, even though it doesn't correspond to any values
+      directly represented in the underlying physical structure of the
+      value.</p><p>Since the comparator isn't included in the tree, we need to
+      provide the comparator explicitly when we, say, search for a key, as
+      shown below:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 12)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Map.Tree.find ~comparator:String.comparator ord_tree "snoo";;</code></strong>
+<code class="computeroutput">- : int option = Some 3</code></pre><p>The algorithm of <code>Map.Tree.find</code>
+      depends on the fact that it's using the same comparator when looking up
+      a value as you were when you stored it. That's the invariant that the
+      phantom type is there to enforce. As you can see in the following
+      example, using the wrong comparator will lead to a type error:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 13)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Map.Tree.find ~comparator:Reverse.comparator ord_tree "snoo";;</code></strong>
+<code class="computeroutput">Characters 45-53:</code>
+<code class="computeroutput">Error: This expression has type (string, int, String.comparator) Map.Tree.t</code>
+<code class="computeroutput">       but an expression was expected of type</code>
+<code class="computeroutput">         (string, int, Reverse.comparator) Map.Tree.t</code>
+<code class="computeroutput">       Type String.comparator is not compatible with type Reverse.comparator </code></pre></section><section id="the-polymorphic-comparator" data-type="sect2"><h2>The Polymorphic Comparator</h2><p>We don't need to generate specialized comparators for every type
+      we want to build a map on. We can instead use a comparator based on
+      OCaml's built-in polymorphic comparison function, which was discussed in
+      <a href="#lists-and-patterns" data-type="xref">#lists-and-patterns</a>. This comparator is found in the
+      <code>Comparator.Poly</code> module, allowing us
+      to write:<a data-type="indexterm" data-primary="maps" data-secondary="polymorphic comparison in">&#xa0;</a><a data-type="indexterm" data-primary="Comparator.Poly module">&#xa0;</a><a data-type="indexterm" data-primary="polymorphic comparisons">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 14)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Map.of_alist_exn ~comparator:Comparator.Poly.comparator digit_alist;;</code></strong>
+<code class="computeroutput">- : (int, string, Comparator.Poly.comparator) Map.t = &lt;abstr&gt;</code></pre><p>Or, equivalently:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 15)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Map.Poly.of_alist_exn digit_alist;;</code></strong>
+<code class="computeroutput">- : (int, string) Map.Poly.t = &lt;abstr&gt;</code></pre><p>Note that maps based on the polymorphic comparator are not
+      equivalent to those based on the type-specific comparators from the
+      point of view of the type system. Thus, the compiler rejects the
+      following:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 16)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Map.symmetric_diff (Map.Poly.singleton 3 "three")</code></strong>
+<strong><code>                     (Int.Map.singleton  3 "four" ) ;;</code></strong>
+<code class="computeroutput">Characters 72-99:</code>
+<code class="computeroutput">Error: This expression has type</code>
+<code class="computeroutput">         string Int.Map.t = (int, string, Int.comparator) Map.t</code>
+<code class="computeroutput">       but an expression was expected of type</code>
+<code class="computeroutput">         (int, string, Comparator.Poly.comparator) Map.t</code>
+<code class="computeroutput">       Type Int.comparator is not compatible with type</code>
+<code class="computeroutput">         Comparator.Poly.comparator </code></pre><p>This is rejected for good reason: there's no guarantee that the
+      comparator associated with a given type will order things in the same
+      way that polymorphic compare does.</p><aside data-type="sidebar"><h5>The Perils of Polymorphic Compare</h5><p>Polymorphic compare is highly convenient, but it has serious
+        downsides as well and should be used with care. In particular,
+        polymorphic compare has a fixed algorithm for comparing values of any
+        type, and that algorithm can sometimes yield surprising
+        results.</p><p>To understand what's wrong with polymorphic compare, you need to
+        understand a bit about how it works. Polymorphic compare is
+        <em>structural</em>, in that it operates directly on the
+        runtime representation of OCaml values, walking the structure of the
+        values in question without regard for their type.</p><p>This is convenient because it provides a comparison function that works for most OCaml
+          values and largely behaves as you would expect. For example, on <code>int</code>s and <code>float</code>s, it acts as you would
+          expect a numeric comparison function to act. For simple containers like strings and lists
+          and arrays, it operates as a lexicographic comparison. And except for functions and values
+          from outside of the OCaml heap, it works on almost every OCaml type.</p><p>But sometimes, a structural comparison is not what you want.
+        Sets are a great example of this. Consider the following two
+        sets:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+        (part 18)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let (s1,s2) = (Int.Set.of_list [1;2],</code></strong>
+<strong><code>                 Int.Set.of_list [2;1]);;</code></strong>
+<code class="computeroutput">val s1 : Int.Set.t = &lt;abstr&gt;</code>
+<code class="computeroutput">val s2 : Int.Set.t = &lt;abstr&gt;</code></pre><p>Logically, these two sets should be equal, and that's the result
+        that you get if you call <code>Set.equal</code>
+        on them:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+        (part 19)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Set.equal s1 s2;;</code></strong>
+<code class="computeroutput">- : bool = true</code></pre><p>But because the elements were added in different orders, the
+        layout of the trees underlying the sets will be different. As such, a
+        structural comparison function will conclude that they're
+        different.</p><p>Let's see what happens if we use polymorphic compare to test for
+        equality by way of the <code>=</code> operator.
+        Comparing the maps directly will fail at runtime because the
+        comparators stored within the sets contain function values:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+        (part 20)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>s1 = s2;;</code></strong>
+<code class="computeroutput">Exception: (Invalid_argument "equal: functional value").</code></pre><p>We can, however, use the function <code>Set.to_tree</code> to expose the underlying tree
+        without the attached comparator:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+        (part 21)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Set.to_tree s1 = Set.to_tree s2;;</code></strong>
+<code class="computeroutput">- : bool = false</code></pre><p>This can cause real and quite subtle bugs. If, for example, you
+        use a map whose keys contain sets, then the map built with the
+        polymorphic comparator will behave incorrectly, separating out keys
+        that should be aggregated together. Even worse, it will work sometimes
+        and fail others; since if the sets are built in a consistent order,
+        then they will work as expected, but once the order changes, the
+        behavior will change.</p></aside></section><section id="sets" data-type="sect2"><h2>Sets</h2><p>Sometimes, instead of keeping track of a set of key/value pairs,
+      you just want a data type for keeping track of a set of keys. You could
+      build this on top of a map by representing a set of values by a map
+      whose data type is <code>unit</code>. But a more
+      idiomatic (and efficient) solution is to use Core's set type, which is
+      similar in design and spirit to the map type, while having an API better
+      tuned to working with sets and a lower memory footprint. Here's a simple
+      example:<a data-type="indexterm" data-primary="set types">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 17)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let dedup ~comparator l =</code></strong>
+<strong><code>    List.fold l ~init:(Set.empty ~comparator) ~f:Set.add</code></strong>
+<strong><code>    |&gt; Set.to_list</code></strong>
+<strong><code>  ;;</code></strong>
+<code class="computeroutput">val dedup :</code>
+<code class="computeroutput">  comparator:('a, 'b) Core_kernel.Comparator.t_ -&gt; 'a list -&gt; 'a list = &lt;fun&gt;</code>
+<code class="prompt"># </code><strong><code>dedup ~comparator:Int.comparator [8;3;2;3;7;8;10];;</code></strong>
+<code class="computeroutput">- : int list = [2; 3; 7; 8; 10]</code></pre><p>In addition to the operators you would expect to have for maps,
+      sets support the traditional set operations, including union,
+      intersection, and set difference. And, as with maps, we can create sets
+      based on type-specific comparators or on the polymorphic
+      comparator.</p></section><section id="satisfying-the-comparable.s-interface" data-type="sect2"><h2>Satisfying the Comparable.S Interface</h2><p>Core's <code>Comparable.S</code> interface
+      includes a lot of useful functionality, including support for working
+      with maps and sets. In particular, <code>Comparable.S</code> requires the presence of the
+      <code>Map</code> and <code>Set</code> submodules, as well as a
+      comparator.<a data-type="indexterm" data-primary="interfaces" data-secondary="Comparable.S">&#xa0;</a><a data-type="indexterm" data-primary="Comparable module" data-secondary="Comparable.Make">&#xa0;</a><a data-type="indexterm" data-primary="Comparable module" data-secondary="Comparable.S">&#xa0;</a><a data-type="indexterm" data-primary="maps" data-secondary="comparable.S interface">&#xa0;</a></p><p><code>Comparable.S</code> is satisfied by
+      most of the types in Core, but the question arises of how to satisfy the
+      comparable interface for a new type that you design. Certainly
+      implementing all of the required functionality from scratch would be an
+      absurd amount of work.</p><p>The module <code>Comparable</code> contains
+      a number of functors to help you automate this task. The simplest one of
+      these is <code>Comparable.Make</code>, which takes
+      as an input any module that satisfies the following interface:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/comparable.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">module type Comparable = sig
+  type t
+  val sexp_of_t : t -&gt; Sexp.t
+  val t_of_sexp : Sexp.t -&gt; t
+  val compare : t -&gt; t -&gt; int
+end</pre><p>In other words, it expects a type with a comparison function, as
+      well as functions for converting to and from
+      <em>s-expressions</em>. S-expressions are a serialization
+      format used commonly in Core and are required here to enable better
+      error messages. We'll discuss s-expressions more in <a href="#data-serialization-with-s-expressions" data-type="xref">#data-serialization-with-s-expressions</a>, but in the meantime,
+      we'll use the <code>with sexp</code> declaration
+      that comes from the Sexplib syntax extension. This declaration kicks off
+      the automatic generation of s-expression conversion functions for the
+      marked type.</p><p>The following example shows how this all fits together, following
+      the same basic pattern for using functors described in <a href="#extending-modules" data-type="xref">#extending-modules</a>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main-22.rawscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><strong><code># module Foo_and_bar : sig
+    type t = { foo: Int.Set.t; bar: string }
+    include Comparable.S with type t := t
+  end = struct
+    module T = struct
+      type t = { foo: Int.Set.t; bar: string } with sexp
+      let compare t1 t2 =
+        let c = Int.Set.compare t1.foo t2.foo in
+        if c &lt;&gt; 0 then c else String.compare t1.bar t2.bar
+    end
+    include T
+    include Comparable.Make(T)
+  end;;</code></strong>
+<code class="computeroutput">module Foo_and_bar :
+sig
+  type t = { foo : Int.Set.t; bar : string; }
+  val ( &gt;= ) : t -&gt; t -&gt; bool
+  val ( &lt;= ) : t -&gt; t -&gt; bool
+  val ( = ) : t -&gt; t -&gt; bool
+
+    ...
+
+end</code></pre><p>We don't include the full response from the toplevel because it is
+      quite lengthy, but <code>Foo_and_bar</code> does
+      satisfy <code>Comparable.S</code>.</p><p>In the preceding code we wrote the comparison function by hand,
+      but this isn't strictly necessary. Core ships with a syntax extension
+      called <code>comparelib</code>, which will create
+      a comparison function from a type definition. Using it, we can rewrite
+      the previous example as follows:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main-23.rawscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><strong><code># module Foo_and_bar : sig
+    type t = { foo: Int.Set.t; bar: string }
+    include Comparable.S with type t := t
+  end = struct
+    module T = struct
+      type t = { foo: Int.Set.t; bar: string } with sexp, compare
+    end
+    include T
+    include Comparable.Make(T)
+  end;;</code></strong>
+<code class="computeroutput">module Foo_and_bar :
+sig
+  type t = { foo : Int.Set.t; bar : string; }
+  val ( &gt;= ) : t -&gt; t -&gt; bool
+  val ( &lt;= ) : t -&gt; t -&gt; bool
+  val ( = ) : t -&gt; t -&gt; bool
+
+  ...
+
+end</code></pre><p>The comparison function created by <code>comparelib</code> for a given type will call out to
+      the comparison functions for its component types. As a result, the
+      <code>foo</code> field will be compared using
+      <code>Int.Set.compare</code>. This is different,
+      and saner than the structural comparison done by polymorphic
+      compare.</p><p>If you want your comparison function to behave in a specific way,
+      you should still write your own comparison function by hand; but if all
+      you want is a total order suitable for creating maps and sets with, then
+      <code>comparelib</code> is a good way to
+      go.</p><p>You can also satisfy the <code>Comparable.S</code> interface using polymorphic
+      compare:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main-24.rawscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><strong><code># module Foo_and_bar : sig
+    type t = { foo: int; bar: string }
+    include Comparable.S with type t := t
+  end = struct
+    module T = struct
+      type t = { foo: int; bar: string } with sexp
+    end
+    include T
+    include Comparable.Poly(T)
+  end;;</code></strong>
+<code class="computeroutput">module Foo_and_bar :
+sig
+  type t = { foo : int; bar : string; }
+  val ( &gt;= ) : t -&gt; t -&gt; bool
+  val ( &lt;= ) : t -&gt; t -&gt; bool
+  val ( = ) : t -&gt; t -&gt; bool
+
+  ...
+
+end
+</code></pre><p>That said, for reasons we discussed earlier, polymorphic compare
+      should be used sparingly.</p><aside data-type="sidebar"><h5>=, ==, and phys_equal</h5><p>If you come from a C/C++ background, you'll probably reflexively
+          use <code>==</code> to test two values for
+          equality. In OCaml, the <code>==</code> operator
+          tests for <em>physical</em> equality, while the <code>=</code> operator tests for
+          <em>structural</em> equality.</p><p>The physical equality test will match if two data structures have
+          precisely the same pointer in memory. Two data structures that have
+          identical contents but are constructed separately will not match using
+          <code>==</code>.</p><p>The <code>=</code> structural equality
+          operator recursively inspects each field in the two values and tests
+          them individually for equality. Crucially, if your data structure is
+          cyclical (that is, a value recursively points back to another field
+          within the same structure), the <code>=</code>
+          operator will never terminate, and your program will hang! You therefore
+          must use the physical equality operator or write a custom comparison
+          function when comparing cyclic values.</p><p>It's quite easy to mix up the use of <code>=</code> and <code>==</code>,
+          so Core disables the <code>==</code> operator and
+          provides the more explicit <code>phys_equal</code>
+          function instead. You'll see a type error if you use <code>==</code> anywhere in code that opens <code>Core.Std</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/core_phys_equal.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>open Core.Std ;;</code></strong>
+<code class="prompt"># </code><strong><code>1 == 2 ;;</code></strong>
+<code class="computeroutput">Characters -1-1:</code>
+<code class="computeroutput">Error: This expression has type int but an expression was expected of type</code>
+<code class="computeroutput">         [ `Consider_using_phys_equal ]</code>
+<code class="prompt"># </code><strong><code>phys_equal 1 2 ;;</code></strong>
+<code class="computeroutput">- : bool = false</code></pre><p>If you feel like hanging your OCaml interpreter, you can verify
+          what happens with recursive values and structural equality for
+          yourself:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/phys_equal.rawscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><strong><code># type t1 = { foo1:int; bar1:t2 } and t2 = { foo2:int; bar2:t1 } ;;</code></strong>
+<code class="computeroutput">type t1 = { foo1 : int; bar1 : t2; }
+and t2 = { foo2 : int; bar2 : t1; }</code>
+<strong><code># let rec v1 = { foo1=1; bar1=v2 } and v2 = { foo2=2; bar2=v1 } ;;</code></strong>
+<code class="computeroutput">&lt;lots of text&gt;</code>
+<strong><code># v1 == v1;;</code></strong>
+<code class="computeroutput">- : bool = true</code>
+<strong><code># phys_equal v1 v1;;</code></strong>
+<code class="computeroutput">- : bool = true</code>
+<strong><code># v1 = v1 ;;</code></strong>
+<code class="computeroutput">&lt;press ^Z and kill the process now&gt;</code></pre></aside></section></section><section id="hash-tables" data-type="sect1"><h1>Hash Tables</h1><p>Hash tables are the imperative cousin of maps. We walked over a
+    basic hash table implementation in <a href="#imperative-programming-1" data-type="xref">#imperative-programming-1</a>, so in this section we'll mostly
+    discuss the pragmatics of Core's <code>Hashtbl</code> module. We'll cover this material more
+    briefly than we did with maps because many of the concepts are
+    shared.<a data-type="indexterm" data-primary="hash tables" data-secondary="basics of">&#xa0;</a></p><p>Hash tables differ from maps in a few key ways. First, hash tables
+    are mutable, meaning that adding a key/value pair to a hash table modifies
+    the table, rather than creating a new table with the binding added.
+    Second, hash tables generally have better time-complexity than maps,
+    providing constant-time lookup and modifications, as opposed to
+    logarithmic for maps. And finally, just as maps depend on having a
+    comparison function for creating the ordered binary tree that underlies a
+    map, hash tables depend on having a <em>hash function</em>,
+    i.e., a function for converting a key to an integer.<a data-type="indexterm" data-primary="functions" data-secondary="hash functions">&#xa0;</a><a data-type="indexterm" data-primary="Hashtbl module">&#xa0;</a><a data-type="indexterm" data-primary="hash tables" data-secondary="time complexity of">&#xa0;</a></p><div class="allow_break" data-type="warning"><h1>Time Complexity of Hash Tables</h1><p>The statement that hash tables provide constant-time access hides some complexities.
+        First of all, any hash table implementation, OCaml's included, needs to resize the table
+        when it gets too full. A resize requires allocating a new backing array for the hash table
+        and copying over all entries, and so it is quite an expensive operation. That means adding a
+        new element to the table is only <em>amortized</em> constant, which is to say,
+        it's constant on average over a long sequence of operations, but some of the individual
+        operations can be quite expensive.</p><p>Another hidden cost of hash tables has to do with the hash function you use. If you end
+        up with a pathologically bad hash function that hashes all of your data to the same number,
+        then all of your insertions will hash to the same underlying bucket, meaning you no longer
+        get constant-time access at all. Core's hash table implementation uses binary trees for the
+        hash-buckets, so this case only leads to logarithmic time, rather than linear for a
+        traditional hash table.</p><p>The logarithmic behavior of Core's hash tables in the presence of hash collisions also
+        helps protect against some denial-of-service attacks. One well-known type of attack is to
+        send queries to a service with carefully chosen keys to cause many collisions. This, in
+        combination with the linear behavior of most hashtables, can cause the service to become
+        unresponsive due to high CPU load. Core's hash tables would be much less susceptible to such
+        an attack because the amount of degradation would be far less.<a data-type="indexterm" data-primary="security issues" data-secondary="denial-of-service attacks">&#xa0;</a><a data-type="indexterm" data-primary="denial-of-service attacks, avoiding">&#xa0;</a></p></div><p>When creating a hash table, we need to provide a value of type
+    <em>hashable</em>, which includes among other things the
+    function for hashing the key type. This is analogous to the comparator
+    used for creating maps:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 25)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let table = Hashtbl.create ~hashable:String.hashable ();;</code></strong>
+<code class="computeroutput">val table : (string, '_a) Hashtbl.t = &lt;abstr&gt;</code>
+<code class="prompt"># </code><strong><code>Hashtbl.replace table ~key:"three" ~data:3;;</code></strong>
+<code class="computeroutput">- : unit = ()</code>
+<code class="prompt"># </code><strong><code>Hashtbl.find table "three";;</code></strong>
+<code class="computeroutput">- : int option = Some 3</code></pre><p>The <code>hashable</code> value is included as
+    part of the <code>Hashable.S</code> interface, which
+    is satisfied by most types in Core. The <code>Hashable.S</code> interface also includes a <code>Table</code> submodule which provides more convenient
+    creation functions:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 26)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let table = String.Table.create ();;</code></strong>
+<code class="computeroutput">val table : '_a String.Table.t = &lt;abstr&gt;</code></pre><p>There is also a polymorphic <code>hashable</code> value, corresponding to the polymorphic
+    hash function provided by the OCaml runtime, for cases where you don't
+    have a hash function for your specific type:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 27)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let table = Hashtbl.create ~hashable:Hashtbl.Poly.hashable ();;</code></strong>
+<code class="computeroutput">val table : ('_a, '_b) Hashtbl.t = &lt;abstr&gt;</code></pre><p>Or, equivalently:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 28)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let table = Hashtbl.Poly.create ();;</code></strong>
+<code class="computeroutput">val table : ('_a, '_b) Hashtbl.t = &lt;abstr&gt;</code></pre><p>Note that, unlike the comparators used with maps and sets, hashables
+    don't show up in the type of a <code>Hashtbl.t</code>. That's because hash tables don't have
+    operations that operate on multiple hash tables that depend on those
+    tables having the same hash function, in the way that <code>Map.symmetric_diff</code> and <code>Set.union</code> depend on their arguments using the
+    same comparison function.<a data-type="indexterm" data-primary="polymorphism" data-secondary="in hash functions">&#xa0;</a></p><div data-type="warning"><h1>Collisions with the Polymorphic Hash Function</h1><p>OCaml's polymorphic hash function works by walking over the data
+      structure it’s given using a breadth-first traversal that is bounded in
+      the number of nodes it’s willing to traverse. By default, that bound is
+      set at 10 "meaningful" nodes.<a data-type="indexterm" data-primary="hash tables" data-secondary="polymorphic hash function">&#xa0;</a></p><p>The bound on the traversal means that the hash function may ignore part of the data
+        structure, and this can lead to pathological <span class="keep-together">cases</span>
+        where every value you store has the same hash value. We'll demonstrate this below, using the
+        function <code>List.range</code> to allocate lists of integers of
+        different length:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 29)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Caml.Hashtbl.hash (List.range 0 9);;</code></strong>
+<code class="computeroutput">- : int = 209331808</code>
+<code class="prompt"># </code><strong><code>Caml.Hashtbl.hash (List.range 0 10);;</code></strong>
+<code class="computeroutput">- : int = 182325193</code>
+<code class="prompt"># </code><strong><code>Caml.Hashtbl.hash (List.range 0 11);;</code></strong>
+<code class="computeroutput">- : int = 182325193</code>
+<code class="prompt"># </code><strong><code>Caml.Hashtbl.hash (List.range 0 100);;</code></strong>
+<code class="computeroutput">- : int = 182325193</code></pre><p>As you can see, the hash function stops after the first 10
+      elements. The same can happen with any large data structure, including
+      records and arrays. When building hash functions over large custom data
+      structures, it is generally a good idea to write one's own hash
+      function.</p></div><section id="satisfying-the-hashable.s-interface" data-type="sect2"><h2>Satisfying the Hashable.S Interface</h2><p>Most types in Core satisfy the <code>Hashable.S</code> interface, but as with the <code>Comparable.S</code> interface, the question remains
+      of how one should satisfy this interface when writing a new module.
+      Again, the answer is to use a functor to build the necessary
+      functionality; in this case, <code>Hashable.Make</code>. Note that we use OCaml's
+      <code>lxor</code> operator for doing the "logical"
+      (i.e., bitwise) exclusive Or of the hashes from the component
+      values:<a data-type="indexterm" data-primary="Hashable.Make">&#xa0;</a><a data-type="indexterm" data-primary="interfaces" data-secondary="Hashable.S">&#xa0;</a><a data-type="indexterm" data-primary="Hashable.S interface">&#xa0;</a><a data-type="indexterm" data-primary="hash tables" data-secondary="satisfying Hashable.S interface">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/main-30.rawscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><strong><code># module Foo_and_bar : sig
+    type t = { foo: int; bar: string }
+    include Hashable.S with type t := t
+  end = struct
+    module T = struct
+      type t = { foo: int; bar: string } with sexp, compare
+      let hash t =
+        (Int.hash t.foo) lxor (String.hash t.bar)
+    end
+    include T
+    include Hashable.Make(T)
+  end;;</code></strong>
+<code class="computeroutput">module Foo_and_bar :
+sig
+  type t = { foo : int; bar : string; }
+  module Hashable : sig type t = t end
+  val hash : t -&gt; int
+  val compare : t -&gt; t -&gt; int
+  val hashable : t Pooled_hashtbl.Hashable.t
+
+  ...
+
+end</code></pre><p>Note that in order to satisfy hashable, one also needs to provide
+      a comparison function. That's because Core's hash tables use an ordered
+      binary tree data structure for the hash-buckets, so that performance of
+      the table degrades gracefully in the case of pathologically bad choice
+      of hash function.</p><p>There is currently no analogue of <code>comparelib</code> for autogeneration of hash
+      functions, so you do need to either write the hash function by hand, or
+      use the built-in polymorphic hash function, <code>Hashtbl.hash</code>.</p></section></section><section id="choosing-between-maps-and-hash-tables" data-type="sect1"><h1>Choosing Between Maps and Hash Tables</h1><p>Maps and hash tables overlap enough in functionality that it's not
+    always clear when to choose one or the other. Maps, by virtue of being
+    immutable, are generally the default choice in OCaml. OCaml also has good
+    support for imperative programming, though, and when programming in an
+    imperative idiom, hash tables are often the more natural choice.<a data-type="indexterm" data-primary="maps" data-secondary="vs. hashtables">&#xa0;</a><a data-type="indexterm" data-primary="hash tables" data-secondary="vs. maps">&#xa0;</a></p><p>Programming idioms aside, there are significant performance differences between maps and
+      hash tables. For code that is dominated by updates and lookups, hash tables are a clear
+      performance win, and the win is clearer the larger the amount of data.</p><p>The best way of answering a performance question is by running a
+    benchmark, so let's do just that. The following benchmark uses the
+    <code>core_bench</code> library, and it compares
+    maps and hash tables under a very simple workload. Here, we're keeping
+    track of a set of 1,000 different integer keys and cycling over the keys
+    and updating the values they contain. Note that we use the <code>Map.change</code> and <code>Hashtbl.change</code> functions to update the
+    respective data structures:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/map_vs_hash.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
+open Core_bench.Std
+
+let map_iter ~num_keys ~iterations =
+  let rec loop i map =
+    if i &lt;= 0 then ()
+    else loop (i - 1)
+           (Map.change map (i mod num_keys) (fun current -&gt;
+              Some (1 + Option.value ~default:0 current)))
+  in
+  loop iterations Int.Map.empty
+
+let table_iter ~num_keys ~iterations =
+  let table = Int.Table.create ~size:num_keys () in
+  let rec loop i =
+    if i &lt;= 0 then ()
+    else (
+      Hashtbl.change table (i mod num_keys) (fun current -&gt;
+        Some (1 + Option.value ~default:0 current));
+      loop (i - 1)
+    )
+  in
+  loop iterations
+
+let tests ~num_keys ~iterations =
+  let test name f = Bench.Test.create f ~name in
+  [ test "map"   (fun () -&gt; map_iter   ~num_keys ~iterations)
+  ; test "table" (fun () -&gt; table_iter ~num_keys ~iterations)
+  ]
+
+let () =
+  tests ~num_keys:1000 ~iterations:100_000
+  |&gt; Bench.make_command
+  |&gt; Command.run</pre><p>The results show the hash table version to be around four times
+    faster than the map version:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/run_map_vs_hash.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>corebuild -pkg core_bench map_vs_hash.native</code></strong>
+<code class="prompt">$ </code><strong><code>./map_vs_hash.native -ascii -clear-columns name time speedup</code></strong>
+<code class="computeroutput">Estimated testing time 20s (change using -quota SECS).</code>
+<code class="computeroutput">                                </code>
+<code class="computeroutput">  Name     Time (ns)   Speedup  </code>
+<code class="computeroutput"> ------- ------------ --------- </code>
+<code class="computeroutput">  map     31_698_313      1.00  </code>
+<code class="computeroutput">  table    7_202_631      4.40  </code>
+<code class="computeroutput">                                </code></pre><p>We can make the speedup smaller or larger depending on the details
+    of the test; for example, it will vary with the number of distinct keys.
+    But overall, for code that is heavy on sequences of querying and updating
+    a set of key/value pairs, hash tables will significantly outperform
+    maps.</p><p>Hash tables are not always the faster choice, though. In particular,
+    maps are often more performant in situations where you need to keep
+    multiple related versions of the data structure in memory at once. That's
+    because maps are immutable, and so operations like <code>Map.add</code> that modify a map do so by creating a
+    new map, leaving the original undisturbed. Moreover, the new and old maps
+    share most of their physical structure, so multiple versions can be kept
+    around efficiently.</p><p>Here's a benchmark that demonstrates this. In it, we create a list
+    of maps (or hash tables) that are built up by iteratively applying small
+    updates, keeping these copies around. In the map case, this is done by
+    using <code>Map.change</code> to update the map. In
+    the hash table implementation, the updates are done using <code>Hashtbl.change</code>, but we also need to call
+    <code>Hashtbl.copy</code> to take snapshots of the
+    table:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/map_vs_hash2.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
+open Core_bench.Std
+
+let create_maps ~num_keys ~iterations =
+  let rec loop i map =
+    if i &lt;= 0 then []
+    else
+      let new_map =
+        Map.change map (i mod num_keys) (fun current -&gt;
+          Some (1 + Option.value ~default:0 current))
+      in
+      new_map :: loop (i - 1) new_map
+  in
+  loop iterations Int.Map.empty
+
+let create_tables ~num_keys ~iterations =
+  let table = Int.Table.create ~size:num_keys () in
+  let rec loop i =
+    if i &lt;= 0 then []
+    else (
+      Hashtbl.change table (i mod num_keys) (fun current -&gt;
+        Some (1 + Option.value ~default:0 current));
+      let new_table = Hashtbl.copy table in
+      new_table :: loop (i - 1)
+    )
+  in
+  loop iterations
+
+let tests ~num_keys ~iterations =
+  let test name f = Bench.Test.create f ~name in
+  [ test "map"   (fun () -&gt; ignore (create_maps   ~num_keys ~iterations))
+  ; test "table" (fun () -&gt; ignore (create_tables ~num_keys ~iterations))
+  ]
+
+let () =
+  tests ~num_keys:50 ~iterations:1000
+  |&gt; Bench.make_command
+  |&gt; Command.run</pre><p>Unsurprisingly, maps perform far better than hash tables on this
+    benchmark, in this case by more than a factor of 10:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/maps-and-hash-tables/run_map_vs_hash2.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>corebuild -pkg core_bench map_vs_hash2.native</code></strong>
+<code class="prompt">$ </code><strong><code>./map_vs_hash2.native -ascii -clear-columns name time speedup</code></strong>
+<code class="computeroutput">Estimated testing time 20s (change using -quota SECS).</code>
+<code class="computeroutput">                               </code>
+<code class="computeroutput">  Name    Time (ns)   Speedup  </code>
+<code class="computeroutput"> ------- ----------- --------- </code>
+<code class="computeroutput">  map       218_581     12.03  </code>
+<code class="computeroutput">  table   2_628_423      1.00  </code>
+<code class="computeroutput">                               </code></pre><p>These numbers can be made more extreme by increasing the size of the
+    tables or the length of the list.</p><p>As you can see, the relative performance of trees and maps depends a
+    great deal on the details of how they're used, and so whether to choose
+    one data structure or the other will depend on the details of the
+    application.<a data-type="indexterm" data-primary="phys_equal function">&#xa0;</a><a data-type="indexterm" data-primary="equal equal (= =) operator">&#xa0;</a><a data-type="indexterm" data-primary="equal (=) operator">&#xa0;</a><a data-type="indexterm" data-primary="structural equality">&#xa0;</a><a data-type="indexterm" data-primary="physical equality">&#xa0;</a><a data-type="indexterm" data-primary="equality, tests of">&#xa0;</a></p></section></section>

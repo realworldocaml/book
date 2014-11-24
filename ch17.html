@@ -1,0 +1,513 @@
+<section xmlns="http://www.w3.org/1999/xhtml" id="data-serialization-with-s-expressions" data-type="chapter"><h1>Data Serialization with S-Expressions</h1><p>S-expressions are nested parenthetical expressions whose atomic values
+  are strings. They were first popularized by the Lisp programming language in
+  the 1960s. They have remained one of the simplest and most effective ways to
+  encode structured data in a human-readable and editable form.<a data-type="indexterm" id="SERFORMsexp" data-primary="serialization formats" data-secondary="s-expressions">&#xa0;</a><a data-type="indexterm" data-primary="s-expressions" data-secondary="uses for">&#xa0;</a><a data-type="indexterm" data-primary="data serialization" data-secondary="with s-expressions">&#xa0;</a></p><p>There's a full definition of s-expressions available <a href="http://people.csail.mit.edu/rivest/Sexp.txt">online</a>. An example
+  s-expression might look like this:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/basic.scm" class="orm:hideurl:ital"><em class="hyperlink">Scheme</em></a></p><pre data-type="programlisting" data-code-language="scheme">(this (is an) (s expression))</pre><p>S-expressions play a major role in Core, effectively acting as the
+  default serialization format. Indeed, we've encountered s-expressions
+  multiple times already, including in <a href="#error-handling" data-type="xref">#error-handling</a>,
+  <a href="#functors" data-type="xref">#functors</a>, and <a href="#first-class-modules" data-type="xref">#first-class-modules</a>.</p><p>This chapter will go into s-expressions in more depth. In particular,
+  we'll discuss:</p><ul><li><p>The details of the s-expression format, including how to parse it while generating good
+        error messages for debugging malformed inputs</p></li><li><p>How to generate s-expressions from arbitrary OCaml types</p></li><li><p>How to use custom type annotations to control the exact printing
+      behavior for s-expression converters</p></li><li><p>How to integrate s-expressions into your interfaces, in particular how to add
+        s-expression converters to a module without breaking abstraction boundaries</p></li></ul><p>We'll tie this together at the end of the chapter with a simple s-expression formatted
+    configuration file for a web server</p><section id="basic-usage" data-type="sect1"><h1>Basic Usage</h1><p>The type used to represent an s-expression is quite
+    simple:<a data-type="indexterm" data-primary="s-expressions" data-secondary="basic usage of">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp.mli" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">module Sexp : sig
+  type t =
+  | Atom of string
+  | List of t list
+end</pre><p>An s-expression can be thought of as a tree where each node contains
+    a list of its children, and where the leaves of the tree are strings. Core
+    provides good support for s-expressions in its <code>Sexp</code> module, including functions for converting
+    s-expressions to and from strings. Let's rewrite our example s-expression
+    in terms of this type:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/print_sexp.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Sexp.List [</code></strong>
+<strong><code>    Sexp.Atom "this";</code></strong>
+<strong><code>    Sexp.List [ Sexp.Atom "is"; Sexp.Atom "an"];</code></strong>
+<strong><code>    Sexp.List [ Sexp.Atom "s"; Sexp.Atom "expression" ];</code></strong>
+<strong><code>  ];;</code></strong>
+<code class="computeroutput">- : Sexp.t = (this (is an) (s expression))</code></pre><p>This prints out nicely because Core registers a pretty printer with
+    the toplevel. This pretty printer is based on the functions in <code>Sexp</code> for converting s-expressions to and from
+    strings:<a data-type="indexterm" data-primary="pretty printers">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_printer.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Sexp.to_string (Sexp.List [Sexp.Atom "1"; Sexp.Atom "2"]) ;;</code></strong>
+<code class="computeroutput">- : string = "(1 2)"</code>
+<code class="prompt"># </code><strong><code>Sexp.of_string ("(1 2 (3 4))") ;;</code></strong>
+<code class="computeroutput">- : Sexp.t = (1 2 (3 4))</code></pre><p>In addition to providing the <code>Sexp</code>
+    module, most of the base types in Core support conversion to and from
+    s-expressions. For example, we can use the conversion functions defined in
+    the respective modules for integers, strings, and exceptions:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/to_from_sexp.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Int.sexp_of_t 3;;</code></strong>
+<code class="computeroutput">- : Sexp.t = 3</code>
+<code class="prompt"># </code><strong><code>String.sexp_of_t "hello";;</code></strong>
+<code class="computeroutput">- : Sexp.t = hello</code>
+<code class="prompt"># </code><strong><code>Exn.sexp_of_t (Invalid_argument "foo");;</code></strong>
+<code class="computeroutput">- : Sexp.t = (Invalid_argument foo)</code></pre><p>It's also possible to convert more complex types such as lists or
+    arrays that are polymorphic across the types that they can contain:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/to_from_sexp.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>List.sexp_of_t;;</code></strong>
+<code class="computeroutput">- : ('a -&gt; Sexp.t) -&gt; 'a list -&gt; Sexp.t = &lt;fun&gt;</code>
+<code class="prompt"># </code><strong><code>List.sexp_of_t Int.sexp_of_t [1; 2; 3];;</code></strong>
+<code class="computeroutput">- : Sexp.t = (1 2 3)</code></pre><p>Notice that <code>List.sexp_of_t</code> is
+    polymorphic and takes as its first argument another conversion function to
+    handle the elements of the list to be converted. Core uses this scheme
+    more generally for defining sexp converters for polymorphic types.</p><p>The functions that go in the other direction, <em>i.e.</em>, reconstruct an
+      OCaml value from an s-expression, use essentially the same trick for handling polymorphic
+      types, as shown in the following example. Note that these functions will fail with an
+      exception when presented with an s-expression that doesn't match the structure of the OCaml
+      type in question.</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/to_from_sexp.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 2)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>List.t_of_sexp;;</code></strong>
+<code class="computeroutput">- : (Sexp.t -&gt; 'a) -&gt; Sexp.t -&gt; 'a list = &lt;fun&gt;</code>
+<code class="prompt"># </code><strong><code>List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 3)");;</code></strong>
+<code class="computeroutput">- : int list = [1; 2; 3]</code>
+<code class="prompt"># </code><strong><code>List.t_of_sexp Int.t_of_sexp (Sexp.of_string "(1 2 three)");;</code></strong>
+<code class="computeroutput">Exception:</code>
+<code class="computeroutput">(Sexplib.Conv.Of_sexp_error (Failure "int_of_sexp: (Failure int_of_string)")</code>
+<code class="computeroutput"> three).</code></pre><div data-type="note"><h1>More on Top-Level Printing</h1><p>The values of the s-expressions that we created were printed
+      properly as s-expressions in the toplevel, instead of as the tree of
+      <code>Atom</code> and <code>List</code> variants that they're actually made
+      of.<a data-type="indexterm" data-primary="top-level printers">&#xa0;</a></p><p>This is due to OCaml's facility for installing custom
+      <em>top-level printers</em> that can rewrite some values
+      into more top-level-friendly equivalents. They are generally installed
+      as <span class="command"><em>ocamlfind</em></span> packages ending in
+      <code>top</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/list_top_packages.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocamlfind list | grep top</code></strong>
+<code class="computeroutput">compiler-libs.toplevel (version: [distributed with Ocaml])</code>
+<code class="computeroutput">core.top            (version: 109.37.00)</code>
+<code class="computeroutput">ctypes.top          (version: 0.1)</code>
+<code class="computeroutput">lwt.simple-top      (version: 2.4.3)</code>
+<code class="computeroutput">num-top             (version: 1.3.3)</code>
+<code class="computeroutput">sexplib.top         (version: 109.20.00)</code>
+<code class="computeroutput">uri.top             (version: 1.3.8)</code></pre><p>The <code>core.top</code> package (which you
+      should have loaded by default in your <code>.ocamlinit</code> file) loads in printers for the
+      Core extensions already, so you don't need to do anything special to use
+      the s-expression printer.</p></div><section id="generating-s-expressions-from-ocaml-types" data-type="sect2"><h2>Generating S-Expressions from OCaml Types</h2><p>But what if you want a function to convert a brand new type to an
+      s-expression? You can of course write it yourself manually. Here's an
+      example:<a data-type="indexterm" data-primary="s-expressions" data-secondary="generating from OCaml types">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/manually_making_sexp.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type t = { foo: int; bar: float } ;;</code></strong>
+<code class="computeroutput">type t = { foo : int; bar : float; }</code>
+<code class="prompt"># </code><strong><code>let sexp_of_t t =</code></strong>
+<strong><code>    let a x = Sexp.Atom x and l x = Sexp.List x in</code></strong>
+<strong><code>    l [ l [a "foo"; Int.sexp_of_t t.foo  ];</code></strong>
+<strong><code>        l [a "bar"; Float.sexp_of_t t.bar]; ] ;;</code></strong>
+<code class="computeroutput">val sexp_of_t : t -&gt; Sexp.t = &lt;fun&gt;</code>
+<code class="prompt"># </code><strong><code>sexp_of_t { foo = 3; bar = -5.5 } ;;</code></strong>
+<code class="computeroutput">- : Sexp.t = ((foo 3) (bar -5.5))</code></pre><p>This is somewhat tiresome to write, and it gets more so when you
+      consider the parser, i.e., <code>t_of_sexp</code>,
+      which is considerably more complex. Writing this kind of parsing and
+      printing code by hand is mechanical and error prone, not to mention a
+      drag.</p><p>Given how mechanical the code is, you could imagine writing a program that inspected the
+        type definition and autogenerated the conversion code for you. As it turns out, Sexplib does
+        just that. <code>Sexplib</code>, which is included with Core, provides
+        both a library for manipulating s-expressions and a <em>syntax extension</em>
+        for generating such conversion functions. With that syntax extension enabled, any type that
+        has <code>with sexp</code> as an annotation will trigger the
+        generation of the functions we want:<a data-type="indexterm" data-primary="Sexplib package" data-secondary="syntax extension in">&#xa0;</a><a data-type="indexterm" data-primary="syntax extension" data-secondary="in Sexplib package">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/auto_making_sexp.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type t = { foo: int; bar: float } with sexp ;;</code></strong>
+<code class="computeroutput">type t = { foo : int; bar : float; }</code>
+<code class="computeroutput">val t_of_sexp : Sexp.t -&gt; t = &lt;fun&gt;</code>
+<code class="computeroutput">val sexp_of_t : t -&gt; Sexp.t = &lt;fun&gt;</code>
+<code class="prompt"># </code><strong><code>t_of_sexp (Sexp.of_string "((bar 35) (foo 3))") ;;</code></strong>
+<code class="computeroutput">- : t = {foo = 3; bar = 35.}</code></pre><p>The syntax extension can be used outside of type declarations as
+      well. As discussed in <a href="#error-handling" data-type="xref">#error-handling</a>, <code>with sexp</code> can be attached to the declaration
+      of an exception, which will improve the ability of Core to generate a
+      useful string representation:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/auto_making_sexp.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>exception Bad_message of string list ;;</code></strong>
+<code class="computeroutput">exception Bad_message of string list</code>
+<code class="prompt"># </code><strong><code>Exn.to_string (Bad_message ["1";"2";"3"]) ;;</code></strong>
+<code class="computeroutput">- : string = "(\"Bad_message(_)\")"</code>
+<code class="prompt"># </code><strong><code>exception Good_message of string list with sexp;;</code></strong>
+<code class="computeroutput">exception Good_message of string list</code>
+<code class="prompt"># </code><strong><code>Exn.to_string (Good_message ["1";"2";"3"]) ;;</code></strong>
+<code class="computeroutput">- : string = "(//toplevel//.Good_message (1 2 3))"</code></pre><?hard-pagebreak?><p>You don't always have to declare a named type to create an
+      s-expression converter. The following syntax lets you create one inline,
+      as part of a larger expression:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/inline_sexp.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let l = [(1,"one"); (2,"two")] ;;</code></strong>
+<code class="computeroutput">val l : (int * string) list = [(1, "one"); (2, "two")]</code>
+<code class="prompt"># </code><strong><code>List.iter l ~f:(fun x -&gt;</code></strong>
+<strong><code>    &lt;:sexp_of&lt;int * string&gt;&gt; x</code></strong>
+<strong><code>    |&gt; Sexp.to_string</code></strong>
+<strong><code>    |&gt; print_endline) ;;</code></strong>
+<code class="computeroutput">(1 one)</code>
+<code class="computeroutput">(2 two)</code>
+<code class="computeroutput">- : unit = ()</code></pre><p>The declaration <code>&lt;:sexp_of&lt;int *
+      string&gt;&gt;</code> simply gets expanded to the sexp converter for
+      the type <code>int * string</code>. This is useful
+      whenever you need a sexp converter for an anonymous type.</p><p>The syntax extensions bundled with Core almost all have the same
+      basic structure: they autogenerate code based on type definitions,
+      implementing functionality that you could in theory have implemented by
+      hand, but with far less programmer effort.</p><div data-type="note"><h1>Syntax Extensions, Camlp4, and Type_conv</h1><p>OCaml doesn't directly support generating code from type
+        definitions. Instead, it supplies a powerful syntax extension
+        mechanism known as Camlp4, which lets you extend the grammar of the
+        language. Camlp4 is well integrated into the OCaml toolchain and can
+        be activated within the toplevel and also included in compilation
+        using the <code>-pp</code> compiler
+        flag.<a data-type="indexterm" data-primary="Camlp4 syntax extension mechanism">&#xa0;</a><a data-type="indexterm" data-primary="syntax extension" data-secondary="in Camlp4">&#xa0;</a></p><p>Sexplib is part of a family of syntax extensions, including
+        Comparelib, described in <a href="#maps-and-hash-tables" data-type="xref">#maps-and-hash-tables</a>, and
+        Fieldslib, described in <a href="#records" data-type="xref">#records</a>, that generate code
+        based on type declarations and are all based on a common library
+        called Type_conv. This library provides a common language for
+        annotating types (e.g., using the <code>with</code> notation) and utilities for working
+        with type definitions. If you want to build your own type-driven
+        syntax extension, you should consider basing it on
+        Type_conv.<a data-type="indexterm" data-primary="Type_conv library">&#xa0;</a><a data-type="indexterm" data-primary="Sexplib package" data-secondary="Type_conv library and">&#xa0;</a></p></div></section></section><section id="the-sexp-format" data-type="sect1"><h1>The Sexp Format</h1><p>The textual representation of s-expressions is pretty
+    straightforward. An s-expression is written down as a nested parenthetical
+    expression, with whitespace-separated strings as the atoms. Quotes are
+    used for atoms that contain parentheses or spaces themselves; backslash is
+    the escape character; and semicolons are used to introduce single-line
+    comments. Thus, the following file, <em class="filename">example.scm</em>:<a data-type="indexterm" data-primary="s-expressions" data-secondary="format of">&#xa0;</a></p><?hard-pagebreak?><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/example.scm" class="orm:hideurl:ital"><em class="hyperlink">Scheme</em></a></p><pre data-type="programlisting" data-code-language="scheme">;; example.scm
+
+((foo 3.3) ;; This is a comment
+ (bar "this is () an \" atom"))</pre><p>can be loaded using Sexplib. As you can see, the commented data is
+    not part of the resulting s-expression:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/example_load.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Sexp.load_sexp "example.scm" ;;</code></strong>
+<code class="computeroutput">- : Sexp.t = ((foo 3.3) (bar "this is () an \" atom"))</code></pre><p>All in, the s-expression format supports three comment
+    syntaxes:</p><dl><dt><code>;</code></dt><dd><p>Comments out everything to the end of line</p></dd><dt><code>#|</code></dt><dt><code>|#</code></dt><dd><p>Delimiters for commenting out a block</p></dd><dt><code>#;</code></dt><dd><p>Comments out the first complete s-expression that
+          follows</p></dd></dl><p>The following example shows all of these in action:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/comment_heavy.scm" class="orm:hideurl:ital"><em class="hyperlink">Scheme</em></a></p><pre data-type="programlisting">;; comment_heavy_example.scm
+((this is included)
+ ; (this is commented out
+ (this stays)
+ #; (all of this is commented
+     out (even though it crosses lines.))
+  (and #| block delimiters #| which can be nested |#
+     will comment out
+    an arbitrary multi-line block))) |#
+   now we're done
+   ))</pre><p>Again, loading the file as an s-expression drops the
+    comments:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/example_load.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Sexp.load_sexp "comment_heavy.scm" ;;</code></strong>
+<code class="computeroutput">- : Sexp.t = ((this is included) (this stays) (and now we're done))</code></pre><p>If we introduce an error into our s-expression, by, say, creating a
+    file <code>broken_example.scm</code> which is
+    <code>example.scm</code>, without open-paren in
+    front of <code>bar</code>, we'll get a parse
+    error:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/example_load.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    (part 2)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Exn.handle_uncaught ~exit:false (fun () -&gt;</code></strong>
+<strong><code>    ignore (Sexp.load_sexp "example_broken.scm")) ;;</code></strong>
+<code class="computeroutput">Uncaught exception:</code>
+<code class="computeroutput">  </code>
+<code class="computeroutput">  (Sexplib.Sexp.Parse_error</code>
+<code class="computeroutput">   ((location parse) (err_msg "unexpected character: ')'") (text_line 4)</code>
+<code class="computeroutput">    (text_char 29) (global_offset 78) (buf_pos 78)))</code>
+<code class="computeroutput">- : unit = ()</code></pre><p>In the preceding example, we use <code>Exn.handle_uncaught</code> to make sure that the
+    exception gets printed out in full detail. You should generally wrap every
+    Core program in this handler to get good error messages for any unexpected
+    exceptions.</p></section><section id="preserving-invariants" data-type="sect1"><h1>Preserving Invariants</h1><p>The most important functionality provided by Sexplib is the
+    autogeneration of converters for new types. We've seen a bit of how this
+    works already, but let's walk through a complete example. Here's the
+    source for a simple library for representing integer intervals, very
+    similar to the one described in <a href="#functors" data-type="xref">#functors</a>:<a data-type="indexterm" data-primary="s-expressions" data-secondary="preserving invariants in">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/int_interval.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">(* Module for representing closed integer intervals *)
+open Core.Std
+
+(* Invariant: For any Range (x,y), y &gt;= x *)
+type t =
+  | Range of int * int
+  | Empty
+with sexp
+
+let is_empty =
+  function 
+  | Empty -&gt; true 
+  | Range _ -&gt; false
+
+let create x y =
+  if x &gt; y then
+    Empty 
+  else 
+    Range (x,y)
+
+let contains i x =
+  match i with
+  | Empty -&gt; false
+  | Range (low,high) -&gt; x &gt;= low &amp;&amp; x &lt;= high</pre><p>We can now use this module as follows:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/test_interval.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
+
+let intervals =
+  let module I = Int_interval in
+  [ I.create 3 4;
+    I.create 5 4; (* should be empty *)
+    I.create 2 3;
+    I.create 1 6;
+  ]
+
+let () =
+  intervals
+  |&gt; List.sexp_of_t Int_interval.sexp_of_t
+  |&gt; Sexp.to_string_hum
+  |&gt; print_endline</pre><p>But we're still missing something: we haven't created an <code>mli</code> signature for <code>Int_interval</code> yet. Note that we need to
+    explicitly export the s-expression converters that were created within the
+    <code>ml</code> file. For example, here's an
+    interface that doesn't export the s-expression functions:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/int_interval_nosexp.mli" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type t
+
+val is_empty : t -&gt; bool
+val create : int -&gt; int -&gt; t
+val contains : t -&gt; int -&gt; bool</pre><p>Building this will give us the following error:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/build_test_interval_nosexp.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>corebuild test_interval_nosexp.native</code></strong>
+<code class="computeroutput">File "test_interval_nosexp.ml", line 14, characters 20-42:</code>
+<code class="computeroutput">Error: Unbound value Int_interval.sexp_of_t</code>
+<code class="computeroutput">Command exited with code 2.</code></pre><p>We could export the types by hand in the signature, by writing the
+    signatures for the extra functions generated by Sexplib:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/int_interval_manual_sexp.mli" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
+
+type t
+val t_of_sexp : Sexp.t -&gt; t
+val sexp_of_t : t -&gt; Sexp.t
+
+val is_empty : t -&gt; bool
+val create : int -&gt; int -&gt; t
+val contains : t -&gt; int -&gt; bool</pre><p>This isn't an ideal solution, as it makes you repeatedly expose
+    these extra functions in every signature you create where you want to
+    serialize values. Sexplib solves this by exposing the same syntax
+    extension in signature definitions so that we can just use the same
+    <code>with</code> shorthand in the <code>mli</code> file. Here's the final version of the
+    signature that does just this:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/int_interval.mli" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type t with sexp
+
+val is_empty : t -&gt; bool
+val create : int -&gt; int -&gt; t
+val contains : t -&gt; int -&gt; bool</pre><p>At this point, <code>test_interval.ml</code>
+    will compile again, and if we run it, we'll get the following
+    output:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/build_test_interval.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>corebuild test_interval.native</code></strong>
+<code class="prompt">$ </code><strong><code>./test_interval.native</code></strong>
+<code class="computeroutput">((Range 3 4) Empty (Range 2 3) (Range 1 6))</code></pre><p>One easy mistake to make when dealing with sexp converters is to
+    ignore the fact that those converters can violate the invariants of your
+    code. For example, the <code>Int_interval</code>
+    module depends for the correctness of the <code>is_empty</code> check on the fact that for any value
+    <code>Range (x,y)</code>, <code>y</code> is greater than or equal to <code>x</code>. The <code>create</code>
+    function preserves this invariant, but the <code>t_of_sexp</code> function does not.<a data-type="indexterm" data-primary="invariant checks">&#xa0;</a></p><p>We can fix this problem by overriding the autogenerated function and
+    writing a custom sexp converter that wraps the autogenerated converter
+    with whatever invariant checks are necessary:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_override.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type t =
+  | Range of int * int
+  | Empty
+with sexp
+
+let create x y =
+  if x &gt; y then Empty else Range (x,y)
+
+let t_of_sexp sexp =
+  let t = t_of_sexp sexp in
+  begin match t with
+    | Empty -&gt; ()
+    | Range (x,y) -&gt;
+      if y &lt; x then of_sexp_error "Upper and lower bound of Range swapped" sexp
+  end;
+  t</pre><p>This trick of overriding an existing function definition with a new
+    one is perfectly acceptable in OCaml. Since <code>t_of_sexp</code> is defined with an ordinary <code>let</code> rather than a <code>let
+    rec</code>, the call to the <code>t_of_sexp</code> goes to the Sexplib-generated version
+    of the function, rather than being a recursive call.</p><p>Another important aspect of our definition is that we call the
+    function <code>of_sexp_error</code> to raise an
+    exception when the parsing process fails. This improves the error
+    reporting that Sexplib can provide when a conversion fails, as we'll see
+    in the next section.</p></section><section id="getting-good-error-messages" data-type="sect1"><h1>Getting Good Error Messages</h1><p>There are two steps to deserializing a type from an s-expression:
+    first, converting the bytes in a file to an s-expression; and the second,
+    converting that s-expression into the type in question. One problem with
+    this is that it can be hard to localize errors to the right place using
+    this scheme. Consider the following example:<a data-type="indexterm" data-primary="debugging" data-secondary="s-expressions">&#xa0;</a><a data-type="indexterm" data-primary="errors" data-secondary="error messages with s-expressions">&#xa0;</a><a data-type="indexterm" data-primary="s-expressions" data-secondary="deserializing a type from">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/read_foo.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
+
+type t = { 
+  a: string;
+  b: int;
+  c: float option 
+} with sexp
+
+let run () =
+  let t =
+    Sexp.load_sexp "foo_broken_example.scm"
+    |&gt; t_of_sexp
+  in
+  printf "b is: %d\n%!" t.b
+
+let () =
+  Exn.handle_uncaught ~exit:true run</pre><p>If you were to run this on a malformatted file, say, this
+    one:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/foo_broken_example.scm" class="orm:hideurl:ital"><em class="hyperlink">Scheme</em></a></p><pre data-type="programlisting" data-code-language="scheme">((a "not-an-integer")
+ (b "not-an-integer")
+ (c 1.0))</pre><p>you'll get the following error:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/build_read_foo.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>corebuild read_foo.native</code></strong>
+<code class="prompt">$ </code><strong><code>./read_foo.native foo_example_broken.scm</code></strong>
+<code class="computeroutput">Uncaught exception:</code>
+<code class="computeroutput">  </code>
+<code class="computeroutput">  (Sexplib.Conv.Of_sexp_error</code>
+<code class="computeroutput">   (Failure "int_of_sexp: (Failure int_of_string)") not-an-integer)</code>
+<code class="computeroutput"> </code>
+<code class="computeroutput">Raised at file "lib/conv.ml", line 281, characters 36-72</code>
+<code class="computeroutput">Called from file "lib/core_int.ml", line 6, characters 7-14</code>
+<code class="computeroutput">Called from file "lib/std_internal.ml", line 115, characters 7-33</code>
+<code class="computeroutput">Called from file "read_foo.ml", line 5, characters 2-8</code>
+<code class="computeroutput">Called from file "read_foo.ml", line 4, characters 2-40</code>
+<code class="computeroutput">Called from file "read_foo.ml", line 11, characters 4-60</code>
+<code class="computeroutput">Called from file "lib/exn.ml", line 87, characters 6-10</code></pre><p>If all you have is the error message and the string, it's not
+    terribly informative. In particular, you know that the parsing errored out
+    on the atom "not-an-integer," but you don't know which one! In a large
+    file, this kind of bad error message can be pure misery.</p><p>But there's hope! We can make a small change to the code to improve
+    the error message greatly:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/read_foo_better_errors.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
+
+type t = { 
+  a: string;
+  b: int;
+  c: float option 
+} with sexp
+
+let run () =
+  let t = Sexp.load_sexp_conv_exn "foo_broken_example.scm" t_of_sexp in
+  printf "b is: %d\n%!" t.b
+
+let () =
+  Exn.handle_uncaught ~exit:true run</pre><p>If we run it again, we'll see a much more specific error:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/build_read_foo_better_errors.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>corebuild read_foo_better_errors.native</code></strong>
+<code class="prompt">$ </code><strong><code>./read_foo_better_errors.native foo_example_broken.scm</code></strong>
+<code class="computeroutput">Uncaught exception:</code>
+<code class="computeroutput">  </code>
+<code class="computeroutput">  (Sexplib.Conv.Of_sexp_error</code>
+<code class="computeroutput">   (Sexplib.Sexp.Annotated.Conv_exn foo_broken_example.scm:2:5</code>
+<code class="computeroutput">    (Failure "int_of_sexp: (Failure int_of_string)"))</code>
+<code class="computeroutput">   not-an-integer)</code>
+<code class="computeroutput"> </code>
+<code class="computeroutput">Raised at file "lib/pre_sexp.ml", line 1145, characters 12-58</code>
+<code class="computeroutput">Called from file "read_foo_better_errors.ml", line 10, characters 10-68</code>
+<code class="computeroutput">Called from file "lib/exn.ml", line 87, characters 6-10</code></pre><p>In the preceding error, <code class="computeroutput">foo_broken_example.scm:2:5</code> tells us that
+    the error occurred in the file <code class="computeroutput">"foo_broken_example.scm"</code> on line 2,
+    character 5. This is a much better start for figuring out what went wrong.
+    The ability to find the precise location of the error depends on the sexp
+    converter reporting errors using the function <code>of_sexp_error</code>. This is already done by
+    converters generated by Sexplib, but you should make sure to do the same
+    when you write custom converters.</p></section><section id="sexp-conversion-directives" data-type="sect1"><h1>Sexp-Conversion Directives</h1><p>Sexplib supports a collection of directives for modifying the
+    default behavior of the autogenerated sexp converters. These directives
+    allow you to customize the way in which types are represented as
+    s-expressions without having to write a custom converter.<a data-type="indexterm" data-primary="s-expressions" data-secondary="modifying default behavior of">&#xa0;</a></p><p>Note that the extra directives aren't part of the standard OCaml
+    syntax, but are added via the Sexplib syntax extension. However, since
+    Sexplib is used throughout Core and is part of the standard bundle
+    activated by <span class="command"><em>corebuild</em></span>, you can use
+    these in your own Core code without any special effort.</p><section id="sexp_opaque" data-type="sect2"><h2>sexp_opaque</h2><p>The most commonly used directive is <code>sexp_opaque</code>, whose purpose is to mark a given
+      component of a type as being unconvertible. Anything marked with
+      <code>sexp_opaque</code> will be presented as the
+      atom <code>&lt;opaque&gt;</code> by the to-sexp
+      converter, and will trigger an exception from the from-sexp
+      converter.<a data-type="indexterm" data-primary="Sexplib package" data-secondary="sexp_opaque">&#xa0;</a></p><p>Note that the type of a component marked as opaque doesn't need to
+      have a sexp converter defined. Here, if we define a type without a sexp
+      converter and then try to use another type with a sexp converter, we'll
+      error out:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_opaque.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type no_converter = int * int ;;</code></strong>
+<code class="computeroutput">type no_converter = int * int</code>
+<code class="prompt"># </code><strong><code>type t = { a: no_converter; b: string } with sexp ;;</code></strong>
+<code class="computeroutput">Characters 14-26:</code>
+<code class="computeroutput">Error: Unbound value no_converter_of_sexp</code></pre><p>But with <code>sexp_opaque</code>, we can
+      embed our opaque <code>no_converter</code> type
+      within the other data structure without an error.</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_opaque.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type t = { a: no_converter sexp_opaque; b: string } with sexp ;;</code></strong>
+<code class="computeroutput">type t = { a : no_converter; b : string; }</code>
+<code class="computeroutput">val t_of_sexp : Sexp.t -&gt; t = &lt;fun&gt;</code>
+<code class="computeroutput">val sexp_of_t : t -&gt; Sexp.t = &lt;fun&gt;</code></pre><p>And if we now convert a value of this type to an s-expression,
+      we'll see the contents of field <code>a</code>
+      marked as opaque:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_opaque.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 2)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>sexp_of_t { a = (3,4); b = "foo" } ;;</code></strong>
+<code class="computeroutput">- : Sexp.t = ((a &lt;opaque&gt;) (b foo))</code></pre><p>Note that the <code>t_of_sexp</code>
+      function for an opaque type is generated, but will fail at runtime if it
+      is used:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_opaque.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 3)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>t_of_sexp (Sexp.of_string "((a whatever) (b foo))") ;;</code></strong>
+<code class="computeroutput">Exception:</code>
+<code class="computeroutput">(Sexplib.Conv.Of_sexp_error</code>
+<code class="computeroutput"> (Failure "opaque_of_sexp: cannot convert opaque values") whatever).</code></pre><p>This is there to allow for s-expression converters to be created
+      for types containing <code>sexp_opaque</code>
+      values. This is useful because the resulting converters won't
+      necessarily fail on all inputs. For example, if you have a record
+      containing a <code>no_converter list</code>, the
+      <code>t_of_sexp</code> function would still
+      succeed when the list is empty:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_opaque.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 4)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type t = { a: no_converter sexp_opaque list; b: string } with sexp ;;</code></strong>
+<code class="computeroutput">type t = { a : no_converter list; b : string; }</code>
+<code class="computeroutput">val t_of_sexp : Sexp.t -&gt; t = &lt;fun&gt;</code>
+<code class="computeroutput">val sexp_of_t : t -&gt; Sexp.t = &lt;fun&gt;</code>
+<code class="prompt"># </code><strong><code>t_of_sexp (Sexp.of_string "((a ()) (b foo))") ;;</code></strong>
+<code class="computeroutput">- : t = {a = []; b = "foo"}</code></pre><p>If you really only want to generate one direction of converter,
+      one can do this by annotating the type with <code>with sexp_of</code> or <code>with
+      of_sexp</code> instead of <code>with
+      sexp</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_opaque.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 5)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type t = { a: no_converter sexp_opaque; b: string } with sexp_of ;;</code></strong>
+<code class="computeroutput">type t = { a : no_converter; b : string; }</code>
+<code class="computeroutput">val sexp_of_t : t -&gt; Sexp.t = &lt;fun&gt;</code>
+<code class="prompt"># </code><strong><code>type t = { a: no_converter sexp_opaque; b: string } with of_sexp ;;</code></strong>
+<code class="computeroutput">type t = { a : no_converter; b : string; }</code>
+<code class="computeroutput">val t_of_sexp : Sexp.t -&gt; t = &lt;fun&gt;</code></pre></section><section id="sexp_list" data-type="sect2"><h2>sexp_list</h2><p>Sometimes, sexp converters have more parentheses than one would
+      ideally like. Consider, for example, the following variant
+      type:<a data-type="indexterm" data-primary="Sexplib package" data-secondary="sexp_list">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_list.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type compatible_versions =</code></strong>
+<strong><code>  | Specific of string list</code></strong>
+<strong><code>  | All with sexp ;;</code></strong>
+<code class="computeroutput">type compatible_versions = Specific of string list | All</code>
+<code class="computeroutput">val compatible_versions_of_sexp : Sexp.t -&gt; compatible_versions = &lt;fun&gt;</code>
+<code class="computeroutput">val sexp_of_compatible_versions : compatible_versions -&gt; Sexp.t = &lt;fun&gt;</code>
+<code class="prompt"># </code><strong><code>sexp_of_compatible_versions</code></strong>
+<strong><code>  (Specific ["3.12.0"; "3.12.1"; "3.13.0"]) ;;</code></strong>
+<code class="computeroutput">- : Sexp.t = (Specific (3.12.0 3.12.1 3.13.0))</code></pre><p>You might prefer to make the syntax a bit less parenthesis-laden
+      by dropping the parentheses around the list. We can replace the <code>string list</code> in the type declaration with
+      <code>string sexp_list</code> to give us this
+      alternate syntax:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_list.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type compatible_versions =</code></strong>
+<strong><code>  | Specific of string sexp_list</code></strong>
+<strong><code>  | All with sexp ;;</code></strong>
+<code class="computeroutput">type compatible_versions = Specific of string list | All</code>
+<code class="computeroutput">val compatible_versions_of_sexp : Sexp.t -&gt; compatible_versions = &lt;fun&gt;</code>
+<code class="computeroutput">val sexp_of_compatible_versions : compatible_versions -&gt; Sexp.t = &lt;fun&gt;</code>
+<code class="prompt"># </code><strong><code>sexp_of_compatible_versions</code></strong>
+<strong><code>  (Specific ["3.12.0"; "3.12.1"; "3.13.0"]) ;;</code></strong>
+<code class="computeroutput">- : Sexp.t = (Specific 3.12.0 3.12.1 3.13.0)</code></pre></section><section id="sexp_option" data-type="sect2"><h2>sexp_option</h2><p>Another common directive is <code>sexp_option</code>, which is used to make a record
+      field optional in the s-expression. Normally, optional values are
+      represented either as <code>()</code> for <code>None</code>, or as <code>(x)</code> for <code>Some
+      x</code>, and a record field containing an option would be rendered
+      accordingly. For example:<a data-type="indexterm" data-primary="Sexplib package" data-secondary="sexp_option">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_option.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type t = { a: int option; b: string } with sexp ;;</code></strong>
+<code class="computeroutput">type t = { a : int option; b : string; }</code>
+<code class="computeroutput">val t_of_sexp : Sexp.t -&gt; t = &lt;fun&gt;</code>
+<code class="computeroutput">val sexp_of_t : t -&gt; Sexp.t = &lt;fun&gt;</code>
+<code class="prompt"># </code><strong><code>sexp_of_t { a = None; b = "hello" } ;;</code></strong>
+<code class="computeroutput">- : Sexp.t = ((a ()) (b hello))</code>
+<code class="prompt"># </code><strong><code>sexp_of_t { a = Some 3; b = "hello" } ;;</code></strong>
+<code class="computeroutput">- : Sexp.t = ((a (3)) (b hello))</code></pre><p>But what if we want a field to be optional, i.e., we want to allow
+      it to be omitted from the record entirely? In that case, we can mark it
+      with <code>sexp_option</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_option.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type t = { a: int sexp_option; b: string } with sexp ;;</code></strong>
+<code class="computeroutput">type t = { a : int option; b : string; }</code>
+<code class="computeroutput">val t_of_sexp : Sexp.t -&gt; t = &lt;fun&gt;</code>
+<code class="computeroutput">val sexp_of_t : t -&gt; Sexp.t = &lt;fun&gt;</code>
+<code class="prompt"># </code><strong><code>sexp_of_t { a = Some 3; b = "hello" } ;;</code></strong>
+<code class="computeroutput">- : Sexp.t = ((a 3) (b hello))</code>
+<code class="prompt"># </code><strong><code>sexp_of_t { a = None; b = "hello" } ;;</code></strong>
+<code class="computeroutput">- : Sexp.t = ((b hello))</code></pre></section><section id="specifying-defaults" data-type="sect2"><h2>Specifying Defaults</h2><p>The <code>sexp_option</code> declaration is
+      really just an example of specifying a default behavior for dealing with
+      an unspecified field. In particular, <code>sexp_option</code> fills in absent fields with
+      <code>None</code>. But you might want to allow
+      other ways of filling in default values.<a data-type="indexterm" data-primary="s-expressions" data-secondary="specifying defaults in">&#xa0;</a></p><p>Consider the following type, which represents the configuration of
+      a very simple web server:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_default.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type http_server_config = {</code></strong>
+<strong><code>     web_root: string;</code></strong>
+<strong><code>     port: int;</code></strong>
+<strong><code>     addr: string;</code></strong>
+<strong><code>  } with sexp ;;</code></strong>
+<code class="computeroutput">type http_server_config = { web_root : string; port : int; addr : string; }</code>
+<code class="computeroutput">val http_server_config_of_sexp : Sexp.t -&gt; http_server_config = &lt;fun&gt;</code>
+<code class="computeroutput">val sexp_of_http_server_config : http_server_config -&gt; Sexp.t = &lt;fun&gt;</code></pre><p>One could imagine making some of these parameters optional; in
+      particular, by default, we might want the web server to bind to port 80,
+      and to listen as localhost. We can do this as follows:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_default.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type http_server_config = {</code></strong>
+<strong><code>     web_root: string;</code></strong>
+<strong><code>     port: int with default(80);</code></strong>
+<strong><code>     addr: string with default("localhost");</code></strong>
+<strong><code>  } with sexp ;;</code></strong>
+<code class="computeroutput">type http_server_config = { web_root : string; port : int; addr : string; }</code>
+<code class="computeroutput">val http_server_config_of_sexp : Sexp.t -&gt; http_server_config = &lt;fun&gt;</code>
+<code class="computeroutput">val sexp_of_http_server_config : http_server_config -&gt; Sexp.t = &lt;fun&gt;</code></pre><p>Now, if we try to convert an s-expression that specifies only the
+      <code>web_root</code>, we'll see that the other
+      values are filled in with the desired defaults:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_default.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 2)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let cfg = http_server_config_of_sexp</code></strong>
+<strong><code>   (Sexp.of_string "((web_root /var/www/html))") ;;</code></strong>
+<code class="computeroutput">val cfg : http_server_config =</code>
+<code class="computeroutput">  {web_root = "/var/www/html"; port = 80; addr = "localhost"}</code></pre><p>If we convert the configuration back out to an s-expression,
+      you'll notice that all of the fields are present, even though they're
+      not strictly necessary:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_default.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 3)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>sexp_of_http_server_config cfg ;;</code></strong>
+<code class="computeroutput">- : Sexp.t = ((web_root /var/www/html) (port 80) (addr localhost))</code></pre><p>We could make the generated s-expression also drop exported
+      values, by using the <code>sexp_drop_default</code> directive:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_default.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 4)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type http_server_config = {</code></strong>
+<strong><code>     web_root: string;</code></strong>
+<strong><code>     port: int with default(80), sexp_drop_default;</code></strong>
+<strong><code>     addr: string with default("localhost"), sexp_drop_default;</code></strong>
+<strong><code>  } with sexp ;;</code></strong>
+<code class="computeroutput">type http_server_config = { web_root : string; port : int; addr : string; }</code>
+<code class="computeroutput">val http_server_config_of_sexp : Sexp.t -&gt; http_server_config = &lt;fun&gt;</code>
+<code class="computeroutput">val sexp_of_http_server_config : http_server_config -&gt; Sexp.t = &lt;fun&gt;</code>
+<code class="prompt"># </code><strong><code>let cfg = http_server_config_of_sexp</code></strong>
+<strong><code>  (Sexp.of_string "((web_root /var/www/html))") ;;</code></strong>
+<code class="computeroutput">val cfg : http_server_config =</code>
+<code class="computeroutput">  {web_root = "/var/www/html"; port = 80; addr = "localhost"}</code>
+<code class="prompt"># </code><strong><code>sexp_of_http_server_config cfg ;;</code></strong>
+<code class="computeroutput">- : Sexp.t = ((web_root /var/www/html))</code></pre><p>As you can see, the fields that are at their default values are
+      simply omitted from the s-expression. On the other hand, if we convert a
+      config with other values, then those values will be included in the
+      s-expression:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/sexpr/sexp_default.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      (part 5)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>sexp_of_http_server_config { cfg with port = 8080 } ;;</code></strong>
+<code class="computeroutput">- : Sexp.t = ((web_root /var/www/html) (port 8080))</code>
+<code class="prompt"># </code><strong><code>sexp_of_http_server_config</code></strong>
+<strong><code>  { cfg with port = 8080; addr = "192.168.0.1" } ;;</code></strong>
+<code class="computeroutput">- : Sexp.t = ((web_root /var/www/html) (port 8080) (addr 192.168.0.1))</code></pre><p>This can be very useful in designing config file formats that are
+      both reasonably terse and easy to generate and maintain. It can also be
+      useful for backwards compatibility: if you add a new field to your
+      config record, but you make that field optional, then you should still
+      be able to parse older version of your config.<a data-type="indexterm" data-startref="SERFORMsexp">&#xa0;</a><a data-type="indexterm" data-primary="files" data-secondary="config files">&#xa0;</a><a data-type="indexterm" data-primary="config file formats">&#xa0;</a></p></section></section></section>
