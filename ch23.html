@@ -1,4 +1,4 @@
-<section xmlns="http://www.w3.org/1999/xhtml" id="the-compiler-backend-byte-code-and-native-code" data-type="chapter"><h1>The Compiler Backend: Bytecode and Native code</h1><p>Once OCaml has passed the type checking stage, it can stop emitting
+<section id="the-compiler-backend-byte-code-and-native-code" data-type="chapter"><h1>The Compiler Backend: Bytecode and Native code</h1><p>Once OCaml has passed the type checking stage, it can stop emitting
   syntax and type errors and begin the process of compiling the well-formed
   modules into executable code.</p><p>In this chapter, we'll cover the following topics:</p><ul><li><p>The untyped intermediate lambda code where pattern matching is
       optimized</p></li><li><p>The bytecode <span class="command"><em>ocamlc</em></span> compiler
@@ -8,12 +8,12 @@
     The lambda form discards higher-level constructs such as modules and
     objects and replaces them with simpler values such as records and function
     pointers. Pattern matches are also analyzed and compiled into highly
-    optimized automata.<a data-type="indexterm" data-primary="lambda form code" data-secondary="basics of"/><a data-type="indexterm" id="CPuntype" data-primary="compilation process" data-secondary="untyped lambda form"/></p><p>The lambda form is the key stage that discards the OCaml type information and maps the
-      source code to the runtime memory model described in <a href="#memory-representation-of-values" data-type="xref"/>. This stage also performs some optimizations,
+    optimized automata.<a data-type="indexterm" data-primary="lambda form code" data-secondary="basics of">&#xa0;</a><a data-type="indexterm" id="CPuntype" data-primary="compilation process" data-secondary="untyped lambda form">&#xa0;</a></p><p>The lambda form is the key stage that discards the OCaml type information and maps the
+      source code to the runtime memory model described in <a href="#memory-representation-of-values" data-type="xref">#memory-representation-of-values</a>. This stage also performs some optimizations,
       most notably converting pattern-match statements into more optimized but low-level
       statements.</p><section id="pattern-matching-optimization" data-type="sect2"><h2>Pattern Matching Optimization</h2><p>The compiler dumps the lambda form in an s-expression syntax if you add the <span class="keep-together"><code>-dlambda</code></span> directive to the
         command line. Let's use this to learn more about how the OCaml pattern-matching engine works
-        by building three different pattern matches and comparing their lambda forms.<a data-type="indexterm" data-primary="pattern matching" data-secondary="optimization in lambda form code"/><a data-type="indexterm" data-primary="lambda form code" data-secondary="pattern matching optimization"/></p><p>Let's start by creating a straightforward exhaustive pattern match
+        by building three different pattern matches and comparing their lambda forms.<a data-type="indexterm" data-primary="pattern matching" data-secondary="optimization in lambda form code">&#xa0;</a><a data-type="indexterm" data-primary="lambda form code" data-secondary="pattern matching optimization">&#xa0;</a></p><p>Let's start by creating a straightforward exhaustive pattern match
       using four normal variants:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/back-end/pattern_monomorphic_large.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type t = | Alice | Bob | Charlie | David
 
 let test v =
@@ -37,7 +37,7 @@ let test v =
       emerge from reading it:</p><ul><li><p>There are no mention of modules or types any more. Global
           values are created via <code>setglobal</code>,
           and OCaml values are constructed by <code>makeblock</code>. The blocks are the runtime
-          values you should remember from <a href="#memory-representation-of-values" data-type="xref"/>.</p></li><li><p>The pattern match has turned into a switch case that jumps to the right case
+          values you should remember from <a href="#memory-representation-of-values" data-type="xref">#memory-representation-of-values</a>.</p></li><li><p>The pattern match has turned into a switch case that jumps to the right case
             depending on the header tag of <code>v</code>. Recall that
             variants without parameters are stored in memory as integers in the order which they
             appear. The pattern-matching engine knows this and has transformed the pattern into an
@@ -75,12 +75,12 @@ let test v =
 <code class="computeroutput">           (if (&gt;= v/1009 482771474) (if (&gt;= v/1009 884917024) 100 102)</code>
 <code class="computeroutput">             (if (&gt;= v/1009 3457716) 104 103))</code>
 <code class="computeroutput">           101)))</code>
-<code class="computeroutput">    (makeblock 0 test/1008)))</code></pre><p>We mentioned in <a href="#variants" data-type="xref"/> that pattern matching over polymorphic
+<code class="computeroutput">    (makeblock 0 test/1008)))</code></pre><p>We mentioned in <a href="#variants" data-type="xref">#variants</a> that pattern matching over polymorphic
         variants is slightly less efficient, and it should be clearer why this is the case now.
         Polymorphic variants have a runtime value that's calculated by hashing the variant name, and
         so the compiler can't use a jump table as it does for normal variants. Instead, it creates a
         decision tree that compares the hash values against the input variable in as few comparisons
-        as possible.<a data-type="indexterm" data-primary="pattern matching" data-secondary="fundamental algorithms in"/></p><div data-type="note"><h1>Learning More About Pattern Matching Compilation</h1><p>Pattern matching is an important part of OCaml programming.
+        as possible.<a data-type="indexterm" data-primary="pattern matching" data-secondary="fundamental algorithms in">&#xa0;</a></p><div data-type="note"><h1>Learning More About Pattern Matching Compilation</h1><p>Pattern matching is an important part of OCaml programming.
         You'll often encounter deeply nested pattern matches over complex data
         structures in real code. A good paper that describes the fundamental
         algorithms implemented in OCaml is <a href="http://dl.acm.org/citation.cfm?id=507641">"Optimizing pattern
@@ -92,7 +92,7 @@ let test v =
         OCaml code.</p></div></section><section id="benchmarking-pattern-matching" data-type="sect2"><h2>Benchmarking Pattern Matching</h2><p>Let's benchmark these three pattern-matching techniques to quantify their runtime costs
         more accurately. The <code>Core_bench</code> module runs the tests
         thousands of times and also calculates statistical variance of the results. You'll need to
-          <code>opam install core_bench</code> to get the library:<a data-type="indexterm" data-primary="pattern matching" data-secondary="benchmarking of"/><a data-type="indexterm" data-primary="lambda form code" data-secondary="pattern matching benchmarking"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/back-end-bench/bench_patterns.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
+          <code>opam install core_bench</code> to get the library:<a data-type="indexterm" data-primary="pattern matching" data-secondary="benchmarking of">&#xa0;</a><a data-type="indexterm" data-primary="lambda form code" data-secondary="pattern matching benchmarking">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/back-end-bench/bench_patterns.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
 open Core_bench.Std
 
 type t = | Alice | Bob 
@@ -157,14 +157,14 @@ let () =
         of your own source code and narrow down any performance hotspots.</p><p>The lambda form is primarily a stepping stone to the bytecode
       executable format that we'll cover next. It's often easier to look at
       the textual output from this stage than to wade through the native
-      assembly code from compiled executables.<a data-type="indexterm" data-startref="CPuntype"/></p></section></section><section id="generating-portable-bytecode" data-type="sect1"><h1>Generating Portable Bytecode</h1><p>After the lambda form has been generated, we are very close to
+      assembly code from compiled executables.<a data-type="indexterm" data-startref="CPuntype">&#xa0;</a></p></section></section><section id="generating-portable-bytecode" data-type="sect1"><h1>Generating Portable Bytecode</h1><p>After the lambda form has been generated, we are very close to
     having executable code. The OCaml toolchain branches into two separate
     compilers at this point. We'll describe the bytecode compiler first, which
-    consists of two pieces:<a data-type="indexterm" data-primary="OCaml toolchain" data-secondary="ocamlrun"/><a data-type="indexterm" data-primary="OCaml toolchain" data-secondary="ocamlc"/><a data-type="indexterm" data-primary="bytecode compiler" data-secondary="tools used"/><a data-type="indexterm" id="CPportbyte" data-primary="compilation process" data-secondary="portable bytecode"/></p><dl><dt><span class="command"><em>ocamlc</em></span></dt><dd><p>Compiles files into a bytecode that is a close mapping to the
+    consists of two pieces:<a data-type="indexterm" data-primary="OCaml toolchain" data-secondary="ocamlrun">&#xa0;</a><a data-type="indexterm" data-primary="OCaml toolchain" data-secondary="ocamlc">&#xa0;</a><a data-type="indexterm" data-primary="bytecode compiler" data-secondary="tools used">&#xa0;</a><a data-type="indexterm" id="CPportbyte" data-primary="compilation process" data-secondary="portable bytecode">&#xa0;</a></p><dl><dt><span class="command"><em>ocamlc</em></span></dt><dd><p>Compiles files into a bytecode that is a close mapping to the
           lambda form</p></dd><dt><span class="command"><em>ocamlrun</em></span></dt><dd><p>A portable interpreter that executes the bytecode</p></dd></dl><p>The big advantage of using bytecode is simplicity, portability, and compilation speed. The
       mapping from the lambda form to bytecode is straightforward, and this results in predictable
       (but slow) execution speed.</p><p>The bytecode interpreter implements a stack-based virtual machine. The OCaml stack and an
-      associated accumulator store values that consist of:<a data-type="indexterm" data-primary="bytecode compiler" data-secondary="values stored by"/><a data-type="indexterm" data-primary="code offset values"/><a data-type="indexterm" data-primary="block values"/><a data-type="indexterm" data-primary="long values"/><a data-type="indexterm" data-primary="values" data-secondary="stored by bytecode compiler"/></p><dl><dt>long</dt><dd><p>Values that correspond to an OCaml <code>int</code> type</p></dd><dt>block</dt><dd><p>Values that contain the block header and a memory address with
+      associated accumulator store values that consist of:<a data-type="indexterm" data-primary="bytecode compiler" data-secondary="values stored by">&#xa0;</a><a data-type="indexterm" data-primary="code offset values">&#xa0;</a><a data-type="indexterm" data-primary="block values">&#xa0;</a><a data-type="indexterm" data-primary="long values">&#xa0;</a><a data-type="indexterm" data-primary="values" data-secondary="stored by bytecode compiler">&#xa0;</a></p><dl><dt>long</dt><dd><p>Values that correspond to an OCaml <code>int</code> type</p></dd><dt>block</dt><dd><p>Values that contain the block header and a memory address with
           the data fields that contain further OCaml values indexed by an
           integer</p></dd><dt>code offset</dt><dd><p>Values that are relative to the starting code address</p></dd></dl><p>The interpreter virtual machine only has seven registers in total: the program counter,
       stack pointer, accumulator, exception and argument pointers, and environment and global data.
@@ -189,7 +189,7 @@ let () =
     a set of simple instructions that are executed serially by the
     interpreter.</p><p>There are around 140 instructions in total, but most are just minor
     variants of commonly encountered operations (e.g., function application at
-    a specific arity). You can find full details <a href="http://cadmium.x9c.fr/distrib/caml-instructions.pdf">online</a>.<a data-type="indexterm" data-primary="bytecode compiler" data-secondary="instruction set for"/></p><div data-type="note"><h1>Where Did the Bytecode Instruction Set Come From?</h1><p>The bytecode interpreter is much slower than compiled native code,
+    a specific arity). You can find full details <a href="http://cadmium.x9c.fr/distrib/caml-instructions.pdf">online</a>.<a data-type="indexterm" data-primary="bytecode compiler" data-secondary="instruction set for">&#xa0;</a></p><div data-type="note"><h1>Where Did the Bytecode Instruction Set Come From?</h1><p>The bytecode interpreter is much slower than compiled native code,
       but is still remarkably performant for an interpreter without a JIT
       compiler. Its efficiency can be traced back to Xavier Leroy's
       ground-breaking work in 1990, <a href="http://hal.inria.fr/docs/00/07/00/49/PS/RT-0117.ps">"The ZINC
@@ -204,7 +204,7 @@ let () =
       individual <code>ml</code> files into bytecode
       files that have a <code>cmo</code> extension. The
       compiled bytecode files are matched with the associated <code>cmi</code> interface, which contains the type
-      signature exported to other compilation units.<a data-type="indexterm" data-primary="bytecode compiler" data-secondary="compiling and linking code"/></p><p>A typical OCaml library consists of multiple source files, and
+      signature exported to other compilation units.<a data-type="indexterm" data-primary="bytecode compiler" data-secondary="compiling and linking code">&#xa0;</a></p><p>A typical OCaml library consists of multiple source files, and
       hence multiple <code>cmo</code> files that all
       need to be passed as command-line arguments to use the library from
       other code. The compiler can combine these multiple files into a more
@@ -233,10 +233,10 @@ let () =
       it executes the bytecode.</p><p>You can also generate a complete standalone executable that
       bundles the <span class="command"><em>ocamlrun</em></span> interpreter with
       the bytecode in a single binary. This is known as a <em>custom
-      runtime</em> mode and is built as follows:<a data-type="indexterm" data-primary="custom runtime mode"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/back-end-embed/link_custom.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocamlc -a -o mylib.cma -custom a.cmo b.cmo -cclib -lmylib</code></strong>
+      runtime</em> mode and is built as follows:<a data-type="indexterm" data-primary="custom runtime mode">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/back-end-embed/link_custom.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocamlc -a -o mylib.cma -custom a.cmo b.cmo -cclib -lmylib</code></strong>
 </pre><p>OCamlbuild takes care of many of these details with its built-in rules. The <code>%.byte</code> rule that you've been using throughout the book builds a
         bytecode executable, and adding the <code>custom</code> tag will
-        bundle the interpreter with it, too.<a data-type="indexterm" data-primary="%.byte rule"/></p><p>The custom mode is the most similar mode to native code
+        bundle the interpreter with it, too.<a data-type="indexterm" data-primary="%.byte rule">&#xa0;</a></p><p>The custom mode is the most similar mode to native code
       compilation, as both generate standalone executables. There are quite a
       few other options available for compiling bytecode (notably with shared
       libraries or building custom runtimes). Full details can be found in the
@@ -244,7 +244,7 @@ let () =
         performed by <span class="command"><em>ocamlc</em></span>. However, you might sometimes want to
         embed your OCaml code inside an existing C application. OCaml also supports this mode of
         operation via the <span class="keep-together"><code>-output-obj</code></span>
-          directive.<a data-type="indexterm" data-primary="C object files"/></p><p>This mode causes <span class="command"><em>ocamlc</em></span> to output an object file
+          directive.<a data-type="indexterm" data-primary="C object files">&#xa0;</a></p><p>This mode causes <span class="command"><em>ocamlc</em></span> to output an object file
         containing the bytecode for the OCaml part of the program, as well as a <code>caml_startup</code> function. All of the OCaml modules are linked into
         this object file as bytecode, just as they would be for an executable.</p><p>This object file can then be linked with C code using the standard C compiler, needing
         only the bytecode runtime library (which is installed as <code>libcamlrun.a</code>). Creating an executable just requires you to link the runtime
@@ -284,12 +284,12 @@ main (int argc, char **argv)
       interfaces with any environment that works with a C compiler. You can
       even cross back from the C code into OCaml by using the <code>Callback</code> module to register named entry points
       in the OCaml code. This is explained in detail in the <a href="http://caml.inria.fr/pub/docs/manual-ocaml/manual033.html#toc149">interfacing
-      with C</a> section of the OCaml manual.<a data-type="indexterm" data-startref="CPportbyte"/></p></section></section><section id="compiling-fast-native-code" data-type="sect1"><h1>Compiling Fast Native Code</h1><p>The native code compiler is ultimately the tool that most production
+      with C</a> section of the OCaml manual.<a data-type="indexterm" data-startref="CPportbyte">&#xa0;</a></p></section></section><section id="compiling-fast-native-code" data-type="sect1"><h1>Compiling Fast Native Code</h1><p>The native code compiler is ultimately the tool that most production
     OCaml code goes through. It compiles the lambda form into fast native code
     executables, with cross-module inlining and additional optimization passes
     that the bytecode interpreter doesn't perform. Care is taken to ensure
     compatibility with the bytecode runtime, so the same code should run
-    identically when compiled with either toolchain.<a data-type="indexterm" data-primary="cmi files"/><a data-type="indexterm" data-primary="files" data-secondary="cmi files"/><a data-type="indexterm" data-primary="cmx files"/><a data-type="indexterm" data-primary="files" data-secondary="cmx files"/><a data-type="indexterm" data-primary="o files"/><a data-type="indexterm" data-primary="files" data-secondary="o files"/><a data-type="indexterm" data-primary="OCaml toolchain" data-secondary="ocamlopt"/><a data-type="indexterm" data-primary="native-code compiler" data-secondary="benefits of"/><a data-type="indexterm" id="CPfast" data-primary="compilation process" data-secondary="fast native code"/></p><p>The <span class="command"><em>ocamlopt</em></span> command is the
+    identically when compiled with either toolchain.<a data-type="indexterm" data-primary="cmi files">&#xa0;</a><a data-type="indexterm" data-primary="files" data-secondary="cmi files">&#xa0;</a><a data-type="indexterm" data-primary="cmx files">&#xa0;</a><a data-type="indexterm" data-primary="files" data-secondary="cmx files">&#xa0;</a><a data-type="indexterm" data-primary="o files">&#xa0;</a><a data-type="indexterm" data-primary="files" data-secondary="o files">&#xa0;</a><a data-type="indexterm" data-primary="OCaml toolchain" data-secondary="ocamlopt">&#xa0;</a><a data-type="indexterm" data-primary="native-code compiler" data-secondary="benefits of">&#xa0;</a><a data-type="indexterm" id="CPfast" data-primary="compilation process" data-secondary="fast native code">&#xa0;</a></p><p>The <span class="command"><em>ocamlopt</em></span> command is the
     frontend to the native code compiler and has a very similar interface to
     <span class="command"><em>ocamlc</em></span>. It also accepts <code>ml</code> and <code>mli</code>
     files, but compiles them to:</p><ul><li><p>A <code>.o</code> file containing native
@@ -307,15 +307,15 @@ main (int argc, char **argv)
       passed to the system assembler for compiling into object files. You can
       get <span class="command"><em>ocamlopt</em></span> to output the assembly
       by passing the <code>-S</code> flag to the
-      compiler command line.<a data-type="indexterm" data-primary="native-code compiler" data-secondary="inspecting assembly output"/></p><p>The assembly code is highly architecture-specific, so the following discussion assumes
+      compiler command line.<a data-type="indexterm" data-primary="native-code compiler" data-secondary="inspecting assembly output">&#xa0;</a></p><p>The assembly code is highly architecture-specific, so the following discussion assumes
         an Intel or AMD 64-bit platform. We've generated the example code using <code>-inline 20</code> and <code>-nodynlink</code>
         since it's best to generate assembly code with the full optimizations that the compiler
         supports. Even though these optimizations make the code a bit harder to read, it will give
         you a more accurate picture of what executes on the CPU. Don't forget that you can use the
         lambda code from earlier to get a slightly higher-level picture of the code if you get lost
-        in the more verbose assembly.</p><section id="the-impact-of-polymorphic-comparison" data-type="sect3"><h3>The impact of polymorphic comparison</h3><p>We warned you in <a href="#maps-and-hash-tables" data-type="xref"/> that using polymorphic
+        in the more verbose assembly.</p><section id="the-impact-of-polymorphic-comparison" data-type="sect3"><h3>The impact of polymorphic comparison</h3><p>We warned you in <a href="#maps-and-hash-tables" data-type="xref">#maps-and-hash-tables</a> that using polymorphic
           comparison is both convenient and perilous. Let's look at precisely what the difference is
-          at the assembly language level now.<a data-type="indexterm" data-primary="polymorphic comparisons"/></p><p>First let's create a comparison function where we've explicitly annotated the types,
+          at the assembly language level now.<a data-type="indexterm" data-primary="polymorphic comparisons">&#xa0;</a></p><p>First let's create a comparison function where we've explicitly annotated the types,
           so the compiler knows that only integers are being compared:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/back-end/compare_mono.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">let cmp (a:int) (b:int) =
   if a &gt; b then a else b</pre><p>Now compile this into assembly and read the resulting <code>compare_mono.S</code> file. This file extension may
         be lowercase on some platforms such as Linux:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/back-end/asm_from_compare_mono.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocamlopt -inline 20 -nodynlink -S compare_mono.ml</code></strong>
@@ -380,7 +380,7 @@ main (int argc, char **argv)
           and they have no effect on runtime performance. Notice that the rest of the implementation
           is no longer a simple register comparison. Instead, the arguments are pushed on the stack
           (the <code>%rsp</code> register), and a C function call is invoked
-          by placing a pointer to <code>caml_greaterthan</code> in <code>%rax</code> and jumping to <code>caml_c_call</code>.<a data-type="indexterm" data-primary="backtraces"/></p><p>OCaml on x86_64 architectures caches the location of the minor
+          by placing a pointer to <code>caml_greaterthan</code> in <code>%rax</code> and jumping to <code>caml_c_call</code>.<a data-type="indexterm" data-primary="backtraces">&#xa0;</a></p><p>OCaml on x86_64 architectures caches the location of the minor
         heap in the <code>%r15</code> register since
         it's so frequently referenced in OCaml functions. The minor heap
         pointer can also be changed by the C code that's being called (e.g.,
@@ -429,12 +429,12 @@ let () =
           manually peering at the produced assembly code to see if you can hand-optimize it.</p></section></section><section id="debugging-native-code-binaries" data-type="sect2"><h2>Debugging Native Code Binaries</h2><p>The native code compiler builds executables that can be debugged using conventional
         system debuggers such as GNU <span class="command"><em>gdb</em></span>. You need to compile
         your libraries with the <code>-g</code> option to add the debug
-        information to the output, just as you need to with C compilers.<a data-type="indexterm" data-primary="debugging" data-secondary="native code binaries"/><a data-type="indexterm" data-primary="native-code compiler" data-secondary="debugging binaries"/></p><p>Extra debugging information is inserted into the output assembly
+        information to the output, just as you need to with C compilers.<a data-type="indexterm" data-primary="debugging" data-secondary="native code binaries">&#xa0;</a><a data-type="indexterm" data-primary="native-code compiler" data-secondary="debugging binaries">&#xa0;</a></p><p>Extra debugging information is inserted into the output assembly
       when the library is compiled in debug mode. These include the CFI stubs
       you will have noticed in the profiling output earlier (<code>.cfi_start_proc</code> and <code>.cfi_end_proc</code> to delimit an OCaml function
       call, for example).</p><section id="understanding-name-mangling" data-type="sect3"><h3>Understanding name mangling</h3><p>So how do you refer to OCaml functions in an interactive debugger like <span class="command"><em>gdb</em></span>? The first thing you need to know is how OCaml function
           names compile down to symbol names in the compiled object files, a procedure generally
-          called <em>name mangling</em>.<a data-type="indexterm" data-primary="gdb debugger"/><a data-type="indexterm" data-primary="debugging" data-secondary="interactive debuggers"/><a data-type="indexterm" data-primary="functions" data-secondary="name mangling of"/><a data-type="indexterm" data-primary="name mangling"/></p><p>Each OCaml source file is compiled into a native object file that must export a unique
+          called <em>name mangling</em>.<a data-type="indexterm" data-primary="gdb debugger">&#xa0;</a><a data-type="indexterm" data-primary="debugging" data-secondary="interactive debuggers">&#xa0;</a><a data-type="indexterm" data-primary="functions" data-secondary="name mangling of">&#xa0;</a><a data-type="indexterm" data-primary="name mangling">&#xa0;</a></p><p>Each OCaml source file is compiled into a native object file that must export a unique
           set of symbols to comply with the C binary interface. This means that any OCaml values
           that may be used by another compilation unit need to be mapped onto a symbol name. This
           mapping has to account for OCaml language features such as nested modules, anonymous
@@ -447,7 +447,7 @@ let () =
         intermediate compiler output. If you need to debug them, it's usually
         easier to modify the source code to let-bind the anonymous function to
         a variable name.</p></section><section id="interactive-breakpoints-with-the-gnu-debugger" data-type="sect3"><h3>Interactive breakpoints with the GNU debugger</h3><p>Let's see name mangling in action with some interactive
-        debugging using GNU <span class="command"><em>gdb</em></span>.<a data-type="indexterm" data-primary="GNU debugger"/></p><div data-type="caution"><h1>Beware gdb on Mac OS X</h1><p>The examples here assume that you are running <span class="command"><em>gdb</em></span> on either Linux or FreeBSD. Mac OS X
+        debugging using GNU <span class="command"><em>gdb</em></span>.<a data-type="indexterm" data-primary="GNU debugger">&#xa0;</a></p><div data-type="caution"><h1>Beware gdb on Mac OS X</h1><p>The examples here assume that you are running <span class="command"><em>gdb</em></span> on either Linux or FreeBSD. Mac OS X
           10.8 does have <span class="command"><em>gdb</em></span> installed, but
           it's a rather quirky experience that doesn't reliably interpret the
           debugging information contained in the native binaries. This can
@@ -542,14 +542,14 @@ let () =
       execution time is known as <em>performance profiling</em>.
       OCaml native code binaries can be profiled just like any other C binary,
       by using the name mangling described earlier to map between OCaml
-      variable names and the profiler output.<a data-type="indexterm" data-primary="profiling"/><a data-type="indexterm" data-primary="performance profiling"/><a data-type="indexterm" data-primary="native-code compiler" data-secondary="performance profiling"/></p><p>Most profiling tools benefit from having some instrumentation
+      variable names and the profiler output.<a data-type="indexterm" data-primary="profiling">&#xa0;</a><a data-type="indexterm" data-primary="performance profiling">&#xa0;</a><a data-type="indexterm" data-primary="native-code compiler" data-secondary="performance profiling">&#xa0;</a></p><p>Most profiling tools benefit from having some instrumentation
       included in the binary. OCaml supports two such tools:</p><ul><li><p>GNU <span class="command"><em>gprof</em></span>, to measure execution time and call
             graphs</p></li><li><p>The <a href="https://perf.wiki.kernel.org/">Perf</a>
           profiling framework in modern versions of Linux</p></li></ul><p>Note that many other tools that operate on native binaries, such as Valgrind, will work
         just fine with OCaml as long as the program is linked with the <code>-g</code> flag to embed debugging symbols.</p><section id="gprof" data-type="sect3"><h3>Gprof</h3><p><span class="command"><em>gprof</em></span> produces an execution
         profile of an OCaml program by recording a call graph of which
         functions call one another, and recording the time these calls take
-        during the program execution.<a data-type="indexterm" data-primary="gprof code profiler"/></p><p>Getting precise information out of <span class="command"><em>gprof</em></span> requires passing the <code>-p</code> flag to the native code compiler when
+        during the program execution.<a data-type="indexterm" data-primary="gprof code profiler">&#xa0;</a></p><p>Getting precise information out of <span class="command"><em>gprof</em></span> requires passing the <code>-p</code> flag to the native code compiler when
         compiling <em>and</em> linking the binary. This generates
         extra code that records profile information to a file called <code>gmon.out</code> when the program is executed. This
         profile information can then be examined using <span class="command"><em>gprof</em></span>.</p></section><section id="perf" data-type="sect3"><h3>Perf</h3><p>Perf is a more modern alternative to <span class="command"><em>gprof</em></span> that doesn't require you to instrument
@@ -584,7 +584,7 @@ let () =
         <code>test_mutable</code> and the <code>caml_modify</code> write barrier function in the
         runtime. This adds up to slightly over half the execution time of the
         application.</p><p>Perf has a growing collection of other commands that let you archive these runs and
-          compare them against each other. You can read more on the <a href="http://perf.wiki.kernel.org">home page</a>.<a data-type="indexterm" data-primary="frame pointers"/></p><aside data-type="sidebar"><h5>Using the Frame Pointer to Get More Accurate Traces</h5><p>Although Perf doesn't require adding in explicit probes to the
+          compare them against each other. You can read more on the <a href="http://perf.wiki.kernel.org">home page</a>.<a data-type="indexterm" data-primary="frame pointers">&#xa0;</a></p><aside data-type="sidebar"><h5>Using the Frame Pointer to Get More Accurate Traces</h5><p>Although Perf doesn't require adding in explicit probes to the
           binary, it does need to understand how to unwind function calls so
           that the kernel can accurately record the function backtrace for
           every event.</p><p>OCaml stack frames are too complex for Perf to understand
@@ -602,7 +602,7 @@ let () =
           interface. You can read more about this on the OCamlPro <a href="http://www.ocamlpro.com/blog/2012/08/08/profile-native-code.html">blog</a>.</p></aside></section></section><section id="embedding-native-code-in-c" data-type="sect2"><h2>Embedding Native Code in C</h2><p>The native code compiler normally links a complete executable, but
       can also output a standalone native object file just as the bytecode
       compiler can. This object file has no further dependencies on OCaml
-      except for the runtime library.<a data-type="indexterm" data-primary="libasmrun.a library"/><a data-type="indexterm" data-primary="native-code compiler" data-secondary="embedding code in C"/></p><p>The native code runtime is a different library from the bytecode one, and is installed
+      except for the runtime library.<a data-type="indexterm" data-primary="libasmrun.a library">&#xa0;</a><a data-type="indexterm" data-primary="native-code compiler" data-secondary="embedding code in C">&#xa0;</a></p><p>The native code runtime is a different library from the bytecode one, and is installed
         as <code>libasmrun.a</code> in the OCaml standard library
         directory.</p><p>Try this custom linking by using the same source files from the
       bytecode embedding example earlier in this chapter:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/back-end-embed/build_embed_native.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocamlopt -output-obj -o embed_native.o embed_me1.ml embed_me2.ml</code></strong>
@@ -616,7 +616,7 @@ let () =
         has no further references to OCaml code beyond the runtime library, just as with the
         bytecode runtime. Do remember that the link order of the libraries is significant in modern
         GNU toolchains (especially as used in Ubuntu 11.10 and later) that resolve symbols from left
-        to right in a single pass.<a data-type="indexterm" data-primary="debugging" data-secondary="activating debug runtime"/></p><div data-type="tip"><h1>Activating the Debug Runtime</h1><p>Despite your best efforts, it is easy to introduce a bug into some components, such as
+        to right in a single pass.<a data-type="indexterm" data-primary="debugging" data-secondary="activating debug runtime">&#xa0;</a></p><div data-type="tip"><h1>Activating the Debug Runtime</h1><p>Despite your best efforts, it is easy to introduce a bug into some components, such as
           C bindings, that causes heap invariants to be violated. OCaml includes a <code>libasmrund.a</code> variant of the runtime library which is compiled
           with extra debugging checks that perform extra memory integrity checks during every
           garbage collection cycle. Running these extra checks will abort the program nearer the
@@ -632,9 +632,9 @@ let () =
 <code class="computeroutput">Initial allocation policy: 0</code>
 <code class="computeroutput">Hello OCaml World!</code></pre><p>If you get an error that <code>libasmrund.a</code> is not found,
           it's probably because you're using OCaml 4.00 and not 4.01. It's only installed by default
-          in the very latest version, which you should be using via the <code>4.01.0</code> OPAM switch.<a data-type="indexterm" data-startref="CPfast"/></p></div></section></section><section id="summarizing-the-file-extensions" data-type="sect1"><h1>Summarizing the File Extensions</h1><p>We've seen how the compiler uses intermediate files to store various
+          in the very latest version, which you should be using via the <code>4.01.0</code> OPAM switch.<a data-type="indexterm" data-startref="CPfast">&#xa0;</a></p></div></section></section><section id="summarizing-the-file-extensions" data-type="sect1"><h1>Summarizing the File Extensions</h1><p>We've seen how the compiler uses intermediate files to store various
     stages of the compilation toolchain. Here's a cheat sheet of all them in
-    one place.<a data-type="indexterm" data-primary="files" data-secondary="chart of file extensions"/><a data-type="indexterm" data-primary="compilation process" data-secondary="file extensions"/></p><p> <a href="#Table2301" data-type="xref"/> shows the intermediate files generated by <span class="command"><em>ocamlc</em></span>.</p><table id="Table2301"><caption>Intermediate files generated by the OCaml compiler toolchain</caption><thead><tr><th>Extension</th><th>Purpose</th></tr></thead><tbody><tr><td><code>.ml</code></td><td>Source files for compilation unit module
+    one place.<a data-type="indexterm" data-primary="files" data-secondary="chart of file extensions">&#xa0;</a><a data-type="indexterm" data-primary="compilation process" data-secondary="file extensions">&#xa0;</a></p><p> <a href="#Table2301" data-type="xref">#Table2301</a> shows the intermediate files generated by <span class="command"><em>ocamlc</em></span>.</p><table id="Table2301"><caption>Intermediate files generated by the OCaml compiler toolchain</caption><thead><tr><th>Extension</th><th>Purpose</th></tr></thead><tbody><tr><td><code>.ml</code></td><td>Source files for compilation unit module
             implementations.</td></tr><tr><td><code>.mli</code></td><td>Source files for compilation unit module interfaces. If
             missing, generated from the <code>.ml</code>
             file.</td></tr><tr><td><code>.cmi</code></td><td>Compiled module interface from a corresponding <code>.mli</code> source file.</td></tr><tr><td><code>.cmo</code></td><td>Compiled bytecode object file of the module
@@ -642,7 +642,7 @@ let () =
             file.</td></tr><tr><td><code>.o</code></td><td>C source files are compiled into native object files by the
             system <code>cc</code>.</td></tr><tr><td><code>.cmt</code></td><td>Typed abstract syntax tree for module
             implementations.</td></tr><tr><td><code>.cmti</code></td><td>Typed abstract syntax tree for module interfaces.</td></tr><tr><td><code>.annot</code></td><td>Old-style annotation file for displaying <code>typed</code>, superseded by
-                <code>cmt</code> files.</td></tr></tbody></table><p>The native code compiler generates some additional files (see <a href="#Table2302" data-type="xref"/>).<a data-type="indexterm" data-primary="native-code compiler" data-secondary="files generated by"/></p><table id="Table2302"><caption>Intermediate outputs produced by the native code OCaml toolchain</caption><thead><tr><th>Extension</th><th>Purpose</th></tr></thead><tbody><tr><td><code>.o</code></td><td>Compiled native object file of the module
+                <code>cmt</code> files.</td></tr></tbody></table><p>The native code compiler generates some additional files (see <a href="#Table2302" data-type="xref">#Table2302</a>).<a data-type="indexterm" data-primary="native-code compiler" data-secondary="files generated by">&#xa0;</a></p><table id="Table2302"><caption>Intermediate outputs produced by the native code OCaml toolchain</caption><thead><tr><th>Extension</th><th>Purpose</th></tr></thead><tbody><tr><td><code>.o</code></td><td>Compiled native object file of the module
             implementation.</td></tr><tr><td><code>.cmx</code></td><td>Contains extra information for linking and cross-module
             optimization of the object file.</td></tr><tr><td><code>.cmxa and .a</code></td><td>Library of <code>cmx</code> and
             <code>o</code> units, stored in the <code>cmxa</code> and <code>a</code> files respectively. These files are

@@ -2,31 +2,31 @@
     Checking</span></h1><p>Compiling source code into executable programs is a fairly complex
   libraries, linkers, and assemblers. It's important to understand how these
   fit together to help with your day-to-day workflow of developing, debugging,
-  and deploying applications.<a data-type="indexterm" data-primary="compilation process" data-secondary="toolchain for"/></p><p>OCaml has a strong emphasis on static type safety and rejects source
+  and deploying applications.<a data-type="indexterm" data-primary="compilation process" data-secondary="toolchain for">&#xa0;</a></p><p>OCaml has a strong emphasis on static type safety and rejects source
   code that doesn't meet its requirements as early as possible. The compiler
   does this by running the source code through a series of checks and
   transformations. Each stage performs its job (e.g., type checking,
   optimization, or code generation) and discards some information from the
   previous stage. The final native code output is low-level assembly code that
   doesn't know anything about the OCaml modules or objects that the compiler
-  started with.<a data-type="indexterm" data-primary="static checking"/><a data-type="indexterm" data-primary="compile-time static checking"/></p><p>You don't have to do all of this manually, of course. The compiler frontends (<code>ocamlc</code> and <code>ocamlopt</code>) are invoked
+  started with.<a data-type="indexterm" data-primary="static checking">&#xa0;</a><a data-type="indexterm" data-primary="compile-time static checking">&#xa0;</a></p><p>You don't have to do all of this manually, of course. The compiler frontends (<code>ocamlc</code> and <code>ocamlopt</code>) are invoked
     via the command line and chain the stages together for you. Sometimes though, you'll need to
     dive into the toolchain to hunt down a bug or investigate a performance problem. This chapter
     explains the compiler pipeline in more depth so you understand how to harness the command-line
-    tools effectively.<a data-type="indexterm" data-primary="OCaml toolchain" data-secondary="ocamlc"/><a data-type="indexterm" data-primary="OCaml toolchain" data-secondary="ocamlopt"/></p><p>In this chapter, we'll cover the following topics:</p><ul><li><p>The compilation pipeline and what each stage represents</p></li><li><p>Source preprocessing via Camlp4 and the intermediate forms</p></li><li><p>The type-checking process, including module resolution</p></li></ul><p>The details of the compilation process into executable code can be found next, in <a href="#the-compiler-backend-byte-code-and-native-code" data-type="xref"/>.</p><section id="an-overview-of-the-toolchain" data-type="sect1"><h1>An Overview of the Toolchain</h1><p>The OCaml tools accept textual source code as input, using the filename extensions
+    tools effectively.<a data-type="indexterm" data-primary="OCaml toolchain" data-secondary="ocamlc">&#xa0;</a><a data-type="indexterm" data-primary="OCaml toolchain" data-secondary="ocamlopt">&#xa0;</a></p><p>In this chapter, we'll cover the following topics:</p><ul><li><p>The compilation pipeline and what each stage represents</p></li><li><p>Source preprocessing via Camlp4 and the intermediate forms</p></li><li><p>The type-checking process, including module resolution</p></li></ul><p>The details of the compilation process into executable code can be found next, in <a href="#the-compiler-backend-byte-code-and-native-code" data-type="xref">#the-compiler-backend-byte-code-and-native-code</a>.</p><section id="an-overview-of-the-toolchain" data-type="sect1"><h1>An Overview of the Toolchain</h1><p>The OCaml tools accept textual source code as input, using the filename extensions
         <code>.ml</code> and <code>.mli</code> for
-      modules and signatures, respectively. We explained the basics of the build process in <a href="#files-modules-and-programs" data-type="xref"/>, so we'll assume you've built a few OCaml programs
-      already by this point.<a data-type="indexterm" data-primary="OCaml toolchain" data-secondary="overview of"/></p><p>Each source file represents a <em>compilation unit</em>
+      modules and signatures, respectively. We explained the basics of the build process in <a href="#files-modules-and-programs" data-type="xref">#files-modules-and-programs</a>, so we'll assume you've built a few OCaml programs
+      already by this point.<a data-type="indexterm" data-primary="OCaml toolchain" data-secondary="overview of">&#xa0;</a></p><p>Each source file represents a <em>compilation unit</em>
     that is built separately. The compiler generates intermediate files with
     different filename extensions to use as it advances through the
     compilation stages. The linker takes a collection of compiled units and
     produces a standalone executable or library archive that can be reused by
-    other applications.<a data-type="indexterm" data-primary="compilation units"/></p><p>The overall compilation pipeline looks like this:<a data-type="indexterm" data-primary="compilation process" data-secondary="diagram of"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/pipeline.ascii" class="orm:hideurl:ital"><em class="hyperlink">Diagram</em></a></p><figure style="float: 0"><img src="images/rwoc_2201.png"/><figcaption/></figure><p>Notice that the pipeline branches toward the end. OCaml has multiple compiler backends
+    other applications.<a data-type="indexterm" data-primary="compilation units">&#xa0;</a></p><p>The overall compilation pipeline looks like this:<a data-type="indexterm" data-primary="compilation process" data-secondary="diagram of">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/pipeline.ascii" class="orm:hideurl:ital"><em class="hyperlink">Diagram</em></a></p><figure style="float: 0"><img src="images/rwoc_2201.png"/><figcaption/></figure><p>Notice that the pipeline branches toward the end. OCaml has multiple compiler backends
       that reuse the early stages of compilation but produce very different final outputs. The
         <em>bytecode</em> can be run by a portable interpreter and can even be
       transformed into JavaScript (via <a href="http://ocsigen.org/js_of_ocaml">js_of_ocaml</a>) or C source code (via <a href="https://github.com/ocaml-bytes/ocamlcc">OCamlCC</a>). The <em>native
         code</em> compiler generates specialized executable binaries suitable for
-      high-performance applications.<a data-type="indexterm" data-primary="compilation process" data-secondary="compiler source code"/><a data-type="indexterm" data-primary="code compilers" data-secondary="bytecode vs. native code"/></p><aside data-type="sidebar"><h5>Obtaining the Compiler Source Code</h5><p>Although it's not necessary to understand the examples, you may
+      high-performance applications.<a data-type="indexterm" data-primary="compilation process" data-secondary="compiler source code">&#xa0;</a><a data-type="indexterm" data-primary="code compilers" data-secondary="bytecode vs. native code">&#xa0;</a></p><aside data-type="sidebar"><h5>Obtaining the Compiler Source Code</h5><p>Although it's not necessary to understand the examples, you may
       find it useful to have a copy of the OCaml source tree checked out while
       you read through this chapter. The source code is available from
       multiple places:</p><ul><li><p>Stable releases as <em class="filename">zip</em> and <em class="filename">tar</em> archives
@@ -47,12 +47,12 @@
             compiler.</p></dd><dt><code>testsuite/</code></dt><dd><p>Regression tests for the core compiler.</p></dd></dl></aside><p>We'll go through each of the compilation stages now and explain how they will be useful to
       you during day-to-day OCaml development.</p></section><section id="parsing-source-code" data-type="sect1"><h1>Parsing Source Code</h1><p>When a source file is passed to the OCaml compiler, its first task is to parse the text
       into a more structured abstract syntax tree (AST). The parsing logic is implemented in OCaml
-      itself using the techniques described earlier in <a href="#parsing-with-ocamllex-and-menhir" data-type="xref"/>. The lexer and parser rules can be found in the
-        <code>parsing</code> directory in the source distribution.<a data-type="indexterm" data-primary="AST (abstract syntax-tree)"/><a data-type="indexterm" id="SCpras" data-primary="source code" data-secondary="parsing of"/><a data-type="indexterm" id="PARSsource" data-primary="parsing" data-secondary="of source code"/><a data-type="indexterm" id="CPpars" data-primary="compilation process" data-secondary="parsing source code"/></p><section id="syntax-errors" data-type="sect2"><h2>Syntax Errors</h2><p>The OCaml parser's goal is to output a well-formed AST data structure to the next phase
+      itself using the techniques described earlier in <a href="#parsing-with-ocamllex-and-menhir" data-type="xref">#parsing-with-ocamllex-and-menhir</a>. The lexer and parser rules can be found in the
+        <code>parsing</code> directory in the source distribution.<a data-type="indexterm" data-primary="AST (abstract syntax-tree)">&#xa0;</a><a data-type="indexterm" id="SCpras" data-primary="source code" data-secondary="parsing of">&#xa0;</a><a data-type="indexterm" id="PARSsource" data-primary="parsing" data-secondary="of source code">&#xa0;</a><a data-type="indexterm" id="CPpars" data-primary="compilation process" data-secondary="parsing source code">&#xa0;</a></p><section id="syntax-errors" data-type="sect2"><h2>Syntax Errors</h2><p>The OCaml parser's goal is to output a well-formed AST data structure to the next phase
         of compilation, and so it any source code that doesn't match basic syntactic requirements.
         The compiler emits a <em>syntax error</em> in this situation, with a pointer to
         the filename and line and character number that's as close to the error as
-          possible.<a data-type="indexterm" data-primary="errors" data-secondary="syntax errors"/><a data-type="indexterm" data-primary="syntax errors"/></p><p>Here's an example syntax error that we obtain by performing a module assignment as a
+          possible.<a data-type="indexterm" data-primary="errors" data-secondary="syntax errors">&#xa0;</a><a data-type="indexterm" data-primary="syntax errors">&#xa0;</a></p><p>Here's an example syntax error that we obtain by performing a module assignment as a
         statement instead of as a <code>let</code> binding:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/broken_module.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">let () =
   module MyString = String;
   ()</pre><p>The code results in a syntax error when compiled:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/build_broken_module.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocamlc -c broken_module.ml</code></strong>
@@ -64,7 +64,7 @@
       first token that couldn't be parsed. In the broken example, the <code>module</code> keyword isn't a valid token at that
       point in parsing, so the error location information is correct.</p></section><section id="automatically-indenting-source-code" data-type="sect2"><h2>Automatically Indenting Source Code</h2><p>Sadly, syntax errors do get more inaccurate sometimes, depending
       on the nature of your mistake. Try to spot the deliberate error in the
-      following function definitions:<a data-type="indexterm" data-primary="source code" data-secondary="automatically indenting"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/follow_on_function.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">let concat_and_print x y =
+      following function definitions:<a data-type="indexterm" data-primary="source code" data-secondary="automatically indenting">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/follow_on_function.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">let concat_and_print x y =
   let v = x ^ y in
   print_endline v;
   v;
@@ -89,7 +89,7 @@ let () =
       via OPAM called <span class="command"><em>ocp-indent</em></span> that
       applies structured indenting rules to your source code on a line-by-line
       basis. This not only beautifies your code layout, but it also makes this
-      syntax error much easier to locate.<a data-type="indexterm" data-primary="debugging" data-secondary="single errant characters"/></p><p>Let's run our erroneous file through <span class="command"><em>ocp-indent</em></span> and see how it processes it:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/indent_follow_on_function.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocp-indent follow_on_function.ml</code></strong>
+      syntax error much easier to locate.<a data-type="indexterm" data-primary="debugging" data-secondary="single errant characters">&#xa0;</a></p><p>Let's run our erroneous file through <span class="command"><em>ocp-indent</em></span> and see how it processes it:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/indent_follow_on_function.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocp-indent follow_on_function.ml</code></strong>
 <code class="computeroutput">let concat_and_print x y =</code>
 <code class="computeroutput">  let v = x ^ y in</code>
 <code class="computeroutput">  print_endline v;</code>
@@ -128,7 +128,7 @@ let () =
         online.</p></section><section id="generating-documentation-from-interfaces" data-type="sect2"><h2>Generating Documentation from Interfaces</h2><p>Whitespace and source code comments are removed during parsing and
       aren't significant in determining the semantics of the program. However,
       other tools in the OCaml distribution can interpret comments for their
-      own ends.<a data-type="indexterm" data-primary="OCaml toolchain" data-secondary="ocamldoc"/><a data-type="indexterm" data-primary="interfaces" data-secondary="generating documentation from"/><a data-type="indexterm" data-primary="documentation, generating from interfaces"/></p><p>The <span class="command"><em>ocamldoc</em></span> tool uses specially formatted comments
+      own ends.<a data-type="indexterm" data-primary="OCaml toolchain" data-secondary="ocamldoc">&#xa0;</a><a data-type="indexterm" data-primary="interfaces" data-secondary="generating documentation from">&#xa0;</a><a data-type="indexterm" data-primary="documentation, generating from interfaces">&#xa0;</a></p><p>The <span class="command"><em>ocamldoc</em></span> tool uses specially formatted comments
         in the source code to generate documentation bundles. These comments are combined with the
         function definitions and signatures, and output as structured documentation in a variety of
         formats. It can generate HTML pages, LaTeX and PDF documents, UNIX manual pages, and even
@@ -164,7 +164,7 @@ let what_is_the_weather_in location =
         be able to view the UNIX manual pages held in <em class="filename">man/man3</em>. There are quite
         a few comment formats and options to control the output for the various backends. Refer to
         the <a href="http://caml.inria.fr/pub/docs/manual-ocaml/manual029.html">OCaml
-          manual</a> for the complete list.<a data-type="indexterm" data-primary="Xen"/><a data-type="indexterm" data-primary="JSON data" data-secondary="Xen custom generator for"/><a data-type="indexterm" data-primary="Bibtex"/><a data-type="indexterm" data-primary="OCaml toolchain" data-secondary="ocamldoc-generators"/><a data-type="indexterm" data-primary="Argot HTML generator"/><a data-type="indexterm" data-primary="HTML generators"/><a data-type="indexterm" data-startref="SCpras"/><a data-type="indexterm" data-startref="PARSsource"/><a data-type="indexterm" data-startref="CPpars"/></p><div data-type="tip"><h1>Using Custom ocamldoc Generators</h1><p>The default HTML output stylesheets from <span class="command"><em>ocamldoc</em></span> are pretty spartan and distinctly
+          manual</a> for the complete list.<a data-type="indexterm" data-primary="Xen">&#xa0;</a><a data-type="indexterm" data-primary="JSON data" data-secondary="Xen custom generator for">&#xa0;</a><a data-type="indexterm" data-primary="Bibtex">&#xa0;</a><a data-type="indexterm" data-primary="OCaml toolchain" data-secondary="ocamldoc-generators">&#xa0;</a><a data-type="indexterm" data-primary="Argot HTML generator">&#xa0;</a><a data-type="indexterm" data-primary="HTML generators">&#xa0;</a><a data-type="indexterm" data-startref="SCpras">&#xa0;</a><a data-type="indexterm" data-startref="PARSsource">&#xa0;</a><a data-type="indexterm" data-startref="CPpars">&#xa0;</a></p><div data-type="tip"><h1>Using Custom ocamldoc Generators</h1><p>The default HTML output stylesheets from <span class="command"><em>ocamldoc</em></span> are pretty spartan and distinctly
         Web 1.0. The tool supports plugging in custom documentation
         generators, and there are several available that provide prettier or
         more detailed output:</p><ul><li><p><a href="http://argot.x9c.fr/">Argot</a> is an
@@ -174,11 +174,11 @@ let what_is_the_weather_in location =
             in Xen.</p></li></ul></div></section></section><section id="preprocessing-source-code" data-type="sect1"><h1>Preprocessing Source Code</h1><p>One powerful feature in OCaml is a facility to extend the standard-language grammar
       without having to modify the compiler. You can roughly think of it as a type-safe version of
       the <code>cpp</code> preprocessor used in C/C++ to control conditional
-      compilation directives.<a data-type="indexterm" data-primary="grammars" data-secondary="extension of standard language"/><a data-type="indexterm" id="SCpreproc" data-primary="source code" data-secondary="preprocessing of"/><a data-type="indexterm" id="CPpreproc" data-primary="compilation process" data-secondary="preprocessing source code"/></p><p>The OCaml distribution includes a system called Camlp4 for writing extensible parsers.
+      compilation directives.<a data-type="indexterm" data-primary="grammars" data-secondary="extension of standard language">&#xa0;</a><a data-type="indexterm" id="SCpreproc" data-primary="source code" data-secondary="preprocessing of">&#xa0;</a><a data-type="indexterm" id="CPpreproc" data-primary="compilation process" data-secondary="preprocessing source code">&#xa0;</a></p><p>The OCaml distribution includes a system called Camlp4 for writing extensible parsers.
       This provides some OCaml libraries that are used to define grammars, as well as dynamically
       loadable syntax extensions of such grammars. Camlp4 modules register new language keywords and
       later transform these keywords (or indeed, any portion of the input program) into conventional
-      OCaml code that can be understood by the rest of the compiler.<a data-type="indexterm" id="SEcamlp" data-primary="syntax extension" data-secondary="in Camlp4"/><a data-type="indexterm" data-primary="programming" data-secondary="dynamic programming"/><a data-type="indexterm" data-primary="dynamic programming"/><a data-type="indexterm" data-primary="Bin_prot library"/><a data-type="indexterm" data-primary="Sexplib package" data-secondary="sexp converter"/><a data-type="indexterm" data-primary="fieldslib"/><a data-type="indexterm" data-primary="parsing" data-secondary="extensible parsers"/><a data-type="indexterm" data-primary="extensible parsers"/><a data-type="indexterm" id="camlp" data-primary="Camlp4 syntax extension mechanism"/></p><p>We've already seen several Core libraries that use Camlp4:</p><dl><dt><code>Fieldslib</code></dt><dd><p>Generates first-class values that represent fields of a
+      OCaml code that can be understood by the rest of the compiler.<a data-type="indexterm" id="SEcamlp" data-primary="syntax extension" data-secondary="in Camlp4">&#xa0;</a><a data-type="indexterm" data-primary="programming" data-secondary="dynamic programming">&#xa0;</a><a data-type="indexterm" data-primary="dynamic programming">&#xa0;</a><a data-type="indexterm" data-primary="Bin_prot library">&#xa0;</a><a data-type="indexterm" data-primary="Sexplib package" data-secondary="sexp converter">&#xa0;</a><a data-type="indexterm" data-primary="fieldslib">&#xa0;</a><a data-type="indexterm" data-primary="parsing" data-secondary="extensible parsers">&#xa0;</a><a data-type="indexterm" data-primary="extensible parsers">&#xa0;</a><a data-type="indexterm" id="camlp" data-primary="Camlp4 syntax extension mechanism">&#xa0;</a></p><p>We've already seen several Core libraries that use Camlp4:</p><dl><dt><code>Fieldslib</code></dt><dd><p>Generates first-class values that represent fields of a
           record</p></dd><dt><code>Sexplib</code></dt><dd><p>To convert types to textual s-expressions</p></dd><dt><code>Bin_prot</code></dt><dd><p>For efficient binary conversion and parsing</p></dd></dl><p>These libraries all extend the language in quite a minimal way by
     adding a <code>with</code> keyword to type
     declarations to signify that extra code should be generated from that
@@ -210,7 +210,7 @@ type t = {
       compilation time. This avoids the performance hit of doing the code generation dynamically and
       also doesn't require a just-in-time (JIT) runtime that can be a source of unpredictable
       dynamic behavior. Instead, all the extra code is simply generated at compilation time via
-      Camlp4, and type information can be discarded from the runtime image.<a data-type="indexterm" data-primary="&#34;Just-in-Time&#34; dynamic patching" data-primary-sortas="Just"/></p><p>The syntax extensions accept an input AST and output a modified one.
+      Camlp4, and type information can be discarded from the runtime image.<a data-type="indexterm" data-primary="&quot;Just-in-Time&quot; dynamic patching" data-primary-sortas="Just">&#xa0;</a></p><p>The syntax extensions accept an input AST and output a modified one.
     If you're not familiar with the Camlp4 module in question, how do you
     figure out what changes it's made to your code? The obvious way is to read
     the documentation that accompanies the extension. Another approach is to
@@ -237,9 +237,9 @@ type t = {
       toplevel to filter all phrases via Camlp4. You can now run <span class="command"><em>utop</em></span> and load the syntax extensions in. We'll
       use the <code>comparelib</code> syntax extension
       for our experiments.</p><p>OCaml provides a built-in polymorphic comparison operator that inspects the runtime
-        representation of two values to see if they're equal. As we noted in <a href="#maps-and-hash-tables" data-type="xref"/>, the polymorphic comparison is less efficient than
+        representation of two values to see if they're equal. As we noted in <a href="#maps-and-hash-tables" data-type="xref">#maps-and-hash-tables</a>, the polymorphic comparison is less efficient than
         defining explicit comparison functions between values. However, it quickly becomes tedious
-        to manually define comparison functions for complex type definitions.<a data-type="indexterm" data-primary="interactive input" data-secondary="with camlp4"/><a data-type="indexterm" data-primary="polymorphic comparisons"/></p><p>Let's see how <code>comparelib</code> solves
+        to manually define comparison functions for complex type definitions.<a data-type="indexterm" data-primary="interactive input" data-secondary="with camlp4">&#xa0;</a><a data-type="indexterm" data-primary="polymorphic comparisons">&#xa0;</a></p><p>Let's see how <code>comparelib</code> solves
       this problem by running it in <span class="command"><em>utop</em></span>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/camlp4_toplevel.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>#require "comparelib.syntax" ;;</code></strong>
 <code class="prompt"># </code><strong><code>type t = { foo: string; bar : t } ;;</code></strong>
@@ -251,7 +251,7 @@ type t = {
         and results in the expected output. The second one includes the <code>with compare</code> directive. This is intercepted by <code>comparelib</code> and transformed into the original type definition with two new
         functions also <span class="keep-together">included</span>.</p></section><section id="running-camlp4-from-the-command-line" data-type="sect2"><h2>Running Camlp4 from the Command Line</h2><p>The toplevel is a quick way to examine the signatures generated from the extensions, but
         how can we see what these new functions actually do? We can't do this from <span class="command"><em>utop</em></span> directly, since it embeds the Camlp4 invocation as an
-        automated part of its operation.<a data-type="indexterm" data-primary="command-line parsing" data-secondary="with Camlp4"/></p><p>Let's turn to the command line to obtain the result of the
+        automated part of its operation.<a data-type="indexterm" data-primary="command-line parsing" data-secondary="with Camlp4">&#xa0;</a></p><p>Let's turn to the command line to obtain the result of the
       <code>comparelib</code> transformation instead.
       Create a file that contains the type declaration from earlier:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/comparelib_test.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type t = { 
   foo: string; 
@@ -297,10 +297,10 @@ camlp4o -printer o $INCLUDE $ARCHIVES $1</pre><p>The script uses the <span class
       a <code>string</code> type. This lets the compiler
       use a specialized string comparison function and not actually call the
       runtime polymorphic comparison function. This has implications for
-      correctness, too: recall from <a href="#maps-and-hash-tables" data-type="xref"/>
+      correctness, too: recall from <a href="#maps-and-hash-tables" data-type="xref">#maps-and-hash-tables</a>
       that <code>comparelib</code> provides reliable
       comparison functions that work for values that are logically the same
-      but that have differing internal representations (e.g., <code>Int.Set.t</code>).<a data-type="indexterm" data-primary="wildcards"/><a data-type="indexterm" data-primary="bindings" data-secondary="wildcards in let bindings"/><a data-type="indexterm" data-primary="let syntax" data-secondary="wildcards in bindings"/></p><div class="allow_break" data-type="note"><h1>A Style Note: Wildcards in let Bindings</h1><p>You may have noticed the <code>let _ =
+      but that have differing internal representations (e.g., <code>Int.Set.t</code>).<a data-type="indexterm" data-primary="wildcards">&#xa0;</a><a data-type="indexterm" data-primary="bindings" data-secondary="wildcards in let bindings">&#xa0;</a><a data-type="indexterm" data-primary="let syntax" data-secondary="wildcards in bindings">&#xa0;</a></p><div class="allow_break" data-type="note"><h1>A Style Note: Wildcards in let Bindings</h1><p>You may have noticed the <code>let _ =
         fun</code> construct in the autogenerated code above. The
         underscore in a <code>let</code> binding is just
         the same as a wildcard underscore in a pattern match, and tells the
@@ -321,7 +321,7 @@ let () = don't_wait_for (&lt;expr&gt;</pre><p>The last one is used to ignore Asy
   let _z = x + y in
   ()</pre><p>Although you don't use <code>_z</code> in
         your code, this will never generate an unused variable warning.</p></div></section><section id="preprocessing-module-signatures" data-type="sect2"><h2>Preprocessing Module Signatures</h2><p>Another useful feature of <code>type_conv</code> is that it can
-        generate module signatures, too. Copy the earlier type definition into a <code>comparelib_test.mli</code> that's got exactly the same <span class="keep-together">content</span>:<a data-type="indexterm" data-primary="signatures" data-secondary="preprocessing module signatures"/><a data-type="indexterm" data-primary="modules" data-secondary="preprocessing signatures of"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/comparelib_test.mli" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type t = { 
+        generate module signatures, too. Copy the earlier type definition into a <code>comparelib_test.mli</code> that's got exactly the same <span class="keep-together">content</span>:<a data-type="indexterm" data-primary="signatures" data-secondary="preprocessing module signatures">&#xa0;</a><a data-type="indexterm" data-primary="modules" data-secondary="preprocessing signatures of">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/comparelib_test.mli" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type t = { 
   foo: string; 
   bar: t
 } with compare</pre><p>If you rerun the Camlp4 dumper script now, you'll see that
@@ -332,7 +332,7 @@ let () = don't_wait_for (&lt;expr&gt;</pre><p>The last one is used to ignore Asy
 <code class="computeroutput">  </code>
 <code class="computeroutput"> </code></pre><p>The external signature generated by <code>comparelib</code> is much simpler than the actual
       code. Running Camlp4 directly on the original source code lets you see
-      these all these transformations precisely.<a data-type="indexterm" data-primary="grammars" data-secondary="avoiding grammar clashes"/><a data-type="indexterm" data-primary="macros"/><a data-type="indexterm" data-primary="conditional compilation"/><a data-type="indexterm" data-primary="whitespace-sensitive indentation"/><a data-type="indexterm" data-primary="syntax extension" data-secondary="potential overuse of"/></p><div class="allow_break" data-type="caution"><h1>Don't Overdo the Syntax Extensions</h1><p>Syntax extensions are a powerful extension mechanism that can
+      these all these transformations precisely.<a data-type="indexterm" data-primary="grammars" data-secondary="avoiding grammar clashes">&#xa0;</a><a data-type="indexterm" data-primary="macros">&#xa0;</a><a data-type="indexterm" data-primary="conditional compilation">&#xa0;</a><a data-type="indexterm" data-primary="whitespace-sensitive indentation">&#xa0;</a><a data-type="indexterm" data-primary="syntax extension" data-secondary="potential overuse of">&#xa0;</a></p><div class="allow_break" data-type="caution"><h1>Don't Overdo the Syntax Extensions</h1><p>Syntax extensions are a powerful extension mechanism that can
         completely alter your source code's layout and style. Core includes a
         very conservative set of extensions that take care to minimize the
         syntax changes. There are a number of third-party libraries that are
@@ -350,7 +350,7 @@ let () = don't_wait_for (&lt;expr&gt;</pre><p>The last one is used to ignore Asy
         <code>with</code> keyword.</p></div></section><section id="further-reading-on-camlp4" data-type="sect2"><h2>Further Reading on Camlp4</h2><p>We've deliberately only shown you how to use Camlp4 extensions
       here, and not how to build your own. The full details of building new
       extensions are fairly daunting and could be the subject of an entirely
-      new book.<a data-type="indexterm" data-primary="syntax extension" data-secondary="building new"/><a data-type="indexterm" data-primary="extensions" data-see="syntax extensions"/></p><p>The best resources to get started are:<a data-type="indexterm" data-startref="SEcamlp"/><a data-type="indexterm" data-startref="camlp"/><a data-type="indexterm" data-startref="SCpreproc"/><a data-type="indexterm" data-startref="CPpreproc"/></p><ul><li><p>A series of <a href="http://ambassadortothecomputers.blogspot.co.uk/p/reading-camlp4.html">blog
+      new book.<a data-type="indexterm" data-primary="syntax extension" data-secondary="building new">&#xa0;</a><a data-type="indexterm" data-primary="extensions" data-see="syntax extensions">&#xa0;</a></p><p>The best resources to get started are:<a data-type="indexterm" data-startref="SEcamlp">&#xa0;</a><a data-type="indexterm" data-startref="camlp">&#xa0;</a><a data-type="indexterm" data-startref="SCpreproc">&#xa0;</a><a data-type="indexterm" data-startref="CPpreproc">&#xa0;</a></p><ul><li><p>A series of <a href="http://ambassadortothecomputers.blogspot.co.uk/p/reading-camlp4.html">blog
           posts</a> by Jake Donham describe the internals of Camlp4 and
           its syntax extension mechanism</p></li><li><p>The online <a href="http://brion.inria.fr/gallium/index.php/Camlp4">Camlp4
           wiki</a></p></li><li><p>Using OPAM to install existing Camlp4 extensions and
@@ -359,7 +359,7 @@ let () = don't_wait_for (&lt;expr&gt;</pre><p>The last one is used to ignore Asy
     is syntactically correct but misuses values is rejected with an
     explanation of the problem.</p><p>Although type checking is done in a single pass in OCaml, it
     actually consists of three distinct steps that happen
-    simultaneously:<a data-type="indexterm" data-primary="explicit subtyping" data-seealso="subtyping"/><a data-type="indexterm" data-primary="automatic type inference" data-seealso="type inference"/><a data-type="indexterm" data-primary="subtyping" data-secondary="in static type checking"/><a data-type="indexterm" data-primary="modules" data-secondary="in static type checking"/><a data-type="indexterm" data-primary="type inference" data-secondary="in static type checking"/><a data-type="indexterm" id="CPstatictype" data-primary="compilation process" data-secondary="static type checking"/></p><dl><dt>automatic type inference</dt><dd><p>An algorithm that calculates types for a module without
+    simultaneously:<a data-type="indexterm" data-primary="explicit subtyping" data-seealso="subtyping">&#xa0;</a><a data-type="indexterm" data-primary="automatic type inference" data-seealso="type inference">&#xa0;</a><a data-type="indexterm" data-primary="subtyping" data-secondary="in static type checking">&#xa0;</a><a data-type="indexterm" data-primary="modules" data-secondary="in static type checking">&#xa0;</a><a data-type="indexterm" data-primary="type inference" data-secondary="in static type checking">&#xa0;</a><a data-type="indexterm" id="CPstatictype" data-primary="compilation process" data-secondary="static type checking">&#xa0;</a></p><dl><dt>automatic type inference</dt><dd><p>An algorithm that calculates types for a module without
           requiring manual type annotations</p></dd><dt>module system</dt><dd><p>Combines software components with explicit knowledge of their
           type signatures</p></dd><dt>explicit subtyping</dt><dd><p>Checks for objects and polymorphic variants</p></dd></dl><p>Automatic type inference lets you write succinct code for a
     particular task and have the compiler ensure that your use of variables is
@@ -367,7 +367,7 @@ let () = don't_wait_for (&lt;expr&gt;</pre><p>The last one is used to ignore Asy
       of files. A small change in one module may ripple through thousands of other files and
       libraries and require all of them to be recompiled. The module system solves this by providing
       the facility to combine and manipulate explicit type signatures for modules within a large
-      project, and also to reuse them via functors and first-class modules.<a data-type="indexterm" data-primary="modules" data-secondary="benefits of"/><a data-type="indexterm" data-primary="type inference" data-secondary="drawbacks of"/></p><p>Subtyping in OCaml objects is always an explicit operation (via the
+      project, and also to reuse them via functors and first-class modules.<a data-type="indexterm" data-primary="modules" data-secondary="benefits of">&#xa0;</a><a data-type="indexterm" data-primary="type inference" data-secondary="drawbacks of">&#xa0;</a></p><p>Subtyping in OCaml objects is always an explicit operation (via the
     <code>:&gt;</code> operator). This means that it
     doesn't complicate the core type inference engine and can be tested as a
     separate concern.</p><section id="displaying-inferred-types-from-the-compiler" data-type="sect2"><h2>Displaying Inferred Types from the Compiler</h2><p>We've already seen how you can explore type inference directly
@@ -401,7 +401,7 @@ let v = Foo</pre><p>Now run the compiler with the <code>-i</code> flag to infer 
         should be written in. It's very easy to begin writing code by starting
         with an <code>ml</code> file and using the type
         inference to guide you as you build up your functions. The <code>mli</code> file can then be generated as described,
-        and the exported functions documented.<a data-type="indexterm" data-primary="code compilers" data-secondary="order of code" data-seealso="compilaton process"/><a data-type="indexterm" data-primary="mli files"/><a data-type="indexterm" data-primary="files" data-secondary="mli files"/><a data-type="indexterm" data-primary="ml files"/><a data-type="indexterm" data-primary="files" data-secondary="ml files"/></p><p>If you're writing code that spans multiple files, it's sometimes easier to start by
+        and the exported functions documented.<a data-type="indexterm" data-primary="code compilers" data-secondary="order of code" data-seealso="compilaton process">&#xa0;</a><a data-type="indexterm" data-primary="mli files">&#xa0;</a><a data-type="indexterm" data-primary="files" data-secondary="mli files">&#xa0;</a><a data-type="indexterm" data-primary="ml files">&#xa0;</a><a data-type="indexterm" data-primary="files" data-secondary="ml files">&#xa0;</a></p><p>If you're writing code that spans multiple files, it's sometimes easier to start by
           writing all the <code>mli</code> signatures and checking that they
           type-check against one another. Once the signatures are in place, you can write the
           implementations with the confidence that they'll all glue together correctly, with no
@@ -419,7 +419,7 @@ let v = Foo</pre><p>Now run the compiler with the <code>-i</code> flag to infer 
       for expressions based on their use. It's a feature that's partially
       present in many other languages such as Haskell and Scala, but OCaml
       embeds it as a fundamental feature throughout the core
-      language.<a data-type="indexterm" data-primary="Hindley-Milner algorithm"/><a data-type="indexterm" data-primary="type inference" data-secondary="algorithm basis of"/></p><p>OCaml type inference is based on the Hindley-Milner algorithm,
+      language.<a data-type="indexterm" data-primary="Hindley-Milner algorithm">&#xa0;</a><a data-type="indexterm" data-primary="type inference" data-secondary="algorithm basis of">&#xa0;</a></p><p>OCaml type inference is based on the Hindley-Milner algorithm,
       which is notable for its ability to infer the most general type for an
       expression without requiring any explicit type annotations. The
       algorithm can deduce multiple types for an expression and has the notion
@@ -438,7 +438,7 @@ let v = Foo</pre><p>Now run the compiler with the <code>-i</code> flag to infer 
         program at compilation time rather than by generating an error at
         runtime. Learning how to navigate the type checker's compile-time
         feedback is key to building robust libraries and applications that
-        take full advantage of these static checks.<a data-type="indexterm" data-primary="type inference" data-secondary="error detection with"/><a data-type="indexterm" data-primary="annotations, for type checking"/><a data-type="indexterm" data-primary="errors" data-secondary="detecting with type annotations"/><a data-type="indexterm" data-primary="type annotations"/><a data-type="indexterm" data-primary="compile-time static checking"/></p><p>There are a couple of tricks to make it easier to quickly locate
+        take full advantage of these static checks.<a data-type="indexterm" data-primary="type inference" data-secondary="error detection with">&#xa0;</a><a data-type="indexterm" data-primary="annotations, for type checking">&#xa0;</a><a data-type="indexterm" data-primary="errors" data-secondary="detecting with type annotations">&#xa0;</a><a data-type="indexterm" data-primary="type annotations">&#xa0;</a><a data-type="indexterm" data-primary="compile-time static checking">&#xa0;</a></p><p>There are a couple of tricks to make it easier to quickly locate
         type errors in your code. The first is to introduce manual type
         annotations to narrow down the source of your error more accurately.
         These annotations shouldn't actually change your types and can be
@@ -447,7 +447,7 @@ let v = Foo</pre><p>Now run the compiler with the <code>-i</code> flag to infer 
         of polymorphic variants or objects. Type inference with row
         polymorphism can generate some very large signatures, and errors tend
         to propagate more widely than if you are using more explicitly typed
-        variants or classes.<a data-type="indexterm" data-primary="polymorphic variant types" data-secondary="type checking and"/><a data-type="indexterm" data-primary="row polymorphism"/></p><p>For instance, consider this broken example that expresses some
+        variants or classes.<a data-type="indexterm" data-primary="polymorphic variant types" data-secondary="type checking and">&#xa0;</a><a data-type="indexterm" data-primary="row polymorphism">&#xa0;</a></p><p>For instance, consider this broken example that expresses some
         simple algebraic operations over integers:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/broken_poly.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">let rec algebra =
   function
   | `Add (x,y) -&gt; (algebra x) + (algebra y)
@@ -526,7 +526,7 @@ let _ =
           that is activated via the <span class="keep-together"><code>-principal</code></span> flag. This warns about risky uses of type information
           to ensure that the type inference has one principal result. A type is considered risky if
           the success or failure of type inference depends on the order in which subexpressions are
-            typed.<a data-type="indexterm" data-primary="type inference" data-secondary="principality checks"/><a data-type="indexterm" data-primary="risky type"/><a data-type="indexterm" data-primary="principal type checking"/></p><p>The principality check only affects a few language
+            typed.<a data-type="indexterm" data-primary="type inference" data-secondary="principality checks">&#xa0;</a><a data-type="indexterm" data-primary="risky type">&#xa0;</a><a data-type="indexterm" data-primary="principal type checking">&#xa0;</a></p><p>The principality check only affects a few language
         features:</p><ul><li><p>Polymorphic methods for objects</p></li><li><p>Permuting the order of labeled arguments in a function from
             their type definition</p></li><li><p>Discarding optional labeled arguments</p></li><li><p>Generalized algebraic data types (GADTs) present from OCaml 4.0 onward</p></li><li><p>Automatic disambiguation of record field and constructor
             names (since OCaml 4.1)</p></li></ul><p>Here's an example of principality warnings when used with record
@@ -580,17 +580,17 @@ let f (x:s) =
           case, just recompile with a clean source tree.</p></section></section><section id="modules-and-separate-compilation" data-type="sect2"><h2>Modules and Separate Compilation</h2><p>The OCaml module system enables smaller components to be reused
       effectively in large projects while still retaining all the benefits of
       static type safety. We covered the basics of using modules earlier in
-      <a href="#files-modules-and-programs" data-type="xref"/>. The module language that
+      <a href="#files-modules-and-programs" data-type="xref">#files-modules-and-programs</a>. The module language that
       operates over these signatures also extends to functors and first-class
-      modules, described in <a href="#functors" data-type="xref"/> and <a href="#first-class-modules" data-type="xref"/>, respectively.<a data-type="indexterm" data-primary="modules" data-secondary="separate compilation in"/></p><p>This section discusses how the compiler implements them in more
+      modules, described in <a href="#functors" data-type="xref">#functors</a> and <a href="#first-class-modules" data-type="xref">#first-class-modules</a>, respectively.<a data-type="indexterm" data-primary="modules" data-secondary="separate compilation in">&#xa0;</a></p><p>This section discusses how the compiler implements them in more
       detail. Modules are essential for larger projects that consist of many
       source files (also known as <em>compilation units</em>).
       It's impractical to recompile every single source file when changing
       just one or two files, and the module system minimizes such
-      recompilation while still encouraging code reuse.<a data-type="indexterm" data-primary="compilation units"/></p><section id="the-mapping-between-files-and-modules" data-type="sect3"><h3>The mapping between files and modules</h3><p>Individual compilation units provide a convenient way to break
+      recompilation while still encouraging code reuse.<a data-type="indexterm" data-primary="compilation units">&#xa0;</a></p><section id="the-mapping-between-files-and-modules" data-type="sect3"><h3>The mapping between files and modules</h3><p>Individual compilation units provide a convenient way to break
         up a big module hierarchy into a collection of files. The relationship
         between files and modules can be explained directly in terms of the
-        module system.<a data-type="indexterm" data-primary="files" data-secondary="relationship with modules"/></p><p>Create a file called <code>alice.ml</code>
+        module system.<a data-type="indexterm" data-primary="files" data-secondary="relationship with modules">&#xa0;</a></p><p>Create a file called <code>alice.ml</code>
         with the following contents:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/alice.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">let friends = [ Bob.name ]</pre><p>and a corresponding signature file:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/alice.mli" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">val friends : Bob.t list</pre><p>These two files are exactly analogous to including the following
         code directly in another module that references <code>Alice</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/alice_combined.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">module Alice : sig
   val friends : Bob.t list
@@ -602,7 +602,7 @@ end</pre></section><section id="defining-a-module-search-path" data-type="sect3"
         also needs to check that the <code>Bob</code>
         module contains at least a <code>Bob.name</code>
         value and defines a <code>Bob.t</code>
-        type.<a data-type="indexterm" data-primary="modules" data-secondary="defining search paths"/></p><p>The type checker resolves such module references into concrete
+        type.<a data-type="indexterm" data-primary="modules" data-secondary="defining search paths">&#xa0;</a></p><p>The type checker resolves such module references into concrete
         structures and signatures in order to unify types across module
         boundaries. It does this by searching a list of directories for a
         compiled interface file matching that module's name. For example, it
@@ -624,7 +624,7 @@ end</pre></section><section id="defining-a-module-search-path" data-type="sect3"
         by setting the <code>CAMLLIB</code> environment
         variable. Needless to say, don't override the default path unless you
         have a good reason to (such as setting up a cross-compilation
-        environment).<a data-type="indexterm" data-primary="cmi files"/><a data-type="indexterm" data-primary="files" data-secondary="cmi files"/><a data-type="indexterm" data-primary="OCaml toolchain" data-secondary="ocamlogjinfo"/></p><aside data-type="sidebar"><h5>Inspecting Compilation Units with ocamlobjinfo</h5><p>For separate compilation to be sound, we need to ensure that
+        environment).<a data-type="indexterm" data-primary="cmi files">&#xa0;</a><a data-type="indexterm" data-primary="files" data-secondary="cmi files">&#xa0;</a><a data-type="indexterm" data-primary="OCaml toolchain" data-secondary="ocamlogjinfo">&#xa0;</a></p><aside data-type="sidebar"><h5>Inspecting Compilation Units with ocamlobjinfo</h5><p>For separate compilation to be sound, we need to ensure that
           all the <code>cmi</code> files used to
           type-check a module are the same across compilation runs. If they
           vary, this raises the possibility of two modules checking different
@@ -663,7 +663,7 @@ end</pre></section><section id="defining-a-module-search-path" data-type="sect3"
           your intermediate files and recompile from scratch.</p></aside></section></section><section id="packing-modules-together" data-type="sect2"><h2>Packing Modules Together</h2><p>The module-to-file mapping described so far rigidly enforces a 1:1
       mapping between a top-level module and a file. It's often convenient to
       split larger modules into separate files to make editing easier, but
-      still compile them all into a single OCaml module.<a data-type="indexterm" data-primary="modules" data-secondary="packing together"/></p><p>The <code>-pack</code> compiler option
+      still compile them all into a single OCaml module.<a data-type="indexterm" data-primary="modules" data-secondary="packing together">&#xa0;</a></p><p>The <code>-pack</code> compiler option
       accepts a list of compiled object files (<code>.cmo</code> in bytecode and <code>.cmx</code> for native code) and their associated
       <code>.cmi</code> compiled interfaces, and
       combines them into a single module that contains them as submodules of
@@ -718,7 +718,7 @@ let w = X.B.w</pre><p>You can now compile this test module and see that its infe
           test, or only using the library after it has been installed (and hence not exposing the
           intermediate compiled modules).</p></div></section><section id="shorter-module-paths-in-type-errors" data-type="sect2"><h2>Shorter Module Paths in Type Errors</h2><p>Core uses the OCaml module system quite extensively to provide a complete replacement
         standard library. It collects these modules into a single <code>Std</code> module, which provides a single module that needs to be opened to import
-        the replacement modules and functions.<a data-type="indexterm" data-primary="errors" data-secondary="reducing verbosity in"/></p><p>There's one downside to this approach: type errors suddenly get
+        the replacement modules and functions.<a data-type="indexterm" data-primary="errors" data-secondary="reducing verbosity in">&#xa0;</a></p><p>There's one downside to this approach: type errors suddenly get
       much more verbose. We can see this if you run the vanilla OCaml toplevel
       (not <span class="command"><em>utop</em></span>).</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/short_paths_1.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocaml</code></strong>
 <code class="computeroutput"># List.map print_endline "" ;;</code>
@@ -735,7 +735,7 @@ let w = X.B.w</pre><p>You can now compile this test module and see that its infe
       heuristic. This causes the compiler to search all the type aliases for
       the shortest module path and use that as the preferred output type. The
       option is activated by passing <code>-short-paths</code> to the compiler, and works on the
-      toplevel, too.<a data-type="indexterm" data-primary="short paths heuristic"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/short_paths_3.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocaml -short-paths</code></strong>
+      toplevel, too.<a data-type="indexterm" data-primary="short paths heuristic">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/short_paths_3.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocaml -short-paths</code></strong>
 <code class="computeroutput"># open Core.Std;;</code>
 <code class="computeroutput"># List.map ~f:print_endline "foo";;</code>
 <code class="computeroutput">Error: This expression has type string but an expression was expected of type</code>
@@ -745,19 +745,19 @@ let w = X.B.w</pre><p>You can now compile this test module and see that its infe
         situations where the type aliasing information is useful to know, and it would be lost in
         the error if the shortest module path is always picked.</p><p>You'll need to choose for yourself if you prefer short paths or
       the default behavior in your own projects, and pass the <code>-short-paths</code> flag to the compiler if you need
-      it.<a data-type="indexterm" data-startref="CPstatictype"/></p></section></section><section id="the-typed-syntax-tree" data-type="sect1"><h1>The Typed Syntax Tree</h1><p>When the type checking process has successfully completed, it is
+      it.<a data-type="indexterm" data-startref="CPstatictype">&#xa0;</a></p></section></section><section id="the-typed-syntax-tree" data-type="sect1"><h1>The Typed Syntax Tree</h1><p>When the type checking process has successfully completed, it is
     combined with the AST to form a <em>typed abstract syntax
     tree</em>. This contains precise location information for every
     token in the input file, and decorates each token with concrete type
-    information.<a data-type="indexterm" data-primary="cmti files"/><a data-type="indexterm" data-primary="cmt files"/><a data-type="indexterm" data-primary="files" data-secondary="cmtii files"/><a data-type="indexterm" data-primary="files" data-secondary="cmt files"/><a data-type="indexterm" data-primary="AST (abstract syntax-tree)"/><a data-type="indexterm" id="typesyntree" data-primary="typed syntax tree"/><a data-type="indexterm" id="CPtypsyn" data-primary="compilation process" data-secondary="typed syntax tree"/></p><p>The compiler can output this as compiled <code>cmt</code> and <code>cmti</code>
+    information.<a data-type="indexterm" data-primary="cmti files">&#xa0;</a><a data-type="indexterm" data-primary="cmt files">&#xa0;</a><a data-type="indexterm" data-primary="files" data-secondary="cmtii files">&#xa0;</a><a data-type="indexterm" data-primary="files" data-secondary="cmt files">&#xa0;</a><a data-type="indexterm" data-primary="AST (abstract syntax-tree)">&#xa0;</a><a data-type="indexterm" id="typesyntree" data-primary="typed syntax tree">&#xa0;</a><a data-type="indexterm" id="CPtypsyn" data-primary="compilation process" data-secondary="typed syntax tree">&#xa0;</a></p><p>The compiler can output this as compiled <code>cmt</code> and <code>cmti</code>
     files that contain the typed AST for the implementation and signatures of
     a compilation unit. This is activated by passing the <code>-bin-annot</code> flag to the compiler.</p><p>The <code>cmt</code> files are particularly
     useful for IDE tools to match up OCaml source code at a specific location
     to the inferred or external types.</p><section id="using-ocp-index-for-auto-completion" data-type="sect2"><h2>Using ocp-index for Autocompletion</h2><p>One such command-line tool to display autocompletion information
       in your editor is <span class="command"><em>ocp-index</em></span>. Install
-      it via OPAM as follows:<a data-type="indexterm" data-primary="autocompletion"/><a data-type="indexterm" data-primary="ocp-index"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/install_ocp_index.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>opam install ocp-index</code></strong>
+      it via OPAM as follows:<a data-type="indexterm" data-primary="autocompletion">&#xa0;</a><a data-type="indexterm" data-primary="ocp-index">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/install_ocp_index.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>opam install ocp-index</code></strong>
 <code class="prompt">$ </code><strong><code>ocp-index</code></strong></pre><p>Let's refer back to our Ncurses binding example from the beginning
-      of <a href="#foreign-function-interface" data-type="xref"/>. This module defined
+      of <a href="#foreign-function-interface" data-type="xref">#foreign-function-interface</a>. This module defined
       bindings for the Ncurses library. First, compile the interfaces with
       <span><code>-bin-annot</code></span> so that we can obtain the
         <code>cmt</code> and <code>cmti</code> files, and then run <span class="command"><em>ocp-index</em></span> in completion mode:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/ocp-index/index_ncurses.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>corebuild -pkg ctypes.foreign -tag bin_annot ncurses.cmi</code></strong>
@@ -783,7 +783,7 @@ let w = X.B.w</pre><p>You can now compile this test module and see that its infe
         home page for more information on how to integrate it with your favorite editor.</p></section><section id="examining-the-typed-syntax-tree-directly" data-type="sect2"><h2>Examining the Typed Syntax Tree Directly</h2><p>The compiler has a couple of advanced flags that can dump the raw
       output of the internal AST representation. You can't depend on these
       flags to give the same output across compiler revisions, but they are a
-      useful learning tool.<a data-type="indexterm" data-primary="flags"/></p><p>We'll use our toy <code>typedef.ml</code>
+      useful learning tool.<a data-type="indexterm" data-primary="flags">&#xa0;</a></p><p>We'll use our toy <code>typedef.ml</code>
       again:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/typedef.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type t = Foo | Bar
 let v = Foo</pre><p>Let's first look at the untyped syntax tree that's generated from
       the parsing phase:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/parsetree_typedef.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocamlc -dparsetree typedef.ml 2&gt;&amp;1</code></strong>
@@ -866,7 +866,7 @@ let v = Foo</pre><p>Let's first look at the untyped syntax tree that's generated
 <code class="computeroutput">    ]</code>
 <code class="computeroutput">]</code>
 <code class="computeroutput"> </code></pre><p>The typed AST is more explicit than the untyped syntax tree. For
-      instance, the type declaration has been given a unique name (<code>t/1008</code>), as has the <code>v</code> value (<code>v/1011</code>).<a data-type="indexterm" data-startref="typesyntree"/><a data-type="indexterm" data-startref="CPtypsyn"/></p><p>You'll rarely need to look at this raw output from the compiler unless you're building
+      instance, the type declaration has been given a unique name (<code>t/1008</code>), as has the <code>v</code> value (<code>v/1011</code>).<a data-type="indexterm" data-startref="typesyntree">&#xa0;</a><a data-type="indexterm" data-startref="CPtypsyn">&#xa0;</a></p><p>You'll rarely need to look at this raw output from the compiler unless you're building
         IDE tools such as <span class="command"><em>ocp-index</em></span>, or are hacking on extensions
         to the core compiler itself. However, it's useful to know that this intermediate form exists
-        before we delve further into the code generation process next, in <a href="#the-compiler-backend-byte-code-and-native-code" data-type="xref"/>.</p><p>There are several new integrated tools emerging that combine these typed AST files with common editors such as Emacs or Vim.  The best of these is <a href="https://github.com/def-lkb/merlin">Merlin</a>, which adds value and module autocompletion, displays inferred types and can build and display errors directly from within your editor.  There are instructions available on its homepage for configuring Merlin with your favorite editor.</p></section></section></section>
+        before we delve further into the code generation process next, in <a href="#the-compiler-backend-byte-code-and-native-code" data-type="xref">#the-compiler-backend-byte-code-and-native-code</a>.</p><p>There are several new integrated tools emerging that combine these typed AST files with common editors such as Emacs or Vim.  The best of these is <a href="https://github.com/def-lkb/merlin">Merlin</a>, which adds value and module autocompletion, displays inferred types and can build and display errors directly from within your editor.  There are instructions available on its homepage for configuring Merlin with your favorite editor.</p></section></section></section>

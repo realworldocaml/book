@@ -1,11 +1,11 @@
 <section xmlns="http://www.w3.org/1999/xhtml" id="records" data-type="chapter"><h1>Records</h1><p>One of OCaml's best features is its concise and expressive system for
   declaring new data types, and records are a key element of that system. We
-  discussed records briefly in <a href="#a-guided-tour" data-type="xref"/>, but this
+  discussed records briefly in <a href="#a-guided-tour" data-type="xref">#a-guided-tour</a>, but this
   chapter will go into more depth, covering the details of how records work,
   as well as advice on how to use them effectively in your software
   designs.</p><p>A record represents a collection of values stored together as one,
   where each component is identified by a different field name. The basic
-  syntax for a record type declaration is as follows:<a data-type="indexterm" data-primary="records" data-secondary="basic syntax for"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/record.syntax" class="orm:hideurl:ital"><em class="hyperlink">Syntax</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type <em>&lt;record-name&gt;</em> =
+  syntax for a record type declaration is as follows:<a data-type="indexterm" data-primary="records" data-secondary="basic syntax for">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/record.syntax" class="orm:hideurl:ital"><em class="hyperlink">Syntax</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type <em>&lt;record-name&gt;</em> =
     {<em> &lt;field&gt;</em> : <em>&lt;type&gt;</em> ;
     <em>&lt;field&gt;</em> : <em>&lt;type&gt;</em> ;
     ...
@@ -55,7 +55,7 @@
 <strong><code>    List.reduce list ~f:(fun a b -&gt; if a.time &lt; b.time then a else b)</code></strong>
 <strong><code>  ;;</code></strong>
 <code class="computeroutput">val first_timestamped : 'a timestamped list -&gt; 'a timestamped option = &lt;fun&gt;</code></pre><section id="patterns-and-exhaustiveness" data-type="sect1"><h1>Patterns and Exhaustiveness</h1><p>Another way of getting information out of a record is by using a
-    pattern match, as in the definition of <code>host_info_to_string</code>:<a data-type="indexterm" data-primary="pattern matching" data-secondary="and exhaustiveness"/><a data-type="indexterm" data-primary="records" data-secondary="patterns and exhaustiveness in"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    pattern match, as in the definition of <code>host_info_to_string</code>:<a data-type="indexterm" data-primary="pattern matching" data-secondary="and exhaustiveness">&#xa0;</a><a data-type="indexterm" data-primary="records" data-secondary="patterns and exhaustiveness in">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 5)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let host_info_to_string { hostname = h; os_name = os;</code></strong>
 <strong><code>                            cpu_arch = c; timestamp = ts;</code></strong>
 <strong><code>                          } =</code></strong>
@@ -69,7 +69,7 @@
     never fail at runtime. This makes sense, because the set of fields
     available in a record is always the same. In general, patterns for types
     with a fixed structure, like records and tuples, are irrefutable, unlike
-    types with variable structures like lists and variants.<a data-type="indexterm" data-primary="irrefutable patterns"/><a data-type="indexterm" data-primary="datatypes" data-secondary="fixed vs. variable structure of"/></p><p>Another important characteristic of record patterns is that they
+    types with variable structures like lists and variants.<a data-type="indexterm" data-primary="irrefutable patterns">&#xa0;</a><a data-type="indexterm" data-primary="datatypes" data-secondary="fixed vs. variable structure of">&#xa0;</a></p><p>Another important characteristic of record patterns is that they
     don't need to be complete; a pattern can mention only a subset of the
     fields in the record. This can be convenient, but it can also be error
     prone. In particular, this means that when new fields are added to the
@@ -95,7 +95,7 @@
     system would give you a warning about the change.</p><p>Happily, OCaml does offer an optional warning for missing fields in
     a record pattern. With that warning turned on (which you can do in the
     toplevel by typing <code>#warnings "+9"</code>), the
-    compiler will warn about the missing field:<a data-type="indexterm" data-primary="errors" data-secondary="compiler warnings"/><a data-type="indexterm" data-primary="code compilers" data-secondary="warning enable/disable"/><a data-type="indexterm" data-primary="errors" data-secondary="missing field warnings"/><a data-type="indexterm" data-primary="records" data-secondary="missing field warnings"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    compiler will warn about the missing field:<a data-type="indexterm" data-primary="errors" data-secondary="compiler warnings">&#xa0;</a><a data-type="indexterm" data-primary="code compilers" data-secondary="warning enable/disable">&#xa0;</a><a data-type="indexterm" data-primary="errors" data-secondary="missing field warnings">&#xa0;</a><a data-type="indexterm" data-primary="records" data-secondary="missing field warnings">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 7)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>#warnings "+9";;</code></strong>
 <code class="prompt"># </code><strong><code>let host_info_to_string { hostname = h; os_name = os;</code></strong>
 <strong><code>                            cpu_arch = c; timestamp = ts;</code></strong>
@@ -135,12 +135,12 @@
     field, OCaml provides some handy syntactic shortcuts. For example, the
     pattern in the following function binds all of the fields in question to
     variables of the same name. This is called <em>field
-    punning</em>:<a data-type="indexterm" data-primary="fields" data-secondary="field punning"/><a data-type="indexterm" data-primary="records" data-secondary="field punning in"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    punning</em>:<a data-type="indexterm" data-primary="fields" data-secondary="field punning">&#xa0;</a><a data-type="indexterm" data-primary="records" data-secondary="field punning in">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 9)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let host_info_to_string { hostname; os_name; cpu_arch; timestamp; _ } =</code></strong>
 <strong><code>     sprintf "%s (%s / %s) &lt;%s&gt;" hostname os_name cpu_arch</code></strong>
 <strong><code>       (Time.to_string timestamp);;</code></strong>
 <code class="computeroutput">val host_info_to_string : host_info -&gt; string = &lt;fun&gt;</code></pre><p>Field punning can also be used to construct a record. Consider the
-    following code for generating a <code>host_info</code> record:<a data-type="indexterm" data-primary="records" data-secondary="construction of"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    following code for generating a <code>host_info</code> record:<a data-type="indexterm" data-primary="records" data-secondary="construction of">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 10)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let my_host =</code></strong>
 <strong><code>    let sh cmd = Shell.sh_one_exn cmd in</code></strong>
 <strong><code>    let hostname   = sh "hostname" in</code></strong>
@@ -156,7 +156,7 @@
     record fields first, and then the record declaration itself simply listed
     the fields that needed to be included.</p><p>You can take advantage of both field punning and label punning when
     writing a function for constructing a record from labeled
-    arguments:<a data-type="indexterm" data-primary="label punning"/><a data-type="indexterm" data-primary="records" data-secondary="label punning in"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    arguments:<a data-type="indexterm" data-primary="label punning">&#xa0;</a><a data-type="indexterm" data-primary="records" data-secondary="label punning in">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 11)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let create_host_info ~hostname ~os_name ~cpu_arch ~os_release =</code></strong>
 <strong><code>    { os_name; cpu_arch; os_release;</code></strong>
 <strong><code>      hostname = String.lowercase hostname;</code></strong>
@@ -180,7 +180,7 @@
     your codebase. This is generally good practice, since it encourages
     consistent naming, which makes it easier to navigate the source.</p></section><section id="reusing-field-names" data-type="sect1"><h1>Reusing Field Names</h1><p>Defining records with the same field names can be problematic. Let's
     consider a simple example: building types to represent the protocol used
-    for a logging server.<a data-type="indexterm" id="FNreus" data-primary="fields" data-secondary="reusing field names"/><a data-type="indexterm" id="RECreusfn" data-primary="records" data-secondary="reusing field names"/></p><p>We'll describe three message types: <code>log_entry</code>, <code>heartbeat</code>, and <code>logon</code>. The <code>log_entry</code> message is used to deliver a log entry
+    for a logging server.<a data-type="indexterm" id="FNreus" data-primary="fields" data-secondary="reusing field names">&#xa0;</a><a data-type="indexterm" id="RECreusfn" data-primary="records" data-secondary="reusing field names">&#xa0;</a></p><p>We'll describe three message types: <code>log_entry</code>, <code>heartbeat</code>, and <code>logon</code>. The <code>log_entry</code> message is used to deliver a log entry
     to the server; the <code>logon</code> message is
     sent to initiate a connection and includes the identity of the user
     connecting and credentials used for authentication; and the <code>heartbeat</code> message is periodically sent by the
@@ -328,13 +328,13 @@
     dot being interpreted as a field name; the second dot is accessing the
     contents of a module, referring to the record field <code>important</code> from within the module <code>Log_entry</code>. The fact that <code>Log_entry</code> is capitalized and so can't be a field
     name is what disambiguates the two uses.</p><p>For functions defined within the module where a given record is
-    defined, the module qualification goes away entirely.<a data-type="indexterm" data-startref="RECreusfn"/><a data-type="indexterm" data-startref="FNreus"/></p></section><section id="functional-updates" data-type="sect1"><h1>Functional Updates</h1><p>Fairly often, you will find yourself wanting to create a new record
+    defined, the module qualification goes away entirely.<a data-type="indexterm" data-startref="RECreusfn">&#xa0;</a><a data-type="indexterm" data-startref="FNreus">&#xa0;</a></p></section><section id="functional-updates" data-type="sect1"><h1>Functional Updates</h1><p>Fairly often, you will find yourself wanting to create a new record
     that differs from an existing record in only a subset of the fields. For
     example, imagine our logging server had a record type for representing the
     state of a given client, including when the last heartbeat was received
     from that client. The following defines a type for representing this
     information, as well as a function for updating the client information
-    when a new heartbeat arrives:<a data-type="indexterm" data-primary="functional updates"/><a data-type="indexterm" data-primary="records" data-secondary="functional updates to"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    when a new heartbeat arrives:<a data-type="indexterm" data-primary="functional updates">&#xa0;</a><a data-type="indexterm" data-primary="records" data-secondary="functional updates to">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 22)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type client_info =</code></strong>
 <strong><code>   { addr: Unix.Inet_addr.t;</code></strong>
 <strong><code>     port: int;</code></strong>
@@ -400,7 +400,7 @@
 <strong><code>    };;</code></strong>
 <code class="computeroutput">val register_heartbeat : client_info -&gt; Heartbeat.t -&gt; client_info = &lt;fun&gt;</code></pre></section><section id="mutable-fields" data-type="sect1"><h1>Mutable Fields</h1><p>Like most OCaml values, records are immutable by default. You can,
     however, declare individual record fields as mutable. In the following
-    code, we've made the last two fields of <code>client_info</code> mutable:<a data-type="indexterm" data-primary="mutable record fields"/><a data-type="indexterm" data-primary="records" data-secondary="mutable fields in"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    code, we've made the last two fields of <code>client_info</code> mutable:<a data-type="indexterm" data-primary="mutable record fields">&#xa0;</a><a data-type="indexterm" data-primary="records" data-secondary="mutable fields in">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 26)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type client_info =</code></strong>
 <strong><code>   { addr: Unix.Inet_addr.t;</code></strong>
 <strong><code>     port: int;</code></strong>
@@ -427,15 +427,15 @@
     because all fields of a record, including mutable ones, are specified when
     the record is created.</p><p>OCaml's policy of immutable-by-default is a good one, but imperative
     programming is an important part of programming in OCaml. We go into more
-    depth about how (and when) to use OCaml's imperative features in <a href="#imperative-programming" data-type="xref"/>.</p></section><section id="first-class-fields" data-type="sect1"><h1>First-Class Fields</h1><p>Consider the following function for extracting the usernames from a
-    list of <code>Logon</code> messages:<a data-type="indexterm" id="Ffc" data-primary="fields" data-secondary="first-class fields"/><a data-type="indexterm" id="firstclass" data-primary="first-class fields"/><a data-type="indexterm" id="RECfirstclass" data-primary="records" data-secondary="first-class fields in"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    depth about how (and when) to use OCaml's imperative features in <a href="#imperative-programming" data-type="xref">#imperative-programming</a>.</p></section><section id="first-class-fields" data-type="sect1"><h1>First-Class Fields</h1><p>Consider the following function for extracting the usernames from a
+    list of <code>Logon</code> messages:<a data-type="indexterm" id="Ffc" data-primary="fields" data-secondary="first-class fields">&#xa0;</a><a data-type="indexterm" id="firstclass" data-primary="first-class fields">&#xa0;</a><a data-type="indexterm" id="RECfirstclass" data-primary="records" data-secondary="first-class fields in">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 28)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let get_users logons =</code></strong>
 <strong><code>     List.dedup (List.map logons ~f:(fun x -&gt; x.Logon.user));;</code></strong>
 <code class="computeroutput">val get_users : Logon.t list -&gt; string list = &lt;fun&gt;</code></pre><p>Here, we wrote a small function <code>(fun x
     -&gt; x.Logon.user)</code> to access the <code>user</code> field. This kind of accessor function is a
     common enough pattern that it would be convenient to generate it
     automatically. The <code>fieldslib</code> syntax
-    extension that ships with Core does just that.<a data-type="indexterm" data-primary="record field accessor functions"/></p><p>The <code>with fields</code> annotation at the
+    extension that ships with Core does just that.<a data-type="indexterm" data-primary="record field accessor functions">&#xa0;</a></p><p>The <code>with fields</code> annotation at the
     end of the declaration of a record type will cause the extension to be
     applied to a given type declaration. So, for example, we could have
     defined <code>Logon</code> as follows:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/records/main-29.rawscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><strong><code># module Logon = struct
@@ -484,7 +484,7 @@
 <code class="computeroutput">val get_users : Logon.t list -&gt; string list = &lt;fun&gt;</code></pre><p>In addition to generating field accessor functions, <code>fieldslib</code> also creates a submodule called
     <code>Fields</code> that contains a first-class
     representative of each field, in the form of a value of type <code>Field.t</code>. The <code>Field</code> module provides the following
-    functions:<a data-type="indexterm" data-primary="Field module" data-secondary="Field.setter"/><a data-type="indexterm" data-primary="Field module" data-secondary="Field.fset"/><a data-type="indexterm" data-primary="Field module" data-secondary="Field.get"/><a data-type="indexterm" data-primary="Field module" data-secondary="Field.name"/><a data-type="indexterm" data-primary="fieldslib"/></p><dl><dt><code>Field.name</code></dt><dd><p>Returns the name of a field</p></dd><dt><code>Field.get</code></dt><dd><p>Returns the content of a field</p></dd><dt><code>Field.fset</code></dt><dd><p>Does a functional update of a field</p></dd><dt><code>Field.setter</code></dt><dd><p>Returns <code>None</code> if the field
+    functions:<a data-type="indexterm" data-primary="Field module" data-secondary="Field.setter">&#xa0;</a><a data-type="indexterm" data-primary="Field module" data-secondary="Field.fset">&#xa0;</a><a data-type="indexterm" data-primary="Field module" data-secondary="Field.get">&#xa0;</a><a data-type="indexterm" data-primary="Field module" data-secondary="Field.name">&#xa0;</a><a data-type="indexterm" data-primary="fieldslib">&#xa0;</a></p><dl><dt><code>Field.name</code></dt><dd><p>Returns the name of a field</p></dd><dt><code>Field.get</code></dt><dd><p>Returns the content of a field</p></dd><dt><code>Field.fset</code></dt><dd><p>Does a functional update of a field</p></dd><dt><code>Field.setter</code></dt><dd><p>Returns <code>None</code> if the field
           is not mutable or <code>Some f</code> if it
           is, where <code>f</code> is a function for
           mutating that field</p></dd></dl><p>A <code>Field.t</code> has two type
@@ -579,4 +579,4 @@
     from building record-validation functions to scaffolding the definition of
     a web form from a record type. Such applications can benefit from the
     guarantee that all fields of the record type in question have been
-    considered.<a data-type="indexterm" data-startref="Ffc"/><a data-type="indexterm" data-startref="firstclass"/><a data-type="indexterm" data-startref="RECfirstclass"/></p></section></section>
+    considered.<a data-type="indexterm" data-startref="Ffc">&#xa0;</a><a data-type="indexterm" data-startref="firstclass">&#xa0;</a><a data-type="indexterm" data-startref="RECfirstclass">&#xa0;</a></p></section></section>

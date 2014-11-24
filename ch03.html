@@ -1,9 +1,9 @@
 <section xmlns="http://www.w3.org/1999/xhtml" id="lists-and-patterns" data-type="chapter"><h1>Lists and Patterns</h1><p>This chapter will focus on two common elements of programming in
-  OCaml: lists and pattern matching. Both of these were discussed in <a href="#a-guided-tour" data-type="xref"/>, but we'll go into more depth here, presenting
+  OCaml: lists and pattern matching. Both of these were discussed in <a href="#a-guided-tour" data-type="xref">#a-guided-tour</a>, but we'll go into more depth here, presenting
   the two topics together and using one to help illustrate the other.</p><section id="list-basics" data-type="sect1"><h1>List Basics</h1><p>An OCaml list is an immutable, finite sequence of elements of the
     same type. As we've seen, OCaml lists can be generated using a
-    bracket-and-semicolon notation:<a data-type="indexterm" data-primary="lists" data-secondary="generation of"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>[1;2;3];;</code></strong>
-<code class="computeroutput">- : int list = [1; 2; 3]</code></pre><p>And they can also be generated using the equivalent <code>::</code> notation:<a data-type="indexterm" data-primary="operators" data-secondary=": : operator"/><a data-type="indexterm" data-primary="lists" data-secondary="operator : :"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    bracket-and-semicolon notation:<a data-type="indexterm" data-primary="lists" data-secondary="generation of">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>[1;2;3];;</code></strong>
+<code class="computeroutput">- : int list = [1; 2; 3]</code></pre><p>And they can also be generated using the equivalent <code>::</code> notation:<a data-type="indexterm" data-primary="operators" data-secondary=": : operator">&#xa0;</a><a data-type="indexterm" data-primary="lists" data-secondary="operator : :">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>1 :: (2 :: (3 :: [])) ;;</code></strong>
 <code class="computeroutput">- : int list = [1; 2; 3]</code>
 <code class="prompt"># </code><strong><code>1 :: 2 :: 3 :: [] ;;</code></strong>
@@ -23,11 +23,11 @@
     rough graphical representation of how the list <code>1
     :: 2 :: 3 :: []</code> is laid out as a data structure. The final arrow
     (from the box containing <code>3</code>) points to
-    the empty list.<a data-type="indexterm" data-primary="lists" data-secondary="structure of"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/lists_layout.ascii" class="orm:hideurl:ital"><em class="hyperlink">Diagram</em></a></p><figure style="float: 0"><img src="images/rwoc_0301.png"/><figcaption/></figure><p>Each <code>::</code> essentially adds a new block to the proceding
+    the empty list.<a data-type="indexterm" data-primary="lists" data-secondary="structure of">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/lists_layout.ascii" class="orm:hideurl:ital"><em class="hyperlink">Diagram</em></a></p><figure style="float: 0"><img src="images/rwoc_0301.png"/><figcaption/></figure><p>Each <code>::</code> essentially adds a new block to the proceding
       picture. Such a block contains two things: a reference to the data in that list element, and a
       reference to the remainder of the list. This is why <code>::</code> can
       extend a list without modifying it; extension allocates a new list element but change any of
-      the existing ones, as you can see:<a data-type="indexterm" data-primary="lists" data-secondary="extension of"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      the existing ones, as you can see:<a data-type="indexterm" data-primary="lists" data-secondary="extension of">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 3)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let l = 1 :: 2 :: 3 :: [];;</code></strong>
 <code class="computeroutput">val l : int list = [1; 2; 3]</code>
 <code class="prompt"># </code><strong><code>let m = 0 :: l;;</code></strong>
@@ -35,7 +35,7 @@
 <code class="prompt"># </code><strong><code>l;;</code></strong>
 <code class="computeroutput">- : int list = [1; 2; 3]</code></pre></section><section id="using-patterns-to-extract-data-from-a-list" data-type="sect1"><h1>Using Patterns to Extract Data from a List</h1><p>We can read data out of a list using a <code>match</code>
     statement. Here's a simple example of a recursive function that computes
-    the sum of all elements of a list:<a data-type="indexterm" data-primary="match statements"/><a data-type="indexterm" id="PATMAT" data-primary="pattern matching" data-secondary="extracting data with"/><a data-type="indexterm" data-primary="lists" data-secondary="extracting data from"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    the sum of all elements of a list:<a data-type="indexterm" data-primary="match statements">&#xa0;</a><a data-type="indexterm" id="PATMAT" data-primary="pattern matching" data-secondary="extracting data with">&#xa0;</a><a data-type="indexterm" data-primary="lists" data-secondary="extracting data from">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 4)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let rec sum l =</code></strong>
 <strong><code>    match l with</code></strong>
 <strong><code>    | [] -&gt; 0</code></strong>
@@ -107,7 +107,7 @@
     literals, as in the <code>drop_zero</code> example,
     but that's where they stop. A pattern can check if a list has two
     elements, but it can't check if the first two elements are equal to each
-    other.<a data-type="indexterm" data-primary="data structures" data-secondary="pattern matching and"/></p><p>You can think of patterns as a specialized sublanguage that can
+    other.<a data-type="indexterm" data-primary="data structures" data-secondary="pattern matching and">&#xa0;</a></p><p>You can think of patterns as a specialized sublanguage that can
     express a limited (though still quite rich) set of conditions. The fact
     that the pattern language is limited turns out to be a very good thing,
     making it possible to build better support for patterns in the compiler.
@@ -205,7 +205,7 @@
       pattern match: in our broken implementation of <code>drop_value</code>, OCaml warned us that the final
       case was redundant. There are no algorithms for determining if a
       predicate written in a general-purpose language is redundant, but it can
-      be solved reliably in the context of patterns.<a data-type="indexterm" data-primary="match statements"/><a data-type="indexterm" data-primary="errors" data-secondary="detecting with match statements"/></p><p>OCaml also checks <code>match</code> statements for
+      be solved reliably in the context of patterns.<a data-type="indexterm" data-primary="match statements">&#xa0;</a><a data-type="indexterm" data-primary="errors" data-secondary="detecting with match statements">&#xa0;</a></p><p>OCaml also checks <code>match</code> statements for
       exhaustiveness. Consider what happens if we modify <code>drop_zero</code> by deleting the handler for one of
       the cases. As you can see, the compiler will produce a warning that
       we've missed a case, along with an example of an unmatched
@@ -220,16 +220,16 @@
 <code class="computeroutput">Here is an example of a value that is not matched:</code>
 <code class="computeroutput">1::_</code>
 <code class="computeroutput">val drop_zero : int list -&gt; 'a list = &lt;fun&gt;</code></pre><p>Even for simple examples like this, exhaustiveness checks are
-      pretty useful. But as we'll see in <a href="#variants" data-type="xref"/>, they
+      pretty useful. But as we'll see in <a href="#variants" data-type="xref">#variants</a>, they
       become yet more valuable as you get to more complicated examples,
       especially those involving user-defined types. In addition to catching
       outright errors, they act as a sort of refactoring tool, guiding you to
       the locations where you need to adapt your code to deal with changing
-      types.<a data-type="indexterm" data-startref="PATMAT"/></p></section></section><section id="using-the-list-module-effectively" data-type="sect1"><h1>Using the List Module Effectively</h1><p>We've so far written a fair amount of list-munging code using
+      types.<a data-type="indexterm" data-startref="PATMAT">&#xa0;</a></p></section></section><section id="using-the-list-module-effectively" data-type="sect1"><h1>Using the List Module Effectively</h1><p>We've so far written a fair amount of list-munging code using
     pattern matching and recursive functions. But in real life, you're usually
     better off using the <code>List</code> module, which
     is full of reusable functions that abstract out common patterns for
-    computing with lists.<a data-type="indexterm" data-primary="tables, creating with List module"/><a data-type="indexterm" data-primary="List module" data-secondary="creating tables with"/><a data-type="indexterm" id="Llistmod" data-primary="lists" data-secondary="List module"/></p><p>Let's work through a concrete example to see this in action. We'll
+    computing with lists.<a data-type="indexterm" data-primary="tables, creating with List module">&#xa0;</a><a data-type="indexterm" data-primary="List module" data-secondary="creating tables with">&#xa0;</a><a data-type="indexterm" id="Llistmod" data-primary="lists" data-secondary="List module">&#xa0;</a></p><p>Let's work through a concrete example to see this in action. We'll
     write a function <code>render_table</code> that,
     given a list of column headers and a list of rows, prints them out in a
     well-formatted text table, as follows:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
@@ -256,11 +256,11 @@
     <code>map</code>, <code>map2_exn</code>, and <code>fold</code>.</p><p><code>List.map</code> is the simplest to
     explain. It takes a list and a function for transforming elements of that
     list, and returns a new list with the transformed elements. Thus, we can
-    write:<a data-type="indexterm" data-primary="List module" data-secondary="List.map"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    write:<a data-type="indexterm" data-primary="List module" data-secondary="List.map">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 14)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>List.map ~f:String.length ["Hello"; "World!"];;</code></strong>
 <code class="computeroutput">- : int list = [5; 6]</code></pre><p><code>List.map2_exn</code> is similar to
     <code>List.map</code>, except that it takes two
-    lists and a function for combining them. Thus, we might write:<a data-type="indexterm" data-primary="List module" data-secondary="List.map2_exn"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    lists and a function for combining them. Thus, we might write:<a data-type="indexterm" data-primary="List module" data-secondary="List.map2_exn">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 15)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>List.map2_exn ~f:Int.max [1;2;3] [3;2;1];;</code></strong>
 <code class="computeroutput">- : int list = [3; 2; 3]</code></pre><p>The <code>_exn</code> is there because the
     function throws an exception if the lists are of mismatched length:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
@@ -269,7 +269,7 @@
       three arguments: a list to process, an initial accumulator value, and a function for updating
       the accumulator. <code>List.fold</code> walks over the list from left to
       right, updating the accumulator at each step and returning the final value of the accumulator
-      when it's done. You can see some of this by looking at the type-signature for <code>fold</code>:<a data-type="indexterm" data-primary="List module" data-secondary="List.fold"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      when it's done. You can see some of this by looking at the type-signature for <code>fold</code>:<a data-type="indexterm" data-primary="List module" data-secondary="List.fold">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 17)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>List.fold;;</code></strong>
 <code class="computeroutput">- : 'a list -&gt; init:'accum -&gt; f:('accum -&gt; 'a -&gt; 'accum) -&gt; 'accum = &lt;fun&gt;</code></pre><p>We can use <code>List.fold</code> for
     something as simple as summing up a list:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
@@ -309,7 +309,7 @@
 <code class="computeroutput">val render_separator : int list -&gt; string = &lt;fun&gt;</code>
 <code class="prompt"># </code><strong><code>render_separator [3;6;2];;</code></strong>
 <code class="computeroutput">- : string = "|-----+--------+----|"</code></pre><p>Note that we make the line of dashes two larger than the provided
-    width to provide some whitespace around each entry in the table.<a data-type="indexterm" data-primary="strings" data-secondary="concatenation of"/><a data-type="indexterm" data-primary="String.concat"/><a data-type="indexterm" data-primary="List module" data-secondary="String.concat and"/></p><div data-type="note"><h1>Performance of String.concat and ^</h1><p>In the preceding code we’ve concatenated strings two different
+    width to provide some whitespace around each entry in the table.<a data-type="indexterm" data-primary="strings" data-secondary="concatenation of">&#xa0;</a><a data-type="indexterm" data-primary="String.concat">&#xa0;</a><a data-type="indexterm" data-primary="List module" data-secondary="String.concat and">&#xa0;</a></p><div data-type="note"><h1>Performance of String.concat and ^</h1><p>In the preceding code we’ve concatenated strings two different
       ways: <code>String.concat</code>, which operates
       on lists of strings; and <code>^</code>, which is
       a pairwise operator. You should avoid <code>^</code> for joining long numbers of strings, since
@@ -323,7 +323,7 @@
       these small sizes, the differences don't amount to much, but for
       assembling large strings, it can be a serious performance issue.</p></div><p>Now we need code for rendering a row with data in it. We'll first write a function called
         <code>pad</code>, for padding out a string to a specified length plus
-      one blank space on both sides:<a data-type="indexterm" data-primary="strings" data-secondary="padding of"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      one blank space on both sides:<a data-type="indexterm" data-primary="strings" data-secondary="padding of">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 24)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let pad s length =</code></strong>
 <strong><code>    " " ^ s ^ String.make (length - String.length s + 1) ' '</code></strong>
 <strong><code>  ;;</code></strong>
@@ -358,7 +358,7 @@
         specialized version of <code>List.fold</code>
         that doesn't require an explicit starting value, and whose accumulator
         has to consume and produce values of the same type as the elements of
-        the list it applies to.<a data-type="indexterm" data-primary="elements" data-secondary="combining with List.reduce"/><a data-type="indexterm" data-primary="List module" data-secondary="List.reduce"/><a data-type="indexterm" data-primary="lists" data-secondary="combining elements in"/></p><p>Here's the type signature:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+        the list it applies to.<a data-type="indexterm" data-primary="elements" data-secondary="combining with List.reduce">&#xa0;</a><a data-type="indexterm" data-primary="List module" data-secondary="List.reduce">&#xa0;</a><a data-type="indexterm" data-primary="lists" data-secondary="combining elements in">&#xa0;</a></p><p>Here's the type signature:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
         (part 27)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>List.reduce;;</code></strong>
 <code class="computeroutput">- : 'a list -&gt; f:('a -&gt; 'a -&gt; 'a) -&gt; 'a option = &lt;fun&gt;</code></pre><p><code>reduce</code> returns an optional
         result, returning <code>None</code> when the
@@ -368,10 +368,10 @@
 <code class="prompt"># </code><strong><code>List.reduce ~f:(+) [];;</code></strong>
 <code class="computeroutput">- : int option = None</code></pre></section><section id="filtering-with-list.filter-and-list.filter_map" data-type="sect3"><h3>Filtering with List.filter and List.filter_map</h3><p>Very often when processing lists, you wants to restrict your attention to a subset of
           the values on your list. The <code>List.filter</code> function is
-          one way of doing that:<a data-type="indexterm" data-primary="lists" data-secondary="filtering values in"/><a data-type="indexterm" data-primary="values" data-secondary="filtering with List.filter"/><a data-type="indexterm" data-primary="List module" data-secondary="List.filter"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+          one way of doing that:<a data-type="indexterm" data-primary="lists" data-secondary="filtering values in">&#xa0;</a><a data-type="indexterm" data-primary="values" data-secondary="filtering with List.filter">&#xa0;</a><a data-type="indexterm" data-primary="List module" data-secondary="List.filter">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
         (part 29)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>List.filter ~f:(fun x -&gt; x mod 2 = 0) [1;2;3;4;5];;</code></strong>
 <code class="computeroutput">- : int list = [2; 4]</code></pre><p>Note that the <code>mod</code> used above
-        is an infix operator, as described in <a href="#variables-and-functions" data-type="xref"/>.</p><p>Sometimes, you want to both transform and filter as part of the
+        is an infix operator, as described in <a href="#variables-and-functions" data-type="xref">#variables-and-functions</a>.</p><p>Sometimes, you want to both transform and filter as part of the
         same computation. In that case, <code>List.filter_map</code> is what you need. The
         function passed to <code>List.filter_map</code>
         returns an optional value, and <code>List.filter_map</code> drops all elements for which
@@ -381,7 +381,7 @@
         Note that this example also uses some functions from other modules,
         including <code>Sys.ls_dir</code> to get a
         directory listing, and <code>String.rsplit2</code> to split a string on the
-        rightmost appearance of a given character:<a data-type="indexterm" data-primary="lists" data-secondary="duplicate removal"/><a data-type="indexterm" data-primary="duplicates, removing"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+        rightmost appearance of a given character:<a data-type="indexterm" data-primary="lists" data-secondary="duplicate removal">&#xa0;</a><a data-type="indexterm" data-primary="duplicates, removing">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
         (part 30)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>List.filter_map (Sys.ls_dir ".") ~f:(fun fname -&gt;</code></strong>
 <strong><code>    match String.rsplit2 ~on:'.' fname with</code></strong>
 <strong><code>    | None  | Some ("",_) -&gt; None</code></strong>
@@ -399,7 +399,7 @@
         returns two lists. The <code>tf</code> in the
         name is a mnemonic to remind the user that <code>true</code> elements go to the first list and
         <code>false</code> ones go to the second. Here's
-        an example:<a data-type="indexterm" data-primary="elements" data-secondary="partitioning with List.partition_tf"/><a data-type="indexterm" data-primary="lists" data-secondary="partitioning elements in"/><a data-type="indexterm" data-primary="List module" data-secondary="List.partition_tf"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+        an example:<a data-type="indexterm" data-primary="elements" data-secondary="partitioning with List.partition_tf">&#xa0;</a><a data-type="indexterm" data-primary="lists" data-secondary="partitioning elements in">&#xa0;</a><a data-type="indexterm" data-primary="List module" data-secondary="List.partition_tf">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
         (part 31)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let is_ocaml_source s =</code></strong>
 <strong><code>    match String.rsplit2 s ~on:'.' with</code></strong>
 <strong><code>    | Some (_,("ml"|"mli")) -&gt; true</code></strong>
@@ -412,7 +412,7 @@
 <code class="computeroutput">val other_files : string list = ["main.topscript"; "lists_layout.ascii"]</code></pre></section><section id="combining-lists" data-type="sect3"><h3>Combining lists</h3><p>Another very common operation on lists is concatenation. The
         list module actually comes with a few different ways of doing this.
         First, there's <code>List.append</code>, for
-        concatenating a pair of lists:<a data-type="indexterm" data-primary="lists" data-secondary="combining"/><a data-type="indexterm" data-primary="List module" data-secondary="List.append"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+        concatenating a pair of lists:<a data-type="indexterm" data-primary="lists" data-secondary="combining">&#xa0;</a><a data-type="indexterm" data-primary="List module" data-secondary="List.append">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
         (part 32)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>List.append [1;2;3] [4;5;6];;</code></strong>
 <code class="computeroutput">- : int list = [1; 2; 3; 4; 5; 6]</code></pre><p>There's also <code>@</code>, an operator
         equivalent of <code>List.append</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
@@ -435,7 +435,7 @@
         representing a file path. It is equivalent to Core's <code>Filename.concat</code>.</p><p>The preceding combination of <code>List.map</code> and <code>List.concat</code> is common enough that there is a
         function <code>List.concat_map</code> that
         combines these into one, more efficient operation:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
-        (part 36)<a data-type="indexterm" data-startref="Llistmod"/></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let rec ls_rec s =</code></strong>
+        (part 36)<a data-type="indexterm" data-startref="Llistmod">&#xa0;</a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let rec ls_rec s =</code></strong>
 <strong><code>    if Sys.is_file_exn ~follow_symlinks:true s</code></strong>
 <strong><code>    then [s]</code></strong>
 <strong><code>    else</code></strong>
@@ -445,8 +445,8 @@
 <code class="computeroutput">val ls_rec : string -&gt; string list = &lt;fun&gt;</code></pre></section></section></section><section id="tail-recursion" data-type="sect1"><h1>Tail Recursion</h1><p>The only way to compute the length of an OCaml list is to walk the
     list from beginning to end. As a result, computing the length of a list
     takes time linear in the size of the list. Here's a simple function for
-    doing so:<a data-type="indexterm" data-primary="List module" data-secondary="List.init"/><a data-type="indexterm" data-primary="lists" data-secondary="computing length of"/><a data-type="indexterm" data-primary="tail recursion"/>
-      <a data-type="indexterm" data-primary="recursion" data-secondary="tail recursion"/>
+    doing so:<a data-type="indexterm" data-primary="List module" data-secondary="List.init">&#xa0;</a><a data-type="indexterm" data-primary="lists" data-secondary="computing length of">&#xa0;</a><a data-type="indexterm" data-primary="tail recursion">&#xa0;</a>
+      <a data-type="indexterm" data-primary="recursion" data-secondary="tail recursion">&#xa0;</a>
     </p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 37)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let rec length = function</code></strong>
 <strong><code>    | [] -&gt; 0</code></strong>
@@ -472,7 +472,7 @@
     is complete. To allow for nested function calls, this information is
     typically organized in a stack, where a new <em>stack
     frame</em> is allocated for each nested function call, and then
-    deallocated when the function call is complete.<a data-type="indexterm" data-primary="stack frames"/></p><p>And that's the problem with our call to <code>length</code>: it tried to allocate 10 million stack
+    deallocated when the function call is complete.<a data-type="indexterm" data-primary="stack frames">&#xa0;</a></p><p>And that's the problem with our call to <code>length</code>: it tried to allocate 10 million stack
     frames, which exhausted the available stack space. Happily, there's a way
     around this problem. Consider the following alternative
     implementation:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
@@ -499,7 +499,7 @@
     to be <em>tail recursive</em> if all of its recursive calls
     are tail calls. <code>length_plus_n</code> is indeed
     tail recursive, and as a result, <code>length</code>
-    can take a long list as input without blowing the stack:<a data-type="indexterm" data-primary="tail calls"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    can take a long list as input without blowing the stack:<a data-type="indexterm" data-primary="tail calls">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 40)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>length (make_list 10_000_000);;</code></strong>
 <code class="computeroutput">- : int = 10000000</code></pre><p>So when is a call a tail call? Let's think about the situation where one function (the
         <em>caller</em>) invokes another (the <em>callee</em>). The
@@ -512,9 +512,9 @@
       logarithmic in the size of your data. But when dealing with situations where the depth of the
       sequence of nested calls is on the order of the size of your data, tail recursion is usually
       the right approach.</p></section><section id="terser-and-faster-patterns" data-type="sect1"><h1>Terser and Faster Patterns</h1><p>Now that we know more about how lists and patterns work, let's
-    consider how we can improve on an example from <a href="#recursive-list-functions" data-type="xref"/>: the function <code>destutter</code>, which removes sequential duplicates
+    consider how we can improve on an example from <a href="#recursive-list-functions" data-type="xref">#recursive-list-functions</a>: the function <code>destutter</code>, which removes sequential duplicates
     from a list. Here's the implementation that was described
-    earlier:<a data-type="indexterm" data-primary="destutter function"/><a data-type="indexterm" id="PTTRNMAT" data-primary="pattern matching" data-secondary="terser and faster patterns"/><a data-type="indexterm" data-primary="lists" data-secondary="duplicate removal"/><a data-type="indexterm" data-primary="duplicates, removing"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    earlier:<a data-type="indexterm" data-primary="destutter function">&#xa0;</a><a data-type="indexterm" id="PTTRNMAT" data-primary="pattern matching" data-secondary="terser and faster patterns">&#xa0;</a><a data-type="indexterm" data-primary="lists" data-secondary="duplicate removal">&#xa0;</a><a data-type="indexterm" data-primary="duplicates, removing">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 41)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let rec destutter list =</code></strong>
 <strong><code>    match list with</code></strong>
 <strong><code>    | [] -&gt; []</code></strong>
@@ -532,7 +532,7 @@
     allocation here by using an <code>as</code> pattern,
     which allows us to declare a name for the thing matched by a pattern or
     subpattern. While we're at it, we'll use the <code>function</code> keyword to eliminate the need for an
-    explicit match:<a data-type="indexterm" data-primary="function keyword"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    explicit match:<a data-type="indexterm" data-primary="function keyword">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 42)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let rec destutter = function</code></strong>
 <strong><code>    | [] as l -&gt; l</code></strong>
 <strong><code>    | [_] as l -&gt; l</code></strong>
@@ -552,7 +552,7 @@
     precondition to a pattern in the form of an arbitrary OCaml expression. In
     this case, we can use it to include the check on whether the first two
     elements are equal:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
-    (part 44)<a data-type="indexterm" data-primary="operators" data-secondary="polymorphic comparison operators"/><a data-type="indexterm" data-primary="polymorphic comparisons"/></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let rec destutter = function</code></strong>
+    (part 44)<a data-type="indexterm" data-primary="operators" data-secondary="polymorphic comparison operators">&#xa0;</a><a data-type="indexterm" data-primary="polymorphic comparisons">&#xa0;</a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let rec destutter = function</code></strong>
 <strong><code>    | [] | [_] as l -&gt; l</code></strong>
 <strong><code>    | hd :: (hd' :: _ as tl) when hd = hd' -&gt; destutter tl</code></strong>
 <strong><code>    | hd :: tl -&gt; hd :: destutter tl</code></strong>
@@ -587,7 +587,7 @@
       compare is a problem, particularly when you have your own notion of
       equality and ordering that you want to impose. We'll discuss this issue
       more, as well as some of the other downsides of polymorphic compare, in
-      <a href="#maps-and-hash-tables" data-type="xref"/>.</p></aside><p>Note that <code>when</code> clauses have some
+      <a href="#maps-and-hash-tables" data-type="xref">#maps-and-hash-tables</a>.</p></aside><p>Note that <code>when</code> clauses have some
     downsides. As we noted earlier, the static checks associated with pattern
     matches rely on the fact that patterns are restricted in what they can
     express. Once we add the ability to add an arbitrary condition to a
@@ -639,5 +639,5 @@
     patterns wherever they are sufficient.</p><p>As a side note, the above implementation of <code>count_some</code> is longer than necessary; even worse,
     it is not tail recursive. In real life, you would probably just use the
     <code>List.count</code> function from <code>Core</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/lists-and-patterns/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
-    (part 53)<a data-type="indexterm" data-startref="PTTRNMAT"/></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let count_some l = List.count ~f:Option.is_some l;;</code></strong>
+    (part 53)<a data-type="indexterm" data-startref="PTTRNMAT">&#xa0;</a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let count_some l = List.count ~f:Option.is_some l;;</code></strong>
 <code class="computeroutput">val count_some : 'a option list -&gt; int = &lt;fun&gt;</code></pre></section></section>

@@ -2,15 +2,15 @@
     waiting: waiting for the click of a mouse, or for data to be fetched from disk, or for space to
     be available on an outgoing network buffer. Even mildly sophisticated interactive applications
     are typically <em>concurrent</em>: needing to wait for multiple different events at
-    the same time, responding immediately to whatever event happens first.<a data-type="indexterm" data-primary="interactive input" data-secondary="concurrent programming for"/><a data-type="indexterm" data-primary="concurrent programming"/><a data-type="indexterm" data-primary="programming" data-secondary="concurrent programming with Async"/></p><p>One approach to concurrency is to use preemptive system threads, which
+    the same time, responding immediately to whatever event happens first.<a data-type="indexterm" data-primary="interactive input" data-secondary="concurrent programming for">&#xa0;</a><a data-type="indexterm" data-primary="concurrent programming">&#xa0;</a><a data-type="indexterm" data-primary="programming" data-secondary="concurrent programming with Async">&#xa0;</a></p><p>One approach to concurrency is to use preemptive system threads, which
   is the dominant approach in languages like Java or C#. In this model, each
   task that may require simultaneous waiting is given an operating system
   thread of its own so it can block without stopping the entire
-  program.<a data-type="indexterm" data-primary="threads" data-secondary="preemptive vs. single-threaded programs"/></p><p>Another approach is to have a single-threaded program, where that single thread runs an
+  program.<a data-type="indexterm" data-primary="threads" data-secondary="preemptive vs. single-threaded programs">&#xa0;</a></p><p>Another approach is to have a single-threaded program, where that single thread runs an
       <em>event loop</em> whose job is to react to external events like timeouts or
     mouse clicks by invoking a callback function that has been registered for that purpose. This
     approach shows up in languages like JavaScript that have single-threaded runtimes, as well as in
-    many GUI toolkits.<a data-type="indexterm" data-primary="event loops"/><a data-type="indexterm" data-primary="system threads" data-seealso="threads"/></p><p>Each of these mechanisms has its own trade-offs. System threads
+    many GUI toolkits.<a data-type="indexterm" data-primary="event loops">&#xa0;</a><a data-type="indexterm" data-primary="system threads" data-seealso="threads">&#xa0;</a></p><p>Each of these mechanisms has its own trade-offs. System threads
   require significant memory and other resources per thread. Also, the
   operating system can arbitrarily interleave the execution of system threads,
   requiring the programmer to carefully protect shared resources with locks
@@ -23,8 +23,8 @@
   that aims to provide the best of both worlds, avoiding the performance
   compromises and synchronization woes of preemptive threads without the
   confusing inversion of control that usually comes with event-driven
-  systems.<a data-type="indexterm" data-primary="Async library" data-secondary="benefits of"/></p><section id="async-basics" data-type="sect1"><h1>Async Basics</h1><p>Recall how I/O is typically done in Core. Here's a simple
-    example:<a data-type="indexterm" id="ALbas" data-primary="Async library" data-secondary="basics of"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+  systems.<a data-type="indexterm" data-primary="Async library" data-secondary="benefits of">&#xa0;</a></p><section id="async-basics" data-type="sect1"><h1>Async Basics</h1><p>Recall how I/O is typically done in Core. Here's a simple
+    example:<a data-type="indexterm" id="ALbas" data-primary="Async library" data-secondary="basics of">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>In_channel.read_all;;</code></strong>
 <code class="computeroutput">- : string -&gt; string = &lt;fun&gt;</code>
 <code class="prompt"># </code><strong><code>Out_channel.write_all "test.txt" ~data:"This is only a test.";;</code></strong>
@@ -34,10 +34,10 @@
     a blocking operation. In particular, the fact that it returns a concrete
     string means it can't return until the read has completed. The blocking
     nature of the call means that no progress can be made on anything else
-    until the read is completed.<a data-type="indexterm" data-primary="blocking"/></p><p>In Async, well-behaved functions never block. Instead, they return a
+    until the read is completed.<a data-type="indexterm" data-primary="blocking">&#xa0;</a></p><p>In Async, well-behaved functions never block. Instead, they return a
     value of type <code>Deferred.t</code> that acts as a
     placeholder that will eventually be filled in with the result. As an
-    example, consider the signature of the Async equivalent of <code>In_channel.read_all</code>:<a data-type="indexterm" data-primary="Deferred.t"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    example, consider the signature of the Async equivalent of <code>In_channel.read_all</code>:<a data-type="indexterm" data-primary="Deferred.t">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 3)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>#require "async";;</code></strong>
 <code class="prompt"># </code><strong><code>open Async.Std;;</code></strong>
 <code class="prompt"># </code><strong><code>Reader.file_contents;;</code></strong>
@@ -48,7 +48,7 @@
     <code>Core.Std</code> is for using Core.</p><p>A deferred is essentially a handle to a value that may be computed
     in the future. As such, if we call <code>Reader.file_contents</code>, the resulting deferred
     will initially be empty, as you can see by calling <code>Deferred.peek</code> on the resulting
-    deferred:<a data-type="indexterm" data-primary="Deferred.peek"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    deferred:<a data-type="indexterm" data-primary="Deferred.peek">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 4)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let contents = Reader.file_contents "test.txt";;</code></strong>
 <code class="computeroutput">val contents : string Deferred.t = &lt;abstr&gt;</code>
 <code class="prompt"># </code><strong><code>Deferred.peek contents;;</code></strong>
@@ -73,7 +73,7 @@
     of <code>Deferred.bind</code> as a kind of
     sequencing operator, and what we're doing is essentially taking an
     asynchronous computation <code>d</code> and tacking
-    on another stage comprised by the actions of the function <code>f</code>.<a data-type="indexterm" data-primary="Deferred.bind"/></p><p>At a more concrete level, the call to <code>Deferred.bind</code> returns a new deferred that
+    on another stage comprised by the actions of the function <code>f</code>.<a data-type="indexterm" data-primary="Deferred.bind">&#xa0;</a></p><p>At a more concrete level, the call to <code>Deferred.bind</code> returns a new deferred that
     becomes determined when the deferred returned by <code>f</code> is determined. It also implicitly registers
     with the scheduler an <em>Async job</em> that is responsible
     for running <code>f</code> once <code>d</code> is determined.</p><p>Here's a simple use of <code>bind</code> for a function that replaces a file with an
@@ -99,7 +99,7 @@
 <strong><code>  ;;</code></strong>
 <code class="computeroutput">val uppercase_file : string -&gt; unit Deferred.t = &lt;fun&gt;</code></pre><p>In the preceding code, we've dropped the parentheses around the function on the righthand
       side of the bind, and we didn't add a level of indentation for the contents of that function.
-      This is standard practice for using the <code>bind</code> operator.<a data-type="indexterm" data-primary="bind function"/></p><p>Now let's look at another potential use of <code>bind</code>. In this case, we'll
+      This is standard practice for using the <code>bind</code> operator.<a data-type="indexterm" data-primary="bind function">&#xa0;</a></p><p>Now let's look at another potential use of <code>bind</code>. In this case, we'll
       write a function that counts the number of lines in a file:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 10)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let count_lines filename =</code></strong>
 <strong><code>    Reader.file_contents filename</code></strong>
@@ -112,7 +112,7 @@
       is that <code>bind</code> expects a function that returns a deferred, but we've provided
       it a function that returns the nondeferred result directly. To make these signatures match, we
       need a function for taking an ordinary value and wrapping it in a deferred. This function is a
-      standard part of Async and is called <code>return</code>:<a data-type="indexterm" data-primary="return function"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      standard part of Async and is called <code>return</code>:<a data-type="indexterm" data-primary="return function">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 11)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>return;;</code></strong>
 <code class="computeroutput">- : 'a -&gt; 'a Deferred.t = &lt;fun&gt;</code>
 <code class="prompt"># </code><strong><code>let three = return 3;;</code></strong>
@@ -128,7 +128,7 @@
 <code class="computeroutput">val count_lines : string -&gt; int Deferred.t = &lt;fun&gt;</code></pre><p>Together, <code>bind</code> and <code>return</code> form a design pattern in functional
     programming known as a <em>monad</em>. You'll run across this
     signature in many applications beyond just threads. Indeed, we already ran
-    across monads in <a href="#bind-and-other-error-handling-idioms" data-type="xref"/>.<a data-type="indexterm" data-primary="monads"/></p><p>Calling <code>bind</code> and <code>return</code> together is a fairly common pattern, and
+    across monads in <a href="#bind-and-other-error-handling-idioms" data-type="xref">#bind-and-other-error-handling-idioms</a>.<a data-type="indexterm" data-primary="monads">&#xa0;</a></p><p>Calling <code>bind</code> and <code>return</code> together is a fairly common pattern, and
     as such there is a standard shortcut for it called <code>Deferred.map</code>, which has the following
     signature:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 13)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Deferred.map;;</code></strong>
@@ -146,7 +146,7 @@
     instead.</p><section id="ivars-and-upon" data-type="sect2"><h2>Ivars and Upon</h2><p>Deferreds are usually built using combinations of <code>bind</code>, <code>map</code> and <code>return</code>, but sometimes you want to construct a deferred that you can determine
         explicitly with usercode. This is done using an <em>ivar</em>. (The term ivar
         dates back to a language called Concurrent ML that was developed by John Reppy in the early
-        '90s. The "i" in ivar stands for incremental.)<a data-type="indexterm" data-primary="ivars"/><a data-type="indexterm" data-primary="Async library" data-secondary="ivars"/></p><p>There are three fundamental operations for working with an ivar:
+        '90s. The "i" in ivar stands for incremental.)<a data-type="indexterm" data-primary="ivars">&#xa0;</a><a data-type="indexterm" data-primary="Async library" data-secondary="ivars">&#xa0;</a></p><p>There are three fundamental operations for working with an ivar:
       you can create one, using <code>Ivar.create</code>; you can read off the deferred
       that corresponds to the ivar in question, using <code>Ivar.read</code>; and you can fill an ivar, thus
       causing the corresponding deferred to become determined, using <code>Ivar.fill</code>. These operations are
@@ -184,7 +184,7 @@
       is handed back to the caller of <code>schedule</code> that will eventually be filled with
       the contents of the deferred value returned by the thunk. To implement
       this, we'll use an operator called <code>upon</code>, which has the following
-      signature:<a data-type="indexterm" data-primary="thunks"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      signature:<a data-type="indexterm" data-primary="thunks">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 17)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>upon;;</code></strong>
 <code class="computeroutput">- : 'a Deferred.t -&gt; ('a -&gt; unit) -&gt; unit = &lt;fun&gt;</code></pre><p>Like <code>bind</code> and <code>return</code>, <code>upon</code> schedules a callback to be executed when
       the deferred it is passed is determined; but unlike those calls, it
@@ -218,12 +218,12 @@
       <code>upon</code> are run out of order. This kind
       of subtlety is typical of code that involves ivars and <code>upon</code>, and because of this, you should stick to
       the simpler map/bind/return style of working with deferreds when you
-      can.<a data-type="indexterm" data-startref="ALbas"/></p></section></section><section id="examples-an-echo-server" data-type="sect1"><h1>Examples: An Echo Server</h1><p>Now that we have the basics of Async under our belt, let's look at a
+      can.<a data-type="indexterm" data-startref="ALbas">&#xa0;</a></p></section></section><section id="examples-an-echo-server" data-type="sect1"><h1>Examples: An Echo Server</h1><p>Now that we have the basics of Async under our belt, let's look at a
     small standalone Async program. In particular, we'll write an echo server,
     i.e., a program that accepts connections from clients and spits back
-    whatever is sent to it.<a data-type="indexterm" id="echo" data-primary="echo servers"/><a data-type="indexterm" id="ALecho" data-primary="Async library" data-secondary="echo server example"/></p><p>The first step is to create a function that can copy data from an input to an output.
+    whatever is sent to it.<a data-type="indexterm" id="echo" data-primary="echo servers">&#xa0;</a><a data-type="indexterm" id="ALecho" data-primary="Async library" data-secondary="echo server example">&#xa0;</a></p><p>The first step is to create a function that can copy data from an input to an output.
       Here, we'll use Async's <code>Reader</code> and <code>Writer</code> modules, which provide a convenient abstraction for working with input and
-      output channels:<a data-type="indexterm" data-primary="Writer module"/><a data-type="indexterm" data-primary="Reader module"/><a data-type="indexterm" data-primary="I/O (input/output) operations" data-secondary="copying data"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/echo.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
+      output channels:<a data-type="indexterm" data-primary="Writer module">&#xa0;</a><a data-type="indexterm" data-primary="Reader module">&#xa0;</a><a data-type="indexterm" data-primary="I/O (input/output) operations" data-secondary="copying data">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/echo.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
 open Async.Std
 
 (* Copy data from the reader to the writer, using the provided buffer
@@ -243,12 +243,12 @@ let rec copy_blocks buffer r w =
     flushed, waiting on the deferred returned by <code>Writer.flushed</code>, at which point we recurse. If we
     hit an end-of-file condition, the loop is ended. The deferred returned by
     a call to <code>copy_blocks</code> becomes
-    determined only once the end-of-file condition is hit.<a data-type="indexterm" data-primary="end-of-file condition"/></p><p>One important aspect of how this is written is that it uses
+    determined only once the end-of-file condition is hit.<a data-type="indexterm" data-primary="end-of-file condition">&#xa0;</a></p><p>One important aspect of how this is written is that it uses
     <em>pushback</em>, which is to say that if the writer can't
     make progress writing, the reader will stop reading. If you don't
     implement pushback in your servers, then a stopped client can cause your
     program to leak memory, since you'll need to allocate space for the data
-    that's been read in but not yet written out.<a data-type="indexterm" data-primary="pushback"/></p><p>You might also be concerned that the chain of deferreds that is
+    that's been read in but not yet written out.<a data-type="indexterm" data-primary="pushback">&#xa0;</a></p><p>You might also be concerned that the chain of deferreds that is
     built up as you go through the loop would lead to a memory leak. After
     all, this code constructs an ever-growing chain of binds, each of which
     creates a deferred. In this case, however, all of the deferreds should
@@ -257,11 +257,11 @@ let rec copy_blocks buffer r w =
     condition is hit. Because of this, we could safely replace all of these
     deferreds with a single deferred. Async has logic to do just this, and so
     there's no memory leak after all. This is essentially a form of tail-call
-    optimization, lifted to the Async monad.<a data-type="indexterm" data-primary="tail calls"/></p><p><code>copy_blocks</code> provides the logic
+    optimization, lifted to the Async monad.<a data-type="indexterm" data-primary="tail calls">&#xa0;</a></p><p><code>copy_blocks</code> provides the logic
     for handling a client connection, but we still need to set up a server to
     receive such connections and dispatch to <code>copy_blocks</code>. For this, we'll use Async's
     <code>Tcp</code> module, which has a collection of
-    utilities for creating TCP clients and servers:<a data-type="indexterm" data-primary="TCP clients/servers"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/echo.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a>
+    utilities for creating TCP clients and servers:<a data-type="indexterm" data-primary="TCP clients/servers">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/echo.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a>
     (part 1)</p><pre data-type="programlisting" data-code-language="ocaml">(** Starts a TCP server, which listens on the specified port, invoking
     copy_blocks every time a client connects. *)
 let run () =
@@ -297,7 +297,7 @@ let () =
 <code class="computeroutput">It repeats whatever I write.</code>
 <code class="computeroutput">It repeats whatever I write.</code></pre><aside data-type="sidebar"><h5>Functions that Never Return</h5><p>You might wonder what's going on with the call to <code>never_returns</code>. <code>never_returns</code> is an idiom
         that comes from Core that is used to mark functions that don't return. Typically, a function
-        that doesn't return is inferred as having return type <code>'a</code>:<a data-type="indexterm" data-primary="Scheduler.go"/><a data-type="indexterm" data-primary="loop_forever"/><a data-type="indexterm" data-primary="never_returns"/><a data-type="indexterm" data-primary="functions" data-secondary="non-returning"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+        that doesn't return is inferred as having return type <code>'a</code>:<a data-type="indexterm" data-primary="Scheduler.go">&#xa0;</a><a data-type="indexterm" data-primary="loop_forever">&#xa0;</a><a data-type="indexterm" data-primary="never_returns">&#xa0;</a><a data-type="indexterm" data-primary="functions" data-secondary="non-returning">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 19)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let rec loop_forever () = loop_forever ();;</code></strong>
 <code class="computeroutput">val loop_forever : unit -&gt; 'a = &lt;fun&gt;</code>
 <code class="prompt"># </code><strong><code>let always_fail () = assert false;;</code></strong>
@@ -369,18 +369,18 @@ let () =
       in the <code>run</code> function. As you might
       guess from the name, <code>Deferred.never</code>
       returns a deferred that is never determined. In this case, that
-      indicates that the echo server doesn't ever shut down.<a data-type="indexterm" data-primary="Deferred.never"/></p><p>The biggest change in the preceding code is the use of Async's
+      indicates that the echo server doesn't ever shut down.<a data-type="indexterm" data-primary="Deferred.never">&#xa0;</a></p><p>The biggest change in the preceding code is the use of Async's
       <code>Pipe</code>. A <code>Pipe</code> is an asynchronous communication channel
       that's used for connecting different parts of your program. You can
       think of it as a consumer/producer queue that uses deferreds for
       communicating when the pipe is ready to be read from or written to. Our
       use of pipes is fairly minimal here, but they are an important part of
-      Async, so it's worth discussing them in some detail.<a data-type="indexterm" data-primary="pipes"/></p><p>Pipes are created in connected read/write pairs:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      Async, so it's worth discussing them in some detail.<a data-type="indexterm" data-primary="pipes">&#xa0;</a></p><p>Pipes are created in connected read/write pairs:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 24)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let (r,w) = Pipe.create ();;</code></strong>
 <code class="computeroutput">val r : '_a Pipe.Reader.t = &lt;abstr&gt;</code>
 <code class="computeroutput">val w : '_a Pipe.Writer.t = &lt;abstr&gt;</code></pre><p><code>r</code> and <code>w</code> are really
         just read and write handles to the same underlying object. Note that <code>r</code> and <code>w</code> have weakly
-        polymorphic types, as discussed in <a href="#imperative-programming" data-type="xref"/>, and so can only
+        polymorphic types, as discussed in <a href="#imperative-programming" data-type="xref">#imperative-programming</a>, and so can only
         contain values of a single, yet-to-be-determined type.</p><p>If we just try and write to the writer, we'll see that we block indefinitely in <span class="command"><em>utop</em></span>. You can break out of the wait by hitting
           <strong><code>Control-C</code></strong>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/pipe_write_break.rawscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><strong><code># Pipe.write w "Hello World!";;</code></strong>
 <code class="computeroutput">Interrupted.</code></pre><p>The deferred returned by write completes on its own once the value
@@ -409,7 +409,7 @@ let () =
       reader to the writer. Once that deferred becomes determined, the server
       will shut down that client connection. So, when a client disconnects,
       the rest of the shutdown happens transparently.</p><p>The command-line parsing for this program is based on the Command library that we
-        introduced in <a href="#command-line-parsing" data-type="xref"/>. Opening <code>Async.Std</code>, shadows the <code>Command</code> module with
+        introduced in <a href="#command-line-parsing" data-type="xref">#command-line-parsing</a>. Opening <code>Async.Std</code>, shadows the <code>Command</code> module with
         an extended version that contains the <code>async_basic</code>
         call:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 27)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Command.async_basic;;</code></strong>
@@ -419,20 +419,20 @@ let () =
 <code class="computeroutput">= &lt;fun&gt;</code></pre><p>This differs from the ordinary <code>Command.basic</code> call in
         that the main function must return a <code>Deferred.t</code>, and that
         the running of the command (using <code>Command.run</code>)
-        automatically starts the Async scheduler, without requiring an explicit call to <code>Scheduler.go</code>.<a data-type="indexterm" data-startref="echo"/><a data-type="indexterm" data-startref="ALecho"/></p></section></section><section id="example-searching-definitions-with-duckduckgo" data-type="sect1"><h1>Example: Searching Definitions with DuckDuckGo</h1><p>DuckDuckGo is a search engine with a freely available search
+        automatically starts the Async scheduler, without requiring an explicit call to <code>Scheduler.go</code>.<a data-type="indexterm" data-startref="echo">&#xa0;</a><a data-type="indexterm" data-startref="ALecho">&#xa0;</a></p></section></section><section id="example-searching-definitions-with-duckduckgo" data-type="sect1"><h1>Example: Searching Definitions with DuckDuckGo</h1><p>DuckDuckGo is a search engine with a freely available search
     interface. In this section, we'll use Async to write a small command-line
     utility for querying DuckDuckGo to extract definitions for a collection of
-    terms.<a data-type="indexterm" data-primary="cohttp library"/><a data-type="indexterm" data-primary="uri library"/><a data-type="indexterm" data-primary="textwrap library"/><a data-type="indexterm" data-primary="DuckDuckGo search engine" data-secondary="additional libraries needed"/><a data-type="indexterm" data-primary="search engines"/></p><p>Our code is going to rely on a number of other libraries, all of
+    terms.<a data-type="indexterm" data-primary="cohttp library">&#xa0;</a><a data-type="indexterm" data-primary="uri library">&#xa0;</a><a data-type="indexterm" data-primary="textwrap library">&#xa0;</a><a data-type="indexterm" data-primary="DuckDuckGo search engine" data-secondary="additional libraries needed">&#xa0;</a><a data-type="indexterm" data-primary="search engines">&#xa0;</a></p><p>Our code is going to rely on a number of other libraries, all of
       which can be installed using OPAM. Refer to <a href="http://realworldocaml.org/install">this Real World OCaml page</a>
     if you need help on the installation. Here's the list of libraries we'll
-    need:<a data-type="indexterm" id="ALduckduck" data-primary="Async library" data-secondary="DuckDuckGo searching example"/></p><dl><dt><code>textwrap</code></dt><dd><p>A library for wrapping long lines. We'll use this for printing
+    need:<a data-type="indexterm" id="ALduckduck" data-primary="Async library" data-secondary="DuckDuckGo searching example">&#xa0;</a></p><dl><dt><code>textwrap</code></dt><dd><p>A library for wrapping long lines. We'll use this for printing
           out our results.</p></dd><dt><code>uri</code></dt><dd><p>A library for handling URIs, or "Uniform Resource Identifiers," of which HTTP URLs
-            are an example.</p></dd><dt><code>yojson</code></dt><dd><p>A JSON parsing library that was described in <a href="#handling-json-data" data-type="xref"/>.</p></dd><dt><code>cohttp</code></dt><dd><p>A library for creating HTTP clients and servers. We need Async
+            are an example.</p></dd><dt><code>yojson</code></dt><dd><p>A JSON parsing library that was described in <a href="#handling-json-data" data-type="xref">#handling-json-data</a>.</p></dd><dt><code>cohttp</code></dt><dd><p>A library for creating HTTP clients and servers. We need Async
           support, which comes with the <code>cohttp.async</code> package.</p></dd></dl><p>Now let's dive into the implementation.</p><section id="uri-handling" data-type="sect2"><h2>URI Handling</h2><p>HTTP URLs, which identify endpoints across the Web, are actually part of a more general
         family known as Uniform Resource Identifiers (URIs). The full URI specification is defined
         in <a href="http://tools.ietf.org/html/rfc3986">RFC3986</a> and is rather
         complicated. Luckily, the <code>uri</code> library provides a strongly
-        typed interface that takes care of much of the hassle.<a data-type="indexterm" data-primary="RFC3986"/><a data-type="indexterm" data-primary="Uniform Resource Identifiers (URIs)"/><a data-type="indexterm" data-primary="DuckDuckGo search engine" data-secondary="URI handling in"/></p><p>We'll need a function for generating the URIs that we're going to
+        typed interface that takes care of much of the hassle.<a data-type="indexterm" data-primary="RFC3986">&#xa0;</a><a data-type="indexterm" data-primary="Uniform Resource Identifiers (URIs)">&#xa0;</a><a data-type="indexterm" data-primary="DuckDuckGo search engine" data-secondary="URI handling in">&#xa0;</a></p><p>We'll need a function for generating the URIs that we're going to
       use to query the DuckDuckGo servers:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/search.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
 open Async.Std
 
@@ -445,7 +445,7 @@ let query_uri query =
       search query. The library takes care of encoding the URI correctly when
       outputting it in the network protocol.</p></section><section id="parsing-json-strings" data-type="sect2"><h2>Parsing JSON Strings</h2><p>The HTTP response from DuckDuckGo is in JSON, a common (and
       thankfully simple) format that is specified in <a href="http://www.ietf.org/rfc/rfc4627.txt">RFC4627</a>. We'll parse
-      the JSON data using the Yojson library, which was introduced in <a href="#handling-json-data" data-type="xref"/>.<a data-type="indexterm" data-primary="Yojson library" data-secondary="parsing JSON with"/><a data-type="indexterm" data-primary="DuckDuckGo search engine" data-secondary="parsing JSON strings in"/><a data-type="indexterm" data-primary="RFC4627"/></p><p>We expect the response from DuckDuckGo to come across as a JSON
+      the JSON data using the Yojson library, which was introduced in <a href="#handling-json-data" data-type="xref">#handling-json-data</a>.<a data-type="indexterm" data-primary="Yojson library" data-secondary="parsing JSON with">&#xa0;</a><a data-type="indexterm" data-primary="DuckDuckGo search engine" data-secondary="parsing JSON strings in">&#xa0;</a><a data-type="indexterm" data-primary="RFC4627">&#xa0;</a></p><p>We expect the response from DuckDuckGo to come across as a JSON
       record, which is represented by the <code>Assoc</code> tag in Yojson's JSON variant. We expect
       the definition itself to come across under either the key "Abstract" or
       "Definition," and so the following code looks under both keys, returning
@@ -465,7 +465,7 @@ let get_definition_from_json json =
     | None -&gt; find "Definition"
     end
   | _ -&gt; None</pre></section><section id="executing-an-http-client-query" data-type="sect2"><h2>Executing an HTTP Client Query</h2><p>Now let's look at the code for dispatching the search queries over
-      HTTP, using the Cohttp library:<a data-type="indexterm" data-primary="query-handlers" data-secondary="executing an HTTP client query"/><a data-type="indexterm" data-primary="client queries"/><a data-type="indexterm" data-primary="HTTP client queries"/><a data-type="indexterm" data-primary="DuckDuckGo search engine" data-secondary="executing an HTTP client query in"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/search.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a>
+      HTTP, using the Cohttp library:<a data-type="indexterm" data-primary="query-handlers" data-secondary="executing an HTTP client query">&#xa0;</a><a data-type="indexterm" data-primary="client queries">&#xa0;</a><a data-type="indexterm" data-primary="HTTP client queries">&#xa0;</a><a data-type="indexterm" data-primary="DuckDuckGo search engine" data-secondary="executing an HTTP client query in">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/search.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a>
       (part 2)</p><pre data-type="programlisting" data-code-language="ocaml">(* Execute the DuckDuckGo search *)
 let get_definition word =
   Cohttp_async.Client.get (query_uri word)
@@ -548,7 +548,7 @@ let search_and_print words =
     )
     (fun words () -&gt; search_and_print words)
   |&gt; Command.run</pre><p>And that's all we need for a simple but usable definition
-      searcher:<a data-type="indexterm" data-startref="ALduckduck"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/run_search.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>corebuild -pkg cohttp.async,yojson,textwrap search.native</code></strong>
+      searcher:<a data-type="indexterm" data-startref="ALduckduck">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/run_search.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>corebuild -pkg cohttp.async,yojson,textwrap search.native</code></strong>
 <code class="prompt">$ </code><strong><code>./search.native "Concurrent Programming" "OCaml"</code></strong>
 <code class="computeroutput">Concurrent Programming</code>
 <code class="computeroutput">----------------------</code>
@@ -568,8 +568,8 @@ let search_and_print words =
     resources can lead to a runtime error. When programming in OCaml, some of
     these errors will show up explicitly in a function's return type, and some
     of them will show up as exceptions. We covered exception handling in OCaml
-    in <a href="#exceptions" data-type="xref"/>, but as we'll see, exception handling in a
-    concurrent program presents some new challenges.<a data-type="indexterm" data-primary="exceptions" data-secondary="in concurrent programming"/><a data-type="indexterm" data-primary="concurrent programming"/><a data-type="indexterm" id="ALexcept" data-primary="Async library" data-secondary="exception handling in"/></p><p>Let's get a better sense of how exceptions work in Async by creating an asynchronous
+    in <a href="#exceptions" data-type="xref">#exceptions</a>, but as we'll see, exception handling in a
+    concurrent program presents some new challenges.<a data-type="indexterm" data-primary="exceptions" data-secondary="in concurrent programming">&#xa0;</a><a data-type="indexterm" data-primary="concurrent programming">&#xa0;</a><a data-type="indexterm" id="ALexcept" data-primary="Async library" data-secondary="exception handling in">&#xa0;</a></p><p>Let's get a better sense of how exceptions work in Async by creating an asynchronous
       computation that (sometimes) fails with an exception. The function <code>maybe_raise</code> <span class="keep-together">blocks for half a second,</span> and then either throws an exception or
       returns <code>unit</code>, alternating between the two behaviors on subsequent
       calls:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
@@ -620,7 +620,7 @@ let search_and_print words =
     only captures exceptions that are thrown in the code directly executed
     within it, while <code>maybe_raise</code> schedules
     an Async job to run in the future, and it's that job that throws an
-    exception.</p><p>We can capture this kind of asynchronous error using the <code>try_with</code> function provided by Async:<a data-type="indexterm" data-primary="exceptions" data-secondary="asynchronous errors"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    exception.</p><p>We can capture this kind of asynchronous error using the <code>try_with</code> function provided by Async:<a data-type="indexterm" data-primary="exceptions" data-secondary="asynchronous errors">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 33)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let handle_error () =</code></strong>
 <strong><code>    try_with (fun () -&gt; maybe_raise ())</code></strong>
 <strong><code>    &gt;&gt;| function</code></strong>
@@ -641,7 +641,7 @@ let search_and_print words =
       system of <em>monitors</em>, which are inspired by the
       error-handling mechanism in Erlang of the same name. Monitors are fairly
       low-level and are only occasionally used directly, but it's nonetheless
-      worth understanding how they work.<a data-type="indexterm" data-primary="monitors"/></p><p>In Async, a monitor is a context that determines what to do when
+      worth understanding how they work.<a data-type="indexterm" data-primary="monitors">&#xa0;</a></p><p>In Async, a monitor is a context that determines what to do when
       there is an unhandled exception. Every Async job runs within the context
       of some monitor, which, when the job is running, is referred to as the
       current monitor. When a new Async job is scheduled, say, using <code>bind</code> or <code>map</code>, it inherits the current monitor of the
@@ -733,7 +733,7 @@ let search_and_print words =
         by closing the connection. It is for building this kind of custom error handling that
         monitors can be helpful.</p></section><section id="example-handling-exceptions-with-duckduckgo" data-type="sect2"><h2>Example: Handling Exceptions with DuckDuckGo</h2><p>Let's now go back and improve the exception handling of our DuckDuckGo client. In
         particular, we'll change it so that any query that fails is reported without preventing
-        other queries from completing.<a data-type="indexterm" data-primary="exceptions" data-secondary="search engine example"/><a data-type="indexterm" data-primary="DuckDuckGo search engine" data-secondary="exception handling in"/></p><p>The search code as it is fails rarely, so let's make a change that
+        other queries from completing.<a data-type="indexterm" data-primary="exceptions" data-secondary="search engine example">&#xa0;</a><a data-type="indexterm" data-primary="DuckDuckGo search engine" data-secondary="exception handling in">&#xa0;</a></p><p>The search code as it is fails rarely, so let's make a change that
       allows us to trigger failures more predictably. We'll do this by making
       it possible to distribute the requests over multiple servers. Then,
       we'll handle the errors that occur when one of those servers is
@@ -815,7 +815,7 @@ let print_result (word,definition) =
       itself after an exception, in particular by closing its file
       descriptors. If you need to implement such functionality directly, you
       may want to use the <code>Monitor.protect</code>
-      call, which is analogous to the <code>protect</code> call described in <a href="#cleaning-up-in-the-presence-of-exceptions" data-type="xref"/>.<a data-type="indexterm" data-startref="ALexcept"/></p></section></section><section id="timeouts-cancellation-and-choices" data-type="sect1"><h1>Timeouts, Cancellation, and Choices</h1><p>In a concurrent program, one often needs to combine results from
+      call, which is analogous to the <code>protect</code> call described in <a href="#cleaning-up-in-the-presence-of-exceptions" data-type="xref">#cleaning-up-in-the-presence-of-exceptions</a>.<a data-type="indexterm" data-startref="ALexcept">&#xa0;</a></p></section></section><section id="timeouts-cancellation-and-choices" data-type="sect1"><h1>Timeouts, Cancellation, and Choices</h1><p>In a concurrent program, one often needs to combine results from
     multiple, distinct concurrent subcomputations going on in the same
     program. We already saw this in our DuckDuckGo example, where we used
     <code>Deferred.all</code> and <code>Deferred.all_unit</code> to wait for a list of
@@ -823,7 +823,7 @@ let print_result (word,definition) =
     deferreds of different types have returned, returning both values as a
     tuple. Here, we use the function <code>sec</code>,
     which is shorthand for creating a time-span equal to a given number of
-    seconds:<a data-type="indexterm" data-primary="errors" data-secondary="timeouts and cancellations"/><a data-type="indexterm" data-primary="Deferred.both"/><a data-type="indexterm" data-primary="cancellations"/><a data-type="indexterm" data-primary="timeouts"/><a data-type="indexterm" data-primary="Async library" data-secondary="timeouts and cancellations"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    seconds:<a data-type="indexterm" data-primary="errors" data-secondary="timeouts and cancellations">&#xa0;</a><a data-type="indexterm" data-primary="Deferred.both">&#xa0;</a><a data-type="indexterm" data-primary="cancellations">&#xa0;</a><a data-type="indexterm" data-primary="timeouts">&#xa0;</a><a data-type="indexterm" data-primary="Async library" data-secondary="timeouts and cancellations">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 39)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let string_and_float = Deferred.both</code></strong>
 <strong><code>   (after (sec 0.5)  &gt;&gt;| fun () -&gt; "A")</code></strong>
 <strong><code>   (after (sec 0.25) &gt;&gt;| fun () -&gt; 32.33);;</code></strong>
@@ -931,7 +931,7 @@ let get_definition ~server ~interrupt word =
     interleaving is controlled by the operating system. We discussed in the
     beginning of the chapter why Async is generally a better choice than
     system threads, but even if you mostly use Async, OCaml's system threads
-    are sometimes necessary, and it's worth understanding them.<a data-type="indexterm" data-primary="parallelism"/><a data-type="indexterm" data-primary="kernel-level threads"/><a data-type="indexterm" data-primary="threads" data-secondary="kernel-level threads"/><a data-type="indexterm" id="systhrd" data-primary="system threads"/><a data-type="indexterm" id="ALsysthr" data-primary="Async library" data-secondary="system threads and"/></p><p>The most surprising aspect of OCaml's system threads is that they
+    are sometimes necessary, and it's worth understanding them.<a data-type="indexterm" data-primary="parallelism">&#xa0;</a><a data-type="indexterm" data-primary="kernel-level threads">&#xa0;</a><a data-type="indexterm" data-primary="threads" data-secondary="kernel-level threads">&#xa0;</a><a data-type="indexterm" id="systhrd" data-primary="system threads">&#xa0;</a><a data-type="indexterm" id="ALsysthr" data-primary="Async library" data-secondary="system threads and">&#xa0;</a></p><p>The most surprising aspect of OCaml's system threads is that they
     don't afford you any access to physical parallelism. That's because
     OCaml's runtime has a single runtime lock that at most one thread can be
     holding at a time.</p><p>Given that threads don't provide physical parallelism, why are they
@@ -941,11 +941,11 @@ let get_definition ~server ~interrupt word =
     blocking your entire program. For this reason, Async maintains a thread
     pool for running such calls. Most of the time, as a user of Async you
     don't need to think about this, but it is happening under the
-    covers.<a data-type="indexterm" data-primary="threads" data-secondary="benefits of"/></p><p>Another reason to have multiple threads is to deal with non-OCaml
+    covers.<a data-type="indexterm" data-primary="threads" data-secondary="benefits of">&#xa0;</a></p><p>Another reason to have multiple threads is to deal with non-OCaml
     libraries that have their own event loop or for another reason need their
     own threads. In that case, it's sometimes useful to run some OCaml code on
     the foreign thread as part of the communication to your main program.
-    OCaml's foreign function interface is discussed in more detail in <a href="#foreign-function-interface" data-type="xref"/>.</p><p>Another occasional use for system threads is to better interoperate with compute-intensive
+    OCaml's foreign function interface is discussed in more detail in <a href="#foreign-function-interface" data-type="xref">#foreign-function-interface</a>.</p><p>Another occasional use for system threads is to better interoperate with compute-intensive
       OCaml code. In Async, if you have a long-running computation that never calls <code>bind</code> or <code>map</code>, then that
       computation will block out the Async runtime until it completes.</p><p>One way of dealing with this is to explicitly break up the
     calculation into smaller pieces that are separated by binds. But sometimes
@@ -953,7 +953,7 @@ let get_definition ~server ~interrupt word =
     changes to an existing codebase. Another solution is to run the code in
     question in a separate thread. Async's <code>In_thread</code> module provides multiple facilities
     for doing just this, <code>In_thread.run</code>
-    being the simplest. We can simply write:<a data-type="indexterm" data-primary="In_thread module"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    being the simplest. We can simply write:<a data-type="indexterm" data-primary="In_thread module">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/async/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 42)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let def = In_thread.run (fun () -&gt; List.range 1 10);;</code></strong>
 <code class="computeroutput">val def : int list Deferred.t = &lt;abstr&gt;</code>
 <code class="prompt"># </code><strong><code>def;;</code></strong>
@@ -1021,7 +1021,7 @@ let get_definition ~server ~interrupt word =
       data between different systems threads. Even data structures that seem
       like they should be safe but are mutable under the covers, like lazy
       values, can have undefined behavior when accessed from multiple
-      threads.<a data-type="indexterm" data-primary="mutexes"/><a data-type="indexterm" data-primary="segfaults"/><a data-type="indexterm" data-primary="threads" data-secondary="locking and"/><a data-type="indexterm" data-primary="threads" data-secondary="thread-safety"/></p><p>There are two commonly available mutex packages for OCaml: the
+      threads.<a data-type="indexterm" data-primary="mutexes">&#xa0;</a><a data-type="indexterm" data-primary="segfaults">&#xa0;</a><a data-type="indexterm" data-primary="threads" data-secondary="locking and">&#xa0;</a><a data-type="indexterm" data-primary="threads" data-secondary="thread-safety">&#xa0;</a></p><p>There are two commonly available mutex packages for OCaml: the
       <code>Mutex</code> module that's part of the
       standard library, which is just a wrapper over OS-level mutexes and
       <code>Nano_mutex</code>, a more efficient
@@ -1036,4 +1036,4 @@ let get_definition ~server ~interrupt word =
       using calls from the <code>Thread_safe</code>
       module in Async, and thereby run Async computations safely. This is a
       very flexible way of connecting threads to the Async world, but it's a
-      complex use case that is beyond the scope of this chapter.<a data-type="indexterm" data-startref="systhrd"/><a data-type="indexterm" data-startref="ALsysthr"/></p></section></section></section>
+      complex use case that is beyond the scope of this chapter.<a data-type="indexterm" data-startref="systhrd">&#xa0;</a><a data-type="indexterm" data-startref="ALsysthr">&#xa0;</a></p></section></section></section>

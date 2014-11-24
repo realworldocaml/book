@@ -3,8 +3,8 @@
   multiple different forms, where each form is marked by an explicit tag. As
   we'll see, when combined with pattern matching, variants give you a powerful
   way of representing complex data and of organizing the case-analysis on that
-  information.<a data-type="indexterm" data-primary="variant types" data-secondary="usefulness of"/><a data-type="indexterm" id="DTvar" data-primary="datatypes" data-secondary="variant types"/></p><p>The basic syntax of a variant type declaration is as
-  follows:<a data-type="indexterm" data-primary="variant types" data-secondary="basic syntax of"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/variant.syntax" class="orm:hideurl:ital"><em class="hyperlink">Syntax</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type <em>&lt;variant&gt;</em> =
+  information.<a data-type="indexterm" data-primary="variant types" data-secondary="usefulness of">&#xa0;</a><a data-type="indexterm" id="DTvar" data-primary="datatypes" data-secondary="variant types">&#xa0;</a></p><p>The basic syntax of a variant type declaration is as
+  follows:<a data-type="indexterm" data-primary="variant types" data-secondary="basic syntax of">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/variant.syntax" class="orm:hideurl:ital"><em class="hyperlink">Syntax</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type <em>&lt;variant&gt;</em> =
   | <em>&lt;Tag&gt;</em> [ of <em>&lt;type&gt;</em> [* <em>&lt;type&gt;</em>]... ]
   | <em>&lt;Tag&gt;</em> [ of <em>&lt;type&gt;</em> [* <em>&lt;type&gt;</em>]... ]
   | ...</pre><p>Each row essentially represents a case of the variant. Each case has an associated tag and
@@ -81,7 +81,7 @@
 <strong><code># color_print (Gray 4) "A muted gray...";;</code></strong>
 <code class="computeroutput">A muted gray...</code></pre><section id="catch-all-cases-and-refactoring" data-type="sect1"><h1>Catch-All Cases and Refactoring</h1><p>OCaml's type system can act as a refactoring tool, warning you of
     places where your code needs to be updated to match an interface change.
-    This is particularly valuable in the context of variants.<a data-type="indexterm" data-primary="errors" data-secondary="catch-all cases and refactoring"/><a data-type="indexterm" data-primary="pattern matching" data-secondary="catch-all cases"/><a data-type="indexterm" data-primary="functional updates"/><a data-type="indexterm" data-primary="refactoring"/><a data-type="indexterm" data-primary="variant types" data-secondary="catch-all cases and refactoring"/></p><p>Consider what would happen if we were to change the definition of
+    This is particularly valuable in the context of variants.<a data-type="indexterm" data-primary="errors" data-secondary="catch-all cases and refactoring">&#xa0;</a><a data-type="indexterm" data-primary="pattern matching" data-secondary="catch-all cases">&#xa0;</a><a data-type="indexterm" data-primary="functional updates">&#xa0;</a><a data-type="indexterm" data-primary="refactoring">&#xa0;</a><a data-type="indexterm" data-primary="variant types" data-secondary="catch-all cases and refactoring">&#xa0;</a></p><p>Consider what would happen if we were to change the definition of
     <code>color</code> to the following:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/catch_all.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type color =</code></strong>
 <strong><code>  | Basic of basic_color     (* basic colors *)</code></strong>
@@ -131,7 +131,7 @@
     exhaustion checks. Imagine we wanted a version of <code>color_to_int</code> that works on older terminals by
     rendering the first 16 colors (the eight <code>basic_color</code>s in regular and bold) in the normal
     way, but renders everything else as white. We might have written the
-    function as follows:<a data-type="indexterm" data-primary="exhaustion checks"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/catch_all.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    function as follows:<a data-type="indexterm" data-primary="exhaustion checks">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/catch_all.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 5)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let oldschool_color_to_int = function</code></strong>
 <strong><code>    | Basic (basic_color,weight) -&gt;</code></strong>
 <strong><code>      let base = match weight with Bold -&gt; 8 | Regular -&gt; 0 in</code></strong>
@@ -151,10 +151,10 @@
     different types together and are mathematically similar to Cartesian
     products; and <em>sum types</em>, like variants, which let you
     combine multiple different possibilities into one type, and are
-    mathematically similar to disjoint unions.<a data-type="indexterm" id="RECvartyp" data-primary="records" data-secondary="and variant types"/><a data-type="indexterm" data-primary="sum types"/><a data-type="indexterm" data-primary="product types"/><a data-type="indexterm" data-primary="datatypes" data-secondary="algebraic types"/><a data-type="indexterm" data-primary="algebraic data types"/><a data-type="indexterm" id="VARTYPrec" data-primary="variant types" data-secondary="and records"/></p><p>Algebraic data types gain much of their power from the ability to
+    mathematically similar to disjoint unions.<a data-type="indexterm" id="RECvartyp" data-primary="records" data-secondary="and variant types">&#xa0;</a><a data-type="indexterm" data-primary="sum types">&#xa0;</a><a data-type="indexterm" data-primary="product types">&#xa0;</a><a data-type="indexterm" data-primary="datatypes" data-secondary="algebraic types">&#xa0;</a><a data-type="indexterm" data-primary="algebraic data types">&#xa0;</a><a data-type="indexterm" id="VARTYPrec" data-primary="variant types" data-secondary="and records">&#xa0;</a></p><p>Algebraic data types gain much of their power from the ability to
     construct layered combinations of sums and products. Let's see what we can
     achieve with this by revisiting the logging server types that were
-    described in <a href="#records" data-type="xref"/>. We'll start by reminding
+    described in <a href="#records" data-type="xref">#records</a>. We'll start by reminding
     ourselves of the definition of <code>Log_entry.t</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/logger.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>module Log_entry = struct</code></strong>
 <strong><code>    type t =</code></strong>
@@ -296,11 +296,11 @@
 <strong><code>    | Log_entry m -&gt; handle_log_entry server_state (common,m)</code></strong>
 <strong><code>    | Logon     m -&gt; handle_logon     server_state (common,m)</code></strong>
 <strong><code>    | Heartbeat m -&gt; handle_heartbeat server_state (common,m)</code></strong>
-<strong><code>  ;;</code></strong></pre><p>And it's explicit at the type level that <code>handle_log_entry</code> sees only <code>Log_entry</code> messages, <code>handle_logon</code> sees only <code>Logon</code> messages, etc.<a data-type="indexterm" data-startref="RECvartyp"/><a data-type="indexterm" data-startref="VARTYPrec"/></p></section><section id="variants-and-recursive-data-structures" data-type="sect1"><h1>Variants and Recursive Data Structures</h1><p>Another common application of variants is to represent tree-like
+<strong><code>  ;;</code></strong></pre><p>And it's explicit at the type level that <code>handle_log_entry</code> sees only <code>Log_entry</code> messages, <code>handle_logon</code> sees only <code>Logon</code> messages, etc.<a data-type="indexterm" data-startref="RECvartyp">&#xa0;</a><a data-type="indexterm" data-startref="VARTYPrec">&#xa0;</a></p></section><section id="variants-and-recursive-data-structures" data-type="sect1"><h1>Variants and Recursive Data Structures</h1><p>Another common application of variants is to represent tree-like
     recursive data structures. We'll show how this can be done by walking
     through the design of a simple Boolean expression language. Such a
     language can be useful anywhere you need to specify filters, which are
-    used in everything from packet analyzers to mail clients.<a data-type="indexterm" data-primary="recursive data structures"/><a data-type="indexterm" data-primary="data structures" data-secondary="recursive"/><a data-type="indexterm" data-primary="variant types" data-secondary="and recursive data&#xA;        structures"/></p><p>An expression in this language will be defined by the variant
+    used in everything from packet analyzers to mail clients.<a data-type="indexterm" data-primary="recursive data structures">&#xa0;</a><a data-type="indexterm" data-primary="data structures" data-secondary="recursive">&#xa0;</a><a data-type="indexterm" data-primary="variant types" data-secondary="and recursive data&#10;        structures">&#xa0;</a></p><p>An expression in this language will be defined by the variant
     <code>expr</code>, with one tag for each kind of
     expression we want to support:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/blang.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type 'a expr =</code></strong>
 <strong><code>    | Base  of 'a</code></strong>
@@ -431,7 +431,7 @@
     supports so-called <em>polymorphic variants</em>. As we'll
     see, polymorphic variants are more flexible and syntactically more
     lightweight than ordinary variants, but that extra power comes at a
-    cost.<a data-type="indexterm" data-primary="polymorphic variant types" data-secondary="basic syntax of"/><a data-type="indexterm" id="VARTYPpoly" data-primary="variant types" data-secondary="polymorphic"/></p><p>Syntactically, polymorphic variants are distinguished from ordinary
+    cost.<a data-type="indexterm" data-primary="polymorphic variant types" data-secondary="basic syntax of">&#xa0;</a><a data-type="indexterm" id="VARTYPpoly" data-primary="variant types" data-secondary="polymorphic">&#xa0;</a></p><p>Syntactically, polymorphic variants are distinguished from ordinary
     variants by the leading backtick. And unlike ordinary variants,
     polymorphic variants can be used without an explicit type
     declaration:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
@@ -447,7 +447,7 @@
     automatically, and when we combine variants with different tags, the
     compiler infers a new type that knows about all of those tags. Note that
     in the preceding example, the tag name (e.g., <code>`Int</code>) matches the type name (<code>int</code>). This is a common convention in
-    OCaml.<a data-type="indexterm" data-primary="polymorphic variant types" data-secondary="automatic inference of"/></p><p>The type system will complain if it sees incompatible uses of the
+    OCaml.<a data-type="indexterm" data-primary="polymorphic variant types" data-secondary="automatic inference of">&#xa0;</a></p><p>The type system will complain if it sees incompatible uses of the
     same tag:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 7)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let five = `Int "five";;</code></strong>
 <code class="computeroutput">val five : [&gt; `Int of string ] = `Int "five"</code>
@@ -480,7 +480,7 @@
     (part 9)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let exact = List.filter ~f:is_positive [three;four];;</code></strong>
 <code class="computeroutput">val exact : [ `Float of float | `Int of int ] list = [`Int 3; `Float 4.]</code></pre><p>Perhaps surprisingly, we can also create polymorphic variant types
     that have different upper and lower bounds. Note that <code>Ok</code> and <code>Error</code>
-    in the following example come from the <code>Result.t</code> type from Core:<a data-type="indexterm" data-primary="polymorphic variant types" data-secondary="upper/lower bounds of"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    in the following example come from the <code>Result.t</code> type from Core:<a data-type="indexterm" data-primary="polymorphic variant types" data-secondary="upper/lower bounds of">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 10)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let is_positive = function</code></strong>
 <strong><code>     | `Int   x -&gt; Ok (x &gt; 0)</code></strong>
 <strong><code>     | `Float x -&gt; Ok (x &gt; 0.)</code></strong>
@@ -498,7 +498,7 @@
       to terminal colors. Imagine that we have a new terminal type that adds
       yet more colors, say, by adding an alpha channel so you can specify
       translucent colors. We could model this extended set of colors as
-      follows, using an ordinary variant:<a data-type="indexterm" data-primary="polymorphic variant types" data-secondary="vs. ordinary variants"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      follows, using an ordinary variant:<a data-type="indexterm" data-primary="polymorphic variant types" data-secondary="vs. ordinary variants">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 11)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type extended_color =</code></strong>
 <strong><code>    | Basic of basic_color * weight  (* basic colors, regular and bold *)</code></strong>
 <strong><code>    | RGB   of int * int * int       (* 6x6x6 color space *)</code></strong>
@@ -606,7 +606,7 @@
         statement can lead to the inference of an upper bound on a variant
         type, limiting the possible tags to those that can be handled by the
         match. If we add a catch-all case to our <code>match</code>
-        statement, we end up with a type with a lower bound:<a data-type="indexterm" data-primary="pattern matching" data-secondary="catch-all cases"/><a data-type="indexterm" data-primary="catch-all cases"/><a data-type="indexterm" data-primary="polymorphic variant types" data-secondary="and catch-all&#xA;            cases"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+        statement, we end up with a type with a lower bound:<a data-type="indexterm" data-primary="pattern matching" data-secondary="catch-all cases">&#xa0;</a><a data-type="indexterm" data-primary="catch-all cases">&#xa0;</a><a data-type="indexterm" data-primary="polymorphic variant types" data-secondary="and catch-all&#10;            cases">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variants/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
         (part 16)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let is_positive_permissive = function</code></strong>
 <strong><code>     | `Int   x -&gt; Ok (x &gt; 0)</code></strong>
 <strong><code>     | `Float x -&gt; Ok (x &gt; 0.)</code></strong>
@@ -629,7 +629,7 @@
         catch-all cases and polymorphic variants.</p></div><p>Let's consider how we might turn our code into a proper library
       with an implementation in an <code>ml</code> file
       and an interface in a separate <code>mli</code>,
-      as we saw in <a href="#files-modules-and-programs" data-type="xref"/>. Let's start
+      as we saw in <a href="#files-modules-and-programs" data-type="xref">#files-modules-and-programs</a>. Let's start
       with the <code>mli</code>:</p><p>OCaml: <a href="https://github.com/realworldocaml/examples/tree/v1/code/variants-termcol/terminal_color.mli" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
 
 type basic_color =
@@ -709,7 +709,7 @@ let extended_color_to_int = function
       down explicitly in the match.</p></section><section id="when-to-use-polymorphic-variants" data-type="sect2"><h2>When to Use Polymorphic Variants</h2><p>At first glance, polymorphic variants look like a strict
       improvement over ordinary variants. You can do everything that ordinary
       variants can do, plus it's more flexible and more concise. What's not to
-      like?<a data-type="indexterm" data-primary="polymorphic variant types" data-secondary="vs. ordinary variants"/><a data-type="indexterm" data-primary="polymorphic variant types" data-secondary="drawbacks of"/></p><p>In reality, regular variants are the more pragmatic choice most of
+      like?<a data-type="indexterm" data-primary="polymorphic variant types" data-secondary="vs. ordinary variants">&#xa0;</a><a data-type="indexterm" data-primary="polymorphic variant types" data-secondary="drawbacks of">&#xa0;</a></p><p>In reality, regular variants are the more pragmatic choice most of
       the time. That's because the flexibility of polymorphic variants comes
       at a price. Here are some of the downsides:</p><dl><dt>Complexity</dt><dd><p>As we've seen, the typing rules for polymorphic variants are
             a lot more complicated than they are for regular variants. This
@@ -736,6 +736,6 @@ let extended_color_to_int = function
       advantage of their power; in particular, when you take advantage of the
       ability of polymorphic variant types to overlap in the tags they
       support. This ties into OCaml's support for subtyping. As we'll discuss
-      further when we cover objects in <a href="#objects" data-type="xref"/>, subtyping
+      further when we cover objects in <a href="#objects" data-type="xref">#objects</a>, subtyping
       brings in a lot of complexity, and most of the time, that's complexity
-      you want to avoid.<a data-type="indexterm" data-startref="VARTYPpoly"/><a data-type="indexterm" data-startref="DTvar"/></p></section></section></section>
+      you want to avoid.<a data-type="indexterm" data-startref="VARTYPpoly">&#xa0;</a><a data-type="indexterm" data-startref="DTvar">&#xa0;</a></p></section></section></section>

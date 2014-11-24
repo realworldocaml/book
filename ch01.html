@@ -6,7 +6,7 @@
     that lets you type in expressions and evaluate them interactively. <span class="command"><em>utop</em></span> is an easier-to-use version of OCaml's standard toplevel (which you can start
     by typing <em>ocaml</em> at the command line). These instructions will assume you're
     using <span class="command"><em>utop</em></span> specifically.</p><p>Before getting started, make sure you have a working OCaml installation so you can try out
-    the examples as you read through the chapter. </p><section id="ocaml-as-a-calculator" data-type="sect1"><h1>OCaml as a Calculator</h1><p>The first thing you need to do when using Core is to open<a data-type="indexterm" data-primary="OCaml" data-secondary="numerical calculations in"/><a data-type="indexterm" data-primary="numerical calculations"/><a data-type="indexterm" data-primary="Core standard library" data-secondary="opening"/> <code>Core.Std</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml">$ utop
+    the examples as you read through the chapter. </p><section id="ocaml-as-a-calculator" data-type="sect1"><h1>OCaml as a Calculator</h1><p>The first thing you need to do when using Core is to open<a data-type="indexterm" data-primary="OCaml" data-secondary="numerical calculations in">&#xa0;</a><a data-type="indexterm" data-primary="numerical calculations">&#xa0;</a><a data-type="indexterm" data-primary="Core standard library" data-secondary="opening">&#xa0;</a> <code>Core.Std</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml">$ utop
 
 <code class="prompt"># </code><strong><code>open Core.Std;;</code></strong>
 </pre><p>This makes the definitions in Core available and is required for
@@ -67,7 +67,7 @@
 <code class="computeroutput">Characters 4-5:</code>
 <code class="computeroutput">Error: Parse error: [fun_binding] expected after [ipatt] (in [let_binding])</code></pre><p>The error messages here are a little confusing, but they'll make
     more sense as you learn more about the language.</p></section><section id="functions-and-type-inference" data-type="sect1"><h1>Functions and Type Inference</h1><p>The <code>let</code> syntax can also be used
-    to define a function:<a data-type="indexterm" data-primary="let syntax" data-secondary="function definition with"/><a data-type="indexterm" data-primary="functions" data-secondary="defining"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a> (part 5)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let square x = x * x ;;</code></strong>
+    to define a function:<a data-type="indexterm" data-primary="let syntax" data-secondary="function definition with">&#xa0;</a><a data-type="indexterm" data-primary="functions" data-secondary="defining">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a> (part 5)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let square x = x * x ;;</code></strong>
 <code class="computeroutput">val square : int -&gt; int = &lt;fun&gt;</code>
 <code class="prompt"># </code><strong><code>square 2;;</code></strong>
 <code class="computeroutput">- : int = 4</code>
@@ -86,7 +86,7 @@
     takes an <code>int</code> and returns an <code>int</code>. We can also write functions that take
     multiple arguments. (Note that the following example will not work if you
     haven't opened <code>Core.Std</code> as was
-    suggested earlier.)<a data-type="indexterm" data-primary="multi-argument functions"/><a data-type="indexterm" data-primary="functions" data-secondary="with multiple arguments"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a> (part 6)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let ratio x y =</code></strong>
+    suggested earlier.)<a data-type="indexterm" data-primary="multi-argument functions">&#xa0;</a><a data-type="indexterm" data-primary="functions" data-secondary="with multiple arguments">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a> (part 6)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let ratio x y =</code></strong>
 <strong><code>     Float.of_int x /. Float.of_int y</code></strong>
 <strong><code>  ;;</code></strong>
 <code class="computeroutput">val ratio : int -&gt; int -&gt; float = &lt;fun&gt;</code>
@@ -99,7 +99,7 @@
     is typically used for accessing a method of an object. Note that module
     names always start with a capital letter.</p><p>The notation for the type-signature of a multiargument function may
     be a little surprising at first, but we'll explain where it comes from
-    when we get to function currying in <a href="#multi-argument-functions" data-type="xref"/>. For the moment, think of the arrows
+    when we get to function currying in <a href="#multi-argument-functions" data-type="xref">#multi-argument-functions</a>. For the moment, think of the arrows
     as separating different arguments of the function, with the type after the
     final arrow being the return value. Thus, <code>int
     -&gt; int -&gt; float</code> describes a function that takes two
@@ -125,7 +125,7 @@
     These are very different operations despite the fact that they share some
     syntax.</p><section id="type-inference" data-type="sect2"><h2>Type Inference</h2><p>As the types we encounter get more complicated, you might ask
       yourself how OCaml is able to figure them out, given that we didn't
-      write down any explicit type information.<a data-type="indexterm" data-primary="type inference" data-secondary="process of"/></p><p>OCaml determines the type of an expression using a technique called <em>type
+      write down any explicit type information.<a data-type="indexterm" data-primary="type inference" data-secondary="process of">&#xa0;</a></p><p>OCaml determines the type of an expression using a technique called <em>type
           inference</em>, by which the type of an expression is inferred from the available
         type information about the components of that expression.</p><p>As an example, let's walk through the process of inferring the
       type of <code>sum_if_true</code>:</p><ol><li><p>OCaml requires that both branches of an <code>if</code> statement have the same type, so the
@@ -156,7 +156,7 @@
       type, with the final annotation indicating the type of the return value.
       Such type annotations can be placed on any expression in an OCaml
       program:</p></section><section id="inferring-generic-types" data-type="sect2"><h2>Inferring Generic Types</h2><p>Sometimes, there isn't enough information to fully determine the
-      concrete type of a given value. Consider this function.<a data-type="indexterm" data-primary="type inference" data-secondary="generic types"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a> (part 10)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let first_if_true test x y =</code></strong>
+      concrete type of a given value. Consider this function.<a data-type="indexterm" data-primary="type inference" data-secondary="generic types">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a> (part 10)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let first_if_true test x y =</code></strong>
 <strong><code>    if test x then x else y</code></strong>
 <strong><code>  ;;</code></strong>
 <code class="computeroutput">val first_if_true : ('a -&gt; bool) -&gt; 'a -&gt; 'a -&gt; 'a = &lt;fun&gt;</code></pre><p><code>first_if_true</code> takes as its
@@ -179,7 +179,7 @@
         other two arguments, <code>x</code> and <code>y</code>, and of the return value of <code>first_if_true</code>.
         This kind of genericity is called <em>parametric polymorphism</em> because it
         works by parameterizing the type in question with a type variable. It is very similar to
-        generics in C# and Java.<a data-type="indexterm" data-primary="parametric polymorphism"/><a data-type="indexterm" data-primary="type variables"/></p><p>The generic type of <code>first_if_true</code> allows us to write this:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a> (part 11)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let long_string s = String.length s &gt; 6;;</code></strong>
+        generics in C# and Java.<a data-type="indexterm" data-primary="parametric polymorphism">&#xa0;</a><a data-type="indexterm" data-primary="type variables">&#xa0;</a></p><p>The generic type of <code>first_if_true</code> allows us to write this:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a> (part 11)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let long_string s = String.length s &gt; 6;;</code></strong>
 <code class="computeroutput">val long_string : string -&gt; bool = &lt;fun&gt;</code>
 <code class="prompt"># </code><strong><code>first_if_true long_string "short" "loooooong";;</code></strong>
 <code class="computeroutput">- : string = "loooooong"</code></pre><p>As well as this:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a> (part 12)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let big_number x = x &gt; 3;;</code></strong>
@@ -200,7 +200,7 @@
         language) between errors that are caught at compile time and those
         that are caught at runtime. It's better to catch errors as early as
         possible in the development process, and compilation time is best of
-        all.<a data-type="indexterm" data-primary="runtime exceptions vs. type errors"/><a data-type="indexterm" data-primary="errors" data-secondary="runtime vs. compile time"/><a data-type="indexterm" data-primary="exceptions" data-secondary="vs. type errors"/><a data-type="indexterm" data-primary="type errors vs. exceptions"/></p><p>Working in the toplevel somewhat obscures the difference between
+        all.<a data-type="indexterm" data-primary="runtime exceptions vs. type errors">&#xa0;</a><a data-type="indexterm" data-primary="errors" data-secondary="runtime vs. compile time">&#xa0;</a><a data-type="indexterm" data-primary="exceptions" data-secondary="vs. type errors">&#xa0;</a><a data-type="indexterm" data-primary="type errors vs. exceptions">&#xa0;</a></p><p>Working in the toplevel somewhat obscures the difference between
         runtime and compile-time errors, but that difference is still there.
         Generally, type errors like this one:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a> (part 14)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let add_potato x =</code></strong>
 <strong><code>     x + "potato";;</code></strong>
@@ -226,7 +226,7 @@
       yet talked about any data structures. We'll start by looking at a
       particularly simple data structure, the tuple. A tuple is an ordered
       collection of values that can each be of a different type. You can
-      create a tuple by joining values together with a comma:<a data-type="indexterm" data-primary="tuples"/><a data-type="indexterm" data-primary="data structures" data-secondary="tuples"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a> (part 16)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let a_tuple = (3,"three");;</code></strong>
+      create a tuple by joining values together with a comma:<a data-type="indexterm" data-primary="tuples">&#xa0;</a><a data-type="indexterm" data-primary="data structures" data-secondary="tuples">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a> (part 16)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let a_tuple = (3,"three");;</code></strong>
 <code class="computeroutput">val a_tuple : int * string = (3, "three")</code>
 <code class="prompt"># </code><strong><code>let another_tuple = (3,"four",5.);;</code></strong>
 <code class="computeroutput">val another_tuple : int * string * float = (3, "four", 5.)</code></pre><p>(For the mathematically inclined, the <code>*</code> character is used because the set of all
@@ -250,7 +250,7 @@
       is a pervasive tool in OCaml, and as you'll see, it has surprising
       power.</p></section><section id="lists" data-type="sect2"><h2>Lists</h2><p>Where tuples let you combine a fixed number of items, potentially
       of different types, lists let you hold any number of items of the same
-      type. Consider the following example:<a data-type="indexterm" id="DSlists" data-primary="data structures" data-secondary="lists"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a> (part 20)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let languages = ["OCaml";"Perl";"C"];;</code></strong>
+      type. Consider the following example:<a data-type="indexterm" id="DSlists" data-primary="data structures" data-secondary="lists">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a> (part 20)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let languages = ["OCaml";"Perl";"C"];;</code></strong>
 <code class="computeroutput">val languages : string list = ["OCaml"; "Perl"; "C"]</code></pre><p>Note that you can't mix elements of different types in the same
       list, unlike tuples:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a> (part 21)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let numbers = [3;"four";5];;</code></strong>
 <code class="computeroutput">Characters 17-23:</code>
@@ -268,18 +268,18 @@
         argument</em> <code>~f</code>. Labeled
         arguments are specified by name rather than by position, and thus
         allow you to change the order in which arguments are presented to a
-        function without changing its behavior, as you can see here:<a data-type="indexterm" data-primary="arguments" data-secondary="labeled arguments"/><a data-type="indexterm" data-primary="labeled arguments"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a> (part 24)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>List.map ~f:String.length languages;;</code></strong>
+        function without changing its behavior, as you can see here:<a data-type="indexterm" data-primary="arguments" data-secondary="labeled arguments">&#xa0;</a><a data-type="indexterm" data-primary="labeled arguments">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a> (part 24)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>List.map ~f:String.length languages;;</code></strong>
 <code class="computeroutput">- : int list = [5; 4; 1]</code></pre><p>We'll learn more about labeled arguments and why they're
-        important in <a href="#variables-and-functions" data-type="xref"/>.</p></section><section id="constructing-lists-with" data-type="sect3"><h3>Constructing lists with ::</h3><p>In addition to constructing lists using brackets, we can use the
+        important in <a href="#variables-and-functions" data-type="xref">#variables-and-functions</a>.</p></section><section id="constructing-lists-with" data-type="sect3"><h3>Constructing lists with ::</h3><p>In addition to constructing lists using brackets, we can use the
         operator <code>::</code> for adding elements to
-        the front of a list:<a data-type="indexterm" data-primary="operators" data-secondary=": : operator"/><a data-type="indexterm" data-primary="lists" data-secondary="operator : :"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a> (part 25)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>"French" :: "Spanish" :: languages;;</code></strong>
+        the front of a list:<a data-type="indexterm" data-primary="operators" data-secondary=": : operator">&#xa0;</a><a data-type="indexterm" data-primary="lists" data-secondary="operator : :">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a> (part 25)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>"French" :: "Spanish" :: languages;;</code></strong>
 <code class="computeroutput">- : string list = ["French"; "Spanish"; "OCaml"; "Perl"; "C"]</code></pre><p>Here, we're creating a new and extended list, not changing the list we started with,
           as you can see below:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a> (part 26)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>languages;;</code></strong>
 <code class="computeroutput">- : string list = ["OCaml"; "Perl"; "C"]</code></pre><div data-type="note"><h1>Semicolons Versus Commas</h1><p>Unlike many other languages, OCaml uses semicolons to separate
           list elements in lists rather than commas. Commas, instead, are used
           for separating elements in a tuple. If you try to use commas in a
           list, you'll see that your code compiles but doesn't do quite what
-          you might expect:<a data-type="indexterm" data-primary="commas vs. semicolons"/><a data-type="indexterm" data-primary="semicolons vs. commas"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a> (part 27)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>["OCaml", "Perl", "C"];;</code></strong>
+          you might expect:<a data-type="indexterm" data-primary="commas vs. semicolons">&#xa0;</a><a data-type="indexterm" data-primary="semicolons vs. commas">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a> (part 27)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>["OCaml", "Perl", "C"];;</code></strong>
 <code class="computeroutput">- : (string * string * string) list = [("OCaml", "Perl", "C")]</code></pre><p>In particular, rather than a list of three strings, what we
           have is a singleton list containing a three-tuple of strings.</p><p>This example uncovers the fact that commas create a tuple,
           even if there are no surrounding parens. So, we can write:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a> (part 28)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>1,2,3;;</code></strong>
@@ -302,7 +302,7 @@
 <code class="computeroutput">- : int list = [1; 2; 3; 4; 5; 6]</code></pre><p>It's important to remember that, unlike <code>::</code>, this is not a constant-time operation.
         Concatenating two lists takes time proportional to the length of the
         first list.</p></section><section id="list-patterns-using-match" data-type="sect3"><h3>List patterns using match</h3><p>The elements of a list can be accessed through pattern matching.
-        List patterns are based on the two list constructors, <code>[]</code> and <code>::</code>. Here's a simple example:<a data-type="indexterm" data-primary="pattern matching" data-secondary="in lists"/><a data-type="indexterm" data-primary="lists" data-secondary="pattern matching"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+        List patterns are based on the two list constructors, <code>[]</code> and <code>::</code>. Here's a simple example:<a data-type="indexterm" data-primary="pattern matching" data-secondary="in lists">&#xa0;</a><a data-type="indexterm" data-primary="lists" data-secondary="pattern matching">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
         (part 31)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let my_favorite_language (my_favorite :: the_rest) =</code></strong>
 <strong><code>     my_favorite</code></strong>
 <strong><code>  ;;</code></strong>
@@ -363,7 +363,7 @@
         logic into a set of <em>base cases</em> that can be solved
         directly and a set of <em>inductive cases</em>, where the
         function breaks the problem down into smaller pieces and then calls
-        itself to solve those smaller problems.<a data-type="indexterm" data-primary="recursive functions" data-secondary="list functions"/><a data-type="indexterm" data-primary="lists" data-secondary="recursive list functions"/></p><p>When writing recursive list functions, this separation between
+        itself to solve those smaller problems.<a data-type="indexterm" data-primary="recursive functions" data-secondary="list functions">&#xa0;</a><a data-type="indexterm" data-primary="lists" data-secondary="recursive list functions">&#xa0;</a></p><p>When writing recursive list functions, this separation between
         the base cases and the inductive cases is often done using pattern
         matching. Here's a simple example of a function that sums the elements
         of a list:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
@@ -429,9 +429,9 @@
         Most of the time, you'll find yourself happy to use the iteration
         functions found in the <code>List</code> module.
         But it's good to know how to use recursion when you need to do
-        something new.<a data-type="indexterm" data-startref="DSlists"/></p></section></section><section id="options" data-type="sect2"><h2>Options</h2><p>Another common data structure in OCaml is the option. An option is
+        something new.<a data-type="indexterm" data-startref="DSlists">&#xa0;</a></p></section></section><section id="options" data-type="sect2"><h2>Options</h2><p>Another common data structure in OCaml is the option. An option is
       used to express that a value might or might not be present. For
-      example:<a data-type="indexterm" data-primary="options"/><a data-type="indexterm" data-primary="data structures" data-secondary="options"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      example:<a data-type="indexterm" data-primary="options">&#xa0;</a><a data-type="indexterm" data-primary="data structures" data-secondary="options">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 37)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let divide x y =</code></strong>
 <strong><code>    if y = 0 then None else Some (x/y) ;;</code></strong>
 <code class="computeroutput">val divide : int -&gt; int -&gt; int option = &lt;fun&gt;</code></pre><p>The function <code>divide</code> either returns <code>None</code> if the divisor is zero, or <code>Some</code> of the result of the division otherwise. <code>Some</code> and
@@ -460,7 +460,7 @@
       opened in every OCaml program.</p><div data-type="note"><h1>Nesting lets with let and in</h1><p><code>log_entry</code> was our first use of <code>let</code> to define a new variable within the body of a function. A
             <code>let</code> paired with an <code>in</code> can be used to introduce a new binding within any local scope, including a
           function body. The <code>in</code> marks the beginning of the scope
-          within which the new variable can be used. Thus, we could write:<a data-type="indexterm" data-primary="let syntax" data-secondary="nested let binding"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/local_let.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let x = 7 in</code></strong>
+          within which the new variable can be used. Thus, we could write:<a data-type="indexterm" data-primary="let syntax" data-secondary="nested let binding">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/local_let.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let x = 7 in</code></strong>
 <strong><code>  x + x</code></strong>
 <strong><code>  ;;</code></strong>
 <code class="computeroutput">- : int = 14</code></pre><p>Note that the scope of the <code>let</code> binding is
@@ -483,19 +483,19 @@
       most if not all data types are <em>nullable</em>, meaning
       that, whatever their type is, any given value also contains the
       possibility of being a null value. In such languages, null is lurking
-      everywhere.<a data-type="indexterm" data-primary="datatypes" data-secondary="nullable"/></p><p>In OCaml, however, missing values are explicit. A value of type <code>string * string</code> always contains two well-defined values of type <code>string</code>. If you want to allow, say, the first of those to be
+      everywhere.<a data-type="indexterm" data-primary="datatypes" data-secondary="nullable">&#xa0;</a></p><p>In OCaml, however, missing values are explicit. A value of type <code>string * string</code> always contains two well-defined values of type <code>string</code>. If you want to allow, say, the first of those to be
         absent, then you need to change the type to <code>string option *
-          string</code>. As we'll see in <a href="#error-handling" data-type="xref"/>, this explicitness
+          string</code>. As we'll see in <a href="#error-handling" data-type="xref">#error-handling</a>, this explicitness
         allows the compiler to provide a great deal of help in making sure you're correctly handling
         the possibility of missing data.</p></section></section><section id="records-and-variants" data-type="sect1"><h1>Records and Variants</h1><p>So far, we've only looked at data structures that were predefined in
     the language, like lists and tuples. But OCaml also allows us to define
     new data types. Here's a toy example of a data type representing a point
-    in two-dimensional space:<a data-type="indexterm" data-primary="datatypes" data-secondary="defining new"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    in two-dimensional space:<a data-type="indexterm" data-primary="datatypes" data-secondary="defining new">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 41)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type point2d = { x : float; y : float };;</code></strong>
 <code class="computeroutput">type point2d = { x : float; y : float; }</code></pre><p><code>point2d</code> is a
     <em>record</em> type, which you can think of as a tuple where
     the individual fields are named, rather than being defined positionally.
-    Record types are easy enough to construct:<a data-type="indexterm" data-primary="records" data-secondary="record types"/><a data-type="indexterm" data-primary="datatypes" data-secondary="record types"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    Record types are easy enough to construct:<a data-type="indexterm" data-primary="records" data-secondary="record types">&#xa0;</a><a data-type="indexterm" data-primary="datatypes" data-secondary="record types">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 42)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let p = { x = 3.; y = -4. };;</code></strong>
 <code class="computeroutput">val p : point2d = {x = 3.; y = -4.}</code></pre><p>And we can get access to the contents of these types using pattern
     matching:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
@@ -504,7 +504,7 @@
 <code class="computeroutput">val magnitude : point2d -&gt; float = &lt;fun&gt;</code></pre><p>The pattern match here binds the variable <code>x_pos</code> to the value contained in the <code>x</code> field, and the variable <code>y_pos</code> to the value in the <code>y</code> field.</p><p>We can write this more tersely using what's called <em>field punning</em>. In
       particular, when the name of the field and the name of the variable it is bound to coincide,
       we don't have to write them both down. Using this, our magnitude function can be rewritten as
-        follows:<a data-type="indexterm" data-primary="fields" data-secondary="field punning"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+        follows:<a data-type="indexterm" data-primary="fields" data-secondary="field punning">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 44)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let magnitude { x; y } = sqrt (x ** 2. +. y ** 2.);;</code></strong>
 <code class="computeroutput">val magnitude : point2d -&gt; float = &lt;fun&gt;</code></pre><p>Alternatively, we can use dot notation for accessing record fields:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 45)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let distance v1 v2 =</code></strong>
@@ -520,7 +520,7 @@
 <code class="computeroutput">type segment_desc = { endpoint1 : point2d; endpoint2 : point2d; }</code></pre><p>Now, imagine that you want to combine multiple objects of these
     types together as a description of a multiobject scene. You need some
     unified way of representing these objects together in a single type. One
-    way of doing this is using a <em>variant</em> type:<a data-type="indexterm" data-primary="datatypes" data-secondary="variant types"/><a data-type="indexterm" data-primary="variant types" data-secondary="combining multiple object types with"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    way of doing this is using a <em>variant</em> type:<a data-type="indexterm" data-primary="datatypes" data-secondary="variant types">&#xa0;</a><a data-type="indexterm" data-primary="variant types" data-secondary="combining multiple object types with">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 47)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type scene_element =</code></strong>
 <strong><code>    | Circle  of circle_desc</code></strong>
 <strong><code>    | Rect    of rect_desc</code></strong>
@@ -561,7 +561,7 @@
     function</em> in the call to <code>List.exists</code>. Anonymous functions are declared
     using the <code>fun</code> keyword, and don't need
     to be explicitly named. Such functions are common in OCaml, particularly
-    when using iteration functions like <code>List.exists</code>.<a data-type="indexterm" data-primary="anonymous functions"/><a data-type="indexterm" data-primary="functions" data-secondary="anonymous functions"/></p><p>The purpose of <code>List.exists</code> is to
+    when using iteration functions like <code>List.exists</code>.<a data-type="indexterm" data-primary="anonymous functions">&#xa0;</a><a data-type="indexterm" data-primary="functions" data-secondary="anonymous functions">&#xa0;</a></p><p>The purpose of <code>List.exists</code> is to
     check if there are any elements of the list in question on which the
     provided function evaluates to <code>true</code>. In
     this case, we're using <code>List.exists</code> to
@@ -573,7 +573,7 @@
     there's no way in the language to modify them at all. This is a quite
     different style from <em>imperative</em> programming, where
     computations are structured as sequences of instructions that operate by
-    making modifications to the state of the program.<a data-type="indexterm" data-primary="functional code"/><a data-type="indexterm" data-primary="pure code"/><a data-type="indexterm" data-primary="data structures" data-secondary="immutable"/><a data-type="indexterm" data-primary="programming" data-secondary="immutable vs. imperative"/></p><p>Functional code is the default in OCaml, with variable bindings and
+    making modifications to the state of the program.<a data-type="indexterm" data-primary="functional code">&#xa0;</a><a data-type="indexterm" data-primary="pure code">&#xa0;</a><a data-type="indexterm" data-primary="data structures" data-secondary="immutable">&#xa0;</a><a data-type="indexterm" data-primary="programming" data-secondary="immutable vs. imperative">&#xa0;</a></p><p>Functional code is the default in OCaml, with variable bindings and
     most data structures being immutable. But OCaml also has excellent support
     for imperative programming, including mutable data structures like arrays
     and hash tables, and control-flow constructs like <code>for</code>
@@ -582,7 +582,7 @@
       indexing starts at 0, and accessing or modifying an array element is a
       constant-time operation. Arrays are more compact in terms of memory
       utilization than most other data structures in OCaml, including lists.
-      Here's an example:<a data-type="indexterm" data-primary="data structures" data-secondary="arrays"/><a data-type="indexterm" data-primary="arrays" data-secondary="imperative programming and"/><a data-type="indexterm" data-primary="imperative programming" data-secondary="arrays"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      Here's an example:<a data-type="indexterm" data-primary="data structures" data-secondary="arrays">&#xa0;</a><a data-type="indexterm" data-primary="arrays" data-secondary="imperative programming and">&#xa0;</a><a data-type="indexterm" data-primary="imperative programming" data-secondary="arrays">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 49)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let numbers = [| 1; 2; 3; 4 |];;</code></strong>
 <code class="computeroutput">val numbers : int array = [|1; 2; 3; 4|]</code>
 <code class="prompt"># </code><strong><code>numbers.(2) &lt;- 4;;</code></strong>
@@ -600,7 +600,7 @@
         role that <code>void</code> plays in languages like C and Java.</p></section><section id="mutable-record-fields" data-type="sect2"><h2>Mutable Record Fields</h2><p>The array is an important mutable data structure, but it's not the only one. Records,
         which are immutable by default, can have some of their fields explicitly declared as
         mutable. Here's a small example of a data structure for storing a running statistical
-        summary of a collection of numbers. <a data-type="indexterm" data-primary="imperative programming" data-secondary="mutable record fields"/><a data-type="indexterm" data-primary="mutable record fields"/><a data-type="indexterm" data-primary="data structures" data-secondary="mutable record fields"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+        summary of a collection of numbers. <a data-type="indexterm" data-primary="imperative programming" data-secondary="mutable record fields">&#xa0;</a><a data-type="indexterm" data-primary="mutable record fields">&#xa0;</a><a data-type="indexterm" data-primary="data structures" data-secondary="mutable record fields">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 50)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type running_sum =</code></strong>
 <strong><code>   { mutable sum: float;</code></strong>
 <strong><code>     mutable sum_sq: float; (* sum of squares *)</code></strong>
@@ -657,7 +657,7 @@
       particular attention to the weighted incremental and parallel
       algorithms.</p></section><section id="refs" data-type="sect2"><h2>Refs</h2><p>We can create a single mutable value by using a <code>ref</code>. The <code>ref</code> type comes predefined in the standard
       library, but there's nothing really special about it. It's just a record
-      type with a single mutable field called <code>contents</code>:<a data-type="indexterm" data-primary="records" data-secondary="record types"/><a data-type="indexterm" data-primary="imperative programming" data-secondary="ref type"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      type with a single mutable field called <code>contents</code>:<a data-type="indexterm" data-primary="records" data-secondary="record types">&#xa0;</a><a data-type="indexterm" data-primary="imperative programming" data-secondary="ref type">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 54)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let x = { contents = 0 };;</code></strong>
 <code class="computeroutput">val x : int ref = {contents = 0}</code>
 <code class="prompt"># </code><strong><code>x.contents &lt;- x.contents + 1;;</code></strong>
@@ -689,7 +689,7 @@
       <code>ref</code> indicates that the <code>ref</code> type is polymorphic, in the same way that
       lists are polymorphic, meaning it can contain values of any type. The
       parentheses around <code>!</code> and <code>:=</code> are needed because these are operators,
-      rather than ordinary functions.<a data-type="indexterm" data-primary="parametric polymorphism"/></p><p>Even though a <code>ref</code> is just
+      rather than ordinary functions.<a data-type="indexterm" data-primary="parametric polymorphism">&#xa0;</a></p><p>Even though a <code>ref</code> is just
       another record type, it's important because it is the standard way of
       simulating the traditional mutable variables you'll find in most
       languages. For example, we can sum over the elements of a list
@@ -708,7 +708,7 @@
       use the <code>Random</code> module as our source
       of randomness. <code>Random</code> starts with a
       default seed, but you can call <code>Random.self_init</code> to choose a new seed at
-      random:<a data-type="indexterm" data-primary="Random module"/><a data-type="indexterm" data-primary="while loops"/><a data-type="indexterm" data-primary="for loops"/><a data-type="indexterm" data-primary="imperative programming" data-secondary="for and while loops"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      random:<a data-type="indexterm" data-primary="Random module">&#xa0;</a><a data-type="indexterm" data-primary="while loops">&#xa0;</a><a data-type="indexterm" data-primary="for loops">&#xa0;</a><a data-type="indexterm" data-primary="imperative programming" data-secondary="for and while loops">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 58)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let permute array =</code></strong>
 <strong><code>    let length = Array.length array in</code></strong>
 <strong><code>    for i = 0 to length - 2 do</code></strong>
@@ -770,7 +770,7 @@
       short-circuits in a similar way to <code>&amp;&amp;</code>.</p></section></section><section id="a-complete-program" data-type="sect1"><h1>A Complete Program</h1><p>So far, we've played with the basic features of the language via
     <span class="command"><em>utop</em></span>. Now we'll show how to create a
     simple standalone program. In particular, we'll create a program that sums
-    up a list of numbers read in from the standard input.<a data-type="indexterm" data-primary="programming" data-secondary="simple standalone example"/></p><p>Here's the code, which you can save in a file called
+    up a list of numbers read in from the standard input.<a data-type="indexterm" data-primary="programming" data-secondary="simple standalone example">&#xa0;</a></p><p>Here's the code, which you can save in a file called
     <em class="filename">sum.ml</em>. Note that we don't terminate expressions with
     <code>;;</code> here, since it's not required
     outside the toplevel:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/sum.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
@@ -798,9 +798,9 @@ let () =
         wrapper on top of <span class="command"><em>ocamlbuild</em></span>, a build tool that ships
         with the OCaml compiler. The <span class="command"><em>corebuild</em></span> script is
         installed along with Core, and its purpose is to pass in the flags required for building a
-        program with Core.<a data-type="indexterm" data-primary="corebuild"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/build_sum.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>corebuild sum.native</code></strong>
+        program with Core.<a data-type="indexterm" data-primary="corebuild">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/build_sum.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>corebuild sum.native</code></strong>
   </pre><p>The <code>.native</code> suffix indicates that we're building a
-        native-code executable, which we'll discuss more in <a href="#files-modules-and-programs" data-type="xref"/>. Once the build completes, we can use the resulting
+        native-code executable, which we'll discuss more in <a href="#files-modules-and-programs" data-type="xref">#files-modules-and-programs</a>. Once the build completes, we can use the resulting
         program like any command-line utility. We can feed input to <code>sum.native</code> by typing in a sequence of numbers, one per line, hitting
           <strong><code>Ctrl-D</code></strong> when we're done:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/guided-tour/sum.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>./sum.native</code></strong>
 <code class="computeroutput">1</code>
@@ -809,7 +809,7 @@ let () =
 <code class="computeroutput">94.5</code>
 <code class="computeroutput">Total: 100.5</code></pre><p>More work is needed to make a really usable command-line program,
       including a proper command-line parsing interface and better error
-      handling, all of which is covered in <a href="#command-line-parsing" data-type="xref"/>.</p></section></section><section id="where-to-go-from-here" data-type="sect1"><h1>Where to Go from Here</h1><p>That's it for the guided tour! There are plenty of features left and
+      handling, all of which is covered in <a href="#command-line-parsing" data-type="xref">#command-line-parsing</a>.</p></section></section><section id="where-to-go-from-here" data-type="sect1"><h1>Where to Go from Here</h1><p>That's it for the guided tour! There are plenty of features left and
     lots of details to explain, but we hope that you now have a sense of what
     to expect from OCaml, and that you'll be more comfortable reading the rest
     of the book as a result.</p></section></section>

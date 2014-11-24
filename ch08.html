@@ -8,7 +8,7 @@
   <em>Imperative</em> code, on the other hand, operates by side
   effects that modify a program's internal state or interact with the outside
   world. An imperative function has a new effect, and potentially returns
-  different results, every time it's called.<a data-type="indexterm" data-primary="imperative programming" data-secondary="benefits of"/><a data-type="indexterm" data-primary="pure code"/><a data-type="indexterm" data-primary="programming" data-secondary="immutable vs. imperative"/><a data-type="indexterm" id="PROGimper" data-primary="programming" data-secondary="imperative programming"/></p><p>Pure code is the default in OCaml, and for good reason—it's generally
+  different results, every time it's called.<a data-type="indexterm" data-primary="imperative programming" data-secondary="benefits of">&#xa0;</a><a data-type="indexterm" data-primary="pure code">&#xa0;</a><a data-type="indexterm" data-primary="programming" data-secondary="immutable vs. imperative">&#xa0;</a><a data-type="indexterm" id="PROGimper" data-primary="programming" data-secondary="imperative programming">&#xa0;</a></p><p>Pure code is the default in OCaml, and for good reason—it's generally
   easier to reason about, less error prone and more composable. But imperative
   code is of fundamental importance to any practical programming language,
   because real-world tasks require that you interact with the outside world,
@@ -23,11 +23,11 @@
     for illustration purposes; both Core and the standard library provide
     imperative dictionaries, and for most real-world tasks, you should use one
     of those implementations. There's more advice on using Core's
-    implementation in particular in <a href="#maps-and-hash-tables" data-type="xref"/>.<a data-type="indexterm" id="DICTimper" data-primary="dictionaries, imperative"/><a data-type="indexterm" data-primary="Core standard library" data-secondary="imperative dictionaries in"/><a data-type="indexterm" id="IPimpdict" data-primary="imperative programming" data-secondary="imperative dictionaries"/></p><p>The dictionary we'll describe now, like those in Core and the
+    implementation in particular in <a href="#maps-and-hash-tables" data-type="xref">#maps-and-hash-tables</a>.<a data-type="indexterm" id="DICTimper" data-primary="dictionaries, imperative">&#xa0;</a><a data-type="indexterm" data-primary="Core standard library" data-secondary="imperative dictionaries in">&#xa0;</a><a data-type="indexterm" id="IPimpdict" data-primary="imperative programming" data-secondary="imperative dictionaries">&#xa0;</a></p><p>The dictionary we'll describe now, like those in Core and the
     standard library, will be implemented as a hash table. In particular,
     we'll use an <em>open hashing</em> scheme, where the hash
     table will be an array of buckets, each bucket containing a list of
-    key/value pairs that have been hashed into that bucket.<a data-type="indexterm" data-primary="open hashing"/></p><p>Here's the interface we'll match, provided as an <code>mli</code>. The type <code>('a, 'b)
+    key/value pairs that have been hashed into that bucket.<a data-type="indexterm" data-primary="open hashing">&#xa0;</a></p><p>Here's the interface we'll match, provided as an <code>mli</code>. The type <code>('a, 'b)
     t</code> represents a dictionary with keys of type <code>'a</code> and data of type <code>'b</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/dictionary.mli" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a>
     (part 1)</p><pre data-type="programlisting" data-code-language="ocaml">(* file: dictionary.mli *)
 open Core.Std
@@ -57,7 +57,7 @@ type ('a, 'b) t = { mutable length: int;
     declared as mutable. In OCaml, records are immutable by default, but
     individual fields are mutable when marked as such. The second field,
     <code>buckets</code>, is immutable but contains an
-    array, which is itself a mutable data structure.<a data-type="indexterm" data-primary="fields" data-secondary="mutability of"/></p><p>Now we'll start putting together the basic functions for
+    array, which is itself a mutable data structure.<a data-type="indexterm" data-primary="fields" data-secondary="mutability of">&#xa0;</a></p><p>Now we'll start putting together the basic functions for
     manipulating a dictionary:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/dictionary.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a>
     (part 2)</p><pre data-type="programlisting" data-code-language="ocaml">let num_buckets = 17
 
@@ -156,11 +156,11 @@ let () = &lt;expr2&gt; in
     "hello world"; 1 + 2</code> first prints the string <code>"hello world"</code>, then returns the integer <code>3</code>.</p><p>Note also that we do all of the side-effecting operations at the
     very end of each function. This is good practice because it minimizes the
     chance that such operations will be interrupted with an exception, leaving
-    the data structure in an inconsistent state.<a data-type="indexterm" data-startref="DICTimper"/><a data-type="indexterm" data-startref="IPimpdict"/></p></section><section id="primitive-mutable-data" data-type="sect1"><h1>Primitive Mutable Data</h1><p>Now that we've looked at a complete example, let's take a more
+    the data structure in an inconsistent state.<a data-type="indexterm" data-startref="DICTimper">&#xa0;</a><a data-type="indexterm" data-startref="IPimpdict">&#xa0;</a></p></section><section id="primitive-mutable-data" data-type="sect1"><h1>Primitive Mutable Data</h1><p>Now that we've looked at a complete example, let's take a more
     systematic look at imperative programming in OCaml. We encountered two
     different forms of mutable data above: records with mutable fields and
     arrays. We'll now discuss these in more detail, along with the other
-    primitive forms of mutable data that are available in OCaml.<a data-type="indexterm" data-primary="array-like data"/><a data-type="indexterm" data-primary="data structures" data-secondary="primitive mutable data"/><a data-type="indexterm" data-primary="mutable data"/><a data-type="indexterm" data-primary="primitive mutable data" data-secondary="array-like data"/><a data-type="indexterm" data-primary="imperative programming" data-secondary="primitive mutable data"/></p><section id="array-like-data" data-type="sect2"><h2>Array-Like Data</h2><p>OCaml supports a number of array-like data structures; i.e.,
+    primitive forms of mutable data that are available in OCaml.<a data-type="indexterm" data-primary="array-like data">&#xa0;</a><a data-type="indexterm" data-primary="data structures" data-secondary="primitive mutable data">&#xa0;</a><a data-type="indexterm" data-primary="mutable data">&#xa0;</a><a data-type="indexterm" data-primary="primitive mutable data" data-secondary="array-like data">&#xa0;</a><a data-type="indexterm" data-primary="imperative programming" data-secondary="primitive mutable data">&#xa0;</a></p><section id="array-like-data" data-type="sect2"><h2>Array-Like Data</h2><p>OCaml supports a number of array-like data structures; i.e.,
       mutable integer-indexed containers that provide constant-time access to
       their elements. We'll discuss several of them in this section.</p><section id="ordinary-arrays" data-type="sect3"><h3>Ordinary arrays</h3><p>The <code>array</code> type is used for
         general-purpose polymorphic arrays. The <code>Array</code> module has a variety of utility
@@ -168,7 +168,7 @@ let () = &lt;expr2&gt; in
         operations. These include <code>Array.set</code>, for setting an individual
         element, and <code>Array.blit</code>, for
         efficiently copying values from one range of indices to
-        another.<a data-type="indexterm" data-primary="values" data-secondary="copying with Array.blit"/><a data-type="indexterm" data-primary="elements" data-secondary="setting with Array.set"/><a data-type="indexterm" data-primary="Array module" data-secondary="Array.blit"/><a data-type="indexterm" data-primary="Array module" data-secondary="Array.set"/></p><p>Arrays also come with special syntax for retrieving an element
+        another.<a data-type="indexterm" data-primary="values" data-secondary="copying with Array.blit">&#xa0;</a><a data-type="indexterm" data-primary="elements" data-secondary="setting with Array.set">&#xa0;</a><a data-type="indexterm" data-primary="Array module" data-secondary="Array.blit">&#xa0;</a><a data-type="indexterm" data-primary="Array module" data-secondary="Array.set">&#xa0;</a></p><p>Arrays also come with special syntax for retrieving an element
         from an array:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/array-get.syntax" class="orm:hideurl:ital"><em class="hyperlink">Syntax</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><em>&lt;array_expr&gt;</em>.(<em>&lt;index_expr&gt;</em>)</pre><p>and for setting an element in an array:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/array-set.syntax" class="orm:hideurl:ital"><em class="hyperlink">Syntax</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><em>&lt;array_expr&gt;</em>.(<em>&lt;index_expr&gt;</em>) &lt;- <em>&lt;value_expr&gt;</em></pre><p>Out-of-bounds accesses for arrays (and indeed for all the
         array-like data structures) will lead to an exception being
         thrown.</p><p>Array literals are written using <code>[|</code> and <code>|]</code>
@@ -177,26 +177,26 @@ let () = &lt;expr2&gt; in
         textual data. The main advantage of using a <code>string</code> in place of a <code>Char.t array</code> (a <code>Char.t</code> is an 8-bit character) is that the
         former is considerably more space-efficient; an array uses one word—8
         bytes on a 64-bit machine—to store a single entry, whereas strings use
-        1 byte per character.<a data-type="indexterm" data-primary="byte arrays"/><a data-type="indexterm" data-primary="strings" data-secondary="vs. Char.t arrays"/></p><p>Strings also come with their own syntax for getting and setting
+        1 byte per character.<a data-type="indexterm" data-primary="byte arrays">&#xa0;</a><a data-type="indexterm" data-primary="strings" data-secondary="vs. Char.t arrays">&#xa0;</a></p><p>Strings also come with their own syntax for getting and setting
         values:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/string.syntax" class="orm:hideurl:ital"><em class="hyperlink">Syntax</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><em>&lt;string_expr&gt;</em>.[<em>&lt;index_expr&gt;</em>]
           <em>&lt;string_expr&gt;</em>.[<em>&lt;index_expr&gt;</em>] &lt;- <em>&lt;char_expr&gt;</em></pre><p>And string literals are bounded by quotes. There's also a module
         <code>String</code> where you'll find useful
         functions for working with strings.</p></section><section id="bigarrays" data-type="sect3"><h3>Bigarrays</h3><p>A <code>Bigarray.t</code> is a handle to a
         block of memory stored outside of the OCaml heap. These are mostly
         useful for interacting with C or Fortran libraries, and are discussed
-        in <a href="#memory-representation-of-values" data-type="xref"/>. Bigarrays too
-        have their own getting and setting syntax:<a data-type="indexterm" data-primary="bigarrays"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/bigarray.syntax" class="orm:hideurl:ital"><em class="hyperlink">Syntax</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><em>&lt;bigarray_expr&gt;</em>.{<em>&lt;index_expr&gt;</em>}
+        in <a href="#memory-representation-of-values" data-type="xref">#memory-representation-of-values</a>. Bigarrays too
+        have their own getting and setting syntax:<a data-type="indexterm" data-primary="bigarrays">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/bigarray.syntax" class="orm:hideurl:ital"><em class="hyperlink">Syntax</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><em>&lt;bigarray_expr&gt;</em>.{<em>&lt;index_expr&gt;</em>}
          <em> &lt;bigarray_expr&gt;</em>.{<em>&lt;index_expr&gt;</em>} &lt;- <em>&lt;value_expr&gt;</em></pre></section></section><section id="mutable-record-and-object-fields-and-ref-cells" data-type="sect2"><h2>Mutable Record and Object Fields and Ref Cells</h2><p>As we've seen, records are immutable by default, but individual
       record fields can be declared as mutable. These mutable fields can be
       set using the <code>&lt;-</code> operator, i.e.,
-      <code>record.field &lt;- expr</code>.<a data-type="indexterm" data-primary="fields" data-secondary="mutability of"/></p><p>As we'll see in <a href="#objects" data-type="xref"/>, fields of an object
+      <code>record.field &lt;- expr</code>.<a data-type="indexterm" data-primary="fields" data-secondary="mutability of">&#xa0;</a></p><p>As we'll see in <a href="#objects" data-type="xref">#objects</a>, fields of an object
       can similarly be declared as mutable, and can then be modified in much
-      the same way as record fields.<a data-type="indexterm" data-primary="primitive mutable data" data-secondary="record/object fields and ref cells"/></p><section id="ref-cells" data-type="sect3"><h3>Ref cells</h3><p>Variables in OCaml are never mutable—they can refer to mutable
+      the same way as record fields.<a data-type="indexterm" data-primary="primitive mutable data" data-secondary="record/object fields and ref cells">&#xa0;</a></p><section id="ref-cells" data-type="sect3"><h3>Ref cells</h3><p>Variables in OCaml are never mutable—they can refer to mutable
         data, but what the variable points to can't be changed. Sometimes,
         though, you want to do exactly what you would do with a mutable
         variable in another language: define a single, mutable value. In OCaml
         this is typically achieved using a <code>ref</code>, which is essentially a container with a
-        single mutable polymorphic field.<a data-type="indexterm" data-primary="ref cells"/></p><p>The definition for the <code>ref</code> type is as
+        single mutable polymorphic field.<a data-type="indexterm" data-primary="ref cells">&#xa0;</a></p><p>The definition for the <code>ref</code> type is as
         follows:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/ref.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
         (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type 'a ref = { mutable contents : 'a };;</code></strong>
 <code class="computeroutput">type 'a ref = { mutable contents : 'a; }</code></pre><p>The standard library defines the following operators for working
@@ -221,13 +221,13 @@ let () = &lt;expr2&gt; in
         OCaml up to imperative constructs that are exported by system calls or other external
         libraries. Many of these come built in, like access to the <code>write</code> system call or to the <code>clock</code>, while
         others come from user libraries, like LAPACK bindings. OCaml's FFI is discussed in more
-        detail in <a href="#foreign-function-interface" data-type="xref"/>.<a data-type="indexterm" data-primary="libraries" data-secondary="interfacing with external"/><a data-type="indexterm" data-primary="external libraries" data-secondary="interfacing with"/><a data-type="indexterm" data-primary="LAPACK bindings"/><a data-type="indexterm" data-primary="foreign function interface (FFI)" data-secondary="imperative operations and"/><a data-type="indexterm" data-primary="primitive mutable data" data-secondary="foreign functions"/></p></section></section><section id="for-and-while-loops-1" data-type="sect1"><h1>for and while Loops</h1><p>OCaml provides support for traditional imperative looping
+        detail in <a href="#foreign-function-interface" data-type="xref">#foreign-function-interface</a>.<a data-type="indexterm" data-primary="libraries" data-secondary="interfacing with external">&#xa0;</a><a data-type="indexterm" data-primary="external libraries" data-secondary="interfacing with">&#xa0;</a><a data-type="indexterm" data-primary="LAPACK bindings">&#xa0;</a><a data-type="indexterm" data-primary="foreign function interface (FFI)" data-secondary="imperative operations and">&#xa0;</a><a data-type="indexterm" data-primary="primitive mutable data" data-secondary="foreign functions">&#xa0;</a></p></section></section><section id="for-and-while-loops-1" data-type="sect1"><h1>for and while Loops</h1><p>OCaml provides support for traditional imperative looping
     constructs, in particular, <code>for</code> and
     <code>while</code> loops. Neither of these
     constructs is strictly necessary, since they can be simulated with
     recursive functions. Nonetheless, explicit <code>for</code> and <code>while</code>
     loops are both more concise and more idiomatic when programming
-    imperatively.<a data-type="indexterm" data-primary="looping constructs"/><a data-type="indexterm" data-primary="while loops"/><a data-type="indexterm" data-primary="for loops"/></p><p>The <code>for</code> loop is the simpler of
+    imperatively.<a data-type="indexterm" data-primary="looping constructs">&#xa0;</a><a data-type="indexterm" data-primary="while loops">&#xa0;</a><a data-type="indexterm" data-primary="for loops">&#xa0;</a></p><p>The <code>for</code> loop is the simpler of
     the two. Indeed, we've already seen the <code>for</code> loop in action—the <code>iter</code> function in <code>Dictionary</code> is built using it. Here's a simple
     example of <code>for</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/for.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>for i = 0 to 3 do printf "i = %d\n" i done;;</code></strong>
@@ -276,7 +276,7 @@ let () = &lt;expr2&gt; in
     Doubly linked lists can be traversed in both directions, and elements can
     be added and removed from the list in constant time. Core defines a doubly
     linked list (the module is called <code>Doubly_linked</code>), but we'll define our own linked
-    list library as an illustration.<a data-type="indexterm" data-primary="lists" data-secondary="doubly-linked lists"/><a data-type="indexterm" data-primary="doubly-linked lists"/><a data-type="indexterm" id="IPdoublink" data-primary="imperative programming" data-secondary="doubly-linked lists"/></p><p>Here's the <code>mli</code> of the module
+    list library as an illustration.<a data-type="indexterm" data-primary="lists" data-secondary="doubly-linked lists">&#xa0;</a><a data-type="indexterm" data-primary="doubly-linked lists">&#xa0;</a><a data-type="indexterm" id="IPdoublink" data-primary="imperative programming" data-secondary="doubly-linked lists">&#xa0;</a></p><p>Here's the <code>mli</code> of the module
     we'll build:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/dlist.mli" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">(* file: dlist.mli *)
 open Core.Std
 
@@ -333,7 +333,7 @@ let prev elt = elt.prev</pre><p>These all follow relatively straightforwardly fr
       is possible to follow a nontrivial sequence of pointers that closes in
       on itself. In general, building cyclic data structures requires the use
       of side effects. This is done by constructing the data elements first,
-      and then adding cycles using assignment afterward.<a data-type="indexterm" data-primary="let rec"/><a data-type="indexterm" data-primary="data structures" data-secondary="cyclic"/><a data-type="indexterm" data-primary="cyclic data structures"/></p><p>There is an exception to this, though: you can construct
+      and then adding cycles using assignment afterward.<a data-type="indexterm" data-primary="let rec">&#xa0;</a><a data-type="indexterm" data-primary="data structures" data-secondary="cyclic">&#xa0;</a><a data-type="indexterm" data-primary="cyclic data structures">&#xa0;</a></p><p>There is an exception to this, though: you can construct
       fixed-size cyclic data structures using <code>let
       rec</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/examples.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 2)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let rec endless_loop = 1 :: 2 :: 3 :: endless_loop;;</code></strong>
@@ -344,7 +344,7 @@ let prev elt = elt.prev</pre><p>These all follow relatively straightforwardly fr
 <code class="computeroutput">   ...]</code></pre><p>This approach is quite limited, however. General-purpose cyclic
       data structures require mutation.</p></div><section id="modifying-the-list" data-type="sect2"><h2>Modifying the List</h2><p>Now, we'll start considering operations that mutate the list,
       starting with <code>insert_first</code>, which
-      inserts an element at the front of the list:<a data-type="indexterm" data-primary="elements" data-secondary="inserting in lists"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/dlist.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a>
+      inserts an element at the front of the list:<a data-type="indexterm" data-primary="elements" data-secondary="inserting in lists">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/dlist.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a>
       (part 3)</p><pre data-type="programlisting" data-code-language="ocaml">let insert_first t value =
   let new_elt = { prev = None; next = !t; value } in
   begin match !t with
@@ -359,7 +359,7 @@ let prev elt = elt.prev</pre><p>These all follow relatively straightforwardly fr
       separate it from the following assignment (<code>t :=
       Some new_elt</code>), we surround the match with <code>begin ... end</code>. We could have used parentheses
       for the same purpose. Without some kind of bracketing, the final
-      assignment would incorrectly become part of the <code>None</code> case.<a data-type="indexterm" data-primary="elements" data-secondary="defining new"/></p><p>We can use <code>insert_after</code> to
+      assignment would incorrectly become part of the <code>None</code> case.<a data-type="indexterm" data-primary="elements" data-secondary="defining new">&#xa0;</a></p><p>We can use <code>insert_after</code> to
       insert elements later in the list. <code>insert_after</code> takes as arguments both an
       <code>element</code> after which to insert the new
       node and a value to insert:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/dlist.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a>
@@ -399,10 +399,10 @@ let prev elt = elt.prev</pre><p>These all follow relatively straightforwardly fr
       modules like Core's <code>Doubly_linked</code>.
       You should use imperative data structures from a well-designed library
       when you can. And when you can't, you should make sure to put great care
-      into your error handling.<a data-type="indexterm" data-primary="imperative programming" data-secondary="drawbacks of"/><a data-type="indexterm" data-primary="Doubly-linked module"/><a data-type="indexterm" data-primary="error handling" data-secondary="and imperative data&#xA;          structures"/></p></section><section id="iteration-functions" data-type="sect2"><h2>Iteration Functions</h2><p>When defining containers like lists, dictionaries, and trees,
+      into your error handling.<a data-type="indexterm" data-primary="imperative programming" data-secondary="drawbacks of">&#xa0;</a><a data-type="indexterm" data-primary="Doubly-linked module">&#xa0;</a><a data-type="indexterm" data-primary="error handling" data-secondary="and imperative data&#10;          structures">&#xa0;</a></p></section><section id="iteration-functions" data-type="sect2"><h2>Iteration Functions</h2><p>When defining containers like lists, dictionaries, and trees,
       you'll typically want to define a set of iteration functions like
       <code>iter</code>, <code>map</code>, and <code>fold</code>, which let you concisely express common
-      iteration patterns.<a data-type="indexterm" data-primary="functions" data-secondary="iteration functions"/><a data-type="indexterm" data-primary="iteration functions"/></p><p><code>Dlist</code> has two such iterators:
+      iteration patterns.<a data-type="indexterm" data-primary="functions" data-secondary="iteration functions">&#xa0;</a><a data-type="indexterm" data-primary="iteration functions">&#xa0;</a></p><p><code>Dlist</code> has two such iterators:
       <code>iter</code>, the goal of which is to call a
       <code>unit</code>-producing function on every
       element of the list, in order; and <code>find_el</code>, which runs a provided test function
@@ -431,12 +431,12 @@ let find_el t ~f =
       a more complete interface and has more of the tricky corner cases worked
       out. Nonetheless, this example should serve to demonstrate some of the
       techniques you can use to build nontrivial imperative data structure in
-      OCaml, as well as some of the pitfalls.<a data-type="indexterm" data-startref="IPdoublink"/></p></section></section><section id="laziness-and-other-benign-effects" data-type="sect1"><h1>Laziness and Other Benign Effects</h1><p>There are many instances where you basically want to program in a
+      OCaml, as well as some of the pitfalls.<a data-type="indexterm" data-startref="IPdoublink">&#xa0;</a></p></section></section><section id="laziness-and-other-benign-effects" data-type="sect1"><h1>Laziness and Other Benign Effects</h1><p>There are many instances where you basically want to program in a
     pure style, but you want to make limited use of side effects to improve
     the performance of your code. Such side effects are sometimes called
     <em>benign effects</em>, and they are a useful way of
     leveraging OCaml's imperative features while still maintaining most of the
-    benefits of pure programming.<a data-type="indexterm" data-primary="lazy keyword"/><a data-type="indexterm" data-primary="side effects"/><a data-type="indexterm" data-primary="laziness"/><a data-type="indexterm" data-primary="benign effects" data-secondary="laziness"/><a data-type="indexterm" data-primary="imperative programming" data-secondary="benign effects and"/></p><p>One of the simplest benign effects is <em>laziness</em>.
+    benefits of pure programming.<a data-type="indexterm" data-primary="lazy keyword">&#xa0;</a><a data-type="indexterm" data-primary="side effects">&#xa0;</a><a data-type="indexterm" data-primary="laziness">&#xa0;</a><a data-type="indexterm" data-primary="benign effects" data-secondary="laziness">&#xa0;</a><a data-type="indexterm" data-primary="imperative programming" data-secondary="benign effects and">&#xa0;</a></p><p>One of the simplest benign effects is <em>laziness</em>.
     A lazy value is one that is not computed until it is actually needed. In
     OCaml, lazy values are created using the <code>lazy</code> keyword, which can be used to convert any
     expression of type <code>s</code> into a lazy value
@@ -466,7 +466,7 @@ let find_el t ~f =
     the <code>Delayed</code> state to being in the
     <code>Value</code> or <code>Exn</code> states.</p><p>We can create a lazy value from a thunk, i.e., a function that takes
     a unit argument. Wrapping an expression in a thunk is another way to
-    suspend the computation of an expression:<a data-type="indexterm" data-primary="thunks"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/lazy.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    suspend the computation of an expression:<a data-type="indexterm" data-primary="thunks">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/lazy.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 3)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let create_lazy f = ref (Delayed f);;</code></strong>
 <code class="computeroutput">val create_lazy : (unit -&gt; 'a) -&gt; 'a lazy_state ref = &lt;fun&gt;</code>
 <code class="prompt"># </code><strong><code>let v = create_lazy</code></strong>
@@ -497,7 +497,7 @@ let find_el t ~f =
     <code>lazy (sqrt 16.)</code>.</p><section id="memoization-and-dynamic-programming" data-type="sect2"><h2>Memoization and Dynamic Programming</h2><p>Another benign effect is <em>memoization</em>. A
       memoized function remembers the result of previous invocations of the
       function so that they can be returned without further computation when
-      the same arguments are presented again.<a data-type="indexterm" data-primary="memoization" data-secondary="function of"/><a data-type="indexterm" id="BEmem" data-primary="benign effects" data-secondary="memoization"/></p><p>Here's a function that takes as an argument an arbitrary
+      the same arguments are presented again.<a data-type="indexterm" data-primary="memoization" data-secondary="function of">&#xa0;</a><a data-type="indexterm" id="BEmem" data-primary="benign effects" data-secondary="memoization">&#xa0;</a></p><p>Here's a function that takes as an argument an arbitrary
       single-argument function and returns a memoized version of that
       function. Here we'll use Core's <code>Hashtbl</code> module, rather than our toy <code>Dictionary</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/memo.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let memoize f =</code></strong>
@@ -518,7 +518,7 @@ let find_el t ~f =
       a value, calls <code>f</code> and stashes the
       result in <code>table</code>. Note that <code>table</code> doesn't go out of scope as long as the
       function returned by <code>memoize</code> is in
-      scope.<a data-type="indexterm" data-primary="memoization" data-secondary="benefits and drawbacks of"/></p><p>Memoization can be useful whenever you have a function that is
+      scope.<a data-type="indexterm" data-primary="memoization" data-secondary="benefits and drawbacks of">&#xa0;</a></p><p>Memoization can be useful whenever you have a function that is
       expensive to recompute and you don't mind caching old values
       indefinitely. One important caution: a memoized function by its nature
       leaks memory. As long as you hold on to the memoized function, you're
@@ -528,9 +528,9 @@ let find_el t ~f =
         single-character changes (including letter switches, insertions, and deletions) required to
           <span class="keep-together">convert</span> one string to the other. This kind of
         distance metric can be useful for a variety of approximate string-matching problems, like
-          spellcheckers.<a data-type="indexterm" data-primary="string matching"/><a data-type="indexterm" data-primary="Levenshtein distance"/><a data-type="indexterm" data-primary="edit distance"/></p><p>Consider the following code for computing the edit distance.
+          spellcheckers.<a data-type="indexterm" data-primary="string matching">&#xa0;</a><a data-type="indexterm" data-primary="Levenshtein distance">&#xa0;</a><a data-type="indexterm" data-primary="edit distance">&#xa0;</a></p><p>Consider the following code for computing the edit distance.
       Understanding the algorithm isn't important here, but you should pay
-      attention to the structure of the recursive calls:<a data-type="indexterm" data-primary="memoization" data-secondary="example of"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/memo.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      attention to the structure of the recursive calls:<a data-type="indexterm" data-primary="memoization" data-secondary="example of">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/memo.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 2)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let rec edit_distance s t =</code></strong>
 <strong><code>    match String.length s, String.length t with</code></strong>
 <strong><code>    | (0,x) | (x,0) -&gt; x</code></strong>
@@ -577,7 +577,7 @@ let find_el t ~f =
       Fibonacci sequence. The Fibonacci sequence by definition starts out with
       two <code>1</code>s, with every subsequent element
       being the sum of the previous two. The classic recursive definition of
-      Fibonacci is as follows:<a data-type="indexterm" data-primary="programming" data-secondary="dynamic programming"/><a data-type="indexterm" data-primary="dynamic programming"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/fib.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      Fibonacci is as follows:<a data-type="indexterm" data-primary="programming" data-secondary="dynamic programming">&#xa0;</a><a data-type="indexterm" data-primary="dynamic programming">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/fib.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let rec fib i =</code></strong>
 <strong><code>    if i &lt;= 1 then 1 else fib (i - 1) + fib (i - 2);;</code></strong>
 <code class="computeroutput">val fib : int -&gt; int = &lt;fun&gt;</code></pre><p>This is, however, exponentially slow, for the same reason that
@@ -698,7 +698,7 @@ let find_el t ~f =
 <code class="computeroutput">Time: 0.500917ms</code>
 <code class="computeroutput">- : int = 2</code></pre><div class="allow_break" data-type="note"><h1>Limitations of let rec</h1><p>You might wonder why we didn't tie the recursive knot in
         <code>memo_rec</code> using <code>let rec</code>, as we did for <code>make_rec</code> earlier. Here's code that tries to
-        do just that:<a data-type="indexterm" data-primary="let rec"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/letrec.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+        do just that:<a data-type="indexterm" data-primary="let rec">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/letrec.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
         (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let memo_rec f_norec =</code></strong>
 <strong><code>    let rec f = memoize (fun x -&gt; f_norec f x) in</code></strong>
 <strong><code>    f</code></strong>
@@ -738,19 +738,19 @@ let find_el t ~f =
 <code class="computeroutput">Time: 0.0650883ms</code>
 <code class="computeroutput">- : int = 102334155</code></pre><p>Laziness is more constrained than explicit mutation, and so in
         some cases can lead to code whose behavior is easier to think
-        about.<a data-type="indexterm" data-startref="BEmem"/></p></div></section></section><section id="input-and-output" data-type="sect1"><h1>Input and Output</h1><p>Imperative programming is about more than modifying in-memory data
+        about.<a data-type="indexterm" data-startref="BEmem">&#xa0;</a></p></div></section></section><section id="input-and-output" data-type="sect1"><h1>Input and Output</h1><p>Imperative programming is about more than modifying in-memory data
     structures. Any function that doesn't boil down to a deterministic
     transformation from its arguments to its return value is imperative in
     nature. That includes not only things that mutate your program's data, but
     also operations that interact with the world outside of your program. An
     important example of this kind of interaction is I/O, i.e., operations for
     reading or writing data to things like files, terminal input and output,
-    and network sockets.<a data-type="indexterm" data-primary="I/O (input/output) operations" data-secondary="terminal I/O"/><a data-type="indexterm" id="IPinpout" data-primary="imperative programming" data-secondary="input and output"/></p><p>There are multiple I/O libraries in OCaml. In this section we'll discuss OCaml's buffered
+    and network sockets.<a data-type="indexterm" data-primary="I/O (input/output) operations" data-secondary="terminal I/O">&#xa0;</a><a data-type="indexterm" id="IPinpout" data-primary="imperative programming" data-secondary="input and output">&#xa0;</a></p><p>There are multiple I/O libraries in OCaml. In this section we'll discuss OCaml's buffered
       I/O library that can be used through the <code>In_channel</code> and
         <code>Out_channel</code> modules in Core. Other I/O primitives are
       also available through the <code>Unix</code> module in Core as well as
         <code>Async</code>, the asynchronous I/O library that is covered in
-        <a href="#concurrent-programming-with-async" data-type="xref"/>. Most of the functionality in Core's
+        <a href="#concurrent-programming-with-async" data-type="xref">#concurrent-programming-with-async</a>. Most of the functionality in Core's
         <code>In_channel</code> and <code>Out_channel</code> (and in Core's <code>Unix</code> module)
       derives from the standard library, but we'll use Core's interfaces here.</p><section id="terminal-io" data-type="sect2"><h2>Terminal I/O</h2><p>OCaml's buffered I/O library is organized around two types:
       <code>in_channel</code>, for channels you read
@@ -758,7 +758,7 @@ let find_el t ~f =
       you write to. The <code>In_channel</code> and
       <code>Out_channel</code> modules only have direct
       support for channels corresponding to files and terminals; other kinds
-      of channels can be created through the <code>Unix</code> module.<a data-type="indexterm" data-primary="Out_channel module" data-secondary="Out_channel.stderr"/><a data-type="indexterm" data-primary="Out_channel module" data-secondary="Out_channel.stdout"/><a data-type="indexterm" data-primary="In_channel module"/></p><p>We'll start our discussion of I/O by focusing on the terminal.
+      of channels can be created through the <code>Unix</code> module.<a data-type="indexterm" data-primary="Out_channel module" data-secondary="Out_channel.stderr">&#xa0;</a><a data-type="indexterm" data-primary="Out_channel module" data-secondary="Out_channel.stdout">&#xa0;</a><a data-type="indexterm" data-primary="In_channel module">&#xa0;</a></p><p>We'll start our discussion of I/O by focusing on the terminal.
       Following the UNIX model, communication with the terminal is organized
       around three channels, which correspond to the three standard file
       descriptors in Unix:</p><dl><dt><code>In_channel.stdin</code></dt><dd><p>The "standard input" channel. By default, input comes from
@@ -812,7 +812,7 @@ let () =
       <em>format string</em> that describes what to print and how
       to format it, as well as arguments to be printed, as determined by the
       formatting directives embedded in the format string. So, for example, we
-      can write:<a data-type="indexterm" data-primary="strings" data-secondary="format strings"/><a data-type="indexterm" data-primary="format strings"/><a data-type="indexterm" data-primary="printf function"/><a data-type="indexterm" data-primary="I/O (input/output) operations" data-secondary="formatted output"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/printf.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      can write:<a data-type="indexterm" data-primary="strings" data-secondary="format strings">&#xa0;</a><a data-type="indexterm" data-primary="format strings">&#xa0;</a><a data-type="indexterm" data-primary="printf function">&#xa0;</a><a data-type="indexterm" data-primary="I/O (input/output) operations" data-secondary="formatted output">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/printf.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>printf "%i is an integer, %F is a float, \"%s\" is a string\n"</code></strong>
 <strong><code>    3 4.5 "five";;</code></strong>
 <code class="computeroutput">3 is an integer, 4.5 is a float, "five" is a string</code>
@@ -867,9 +867,9 @@ let () =
       directives: <code>%s</code>, for including a
       string, and <code>%!</code> which causes <code>printf</code> to flush the channel.</p><p><code>printf</code>'s formatting directives
       offer a significant amount of control, allowing you to specify things
-      like:<a data-type="indexterm" data-primary="binary numbers, formatting with printf"/><a data-type="indexterm" data-primary="hex numbers, formatting with printf"/><a data-type="indexterm" data-primary="decimals, formatting with printf"/><a data-type="indexterm" data-primary="alignment, formatting with printf"/></p><ul><li><p>Alignment and padding</p></li><li><p>Escaping rules for strings</p></li><li><p>Whether numbers should be formatted in decimal, hex, or
+      like:<a data-type="indexterm" data-primary="binary numbers, formatting with printf">&#xa0;</a><a data-type="indexterm" data-primary="hex numbers, formatting with printf">&#xa0;</a><a data-type="indexterm" data-primary="decimals, formatting with printf">&#xa0;</a><a data-type="indexterm" data-primary="alignment, formatting with printf">&#xa0;</a></p><ul><li><p>Alignment and padding</p></li><li><p>Escaping rules for strings</p></li><li><p>Whether numbers should be formatted in decimal, hex, or
           binary</p></li><li><p>Precision of float conversions</p></li></ul><p>There are also <code>printf</code>-style
-      functions that target outputs other than <code>stdout</code>, including:<a data-type="indexterm" data-primary="sprintf function"/><a data-type="indexterm" data-primary="fprintf function"/><a data-type="indexterm" data-primary="eprintf function"/></p><ul><li><p><code>eprintf</code>, which prints to
+      functions that target outputs other than <code>stdout</code>, including:<a data-type="indexterm" data-primary="sprintf function">&#xa0;</a><a data-type="indexterm" data-primary="fprintf function">&#xa0;</a><a data-type="indexterm" data-primary="eprintf function">&#xa0;</a></p><ul><li><p><code>eprintf</code>, which prints to
           <code>stderr</code></p></li><li><p><code>fprintf</code>, which prints to an
           arbitrary <code>out_channel</code></p></li><li><p><code>sprintf</code>, which returns a
           formatted string</p></li></ul><p>All of this, and a good deal more, is described in the API
@@ -877,7 +877,7 @@ let () =
       in the OCaml Manual.</p></section><section id="file-io" data-type="sect2"><h2>File I/O</h2><p>Another common use of <code>in_channel</code>s and <code>out_channel</code>s is for working with files. Here
       are a couple of functions—one that creates a file full of numbers, and
       the other that reads in such a file and returns the sum of those
-      numbers:<a data-type="indexterm" data-primary="files" data-secondary="file I/O"/><a data-type="indexterm" data-primary="I/O (input/output) operations" data-secondary="file I/O"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/file.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      numbers:<a data-type="indexterm" data-primary="files" data-secondary="file I/O">&#xa0;</a><a data-type="indexterm" data-primary="I/O (input/output) operations" data-secondary="file I/O">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/file.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let create_number_file filename numbers =</code></strong>
 <strong><code>    let outc = Out_channel.create filename in</code></strong>
 <strong><code>    List.iter numbers ~f:(fun x -&gt; fprintf outc "%d\n" x);</code></strong>
@@ -911,7 +911,7 @@ let () =
 <code class="prompt"># </code><strong><code>sum_file "numbers.txt";;</code></strong>
 <code class="computeroutput">Exception: (Sys_error "numbers.txt: Too many open files").</code></pre><p>And now, you'll need to restart your toplevel if you want to open
       any more files!</p><p>To avoid this, we need to make sure that our code cleans up after
-      itself. We can do this using the <code>protect</code> function described in <a href="#error-handling" data-type="xref"/>, as follows:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/file2.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      itself. We can do this using the <code>protect</code> function described in <a href="#error-handling" data-type="xref">#error-handling</a>, as follows:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/file2.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let sum_file filename =</code></strong>
 <strong><code>    let file = In_channel.create filename in</code></strong>
 <strong><code>    protect ~f:(fun () -&gt;</code></strong>
@@ -945,13 +945,13 @@ let () =
 <strong><code>        sum + Int.of_string line))</code></strong>
 <strong><code>  ;;</code></strong>
 <code class="computeroutput">val sum_file : string -&gt; int = &lt;fun&gt;</code></pre><p>This is just a taste of the functionality of <code>In_channel</code> and <code>Out_channel</code>. To get a fuller understanding,
-      you should review the API documentation for those modules.<a data-type="indexterm" data-startref="IPinpout"/></p></section></section><section id="order-of-evaluation" data-type="sect1"><h1>Order of Evaluation</h1><p>The order in which expressions are evaluated is an important part of the definition of a
+      you should review the API documentation for those modules.<a data-type="indexterm" data-startref="IPinpout">&#xa0;</a></p></section></section><section id="order-of-evaluation" data-type="sect1"><h1>Order of Evaluation</h1><p>The order in which expressions are evaluated is an important part of the definition of a
       programming language, and it is particularly important when programming imperatively. Most
       programming languages you're likely to have encountered are <em>strict</em>, and
       OCaml is, too. In a strict language, when you bind an identifier to the result of some
       expression, the expression is evaluated before the variable is bound. Similarly, if you call a
       function on a set of arguments, those arguments are evaluated before they are passed to the
-        function.<a data-type="indexterm" data-primary="strict evaluation"/><a data-type="indexterm" data-primary="expressions, order of evaluation"/><a data-type="indexterm" data-primary="evaluation, order of"/><a data-type="indexterm" data-primary="order of evaluation"/><a data-type="indexterm" data-primary="imperative programming" data-secondary="order of evaluation"/></p><p>Consider the following simple example. Here, we have a collection of
+        function.<a data-type="indexterm" data-primary="strict evaluation">&#xa0;</a><a data-type="indexterm" data-primary="expressions, order of evaluation">&#xa0;</a><a data-type="indexterm" data-primary="evaluation, order of">&#xa0;</a><a data-type="indexterm" data-primary="order of evaluation">&#xa0;</a><a data-type="indexterm" data-primary="imperative programming" data-secondary="order of evaluation">&#xa0;</a></p><p>Consider the following simple example. Here, we have a collection of
     angles, and we want to determine if any of them have a negative <code>sin</code>. The following snippet of code would answer
     that question:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/order.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let x = sin 120. in</code></strong>
@@ -1000,7 +1000,7 @@ let () =
 <code class="computeroutput">- : bool = true</code></pre><p>Here, you can see that the subexpression that came last was actually
     evaluated first! This is generally the case for many different kinds of
     expressions. If you want to make sure of the evaluation order of different
-    subexpressions, you should express them as a series of <code>let</code> bindings.</p></section><section id="side-effects-and-weak-polymorphism" data-type="sect1"><h1>Side Effects and Weak Polymorphism</h1><p>Consider the following simple, imperative function:<a data-type="indexterm" data-primary="polymorphism" data-secondary="weak polymorphism"/><a data-type="indexterm" data-primary="weak polymorphism"/><a data-type="indexterm" data-primary="side effects"/><a data-type="indexterm" id="IPsideweak" data-primary="imperative programming" data-secondary="side effects/weak polymorphism"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/weak.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    subexpressions, you should express them as a series of <code>let</code> bindings.</p></section><section id="side-effects-and-weak-polymorphism" data-type="sect1"><h1>Side Effects and Weak Polymorphism</h1><p>Consider the following simple, imperative function:<a data-type="indexterm" data-primary="polymorphism" data-secondary="weak polymorphism">&#xa0;</a><a data-type="indexterm" data-primary="weak polymorphism">&#xa0;</a><a data-type="indexterm" data-primary="side effects">&#xa0;</a><a data-type="indexterm" id="IPsideweak" data-primary="imperative programming" data-secondary="side effects/weak polymorphism">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/weak.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let remember =</code></strong>
 <strong><code>    let cache = ref None in</code></strong>
 <strong><code>    (fun x -&gt;</code></strong>
@@ -1032,7 +1032,7 @@ let () =
     used with any <em>single</em> type. That makes sense because,
     unlike <code>identity</code>, <code>remember</code> always returns the value it was passed
     on its first invocation, which means its return value must always have the
-    same type.<a data-type="indexterm" data-primary="type variables"/></p><p>OCaml will convert a weakly polymorphic variable to a concrete type
+    same type.<a data-type="indexterm" data-primary="type variables">&#xa0;</a></p><p>OCaml will convert a weakly polymorphic variable to a concrete type
     as soon as it gets a clue as to what concrete type it is to be used
     as:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/weak.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 3)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let remember_three () = remember 3;;</code></strong>
@@ -1050,7 +1050,7 @@ let () =
       OCaml uses a rough rule to flag cases that don't introduce any
       persistent mutable cells, and to only infer polymorphic types in those
       cases. This rule is called <em>the value
-      restriction</em>.<a data-type="indexterm" data-primary="value restriction"/></p><p>The core of the value restriction is the observation that some
+      restriction</em>.<a data-type="indexterm" data-primary="value restriction">&#xa0;</a></p><p>The core of the value restriction is the observation that some
       kinds of expressions, which we'll refer to as <em>simple
       values</em>, by their nature can't introduce persistent mutable
       cells, including:</p><ul><li><p>Constants (i.e., things like integer and floating-point
@@ -1092,7 +1092,7 @@ let () =
       applied functions. A partially applied function, like any function
       application, is not a simple value, and as such, functions created by
       partial application are sometimes less general than you might
-      expect.<a data-type="indexterm" data-primary="partial application"/></p><p>Consider the <code>List.init</code>
+      expect.<a data-type="indexterm" data-primary="partial application">&#xa0;</a></p><p>Consider the <code>List.init</code>
       function, which is used for creating lists where each element is created
       by calling a function on the index of that element:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/value_restriction.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 5)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>List.init;;</code></strong>
@@ -1175,8 +1175,8 @@ let () =
       type. We can resolve this in one of two ways: either by making the type
       concrete (i.e., exposing the implementation in the <code>mli</code>), which is often not desirable; or by
       marking the type variable in question as <em>covariant</em>.
-      We'll learn more about covariance and contravariance in <a href="#objects" data-type="xref"/>, but for now, you can think of it as an annotation
-      that can be put in the interface of a pure data structure.<a data-type="indexterm" data-primary="datatypes" data-secondary="covariant"/></p><p>In particular, if we replace <code>type 'a
+      We'll learn more about covariance and contravariance in <a href="#objects" data-type="xref">#objects</a>, but for now, you can think of it as an annotation
+      that can be put in the interface of a pure data structure.<a data-type="indexterm" data-primary="datatypes" data-secondary="covariant">&#xa0;</a></p><p>In particular, if we replace <code>type 'a
       t</code> in the interface with <code>type +'a
       t</code>, that will make it explicit in the interface that the data
       structure doesn't contain any persistent references to values of type
@@ -1204,8 +1204,8 @@ let () =
     val to_list : 'a t -&gt; 'a list
   end</code></pre><p>Now, we can apply the identity function to <code>Concat_list.empty</code> without without losing any
       polymorphism:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/imperative-programming/value_restriction.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
-      (part 14)<a data-type="indexterm" data-startref="IPsideweak"/></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>identity Concat_list.empty;;</code></strong>
-<code class="computeroutput">- : 'a Concat_list.t = &lt;abstr&gt;</code></pre></section></section><section id="summary" data-type="sect1"><h1>Summary</h1><p>This chapter has covered quite a lot of ground, including:<a data-type="indexterm" data-primary="imperative programming" data-secondary="overview of"/></p><ul><li><p>Discussing the building blocks of mutable data structures as
+      (part 14)<a data-type="indexterm" data-startref="IPsideweak">&#xa0;</a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>identity Concat_list.empty;;</code></strong>
+<code class="computeroutput">- : 'a Concat_list.t = &lt;abstr&gt;</code></pre></section></section><section id="summary" data-type="sect1"><h1>Summary</h1><p>This chapter has covered quite a lot of ground, including:<a data-type="indexterm" data-primary="imperative programming" data-secondary="overview of">&#xa0;</a></p><ul><li><p>Discussing the building blocks of mutable data structures as
         well as the basic imperative constructs like <code>for</code> loops, <code>while</code> loops, and the sequencing operator
         <code>;</code></p></li><li><p>Walking through the implementation of a couple of classic
         imperative data structures</p></li><li><p>Discussing so-called benign effects like memoization and
@@ -1215,4 +1215,4 @@ let () =
     defaults to immutability shouldn't obscure the fact that imperative
     programming is a fundamental part of building any serious application, and
     that if you want to be an effective OCaml programmer, you need to
-    understand OCaml's approach to imperative programming.<a data-type="indexterm" data-startref="PROGimper"/></p></section></section>
+    understand OCaml's approach to imperative programming.<a data-type="indexterm" data-startref="PROGimper">&#xa0;</a></p></section></section>

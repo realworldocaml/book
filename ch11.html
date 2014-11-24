@@ -2,8 +2,8 @@
   programs, particularly modules. In addition, OCaml also supports
   object-oriented programming. There are objects, classes, and their
   associated types. In this chapter, we'll introduce you to OCaml objects and
-  subtyping. In the next chapter, <a href="#classes" data-type="xref"/>, we'll introduce
-  you to classes and inheritance.<a data-type="indexterm" data-primary="objects" data-secondary="in object-oriented&#xA;      programming"/><a data-type="indexterm" data-primary="object-oriented programming (OOP)"/><a data-type="indexterm" data-primary="programming" data-secondary="object-oriented programming (OOP)"/></p><aside data-type="sidebar"><h5>What Is Object-Oriented Programming?</h5><p>Object-oriented programming (often shorted to OOP) is a programming
+  subtyping. In the next chapter, <a href="#classes" data-type="xref">#classes</a>, we'll introduce
+  you to classes and inheritance.<a data-type="indexterm" data-primary="objects" data-secondary="in object-oriented&#10;      programming">&#xa0;</a><a data-type="indexterm" data-primary="object-oriented programming (OOP)">&#xa0;</a><a data-type="indexterm" data-primary="programming" data-secondary="object-oriented programming (OOP)">&#xa0;</a></p><aside data-type="sidebar"><h5>What Is Object-Oriented Programming?</h5><p>Object-oriented programming (often shorted to OOP) is a programming
     style that encapsulates computation and data within logical
     <em>objects</em>. Each object contains some data stored in
     <em>fields</em> and has <em>method</em> functions
@@ -36,7 +36,7 @@
     it, and the relationships between these object types correspond to
     inheritance. For example, if we implement a class <code>Deque</code> in Java by inheriting from a class
     <code>Stack</code>, we would be allowed to pass a
-    deque anywhere a stack is expected.<a data-type="indexterm" data-primary="objects" data-secondary="in OCaml"/></p><p>OCaml is entirely different. Classes are used to construct objects
+    deque anywhere a stack is expected.<a data-type="indexterm" data-primary="objects" data-secondary="in OCaml">&#xa0;</a></p><p>OCaml is entirely different. Classes are used to construct objects
     and support inheritance, but classes are not types. Instead, objects have
     <em>object types</em>, and if you want to use objects, you
     aren't required to use classes at all. Here's an example of a simple
@@ -90,7 +90,7 @@
     polymorphic type <code>'a</code>. When <code>stack</code> is invoked on a concrete value <code>[3; 2; 1]</code>, we get the same object type as
     before, with type <code>int</code> for the values on
     the stack.</p></section><section id="object-polymorphism" data-type="sect1"><h1>Object Polymorphism</h1><p>Like polymorphic variants, methods can be used without an explicit
-    type declaration:<a data-type="indexterm" data-primary="polymorphism" data-secondary="in objects"/><a data-type="indexterm" data-primary="objects" data-secondary="polymorphism of"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/objects/polymorphism.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    type declaration:<a data-type="indexterm" data-primary="polymorphism" data-secondary="in objects">&#xa0;</a><a data-type="indexterm" data-primary="objects" data-secondary="polymorphism of">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/objects/polymorphism.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let area sq = sq#width * sq#width ;;</code></strong>
 <code class="computeroutput">val area : &lt; width : int; .. &gt; -&gt; int = &lt;fun&gt;</code>
 <code class="prompt"># </code><strong><code>let minimize sq : unit = sq#resize 1 ;;</code></strong>
@@ -110,7 +110,7 @@
     types are ellipses, standing for other unspecified methods that the object
     may have. The type <code>&lt; width : float; ..
     &gt;</code> specifies an object that must have at least a <code>width</code> method, and possibly some others as well.
-    Such object types are said to be <em>open</em>.<a data-type="indexterm" data-primary="open object types"/></p><p>We can manually <em>close</em> an object type using a
+    Such object types are said to be <em>open</em>.<a data-type="indexterm" data-primary="open object types">&#xa0;</a></p><p>We can manually <em>close</em> an object type using a
     type annotation:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/objects/polymorphism.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 3)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let area_closed (sq: &lt; width : int &gt;) = sq#width * sq#width ;;</code></strong>
 <code class="computeroutput">val area_closed : &lt; width : int &gt; -&gt; int = &lt;fun&gt;</code>
@@ -127,7 +127,7 @@
       is an elision, standing for "possibly more methods." It may not be
       apparent from the syntax, but an elided object type is actually
       polymorphic. For example, if we try to write a type definition, we get
-      an "unbound type variable" error:<a data-type="indexterm" data-primary="polymorphism" data-secondary="row polymorphism"/><a data-type="indexterm" data-primary="row polymorphism"/><a data-type="indexterm" data-primary="ellipses (..)"/><a data-type="indexterm" data-primary="type variables"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/objects/polymorphism.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      an "unbound type variable" error:<a data-type="indexterm" data-primary="polymorphism" data-secondary="row polymorphism">&#xa0;</a><a data-type="indexterm" data-primary="row polymorphism">&#xa0;</a><a data-type="indexterm" data-primary="ellipses (..)">&#xa0;</a><a data-type="indexterm" data-primary="type variables">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/objects/polymorphism.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 4)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type square = &lt; width : int; ..&gt; ;;</code></strong>
 <code class="computeroutput">Characters 5-32:</code>
 <code class="computeroutput">Error: A type variable is unbound in this type declaration.</code>
@@ -155,7 +155,7 @@
 <code class="computeroutput">- : unit = ()</code></pre></section><section id="immutable-objects" data-type="sect1"><h1>Immutable Objects</h1><p>Many people consider object-oriented programming to be intrinsically
     imperative, where an object is like a state machine. Sending a message to
     an object causes it to change state, possibly sending messages to other
-    objects.<a data-type="indexterm" data-primary="objects" data-secondary="immutabile"/></p><p>Indeed, in many programs this makes sense, but it is by no means
+    objects.<a data-type="indexterm" data-primary="objects" data-secondary="immutabile">&#xa0;</a></p><p>Indeed, in many programs this makes sense, but it is by no means
     required. Let's define a function that creates immutable stack
     objects:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/objects/immutable.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let imm_stack init = object</code></strong>
@@ -193,7 +193,7 @@
     modules are more expressive (a module can include types, while classes and
     objects cannot). Modules, functors, and data types also offer a wide range
     of ways to express program structure. In fact, many seasoned OCaml
-    programmers rarely use classes and objects, if at all.<a data-type="indexterm" data-primary="first-class modules" data-secondary="vs. objects"/><a data-type="indexterm" data-primary="objects" data-secondary="benefits and drawbacks of"/></p><p>Objects have some advantages over records: they don't require type
+    programmers rarely use classes and objects, if at all.<a data-type="indexterm" data-primary="first-class modules" data-secondary="vs. objects">&#xa0;</a><a data-type="indexterm" data-primary="objects" data-secondary="benefits and drawbacks of">&#xa0;</a></p><p>Objects have some advantages over records: they don't require type
     definitions, and their support for row polymorphism makes them more
     flexible. However, the heavy syntax and additional runtime cost means that
     objects are rarely used in place of records.</p><p>The real benefits of objects come from the class system. Classes
@@ -203,7 +203,7 @@
     object is instantiated, a form of <em>late</em> binding. This
     makes it possible (and necessary) for one method to refer to other methods
     in the object without knowing statically how they will be
-    implemented.<a data-type="indexterm" data-primary="late binding"/><a data-type="indexterm" data-primary="recursion" data-secondary="open recursion"/><a data-type="indexterm" data-primary="open recursion"/><a data-type="indexterm" data-primary="classes" data-secondary="benefits of"/></p><p>In contrast, modules use early binding. If you want to parameterize
+    implemented.<a data-type="indexterm" data-primary="late binding">&#xa0;</a><a data-type="indexterm" data-primary="recursion" data-secondary="open recursion">&#xa0;</a><a data-type="indexterm" data-primary="open recursion">&#xa0;</a><a data-type="indexterm" data-primary="classes" data-secondary="benefits of">&#xa0;</a></p><p>In contrast, modules use early binding. If you want to parameterize
     your module code so that some part of it can be implemented later, you
     would write a function or functor. This is more explicit, but often more
     verbose than overriding a method in a class.</p><p>In general, a rule of thumb is: use classes and objects in
@@ -214,17 +214,17 @@
     which manipulates various graphical file formats. Camlimages also provides
     a module-based version of the same library, letting you choose between
     functional and object-oriented styles depending on your problem
-    domain.<a data-type="indexterm" data-primary="Camlimages library"/><a data-type="indexterm" data-primary="Cryptokit library"/><a data-type="indexterm" data-primary="libraries" data-secondary="Cryptokit"/><a data-type="indexterm" data-primary="libraries" data-secondary="Camlimages"/><a data-type="indexterm" data-primary="external libraries" data-secondary="Camlimages"/><a data-type="indexterm" data-primary="external libraries" data-secondary="Cryptokit"/></p><p>We'll introduce you to classes, and examples using open recursion,
-    in <a href="#classes" data-type="xref"/>.</p></section><section id="subtyping" data-type="sect1"><h1>Subtyping</h1><p>Subtyping is a central concept in object-oriented programming. It
+    domain.<a data-type="indexterm" data-primary="Camlimages library">&#xa0;</a><a data-type="indexterm" data-primary="Cryptokit library">&#xa0;</a><a data-type="indexterm" data-primary="libraries" data-secondary="Cryptokit">&#xa0;</a><a data-type="indexterm" data-primary="libraries" data-secondary="Camlimages">&#xa0;</a><a data-type="indexterm" data-primary="external libraries" data-secondary="Camlimages">&#xa0;</a><a data-type="indexterm" data-primary="external libraries" data-secondary="Cryptokit">&#xa0;</a></p><p>We'll introduce you to classes, and examples using open recursion,
+    in <a href="#classes" data-type="xref">#classes</a>.</p></section><section id="subtyping" data-type="sect1"><h1>Subtyping</h1><p>Subtyping is a central concept in object-oriented programming. It
     governs when an object with one type <em>A</em> can be used in
     an expression that expects an object of another type
     <em>B</em>. When this is true, we say that
     <em>A</em> is a <em>subtype</em> of
     <em>B</em>. More concretely, subtyping restricts when the
     coercion operator <code>e :&gt; t</code> can be
-    applied. This coercion works only if the type of <code>e</code> is a subtype of <code>t</code>.<a data-type="indexterm" data-primary="subtyping" data-secondary="basics of"/><a data-type="indexterm" id="OBsub" data-primary="objects" data-secondary="subtyping and"/></p><section id="width-subtyping" data-type="sect2"><h2>Width Subtyping</h2><p>To explore this, let's define some simple object types for
+    applied. This coercion works only if the type of <code>e</code> is a subtype of <code>t</code>.<a data-type="indexterm" data-primary="subtyping" data-secondary="basics of">&#xa0;</a><a data-type="indexterm" id="OBsub" data-primary="objects" data-secondary="subtyping and">&#xa0;</a></p><section id="width-subtyping" data-type="sect2"><h2>Width Subtyping</h2><p>To explore this, let's define some simple object types for
       geometric shapes. The generic type <code>shape</code> has a method to compute the area, and
-      <code>square</code> and <code>circle</code> are specific kinds of shapes:<a data-type="indexterm" data-primary="geometric shapes"/><a data-type="indexterm" data-primary="width subtyping"/><a data-type="indexterm" data-primary="subtyping" data-secondary="width subtyping"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/objects/subtyping.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a>
+      <code>square</code> and <code>circle</code> are specific kinds of shapes:<a data-type="indexterm" data-primary="geometric shapes">&#xa0;</a><a data-type="indexterm" data-primary="width subtyping">&#xa0;</a><a data-type="indexterm" data-primary="subtyping" data-secondary="width subtyping">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/objects/subtyping.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a>
       (part 1)</p><pre data-type="programlisting" data-code-language="ocaml">type shape = &lt; area : float &gt;
 
 type square = &lt; area : float; width : int &gt;
@@ -257,7 +257,7 @@ end</pre><p>A <code>square</code> has a method <code>area</code> just like a <co
       could safely be coerced. So an object type <code>&lt;
       m: t1 &gt;</code> is a subtype of <code>&lt; m: t2
       &gt;</code> if <code>t1</code> is a subtype of
-      <code>t2</code>.<a data-type="indexterm" data-primary="depth subtyping"/><a data-type="indexterm" data-primary="subtyping" data-secondary="depth subtyping"/></p><p>For example, we can create two objects with a <code>shape</code> method:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/objects/subtyping.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      <code>t2</code>.<a data-type="indexterm" data-primary="depth subtyping">&#xa0;</a><a data-type="indexterm" data-primary="subtyping" data-secondary="depth subtyping">&#xa0;</a></p><p>For example, we can create two objects with a <code>shape</code> method:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/objects/subtyping.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 2)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let coin = object</code></strong>
 <strong><code>    method shape = circle 5</code></strong>
 <strong><code>    method color = "silver"</code></strong>
@@ -270,7 +270,7 @@ end</pre><p>A <code>square</code> has a method <code>area</code> just like a <co
       method whose type is a subtype of the <code>shape</code> type, so they can both be coerced into
       the object type <code>&lt; shape : shape
       &gt;</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/objects/subtyping.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
-      (part 3)<a data-type="indexterm" data-primary="polymorphic variant subtyping"/></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type item = &lt; shape : shape &gt; ;;</code></strong>
+      (part 3)<a data-type="indexterm" data-primary="polymorphic variant subtyping">&#xa0;</a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type item = &lt; shape : shape &gt; ;;</code></strong>
 <code class="computeroutput">type item = &lt; shape : shape &gt;</code>
 <code class="prompt"># </code><strong><code>let items = [ (coin :&gt; item) ; (map :&gt; item) ] ;;</code></strong>
 <code class="computeroutput">val items : item list = [&lt;obj&gt;; &lt;obj&gt;]</code></pre><div data-type="note"><h1>Polymorphic Variant Subtyping</h1><p>Subtyping can also be used to coerce a polymorphic variant into
@@ -286,7 +286,7 @@ end</pre><p>A <code>square</code> has a method <code>area</code> just like a <co
 <code class="computeroutput">val n : num = `Int 3</code>
 <code class="prompt"># </code><strong><code>let c : const = (n :&gt; const) ;;</code></strong>
 <code class="computeroutput">val c : const = `Int 3</code></pre></div></section><section id="variance" data-type="sect2"><h2>Variance</h2><p>What about types built from object types? If a <code>square</code> is a <code>shape</code>, we expect a <code>square list</code> to be a <code>shape list</code>. OCaml does indeed allow such
-      coercions:<a data-type="indexterm" id="var" data-primary="variance"/><a data-type="indexterm" id="SUBvar" data-primary="subtyping" data-secondary="variance and"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/objects/subtyping.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      coercions:<a data-type="indexterm" id="var" data-primary="variance">&#xa0;</a><a data-type="indexterm" id="SUBvar" data-primary="subtyping" data-secondary="variance and">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/objects/subtyping.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 5)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let squares: square list = [ square 10; square 20 ] ;;</code></strong>
 <code class="computeroutput">val squares : square list = [&lt;obj&gt;; &lt;obj&gt;]</code>
 <code class="prompt"># </code><strong><code>let shapes: shape list = (squares :&gt; shape list) ;;</code></strong>
@@ -304,7 +304,7 @@ end</pre><p>A <code>square</code> has a method <code>area</code> just like a <co
 <code class="computeroutput">       is not compatible with type shape = &lt; area : float &gt; </code>
 <code class="computeroutput">       The second object type has no method width</code></pre><p>We say that <code>'a list</code> is
       <em>covariant</em> (in <code>'a</code>), while <code>'a
-      array</code> is <em>invariant</em>.<a data-type="indexterm" data-primary="invariance"/><a data-type="indexterm" data-primary="covariance"/></p><p>Subtyping function types requires a third class of variance. A
+      array</code> is <em>invariant</em>.<a data-type="indexterm" data-primary="invariance">&#xa0;</a><a data-type="indexterm" data-primary="covariance">&#xa0;</a></p><p>Subtyping function types requires a third class of variance. A
       function with type <code>square -&gt;
       string</code> cannot be used with type <code>shape
       -&gt; string</code> because it expects its argument to be a <code>square</code> and would not know what to do with a
@@ -319,7 +319,7 @@ end</pre><p>A <code>square</code> has a method <code>area</code> just like a <co
 <code class="computeroutput">val square_to_string : square -&gt; string = &lt;fun&gt;</code></pre><p>We say that <code>'a -&gt; string</code> is
       <em>contravariant</em> in <code>'a</code>. In general, function types are
       contravariant in their arguments and covariant in their
-      results.<a data-type="indexterm" data-primary="contravariance"/></p><aside data-type="sidebar"><h5>Variance Annotations</h5><p>OCaml works out the variance of a type using that type's
+      results.<a data-type="indexterm" data-primary="contravariance">&#xa0;</a></p><aside data-type="sidebar"><h5>Variance Annotations</h5><p>OCaml works out the variance of a type using that type's
         definition:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/objects/subtyping.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
         (part 8)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>module Either = struct</code></strong>
 <strong><code>    type ('a, 'b) t = </code></strong>
@@ -437,7 +437,7 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</pre><p>If we want
       safely). The situation is similar in Java, although Java has an escape
       hatch that allows the program to fall back to dynamic typing. The
       situation in OCaml is much better: it works, it is statically checked,
-      and the annotations are pretty simple.<a data-type="indexterm" data-startref="var"/><a data-type="indexterm" data-startref="SUBvar"/></p></section><section id="narrowing" data-type="sect2"><h2>Narrowing</h2><p>Narrowing, also called <em>down casting</em>, is the
+      and the annotations are pretty simple.<a data-type="indexterm" data-startref="var">&#xa0;</a><a data-type="indexterm" data-startref="SUBvar">&#xa0;</a></p></section><section id="narrowing" data-type="sect2"><h2>Narrowing</h2><p>Narrowing, also called <em>down casting</em>, is the
       ability to coerce an object to one of its subtypes. For example, if we
       have a list of shapes <code>shape list</code>, we
       might know (for some reason) what the actual type of each shape is.
@@ -445,7 +445,7 @@ let circle_stack: circle stack = stack [circle 20; circle 40]</pre><p>If we want
       <em>narrowing</em> would allow the recasting of the object
       from type <code>shape</code> to type <code>square</code>. Many languages support narrowing
       through dynamic type checking. For example, in Java, a coercion <code>(Square) x</code> is allowed if the value <code>x</code> has type <code>Square</code> or one of its subtypes; otherwise the
-      coercion throws an exception.<a data-type="indexterm" data-primary="dynamic type checking"/><a data-type="indexterm" data-primary="down casting"/><a data-type="indexterm" data-primary="narrowing"/><a data-type="indexterm" data-primary="objects" data-secondary="narrowing and"/></p><p>Narrowing is <em>not permitted</em> in OCaml.
+      coercion throws an exception.<a data-type="indexterm" data-primary="dynamic type checking">&#xa0;</a><a data-type="indexterm" data-primary="down casting">&#xa0;</a><a data-type="indexterm" data-primary="narrowing">&#xa0;</a><a data-type="indexterm" data-primary="objects" data-secondary="narrowing and">&#xa0;</a></p><p>Narrowing is <em>not permitted</em> in OCaml.
       Period.</p><p>Why? There are two reasonable explanations, one based on a design
       principle, and another technical (the technical reason is simple: it is
       hard to implement).</p><p>The design argument is this: narrowing violates abstraction. In
@@ -505,7 +505,7 @@ let is_barbell = function
       applied to objects of different types. In these cases, row polymorphism
       is usually preferred over subtyping because it does not require explicit
       coercions, and it preserves more type information, allowing functions
-      like the following:<a data-type="indexterm" data-primary="polymorphism" data-secondary="row polymorphism"/><a data-type="indexterm" data-primary="row polymorphism"/><a data-type="indexterm" data-primary="subtyping" data-secondary="vs. row&#xA;          polymorphism"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/objects/row_polymorphism.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      like the following:<a data-type="indexterm" data-primary="polymorphism" data-secondary="row polymorphism">&#xa0;</a><a data-type="indexterm" data-primary="row polymorphism">&#xa0;</a><a data-type="indexterm" data-primary="subtyping" data-secondary="vs. row&#10;          polymorphism">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/objects/row_polymorphism.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let remove_large l =</code></strong>
 <strong><code>    List.filter ~f:(fun s -&gt; s#area &lt;= 100.) l ;;</code></strong>
 <code class="computeroutput">val remove_large : (&lt; area : float; .. &gt; as 'a) list -&gt; 'a list = &lt;fun&gt;</code></pre><p>The return type of this function is built from the open object
@@ -538,7 +538,7 @@ let is_barbell = function
 <code class="computeroutput">Characters 13-22:</code>
 <code class="computeroutput">Error: This expression has type &lt; area : float; radius : int &gt;</code>
 <code class="computeroutput">       but an expression was expected of type &lt; area : float; width : int &gt;</code>
-<code class="computeroutput">       The second object type has no method radius</code></pre><p>In both these cases we must use subtyping:<a data-type="indexterm" data-startref="OBsub"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/objects/row_polymorphism.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+<code class="computeroutput">       The second object type has no method radius</code></pre><p>In both these cases we must use subtyping:<a data-type="indexterm" data-startref="OBsub">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/objects/row_polymorphism.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 6)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let hlist: shape list = [(square 10 :&gt; shape); (circle 30 :&gt; shape)] ;;</code></strong>
 <code class="computeroutput">val hlist : shape list = [&lt;obj&gt;; &lt;obj&gt;]</code>
 <code class="prompt"># </code><strong><code>let shape_ref: shape ref = ref (square 40 :&gt; shape) ;;</code></strong>

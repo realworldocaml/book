@@ -5,7 +5,7 @@
   program you write. Core provides the Command library, which simplifies all
   of this by letting you declare all your command-line options in one place
   and by deriving all of the above functionality from these
-  declarations.<a data-type="indexterm" data-primary="command-line parsing" data-secondary="Command library for"/></p><p>Command is simple to use for simple applications but also scales well
+  declarations.<a data-type="indexterm" data-primary="command-line parsing" data-secondary="Command library for">&#xa0;</a></p><p>Command is simple to use for simple applications but also scales well
   as your needs grow more complex. In particular, Command provides a
   sophisticated subcommand mode that groups related commands together as the
   complexity of your user interface grows. You may already be familiar with
@@ -13,10 +13,10 @@
   systems.</p><p>In this chapter, we'll:</p><ul><li><p>Learn how to use Command to construct basic and grouped
       command-line interfaces</p></li><li><p>We will build simple equivalents to the cryptographic <code>md5</code> and <code>shasum</code> utilities</p></li><li><p>Demonstrate how <em>functional combinators</em> can be
       used to declare complex command-line interfaces in a type-safe and
-      elegant way<a data-type="indexterm" data-primary="combinators" data-secondary="functional combinators"/></p></li></ul><section id="basic-command-line-parsing" data-type="sect1"><h1>Basic Command-Line Parsing</h1><p>Let's start by working through a clone of the <em>md5sum</em> command that is
+      elegant way<a data-type="indexterm" data-primary="combinators" data-secondary="functional combinators">&#xa0;</a></p></li></ul><section id="basic-command-line-parsing" data-type="sect1"><h1>Basic Command-Line Parsing</h1><p>Let's start by working through a clone of the <em>md5sum</em> command that is
       present on most Linux installations (the equivalent command on Mac OS X is simply <code>md5</code>). The following function defined below reads in the contents
       of a file, applies the MD5 one-way cryptographic hash function to the data, and outputs an
-      ASCII hex representation of the result:<a data-type="indexterm" data-primary="MD5 one-way cryptographic hash function"/><a data-type="indexterm" data-primary="command-line parsing" data-secondary="basic approach to"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/basic_md5.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
+      ASCII hex representation of the result:<a data-type="indexterm" data-primary="MD5 one-way cryptographic hash function">&#xa0;</a><a data-type="indexterm" data-primary="command-line parsing" data-secondary="basic approach to">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/basic_md5.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
 
 let do_hash file =
   In_channel.with_file file ~f:(fun ic -&gt;
@@ -34,7 +34,7 @@ let do_hash file =
     types they should map to, and whether to take special actions (such as
     pausing for interactive input) if certain inputs are encountered.</p><section id="anonymous-arguments" data-type="sect2"><h2>Anonymous Arguments</h2><p>Let's build the specification for a single argument that is passed
       directly on the command line. This is known as an
-      <em>anonymous</em> argument:<a data-type="indexterm" data-primary="arguments" data-secondary="anonymous arguments"/><a data-type="indexterm" data-primary="anonymous arguments"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/basic_md5.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a>
+      <em>anonymous</em> argument:<a data-type="indexterm" data-primary="arguments" data-secondary="anonymous arguments">&#xa0;</a><a data-type="indexterm" data-primary="anonymous arguments">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/basic_md5.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a>
       (part 1)</p><pre data-type="programlisting" data-code-language="ocaml">let spec =
   let open Command.Spec in
   empty
@@ -53,7 +53,7 @@ let do_hash file =
       we'll see more complex conversion options later in the chapter.</p></section><section id="defining-basic-commands" data-type="sect2"><h2>Defining Basic Commands</h2><p>Once we've defined a specification, we need to put it to work on
       real input. The simplest way is to directly create a command-line
       interface via the <code>Command.basic</code>
-      module:<a data-type="indexterm" data-primary="Command.basic module"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/basic_md5.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a>
+      module:<a data-type="indexterm" data-primary="Command.basic module">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/basic_md5.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a>
       (part 2)</p><pre data-type="programlisting" data-code-language="ocaml">let command =
   Command.basic
     ~summary:"Generate an MD5 hash of the input data"
@@ -70,7 +70,7 @@ let do_hash file =
       arguments containing the parsed command-line values, and it takes over
       as the main thread of the application. The callback's arguments are
       passed in the same order as they were bound in the specification (using
-      the <code>+&gt;</code> operator).<a data-type="indexterm" data-primary="arguments" data-secondary="unit argument to callbacks"/><a data-type="indexterm" data-primary="unit argument"/><a data-type="indexterm" data-primary="callback function"/></p><div data-type="note"><h1>The Extra unit Argument to Callbacks</h1><p>The preceding callback needs an extra <code>unit</code> argument after <code>filename</code>. This is to ensure that
+      the <code>+&gt;</code> operator).<a data-type="indexterm" data-primary="arguments" data-secondary="unit argument to callbacks">&#xa0;</a><a data-type="indexterm" data-primary="unit argument">&#xa0;</a><a data-type="indexterm" data-primary="callback function">&#xa0;</a></p><div data-type="note"><h1>The Extra unit Argument to Callbacks</h1><p>The preceding callback needs an extra <code>unit</code> argument after <code>filename</code>. This is to ensure that
         specifications can work even when they are empty (i.e. the <code>Command.Spec.empty</code> value).</p><p>Every OCaml function needs at least one argument, so the final
         <code>unit</code> guarantees that it will not be
         evaluated immediately as a value if there are no other
@@ -135,8 +135,8 @@ let () =
   Command.run ~version:"1.0" ~build_info:"RWO" command</pre><p>Now that we have the basics in place, the rest of the chapter will
       examine some of the more advanced features of Command.</p></section></section><section id="argument-types" data-type="sect1"><h1>Argument Types</h1><p>You aren't just limited to parsing command lines as strings, of
     course. <code>Command.Spec</code> defines several
-    other conversion functions (shown in <a href="#table14_1" data-type="xref"/>) that
-    validate and parse input into various types.<a data-type="indexterm" data-primary="arguments" data-secondary="argument types"/><a data-type="indexterm" data-primary="command-line parsing" data-secondary="argument types"/></p><table id="table14_1"><caption>Conversion functions defined by
+    other conversion functions (shown in <a href="#table14_1" data-type="xref">#table14_1</a>) that
+    validate and parse input into various types.<a data-type="indexterm" data-primary="arguments" data-secondary="argument types">&#xa0;</a><a data-type="indexterm" data-primary="command-line parsing" data-secondary="argument types">&#xa0;</a></p><table id="table14_1"><caption>Conversion functions defined by
       <code>Command.spec</code></caption><thead><tr><th>Argument type</th><th>OCaml type</th><th>Example</th></tr></thead><tbody><tr><td><code>string</code></td><td><code>string</code></td><td><code>foo</code></td></tr><tr><td><code>int</code></td><td><code>int</code></td><td><code>123</code></td></tr><tr><td><code>float</code></td><td><code>float</code></td><td><code>123.01</code></td></tr><tr><td><code>bool</code></td><td><code>bool</code></td><td><code>true</code></td></tr><tr><td><code>date</code></td><td><code>Date.t</code></td><td><code>2013-12-25</code></td></tr><tr><td><code>time_span</code></td><td><code>Span.t</code></td><td><code>5s</code></td></tr><tr><td><code>file</code></td><td><code>string</code></td><td><code>/etc/passwd</code></td></tr></tbody></table><p>We can tighten up the specification of the command to <code>file</code> to reflect that the argument must be a
     valid filename, and not just any string:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/basic_md5_as_filename.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a>
     (part 1)</p><pre data-type="programlisting" data-code-language="ocaml">let command =
@@ -160,7 +160,7 @@ let () =
 <code class="computeroutput">Called from file "lib/exn.ml", line 87, characters 6-10</code></pre><section id="defining-custom-argument-types" data-type="sect2"><h2>Defining Custom Argument Types</h2><p>We can also define our own argument types if the predefined ones
       aren't sufficient. For instance, let's make a <code>regular_file</code> argument type that ensures that
       the input file isn't a character device or some other odd UNIX file type
-      that can't be fully read:<a data-type="indexterm" data-primary="arguments" data-secondary="defining custom types"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/basic_md5_with_custom_arg.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
+      that can't be fully read:<a data-type="indexterm" data-primary="arguments" data-secondary="defining custom types">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/basic_md5_with_custom_arg.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
 
 let do_hash file () =
   In_channel.with_file file ~f:(fun ic -&gt;
@@ -198,7 +198,7 @@ let () =
 <code class="prompt">$ </code><strong><code>./basic_md5_with_custom_arg.native /dev/null</code></strong>
 <code class="computeroutput">'/dev/null' is not a regular file.</code></pre></section><section id="optional-and-default-arguments" data-type="sect2"><h2>Optional and Default Arguments</h2><p>A more realistic MD5 binary could also read from the standard
       input if a <code>filename</code> isn't
-      specified:<a data-type="indexterm" data-primary="arguments" data-secondary="default arguments"/><a data-type="indexterm" data-primary="default arguments"/><a data-type="indexterm" data-primary="optional arguments" data-secondary="and default arguments"/><a data-type="indexterm" data-primary="arguments" data-secondary="optional arguments"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/basic_md5_with_optional_file_broken.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a>
+      specified:<a data-type="indexterm" data-primary="arguments" data-secondary="default arguments">&#xa0;</a><a data-type="indexterm" data-primary="default arguments">&#xa0;</a><a data-type="indexterm" data-primary="optional arguments" data-secondary="and default arguments">&#xa0;</a><a data-type="indexterm" data-primary="arguments" data-secondary="optional arguments">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/basic_md5_with_optional_file_broken.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a>
       (part 1)</p><pre data-type="programlisting" data-code-language="ocaml">let command =
   Command.basic
     ~summary:"Generate an MD5 hash of the input data"
@@ -281,7 +281,7 @@ let () =
 <code class="computeroutput">8cfb68a5622dd12932df658a54698aad</code></pre></section><section id="sequences-of-arguments" data-type="sect2"><h2>Sequences of Arguments</h2><p>One last transformation that's useful is to obtain lists of
       anonymous arguments rather than a single one. As an example, let's
       modify our MD5 code to take a collection of files to process on the
-      command line:<a data-type="indexterm" data-primary="arguments" data-secondary="sequences of"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/basic_md5_sequence.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
+      command line:<a data-type="indexterm" data-primary="arguments" data-secondary="sequences of">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/basic_md5_sequence.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
 
 let do_hash filename ic =
   let open Cryptokit in
@@ -313,7 +313,7 @@ let () =
     A <em>flag</em> is a named field that can be followed by an
     optional argument. These flags can appear in any order on the command
     line, or multiple times, depending on how they're declared in the
-    specification.<a data-type="indexterm" data-primary="flags"/><a data-type="indexterm" data-primary="command-line parsing" data-secondary="labeled flags and"/></p><p>Let's add two arguments to our <code>md5</code> command that mimics the Mac OS X version. A
+    specification.<a data-type="indexterm" data-primary="flags">&#xa0;</a><a data-type="indexterm" data-primary="command-line parsing" data-secondary="labeled flags and">&#xa0;</a></p><p>Let's add two arguments to our <code>md5</code> command that mimics the Mac OS X version. A
     <code>-s</code> flag specifies
     the string to be hashed directly on the command line and <code>-t</code> runs a self-test. The complete example
     follows:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/basic_md5_with_flags.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
@@ -377,8 +377,8 @@ let () = Command.run command</pre><p>The specification now uses the <code>flag</
 <code class="computeroutput">5a118fe92ac3b6c7854c595ecf6419cb</code></pre><p>The <code>-s</code> flag in our specification
     requires a <code>string</code> argument and isn't
     optional. The Command parser outputs an error message if the flag isn't
-    supplied, as with the anonymous arguments in earlier examples. <a href="#table14-2" data-type="xref"/> contains a list of some of the functions that you
-    can wrap flags in to control how they are parsed.<a data-type="indexterm" data-primary="flag functions"/></p><table id="table14-2"><caption>Flag functions</caption><thead><tr><th>Flag function</th><th>OCaml type</th></tr></thead><tbody><tr><td><code>required</code>
+    supplied, as with the anonymous arguments in earlier examples. <a href="#table14-2" data-type="xref">#table14-2</a> contains a list of some of the functions that you
+    can wrap flags in to control how they are parsed.<a data-type="indexterm" data-primary="flag functions">&#xa0;</a></p><table id="table14-2"><caption>Flag functions</caption><thead><tr><th>Flag function</th><th>OCaml type</th></tr></thead><tbody><tr><td><code>required</code>
             <em>arg</em></td><td><em>arg</em> and error if not present</td></tr><tr><td><code>optional</code>
             <em>arg</em></td><td><em>arg</em> <code>option</code></td></tr><tr><td><code>optional_with_default</code>
             <em>val</em> <em>arg</em></td><td><em>arg</em> with default
@@ -393,7 +393,7 @@ let () = Command.run command</pre><p>The specification now uses the <code>flag</
     options can make the program very confusing for newcomers to your
     application. One way to solve this is by grouping common operations
     together and adding some hierarchy to the command-line
-    interface.<a data-type="indexterm" data-primary="subcommands, grouping of"/><a data-type="indexterm" data-primary="OPAM package manager"/><a data-type="indexterm" data-primary="command-line parsing" data-secondary="subcommand grouping"/></p><p>You'll have run across this style already when using the OPAM
+    interface.<a data-type="indexterm" data-primary="subcommands, grouping of">&#xa0;</a><a data-type="indexterm" data-primary="OPAM package manager">&#xa0;</a><a data-type="indexterm" data-primary="command-line parsing" data-secondary="subcommand grouping">&#xa0;</a></p><p>You'll have run across this style already when using the OPAM
     package manager (or, in the non-OCaml world, the Git or Mercurial
     commands). OPAM exposes commands in this form:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/opam.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>opam config env</code></strong>
 <code class="prompt">$ </code><strong><code>opam remote list -k git</code></strong>
@@ -401,11 +401,11 @@ let () = Command.run command</pre><p>The specification now uses the <code>flag</
 <code class="prompt">$ </code><strong><code>opam install cryptokit --verbose</code></strong></pre><p>The <code>config</code>, <code>remote</code>, and <code>install</code> keywords form a logical grouping of
     commands that factor out a set of flags and arguments. This lets you
     prevent flags that are specific to a particular subcommand from leaking
-    into the general configuration space.<a data-type="indexterm" data-primary="install keyword"/><a data-type="indexterm" data-primary="remote keyword"/></p><p>This usually only becomes a concern when your application
+    into the general configuration space.<a data-type="indexterm" data-primary="install keyword">&#xa0;</a><a data-type="indexterm" data-primary="remote keyword">&#xa0;</a></p><p>This usually only becomes a concern when your application
     organically grows features. Luckily, it's simple to extend your
     application to do this in Command: just swap the <code>Command.basic</code> for <code>Command.group</code>, which takes an association list
     of specifications and handles the subcommand parsing and help output for
-    you:<a data-type="indexterm" data-primary="Command.group"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/group.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Command.basic ;;</code></strong>
+    you:<a data-type="indexterm" data-primary="Command.group">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/group.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Command.basic ;;</code></strong>
 <code class="computeroutput">- : summary:string -&gt;</code>
 <code class="computeroutput">    ?readme:(unit -&gt; string) -&gt;</code>
 <code class="computeroutput">    ('main, unit -&gt; unit) Command.Spec.t -&gt; 'main -&gt; Command.t</code>
@@ -491,7 +491,7 @@ let () = Command.run command</pre><p>And that's all you really need to add subco
 <code class="computeroutput">54 days</code></pre></section><section id="advanced-control-over-parsing" data-type="sect1"><h1>Advanced Control over Parsing</h1><p>The functions for generating a specification may seem like magic. In
     particular, even if you know how to use them, it's not entirely clear how
     they work, and in particular, why the types work out the way they
-    do.<a data-type="indexterm" id="CLPadv" data-primary="command-line parsing" data-secondary="advanced control over"/></p><p>Understanding the details of how these specifications fit together
+    do.<a data-type="indexterm" id="CLPadv" data-primary="command-line parsing" data-secondary="advanced control over">&#xa0;</a></p><p>Understanding the details of how these specifications fit together
     becomes more useful as your command-line interfaces get more complex. In
     particular, you may want to factor out common functionality between
     specifications or interrupt the parsing to perform special processing,
@@ -504,7 +504,7 @@ let () = Command.run command</pre><p>And that's all you really need to add subco
       program. In order to prevent any such mismatches, Command uses some
       interesting type machinery to guarantee they remain in sync. You don't
       have to understand this section to use the more advanced combinators,
-      but it'll help you debug type errors as you use Command more.<a data-type="indexterm" data-primary="callback function"/><a data-type="indexterm" data-primary="debugging" data-secondary="Command mode"/><a data-type="indexterm" data-primary="Command module"/></p><p>The <code>Command.Spec.t</code> type looks
+      but it'll help you debug type errors as you use Command more.<a data-type="indexterm" data-primary="callback function">&#xa0;</a><a data-type="indexterm" data-primary="debugging" data-secondary="Command mode">&#xa0;</a><a data-type="indexterm" data-primary="Command module">&#xa0;</a></p><p>The <code>Command.Spec.t</code> type looks
       deceptively simple: <code>('a, 'b) t</code>. You
       can think of <code>('a, 'b) t</code> here as a
       function of type <code>'a -&gt; 'b</code>, but
@@ -579,7 +579,7 @@ let diff ~common =
       callback functions. This makes code refactoring a breeze by using the
       compiler to spot places where you use commands. Just add a parameter to
       the common definition, run the compiler, and fix type errors until
-      everything works again.<a data-type="indexterm" data-primary="refactoring"/></p><p>For example, if we remove the <code>verbose</code> flag and recompile, we'll get this
+      everything works again.<a data-type="indexterm" data-primary="refactoring">&#xa0;</a></p><p>For example, if we remove the <code>verbose</code> flag and recompile, we'll get this
       impressively long type error:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/build_cal_append_broken.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>corebuild cal_append_broken.native</code></strong>
 <code class="computeroutput">File "cal_append_broken.ml", line 38, characters 45-52:</code>
 <code class="computeroutput">Error: This expression has type</code>
@@ -597,7 +597,7 @@ let diff ~common =
       control the normal course of parsing by supplying a function that maps
       callback arguments to a new set of values. For instance, let's revisit
       our first calendar application that added a number of days onto a
-      supplied base date:<a data-type="indexterm" data-primary="interactive input" data-secondary="prompts for"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/cal_add_days.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
+      supplied base date:<a data-type="indexterm" data-primary="interactive input" data-secondary="prompts for">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/cal_add_days.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
 
 let add =
   Command.basic
@@ -677,7 +677,7 @@ let () = Command.run add</pre><p>The <code>days</code> anonymous argument is
       int option</code>.</p></section><section id="adding-labeled-arguments-to-callbacks" data-type="sect2"><h2>Adding Labeled Arguments to Callbacks</h2><p>The <code>step</code> chaining lets you
       control the types of your callbacks very easily. This can help you match
       existing interfaces or make things more explicit by adding labeled
-      arguments:<a data-type="indexterm" data-primary="callback function"/><a data-type="indexterm" data-primary="arguments" data-secondary="labeled arguments"/><a data-type="indexterm" data-primary="labeled arguments"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/cal_add_labels.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
+      arguments:<a data-type="indexterm" data-primary="callback function">&#xa0;</a><a data-type="indexterm" data-primary="arguments" data-secondary="labeled arguments">&#xa0;</a><a data-type="indexterm" data-primary="labeled arguments">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/command-line-parsing/cal_add_labels.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
 
 let add_days ~base_date ~num_days () =
   Date.add_days base_date num_days
@@ -701,17 +701,17 @@ let () = Command.run add</pre><p>This <code>cal_add_labels</code> example goes b
         arguments into a labeled function.</p><p>Labeled arguments are more verbose but can also help prevent
       errors with command-line arguments with similar types but different
       names and purposes. It's good form to use labels when you have a lot of
-      otherwise anonymous <code>int</code> and <code>string</code> arguments.<a data-type="indexterm" data-startref="CLPadv"/></p></section></section><section id="command-line-auto-completion-with-bash" data-type="sect1"><h1>Command-Line Autocompletion with bash</h1><p>Modern UNIX shells usually have a tab-completion feature to
+      otherwise anonymous <code>int</code> and <code>string</code> arguments.<a data-type="indexterm" data-startref="CLPadv">&#xa0;</a></p></section></section><section id="command-line-auto-completion-with-bash" data-type="sect1"><h1>Command-Line Autocompletion with bash</h1><p>Modern UNIX shells usually have a tab-completion feature to
     interactively help you figure out how to build a command line. These work
     by pressing the Tab key in the middle of typing a command, and seeing the
     options that pop up. You've probably used this most often to find the
     files in the current directory, but it can actually be extended for other
-    parts of the command, too.<a data-type="indexterm" data-primary="tab-autocompletion"/><a data-type="indexterm" data-primary="autocompletion"/><a data-type="indexterm" data-primary="command-line parsing" data-secondary="autocompletion with bash"/></p><p>The precise mechanism for autocompletion varies depending on what
+    parts of the command, too.<a data-type="indexterm" data-primary="tab-autocompletion">&#xa0;</a><a data-type="indexterm" data-primary="autocompletion">&#xa0;</a><a data-type="indexterm" data-primary="command-line parsing" data-secondary="autocompletion with bash">&#xa0;</a></p><p>The precise mechanism for autocompletion varies depending on what
     shell you are using, but we'll assume you are using the most common one:
     <span class="command"><em>bash</em></span>. This is the default interactive
     shell on most Linux distributions and Mac OS X, but you may need to switch
     to it on *BSD or Windows (when using Cygwin). The rest of this section
-    assumes that you're using <span class="command"><em>bash</em></span>.<a data-type="indexterm" data-primary="bash autocompletion"/></p><p>Bash autocompletion isn't always installed by default, so check your
+    assumes that you're using <span class="command"><em>bash</em></span>.<a data-type="indexterm" data-primary="bash autocompletion">&#xa0;</a></p><p>Bash autocompletion isn't always installed by default, so check your
     OS package manager to see if you have it available.</p><table><thead><tr><th>Operating system</th><th>Package manager</th><th>Package</th></tr></thead><tbody><tr><td>Debian Linux</td><td><code>apt</code></td><td><code>bash-completion</code></td></tr><tr><td>Mac OS X</td><td>Homebrew</td><td><code>bash-completion</code></td></tr><tr><td>FreeBSD</td><td>Ports system</td><td><em class="filename">/usr/ports/shells/bash-completion</em></td></tr></tbody></table><p>Once <em>bash</em> completion is installed and
     configured, check that it works by typing the <code>ssh</code> command and pressing the Tab key. This
     should show you the list of known hosts from your
@@ -747,7 +747,7 @@ let () = Command.run add</pre><p>This <code>cal_add_labels</code> example goes b
 <code class="computeroutput">add      diff     help     version</code></pre><p>Command completion support works for flags and grouped commands
       and is very useful when building larger command-line interfaces. Don't
       forget to install the shell fragment into your global <em class="filename">bash_completion.d</em> directory if you want it to
-      be loaded in all of your login shells.<a data-type="indexterm" data-primary="completion handlers"/></p><div data-type="note"><h1>Installing a Generic Completion Handler</h1><p>Sadly, <span class="command"><em>bash</em></span> doesn't support
+      be loaded in all of your login shells.<a data-type="indexterm" data-primary="completion handlers">&#xa0;</a></p><div data-type="note"><h1>Installing a Generic Completion Handler</h1><p>Sadly, <span class="command"><em>bash</em></span> doesn't support
         installing a generic handler for all Command-based applications. This
         means you have to install the completion script for every application,
         but you should be able to automate this in the build and packaging
@@ -756,7 +756,7 @@ let () = Command.run add</pre><p>This <code>cal_add_labels</code> example goes b
         OS-specific.</p></div></section></section><section id="alternative-command-line-parsers" data-type="sect1"><h1>Alternative Command-Line Parsers</h1><p>This rounds up our tour of the Command library. This isn't the only
     way to parse command-line arguments of course; there are several
     alternatives available on OPAM. Three of the most prominent ones
-    follow:<a data-type="indexterm" data-primary="Cmdliner"/><a data-type="indexterm" data-primary="OCaml toolchain" data-secondary="ocaml-getopt"/><a data-type="indexterm" data-primary="Arg module"/><a data-type="indexterm" data-primary="command-line parsing" data-secondary="alternatives to Command library"/><a data-type="indexterm" data-primary="OPAM package manager"/></p><dl><dt>The <code>Arg</code> module</dt><dd><p>The<code> Arg</code> module is from the OCaml standard
+    follow:<a data-type="indexterm" data-primary="Cmdliner">&#xa0;</a><a data-type="indexterm" data-primary="OCaml toolchain" data-secondary="ocaml-getopt">&#xa0;</a><a data-type="indexterm" data-primary="Arg module">&#xa0;</a><a data-type="indexterm" data-primary="command-line parsing" data-secondary="alternatives to Command library">&#xa0;</a><a data-type="indexterm" data-primary="OPAM package manager">&#xa0;</a></p><dl><dt>The <code>Arg</code> module</dt><dd><p>The<code> Arg</code> module is from the OCaml standard
           library, which is used by the compiler itself to handle its
           command-line interface. Command is generally more featureful than
           Arg (mainly via support for subcommands, the <code>step</code> combinator to transform inputs, and

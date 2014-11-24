@@ -10,14 +10,14 @@
     the <code>let</code> keyword. We can type a
     so-called <em>top-level</em> <code>let</code> binding with the following syntax. Note that
     variable names must start with a lowercase letter or an
-    underscore:<a data-type="indexterm" data-primary="bindings" data-secondary="top-level"/><a data-type="indexterm" data-primary="top-level bindings"/><a data-type="indexterm" data-primary="let syntax" data-secondary="top-level bindings"/></p><p>
-      <a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/let.syntax" class="orm:hideurl:ital"><em class="hyperlink">Syntax</em></a></p><pre data-type="programlisting" data-code-language="ocaml">let <em>&lt;variable&gt;</em> = <em>&lt;expr&gt;</em></pre><p>As we'll see when we get to the module system in <a href="#files-modules-and-programs" data-type="xref"/>, this same syntax is used for <code>let</code>
+    underscore:<a data-type="indexterm" data-primary="bindings" data-secondary="top-level">&#xa0;</a><a data-type="indexterm" data-primary="top-level bindings">&#xa0;</a><a data-type="indexterm" data-primary="let syntax" data-secondary="top-level bindings">&#xa0;</a></p><p>
+      <a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/let.syntax" class="orm:hideurl:ital"><em class="hyperlink">Syntax</em></a></p><pre data-type="programlisting" data-code-language="ocaml">let <em>&lt;variable&gt;</em> = <em>&lt;expr&gt;</em></pre><p>As we'll see when we get to the module system in <a href="#files-modules-and-programs" data-type="xref">#files-modules-and-programs</a>, this same syntax is used for <code>let</code>
       bindings at the top level of a module.</p><p>Every variable binding has a <em>scope</em>, which is
     the portion of the code that can refer to that binding. When using
     <span class="command"><em>utop</em></span>, the scope of a top-level
     <code>let</code> binding is everything that follows it in the
     session. When it shows up in a module, the scope is the remainder of that
-    module.<a data-type="indexterm" data-primary="variables" data-secondary="scope of"/><a data-type="indexterm" data-primary="bindings" data-secondary="scope of"/><a data-type="indexterm" data-primary="scope"/></p><p>Here's a simple example:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let x = 3;;</code></strong>
+    module.<a data-type="indexterm" data-primary="variables" data-secondary="scope of">&#xa0;</a><a data-type="indexterm" data-primary="bindings" data-secondary="scope of">&#xa0;</a><a data-type="indexterm" data-primary="scope">&#xa0;</a></p><p>Here's a simple example:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let x = 3;;</code></strong>
 <code class="computeroutput">val x : int = 3</code>
 <code class="prompt"># </code><strong><code>let y = 4;;</code></strong>
 <code class="computeroutput">val y : int = 4</code>
@@ -41,7 +41,7 @@
 <code class="computeroutput">Characters -1-13:</code>
 <code class="computeroutput">Error: Unbound value language_list</code></pre><p>A <code>let</code> binding in an inner scope can
     <em>shadow</em>, or hide, the definition from an outer scope.
-    So, for example, we could have written the <code>dashed_languages</code> example as follows:<a data-type="indexterm" data-primary="variables" data-secondary="shadowing of"/><a data-type="indexterm" data-primary="shadowing"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    So, for example, we could have written the <code>dashed_languages</code> example as follows:<a data-type="indexterm" data-primary="variables" data-secondary="shadowing of">&#xa0;</a><a data-type="indexterm" data-primary="shadowing">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 3)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let languages = "OCaml,Perl,C++,C";;</code></strong>
 <code class="computeroutput">val languages : string = "OCaml,Perl,C++,C"</code>
 <code class="prompt"># </code><strong><code>let dashed_languages =</code></strong>
@@ -56,7 +56,7 @@
     (part 4)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>languages;;</code></strong>
 <code class="computeroutput">- : string = "OCaml,Perl,C++,C"</code></pre><p>One common idiom is to use a series of nested <code>let</code>/<code>in</code>
     expressions to build up the components of a larger computation. Thus, we
-    might write:<a data-type="indexterm" data-primary="let syntax" data-secondary="nested bindings"/><a data-type="indexterm" data-primary="nested let binding"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+    might write:<a data-type="indexterm" data-primary="let syntax" data-secondary="nested bindings">&#xa0;</a><a data-type="indexterm" data-primary="nested let binding">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
     (part 5)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let area_of_ring inner_radius outer_radius =</code></strong>
 <strong><code>     let pi = acos (-1.) in</code></strong>
 <strong><code>     let area_of_circle r = pi *. r *. r in</code></strong>
@@ -85,10 +85,10 @@
       of <code>pi</code> to <code>0.</code> made no
       difference. This explains the warning produced by the toplevel telling us that there is an
       unused definition of <code>pi</code>.</p><p>In OCaml, <code>let</code> bindings are immutable. There are
-    many kinds of mutable values in OCaml, which we'll discuss in <a href="#imperative-programming-1" data-type="xref"/>, but there are no mutable
+    many kinds of mutable values in OCaml, which we'll discuss in <a href="#imperative-programming-1" data-type="xref">#imperative-programming-1</a>, but there are no mutable
     variables.</p><div data-type="note"><h1>Why Don't Variables Vary?</h1><p>One source of confusion for people new to OCaml is the fact that
       variables are immutable. This seems pretty surprising even on linguistic
-      terms. Isn't the whole point of a variable that it can vary?<a data-type="indexterm" data-primary="variables" data-secondary="immutability of"/></p><p>The answer to this is that variables in OCaml (and generally in functional languages)
+      terms. Isn't the whole point of a variable that it can vary?<a data-type="indexterm" data-primary="variables" data-secondary="immutability of">&#xa0;</a></p><p>The answer to this is that variables in OCaml (and generally in functional languages)
         are really more like variables in an equation than a variable in an imperative language. If
         you think about the mathematical identity <code>x(y + z) = xy +
           xz</code>, there's no notion of mutating the variables <code>x</code>, <code>y</code>, and <code>z</code>. They vary in the sense that you can instantiate this equation with different
@@ -97,19 +97,19 @@
       different values, even without mutation.</p></div><section id="pattern-matching-and-let" data-type="sect2"><h2>Pattern Matching and let</h2><p>Another useful feature of <code>let</code> bindings is that
       they support the use of <em>patterns</em> on the lefthand
       side. Consider the following code, which uses <code>List.unzip</code>, a function for converting a list
-      of pairs into a pair of lists:<a data-type="indexterm" data-primary="pattern matching" data-secondary="and let"/><a data-type="indexterm" data-primary="let syntax" data-secondary="pattern matching"/><a data-type="indexterm" data-primary="variables" data-secondary="pattern matching in"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      of pairs into a pair of lists:<a data-type="indexterm" data-primary="pattern matching" data-secondary="and let">&#xa0;</a><a data-type="indexterm" data-primary="let syntax" data-secondary="pattern matching">&#xa0;</a><a data-type="indexterm" data-primary="variables" data-secondary="pattern matching in">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 7)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let (ints,strings) = List.unzip [(1,"one"); (2,"two"); (3,"three")];;</code></strong>
 <code class="computeroutput">val ints : int list = [1; 2; 3]</code>
 <code class="computeroutput">val strings : string list = ["one"; "two"; "three"]</code></pre><p>Here, <code>(ints,strings)</code> is a
       pattern, and the <code>let</code> binding assigns
       values to both of the identifiers that show up in that pattern. A
       pattern is essentially a description of the shape of a data structure,
-      where some components are identifiers to be bound. As we saw in <a href="#tuples-lists-options-and-pattern-matching" data-type="xref"/>, OCaml has
+      where some components are identifiers to be bound. As we saw in <a href="#tuples-lists-options-and-pattern-matching" data-type="xref">#tuples-lists-options-and-pattern-matching</a>, OCaml has
       patterns for a variety of different data types.</p><p>Using a pattern in a <code>let</code> binding makes the most sense for a pattern
         that is <em>irrefutable</em>, <em>i.e.</em>, where any value of the
         type in question is guaranteed to match the pattern. Tuple and record patterns are
         irrefutable, but list patterns are not. Consider the following code that implements a
-        function for upper casing the first element of a comma-separated list:<a data-type="indexterm" data-primary="irrefutable patterns"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+        function for upper casing the first element of a comma-separated list:<a data-type="indexterm" data-primary="irrefutable patterns">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 8)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let upcase_first_entry line =</code></strong>
 <strong><code>     let (first :: rest) = String.split ~on:',' line in</code></strong>
 <strong><code>     String.concat ~sep:"," (String.uppercase first :: rest)</code></strong>
@@ -128,14 +128,14 @@
 <strong><code>     | first :: rest -&gt; String.concat ~sep:"," (String.uppercase first :: rest)</code></strong>
 <strong><code>  ;;</code></strong>
 <code class="computeroutput">val upcase_first_entry : string -&gt; string = &lt;fun&gt;</code></pre><p>Note that this is our first use of <code>assert</code>, which is useful for marking cases that
-      should be impossible. We'll discuss <code>assert</code> in more detail in <a href="#error-handling" data-type="xref"/>.</p></section></section><section id="functions" data-type="sect1"><h1>Functions</h1><p>Given that OCaml is a functional language, it's no surprise that
+      should be impossible. We'll discuss <code>assert</code> in more detail in <a href="#error-handling" data-type="xref">#error-handling</a>.</p></section></section><section id="functions" data-type="sect1"><h1>Functions</h1><p>Given that OCaml is a functional language, it's no surprise that
     functions are important and pervasive. Indeed, functions have come up in
     almost every example we've done so far. This section will go into more
     depth, explaining the details of how OCaml's functions work. As you'll
     see, functions in OCaml differ in a variety of ways from what you'll find
     in most mainstream languages.</p><section id="anonymous-functions" data-type="sect2"><h2>Anonymous Functions</h2><p>We'll start by looking at the most basic style of function declaration in OCaml: the
           <em>anonymous function</em>. An anonymous function is a function that is
-        declared without being named. These can be declared using the <code>fun</code> keyword, as shown here:<a data-type="indexterm" data-primary="fun keyword" data-secondary="anonymous functions"/><a data-type="indexterm" data-primary="anonymous functions"/><a data-type="indexterm" data-primary="functions" data-secondary="anonymous functions"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+        declared without being named. These can be declared using the <code>fun</code> keyword, as shown here:<a data-type="indexterm" data-primary="fun keyword" data-secondary="anonymous functions">&#xa0;</a><a data-type="indexterm" data-primary="anonymous functions">&#xa0;</a><a data-type="indexterm" data-primary="functions" data-secondary="anonymous functions">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 10)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>(fun x -&gt; x + 1);;</code></strong>
 <code class="computeroutput">- : int -&gt; int = &lt;fun&gt;</code></pre><p>Anonymous functions operate in much the same way as named
       functions. For example, we can apply an anonymous function to an
@@ -170,13 +170,13 @@
         aside, the two styles of function definition are equivalent.</p><div data-type="note"><h1>let and fun</h1><p>Functions and <code>let</code> bindings have a lot to do
         with each other. In some sense, you can think of the parameter of a
         function as a variable being bound to the value passed by the caller.
-        Indeed, the following two expressions are nearly equivalent:<a data-type="indexterm" data-primary="let syntax" data-secondary="functions and"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+        Indeed, the following two expressions are nearly equivalent:<a data-type="indexterm" data-primary="let syntax" data-secondary="functions and">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
         (part 16)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>(fun x -&gt; x + 1) 7;;</code></strong>
 <code class="computeroutput">- : int = 8</code>
 <code class="prompt"># </code><strong><code>let x = 7 in x + 1;;</code></strong>
 <code class="computeroutput">- : int = 8</code></pre><p>This connection is important, and will come up more when
-        programming in a monadic style, as we'll see in <a href="#concurrent-programming-with-async" data-type="xref"/>.</p></div></section><section id="multi-argument-functions" data-type="sect2"><h2>Multiargument functions</h2><p>OCaml of course also supports multiargument functions, such
-      as:<a data-type="indexterm" data-primary="fun keyword" data-secondary="multi-argument functions"/><a data-type="indexterm" data-primary="multi-argument functions"/><a data-type="indexterm" data-primary="functions" data-secondary="multi-argument functions"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+        programming in a monadic style, as we'll see in <a href="#concurrent-programming-with-async" data-type="xref">#concurrent-programming-with-async</a>.</p></div></section><section id="multi-argument-functions" data-type="sect2"><h2>Multiargument functions</h2><p>OCaml of course also supports multiargument functions, such
+      as:<a data-type="indexterm" data-primary="fun keyword" data-secondary="multi-argument functions">&#xa0;</a><a data-type="indexterm" data-primary="multi-argument functions">&#xa0;</a><a data-type="indexterm" data-primary="functions" data-secondary="multi-argument functions">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 17)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let abs_diff x y = abs (x - y);;</code></strong>
 <code class="computeroutput">val abs_diff : int -&gt; int -&gt; int = &lt;fun&gt;</code>
 <code class="prompt"># </code><strong><code>abs_diff 3 4;;</code></strong>
@@ -197,7 +197,7 @@
       The key to interpreting the type signature of a curried function is the
       observation that <code>-&gt;</code> is
       right-associative. The type signature of <code>abs_diff</code> can therefore be parenthesized as
-      follows:<a data-type="indexterm" data-primary="curried functions"/><a data-type="indexterm" data-primary="functions" data-secondary="curried functions"/></p><p>OCaml: <a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/abs_diff.mli" class="orm:hideurl:ital"><em class="hyperlink">variables-and-functions/abs_diff.mli</em></a></p><pre data-type="programlisting" data-code-language="ocaml">val abs_diff : int -&gt; (int -&gt; int)</pre><p>The parentheses don't change the meaning of the signature, but
+      follows:<a data-type="indexterm" data-primary="curried functions">&#xa0;</a><a data-type="indexterm" data-primary="functions" data-secondary="curried functions">&#xa0;</a></p><p>OCaml: <a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/abs_diff.mli" class="orm:hideurl:ital"><em class="hyperlink">variables-and-functions/abs_diff.mli</em></a></p><pre data-type="programlisting" data-code-language="ocaml">val abs_diff : int -&gt; (int -&gt; int)</pre><p>The parentheses don't change the meaning of the signature, but
       they make it easier to see the currying.</p><p>Currying is more than just a theoretical curiosity. You can make
       use of currying to specialize a function by feeding in some of the
       arguments. Here's an example where we create a specialized version of
@@ -210,10 +210,10 @@
 <code class="prompt"># </code><strong><code>dist_from_3 (-1);;</code></strong>
 <code class="computeroutput">- : int = 4</code></pre><p>The practice of applying some of the arguments of a curried
       function to get a new function is called <em>partial
-      application</em>.<a data-type="indexterm" data-primary="partial application"/></p><p>Note that the <code>fun</code> keyword
+      application</em>.<a data-type="indexterm" data-primary="partial application">&#xa0;</a></p><p>Note that the <code>fun</code> keyword
       supports its own syntax for currying, so the following definition of
       <code>abs_diff</code> is equivalent to the
-      previous one.<a data-type="indexterm" data-primary="fun keyword" data-secondary="currying syntax"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      previous one.<a data-type="indexterm" data-primary="fun keyword" data-secondary="currying syntax">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 20)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let abs_diff = (fun x y -&gt; abs (x - y));;</code></strong>
 <code class="computeroutput">val abs_diff : int -&gt; int -&gt; int = &lt;fun&gt;</code></pre><p>You might worry that curried functions are terribly expensive, but
       this is not the case. In OCaml, there is no penalty for calling a
@@ -233,11 +233,11 @@
       itself in its definition. Recursion is important in any programming
       language, but is particularly important in functional languages, because
       it is the way that you build looping constructs. (As will be discussed
-      in more detail in <a href="#imperative-programming-1" data-type="xref"/>, OCaml
+      in more detail in <a href="#imperative-programming-1" data-type="xref">#imperative-programming-1</a>, OCaml
       also supports imperative looping constructs like <code>for</code> and <code>while</code>, but these are only useful when using
-      OCaml's imperative features.)<a data-type="indexterm" data-primary="recursive functions" data-secondary="definition of"/><a data-type="indexterm" data-primary="functions" data-secondary="recursive functions"/></p><p>In order to define a recursive function, you need to mark the
+      OCaml's imperative features.)<a data-type="indexterm" data-primary="recursive functions" data-secondary="definition of">&#xa0;</a><a data-type="indexterm" data-primary="functions" data-secondary="recursive functions">&#xa0;</a></p><p>In order to define a recursive function, you need to mark the
       <code>let</code> binding as recursive with the <code>rec</code> keyword, as shown in this function for
-      finding the first sequentially repeated element in a list:<a data-type="indexterm" data-primary="rec keyword"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      finding the first sequentially repeated element in a list:<a data-type="indexterm" data-primary="rec keyword">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 22)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let rec find_first_stutter list =</code></strong>
 <strong><code>    match list with</code></strong>
 <strong><code>    | [] | [_] -&gt;</code></strong>
@@ -251,7 +251,7 @@
       is a disjunction of two patterns, meaning that it will be considered a
       match if either pattern matches. In this case, <code>[]</code> matches the empty list, and <code>[_]</code> matches any single element list. The
       <code>_</code> is there so we don't have to put an
-      explicit name on that single element.<a data-type="indexterm" data-primary="or patterns"/></p><p>We can also define multiple mutually recursive values by using
+      explicit name on that single element.<a data-type="indexterm" data-primary="or patterns">&#xa0;</a></p><p>We can also define multiple mutually recursive values by using
       <code>let rec</code> combined with the <code>and</code> keyword. Here's a (gratuitously
       inefficient) example:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 23)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let rec is_even x =</code></strong>
@@ -270,7 +270,7 @@
       reasons: the type-inference algorithm needs to know when a set of
       function definitions are mutually recursive, and for reasons that don't
       apply to a pure language like Haskell, these have to be marked
-      explicitly by the programmer.<a data-type="indexterm" data-primary="let syntax" data-secondary="nonrecursive vs. recursive functions"/></p><p>But this decision has some good effects. For one thing, recursive
+      explicitly by the programmer.<a data-type="indexterm" data-primary="let syntax" data-secondary="nonrecursive vs. recursive functions">&#xa0;</a></p><p>But this decision has some good effects. For one thing, recursive
       (and especially mutually recursive) definitions are harder to reason
       about than nonrecursive ones. It's therefore useful that, in the absence
       of an explicit <code>rec</code>, you can assume
@@ -278,7 +278,7 @@
       build upon previous bindings.</p><p>In addition, having a nonrecursive form makes it easier to create
       a new definition that extends and supersedes an existing one by
       shadowing it.</p></section><section id="prefix-and-infix-operators" data-type="sect2"><h2>Prefix and Infix Operators</h2><p>So far, we've seen examples of functions used in both prefix and
-      infix style:<a data-type="indexterm" data-primary="operators" data-secondary="prefix and infix operators"/><a data-type="indexterm" data-primary="infix operators"/><a data-type="indexterm" data-primary="prefix operators"/><a data-type="indexterm" id="FNCprf" data-primary="functions" data-secondary="prefix and infix operators"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      infix style:<a data-type="indexterm" data-primary="operators" data-secondary="prefix and infix operators">&#xa0;</a><a data-type="indexterm" data-primary="infix operators">&#xa0;</a><a data-type="indexterm" data-primary="prefix operators">&#xa0;</a><a data-type="indexterm" id="FNCprf" data-primary="functions" data-secondary="prefix and infix operators">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 24)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Int.max 3 4  (* prefix *);;</code></strong>
 <code class="computeroutput">- : int = 4</code>
 <code class="prompt"># </code><strong><code>3 + 4        (* infix  *);;</code></strong>
@@ -314,7 +314,7 @@
       begins or ends with <code>*</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 28)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let ( *** ) x y = (x ** y) ** y;;</code></strong>
 <code class="computeroutput">val ( *** ) : float -&gt; float -&gt; float = &lt;fun&gt;</code></pre><p>The syntactic role of an operator is typically determined by its
-      first character or two, though there are a few exceptions. <a href="#table2_1" data-type="xref"/> breaks the different operators and other syntactic
+      first character or two, though there are a few exceptions. <a href="#table2_1" data-type="xref">#table2_1</a> breaks the different operators and other syntactic
       forms into groups from highest to lowest precedence, explaining how each
       behaves syntactically. We write <code>!</code>...
       to indicate the class of operators beginning with <code>!</code>.</p><table id="table2_1"><caption>Precedence and associativity</caption><thead><tr><th>Operator prefix</th><th>Associativity</th></tr></thead><tbody><tr><td><code>!</code>..., <code>?</code>..., <code>~</code>...</td><td>Prefix</td></tr><tr><td><code>.</code>, <code>.(</code>, <code>.[</code></td><td>-</td></tr><tr><td>function application, constructor, <code>assert</code>, <code>lazy</code></td><td>Left associative</td></tr><tr><td><code>-</code>, <code>-.</code></td><td>Prefix</td></tr><tr><td><code>**</code>..., <code>lsl</code>, <code>lsr</code>, <code>asr</code></td><td>Right associative</td></tr><tr><td><code>*</code>..., <code>/</code>..., <code>%</code>..., <code>mod</code>, <code>land</code>, <code>lor</code>, <code>lxor</code></td><td>Left associative</td></tr><tr><td><code>+</code>..., <code>-</code>...</td><td>Left associative</td></tr><tr><td><code>::</code></td><td>Right associative</td></tr><tr><td><code>@</code>..., <code>^</code>...</td><td>Right associative</td></tr><tr><td><code>=</code>..., <code>&lt;</code>..., <code>&gt;</code>..., <code>|</code>..., <code>&amp;</code>..., <code>$</code>...</td><td>Left associative</td></tr><tr><td><code>&amp;</code>, <code>&amp;&amp;</code></td><td>Right associative</td></tr><tr><td><code>or</code>, <code>||</code></td><td>Right associative</td></tr><tr><td><code>,</code></td><td>-</td></tr><tr><td><code>&lt;-</code>, <code>:=</code></td><td>Right associative</td></tr><tr><td><code>if</code></td><td>-</td></tr><tr><td><code>;</code></td><td>Right associative</td></tr></tbody></table><p>There's one important special case: <code>-</code> and <code>-.</code>,
@@ -325,7 +325,7 @@
       Another thing to remember about negation is that it has lower precedence
       than function application, which means that if you want to pass a
       negative value, you need to wrap it in parentheses, as you can see in
-      this code:<a data-type="indexterm" data-primary="operators" data-secondary="negation operators"/><a data-type="indexterm" data-primary="operators" data-secondary="subtraction operators"/><a data-type="indexterm" data-primary="subtraction operators"/><a data-type="indexterm" data-primary="negation operators"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      this code:<a data-type="indexterm" data-primary="operators" data-secondary="negation operators">&#xa0;</a><a data-type="indexterm" data-primary="operators" data-secondary="subtraction operators">&#xa0;</a><a data-type="indexterm" data-primary="subtraction operators">&#xa0;</a><a data-type="indexterm" data-primary="negation operators">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 29)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Int.max 3 (-4);;</code></strong>
 <code class="computeroutput">- : int = 3</code>
 <code class="prompt"># </code><strong><code>Int.max 3 -4;;</code></strong>
@@ -347,7 +347,7 @@
       in the UNIX shell. Consider, for example, the following code for
       printing out the unique elements of your <code>PATH</code>. Note that <code>List.dedup</code> that follows removes duplicates
       from a list by sorting the list using the provided comparison
-      function:<a data-type="indexterm" data-primary="lists" data-secondary="duplicate removal"/><a data-type="indexterm" data-primary="duplicates, removing"/><a data-type="indexterm" data-primary="List.dedup"/><a data-type="indexterm" data-primary="operators" data-secondary="sequencing operators"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      function:<a data-type="indexterm" data-primary="lists" data-secondary="duplicate removal">&#xa0;</a><a data-type="indexterm" data-primary="duplicates, removing">&#xa0;</a><a data-type="indexterm" data-primary="List.dedup">&#xa0;</a><a data-type="indexterm" data-primary="operators" data-secondary="sequencing operators">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 32)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let path = "/usr/bin:/usr/local/bin:/bin:/sbin";;</code></strong>
 <code class="computeroutput">val path : string = "/usr/bin:/usr/local/bin:/bin:/sbin"</code>
 <code class="prompt"># </code><strong><code>String.split ~on:':' path</code></strong>
@@ -371,7 +371,7 @@
 <code class="computeroutput">- : unit = ()</code></pre><p>An important part of what's happening here is partial application.
       For example, <code>List.iter</code> normally takes
       two arguments: a function to be called on each element of the list, and
-      the list to iterate over. We can call <code>List.iter</code> with all its arguments:<a data-type="indexterm" data-primary="partial application"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      the list to iterate over. We can call <code>List.iter</code> with all its arguments:<a data-type="indexterm" data-primary="partial application">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 34)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>List.iter ~f:print_endline ["Two"; "lines"];;</code></strong>
 <code class="computeroutput">Two</code>
 <code class="computeroutput">lines</code>
@@ -400,9 +400,9 @@
       But <code>List.iter ~f:print_endline</code>
       expects a list of strings as its input, not a function.</p><p>The type error aside, this example highlights the importance of
       choosing the operator you use with care, particularly with respect to
-      associativity.<a data-type="indexterm" data-startref="FNCprf"/></p></section><section id="declaring-functions-with-function" data-type="sect2"><h2>Declaring Functions with Function</h2><p>Another way to define a function is using the <code>function</code> keyword. Instead of having syntactic
+      associativity.<a data-type="indexterm" data-startref="FNCprf">&#xa0;</a></p></section><section id="declaring-functions-with-function" data-type="sect2"><h2>Declaring Functions with Function</h2><p>Another way to define a function is using the <code>function</code> keyword. Instead of having syntactic
       support for declaring multiargument (curried) functions, <code>function</code> has built-in pattern matching. Here's
-      an example:<a data-type="indexterm" data-primary="functions" data-secondary="defining"/><a data-type="indexterm" data-primary="function keyword"/><a data-type="indexterm" data-primary="functions" data-secondary="declaring with function keyword"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      an example:<a data-type="indexterm" data-primary="functions" data-secondary="defining">&#xa0;</a><a data-type="indexterm" data-primary="function keyword">&#xa0;</a><a data-type="indexterm" data-primary="functions" data-secondary="declaring with function keyword">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 37)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let some_or_zero = function</code></strong>
 <strong><code>     | Some x -&gt; x</code></strong>
 <strong><code>     | None -&gt; 0</code></strong>
@@ -435,7 +435,7 @@
         OCaml also supports labeled arguments, which let you identify a function argument by name.
         Indeed, we've already encountered functions from Core like <code>List.map</code> that use labeled arguments. Labeled arguments are marked by a leading
         tilde, and a label (followed by a colon) is put in front of the variable to be labeled.
-        Here's an example:<a data-type="indexterm" data-primary="labeled arguments"/><a data-type="indexterm" data-primary="arguments" data-secondary="labeled arguments"/><a data-type="indexterm" data-primary="functions" data-secondary="labeled arguments"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+        Here's an example:<a data-type="indexterm" data-primary="labeled arguments">&#xa0;</a><a data-type="indexterm" data-primary="arguments" data-secondary="labeled arguments">&#xa0;</a><a data-type="indexterm" data-primary="functions" data-secondary="labeled arguments">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 40)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let ratio ~num ~denom = float num /. float denom;;</code></strong>
 <code class="computeroutput">val ratio : num:int -&gt; denom:int -&gt; float = &lt;fun&gt;</code></pre><p>We can then provide a labeled argument using a similar convention.
       As you can see, the arguments can be provided in any order:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
@@ -447,13 +447,13 @@
       variable being used are the same. We were actually already using label
       punning when defining <code>ratio</code>. The
       following shows how punning can be used when invoking a
-      function:<a data-type="indexterm" data-primary="punning"/><a data-type="indexterm" data-primary="label punning"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+      function:<a data-type="indexterm" data-primary="punning">&#xa0;</a><a data-type="indexterm" data-primary="label punning">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 42)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let num = 3 in</code></strong>
 <strong><code>  let denom = 4 in</code></strong>
 <strong><code>  ratio ~num ~denom;;</code></strong>
 <code class="computeroutput">- : float = 0.75</code></pre><p>Labeled arguments are useful in a few different cases:</p><ul><li><p>When defining a function with lots of arguments. Beyond a
           certain number, arguments are easier to remember by name than by
-          position.<a data-type="indexterm" data-primary="functions" data-secondary="with multiple arguments"/><a data-type="indexterm" data-primary="multi-argument functions"/></p></li><li><p>When the meaning of a particular argument is unclear from the
+          position.<a data-type="indexterm" data-primary="functions" data-secondary="with multiple arguments">&#xa0;</a><a data-type="indexterm" data-primary="multi-argument functions">&#xa0;</a></p></li><li><p>When the meaning of a particular argument is unclear from the
           type alone. Consider a function for creating a hash table whose
           first argument is the initial size of the array backing the hash
           table, and the second is a Boolean flag, which indicates whether
@@ -489,7 +489,7 @@
           is the final argument to that function.</p></li></ul><section id="higher-order-functions-and-labels" data-type="sect3"><h3>Higher-order functions and labels</h3><p>One surprising gotcha with labeled arguments is that while order doesn't matter when
           calling a function with labeled arguments, it does matter in a higher-order context,
             <em>e.g.</em>, when passing a function with labeled arguments to another
-          function. Here's an example:<a data-type="indexterm" data-primary="higher-order functions, and labels"/><a data-type="indexterm" data-primary="functions" data-secondary="higher-order and labels"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+          function. Here's an example:<a data-type="indexterm" data-primary="higher-order functions, and labels">&#xa0;</a><a data-type="indexterm" data-primary="functions" data-secondary="higher-order and labels">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
         (part 44)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let apply_to_tuple f (first,second) = f ~first ~second;;</code></strong>
 <code class="computeroutput">val apply_to_tuple : (first:'a -&gt; second:'b -&gt; 'c) -&gt; 'a * 'b -&gt; 'c = &lt;fun&gt;</code></pre><p>Here, the definition of <code>apply_to_tuple</code> sets up the expectation that
         its first argument is a function with two labeled arguments, <code>first</code> and <code>second</code>, listed in that order. We could have
@@ -512,7 +512,7 @@
         arguments.</p></section></section><section id="optional-arguments" data-type="sect2"><h2>Optional Arguments</h2><p>An optional argument is like a labeled argument that the caller
       can choose whether or not to provide. Optional arguments are passed in
       using the same syntax as labeled arguments, and, like labeled arguments,
-      can be provided in any order.<a data-type="indexterm" id="ARGopt" data-primary="arguments" data-secondary="optional arguments"/><a data-type="indexterm" id="FNCopt" data-primary="functions" data-secondary="optional arguments"/></p><p>Here's an example of a string concatenation function with an
+      can be provided in any order.<a data-type="indexterm" id="ARGopt" data-primary="arguments" data-secondary="optional arguments">&#xa0;</a><a data-type="indexterm" id="FNCopt" data-primary="functions" data-secondary="optional arguments">&#xa0;</a></p><p>Here's an example of a string concatenation function with an
       optional separator. This function uses the <code>^</code> operator for pairwise string
       concatenation:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
       (part 49)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let concat ?sep x y =</code></strong>
@@ -542,7 +542,7 @@
       explicitness.</p><p>This means that rarely used functions should not have optional arguments. A good rule of
         thumb is to avoid optional arguments for functions internal to a module,
           <em>i.e.</em>, functions that are not included in the module's interface, or
-          <code>mli</code> file. We'll learn more about <code>mli</code>s in <a href="#files-modules-and-programs" data-type="xref"/>.</p><section id="explicit-passing-of-an-optional-argument" data-type="sect3"><h3>Explicit passing of an optional argument</h3><p>Under the covers, a function with an optional argument receives
+          <code>mli</code> file. We'll learn more about <code>mli</code>s in <a href="#files-modules-and-programs" data-type="xref">#files-modules-and-programs</a>.</p><section id="explicit-passing-of-an-optional-argument" data-type="sect3"><h3>Explicit passing of an optional argument</h3><p>Under the covers, a function with an optional argument receives
         <code>None</code> when the caller doesn't
         provide the argument, and <code>Some</code> when
         it does. But the <code>Some</code> and <code>None</code> are normally not explicitly passed in
@@ -551,7 +551,7 @@
         instead of <code>~</code> to mark the argument.
         Thus, the following two lines are equivalent ways of specifying the
         <code>sep</code> argument to
-        <code>concat</code>:<a data-type="indexterm" data-primary="optional arguments" data-secondary="explicit passing of"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+        <code>concat</code>:<a data-type="indexterm" data-primary="optional arguments" data-secondary="explicit passing of">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
         (part 51)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>concat ~sep:":" "foo" "bar" (* provide the optional argument *);;</code></strong>
 <code class="computeroutput">- : string = "foo:bar"</code>
 <code class="prompt"># </code><strong><code>concat ?sep:(Some ":") "foo" "bar" (* pass an explicit [Some] *);;</code></strong>
@@ -593,7 +593,7 @@
         arguments, <code>x</code> and <code>y</code>. Note that you can use an apostrophe as
         part of a variable name, so <code>x'</code> and
         <code>y'</code> are just ordinary
-        variables:<a data-type="indexterm" data-primary="functions" data-secondary="argument inference"/><a data-type="indexterm" data-primary="labeled arguments"/><a data-type="indexterm" data-primary="arguments" data-secondary="inference of"/><a data-type="indexterm" data-primary="optional arguments" data-secondary="inference of"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+        variables:<a data-type="indexterm" data-primary="functions" data-secondary="argument inference">&#xa0;</a><a data-type="indexterm" data-primary="labeled arguments">&#xa0;</a><a data-type="indexterm" data-primary="arguments" data-secondary="inference of">&#xa0;</a><a data-type="indexterm" data-primary="optional arguments" data-secondary="inference of">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
         (part 55)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let numeric_deriv ~delta ~x ~y ~f =</code></strong>
 <strong><code>    let x' = x +. delta in</code></strong>
 <strong><code>    let y' = y +. delta in</code></strong>
@@ -635,7 +635,7 @@
         the fact that <code>f</code> is used with
         different argument orders if we provide explicit type information.
         Thus, the following code compiles without error, due to the type
-        annotation on <code>f</code>:<a data-type="indexterm" data-primary="type annotations"/></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
+        annotation on <code>f</code>:<a data-type="indexterm" data-primary="type annotations">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/variables-and-functions/main.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
         (part 57)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let numeric_deriv ~delta ~x ~y ~(f: x:float -&gt; y:float -&gt; float) =</code></strong>
 <strong><code>    let x' = x +. delta in</code></strong>
 <strong><code>    let y' = y +. delta in</code></strong>
@@ -700,4 +700,4 @@
         complexities obscure the usefulness of these features. Labels and
         optional arguments are very effective tools for making your APIs both
         more convenient and safer, and it's worth the effort of learning how
-        to use them effectively.<a data-type="indexterm" data-startref="ARGopt"/><a data-type="indexterm" data-startref="FNCopt"/></p></section></section></section></section>
+        to use them effectively.<a data-type="indexterm" data-startref="ARGopt">&#xa0;</a><a data-type="indexterm" data-startref="FNCopt">&#xa0;</a></p></section></section></section></section>
