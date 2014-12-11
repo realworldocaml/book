@@ -19,7 +19,7 @@ LIB_MODULES[] =
   $(removesuffix $(basename $(ls lib/*.ml)))
   $(removesuffix $(removesuffix $(basename $(ls lib/*.ml.m4))))
 LIB_PACKAGES = core async sexplib.syntax \
-               netstring
+               netstring cow cow.syntax
 
 APP_NAME = $(PROJECT)-app
 APP_MODULES[] =
