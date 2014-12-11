@@ -1,0 +1,91 @@
+open build/OCaml
+DefineCommandVars()
+
+.PHONY: lib app clean
+
+################################################################################
+# General Project Information
+PROJECT = rwo
+
+if $(test -e .git)
+  GIT_COMMIT = 'Some "$(shell git rev-parse HEAD)"'
+  export
+else
+  GIT_COMMIT = 'None'
+  export
+
+LIB_NAME = $(PROJECT)
+LIB_MODULES[] =
+  $(removesuffix $(basename $(ls lib/*.ml)))
+  $(removesuffix $(removesuffix $(basename $(ls lib/*.ml.m4))))
+LIB_PACKAGES = core async sexplib.syntax \
+               netstring
+
+APP_NAME = $(PROJECT)-app
+APP_MODULES[] =
+  $(removesuffix $(basename $(ls app/*.ml)))
+APP_PACKAGES = $(LIB_PACKAGES)
+APP = $(ROOT)/_build/app/$(APP_NAME)
+
+
+################################################################################
+# Build Parameters
+USE_OCAMLFIND = true
+if $(not $(OCAMLFIND_EXISTS))
+   eprintln(Required package ocamlfind not found.)
+   exit 1
+
+NATIVE_ENABLED = $(OCAMLOPT_EXISTS)
+BYTE_ENABLED = $(OCAMLC_EXISTS)
+
+OCAMLFLAGS = -bin-annot -annot -w A-4-33-41-42-44-45-48 -thread -safe-string
+OCAMLCFLAGS =
+OCAMLOPTFLAGS =
+OCAML_LINK_FLAGS = -linkpkg
+OCAML_BYTE_LINK_FLAGS =
+OCAML_NATIVE_LINK_FLAGS =
+OCAMLFINDFLAGS = -syntax camlp4o
+
+
+################################################################################
+# Sub-directories
+.SUBDIRS: .
+  mkdir -p _build/lib
+  mkdir -p _build/app
+  vmount(-l, lib/, _build/lib/)
+  vmount(-l, app/, _build/app/)
+
+  ##############################################################################
+  # Library
+  .SUBDIRS: _build/lib
+    OCAMLPACKS[] = $(LIB_PACKAGES)
+
+    %.ml: %.ml.m4 :value: $(GIT_COMMIT)
+      m4 -D GIT_COMMIT=$(GIT_COMMIT) $< > $@
+
+    lib: $(OCamlLibrary $(LIB_NAME), $(LIB_MODULES))
+
+    .DEFAULT: lib
+
+
+  ##############################################################################
+  # Command Line App
+  .SUBDIRS: _build/app
+    OCAML_LIBS = ../lib/$(LIB_NAME)
+    OCAMLINCLUDES += $(dir ../lib/)
+    OCAMLPACKS[] = $(APP_PACKAGES)
+
+    app: $(OCamlProgram $(APP_NAME), $(APP_MODULES))
+
+    $(ROOT)/$(APP_NAME): app
+      ln -fs _build/app/$(APP_NAME).opt $(ROOT)/$(APP_NAME)
+
+    .DEFAULT: app $(ROOT)/$(APP_NAME)
+
+
+################################################################################
+# Clean Up
+clean:
+  rm -f $(ROOT)/$(APP_NAME)
+  rm -rf _build
+  rm -rf OMakefile.omc OMakeroot.omc .omakedb .omakedb.lock
