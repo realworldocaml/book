@@ -1,14 +1,21 @@
+(** HTML processing. *)
 open Core.Std
 open Async.Std
 
 (** Html element. *)
-type item = Nethtml.document
+type item
+= Nethtml.document =
+  | Element of (string * (string * string) list * item list)
+  | Data of string
+with sexp
 
 (** Html document. Note: nethtml's terminology is incorrect. An html
     document is really a list of what it calls a document. *)
 type t = item list
+with sexp
 
 type attributes = (string * string) list
+with sexp
 
 val item_of_string : string -> item Or_error.t
 val item_of_file : string -> item Or_error.t Deferred.t
@@ -47,6 +54,42 @@ val print_elements_only
   -> unit
 
 
+(** {2 Constructors} *)
+
+val item : string -> ?a:attributes -> t -> item
+val data : string -> item
+
+val div : ?a:attributes -> t -> item
+val span : ?a:attributes -> t -> item
+
+val a : ?a:attributes -> t -> item
+val i : ?a:attributes -> t -> item
+val br : item
+
+val ul : ?a:attributes -> t -> item
+val li : ?a:attributes -> t -> item
+
+val h1 : ?a:attributes -> t -> item
+val h2 : ?a:attributes -> t -> item
+val h3 : ?a:attributes -> t -> item
+val h4 : ?a:attributes -> t -> item
+val h5 : ?a:attributes -> t -> item
+val h6 : ?a:attributes -> t -> item
+
+val table : ?a:attributes -> t -> item
+val thead : ?a:attributes -> t -> item
+val th : ?a:attributes -> t -> item
+val tbody : ?a:attributes -> t -> item
+val tr : ?a:attributes -> t -> item
+val td : ?a:attributes -> t -> item
+
+val dl : ?a:attributes -> t -> item
+val dd : ?a:attributes -> t -> item
+
+val script : ?a:attributes -> t -> item
+val link : ?a:attributes -> t -> item
+
+
 (** {2 Attributes} *)
 
 (** Get list of all attribute names occurring anywhere in [t]. *)
@@ -64,40 +107,3 @@ val check_attrs
   -> ?allowed : [`Some of string list | `Any]
   -> attributes
   -> unit Or_error.t
-
-
-(** {2 HTMLBook Code Blocks} *)
-
-type code_item = [
-| `Output of string
-| `Prompt of string
-| `Input of string
-| `Data of string
-]
-
-(** Guaranteed that `Prompt always followed by `Input. *)
-type code_block = private code_item list
-
-type pre = {
-  data_type : string;
-  class_ : string option;
-  data_code_language : string option;
-  code_block : code_block;
-}
-
-val code_items_to_code_block : code_item list -> code_block Or_error.t
-
-val parse_pre : item -> pre Or_error.t
-
-
-(** {2 Import Nodes}
-
-    Nodes of the form <link rel="import"> are handled specially.
-*)
-
-type import = {
-  data_code_language : string;
-  href : string;
-}
-
-val parse_import : item -> import Or_error.t

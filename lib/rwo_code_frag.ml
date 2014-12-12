@@ -17,7 +17,7 @@ type typ = [
   | `Java
   | `Ascii
   | `Gas
-]
+] with sexp
 
 type t = {
   typ: string;
@@ -42,6 +42,23 @@ let typ_of_string = function
   | "ascii"    -> Ok `Ascii
   | "gas"      -> Ok `Gas
   | x          -> error "unknown fragment type" x sexp_of_string
+
+let typ_to_string (t:typ) =
+  match t with
+  | `OCaml             -> "ocaml"
+  | `OCaml_toplevel    -> "ocamltop"
+  | `OCaml_rawtoplevel -> "ocamlrawtop"
+  | `Console           -> "console"
+  | `JSON              -> "json"
+  | `ATD               -> "atd"
+  | `Scheme            -> "scheme"
+  | `OCaml_syntax      -> "ocamlsyntax"
+  | `Java              -> "java"
+  | `C                 -> "c"
+  | `Bash              -> "sh"
+  | `CPP               -> "cpp"
+  | `Ascii             -> "ascii"
+  | `Gas               -> "gas"
 
 let file_of_t ~ext t =
   sprintf "code/_build/%s.%d.%s" t.name t.part ext

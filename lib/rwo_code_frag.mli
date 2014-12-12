@@ -30,7 +30,7 @@ type typ = [
 | `Java
 | `Ascii
 | `Gas
-]
+] with sexp
 
 type t = {
   typ: string;
@@ -40,6 +40,7 @@ type t = {
 } with sexp
 
 val typ_of_string : string -> typ Or_error.t
+val typ_to_string : typ -> string
 
 (** Generate filepath for given [t] and extension [ext]. *)
 val file_of_t : ext:string -> t -> string
@@ -72,7 +73,7 @@ val concat_toplevel_phrases : string list -> string list Or_error.t
 
 (** [wrap_in_pretty_box ~part typ file buf] *)
 val wrap_in_pretty_box
-  :  part : int
+  :  part:int
   -> string
   -> string
   -> Cow.Xml.t
