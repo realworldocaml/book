@@ -1,0 +1,18 @@
+type t = { a: int option; b: string } with sexp ;;
+
+
+
+sexp_of_t { a = None; b = "hello" } ;;
+
+sexp_of_t { a = Some 3; b = "hello" } ;;
+
+
+#part 1
+type t = { a: int sexp_option; b: string } with sexp ;;
+
+
+
+sexp_of_t { a = Some 3; b = "hello" } ;;
+
+sexp_of_t { a = None; b = "hello" } ;;
+

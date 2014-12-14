@@ -1,0 +1,4 @@
+$ env COMMAND_OUTPUT_INSTALLATION_BASH=1 ./cal_add_sub_days.native > cal.cmd
+$ . cal.cmd
+$ ./cal_add_sub_days.native <tab>
+add      diff     help     version

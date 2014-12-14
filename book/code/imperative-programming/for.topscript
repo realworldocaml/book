@@ -1,0 +1,39 @@
+
+#part 1
+for i = 0 to 3 do printf "i = %d\n" i done;;
+
+
+
+
+
+
+#part 2
+for i = 3 downto 0 do printf "i = %d\n" i done;;
+
+
+
+
+
+
+#part 3
+let rev_inplace ar =
+    let i = ref 0 in
+    let j = ref (Array.length ar - 1) in
+    (* terminate when the upper and lower indices meet *)
+    while !i < !j do
+      (* swap the two elements *)
+      let tmp = ar.(!i) in
+      ar.(!i) <- ar.(!j);
+      ar.(!j) <- tmp;
+      (* bump the indices *)
+      incr i;
+      decr j
+    done
+  ;;
+
+let nums = [|1;2;3;4;5|];;
+
+rev_inplace nums;;
+
+nums;;
+

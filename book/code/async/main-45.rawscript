@@ -1,0 +1,7 @@
+# let busy_loop () =
+    let x = ref None in
+    for i = 1 to 100_000_000 do x := Some i done
+  ;;
+
+# log_delays (fun () -> return (busy_loop ()));;
+

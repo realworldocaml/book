@@ -1,0 +1,88 @@
+
+#part 1
+(fun x -> [x;x]);;
+
+
+#part 2
+memoize (fun x -> [x;x]);;
+
+
+#part 3
+identity (fun x -> [x;x]);;
+
+
+#part 4
+let f () = ref None;;
+
+
+#part 5
+List.init;;
+
+List.init 10 ~f:Int.to_string;;
+
+
+#part 6
+let list_init_10 = List.init 10;;
+
+
+#part 7
+let list_init_10 ~f = List.init 10 ~f;;
+
+
+#part 8
+identity (fun x -> [x;x]);;
+
+
+#part 9
+identity [];;
+
+
+#part 10
+[||];;
+
+identity [||];;
+
+
+#part 11
+module Concat_list : sig
+    type 'a t
+    val empty : 'a t
+    val singleton : 'a -> 'a t
+    val concat  : 'a t -> 'a t -> 'a t  (* constant time *)
+    val to_list : 'a t -> 'a list       (* linear time   *)
+  end = struct
+
+    type 'a t = Empty | Singleton of 'a | Concat of 'a t * 'a t
+
+    let empty = Empty
+    let singleton x = Singleton x
+    let concat x y = Concat (x,y)
+
+    let rec to_list_with_tail t tail =
+      match t with
+      | Empty -> tail
+      | Singleton x -> x :: tail
+      | Concat (x,y) -> to_list_with_tail x (to_list_with_tail y tail)
+
+    let to_list t =
+      to_list_with_tail t []
+
+  end;;
+
+
+
+
+
+
+
+
+
+#part 12
+Concat_list.empty;;
+
+identity Concat_list.empty;;
+
+
+#part 14
+identity Concat_list.empty;;
+

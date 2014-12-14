@@ -49,7 +49,7 @@
       generational hypothesis. The minor collection <em>stops the world</em> (that it,
       halts the application) while it runs, which is why it's so important that it complete quickly
       to let the application resume running with minimal interruption.</p><section id="allocating-on-the-minor-heap" data-type="sect2"><h2>Allocating on the Minor Heap</h2><p>The minor heap is a contiguous chunk of virtual memory that is usually a few megabytes
-        in size so that it can be scanned quickly.<a data-type="indexterm" data-primary="minor heaps" data-secondary="allocating on">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/gc/minor_heap.ascii" class="orm:hideurl:ital"><em class="hyperlink">Diagram</em></a></p><figure style="float: 0"><img src="images/rwoc_2101.png"/><figcaption/></figure><p>The runtime stores the boundaries of the minor heap in two
+        in size so that it can be scanned quickly.<a data-type="indexterm" data-primary="minor heaps" data-secondary="allocating on">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/gc/minor_heap.ascii" class="orm:hideurl:ital"><em class="hyperlink">Diagram</em></a></p><figure style="float: 0"><img src="images/rwoc_2101.png"/><figcaption></figcaption></figure><p>The runtime stores the boundaries of the minor heap in two
       pointers that delimit the start and end of the heap region (<code>caml_young_start</code> and <code>caml_young_end</code>, but we will drop the <code>caml_young</code> prefix for brevity). The <code>base</code> is the memory address returned by the
       system <code>malloc</code>, and <code>start</code> is aligned against the next nearest word
       boundary from <code>base</code> to make it easier
@@ -68,13 +68,7 @@
           increased to 8 MB if you use Core (which generally prefers default settings that improve
           performance, but at the cost of a bigger memory profile). This setting can be overridden
           via the <code>s=&lt;words&gt;</code> argument to <code>OCAMLRUNPARAM</code>. You can change it after the program has started
-          by calling the <code>Gc.set</code> function:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/gc/tune.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>let c = Gc.get () ;;</code></strong>
-<code class="computeroutput">val c : Gc.control =</code>
-<code class="computeroutput">  {Core.Std.Gc.Control.minor_heap_size = 1000000;</code>
-<code class="computeroutput">   major_heap_increment = 1000448; space_overhead = 100; verbose = 0;</code>
-<code class="computeroutput">   max_overhead = 500; stack_limit = 1048576; allocation_policy = 0}</code>
-<code class="prompt"># </code><strong><code>Gc.tune ~minor_heap_size:(262144 * 2) () ;;</code></strong>
-<code class="computeroutput">- : unit = ()</code></pre><p>Changing the GC size dynamically will trigger an immediate minor
+          by calling the <code>Gc.set</code> function:</p><link rel="import" data-code-language="ocamltop" href="gc/tune.topscript"/><p>Changing the GC size dynamically will trigger an immediate minor
         heap collection. Note that Core increases the default minor heap size
         from the standard OCaml installation quite significantly, and you'll
         want to reduce this if running in very memory-constrained
@@ -114,9 +108,7 @@
           amount of heap resizing required in order to satisfy the allocation requests. A small
           increment may result in lots of smaller heap chunks spread across different regions of
           virtual memory that require more housekeeping in the OCaml runtime to keep track of
-          them:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/gc/tune.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
-        (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Gc.tune ~major_heap_increment:(1000448 * 4) () ;;</code></strong>
-<code class="computeroutput">- : unit = ()</code></pre></div><p>Allocating an OCaml value on the major heap first checks the free
+          them:</p><link rel="import" data-code-language="ocamltop" href="gc/tune.topscript" part="1"/></div><p>Allocating an OCaml value on the major heap first checks the free
       list of blocks for a suitable region to place it. If there isn't enough
       room on the free list, the runtime expands the major heap by allocating
       a fresh heap chunk that will be large enough. That chunk is then added
@@ -190,11 +182,7 @@
         collection first, and then a single slice. The size of the slice is
         normally automatically computed by the GC to an appropriate value and
         returns this value so that you can modify it in future calls if
-        necessary:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/gc/tune.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
-        (part 2)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Gc.major_slice 0 ;;</code></strong>
-<code class="computeroutput">- : int = 260440</code>
-<code class="prompt"># </code><strong><code>Gc.full_major () ;;</code></strong>
-<code class="computeroutput">- : unit = ()</code></pre><p>The <code>space_overhead</code> setting
+        necessary:</p><link rel="import" data-code-language="ocamltop" href="gc/tune.topscript" part="2"/><p>The <code>space_overhead</code> setting
         controls how aggressive the GC is about setting the slice size to a
         large size. This represents the proportion of memory used for live
         data that will be "wasted" because the GC doesn't immediately collect
@@ -216,9 +204,7 @@
         maximum value of <code>1000000</code> disables
         heap compaction completely. The default settings should be fine unless
         you have unusual allocation patterns that are causing a
-        higher-than-usual rate of compactions:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/gc/tune.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
-        (part 3)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Gc.tune ~max_overhead:0 () ;;</code></strong>
-<code class="computeroutput">- : unit = ()</code></pre></div></section><section id="inter-generational-pointers" data-type="sect2"><h2>Intergenerational Pointers</h2><p>One complexity of generational collection arises from the fact
+        higher-than-usual rate of compactions:</p><link rel="import" data-code-language="ocamltop" href="gc/tune.topscript" part="3"/></div></section><section id="inter-generational-pointers" data-type="sect2"><h2>Intergenerational Pointers</h2><p>One complexity of generational collection arises from the fact
       that minor heap sweeps are much more frequent than major heap
       collections. In order to know which blocks in the minor heap are live,
       the collector must track which minor-heap blocks are directly pointed to
@@ -237,48 +223,10 @@
           it can sometimes be slower than simply allocating a fresh value on the fast minor heap and
           doing some extra minor collections.</p><p>Let's see this for ourselves with a simple test program. You'll
         need to install the Core benchmarking suite via <code>opam install core_bench</code> before you compile
-        this code:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/gc/barrier_bench.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
-open Core_bench.Std
-
-type t1 = { mutable iters1: int; mutable count1: float }
-type t2 = { iters2: int; count2: float }
-
-let rec test_mutable t1 =
-  match t1.iters1 with
-  |0 -&gt; ()
-  |_ -&gt;
-    t1.iters1 &lt;- t1.iters1 - 1;
-    t1.count1 &lt;- t1.count1 +. 1.0;
-    test_mutable t1
-
-let rec test_immutable t2 =
-  match t2.iters2 with
-  |0 -&gt; ()
-  |n -&gt;
-    let iters2 = n - 1 in
-    let count2 = t2.count2 +. 1.0 in
-    test_immutable { iters2; count2 }
-
-let () =
-  let iters = 1000000 in
-  let tests = [
-    Bench.Test.create ~name:"mutable" 
-      (fun () -&gt; test_mutable { iters1=iters; count1=0.0 });
-    Bench.Test.create ~name:"immutable"
-      (fun () -&gt; test_immutable { iters2=iters; count2=0.0 })
-  ] in
-  Bench.make_command tests |&gt; Command.run</pre><p>This program defines a type <code>t1</code> that is mutable and <code>t2</code> that is immutable. The benchmark loop
+        this code:</p><link rel="import" data-code-language="ocaml" href="gc/barrier_bench.ml"/><p>This program defines a type <code>t1</code> that is mutable and <code>t2</code> that is immutable. The benchmark loop
         iterates over both fields and increments a counter. Compile and
         execute this with some extra options to show the amount of garbage
-        collection occurring:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/gc/run_barrier_bench.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>corebuild -pkg core_bench barrier_bench.native</code></strong>
-<code class="prompt">$ </code><strong><code>./barrier_bench.native -ascii name alloc</code></strong>
-<code class="computeroutput">Estimated testing time 20s (change using -quota SECS).</code>
-<code class="computeroutput">                                                                   </code>
-<code class="computeroutput">  Name        Time (ns)       Minor   Major   Promoted   % of max  </code>
-<code class="computeroutput"> ----------- ----------- ----------- ------- ---------- ---------- </code>
-<code class="computeroutput">  mutable     6_304_612   2_000_004    9.05       9.05     100.00  </code>
-<code class="computeroutput">  immutable   4_775_718   5_000_005    0.03       0.03      75.75  </code>
-<code class="computeroutput">                                                                   </code></pre><p>There is a stark space/time trade-off here. The mutable version takes significantly
+        collection occurring:</p><link rel="import" data-code-language="console" href="gc/run_barrier_bench.out"/><p>There is a stark space/time trade-off here. The mutable version takes significantly
           longer to complete than the immutable one but allocates many fewer minor-heap words than
           the immutable version. Minor allocation in OCaml is very fast, and so it is often better
           to use immutable data structures in preference to the more conventional mutable versions.
@@ -286,59 +234,7 @@ let () =
           write-barrier hit and not allocate at all.</p><p>The only way to know for sure is to benchmark your program under real-world scenarios
           using <code>Core_bench</code> and experiment with the trade-offs.
           The command-line benchmark binaries have a number of useful options that affect garbage
-          collection behavior:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/gc/show_barrier_bench_help.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>./barrier_bench.native -help</code></strong>
-<code class="computeroutput">Benchmark for mutable, immutable</code>
-<code class="computeroutput"> </code>
-<code class="computeroutput">  barrier_bench.native [COLUMN ...]</code>
-<code class="computeroutput"> </code>
-<code class="computeroutput">Columns that can be specified are:</code>
-<code class="computeroutput">	name       - Name of the test.</code>
-<code class="computeroutput">	cycles     - Number of CPU cycles (RDTSC) taken.</code>
-<code class="computeroutput">	cycles-err - 95% confidence interval and R^2 error for cycles.</code>
-<code class="computeroutput">	~cycles    - Cycles taken excluding major GC costs.</code>
-<code class="computeroutput">	time       - Number of nano secs taken.</code>
-<code class="computeroutput">	time-err   - 95% confidence interval and R^2 error for time.</code>
-<code class="computeroutput">	~time      - Time (ns) taken excluding major GC costs.</code>
-<code class="computeroutput">	alloc      - Allocation of major, minor and promoted words.</code>
-<code class="computeroutput">	gc         - Show major and minor collections per 1000 runs.</code>
-<code class="computeroutput">	percentage - Relative execution time as a percentage.</code>
-<code class="computeroutput">	speedup    - Relative execution cost as a speedup.</code>
-<code class="computeroutput">	samples    - Number of samples collected for profiling.</code>
-<code class="computeroutput"> </code>
-<code class="computeroutput">R^2 error indicates how noisy the benchmark data is. A value of</code>
-<code class="computeroutput">1.0 means the amortized cost of benchmark is almost exactly predicated</code>
-<code class="computeroutput">and 0.0 means the reported values are not reliable at all.</code>
-<code class="computeroutput">Also see: http://en.wikipedia.org/wiki/Coefficient_of_determination</code>
-<code class="computeroutput"> </code>
-<code class="computeroutput">Major and Minor GC stats indicate how many collections happen per 1000</code>
-<code class="computeroutput">runs of the benchmarked function.</code>
-<code class="computeroutput"> </code>
-<code class="computeroutput">The following columns will be displayed by default:</code>
-<code class="computeroutput">	+name time percentage</code>
-<code class="computeroutput"> </code>
-<code class="computeroutput">To specify that a column should be displayed only if it has a non-trivial value,</code>
-<code class="computeroutput">prefix the column name with a '+'.</code>
-<code class="computeroutput"> </code>
-<code class="computeroutput">=== flags ===</code>
-<code class="computeroutput"> </code>
-<code class="computeroutput">  [-ascii]             Display data in simple ascii based tables.</code>
-<code class="computeroutput">  [-clear-columns]     Don't display default columns. Only show user specified</code>
-<code class="computeroutput">                       ones.</code>
-<code class="computeroutput">  [-display STYLE]     Table style (short, tall, line, blank or column). Default</code>
-<code class="computeroutput">                       short.</code>
-<code class="computeroutput">  [-geometric SCALE]   Use geometric sampling. (default 1.01)</code>
-<code class="computeroutput">  [-linear INCREMENT]  Use linear sampling to explore number of runs, example 1.</code>
-<code class="computeroutput">  [-no-compactions]    Disable GC compactions.</code>
-<code class="computeroutput">  [-quota SECS]        Time quota allowed per test (default 10s).</code>
-<code class="computeroutput">  [-save]              Save benchmark data to &lt;test name&gt;.txt files.</code>
-<code class="computeroutput">  [-stabilize-gc]      Stabilize GC between each sample capture.</code>
-<code class="computeroutput">  [-v]                 High verbosity level.</code>
-<code class="computeroutput">  [-width WIDTH]       width limit on column display (default 150).</code>
-<code class="computeroutput">  [-build-info]        print info about this build and exit</code>
-<code class="computeroutput">  [-version]           print the version of this build and exit</code>
-<code class="computeroutput">  [-help]              print this help text and exit</code>
-<code class="computeroutput">                       (alias: -?)</code>
-<code class="computeroutput"> </code></pre><p>The <code>-no-compactions</code> and <code>-stabilize-gc</code> options can help force a situation where your application has
+          collection behavior:</p><link rel="import" data-code-language="console" href="gc/show_barrier_bench_help.out"/><p>The <code>-no-compactions</code> and <code>-stabilize-gc</code> options can help force a situation where your application has
           fragmented memory. This can simulate the behavior of a long-running application without
           you having to actually wait that long to re-create the behavior in a performance unit
             test.<a data-type="indexterm" data-startref="Hmh">&#xa0;</a></p></section></section></section><section id="attaching-finalizer-functions-to-values" data-type="sect1"><h1>Attaching Finalizer Functions to Values</h1><p>OCaml's automatic memory management guarantees that a value will eventually be freed when
@@ -362,50 +258,7 @@ let () =
     finalizer safely with respect to all the other concurrent program
     threads.<a data-type="indexterm" data-primary="heaps" data-secondary="Heap_block module">&#xa0;</a></p><p>Let's explore this with a small example that finalizes values of
     different types, some of which are heap-allocated and others which are
-    compile-time constants:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/gc/finalizer.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Core.Std
-open Async.Std
-
-let attach_finalizer n v =
-  match Heap_block.create v with
-  | None -&gt; printf "%20s: FAIL\n%!" n
-  | Some hb -&gt;
-    let final _ = printf "%20s: OK\n%!" n in
-    Gc.add_finalizer hb final
-
-type t = { foo: bool }
-
-let main () =
-  let alloced_float = Unix.gettimeofday () in
-  let alloced_bool = alloced_float &gt; 0.0 in
-  let alloced_string = String.create 4 in
-  attach_finalizer "immediate int" 1;
-  attach_finalizer "immediate float" 1.0;
-  attach_finalizer "immediate variant" (`Foo "hello");
-  attach_finalizer "immediate string" "hello world";
-  attach_finalizer "immediate record" { foo=false };
-  attach_finalizer "allocated float" alloced_float;
-  attach_finalizer "allocated bool" alloced_bool;
-  attach_finalizer "allocated variant" (`Foo alloced_bool);
-  attach_finalizer "allocated string" alloced_string;
-  attach_finalizer "allocated record" { foo=alloced_bool };
-  Gc.compact ();
-  return ()
-
-let () =
-  Command.async_basic ~summary:"Testing finalizers"
-    Command.Spec.empty main
-  |&gt; Command.run</pre><p>Building and running this should show the following output:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/gc/run_finalizer.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>corebuild -pkg async finalizer.native</code></strong>
-<code class="prompt">$ </code><strong><code>./finalizer.native</code></strong>
-<code class="computeroutput">       immediate int: FAIL</code>
-<code class="computeroutput">     immediate float: FAIL</code>
-<code class="computeroutput">   immediate variant: FAIL</code>
-<code class="computeroutput">    immediate string: FAIL</code>
-<code class="computeroutput">    immediate record: FAIL</code>
-<code class="computeroutput">      allocated bool: FAIL</code>
-<code class="computeroutput">    allocated record: OK</code>
-<code class="computeroutput">    allocated string: OK</code>
-<code class="computeroutput">   allocated variant: OK</code>
-<code class="computeroutput">     allocated float: OK</code></pre><p>The GC calls the finalization functions in the order of the deallocation. If several
+    compile-time constants:</p><link rel="import" data-code-language="ocaml" href="gc/finalizer.ml"/><p>Building and running this should show the following output:</p><link rel="import" data-code-language="console" href="gc/run_finalizer.out"/><p>The GC calls the finalization functions in the order of the deallocation. If several
       values become unreachable during the same GC cycle, the finalization functions will be called
       in the reverse order of the corresponding calls to <code>add_finalizer</code>. Each call to <code>add_finalizer</code> adds
       to the set of functions, which are run when the value becomes unreachable. You can have many

@@ -1,0 +1,16 @@
+Sexp.load_sexp "example.scm" ;;
+
+
+#part 1
+Sexp.load_sexp "comment_heavy.scm" ;;
+
+
+#part 2
+Exn.handle_uncaught ~exit:false (fun () ->
+    ignore (Sexp.load_sexp "example_broken.scm")) ;;
+
+
+
+
+
+

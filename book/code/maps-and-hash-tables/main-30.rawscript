@@ -1,0 +1,13 @@
+# module Foo_and_bar : sig
+    type t = { foo: int; bar: string }
+    include Hashable.S with type t := t
+  end = struct
+    module T = struct
+      type t = { foo: int; bar: string } with sexp, compare
+      let hash t =
+        (Int.hash t.foo) lxor (String.hash t.bar)
+    end
+    include T
+    include Hashable.Make(T)
+  end;;
+

@@ -1,0 +1,4 @@
+Command.Spec.empty ;;
+
+Command.Spec.(empty +> anon ("foo" %: int)) ;;
+

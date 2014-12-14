@@ -1,0 +1,10 @@
+# let swallow_error () =
+    let monitor = Monitor.create () in
+    Stream.iter (Monitor.errors monitor) ~f:(fun _exn ->
+      printf "an error happened\n");
+    within' ~monitor (fun () ->
+      after (Time.Span.of_sec 0.5) >>= fun () -> failwith "Kaboom!")
+  ;;
+
+# swallow_error ();;
+

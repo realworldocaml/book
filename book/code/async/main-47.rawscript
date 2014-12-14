@@ -1,0 +1,6 @@
+# let noalloc_busy_loop () =
+    for i = 0 to 100_000_000 do () done
+;;
+
+# log_delays (fun () -> In_thread.run noalloc_busy_loop);;
+

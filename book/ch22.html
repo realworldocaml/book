@@ -21,7 +21,7 @@
     different filename extensions to use as it advances through the
     compilation stages. The linker takes a collection of compiled units and
     produces a standalone executable or library archive that can be reused by
-    other applications.<a data-type="indexterm" data-primary="compilation units">&#xa0;</a></p><p>The overall compilation pipeline looks like this:<a data-type="indexterm" data-primary="compilation process" data-secondary="diagram of">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/pipeline.ascii" class="orm:hideurl:ital"><em class="hyperlink">Diagram</em></a></p><figure style="float: 0"><img src="images/rwoc_2201.png"/><figcaption/></figure><p>Notice that the pipeline branches toward the end. OCaml has multiple compiler backends
+    other applications.<a data-type="indexterm" data-primary="compilation units">&#xa0;</a></p><p>The overall compilation pipeline looks like this:<a data-type="indexterm" data-primary="compilation process" data-secondary="diagram of">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/pipeline.ascii" class="orm:hideurl:ital"><em class="hyperlink">Diagram</em></a></p><figure style="float: 0"><img src="images/rwoc_2201.png"/><figcaption></figcaption></figure><p>Notice that the pipeline branches toward the end. OCaml has multiple compiler backends
       that reuse the early stages of compilation but produce very different final outputs. The
         <em>bytecode</em> can be run by a portable interpreter and can even be
       transformed into JavaScript (via <a href="http://ocsigen.org/js_of_ocaml">js_of_ocaml</a>) or C source code (via <a href="https://github.com/ocaml-bytes/ocamlcc">OCamlCC</a>). The <em>native
@@ -53,34 +53,13 @@
         The compiler emits a <em>syntax error</em> in this situation, with a pointer to
         the filename and line and character number that's as close to the error as
           possible.<a data-type="indexterm" data-primary="errors" data-secondary="syntax errors">&#xa0;</a><a data-type="indexterm" data-primary="syntax errors">&#xa0;</a></p><p>Here's an example syntax error that we obtain by performing a module assignment as a
-        statement instead of as a <code>let</code> binding:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/broken_module.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">let () =
-  module MyString = String;
-  ()</pre><p>The code results in a syntax error when compiled:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/build_broken_module.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocamlc -c broken_module.ml</code></strong>
-<code class="computeroutput">File "broken_module.ml", line 2, characters 2-8:</code>
-<code class="computeroutput">Error: Syntax error</code></pre><p>The correct version of this source code creates the <code>MyString</code> module correctly via a local open,
-      and compiles successfully:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/fixed_module.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">let () =
-  let module MyString = String in
-  ()</pre><p>The syntax error points to the line and character number of the
+        statement instead of as a <code>let</code> binding:</p><link rel="import" data-code-language="ocaml" href="front-end/broken_module.ml"/><p>The code results in a syntax error when compiled:</p><link rel="import" data-code-language="console" href="front-end/build_broken_module.out"/><p>The correct version of this source code creates the <code>MyString</code> module correctly via a local open,
+      and compiles successfully:</p><link rel="import" data-code-language="ocaml" href="front-end/fixed_module.ml"/><p>The syntax error points to the line and character number of the
       first token that couldn't be parsed. In the broken example, the <code>module</code> keyword isn't a valid token at that
       point in parsing, so the error location information is correct.</p></section><section id="automatically-indenting-source-code" data-type="sect2"><h2>Automatically Indenting Source Code</h2><p>Sadly, syntax errors do get more inaccurate sometimes, depending
       on the nature of your mistake. Try to spot the deliberate error in the
-      following function definitions:<a data-type="indexterm" data-primary="source code" data-secondary="automatically indenting">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/follow_on_function.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">let concat_and_print x y =
-  let v = x ^ y in
-  print_endline v;
-  v;
-
-let add_and_print x y =
-  let v = x + y in
-  print_endline (string_of_int v);
-  v
-
-let () =
-  let _x = add_and_print 1 2 in
-  let _y = concat_and_print "a" "b" in
-  ()</pre><p>When you compile this file, you'll get a syntax error
-      again:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/build_follow_on_function.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocamlc -c follow_on_function.ml</code></strong>
-<code class="computeroutput">File "follow_on_function.ml", line 11, characters 0-3:</code>
-<code class="computeroutput">Error: Syntax error</code></pre><p>The line number in the error points to the end of the <code>add_and_print</code> function, but the actual error
+      following function definitions:<a data-type="indexterm" data-primary="source code" data-secondary="automatically indenting">&#xa0;</a></p><link rel="import" data-code-language="ocaml" href="front-end/follow_on_function.ml"/><p>When you compile this file, you'll get a syntax error
+      again:</p><link rel="import" data-code-language="console" href="front-end/build_follow_on_function.out"/><p>The line number in the error points to the end of the <code>add_and_print</code> function, but the actual error
       is at the end of the <em>first</em> function definition.
       There's an extra semicolon at the end of the first definition that
       causes the second definition to become part of the first <code>let</code> binding. This eventually results in a
@@ -89,39 +68,11 @@ let () =
       via OPAM called <span class="command"><em>ocp-indent</em></span> that
       applies structured indenting rules to your source code on a line-by-line
       basis. This not only beautifies your code layout, but it also makes this
-      syntax error much easier to locate.<a data-type="indexterm" data-primary="debugging" data-secondary="single errant characters">&#xa0;</a></p><p>Let's run our erroneous file through <span class="command"><em>ocp-indent</em></span> and see how it processes it:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/indent_follow_on_function.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocp-indent follow_on_function.ml</code></strong>
-<code class="computeroutput">let concat_and_print x y =</code>
-<code class="computeroutput">  let v = x ^ y in</code>
-<code class="computeroutput">  print_endline v;</code>
-<code class="computeroutput">  v;</code>
-<code class="computeroutput"> </code>
-<code class="computeroutput">  let add_and_print x y =</code>
-<code class="computeroutput">    let v = x + y in</code>
-<code class="computeroutput">    print_endline (string_of_int v);</code>
-<code class="computeroutput">    v</code>
-<code class="computeroutput"> </code>
-<code class="computeroutput">let () =</code>
-<code class="computeroutput">  let _x = add_and_print 1 2 in</code>
-<code class="computeroutput">  let _y = concat_and_print "a" "b" in</code>
-<code class="computeroutput">  ()</code></pre><p>The <code>add_and_print</code> definition has been indented as if
+      syntax error much easier to locate.<a data-type="indexterm" data-primary="debugging" data-secondary="single errant characters">&#xa0;</a></p><p>Let's run our erroneous file through <span class="command"><em>ocp-indent</em></span> and see how it processes it:</p><link rel="import" data-code-language="console" href="front-end/indent_follow_on_function.out"/><p>The <code>add_and_print</code> definition has been indented as if
         it were part of the first <code>concat_and_print</code> definition,
         and the errant semicolon is now much easier to spot. We just need to remove that semicolon
         and rerun <span class="command"><em>ocp-indent</em></span> to verify that the syntax is
-        correct:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/indent_follow_on_function_fixed.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocp-indent follow_on_function_fixed.ml</code></strong>
-<code class="computeroutput">let concat_and_print x y =</code>
-<code class="computeroutput">  let v = x ^ y in</code>
-<code class="computeroutput">  print_endline v;</code>
-<code class="computeroutput">  v</code>
-<code class="computeroutput"> </code>
-<code class="computeroutput">let add_and_print x y =</code>
-<code class="computeroutput">  let v = x + y in</code>
-<code class="computeroutput">  print_endline (string_of_int v);</code>
-<code class="computeroutput">  v</code>
-<code class="computeroutput"> </code>
-<code class="computeroutput">let () =</code>
-<code class="computeroutput">  let _x = add_and_print 1 2 in</code>
-<code class="computeroutput">  let _y = concat_and_print "a" "b" in</code>
-<code class="computeroutput">  ()</code></pre><p>The <span class="command"><em>ocp-indent</em></span>
+        correct:</p><link rel="import" data-code-language="console" href="front-end/indent_follow_on_function_fixed.out"/><p>The <span class="command"><em>ocp-indent</em></span>
         <a href="https://github.com/OCamlPro/ocp-indent">home page</a> documents how to
         integrate it with your favorite editor. All the Core libraries are formatted using it to
         ensure consistency, and it's a good idea to do this before publishing your own source code
@@ -133,34 +84,12 @@ let () =
         function definitions and signatures, and output as structured documentation in a variety of
         formats. It can generate HTML pages, LaTeX and PDF documents, UNIX manual pages, and even
         module dependency graphs that can be viewed using <a href="http://www.graphviz.org">Graphviz</a>.</p><p>Here's a sample of some source code that's been annotated with
-      <span class="command"><em>ocamldoc</em></span> comments:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/doc.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">(** example.ml: The first special comment of the file is the comment 
-    associated with the whole module. *)
-
-(** Comment for exception My_exception. *)
-exception My_exception of (int -&gt; int) * int
-
-(** Comment for type [weather]  *)
-type weather =
-  | Rain of int (** The comment for construtor Rain *)
-  | Sun         (** The comment for constructor Sun *)
-
-(** Find the current weather for a country
-    @author Anil Madhavapeddy
-    @param location The country to get the weather for.
-*)
-let what_is_the_weather_in location =
-  match location with
-  | `Cambridge  -&gt; Rain 100
-  | `New_york   -&gt; Rain 20
-  | `California -&gt; Sun</pre><p>The <span class="command"><em>ocamldoc</em></span> comments are
+      <span class="command"><em>ocamldoc</em></span> comments:</p><link rel="import" data-code-language="ocaml" href="front-end/doc.ml"/><p>The <span class="command"><em>ocamldoc</em></span> comments are
       distinguished by beginning with the double asterisk. There are
       formatting conventions for the contents of the comment to mark metadata.
       For instance, the <code>@tag</code> fields mark
       specific properties such as the author of that section of code.</p><p>Try compiling the HTML documentation and UNIX man pages by running
-      <span class="command"><em>ocamldoc</em></span> over the source file:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/build_ocamldoc.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>mkdir -p html man/man3</code></strong>
-<code class="prompt">$ </code><strong><code>ocamldoc -html -d html doc.ml</code></strong>
-<code class="prompt">$ </code><strong><code>ocamldoc -man -d man/man3 doc.ml</code></strong>
-<code class="prompt">$ </code><strong><code>man -M man Doc</code></strong></pre><p>You should now have HTML files inside the <em class="filename">html/</em> directory and also
+      <span class="command"><em>ocamldoc</em></span> over the source file:</p><link rel="import" data-code-language="console" href="front-end/build_ocamldoc.out"/><p>You should now have HTML files inside the <em class="filename">html/</em> directory and also
         be able to view the UNIX manual pages held in <em class="filename">man/man3</em>. There are quite
         a few comment formats and options to control the output for the various backends. Refer to
         the <a href="http://caml.inria.fr/pub/docs/manual-ocaml/manual029.html">OCaml
@@ -183,18 +112,10 @@ let what_is_the_weather_in location =
     adding a <code>with</code> keyword to type
     declarations to signify that extra code should be generated from that
     declaration. For example, here's a trivial use of Sexplib and
-    Fieldslib:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/type_conv_example.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">open Sexplib.Std
-
-type t = {
-  foo: int;
-  bar: string
-} with sexp, fields</pre><p>Compiling this code will normally give you a syntax error if you do so without Camlp4,
+    Fieldslib:</p><link rel="import" data-code-language="ocaml" href="front-end/type_conv_example.ml"/><p>Compiling this code will normally give you a syntax error if you do so without Camlp4,
       since the <code>with</code> keyword isn't normally allowed after a type
-      definition:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/build_type_conv_without_camlp4.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocamlfind ocamlc -c type_conv_example.ml</code></strong>
-<code class="computeroutput">File "type_conv_example.ml", line 6, characters 2-6:</code>
-<code class="computeroutput">Error: Syntax error</code></pre><p>Now add in the syntax extension packages for Fieldslib and Sexplib,
-    and everything will compile again:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/build_type_conv_with_camlp4.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocamlfind ocamlc -c -syntax camlp4o -package sexplib.syntax \</code></strong>
-<code class="computeroutput">    -package fieldslib.syntax type_conv_example.ml</code></pre><p>We've specified a couple of additional flags here. The <code>-syntax</code> flag directs <span class="command"><em>ocamlfind</em></span> to add the <code>-pp</code> flag to the compiler command line. This flag
+      definition:</p><link rel="import" data-code-language="console" href="front-end/build_type_conv_without_camlp4.out"/><p>Now add in the syntax extension packages for Fieldslib and Sexplib,
+    and everything will compile again:</p><link rel="import" data-code-language="console" href="front-end/build_type_conv_with_camlp4.out"/><p>We've specified a couple of additional flags here. The <code>-syntax</code> flag directs <span class="command"><em>ocamlfind</em></span> to add the <code>-pp</code> flag to the compiler command line. This flag
     instructs the compiler to run the preprocessor during its parsing
     phase.</p><p>The <code>-package</code> flag imports other
     OCaml libraries. The <code>.syntax</code> suffix in
@@ -219,19 +140,7 @@ type t = {
     to do both of these now.</p><section id="using-camlp4-interactively" data-type="sect2"><h2>Using Camlp4 Interactively</h2><p>The <span class="command"><em>utop</em></span> toplevel can run the
       phrases that you type through <span class="command"><em>camlp4</em></span>
       automatically. You should have at least these lines in your <code>~/.ocamlinit</code> file in your home directory (see
-        <a href="http://realworldocaml.org/install">this Real World OCaml page</a> for more information):</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/camlp4_toplevel.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>#use "topfind" ;;</code></strong>
-<code class="computeroutput">- : unit = ()</code>
-<code class="computeroutput">Findlib has been successfully loaded. Additional directives:</code>
-<code class="computeroutput">  #require "package";;      to load a package</code>
-<code class="computeroutput">  #list;;                   to list the available packages</code>
-<code class="computeroutput">  #camlp4o;;                to load camlp4 (standard syntax)</code>
-<code class="computeroutput">  #camlp4r;;                to load camlp4 (revised syntax)</code>
-<code class="computeroutput">  #predicates "p,q,...";;   to set these predicates</code>
-<code class="computeroutput">  Topfind.reset();;         to force that packages will be reloaded</code>
-<code class="computeroutput">  #thread;;                 to enable threads</code>
-<code class="computeroutput"/>
-<code class="computeroutput">- : unit = ()</code>
-<code class="prompt"># </code><strong><code>#camlp4o ;;</code></strong></pre><p>The first directive loads the <span class="command"><em>ocamlfind</em></span> top-level interface that lets you
+        <a href="http://realworldocaml.org/install">this Real World OCaml page</a> for more information):</p><link rel="import" data-code-language="ocamltop" href="front-end/camlp4_toplevel.topscript"/><p>The first directive loads the <span class="command"><em>ocamlfind</em></span> top-level interface that lets you
       require <span class="command"><em>ocamlfind</em></span> packages (including
       all their dependent packages). The second directive instructs the
       toplevel to filter all phrases via Camlp4. You can now run <span class="command"><em>utop</em></span> and load the syntax extensions in. We'll
@@ -240,56 +149,17 @@ type t = {
         representation of two values to see if they're equal. As we noted in <a href="#maps-and-hash-tables" data-type="xref">#maps-and-hash-tables</a>, the polymorphic comparison is less efficient than
         defining explicit comparison functions between values. However, it quickly becomes tedious
         to manually define comparison functions for complex type definitions.<a data-type="indexterm" data-primary="interactive input" data-secondary="with camlp4">&#xa0;</a><a data-type="indexterm" data-primary="polymorphic comparisons">&#xa0;</a></p><p>Let's see how <code>comparelib</code> solves
-      this problem by running it in <span class="command"><em>utop</em></span>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/camlp4_toplevel.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
-      (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>#require "comparelib.syntax" ;;</code></strong>
-<code class="prompt"># </code><strong><code>type t = { foo: string; bar : t } ;;</code></strong>
-<code class="computeroutput">type t = { foo : string; bar : t; }</code>
-<code class="prompt"># </code><strong><code>type t = { foo: string; bar: t } with compare ;;</code></strong>
-<code class="computeroutput">type t = { foo : string; bar : t; }</code>
-<code class="computeroutput">val compare : t -&gt; t -&gt; int = &lt;fun&gt;</code>
-<code class="computeroutput">val compare_t : t -&gt; t -&gt; int = &lt;fun&gt;</code></pre><p>The first definition of <code>t</code> is a standard OCaml phrase
+      this problem by running it in <span class="command"><em>utop</em></span>:</p><link rel="import" data-code-language="ocamltop" href="front-end/camlp4_toplevel.topscript" part="1"/><p>The first definition of <code>t</code> is a standard OCaml phrase
         and results in the expected output. The second one includes the <code>with compare</code> directive. This is intercepted by <code>comparelib</code> and transformed into the original type definition with two new
         functions also <span class="keep-together">included</span>.</p></section><section id="running-camlp4-from-the-command-line" data-type="sect2"><h2>Running Camlp4 from the Command Line</h2><p>The toplevel is a quick way to examine the signatures generated from the extensions, but
         how can we see what these new functions actually do? We can't do this from <span class="command"><em>utop</em></span> directly, since it embeds the Camlp4 invocation as an
         automated part of its operation.<a data-type="indexterm" data-primary="command-line parsing" data-secondary="with Camlp4">&#xa0;</a></p><p>Let's turn to the command line to obtain the result of the
       <code>comparelib</code> transformation instead.
-      Create a file that contains the type declaration from earlier:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/comparelib_test.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type t = { 
-  foo: string; 
-  bar: t
-} with compare</pre><p>We need to run the Camlp4 binary with the library paths to
+      Create a file that contains the type declaration from earlier:</p><link rel="import" data-code-language="ocaml" href="front-end/comparelib_test.ml"/><p>We need to run the Camlp4 binary with the library paths to
       Comparelib and Type_conv. Let's use a small shell script to wrap this
-      invocation:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/camlp4_dump.cmd" class="orm:hideurl:ital"><em class="hyperlink">Shell script</em></a></p><pre data-type="programlisting" data-code-language="bash">#!/bin/sh
-
-OCAMLFIND="ocamlfind query -predicates syntax,preprocessor -r"
-INCLUDE=`$OCAMLFIND -i-format comparelib.syntax`
-ARCHIVES=`$OCAMLFIND -a-format comparelib.syntax`
-camlp4o -printer o $INCLUDE $ARCHIVES $1</pre><p>The script uses the <span class="command"><em>ocamlfind</em></span>
+      invocation:</p><link rel="import" data-code-language="sh" href="front-end/camlp4_dump.cmd"/><p>The script uses the <span class="command"><em>ocamlfind</em></span>
       package manager to list the include and library paths needed by <code>comparelib</code>. It then invokes the <span class="command"><em>camlp4o</em></span> preprocessor with these paths and
-      outputs the resulting AST to the standard output:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/process_comparelib_test.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>sh camlp4_dump.cmd comparelib_test.ml</code></strong>
-<code class="computeroutput">type t = { foo : string; bar : t }</code>
-<code class="computeroutput"> </code>
-<code class="computeroutput">let _ = fun (_ : t) -&gt; ()</code>
-<code class="computeroutput">  </code>
-<code class="computeroutput">let rec compare : t -&gt; t -&gt; int =</code>
-<code class="computeroutput">  fun a__001_ b__002_ -&gt;</code>
-<code class="computeroutput">    if Pervasives.( == ) a__001_ b__002_</code>
-<code class="computeroutput">    then 0</code>
-<code class="computeroutput">    else</code>
-<code class="computeroutput">      (let ret =</code>
-<code class="computeroutput">         (Pervasives.compare : string -&gt; string -&gt; int) a__001_.foo</code>
-<code class="computeroutput">           b__002_.foo</code>
-<code class="computeroutput">       in</code>
-<code class="computeroutput">         if Pervasives.( &lt;&gt; ) ret 0</code>
-<code class="computeroutput">         then ret</code>
-<code class="computeroutput">         else compare a__001_.bar b__002_.bar)</code>
-<code class="computeroutput">  </code>
-<code class="computeroutput">let _ = compare</code>
-<code class="computeroutput">  </code>
-<code class="computeroutput">let compare_t = compare</code>
-<code class="computeroutput">  </code>
-<code class="computeroutput">let _ = compare_t</code>
-<code class="computeroutput">  </code>
-<code class="computeroutput"> </code></pre><p>The output contains the original type definition accompanied by
+      outputs the resulting AST to the standard output:</p><link rel="import" data-code-language="console" href="front-end/process_comparelib_test.out"/><p>The output contains the original type definition accompanied by
       some automatically generated code that implements an explicit comparison
       function for each field in the record. If you're using the extension in
       your compiler command line, this generated code is then compiled as if
@@ -308,29 +178,16 @@ camlp4o -printer o $INCLUDE $ARCHIVES $1</pre><p>The script uses the <span class
         should be avoided in code that you write by hand. If it's a
         unit-returning expression, then write a <code>unit</code> binding explicitly instead. This will
         cause a type error if the expression changes type in the future (e.g.,
-        due to code refactoring):</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/let_unit.syntax" class="orm:hideurl:ital"><em class="hyperlink">Syntax</em></a></p><pre data-type="programlisting">let () = &lt;expr&gt;</pre><p>If the expression has a different type, then write it
-        explicitly:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/let_notunit.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">let (_:some_type) = &lt;expr&gt;
-let () = ignore (&lt;expr&gt; : some_type)
-)(* if the expression returns a unit Deferred.t *)
-let () = don't_wait_for (&lt;expr&gt;</pre><p>The last one is used to ignore Async expressions that should run
+        due to code refactoring):</p><link rel="import" data-code-language="ocamlsyntax" href="front-end/let_unit.syntax"/><p>If the expression has a different type, then write it
+        explicitly:</p><link rel="import" data-code-language="ocaml" href="front-end/let_notunit.ml"/><p>The last one is used to ignore Async expressions that should run
         in the background rather than blocking in the current thread.</p><p>One other important reason for using wildcard matches is to bind
         a variable name to something that you want to use in future code but
         don't want to use right away. This would normally generate an "unused
         value" compiler warning. These warnings are suppressed for any
-        variable name that's prepended with an underscore:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/unused_var.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">let fn x y =
-  let _z = x + y in
-  ()</pre><p>Although you don't use <code>_z</code> in
+        variable name that's prepended with an underscore:</p><link rel="import" data-code-language="ocaml" href="front-end/unused_var.ml"/><p>Although you don't use <code>_z</code> in
         your code, this will never generate an unused variable warning.</p></div></section><section id="preprocessing-module-signatures" data-type="sect2"><h2>Preprocessing Module Signatures</h2><p>Another useful feature of <code>type_conv</code> is that it can
-        generate module signatures, too. Copy the earlier type definition into a <code>comparelib_test.mli</code> that's got exactly the same <span class="keep-together">content</span>:<a data-type="indexterm" data-primary="signatures" data-secondary="preprocessing module signatures">&#xa0;</a><a data-type="indexterm" data-primary="modules" data-secondary="preprocessing signatures of">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/comparelib_test.mli" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type t = { 
-  foo: string; 
-  bar: t
-} with compare</pre><p>If you rerun the Camlp4 dumper script now, you'll see that
-      different code is produced for signature files:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/process_comparelib_interface.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>sh camlp4_dump.cmd comparelib_test.mli</code></strong>
-<code class="computeroutput">type t = { foo : string; bar : t }</code>
-<code class="computeroutput"> </code>
-<code class="computeroutput">val compare : t -&gt; t -&gt; int</code>
-<code class="computeroutput">  </code>
-<code class="computeroutput"> </code></pre><p>The external signature generated by <code>comparelib</code> is much simpler than the actual
+        generate module signatures, too. Copy the earlier type definition into a <code>comparelib_test.mli</code> that's got exactly the same <span class="keep-together">content</span>:<a data-type="indexterm" data-primary="signatures" data-secondary="preprocessing module signatures">&#xa0;</a><a data-type="indexterm" data-primary="modules" data-secondary="preprocessing signatures of">&#xa0;</a></p><link rel="import" data-code-language="ocaml" href="front-end/comparelib_test.mli"/><p>If you rerun the Camlp4 dumper script now, you'll see that
+      different code is produced for signature files:</p><link rel="import" data-code-language="console" href="front-end/process_comparelib_interface.out"/><p>The external signature generated by <code>comparelib</code> is much simpler than the actual
       code. Running Camlp4 directly on the original source code lets you see
       these all these transformations precisely.<a data-type="indexterm" data-primary="grammars" data-secondary="avoiding grammar clashes">&#xa0;</a><a data-type="indexterm" data-primary="macros">&#xa0;</a><a data-type="indexterm" data-primary="conditional compilation">&#xa0;</a><a data-type="indexterm" data-primary="whitespace-sensitive indentation">&#xa0;</a><a data-type="indexterm" data-primary="syntax extension" data-secondary="potential overuse of">&#xa0;</a></p><div class="allow_break" data-type="caution"><h1>Don't Overdo the Syntax Extensions</h1><p>Syntax extensions are a powerful extension mechanism that can
         completely alter your source code's layout and style. Core includes a
@@ -373,12 +230,9 @@ let () = don't_wait_for (&lt;expr&gt;</pre><p>The last one is used to ignore Asy
     separate concern.</p><section id="displaying-inferred-types-from-the-compiler" data-type="sect2"><h2>Displaying Inferred Types from the Compiler</h2><p>We've already seen how you can explore type inference directly
       from the toplevel. It's also possible to generate type signatures for an
       entire file by asking the compiler to do the work for you. Create a file
-      with a single type definition and value:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/typedef.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type t = Foo | Bar
-let v = Foo</pre><p>Now run the compiler with the <code>-i</code> flag to infer the type signature for that
+      with a single type definition and value:</p><link rel="import" data-code-language="ocaml" href="front-end/typedef.ml"/><p>Now run the compiler with the <code>-i</code> flag to infer the type signature for that
       file. This runs the type checker but doesn't compile the code any
-      further after displaying the interface to the standard output:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/infer_typedef.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocamlc -i typedef.ml</code></strong>
-<code class="computeroutput">type t = Foo | Bar</code>
-<code class="computeroutput">val v : t</code></pre><p>The output is the default signature for the module that represents the input file. It's
+      further after displaying the interface to the standard output:</p><link rel="import" data-code-language="console" href="front-end/infer_typedef.out"/><p>The output is the default signature for the module that represents the input file. It's
         often useful to redirect this output to an <code>mli</code> file to
         give you a starting signature to edit the external interface without having to type it all
         in by hand.</p><p>The compiler stores a compiled version of the interface as a
@@ -387,17 +241,7 @@ let v = Foo</pre><p>Now run the compiler with the <code>-i</code> flag to infer 
       signature file for a module, or by the inferred type if there is only an
       <code>ml</code> implementation present.</p><p>The compiler makes sure that your <code>ml</code> and <code>mli</code>
       files have compatible signatures. The type checker throws an immediate
-      error if this isn't the case:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/conflicting_interfaces.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>echo type t = Foo &gt; test.ml</code></strong>
-<code class="prompt">$ </code><strong><code>echo type t = Bar &gt; test.mli</code></strong>
-<code class="prompt">$ </code><strong><code>ocamlc -c test.mli test.ml</code></strong>
-<code class="computeroutput">File "test.ml", line 1:</code>
-<code class="computeroutput">Error: The implementation test.ml does not match the interface test.cmi:</code>
-<code class="computeroutput">       Type declarations do not match:</code>
-<code class="computeroutput">         type t = Foo</code>
-<code class="computeroutput">       is not included in</code>
-<code class="computeroutput">         type t = Bar</code>
-<code class="computeroutput">       File "test.ml", line 1, characters 5-12: Actual declaration</code>
-<code class="computeroutput">       Fields number 1 have different names, Foo and Bar.</code></pre><div class="allow_break" data-type="note"><h1>Which Comes First: The ml or the mli?</h1><p>There are two schools of thought on which order OCaml code
+      error if this isn't the case:</p><link rel="import" data-code-language="console" href="front-end/conflicting_interfaces.out"/><div class="allow_break" data-type="note"><h1>Which Comes First: The ml or the mli?</h1><p>There are two schools of thought on which order OCaml code
         should be written in. It's very easy to begin writing code by starting
         with an <code>ml</code> file and using the type
         inference to guide you as you build up your functions. The <code>mli</code> file can then be generated as described,
@@ -448,38 +292,9 @@ let v = Foo</pre><p>Now run the compiler with the <code>-i</code> flag to infer 
         polymorphism can generate some very large signatures, and errors tend
         to propagate more widely than if you are using more explicitly typed
         variants or classes.<a data-type="indexterm" data-primary="polymorphic variant types" data-secondary="type checking and">&#xa0;</a><a data-type="indexterm" data-primary="row polymorphism">&#xa0;</a></p><p>For instance, consider this broken example that expresses some
-        simple algebraic operations over integers:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/broken_poly.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">let rec algebra =
-  function
-  | `Add (x,y) -&gt; (algebra x) + (algebra y)
-  | `Sub (x,y) -&gt; (algebra x) - (algebra y)
-  | `Mul (x,y) -&gt; (algebra x) * (algebra y)
-  | `Num x     -&gt; x
-
-let _ =
-  algebra (
-    `Add (
-      (`Num 0),
-      (`Sub (
-          (`Num 1),
-          (`Mul (
-              (`Nu 3),(`Num 2)
-            ))
-        ))
-    ))</pre><p>There's a single character typo in the code so that it uses
+        simple algebraic operations over integers:</p><link rel="import" data-code-language="ocaml" href="front-end/broken_poly.ml"/><p>There's a single character typo in the code so that it uses
         <code>Nu</code> instead of <code>Num</code>. The resulting type error is
-        impressive:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/build_broken_poly.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocamlc -c broken_poly.ml</code></strong>
-<code class="computeroutput">File "broken_poly.ml", line 9, characters 10-154:</code>
-<code class="computeroutput">Error: This expression has type</code>
-<code class="computeroutput">         [&gt; `Add of</code>
-<code class="computeroutput">              ([&lt; `Add of 'a * 'a</code>
-<code class="computeroutput">                | `Mul of 'a * 'a</code>
-<code class="computeroutput">                | `Num of int</code>
-<code class="computeroutput">                | `Sub of 'a * 'a</code>
-<code class="computeroutput">                &gt; `Num ]</code>
-<code class="computeroutput">               as 'a) *</code>
-<code class="computeroutput">              [&gt; `Sub of 'a * [&gt; `Mul of [&gt; `Nu of int ] * [&gt; `Num of int ] ] ] ]</code>
-<code class="computeroutput">       but an expression was expected of type 'a</code>
-<code class="computeroutput">       The second variant type does not allow tag(s) `Nu</code></pre><p>The type error is perfectly accurate, but rather verbose and
+        impressive:</p><link rel="import" data-code-language="console" href="front-end/build_broken_poly.out"/><p>The type error is perfectly accurate, but rather verbose and
         with a line number that doesn't point to the exact location of the
         incorrect variant name. The best the compiler can do is to point you
         in the general direction of the <code>algebra</code> function application.</p><p>This is because the type checker doesn't have enough information
@@ -487,38 +302,10 @@ let _ =
         lines down. It calculates types for both expressions separately, and
         when they don't match up, outputs the difference as best it
         can.</p><p>Let's see what happens with an explicit type annotation to help
-        the compiler out:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/broken_poly_with_annot.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type t = [
-  | `Add of t * t
-  | `Sub of t * t
-  | `Mul of t * t
-  | `Num of int
-]
-
-let rec algebra (x:t) =
-  match x with
-  | `Add (x,y) -&gt; (algebra x) + (algebra y)
-  | `Sub (x,y) -&gt; (algebra x) - (algebra y)
-  | `Mul (x,y) -&gt; (algebra x) * (algebra y)
-  | `Num x     -&gt; x
-
-let _ =
-  algebra (
-    `Add (
-      (`Num 0),
-      (`Sub (
-          (`Num 1),
-          (`Mul (
-              (`Nu 3),(`Num 2)
-            ))
-        ))
-    ))</pre><p>This code contains exactly the same error as before, but we've
+        the compiler out:</p><link rel="import" data-code-language="ocaml" href="front-end/broken_poly_with_annot.ml"/><p>This code contains exactly the same error as before, but we've
         added a closed type definition of the polymorphic variants, and a type
         annotation to the <code>algebra</code>
-        definition. The compiler error we get is much more useful now:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/build_broken_poly_with_annot.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocamlc -i broken_poly_with_annot.ml</code></strong>
-<code class="computeroutput">File "broken_poly_with_annot.ml", line 22, characters 14-21:</code>
-<code class="computeroutput">Error: This expression has type [&gt; `Nu of int ]</code>
-<code class="computeroutput">       but an expression was expected of type t</code>
-<code class="computeroutput">       The second variant type does not allow tag(s) `Nu</code></pre><p>This error points directly to the correct line number that
+        definition. The compiler error we get is much more useful now:</p><link rel="import" data-code-language="console" href="front-end/build_broken_poly_with_annot.out"/><p>This error points directly to the correct line number that
         contains the typo. Once you fix the problem, you can remove the manual
         annotations if you prefer more succinct code. You can also leave the
         annotations there, of course, to help with future refactoring and
@@ -530,18 +317,8 @@ let _ =
         features:</p><ul><li><p>Polymorphic methods for objects</p></li><li><p>Permuting the order of labeled arguments in a function from
             their type definition</p></li><li><p>Discarding optional labeled arguments</p></li><li><p>Generalized algebraic data types (GADTs) present from OCaml 4.0 onward</p></li><li><p>Automatic disambiguation of record field and constructor
             names (since OCaml 4.1)</p></li></ul><p>Here's an example of principality warnings when used with record
-        disambiguation.</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/non_principal.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type s = { foo: int; bar: unit }
-type t = { foo: int }
-
-let f x =
-  x.bar;
-  x.foo</pre><p>Inferring the signature with <code>-principal</code> will show you a new
-        warning:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/build_non_principal.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocamlc -i -principal non_principal.ml</code></strong>
-<code class="computeroutput">File "non_principal.ml", line 6, characters 4-7:</code>
-<code class="computeroutput">Warning 18: this type-based field disambiguation is not principal.</code>
-<code class="computeroutput">type s = { foo : int; bar : unit; }</code>
-<code class="computeroutput">type t = { foo : int; }</code>
-<code class="computeroutput">val f : s -&gt; int</code></pre><p>This example isn't principal, since the inferred type for
+        disambiguation.</p><link rel="import" data-code-language="ocaml" href="front-end/non_principal.ml"/><p>Inferring the signature with <code>-principal</code> will show you a new
+        warning:</p><link rel="import" data-code-language="console" href="front-end/build_non_principal.out"/><p>This example isn't principal, since the inferred type for
         <code>x.foo</code> is guided by the inferred
         type of <code>x.bar</code>, whereas principal
         typing requires that each subexpression's type can be calculated
@@ -549,22 +326,12 @@ let f x =
         removed from the definition of <code>f</code>,
         its argument would be of type <code>t</code> and
         not <code>type s</code>.</p><p>You can fix this either by permuting the order of the type
-        declarations, or by adding an explicit type annotation:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/principal.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type s = { foo: int; bar: unit }
-type t = { foo: int }
-
-let f (x:s) =
-  x.bar;
-  x.foo</pre><p>There is now no ambiguity about the inferred types, since we've
+        declarations, or by adding an explicit type annotation:</p><link rel="import" data-code-language="ocaml" href="front-end/principal.ml"/><p>There is now no ambiguity about the inferred types, since we've
         explicitly given the argument a type, and the order of inference of
-        the subexpressions no longer matters.</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/build_principal.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocamlc -i -principal principal.ml</code></strong>
-<code class="computeroutput">type s = { foo : int; bar : unit; }</code>
-<code class="computeroutput">type t = { foo : int; }</code>
-<code class="computeroutput">val f : s -&gt; int</code></pre><p>The <span class="command"><em>ocamlbuild</em></span> equivalent is to add the tag
+        the subexpressions no longer matters.</p><link rel="import" data-code-language="console" href="front-end/build_principal.out"/><p>The <span class="command"><em>ocamlbuild</em></span> equivalent is to add the tag
             <code>principal</code> to your build. The
             <em>corebuild</em> wrapper script actually adds this by default, but it does
-          no harm to explicitly repeat it:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/principal/build_principal.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>corebuild -tag principal principal.cmi non_principal.cmi</code></strong>
-<code class="computeroutput">File "non_principal.ml", line 6, characters 4-7:</code>
-<code class="computeroutput">Warning 18: this type-based field disambiguation is not principal.</code></pre><p>Ideally, all code should systematically use <code>-principal</code>. It reduces variance in type inference and enforces the notion of
+          no harm to explicitly repeat it:</p><link rel="import" data-code-language="console" href="principal/build_principal.out"/><p>Ideally, all code should systematically use <code>-principal</code>. It reduces variance in type inference and enforces the notion of
           a single known type. However, there are drawbacks to this mode: type inference is slower,
           and the <code>cmi</code> files become larger. This is generally only
           a problem if you extensively use objects, which usually have larger type signatures to
@@ -591,12 +358,8 @@ let f (x:s) =
         up a big module hierarchy into a collection of files. The relationship
         between files and modules can be explained directly in terms of the
         module system.<a data-type="indexterm" data-primary="files" data-secondary="relationship with modules">&#xa0;</a></p><p>Create a file called <code>alice.ml</code>
-        with the following contents:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/alice.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">let friends = [ Bob.name ]</pre><p>and a corresponding signature file:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/alice.mli" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">val friends : Bob.t list</pre><p>These two files are exactly analogous to including the following
-        code directly in another module that references <code>Alice</code>:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/alice_combined.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">module Alice : sig
-  val friends : Bob.t list
-end = struct
-  let friends = [ Bob.name ]
-end</pre></section><section id="defining-a-module-search-path" data-type="sect3"><h3>Defining a module search path</h3><p>In the preceding example, <code>Alice</code> also has a reference to another module
+        with the following contents:</p><link rel="import" data-code-language="ocaml" href="front-end/alice.ml"/><p>and a corresponding signature file:</p><link rel="import" data-code-language="ocaml" href="front-end/alice.mli"/><p>These two files are exactly analogous to including the following
+        code directly in another module that references <code>Alice</code>:</p><link rel="import" data-code-language="ocaml" href="front-end/alice_combined.ml"/></section><section id="defining-a-module-search-path" data-type="sect3"><h3>Defining a module search path</h3><p>In the preceding example, <code>Alice</code> also has a reference to another module
         <code>Bob</code>. For the overall type of
         <code>Alice</code> to be valid, the compiler
         also needs to check that the <code>Bob</code>
@@ -632,13 +395,7 @@ end</pre></section><section id="defining-a-module-search-path" data-type="sect3"
           lets the program completely violate the static type system and can
           lead to memory corruption and crashes.</p><p>OCaml guards against this by recording a MD5 checksum in every
           <code>cmi</code>. Let's examine our earlier
-          <code>typedef.ml</code> more closely:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/typedef_objinfo.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocamlc -c typedef.ml</code></strong>
-<code class="prompt">$ </code><strong><code>ocamlobjinfo typedef.cmi</code></strong>
-<code class="computeroutput">File typedef.cmi</code>
-<code class="computeroutput">Unit name: Typedef</code>
-<code class="computeroutput">Interfaces imported:</code>
-<code class="computeroutput">	bd274dc132ce5c3d8b6774d19cd373a6	Typedef</code>
-<code class="computeroutput">	36b5bc8227dc9914c6d9fd9bdcfadb45	Pervasives</code></pre><p><code>ocamlobjinfo</code> examines the
+          <code>typedef.ml</code> more closely:</p><link rel="import" data-code-language="console" href="front-end/typedef_objinfo.out"/><p><code>ocamlobjinfo</code> examines the
           compiled interface and displays what other compilation units it
           depends on. In this case, we don't use any external modules other
           than <code>Pervasives</code>. Every module
@@ -652,11 +409,7 @@ end</pre></section><section id="defining-a-module-search-path" data-type="sect3"
           consistently against one another. A difference in the hashes means
           that a compilation unit with the same module name may have
           conflicting type signatures in different modules. The compiler will
-          reject such programs with an error similar to this:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/inconsistent_compilation_units.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocamlc -c foo.ml</code></strong>
-<code class="computeroutput">File "foo.ml", line 1, characters 0-1:</code>
-<code class="computeroutput">Error: The files /home/build/bar.cmi</code>
-<code class="computeroutput">       and /usr/lib/ocaml/map.cmi make inconsistent assumptions</code>
-<code class="computeroutput">       over interface Map</code></pre><p>This hash check is very conservative, but ensures that
+          reject such programs with an error similar to this:</p><link rel="import" data-code-language="console" href="front-end/inconsistent_compilation_units.out"/><p>This hash check is very conservative, but ensures that
           separate compilation remains type-safe all the way up to the final
           link phase. Your build system should ensure that you never see the
           preceding error messages, but if you do run into it, just clean out
@@ -680,32 +433,13 @@ end</pre></section><section id="defining-a-module-search-path" data-type="sect3"
       file contains the list of modules that are intended to be packed under
       module <code>X</code>. There are special rules in
       <span class="command"><em>ocamlbuild</em></span> that tell it how to map
-      <code>%.mlpack</code> files to the packed <code>%.cmx</code> or <code>%.cmo</code> equivalent:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/packing/show_files.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>cat A.ml</code></strong>
-<code class="computeroutput">let v = "hello"</code>
-<code class="prompt">$ </code><strong><code>cat B.ml</code></strong>
-<code class="computeroutput">let w = 42</code>
-<code class="prompt">$ </code><strong><code>cat _tags</code></strong>
-<code class="computeroutput">&lt;*.cmx&gt; and not "X.cmx": for-pack(X)</code>
-<code class="prompt">$ </code><strong><code>cat X.mlpack</code></strong>
-<code class="computeroutput">A</code>
-<code class="computeroutput">B</code></pre><p>You can now run <em>corebuild</em> to build the <code>X.cmx</code> file directly, but let's create a new module to link against <code>X</code> to complete the example:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/packing/test.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">let v = X.A.v
-let w = X.B.w</pre><p>You can now compile this test module and see that its inferred
+      <code>%.mlpack</code> files to the packed <code>%.cmx</code> or <code>%.cmo</code> equivalent:</p><link rel="import" data-code-language="console" href="packing/show_files.out"/><p>You can now run <em>corebuild</em> to build the <code>X.cmx</code> file directly, but let's create a new module to link against <code>X</code> to complete the example:</p><link rel="import" data-code-language="ocaml" href="packing/test.ml"/><p>You can now compile this test module and see that its inferred
       interface is the result of using the packed contents of <code>X</code>. We further verify this by examining the
       imported interfaces in <code>Test</code> and
       confirming that neither <code>A</code> nor
       <code>B</code> are mentioned in there and that
       only the packed <code>X</code> module is
-      used:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/packing/build_test.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>corebuild test.inferred.mli test.cmi</code></strong>
-<code class="prompt">$ </code><strong><code>cat _build/test.inferred.mli</code></strong>
-<code class="computeroutput">val v : string</code>
-<code class="computeroutput">val w : int</code>
-<code class="prompt">$ </code><strong><code>ocamlobjinfo _build/test.cmi</code></strong>
-<code class="computeroutput">File _build/test.cmi</code>
-<code class="computeroutput">Unit name: Test</code>
-<code class="computeroutput">Interfaces imported:</code>
-<code class="computeroutput">	906fc1b74451f0c24ceaa085e0f26e5f	Test</code>
-<code class="computeroutput">	36b5bc8227dc9914c6d9fd9bdcfadb45	Pervasives</code>
-<code class="computeroutput">	25f4b4e10ec64c56b2987f5900045fec	X</code></pre><div data-type="warning"><h1>Packing and Search Paths</h1><p>One very common build error that happens with packing is
+      used:</p><link rel="import" data-code-language="console" href="packing/build_test.out"/><div data-type="warning"><h1>Packing and Search Paths</h1><p>One very common build error that happens with packing is
         confusion resulting from building the packed <code>cmi</code> in the same directory as the submodules.
         When you add this directory to your module search path, the submodules
         are also visible. If you forget to include the top-level prefix (e.g.,
@@ -720,26 +454,15 @@ let w = X.B.w</pre><p>You can now compile this test module and see that its infe
         standard library. It collects these modules into a single <code>Std</code> module, which provides a single module that needs to be opened to import
         the replacement modules and functions.<a data-type="indexterm" data-primary="errors" data-secondary="reducing verbosity in">&#xa0;</a></p><p>There's one downside to this approach: type errors suddenly get
       much more verbose. We can see this if you run the vanilla OCaml toplevel
-      (not <span class="command"><em>utop</em></span>).</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/short_paths_1.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocaml</code></strong>
-<code class="computeroutput"># List.map print_endline "" ;;</code>
-<code class="computeroutput">Error: This expression has type string but an expression was expected of type</code>
-<code class="computeroutput">         string list</code></pre><p>This type error without <code>Core.Std</code> has a straightforward type error.
-      When we switch to Core, though, it gets more verbose:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/short_paths_2.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocaml</code></strong>
-<code class="computeroutput"># open Core.Std ;;</code>
-<code class="computeroutput"># List.map ~f:print_endline "" ;;</code>
-<code class="computeroutput">Error: This expression has type string but an expression was expected of type</code>
-<code class="computeroutput">         'a Core.Std.List.t = 'a list</code></pre><p>The default <code>List</code> module in
+      (not <span class="command"><em>utop</em></span>).</p><link rel="import" data-code-language="console" href="front-end/short_paths_1.out"/><p>This type error without <code>Core.Std</code> has a straightforward type error.
+      When we switch to Core, though, it gets more verbose:</p><link rel="import" data-code-language="console" href="front-end/short_paths_2.out"/><p>The default <code>List</code> module in
       OCaml is overridden by <code>Core.Std.List</code>.
       The compiler does its best to show the type equivalence, but at the cost
       of a more verbose error message.</p><p>The compiler can remedy this via a so-called short paths
       heuristic. This causes the compiler to search all the type aliases for
       the shortest module path and use that as the preferred output type. The
       option is activated by passing <code>-short-paths</code> to the compiler, and works on the
-      toplevel, too.<a data-type="indexterm" data-primary="short paths heuristic">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/short_paths_3.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocaml -short-paths</code></strong>
-<code class="computeroutput"># open Core.Std;;</code>
-<code class="computeroutput"># List.map ~f:print_endline "foo";;</code>
-<code class="computeroutput">Error: This expression has type string but an expression was expected of type</code>
-<code class="computeroutput">         'a list</code></pre><p>The <span class="command"><em>utop</em></span> enhanced toplevel activates short paths by
+      toplevel, too.<a data-type="indexterm" data-primary="short paths heuristic">&#xa0;</a></p><link rel="import" data-code-language="console" href="front-end/short_paths_3.out"/><p>The <span class="command"><em>utop</em></span> enhanced toplevel activates short paths by
         default, which is why we have not had to do this before in our interactive examples.
         However, the compiler doesn't default to the short path heuristic, since there are some
         situations where the type aliasing information is useful to know, and it would be lost in
@@ -755,28 +478,11 @@ let w = X.B.w</pre><p>You can now compile this test module and see that its infe
     useful for IDE tools to match up OCaml source code at a specific location
     to the inferred or external types.</p><section id="using-ocp-index-for-auto-completion" data-type="sect2"><h2>Using ocp-index for Autocompletion</h2><p>One such command-line tool to display autocompletion information
       in your editor is <span class="command"><em>ocp-index</em></span>. Install
-      it via OPAM as follows:<a data-type="indexterm" data-primary="autocompletion">&#xa0;</a><a data-type="indexterm" data-primary="ocp-index">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/install_ocp_index.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>opam install ocp-index</code></strong>
-<code class="prompt">$ </code><strong><code>ocp-index</code></strong></pre><p>Let's refer back to our Ncurses binding example from the beginning
+      it via OPAM as follows:<a data-type="indexterm" data-primary="autocompletion">&#xa0;</a><a data-type="indexterm" data-primary="ocp-index">&#xa0;</a></p><link rel="import" data-code-language="console" href="front-end/install_ocp_index.out"/><p>Let's refer back to our Ncurses binding example from the beginning
       of <a href="#foreign-function-interface" data-type="xref">#foreign-function-interface</a>. This module defined
       bindings for the Ncurses library. First, compile the interfaces with
       <span><code>-bin-annot</code></span> so that we can obtain the
-        <code>cmt</code> and <code>cmti</code> files, and then run <span class="command"><em>ocp-index</em></span> in completion mode:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/ocp-index/index_ncurses.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>corebuild -pkg ctypes.foreign -tag bin_annot ncurses.cmi</code></strong>
-<code class="prompt">$ </code><strong><code>ocp-index complete -I . Ncur</code></strong>
-<code class="computeroutput">Ncurses module</code>
-<code class="prompt">$ </code><strong><code>ocp-index complete -I . Ncurses.a</code></strong>
-<code class="computeroutput">Ncurses.addstr val string -&gt; unit</code>
-<code class="prompt">$ </code><strong><code>ocp-index complete -I . Ncurses.</code></strong>
-<code class="computeroutput">Ncurses.window val Ncurses.window Ctypes.typ</code>
-<code class="computeroutput">Ncurses.wrefresh val Ncurses.window -&gt; unit</code>
-<code class="computeroutput">Ncurses.initscr val unit -&gt; Ncurses.window</code>
-<code class="computeroutput">Ncurses.endwin val unit -&gt; unit</code>
-<code class="computeroutput">Ncurses.refresh val unit -&gt; unit</code>
-<code class="computeroutput">Ncurses.newwin val int -&gt; int -&gt; int -&gt; int -&gt; Ncurses.window</code>
-<code class="computeroutput">Ncurses.mvwaddch val Ncurses.window -&gt; int -&gt; int -&gt; char -&gt; unit</code>
-<code class="computeroutput">Ncurses.mvwaddstr val Ncurses.window -&gt; int -&gt; int -&gt; string -&gt; unit</code>
-<code class="computeroutput">Ncurses.addstr val string -&gt; unit</code>
-<code class="computeroutput">Ncurses.box val Ncurses.window -&gt; char -&gt; char -&gt; unit</code>
-<code class="computeroutput">Ncurses.cbreak val unit -&gt; int</code></pre><p>You need to pass <span class="command"><em>ocp-index</em></span> a set of directories to
+        <code>cmt</code> and <code>cmti</code> files, and then run <span class="command"><em>ocp-index</em></span> in completion mode:</p><link rel="import" data-code-language="console" href="ocp-index/index_ncurses.out"/><p>You need to pass <span class="command"><em>ocp-index</em></span> a set of directories to
         search for <code>cmt</code> files in, and a fragment of text to
         autocomplete. As you can imagine, autocompletion is invaluable on larger codebases. See the
           <a href="https://github.com/ocamlpro/ocp-index"><em>ocp-index</em></a>
@@ -784,88 +490,13 @@ let w = X.B.w</pre><p>You can now compile this test module and see that its infe
       output of the internal AST representation. You can't depend on these
       flags to give the same output across compiler revisions, but they are a
       useful learning tool.<a data-type="indexterm" data-primary="flags">&#xa0;</a></p><p>We'll use our toy <code>typedef.ml</code>
-      again:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/typedef.ml" class="orm:hideurl:ital"><em class="hyperlink">OCaml</em></a></p><pre data-type="programlisting" data-code-language="ocaml">type t = Foo | Bar
-let v = Foo</pre><p>Let's first look at the untyped syntax tree that's generated from
-      the parsing phase:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/parsetree_typedef.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocamlc -dparsetree typedef.ml 2&gt;&amp;1</code></strong>
-<code class="computeroutput">[</code>
-<code class="computeroutput">  structure_item (typedef.ml[1,0+0]..[1,0+18])</code>
-<code class="computeroutput">    Pstr_type</code>
-<code class="computeroutput">    [</code>
-<code class="computeroutput">      "t" (typedef.ml[1,0+5]..[1,0+6])</code>
-<code class="computeroutput">        type_declaration (typedef.ml[1,0+5]..[1,0+18])</code>
-<code class="computeroutput">          ptype_params =</code>
-<code class="computeroutput">            []</code>
-<code class="computeroutput">          ptype_cstrs =</code>
-<code class="computeroutput">            []</code>
-<code class="computeroutput">          ptype_kind =</code>
-<code class="computeroutput">            Ptype_variant</code>
-<code class="computeroutput">              [</code>
-<code class="computeroutput">                (typedef.ml[1,0+9]..[1,0+12])</code>
-<code class="computeroutput">                  "Foo" (typedef.ml[1,0+9]..[1,0+12])</code>
-<code class="computeroutput">                  []</code>
-<code class="computeroutput">                  None</code>
-<code class="computeroutput">                (typedef.ml[1,0+15]..[1,0+18])</code>
-<code class="computeroutput">                  "Bar" (typedef.ml[1,0+15]..[1,0+18])</code>
-<code class="computeroutput">                  []</code>
-<code class="computeroutput">                  None</code>
-<code class="computeroutput">              ]</code>
-<code class="computeroutput">          ptype_private = Public</code>
-<code class="computeroutput">          ptype_manifest =</code>
-<code class="computeroutput">            None</code>
-<code class="computeroutput">    ]</code>
-<code class="computeroutput">  structure_item (typedef.ml[2,19+0]..[2,19+11])</code>
-<code class="computeroutput">    Pstr_value Nonrec</code>
-<code class="computeroutput">    [</code>
-<code class="computeroutput">      &lt;def&gt;</code>
-<code class="computeroutput">        pattern (typedef.ml[2,19+4]..[2,19+5])</code>
-<code class="computeroutput">          Ppat_var "v" (typedef.ml[2,19+4]..[2,19+5])</code>
-<code class="computeroutput">        expression (typedef.ml[2,19+8]..[2,19+11])</code>
-<code class="computeroutput">          Pexp_construct "Foo" (typedef.ml[2,19+8]..[2,19+11])</code>
-<code class="computeroutput">          None</code>
-<code class="computeroutput">          false</code>
-<code class="computeroutput">    ]</code>
-<code class="computeroutput">]</code>
-<code class="computeroutput"> </code></pre><p>This is rather a lot of output for a simple two-line program, but
+      again:</p><link rel="import" data-code-language="ocaml" href="front-end/typedef.ml"/><p>Let's first look at the untyped syntax tree that's generated from
+      the parsing phase:</p><link rel="import" data-code-language="console" href="front-end/parsetree_typedef.out"/><p>This is rather a lot of output for a simple two-line program, but
       it shows just how much structure the OCaml parser generates even from a
       small source file.</p><p>Each portion of the AST is decorated with the precise location information (including
         the filename and character location of the token). This code hasn't been type checked yet,
         so the raw tokens are all included.</p><p>The typed AST that is normally output as a compiled <code>cmt</code> file can be displayed in a more
-      developer-readable form via the <code>-dtypedtree</code> option:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/front-end/typedtree_typedef.out" class="orm:hideurl:ital"><em class="hyperlink">Terminal</em></a></p><pre data-type="programlisting" data-code-language="console"><code class="prompt">$ </code><strong><code>ocamlc -dtypedtree typedef.ml 2&gt;&amp;1</code></strong>
-<code class="computeroutput">[</code>
-<code class="computeroutput">  structure_item (typedef.ml[1,0+0]..typedef.ml[1,0+18])</code>
-<code class="computeroutput">    Pstr_type</code>
-<code class="computeroutput">    [</code>
-<code class="computeroutput">      t/1008</code>
-<code class="computeroutput">        type_declaration (typedef.ml[1,0+5]..typedef.ml[1,0+18])</code>
-<code class="computeroutput">          ptype_params =</code>
-<code class="computeroutput">            []</code>
-<code class="computeroutput">          ptype_cstrs =</code>
-<code class="computeroutput">            []</code>
-<code class="computeroutput">          ptype_kind =</code>
-<code class="computeroutput">            Ptype_variant</code>
-<code class="computeroutput">              [</code>
-<code class="computeroutput">                "Foo/1009"</code>
-<code class="computeroutput">                  []</code>
-<code class="computeroutput">                "Bar/1010"</code>
-<code class="computeroutput">                  []</code>
-<code class="computeroutput">              ]</code>
-<code class="computeroutput">          ptype_private = Public</code>
-<code class="computeroutput">          ptype_manifest =</code>
-<code class="computeroutput">            None</code>
-<code class="computeroutput">    ]</code>
-<code class="computeroutput">  structure_item (typedef.ml[2,19+0]..typedef.ml[2,19+11])</code>
-<code class="computeroutput">    Pstr_value Nonrec</code>
-<code class="computeroutput">    [</code>
-<code class="computeroutput">      &lt;def&gt;</code>
-<code class="computeroutput">        pattern (typedef.ml[2,19+4]..typedef.ml[2,19+5])</code>
-<code class="computeroutput">          Ppat_var "v/1011"</code>
-<code class="computeroutput">        expression (typedef.ml[2,19+8]..typedef.ml[2,19+11])</code>
-<code class="computeroutput">          Pexp_construct "Foo"</code>
-<code class="computeroutput">          []</code>
-<code class="computeroutput">          false</code>
-<code class="computeroutput">    ]</code>
-<code class="computeroutput">]</code>
-<code class="computeroutput"> </code></pre><p>The typed AST is more explicit than the untyped syntax tree. For
+      developer-readable form via the <code>-dtypedtree</code> option:</p><link rel="import" data-code-language="console" href="front-end/typedtree_typedef.out"/><p>The typed AST is more explicit than the untyped syntax tree. For
       instance, the type declaration has been given a unique name (<code>t/1008</code>), as has the <code>v</code> value (<code>v/1011</code>).<a data-type="indexterm" data-startref="typesyntree">&#xa0;</a><a data-type="indexterm" data-startref="CPtypsyn">&#xa0;</a></p><p>You'll rarely need to look at this raw output from the compiler unless you're building
         IDE tools such as <span class="command"><em>ocp-index</em></span>, or are hacking on extensions
         to the core compiler itself. However, it's useful to know that this intermediate form exists

@@ -1,0 +1,5 @@
+$ ocamlc -c foo.ml
+File "foo.ml", line 1, characters 0-1:
+Error: The files /home/build/bar.cmi
+       and /usr/lib/ocaml/map.cmi make inconsistent assumptions
+       over interface Map

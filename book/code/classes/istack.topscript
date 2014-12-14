@@ -1,0 +1,33 @@
+class istack = object
+    val mutable v = [0; 2]
+
+    method pop =
+      match v with
+      | hd :: tl ->
+          v <- tl;
+          Some hd
+      | [] -> None
+
+    method push hd =
+      v <- hd :: v
+  end ;;
+
+
+
+
+
+
+
+#part 1
+let s = new istack ;;
+
+s#pop ;;
+
+s#push 5 ;;
+
+s#pop ;;
+
+
+#part 2
+type istack = < pop: int option; push: int -> unit > ;;
+

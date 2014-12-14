@@ -1,0 +1,15 @@
+$ ./basic_md5.native
+Generate an MD5 hash of the input data
+ 
+  basic_md5.native FILENAME
+ 
+More detailed information
+ 
+=== flags ===
+ 
+  [-build-info]  print info about this build and exit
+  [-version]     print the version of this build and exit
+  [-help]        print this help text and exit
+                 (alias: -?)
+ 
+missing anonymous argument: FILENAME

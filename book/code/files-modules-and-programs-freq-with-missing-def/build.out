@@ -1,0 +1,6 @@
+$ corebuild freq.byte
+File "counter.ml", line 1:
+Error: The implementation counter.ml
+       does not match the interface counter.cmi:
+       The field `count' is required but not provided
+Command exited with code 2.

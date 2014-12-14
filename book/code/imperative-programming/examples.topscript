@@ -1,0 +1,10 @@
+
+#part 1
+List.find_map;;
+
+
+#part 2
+let rec endless_loop = 1 :: 2 :: 3 :: endless_loop;;
+
+
+

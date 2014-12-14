@@ -1,0 +1,125 @@
+type 'a iterator = < get : 'a; has_value : bool; next : unit > ;;
+
+
+#part 1
+class ['a] list_iterator init = object
+    val mutable current : 'a list = init
+
+    method has_value = current <> []
+
+    method get =
+      match current with
+      | hd :: tl -> hd
+      | [] -> raise (Invalid_argument "no value")
+
+    method next =
+      match current with
+      | hd :: tl -> current <- tl
+      | [] -> raise (Invalid_argument "no value")
+   end  ;;
+
+
+
+
+
+
+
+
+
+#part 2
+class ['a] stack init = object
+    val mutable v : 'a list = init
+
+    method pop =
+      match v with
+      | hd :: tl ->
+        v <- tl;
+        Some hd
+      | [] -> None
+
+    method push hd =
+      v <- hd :: v
+
+    method iterator : 'a iterator =
+      new list_iterator v
+  end ;;
+
+
+
+
+
+
+
+
+
+#part 3
+let s = new stack [] ;;
+
+s#push 5 ;;
+
+s#push 4 ;;
+
+let it = s#iterator ;;
+
+it#get ;;
+
+it#next ;;
+
+it#get ;;
+
+it#next ;;
+
+it#has_value ;;
+
+
+#part 4
+class ['a] stack init = object
+    val mutable v : 'a list = init
+
+    method pop =
+      match v with
+      | hd :: tl ->
+        v <- tl;
+        Some hd
+      | [] -> None
+
+    method push hd =
+      v <- hd :: v
+
+   method iter f = 
+     List.iter ~f v 
+  end ;;
+
+
+
+
+
+
+
+
+
+#part 5
+class ['a] stack init = object
+    val mutable v : 'a list = init
+
+    method pop =
+      match v with
+      | hd :: tl ->
+        v <- tl;
+        Some hd
+      | [] -> None
+
+    method push hd =
+      v <- hd :: v
+
+    method fold : 'b. ('b -> 'a -> 'b) -> 'b -> 'b =
+     (fun f init -> List.fold ~f ~init v) 
+  end ;;
+
+
+
+
+
+
+
+

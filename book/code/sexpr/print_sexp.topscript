@@ -1,0 +1,6 @@
+Sexp.List [
+    Sexp.Atom "this";
+    Sexp.List [ Sexp.Atom "is"; Sexp.Atom "an"];
+    Sexp.List [ Sexp.Atom "s"; Sexp.Atom "expression" ];
+  ];;
+

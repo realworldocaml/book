@@ -1,0 +1,6 @@
+$ corebuild terminal_color.native
+File "terminal_color.ml", line 30, characters 4-11:
+Error: This pattern matches values of type [? `Grey of 'a ]
+       but a pattern was expected which matches values of type extended_color
+       The second variant type does not allow tag(s) `Grey
+Command exited with code 2.

@@ -1,0 +1,2 @@
+<string_expr>.[<index_expr>]
+          <string_expr>.[<index_expr>] <- <char_expr>

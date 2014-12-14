@@ -33,10 +33,7 @@
   values are managed by the runtime later on in <a href="#understanding-the-garbage-collector" data-type="xref">#understanding-the-garbage-collector</a>.<a data-type="indexterm" id="MAPocaml" data-primary="mapping" data-secondary="of OCaml types to runtime values">&#xa0;</a></p><section id="ocaml-blocks-and-values" data-type="sect1"><h1>OCaml Blocks and Values</h1><p>A running OCaml program uses blocks of memory (i.e., contiguous
     sequences of words in RAM) to represent values such as tuples, records,
     closures, or arrays. An OCaml program implicitly allocates a block of
-    memory when such a value is created:<a data-type="indexterm" id="blck" data-primary="blocks (of memory)">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/simple_record.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type t = { foo: int; bar: int } ;;</code></strong>
-<code class="computeroutput">type t = { foo : int; bar : int; }</code>
-<code class="prompt"># </code><strong><code>let x = { foo = 13; bar = 14 } ;;</code></strong>
-<code class="computeroutput">val x : t = {foo = 13; bar = 14}</code></pre><p>The type declaration <code>t</code> doesn't
+    memory when such a value is created:<a data-type="indexterm" id="blck" data-primary="blocks (of memory)">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="memory-repr/simple_record.topscript"/><p>The type declaration <code>t</code> doesn't
     take up any memory at runtime, but the subsequent <code>let</code> binding allocates a new block of memory with
     two words of available space. One word holds the <code>foo</code> field, and the other word holds the <code>bar</code> field. The OCaml compiler translates such an
     expression into an explicit allocation for the block from OCaml's runtime
@@ -96,7 +93,7 @@
     header has a multipurpose tag byte that defines whether to interpret the
     subsequent data as opaque bytes or OCaml fields.<a data-type="indexterm" data-primary="runtime memory representation" data-secondary="blocks and values">&#xa0;</a></p><p>The GC never inspects opaque bytes. If the tag indicates an array of OCaml fields are
       present, their contents are all treated as more valid OCaml values. The GC always inspects fields and follows them as part of the
-      collection process described earlier.<a data-type="indexterm" data-primary="garbage collection" data-secondary="opaque bytes and">&#xa0;</a><a data-type="indexterm" data-primary="opaque bytes">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/block.ascii" class="orm:hideurl:ital"><em class="hyperlink">Diagram</em></a></p><figure style="float: 0"><img src="images/rwoc_2001.png"/><figcaption/></figure><p>The <code>size</code> field records the length
+      collection process described earlier.<a data-type="indexterm" data-primary="garbage collection" data-secondary="opaque bytes and">&#xa0;</a><a data-type="indexterm" data-primary="opaque bytes">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/block.ascii" class="orm:hideurl:ital"><em class="hyperlink">Diagram</em></a></p><figure style="float: 0"><img src="images/rwoc_2001.png"/><figcaption></figcaption></figure><p>The <code>size</code> field records the length
     of the block in memory words. This is 22 bits on 32-bit platforms, which
     is the reason OCaml strings are limited to 16 MB on that architecture. If
     you need bigger strings, either switch to a 64-bit host, or use the
@@ -122,79 +119,40 @@
         very efficient to use, since integers are never allocated on the heap. They can be passed
         directly in registers and not appear on the stack if you don't have too many parameters to
         your functions. Modern architectures such as <code>x86_64</code> have
-        a lot of spare registers to further improve the efficiency of using unboxed integers.</p></section></section><section id="tuples-records-and-arrays" data-type="sect1"><h1>Tuples, Records, and Arrays</h1><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/tuple_layout.ascii" class="orm:hideurl:ital"><em class="hyperlink">Diagram</em></a></p><figure style="float: 0"><img src="images/rwoc_2002.png"/><figcaption/></figure><p>Tuples, records, and arrays are all represented identically at
+        a lot of spare registers to further improve the efficiency of using unboxed integers.</p></section></section><section id="tuples-records-and-arrays" data-type="sect1"><h1>Tuples, Records, and Arrays</h1><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/tuple_layout.ascii" class="orm:hideurl:ital"><em class="hyperlink">Diagram</em></a></p><figure style="float: 0"><img src="images/rwoc_2002.png"/><figcaption></figcaption></figure><p>Tuples, records, and arrays are all represented identically at
     runtime as a block with tag <code>0</code>. Tuples
     and records have constant sizes determined at compile time, whereas arrays
     can be of variable length. While arrays are restricted to containing a
     single type of element in the OCaml type system, this is not required by
     the memory representation.<a data-type="indexterm" data-primary="arrays" data-secondary="memory representation of">&#xa0;</a><a data-type="indexterm" data-primary="records" data-secondary="memory representation of">&#xa0;</a><a data-type="indexterm" data-primary="tuples">&#xa0;</a><a data-type="indexterm" data-primary="runtime memory representation" data-secondary="tuples, records, and arrays">&#xa0;</a></p><p>You can check the difference between a block and a direct integer
     yourself using the <code>Obj</code> module, which
-    exposes the internal representation of values to OCaml code:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/reprs.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a></p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Obj.is_block (Obj.repr (1,2,3)) ;;</code></strong>
-<code class="computeroutput">- : bool = true</code>
-<code class="prompt"># </code><strong><code>Obj.is_block (Obj.repr 1) ;;</code></strong>
-<code class="computeroutput">- : bool = false</code></pre><p>The <code>Obj.repr</code> function retrieves
+    exposes the internal representation of values to OCaml code:</p><link rel="import" data-code-language="ocamltop" href="memory-repr/reprs.topscript"/><p>The <code>Obj.repr</code> function retrieves
     the runtime representation of any OCaml value. <code>Obj.is_block</code> checks the bottom bit to determine
     if the value is a block header or an unboxed integer.</p><section id="floating-point-numbers-and-arrays" data-type="sect2"><h2>Floating-Point Numbers and Arrays</h2><p>Floating-point numbers in OCaml are always stored as full, double-precision values.
         Individual floating-point values are stored as a block with a single field that contains the
         number. This block has the <code>Double_tag</code> set, which signals
-        to the collector that the floating-point value is not to be scanned:<a data-type="indexterm" data-primary="floating-point values">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/reprs.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
-      (part 1)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Obj.tag (Obj.repr 1.0) ;;</code></strong>
-<code class="computeroutput">- : int = 253</code>
-<code class="prompt"># </code><strong><code>Obj.double_tag ;;</code></strong>
-<code class="computeroutput">- : int = 253</code></pre><p>Since each floating-point value is boxed in a separate memory block, it can be
+        to the collector that the floating-point value is not to be scanned:<a data-type="indexterm" data-primary="floating-point values">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="memory-repr/reprs.topscript" part="1"/><p>Since each floating-point value is boxed in a separate memory block, it can be
         inefficient to handle large arrays of floats in comparison to unboxed integers. OCaml
         therefore special-cases records or arrays that contain <em>only</em>
         <code>float</code> types. These are stored in a block that contains
         the floats packed directly in the data section, with <code>Double_array_tag</code> set to signal to the collector that the contents are not OCaml
-        values.</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/float_array_layout.ascii" class="orm:hideurl:ital"><em class="hyperlink">Diagram</em></a></p><figure style="float: 0"><img src="images/rwoc_2003.png"/><figcaption/></figure><p>First, let's check that float arrays do in fact have a different
-      tag number from normal floating-point values:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/reprs.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
-      (part 2)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Obj.double_tag ;;</code></strong>
-<code class="computeroutput">- : int = 253</code>
-<code class="prompt"># </code><strong><code>Obj.double_array_tag ;;</code></strong>
-<code class="computeroutput">- : int = 254</code></pre><p>This tells us that float arrays have a tag value of 254. Now let's
+        values.</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/float_array_layout.ascii" class="orm:hideurl:ital"><em class="hyperlink">Diagram</em></a></p><figure style="float: 0"><img src="images/rwoc_2003.png"/><figcaption></figcaption></figure><p>First, let's check that float arrays do in fact have a different
+      tag number from normal floating-point values:</p><link rel="import" data-code-language="ocamltop" href="memory-repr/reprs.topscript" part="2"/><p>This tells us that float arrays have a tag value of 254. Now let's
       test some sample values using the <code>Obj.tag</code> function to check that the allocated
       block has the expected runtime tag, and also use <code>Obj.double_field</code> to retrieve a float from
-      within the block:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/reprs.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
-      (part 3)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Obj.tag (Obj.repr [| 1.0; 2.0; 3.0 |]) ;;</code></strong>
-<code class="computeroutput">- : int = 254</code>
-<code class="prompt"># </code><strong><code>Obj.tag (Obj.repr (1.0, 2.0, 3.0) ) ;;</code></strong>
-<code class="computeroutput">- : int = 0</code>
-<code class="prompt"># </code><strong><code>Obj.double_field (Obj.repr [| 1.1; 2.2; 3.3 |]) 1 ;;</code></strong>
-<code class="computeroutput">- : float = 2.2</code>
-<code class="prompt"># </code><strong><code>Obj.double_field (Obj.repr 1.234) 0 ;;</code></strong>
-<code class="computeroutput">- : float = 1.234</code></pre><p>The first thing we tested was that a float array has the correct unboxed float array tag
+      within the block:</p><link rel="import" data-code-language="ocamltop" href="memory-repr/reprs.topscript" part="3"/><p>The first thing we tested was that a float array has the correct unboxed float array tag
         value (254). However, the next line tests a tuple of floating-point values instead, which
         are <em>not</em> optimized in the same way and have the normal tuple tag value
         (0).</p><p>Only records and arrays can have the float array optimization, and
       for records, every single field must be a float.</p></section></section><section id="variants-and-lists" data-type="sect1"><h1>Variants and Lists</h1><p>Basic variant types with no extra parameters for any of their
     branches are simply stored as an OCaml integer, starting with <code>0</code> for the first option and in ascending
-    order:<a data-type="indexterm" data-primary="variant types" data-secondary="memory representation of">&#xa0;</a><a data-type="indexterm" data-primary="lists" data-secondary="memory representation of">&#xa0;</a><a data-type="indexterm" data-primary="runtime memory representation" data-secondary="variants and lists">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/reprs.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
-    (part 4)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type t = Apple | Orange | Pear ;;</code></strong>
-<code class="computeroutput">type t = Apple | Orange | Pear</code>
-<code class="prompt"># </code><strong><code>((Obj.magic (Obj.repr Apple)) : int) ;;</code></strong>
-<code class="computeroutput">- : int = 0</code>
-<code class="prompt"># </code><strong><code>((Obj.magic (Obj.repr Pear)) : int) ;;</code></strong>
-<code class="computeroutput">- : int = 2</code>
-<code class="prompt"># </code><strong><code>Obj.is_block (Obj.repr Apple) ;;</code></strong>
-<code class="computeroutput">- : bool = false</code></pre><p><code>Obj.magic</code> unsafely forces a type
+    order:<a data-type="indexterm" data-primary="variant types" data-secondary="memory representation of">&#xa0;</a><a data-type="indexterm" data-primary="lists" data-secondary="memory representation of">&#xa0;</a><a data-type="indexterm" data-primary="runtime memory representation" data-secondary="variants and lists">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="memory-repr/reprs.topscript" part="4"/><p><code>Obj.magic</code> unsafely forces a type
     cast between any two OCaml types; in this example, the <code>int</code> type hint retrieves the runtime integer
     value. The <code>Obj.is_block</code> confirms that
     the value isn't a more complex block, but just an OCaml <code>int</code>.</p><p>Variants that have parameters arguments are a little more complex.
     They are stored as blocks, with the value <em>tags</em>
     ascending from 0 (counting from leftmost variants with parameters). The
-    parameters are stored as words in the block:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/reprs.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
-    (part 5)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>type t = Apple | Orange of int | Pear of string | Kiwi ;;</code></strong>
-<code class="computeroutput">type t = Apple | Orange of int | Pear of string | Kiwi</code>
-<code class="prompt"># </code><strong><code>Obj.is_block (Obj.repr (Orange 1234)) ;;</code></strong>
-<code class="computeroutput">- : bool = true</code>
-<code class="prompt"># </code><strong><code>Obj.tag (Obj.repr (Orange 1234)) ;;</code></strong>
-<code class="computeroutput">- : int = 0</code>
-<code class="prompt"># </code><strong><code>Obj.tag (Obj.repr (Pear "xyz")) ;;</code></strong>
-<code class="computeroutput">- : int = 1</code>
-<code class="prompt"># </code><strong><code>(Obj.magic (Obj.field (Obj.repr (Orange 1234)) 0) : int) ;;</code></strong>
-<code class="computeroutput">- : int = 1234</code>
-<code class="prompt"># </code><strong><code>(Obj.magic (Obj.field (Obj.repr (Pear "xyz")) 0) : string) ;;</code></strong>
-<code class="computeroutput">- : string = "xyz"</code></pre><p>In the preceding example, the <code>Apple</code> and <code>Kiwi</code> values are still stored as normal OCaml integers with values
+    parameters are stored as words in the block:</p><link rel="import" data-code-language="ocamltop" href="memory-repr/reprs.topscript" part="5"/><p>In the preceding example, the <code>Apple</code> and <code>Kiwi</code> values are still stored as normal OCaml integers with values
         <code>0</code> and <code>1</code>, respectively.
       The <code>Orange</code> and <code>Pear</code>
       values both have parameters and are stored as blocks whose tags ascend from <code>0</code> (and so <code>Pear</code> has a tag of
@@ -219,11 +177,7 @@
     variant. This integer value is determined by applying a hash function to
     the <em>name</em> of the variant. The hash function isn't
     exposed directly by the compiler, but the <code>type_conv</code> library from Core provides an
-    alternative implementation:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/reprs.topscript" class="orm:hideurl:ital"><em class="hyperlink">OCaml utop</em></a>
-    (part 6)</p><pre data-type="programlisting" data-code-language="ocaml"><code class="prompt"># </code><strong><code>Pa_type_conv.hash_variant "Foo" ;;</code></strong>
-<code class="computeroutput">- : int = 3505894</code>
-<code class="prompt"># </code><strong><code>(Obj.magic (Obj.repr `Foo) : int) ;;</code></strong>
-<code class="computeroutput">- : int = 3505894</code></pre><p>The hash function is designed to give the same results on 32-bit and
+    alternative implementation:</p><link rel="import" data-code-language="ocamltop" href="memory-repr/reprs.topscript" part="6"/><p>The hash function is designed to give the same results on 32-bit and
     64-bit architectures, so the memory representation is stable across
     different CPUs and host types.</p><p>Polymorphic variants use more memory space than normal variants when parameters are
       included in the data type constructors. Normal variants use the tag byte to encode the variant
@@ -246,12 +200,12 @@
     size of the string in machine words. The <code>String_tag</code> (252) is higher than the <code>No_scan_tag</code>, indicating that the contents of the
     block are opaque to the collector. The block contents are the contents of
     the string, with padding bytes to align the block on a word
-    boundary.<a data-type="indexterm" data-primary="strings" data-secondary="memory representation of">&#xa0;</a><a data-type="indexterm" data-primary="runtime memory representation" data-secondary="string values">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/string_block.ascii" class="orm:hideurl:ital"><em class="hyperlink">Diagram</em></a></p><figure style="float: 0"><img src="images/rwoc_2004.png"/><figcaption/></figure><p>On a 32-bit machine, the padding is calculated based on the modulo of the string length
+    boundary.<a data-type="indexterm" data-primary="strings" data-secondary="memory representation of">&#xa0;</a><a data-type="indexterm" data-primary="runtime memory representation" data-secondary="string values">&#xa0;</a></p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/string_block.ascii" class="orm:hideurl:ital"><em class="hyperlink">Diagram</em></a></p><figure style="float: 0"><img src="images/rwoc_2004.png"/><figcaption></figcaption></figure><p>On a 32-bit machine, the padding is calculated based on the modulo of the string length
       and word size to ensure the result is word-aligned. A 64-bit machine extends the potential
       padding up to 7 bytes instead of 3 (see <a href="#chapter_20_table" data-type="xref">#chapter_20_table</a>).</p><table id="chapter_20_table"><caption>String length and padding</caption><thead><tr><th>String length mod 4</th><th>Padding</th></tr></thead><tbody><tr><td>0</td><td><code>00 00 00 03</code></td></tr><tr><td>1</td><td><code>00 00 02</code></td></tr><tr><td>2</td><td><code>00 01</code></td></tr><tr><td>3</td><td><code>00</code></td></tr></tbody></table><p>This string representation is a clever way to ensure that the
     contents are always zero-terminated by the padding word and to still
     compute its length efficiently without scanning the whole string. The
-    following formula is used:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/string_size_calc.ascii" class="orm:hideurl:ital"><em class="hyperlink">Diagram</em></a></p><figure style="float: 0"><img src="images/rwoc_2005.png"/><figcaption/></figure><p>The guaranteed <code>NULL</code> termination comes in handy when
+    following formula is used:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/string_size_calc.ascii" class="orm:hideurl:ital"><em class="hyperlink">Diagram</em></a></p><figure style="float: 0"><img src="images/rwoc_2005.png"/><figcaption></figcaption></figure><p>The guaranteed <code>NULL</code> termination comes in handy when
       passing a string to C, but is not relied upon to compute the length from OCaml code. OCaml
       strings can thus contain <code>NULL</code> bytes at any point within the
       string.</p><p>Care should be taken that any C library functions that receive these buffers can also cope
@@ -262,17 +216,7 @@
       values. A custom block lives in the OCaml heap like an ordinary block and can be of whatever
       size the user desires. The <code>Custom_tag</code> (255) is higher than
         <code>No_scan_tag</code> and so isn't scanned by the GC.<a data-type="indexterm" data-primary="custom heap blocks">&#xa0;</a><a data-type="indexterm" data-primary="runtime memory representation" data-secondary="custom heap blocks">&#xa0;</a></p><p>The first word of the data within the custom block is a C pointer to a <code>struct</code> of custom operations. The custom block cannot have pointers
-      to OCaml blocks and is opaque to the GC:</p><p><a href="https://github.com/realworldocaml/examples/tree/v1/code/memory-repr/custom_ops.c" class="orm:hideurl:ital"><em class="hyperlink">C</em></a></p><pre data-type="programlisting" data-code-language="c">struct custom_operations {
-  char *identifier;
-  void (*finalize)(value v);
-  int (*compare)(value v1, value v2);
-  intnat (*hash)(value v);
-  void (*serialize)(value v,
-                    /*out*/ uintnat * wsize_32 /*size in bytes*/,
-                    /*out*/ uintnat * wsize_64 /*size in bytes*/);
-  uintnat (*deserialize)(void * dst);
-  int (*compare_ext)(value v1, value v2);
-};</pre><p>The custom operations specify how the runtime should perform polymorphic comparison,
+      to OCaml blocks and is opaque to the GC:</p><link rel="import" data-code-language="c" href="memory-repr/custom_ops.c"/><p>The custom operations specify how the runtime should perform polymorphic comparison,
       hashing and binary marshaling. They also optionally contain a <em>finalizer</em>
       that the runtime calls just before the block is garbage-collected. This finalizer has nothing
       to do with ordinary OCaml finalizers (as created by <code>Gc.finalize</code> and explained in <a href="#understanding-the-garbage-collector" data-type="xref">#understanding-the-garbage-collector</a>). They are instead used to call C cleanup functions such as <code>free</code>.<a data-type="indexterm" data-primary="finalizers" data-secondary="for C cleanup functions">&#xa0;</a></p><section id="managing-external-memory-with-bigarray" data-type="sect2"><h2>Managing External Memory with Bigarray</h2><p>A common use of custom blocks is to manage external system memory

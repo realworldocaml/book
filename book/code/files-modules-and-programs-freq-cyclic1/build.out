@@ -1,0 +1,4 @@
+$ corebuild freq.byte
+File "counter.ml", line 18, characters 18-31:
+Error: Unbound module Counter
+Command exited with code 2.

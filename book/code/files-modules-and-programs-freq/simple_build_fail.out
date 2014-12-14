@@ -1,0 +1,3 @@
+$ ocamlc freq.ml -o freq.byte
+File "freq.ml", line 1, characters 0-13:
+Error: Unbound module Core

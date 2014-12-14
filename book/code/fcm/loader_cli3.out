@@ -1,0 +1,9 @@
+>>> (loader (load ls /var))
+()
+>>> (ls /var)
+(agentx at audit backups db empty folders jabberd lib log mail msgs named
+ netboot pgsql_socket_alt root rpc run rwho spool tmp vm yp)
+>>> (loader (unload ls))
+()
+>>> (ls /var)
+Could not find matching handler: ls

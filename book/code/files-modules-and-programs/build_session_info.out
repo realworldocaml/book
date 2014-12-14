@@ -1,0 +1,5 @@
+$ corebuild session_info.native
+File "session_info.ml", line 24, characters 12-19:
+Error: This expression has type Hostname.t
+       but an expression was expected of type Username.t
+Command exited with code 2.
