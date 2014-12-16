@@ -3,6 +3,7 @@
  * Modified by Anil Madhavapeddy for Real World OCaml and to use Core *)
 open Printf
 open Scanf
+open Rwo
 
 (* Run these phrases silently before any code *)
 let initial_phrases = [
@@ -118,9 +119,9 @@ let rec map_items unwrap wrap items =
       | Outcometree.Osig_class (_, name, _, _, rs)
       | Outcometree.Osig_class_type (_, name, _, _, rs)
       | Outcometree.Osig_module (name, _, rs)
-      | Outcometree.Osig_type ((name, _, _, _, _), rs) ->
+      | Outcometree.Osig_type ({Outcometree.otype_name=name;_}, rs) ->
         (name, rs)
-      | Outcometree.Osig_exception (name, _)
+      | Outcometree.Osig_typext ({Outcometree.oext_name=name;_}, _)
       | Outcometree.Osig_modtype (name, _)
       | Outcometree.Osig_value (name, _, _) ->
         (name, Outcometree.Orec_not)
@@ -152,12 +153,12 @@ let rec map_items unwrap wrap items =
               wrap (Outcometree.Osig_module (name, a, Outcometree.Orec_first)) extra :: items'
             else
               items
-          | Outcometree.Osig_type ((name, a, b, c, d), rs) ->
+          | Outcometree.Osig_type (out_type_decl, rs) ->
             if rs = Outcometree.Orec_next then
-              wrap (Outcometree.Osig_type ((name, a, b, c, d), Outcometree.Orec_first)) extra :: items'
+              wrap (Outcometree.Osig_type (out_type_decl, Outcometree.Orec_first)) extra :: items'
             else
               items
-          | Outcometree.Osig_exception _
+          | Outcometree.Osig_typext _
           | Outcometree.Osig_modtype _
           | Outcometree.Osig_value _ ->
             items

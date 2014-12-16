@@ -1,7 +1,7 @@
 open build/OCaml
 DefineCommandVars()
 
-.PHONY: lib app clean
+.PHONY: lib clean rwo_app
 
 ################################################################################
 # General Project Information
@@ -21,11 +21,7 @@ LIB_MODULES[] =
 LIB_PACKAGES = core async sexplib.syntax \
                netstring cow cow.syntax
 
-APP_NAME = $(PROJECT)-app
-APP_MODULES[] =
-  $(removesuffix $(basename $(ls app/*.ml)))
 APP_PACKAGES = $(LIB_PACKAGES)
-APP = $(ROOT)/_build/app/$(APP_NAME)
 
 
 ################################################################################
@@ -75,17 +71,20 @@ OCAMLFINDFLAGS = -syntax camlp4o
     OCAMLINCLUDES += $(dir ../lib/)
     OCAMLPACKS[] = $(APP_PACKAGES)
 
-    app: $(OCamlProgram $(APP_NAME), $(APP_MODULES))
+    run_core_toplevel: run_core_toplevel.ml ../lib/rwo.cma
+      ocamlfind ocamlc \
+        -linkpkg -thread -syntax camlp4o \
+        -package $(concat \,, $(APP_PACKAGES) compiler-libs.toplevel) \
+        -I . -I ../lib $(LIB_NAME).cma \
+        run_core_toplevel.ml -o $@
 
-    $(ROOT)/$(APP_NAME): app
-      ln -fs _build/app/$(APP_NAME).opt $(ROOT)/$(APP_NAME)
+    rwo_app: $(OCamlProgram rwo_app, rwo_app)
 
-    .DEFAULT: app $(ROOT)/$(APP_NAME)
+    .DEFAULT: rwo_app run_core_toplevel
 
 
 ################################################################################
 # Clean Up
 clean:
-  rm -f $(ROOT)/$(APP_NAME)
   rm -rf _build
   rm -rf OMakefile.omc OMakeroot.omc .omakedb .omakedb.lock
