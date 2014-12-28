@@ -80,6 +80,7 @@ let plus_one_match x =
     | 1 -> 2
     | 2 -> 3
     | _ -> x + 1
+;;
 
   let plus_one_if x =
     if      x = 0 then 1

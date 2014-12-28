@@ -1,3 +1,5 @@
+#require "yojson";;
+let json = Yojson.Basic.from_file "book.json" ;;
 
 #part 1
 open Yojson.Basic.Util ;;

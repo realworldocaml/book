@@ -34,7 +34,7 @@ if $(not $(OCAMLFIND_EXISTS))
 NATIVE_ENABLED = $(OCAMLOPT_EXISTS)
 BYTE_ENABLED = $(OCAMLC_EXISTS)
 
-OCAMLFLAGS = -bin-annot -annot -w A-4-33-41-42-44-45-48 -thread -safe-string
+OCAMLFLAGS = -bin-annot -annot -w A-4-33-41-42-44-45-48 -thread -safe-string -short-paths
 OCAMLCFLAGS =
 OCAMLOPTFLAGS =
 OCAML_LINK_FLAGS = -linkpkg
@@ -78,9 +78,16 @@ OCAMLFINDFLAGS = -syntax camlp4o
         -I . -I ../lib $(LIB_NAME).cma \
         run_core_toplevel.ml -o $@
 
+    rwo_runtop: rwo_runtop.ml ../lib/rwo.cma
+      ocamlfind ocamlc \
+        -g -safe-string -linkpkg -thread -syntax camlp4o \
+        -package $(concat \,, $(APP_PACKAGES) compiler-libs.toplevel) \
+        -I . -I ../lib $(LIB_NAME).cma \
+        rwo_runtop.ml -o $@
+
     rwo_app: $(OCamlProgram rwo_app, rwo_app)
 
-    .DEFAULT: rwo_app run_core_toplevel
+    .DEFAULT: rwo_app run_core_toplevel rwo_runtop
 
 
 ################################################################################

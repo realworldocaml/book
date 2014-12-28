@@ -1,2 +1,0 @@
-# log_delays (fun () -> after (sec 0.5));;
-

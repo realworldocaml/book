@@ -1,3 +1,4 @@
+;;
 
 #part 1
 let area sq = sq#width * sq#width ;;

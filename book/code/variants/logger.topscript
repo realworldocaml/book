@@ -1,3 +1,4 @@
+;;
 
 #part 1
 module Log_entry = struct
@@ -13,9 +14,23 @@ module Log_entry = struct
 
 
 
+#part 100
 
-
-
+module Heartbeat = struct
+    type t =
+      { session_id: string;
+        time: Time.t;
+        status_message: string;
+      }
+  end;;
+  module Logon = struct
+    type t =
+      { session_id: string;
+        time: Time.t;
+        user: string;
+        credentials: string;
+      }
+  end;;
 
 
 
@@ -60,10 +75,10 @@ module Log_entry = struct
     type t = { important: bool;
                message: string;
              }
-  end
+  end;;
   module Heartbeat = struct
     type t = { status_message: string; }
-  end
+  end;;
   module Logon = struct
     type t = { user: string;
                credentials: string;

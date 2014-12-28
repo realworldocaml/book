@@ -184,7 +184,7 @@
         just read and write handles to the same underlying object. Note that <code>r</code> and <code>w</code> have weakly
         polymorphic types, as discussed in <a href="#imperative-programming" data-type="xref">#imperative-programming</a>, and so can only
         contain values of a single, yet-to-be-determined type.</p><p>If we just try and write to the writer, we'll see that we block indefinitely in <span class="command"><em>utop</em></span>. You can break out of the wait by hitting
-          <strong><code>Control-C</code></strong>:</p><link rel="import" data-code-language="ocamltop" href="async/pipe_write_break.rawscript"/><p>The deferred returned by write completes on its own once the value
+          <strong><code>Control-C</code></strong>:</p><link rel="import" data-code-language="ocamlrawtop" href="async/pipe_write_break.rawscript"/><p>The deferred returned by write completes on its own once the value
       written into the pipe has been read out:</p><link rel="import" data-code-language="ocamltop" href="async/main.topscript" part="25"/><p>In the function <code>run</code>, we're
       taking advantage of one of the many utility functions provided for pipes
       in the <code>Pipe</code> module. In particular,
@@ -311,7 +311,9 @@
         the monitor from its parent, handing back the stream of errors that would otherwise have
         been delivered to the parent monitor. This allows one to do custom handling of errors, which
         may include reraising errors to the parent. Here is a very simple example of a function that
-        captures and ignores errors in the processes it spawns:</p><link rel="import" data-code-language="ocamltop" href="async/main-35.rawscript"/><p>The message "an error happened" is printed out, but the deferred
+        captures and ignores errors in the processes it
+    spawns:</p><link rel="import" data-code-language="ocamltop"
+    href="async/main.topscript" part="35"/><p>The message "an error happened" is printed out, but the deferred
       returned by <code>swallow_error</code> is never
       determined. This makes sense, since the calculation never actually
       completes, so there's no value to return. You can break out of this in
@@ -323,7 +325,12 @@
       information, including the monitor trace, so you need to grab the
       underlying exception to match on it.</p><p>If we pass in an exception other than <code>Ignore_me</code>, like, say, the built-in exception
       <code>Not_found</code>, then the exception will be
-      passed to the parent monitor and delivered as usual:</p><link rel="import" data-code-language="ocamltop" href="async/main.topscript" part="37"/><p>If instead we use <code>Ignore_me</code>, the exception will be ignorred, and the deferred never becomes determined:</p><link rel="import" data-code-language="ocamltop" href="async/main-38.rawscript"/><p>In practice, you should rarely use monitors directly, and instead use functions like
+      passed to the parent monitor and delivered as
+      usual:</p><link rel="import" data-code-language="ocamltop"
+      href="async/main.topscript" part="37"/><p>If instead we
+      use <code>Ignore_me</code>, the exception will be ignorred, and
+      the deferred never becomes determined:</p><link rel="import"
+      data-code-language="ocamltop" href="async/main.topscript" part="38"/><p>In practice, you should rarely use monitors directly, and instead use functions like
           <code>try_with</code> and <code>Monitor.protect</code> that are built on top of monitors. One example of a library
         that uses monitors directly is <code>Tcp.Server.create</code>, which
         tracks both exceptions thrown by the logic that handles the network connection and by the
@@ -425,10 +432,15 @@
     wake up every 100 milliseconds and print out a timestamp, until the
     returned deferred becomes determined, at which point it prints out one
     last timestamp:</p><link rel="import" data-code-language="ocamltop" href="async/main.topscript" part="43"/><p>If we feed this function a simple timeout deferred, it works as you
-    might expect, waking up roughly every 100 milliseconds:</p><link rel="import" data-code-language="ocamltop" href="async/main-44.rawscript"/><p>Now see what happens if, instead of waiting on a clock event, we wait for a busy loop to
-      finish running:</p><link rel="import" data-code-language="ocamltop" href="async/main-45.rawscript"/><p>As you can see, instead of waking up 10 times a second, <code>log_delays</code> is blocked out entirely while
+    might expect, waking up roughly every 100
+    milliseconds:</p><link rel="import" data-code-language="ocamltop"
+    href="async/main.topscript" part="44"/><p>Now see what happens if, instead of waiting on a clock event, we wait for a busy loop to
+      finish running:</p><link rel="import"
+    data-code-language="ocamltop" href="async/main.topscript" part="45"/><p>As you can see, instead of waking up 10 times a second, <code>log_delays</code> is blocked out entirely while
     <code>busy_loop</code> churns away.</p><p>If, on the other hand, we use <code>In_thread.run</code> to offload this to a different
-    system thread, the behavior will be different:</p><link rel="import" data-code-language="ocamltop" href="async/main-46.rawscript"/><p>Now <code>log_delays</code> does get a chance to run, but not nearly
+    system thread, the behavior will be
+    different:</p><link rel="import" data-code-language="ocamltop"
+    href="async/main.topscript" part="46"/><p>Now <code>log_delays</code> does get a chance to run, but not nearly
       as often as every 100 milliseconds. The reason is that now that we're using system threads, we
       are at the mercy of the operating system to decide when each thread gets scheduled. The
       behavior of threads is very much dependent on the operating system and how it is
@@ -436,7 +448,9 @@
       compiling to native code, OCaml's threads only get a chance to give up the runtime lock when
       they interact with the allocator, so if there's a piece of code that doesn't allocate at all,
       then it will never allow another OCaml thread to run. Bytecode doesn't have this behavior, so
-      if we run a nonallocating loop in bytecode, our timer process will get to run:</p><link rel="import" data-code-language="ocamltop" href="async/main-47.rawscript"/><p>But if we compile this to a native-code executable, then the nonallocating busy loop will
+      if we run a nonallocating loop in bytecode, our timer process
+    will get to run:</p><link rel="import"
+    data-code-language="ocamltop" href="async/main.topscript" part="47"/><p>But if we compile this to a native-code executable, then the nonallocating busy loop will
       block anything else from running:</p><link rel="import" data-code-language="console" href="async/run_native_code_log_delays.out"/><p>The takeaway from these examples is that predicting thread
     interleavings is a subtle business. Staying within the bounds of Async has
     its limitations, but it leads to more predictable behavior.</p><section id="thread-safety-and-locking" data-type="sect2"><h2>Thread-Safety and Locking</h2><p>Once you start working with system threads, you'll need to be

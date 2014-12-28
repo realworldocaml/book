@@ -122,7 +122,7 @@
       interdependent types and values.</p><p>Now let's turn this into a complete, running example by adding a
       command-line interface:</p><link rel="import" data-code-language="ocamltop" href="fcm/query_handler.topscript" part="13"/><p>We can most effectively run this command-line interface from a
       standalone program, which we can do by putting the above code in a file
-      along with following command to launch the interface:</p><link rel="import" data-code-language="ocaml" href="fcm/query_handler.ml" part="1"/><p>Here's an example of a session with this program:</p><link rel="import" data-code-language="ocamltop" href="fcm/query_example.rawscript"/></section><section id="loading-and-unloading-query-handlers" data-type="sect2"><h2>Loading and Unloading Query Handlers</h2><p>One of the advantages of first-class modules is that they afford a
+      along with following command to launch the interface:</p><link rel="import" data-code-language="ocaml" href="fcm/query_handler.ml" part="1"/><p>Here's an example of a session with this program:</p><link rel="import" data-code-language="ocamlrawtop" href="fcm/query_example.rawscript"/></section><section id="loading-and-unloading-query-handlers" data-type="sect2"><h2>Loading and Unloading Query Handlers</h2><p>One of the advantages of first-class modules is that they afford a
       great deal of dynamism and flexibility. For example, it's a fairly
       simple matter to change our design to allow query handlers to be loaded
       and unloaded at runtime.<a data-type="indexterm" data-primary="query-handlers" data-secondary="loading/unloading of">&#xa0;</a></p><p>We'll do this by creating a query handler whose job is to control

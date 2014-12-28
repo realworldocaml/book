@@ -256,7 +256,7 @@ let parse_file fullfile file =
     fun ~key ~data ->
       let code = Cow.Html.of_string (String.strip (Buffer.contents data)) in
       let data =
-        Code_frag.wrap_in_pretty_box ~part:key "OCaml UTop" fullfile code
+        Code.wrap_in_pretty_box ~part:key "OCaml UTop" fullfile code
         |> Cow.Html.to_string in
       eprintf "W: %s\n%!" (ofile_html file key);
       Out_channel.write_all (ofile_html file key) ~data)

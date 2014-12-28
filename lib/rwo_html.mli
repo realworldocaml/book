@@ -54,13 +54,15 @@ val print_elements_only
   -> unit
 
 
+(******************************************************************************)
 (** {2 Constructors} *)
-
+(******************************************************************************)
 val item : string -> ?a:attributes -> t -> item
 val data : string -> item
 
 val div : ?a:attributes -> t -> item
 val span : ?a:attributes -> t -> item
+val pre : ?a:attributes -> t -> item
 
 val a : ?a:attributes -> t -> item
 val i : ?a:attributes -> t -> item
@@ -90,7 +92,9 @@ val script : ?a:attributes -> t -> item
 val link : ?a:attributes -> t -> item
 
 
+(******************************************************************************)
 (** {2 Attributes} *)
+(******************************************************************************)
 
 (** Get list of all attribute names occurring anywhere in [t]. *)
 val get_all_attributes : t -> string list

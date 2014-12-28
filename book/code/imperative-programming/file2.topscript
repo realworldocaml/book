@@ -1,4 +1,4 @@
-
+;;
 #part 1
 let sum_file filename =
     let file = In_channel.create filename in

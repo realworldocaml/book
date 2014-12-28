@@ -1,4 +1,4 @@
-
+;;
 #part 1
 let digit_alist =
     [ 0, "zero"; 1, "one"; 2, "two"  ; 3, "three"; 4, "four"
@@ -30,8 +30,8 @@ let zilch_map = Map.add digit_map ~key:0 ~data:"zilch";;
 
 
 #part 5
-let left = String.Map.of_alist_exn ["foo",1; "bar",3; "snoo",0]
-  let right = String.Map.of_alist_exn ["foo",0; "snoo",0]
+let left = String.Map.of_alist_exn ["foo",1; "bar",3; "snoo",0];;
+  let right = String.Map.of_alist_exn ["foo",0; "snoo",0];;
   let diff = Map.symmetric_diff ~data_equal:Int.equal left right
   ;;
 
@@ -149,6 +149,46 @@ s1 = s2;;
 #part 21
 Set.to_tree s1 = Set.to_tree s2;;
 
+#part 22
+module Foo_and_bar : sig
+    type t = { foo: Int.Set.t; bar: string }
+    include Comparable.S with type t := t
+  end = struct
+    module T = struct
+      type t = { foo: Int.Set.t; bar: string } with sexp
+      let compare t1 t2 =
+        let c = Int.Set.compare t1.foo t2.foo in
+        if c <> 0 then c else String.compare t1.bar t2.bar
+    end
+    include T
+    include Comparable.Make(T)
+  end;;
+
+#part 23
+module Foo_and_bar : sig
+    type t = { foo: Int.Set.t; bar: string }
+    include Comparable.S with type t := t
+  end = struct
+    module T = struct
+      type t = { foo: Int.Set.t; bar: string } with sexp, compare
+    end
+    include T
+    include Comparable.Make(T)
+  end;;
+
+#part 24
+module Foo_and_bar : sig
+    type t = { foo: int; bar: string }
+    include Comparable.S with type t := t
+  end = struct
+    module T = struct
+      type t = { foo: int; bar: string } with sexp
+    end
+    include T
+    include Comparable.Poly(T)
+  end;;
+
+
 
 #part 25
 let table = Hashtbl.create ~hashable:String.hashable ();;
@@ -179,3 +219,16 @@ Caml.Hashtbl.hash (List.range 0 11);;
 
 Caml.Hashtbl.hash (List.range 0 100);;
 
+#part 30
+module Foo_and_bar : sig
+    type t = { foo: int; bar: string }
+    include Hashable.S with type t := t
+  end = struct
+    module T = struct
+      type t = { foo: int; bar: string } with sexp, compare
+      let hash t =
+        (Int.hash t.foo) lxor (String.hash t.bar)
+    end
+    include T
+    include Hashable.Make(T)
+  end;;

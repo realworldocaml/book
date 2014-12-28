@@ -1,3 +1,4 @@
+;;
 
 #part 1
 type 'a ref = { mutable contents : 'a };;

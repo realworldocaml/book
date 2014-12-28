@@ -1,56 +1,68 @@
 open Core.Std
 open Rwo_core2
 open Async.Std
-module Code_frag = Rwo_code_frag
+module Code = Rwo_code
 module Html = Rwo_html
 
 (******************************************************************************)
 (* <link rel="import"> nodes                                                  *)
 (******************************************************************************)
 type import = {
-  data_code_language : Rwo_code_frag.typ;
+  data_code_language : Rwo_code.lang;
   href : string;
   part : int option;
   childs : Rwo_html.item list;
 } with sexp
 
+let is_import_node = function
+  | Nethtml.Data _ -> false
+  | Nethtml.Element ("link", attrs, _) -> (
+    match List.Assoc.find attrs "rel" with
+    | Some "import" -> true
+    | Some _
+    | None -> false
+  )
+  | Nethtml.Element (_,_,_) -> false
+
 let parse_import item =
   let open Result.Monad_infix in
-  match item with
-  | Nethtml.Data x ->
-    error "expected <link> but got DATA" x sexp_of_string
+  if not (is_import_node item) then
+    error "attempting to parse non-import node as an import node"
+      item Html.sexp_of_item
+  else (
+    match item with
+    | Nethtml.Element ("link", attrs, childs) -> (
+      let find x = List.Assoc.find attrs x in
+      Html.check_attrs attrs
+        ~required:["data-code-language"; "href"; "rel"]
+        ~allowed:(`Some ["part"])
+      >>= fun () ->
 
-  | Nethtml.Element ("link", attrs, childs) -> (
-    let find x = List.Assoc.find attrs x in
-    Html.check_attrs attrs
-      ~required:["data-code-language"; "href"]
-      ~allowed:(`Some ["part"])
-    >>= fun () ->
+      (
+        try Ok (find "part" |> Option.map ~f:Int.of_string)
+        with exn -> error "invalid part" exn sexp_of_exn
+      ) >>= fun part ->
 
-    (
-      try Ok (find "part" |> Option.map ~f:Int.of_string)
-      with exn -> error "invalid part" exn sexp_of_exn
-    ) >>= fun part ->
+      Code.lang_of_string (Option.value_exn (find "data-code-language"))
+      >>= fun data_code_language ->
 
-    Code_frag.typ_of_string (Option.value_exn (find "data-code-language"))
-    >>= fun data_code_language ->
-
-    Ok {
-      data_code_language;
-      href = Option.value_exn (find "href");
-      part;
-      childs;
-    }
+      Ok {
+        data_code_language;
+        href = Option.value_exn (find "href");
+        part;
+        childs;
+      }
+    )
+    | Nethtml.Element (_,_,_)
+    | Nethtml.Data _ ->
+      assert false
   )
-
-  | Nethtml.Element (name, _, _) ->
-    error "expected <link> but got other type of node" name sexp_of_string
 ;;
 
 let import_to_item x =
   [
     Some ("rel", "import");
-    Some ("data-code-language", Code_frag.typ_to_string x.data_code_language);
+    Some ("data-code-language", Code.lang_to_string x.data_code_language);
     Some ("href", x.href);
     (Option.map x.part ~f:(fun x -> "part", Int.to_string x));
   ]
@@ -345,35 +357,36 @@ let map_code_sections (html:Html.t) ~f =
 *)
 let code_section_to_import (x:code_section) : import Or_error.t =
   let open Result.Monad_infix in
-  (match x.pre.data_code_language, x.p.em_data, x.p.data1 with
-  | (None, "Scheme", None) -> Ok `Scheme
-  | (None, "Syntax", None) -> Ok `OCaml_syntax
-  | (Some "bash", "Shell script", None) -> Ok `Bash
-  | (Some "c", "C", None) -> Ok `C
-  | (Some "c", "C:", None) -> Ok `C
-  | (Some "console", "Terminal", None) -> Ok `Console
-  | (Some "gas", "Assembly", None) -> Ok `Gas
-  | (Some "java", "Java", None) -> Ok `Java
-  | (Some "java", "objects/Shape.java", Some "Java: ") -> Ok `Java
-  | (Some "json", "JSON", None) -> Ok `JSON
-  | (Some "ocaml", "OCaml", None) -> Ok `OCaml
-  | (Some "ocaml", "OCaml", Some "OCaml: ") -> Ok `OCaml
-  | (Some "ocaml", "OCaml utop", None) -> Ok `OCaml_toplevel
-  | (Some "ocaml", "Syntax", None) -> Ok `OCaml_syntax
-  | (Some "ocaml", "Syntax", Some "\n      ") -> Ok `OCaml_syntax
-  | (Some "ocaml", "guided-tour/recursion.ml", Some "OCaml: ") ->
-    Ok `OCaml
-  | (Some "ocaml",
-     "variables-and-functions/abs_diff.mli",
-     Some "OCaml: "
-  ) ->
-    Ok `OCaml
-  | (Some "scheme", "Scheme", None) ->
-    Ok `Scheme
-  | _ ->
-    error "unable to determine language"
-      (x.pre.data_code_language, x.p.em_data, x.p.data1)
-      <:sexp_of< string option * string * string option >>
+  (
+    match x.pre.data_code_language, x.p.em_data, x.p.data1 with
+    | (None, "Scheme", None) -> Ok `Scheme
+    | (None, "Syntax", None) -> Ok `OCaml_syntax
+    | (Some "bash", "Shell script", None) -> Ok `Bash
+    | (Some "c", "C", None) -> Ok `C
+    | (Some "c", "C:", None) -> Ok `C
+    | (Some "console", "Terminal", None) -> Ok `Console
+    | (Some "gas", "Assembly", None) -> Ok `Gas
+    | (Some "java", "Java", None) -> Ok `Java
+    | (Some "java", "objects/Shape.java", Some "Java: ") -> Ok `Java
+    | (Some "json", "JSON", None) -> Ok `JSON
+    | (Some "ocaml", "OCaml", None) -> Ok `OCaml
+    | (Some "ocaml", "OCaml", Some "OCaml: ") -> Ok `OCaml
+    | (Some "ocaml", "OCaml utop", None) -> Ok `OCaml_toplevel
+    | (Some "ocaml", "Syntax", None) -> Ok `OCaml_syntax
+    | (Some "ocaml", "Syntax", Some "\n      ") -> Ok `OCaml_syntax
+    | (Some "ocaml", "guided-tour/recursion.ml", Some "OCaml: ") ->
+      Ok `OCaml
+    | (Some "ocaml",
+       "variables-and-functions/abs_diff.mli",
+       Some "OCaml: "
+    ) ->
+      Ok `OCaml
+    | (Some "scheme", "Scheme", None) ->
+      Ok `Scheme
+    | _ ->
+      error "unable to determine language"
+        (x.pre.data_code_language, x.p.em_data, x.p.data1)
+        <:sexp_of< string option * string * string option >>
   ) >>| fun data_code_language ->
   {
     data_code_language;
@@ -395,7 +408,7 @@ module ImportMap = Map.Make(
   end
 )
 
-let extract_code_from_1e chapter =
+let extract_code_from_1e_exn chapter =
   let (/) = Filename.concat in
   let base = sprintf "ch%02d" chapter in
   let in_file = "book"/(base ^ ".html") in
@@ -407,18 +420,18 @@ let extract_code_from_1e chapter =
     let part = match part with
       | None | Some 0 -> ""
       | Some part -> (match lang with
-        | `OCaml_toplevel | `OCaml_rawtoplevel -> sprintf "\n#part %d\n" part
+        | `OCaml_toplevel -> sprintf "\n#part %d\n" part
         | `OCaml -> sprintf "\n\n(* part %d *)\n" part
         | _ ->
           ok_exn (error "unexpected part number with this language"
-                    (part, lang) <:sexp_of< int * Code_frag.typ >>
+                    (part, lang) <:sexp_of< int * Code.lang >>
           )
       )
     in
 
     let f = function
       | `Output x | `Prompt x -> (match lang with
-        | `OCaml_toplevel | `OCaml_rawtoplevel -> ""
+        | `OCaml_toplevel -> ""
         | _ -> x
       )
       | `Input x | `Data x -> x
@@ -454,3 +467,59 @@ let extract_code_from_1e chapter =
   return (ok_exn (map_code_sections t ~f)) >>= fun t ->
   write_imports () >>= fun () ->
   Writer.save out_file ~contents:(Html.to_string t)
+;;
+
+
+(******************************************************************************)
+(* Main Functions                                                             *)
+(******************************************************************************)
+let html_to_HTMLBook_exn import_base_dir (html:Html.t) : Html.t Deferred.t =
+  let (/) = Filename.concat in
+
+  (* OCaml code blocks *)
+  let code : Code.phrase list Code.t ref = ref Code.empty in
+
+  let update_code lang href : unit Deferred.t =
+    match Code.file_is_mem !code href with
+    | true -> return ()
+    | false ->
+      Code.add_file_exn
+        ~lang
+        ~run:(Code.run_file_exn ~lang)
+        !code href
+      >>| fun new_code ->
+      code := new_code
+  in
+
+  let rec loop html =
+    let import_node_to_html (i:import) : Html.t Deferred.t =
+      let href = import_base_dir/"code"/i.href in
+      update_code i.data_code_language href
+      >>| fun () ->
+      Code.find_exn !code ~file:href ?part:i.part
+      |> Code.phrases_to_html i.data_code_language
+      |> fun x -> [x]
+    in
+
+    (Deferred.List.map html ~f:(fun item -> match item with
+    | Nethtml.Data _ -> return [item]
+    | Nethtml.Element (name, attrs, childs) -> (
+      if is_import_node item then
+        import_node_to_html (ok_exn (parse_import item))
+      else (
+        Deferred.List.map childs ~f:(fun x -> loop [x])
+        >>| List.concat
+        >>| fun childs -> [Nethtml.Element (name, attrs, childs)]
+      )
+    ) ) )
+    >>| List.concat
+  in
+  loop html
+;;
+
+let to_HTMLBook_exn in_file out_dir =
+  let out_file = Filename.(concat out_dir (basename in_file)) in
+  Html.of_file in_file >>=
+  html_to_HTMLBook_exn (Filename.dirname in_file) >>= fun html ->
+  return (Html.to_string html) >>= fun contents ->
+  Writer.save out_file ~contents

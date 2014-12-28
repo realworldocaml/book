@@ -12,7 +12,9 @@
   must be capitalized:</p><link rel="import" data-code-language="ocamltop" href="variants/main.topscript"/><p>The following function uses pattern matching to convert a <code>basic_color</code> to a corresponding integer. The
   exhaustiveness checking on pattern matches means that the compiler will warn
   us if we miss a color:</p><link rel="import" data-code-language="ocamltop" href="variants/main.topscript" part="1"/><p>Using the preceding function, we can generate escape codes to change
-  the color of a given string displayed in a terminal:</p><link rel="import" data-code-language="ocamltop" href="variants/main-2.rawscript"/><p>On most terminals, that word "Blue" will be rendered in blue.</p><p>In this example, the cases of the variant are simple tags with no
+  the color of a given string displayed in a
+  terminal:</p><link rel="import" data-code-language="ocamltop"
+	 href="variants/main.topscript" part="2"/><p>On most terminals, that word "Blue" will be rendered in blue.</p><p>In this example, the cases of the variant are simple tags with no
   associated data. This is substantively the same as the enumerations found in
   languages like C and Java. But as we'll see, variants can do considerably
   more than represent a simple enumeration. As it happens, an enumeration
@@ -24,7 +26,11 @@
   which are separated by <code>*</code>s:</p><link rel="import" data-code-language="ocamltop" href="variants/main.topscript" part="3"/><p>Once again, we'll use pattern matching to convert a color to a
   corresponding integer. But in this case, the pattern matching does more than
   separate out the different cases; it also allows us to extract the data
-  associated with each tag:</p><link rel="import" data-code-language="ocamltop" href="variants/main.topscript" part="4"/><p>Now, we can print text using the full set of available colors:</p><link rel="import" data-code-language="ocamltop" href="variants/main-5.rawscript"/><section id="catch-all-cases-and-refactoring" data-type="sect1"><h1>Catch-All Cases and Refactoring</h1><p>OCaml's type system can act as a refactoring tool, warning you of
+  associated with each tag:</p><link rel="import"
+  data-code-language="ocamltop" href="variants/main.topscript"
+  part="4"/><p>Now, we can print text using the full set of available
+  colors:</p><link rel="import" data-code-language="ocamltop"
+  href="variants/main.topscript" part="5"/><section id="catch-all-cases-and-refactoring" data-type="sect1"><h1>Catch-All Cases and Refactoring</h1><p>OCaml's type system can act as a refactoring tool, warning you of
     places where your code needs to be updated to match an interface change.
     This is particularly valuable in the context of variants.<a data-type="indexterm" data-primary="errors" data-secondary="catch-all cases and refactoring">&#xa0;</a><a data-type="indexterm" data-primary="pattern matching" data-secondary="catch-all cases">&#xa0;</a><a data-type="indexterm" data-primary="functional updates">&#xa0;</a><a data-type="indexterm" data-primary="refactoring">&#xa0;</a><a data-type="indexterm" data-primary="variant types" data-secondary="catch-all cases and refactoring">&#xa0;</a></p><p>Consider what would happen if we were to change the definition of
     <code>color</code> to the following:</p><link rel="import" data-code-language="ocamltop" href="variants/catch_all.topscript" part="1"/><p>We've essentially broken out the <code>Basic</code> case into two cases, <code>Basic</code> and <code>Bold</code>, and <code>Basic</code> has changed from having two arguments to

@@ -1,4 +1,4 @@
-
+;;
 #part 1
 In_channel.read_all;;
 
@@ -289,12 +289,16 @@ blow_up ();;
 blow_up ();;
 
 
+#part 35
+let swallow_error () =
+    let monitor = Monitor.create () in
+    Stream.iter (Monitor.errors monitor) ~f:(fun _exn ->
+      printf "an error happened\n");
+    within' ~monitor (fun () ->
+      after (Time.Span.of_sec 0.5) >>= fun () -> failwith "Kaboom!")
+  ;;
 
-
-
-
-
-
+swallow_error ();;
 
 
 
@@ -318,13 +322,8 @@ let swallow_some_errors exn_to_raise =
 swallow_some_errors Not_found;;
 
 
-
-
-
-
-
-
-
+#part 38
+swallow_some_errors Ignore_me;;
 
 
 #part 39
@@ -364,3 +363,25 @@ let log_delays thunk =
     d >>| fun () -> print_time (); printf "\n"
   ;;
 
+
+#part 44
+log_delays (fun () -> after (sec 0.5));;
+
+#part 45
+let busy_loop () =
+    let x = ref None in
+    for i = 1 to 100_000_000 do x := Some i done
+  ;;
+
+log_delays (fun () -> return (busy_loop ()));;
+
+
+#part 46
+log_delays (fun () -> In_thread.run busy_loop);;
+
+#part 47
+let noalloc_busy_loop () =
+    for i = 0 to 100_000_000 do () done
+;;
+
+log_delays (fun () -> In_thread.run noalloc_busy_loop);;

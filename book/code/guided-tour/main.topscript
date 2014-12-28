@@ -1,7 +1,4 @@
-$ utop
-
 open Core.Std;;
-
 
 #part 1
 3 + 4;;
@@ -302,9 +299,9 @@ let distance v1 v2 =
 
 
 #part 46
-type circle_desc  = { center: point2d; radius: float }
-  type rect_desc    = { lower_left: point2d; width: float; height: float }
-  type segment_desc = { endpoint1: point2d; endpoint2: point2d } ;;
+type circle_desc  = { center: point2d; radius: float };;
+type rect_desc    = { lower_left: point2d; width: float; height: float };;
+type segment_desc = { endpoint1: point2d; endpoint2: point2d } ;;
 
 
 
@@ -365,7 +362,7 @@ type running_sum =
 
 
 #part 51
-let mean rsum = rsum.sum /. float rsum.samples
+let mean rsum = rsum.sum /. float rsum.samples;;
   let stdev rsum =
      sqrt (rsum.sum_sq /. float rsum.samples
            -. (rsum.sum /. float rsum.samples) ** 2.) ;;
@@ -373,7 +370,7 @@ let mean rsum = rsum.sum /. float rsum.samples
 
 
 #part 52
-let create () = { sum = 0.; sum_sq = 0.; samples = 0 }
+let create () = { sum = 0.; sum_sq = 0.; samples = 0 };;
   let update rsum x =
      rsum.samples <- rsum.samples + 1;
      rsum.sum     <- rsum.sum     +. x;
@@ -411,12 +408,10 @@ x := !x + 1    (* assignment, i.e., x.contents <- ... *) ;;
 
 
 #part 56
-type 'a ref = { mutable contents : 'a }
-
-  let ref x = { contents = x }
-  let (!) r = r.contents
-  let (:=) r x = r.contents <- x
-  ;;
+type 'a ref = { mutable contents : 'a };;
+let ref x = { contents = x };;
+let (!) r = r.contents;;
+let (:=) r x = r.contents <- x;;
 
 
 

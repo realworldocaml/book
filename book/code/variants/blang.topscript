@@ -13,7 +13,7 @@ type 'a expr =
 
 
 #part 1
-type mail_field = To | From | CC | Date | Subject
+type mail_field = To | From | CC | Date | Subject;;
   type mail_predicate = { field: mail_field;
                           contains: string }
   ;;
@@ -56,7 +56,7 @@ let and_ l =
       | [] -> Const true
       | [ x ] -> x
       | l -> And l
-
+;;
   let or_ l =
     if List.mem l (Const true) then Const true
     else
@@ -64,7 +64,7 @@ let and_ l =
       | [] -> Const false
       | [x] -> x
       | l -> Or l
-
+;;
   let not_ = function
     | Const b -> Const (not b)
     | e -> Not e

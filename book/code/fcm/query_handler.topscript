@@ -215,7 +215,7 @@ let rec cli dispatch_table =
 #part 14
 type query_handler_instance = { name : string
                                 ; eval : Sexp.t -> Sexp.t Or_error.t
-                                }
+                                };;
   type query_handler = Sexp.t -> query_handler_instance
   ;;
 

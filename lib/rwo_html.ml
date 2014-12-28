@@ -108,6 +108,7 @@ let print_elements_only ?(exclude_elements=[]) ?(keep_attrs=[]) t =
   List.iter t ~f:(print_item 0)
 
 
+
 (******************************************************************************)
 (* Constructors                                                               *)
 (******************************************************************************)
@@ -118,6 +119,7 @@ let data s = Nethtml.Data s
 
 let div = item "div"
 let span = item "span"
+let pre = item "pre"
 
 let a = item "a"
 let i = item "i"

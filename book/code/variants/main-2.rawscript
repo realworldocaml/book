@@ -1,7 +1,0 @@
-# let color_by_number number text =
-    sprintf "\027[38;5;%dm%s\027[0m" number text;;
-
-# let blue = color_by_number (basic_color_to_int Blue) "Blue";;
-
-# printf "Hello %s World!\n" blue;;
-

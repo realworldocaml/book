@@ -81,8 +81,6 @@ module Make_interval(Endpoint : Comparable) = struct
 
 
 
-
-
 #part 7
 module Int_interval =
     Make_interval(struct
@@ -175,12 +173,16 @@ module type Interval_intf = sig
   end;;
 
 
+#part 15
 
+module Make_interval(Endpoint : Comparable) : Interval_intf = struct
+    type endpoint = Endpoint.t
+    type t = | Interval of Endpoint.t * Endpoint.t
+             | Empty
 
+    (* ... *)
 
-
-
-
+  end ;;
 
 
 #part 16
@@ -203,24 +205,22 @@ Int_interval.create 3 4;;
 module type Int_interval_intf =
     Interval_intf with type endpoint = int;;
 
+#part 18
+module Make_interval(Endpoint : Comparable)
+      : (Interval_intf with type endpoint = Endpoint.t)
+  = struct
 
+    type endpoint = Endpoint.t
+    type t = | Interval of Endpoint.t * Endpoint.t
+             | Empty
 
+    (* ... *)
 
-
-
-
-
+  end ;;
 
 
 #part 19
 module Int_interval = Make_interval(Int);;
-
-
-
-
-
-
-
 
 
 let i = Int_interval.create 3 4;;
@@ -233,10 +233,17 @@ module type Int_interval_intf =
     Interval_intf with type endpoint := int;;
 
 
+#part 21
+# module Make_interval(Endpoint : Comparable)
+    : Interval_intf with type endpoint := Endpoint.t =
+  struct
 
+    type t = | Interval of Endpoint.t * Endpoint.t
+             | Empty
 
+    (* ... *)
 
-
+  end ;;
 
 
 
@@ -270,6 +277,18 @@ type some_type = int * string list with sexp;;
 sexp_of_some_type (33, ["one"; "two"]);;
 
 Sexp.of_string "(44 (five six))" |> some_type_of_sexp;;
+
+#part 25
+module Make_interval(Endpoint : Comparable)
+    : (Interval_intf with type endpoint := Endpoint.t) = struct
+
+    type t = | Interval of Endpoint.t * Endpoint.t
+             | Empty
+    with sexp
+
+    (* ... *)
+
+  end ;;
 
 
 #part 26

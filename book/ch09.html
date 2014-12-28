@@ -98,7 +98,9 @@
       endpoint type. Given this interface, we can redo our definition of
       <code>Make_interval</code>. Notice that we added
       the type <code>endpoint</code> to the
-      implementation of the module to match <code>Interval_intf</code>:</p><link rel="import" data-code-language="ocamltop" href="functors/main-15.rawscript"/></section><section id="sharing-constraints" data-type="sect2"><h2>Sharing Constraints</h2><p>The resulting module is abstract, but it's unfortunately too
+      implementation of the module to
+      match <code>Interval_intf</code>:</p><link rel="import"
+      data-code-language="ocamltop" href="functors/main.topscript" part="15"/></section><section id="sharing-constraints" data-type="sect2"><h2>Sharing Constraints</h2><p>The resulting module is abstract, but it's unfortunately too
       abstract. In particular, we haven't exposed the type <code>endpoint</code>, which means that we can't even
       construct an interval anymore:<a data-type="indexterm" data-primary="sharing constraint">&#xa0;</a><a data-type="indexterm" data-primary="interval computation" data-secondary="sharing constraints">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="functors/main.topscript" part="16"/><p>To fix this, we need to expose the fact that <code>endpoint</code> is equal to <code>Int.t</code> (or more generally, <code>Endpoint.t</code>, where <code>Endpoint</code> is the argument to the functor). One
       way of doing this is through a <em>sharing constraint</em>,
@@ -117,7 +119,8 @@
       <code>endpoint</code> in the new module and the
       type <code>Endpoint.t</code>, from the module
       <code>Endpoint</code> that is the functor
-      argument. We can do this as follows:</p><link rel="import" data-code-language="ocamltop" href="functors/main-18.rawscript"/><p>So now, the interface is as it was, except that <code>endpoint</code> is known to be equal to <code>Endpoint.t</code>.
+      argument. We can do this as follows:</p><link rel="import"
+      data-code-language="ocamltop" href="functors/main.topscript" part="18"/><p>So now, the interface is as it was, except that <code>endpoint</code> is known to be equal to <code>Endpoint.t</code>.
         As a result of that type equality, we can again do things that require that <code>endpoint</code> be exposed, like constructing intervals:</p><link rel="import" data-code-language="ocamltop" href="functors/main.topscript" part="19"/></section><section id="destructive-substitution" data-type="sect2"><h2>Destructive Substitution</h2><p>Sharing constraints basically do the job, but they have some
       downsides. In particular, we've now been stuck with the useless type
       declaration of <code>endpoint</code> that clutters
@@ -129,7 +132,8 @@
       <em>destructive substitution</em>. Here's the basic
       syntax:<a data-type="indexterm" data-primary="destructive substitution">&#xa0;</a><a data-type="indexterm" data-primary="interval computation" data-secondary="destructive substitution">&#xa0;</a></p><link rel="import" data-code-language="ocamlsyntax" href="functors/destructive_sub.syntax"/><p>The following shows how we could use this with <code>Make_interval</code>:</p><link rel="import" data-code-language="ocamltop" href="functors/main.topscript" part="20"/><p>There's now no <code>endpoint</code> type:
       all of its occurrences of have been replaced by <code>int</code>. As with sharing constraints, we can also
-      use this in the context of a functor:</p><link rel="import" data-code-language="ocamltop" href="functors/main-21.rawscript"/><p>The interface is precisely what we want: the type <code>t</code> is abstract, and the type of the endpoint is
+      use this in the context of a functor:</p><link rel="import"
+      data-code-language="ocamltop" href="functors/main.topscript" part="21"/><p>The interface is precisely what we want: the type <code>t</code> is abstract, and the type of the endpoint is
       exposed; so we can create values of type <code>Int_interval.t</code> using the creation function,
       but not directly using the constructors and thereby violating the
       invariants of the module:</p><link rel="import" data-code-language="ocamltop" href="functors/main.topscript" part="22"/><p>In addition, the <code>endpoint</code> type
@@ -151,7 +155,9 @@
       definition signals to the extension to generate the converters. Thus, we
       can write:<a data-type="indexterm" data-primary="sexp declaration">&#xa0;</a></p><link rel="import" data-code-language="ocamltop" href="functors/main.topscript" part="24"/><p>We'll discuss s-expressions and Sexplib in more detail in <a href="#data-serialization-with-s-expressions" data-type="xref">#data-serialization-with-s-expressions</a>, but for now, let's
       see what happens if we attach the <code>with
-      sexp</code> declaration to the definition of <code>t</code> within the functor:</p><link rel="import" data-code-language="ocamltop" href="functors/main-25.rawscript"/><p>The problem is that <code>with sexp</code>
+      sexp</code> declaration to the definition of <code>t</code>
+      within the functor:</p><link rel="import"
+      data-code-language="ocamltop" href="functors/main.topscript" part="25"/><p>The problem is that <code>with sexp</code>
       adds code for defining the s-expression converters, and that code
       assumes that <code>Endpoint</code> has the
       appropriate sexp-conversion functions for <code>Endpoint.t</code>. But all we know about <code>Endpoint</code> is that it satisfies the <code>Comparable</code> interface, which doesn't say

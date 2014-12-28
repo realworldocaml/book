@@ -131,12 +131,12 @@ type log_entry =
       time: Time.t;
       important: bool;
       message: string;
-    }
+    };;
   type heartbeat =
     { session_id: string;
       time: Time.t;
       status_message: string;
-    }
+    };;
   type logon =
     { session_id: string;
       time: Time.t;
@@ -187,14 +187,14 @@ module Log_entry = struct
         important: bool;
         message: string;
       }
-  end
+  end;;
   module Heartbeat = struct
     type t =
       { session_id: string;
         time: Time.t;
         status_message: string;
       }
-  end
+  end;;
   module Logon = struct
     type t =
       { session_id: string;
@@ -335,6 +335,16 @@ let register_heartbeat t hb =
 let get_users logons =
      List.dedup (List.map logons ~f:(fun x -> x.Logon.user));;
 
+#part 29
+module Logon = struct
+    type t =
+      { session_id: string;
+        time: Time.t;
+        user: string;
+        credentials: string;
+      }
+    with fields
+  end;;
 
 #part 30
 let get_users logons = List.dedup (List.map logons ~f:Logon.user);;
